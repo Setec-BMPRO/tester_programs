@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-04-17, 21:28:31 -->
+<!-- Saved: 2015-04-28, 16:43:14 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -190,6 +190,9 @@
     <Source>tester/sensor/test/test_mirror.py</Source>
     <Source>tester/devlogical/_base.py</Source>
     <Source>tester/devphysical/signals.py</Source>
+    <Source>smu75070_final/limit.py</Source>
+    <Source>smu75070_final/__init__.py</Source>
+    <Source>smu75070_final/support.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
