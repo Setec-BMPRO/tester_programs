@@ -8,8 +8,7 @@ import gpib
 gpib.DEBUG_GPIB = True
 
 import tester
-#import tester.sensor
-# tester.sensor.DSO_DELAY = False
+#tester.sensor.DSO_DELAY = False
 import dummy
 import selftest
 import _2040_final
@@ -36,6 +35,7 @@ import ids500_initial_sub
 import ids500_final
 import mk7_final
 import rm50_final
+import smu75070_final
 import spa_multi
 import spa_single
 import st3_final
@@ -148,6 +148,7 @@ def _main():
         ('SX-750 Initial', sx750_initial.Main, sx750_initial.LIMIT_DATA),
         ('SX-750 Final', sx750_final.Main, sx750_final.LIMIT_DATA),
         ('SX-750 Safety', sx750_safety.Main, sx750_safety.LIMIT_DATA),
+        ('SMU750-70 Final', smu75070_final.Main, smu75070_final.LIMIT_DATA),
         ('TS3020-H Initial', ts3020h_initial.Main, ts3020h_initial.LIMIT_DATA),
         ('TS3020-H Final', ts3020h_final.Main, ts3020h_final.LIMIT_DATA),
         ('TS3520 Final', ts3520_final.Main, ts3520_final.LIMIT_DATA),
