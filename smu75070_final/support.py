@@ -55,7 +55,7 @@ class Sensors():
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.o70V,
             detect_limit=(limits['inOCP'], ),
-            start=11.1, stop=11.8, step=0.1, delay=1)
+            start=11.3, stop=11.8, step=0.01, delay=0.1)
 
 
 class Measurements():
@@ -81,7 +81,7 @@ class SubTests():
         m = measurements
         # PowerUp: Min load, 240Vac, measure.
         ld1 = LoadSubStep(((d.dcl, 0.0), ), output=True)
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=1.0)
+        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=2.0)
         msr1 = MeasureSubStep((m.dmm_70Von, m.ui_YesNoFan,), timeout=5)
         self.pwr_up = Step((ld1, acs1, msr1))
 
@@ -93,6 +93,6 @@ class SubTests():
         # Shutdown: Overload, restart, measure.
         ld1 = LoadSubStep( ((d.dcl, 11.9), ))
         msr1 = MeasureSubStep((m.dmm_70Voff, ), timeout=5)
-        ld2 = LoadSubStep( ((d.dcl, 0.0), ), delay=1)
+        ld2 = LoadSubStep( ((d.dcl, 0.0), ), delay=2)
         msr2 = MeasureSubStep((m.dmm_70Von, ), timeout=10)
         self.shdn = Step((ld1, msr1, ld2, msr2))
