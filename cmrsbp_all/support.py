@@ -164,8 +164,8 @@ class MeasureFin():
            @param limits Product test limits
 
         """
-        self.dmm_vbatIn = Measurement(limits['vbatIn'], sense.ovbatIn)
-        self.cmr_vbatIn = Measurement(limits['vbatIn'], sense.oMirvbatIn)
+        self.dmm_vbatIn = Measurement(limits['VbatIn'], sense.ovbatIn)
+        self.cmr_vbatIn = Measurement(limits['VbatIn'], sense.oMirvbatIn)
         self.cmr_ErrV = Measurement(limits['ErrV'], sense.oMirErrV)
         self.cmr_CycleCnt = Measurement(limits['CycleCnt'], sense.oMirCycleCnt)
         self.cmr_RelrnFlg = Measurement(limits['RelrnFlg'], sense.oMirRelrnFlg)
