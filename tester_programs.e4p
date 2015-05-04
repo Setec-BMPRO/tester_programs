@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-04-28, 16:43:14 -->
+<!-- Saved: 2015-05-01, 16:39:35 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -193,6 +193,9 @@
     <Source>smu75070_final/limit.py</Source>
     <Source>smu75070_final/__init__.py</Source>
     <Source>smu75070_final/support.py</Source>
+    <Source>ids500_initial_main/support.py</Source>
+    <Source>ids500_initial_main/__init__.py</Source>
+    <Source>ids500_initial_main/limit.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
