@@ -57,9 +57,9 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         self.oLock = sensor.Res(dmm, high=12, low=6, rng=10000, res=1)
-        self.oVccAC = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.001)
+        self.oVccAC = sensor.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
         self.oVccDC = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
-        self.oVbus = sensor.Vdc(dmm, high=3, low=2, rng=1000, res=0.01)
+        self.oVbus = sensor.Vdc(dmm, high=3, low=5, rng=1000, res=0.01)
         self.oSD = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.oACin = sensor.Vac(dmm, high=5, low=4, rng=1000, res=0.01)
         self.oVout = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.001)
