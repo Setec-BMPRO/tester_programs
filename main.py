@@ -18,6 +18,7 @@ import batterycheck_initial
 import batterycheck_final
 import bce4_final
 import bce282_final
+import bce282_initial
 import c15a15_final
 import c15d15_final
 import c45a15_initial
@@ -109,7 +110,9 @@ def _main():
         ('BCE4 Final', bce4_final.Main, bce4_final.LIMIT_DATA4),
         ('BCE5 Final', bce4_final.Main, bce4_final.LIMIT_DATA5),
         ('BCE282-12 Final', bce282_final.Main, bce282_final.LIMIT_DATA12),
+        ('BCE282-12 Initial', bce282_initial.Main, bce282_initial.LIMIT_DATA12),
         ('BCE282-24 Final', bce282_final.Main, bce282_final.LIMIT_DATA24),
+        ('BCE282-24 Initial', bce282_initial.Main, bce282_initial.LIMIT_DATA24),
         ('C15A-15 Final', c15a15_final.Main, c15a15_final.LIMIT_DATA),
         ('C15D-15(M) Final', c15d15_final.Main, c15d15_final.LIMIT_DATA),
         ('C45A-15(M) Initial', c45a15_initial.Main, c45a15_initial.LIMIT_DATA),
