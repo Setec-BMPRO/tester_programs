@@ -31,8 +31,6 @@ import gen8_initial
 import geniusII_final
 import gsu3601ta_initial
 import gsu3601ta_final
-import ids500_initial_sub
-import ids500_final
 import mk7_final
 import rm50_final
 import smu75070_final
@@ -135,9 +133,6 @@ def _main():
         ('GSU360-1TA Initial', gsu3601ta_initial.Main,
          gsu3601ta_initial.LIMIT_DATA),
         ('GSU360-1TA Final', gsu3601ta_final.Main, gsu3601ta_final.LIMIT_DATA),
-        ('IDS500-INI-MICRO', ids500_initial_sub.Main,
-         ids500_initial_sub.LIMIT_DATA),
-        ('IDS500-FIN-06A', ids500_final.Main, ids500_final.LIMIT_DATA),
         ('MK7-400-1 Final', mk7_final.Main, mk7_final.LIMIT_DATA),
         ('RM-50-24 Final', rm50_final.Main, rm50_final.LIMIT_DATA),
         ('Spa Multi RGB', spa_multi.Main, spa_multi.LIMIT_DATA_RGB),
