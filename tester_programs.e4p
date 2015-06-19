@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-05-01, 16:39:35 -->
+<!-- Saved: 2015-06-19, 14:19:26 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -162,14 +162,8 @@
     <Source>share/ticker.py</Source>
     <Source>share/timed_data.py</Source>
     <Source>tester/sensor/__init__.py</Source>
-    <Source>ids500_final/__init__.py</Source>
-    <Source>ids500_final/support.py</Source>
-    <Source>ids500_final/limit.py</Source>
     <Source>__init__.py</Source>
     <Source>share/ids500.py</Source>
-    <Source>ids500_initial_sub/__init__.py</Source>
-    <Source>ids500_initial_sub/support.py</Source>
-    <Source>ids500_initial_sub/limit.py</Source>
     <Source>dummy/test_dummy.py</Source>
     <Source>tester/sensor/dmm.py</Source>
     <Source>tester/sensor/power.py</Source>
@@ -193,9 +187,11 @@
     <Source>smu75070_final/limit.py</Source>
     <Source>smu75070_final/__init__.py</Source>
     <Source>smu75070_final/support.py</Source>
-    <Source>ids500_initial_main/support.py</Source>
-    <Source>ids500_initial_main/__init__.py</Source>
-    <Source>ids500_initial_main/limit.py</Source>
+    <Source>bce282_initial/support.py</Source>
+    <Source>bce282_initial/__init__.py</Source>
+    <Source>bce282_initial/tos-bsl.py</Source>
+    <Source>bce282_initial/limit.py</Source>
+    <Source>bce282_initial/msp.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
