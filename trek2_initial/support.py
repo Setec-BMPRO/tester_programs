@@ -72,7 +72,7 @@ class Sensors():
 
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self.oBkLght = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
+        self.oBkLght = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

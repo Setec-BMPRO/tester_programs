@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-06-19, 14:24:28 -->
+<!-- Saved: 2015-06-24, 17:35:18 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -193,6 +193,7 @@
     <Source>trek2_initial/support.py</Source>
     <Source>trek2_initial/__init__.py</Source>
     <Source>trek2_initial/limit.py</Source>
+    <Source>share/trek2.py</Source>
   </Sources>
   <Forms/>
   <Translations/>

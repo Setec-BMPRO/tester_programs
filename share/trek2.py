@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-"""GEN8/SX-750 ARM processor console driver.
+"""Trek2 ARM processor console driver.
 
 Communication via Serial port to the ARM processor.
 
 """
 
-import serial
 import time
 import logging
 
 import tester
 
-
 # Line terminator
-#_EOL = b'\r'
 _EOL = b'\n'
 # Timeouts
 _READ_TMO = 0.1
@@ -52,13 +49,12 @@ class Console():
 
     """Communications to ARM console."""
 
-    def __init__(self, port=0, baud=57600):
+    def __init__(self, serport):
         """Open serial communications."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._port = port
-        self._baud = baud
-        self._ser = None
+        self._ser = serport
+        self._ser.flushInput()
         self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
@@ -90,25 +86,6 @@ class Console():
                             ('X-ADC-24V-RAIL', 1, 'Counts')),
             'ARM_SwVer':   (self.version, None),
             }
-
-    def open(self):
-        """Open serial communications."""
-        self._logger.debug('Open')
-        if self._ser is None:
-            self._ser = serial.Serial(
-                self._port, self._baud, timeout=_READ_TMO)
-        self._flush()
-
-    def close(self):
-        """Close serial communications."""
-        self._logger.debug('Close')
-        if self._ser is None:
-            return
-        try:
-            self._ser.close()
-            self._ser = None
-        except Exception:
-            pass
 
     def configure(self, cmd):
         """Sensor: Configure for next reading."""
@@ -164,6 +141,10 @@ class Console():
         if self._ser is not None:
             time.sleep(0.5)     # Allow the NV memory write to complete
 
+    def bklght(self, param=None):
+        """Turn backlight on/off."""
+        self._writeline('{} 5 X!'.format(param))
+
     def version(self, param=None):
         """Return software version."""
         ver = self._sendrecv('X-SOFTWARE-VERSION x?').strip()
@@ -171,30 +152,6 @@ class Console():
         verbld = '.'.join((ver, bld))
         self._logger.debug('Version is %s', verbld)
         return verbld
-
-    def cal_pfc(self, voltage):
-        """Calibrate PFC voltage.
-
-        420000 CAL-PFC-BUS-VOLTS        (V in mV)
-        NV-WRITE
-
-        """
-        self._logger.debug('CalPFC %s', voltage)
-        cmd = '{} CAL-PFC-BUS-VOLTS'.format(int(voltage * 1000))
-        self._sendrecv(cmd)
-        self._nvwrite()
-
-    def cal_12v(self, voltage):
-        """Calibrate 12V output.
-
-        12000 CAL-CONVERTER-VOLTS       (V in mV)
-        NV-WRITE
-
-        """
-        self._logger.debug('Cal12v %s', voltage)
-        cmd = '{} CAL-CONVERTER-VOLTS'.format(int(voltage * 1000))
-        self._sendrecv(cmd)
-        self._nvwrite()
 
     def _flush(self):
         """Flush input (serial port and buffer)."""

@@ -7,8 +7,9 @@ DATA = (
         ('Vin', 1, 11.5, 12.5, None, None),
         # 3.3 +/- 3%
         ('3V3', 1, 3.25, 3.35, None, None),
-        ('BkLghtOff', 1, 11.5, 12.5, None, None),
-        ('BkLghtOn', 1, 0.5, None, None, None),
+        ('BkLghtOff', 1, 0.5, None, None, None),
+        # 40mA = 4V with 100R (1%)
+        ('BkLghtOn', 1, 3.465, 4.545, None, None),
         ('Program', 2, -0.1, 0.1, None, None),
         ('Notify', 2, None, None, None, True),
         )
