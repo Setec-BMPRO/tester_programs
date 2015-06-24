@@ -4,8 +4,8 @@
 import logging.handlers
 from pydispatch import dispatcher
 
-import gpib
-gpib.DEBUG_GPIB = True
+#import gpib
+#gpib.DEBUG_GPIB = True
 
 import tester
 #tester.sensor.DSO_DELAY = False
@@ -49,7 +49,7 @@ import uni750_final
 import wtsi200_final
 
 # Set to True to push fake readings into sensor FIFOs.
-_FIFO = True
+_FIFO = False #True
 
 # True = Use Test Limits from Program Data.
 # False = Use Test Limits from limits file.
@@ -156,7 +156,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'Trek2 Initial',
+        'Dummy',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', _TESTER_TYPE)
@@ -165,12 +165,12 @@ def _main():
     logger.info('Open Tester')
     tst.open(pgm)
 #    Allows 2 seconds before fixture lock to remove board at ATE2
-#    import time
-#    time.sleep(2)
+    import time
+    time.sleep(2)
     logger.info('Running Test')
     tst.test(('UUT1', ))
 #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
-#    time.sleep(5)
+    time.sleep(2)
     logger.info('Close Tester')
     tst.close()
     logger.info('Stop Tester')
