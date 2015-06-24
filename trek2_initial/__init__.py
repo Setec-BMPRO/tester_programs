@@ -25,9 +25,9 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              }[os.name]
 
 _ARM_HEX = 'Trek2_1.0.102.hex'
-
 _HEX_DIR = {'posix': '/opt/setec/ate4/trek2_initial',
-            'nt': r'C:\TestGear\TcpServer\trek2_initial',
+#            'nt': r'C:\TestGear\TcpServer\trek2_initial',
+            'nt': r'C:\TestGear\Python\tester_programs\trek2_initial',
            }[os.name]
 
 
