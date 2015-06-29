@@ -113,7 +113,7 @@ class SubTests():
         m = measurements
 
         # PowerUp:
-        dcs1 = DcSubStep(setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.5)), output=True)
+        dcs1 = DcSubStep(setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.75)), output=True)
         msr1 = MeasureSubStep((m.dmm_Vin, m.dmm_3V3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
 

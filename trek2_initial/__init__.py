@@ -3,6 +3,7 @@
 """Trek2 Initial Test Program."""
 
 import os
+import inspect
 import logging
 import time
 import serial
@@ -21,15 +22,10 @@ LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt': r'\\.\COM1',
+             'nt': r'\\.\COM2',
              }[os.name]
 
 _ARM_HEX = 'Trek2_1.0.102.hex'
-_HEX_DIR = {'posix': '/opt/setec/ate4/trek2_initial',
-#            'nt': r'C:\TestGear\TcpServer\trek2_initial',
-            'nt': r'C:\TestGear\Python\tester_programs\trek2_initial',
-           }[os.name]
-
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -145,10 +141,10 @@ class Main(tester.TestSequence):
         self._logger.info('Open')
         if self._fifo:
             self._arm_ser = MockSerial()
-        else:
-            self._arm_ser = serial.Serial(port=_ARM_PORT,
-                                          baudrate=115200, timeout=0.1)
-        self._armdev = share.trek2.Console(self._arm_ser)
+#        else:
+#            self._arm_ser = serial.Serial(port=_ARM_PORT,
+#                                          baudrate=115200, timeout=0.1)
+#        self._armdev = share.trek2.Console(self._arm_ser)
         global d
         d = support.LogicalDevices(self._devices)
         global s
@@ -161,7 +157,7 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._arm_ser.close()
+#        self._arm_ser.close()
         global m
         m = None
         global d
@@ -194,8 +190,10 @@ class Main(tester.TestSequence):
         d.rla_boot.set_on()
         # Start the ARM programmer
         self._logger.info('Start ARM programmer')
+        head, tail = os.path.split(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         arm = share.programmer.ProgramARM(
-            _ARM_HEX, _HEX_DIR, s.oMirARM, _ARM_PORT, fifo=self._fifo)
+            _ARM_HEX, head, s.oMirARM, _ARM_PORT, fifo=self._fifo)
         arm.read()
         m.pgmARM.measure()
         # Reset BOOT to ARM
@@ -210,7 +208,13 @@ class Main(tester.TestSequence):
         """Initialise the ARM device."""
         self.fifo_push(((s.oBkLght, (4.0, 0)),  ))
 
-        self._armdev.bklght(100)
-        m.dmm_BkLghtOn.measure(timeout=5)
-        self._armdev.bklght(0)
-        m.dmm_BkLghtOff.measure(timeout=5)
+        if not self._fifo:
+            self._arm_ser = serial.Serial(port=_ARM_PORT,
+                                          baudrate=115200, timeout=0.1)
+            self._armdev = share.trek2.Console(self._arm_ser)
+            self._arm_ser.close()
+
+#        self._armdev.bklght(100)
+#        m.dmm_BkLghtOn.measure(timeout=5)
+#        self._armdev.bklght(0)
+#        m.dmm_BkLghtOff.measure(timeout=5)
