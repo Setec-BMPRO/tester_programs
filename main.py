@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Tester program loader."""
 
+import os
+import inspect
+import configparser
 import logging.handlers
 from pydispatch import dispatcher
 
 import gpib
-gpib.DEBUG_GPIB = True
-
 import tester
 #tester.sensor.DSO_DELAY = False
 import dummy
@@ -46,15 +47,6 @@ import ts3520_final
 import uni750_final
 import wtsi200_final
 
-# Set to True to push fake readings into sensor FIFOs.
-_FIFO = True
-
-# True = Use Test Limits from Program Data.
-# False = Use Test Limits from limits file.
-_USE_PROGDATA_LIMITS = False
-
-# Type of Tester.
-_TESTER_TYPE = 'ATE3'
 
 # Configuration of logger.
 _CONSOLE_LOG_LEVEL = logging.DEBUG
@@ -87,6 +79,29 @@ def _main():
     # Suppress lower level GPIB logging
     log = logging.getLogger('gpib')
     log.setLevel(logging.INFO)
+
+    # Get the pathname of this module's configuration file
+    head, tail = os.path.split(
+        os.path.abspath(inspect.getfile(inspect.currentframe())))
+    config_file = os.path.join(head, tail + '.ini')
+    logger.debug('Configuration file: %s', config_file)
+
+    # Read settings from the configuration file
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    debug_gpib = config['DEFAULT'].getboolean('DebugGPIB')
+    if debug_gpib is None:
+        debug_gpib = False
+    gpib.DEBUG_GPIB.enabled = debug_gpib
+    fifo = config['DEFAULT'].getboolean('FIFO')
+    if fifo is None:
+        fifo = True
+    use_progdata_limits = config['DEFAULT'].getboolean('UseProgDataLimits')
+    if use_progdata_limits is None:
+        use_progdata_limits = False
+    tester_type = config['DEFAULT'].get('TesterType')
+    if tester_type is None:
+        tester_type = 'ATE3'
 
     # Receive Test Result signals here
     def test_result(result):
@@ -155,8 +170,8 @@ def _main():
         'Dummy',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
-    logger.info('Creating "%s" Tester', _TESTER_TYPE)
-    tst = tester.Tester(_TESTER_TYPE, programs, _FIFO, _USE_PROGDATA_LIMITS)
+    logger.info('Creating "%s" Tester', tester_type)
+    tst = tester.Tester(tester_type, programs, fifo, use_progdata_limits)
     tst.start()
     logger.info('Open Tester')
     tst.open(pgm)
