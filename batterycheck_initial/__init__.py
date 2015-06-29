@@ -3,6 +3,7 @@
 
 import sys
 import os
+import inspect
 import time
 import subprocess
 import logging
@@ -25,11 +26,12 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt': r'\\.\COM2',
              }[os.name]
 
+_AVRDUDE = r'C:\Program Files\AVRdude\avrdude.exe'
+_AVR_HEX = 'BatteryCheckSupervisor-1.hex'
+
 _ARM_HEX = 'BatteryCheckControl_1.4.3334.hex'
 
-_HEX_DIR = {'posix': '/opt/setec/ate4/batterycheck_initial',
-            'nt': r'C:\TestGear\Python\TcpServer\batterycheck_initial',
-            }[os.name]
+_PYTHON27 = r'C:\Python27\pythonw.exe'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -67,6 +69,8 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
+        self._folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         if not self._fifo:
             self._armdev = arm.Console()
         global d
@@ -78,7 +82,7 @@ class Main(tester.TestSequence):
         self._logger.debug('Starting bluetooth server')
         try:
             self._btserver = subprocess.Popen(
-                [r'C:\Python27\pythonw.exe', 'btserver.py'], cwd=_HEX_DIR)
+                [_PYTHON27, 'btserver.py'], cwd=self._folder)
             self.btserver = jsonrpclib.Server('http://localhost:8888/')
         except FileNotFoundError:
             pass
@@ -141,15 +145,15 @@ class Main(tester.TestSequence):
             # Wait for the programmer to 'see' the 5V power
             time.sleep(2)
             avr_cmd = [
-                r'C:\Program Files\AVRdude\avrdude.exe',
+                _AVRDUDE,
                 '-P', 'usb',
                 '-p', 't10',
                 '-c', 'avrisp2',
-                '-U', 'flash:w:BatteryCheckSupervisor-1.hex',
+                '-U', 'flash:w:' + _AVR_HEX,
                 '-U', 'fuse:w:0xfe:m',
                 ]
             try:
-                console = subprocess.check_output(avr_cmd, cwd=_HEX_DIR)
+                console = subprocess.check_output(avr_cmd, cwd=self._folder)
                 result = 0
                 self._logger.debug(console)
             except subprocess.CalledProcessError:
@@ -181,7 +185,7 @@ class Main(tester.TestSequence):
         # Connect ARM programming port
         d.rla_arm.set_on()
         arm = share.programmer.ProgramARM(
-            _ARM_HEX, _HEX_DIR, s.oMirARM, _ARM_PORT,
+            _ARM_HEX, self._folder, s.oMirARM, _ARM_PORT,
             wipe=True, fifo=self._fifo)
         arm.read()
         m.pgmARM.measure()

@@ -2,6 +2,7 @@
 """Drifter Initial Test Program."""
 
 import os
+import inspect
 import logging
 import time
 
@@ -21,10 +22,6 @@ LIMIT_DATA_BM = limit.DATA_BM
 _PIC_PORT = {'posix': '/dev/ttyUSB0',
              'nt': r'\\.\COM1',
              }[os.name]
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/drifter_initial',
-            'nt': r'C:\TestGear\Python\TcpServer\drifter_initial',
-            }[os.name]
 
 
 # These are module level variable to avoid having to use 'self.' everywhere.
@@ -109,11 +106,13 @@ class Main(tester.TestSequence):
     def _step_program(self):
         """Program the PIC device."""
         self._logger.info('Start PIC programmer')
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_Prog.set_on()
         hexfile = self._limits['Software'].limit
         self._logger.debug('HexFile "%s"', hexfile)
         pic = share.programmer.ProgramPIC(hexfile=hexfile,
-                                          working_dir=_HEX_DIR,
+                                          working_dir=folder,
                                           device_type='18F87J93',
                                           sensor=s.oMirPIC,
                                           fifo=self._fifo)

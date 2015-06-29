@@ -2,6 +2,7 @@
 """C45A-15 Initial Test Program."""
 
 import os
+import inspect
 import logging
 import time
 
@@ -14,10 +15,6 @@ import share.programmer
 LIMIT_DATA = limit.DATA
 
 _PIC_HEX = 'c45a-15.hex'
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/c45a15_initial',
-            'nt': r'C:\TestGear\Python\TcpServer\c45a15_initial',
-            }[os.name]
 
 _OCP_PERCENT_REG = 0.015
 
@@ -125,9 +122,11 @@ class Main(tester.TestSequence):
         """
         # Start the PIC programmer (takes about 6 sec)
         self._logger.info('Start PIC programmer')
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_Prog.set_on()
         pic = share.programmer.ProgramPIC(hexfile=_PIC_HEX,
-                                          working_dir=_HEX_DIR,
+                                          working_dir=folder,
                                           device_type='16F684',
                                           sensor=s.oMirPIC,
                                           fifo=self._fifo)

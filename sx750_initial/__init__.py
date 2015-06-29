@@ -2,6 +2,7 @@
 """SX-750 Initial Test Program."""
 
 import os
+import inspect
 import time
 import logging
 
@@ -21,12 +22,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              }[os.name]
 
 _ARM_HEX = 'sx750_arm_3.1.2118.hex'
-
 _PIC_HEX = 'sx750_pic_2.hex'
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/sx750_initial',
-            'nt': r'C:\TestGear\Python\TcpServer\sx750_initial',
-            }[os.name]
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -145,13 +141,15 @@ class Main(tester.TestSequence):
         MeasureGroup((m.dmm_PriCtl, m.dmm_5Vsb, m.dmm_3V3), 2)
         # Start the ARM programmer (takes about 6 sec)
         self._logger.info('Start ARM programmer')
-        arm = share.programmer.ProgramARM(_ARM_HEX, _HEX_DIR, s.oMirARM,
-                                          _ARM_PORT, fifo=self._fifo)
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        arm = share.programmer.ProgramARM(
+            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
         # Start the PIC programmer (takes about 6 sec)
         self._logger.info('Start PIC programmer')
         d.rla_pic.set_on()
-        pic = share.programmer.ProgramPIC(_PIC_HEX, _HEX_DIR, '10F320',
-                                          s.oMirPIC, self._fifo)
+        pic = share.programmer.ProgramPIC(
+            _PIC_HEX, folder, '10F320', s.oMirPIC, self._fifo)
         # While programming, we also set OCP adjust to maximum.
         # (takes about 6 sec)
         self._logger.info('Reset digital pots')

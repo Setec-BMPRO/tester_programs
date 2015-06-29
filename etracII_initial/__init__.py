@@ -2,6 +2,7 @@
 """ETrac-II Initial Test Program."""
 
 import os
+import inspect
 import logging
 
 import tester
@@ -14,10 +15,6 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 _PIC_HEX = 'etracII-2A.hex'
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/etracII_initial',
-            'nt': r'C:\TestGear\Python\TcpServer\etracII_initial',
-            }[os.name]
 
 
 # These are module level variable to avoid having to use 'self.' everywhere.
@@ -98,9 +95,11 @@ class Main(tester.TestSequence):
     def _step_program(self):
         """Program the PIC micro."""
         self._logger.info('Start PIC programmer')
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_Prog.set_on()
         pic = share.programmer.ProgramPIC(hexfile=_PIC_HEX,
-                                          working_dir=_HEX_DIR,
+                                          working_dir=folder,
                                           device_type='16F1828',
                                           sensor=s.oMirPIC,
                                           fifo=self._fifo)

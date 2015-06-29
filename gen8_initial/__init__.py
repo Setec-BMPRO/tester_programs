@@ -2,6 +2,7 @@
 """GEN8 Initial Test Program."""
 
 import os
+import inspect
 import time
 import logging
 
@@ -22,10 +23,6 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              }[os.name]
 
 _ARM_HEX = 'gen8_1.4.645.hex'
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/gen8_initial',
-            'nt': r'C:\TestGear\Python\TcpServer\gen8_initial',
-            }[os.name]
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -133,8 +130,10 @@ class Main(tester.TestSequence):
         MeasureGroup((m.dmm_5V, m.dmm_3V3, ), timeout=2)
         # Start the ARM programmer
         self._logger.info('Start ARM programmer')
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         arm = share.programmer.ProgramARM(
-            _ARM_HEX, _HEX_DIR, s.oMirARM, _ARM_PORT, fifo=self._fifo)
+            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
         arm.read()
         m.pgmARM.measure()
         # Reset BOOT to ARM
