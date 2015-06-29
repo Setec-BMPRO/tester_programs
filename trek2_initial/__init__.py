@@ -190,10 +190,10 @@ class Main(tester.TestSequence):
         d.rla_boot.set_on()
         # Start the ARM programmer
         self._logger.info('Start ARM programmer')
-        head, tail = os.path.split(
+        folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         arm = share.programmer.ProgramARM(
-            _ARM_HEX, head, s.oMirARM, _ARM_PORT, fifo=self._fifo)
+            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
         arm.read()
         m.pgmARM.measure()
         # Reset BOOT to ARM
