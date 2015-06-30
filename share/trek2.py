@@ -17,6 +17,11 @@ _READ_TMO = 0.1
 _LINE_TMO = 4.0
 
 
+class TimeoutError(Exception):
+
+    """Read line Timeout."""
+
+
 class Sensor(tester.sensor.Sensor):
 
     """ARM console data exposed as a Sensor."""
@@ -53,8 +58,9 @@ class Console():
         """Open serial communications."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._ser = serport
-        self._ser.flushInput()
+        self._serport = serport
+        self._buf = b''
+        self._serport.flushInput()
         self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
@@ -122,23 +128,26 @@ class Console():
             value = float(reply) * scale
         return value
 
-    def defaults(self):
-        """Write defaults into NV memory."""
-        self._logger.debug('Defaults')
+    def defaults(self, hwver, sernum):
+        """Write factory defaults into NV memory."""
+        self._logger.debug('Write factory defaults')
         self.unlock()
+        self._sendrecv('{} “ SET-HW-VER'.format(hwver))
+        self._sendrecv('“{} SET-SERIAL-ID'.format(sernum))
+        self._sendrecv('NV-DEFAULT')
         self._nvwrite()
+        self._sendrecv('RESTART')
 
     def unlock(self):
-        """Unlock the ARM and turn echo off."""
+        """Unlock the ARM."""
         self._logger.debug('Unlock')
-        self._flush()
-        self._sendrecv('0 ECHO')
+#        self._flush()
         self._sendrecv('$DEADBEA7 UNLOCK')
 
     def _nvwrite(self):
         """Perform NV Memory Write."""
         self._sendrecv('NV-WRITE')
-        if self._ser is not None:
+        if self._serport is not None:
             time.sleep(0.5)     # Allow the NV memory write to complete
 
     def bklght(self, param=None):
@@ -155,48 +164,59 @@ class Console():
 
     def _flush(self):
         """Flush input (serial port and buffer)."""
-        if self._ser is not None:
-            self._ser.flushInput()
+        if not self._serport is None:
+            self._buf += self._serport.read(512)
+            self._serport.flushInput()
+        if len(self._buf) > 0:
+            self._logger.debug('_flush() %s', self._buf)
         self._buf = b''
 
-    def _sendrecv(self, command):
-        """Send a command, and read the response line.
-
-        @return Reply string
-
-        """
-        self._writeline(command)
-        if self._ser is not None:
-            reply = self._readline()
-            if reply is None:
-                self._logger.debug('Timeout after %s', command)
-                self._limit.check(True)
+    def _sendrecv(self, command, delay=0):
+        """Send a command, and read the response line."""
+        if command:
+            self._writeline(command)
+        if not self._serport is None:
+            try:
+                reply = self._readline()
+            except TimeoutError:
+                self._writeline(command)
+                try:
+                    reply = self._readline()
+                except TimeoutError:
+                    self._logger.debug('Timeout after %s', command)
+                    self._limit.check(True, 1)
+                    return
+            time.sleep(delay)
             return reply
 
     def _readline(self):
-        """Read a _EOL terminated line from the ARM.
+        """
+        Read a _EOL terminated line from the ARM.
 
         Return string, with the _EOL removed.
         Upon read timeout, return None.
 
         """
-
         tries = 0
         while True:
-            self._buf += self._ser.read(512)
+            self._buf += self._serport.read(512)
             pos = self._buf.find(_EOL)
             if pos >= 0:
+                self._logger.debug('EOL match at %s in %s', pos, self._buf)
                 line, self._buf = self._buf[:pos], self._buf[pos + 1:]
                 break
             tries += 1
             if tries * _READ_TMO > _LINE_TMO:
-                line = None
-                break
-        self._logger.debug('Decode line: %s', repr(line))
+                self._logger.debug('Timeout. Buffer=%s', self._buf)
+                raise TimeoutError
+        self._logger.debug('Line=%s, Buffer=%s', line, self._buf)
+#        self._flush()
         return line.decode()
 
-    def _writeline(self, line):
+    def _writeline(self, line, delay=0):
         """Write a _EOL terminated line to the ARM."""
-        self._logger.debug('Send line: %s', repr(line))
-        if self._ser is not None:
-            self._ser.write(line.encode() + _EOL)
+        if not self._serport is None:
+            self._logger.debug('writeline: %s', repr(line))
+            self._serport.write(line.encode() + _EOL)
+            time.sleep(delay)
+

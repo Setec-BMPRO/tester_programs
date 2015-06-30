@@ -127,6 +127,7 @@ class Main(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('Program', self._step_program, None, True),
             ('TestArm', self._step_test_arm, None, True),
+            ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -139,12 +140,6 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        if self._fifo:
-            self._arm_ser = MockSerial()
-#        else:
-#            self._arm_ser = serial.Serial(port=_ARM_PORT,
-#                                          baudrate=115200, timeout=0.1)
-#        self._armdev = share.trek2.Console(self._arm_ser)
         global d
         d = support.LogicalDevices(self._devices)
         global s
@@ -157,7 +152,10 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-#        self._arm_ser.close()
+        try:
+            self._arm_ser.close()
+        except:
+            pass
         global m
         m = None
         global d
@@ -205,16 +203,24 @@ class Main(tester.TestSequence):
             time.sleep(1)
 
     def _step_test_arm(self):
-        """Initialise the ARM device."""
-        self.fifo_push(((s.oBkLght, (4.0, 0)),  ))
-
-        if not self._fifo:
+        """Test the ARM device."""
+        self.fifo_push(((s.oSnEntry, ('A1429050001', )), (s.oBkLght, (4.0, 0)),  ))
+        if self._fifo:
+            self._arm_ser = MockSerial()
+        else:
             self._arm_ser = serial.Serial(port=_ARM_PORT,
                                           baudrate=115200, timeout=0.1)
-            self._armdev = share.trek2.Console(self._arm_ser)
-            self._arm_ser.close()
+        _armdev = share.trek2.Console(self._arm_ser)
 
-#        self._armdev.bklght(100)
+#        _armdev.bklght(100)
 #        m.dmm_BkLghtOn.measure(timeout=5)
-#        self._armdev.bklght(0)
+#        _armdev.bklght(0)
 #        m.dmm_BkLghtOff.measure(timeout=5)
+        sernum = m.ui_SnEntry.measure()[0]
+        hwver = 1
+        if self._fifo:
+            self._arm_ser.put(b'\n' * 6)
+        _armdev.defaults(hwver, sernum)
+
+    def _step_canbus(self):
+        """Test the Can Bus."""

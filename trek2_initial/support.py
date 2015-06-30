@@ -15,6 +15,7 @@ from tester.devlogical import *
 from tester.measure import *
 
 sensor = tester.sensor
+translate = tester.translate
 
 
 class LogicalDevices():
@@ -73,6 +74,10 @@ class Sensors():
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self.oBkLght = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
+        tester.TranslationContext = 'trek2_initial'
+        self.oSnEntry = sensor.DataEntry(
+            message=translate('msgSnEntry'),
+            caption=translate('capSnEntry'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -96,6 +101,7 @@ class Measurements():
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_BkLghtOff = Measurement(limits['BkLghtOff'], sense.oBkLght)
         self.dmm_BkLghtOn = Measurement(limits['BkLghtOn'], sense.oBkLght)
+        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
 
 
 class SubTests():
