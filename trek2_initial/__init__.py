@@ -13,6 +13,7 @@ import threading
 import tester
 import share.programmer
 import share.trek2
+import share.isplpc
 from . import support
 from . import limit
 
@@ -26,6 +27,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              }[os.name]
 
 _ARM_HEX = 'Trek2_1.0.102.hex'
+_ARM_BIN = 'Trek2_1.0.102.bin'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -125,7 +127,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, True),
+            ('Program', self._step_program, None, False),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -186,13 +188,31 @@ class Main(tester.TestSequence):
         """Program the ARM device."""
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
+        # Reset micro.
+        d.rla_reset.pulse(0.1)
         # Start the ARM programmer
         self._logger.info('Start ARM programmer')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        arm = share.programmer.ProgramARM(
-            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
-        arm.read()
+        file = os.path.join(folder, _ARM_BIN)
+        with open(file, 'rb') as infile:
+            bindata = bytearray(infile.read())
+        ser = serial.Serial(port=_ARM_PORT, baudrate=115200, timeout=10)
+        ser.flush()
+        # Program the device
+        pgm = share.isplpc.Programmer(ser, bindata,
+            erase_only=False, verify=True, crpmode=False)
+        try:
+            pgm.program()
+            s.oMirARM.store(0)
+        except:
+            s.oMirARM.store(1)
+        ser.close()
+
+#        arm = share.programmer.ProgramARM(
+#            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
+#        arm.read()
+
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()

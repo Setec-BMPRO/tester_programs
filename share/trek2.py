@@ -141,7 +141,7 @@ class Console():
     def unlock(self):
         """Unlock the ARM."""
         self._logger.debug('Unlock')
-#        self._flush()
+        self._flush()
         self._sendrecv('$DEADBEA7 UNLOCK')
 
     def _nvwrite(self):
@@ -165,7 +165,7 @@ class Console():
     def _flush(self):
         """Flush input (serial port and buffer)."""
         if not self._serport is None:
-            self._buf += self._serport.read(512)
+            self._buf += self._serport.read(10240)
             self._serport.flushInput()
         if len(self._buf) > 0:
             self._logger.debug('_flush() %s', self._buf)
@@ -209,9 +209,9 @@ class Console():
             if tries * _READ_TMO > _LINE_TMO:
                 self._logger.debug('Timeout. Buffer=%s', self._buf)
                 raise TimeoutError
+        line = line.decode().replace('\r', '')
         self._logger.debug('Line=%s, Buffer=%s', line, self._buf)
-#        self._flush()
-        return line.decode()
+        return line
 
     def _writeline(self, line, delay=0):
         """Write a _EOL terminated line to the ARM."""
