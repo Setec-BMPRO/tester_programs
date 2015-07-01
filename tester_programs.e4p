@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-07-01, 17:22:29 -->
+<!-- Saved: 2015-07-01, 17:31:18 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -198,6 +198,7 @@
     <Source>share/isplpc/device.py</Source>
     <Source>share/isplpc/isp.py</Source>
     <Source>share/isplpc/__init__.py</Source>
+    <Source></Source>
   </Sources>
   <Forms/>
   <Translations/>
