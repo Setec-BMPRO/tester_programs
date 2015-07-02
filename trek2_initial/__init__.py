@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Trek2 Initial Test Program."""
 
 import os
@@ -23,10 +22,9 @@ LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt': r'\\.\COM2',
+             'nt':    'COM2',
              }[os.name]
 
-_ARM_HEX = 'Trek2_1.0.102.hex'
 _ARM_BIN = 'Trek2_1.0.102.bin'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
@@ -101,7 +99,7 @@ class MockSerial():
         if self._enable.is_set() and not self.in_queue.empty():
             data = self.in_queue.get()
         else:
-            # FIXME: Should we use the timeout from the call to __init__() ?
+# FIXME: Should we use the timeout from the call to __init__() ?
             time.sleep(0.1)
             data = b''
         return data
@@ -181,7 +179,6 @@ class Main(tester.TestSequence):
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
         self.fifo_push(((s.oVin, 12.0), (s.o3V3, 3.3), ))
-
         t.pwr_up.run()
 
     def _step_program(self):
@@ -197,21 +194,17 @@ class Main(tester.TestSequence):
         file = os.path.join(folder, _ARM_BIN)
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
-        ser = serial.Serial(port=_ARM_PORT, baudrate=115200, timeout=10)
+        ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
         ser.flush()
         # Program the device
-        pgm = share.isplpc.Programmer(ser, bindata,
-            erase_only=False, verify=True, crpmode=False)
+        pgm = share.isplpc.Programmer(
+            ser, bindata, erase_only=False, verify=True, crpmode=False)
         try:
             pgm.program()
             s.oMirARM.store(0)
-        except:
+        except share.isplpc.ProgrammerError:
             s.oMirARM.store(1)
         ser.close()
-
-#        arm = share.programmer.ProgramARM(
-#            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
-#        arm.read()
 
         m.pgmARM.measure()
         # Reset BOOT to ARM
@@ -224,12 +217,13 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        self.fifo_push(((s.oSnEntry, ('A1429050001', )), (s.oBkLght, (4.0, 0)),  ))
+        self.fifo_push(
+            ((s.oSnEntry, ('A1429050001', )), (s.oBkLght, (4.0, 0)),  ))
         if self._fifo:
             self._arm_ser = MockSerial()
         else:
-            self._arm_ser = serial.Serial(port=_ARM_PORT,
-                                          baudrate=115200, timeout=0.1)
+            self._arm_ser = serial.Serial(
+                port=_ARM_PORT, baudrate=115200, timeout=0.1)
         _armdev = share.trek2.Console(self._arm_ser)
 
 #        _armdev.bklght(100)
@@ -237,9 +231,9 @@ class Main(tester.TestSequence):
 #        _armdev.bklght(0)
 #        m.dmm_BkLghtOff.measure(timeout=5)
         sernum = m.ui_SnEntry.measure()[0]
-        hwver = 1
-        if self._fifo:
-            self._arm_ser.put(b'\n' * 6)
+        hwver = '1 0'
+#        if self._fifo:
+#            self._arm_ser.put(b'\n' * 6)
         _armdev.defaults(hwver, sernum)
 
     def _step_canbus(self):

@@ -132,7 +132,7 @@ class Console():
         """Write factory defaults into NV memory."""
         self._logger.debug('Write factory defaults')
         self.unlock()
-        self._sendrecv('{} “ SET-HW-VER'.format(hwver))
+        self._sendrecv('{} “SET-HW-VER'.format(hwver))
         self._sendrecv('“{} SET-SERIAL-ID'.format(sernum))
         self._sendrecv('NV-DEFAULT')
         self._nvwrite()
@@ -147,8 +147,7 @@ class Console():
     def _nvwrite(self):
         """Perform NV Memory Write."""
         self._sendrecv('NV-WRITE')
-        if self._serport is not None:
-            time.sleep(0.5)     # Allow the NV memory write to complete
+        time.sleep(0.5)     # Allow the NV memory write to complete
 
     def bklght(self, param=None):
         """Turn backlight on/off."""
@@ -164,9 +163,8 @@ class Console():
 
     def _flush(self):
         """Flush input (serial port and buffer)."""
-        if not self._serport is None:
-            self._buf += self._serport.read(10240)
-            self._serport.flushInput()
+        self._buf += self._serport.read(10240)
+        self._serport.flushInput()
         if len(self._buf) > 0:
             self._logger.debug('_flush() %s', self._buf)
         self._buf = b''
@@ -175,26 +173,24 @@ class Console():
         """Send a command, and read the response line."""
         if command:
             self._writeline(command)
-        if not self._serport is None:
+        try:
+            reply = self._readline()
+        except TimeoutError:
+            self._writeline(command)
             try:
                 reply = self._readline()
             except TimeoutError:
-                self._writeline(command)
-                try:
-                    reply = self._readline()
-                except TimeoutError:
-                    self._logger.debug('Timeout after %s', command)
-                    self._limit.check(True, 1)
-                    return
-            time.sleep(delay)
-            return reply
+                self._logger.debug('Timeout after %s', command)
+                self._limit.check(True, 1)
+                return
+        time.sleep(delay)
+        return reply
 
     def _readline(self):
-        """
-        Read a _EOL terminated line from the ARM.
+        """Read a _EOL terminated line from the ARM.
 
-        Return string, with the _EOL removed.
-        Upon read timeout, return None.
+        @return String, with the _EOL removed.
+        @raises TimeoutError upon read timeout.
 
         """
         tries = 0
@@ -215,8 +211,6 @@ class Console():
 
     def _writeline(self, line, delay=0):
         """Write a _EOL terminated line to the ARM."""
-        if not self._serport is None:
-            self._logger.debug('writeline: %s', repr(line))
-            self._serport.write(line.encode() + _EOL)
-            time.sleep(delay)
-
+        self._logger.debug('writeline: %s', repr(line))
+        self._serport.write(line.encode() + _EOL)
+        time.sleep(delay)

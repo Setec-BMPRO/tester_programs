@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Trek2 Initial Test Program.
+"""Trek2 Initial Test Program.
 
         Logical Devices
         Sensors
@@ -32,8 +30,10 @@ class LogicalDevices():
 
         self.dmm = dmm.DMM(devices['DMM'])
 
-        self.dcs_Vcom = dcsource.DCSource(devices['DCS1']) # Power RS232 + Fixture Trek2.
-        self.dcs_Vin = dcsource.DCSource(devices['DCS2']) # Power unit under test.
+        # Power RS232 + Fixture Trek2.
+        self.dcs_Vcom = dcsource.DCSource(devices['DCS1'])
+        # Power unit under test.
+        self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
 
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
         self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
@@ -65,12 +65,12 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-
         # Mirror sensor for Programming result logging
         self.oMirARM = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
-
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self.oBkLght = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
@@ -96,7 +96,6 @@ class Measurements():
 
         """
         self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
-
         self.dmm_Vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_BkLghtOff = Measurement(limits['BkLghtOff'], sense.oBkLght)
@@ -117,10 +116,8 @@ class SubTests():
         """
         d = logical_devices
         m = measurements
-
         # PowerUp:
-        dcs1 = DcSubStep(setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.75)),
-                                  output=True)
+        dcs1 = DcSubStep(
+            setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.75)), output=True)
         msr1 = MeasureSubStep((m.dmm_Vin, m.dmm_3V3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
-

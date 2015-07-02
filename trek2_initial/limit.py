@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Trek2 Initial Program Limits."""
 
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
