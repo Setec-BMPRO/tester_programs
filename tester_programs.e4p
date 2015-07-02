@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-07-01, 17:31:18 -->
+<!-- Saved: 2015-07-02, 15:29:26 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -214,7 +214,7 @@
     <Other>spa_multi/MFDtri_V103.hex</Other>
     <Other>sx750_initial/sx750_arm_3.1.2118.hex</Other>
     <Other>sx750_initial/sx750_pic_2.hex</Other>
-    <Other>trek2_initial/Trek2_1.0.102.hex</Other>
+    <Other>trek2_initial/Trek2_1.0.102.bin</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>
