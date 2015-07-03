@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-07-03, 11:10:37 -->
+<!-- Saved: 2015-07-03, 13:18:42 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -196,6 +196,9 @@
     <Source>share/trek2.py</Source>
     <Source>tester/_base.py</Source>
     <Source></Source>
+    <Source>share/isplpc/device.py</Source>
+    <Source>share/isplpc/isp.py</Source>
+    <Source>share/isplpc/__init__.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
