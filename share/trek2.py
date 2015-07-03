@@ -132,8 +132,8 @@ class Console():
         """Write factory defaults into NV memory."""
         self._logger.debug('Write factory defaults')
         self.unlock()
-        self._sendrecv('{} “SET-HW-VER'.format(hwver))
-        self._sendrecv('“{} SET-SERIAL-ID'.format(sernum))
+        self._sendrecv('{} "SET-HW-VER'.format(hwver))
+        self._sendrecv('"{} SET-SERIAL-ID'.format(sernum))
         self._sendrecv('NV-DEFAULT')
         self._nvwrite()
         self._sendrecv('RESTART')
@@ -148,6 +148,19 @@ class Console():
         """Perform NV Memory Write."""
         self._sendrecv('NV-WRITE')
         time.sleep(0.5)     # Allow the NV memory write to complete
+
+    def testmode(self, enable):
+        """Go into Test Mode"""
+        self._logger.debug('Test Mode')
+        reply = self._sendrecv('“STATUS XN?')
+        self._logger.debug('%s', reply)
+        if enable:
+            value = 0x80000000 | int(reply)
+        else:
+            value = 0xEFFFFFFF & int(reply)
+        cmd = '${} "STATUS XN!'.format(value)
+        self._logger.debug('%s', cmd)
+        self._writeline(cmd)
 
     def bklght(self, param=None):
         """Turn backlight on/off."""
@@ -212,5 +225,5 @@ class Console():
     def _writeline(self, line, delay=0):
         """Write a _EOL terminated line to the ARM."""
         self._logger.debug('writeline: %s', repr(line))
-        self._serport.write(line.encode() + _EOL)
+        self._serport.write(line.encode() + b'\r' + _EOL)
         time.sleep(delay)

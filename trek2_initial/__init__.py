@@ -219,19 +219,20 @@ class Main(tester.TestSequence):
         """Test the ARM device."""
         self.fifo_push(
             ((s.oSnEntry, ('A1429050001', )), (s.oBkLght, (4.0, 0)),  ))
+
         if self._fifo:
             self._arm_ser = MockSerial()
         else:
             self._arm_ser = serial.Serial(
                 port=_ARM_PORT, baudrate=115200, timeout=0.1)
         _armdev = share.trek2.Console(self._arm_ser)
-
+        time.sleep(10)
 #        _armdev.bklght(100)
 #        m.dmm_BkLghtOn.measure(timeout=5)
 #        _armdev.bklght(0)
 #        m.dmm_BkLghtOff.measure(timeout=5)
-        sernum = m.ui_SnEntry.measure()[0]
-        hwver = '1 0'
+        sernum = m.ui_SnEntry.measure()[1][0]
+        hwver = '10'
 #        if self._fifo:
 #            self._arm_ser.put(b'\n' * 6)
         _armdev.defaults(hwver, sernum)
