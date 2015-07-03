@@ -232,7 +232,7 @@ class Main(tester.TestSequence):
 #        _armdev.bklght(0)
 #        m.dmm_BkLghtOff.measure(timeout=5)
         sernum = m.ui_SnEntry.measure()[1][0]
-        hwver = '10'
+        hwver = (1, 0, '')
 #        if self._fifo:
 #            self._arm_ser.put(b'\n' * 6)
         _armdev.defaults(hwver, sernum)

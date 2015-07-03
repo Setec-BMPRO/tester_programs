@@ -10,8 +10,6 @@ import logging
 
 import tester
 
-# Line terminator
-_EOL = b'\n'
 # Timeouts
 _READ_TMO = 0.1
 _LINE_TMO = 4.0
@@ -65,6 +63,7 @@ class Console():
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor, StrKill ))
+# FIXME: Are all these needed?
         self._data = {
             'ARM-AcDuty':  (self._getvalue,
                             ('X-AC-DETECTOR-DUTY', 1, '%')),
@@ -129,10 +128,15 @@ class Console():
         return value
 
     def defaults(self, hwver, sernum):
-        """Write factory defaults into NV memory."""
+        """Write factory defaults into NV memory.
+
+        @param hwver Tuple (Major [1-255], Minor [1-255], Mod [character]).
+        @param sernum Serial number string.
+
+        """
         self._logger.debug('Write factory defaults')
         self.unlock()
-        self._sendrecv('{} "SET-HW-VER'.format(hwver))
+        self._sendrecv('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
         self._sendrecv('"{} SET-SERIAL-ID'.format(sernum))
         self._sendrecv('NV-DEFAULT')
         self._nvwrite()
@@ -200,16 +204,16 @@ class Console():
         return reply
 
     def _readline(self):
-        """Read a _EOL terminated line from the ARM.
+        """Read a '\n' terminated line from the ARM.
 
-        @return String, with the _EOL removed.
+        @return String, with the '\n' removed.
         @raises TimeoutError upon read timeout.
 
         """
         tries = 0
         while True:
             self._buf += self._serport.read(512)
-            pos = self._buf.find(_EOL)
+            pos = self._buf.find(b'\n')
             if pos >= 0:
                 self._logger.debug('EOL match at %s in %s', pos, self._buf)
                 line, self._buf = self._buf[:pos], self._buf[pos + 1:]
@@ -223,7 +227,15 @@ class Console():
         return line
 
     def _writeline(self, line, delay=0):
-        """Write a _EOL terminated line to the ARM."""
+        """Write a '\r' terminated line to the ARM.
+
+        Add a small delay after each character to allow for the non-buffered
+        hardware UART of the LPC1549 device.
+
+        """
         self._logger.debug('writeline: %s', repr(line))
-        self._serport.write(line.encode() + b'\r' + _EOL)
+        send_data = line.encode() + b'\r'
+        for a_byte in send_data:
+            self._serport.write(a_byte)
+            time.sleep(0.01)
         time.sleep(delay)
