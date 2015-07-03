@@ -2,6 +2,7 @@
 """CMR-SBP ALL Test Program."""
 
 import os
+import inspect
 import logging
 import datetime
 import time
@@ -26,10 +27,6 @@ LIMIT_DATA_17L = limit.DATA_17L     # CMR-SBP-17-LiFePO4 Final limits
 
 
 _PIC_HEX = 'CMR-SBP-9.hex'
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/cmrsbp_all',
-            'nt': r'C:\TestGear\Python\TcpServer\cmrsbp_all',
-            }[os.name]
 
 # Serial port for the EV2200.
 _EV_PORT = {'posix': '/dev/ttyUSB0',
@@ -241,9 +238,11 @@ class Main(tester.TestSequence):
         d.rla_Erase.set_on()
         m.dmm_VErase.measure(timeout=5)
         self._logger.info('Start PIC programmer')
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_Prog.set_on()
         pic = share.programmer.ProgramPIC(hexfile=_PIC_HEX,
-                                          working_dir=_HEX_DIR,
+                                          working_dir=folder,
                                           device_type='18F252',
                                           sensor=s.oMirPIC,
                                           fifo=self._fifo)
