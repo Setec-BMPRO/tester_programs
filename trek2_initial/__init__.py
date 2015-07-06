@@ -209,32 +209,28 @@ class Main(tester.TestSequence):
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
-        # Reset micro.
-        d.rla_reset.pulse(0.1)
-        # ARM startup delay
-        if not self._fifo:
-            time.sleep(1)
 
     def _step_test_arm(self):
         """Test the ARM device."""
         self.fifo_push(
             ((s.oSnEntry, ('A1429050001', )), (s.oBkLght, (4.0, 0)),  ))
 
+        sernum = m.ui_SnEntry.measure()[1][0]
+        hwver = (1, 0, '')
         if self._fifo:
             self._arm_ser = MockSerial()
         else:
             self._arm_ser = serial.Serial(
                 port=_ARM_PORT, baudrate=115200, timeout=0.1)
         _armdev = share.trek2.Console(self._arm_ser)
-        time.sleep(10)
+        # Reset micro.
+        d.rla_reset.pulse(0.1)
 #        _armdev.bklght(100)
 #        m.dmm_BkLghtOn.measure(timeout=5)
 #        _armdev.bklght(0)
 #        m.dmm_BkLghtOff.measure(timeout=5)
-        sernum = m.ui_SnEntry.measure()[1][0]
-        hwver = (1, 0, '')
-#        if self._fifo:
-#            self._arm_ser.put(b'\n' * 6)
+        if self._fifo:
+            self._arm_ser.put(b'\n' * 6)
         _armdev.defaults(hwver, sernum)
 
     def _step_canbus(self):

@@ -153,15 +153,14 @@ class Console():
         self._sendrecv('NV-WRITE')
         time.sleep(0.5)     # Allow the NV memory write to complete
 
-    def testmode(self, enable):
-        """Go into Test Mode"""
-        self._logger.debug('Test Mode')
-        reply = self._sendrecv('“STATUS XN?')
-        self._logger.debug('%s', reply)
-        if enable:
+    def testmode(self, action):
+        """Enable or disable Test Mode"""
+        self._logger.debug('Test Mode Enabled> %s', action)
+        reply = self._sendrecv('"STATUS XN?')
+        if action:
             value = 0x80000000 | int(reply)
         else:
-            value = 0xEFFFFFFF & int(reply)
+            value = 0x7FFFFFFF & int(reply)
         cmd = '${} "STATUS XN!'.format(value)
         self._logger.debug('%s', cmd)
         self._writeline(cmd)
@@ -234,8 +233,8 @@ class Console():
 
         """
         self._logger.debug('writeline: %s', repr(line))
-        send_data = line.encode() + b'\r'
+        send_data = line + '\r'
         for a_byte in send_data:
-            self._serport.write(a_byte)
+            self._serport.write(a_byte.encode())
             time.sleep(0.01)
         time.sleep(delay)
