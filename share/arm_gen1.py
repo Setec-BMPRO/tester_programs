@@ -33,9 +33,9 @@ _CMD_SUFFIX = b' -> '
 _CMD_PROMPT = b'\r\n> '
 
 
-class EchoError(Exception):
+class ArmError(Exception):
 
-    """Command Echo Error."""
+    """ARM Command Echo or Response Error."""
 
 
 class ArmConsoleGen1():
@@ -64,10 +64,11 @@ class ArmConsoleGen1():
             self._logger.debug('flush() %s', buf)
         self._ser.flushInput()
 
-    def action(self, command=None, delay=0):
+    def action(self, command=None, expected=0, delay=0):
         """Send a command, and read the response line(s).
 
         @param command Command string.
+        @param expected Expected number of responses.
         @param delay Delay between sending command and reading response.
         @return Response (a List of received line Strings).
 
@@ -76,12 +77,13 @@ class ArmConsoleGen1():
             self._write_command(command)
         if delay:
             time.sleep(delay)
-        return self._read_response()
+        return self._read_response(expected)
 
-    def _read_response(self):
+    def _read_response(self, expected):
         """Read a response.
 
-        @return Response (a List of received line Strings).
+        @return Response (None / String / List of Strings).
+        @raises ArmError If not enough response strings.
 
         """
         # Read until a timeout happens
@@ -93,10 +95,18 @@ class ArmConsoleGen1():
         if buf.endswith(_CMD_PROMPT):
             buf = buf[:-len(_CMD_PROMPT)]
         if len(buf) > 0:
-            response = buf.decode().splitlines()
+            response = buf.decode(errors='ignore').splitlines()
+            # Reduce a List of 1 string to just a string
+            response_count = len(response)
+            if response_count == 1:
+                response = response[0]
         else:
+            response_count = 0
             response = None
-        self._logger.debug('Read_Response: %s', response)
+        self._logger.debug('<-- %s', response)
+        if response_count < expected:
+            raise ArmError(
+                'Expected {}, actual {}'.format(expected, response_count))
         return response
 
     def _write_command(self, command):
@@ -105,18 +115,18 @@ class ArmConsoleGen1():
         The echo of each command character sent is read back.
         The echo of _CMD_RUN is NOT expected, or read.
         @param command Command string.
-        @raises EchoError if the command does not echo.
+        @raises ArmError if the command does not echo.
 
         """
-        self._logger.debug('Write_Command: %s', repr(command))
-        send_data = command.encode()
+        self._logger.debug('--> %s', repr(command))
+        cmd_data = command.encode()
         # Flush input to be able to read echoed characters
         self.flush()
         # Send each byte with echo verification
-        for a_byte in send_data:
+        for a_byte in cmd_data:
             self._ser.write(a_byte)
             echo = self._ser.read(1)
             if echo != a_byte:
-                raise EchoError
+                raise ArmError('Command echo error')
         # And the command RUN, without echo
         self._ser.write(_CMD_RUN)
