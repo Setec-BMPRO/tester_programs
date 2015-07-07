@@ -32,6 +32,13 @@ _CMD_SUFFIX = b' -> '
 # Command prompt (after command response)
 _CMD_PROMPT = b'\r\n> '
 
+# Dialect dependant commands
+#   Use the key name for lookup, then index by self._dialect
+_DIALECT = {
+    'VERSION': ('X-SOFTWARE-VERSION x?', 'SW-VERSION?'),
+    'BUILD': ('X-BUILD-NUMBER x?', 'BUILD?'),
+    }
+
 
 class ArmError(Exception):
 
@@ -42,29 +49,51 @@ class ArmConsoleGen1():
 
     """Communications to First Generation ARM console."""
 
-    def __init__(self, serport):
+    def __init__(self, serport, dialect=0):
         """Initialise communications.
 
         Set an appropriate serial read timeout.
         @param serport Opened serial port to use.
+        @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
 
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
+        self._dialect = dialect
         self._ser = serport
         self._ser.timeout = 10240 / self._ser.baudrate  # Timeout of 1k bytes
         self.flush()
 
-    def flush(self):
-        """Flush input (both serial port and buffer)."""
-        # See what is waiting
-        buf = self._ser.read(10240)
-        if len(buf) > 0:
-            # Show what we are flushing
-            self._logger.debug('flush() %s', buf)
-        self._ser.flushInput()
+    def defaults(self):
+        """Write factory defaults into NV memory."""
+        self._logger.debug('Write factory defaults')
+        self.unlock()
+        self.action('NV-DEFAULT')
+        self.nvwrite()
+        # We expect to see 2 banner lines
+        self.action('RESTART', delay=0.5, expected=2)
 
-    def action(self, command=None, expected=0, delay=0):
+    def unlock(self):
+        """Unlock the ARM."""
+        self._logger.debug('Unlock')
+        self.action('$DEADBEA7 UNLOCK')
+
+    def nvwrite(self):
+        """Perform NV Memory Write."""
+        self._logger.debug('NV-Write')
+        self.action('NV-WRITE', delay=0.5)
+
+    def version(self):
+        """Return software version."""
+        ver_cmd = _DIALECT['VERSION'][self._dialect]
+        bld_cmd = _DIALECT['BUILD'][self._dialect]
+        ver = self.action(ver_cmd, expected=1)
+        bld = self.action(bld_cmd, expected=1)
+        verbld = '.'.join((ver, bld))
+        self._logger.debug('Version is %s', verbld)
+        return verbld
+
+    def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response line(s).
 
         @param command Command string.
@@ -82,8 +111,9 @@ class ArmConsoleGen1():
     def _read_response(self, expected):
         """Read a response.
 
+        @param expected Expected number of responses.
         @return Response (None / String / List of Strings).
-        @raises ArmError If not enough response strings.
+        @raises ArmError If not enough response strings are seen.
 
         """
         # Read until a timeout happens
@@ -130,3 +160,12 @@ class ArmConsoleGen1():
                 raise ArmError('Command echo error')
         # And the command RUN, without echo
         self._ser.write(_CMD_RUN)
+
+    def flush(self):
+        """Flush input (both serial port and buffer)."""
+        # See what is waiting
+        buf = self._ser.read(10240)
+        if len(buf) > 0:
+            # Show what we are flushing
+            self._logger.debug('flush() %s', buf)
+        self._ser.flushInput()
