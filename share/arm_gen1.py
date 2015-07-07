@@ -202,6 +202,9 @@ class ArmConsoleGen1():
             buf = buf[:-len(_CMD_PROMPT)]
         if len(buf) > 0:
             response = buf.decode(errors='ignore').splitlines()
+            # Remove any empty strings
+            while '' in response:
+                response.remove('')
             # Reduce a List of 1 string to just a string
             response_count = len(response)
             if response_count == 1:
@@ -234,7 +237,8 @@ class ArmConsoleGen1():
             self._ser.write(a_byte)
             echo = self._ser.read(1)
             if echo != a_byte:
-                raise ArmError('Command echo error. Sent {}, Rx {}'.format(a_byte, echo))
+                raise ArmError(
+                    'Command echo error. Sent {}, Rx {}'.format(a_byte, echo))
         # And the command RUN, without echo
         self._ser.write(_CMD_RUN)
 
