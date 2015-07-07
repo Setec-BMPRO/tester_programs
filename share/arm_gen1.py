@@ -230,10 +230,11 @@ class ArmConsoleGen1():
         self.flush()
         # Send each byte with echo verification
         for a_byte in cmd_data:
+            a_byte = bytes([a_byte])
             self._ser.write(a_byte)
             echo = self._ser.read(1)
             if echo != a_byte:
-                raise ArmError('Command echo error')
+                raise ArmError('Command echo error. Sent {}, Rx {}'.format(a_byte, echo))
         # And the command RUN, without echo
         self._ser.write(_CMD_RUN)
 

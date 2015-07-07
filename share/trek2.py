@@ -114,4 +114,4 @@ class Console(share.arm_gen1.ArmConsoleGen1):
 
     def bklght(self, param=100):
         """Turn backlight on/off."""
-        self.action('{} 5 X!'.format(param))
+        self.action('{} 0 X!'.format(param))
