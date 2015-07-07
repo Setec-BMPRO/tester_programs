@@ -20,10 +20,14 @@ and:
     A command with a return value: 'X-SOFTWARE-VERSION x?'
     will return the echo and response: 'X-SOFTWARE-VERSION x? -> 2\r\n> '
 
+Implements the methods to expose ARM readings as Sensors.
+
 """
 
 import logging
 import time
+
+import tester
 
 # Command trigger
 _CMD_RUN = b'\r'
@@ -45,6 +49,34 @@ class ArmError(Exception):
     """ARM Command Echo or Response Error."""
 
 
+class Sensor(tester.sensor.Sensor):
+
+    """ARM console data exposed as a Sensor."""
+
+    def __init__(self, arm, key, rdgtype=tester.sensor.Reading, position=1):
+        """Create a sensor."""
+        super().__init__(arm, position)
+        self._arm = arm
+        self._key = key
+        self._rdgtype = rdgtype
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
+        self._logger.debug('Created')
+
+    def configure(self):
+        """Configure measurement."""
+        self._arm.configure(self._key)
+
+    def read(self):
+        """Take a reading.
+
+        @return Reading
+
+        """
+        rdg = self._rdgtype(value=super().read(), position=self.position)
+        return (rdg, )
+
+
 class ArmConsoleGen1():
 
     """Communications to First Generation ARM console."""
@@ -63,6 +95,50 @@ class ArmConsoleGen1():
         self._ser = serport
         self._ser.timeout = 10240 / self._ser.baudrate  # Timeout of 1k bytes
         self.flush()
+        self._read_cmd = None
+        # Data readings:
+        #   Name -> (function, Tuple of Parameters)
+        #       read_float() parameters: (Command, ScaleFactor, StrKill)
+        self._data = {
+#            'ARM-AcDuty': (self.read_float,
+#                            ('X-AC-DETECTOR-DUTY X?', 1, '%')),
+            }
+
+    def configure(self, cmd):
+        """Sensor: Configure for next reading."""
+        self._read_cmd = cmd
+
+    def opc(self):
+        """Sensor: Dummy OPC."""
+        pass
+
+    def read(self):
+        """Sensor: Read ARM data.
+
+        @return Value
+
+        """
+        self._logger.debug('read %s', self._read_cmd)
+        fn, param = self._data[self._read_cmd]
+        result = fn(param)
+        self._logger.debug('result %s', result)
+        return result
+
+    def read_float(self, data):
+        """Get float value from ARM.
+
+        @return Value
+
+        """
+        cmd, scale, strkill = data
+        reply = self.action(cmd, expected=1)
+# FIXME: There has to be a better way than this...
+        if reply is None:
+            value = -999.999
+        else:
+            reply = reply.replace(strkill, '')
+            value = float(reply) * scale
+        return value
 
     def defaults(self):
         """Write factory defaults into NV memory."""
@@ -70,7 +146,7 @@ class ArmConsoleGen1():
         self.unlock()
         self.action('NV-DEFAULT')
         self.nvwrite()
-        # We expect to see 2 banner lines
+        # We expect to see 2 banner lines after a restart
         self.action('RESTART', delay=0.5, expected=2)
 
     def unlock(self):
