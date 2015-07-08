@@ -113,5 +113,5 @@ class Console(share.arm_gen1.ArmConsoleGen1):
         self.action(cmd)
 
     def bklght(self, param=100):
-        """Turn backlight on/off."""
+        """Set backlight intensity."""
         self.action('{} 0 X!'.format(param))
