@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fake serial port."""
+"""Mock Serial Port for testing serial communication modules."""
 
 import time
 import queue
@@ -24,28 +24,34 @@ class MockSerial():
         self.baudrate = baudrate
         self.timeout = timeout
 
-    def put(self, data):
-        """Put data into the read-back queue."""
-        self.in_queue.put(data)
-
     def putch(self, data, blanks=0):
-        """Put data character by character into the read-back queue."""
+        """Put data character by character into the read-back queue.
+
+        @param data String to be entered character by character.
+        @param blanks Number of b'' to be entered before the data.
+        Note: b'' is a marker to stop the flush of the data queue.
+
+        """
         for _ in range(blanks):
             self.put(b'')
         for c in data:
             self.put(c.encode())
 
+    def put(self, data):
+        """Put data into the read-back queue.
+
+        @param data Bytes of data.
+
+        """
+        self.in_queue.put(data)
+
     def get(self):
         """Get data from the written-out queue.
 
-        @return bytes
+        @return Bytes from the queue.
 
         """
-        if not self.out_queue.empty():
-            data = self.out_queue.get()
-        else:
-            data = b''
-        return data
+        return b'' if self.out_queue.empty() else self.out_queue.get()
 
     def flush(self):
         """Flush both input and output queues."""
@@ -53,10 +59,14 @@ class MockSerial():
         self.flushOutput()
 
     def flushInput(self):
-        """Flush input queue."""
+        """Flush input queue.
+
+        A value of b'' will stop the flush of the queue.
+
+        """
         while not self.in_queue.empty():
             data = self.in_queue.get()
-            if len(data) == 0:
+            if len(data) == 0:      # This is a b''
                 break
 
     def flushOutput(self):
@@ -75,7 +85,8 @@ class MockSerial():
     def read(self, size=1):
         """A non-blocking read.
 
-        @return bytes
+        @param size Number of bytes to read.
+        @return Bytes read.
 
         """
 # FIXME: Honour the size argument
@@ -88,5 +99,9 @@ class MockSerial():
         return data
 
     def write(self, data):
-        """Write data bytes to the written-out queue."""
+        """Write data bytes to the written-out queue.
+
+        @param data Bytes to write.
+
+        """
         self.out_queue.put(data)

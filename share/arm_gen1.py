@@ -36,8 +36,10 @@ _CMD_SUFFIX = b' -> '
 # Command prompt (after command response)
 _CMD_PROMPT = b'\r\n> '
 
-# Dialect dependant commands
+# Dialect dependent commands
 #   Use the key name for lookup, then index by self._dialect
+# Dialect 0 = SX-750, GEN8, BatteryCheck
+# Dialect 1 = BP35, Trek2
 _DIALECT = {
     'VERSION': ('X-SOFTWARE-VERSION x?', 'SW-VERSION?'),
     'BUILD': ('X-BUILD-NUMBER x?', 'BUILD?'),
@@ -99,7 +101,7 @@ class ArmConsoleGen1():
         # Data readings:
         #   Name -> (function, Tuple of Parameters)
         #       read_float() parameters: (Command, ScaleFactor, StrKill)
-        self._data = {
+        self.cmd_data = {
 #            'ARM-AcDuty': (self.read_float,
 #                            ('X-AC-DETECTOR-DUTY X?', 1, '%')),
             }
@@ -119,7 +121,7 @@ class ArmConsoleGen1():
 
         """
         self._logger.debug('read %s', self._read_cmd)
-        fn, param = self._data[self._read_cmd]
+        fn, param = self.cmd_data[self._read_cmd]
         result = fn(param)
         self._logger.debug('result %s', result)
         return result
