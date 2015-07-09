@@ -23,3 +23,5 @@ __pycache__/
 *.bas
 dummy
 tester
+main.py.ini
+share/isplpc
