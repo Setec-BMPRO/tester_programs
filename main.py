@@ -39,6 +39,8 @@ import smu75070_final
 import spa_multi
 import spa_single
 import st3_final
+import trek2_initial
+import trek2_final
 import sx750_initial
 import sx750_safety
 import sx750_final
@@ -161,6 +163,8 @@ def _main():
         ('SX-750 Final', sx750_final.Main, sx750_final.LIMIT_DATA),
         ('SX-750 Safety', sx750_safety.Main, sx750_safety.LIMIT_DATA),
         ('SMU750-70 Final', smu75070_final.Main, smu75070_final.LIMIT_DATA),
+        ('Trek2 Initial', trek2_initial.Main, trek2_initial.LIMIT_DATA),
+        ('Trek2 Final', trek2_final.Main, trek2_final.LIMIT_DATA),
         ('TS3020-H Initial', ts3020h_initial.Main, ts3020h_initial.LIMIT_DATA),
         ('TS3020-H Final', ts3020h_final.Main, ts3020h_final.LIMIT_DATA),
         ('TS3520 Final', ts3520_final.Main, ts3520_final.LIMIT_DATA),
@@ -169,7 +173,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'Dummy',
+        'Trek2 Initial',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
@@ -178,12 +182,12 @@ def _main():
     logger.info('Open Tester')
     tst.open(pgm)
 #    Allows 2 seconds before fixture lock to remove board at ATE2
-#    import time
-#    time.sleep(2)
+    import time
+    time.sleep(2)
     logger.info('Running Test')
     tst.test(('UUT1', ))
 #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
-#    time.sleep(5)
+    time.sleep(2)
     logger.info('Close Tester')
     tst.close()
     logger.info('Stop Tester')
