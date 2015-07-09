@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-06-19, 14:17:16 -->
+<!-- Saved: 2015-07-09, 17:25:20 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -187,6 +187,12 @@
     <Source>smu75070_final/limit.py</Source>
     <Source>smu75070_final/__init__.py</Source>
     <Source>smu75070_final/support.py</Source>
+    <Source>bp35_initial/support.py</Source>
+    <Source>bp35_initial/__init__.py</Source>
+    <Source>bp35_initial/limit.py</Source>
+    <Source>share/arm_gen1.py</Source>
+    <Source>share/mock_serial.py</Source>
+    <Source>share/bp35.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
