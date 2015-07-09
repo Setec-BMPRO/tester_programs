@@ -3,11 +3,16 @@
 """BP35 Initial Test Program."""
 
 import os
+import inspect
+import serial
 import logging
 import time
 
 import tester
 import share.programmer
+import share.trek2
+import share.isplpc
+import share.mock_serial
 from . import support
 from . import limit
 
@@ -17,15 +22,14 @@ LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt': r'\\.\COM1',
+             'nt':    'COM2',
              }[os.name]
 
-_ARM_HEX = '.hex'
+_ARM_BIN = 'BP35_1.0.3025.bin'
 
 _HEX_DIR = {'posix': '/opt/setec/ate4/bp35_initial',
             'nt': r'C:\TestGear\TcpServer\bp35_initial',
            }[os.name]
-
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -51,7 +55,8 @@ class Main(tester.TestSequence):
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
             ('Program', self._step_program, None, True),
-            ('PowerUp', self._step_power_up, None, True),
+            ('TestArm', self._step_test_arm, None, True),
+            ('CanBus', self._step_canbus, None, True),
             ('OCP', self._step_ocp, None, True),
             ('ShutDown', self._step_shutdown, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -108,44 +113,65 @@ class Main(tester.TestSequence):
 
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed."""
-        self.fifo_push(((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
-                      (s.osw3, 100.0), (s.osw4, 100.0), ))
-        MeasureGroup((m.dmm_Lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3,
-                    m.dmm_sw4, ), timeout=5)
+        self.fifo_push(((s.oLock, 10.0), ))
+        m.dmm_Lock.measure(timeout=5)
 
     def _step_program(self):
         """Program the ARM device.
 
-        5Vsb is injected to power the ARM for programming.
-        Unit is left running the new code.
+        3V3 is injected to power the ARM for programming.
 
         """
         self.fifo_push(((s.o3V3, 3.30), ))
-
-        # Set BOOT active before power-on so the ARM boot-loader runs
-        d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_vbat.output(12.0, True)
-        MeasureGroup((m.dmm_5V, m.dmm_3V3, ), timeout=2)
+        MeasureGroup((m.dmm_3V3, ), timeout=5)
+        # Set BOOT active before power-on so the ARM boot-loader runs
+        d.rla_boot.set_on()
+        # Reset micro.
+        d.rla_reset.pulse(0.1)
         # Start the ARM programmer
         self._logger.info('Start ARM programmer')
-        arm = share.programmer.ProgramARM(
-            _ARM_HEX, _HEX_DIR, s.oMirARM, _ARM_PORT, fifo=self._fifo)
-        arm.read()
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        file = os.path.join(folder, _ARM_BIN)
+        with open(file, 'rb') as infile:
+            bindata = bytearray(infile.read())
+        ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
+        ser.flush()
+        # Program the device
+        pgm = share.isplpc.Programmer(
+            ser, bindata, erase_only=False, verify=True, crpmode=False)
+        try:
+            pgm.program()
+            s.oMirARM.store(0)
+        except share.isplpc.ProgrammerError:
+            s.oMirARM.store(1)
+        ser.close()
+
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
-        # Reset micro.
-        d.rla_reset.pulse(0.1)
-        # ARM startup delay
-        if not self._fifo:
-            time.sleep(1)
 
-    def _step_power_up(self):
-        """ """
-        self.fifo_push(((s.oACin, 240.0), ))
+
+    def _step_test_arm(self):
+        """Test the ARM device."""
+        self.fifo_push((s.oACin, 240.0),
+            ((s.oSnEntry, ('A1429050001', )), ))
 
         t.pwr_up.run()
+        if self._fifo:
+            self._arm_ser = share.mock_serial.MockSerial()
+        else:
+            self._arm_ser = serial.Serial(
+                port=_ARM_PORT, baudrate=115200, timeout=0.1)
+        self._armdev = share.trek2.Console(self._arm_ser)
+        # Reset micro.
+        d.rla_reset.pulse(0.1)
+        self._armdev.unlock()
+
+    def _step_canbus(self):
+        """Test the Can Bus."""
 
     def _step_ocp(self):
         """Ramp up load until OCP."""
