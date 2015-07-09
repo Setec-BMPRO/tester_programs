@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-06-19, 14:20:39 -->
+<!-- Saved: 2015-07-09, 11:48:50 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -190,6 +190,9 @@
     <Source>bp35_initial/support.py</Source>
     <Source>bp35_initial/__init__.py</Source>
     <Source>bp35_initial/limit.py</Source>
+    <Source>share/arm_gen1.py</Source>
+    <Source>share/mock_serial.py</Source>
+    <Source>share/trek2.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
