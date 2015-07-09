@@ -46,7 +46,7 @@ class LogicalDevices():
 
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
         self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
-        self.rla_Prog = relay.Relay(devices['RLA3'])    # Connect PIC programmer.
+        self.rla_pic = relay.Relay(devices['RLA3'])    # Connect PIC programmer.
         self.rla_loadsw = relay.Relay(devices['RLA4'])
 
     def error_check(self):
@@ -64,7 +64,8 @@ class LogicalDevices():
         for ld in (self.dcl_out, self.dcl_bat):
             ld.output(0.0, False)
         # Switch off all Relays
-        for rla in (self.rla_reset, self.rla_boot, self.rla_loadsw):
+        for rla in (self.rla_reset, self.rla_boot, self.rla_pic,
+                   self.rla_loadsw):
             rla.set_off()
 
 
@@ -99,6 +100,7 @@ class Sensors():
         self.oFan = sensor.Vdc(dmm, high=7, low=5, rng=100, res=0.01)
         self.o5Vusb = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
+        self.o5Vprog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
         self.oOCP = sensor.Ramp(
             stimulus=dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
@@ -149,6 +151,7 @@ class Measurements():
         self.dmm_FanOff = Measurement(limits['FanOff'], sense.oFan)
         self.dmm_5Vusb = Measurement(limits['5Vusb'], sense.o5Vusb)
         self.dmm_15Vs = Measurement(limits['15Vs'], sense.o15Vs)
+        self.dmm_5Vprog = Measurement(limits['5Vprog'], sense.o5Vprog)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
         self.ui_YesNoRed = Measurement(limits['Notify'], sense.oYesNoRed)

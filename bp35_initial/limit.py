@@ -18,6 +18,7 @@ DATA = (
         ('FanOff', 1, 0.5, None, None, None),
         ('5Vusb', 1, 4.5, 5.5, None, None),
         ('15Vs', 1, 11.5, 13.0, None, None),
+        ('5Vprog', 1, 4.75, 5.25, None, None),
         ('InOCP', 1, 11.65, None, None, None),
         ('OCP', 1, 35.0, 38.0, None, None),
         ('Program', 2, -0.1, 0.1, None, None),

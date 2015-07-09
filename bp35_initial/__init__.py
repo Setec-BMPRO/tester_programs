@@ -27,9 +27,12 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
 
 _ARM_BIN = 'BP35_1.0.3025.bin'
 
+_PIC_HEX = '.hex'
+
 _HEX_DIR = {'posix': '/opt/setec/ate4/bp35_initial',
             'nt': r'C:\TestGear\TcpServer\bp35_initial',
            }[os.name]
+
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -54,7 +57,8 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
-            ('Program', self._step_program, None, True),
+            ('ProgramARM', self._step_program_arm, None, True),
+            ('ProgramPIC', self._step_program_pic, None, True),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
             ('OCP', self._step_ocp, None, True),
@@ -116,10 +120,10 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oLock, 10.0), ))
         m.dmm_Lock.measure(timeout=5)
 
-    def _step_program(self):
+    def _step_program_arm(self):
         """Program the ARM device.
 
-        3V3 is injected to power the ARM for programming.
+        External Vbat is applied to power the ARM for programming.
 
         """
         self.fifo_push(((s.o3V3, 3.30), ))
@@ -148,16 +152,31 @@ class Main(tester.TestSequence):
         except share.isplpc.ProgrammerError:
             s.oMirARM.store(1)
         ser.close()
-
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
 
+    def _step_program_pic(self):
+        """Program the PIC device.
+
+        External Vbat powers the PIC for programming.
+
+        """
+        self.fifo_push(((s.o5Vprog, 5.0), ))
+        m.dmm_5Vprog.measure(timeout=5)
+        # Start the PIC programmer
+        self._logger.info('Start PIC programmer')
+        d.rla_pic.set_on()
+        pic = share.programmer.ProgramPIC(_PIC_HEX, _HEX_DIR, '33FJ16GS402',
+                                          s.oMirPIC, self._fifo)
+        # Wait for programming completion & read results
+        pic.read()
+        d.rla_pic.set_off()
+        m.pgmPIC.measure()
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        self.fifo_push((s.oACin, 240.0),
-            ((s.oSnEntry, ('A1429050001', )), ))
+        self.fifo_push(((s.oACin, 240.0), ))
 
         t.pwr_up.run()
         if self._fifo:
