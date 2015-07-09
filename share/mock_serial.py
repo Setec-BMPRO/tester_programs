@@ -24,26 +24,42 @@ class MockSerial():
         self.baudrate = baudrate
         self.timeout = timeout
 
-    def putch(self, data, blanks=0):
+    def putch(self, data, preflush=0, postflush=0):
         """Put data character by character into the read-back queue.
 
         @param data String to be entered character by character.
-        @param blanks Number of b'' to be entered before the data.
+        @param preflush Number of b'' to be entered before the data.
+        @param postflush Number of b'' to be entered after the data.
         Note: b'' is a marker to stop the flush of the data queue.
 
         """
-        for _ in range(blanks):
-            self.put(b'')
+        self._put_flush(preflush)
         for c in data:
             self.put(c.encode())
+        self._put_flush(postflush)
 
-    def put(self, data):
+    def put(self, data, preflush=0, postflush=0):
         """Put data into the read-back queue.
 
         @param data Bytes of data.
+        @param preflush Number of b'' to be entered before the data.
+        @param postflush Number of b'' to be entered after the data.
+        Note: b'' is a marker to stop the flush of the data queue.
 
         """
+        self._put_flush(preflush)
         self.in_queue.put(data)
+        self._put_flush(postflush)
+
+    def _put_flush(self, flush_count):
+        """Add flush stop markers into the queue.
+
+        @param flush_count Number of b'' to be entered.
+        Note: b'' is a marker to stop the flush of the data queue.
+
+        """
+        for _ in range(flush_count):
+            self.put(b'')
 
     def get(self):
         """Get data from the written-out queue.

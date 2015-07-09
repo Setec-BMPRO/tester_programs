@@ -150,10 +150,10 @@ class Main(tester.TestSequence):
         # Reset micro.
         d.rla_reset.pulse(0.1)
         if self._fifo:
-            self._arm_ser.putch('50 0 X!', blanks=2)
+            self._arm_ser.putch('50 0 X!', preflush=2)
         _armdev.action('50 0 X!')
         if self._fifo:
-            self._arm_ser.putch('0 X?', blanks=2)
+            self._arm_ser.putch('0 X?', preflush=2)
             self._arm_ser.put(b'50%')
         _armdev.action('0 X?')
         _armdev.defaults(hwver, sernum)
