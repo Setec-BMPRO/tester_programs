@@ -61,7 +61,7 @@ class LogicalDevices():
         for dcs in (self.dcs_vcom, self.dcs_vbat, self.dcs_vaux):
             dcs.output(0.0, False)
         # Switch off DC Loads
-        for ld in (self.dcl_out, self.dcl_bat):
+        for ld in (self.dcl, ):
             ld.output(0.0, False)
         # Switch off all Relays
         for rla in (self.rla_reset, self.rla_boot, self.rla_pic,
@@ -81,8 +81,10 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        dcl = logical_devices.dcl
 
         self.oMirPIC = sensor.Mirror()
+        self.oMirARM = sensor.Mirror()
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
 
@@ -119,6 +121,7 @@ class Sensors():
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
         self.oMirPIC.flush()
+        self.oMirARM.flush()
 
 
 class Measurements():
@@ -133,6 +136,7 @@ class Measurements():
 
         """
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
+        self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
 
         self.dmm_Lock = Measurement(limits['FixtureLock'], sense.oLock)
         self.dmm_sw1 = Measurement(limits['SwShort'], sense.osw1)
@@ -155,7 +159,7 @@ class Measurements():
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
         self.ui_YesNoRed = Measurement(limits['Notify'], sense.oYesNoRed)
-        self.ui_YesNoBlue = Measurement(limits['Notify'], sense.oYesNoBlue)
+        self.ui_YesNoOrange = Measurement(limits['Notify'], sense.oYesNoOrange)
 
 
 class SubTests():

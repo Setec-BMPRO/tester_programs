@@ -58,11 +58,11 @@ class Main(tester.TestSequence):
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
             ('ProgramARM', self._step_program_arm, None, True),
-            ('ProgramPIC', self._step_program_pic, None, True),
-            ('TestArm', self._step_test_arm, None, True),
-            ('CanBus', self._step_canbus, None, True),
-            ('OCP', self._step_ocp, None, True),
-            ('ShutDown', self._step_shutdown, None, True),
+            ('ProgramPIC', self._step_program_pic, None, False),
+            ('TestArm', self._step_test_arm, None, False),
+            ('CanBus', self._step_canbus, None, False),
+            ('OCP', self._step_ocp, None, False),
+            ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -101,8 +101,7 @@ class Main(tester.TestSequence):
         self._logger.info('Safety(%s)', run)
         if run:
             d.acsource.output(voltage=0.0, output=False)
-            d.dcl_Out.output(2.0)
-            d.dcl_Bat.output(2.0)
+            d.dcl.output(2.0)
             if self._fifo:
                 d.discharge.pulse(0.1)
             else:
@@ -128,6 +127,7 @@ class Main(tester.TestSequence):
         """
         self.fifo_push(((s.o3V3, 3.30), ))
         # Apply and check injected rails
+        d.dcs_vcom.output(12.0, True)
         d.dcs_vbat.output(12.0, True)
         MeasureGroup((m.dmm_3V3, ), timeout=5)
         # Set BOOT active before power-on so the ARM boot-loader runs
@@ -149,7 +149,7 @@ class Main(tester.TestSequence):
         try:
             pgm.program()
             s.oMirARM.store(0)
-        except share.isplpc.ProgrammerError:
+        except share.isplpc.ProgrammingError:
             s.oMirARM.store(1)
         ser.close()
         m.pgmARM.measure()

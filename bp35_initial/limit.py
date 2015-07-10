@@ -14,7 +14,7 @@ DATA = (
         ('Vbat', 1, 12.6, 13.0, None, None),
         ('12Vpri', 1, 11.5, 13.0, None, None),
         ('3V3', 1, 3.25, 3.35, None, None),
-        ('FanOn', 1, 12.5, 11.5, None, None),
+        ('FanOn', 1, 11.5, 12.5, None, None),
         ('FanOff', 1, 0.5, None, None, None),
         ('5Vusb', 1, 4.5, 5.5, None, None),
         ('15Vs', 1, 11.5, 13.0, None, None),
