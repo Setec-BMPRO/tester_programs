@@ -49,7 +49,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, False),
+            ('Program', self._step_program, None, True),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -120,13 +120,13 @@ class Main(tester.TestSequence):
             bindata = bytearray(infile.read())
         ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
         ser.flush()
-        # Program the device
+        # Program the device (LPC1549 has internal CRC, so no need for verify)
         pgm = share.isplpc.Programmer(
-            ser, bindata, erase_only=False, verify=True, crpmode=False)
+            ser, bindata, erase_only=False, verify=False, crpmode=False)
         try:
             pgm.program()
             s.oMirARM.store(0)
-        except share.isplpc.ProgrammerError:
+        except share.isplpc.ProgrammingError:
             s.oMirARM.store(1)
         ser.close()
 
