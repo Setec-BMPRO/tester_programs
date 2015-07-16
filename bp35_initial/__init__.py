@@ -24,9 +24,9 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
 # ARM software image file
-_ARM_BIN = 'BP35_1.0.3025.bin'
+_ARM_BIN = 'bp35_1.0.3119.bin'
 # dsPIC software image file
-_PIC_HEX = '.hex'
+_PIC_HEX = 'bp35sr_1.hex'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
