@@ -57,13 +57,13 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('ProgramARM', self._step_program_arm, None, False),
-            ('ProgramPIC', self._step_program_pic, None, False),
+            ('ProgramARM', self._step_program_arm, None, True),
+            ('ProgramPIC', self._step_program_pic, None, True),
             ('PowerUp', self._step_powerup, None, False),
-            ('TestArm', self._step_test_arm, None, True),
+            ('TestArm', self._step_test_arm, None, False),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, True),
-            ('ShutDown', self._step_shutdown, None, True),
+            ('OCP', self._step_ocp, None, False),
+            ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -150,15 +150,16 @@ class Main(tester.TestSequence):
             bindata = bytearray(infile.read())
         ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
         ser.flush()
-        # Program the device
+        # Program the device (LPC1549 has internal CRC, so no need for verify)
         pgm = share.isplpc.Programmer(
-            ser, bindata, erase_only=False, verify=True, crpmode=False)
+            ser, bindata, erase_only=False, verify=False, crpmode=False)
         try:
             pgm.program()
             s.oMirARM.store(0)
         except share.isplpc.ProgrammingError:
             s.oMirARM.store(1)
         ser.close()
+
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
@@ -180,7 +181,6 @@ class Main(tester.TestSequence):
         pic.read()
         d.rla_pic.set_off()
         m.pgmPIC.measure()
-        d.dcs_vbat.output(0.0)
 
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac."""
@@ -188,6 +188,7 @@ class Main(tester.TestSequence):
                       (s.o5Vusb, 5.0), (s.o15Vs, 12.5), (s.oVout, 12.8),
                       (s.oVbat, 12.8), ))
 
+        d.dcs_vbat.output(0.0)
         t.pwr_up.run()
 
     def _step_test_arm(self):
