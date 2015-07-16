@@ -145,16 +145,16 @@ class Measurements():
         self.dmm_sw4 = Measurement(limits['SwShort'], sense.osw4)
         self.dmm_ACin = Measurement(limits['ACin'], sense.oACin)
         self.dmm_Vbus = Measurement(limits['Vbus'], sense.oVbus)
+        self.dmm_12Vpri = Measurement(limits['12Vpri'], sense.o12Vpri)
+        self.dmm_5Vusb = Measurement(limits['5Vusb'], sense.o5Vusb)
+        self.dmm_15Vs = Measurement(limits['15Vs'], sense.o15Vs)
         self.dmm_Vout = Measurement(limits['Vout'], sense.oVout)
         self.dmm_VoutFl = Measurement(limits['VoutFl'], sense.oVout)
         self.dmm_VoutOff = Measurement(limits['VoutOff'], sense.oVout)
         self.dmm_Vbat = Measurement(limits['Vbat'], sense.oVbat)
-        self.dmm_12Vpri = Measurement(limits['12Vpri'], sense.o12Vpri)
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_FanOn = Measurement(limits['FanOn'], sense.oFan)
         self.dmm_FanOff = Measurement(limits['FanOff'], sense.oFan)
-        self.dmm_5Vusb = Measurement(limits['5Vusb'], sense.o5Vusb)
-        self.dmm_15Vs = Measurement(limits['15Vs'], sense.o15Vs)
         self.dmm_5Vprog = Measurement(limits['5Vprog'], sense.o5Vprog)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
@@ -178,7 +178,8 @@ class SubTests():
 
         # PowerUp:
         acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr1 = MeasureSubStep((m.dmm_ACin, ), timeout=5)
+        msr1 = MeasureSubStep((m.dmm_ACin, m.dmm_Vbus, m.dmm_12Vpri, m.dmm_5Vusb,
+                             m.dmm_15Vs, m.dmm_Vout, m.dmm_Vbat), timeout=5)
         self.pwr_up = Step((acs1, msr1, ))
 
         # Shutdown: Shutdown, recovery, check load switch.

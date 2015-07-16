@@ -10,7 +10,7 @@ import time
 
 import tester
 import share.programmer
-import share.trek2
+import share.bp35
 import share.isplpc
 import share.mock_serial
 from . import support
@@ -56,13 +56,14 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('FixtureLock', self._step_fixture_lock, None, True),
-            ('ProgramARM', self._step_program_arm, None, True),
+            ('PartDetect', self._step_part_detect, None, True),
+            ('ProgramARM', self._step_program_arm, None, False),
             ('ProgramPIC', self._step_program_pic, None, False),
-            ('TestArm', self._step_test_arm, None, False),
+            ('PowerUp', self._step_powerup, None, False),
+            ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, False),
-            ('ShutDown', self._step_shutdown, None, False),
+            ('OCP', self._step_ocp, None, True),
+            ('ShutDown', self._step_shutdown, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -87,6 +88,10 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
+        try:
+            self._arm_ser.close()
+        except:
+            pass
         global m
         m = None
         global d
@@ -114,10 +119,12 @@ class Main(tester.TestSequence):
         """Check physical instruments for errors."""
         d.error_check()
 
-    def _step_fixture_lock(self):
-        """Check that Fixture Lock is closed."""
-        self.fifo_push(((s.oLock, 10.0), ))
-        m.dmm_Lock.measure(timeout=5)
+    def _step_part_detect(self):
+        """Measure fixture lock and part detection microswitches."""
+        self.fifo_push(((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
+                      (s.osw3, 100.0), (s.osw4, 100.0), ))
+        MeasureGroup((m.dmm_Lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3,
+                    m.dmm_sw4, ), timeout=5)
 
     def _step_program_arm(self):
         """Program the ARM device.
@@ -173,20 +180,28 @@ class Main(tester.TestSequence):
         pic.read()
         d.rla_pic.set_off()
         m.pgmPIC.measure()
+        d.dcs_vbat.output(0.0)
+
+    def _step_powerup(self):
+        """Power-Up the Unit with 240Vac."""
+        self.fifo_push(((s.oACin, 240.0), (s.oVbus, 415.0), (s.o12Vpri, 12.5),
+                      (s.o5Vusb, 5.0), (s.o15Vs, 12.5), (s.oVout, 12.8),
+                      (s.oVbat, 12.8), ))
+
+        t.pwr_up.run()
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        self.fifo_push(((s.oACin, 240.0), ))
-
-        t.pwr_up.run()
         if self._fifo:
             self._arm_ser = share.mock_serial.MockSerial()
         else:
             self._arm_ser = serial.Serial(
                 port=_ARM_PORT, baudrate=115200, timeout=0.1)
-        self._armdev = share.trek2.Console(self._arm_ser)
+        self._armdev = share.bp35.Console(self._arm_ser)
         # Reset micro.
         d.rla_reset.pulse(0.1)
+        if self._fifo:
+            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=2)
         self._armdev.unlock()
 
     def _step_canbus(self):
@@ -194,12 +209,12 @@ class Main(tester.TestSequence):
 
     def _step_ocp(self):
         """Ramp up load until OCP."""
-        self.fifo_push(((s.oVout, (12.8, ) * 11 + (11.0, ), ), ))
+        self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ), ))
         d.dcl.output(0.0, output=True)
         d.dcl.binary(0.0, 32.0, 5.0)
         m.ramp_OCP.measure()
 
     def _step_shutdown(self):
         """Apply overload to shutdown. Check load switch."""
-        self.fifo_push(((s.oVout, (0.0, 12.0, 0.0, 12.0)), (s.oVbat, 12.0), ))
+        self.fifo_push(((s.oVout, (0.0, 12.8, 0.0, 12.8)), (s.oVbat, 12.9), ))
         t.shdn.run()

@@ -114,6 +114,22 @@ class MockSerial():
             data = b''
         return data
 
+    def readline(self, size=1):
+        """A non-blocking read.
+
+        @param size Number of bytes to read.
+        @return Bytes read.
+
+        """
+# FIXME: Honour the size argument
+        if self._enable.is_set() and not self.in_queue.empty():
+            data = self.in_queue.get()
+        else:
+# FIXME: Should we use the timeout from the call to __init__() ?
+            time.sleep(0.1)
+            data = b''
+        return data
+
     def write(self, data):
         """Write data bytes to the written-out queue.
 
