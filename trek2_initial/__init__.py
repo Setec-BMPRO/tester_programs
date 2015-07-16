@@ -60,6 +60,8 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
+        self._arm_ser = None
+        self._trek2 = None
 
     def open(self):
         """Prepare for testing."""
@@ -76,10 +78,8 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        try:
-            self._arm_ser.close()
-        except:
-            pass
+        self._arm_ser.close()
+        self._trek2 = None
         global m
         m = None
         global d
@@ -118,18 +118,19 @@ class Main(tester.TestSequence):
         file = os.path.join(folder, _ARM_BIN)
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
-        ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
-        ser.flush()
-        # Program the device (LPC1549 has internal CRC, so no need for verify)
-        pgm = share.isplpc.Programmer(
-            ser, bindata, erase_only=False, verify=False, crpmode=False)
         try:
-            pgm.program()
-            s.oMirARM.store(0)
-        except share.isplpc.ProgrammingError:
-            s.oMirARM.store(1)
-        ser.close()
-
+            ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
+            ser.flush()
+            # Program the device (LPC1549 has internal CRC for verification)
+            pgm = share.isplpc.Programmer(
+                ser, bindata, erase_only=False, verify=False, crpmode=False)
+            try:
+                pgm.program()
+                s.oMirARM.store(0)
+            except share.isplpc.ProgrammingError:
+                s.oMirARM.store(1)
+        finally:
+            ser.close()
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
@@ -137,26 +138,30 @@ class Main(tester.TestSequence):
     def _step_test_arm(self):
         """Test the ARM device."""
         self.fifo_push(
-            ((s.oSnEntry, ('A1429050001', )), (s.oBkLght, (4.0, 0)),  ))
+            ((s.oSnEntry, ('A1429050001', )), ))
 
         sernum = m.ui_SnEntry.measure()[1][0]
         hwver = (1, 0, '')
-        if self._fifo:
-            self._arm_ser = share.mock_serial.MockSerial()
-        else:
-            self._arm_ser = serial.Serial(
-                port=_ARM_PORT, baudrate=115200, timeout=0.1)
-        _armdev = share.trek2.Console(self._arm_ser)
+        ser_cls = share.mock_serial.MockSerial if self._fifo else serial.Serial
+        self._arm_ser = ser_cls(port=_ARM_PORT, baudrate=115200, timeout=0.1)
+        self._trek2 = share.trek2.Console(self._arm_ser)
         # Reset micro.
         d.rla_reset.pulse(0.1)
         if self._fifo:
-            self._arm_ser.putch('50 0 X!', preflush=2)
-        _armdev.action('50 0 X!')
-        if self._fifo:
-            self._arm_ser.putch('0 X?', preflush=2)
-            self._arm_ser.put(b'50%')
-        _armdev.action('0 X?')
-        _armdev.defaults(hwver, sernum)
+            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
+            self._arm_ser.putch('1 0 " SET-HW-VER', preflush=1, postflush=1)
+            self._arm_ser.putch(
+                '"A1429050001 SET-SERIAL-ID', preflush=1, postflush=1)
+            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
+            self._arm_ser.putch('NV-DEFAULT', preflush=1, postflush=1)
+            self._arm_ser.putch('NV-WRITE', preflush=1, postflush=1)
+            self._arm_ser.putch('RESTART', preflush=1)
+            self._arm_ser.put(b'Banner1\r\nBanner2\r\n')
+        self._trek2.defaults(hwver, sernum)
 
     def _step_canbus(self):
         """Test the Can Bus."""
+        if self._fifo:
+            self._arm_ser.putch('"TQQ,16,0 CAN', preflush=1)
+            self._arm_ser.put(b'RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+# FIXME: Measure a sensor here

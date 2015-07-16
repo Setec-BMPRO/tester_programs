@@ -245,10 +245,9 @@ class ArmConsoleGen1():
         self._ser.write(_CMD_RUN)
 
     def flush(self):
-        """Flush input (both serial port and buffer)."""
+        """Flush input by reading everything."""
         # See what is waiting
-        buf = self._ser.read(10240)
+        buf = self._ser.read(1024 * 1024)
         if len(buf) > 0:
             # Show what we are flushing
             self._logger.debug('flush() %s', buf)
-        self._ser.flushInput()
