@@ -23,8 +23,10 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
-
+# Software image filename
 _ARM_BIN = 'Trek2_1.0.102.bin'
+# Hardware version (Major [1-255], Minor [1-255], Mod [character])
+_HW_VER = (1, 0, '')
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -66,10 +68,11 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
+        self._trek2 = share.trek2.Console()
         global d
         d = support.LogicalDevices(self._devices)
         global s
-        s = support.Sensors(d, self._limits)
+        s = support.Sensors(d, self._limits, self._trek2)
         global m
         m = support.Measurements(s, self._limits)
         global t
@@ -78,8 +81,8 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._arm_ser.close()
         self._trek2 = None
+        self._arm_ser.close()
         global m
         m = None
         global d
@@ -111,13 +114,12 @@ class Main(tester.TestSequence):
         d.rla_boot.set_on()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        # Start the ARM programmer
-        self._logger.info('Start ARM programmer')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         file = os.path.join(folder, _ARM_BIN)
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
+        self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
             ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
             ser.flush()
@@ -137,14 +139,11 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        self.fifo_push(
-            ((s.oSnEntry, ('A1429050001', )), ))
-
+        self.fifo_push(((s.oSnEntry, ('A1429050001', )), ))
         sernum = m.ui_SnEntry.measure()[1][0]
-        hwver = (1, 0, '')
         ser_cls = share.mock_serial.MockSerial if self._fifo else serial.Serial
         self._arm_ser = ser_cls(port=_ARM_PORT, baudrate=115200, timeout=0.1)
-        self._trek2 = share.trek2.Console(self._arm_ser)
+        self._trek2.set_port(self._arm_ser)
         # Reset micro.
         d.rla_reset.pulse(0.1)
         if self._fifo:
@@ -157,11 +156,11 @@ class Main(tester.TestSequence):
             self._arm_ser.putch('NV-WRITE', preflush=1, postflush=1)
             self._arm_ser.putch('RESTART', preflush=1)
             self._arm_ser.put(b'Banner1\r\nBanner2\r\n')
-        self._trek2.defaults(hwver, sernum)
+        self._trek2.defaults(_HW_VER, sernum)
 
     def _step_canbus(self):
         """Test the Can Bus."""
         if self._fifo:
             self._arm_ser.putch('"TQQ,16,0 CAN', preflush=1)
             self._arm_ser.put(b'RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
-# FIXME: Measure a sensor here
+        m.trek2_can_id.measure()

@@ -4,26 +4,30 @@
 import share.arm_gen1
 
 
+# Expose arm_gen1.Sensor as trek2.Sensor
+Sensor = share.arm_gen1.Sensor
+
+
 class Console(share.arm_gen1.ArmConsoleGen1):
 
     """Communications to ARM console."""
 
-    def __init__(self, serport):
-        """Open serial communications.
-
-        @param serport An opened serial port instance.
-
-        """
-        super().__init__(serport, dialect=1)
+    def __init__(self):
+        """Create console instance."""
+        super().__init__(dialect=1)
         self._read_cmd = None
-        # Data readings:
-        #   Name -> (function, parameter)
+        # Data readings: Name -> (function, parameter)
         self.cmd_data = {
-            'CAN-Test': (self.can_id, None),
+            'CAN_ID': (self.can_id, None),
             }
 
     def can_id(self, dummy):
-        """Simple CAN check by sending a ID request."""
+        """Simple CAN check by sending a ID request.
+
+        @param dummy Unused parameter.
+        @return The response string from the target device.
+
+        """
         return self.action('"TQQ,16,0 CAN', expected=1)
 
     def defaults(self, hwver, sernum):

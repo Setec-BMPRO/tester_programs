@@ -11,6 +11,7 @@ from pydispatch import dispatcher
 import tester
 from tester.devlogical import *
 from tester.measure import *
+import share.trek2
 
 sensor = tester.sensor
 translate = tester.translate
@@ -27,14 +28,11 @@ class LogicalDevices():
 
         """
         self._devices = devices
-
         self.dmm = dmm.DMM(devices['DMM'])
-
         # Power RS232 + Fixture Trek2.
         self.dcs_Vcom = dcsource.DCSource(devices['DCS1'])
         # Power unit under test.
         self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
-
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
         self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
 
@@ -57,11 +55,12 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
+    def __init__(self, logical_devices, limits, trek2):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
            @param limits Product test limits
+           @param trek2 Trek2 ARM console driver
 
         """
         dmm = logical_devices.dmm
@@ -78,9 +77,11 @@ class Sensors():
         self.oSnEntry = sensor.DataEntry(
             message=translate('msgSnEntry'),
             caption=translate('capSnEntry'))
+        self.oCANID = share.trek2.Sensor(
+            trek2, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
 
     def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensors."""
+        """TestRun.stop: Empty the Mirror Sensor."""
         self.oMirARM.flush()
 
 
@@ -101,6 +102,7 @@ class Measurements():
         self.dmm_BkLghtOff = Measurement(limits['BkLghtOff'], sense.oBkLght)
         self.dmm_BkLghtOn = Measurement(limits['BkLghtOn'], sense.oBkLght)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
+        self.trek2_can_id = Measurement(limits['CAN_ID'], sense.oCANID)
 
 
 class SubTests():
