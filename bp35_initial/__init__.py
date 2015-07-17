@@ -51,10 +51,10 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('ProgramARM', self._step_program_arm, None, True),
-            ('ProgramPIC', self._step_program_pic, None, True),
-            ('PowerUp', self._step_powerup, None, False),
-            ('TestArm', self._step_test_arm, None, False),
+            ('ProgramARM', self._step_program_arm, None, False),
+            ('ProgramPIC', self._step_program_pic, None, False),
+            ('PowerUp', self._step_powerup, None, True),
+            ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, False),
             ('OCP', self._step_ocp, None, False),
             ('ShutDown', self._step_shutdown, None, False),
@@ -122,6 +122,8 @@ class Main(tester.TestSequence):
         MeasureGroup(
             (m.dmm_Lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
              timeout=5)
+        # Apply power to comms circuit.
+        d.dcs_vcom.output(12.8, True)
 
     def _step_program_arm(self):
         """Program the ARM device.
@@ -129,11 +131,10 @@ class Main(tester.TestSequence):
         External Vbat is applied to power the ARM for programming.
 
         """
-        self.fifo_push(((s.o3V3, 3.30), ))
+        self.fifo_push(((s.o3V3, 3.3), ))
         # Apply and check injected rails
-        d.dcs_vcom.output(12.0, True)
-        d.dcs_vbat.output(12.0, True)
-        MeasureGroup((m.dmm_3V3, ), timeout=5)
+        d.dcs_vbat.output(12.8, True)
+        MeasureGroup((m.dmm_Vbat, m.dmm_3V3, ), timeout=5)
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Reset micro.
@@ -167,8 +168,8 @@ class Main(tester.TestSequence):
         External Vbat powers the PIC for programming.
 
         """
-        self.fifo_push(((s.o5Vprog, 5.0), ))
-        m.dmm_5Vprog.measure(timeout=5)
+        self.fifo_push(((s.o3V3prog, 3.3), ))
+        m.dmm_3V3prog.measure(timeout=5)
         # Start the PIC programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -184,9 +185,8 @@ class Main(tester.TestSequence):
         """Power-Up the Unit with 240Vac."""
         self.fifo_push(
             ((s.oACin, 240.0), (s.oVbus, 415.0), (s.o12Vpri, 12.5),
-             (s.o5Vusb, 5.0), (s.o15Vs, 12.5), (s.oVout, 12.8),
-             (s.oVbat, 12.8), ))
-        d.dcs_vbat.output(0.0)
+             (s.o5Vusb, 5.0), (s.o3V3, 3.3), (s.o15Vs, 12.5),
+             (s.oVout, 12.8), (s.oVbat, 12.8), ))
         t.pwr_up.run()
 
     def _step_test_arm(self):
@@ -198,7 +198,7 @@ class Main(tester.TestSequence):
         d.rla_reset.pulse(0.1)
         if self._fifo:
             self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
-        self._armdev.unlock()
+        self._bp35.version()
 
     def _step_canbus(self):
         """Test the Can Bus."""

@@ -65,7 +65,7 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
+    def __init__(self, logical_devices, limits, bp35):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
@@ -94,7 +94,7 @@ class Sensors():
         self.oFan = sensor.Vdc(dmm, high=7, low=5, rng=100, res=0.01)
         self.o5Vusb = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
-        self.o5Vprog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self.o3V3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
         self.oOCP = sensor.Ramp(
             stimulus=dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
@@ -147,7 +147,7 @@ class Measurements():
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_FanOn = Measurement(limits['FanOn'], sense.oFan)
         self.dmm_FanOff = Measurement(limits['FanOff'], sense.oFan)
-        self.dmm_5Vprog = Measurement(limits['5Vprog'], sense.o5Vprog)
+        self.dmm_3V3prog = Measurement(limits['3V3prog'], sense.o3V3prog)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
         self.ui_YesNoRed = Measurement(limits['Notify'], sense.oYesNoRed)
@@ -169,10 +169,15 @@ class SubTests():
         m = measurements
 
         # PowerUp:
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr1 = MeasureSubStep((m.dmm_ACin, m.dmm_Vbus, m.dmm_12Vpri, m.dmm_5Vusb,
-                             m.dmm_15Vs, m.dmm_Vout, m.dmm_Vbat), timeout=5)
-        self.pwr_up = Step((acs1, msr1, ))
+        dcs1 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
+        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=1)
+        msr1 = MeasureSubStep((m.dmm_ACin, m.dmm_Vbus, m.dmm_12Vpri,
+                               m.dmm_5Vusb, m.dmm_3V3, m.dmm_15Vs,
+                               m.dmm_Vout, m.dmm_Vbat), timeout=5)
+        ld1 = LoadSubStep(((d.dcl, 1.0), ), output=True)
+        msr2 = MeasureSubStep((m.dmm_Vout, m.dmm_Vbat,), timeout=5)
+        ld2 = LoadSubStep(((d.dcl, 0.0), ))
+        self.pwr_up = Step((dcs1, acs1, msr1, ld1, msr2, ld2))
 
         # Shutdown: Shutdown, recovery, check load switch.
         ld1 = LoadSubStep(((d.dcl, 39.0), ), output=True)
