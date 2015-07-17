@@ -6,7 +6,7 @@ DATA = (
     ('ACin', 1, 235.0, 245.0, None, None),
     ('Vbus', 1, 410.0, 420.0, None, None),
     ('12Vpri', 1, 11.5, 13.0, None, None),
-    ('5Vusb', 1, 4.5, 5.5, None, None),
+    ('5Vusb', 1, -4.5, 5.5, None, None),
     ('15Vs', 1, 11.5, 13.0, None, None),
     # 12.8 +/- 0.1
     ('Vout', 1, 12.7, 12.9, None, None),
@@ -17,7 +17,7 @@ DATA = (
     ('3V3', 1, 3.25, 3.35, None, None),
     ('FanOn', 1, 11.5, 12.5, None, None),
     ('FanOff', 1, 0.5, None, None, None),
-    ('5Vprog', 1, 4.75, 5.25, None, None),
+    ('3V3prog', 1, 3.2, 3.4, None, None),
     ('InOCP', 1, 11.65, None, None, None),
     ('OCP', 1, 35.0, 38.0, None, None),
     ('Program', 2, -0.1, 0.1, None, None),
