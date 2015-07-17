@@ -4,24 +4,31 @@
 import share.arm_gen1
 
 
+# Expose arm_gen1.Sensor as trek2.Sensor
+Sensor = share.arm_gen1.Sensor
+
+
 class Console(share.arm_gen1.ArmConsoleGen1):
 
     """Communications to ARM console."""
 
-    def __init__(self, serport):
-        """Open serial communications.
+    def __init__(self):
+        """Create console instance."""
+        super().__init__(dialect=1)
+        self._read_cmd = None
+        # Data readings: Name -> (function, parameter)
+        self.cmd_data = {
+            'CAN_ID': (self.can_id, None),
+            }
 
-        @param serport An opened serial port instance.
+    def can_id(self, dummy):
+        """Simple CAN check by sending a ID request.
+
+        @param dummy Unused parameter.
+        @return The response string from the target device.
 
         """
-        super().__init__(serport, dialect=1)
-        self._read_cmd = None
-        # Data readings:
-        #   Name -> (function, ( Command, ScaleFactor, StrKill ))
-#        self.cmd_data = {
-#            'ARM-AcDuty':  (self.read_float,
-#                            ('X-AC-DETECTOR-DUTY', 1, '%')),
-#            }
+        return self.action('"TQQ,16,0 CAN', expected=1)
 
     def defaults(self, hwver, sernum):
         """Write factory defaults into NV memory.

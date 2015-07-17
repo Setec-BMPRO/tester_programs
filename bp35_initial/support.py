@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-    BP35 Initial Test Program.
+"""BP35 Initial Test Program.
 
         Logical Devices
         Sensors
@@ -29,21 +27,15 @@ class LogicalDevices():
 
         """
         self._devices = devices
-
         self.dmm = dmm.DMM(devices['DMM'])
-
         self.acsource = acsource.ACSource(devices['ACS'])
-
         self.discharge = discharge.Discharge(devices['DIS'])
-
         self.dcs_vcom = dcsource.DCSource(devices['DCS1'])  # Power RS232 + Fixture Trek2.
         self.dcs_vbat = dcsource.DCSource(devices['DCS2'])  # Power for programming.
         self.dcs_vaux = dcsource.DCSource(devices['DCS3'])
-
         dcl_vout = dcload.DCLoad(devices['DCL1'])
         dcl_vbat = dcload.DCLoad(devices['DCL5'])
         self.dcl = dcload.DCLoadParallel(((dcl_vout, 29), (dcl_vbat, 14)))
-
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
         self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
         self.rla_pic = relay.Relay(devices['RLA3'])    # Connect PIC programmer.

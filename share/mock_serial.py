@@ -24,6 +24,11 @@ class MockSerial():
         self.baudrate = baudrate
         self.timeout = timeout
 
+    def _dummy(self):
+        pass
+
+    close = _dummy
+
     def putch(self, data, preflush=0, postflush=0):
         """Put data character by character into the read-back queue.
 

@@ -83,20 +83,16 @@ class ArmConsoleGen1():
 
     """Communications to First Generation ARM console."""
 
-    def __init__(self, serport, dialect=0):
+    def __init__(self, dialect=0):
         """Initialise communications.
 
-        Set an appropriate serial read timeout.
-        @param serport Opened serial port to use.
         @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
 
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._dialect = dialect
-        self._ser = serport
-        self._ser.timeout = 10240 / self._ser.baudrate  # Timeout of 1k bytes
-        self.flush()
+        self._ser = None
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, Tuple of Parameters)
@@ -105,6 +101,17 @@ class ArmConsoleGen1():
 #            'ARM-AcDuty': (self.read_float,
 #                            ('X-AC-DETECTOR-DUTY X?', 1, '%')),
             }
+
+    def set_port(self, serport):
+        """Set serial port.
+
+        @param serport An opened serial port to use.
+        Set an appropriate serial read timeout.
+
+        """
+        self._ser = serport
+        self._ser.timeout = 10240 / self._ser.baudrate  # Timeout of 1kB
+        self.flush()
 
     def configure(self, cmd):
         """Sensor: Configure for next reading."""
@@ -245,10 +252,9 @@ class ArmConsoleGen1():
         self._ser.write(_CMD_RUN)
 
     def flush(self):
-        """Flush input (both serial port and buffer)."""
+        """Flush input by reading everything."""
         # See what is waiting
-        buf = self._ser.read(10240)
+        buf = self._ser.read(1024 * 1024)
         if len(buf) > 0:
             # Show what we are flushing
             self._logger.debug('flush() %s', buf)
-        self._ser.flushInput()

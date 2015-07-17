@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """BP35 Initial Test Program."""
 
 import os
@@ -24,15 +23,10 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
-
-_ARM_BIN = 'BP35_1.0.3025.bin'
-
-_PIC_HEX = '.hex'
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/bp35_initial',
-            'nt': r'C:\TestGear\TcpServer\bp35_initial',
-           }[os.name]
-
+# ARM software image file
+_ARM_BIN = 'bp35_1.0.3119.bin'
+# dsPIC software image file
+_PIC_HEX = 'bp35sr_1.hex'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -57,13 +51,13 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('ProgramARM', self._step_program_arm, None, False),
-            ('ProgramPIC', self._step_program_pic, None, False),
+            ('ProgramARM', self._step_program_arm, None, True),
+            ('ProgramPIC', self._step_program_pic, None, True),
             ('PowerUp', self._step_powerup, None, False),
-            ('TestArm', self._step_test_arm, None, True),
+            ('TestArm', self._step_test_arm, None, False),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, True),
-            ('ShutDown', self._step_shutdown, None, True),
+            ('OCP', self._step_ocp, None, False),
+            ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -72,14 +66,17 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
+        self._arm_ser = None
+        self._bp35 = None
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
+        self._bp35 = share.bp35.Console()
         global d
         d = support.LogicalDevices(self._devices)
         global s
-        s = support.Sensors(d, self._limits)
+        s = support.Sensors(d, self._limits, self._bp35)
         global m
         m = support.Measurements(s, self._limits)
         global t
@@ -88,10 +85,8 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        try:
-            self._arm_ser.close()
-        except:
-            pass
+        self._bp35 = None
+        self._arm_ser.close()
         global m
         m = None
         global d
@@ -121,10 +116,12 @@ class Main(tester.TestSequence):
 
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
-        self.fifo_push(((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
-                      (s.osw3, 100.0), (s.osw4, 100.0), ))
-        MeasureGroup((m.dmm_Lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3,
-                    m.dmm_sw4, ), timeout=5)
+        self.fifo_push(
+            ((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
+             (s.osw3, 100.0), (s.osw4, 100.0), ))
+        MeasureGroup(
+            (m.dmm_Lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
+             timeout=5)
 
     def _step_program_arm(self):
         """Program the ARM device.
@@ -141,30 +138,31 @@ class Main(tester.TestSequence):
         d.rla_boot.set_on()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        # Start the ARM programmer
-        self._logger.info('Start ARM programmer')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         file = os.path.join(folder, _ARM_BIN)
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
-        ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
-        ser.flush()
-        # Program the device
-        pgm = share.isplpc.Programmer(
-            ser, bindata, erase_only=False, verify=True, crpmode=False)
+        self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
-            pgm.program()
-            s.oMirARM.store(0)
-        except share.isplpc.ProgrammingError:
-            s.oMirARM.store(1)
-        ser.close()
+            ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
+            ser.flush()
+            # Program the device (LPC1549 has internal CRC for verification)
+            pgm = share.isplpc.Programmer(
+                ser, bindata, erase_only=False, verify=False, crpmode=False)
+            try:
+                pgm.program()
+                s.oMirARM.store(0)
+            except share.isplpc.ProgrammingError:
+                s.oMirARM.store(1)
+        finally:
+            ser.close()
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
 
     def _step_program_pic(self):
-        """Program the PIC device.
+        """Program the dsPIC device.
 
         External Vbat powers the PIC for programming.
 
@@ -172,36 +170,34 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.o5Vprog, 5.0), ))
         m.dmm_5Vprog.measure(timeout=5)
         # Start the PIC programmer
-        self._logger.info('Start PIC programmer')
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_pic.set_on()
-        pic = share.programmer.ProgramPIC(_PIC_HEX, _HEX_DIR, '33FJ16GS402',
-                                          s.oMirPIC, self._fifo)
+        pic = share.programmer.ProgramPIC(
+            _PIC_HEX, folder, '33FJ16GS402', s.oMirPIC, self._fifo)
         # Wait for programming completion & read results
         pic.read()
         d.rla_pic.set_off()
         m.pgmPIC.measure()
-        d.dcs_vbat.output(0.0)
 
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac."""
-        self.fifo_push(((s.oACin, 240.0), (s.oVbus, 415.0), (s.o12Vpri, 12.5),
-                      (s.o5Vusb, 5.0), (s.o15Vs, 12.5), (s.oVout, 12.8),
-                      (s.oVbat, 12.8), ))
-
+        self.fifo_push(
+            ((s.oACin, 240.0), (s.oVbus, 415.0), (s.o12Vpri, 12.5),
+             (s.o5Vusb, 5.0), (s.o15Vs, 12.5), (s.oVout, 12.8),
+             (s.oVbat, 12.8), ))
+        d.dcs_vbat.output(0.0)
         t.pwr_up.run()
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        if self._fifo:
-            self._arm_ser = share.mock_serial.MockSerial()
-        else:
-            self._arm_ser = serial.Serial(
-                port=_ARM_PORT, baudrate=115200, timeout=0.1)
-        self._armdev = share.bp35.Console(self._arm_ser)
+        ser_cls = share.mock_serial.MockSerial if self._fifo else serial.Serial
+        self._arm_ser = ser_cls(port=_ARM_PORT, baudrate=115200, timeout=0.1)
+        self._bp35.set_port(self._arm_ser)
         # Reset micro.
         d.rla_reset.pulse(0.1)
         if self._fifo:
-            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=2)
+            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
         self._armdev.unlock()
 
     def _step_canbus(self):
