@@ -155,13 +155,17 @@ class ArmConsoleGen1():
         self.unlock()
         self.action('NV-DEFAULT')
         self.nvwrite()
-        # We expect to see 2 banner lines after a restart
-        self.action('RESTART', delay=0.5, expected=2)
 
     def unlock(self):
         """Unlock the ARM."""
         self._logger.debug('Unlock')
         self.action('$DEADBEA7 UNLOCK')
+
+    def restart(self):
+        """Restart ARM (It must be unlocked)."""
+        self._logger.debug('Restart')
+        # We expect to see 2 banner lines after a restart
+        self.action('RESTART', delay=0.5, expected=2)
 
     def nvwrite(self):
         """Perform NV Memory Write."""
@@ -247,7 +251,7 @@ class ArmConsoleGen1():
             echo = self._ser.read(1)
             if echo != a_byte:
                 raise ArmError(
-                    'Command echo error. Sent {}, Rx {}'.format(a_byte, echo))
+                    'Command echo error. Tx: {}, Rx: {}'.format(a_byte, echo))
         # And the command RUN, without echo
         self._ser.write(_CMD_RUN)
 

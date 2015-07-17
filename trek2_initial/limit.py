@@ -12,6 +12,6 @@ DATA = (
         ('Program', 2, -0.1, 0.1, None, None),
         # Serial Number entry
         ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
-        ('CAN_ID', 0, None, None, r'^RRQ,16,', None),
+        ('CAN_ID', 0, None, None, r'^> RRQ,16,', None),
         ('Notify', 2, None, None, None, True),
         )

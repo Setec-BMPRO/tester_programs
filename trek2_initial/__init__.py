@@ -51,7 +51,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, True),
+            ('Program', self._step_program, None, False), # True),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -82,7 +82,10 @@ class Main(tester.TestSequence):
         """Finished testing."""
         self._logger.info('Close')
         self._trek2 = None
-        self._arm_ser.close()
+        try:
+            self._arm_ser.close()
+        except:
+            pass
         global m
         m = None
         global d
@@ -140,7 +143,8 @@ class Main(tester.TestSequence):
     def _step_test_arm(self):
         """Test the ARM device."""
         self.fifo_push(((s.oSnEntry, ('A1429050001', )), ))
-        sernum = m.ui_SnEntry.measure()[1][0]
+#        sernum = m.ui_SnEntry.measure()[1][0]
+        sernum = 'A1529010001'
         ser_cls = share.mock_serial.MockSerial if self._fifo else serial.Serial
         self._arm_ser = ser_cls(port=_ARM_PORT, baudrate=115200, timeout=0.1)
         self._trek2.set_port(self._arm_ser)
@@ -154,13 +158,15 @@ class Main(tester.TestSequence):
             self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
             self._arm_ser.putch('NV-DEFAULT', preflush=1, postflush=1)
             self._arm_ser.putch('NV-WRITE', preflush=1, postflush=1)
-            self._arm_ser.putch('RESTART', preflush=1)
-            self._arm_ser.puts('Banner1\r\nBanner2\r\n')
+        # Flush the startup banner (2 lines)
+        self._trek2.action(None, expected=2)
+        self._trek2.testmode(True)
         self._trek2.defaults(_HW_VER, sernum)
 
     def _step_canbus(self):
         """Test the Can Bus."""
         if self._fifo:
             self._arm_ser.putch('"TQQ,16,0 CAN', preflush=1)
-            self._arm_ser.put(b'RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
-        m.trek2_can_id.measure()
+            self._arm_ser.put(b'> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+        self._trek2.can_mode(True)
+        m.trek2_can_id.measure(timeout=10)

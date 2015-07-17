@@ -28,7 +28,11 @@ class Console(share.arm_gen1.ArmConsoleGen1):
         @return The response string from the target device.
 
         """
-        return self.action('"TQQ,16,0 CAN', expected=1)
+        try:
+            reply = self.action('"TQQ,16,0 CAN', expected=2)[1]
+        except share.arm_gen1.ArmError:
+            reply = ''
+        return reply
 
     def defaults(self, hwver, sernum):
         """Write factory defaults into NV memory.
@@ -46,15 +50,28 @@ class Console(share.arm_gen1.ArmConsoleGen1):
     def testmode(self, state):
         """Enable or disable Test Mode"""
         self._logger.debug('Test Mode Enabled> %s', state)
-        reply = int(self.action('"STATUS XN?', expected=1))
+        reply = int(self.action('"STATUS XN?', expected=1), 16) # Reply is hex
         if state:
             value = 0x80000000 | reply
         else:
             value = 0x7FFFFFFF & reply
-        cmd = '${} "STATUS XN!'.format(value)
+        cmd = '${:08X} "STATUS XN!'.format(value)
         self._logger.debug('%s', cmd)
         self.action(cmd)
 
     def bklght(self, param=100):
         """Set backlight intensity."""
         self.action('{} 0 X!'.format(param))
+
+    def can_mode(self, state):
+        """Enable or disable CAN Communications Mode"""
+        self._logger.debug('CAN Mode Enabled> %s', state)
+        self.action('"RF,ALL CAN')
+        reply = int(self.action('"STATUS XN?', expected=1), 16) # Reply is hex
+        if state:
+            value = 0x20000000 | reply
+        else:
+            value = 0xDFFFFFFF & reply
+        cmd = '${:08X} "STATUS XN!'.format(value)
+        self._logger.debug('%s', cmd)
+        self.action(cmd)
