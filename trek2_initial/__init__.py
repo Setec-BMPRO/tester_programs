@@ -155,7 +155,7 @@ class Main(tester.TestSequence):
             self._arm_ser.putch('NV-DEFAULT', preflush=1, postflush=1)
             self._arm_ser.putch('NV-WRITE', preflush=1, postflush=1)
             self._arm_ser.putch('RESTART', preflush=1)
-            self._arm_ser.put(b'Banner1\r\nBanner2\r\n')
+            self._arm_ser.puts('Banner1\r\nBanner2\r\n')
         self._trek2.defaults(_HW_VER, sernum)
 
     def _step_canbus(self):

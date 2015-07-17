@@ -5,6 +5,9 @@ import time
 import queue
 import threading
 
+# Queue entry to be read when a flush occurs
+_FLUSH = b''
+
 
 class MockSerial():
 
@@ -29,13 +32,27 @@ class MockSerial():
 
     close = _dummy
 
+    def puts(self, string_data, preflush=0, postflush=0):
+        """Put a string into the read-back queue.
+
+        @param string_data Data string, or tuple of data strings.
+        @param preflush Number of _FLUSH to be entered before the data.
+        @param postflush Number of _FLUSH to be entered after the data.
+        Note: _FLUSH is a marker to stop the flush of the data queue.
+
+        """
+        if isinstance(string_data, str):
+            string_data = (string_data, )
+        for a_string in string_data:
+            self.put(a_string.encode(), preflush, postflush)
+
     def putch(self, data, preflush=0, postflush=0):
         """Put data character by character into the read-back queue.
 
         @param data String to be entered character by character.
-        @param preflush Number of b'' to be entered before the data.
-        @param postflush Number of b'' to be entered after the data.
-        Note: b'' is a marker to stop the flush of the data queue.
+        @param preflush Number of _FLUSH to be entered before the data.
+        @param postflush Number of _FLUSH to be entered after the data.
+        Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
         self._put_flush(preflush)
@@ -47,9 +64,9 @@ class MockSerial():
         """Put data into the read-back queue.
 
         @param data Bytes of data.
-        @param preflush Number of b'' to be entered before the data.
-        @param postflush Number of b'' to be entered after the data.
-        Note: b'' is a marker to stop the flush of the data queue.
+        @param preflush Number of _FLUSH to be entered before the data.
+        @param postflush Number of _FLUSH to be entered after the data.
+        Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
         self._put_flush(preflush)
@@ -59,12 +76,12 @@ class MockSerial():
     def _put_flush(self, flush_count):
         """Add flush stop markers into the queue.
 
-        @param flush_count Number of b'' to be entered.
-        Note: b'' is a marker to stop the flush of the data queue.
+        @param flush_count Number of _FLUSH to be entered.
+        Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
         for _ in range(flush_count):
-            self.put(b'')
+            self.put(_FLUSH)
 
     def get(self):
         """Get data from the written-out queue.
@@ -82,12 +99,12 @@ class MockSerial():
     def flushInput(self):
         """Flush input queue.
 
-        A value of b'' will stop the flush of the queue.
+        A value of _FLUSH will stop the flush of the queue.
 
         """
         while not self.in_queue.empty():
             data = self.in_queue.get()
-            if len(data) == 0:      # This is a b''
+            if data == _FLUSH:
                 break
 
     def flushOutput(self):
@@ -119,14 +136,12 @@ class MockSerial():
             data = b''
         return data
 
-    def readline(self, size=1):
+    def readline(self):
         """A non-blocking read.
 
-        @param size Number of bytes to read.
         @return Bytes read.
 
         """
-# FIXME: Honour the size argument
         if self._enable.is_set() and not self.in_queue.empty():
             data = self.in_queue.get()
         else:
