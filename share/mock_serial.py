@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
-"""Mock Serial Port for testing serial communication modules."""
+"""Serial Port with simulation ability.
 
+Setting the 'simulate' argument at creation will create a port with queues
+to hold simulated Tx & Rx data, for testing purposes.
+
+"""
+
+import serial
 import time
 import queue
 import threading
@@ -9,28 +15,24 @@ import threading
 _FLUSH = b''
 
 
-class MockSerial():
+class _Simulator():
 
-    """Simulated serial port for testing."""
+    """Serial port simulation abilities."""
 
-    def __init__(self, port=None, baudrate=9600, bytesize=8, parity='N',
-                 stopbits=1, timeout=None, xonxoff=False, rtscts=False,
-                 writeTimeout=None, dsrdtr=False, interCharTimeout=None):
+    def __init__(self, simulation=False, **kwargs):
         """Create internal data storage queue."""
+        self.simulation = simulation
+        if self.simulation:
+            kwargs['port'] = None   # Prevent a real port from being opened
         # Queue to hold data to be read by read()
-        self.in_queue = queue.Queue()
+        self._in_queue = queue.Queue()
         # Queue to hold data written by write()
-        self.out_queue = queue.Queue()
+        self._out_queue = queue.Queue()
         # Control of read() enable
         self._enable = threading.Event()
         self._enable.set()
-        self.baudrate = baudrate
-        self.timeout = timeout
-
-    def _dummy(self):
-        pass
-
-    close = _dummy
+        # Initialise the serial.Serial
+        super().__init__(**kwargs)
 
     def puts(self, string_data, preflush=0, postflush=0):
         """Put a string into the read-back queue.
@@ -70,7 +72,7 @@ class MockSerial():
 
         """
         self._put_flush(preflush)
-        self.in_queue.put(data)
+        self._in_queue.put(data)
         self._put_flush(postflush)
 
     def _put_flush(self, flush_count):
@@ -89,28 +91,7 @@ class MockSerial():
         @return Bytes from the queue.
 
         """
-        return b'' if self.out_queue.empty() else self.out_queue.get()
-
-    def flush(self):
-        """Flush both input and output queues."""
-        self.flushInput()
-        self.flushOutput()
-
-    def flushInput(self):
-        """Flush input queue.
-
-        A value of _FLUSH will stop the flush of the queue.
-
-        """
-        while not self.in_queue.empty():
-            data = self.in_queue.get()
-            if data == _FLUSH:
-                break
-
-    def flushOutput(self):
-        """Flush output queue."""
-        while not self.out_queue.empty():
-            self.out_queue.get()
+        return b'' if self._out_queue.empty() else self._out_queue.get()
 
     def enable(self):
         """Enable reading of the read-back queue."""
@@ -120,6 +101,41 @@ class MockSerial():
         """Disable reading of the read-back queue."""
         self._enable.clear()
 
+
+class SimSerial(_Simulator, serial.Serial):
+
+    """Serial port with simulation abilities."""
+
+    def __init__(self,
+        simulation=False,  # Extra argument for a simulated port
+        port=None,         # These defaults match serial.Serial()
+        baudrate=9600, bytesize=8, parity='N', stopbits=1,
+        timeout=None, xonxoff=False, rtscts=False, writeTimeout=None,
+        dsrdtr=False, interCharTimeout=None
+        ):
+        """Create base class instances."""
+        super().__init__(           # Initialise the _Simulator()
+            simulation=simulation,
+            port=port, baudrate=baudrate, bytesize=bytesize, parity=parity,
+            stopbits=stopbits, timeout=timeout, xonxoff=xonxoff,
+            rtscts=rtscts, writeTimeout=writeTimeout, dsrdtr=dsrdtr,
+            interCharTimeout=interCharTimeout)
+
+    def open(self):
+        """Open port."""
+        if not self.simulation:
+            return super().open()
+        self._isOpen = True
+
+    def close(self):
+        """Close port."""
+        if not self.simulation:
+            return super().close()
+        self._isOpen = False
+
+    def makeDeviceName(self, port):
+        return 'simulation'
+
     def read(self, size=1):
         """A non-blocking read.
 
@@ -127,23 +143,27 @@ class MockSerial():
         @return Bytes read.
 
         """
+        if not self.simulation:
+            return super().read(size)
 # FIXME: Honour the size argument
-        if self._enable.is_set() and not self.in_queue.empty():
-            data = self.in_queue.get()
+        if self._enable.is_set() and not self._in_queue.empty():
+            data = self._in_queue.get()
         else:
 # FIXME: Should we use the timeout from the call to __init__() ?
             time.sleep(0.1)
             data = b''
         return data
 
-    def readline(self):
+    def readline(self, size=None, eol=b'\n'):
         """A non-blocking read.
 
         @return Bytes read.
 
         """
-        if self._enable.is_set() and not self.in_queue.empty():
-            data = self.in_queue.get()
+        if not self.simulation:
+            return super().readline(size, eol)
+        if self._enable.is_set() and not self._in_queue.empty():
+            data = self._in_queue.get()
         else:
 # FIXME: Should we use the timeout from the call to __init__() ?
             time.sleep(0.1)
@@ -156,4 +176,33 @@ class MockSerial():
         @param data Bytes to write.
 
         """
-        self.out_queue.put(data)
+        if not self.simulation:
+            return super().write(data)
+        self._out_queue.put(data)
+
+    def flush(self):
+        """Flush both input and output queues."""
+        if not self.simulation:
+            return super().flush()
+        self.flushInput()
+        self.flushOutput()
+
+    def flushInput(self):
+        """Flush input queue.
+
+        A queue value of _FLUSH will stop the flush of the queue.
+
+        """
+        if not self.simulation:
+            return super().flushInput()
+        while not self._in_queue.empty():
+            data = self._in_queue.get()
+            if data == _FLUSH:
+                break
+
+    def flushOutput(self):
+        """Flush output queue."""
+        if not self.simulation:
+            return super().flushOutput()
+        while not self._out_queue.empty():
+            self._out_queue.get()
