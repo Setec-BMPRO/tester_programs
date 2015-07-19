@@ -109,6 +109,9 @@ class Sensors():
         self.oYesNoOrange = sensor.YesNo(
             message=translate('IsLedOrange?'),
             caption=translate('capOrangeLed'))
+        self.oSnEntry = sensor.DataEntry(
+            message=translate('msgSnEntry'),
+            caption=translate('capSnEntry'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -152,6 +155,7 @@ class Measurements():
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
         self.ui_YesNoRed = Measurement(limits['Notify'], sense.oYesNoRed)
         self.ui_YesNoOrange = Measurement(limits['Notify'], sense.oYesNoOrange)
+        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
 
 
 class SubTests():

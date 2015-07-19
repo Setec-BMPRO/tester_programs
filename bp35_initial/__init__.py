@@ -3,15 +3,14 @@
 
 import os
 import inspect
-import serial
 import logging
 import time
 
 import tester
-import share.programmer
-import share.bp35
 import share.isplpc
-import share.mock_serial
+import share.programmer
+import share.sim_serial
+import share.bp35
 from . import support
 from . import limit
 
@@ -23,6 +22,8 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
+# Hardware version (Major [1-255], Minor [1-255], Mod [character])
+_HW_VER = (1, 0, '')
 # ARM software image file
 _ARM_BIN = 'bp35_1.0.3119.bin'
 # dsPIC software image file
@@ -66,13 +67,15 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._arm_ser = None
-        self._bp35 = None
+        self._bp35 = share.bp35.Console(
+            simulation=self._fifo,
+            baudrate=115200, timeout=0.1)
+        # Set port separately, as we don't want it opened yet
+        self._bp35.setPort(_ARM_PORT)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._bp35 = share.bp35.Console()
         global d
         d = support.LogicalDevices(self._devices)
         global s
@@ -85,8 +88,10 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._bp35 = None
-        self._arm_ser.close()
+        try:
+            self._bp35.close()
+        except:
+            pass
         global m
         m = None
         global d
@@ -146,7 +151,7 @@ class Main(tester.TestSequence):
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
-            ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
+            ser = share.sim_serial.SimSerial(port=_ARM_PORT, baudrate=115200)
             ser.flush()
             # Program the device (LPC1549 has internal CRC for verification)
             pgm = share.isplpc.Programmer(
@@ -186,18 +191,44 @@ class Main(tester.TestSequence):
         self.fifo_push(
             ((s.oACin, 240.0), (s.oVbus, 415.0), (s.o12Vpri, 12.5),
              (s.o5Vusb, 5.0), (s.o3V3, 3.3), (s.o15Vs, 12.5),
+             (s.oVout, 12.8), (s.oVbat, 12.8),
              (s.oVout, 12.8), (s.oVbat, 12.8), ))
         t.pwr_up.run()
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        ser_cls = share.mock_serial.MockSerial if self._fifo else serial.Serial
-        self._arm_ser = ser_cls(port=_ARM_PORT, baudrate=115200, timeout=0.1)
-        self._bp35.set_port(self._arm_ser)
+        dummy_sn = 'A1526040123'
+        self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
+#        sernum = m.ui_SnEntry.measure()[1][0]
+        sernum = dummy_sn
+        self._bp35.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
         if self._fifo:
-            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
+            # Startup banner
+            self._bp35.puts('Banner1\r\nBanner2\r\n')
+            # Going into Test Mode
+            self._bp35.putch('"STATUS XN?', preflush=1)
+            self._bp35.puts('0x00000000\r\n')
+            self._bp35.putch('$80000000 "STATUS XN!', preflush=1, postflush=1)
+            # Unlock
+            self._bp35.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
+            # Set hardware ID
+            self._bp35.putch('1 0 " SET-HW-VER', preflush=1, postflush=1)
+            # Set software ID
+            self._bp35.putch('"{} SET-SERIAL-ID'.format(dummy_sn),
+                preflush=1, postflush=1)
+            # Set & Write defaults
+            self._bp35.putch('NV-DEFAULT', preflush=1, postflush=1)
+            self._bp35.putch('NV-WRITE', preflush=1, postflush=1)
+            # Version queries
+            self._bp35.putch('SW-VERSION?', preflush=1)
+            self._bp35.puts('1.0\r\n')
+            self._bp35.putch('BUILD?', preflush=1)
+            self._bp35.puts('3119\r\n')
+        self._bp35.action(None, expected=2)    # Flush banner (2 lines)
+        self._bp35.testmode(True)
+        self._bp35.defaults(_HW_VER, sernum)
         self._bp35.version()
 
     def _step_canbus(self):

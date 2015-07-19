@@ -27,6 +27,7 @@ Implements the methods to expose ARM readings as Sensors.
 import logging
 import time
 
+import share.sim_serial
 import tester
 
 # Command trigger
@@ -79,11 +80,11 @@ class Sensor(tester.sensor.Sensor):
         return (rdg, )
 
 
-class ArmConsoleGen1():
+class ArmConsoleGen1(share.sim_serial.SimSerial):
 
     """Communications to First Generation ARM console."""
 
-    def __init__(self, dialect=0):
+    def __init__(self, dialect=0, simulation=False, **kwargs):
         """Initialise communications.
 
         @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
@@ -92,7 +93,6 @@ class ArmConsoleGen1():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._dialect = dialect
-        self._ser = None
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, Tuple of Parameters)
@@ -101,17 +101,19 @@ class ArmConsoleGen1():
 #            'ARM-AcDuty': (self.read_float,
 #                            ('X-AC-DETECTOR-DUTY X?', 1, '%')),
             }
+        super().__init__(           # Initialise the SimSerial()
+            simulation=simulation, **kwargs)
 
-    def set_port(self, serport):
+    def setPort(self, port):
         """Set serial port.
 
-        @param serport An opened serial port to use.
+        @param port Serial port to use.
         Set an appropriate serial read timeout.
 
         """
-        self._ser = serport
-        self._ser.timeout = 10240 / self._ser.baudrate  # Timeout of 1kB
-        self.flush()
+        self._logger.debug('Set port: %s', port)
+        self.timeout = 10240 / self.baudrate  # Timeout of 1kB
+        super().setPort(port)
 
     def configure(self, cmd):
         """Sensor: Configure for next reading."""
@@ -152,7 +154,6 @@ class ArmConsoleGen1():
     def defaults(self):
         """Write factory defaults into NV memory."""
         self._logger.debug('Write factory defaults')
-        self.unlock()
         self.action('NV-DEFAULT')
         self.nvwrite()
 
@@ -206,7 +207,7 @@ class ArmConsoleGen1():
 
         """
         # Read until a timeout happens
-        buf = self._ser.read(1024)
+        buf = super().read(1024)
         # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
@@ -225,7 +226,7 @@ class ArmConsoleGen1():
         else:
             response_count = 0
             response = None
-        self._logger.debug('<-- %s', response)
+        self._logger.debug('<-- %s', repr(response))
         if response_count < expected:
             raise ArmError(
                 'Expected {}, actual {}'.format(expected, response_count))
@@ -247,18 +248,18 @@ class ArmConsoleGen1():
         # Send each byte with echo verification
         for a_byte in cmd_data:
             a_byte = bytes([a_byte])
-            self._ser.write(a_byte)
-            echo = self._ser.read(1)
+            super().write(a_byte)
+            echo = super().read(1)
             if echo != a_byte:
                 raise ArmError(
                     'Command echo error. Tx: {}, Rx: {}'.format(a_byte, echo))
         # And the command RUN, without echo
-        self._ser.write(_CMD_RUN)
+        super().write(_CMD_RUN)
 
     def flush(self):
         """Flush input by reading everything."""
         # See what is waiting
-        buf = self._ser.read(1024 * 1024)
+        buf = super().read(1024 * 1024)
         if len(buf) > 0:
             # Show what we are flushing
             self._logger.debug('flush() %s', buf)

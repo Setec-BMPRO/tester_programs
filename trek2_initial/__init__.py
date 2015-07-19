@@ -3,14 +3,12 @@
 
 import os
 import inspect
-import serial
 import logging
 
 import tester
-import share.programmer
-import share.trek2
 import share.isplpc
-import share.mock_serial
+import share.trek2
+import share.sim_serial
 from . import support
 from . import limit
 
@@ -62,13 +60,15 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._arm_ser = None
-        self._trek2 = None
+        self._trek2 = share.trek2.Console(
+            simulation=self._fifo,
+            baudrate=115200, timeout=0.1)
+        # Set port separately, as we don't want it opened yet
+        self._trek2.setPort(_ARM_PORT)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._trek2 = share.trek2.Console()
         global d
         d = support.LogicalDevices(self._devices)
         global s
@@ -81,9 +81,8 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._trek2 = None
         try:
-            self._arm_ser.close()
+            self._trek2.close()
         except:
             pass
         global m
@@ -124,7 +123,7 @@ class Main(tester.TestSequence):
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
-            ser = serial.Serial(port=_ARM_PORT, baudrate=115200)
+            ser = share.sim_serial.SimSerial(port=_ARM_PORT, baudrate=115200)
             ser.flush()
             # Program the device (LPC1549 has internal CRC for verification)
             pgm = share.isplpc.Programmer(
@@ -142,31 +141,45 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        self.fifo_push(((s.oSnEntry, ('A1429050001', )), ))
+        dummy_sn = 'A1526040123'
+        self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
 #        sernum = m.ui_SnEntry.measure()[1][0]
-        sernum = 'A1529010001'
-        ser_cls = share.mock_serial.MockSerial if self._fifo else serial.Serial
-        self._arm_ser = ser_cls(port=_ARM_PORT, baudrate=115200, timeout=0.1)
-        self._trek2.set_port(self._arm_ser)
+        sernum = dummy_sn
+        self._trek2.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
         if self._fifo:
-            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
-            self._arm_ser.putch('1 0 " SET-HW-VER', preflush=1, postflush=1)
-            self._arm_ser.putch(
-                '"A1429050001 SET-SERIAL-ID', preflush=1, postflush=1)
-            self._arm_ser.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
-            self._arm_ser.putch('NV-DEFAULT', preflush=1, postflush=1)
-            self._arm_ser.putch('NV-WRITE', preflush=1, postflush=1)
-        # Flush the startup banner (2 lines)
-        self._trek2.action(None, expected=2)
+            # Startup banner
+            self._trek2.puts('Banner1\r\nBanner2\r\n')
+            # Going into Test Mode
+            self._trek2.putch('"STATUS XN?', preflush=1)
+            self._trek2.puts('0x00000000\r\n')
+            self._trek2.putch('$80000000 "STATUS XN!', preflush=1, postflush=1)
+            # Unlock
+            self._trek2.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
+            # Set hardware ID
+            self._trek2.putch('1 0 " SET-HW-VER', preflush=1, postflush=1)
+            # Set software ID
+            self._trek2.putch('"{} SET-SERIAL-ID'.format(dummy_sn),
+                preflush=1, postflush=1)
+            # Set & Write defaults
+            self._trek2.putch('NV-DEFAULT', preflush=1, postflush=1)
+            self._trek2.putch('NV-WRITE', preflush=1, postflush=1)
+        self._trek2.action(None, expected=2)    # Flush banner (2 lines)
         self._trek2.testmode(True)
         self._trek2.defaults(_HW_VER, sernum)
 
     def _step_canbus(self):
-        """Test the Can Bus."""
+        """Test the CAN Bus."""
         if self._fifo:
-            self._arm_ser.putch('"TQQ,16,0 CAN', preflush=1)
-            self._arm_ser.put(b'> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+            # CAN mode on
+            self._trek2.putch('"RF,ALL CAN', preflush=1, postflush=1)
+            # Going into Test Mode
+            self._trek2.putch('"STATUS XN?', preflush=1)
+            self._trek2.puts('0x80000000\r\n')
+            self._trek2.putch('$A0000000 "STATUS XN!', preflush=1, postflush=1)
+            # CAN query command & response
+            self._trek2.putch('"TQQ,16,0 CAN', preflush=1)
+            self._trek2.puts('OK\r\n> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
         self._trek2.can_mode(True)
         m.trek2_can_id.measure(timeout=10)

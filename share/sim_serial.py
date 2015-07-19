@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Serial Port with simulation ability.
 
-Setting the 'simulate' argument at creation will create a port with queues
+Setting the 'simulate' argument at creation will give a port with queues
 to hold simulated Tx & Rx data, for testing purposes.
 
 """
 
 import serial
+import logging
 import time
 import queue
 import threading
@@ -43,6 +44,9 @@ class _Simulator():
         Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
+        if not self.simulation:
+            return
+        self._logger.debug('puts() %s', repr(string_data))
         if isinstance(string_data, str):
             string_data = (string_data, )
         for a_string in string_data:
@@ -57,6 +61,9 @@ class _Simulator():
         Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
+        if not self.simulation:
+            return
+        self._logger.debug('putch() %s', repr(data))
         self._put_flush(preflush)
         for c in data:
             self.put(c.encode())
@@ -71,6 +78,8 @@ class _Simulator():
         Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
+        if not self.simulation:
+            return
         self._put_flush(preflush)
         self._in_queue.put(data)
         self._put_flush(postflush)
@@ -114,6 +123,9 @@ class SimSerial(_Simulator, serial.Serial):
         dsrdtr=False, interCharTimeout=None
         ):
         """Create base class instances."""
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
+        self._logger.debug('Created. Simulation = %s', simulation)
         super().__init__(           # Initialise the _Simulator()
             simulation=simulation,
             port=port, baudrate=baudrate, bytesize=bytesize, parity=parity,
@@ -123,12 +135,14 @@ class SimSerial(_Simulator, serial.Serial):
 
     def open(self):
         """Open port."""
+        self._logger.debug('Open port')
         if not self.simulation:
             return super().open()
         self._isOpen = True
 
     def close(self):
         """Close port."""
+        self._logger.debug('Close port')
         if not self.simulation:
             return super().close()
         self._isOpen = False

@@ -12,13 +12,48 @@ class Console(share.arm_gen1.ArmConsoleGen1):
 
     """Communications to ARM console."""
 
-    def __init__(self):
+    def __init__(self, simulation=False, **kwargs):
         """Create console instance."""
-        super().__init__(dialect=1)
+        super().__init__(dialect=1, simulation=simulation, **kwargs)
         self._read_cmd = None
-        # Data readings:
-        #   Name -> (function, ( Command, ScaleFactor, StrKill ))
-#        self.cmd_data = {
-#            'ARM-AcDuty':  (self.read_float,
-#                            ('X-AC-DETECTOR-DUTY', 1, '%')),
-#            }
+        # Data readings: Name -> (function, parameter)
+        self.cmd_data = {
+            'CAN_ID': (self.can_id, None),
+            }
+
+    def defaults(self, hwver, sernum):
+        """Write factory defaults into NV memory.
+
+        @param hwver Tuple (Major [1-255], Minor [1-255], Mod [character]).
+        @param sernum Serial number string.
+
+        """
+        self._logger.debug('Write factory defaults')
+        self.unlock()
+        self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
+        self.action('"{} SET-SERIAL-ID'.format(sernum))
+        super().defaults()
+
+    def testmode(self, state):
+        """Enable or disable Test Mode"""
+        self._logger.debug('Test Mode = %s', state)
+        reply = int(self.action('"STATUS XN?', expected=1), 16) # Reply is hex
+        if state:
+            value = 0x80000000 | reply
+        else:
+            value = 0x7FFFFFFF & reply
+        cmd = '${:08X} "STATUS XN!'.format(value)
+        self.action(cmd)
+
+    def can_id(self, dummy):
+        """Simple CAN check by sending an ID request to the Trek2.
+
+        @param dummy Unused parameter.
+        @return The response string from the target device.
+
+        """
+        try:
+            reply = self.action('"TQQ,32,0 CAN', expected=2)[1]
+        except share.arm_gen1.ArmError:
+            reply = ''
+        return reply

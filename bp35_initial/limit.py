@@ -25,4 +25,6 @@ DATA = (
     ('SwShort', 0, None, 20, None, None),
     ('Notify', 2, None, None, None, True),
     ('ARM-SwVer', 0, None, None, r'^1\.0\.3119$', None),
+    # Serial Number entry
+    ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
     )
