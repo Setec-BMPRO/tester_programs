@@ -52,10 +52,10 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('ProgramARM', self._step_program_arm, None, False),
-            ('ProgramPIC', self._step_program_pic, None, False),
-            ('PowerUp', self._step_powerup, None, True),
-            ('TestArm', self._step_test_arm, None, True),
+            ('ProgramARM', self._step_program_arm, None, True),
+            ('ProgramPIC', self._step_program_pic, None, True),
+            ('PowerUp', self._step_powerup, None, False),
+            ('TestArm', self._step_test_arm, None, False),
             ('CanBus', self._step_canbus, None, False),
             ('OCP', self._step_ocp, None, False),
             ('ShutDown', self._step_shutdown, None, False),
@@ -106,7 +106,7 @@ class Main(tester.TestSequence):
         self._logger.info('Safety(%s)', run)
         if run:
             d.acsource.output(voltage=0.0, output=False)
-            d.dcl.output(2.0)
+            d.dcl_out.output(2.0)
             if self._fifo:
                 d.discharge.pulse(0.1)
             else:
@@ -139,6 +139,7 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.o3V3, 3.3), ))
         # Apply and check injected rails
         d.dcs_vbat.output(12.8, True)
+        d.rla_vbat.set_on()
         MeasureGroup((m.dmm_Vbat, m.dmm_3V3, ), timeout=5)
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
@@ -236,10 +237,20 @@ class Main(tester.TestSequence):
 
     def _step_ocp(self):
         """Ramp up load until OCP."""
-        self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ), ))
-        d.dcl.output(0.0, output=True)
-        d.dcl.binary(0.0, 32.0, 5.0)
-        m.ramp_OCP.measure()
+        self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ),
+                        (s.oVbat, (12.8, ) * 16 + (11.0, ), ), ))
+        d.dcl_out.output(0.0, output=True)
+        d.dcl_bat.output(0.0, output=True)
+        d.dcl_out.binary(0.0, 30.0, 5.0)
+        m.ramp_OutOCP.measure()
+        d.dcl_out.output(0.0)
+        d.dcs_vbat.output(12.8, True)
+        d.rla_vbat.set_on()
+        m.dmm_Vbat.measure(timeout=5)
+        d.dcl_bat.binary(0.0, 18.0, 5.0)
+        m.ramp_BatOCP.measure()
+        d.dcl_bat.output(0.0)
+        d.rla_vbat.set_off()
 
     def _step_shutdown(self):
         """Apply overload to shutdown. Check load switch."""

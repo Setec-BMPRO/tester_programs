@@ -33,13 +33,13 @@ class LogicalDevices():
         self.dcs_vcom = dcsource.DCSource(devices['DCS1'])  # Power RS232 + Fixture Trek2.
         self.dcs_vbat = dcsource.DCSource(devices['DCS2'])  # Power for programming.
         self.dcs_vaux = dcsource.DCSource(devices['DCS3'])
-        dcl_vout = dcload.DCLoad(devices['DCL1'])
-        dcl_vbat = dcload.DCLoad(devices['DCL5'])
-        self.dcl = dcload.DCLoadParallel(((dcl_vout, 29), (dcl_vbat, 14)))
+        self.dcl_out = dcload.DCLoad(devices['DCL1'])
+        self.dcl_bat = dcload.DCLoad(devices['DCL5'])
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
         self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
         self.rla_pic = relay.Relay(devices['RLA3'])    # Connect PIC programmer.
         self.rla_loadsw = relay.Relay(devices['RLA4'])
+        self.rla_vbat = relay.Relay(devices['RLA5'])
 
     def error_check(self):
         """Check instruments for errors."""
@@ -53,11 +53,11 @@ class LogicalDevices():
         for dcs in (self.dcs_vcom, self.dcs_vbat, self.dcs_vaux):
             dcs.output(0.0, False)
         # Switch off DC Loads
-        for ld in (self.dcl, ):
+        for ld in (self.dcl_out, self.dcl_bat):
             ld.output(0.0, False)
         # Switch off all Relays
         for rla in (self.rla_reset, self.rla_boot, self.rla_pic,
-                   self.rla_loadsw):
+                    self.rla_loadsw, self.rla_vbat):
             rla.set_off()
 
 
@@ -73,7 +73,6 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-        dcl = logical_devices.dcl
 
         self.oMirPIC = sensor.Mirror()
         self.oMirARM = sensor.Mirror()
@@ -95,10 +94,14 @@ class Sensors():
         self.o5Vusb = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.o3V3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
-        self.oOCP = sensor.Ramp(
-            stimulus=dcl, sensor=self.oVout,
+        self.oOutOCP = sensor.Ramp(
+            stimulus=logical_devices.dcl_out, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
-            start=32.0, stop=39.0, step=0.2, delay=0.1)
+            start=30.0, stop=37.0, step=0.2, delay=0.1)
+        self.oBatOCP = sensor.Ramp(
+            stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
+            detect_limit=(limits['InOCP'], ),
+            start=18.0, stop=22.0, step=0.2, delay=0.1)
         tester.TranslationContext = 'bp35_initial'
         self.oYesNoGreen = sensor.YesNo(
             message=translate('IsLedGreen?'),
@@ -151,7 +154,8 @@ class Measurements():
         self.dmm_FanOn = Measurement(limits['FanOn'], sense.oFan)
         self.dmm_FanOff = Measurement(limits['FanOff'], sense.oFan)
         self.dmm_3V3prog = Measurement(limits['3V3prog'], sense.o3V3prog)
-        self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
+        self.ramp_OutOCP = Measurement(limits['OutOCP'], sense.oOutOCP)
+        self.ramp_BatOCP = Measurement(limits['BatOCP'], sense.oBatOCP)
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
         self.ui_YesNoRed = Measurement(limits['Notify'], sense.oYesNoRed)
         self.ui_YesNoOrange = Measurement(limits['Notify'], sense.oYesNoOrange)
@@ -173,21 +177,22 @@ class SubTests():
         m = measurements
 
         # PowerUp:
+        rly1 = RelaySubStep(((d.rla_vbat, False), ))
         dcs1 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
         acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=1)
         msr1 = MeasureSubStep((m.dmm_ACin, m.dmm_Vbus, m.dmm_12Vpri,
                                m.dmm_5Vusb, m.dmm_3V3, m.dmm_15Vs,
                                m.dmm_Vout, m.dmm_Vbat), timeout=5)
-        ld1 = LoadSubStep(((d.dcl, 1.0), ), output=True)
+        ld1 = LoadSubStep(((d.dcl_out, 1.0), ), output=True)
         msr2 = MeasureSubStep((m.dmm_Vout, m.dmm_Vbat,), timeout=5)
-        ld2 = LoadSubStep(((d.dcl, 0.0), ))
-        self.pwr_up = Step((dcs1, acs1, msr1, ld1, msr2, ld2))
+        ld2 = LoadSubStep(((d.dcl_out, 0.0), ))
+        self.pwr_up = Step((rly1, dcs1, acs1, msr1, ld1, msr2, ld2))
 
         # Shutdown: Shutdown, recovery, check load switch.
-        ld1 = LoadSubStep(((d.dcl, 39.0), ), output=True)
+        ld1 = LoadSubStep(((d.dcl_out, 39.0), ), output=True)
         msr1 = MeasureSubStep((m.dmm_VoutOff, ), timeout=10)
-        ld2 = LoadSubStep(((d.dcl, 0.0), ), )
-        msr2 = MeasureSubStep((m.dmm_Vout, m.dmm_Vbat,), timeout=10)
+        ld2 = LoadSubStep(((d.dcl_out, 0.0), ), )
+        msr2 = MeasureSubStep((m.dmm_Vout, m.dmm_Vbat,), timeout=20)
         rly1 = RelaySubStep(((d.rla_loadsw, True), ))
         msr3 = MeasureSubStep((m.dmm_VoutOff, ), timeout=5)
         rly2 = RelaySubStep(((d.rla_loadsw, False), ))
