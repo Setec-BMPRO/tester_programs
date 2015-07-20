@@ -234,9 +234,11 @@ class Main(tester.TestSequence):
     def _step_test_unit(self):
         """Test functions of the unit."""
         self.fifo_push(((s.oFan, (0, 12.0)), ))
-        m.dmm_FanOff(timeout=5)
+        m.dmm_FanOff.measure(timeout=5)
+        if self._fifo:
+            self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
         self._bp35.fanspeed(1000)
-        m.dmm_FanOn(timeout=5)
+        m.dmm_FanOn.measure(timeout=5)
 
     def _step_canbus(self):
         """Test the Can Bus."""

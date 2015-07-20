@@ -8,7 +8,6 @@ to hold simulated Tx & Rx data, for testing purposes.
 
 import serial
 import logging
-import time
 import queue
 import threading
 
@@ -159,12 +158,10 @@ class SimSerial(_Simulator, serial.Serial):
         """
         if not self.simulation:
             return super().read(size)
-# FIXME: Honour the size argument
         if self._enable.is_set() and not self._in_queue.empty():
-            data = self._in_queue.get()
+            # limit to 'size' bytes
+            data = self._in_queue.get()[:size]
         else:
-# FIXME: Should we use the timeout from the call to __init__() ?
-            time.sleep(0.1)
             data = b''
         return data
 
@@ -179,8 +176,6 @@ class SimSerial(_Simulator, serial.Serial):
         if self._enable.is_set() and not self._in_queue.empty():
             data = self._in_queue.get()
         else:
-# FIXME: Should we use the timeout from the call to __init__() ?
-            time.sleep(0.1)
             data = b''
         return data
 
