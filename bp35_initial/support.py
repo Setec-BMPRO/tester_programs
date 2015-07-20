@@ -85,7 +85,7 @@ class Sensors():
         self.osw3 = sensor.Res(dmm, high=19, low=7, rng=1000000, res=1)
         self.osw4 = sensor.Res(dmm, high=19, low=8, rng=1000000, res=1)
         self.oACin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
-        self.oVbus = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
+        self.oVbus = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
         self.oVout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.oVbat = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
         self.o12Vpri = sensor.Vdc(dmm, high=5, low=2, rng=100, res=0.001)
@@ -179,14 +179,11 @@ class SubTests():
         # PowerUp:
         rly1 = RelaySubStep(((d.rla_vbat, False), ))
         dcs1 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=1)
+        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=0.5)
         msr1 = MeasureSubStep((m.dmm_ACin, m.dmm_Vbus, m.dmm_12Vpri,
                                m.dmm_5Vusb, m.dmm_3V3, m.dmm_15Vs,
                                m.dmm_Vout, m.dmm_Vbat), timeout=5)
-        ld1 = LoadSubStep(((d.dcl_out, 1.0), ), output=True)
-        msr2 = MeasureSubStep((m.dmm_Vout, m.dmm_Vbat,), timeout=5)
-        ld2 = LoadSubStep(((d.dcl_out, 0.0), ))
-        self.pwr_up = Step((rly1, dcs1, acs1, msr1, ld1, msr2, ld2))
+        self.pwr_up = Step((rly1, dcs1, acs1, msr1))
 
         # Shutdown: Shutdown, recovery, check load switch.
         ld1 = LoadSubStep(((d.dcl_out, 39.0), ), output=True)

@@ -154,7 +154,7 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
     def defaults(self):
         """Write factory defaults into NV memory."""
         self._logger.debug('Write factory defaults')
-        self.action('NV-DEFAULT')
+        self.action('NV-DEFAULT', delay=0.3)
         self.nvwrite()
 
     def unlock(self):

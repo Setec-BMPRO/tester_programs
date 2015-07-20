@@ -34,15 +34,16 @@ class Console(share.arm_gen1.ArmConsoleGen1):
         self.action('"{} SET-SERIAL-ID'.format(sernum))
         super().defaults()
 
-    def testmode(self, state):
+    def sleepmode(self, state):
         """Enable or disable Test Mode"""
         self._logger.debug('Test Mode = %s', state)
-        reply = int(self.action('"STATUS XN?', expected=1), 16) # Reply is hex
-        if state:
-            value = 0x80000000 | reply
-        else:
-            value = 0x7FFFFFFF & reply
-        cmd = '${:08X} "STATUS XN!'.format(value)
+        value = 3 if state else 0
+        cmd = '{} "SLEEPMODE XN!'.format(value)
+        self.action(cmd)
+
+    def fanspeed(self, value):
+        """Set the fan speed"""
+        cmd = '{} "FAN_SPEED XN!'.format(value)
         self.action(cmd)
 
     def can_id(self, dummy):
