@@ -168,14 +168,14 @@ class SimSerial(_Simulator, serial.Serial):
             data = b''
         return data
 
-    def readline(self, size=None, eol=b'\n'):
+    def readline(self, size=-1):
         """A non-blocking read.
 
         @return Bytes read.
 
         """
         if not self.simulation:
-            return super().readline(size, eol)
+            return super().readline(size)
         if self._enable.is_set() and not self._in_queue.empty():
             data = self._in_queue.get()
         else:

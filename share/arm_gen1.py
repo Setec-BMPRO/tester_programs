@@ -39,8 +39,8 @@ _CMD_PROMPT = b'\r\n> '
 
 # Dialect dependent commands
 #   Use the key name for lookup, then index by self._dialect
-# Dialect 0 = SX-750, GEN8, BatteryCheck
-# Dialect 1 = BP35, Trek2
+# Dialect 0 = SX-750, GEN8
+# Dialect 1 = BatteryCheck, BP35, Trek2
 _DIALECT = {
     'VERSION': ('X-SOFTWARE-VERSION x?', 'SW-VERSION?'),
     'BUILD': ('X-BUILD-NUMBER x?', 'BUILD?'),
