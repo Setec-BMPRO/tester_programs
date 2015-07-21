@@ -6,6 +6,7 @@ import inspect
 import configparser
 import logging.handlers
 from pydispatch import dispatcher
+import time
 
 import gpib
 import tester
@@ -182,12 +183,11 @@ def _main():
     logger.info('Open Tester')
     tst.open(pgm)
 #    Allows 2 seconds before fixture lock to remove board at ATE2
-    import time
-    time.sleep(2)
+#    time.sleep(2)
     logger.info('Running Test')
     tst.test(('UUT1', ))
 #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
-    time.sleep(2)
+#    time.sleep(2)
     logger.info('Close Tester')
     tst.close()
     logger.info('Stop Tester')
@@ -195,6 +195,10 @@ def _main():
     tst.join()
     logger.info('Finished')
 
+def no_sleep(secs=0):
+    pass
+
 if __name__ == '__main__':
+    time.sleep = no_sleep   # "Monkey Patch" time, so all delays are zero
     _logging_setup()
     _main()

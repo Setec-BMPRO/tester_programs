@@ -4,7 +4,7 @@
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('ACin', 1, 235.0, 245.0, None, None),
-    ('Vbus', 1, 410.0, 420.0, None, None),
+    ('Vbus', 1, 401.0, 424.0, None, None),
     ('12Vpri', 1, 11.5, 13.0, None, None),
     ('5Vusb', 1, -4.5, 5.5, None, None),
     ('15Vs', 1, 11.5, 13.0, None, None),

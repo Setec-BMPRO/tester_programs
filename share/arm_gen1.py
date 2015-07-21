@@ -39,8 +39,8 @@ _CMD_PROMPT = b'\r\n> '
 
 # Dialect dependent commands
 #   Use the key name for lookup, then index by self._dialect
-# Dialect 0 = SX-750, GEN8, BatteryCheck
-# Dialect 1 = BP35, Trek2
+# Dialect 0 = SX-750, GEN8
+# Dialect 1 = BatteryCheck, BP35, Trek2
 _DIALECT = {
     'VERSION': ('X-SOFTWARE-VERSION x?', 'SW-VERSION?'),
     'BUILD': ('X-BUILD-NUMBER x?', 'BUILD?'),
@@ -93,6 +93,7 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._dialect = dialect
+        self._can_tunnel = False        # CAN tunneling OFF
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, Tuple of Parameters)
@@ -154,7 +155,7 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
     def defaults(self):
         """Write factory defaults into NV memory."""
         self._logger.debug('Write factory defaults')
-        self.action('NV-DEFAULT')
+        self.action('NV-DEFAULT', delay=0.3)
         self.nvwrite()
 
     def unlock(self):
@@ -207,7 +208,7 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
 
         """
         # Read until a timeout happens
-        buf = super().read(1024)
+        buf = self._read(1024)
         # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
@@ -248,18 +249,45 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         # Send each byte with echo verification
         for a_byte in cmd_data:
             a_byte = bytes([a_byte])
-            super().write(a_byte)
-            echo = super().read(1)
+            self._write(a_byte)
+            echo = self._read(1)
             if echo != a_byte:
                 raise ArmError(
                     'Command echo error. Tx: {}, Rx: {}'.format(a_byte, echo))
         # And the command RUN, without echo
-        super().write(_CMD_RUN)
+        self._write(_CMD_RUN)
 
     def flush(self):
         """Flush input by reading everything."""
         # See what is waiting
-        buf = super().read(1024 * 1024)
+        buf = self._read(1024 * 1024)
         if len(buf) > 0:
             # Show what we are flushing
             self._logger.debug('flush() %s', buf)
+
+    def ct_open(self, target_id):
+        """Open a CAN tunnel.
+
+        The console of the target device will be presented as if it where
+        the console of this instance.
+
+        @param target_id CAN ID of the target device."""
+# TODO: Open the CAN tunnel
+        self._can_tunnel = True
+
+    def ct_close(self):
+        """Close a CAN tunnel."""
+# TODO: Close the CAN tunnel
+        self._can_tunnel = False
+
+    def _read(self, size=1):
+        """Read characters from CAN tunnel or serial."""
+        if not self._can_tunnel:
+            return super().read(size)
+# TODO: Read the CAN tunnel
+
+    def _write(self, data):
+        """Write characters to CAN tunnel or serial."""
+        if not self._can_tunnel:
+            super().write(data)
+# TODO: Write to the CAN tunnel

@@ -52,11 +52,12 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('ProgramARM', self._step_program_arm, None, True),
-            ('ProgramPIC', self._step_program_pic, None, True),
-            ('PowerUp', self._step_powerup, None, False),
+            ('ProgramARM', self._step_program_arm, None, False),
+            ('ProgramPIC', self._step_program_pic, None, False),
+            ('PowerUp', self._step_powerup, None, True),
             ('TestArm', self._step_test_arm, None, False),
-            ('CanBus', self._step_canbus, None, False),
+            ('TestUnit', self._step_test_unit, None, True),
+            ('CanBus', self._step_canbus, None, True),
             ('OCP', self._step_ocp, None, False),
             ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -193,8 +194,11 @@ class Main(tester.TestSequence):
             ((s.oACin, 240.0), (s.oVbus, 415.0), (s.o12Vpri, 12.5),
              (s.o5Vusb, 5.0), (s.o3V3, 3.3), (s.o15Vs, 12.5),
              (s.oVout, 12.8), (s.oVbat, 12.8),
-             (s.oVout, 12.8), (s.oVbat, 12.8), ))
+             (s.oVout, 12.8), (s.oVbat, 12.8),
+             (s.oVbus, (415.0, 415.0), )))
         t.pwr_up.run()
+        _PFC_STABLE = 0.05
+        m.dmm_Vbus.stable(_PFC_STABLE)
 
     def _step_test_arm(self):
         """Test the ARM device."""
@@ -208,10 +212,6 @@ class Main(tester.TestSequence):
         if self._fifo:
             # Startup banner
             self._bp35.puts('Banner1\r\nBanner2\r\n')
-            # Going into Test Mode
-            self._bp35.putch('"STATUS XN?', preflush=1)
-            self._bp35.puts('0x00000000\r\n')
-            self._bp35.putch('$80000000 "STATUS XN!', preflush=1, postflush=1)
             # Unlock
             self._bp35.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
             # Set hardware ID
@@ -228,9 +228,17 @@ class Main(tester.TestSequence):
             self._bp35.putch('BUILD?', preflush=1)
             self._bp35.puts('3119\r\n')
         self._bp35.action(None, expected=2)    # Flush banner (2 lines)
-        self._bp35.testmode(True)
         self._bp35.defaults(_HW_VER, sernum)
         self._bp35.version()
+
+    def _step_test_unit(self):
+        """Test functions of the unit."""
+        self.fifo_push(((s.oFan, (0, 12.0)), ))
+        m.dmm_FanOff.measure(timeout=5)
+        if self._fifo:
+            self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
+        self._bp35.fanspeed(1000)
+        m.dmm_FanOn.measure(timeout=5)
 
     def _step_canbus(self):
         """Test the Can Bus."""
