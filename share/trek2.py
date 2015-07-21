@@ -21,19 +21,6 @@ class Console(share.arm_gen1.ArmConsoleGen1):
             'CAN_ID': (self.can_id, None),
             }
 
-    def defaults(self, hwver, sernum):
-        """Write factory defaults into NV memory.
-
-        @param hwver Tuple (Major [1-255], Minor [1-255], Mod [character]).
-        @param sernum Serial number string.
-
-        """
-        self._logger.debug('Write factory defaults')
-        self.unlock()
-        self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
-        self.action('"{} SET-SERIAL-ID'.format(sernum))
-        super().defaults()
-
     def testmode(self, state):
         """Enable or disable Test Mode"""
         self._logger.debug('Test Mode = %s', state)
@@ -45,7 +32,7 @@ class Console(share.arm_gen1.ArmConsoleGen1):
         cmd = '${:08X} "STATUS XN!'.format(value)
         self.action(cmd)
 
-    def bklght(self, param=100):
+    def backlight(self, param=100):
         """Set backlight intensity."""
         self.action('{} 0 X!'.format(param))
 

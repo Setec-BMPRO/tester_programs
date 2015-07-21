@@ -45,6 +45,10 @@ _DIALECT = {
     'VERSION': ('X-SOFTWARE-VERSION x?', 'SW-VERSION?'),
     'BUILD': ('X-BUILD-NUMBER x?', 'BUILD?'),
     }
+# Dialect dependent features
+#   Dialect 1 has the 'SET-HW-VER' and 'SET-SERIAL-ID' commands.
+#   BatteryCheck has the 'SET-SERIAL-ID' command, but it works differently
+#   to the Dialect 1 units...
 
 
 class ArmError(Exception):
@@ -144,7 +148,7 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         """
         cmd, scale, strkill = data
         reply = self.action(cmd, expected=1)
-# FIXME: There has to be a better way than this...
+# TODO: There has to be a better way than this...
         if reply is None:
             value = -999.999
         else:
@@ -152,10 +156,19 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
             value = float(reply) * scale
         return value
 
-    def defaults(self):
-        """Write factory defaults into NV memory."""
+    def defaults(self, hwver=None, sernum=None):
+        """Write factory defaults into NV memory.
+
+        @param hwver Tuple (Major [1-255], Minor [1-255], Mod [character]).
+        @param sernum Serial number string.
+
+        """
         self._logger.debug('Write factory defaults')
-        self.action('NV-DEFAULT', delay=0.3)
+        self.unlock()
+        if self._dialect != 0:
+            self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
+            self.action('"{} SET-SERIAL-ID'.format(sernum))
+        self.action('NV-DEFAULT')
         self.nvwrite()
 
     def unlock(self):
