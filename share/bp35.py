@@ -3,206 +3,93 @@
 
 import share.arm_gen1
 
-
 # Expose arm_gen1.Sensor as bp35.Sensor
 Sensor = share.arm_gen1.Sensor
 
-
-class _Parameter():
-
-    """Parameter base class."""
-
-    def __init__(self, command, writeable=False):
-        """Remember the command verb and writeable state."""
-        self._cmd = command
-        self._writeable = writeable
-
-    def write_cmd(self, value):
-        """Generate the write command string.
-
-        @param value Data value.
-        @return Command string.
-
-        """
-        if not self._writeable:
-            raise ValueError('Parameter is read-only')
-        return '{} "{} XN!'.format(value, self._cmd)
-
-    def read_cmd(self, value):
-        """Generate the read command string.
-
-        @param value Data value.
-        @return Command string.
-
-        """
-        return '"{} XN?'.format(self._cmd)
+# Some easier to use short names
+ArmConsoleGen1 = share.arm_gen1.ArmConsoleGen1
+ParameterBoolean = share.arm_gen1.ParameterBoolean
+ParameterFloat = share.arm_gen1.ParameterFloat
+ParameterHex = share.arm_gen1.ParameterHex
+ParameterCAN = share.arm_gen1.ParameterCAN
 
 
-class ParameterBoolean(_Parameter):
+class Console(ArmConsoleGen1):
 
-    """Boolean parameter type."""
-
-    def write_cmd(self, value):
-        """Generate the write command string.
-
-        @param value Data value to be validated.
-        @return Command string.
-
-        """
-        if not isinstance(value, bool):
-            raise ValueError('value "{}" must be boolean'.format(value))
-        return super().write_cmd(int(value))
-
-    def read_val(self, value):
-        """Convert the data value read from the unit.
-
-        @param value Data value from the unit.
-        @return Boolean data value.
-
-        """
-        return bool(value)
-
-
-class ParameterFloat(_Parameter):
-
-    """Float parameter type."""
-
-    def __init__(self, command, writeable=False,
-                       minimum=0, maximum=1000, scale=1):
-        """Remember the scaling and data limits."""
-        super().__init__(command, writeable)
-        self._min = minimum
-        self._max = maximum
-        self._scale = scale
-
-    def write_cmd(self, value):
-        """Generate the write command string.
-
-        @param value Data value to be validated.
-        @return Command string.
-
-        """
-        if value < self._min or value > self._max:
-            raise ValueError(
-                'Value out of range {} - {}'.format(self._min, self._max))
-        return super().write_cmd(int(value * self._scale))
-
-    def read_val(self, value):
-        """Convert the data value read from the unit.
-
-        @param value Data value from the unit.
-        @return Float data value.
-
-        """
-        return value / self._scale
-
-
-_BP35_DATA = {
-    'FAN': ParameterFloat('FAN_SPEED', writeable=True,
-                          minimum=0, maximum=100, scale=0.1),
-    'VOUT': ParameterFloat('CONVERTER_VOLTS_SETPOINT', writeable=True,
-                           minimum=0.0, maximum=14.0, scale=0.001),
-    'IOUT': ParameterFloat('CONVERTER_CURRENT_SETPOINT', writeable=True,
-                           minimum=15.0, maximum=35.0, scale=0.001),
-    'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
-    'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
-    'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
-    'CAN_POWER_EN': ParameterBoolean('CAN_BUS_POWER_ENABLE', writeable=True),
-    '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
-    'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
-    # FIXME: Is this a float, or something else?
-    'LOAD_SWITCH_STATE': ParameterFloat('LOAD_SWITCH_STATE', writeable=True,
-                                        minimum=0, maximum=999999, scale=1),
-    'SLEEPMODE': ParameterFloat('SLEEPMODE', writeable=True,
-                                minimum=0, maximum=3, scale=1),
-# Read-only values
-    'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH',
-                                          minimum=0, maximum=9, scale=1),
-    'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
-    }
-
-#'CONVERTER_OVERVOLT'
-#'PRIMARY_TEMPERATURE'
-#'SECONDARY_TEMPERATURE'
-#'BATTERY_TEMPERATURE'
-#'BUS_VOLTS'
-#'CONVERTER_CURRENT'
-#'AUX_INPUT_VOLTS'
-#'AUX_INPUT_CURRENT'
-#'CAN_BUS_VOLTS_SENSE'
-#'BATTERY_VOLTS'
-#'BATTERY_CURRENT'
-#'AC_LINE_FREQUENCY'
-#'AC_LINE_VOLTS'
-#'LOAD_SWITCH_CURRENT_1'
-#'LOAD_SWITCH_CURRENT_2'
-#'LOAD_SWITCH_CURRENT_3'
-#'LOAD_SWITCH_CURRENT_4'
-#'LOAD_SWITCH_CURRENT_5'
-#'LOAD_SWITCH_CURRENT_6'
-#'LOAD_SWITCH_CURRENT_7'
-#'LOAD_SWITCH_CURRENT_8'
-#'LOAD_SWITCH_CURRENT_9'
-#'LOAD_SWITCH_CURRENT_10'
-#'LOAD_SWITCH_CURRENT_11'
-#'LOAD_SWITCH_CURRENT_12'
-#'LOAD_SWITCH_CURRENT_13'
-#'LOAD_SWITCH_CURRENT_14'
-#'I2C_FAULTS'
-#'SPI_FAULTS'
-
-
-class Console(share.arm_gen1.ArmConsoleGen1):
-
-    """Communications to ARM console."""
+    """Communications to BP35 console."""
 
     def __init__(self, simulation=False, **kwargs):
         """Create console instance."""
         super().__init__(dialect=1, simulation=simulation, **kwargs)
-        self._read_cmd = None
-        # Data readings: Name -> (function, parameter)
         self.cmd_data = {
-            'CAN_ID': (self.can_id, None),
+            # Read-Write values
+            'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
+            'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
+            'VOUT': ParameterFloat('CONVERTER_VOLTS_SETPOINT', writeable=True,
+                minimum=0.0, maximum=14.0, scale=0.001),
+            'IOUT': ParameterFloat('CONVERTER_CURRENT_SETPOINT',
+                writeable=True, minimum=15.0, maximum=35.0, scale=0.001),
+            'FAN': ParameterFloat('FAN_SPEED', writeable=True,
+                minimum=0, maximum=100, scale=0.1),
+            'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
+            'CAN_EN': ParameterBoolean('CAN_BUS_POWER_ENABLE', writeable=True),
+            '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
+            'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
+            'LOAD_SET': ParameterFloat('LOAD_SWITCH_STATE', writeable=True,
+                minimum=0, maximum=0x0FFFFFFF, scale=1),
+            'BUS_OV': ParameterFloat('CONVERTER_OVERVOLT', writeable=True,
+                minimum=0, maximum=2, scale=1),
+            'MODE': ParameterFloat('SLEEPMODE', writeable=True,
+                minimum=0, maximum=3, scale=1),
+            # Read-only values
+            'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
+            'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
+            'PRI_T': ParameterFloat('PRIMARY_TEMPERATURE', scale=0.1),
+            'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=0.1),
+            'BATT_T': ParameterFloat('BATTERY_TEMPERATURE', scale=0.1),
+            'BUS_V': ParameterFloat('BUS_VOLTS', scale=0.001),
+            'BUS_I': ParameterFloat('CONVERTER_CURRENT', scale=0.001),
+            'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=0.001),
+            'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=0.001),
+            'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=0.001),
+            'BATT_V': ParameterFloat('BATTERY_VOLTS', scale=0.001),
+            'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=0.001),
+            'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=0.001),
+            'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
+            'LOAD_1': ParameterFloat('LOAD_SWITCH_CURRENT_1', scale=0.001),
+            'LOAD_2': ParameterFloat('LOAD_SWITCH_CURRENT_2', scale=0.001),
+            'LOAD_3': ParameterFloat('LOAD_SWITCH_CURRENT_3', scale=0.001),
+            'LOAD_4': ParameterFloat('LOAD_SWITCH_CURRENT_4', scale=0.001),
+            'LOAD_5': ParameterFloat('LOAD_SWITCH_CURRENT_5', scale=0.001),
+            'LOAD_6': ParameterFloat('LOAD_SWITCH_CURRENT_6', scale=0.001),
+            'LOAD_7': ParameterFloat('LOAD_SWITCH_CURRENT_7', scale=0.001),
+            'LOAD_8': ParameterFloat('LOAD_SWITCH_CURRENT_8', scale=0.001),
+            'LOAD_9': ParameterFloat('LOAD_SWITCH_CURRENT_9', scale=0.001),
+            'LOAD_10': ParameterFloat('LOAD_SWITCH_CURRENT_10', scale=0.001),
+            'LOAD_11': ParameterFloat('LOAD_SWITCH_CURRENT_11', scale=0.001),
+            'LOAD_12': ParameterFloat('LOAD_SWITCH_CURRENT_12', scale=0.001),
+            'LOAD_13': ParameterFloat('LOAD_SWITCH_CURRENT_13', scale=0.001),
+            'LOAD_14': ParameterFloat('LOAD_SWITCH_CURRENT_14', scale=0.001),
+            'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
+            'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
+            'CAN_ID': ParameterCAN('TQQ,32,0'),
             }
 
-    def __getitem__(self, key):
-        """Read a value from the BP35.
+    def load_set(self, set_on=True, loads=()):
+        """Set the state of load outputs.
 
-        @return Reading ID
-
-        """
-        pass
-
-    def __setitem__(self, key, value):
-        """Write a value to the BP35.
-
-        @param key Reading ID
-        @param value Data value.
+        @param set_on True to set loads ON, False to set OFF.
+             ON = 0x01 (Green LED ON, Load ON)
+            OFF = 0x10 (Red LED ON, Load OFF)
+        @param loads Tuple of loads to set ON or OFF (0-13).
 
         """
-        pass
-
-    def sleepmode(self, state):
-        """Enable or disable Test Mode"""
-        self._logger.debug('Test Mode = %s', state)
-        value = 3 if state else 0
-        cmd = '{} "SLEEPMODE XN!'.format(value)
-        self.action(cmd)
-
-    def fanspeed(self, value):
-        """Set the fan speed"""
-        cmd = '{} "FAN_SPEED XN!'.format(value)
-        self.action(cmd)
-
-    def can_id(self, dummy):
-        """Simple CAN check by sending an ID request to the Trek2.
-
-        @param dummy Unused parameter.
-        @return The response string from the target device.
-
-        """
-        try:
-            reply = self.action('"TQQ,32,0 CAN', expected=2)[1]
-        except share.arm_gen1.ArmError:
-            reply = ''
-        return reply
+        value = 0x0AAAAAAA if set_on else 0x05555555
+        code = 0x1 if set_on else 0x2
+        for load in loads:
+            if load not in range(14):
+                raise ValueError('Load must be 0-13')
+            mask = ~(0x3 << (load * 2)) & 0xFFFFFFFF
+            bits = code << (load * 2)
+            value = value & mask | bits
+        self['LOAD_SET'] = value

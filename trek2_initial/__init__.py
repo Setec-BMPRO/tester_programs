@@ -165,7 +165,7 @@ class Main(tester.TestSequence):
             # Set & Write defaults
             self._trek2.putch('NV-DEFAULT', preflush=1, postflush=1)
             self._trek2.putch('NV-WRITE', preflush=1, postflush=1)
-        self._trek2.action(None, expected=2)    # Flush banner (2 lines)
+        self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
         self._trek2.testmode(True)
         self._trek2.defaults(_HW_VER, sernum)
 
@@ -180,6 +180,6 @@ class Main(tester.TestSequence):
             self._trek2.putch('$A0000000 "STATUS XN!', preflush=1, postflush=1)
             # CAN query command & response
             self._trek2.putch('"TQQ,16,0 CAN', preflush=1)
-            self._trek2.puts('OK\r\n> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+            self._trek2.puts('> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
         self._trek2.can_mode(True)
         m.trek2_can_id.measure(timeout=10)
