@@ -36,6 +36,8 @@ _CMD_RUN = b'\r'
 _CMD_SUFFIX = b' -> '
 # Command prompt (after command response)
 _CMD_PROMPT = b'\r\n> '
+# Delay after a value set command
+_SET_DELAY = 0.3
 
 # Dialect dependent commands
 #   Use the key name for lookup, then index by self._dialect
@@ -45,6 +47,10 @@ _DIALECT = {
     'VERSION': ('X-SOFTWARE-VERSION x?', 'SW-VERSION?'),
     'BUILD': ('X-BUILD-NUMBER x?', 'BUILD?'),
     }
+# Dialect dependent features
+#   Dialect 1 has the 'SET-HW-VER' and 'SET-SERIAL-ID' commands.
+#   BatteryCheck has the 'SET-SERIAL-ID' command, but it works differently
+#   to the Dialect 1 units...
 
 
 class ArmError(Exception):
@@ -80,6 +86,175 @@ class Sensor(tester.sensor.Sensor):
         return (rdg, )
 
 
+class _Parameter():
+
+    """Parameter base class."""
+
+    def __init__(self, command, writeable=False):
+        """Remember the command verb and writeable state."""
+        self._cmd = command
+        self._writeable = writeable
+
+    def write_cmd(self, value):
+        """Generate the write command string.
+
+        @param value Data value.
+        @return Command string.
+
+        """
+        if not self._writeable:
+            raise ValueError('Parameter is read-only')
+        return '{} "{} XN!'.format(value, self._cmd)
+
+    def read_cmd(self):
+        """Generate the read command string.
+
+        @param value Data value.
+        @return Command string.
+
+        """
+        return '"{} XN?'.format(self._cmd)
+
+
+class ParameterBoolean(_Parameter):
+
+    """Boolean parameter type."""
+
+    error_value = False
+
+    def write_cmd(self, value):
+        """Generate the write command string.
+
+        @param value Data value to be validated.
+        @return Command string.
+
+        """
+        if not isinstance(value, bool):
+            raise ValueError('value "{}" must be boolean'.format(value))
+        return super().write_cmd(int(value))
+
+    def read_val(self, value):
+        """Convert the data value read from the unit.
+
+        @param value Data value from the unit, or None.
+        @return Boolean data value.
+
+        """
+        return bool(value)
+
+
+class ParameterFloat(_Parameter):
+
+    """Float parameter type."""
+
+    error_value = float('NaN')
+
+    def __init__(self, command, writeable=False,
+                       minimum=0, maximum=1000, scale=1):
+        """Remember the scaling and data limits."""
+        super().__init__(command, writeable)
+        self._min = minimum
+        self._max = maximum
+        self._scale = scale
+
+    def write_cmd(self, value):
+        """Generate the write command string.
+
+        @param value Data value to be validated.
+        @return Command string.
+
+        """
+        if value < self._min or value > self._max:
+            raise ValueError(
+                'Value out of range {} - {}'.format(self._min, self._max))
+        return super().write_cmd(int(value * self._scale))
+
+    def read_val(self, value):
+        """Convert the data value read from the unit.
+
+        @param value String value from the unit, or None.
+        @return Float data value.
+
+        """
+        if value is None:
+            value = '0'
+        return int(value) / self._scale
+
+
+class ParameterHex(_Parameter):
+
+    """Hex parameter type."""
+
+    error_value = float('NaN')
+
+    def __init__(self, command, writeable=False, minimum=0, maximum=1000):
+        """Remember the scaling and data limits."""
+        super().__init__(command, writeable)
+        self._min = minimum
+        self._max = maximum
+
+    def write_cmd(self, value):
+        """Generate the write command string.
+
+        @param value Data value to be validated.
+        @return Command string.
+
+        """
+        if value < self._min or value > self._max:
+            raise ValueError(
+                'Value out of range {} - {}'.format(self._min, self._max))
+        if not self._writeable:
+            raise ValueError('Parameter is read-only')
+        return '${:08X} "{} XN!'.format(value, self._cmd)
+
+    def read_val(self, value):
+        """Convert the data value read from the unit.
+
+        @param value String value from the unit, or None.
+        @return Int data value.
+
+        """
+        if value is None:
+            value = '0'
+        return int(value, 16)
+
+
+class ParameterCAN(_Parameter):
+
+    """CAN Parameter class."""
+
+    error_value = ''
+
+    def write_cmd(self, value):
+        """Generate the write command string.
+
+        @param value Data value.
+        @return Command string.
+
+        """
+        raise ValueError('CAN parameters are read-only')
+
+    def read_cmd(self):
+        """Generate the read command string.
+
+        @param value Data value.
+        @return Command string.
+
+        """
+        return '"{} CAN'.format(self._cmd)
+
+    def read_val(self, value):
+        """Convert the data value read from the unit.
+
+        @param value String value from the unit, or None.
+        @return String data value.
+
+        """
+        if value is None:
+            value = ''
+        return value
+
+
 class ArmConsoleGen1(share.sim_serial.SimSerial):
 
     """Communications to First Generation ARM console."""
@@ -94,16 +269,11 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
             '.'.join((__name__, self.__class__.__name__)))
         self._dialect = dialect
         self._can_tunnel = False        # CAN tunneling OFF
-        self._read_cmd = None
-        # Data readings:
-        #   Name -> (function, Tuple of Parameters)
-        #       read_float() parameters: (Command, ScaleFactor, StrKill)
-        self.cmd_data = {
-#            'ARM-AcDuty': (self.read_float,
-#                            ('X-AC-DETECTOR-DUTY X?', 1, '%')),
-            }
-        super().__init__(           # Initialise the SimSerial()
-            simulation=simulation, **kwargs)
+        self._read_key = None
+        # Data readings: Key=Name, Value=Parameter
+        self.cmd_data = {}
+        # Initialise the SimSerial()
+        super().__init__(simulation=simulation, **kwargs)
 
     def setPort(self, port):
         """Set serial port.
@@ -116,46 +286,66 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         self.timeout = 10240 / self.baudrate  # Timeout of 1kB
         super().setPort(port)
 
-    def configure(self, cmd):
+    def configure(self, key):
         """Sensor: Configure for next reading."""
-        self._read_cmd = cmd
+        self._read_key = key
 
     def opc(self):
         """Sensor: Dummy OPC."""
         pass
 
     def read(self):
-        """Sensor: Read ARM data.
+        """Sensor: Read ARM data using the last defined key.
 
         @return Value
 
         """
-        self._logger.debug('read %s', self._read_cmd)
-        fn, param = self.cmd_data[self._read_cmd]
-        result = fn(param)
-        self._logger.debug('result %s', result)
-        return result
+        return self[self._read_key]
 
-    def read_float(self, data):
-        """Get float value from ARM.
+    def __getitem__(self, key):
+        """Read a value from the ARM.
 
-        @return Value
+        @return Reading ID
 
         """
-        cmd, scale, strkill = data
-        reply = self.action(cmd, expected=1)
-# FIXME: There has to be a better way than this...
-        if reply is None:
-            value = -999.999
-        else:
-            reply = reply.replace(strkill, '')
-            value = float(reply) * scale
-        return value
+        try:
+            parameter = self.cmd_data[key]
+            read_cmd = parameter.read_cmd()
+            reply = self.action(read_cmd, expected=1)
+            reply = parameter.read_val(reply)
+        except ArmError:
+            # Sensor uses this, so we must always return a valid reading
+            reply = parameter.error_value
+        return reply
 
-    def defaults(self):
-        """Write factory defaults into NV memory."""
+    def __setitem__(self, key, value):
+        """Write a value to the ARM.
+
+        @param key Reading ID
+        @param value Data value.
+
+        """
+        try:
+            parameter = self.cmd_data[key]
+            write_cmd = parameter.write_cmd(value)
+            self.action(write_cmd, delay=_SET_DELAY)
+        except ArmError:
+            # This will make the unit fail the test
+            raise tester.measure.MeasurementFailedError
+
+    def defaults(self, hwver=None, sernum=None):
+        """Write factory defaults into NV memory.
+
+        @param hwver Tuple (Major [1-255], Minor [1-255], Mod [character]).
+        @param sernum Serial number string.
+
+        """
         self._logger.debug('Write factory defaults')
-        self.action('NV-DEFAULT', delay=0.3)
+        self.unlock()
+        if self._dialect != 0:
+            self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
+            self.action('"{} SET-SERIAL-ID'.format(sernum))
+        self.action('NV-DEFAULT')
         self.nvwrite()
 
     def unlock(self):

@@ -106,6 +106,15 @@ def _main():
     tester_type = config['DEFAULT'].get('TesterType')
     if tester_type is None:
         tester_type = 'ATE3'
+    no_delays = config['DEFAULT'].getboolean('NoDelays')
+    if no_delays is None:
+        no_delays = False
+
+    # "Monkey Patch" time, so all delays are zero
+    if no_delays:
+        def no_sleep(secs=0):
+            pass
+        time.sleep = no_sleep
 
     # Receive Test Result signals here
     def test_result(result):
@@ -174,7 +183,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'BP35 Initial',
+        'Trek2 Initial',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
@@ -183,11 +192,11 @@ def _main():
     logger.info('Open Tester')
     tst.open(pgm)
 #    Allows 2 seconds before fixture lock to remove board at ATE2
-#    time.sleep(2)
+    time.sleep(2)
     logger.info('Running Test')
     tst.test(('UUT1', ))
 #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
-#    time.sleep(2)
+    time.sleep(2)
     logger.info('Close Tester')
     tst.close()
     logger.info('Stop Tester')
@@ -195,10 +204,6 @@ def _main():
     tst.join()
     logger.info('Finished')
 
-def no_sleep(secs=0):
-    pass
-
 if __name__ == '__main__':
-    time.sleep = no_sleep   # "Monkey Patch" time, so all delays are zero
     _logging_setup()
     _main()
