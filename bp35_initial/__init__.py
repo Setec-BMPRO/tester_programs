@@ -51,13 +51,13 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PartDetect', self._step_part_detect, None, True),
+            ('PartDetect', self._step_part_detect, None, False),
             ('ProgramARM', self._step_program_arm, None, False),
             ('ProgramPIC', self._step_program_pic, None, False),
-            ('PowerUp', self._step_powerup, None, True),
+            ('PowerUp', self._step_powerup, None, False),
             ('TestArm', self._step_test_arm, None, False),
             ('TestUnit', self._step_test_unit, None, True),
-            ('CanBus', self._step_canbus, None, True),
+            ('CanBus', self._step_canbus, None, False),
             ('OCP', self._step_ocp, None, False),
             ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -126,7 +126,7 @@ class Main(tester.TestSequence):
             ((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
              (s.osw3, 100.0), (s.osw4, 100.0), ))
         MeasureGroup(
-            (m.dmm_Lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
+            (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
              timeout=5)
         # Apply power to comms circuit.
         d.dcs_vcom.output(12.8, True)
@@ -137,7 +137,7 @@ class Main(tester.TestSequence):
         External Vbat is applied to power the ARM for programming.
 
         """
-        self.fifo_push(((s.o3V3, 3.3), ))
+        self.fifo_push(((s.oVbat, 12.8), (s.o3V3, 3.3),))
         # Apply and check injected rails
         d.dcs_vbat.output(12.8, True)
         d.rla_vbat.set_on()
@@ -198,7 +198,7 @@ class Main(tester.TestSequence):
              (s.oVbus, (415.0, 415.0), )))
         t.pwr_up.run()
         _PFC_STABLE = 0.05
-        m.dmm_Vbus.stable(_PFC_STABLE)
+        m.dmm_vbus.stable(_PFC_STABLE)
 
     def _step_test_arm(self):
         """Test the ARM device."""
@@ -232,13 +232,28 @@ class Main(tester.TestSequence):
         self._bp35.version()
 
     def _step_test_unit(self):
-        """Test functions of the unit."""
-        self.fifo_push(((s.oFan, (0, 12.0)), ))
-        m.dmm_FanOff.measure(timeout=5)
+        """Test functions of the unit.
+
+        Enter sleep mode.
+
+        """
+        self.fifo_push(((s.oFan, (0, 12.0)), (s.oVout, 12.8), ))
+        if self._fifo:
+            self._bp35.putch('3 "SLEEPMODE XN!', preflush=1, postflush=1)
+            self._bp35.putch('1 "PFC_ENABLE XN!', preflush=1, postflush=1)
+            self._bp35.putch('1 "CONVERTER_ENABLE XN!', preflush=1, postflush=1)
+            self._bp35.putch('12800 "CONVERTER_VOLTS_SETPOINT XN!',
+                            preflush=1, postflush=1)
+        self._bp35['MODE'] = 3
+        self._bp35['PFC_EN'] = True
+        self._bp35['DCDC_EN'] = True
+        self._bp35['VOUT'] = 12.8
+        MeasureGroup(
+            (m.dmm_vout, m.dmm_fanOff, ), timeout=5)
         if self._fifo:
             self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
-        self._bp35.fanspeed(1000)
-        m.dmm_FanOn.measure(timeout=5)
+        self._bp35['FAN'] = 100
+        m.dmm_fanOn.measure(timeout=5)
 
     def _step_canbus(self):
         """Test the Can Bus."""
@@ -246,19 +261,8 @@ class Main(tester.TestSequence):
     def _step_ocp(self):
         """Ramp up load until OCP."""
         self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ),
-                        (s.oVbat, (12.8, ) * 16 + (11.0, ), ), ))
-        d.dcl_out.output(0.0, output=True)
-        d.dcl_bat.output(0.0, output=True)
-        d.dcl_out.binary(0.0, 30.0, 5.0)
-        m.ramp_OutOCP.measure()
-        d.dcl_out.output(0.0)
-        d.dcs_vbat.output(12.8, True)
-        d.rla_vbat.set_on()
-        m.dmm_Vbat.measure(timeout=5)
-        d.dcl_bat.binary(0.0, 18.0, 5.0)
-        m.ramp_BatOCP.measure()
-        d.dcl_bat.output(0.0)
-        d.rla_vbat.set_off()
+                        (s.oVbat, (12.8, ) * 10 + (11.0, ), ), ))
+        t.ocp.run()
 
     def _step_shutdown(self):
         """Apply overload to shutdown. Check load switch."""
