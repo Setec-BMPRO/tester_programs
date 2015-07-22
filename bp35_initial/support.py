@@ -11,6 +11,7 @@ from pydispatch import dispatcher
 import tester
 from tester.devlogical import *
 from tester.measure import *
+import share.bp35
 
 sensor = tester.sensor
 translate = tester.translate
@@ -115,6 +116,8 @@ class Sensors():
         self.oSnEntry = sensor.DataEntry(
             message=translate('msgSnEntry'),
             caption=translate('capSnEntry'))
+        self.oSwVer = share.bp35.Sensor(
+            bp35, 'SwVer', rdgtype=tester.sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -160,6 +163,7 @@ class Measurements():
         self.ui_YesNoRed = Measurement(limits['Notify'], sense.oYesNoRed)
         self.ui_YesNoOrange = Measurement(limits['Notify'], sense.oYesNoOrange)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
+        self.bp35_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
 
 
 class SubTests():
@@ -182,7 +186,7 @@ class SubTests():
         acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=0.5)
         msr1 = MeasureSubStep((m.dmm_acin, m.dmm_vbus, m.dmm_12Vpri,
                                m.dmm_5Vusb, m.dmm_3V3, m.dmm_15Vs,
-                               m.dmm_vout, m.dmm_vbat), timeout=5)
+                               m.dmm_vout, m.dmm_vbat), timeout=10)
         self.pwr_up = Step((rly1, dcs1, acs1, msr1))
 
         # OCP:

@@ -12,6 +12,7 @@ ParameterBoolean = share.arm_gen1.ParameterBoolean
 ParameterFloat = share.arm_gen1.ParameterFloat
 ParameterHex = share.arm_gen1.ParameterHex
 ParameterCAN = share.arm_gen1.ParameterCAN
+ParameterRaw = share.arm_gen1.ParameterRaw
 
 
 class Console(ArmConsoleGen1):
@@ -73,6 +74,7 @@ class Console(ArmConsoleGen1):
             'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
             'CAN_ID': ParameterCAN('TQQ,32,0'),
+            'SwVer': ParameterRaw('', func=self.version),
             }
 
     def load_set(self, set_on=True, loads=()):

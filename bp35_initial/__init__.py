@@ -25,7 +25,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, '')
 # ARM software image file
-_ARM_BIN = 'bp35_1.0.3119.bin'
+_ARM_BIN = 'bp35_1.0.3156.bin'
 # dsPIC software image file
 _PIC_HEX = 'bp35sr_1.hex'
 
@@ -51,14 +51,14 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PartDetect', self._step_part_detect, None, False),
+            ('PartDetect', self._step_part_detect, None, True),
             ('ProgramARM', self._step_program_arm, None, False),
             ('ProgramPIC', self._step_program_pic, None, False),
-            ('PowerUp', self._step_powerup, None, False),
-            ('TestArm', self._step_test_arm, None, False),
+            ('PowerUp', self._step_powerup, None, True),
+            ('TestArm', self._step_test_arm, None, True),
             ('TestUnit', self._step_test_unit, None, True),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, False),
+            ('OCP', self._step_ocp, None, True),
             ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -141,7 +141,7 @@ class Main(tester.TestSequence):
         # Apply and check injected rails
         d.dcs_vbat.output(12.8, True)
         d.rla_vbat.set_on()
-        MeasureGroup((m.dmm_Vbat, m.dmm_3V3, ), timeout=5)
+        MeasureGroup((m.dmm_vbat, m.dmm_3V3, ), timeout=5)
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Reset micro.
@@ -224,12 +224,10 @@ class Main(tester.TestSequence):
             self._bp35.putch('NV-WRITE', preflush=1, postflush=1)
             # Version queries
             self._bp35.putch('SW-VERSION?', preflush=1)
-            self._bp35.puts('1.0\r\n')
-            self._bp35.putch('BUILD?', preflush=1)
-            self._bp35.puts('3119\r\n')
+            self._bp35.puts('1.0.10902.3156\r\n')
         self._bp35.action(None, expected=2)    # Flush banner (2 lines)
         self._bp35.defaults(_HW_VER, sernum)
-        self._bp35.version()
+        m.bp35_SwVer.measure()
 
     def _step_test_unit(self):
         """Test functions of the unit.
@@ -243,11 +241,14 @@ class Main(tester.TestSequence):
             self._bp35.putch('1 "PFC_ENABLE XN!', preflush=1, postflush=1)
             self._bp35.putch('1 "CONVERTER_ENABLE XN!', preflush=1, postflush=1)
             self._bp35.putch('12800 "CONVERTER_VOLTS_SETPOINT XN!',
-                            preflush=1, postflush=1)
+                             preflush=1, postflush=1)
         self._bp35['MODE'] = 3
         self._bp35['PFC_EN'] = True
+        time.sleep(1)
         self._bp35['DCDC_EN'] = True
+        time.sleep(1)
         self._bp35['VOUT'] = 12.8
+        self._bp35['IOUT'] = 35.0
         MeasureGroup(
             (m.dmm_vout, m.dmm_fanOff, ), timeout=5)
         if self._fifo:
