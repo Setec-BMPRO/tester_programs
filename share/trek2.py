@@ -13,6 +13,7 @@ ParameterBoolean = share.arm_gen1.ParameterBoolean
 ParameterFloat = share.arm_gen1.ParameterFloat
 ParameterHex = share.arm_gen1.ParameterHex
 ParameterCAN = share.arm_gen1.ParameterCAN
+ParameterRaw = share.arm_gen1.ParameterRaw
 
 # Test mode controlled by STATUS bit 31
 _TEST_ON = (1 << 31)
@@ -37,7 +38,7 @@ class Console(ArmConsoleGen1):
             'CAN_BIND': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,16,0'),
-#            'SwVer': ParameterString(),
+            'SwVer': ParameterRaw('', func=self.version),
             }
 
     def testmode(self, state):

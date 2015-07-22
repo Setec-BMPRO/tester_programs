@@ -162,6 +162,9 @@ class Main(tester.TestSequence):
             # Set & Write defaults
             self._trek2.putch('NV-DEFAULT', preflush=1, postflush=1)
             self._trek2.putch('NV-WRITE', preflush=1, postflush=1)
+            # Software version
+            self._trek2.putch('SW-VERSION?', preflush=1)
+            self._trek2.puts('1.0.10892.112\r\n')
         self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
         self._trek2.defaults(_HW_VER, sernum)
         m.trek2_SwVer.measure()
@@ -180,7 +183,7 @@ class Main(tester.TestSequence):
             self._trek2.putch('$30000000 "STATUS XN!', preflush=1, postflush=1)
             # CAN ID query command & the response
             self._trek2.putch('"TQQ,16,0 CAN', preflush=1)
-            self._trek2.puts('RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+            self._trek2.puts('> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
         m.trek2_can_bind.measure(timeout=5)
         time.sleep(1)
         self._trek2.can_mode(True)

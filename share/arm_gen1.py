@@ -97,25 +97,27 @@ class _Parameter():
         self._cmd = command
         self._writeable = writeable
 
-    def write_cmd(self, value):
-        """Generate the write command string.
+    def write(self, value, func):
+        """Write parameter value.
 
         @param value Data value.
-        @return Command string.
+        @param func Function to use to write the value.
 
         """
         if not self._writeable:
             raise ValueError('Parameter is read-only')
-        return '{} "{} XN!'.format(value, self._cmd)
+        write_cmd = '{} "{} XN!'.format(value, self._cmd)
+        func(write_cmd, delay=_SET_DELAY)
 
-    def read_cmd(self):
-        """Generate the read command string.
+    def read(self, func):
+        """Read parameter value.
 
-        @param value Data value.
-        @return Command string.
+        @param func Function to use to read the value.
+        @return Data value.
 
         """
-        return '"{} XN?'.format(self._cmd)
+        read_cmd = '"{} XN?'.format(self._cmd)
+        return func(read_cmd)
 
 
 class ParameterBoolean(_Parameter):
@@ -124,25 +126,25 @@ class ParameterBoolean(_Parameter):
 
     error_value = False
 
-    def write_cmd(self, value):
-        """Generate the write command string.
+    def write(self, value, func):
+        """Write parameter value.
 
-        @param value Data value to be validated.
-        @return Command string.
+        @param value Data value.
+        @param func Function to use to write the value.
 
         """
         if not isinstance(value, bool):
             raise ValueError('value "{}" must be boolean'.format(value))
-        return super().write_cmd(int(value))
+        super().write(int(value), func)
 
-    def read_val(self, value):
-        """Convert the data value read from the unit.
+    def read(self, func):
+        """Read parameter value.
 
-        @param value Data value from the unit, or None.
+        @param func Function to use to read the value.
         @return Boolean data value.
 
         """
-        return bool(value)
+        return bool(super().read(func))
 
 
 class ParameterFloat(_Parameter):
@@ -159,25 +161,26 @@ class ParameterFloat(_Parameter):
         self._max = maximum
         self._scale = scale
 
-    def write_cmd(self, value):
-        """Generate the write command string.
+    def write(self, value, func):
+        """Write parameter value.
 
-        @param value Data value to be validated.
-        @return Command string.
+        @param value Data value.
+        @param func Function to use to write the value.
 
         """
         if value < self._min or value > self._max:
             raise ValueError(
                 'Value out of range {} - {}'.format(self._min, self._max))
-        return super().write_cmd(int(value * self._scale))
+        super().write(int(value * self._scale), func)
 
-    def read_val(self, value):
-        """Convert the data value read from the unit.
+    def read(self, func):
+        """Read parameter value.
 
-        @param value String value from the unit, or None.
+        @param func Function to use to read the value.
         @return Float data value.
 
         """
+        value = super().read(func)
         if value is None:
             value = '0'
         return int(value) / self._scale
@@ -197,11 +200,11 @@ class ParameterHex(_Parameter):
         self._max = maximum
         self._mask = mask
 
-    def write_cmd(self, value):
-        """Generate the write command string.
+    def write(self, value, func):
+        """Write parameter value.
 
-        @param value Data value to be validated.
-        @return Command string.
+        @param value Data value.
+        @param func Function to use to write the value.
 
         """
         if value < self._min or value > self._max:
@@ -209,15 +212,17 @@ class ParameterHex(_Parameter):
                 'Value out of range {} - {}'.format(self._min, self._max))
         if not self._writeable:
             raise ValueError('Parameter is read-only')
-        return '${:08X} "{} XN!'.format(value, self._cmd)
+        write_cmd = '${:08X} "{} XN!'.format(value, self._cmd)
+        func(write_cmd, delay=_SET_DELAY)
 
-    def read_val(self, value):
-        """Convert the data value read from the unit.
+    def read(self, func):
+        """Read parameter value.
 
         @param value String value from the unit, or None.
         @return Int data value.
 
         """
+        value = super().read(func)
         if value is None:
             value = '0'
         return int(value, 16) & self._mask
@@ -229,31 +234,62 @@ class ParameterCAN(_Parameter):
 
     error_value = ''
 
-    def write_cmd(self, value):
-        """Generate the write command string.
+    def write(self, value):
+        """Write parameter value.
 
         @param value Data value.
-        @return Command string.
+        @param func Function to use to write the value.
 
         """
         raise ValueError('CAN parameters are read-only')
 
-    def read_cmd(self):
-        """Generate the read command string.
+    def read(self, func):
+        """Read parameter value.
+
+        @param func Function to use to write the value.
+        @return String value.
+
+        """
+        can_cmd = '"{} CAN'.format(self._cmd)
+        value = func(can_cmd)
+        if value is None:
+            value = ''
+        return value
+
+
+class ParameterRaw(_Parameter):
+
+    """Raw Parameter class.
+
+    Calls a function directly rather than generating command strings and
+    using console.action().
+
+    """
+
+    error_value = ''
+
+    def __init__(self, command, writeable=False, func=None):
+        """Remember function to call."""
+        super().__init__(command, writeable)
+        self._func = func
+
+    def write(self, value):
+        """Write parameter value.
 
         @param value Data value.
-        @return Command string.
+        @param func Function to use to write the value.
 
         """
-        return '"{} CAN'.format(self._cmd)
+        raise ValueError('Raw parameters are read-only')
 
-    def read_val(self, value):
-        """Convert the data value read from the unit.
+    def read(self, func):
+        """Read parameter value.
 
-        @param value String value from the unit, or None.
-        @return String data value.
+        @param func Ignored.
+        @return String value.
 
         """
+        value = self._func()
         if value is None:
             value = ''
         return value
@@ -314,9 +350,7 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         """
         try:
             parameter = self.cmd_data[key]
-            read_cmd = parameter.read_cmd()
-            reply = self.action(read_cmd, expected=1)
-            reply = parameter.read_val(reply)
+            reply = parameter.read(self.action)
         except ArmError:
             # Sensor uses this, so we must always return a valid reading
             reply = parameter.error_value
@@ -331,8 +365,7 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         """
         try:
             parameter = self.cmd_data[key]
-            write_cmd = parameter.write_cmd(value)
-            self.action(write_cmd, delay=_SET_DELAY)
+            parameter.write(value, self.action)
         except ArmError:
             # This will make the unit fail the test
             raise tester.measure.MeasurementFailedError
