@@ -32,10 +32,12 @@ import tester
 
 # Command trigger
 _CMD_RUN = b'\r'
-# Command suffix (between command echo and command response)
+# Command suffix (between echo and response)
 _CMD_SUFFIX = b' -> '
-# Command prompt (after command response)
-_CMD_PROMPT = b'\r\n> '
+# Command prompt (after a response)
+_CMD_PROMPT1 = b'\r\n> '
+# Command prompt (before a response)
+_CMD_PROMPT2 = '> '
 # Delay after a value set command
 _SET_DELAY = 0.3
 
@@ -187,11 +189,13 @@ class ParameterHex(_Parameter):
 
     error_value = float('NaN')
 
-    def __init__(self, command, writeable=False, minimum=0, maximum=1000):
-        """Remember the scaling and data limits."""
+    def __init__(self, command, writeable=False,
+                 minimum=0, maximum=1000, mask=0xFFFFFFFF):
+        """Remember the data limits."""
         super().__init__(command, writeable)
         self._min = minimum
         self._max = maximum
+        self._mask = mask
 
     def write_cmd(self, value):
         """Generate the write command string.
@@ -216,7 +220,7 @@ class ParameterHex(_Parameter):
         """
         if value is None:
             value = '0'
-        return int(value, 16)
+        return int(value, 16) & self._mask
 
 
 class ParameterCAN(_Parameter):
@@ -366,11 +370,15 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
 
     def version(self):
         """Return software version."""
-        ver_cmd = _DIALECT['VERSION'][self._dialect]
-        bld_cmd = _DIALECT['BUILD'][self._dialect]
-        ver = self.action(ver_cmd, expected=1)
-        bld = self.action(bld_cmd, expected=1)
-        verbld = '.'.join((ver, bld))
+        if self._dialect == 0:
+            ver_cmd = _DIALECT['VERSION'][self._dialect]
+            bld_cmd = _DIALECT['BUILD'][self._dialect]
+            ver = self.action(ver_cmd, expected=1)
+            bld = self.action(bld_cmd, expected=1)
+            verbld = '.'.join((ver, bld))
+        else:
+            ver_cmd = _DIALECT['VERSION'][self._dialect]
+            verbld = self.action(ver_cmd, expected=1)
         self._logger.debug('Version is %s', verbld)
         return verbld
 
@@ -399,17 +407,23 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         """
         # Read until a timeout happens
         buf = self._read(1024)
+        self._logger.debug('<== %s', repr(buf.decode()))
         # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
         # Remove trailing _CMD_PROMPT
-        if buf.endswith(_CMD_PROMPT):
-            buf = buf[:-len(_CMD_PROMPT)]
+        if buf.endswith(_CMD_PROMPT1):
+            buf = buf[:-len(_CMD_PROMPT1)]
         if len(buf) > 0:
             response = buf.decode(errors='ignore').splitlines()
             # Remove any empty strings
             while '' in response:
                 response.remove('')
+            # Trim any leading command prompts
+            for i in range(len(response)):
+                resp = response[i]
+                if resp.startswith(_CMD_PROMPT2):
+                    response[i] = resp[len(_CMD_PROMPT2):]
             # Reduce a List of 1 string to just a string
             response_count = len(response)
             if response_count == 1:

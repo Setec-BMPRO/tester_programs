@@ -79,6 +79,9 @@ class Sensors():
             caption=translate('capSnEntry'))
         self.oCANID = share.trek2.Sensor(
             trek2, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
+        self.oCANBIND = share.trek2.Sensor(trek2, 'CAN_BIND')
+        self.oSwVer = share.trek2.Sensor(
+            trek2, 'SwVer', rdgtype=tester.sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensor."""
@@ -103,6 +106,8 @@ class Measurements():
         self.dmm_BkLghtOn = Measurement(limits['BkLghtOn'], sense.oBkLght)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
         self.trek2_can_id = Measurement(limits['CAN_ID'], sense.oCANID)
+        self.trek2_can_bind = Measurement(limits['CAN_BIND'], sense.oCANBIND)
+        self.trek2_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
 
 
 class SubTests():
