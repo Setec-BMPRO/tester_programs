@@ -4,6 +4,7 @@
 import os
 import inspect
 import logging
+import time
 
 import tester
 import share.isplpc
@@ -151,10 +152,6 @@ class Main(tester.TestSequence):
         if self._fifo:
             # Startup banner
             self._trek2.puts('Banner1\r\nBanner2\r\n')
-            # Going into Test Mode
-            self._trek2.putch('"STATUS XN?', preflush=1)
-            self._trek2.puts('0x00000000\r\n')
-            self._trek2.putch('$80000000 "STATUS XN!', preflush=1, postflush=1)
             # Unlock
             self._trek2.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
             # Set hardware ID
@@ -166,20 +163,25 @@ class Main(tester.TestSequence):
             self._trek2.putch('NV-DEFAULT', preflush=1, postflush=1)
             self._trek2.putch('NV-WRITE', preflush=1, postflush=1)
         self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
-        self._trek2.testmode(True)
         self._trek2.defaults(_HW_VER, sernum)
+        m.trek2_SwVer.measure()
 
     def _step_canbus(self):
         """Test the CAN Bus."""
         if self._fifo:
-            # CAN mode on
-            self._trek2.putch('"RF,ALL CAN', preflush=1, postflush=1)
-            # Going into Test Mode
+            # CAN bind ready
             self._trek2.putch('"STATUS XN?', preflush=1)
-            self._trek2.puts('0x80000000\r\n')
-            self._trek2.putch('$A0000000 "STATUS XN!', preflush=1, postflush=1)
-            # CAN query command & response
+            self._trek2.puts('0x10000000\r\n')
+            # Open CAN filter
+            self._trek2.putch('"RF,ALL CAN', preflush=1, postflush=1)
+            # Going into CAN Test Mode
+            self._trek2.putch('"STATUS XN?', preflush=1)
+            self._trek2.puts('0x10000000\r\n')
+            self._trek2.putch('$30000000 "STATUS XN!', preflush=1, postflush=1)
+            # CAN ID query command & the response
             self._trek2.putch('"TQQ,16,0 CAN', preflush=1)
-            self._trek2.puts('> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+            self._trek2.puts('RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+        m.trek2_can_bind.measure(timeout=5)
+        time.sleep(1)
         self._trek2.can_mode(True)
-        m.trek2_can_id.measure(timeout=10)
+        m.trek2_can_id.measure()
