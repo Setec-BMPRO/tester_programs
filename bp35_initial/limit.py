@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """BP35 Initial Program Limits."""
 
+# CAN Bus is operational if status bit 28 is set
+_CAN_BIND = 1 << 28
+
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('ACin', 0, 235.0, 245.0, None, None),
@@ -31,4 +34,6 @@ DATA = (
     ('ARM-SwVer', 0, None, None, r'^1\.0\.10902\.3156$', None),
     # Serial Number entry
     ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
+    ('CAN_ID', 0, None, None, r'^RRQ,16,0', None),
+    ('CAN_BIND', 0, _CAN_BIND - 0.5, _CAN_BIND + 0.5, None, None),
     )

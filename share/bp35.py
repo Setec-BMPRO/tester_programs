@@ -16,6 +16,10 @@ ParameterHex = share.arm_gen1.ParameterHex
 ParameterCAN = share.arm_gen1.ParameterCAN
 ParameterRaw = share.arm_gen1.ParameterRaw
 
+# CAN Test mode controlled by STATUS bit 29
+_CAN_ON = (1 << 29)
+_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
+
 
 class Console(ArmConsoleGen1):
 
@@ -75,28 +79,28 @@ class Console(ArmConsoleGen1):
             'LOAD_14': ParameterFloat('LOAD_SWITCH_CURRENT_14', scale=1000),
             'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
+            # Other items
+            'STATUS': ParameterHex('STATUS', writeable=True,
+                minimum=0, maximum=0xF0000000),
+            'CAN_BIND': ParameterHex('STATUS', writeable=True,
+                minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,32,0'),
             'SwVer': ParameterRaw('', func=self.version),
             }
 
     def manual_mode(self):
-        """Enter sleep mode.
-
-        Set output parameters.
-        Startup the PSU.
-
-        """
+        """Enter manual control mode."""
         self['MODE'] = 3
         time.sleep(1)
         self['VOUT'] = 12.8
         self['IOUT'] = 35.0
-        self['3V3_EN'] = True
-        self['CAN_EN'] = True
         self['VOUT_OV'] = 2
+
+    def power_on(self):
+        """Power ON the converter circuits."""
         self['PFC_EN'] = True
         time.sleep(1)
         self['DCDC_EN'] = True
-
 
     def load_set(self, set_on=True, loads=()):
         """Set the state of load outputs.
@@ -116,3 +120,14 @@ class Console(ArmConsoleGen1):
             bits = code << (load * 2)
             value = value & mask | bits
         self['LOAD_SET'] = value
+
+    def can_mode(self, state):
+        """Enable or disable CAN Communications Mode."""
+        self._logger.debug('CAN Mode Enabled> %s', state)
+        self.action('"RF,ALL CAN')
+        reply = self['STATUS']
+        if state:
+            value = _CAN_ON | reply
+        else:
+            value = _CAN_OFF & reply
+        self['STATUS'] = value

@@ -27,7 +27,7 @@ Implements the methods to expose ARM readings as Sensors.
 import logging
 import time
 
-import share.sim_serial
+from share.sim_serial import SimSerial
 import tester
 
 # Command trigger
@@ -295,7 +295,7 @@ class ParameterRaw(_Parameter):
         return value
 
 
-class ArmConsoleGen1(share.sim_serial.SimSerial):
+class ArmConsoleGen1(SimSerial):
 
     """Communications to First Generation ARM console."""
 
@@ -314,6 +314,13 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
         self.cmd_data = {}
         # Initialise the SimSerial()
         super().__init__(simulation=simulation, **kwargs)
+
+    def close(self):
+        """Close, and ignore any errors."""
+        try:
+            super().close()
+        except:
+            pass
 
     def setPort(self, port):
         """Set serial port.
@@ -367,6 +374,8 @@ class ArmConsoleGen1(share.sim_serial.SimSerial):
             parameter = self.cmd_data[key]
             parameter.write(value, self.action)
         except ArmError:
+# FIXME: This does not setup the test results properly.
+#   We should be sending a TestLimit fail signal...
             # This will make the unit fail the test
             raise tester.measure.MeasurementFailedError
 

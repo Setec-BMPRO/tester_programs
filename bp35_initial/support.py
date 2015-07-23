@@ -51,7 +51,7 @@ class LogicalDevices():
         # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
         # Switch off DC Sources
-        for dcs in (self.dcs_vcom, self.dcs_vbat, self.dcs_vaux):
+        for dcs in (self.dcs_vbat, self.dcs_vaux):
             dcs.output(0.0, False)
         # Switch off DC Loads
         for ld in (self.dcl_out, self.dcl_bat):
@@ -99,6 +99,9 @@ class Sensors():
             bp35, 'SwVer', rdgtype=tester.sensor.ReadingString)
         self.ARM_Fan = share.bp35.Sensor(bp35, 'FAN')
         self.ARM_Vout = share.bp35.Sensor(bp35, 'BUS_V')
+        self.ARM_CANID = share.bp35.Sensor(
+            bp35, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
+        self.ARM_CANBIND = share.bp35.Sensor(bp35, 'CAN_BIND')
 
         self.oOutOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_out, sensor=self.oVout,
@@ -169,6 +172,8 @@ class Measurements():
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
         self.arm_vout = Measurement(limits['ARM-Vout'], sense.ARM_Vout)
         self.arm_fan = Measurement(limits['ARM-Fan'], sense.ARM_Fan)
+        self.arm_can_id = Measurement(limits['CAN_ID'], sense.ARM_CANID)
+        self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.ARM_CANBIND)
 
 
 class SubTests():
@@ -185,27 +190,19 @@ class SubTests():
         d = logical_devices
         m = measurements
 
-        # PowerUp:
-        rly1 = RelaySubStep(((d.rla_vbat, False), ))
-        dcs1 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr1 = MeasureSubStep((m.dmm_acin, m.dmm_vbus, m.dmm_12Vpri,
-                               m.dmm_5Vusb, m.dmm_3V3, m.dmm_15Vs,
-                               m.dmm_vout, m.dmm_vbat), timeout=10)
-        self.pwr_up = Step((rly1, dcs1, acs1, msr1))
-
         # OCP:
         bin1 = BinarySubStep(((d.dcl_out, 0.0, 30.0, 5.0), ), output=True)
         msr1 = MeasureSubStep((m.ramp_outOCP, ))
         ld2 = LoadSubStep(((d.dcl_out, 0.0), ), )
-        dcs1 = DcSubStep(setting=((d.dcs_vbat, 12.8), ))    # Simulate a battery
+        dcs1 = DcSubStep(setting=((d.dcs_vbat, 12.8), ))  # Simulate a battery
         rly1 = RelaySubStep(((d.rla_vbat, True), ))
         msr2 = MeasureSubStep((m.dmm_vbat, ), timeout=5)
         bin2 = BinarySubStep(((d.dcl_bat, 0.0, 18.0, 5.0), ), output=True)
         msr3 = MeasureSubStep((m.ramp_batOCP, ))
         rly2 = RelaySubStep(((d.rla_vbat, False), ))
         dcs2 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
-        self.ocp = Step((bin1, msr1, ld2, dcs1, rly1, msr2, bin2, msr3, rly2, dcs2))
+        self.ocp = Step(
+            (bin1, msr1, ld2, dcs1, rly1, msr2, bin2, msr3, rly2, dcs2))
 
         # Shutdown: Shutdown, recovery, check load switch.
         ld1 = LoadSubStep(((d.dcl_out, 39.0), ), output=True)

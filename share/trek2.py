@@ -20,7 +20,7 @@ _TEST_ON = (1 << 31)
 _TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
 # CAN Test mode controlled by STATUS bit 29
 _CAN_ON = (1 << 29)
-_CAN_OFF = ~_TEST_ON & 0xFFFFFFFF
+_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 
 
 class Console(ArmConsoleGen1):
@@ -31,8 +31,10 @@ class Console(ArmConsoleGen1):
         """Create console instance."""
         super().__init__(dialect=1, simulation=simulation, **kwargs)
         self.cmd_data = {
+            # Read-Write values
             'BACKLIGHT': ParameterFloat('BACKLIGHT', writeable=True,
                 minimum=0, maximum=100, scale=1),
+            # Other items
             'STATUS': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),
             'CAN_BIND': ParameterHex('STATUS', writeable=True,

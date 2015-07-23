@@ -9,7 +9,7 @@ import time
 import tester
 import share.isplpc
 import share.trek2
-import share.sim_serial
+from share.sim_serial import SimSerial
 from . import support
 from . import limit
 
@@ -62,38 +62,25 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         self._trek2 = share.trek2.Console(
-            simulation=self._fifo,
-            baudrate=115200, timeout=0.1)
+            simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
         self._trek2.setPort(_ARM_PORT)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits, self._trek2)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        try:
-            self._trek2.close()
-        except:
-            pass
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        self._trek2.close()
+        global m, d, s, t
+        m = d = s = t = None
 
     def safety(self, run=True):
         """Make the unit safe after a test."""
@@ -124,7 +111,7 @@ class Main(tester.TestSequence):
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
-            ser = share.sim_serial.SimSerial(port=_ARM_PORT, baudrate=115200)
+            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
             ser.flush()
             # Program the device (LPC1549 has internal CRC for verification)
             pgm = share.isplpc.Programmer(
@@ -165,7 +152,7 @@ class Main(tester.TestSequence):
             # Software version
             self._trek2.putch('SW-VERSION?', preflush=1)
             self._trek2.puts('1.0.10892.112\r\n')
-        self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
+        self._trek2.action(None, delay=0.5, expected=2)   # Flush banner
         self._trek2.defaults(_HW_VER, sernum)
         m.trek2_SwVer.measure()
 
@@ -185,6 +172,6 @@ class Main(tester.TestSequence):
             self._trek2.putch('"TQQ,16,0 CAN', preflush=1)
             self._trek2.puts('> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
         m.trek2_can_bind.measure(timeout=5)
-        time.sleep(1)
+        time.sleep(1)   # Let junk CAN messages come in
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()
