@@ -95,6 +95,11 @@ class Sensors():
         self.o5Vusb = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.o3V3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self.ARM_SwVer = share.bp35.Sensor(
+            bp35, 'SwVer', rdgtype=tester.sensor.ReadingString)
+        self.ARM_Fan = share.bp35.Sensor(bp35, 'FAN')
+        self.ARM_Vout = share.bp35.Sensor(bp35, 'VOUT')
+
         self.oOutOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_out, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
@@ -116,8 +121,6 @@ class Sensors():
         self.oSnEntry = sensor.DataEntry(
             message=translate('msgSnEntry'),
             caption=translate('capSnEntry'))
-        self.oSwVer = share.bp35.Sensor(
-            bp35, 'SwVer', rdgtype=tester.sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -163,7 +166,9 @@ class Measurements():
         self.ui_YesNoRed = Measurement(limits['Notify'], sense.oYesNoRed)
         self.ui_YesNoOrange = Measurement(limits['Notify'], sense.oYesNoOrange)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
-        self.bp35_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
+        self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
+        self.arm_vout = Measurement(limits['ARM-Vout'], sense.ARM_Vout)
+        self.arm_fan = Measurement(limits['ARM-Fan'], sense.ARM_Fan)
 
 
 class SubTests():

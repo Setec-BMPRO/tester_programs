@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """BP35 ARM processor console driver."""
 
+import time
+
 import share.arm_gen1
 
 # Expose arm_gen1.Sensor as bp35.Sensor
@@ -76,6 +78,22 @@ class Console(ArmConsoleGen1):
             'CAN_ID': ParameterCAN('TQQ,32,0'),
             'SwVer': ParameterRaw('', func=self.version),
             }
+
+    def manual_mode(self):
+        """Enter sleep mode.
+
+        Set output parameters.
+        Startup the PSU.
+
+        """
+        self['MODE'] = 3
+        time.sleep(1)
+        self['VOUT'] = 12.8
+        self['IOUT'] = 35.0
+        self['PFC_EN'] = True
+        time.sleep(1)
+        self['DCDC_EN'] = True
+
 
     def load_set(self, set_on=True, loads=()):
         """Set the state of load outputs.

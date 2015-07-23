@@ -57,8 +57,9 @@ class Main(tester.TestSequence):
             ('PowerUp', self._step_powerup, None, True),
             ('TestArm', self._step_test_arm, None, True),
             ('TestUnit', self._step_test_unit, None, True),
+            ('Load', self._step_load, None, True),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, True),
+            ('OCP', self._step_ocp, None, False),
             ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -194,7 +195,6 @@ class Main(tester.TestSequence):
             ((s.oACin, 240.0), (s.oVbus, 415.0), (s.o12Vpri, 12.5),
              (s.o5Vusb, 5.0), (s.o3V3, 3.3), (s.o15Vs, 12.5),
              (s.oVout, 12.8), (s.oVbat, 12.8),
-             (s.oVout, 12.8), (s.oVbat, 12.8),
              (s.oVbus, (415.0, 415.0), )))
         t.pwr_up.run()
         _PFC_STABLE = 0.05
@@ -227,7 +227,7 @@ class Main(tester.TestSequence):
             self._bp35.puts('1.0.10902.3156\r\n')
         self._bp35.action(None, expected=2)    # Flush banner (2 lines)
         self._bp35.defaults(_HW_VER, sernum)
-        m.bp35_SwVer.measure()
+        m.arm_SwVer.measure()
 
     def _step_test_unit(self):
         """Test functions of the unit.
@@ -235,26 +235,43 @@ class Main(tester.TestSequence):
         Enter sleep mode.
 
         """
-        self.fifo_push(((s.oFan, (0, 12.0)), (s.oVout, 12.8), ))
+        self.fifo_push(((s.oVout, 12.8), (s.oFan, (0, 12.0)), ))
         if self._fifo:
             self._bp35.putch('3 "SLEEPMODE XN!', preflush=1, postflush=1)
-            self._bp35.putch('1 "PFC_ENABLE XN!', preflush=1, postflush=1)
-            self._bp35.putch('1 "CONVERTER_ENABLE XN!', preflush=1, postflush=1)
             self._bp35.putch('12800 "CONVERTER_VOLTS_SETPOINT XN!',
                              preflush=1, postflush=1)
-        self._bp35['MODE'] = 3
-        self._bp35['PFC_EN'] = True
-        time.sleep(1)
-        self._bp35['DCDC_EN'] = True
-        time.sleep(1)
-        self._bp35['VOUT'] = 12.8
-        self._bp35['IOUT'] = 35.0
-        MeasureGroup(
-            (m.dmm_vout, m.dmm_fanOff, ), timeout=5)
+            self._bp35.putch('35000 "CONVERTER_CURRENT_SETPOINT XN!',
+                             preflush=1, postflush=1)
+            self._bp35.putch('1 "PFC_ENABLE XN!', preflush=1, postflush=1)
+            self._bp35.putch('1 "CONVERTER_ENABLE XN!', preflush=1, postflush=1)
+        self._bp35.manual_mode()
+        MeasureGroup((m.dmm_vout, m.dmm_fanOff, ), timeout=5)
         if self._fifo:
+            self._bp35.putch('"CONVERTER_VOLTS_SETPOINT XN?', preflush=1)
+            self._bp35.puts('12800\r\n')
+            self._bp35.putch('"FAN_SPEED XN?', preflush=1)
+            self._bp35.puts('500\r\n')
             self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
+        m.arm_vout.measure()
+        m.arm_fan.measure()
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
+
+    def _step_load(self):
+        """Test the load outputs."""
+        self.fifo_push(((s.oVout, (0.0, ) + (12.8, ) * 14),  ))
+        if self._fifo:
+            self._bp35.putch('178956970 "LOAD_SWITCH_STATE XN!',
+                            preflush=1, postflush=1)
+            self._bp35.putch('178956969 "LOAD_SWITCH_STATE XN!',
+                            preflush=1, postflush=1)
+            self._bp35.putch('178956966 "LOAD_SWITCH_STATE XN!',
+                            preflush=1, postflush=1)
+        self._bp35.load_set(set_on=True, loads=())
+        m.dmm_voutOff.measure(timeout=5)
+        for ld in range(14):
+            self._bp35.load_set(set_on=True, loads=(ld, ))
+            m.dmm_vout.measure(timeout=5)
 
     def _step_canbus(self):
         """Test the Can Bus."""
