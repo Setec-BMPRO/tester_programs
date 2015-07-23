@@ -38,9 +38,9 @@ class Console(ArmConsoleGen1):
             'CAN_EN': ParameterBoolean('CAN_BUS_POWER_ENABLE', writeable=True),
             '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
             'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
-            'LOAD_SET': ParameterFloat('LOAD_SWITCH_STATE', writeable=True,
+            'LOAD_SET': ParameterFloat('LOAD_SWITCH_STATE_0', writeable=True,
                 minimum=0, maximum=0x0FFFFFFF, scale=1),
-            'BUS_OV': ParameterFloat('CONVERTER_OVERVOLT', writeable=True,
+            'VOUT_OV': ParameterFloat('CONVERTER_OVERVOLT', writeable=True,
                 minimum=0, maximum=2, scale=1),
             'MODE': ParameterFloat('SLEEPMODE', writeable=True,
                 minimum=0, maximum=3, scale=1),
@@ -90,6 +90,9 @@ class Console(ArmConsoleGen1):
         time.sleep(1)
         self['VOUT'] = 12.8
         self['IOUT'] = 35.0
+        self['3V3_EN'] = True
+        self['CAN_EN'] = True
+        self['VOUT_OV'] = 2
         self['PFC_EN'] = True
         time.sleep(1)
         self['DCDC_EN'] = True

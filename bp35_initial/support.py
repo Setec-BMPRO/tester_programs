@@ -98,7 +98,7 @@ class Sensors():
         self.ARM_SwVer = share.bp35.Sensor(
             bp35, 'SwVer', rdgtype=tester.sensor.ReadingString)
         self.ARM_Fan = share.bp35.Sensor(bp35, 'FAN')
-        self.ARM_Vout = share.bp35.Sensor(bp35, 'VOUT')
+        self.ARM_Vout = share.bp35.Sensor(bp35, 'BUS_V')
 
         self.oOutOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_out, sensor=self.oVout,

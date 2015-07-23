@@ -109,11 +109,8 @@ class Main(tester.TestSequence):
         if run:
             d.acsource.output(voltage=0.0, output=False)
             d.dcl_out.output(2.0)
-            if self._fifo:
-                d.discharge.pulse(0.1)
-            else:
-                time.sleep(1)
-                d.discharge.pulse()
+            time.sleep(1)
+            d.discharge.pulse()
             # Reset Logical Devices
             d.reset()
 
@@ -169,6 +166,8 @@ class Main(tester.TestSequence):
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
+        # Reset micro.
+        d.rla_reset.pulse(0.1)
 
     def _step_program_pic(self):
         """Program the dsPIC device.
@@ -207,11 +206,11 @@ class Main(tester.TestSequence):
 #        sernum = m.ui_SnEntry.measure()[1][0]
         sernum = dummy_sn
         self._bp35.open()
-        # Reset micro.
-        d.rla_reset.pulse(0.1)
+#        # Reset micro.
+#        d.rla_reset.pulse(0.1)
         if self._fifo:
-            # Startup banner
-            self._bp35.puts('Banner1\r\nBanner2\r\n')
+#            # Startup banner
+#            self._bp35.puts('Banner1\r\nBanner2\r\n')
             # Unlock
             self._bp35.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
             # Set hardware ID
@@ -225,7 +224,8 @@ class Main(tester.TestSequence):
             # Version queries
             self._bp35.putch('SW-VERSION?', preflush=1)
             self._bp35.puts('1.0.10902.3156\r\n')
-        self._bp35.action(None, expected=2)    # Flush banner (2 lines)
+#        time.sleep(0.5)
+#        self._bp35.action(None, expected=2)    # Flush banner (2 lines)
         self._bp35.defaults(_HW_VER, sernum)
         m.arm_SwVer.measure()
 
@@ -245,15 +245,15 @@ class Main(tester.TestSequence):
             self._bp35.putch('1 "PFC_ENABLE XN!', preflush=1, postflush=1)
             self._bp35.putch('1 "CONVERTER_ENABLE XN!', preflush=1, postflush=1)
         self._bp35.manual_mode()
-        MeasureGroup((m.dmm_vout, m.dmm_fanOff, ), timeout=5)
         if self._fifo:
-            self._bp35.putch('"CONVERTER_VOLTS_SETPOINT XN?', preflush=1)
+            self._bp35.putch('"BUS_V XN?', preflush=1)
             self._bp35.puts('12800\r\n')
             self._bp35.putch('"FAN_SPEED XN?', preflush=1)
             self._bp35.puts('500\r\n')
             self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
-        m.arm_vout.measure()
+        m.arm_vout.measure(timeout=5)
         m.arm_fan.measure()
+        m.dmm_fanOff.measure(timeout=5)
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 

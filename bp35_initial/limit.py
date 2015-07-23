@@ -15,7 +15,7 @@ DATA = (
     ('VoutOff', 0, 0.5, None, None, None),
     ('Vbat', 0, 12.6, 13.0, None, None),
     ('3V3', 0, 3.25, 3.35, None, None),
-    ('FanOn', 0, 11.5, 12.5, None, None),
+    ('FanOn', 0, 12.0, 13.0, None, None),
     ('FanOff', 0, 0.5, None, None, None),
     ('3V3prog', 0, 3.2, 3.4, None, None),
     ('OutOCP', 0, 32.0, 35.0, None, None),
