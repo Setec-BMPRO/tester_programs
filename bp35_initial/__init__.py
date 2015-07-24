@@ -56,8 +56,8 @@ class Main(tester.TestSequence):
             ('ProgramARM', self._step_program_arm, None, False),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
-            ('TestUnit', self._step_test_unit, None, True),
             ('Load', self._step_load, None, True),
+            ('TestUnit', self._step_test_unit, None, True),
             ('CanBus', self._step_canbus, None, False),
             ('OCP', self._step_ocp, None, False),
             ('ShutDown', self._step_shutdown, None, False),
@@ -251,24 +251,6 @@ class Main(tester.TestSequence):
         _PFC_STABLE = 0.05
         m.dmm_vbus.stable(_PFC_STABLE)
 
-    def _step_test_unit(self):
-        """Test functions of the unit."""
-        self.fifo_push(((s.oFan, (0, 12.0)), ))
-        if self._fifo:
-            # Vout measure
-            self._bp35.putch('"BUS_VOLTS XN?', preflush=1)
-            self._bp35.puts('12800\r\n')
-            # Fan speed read & set
-            self._bp35.putch('"FAN_SPEED XN?', preflush=1)
-            self._bp35.puts('500\r\n')
-            self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
-        m.arm_vout.measure(timeout=5)
-        m.arm_fan.measure()
-        m.dmm_fanOff.measure(timeout=5)
-        self._bp35['FAN'] = 100
-        m.dmm_fanOn.measure(timeout=5)
-# FIXME: Add more measurements here...
-
     def _step_load(self):
         """Test the load output switches.
 
@@ -300,6 +282,33 @@ class Main(tester.TestSequence):
             m.dmm_vout.measure(timeout=2)
         # All outputs ON
         self._bp35.load_set(set_on=False, loads=())
+
+    def _step_test_unit(self):
+        """Test functions of the unit."""
+        self.fifo_push(((s.oFan, (0, 12.0)), ))
+        if self._fifo:
+            # Vout measure
+            self._bp35.putch('"BUS_VOLTS XN?', preflush=1)
+            self._bp35.puts('12800\r\n')
+            # Fan speed read & set
+            self._bp35.putch('"FAN_SPEED XN?', preflush=1)
+            self._bp35.puts('500\r\n')
+            self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
+            self._bp35.putch('"LOAD_SWITCH_CURRENT_1 XN?', preflush=1)
+            self._bp35.puts('2000\r\n')
+        m.arm_vout.measure(timeout=5)
+        m.arm_fan.measure()
+        m.dmm_fanOff.measure(timeout=5)
+        self._bp35['FAN'] = 100
+        m.dmm_fanOn.measure(timeout=5)
+        d.dcl_out.output(28.0, output=True)
+        d.dcl_bat.output(4.0, output=True)
+        meas_curr = (m.arm_ld1I, m.arm_ld2I, m.arm_ld3I, m.arm_ld4I, m.arm_ld5I,
+                    m.arm_ld6I, m.arm_ld7I, m.arm_ld8I, m.arm_ld9I, m.arm_ld10I,
+                    m.arm_ld11I, m.arm_ld12I, m.arm_ld13I, m.arm_ld14I)
+        for meas in meas_curr:
+            meas.measure()
+        m.arm_battI.measure()
 
     def _step_canbus(self):
         """Test the Can Bus."""

@@ -31,6 +31,8 @@ DATA = (
     # Data reported by the ARM
     ('ARM-Vout', 0, 12.7, 12.9, None, None),
     ('ARM-Fan', 0, 0, 100, None, None),
+    ('ARM-LoadI', 0, 1.9, 2.1, None, None),
+    ('ARM-BattI', 0, 3.9, 4.1, None, None),
     ('ARM-SwVer', 0, None, None, r'^1\.0\.10902\.3156$', None),
     # Serial Number entry
     ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
