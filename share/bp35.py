@@ -16,9 +16,10 @@ ParameterHex = share.arm_gen1.ParameterHex
 ParameterCAN = share.arm_gen1.ParameterCAN
 ParameterRaw = share.arm_gen1.ParameterRaw
 
-# CAN Test mode controlled by STATUS bit 29
-_CAN_ON = (1 << 29)
-_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
+# BP35 doesn't have the status bits yet
+## CAN Test mode controlled by STATUS bit 29
+#_CAN_ON = (1 << 29)
+#_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 
 
 class Console(ArmConsoleGen1):
@@ -36,8 +37,8 @@ class Console(ArmConsoleGen1):
                 minimum=0.0, maximum=14.0, scale=1000),
             'IOUT': ParameterFloat('CONVERTER_CURRENT_SETPOINT',
                 writeable=True, minimum=15.0, maximum=35.0, scale=1000),
-            'LOAD_DIS': ParameterFloat('LOAD_SWITCHES_INHIBITED', writeable=True,
-                minimum=0, maximum=1, scale=1),
+            'LOAD_DIS': ParameterFloat('LOAD_SWITCHES_INHIBITED',
+                writeable=True, minimum=0, maximum=1, scale=1),
             'FAN': ParameterFloat('FAN_SPEED', writeable=True,
                 minimum=0, maximum=100, scale=10),
             'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
@@ -65,20 +66,6 @@ class Console(ArmConsoleGen1):
             'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
             'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
             'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
-            'LOAD_1': ParameterFloat('LOAD_SWITCH_CURRENT_1', scale=1000),
-            'LOAD_2': ParameterFloat('LOAD_SWITCH_CURRENT_2', scale=1000),
-            'LOAD_3': ParameterFloat('LOAD_SWITCH_CURRENT_3', scale=1000),
-            'LOAD_4': ParameterFloat('LOAD_SWITCH_CURRENT_4', scale=1000),
-            'LOAD_5': ParameterFloat('LOAD_SWITCH_CURRENT_5', scale=1000),
-            'LOAD_6': ParameterFloat('LOAD_SWITCH_CURRENT_6', scale=1000),
-            'LOAD_7': ParameterFloat('LOAD_SWITCH_CURRENT_7', scale=1000),
-            'LOAD_8': ParameterFloat('LOAD_SWITCH_CURRENT_8', scale=1000),
-            'LOAD_9': ParameterFloat('LOAD_SWITCH_CURRENT_9', scale=1000),
-            'LOAD_10': ParameterFloat('LOAD_SWITCH_CURRENT_10', scale=1000),
-            'LOAD_11': ParameterFloat('LOAD_SWITCH_CURRENT_11', scale=1000),
-            'LOAD_12': ParameterFloat('LOAD_SWITCH_CURRENT_12', scale=1000),
-            'LOAD_13': ParameterFloat('LOAD_SWITCH_CURRENT_13', scale=1000),
-            'LOAD_14': ParameterFloat('LOAD_SWITCH_CURRENT_14', scale=1000),
             'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
             # Other items
@@ -89,6 +76,10 @@ class Console(ArmConsoleGen1):
             'CAN_ID': ParameterCAN('TQQ,32,0'),
             'SwVer': ParameterRaw('', func=self.version),
             }
+        # Add in the 14 load switch current readings
+        for i in range(1, 15):
+            self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
+                'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
 
     def manual_mode(self):
         """Enter manual control mode."""
@@ -129,9 +120,10 @@ class Console(ArmConsoleGen1):
         """Enable or disable CAN Communications Mode."""
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
-        reply = self['STATUS']
-        if state:
-            value = _CAN_ON | reply
-        else:
-            value = _CAN_OFF & reply
-        self['STATUS'] = value
+# BP35 doesn't have the status bits yet
+#        reply = self['STATUS']
+#        if state:
+#            value = _CAN_ON | reply
+#        else:
+#            value = _CAN_OFF & reply
+#        self['STATUS'] = value

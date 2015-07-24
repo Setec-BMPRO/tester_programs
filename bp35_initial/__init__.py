@@ -259,9 +259,9 @@ class Main(tester.TestSequence):
         """Test the Can Bus."""
         self.fifo_push(
             ((s.ARM_CANBIND, 0x10000000), (s.ARM_CANID, ('RRQ,16,0,7', )), ))
-        m.arm_can_bind.measure(timeout=5)
-        time.sleep(1)
-        self._bp35.puts('0x10000000\r\n')   # Going into CAN Test Mode
+#        m.arm_can_bind.measure(timeout=5)
+#        time.sleep(1)
+#        self._bp35.puts('0x10000000\r\n')   # Going into CAN Test Mode
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
 
