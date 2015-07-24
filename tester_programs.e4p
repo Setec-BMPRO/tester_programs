@@ -2,6 +2,7 @@
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
 <!-- Saved: 2015-07-24, 14:49:54 -->
+<!-- Saved: 2015-07-24, 14:23:38 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -221,6 +222,7 @@
     <Other>sx750_initial/sx750_pic_2.hex</Other>
     <Other>bp35_initial/bp35sr_1.hex</Other>
     <Other>bp35_initial/bp35_1.0.3156.bin</Other>
+    <Other>trek2_initial/Trek2_1.0.110.bin</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>

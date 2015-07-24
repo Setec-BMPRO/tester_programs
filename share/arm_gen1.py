@@ -117,7 +117,7 @@ class _Parameter():
 
         """
         read_cmd = '"{} XN?'.format(self._cmd)
-        return func(read_cmd)
+        return func(read_cmd, expected=1)
 
 
 class ParameterBoolean(_Parameter):
@@ -251,7 +251,7 @@ class ParameterCAN(_Parameter):
 
         """
         can_cmd = '"{} CAN'.format(self._cmd)
-        value = func(can_cmd)
+        value = func(can_cmd, expected=1)
         if value is None:
             value = ''
         return value
@@ -478,6 +478,7 @@ class ArmConsoleGen1(SimSerial):
         """
         # Read until a timeout happens
         buf = self._read(1024)
+        self._logger.debug('<== %s', buf)
         # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
