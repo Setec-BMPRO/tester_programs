@@ -17,6 +17,6 @@ DATA = (
     ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
     ('CAN_ID', 0, None, None, r'^RRQ,16,0', None),
     ('CAN_BIND', 0, _CAN_BIND - 0.5, _CAN_BIND + 0.5, None, None),
-    ('SwVer', 0, None, None, r'^1\.0\.10892\.112$', None),
+    ('SwVer', 0, None, None, r'^1\.0\.10892\.110$', None),
     ('Notify', 2, None, None, None, True),
     )

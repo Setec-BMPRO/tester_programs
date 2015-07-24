@@ -23,7 +23,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
 # Software image filename
-_ARM_BIN = 'Trek2_1.0.102.bin'
+_ARM_BIN = 'Trek2_1.0.110.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, '')
 
@@ -136,42 +136,18 @@ class Main(tester.TestSequence):
         self._trek2.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        if self._fifo:
-            # Startup banner
-            self._trek2.puts('Banner1\r\nBanner2\r\n')
-            # Unlock
-            self._trek2.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
-            # Set hardware ID
-            self._trek2.putch('1 0 " SET-HW-VER', preflush=1, postflush=1)
-            # Set software ID
-            self._trek2.putch('"{} SET-SERIAL-ID'.format(dummy_sn),
-                preflush=1, postflush=1)
-            # Set & Write defaults
-            self._trek2.putch('NV-DEFAULT', preflush=1, postflush=1)
-            self._trek2.putch('NV-WRITE', preflush=1, postflush=1)
-            # Software version
-            self._trek2.putch('SW-VERSION?', preflush=1)
-            self._trek2.puts('1.0.10892.112\r\n')
+        self._trek2.puts('Banner1\r\nBanner2\r\n')
         self._trek2.action(None, delay=0.5, expected=2)   # Flush banner
         self._trek2.defaults(_HW_VER, sernum)
+        self._trek2.puts('1.0.10892.112\r\n')
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):
         """Test the CAN Bus."""
-        if self._fifo:
-            # CAN bind ready
-            self._trek2.putch('"STATUS XN?', preflush=1)
-            self._trek2.puts('0x10000000\r\n')
-            # Open CAN filter
-            self._trek2.putch('"RF,ALL CAN', preflush=1, postflush=1)
-            # Going into CAN Test Mode
-            self._trek2.putch('"STATUS XN?', preflush=1)
-            self._trek2.puts('0x10000000\r\n')
-            self._trek2.putch('$30000000 "STATUS XN!', preflush=1, postflush=1)
-            # CAN ID query command & the response
-            self._trek2.putch('"TQQ,16,0 CAN', preflush=1)
-            self._trek2.puts('> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+        self.fifo_push(
+            ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
         m.trek2_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
+        self._trek2.puts('0x10000000\r\n')      # Going into CAN Test Mode
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()
