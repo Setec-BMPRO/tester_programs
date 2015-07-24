@@ -88,10 +88,10 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        # Remove power from fixture circuits.
-        d.dcs_vcom.output(0, False)
         self._bp35.close()
         global m, d, s, t
+        # Remove power from fixture circuits.
+        d.dcs_vcom.output(0, False)
         m = d = s = t = None
 
     def safety(self, run=True):
@@ -119,14 +119,14 @@ class Main(tester.TestSequence):
         self.fifo_push(
             ((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
              (s.osw3, 100.0), (s.osw4, 100.0),
-             (s.oVbat, 12.8), (s.o3V3, 3.3),))
+             (s.oVbat, 12.0), (s.o3V3, 3.3),))
         MeasureGroup(
             (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
              timeout=5)
         # Apply DC Source to Battery terminals
-        d.dcs_vbat.output(12.8, True)
+        d.dcs_vbat.output(12.4, True)
         d.rla_vbat.set_on()
-        MeasureGroup((m.dmm_vbat, m.dmm_3V3, ), timeout=5)
+        MeasureGroup((m.dmm_vbatin, m.dmm_3V3, ), timeout=5)
 
     def _step_program_pic(self):
         """Program the dsPIC device.
@@ -194,35 +194,10 @@ class Main(tester.TestSequence):
         self._bp35.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        if self._fifo:
-            # Startup banner
-            self._bp35.puts('Banner1\r\nBanner2\r\n')
-            # Unlock
-            self._bp35.putch('$DEADBEA7 UNLOCK', preflush=1, postflush=1)
-            # Set hardware ID
-            self._bp35.putch('1 0 " SET-HW-VER', preflush=1, postflush=1)
-            # Set software ID
-            self._bp35.putch('"{} SET-SERIAL-ID'.format(dummy_sn),
-                preflush=1, postflush=1)
-            # Set defaults
-            self._bp35.putch('NV-DEFAULT', preflush=1, postflush=1)
-            self._bp35.putch('NV-WRITE', preflush=1, postflush=1)
-            # Version queries
-            self._bp35.putch('SW-VERSION?', preflush=1)
-            self._bp35.puts('1.0.10902.3156\r\n')
-            # Manual control mode
-            self._bp35.putch('3 "SLEEPMODE XN!', preflush=1, postflush=1)
-            # Vout setting
-            self._bp35.putch('12800 "CONVERTER_VOLTS_SETPOINT XN!',
-                preflush=1, postflush=1)
-            # OCP setting
-            self._bp35.putch('35000 "CONVERTER_CURRENT_SETPOINT XN!',
-                preflush=1, postflush=1)
-            # Reset OVP latch
-            self._bp35.putch('2 "CONVERTER_OVERVOLT XN!',
-                preflush=1, postflush=1)
+        self._bp35.puts('Banner1\r\nBanner2\r\n')
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
         self._bp35.defaults(_HW_VER, sernum)
+        self._bp35.puts('1.0.10902.3156\r\n')
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
 
@@ -230,38 +205,27 @@ class Main(tester.TestSequence):
         """Power-Up the Unit with 240Vac."""
         self.fifo_push(
             ((s.oACin, 240.0), (s.o12Vpri, 12.5), (s.o5Vusb, 5.0),
-             (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.oVout, 12.8), (s.oVbat, 12.8),
-             (s.oVbus, (415.0, 415.0), )))
-        if self._fifo:
-            self._bp35.putch('1 "PFC_ENABLE XN!', preflush=1, postflush=1)
-            self._bp35.putch('1 "CONVERTER_ENABLE XN!', preflush=1, postflush=1)
+             (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.oVbat, 12.8),
+             (s.oVpfc, (415.0, 415.0), )))
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         MeasureGroup(
             (m.dmm_acin, m.dmm_12Vpri, m.dmm_5Vusb, ), timeout=10)
         # Enable PFC & DCDC converters
         self._bp35.power_on()
+        # Wait for PFC overshoot to settle
+        _PFC_STABLE = 0.05
+        m.dmm_vpfc.stable(_PFC_STABLE)
         # Remove injected Battery voltage
         d.rla_vbat.set_off()
         d.dcs_vbat.output(0.0, output=False)
         # Is it all still running?
-        MeasureGroup(
-            (m.dmm_3V3, m.dmm_15Vs, m.dmm_vout, m.dmm_vbat), timeout=10)
-        # Wait for PFC overshoot to settle
-        _PFC_STABLE = 0.05
-        m.dmm_vbus.stable(_PFC_STABLE)
+        MeasureGroup((m.dmm_3V3, m.dmm_15Vs, m.dmm_vbat), timeout=10)
 
     def _step_test_unit(self):
         """Test functions of the unit."""
-        self.fifo_push(((s.oFan, (0, 12.0)), ))
-        if self._fifo:
-            # Vout measure
-            self._bp35.putch('"BUS_VOLTS XN?', preflush=1)
-            self._bp35.puts('12800\r\n')
-            # Fan speed read & set
-            self._bp35.putch('"FAN_SPEED XN?', preflush=1)
-            self._bp35.puts('500\r\n')
-            self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
+        self.fifo_push(
+            ((s.ARM_Vout, 12.8), (s.ARM_Fan, 50), (s.oFan, (0, 12.0)), ))
         m.arm_vout.measure(timeout=5)
         m.arm_fan.measure()
         m.dmm_fanOff.measure(timeout=5)
@@ -277,20 +241,6 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(((s.oVout, (0.0, ) + (12.8, ) * 14),  ))
-        if self._fifo:
-            # All OFF
-            self._bp35.putch('178956970 "LOAD_SWITCH_STATE_0 XN!',
-                preflush=1, postflush=1)
-            # One at a time ON
-            for load in range(14):
-                mask = ~(0x3 << (load * 2)) & 0xFFFFFFFF
-                bits = 0x1 << (load * 2)
-                value = 0x0AAAAAAA & mask | bits
-                self._bp35.putch('{} "LOAD_SWITCH_STATE_0 XN!'.format(value),
-                    preflush=1, postflush=1)
-            # All ON
-            self._bp35.putch('89478485 "LOAD_SWITCH_STATE_0 XN!',
-                preflush=1, postflush=1)
         # All outputs OFF
         self._bp35.load_set(set_on=True, loads=())
         m.dmm_voutOff.measure(timeout=2)
@@ -303,21 +253,11 @@ class Main(tester.TestSequence):
 
     def _step_canbus(self):
         """Test the Can Bus."""
-        if self._fifo:
-            # CAN bind ready
-            self._bp35.putch('"STATUS XN?', preflush=1)
-            self._bp35.puts('0x10000000\r\n')
-            # Open CAN filter
-            self._bp35.putch('"RF,ALL CAN', preflush=1, postflush=1)
-            # Going into CAN Test Mode
-            self._bp35.putch('"STATUS XN?', preflush=1)
-            self._bp35.puts('0x10000000\r\n')
-            self._bp35.putch('$30000000 "STATUS XN!', preflush=1, postflush=1)
-            # CAN ID query command & the response
-            self._bp35.putch('"TQQ,16,0 CAN', preflush=1)
-            self._bp35.puts('> RRQ,16,0,7,0,0,0,0,0,0,0\r\n')
+        self.fifo_push(
+            ((s.ARM_CANBIND, 0x10000000), (s.ARM_CANID, ('RRQ,16,0,7', )), ))
         m.arm_can_bind.measure(timeout=5)
         time.sleep(1)
+        self._bp35.puts('0x10000000\r\n')   # Going into CAN Test Mode
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
 

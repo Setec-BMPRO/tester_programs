@@ -25,7 +25,7 @@ class _Simulator():
         if self.simulation:
             kwargs['port'] = None   # Prevent a real port from being opened
         # Queue to hold data to be read by read()
-        self._in_queue = queue.Queue()
+        self._in_queue = queue.PriorityQueue()
         # Queue to hold data written by write()
         self._out_queue = queue.Queue()
         # Control of read() enable
@@ -34,12 +34,13 @@ class _Simulator():
         # Initialise the serial.Serial
         super().__init__(**kwargs)
 
-    def puts(self, string_data, preflush=0, postflush=0):
+    def puts(self, string_data, preflush=0, postflush=0, priority=10):
         """Put a string into the read-back queue.
 
         @param string_data Data string, or tuple of data strings.
         @param preflush Number of _FLUSH to be entered before the data.
         @param postflush Number of _FLUSH to be entered after the data.
+        @param priority Priority of queue data (lower numbers are returned 1st)
         Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
@@ -49,49 +50,52 @@ class _Simulator():
         if isinstance(string_data, str):
             string_data = (string_data, )
         for a_string in string_data:
-            self.put(a_string.encode(), preflush, postflush)
+            self.put(a_string.encode(), preflush, postflush, priority)
 
-    def putch(self, data, preflush=0, postflush=0):
+    def putch(self, data, preflush=0, postflush=0, priority=10):
         """Put data character by character into the read-back queue.
 
         @param data String to be entered character by character.
         @param preflush Number of _FLUSH to be entered before the data.
         @param postflush Number of _FLUSH to be entered after the data.
+        @param priority Priority of queue data (lower numbers are returned 1st)
         Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
         if not self.simulation:
             return
         self._logger.debug('putch() %s', repr(data))
-        self._put_flush(preflush)
+        self._put_flush(preflush, priority)
         for c in data:
-            self.put(c.encode())
-        self._put_flush(postflush)
+            self.put(c.encode(), priority)
+        self._put_flush(postflush, priority)
 
-    def put(self, data, preflush=0, postflush=0):
+    def put(self, data, preflush=0, postflush=0, priority=10):
         """Put data into the read-back queue.
 
         @param data Bytes of data.
         @param preflush Number of _FLUSH to be entered before the data.
         @param postflush Number of _FLUSH to be entered after the data.
+        @param priority Priority of queue data (lower numbers are returned 1st)
         Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
         if not self.simulation:
             return
-        self._put_flush(preflush)
-        self._in_queue.put(data)
-        self._put_flush(postflush)
+        self._put_flush(preflush, priority)
+        self._in_queue.put((priority, data))
+        self._put_flush(postflush, priority)
 
-    def _put_flush(self, flush_count):
+    def _put_flush(self, flush_count, priority):
         """Add flush stop markers into the queue.
 
         @param flush_count Number of _FLUSH to be entered.
+        @param priority Priority of queue data (lower numbers are returned 1st)
         Note: _FLUSH is a marker to stop the flush of the data queue.
 
         """
         for _ in range(flush_count):
-            self.put(_FLUSH)
+            self.put(_FLUSH, priority)
 
     def get(self):
         """Get data from the written-out queue.
