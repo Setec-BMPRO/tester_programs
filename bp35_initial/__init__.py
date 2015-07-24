@@ -222,17 +222,6 @@ class Main(tester.TestSequence):
         # Is it all still running?
         MeasureGroup((m.dmm_3V3, m.dmm_15Vs, m.dmm_vbat), timeout=10)
 
-    def _step_test_unit(self):
-        """Test functions of the unit."""
-        self.fifo_push(
-            ((s.ARM_Vout, 12.8), (s.ARM_Fan, 50), (s.oFan, (0, 12.0)), ))
-        m.arm_vout.measure(timeout=5)
-        m.arm_fan.measure()
-        m.dmm_fanOff.measure(timeout=5)
-        self._bp35['FAN'] = 100
-        m.dmm_fanOn.measure(timeout=5)
-# FIXME: Add more measurements here...
-
     def _step_load(self):
         """Test the load output switches.
 
@@ -253,30 +242,18 @@ class Main(tester.TestSequence):
 
     def _step_test_unit(self):
         """Test functions of the unit."""
-        self.fifo_push(((s.oFan, (0, 12.0)), ))
+        self.fifo_push(
+            ((s.ARM_Vout, 12.8), (s.ARM_BattI, 4.0), (s.ARM_Fan, 50),
+             (s.oFan, (0, 12.0)), ))
         if self._fifo:
-            # Vout measure
-            self._bp35.putch('"BUS_VOLTS XN?', preflush=1)
-            self._bp35.puts('12800\r\n')
-            # Fan speed read & set
-            self._bp35.putch('"FAN_SPEED XN?', preflush=1)
-            self._bp35.puts('500\r\n')
-            self._bp35.putch('1000 "FAN_SPEED XN!', preflush=1, postflush=1)
-            self._bp35.putch('"LOAD_SWITCH_CURRENT_1 XN?', preflush=1)
-            self._bp35.puts('2000\r\n')
-        m.arm_vout.measure(timeout=5)
-        m.arm_fan.measure()
-        m.dmm_fanOff.measure(timeout=5)
+            for sen in s.ARM_Loads:
+                sen.store(2.0)
+        MeasureGroup((m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
         d.dcl_out.output(28.0, output=True)
         d.dcl_bat.output(4.0, output=True)
-        meas_curr = (m.arm_ld1I, m.arm_ld2I, m.arm_ld3I, m.arm_ld4I, m.arm_ld5I,
-                    m.arm_ld6I, m.arm_ld7I, m.arm_ld8I, m.arm_ld9I, m.arm_ld10I,
-                    m.arm_ld11I, m.arm_ld12I, m.arm_ld13I, m.arm_ld14I)
-        for meas in meas_curr:
-            meas.measure()
-        m.arm_battI.measure()
+        MeasureGroup(m.arm_loads + (m.arm_battI, ))
 
     def _step_canbus(self):
         """Test the Can Bus."""
