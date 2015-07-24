@@ -436,9 +436,9 @@ class ArmConsoleGen1(SimSerial):
         if command:
             if self.simulation:     # Auto simulate the command echo
                 postflush = 0 if expected > 0 else 1
-                # Push echo at highest priority (0) so it is returned first
+                # Push echo at high priority so it is returned first
                 self.putch(
-                    command, preflush=1, postflush=postflush, priority=0)
+                    command, preflush=1, postflush=postflush, priority=True)
             self._write_command(command)
         if delay:
             time.sleep(delay)
@@ -478,7 +478,6 @@ class ArmConsoleGen1(SimSerial):
         """
         # Read until a timeout happens
         buf = self._read(1024)
-        self._logger.debug('<== %s', repr(buf.decode()))
         # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
