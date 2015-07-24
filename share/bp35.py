@@ -36,6 +36,8 @@ class Console(ArmConsoleGen1):
                 minimum=0.0, maximum=14.0, scale=1000),
             'IOUT': ParameterFloat('CONVERTER_CURRENT_SETPOINT',
                 writeable=True, minimum=15.0, maximum=35.0, scale=1000),
+            'LOAD_DIS': ParameterFloat('LOAD_SWITCHES_INHIBITED', writeable=True,
+                minimum=0, maximum=1, scale=1),
             'FAN': ParameterFloat('FAN_SPEED', writeable=True,
                 minimum=0, maximum=100, scale=10),
             'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
@@ -91,16 +93,18 @@ class Console(ArmConsoleGen1):
     def manual_mode(self):
         """Enter manual control mode."""
         self['MODE'] = 3
-        time.sleep(1)
+        time.sleep(2)           # Takes 1.0 - 2.0 sec to enter the mode
         self['VOUT'] = 12.8
         self['IOUT'] = 35.0
-        self['VOUT_OV'] = 2
+        self['VOUT_OV'] = 2     # OVP Latch reset
 
     def power_on(self):
         """Power ON the converter circuits."""
         self['PFC_EN'] = True
         time.sleep(1)
         self['DCDC_EN'] = True
+        time.sleep(1)
+        self['LOAD_DIS'] = False
 
     def load_set(self, set_on=True, loads=()):
         """Set the state of load outputs.

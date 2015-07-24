@@ -434,10 +434,39 @@ class ArmConsoleGen1(SimSerial):
 
         """
         if command:
+            if self.simulation:     # Auto simulate the command echo
+                postflush = 0 if expected > 0 else 1
+                # Push echo at high priority so it is returned first
+                self.putch(
+                    command, preflush=1, postflush=postflush, priority=True)
             self._write_command(command)
         if delay:
             time.sleep(delay)
         return self._read_response(expected)
+
+    def _write_command(self, command):
+        """Write a command.
+
+        The echo of each command character sent is read back.
+        The echo of _CMD_RUN is NOT expected, or read.
+        @param command Command string.
+        @raises ArmError if the command does not echo.
+
+        """
+        self._logger.debug('--> %s', repr(command))
+        cmd_data = command.encode()
+        # Flush input to be able to read echoed characters
+        self.flush()
+        # Send each byte with echo verification
+        for a_byte in cmd_data:
+            a_byte = bytes([a_byte])
+            self._write(a_byte)
+            echo = self._read(1)
+            if echo != a_byte:
+                raise ArmError(
+                    'Command echo error. Tx: {}, Rx: {}'.format(a_byte, echo))
+        # And the command RUN, without echo
+        self._write(_CMD_RUN)
 
     def _read_response(self, expected):
         """Read a response.
@@ -449,7 +478,6 @@ class ArmConsoleGen1(SimSerial):
         """
         # Read until a timeout happens
         buf = self._read(1024)
-        self._logger.debug('<== %s', repr(buf.decode()))
         # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
@@ -478,30 +506,6 @@ class ArmConsoleGen1(SimSerial):
             raise ArmError(
                 'Expected {}, actual {}'.format(expected, response_count))
         return response
-
-    def _write_command(self, command):
-        """Write a command.
-
-        The echo of each command character sent is read back.
-        The echo of _CMD_RUN is NOT expected, or read.
-        @param command Command string.
-        @raises ArmError if the command does not echo.
-
-        """
-        self._logger.debug('--> %s', repr(command))
-        cmd_data = command.encode()
-        # Flush input to be able to read echoed characters
-        self.flush()
-        # Send each byte with echo verification
-        for a_byte in cmd_data:
-            a_byte = bytes([a_byte])
-            self._write(a_byte)
-            echo = self._read(1)
-            if echo != a_byte:
-                raise ArmError(
-                    'Command echo error. Tx: {}, Rx: {}'.format(a_byte, echo))
-        # And the command RUN, without echo
-        self._write(_CMD_RUN)
 
     def flush(self):
         """Flush input by reading everything."""
