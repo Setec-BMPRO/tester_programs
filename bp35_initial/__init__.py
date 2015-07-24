@@ -59,7 +59,7 @@ class Main(tester.TestSequence):
             ('Load', self._step_load, None, True),
             ('TestUnit', self._step_test_unit, None, True),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, False),
+            ('OCP', self._step_ocp, None, True),
             ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -253,7 +253,7 @@ class Main(tester.TestSequence):
         m.dmm_fanOn.measure(timeout=5)
         d.dcl_out.output(28.0, output=True)
         d.dcl_bat.output(4.0, output=True)
-        MeasureGroup(m.arm_loads + (m.arm_battI, ))
+        MeasureGroup((m.dmm_vbat, ) + m.arm_loads + (m.arm_battI, ), timeout=5)
 
     def _step_canbus(self):
         """Test the Can Bus."""

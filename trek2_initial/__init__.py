@@ -50,7 +50,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, False), # True),
+            ('Program', self._step_program, None, True),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -137,7 +137,7 @@ class Main(tester.TestSequence):
         # Reset micro.
         d.rla_reset.pulse(0.1)
         self._trek2.puts('Banner1\r\nBanner2\r\n')
-        self._trek2.action(None, delay=0.5, expected=2)   # Flush banner
+        self._trek2.action(None, delay=1, expected=2)   # Flush banner
         self._trek2.defaults(_HW_VER, sernum)
         self._trek2.puts('1.0.10892.112\r\n')
         m.trek2_SwVer.measure()

@@ -478,7 +478,7 @@ class ArmConsoleGen1(SimSerial):
         """
         # Read until a timeout happens
         buf = self._read(1024)
-        self._logger.debug('<== %s', buf)
+#        self._logger.debug('<== %s', buf)
         # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
