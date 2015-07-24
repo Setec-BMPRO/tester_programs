@@ -52,8 +52,8 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramPIC', self._step_program_pic, None, False),
-            ('ProgramARM', self._step_program_arm, None, False),
+            ('ProgramPIC', self._step_program_pic, None, not fifo),
+            ('ProgramARM', self._step_program_arm, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Load', self._step_load, None, True),
@@ -244,7 +244,7 @@ class Main(tester.TestSequence):
         """Test functions of the unit."""
         self.fifo_push(
             ((s.ARM_Vout, 12.8), (s.ARM_BattI, 4.0), (s.ARM_Fan, 50),
-             (s.oFan, (0, 12.0)), ))
+             (s.oFan, (0, 12.0)), (s.oVbat, 12.8), ))
         if self._fifo:
             for sen in s.ARM_Loads:
                 sen.store(2.0)
