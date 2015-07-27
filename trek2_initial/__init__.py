@@ -131,8 +131,7 @@ class Main(tester.TestSequence):
         """Test the ARM device."""
         dummy_sn = 'A1526040123'
         self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
-#        sernum = m.ui_SnEntry.measure()[1][0]
-        sernum = dummy_sn
+        sernum = m.ui_SnEntry.measure()[1][0]
         self._trek2.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
