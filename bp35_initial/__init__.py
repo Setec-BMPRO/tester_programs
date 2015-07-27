@@ -60,6 +60,7 @@ class Main(tester.TestSequence):
             ('TestUnit', self._step_test_unit, None, True),
             ('CanBus', self._step_canbus, None, False),
             ('OCP', self._step_ocp, None, True),
+            ('Aux', self._step_aux, None, True),
             ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -243,12 +244,15 @@ class Main(tester.TestSequence):
     def _step_test_unit(self):
         """Test functions of the unit."""
         self.fifo_push(
-            ((s.ARM_Vout, 12.8), (s.ARM_BattI, 4.0), (s.ARM_Fan, 50),
-             (s.oFan, (0, 12.0)), (s.oVbat, 12.8), ))
+            ((s.ARM_AcV, 240.0), (s.ARM_AcF, 50.0), (s.ARM_PriT, 26.0),
+             (s.ARM_SecT, 26.0), (s.ARM_BattT, 26.0), (s.ARM_Vout, 12.8),
+             (s.ARM_Fan, 50), (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
+             (s.oVbat, 12.8), ))
         if self._fifo:
             for sen in s.ARM_Loads:
                 sen.store(2.0)
-        MeasureGroup((m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
+        MeasureGroup((m.arm_acv, m.arm_acf, m.arm_priT, m.arm_secT, m.arm_battT,
+                    m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
         d.dcl_out.output(28.0, output=True)
@@ -270,6 +274,12 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ),
                         (s.oVbat, (12.8, ) * 10 + (11.0, ), ), ))
         t.ocp.run()
+
+    def _step_aux(self):
+        """Apply Auxillary input and measure voltage and current."""
+        self.fifo_push(((s.ARM_AuxV, 12.5), (s.ARM_AuxI, 2.0), (s.oVout, 12.5), ))
+        self._bp35['AUX_RELAY'] = True
+        t.aux.run()
 
     def _step_shutdown(self):
         """Apply overload to shutdown."""
