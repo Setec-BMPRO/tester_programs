@@ -52,15 +52,15 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramPIC', self._step_program_pic, None, not fifo),
-            ('ProgramARM', self._step_program_arm, None, not fifo),
+            ('ProgramPIC', self._step_program_pic, None, False),
+            ('ProgramARM', self._step_program_arm, None, False),
             ('Initialise', self._step_initialise_arm, None, True),
+            ('Aux', self._step_aux, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Load', self._step_load, None, True),
             ('TestUnit', self._step_test_unit, None, True),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, True),
-            ('Aux', self._step_aux, None, True),
+            ('OCP', self._step_ocp, None, False),
             ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -202,6 +202,16 @@ class Main(tester.TestSequence):
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
 
+    def _step_aux(self):
+        """Apply Auxillary input and measure voltage and current."""
+        self.fifo_push(((s.ARM_AuxV, 12.5), (s.ARM_AuxI, 2.0),
+                        (s.oVbat, 12.5), ))
+        d.dcs_vaux.output(12.8, output=True)
+        self._bp35['AUX_RELAY'] = True
+        MeasureGroup(
+            (m.dmm_vaux, m.arm_auxV, m.arm_auxI), timeout=5)
+        d.dcl_bat.output(0.0)
+
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac."""
         self.fifo_push(
@@ -233,6 +243,8 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oVout, (0.0, ) + (12.8, ) * 14),  ))
         # All outputs OFF
         self._bp35.load_set(set_on=True, loads=())
+        # A little load on the output.
+        d.dcl_out.output(0.1, True)
         m.dmm_voutOff.measure(timeout=2)
         # One at a time ON
         for ld in range(14):
@@ -274,12 +286,6 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ),
                         (s.oVbat, (12.8, ) * 10 + (11.0, ), ), ))
         t.ocp.run()
-
-    def _step_aux(self):
-        """Apply Auxillary input and measure voltage and current."""
-        self.fifo_push(((s.ARM_AuxV, 12.5), (s.ARM_AuxI, 2.0), (s.oVout, 12.5), ))
-        self._bp35['AUX_RELAY'] = True
-        t.aux.run()
 
     def _step_shutdown(self):
         """Apply overload to shutdown."""

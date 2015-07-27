@@ -171,6 +171,7 @@ class Measurements():
         self.dmm_voutOff = Measurement(limits['VoutOff'], sense.oVout)
         self.dmm_vbatin = Measurement(limits['VbatIn'], sense.oVbat)
         self.dmm_vbat = Measurement(limits['Vbat'], sense.oVbat)
+        self.dmm_vaux = Measurement(limits['Vaux'], sense.oVbat)
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_fanOn = Measurement(limits['FanOn'], sense.oFan)
         self.dmm_fanOff = Measurement(limits['FanOff'], sense.oFan)
@@ -218,21 +219,17 @@ class SubTests():
         # OCP:
         bin1 = BinarySubStep(((d.dcl_out, 0.0, 30.0, 5.0), ), output=True)
         msr1 = MeasureSubStep((m.ramp_outOCP, ))
-        ld2 = LoadSubStep(((d.dcl_out, 0.0), ), )
+        ld1 = LoadSubStep(((d.dcl_out, 0.0), ), )
         dcs1 = DcSubStep(setting=((d.dcs_vbat, 12.8), ))  # Simulate a battery
         rly1 = RelaySubStep(((d.rla_vbat, True), ))
         msr2 = MeasureSubStep((m.dmm_vbat, ), timeout=5)
         bin2 = BinarySubStep(((d.dcl_bat, 0.0, 18.0, 5.0), ), output=True)
         msr3 = MeasureSubStep((m.ramp_batOCP, ))
-        rly2 = RelaySubStep(((d.rla_vbat, False), ))
         dcs2 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
+        rly2 = RelaySubStep(((d.rla_vbat, False), ))
+        ld2 = LoadSubStep(((d.dcl_bat, 0.0), ), )
         self.ocp = Step(
-            (bin1, msr1, ld2, dcs1, rly1, msr2, bin2, msr3, rly2, dcs2))
-
-        # AUX: Apply Aux In, measure.
-        dcs1 = DcSubStep(setting=((d.dcs_vaux, 12.5), ))
-        msr1 = MeasureSubStep((m.arm_auxV, m.arm_auxI, m.dmm_vout, ), timeout=5)
-        self.aux = Step((dcs1, msr1))
+            (bin1, msr1, ld1, dcs1, rly1, msr2, bin2, msr3, dcs2, rly2, ld2))
 
 #        # Shutdown: Shutdown, recovery, check load switch.
 #        ld1 = LoadSubStep(((d.dcl_out, 39.0), ), output=True)
