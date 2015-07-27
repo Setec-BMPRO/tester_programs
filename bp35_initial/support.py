@@ -96,11 +96,11 @@ class Sensors():
         self.oOutOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_out, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
-            start=30.0, stop=37.0, step=0.2, delay=0.1)
+            start=30.0, stop=36.0, step=0.2, delay=0.1)
         self.oBatOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
             detect_limit=(limits['InOCP'], ),
-            start=18.0, stop=22.0, step=0.2, delay=0.1)
+            start=18.0, stop=21.0, step=0.2, delay=0.1)
         tester.TranslationContext = 'bp35_initial'
         self.oYesNoGreen = sensor.YesNo(
             message=translate('IsLedGreen?'),
@@ -121,10 +121,7 @@ class Sensors():
         self.ARM_PriT = share.bp35.Sensor(bp35, 'PRI_T')
         self.ARM_SecT = share.bp35.Sensor(bp35, 'SEC_T')
         self.ARM_BattT = share.bp35.Sensor(bp35, 'BATT_T')
-        self.ARM_BattI = share.bp35.Sensor(bp35, 'BATT_I')
         self.ARM_Vout = share.bp35.Sensor(bp35, 'BUS_V')
-        self.ARM_AuxV = share.bp35.Sensor(bp35, 'AUX_V')
-        self.ARM_AuxI = share.bp35.Sensor(bp35, 'AUX_I')
         self.ARM_BattType = share.bp35.Sensor(bp35, 'BATT_TYPE')
         self.ARM_BattSw = share.bp35.Sensor(bp35, 'BATT_SWITCH')
         self.ARM_Fan = share.bp35.Sensor(bp35, 'FAN')
@@ -136,6 +133,9 @@ class Sensors():
         for i in range(1, 15):
             s = share.bp35.Sensor(bp35, 'LOAD_{}'.format(i))
             self.ARM_Loads.append(s)
+        self.ARM_BattI = share.bp35.Sensor(bp35, 'BATT_I')
+        self.ARM_AuxV = share.bp35.Sensor(bp35, 'AUX_V')
+        self.ARM_AuxI = share.bp35.Sensor(bp35, 'AUX_I')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -171,6 +171,7 @@ class Measurements():
         self.dmm_voutOff = Measurement(limits['VoutOff'], sense.oVout)
         self.dmm_vbatin = Measurement(limits['VbatIn'], sense.oVbat)
         self.dmm_vbat = Measurement(limits['Vbat'], sense.oVbat)
+        self.dmm_vaux = Measurement(limits['Vaux'], sense.oVbat)
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_fanOn = Measurement(limits['FanOn'], sense.oFan)
         self.dmm_fanOff = Measurement(limits['FanOff'], sense.oFan)
@@ -182,9 +183,13 @@ class Measurements():
         self.ui_YesNoOrange = Measurement(limits['Notify'], sense.oYesNoOrange)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
+        self.arm_acv = Measurement(limits['ARM-AcV'], sense.ARM_AcV)
+        self.arm_acf = Measurement(limits['ARM-AcF'], sense.ARM_AcF)
+        self.arm_priT = Measurement(limits['ARM-PriT'], sense.ARM_PriT)
+        self.arm_secT = Measurement(limits['ARM-SecT'], sense.ARM_SecT)
+        self.arm_battT = Measurement(limits['ARM-BattT'], sense.ARM_BattT)
         self.arm_vout = Measurement(limits['ARM-Vout'], sense.ARM_Vout)
         self.arm_fan = Measurement(limits['ARM-Fan'], sense.ARM_Fan)
-        self.arm_battI = Measurement(limits['ARM-BattI'], sense.ARM_BattI)
         self.arm_can_id = Measurement(limits['CAN_ID'], sense.ARM_CANID)
         self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.ARM_CANBIND)
         # Generate 14 load current measurements
@@ -192,6 +197,9 @@ class Measurements():
         for sen in sense.ARM_Loads:
             m = Measurement(limits['ARM-LoadI'], sen)
             self.arm_loads += (m, )
+        self.arm_battI = Measurement(limits['ARM-BattI'], sense.ARM_BattI)
+        self.arm_auxV = Measurement(limits['ARM-AuxV'], sense.ARM_AuxV)
+        self.arm_auxI = Measurement(limits['ARM-AuxI'], sense.ARM_AuxI)
 
 
 class SubTests():
@@ -211,16 +219,17 @@ class SubTests():
         # OCP:
         bin1 = BinarySubStep(((d.dcl_out, 0.0, 30.0, 5.0), ), output=True)
         msr1 = MeasureSubStep((m.ramp_outOCP, ))
-        ld2 = LoadSubStep(((d.dcl_out, 0.0), ), )
+        ld1 = LoadSubStep(((d.dcl_out, 0.0), ), )
         dcs1 = DcSubStep(setting=((d.dcs_vbat, 12.8), ))  # Simulate a battery
         rly1 = RelaySubStep(((d.rla_vbat, True), ))
         msr2 = MeasureSubStep((m.dmm_vbat, ), timeout=5)
         bin2 = BinarySubStep(((d.dcl_bat, 0.0, 18.0, 5.0), ), output=True)
         msr3 = MeasureSubStep((m.ramp_batOCP, ))
-        rly2 = RelaySubStep(((d.rla_vbat, False), ))
         dcs2 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
+        rly2 = RelaySubStep(((d.rla_vbat, False), ))
+        ld2 = LoadSubStep(((d.dcl_bat, 0.0), ), )
         self.ocp = Step(
-            (bin1, msr1, ld2, dcs1, rly1, msr2, bin2, msr3, rly2, dcs2))
+            (bin1, msr1, ld1, dcs1, rly1, msr2, bin2, msr3, dcs2, rly2, ld2))
 
 #        # Shutdown: Shutdown, recovery, check load switch.
 #        ld1 = LoadSubStep(((d.dcl_out, 39.0), ), output=True)
