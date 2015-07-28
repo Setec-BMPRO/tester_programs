@@ -122,7 +122,10 @@ class Main(tester.TestSequence):
             except share.isplpc.ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            ser.close()
+            try:
+                ser.close()
+            except:
+                pass
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
