@@ -16,10 +16,9 @@ ParameterHex = share.arm_gen1.ParameterHex
 ParameterCAN = share.arm_gen1.ParameterCAN
 ParameterRaw = share.arm_gen1.ParameterRaw
 
-# BP35 doesn't have the status bits yet
-## CAN Test mode controlled by STATUS bit 29
-#_CAN_ON = (1 << 29)
-#_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
+# CAN Test mode controlled by STATUS bit 29
+_CAN_ON = (1 << 29)
+_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 
 
 class Console(ArmConsoleGen1):
@@ -74,6 +73,7 @@ class Console(ArmConsoleGen1):
             'CAN_BIND': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,32,0'),
+            'CAN_STATS': ParameterRaw('', func=self.canstats),
             'SwVer': ParameterRaw('', func=self.version),
             }
         # Add in the 14 load switch current readings
@@ -120,10 +120,14 @@ class Console(ArmConsoleGen1):
         """Enable or disable CAN Communications Mode."""
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
-# BP35 doesn't have the status bits yet
-#        reply = self['STATUS']
-#        if state:
-#            value = _CAN_ON | reply
-#        else:
-#            value = _CAN_OFF & reply
-#        self['STATUS'] = value
+        reply = self['STATUS']
+        if state:
+            value = _CAN_ON | reply
+        else:
+            value = _CAN_OFF & reply
+        self['STATUS'] = value
+
+    def canstats(self):
+        """Read CAN Status Data."""
+        self.action('CANSTATS?', expected=1)
+        return '0'

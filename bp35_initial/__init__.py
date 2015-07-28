@@ -52,16 +52,14 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramPIC', self._step_program_pic, None, False),
-            ('ProgramARM', self._step_program_arm, None, False),
+            ('ProgramPIC', self._step_program_pic, None, True),
+            ('ProgramARM', self._step_program_arm, None, True),
             ('Initialise', self._step_initialise_arm, None, True),
             ('Aux', self._step_aux, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
             ('TestUnit', self._step_test_unit, None, True),
-#            ('OCP', self._step_ocp, None, False),
-            ('CanBus', self._step_canbus, None, False),
-#            ('ShutDown', self._step_shutdown, None, False),
+            ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -257,13 +255,13 @@ class Main(tester.TestSequence):
         """Test functions of the unit."""
         self.fifo_push(
             ((s.ARM_AcV, 240.0), (s.ARM_AcF, 50.0), (s.ARM_PriT, 26.0),
-             (s.ARM_SecT, 26.0), (s.ARM_BattT, 26.0), (s.ARM_Vout, 12.8),
-             (s.ARM_Fan, 50), (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
+             (s.ARM_SecT, 26.0), (s.ARM_Vout, 12.8), (s.ARM_Fan, 50),
+             (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
              (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 12 + (11.0, ), ), ))
         if self._fifo:
             for sen in s.ARM_Loads:
                 sen.store(2.0)
-        MeasureGroup((m.arm_acv, m.arm_acf, m.arm_priT, m.arm_secT, m.arm_battT,
+        MeasureGroup((m.arm_acv, m.arm_acf, m.arm_priT, m.arm_secT,
                     m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
@@ -273,12 +271,6 @@ class Main(tester.TestSequence):
         m.ramp_batOCP.measure(timeout=5)
         d.dcl_bat.output(0.0)
 
-#    def _step_ocp(self):
-#        """Ramp up load until OCP."""
-#        self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ),
-#                        (s.oVbat, (12.8, ) * 10 + (11.0, ), ), ))
-#        t.ocp.run()
-
     def _step_canbus(self):
         """Test the Can Bus."""
         self.fifo_push(
@@ -286,11 +278,6 @@ class Main(tester.TestSequence):
 #        m.arm_can_bind.measure(timeout=5)
 #        time.sleep(1)
 #        self._bp35.puts('0x10000000\r\n')   # Going into CAN Test Mode
+        m.arm_can_stats.measure()
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
-
-#    def _step_shutdown(self):
-#        """Apply overload to shutdown."""
-# FIXME: In manual mode it won't shutdown! No need to do this?
-#        self.fifo_push(((s.oVout, (0.0, 12.8, 0.0, 12.8)), (s.oVbat, 12.9), ))
-#        t.shdn.run()
