@@ -57,11 +57,11 @@ class Main(tester.TestSequence):
             ('Initialise', self._step_initialise_arm, None, True),
             ('Aux', self._step_aux, None, True),
             ('PowerUp', self._step_powerup, None, True),
-            ('Load', self._step_load, None, True),
+            ('Output', self._step_output, None, True),
             ('TestUnit', self._step_test_unit, None, True),
+#            ('OCP', self._step_ocp, None, False),
             ('CanBus', self._step_canbus, None, False),
-            ('OCP', self._step_ocp, None, False),
-            ('ShutDown', self._step_shutdown, None, False),
+#            ('ShutDown', self._step_shutdown, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -204,8 +204,8 @@ class Main(tester.TestSequence):
 
     def _step_aux(self):
         """Apply Auxillary input and measure voltage and current."""
-        self.fifo_push(((s.ARM_AuxV, 12.5), (s.ARM_AuxI, 2.0),
-                        (s.oVbat, 12.5), ))
+        self.fifo_push(((s.ARM_AuxV, 12.8), (s.ARM_AuxI, 0.35),
+                        (s.oVbat, 12.8), ))
         d.dcs_vaux.output(12.8, output=True)
         self._bp35['AUX_RELAY'] = True
         MeasureGroup(
@@ -233,8 +233,8 @@ class Main(tester.TestSequence):
         # Is it all still running?
         MeasureGroup((m.dmm_3V3, m.dmm_15Vs, m.dmm_vbat), timeout=10)
 
-    def _step_load(self):
-        """Test the load output switches.
+    def _step_output(self):
+        """Test the output switches.
 
         Each output is turned ON in turn.
         All outputs are then left ON.
@@ -259,7 +259,7 @@ class Main(tester.TestSequence):
             ((s.ARM_AcV, 240.0), (s.ARM_AcF, 50.0), (s.ARM_PriT, 26.0),
              (s.ARM_SecT, 26.0), (s.ARM_BattT, 26.0), (s.ARM_Vout, 12.8),
              (s.ARM_Fan, 50), (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
-             (s.oVbat, 12.8), ))
+             (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 12 + (11.0, ), ), ))
         if self._fifo:
             for sen in s.ARM_Loads:
                 sen.store(2.0)
@@ -270,6 +270,14 @@ class Main(tester.TestSequence):
         d.dcl_out.output(28.0, output=True)
         d.dcl_bat.output(4.0, output=True)
         MeasureGroup((m.dmm_vbat, ) + m.arm_loads + (m.arm_battI, ), timeout=5)
+        m.ramp_batOCP.measure(timeout=5)
+        d.dcl_bat.output(0.0)
+
+#    def _step_ocp(self):
+#        """Ramp up load until OCP."""
+#        self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ),
+#                        (s.oVbat, (12.8, ) * 10 + (11.0, ), ), ))
+#        t.ocp.run()
 
     def _step_canbus(self):
         """Test the Can Bus."""
@@ -281,14 +289,8 @@ class Main(tester.TestSequence):
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
 
-    def _step_ocp(self):
-        """Ramp up load until OCP."""
-        self.fifo_push(((s.oVout, (12.8, ) * 16 + (11.0, ), ),
-                        (s.oVbat, (12.8, ) * 10 + (11.0, ), ), ))
-        t.ocp.run()
-
-    def _step_shutdown(self):
-        """Apply overload to shutdown."""
+#    def _step_shutdown(self):
+#        """Apply overload to shutdown."""
 # FIXME: In manual mode it won't shutdown! No need to do this?
 #        self.fifo_push(((s.oVout, (0.0, 12.8, 0.0, 12.8)), (s.oVbat, 12.9), ))
 #        t.shdn.run()

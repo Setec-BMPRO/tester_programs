@@ -101,6 +101,10 @@ class Sensors():
             stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
             detect_limit=(limits['InOCP'], ),
             start=18.0, stop=21.0, step=0.2, delay=0.1)
+        self.oBatOCP = sensor.Ramp(
+            stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
+            detect_limit=(limits['InOCP'], ),
+            start=4.0, stop=8.0, step=0.2, delay=0.1)
         tester.TranslationContext = 'bp35_initial'
         self.oYesNoGreen = sensor.YesNo(
             message=translate('IsLedGreen?'),
