@@ -258,14 +258,16 @@ class Main(tester.TestSequence):
     def _step_test_unit(self):
         """Test functions of the unit."""
         self.fifo_push(
-            ((s.ARM_AcV, 240.0), (s.ARM_AcF, 50.0), (s.ARM_PriT, 26.0),
+            ((s.ARM_AcV, 240.0), (s.ARM_AcF, 50.0),
              (s.ARM_SecT, 26.0), (s.ARM_Vout, 12.8), (s.ARM_Fan, 50),
              (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
              (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 6 + (11.0, ), ), ))
+        # (s.ARM_PriT, 26.0), [disabled because it has bugs...]
         if self._fifo:
             for sen in s.ARM_Loads:
                 sen.store(2.0)
-        MeasureGroup((m.arm_acv, m.arm_acf, m.arm_priT, m.arm_secT,
+        # m.arm_priT, [disabled because it has bugs...]
+        MeasureGroup((m.arm_acv, m.arm_acf, m.arm_secT,
                     m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)

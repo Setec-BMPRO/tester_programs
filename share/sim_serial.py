@@ -139,16 +139,7 @@ class SimSerial(_Simulator, serial.Serial):
                 bufsize -= 1
         if size > 0 and not self.simulation:
             data.extend(super().read(size))
-        return data
-
-    def readline(self, size=-1):
-        """A non-blocking read.
-
-        Read the buffer, then the device.
-        @return Bytes read.
-
-        """
-        raise NotImplementedError
+        return bytes(data)
 
     def write(self, data):
         """Write data bytes to the written-out queue.
