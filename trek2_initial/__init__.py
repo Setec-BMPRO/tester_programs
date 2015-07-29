@@ -121,7 +121,10 @@ class Main(tester.TestSequence):
             except share.isplpc.ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            ser.close()
+            try:
+                ser.close()
+            except:
+                pass
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
@@ -146,6 +149,6 @@ class Main(tester.TestSequence):
             ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
         m.trek2_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
-        self._trek2.puts('0x10000000\r\n')      # Going into CAN Test Mode
+        self._trek2.puts('0x10000000\r\n', preflush=1)
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()

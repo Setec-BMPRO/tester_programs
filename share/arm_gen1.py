@@ -218,7 +218,7 @@ class ParameterHex(_Parameter):
     def read(self, func):
         """Read parameter value.
 
-        @param value String value from the unit, or None.
+        @param func Function to use to read the value.
         @return Int data value.
 
         """
@@ -246,7 +246,7 @@ class ParameterCAN(_Parameter):
     def read(self, func):
         """Read parameter value.
 
-        @param func Function to use to write the value.
+        @param func Function to use to read the value.
         @return String value.
 
         """
@@ -428,10 +428,8 @@ class ArmConsoleGen1(SimSerial):
         """
         if command:
             if self.simulation:     # Auto simulate the command echo
-                postflush = 0 if expected > 0 else 1
                 # Push echo at high priority so it is returned first
-                self.putch(
-                    command, preflush=1, postflush=postflush, priority=True)
+                self.puts(command, preflush=1, priority=True)
             self._write_command(command)
         if delay:
             time.sleep(delay)
@@ -494,12 +492,6 @@ class ArmConsoleGen1(SimSerial):
             raise ArmError(
                 'Expected {}, actual {}'.format(expected, response_count))
         return response
-
-    def flushInput(self):
-        """Flush input by reading everything."""
-        buf = self._read(1024 * 1024)
-        if len(buf) > 0:
-            self._logger.debug('flushInput() %s', buf)
 
     def ct_open(self, target_id):
         """Open a CAN tunnel.

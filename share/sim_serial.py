@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 """Serial Port with simulation ability.
 
-Setting the 'simulate' argument at creation will give a port with queues
-to hold simulated Tx & Rx data, for testing purposes.
+Data buffers are available to hold simulated input and output data.
+The buffers are arrays of signed short values, where 0-255 is a data byte,
+and -1 is a 'stop flush' marker.
+
+The input data buffer is always available, and is read before the real port,
+if it holds any data.
+In 'simulation' mode, the port device is not accessed at all.
 
 """
 
 import serial
 import logging
-import queue
-import threading
+from array import array
 
-# Queue entry to be read when a flush occurs
-_FLUSH = b''
+# Array data type (signed short)
+_ARRAY_TYPE = 'h'
+# Data buffer entry to mark a 'stop flush' point
+_FLUSH = -1
 
 
 class _Simulator():
@@ -24,97 +30,51 @@ class _Simulator():
         self.simulation = simulation
         if self.simulation:
             kwargs['port'] = None   # Prevent a real port from being opened
-        # Queues to hold data to be read by read()
-        self._in_queue_hi = queue.Queue()   # High priority
-        self._in_queue_lo = queue.Queue()   # Normal priority
-        # Queue to hold data written by write()
-        self._out_queue = queue.Queue()
-        # Control of read() enable
-        self._enable = threading.Event()
-        self._enable.set()
+        # Data buffer for data to be read by read()
+        self._in_buf = array(_ARRAY_TYPE)
+        # Data buffer for data written by write()
+        self._out_buf = array(_ARRAY_TYPE)
         # Initialise the serial.Serial
         super().__init__(**kwargs)
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
-        """Put a string into the read-back queue.
+        """Put a string into the read-back buffer.
 
         @param string_data Data string, or tuple of data strings.
         @param preflush Number of _FLUSH to be entered before the data.
         @param postflush Number of _FLUSH to be entered after the data.
-        @param priority True to use high priority queue.
-        Note: _FLUSH is a marker to stop the flush of the data queue.
+        @param priority True to put in front of the buffer.
+        Note: _FLUSH is a marker to stop the flush of the data buffer.
 
         """
-        if not self.simulation:
-            return
         self._logger.debug('puts() %s', repr(string_data))
-        if isinstance(string_data, str):
-            string_data = (string_data, )
-        for a_string in string_data:
-            self.put(a_string.encode(), preflush, postflush, priority)
+        newdata = array(_ARRAY_TYPE)
+        for _ in range(preflush):
+            newdata.append(_FLUSH)
+        for dat in string_data.encode():
+            newdata.append(dat)
+        for _ in range(postflush):
+            newdata.append(_FLUSH)
+        if priority:    # LIFO - put into start of buffer
+            newdata.extend(self._in_buf)
+            self._in_buf = newdata
+        else:           # FIFO - add onto end of buffer
+            self._in_buf.extend(newdata)
 
-    def putch(self, data, preflush=0, postflush=0, priority=False):
-        """Put data character by character into the read-back queue.
-
-        @param data String to be entered character by character.
-        @param preflush Number of _FLUSH to be entered before the data.
-        @param postflush Number of _FLUSH to be entered after the data.
-        @param priority True to use high priority queue.
-        Note: _FLUSH is a marker to stop the flush of the data queue.
-
-        """
-        if not self.simulation:
-            return
-        self._logger.debug('putch() %s', repr(data))
-        self._put_flush(preflush, priority)
-        for c in data:
-            self.put(c.encode(), priority=priority)
-        self._put_flush(postflush, priority)
-
-    def put(self, data, preflush=0, postflush=0, priority=False):
-        """Put data into the read-back queue.
-
-        @param data Bytes of data.
-        @param preflush Number of _FLUSH to be entered before the data.
-        @param postflush Number of _FLUSH to be entered after the data.
-        @param priority True to use high priority queue.
-        Note: _FLUSH is a marker to stop the flush of the data queue.
-
-        """
-        if not self.simulation:
-            return
-        self._put_flush(preflush, priority)
-        que = self._in_queue_hi if priority else self._in_queue_lo
-        que.put(data)
-        self._put_flush(postflush, priority)
-
-    def _put_flush(self, flush_count, priority):
-        """Add flush stop markers into the queue.
-
-        @param flush_count Number of _FLUSH to be entered.
-        @param priority True to use high priority queue.
-        Note: _FLUSH is a marker to stop the flush of the data queue.
-
-        """
-        que = self._in_queue_hi if priority else self._in_queue_lo
-        for _ in range(flush_count):
-            que.put(_FLUSH)
+    def _in_buf_len(self):
+        """Calculate number of data bytes waiting in the input buffer."""
+        return len(self._in_buf) - self._in_buf.count(_FLUSH)
 
     def get(self):
-        """Get data from the written-out queue.
+        """Get data from the written-out buffer.
 
-        @return Bytes from the queue.
+        @return Bytes from the output capture buffer.
 
         """
-        return b'' if self._out_queue.empty() else self._out_queue.get()
-
-    def enable(self):
-        """Enable reading of the read-back queue."""
-        self._enable.set()
-
-    def disable(self):
-        """Disable reading of the read-back queue."""
-        self._enable.clear()
+        data = bytearray()
+        while len(self._out_buf) > 0:
+            data.extend([self._out_buf.pop(0)])
+        return data
 
 
 class SimSerial(_Simulator, serial.Serial):
@@ -162,35 +122,33 @@ class SimSerial(_Simulator, serial.Serial):
     def read(self, size=1):
         """A non-blocking read.
 
+        Read the buffer, then the device.
         @param size Number of bytes to read.
         @return Bytes read.
 
         """
-        if not self.simulation:
-            return super().read(size)
-        if self._enable.is_set():
-            if not self._in_queue_hi.empty():
-                data = self._in_queue_hi.get()
-                return data[:size]       # limit to 'size' bytes
-            if not self._in_queue_lo.empty():
-                data = self._in_queue_lo.get()
-                return data[:size]       # limit to 'size' bytes
-        return b''
+        data = bytearray()
+        bufsize = self._in_buf_len()
+        while size > 0 and bufsize > 0:
+            dat = self._in_buf.pop(0)
+            if dat == _FLUSH:
+                return data
+            else:
+                data.extend([dat])
+                size -= 1
+                bufsize -= 1
+        if size > 0 and not self.simulation:
+            data.extend(super().read(size))
+        return data
 
     def readline(self, size=-1):
         """A non-blocking read.
 
+        Read the buffer, then the device.
         @return Bytes read.
 
         """
-        if not self.simulation:
-            return super().readline(size)
-        if self._enable.is_set():
-            if not self._in_queue_hi.empty():
-                return self._in_queue_hi.get()
-            if not self._in_queue_lo.empty():
-                return self._in_queue_lo.get()
-        return b''
+        raise NotImplementedError
 
     def write(self, data):
         """Write data bytes to the written-out queue.
@@ -201,15 +159,14 @@ class SimSerial(_Simulator, serial.Serial):
         if not self.simulation:
             super().write(data)
         else:
-            self._out_queue.put(data)
+            self._out_buf.extend(data)
 
     def inWaiting(self):
         """Return the number of characters currently in the input buffer."""
+        in_count = self._in_buf_len()
         if not self.simulation:
-            return super().inWaiting()
-        else:
-            return int((not self._in_queue_hi.empty()) or
-                       (not self._in_queue_lo.empty()))
+            in_count += super().inWaiting()
+        return in_count
 
     def flush(self):
         """Wait until all output data has been sent."""
@@ -219,25 +176,21 @@ class SimSerial(_Simulator, serial.Serial):
     def flushInput(self):
         """Discard waiting input.
 
-        A queue value of _FLUSH will stop the flush of the queues.
+        A buffer value of _FLUSH will stop the flush.
 
         """
+        if len(self._in_buf) > 0:
+            try:
+                marker = self._in_buf.index(_FLUSH)
+                for _ in range(marker + 1):
+                    self._in_buf.pop(0)
+                return
+            except ValueError:      # No flush markers in the buffer
+                self._in_buf = array(_ARRAY_TYPE)   # Empty the buffer
         if not self.simulation:
             super().flushInput()
-        else:
-            while not self._in_queue_hi.empty():
-                data = self._in_queue_hi.get()
-                if data == _FLUSH:
-                    return
-            while not self._in_queue_lo.empty():
-                data = self._in_queue_lo.get()
-                if data == _FLUSH:
-                    return
 
     def flushOutput(self):
         """Discard waiting output."""
         if not self.simulation:
             super().flushOutput()
-        else:
-            while not self._out_queue.empty():
-                self._out_queue.get()

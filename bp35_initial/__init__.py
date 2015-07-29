@@ -52,8 +52,8 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramPIC', self._step_program_pic, None, True),
-            ('ProgramARM', self._step_program_arm, None, True),
+            ('ProgramPIC', self._step_program_pic, None, not fifo),
+            ('ProgramARM', self._step_program_arm, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('Aux', self._step_aux, None, True),
             ('PowerUp', self._step_powerup, None, True),
@@ -171,7 +171,10 @@ class Main(tester.TestSequence):
             except share.isplpc.ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            ser.close()
+            try:
+                ser.close()
+            except:
+                pass
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
@@ -256,7 +259,7 @@ class Main(tester.TestSequence):
             ((s.ARM_AcV, 240.0), (s.ARM_AcF, 50.0), (s.ARM_PriT, 26.0),
              (s.ARM_SecT, 26.0), (s.ARM_Vout, 12.8), (s.ARM_Fan, 50),
              (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
-             (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 12 + (11.0, ), ), ))
+             (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 6 + (11.0, ), ), ))
         if self._fifo:
             for sen in s.ARM_Loads:
                 sen.store(2.0)
@@ -273,10 +276,9 @@ class Main(tester.TestSequence):
     def _step_canbus(self):
         """Test the Can Bus."""
         self.fifo_push(
-            ((s.ARM_CANBIND, 0x10000000), (s.ARM_CANID, ('RRQ,16,0,7', )), ))
-#        m.arm_can_bind.measure(timeout=5)
-#        time.sleep(1)
-#        self._bp35.puts('0x10000000\r\n')   # Going into CAN Test Mode
+            ((s.ARM_CANBIND, 0x10000000), (s.ARM_CANID, ('RRQ,32,0,7', )), ))
+        self._bp35.puts('junk\r\n')
         m.arm_can_stats.measure()
+        self._bp35.puts('10000000\r\n', preflush=1)
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
