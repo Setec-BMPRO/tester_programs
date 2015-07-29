@@ -36,7 +36,7 @@ class BtCheck(object):
         else:
             self._logger.debug(data)
 
-    def serflush(self):
+    def _flushInput(self):
         """Flush the serial buffer."""
         if self._ser is None:
             return
@@ -46,7 +46,6 @@ class BtCheck(object):
                 break
             self._log('flushing serial rx:{}'.format(x))
         self._ser.flushInput()
-        self._ser.flushOutput()
 
     def btcmdresp(self, cmd):
         """Send command to modem.
@@ -54,7 +53,7 @@ class BtCheck(object):
         @return response
 
         """
-        self.serflush()
+        self._flushInput()
         if cmd == '^^^':
             self._log('Leaving streaming mode, sending escape sequence')
             time.sleep(1)  # need long guard time before first letter
@@ -94,7 +93,7 @@ class BtCheck(object):
                     port=self._port, baudrate=115200,
                     timeout=2, writeTimeout=10, rtscts=True)
             time.sleep(1)
-            self.serflush()
+            self._flushInput()
             for retry in range(0, 5):
                 if not self.btcmdresp('AT+JRES'):  # reset
                     time.sleep(2)
@@ -267,7 +266,7 @@ class BtCheck(object):
                    ' "params": {}, "id": 8256}')
             self._log('sending command to get system info...')
             self._log(cmd)
-            self.serflush()
+            self._flushInput()
             self._ser.write((cmd + '\r').encode(_LANG))
             line = self._ser.readline().decode(_LANG)
             if len(line) > 0:
@@ -406,7 +405,7 @@ class BtCheck(object):
 #    # {"Timestamp":271,"Message":"{"jsonrpc": "2.0", "method": "GetLogBaseAddress", "params": {}, "id": 11}"},
 #    if None == ser:
 #        return False
-#    serflush()
+#    _flushInput()
 #    try:
 #        ser.write(b'{"jsonrpc": "2.0", "method": "GetLogBaseAddress", "params": {}, "id": 11}\r')
 #        res=ser.readline().decode(LANG)
@@ -468,7 +467,7 @@ class BtCheck(object):
 #        print('sending command to upload firmware...')
 #        print(cmd)
 #        try:
-#            serflush()
+#            _flushInput()
 #            ser.write((cmd + '\r').encode(LANG))
 #            res=ser.readline().decode(LANG)
 #        except:
@@ -533,7 +532,7 @@ class BtCheck(object):
 #        print("sending command to enter debugconsole...")
 #        print(cmd)
 #        try:
-#            serflush()
+#            _flushInput()
 #            ser.write(('\r' + cmd + '\r').encode(LANG))
 #            res=ser.readline().decode(LANG)
 #        except:
@@ -546,7 +545,7 @@ class BtCheck(object):
 #        print("bad response setting debugconsole try " + str(retry))
 #        time.sleep(2)
 #    time.sleep(2)
-#    serflush()
+#    _flushInput()
 #    ser.write(b'\r')
 #    res=ser.read(1000).decode(LANG)
 #    debugcommand=newid
@@ -583,11 +582,11 @@ class BtCheck(object):
 #                else:
 #                    sys.stdout.write('.')
 #                    sys.stdout.flush()
-#        serflush()
+#        _flushInput()
 #        ser.write(b'\r')
 #        res=ser.read(1000).decode(LANG) # read all with 2 second timeout
 #        if len(res) == 0:
-#            serflush()
+#            _flushInput()
 #            ser.write(b'\r')
 #            res=ser.read(1000).decode(LANG) # read all with 2 second timeout
 #        print('')

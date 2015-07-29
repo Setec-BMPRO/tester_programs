@@ -96,7 +96,7 @@ class Console():
         if self._ser is None:
             self._ser = serial.Serial(
                 self._port, self._baud, timeout=_READ_TMO)
-        self._flush()
+        self._flushInput()
 
     def close(self):
         """Close serial communications."""
@@ -153,7 +153,7 @@ class Console():
     def unlock(self):
         """Unlock the ARM and turn echo off."""
         self._logger.debug('Unlock')
-        self._flush()
+        self._flushInput()
         self._sendrecv('0 ECHO')
         self._sendrecv('$DEADBEA7 UNLOCK')
 
@@ -195,7 +195,7 @@ class Console():
         self._sendrecv(cmd)
         self._nvwrite()
 
-    def _flush(self):
+    def _flushInput(self):
         """Flush input (serial port and buffer)."""
         if self._ser is not None:
             self._ser.flushInput()

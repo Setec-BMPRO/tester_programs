@@ -143,14 +143,17 @@ class SimSerial(_Simulator, serial.Serial):
         """Open port."""
         self._logger.debug('Open port')
         if not self.simulation:
-            return super().open()
+            super().open()
         self._isOpen = True
 
     def close(self):
         """Close port."""
         self._logger.debug('Close port')
         if not self.simulation:
-            return super().close()
+            try:
+                super().close()
+            except:
+                pass
         self._isOpen = False
 
     def makeDeviceName(self, port):
@@ -196,36 +199,45 @@ class SimSerial(_Simulator, serial.Serial):
 
         """
         if not self.simulation:
-            return super().write(data)
-        self._out_queue.put(data)
+            super().write(data)
+        else:
+            self._out_queue.put(data)
+
+    def inWaiting(self):
+        """Return the number of characters currently in the input buffer."""
+        if not self.simulation:
+            return super().inWaiting()
+        else:
+            return int((not self._in_queue_hi.empty()) or
+                       (not self._in_queue_lo.empty()))
 
     def flush(self):
-        """Flush both input and output queues."""
+        """Wait until all output data has been sent."""
         if not self.simulation:
-            return super().flush()
-        self.flushInput()
-        self.flushOutput()
+            super().flush()
 
     def flushInput(self):
-        """Flush input queue.
+        """Discard waiting input.
 
         A queue value of _FLUSH will stop the flush of the queues.
 
         """
         if not self.simulation:
-            return super().flushInput()
-        while not self._in_queue_hi.empty():
-            data = self._in_queue_hi.get()
-            if data == _FLUSH:
-                return
-        while not self._in_queue_lo.empty():
-            data = self._in_queue_lo.get()
-            if data == _FLUSH:
-                return
+            super().flushInput()
+        else:
+            while not self._in_queue_hi.empty():
+                data = self._in_queue_hi.get()
+                if data == _FLUSH:
+                    return
+            while not self._in_queue_lo.empty():
+                data = self._in_queue_lo.get()
+                if data == _FLUSH:
+                    return
 
     def flushOutput(self):
-        """Flush output queue."""
+        """Discard waiting output."""
         if not self.simulation:
-            return super().flushOutput()
-        while not self._out_queue.empty():
-            self._out_queue.get()
+            super().flushOutput()
+        else:
+            while not self._out_queue.empty():
+                self._out_queue.get()

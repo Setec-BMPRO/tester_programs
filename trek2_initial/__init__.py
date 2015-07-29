@@ -112,7 +112,6 @@ class Main(tester.TestSequence):
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
             ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-            ser.flush()
             # Program the device (LPC1549 has internal CRC for verification)
             pgm = share.isplpc.Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
@@ -122,10 +121,7 @@ class Main(tester.TestSequence):
             except share.isplpc.ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            try:
-                ser.close()
-            except:
-                pass
+            ser.close()
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()

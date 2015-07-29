@@ -315,13 +315,6 @@ class ArmConsoleGen1(SimSerial):
         # Initialise the SimSerial()
         super().__init__(simulation=simulation, **kwargs)
 
-    def close(self):
-        """Close, and ignore any errors."""
-        try:
-            super().close()
-        except:
-            pass
-
     def setPort(self, port):
         """Set serial port.
 
@@ -455,8 +448,7 @@ class ArmConsoleGen1(SimSerial):
         """
         self._logger.debug('--> %s', repr(command))
         cmd_data = command.encode()
-        # Flush input to be able to read echoed characters
-        self.flush()
+        self.flushInput()
         # Send each byte with echo verification
         for a_byte in cmd_data:
             a_byte = bytes([a_byte])
@@ -478,19 +470,14 @@ class ArmConsoleGen1(SimSerial):
         """
         # Read until a timeout happens
         buf = self._read(1024)
-#        self._logger.debug('<== %s', buf)
-        # Remove leading _CMD_SUFFIX
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
-        # Remove trailing _CMD_PROMPT
         if buf.endswith(_CMD_PROMPT1):
             buf = buf[:-len(_CMD_PROMPT1)]
         if len(buf) > 0:
             response = buf.decode(errors='ignore').splitlines()
-            # Remove any empty strings
             while '' in response:
                 response.remove('')
-            # Trim any leading command prompts
             for i in range(len(response)):
                 resp = response[i]
                 if resp.startswith(_CMD_PROMPT2):
@@ -508,13 +495,11 @@ class ArmConsoleGen1(SimSerial):
                 'Expected {}, actual {}'.format(expected, response_count))
         return response
 
-    def flush(self):
+    def flushInput(self):
         """Flush input by reading everything."""
-        # See what is waiting
         buf = self._read(1024 * 1024)
         if len(buf) > 0:
-            # Show what we are flushing
-            self._logger.debug('flush() %s', buf)
+            self._logger.debug('flushInput() %s', buf)
 
     def ct_open(self, target_id):
         """Open a CAN tunnel.

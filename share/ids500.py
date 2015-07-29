@@ -121,11 +121,11 @@ class Console():
         self._logger.debug('Software Test Mode')
         self._writeline('?,?')
         self._writeline('?,?')
-        self._flush()
+        self._flushInput()
         self._writeline('S,:,0', )
-        self._flush()
+        self._flushInput()
         self._writeline('S,:,2230')
-        self._flush()
+        self._flushInput()
         self._writeline('S,:,42')
 
     def write_hwver(self, hwver):
@@ -137,7 +137,7 @@ class Console():
             raise HwVerError('Hardware Rev Number must be in the form 01A' +
                              ' (2 digits, then a letter)')
         self._writeline('S,@,{}'.format(hwver))
-        self._flush()
+        self._flushInput()
 
     def write_ser(self, sernum):
         """Write Serial Number into memory."""
@@ -148,13 +148,13 @@ class Console():
         if match:
             self._logger.warning('Cannot write Serial!(Protected)')
 
-    def _flush(self):
+    def _flushInput(self):
         """Flush input (serial port and buffer)."""
         if not self._serport is None:
             self._buf += self._serport.read(512)
             self._serport.flushInput()
         if len(self._buf) > 0:
-            self._logger.debug('_flush() %s', self._buf)
+            self._logger.debug('_flushInput() %s', self._buf)
         self._buf = b''
 
     def _sendrecv(self, command, delay=0):
@@ -196,7 +196,7 @@ class Console():
                 self._logger.debug('Timeout. Buffer=%s', self._buf)
                 raise TimeoutError
         self._logger.debug('Line=%s, Buffer=%s', line, self._buf)
-        self._flush()
+        self._flushInput()
         return line.decode()
 
     def _writeline(self, line, delay=0):
