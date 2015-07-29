@@ -195,10 +195,12 @@ class Main(tester.TestSequence):
         self._bp35.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        self._bp35.puts('Banner1\r\nBanner2\r\n')
+        if self._fifo:
+            self._bp35.puts('Banner1\r\nBanner2\r\n')
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
         self._bp35.defaults(_HW_VER, sernum)
-        self._bp35.puts('1.0.10902.3156\r\n')
+        if self._fifo:
+            self._bp35.puts('1.0.10902.3156\r\n')
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
 
@@ -277,8 +279,10 @@ class Main(tester.TestSequence):
         """Test the Can Bus."""
         self.fifo_push(
             ((s.ARM_CANBIND, 0x10000000), (s.ARM_CANID, ('RRQ,32,0,7', )), ))
-        self._bp35.puts('junk\r\n')
+        if self._fifo:
+            self._bp35.puts('junk\r\n')
         m.arm_can_stats.measure()
-        self._bp35.puts('10000000\r\n', preflush=1)
+        if self._fifo:
+            self._bp35.puts('10000000\r\n', preflush=1)
         self._bp35.can_mode(True)
         m.arm_can_id.measure()

@@ -137,10 +137,12 @@ class Main(tester.TestSequence):
         self._trek2.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        self._trek2.puts('Banner1\r\nBanner2\r\n')
+        if self._fifo:
+            self._trek2.puts('Banner1\r\nBanner2\r\n')
         self._trek2.action(None, delay=1, expected=2)   # Flush banner
         self._trek2.defaults(_HW_VER, sernum)
-        self._trek2.puts('1.0.10892.110\r\n')
+        if self._fifo:
+            self._trek2.puts('1.0.10892.110\r\n')
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):
@@ -149,6 +151,7 @@ class Main(tester.TestSequence):
             ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
         m.trek2_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
-        self._trek2.puts('0x10000000\r\n', preflush=1)
+        if self._fifo:
+            self._trek2.puts('0x10000000\r\n', preflush=1)
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()
