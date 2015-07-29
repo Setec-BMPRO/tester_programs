@@ -188,8 +188,8 @@ class Main(tester.TestSequence):
         """
         dummy_sn = 'A1526040123'
         self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
-#        sernum = m.ui_SnEntry.measure()[1][0]
-        sernum = dummy_sn
+        sernum = m.ui_SnEntry.measure()[1][0]
+#        sernum = dummy_sn
         self._bp35.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
