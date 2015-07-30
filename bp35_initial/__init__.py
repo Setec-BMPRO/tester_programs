@@ -206,12 +206,14 @@ class Main(tester.TestSequence):
 
     def _step_aux(self):
         """Apply Auxillary input and measure voltage and current."""
-        self.fifo_push(((s.ARM_AuxV, 12.8), (s.ARM_AuxI, 0.35),
-                        (s.oVbat, 12.8), ))
-        d.dcs_vaux.output(12.8, output=True)
+        self.fifo_push(((s.ARM_AuxV, 13.5), (s.ARM_AuxI, 0.35),
+                        (s.oVbat, 13.5), ))
+        d.dcs_vaux.output(13.5, output=True)
+        d.dcl_bat.output(0.5)
         self._bp35['AUX_RELAY'] = True
         MeasureGroup(
             (m.dmm_vaux, m.arm_auxV, m.arm_auxI), timeout=5)
+        d.dcs_vaux.output(0.0, output=False)
         d.dcl_bat.output(0.0)
 
     def _step_powerup(self):
@@ -250,8 +252,10 @@ class Main(tester.TestSequence):
         m.dmm_voutOff.measure(timeout=2)
         # One at a time ON
         for ld in range(14):
+            tester.testsequence.path_push('L{}'.format(ld + 1))
             self._bp35.load_set(set_on=True, loads=(ld, ))
             m.dmm_vout.measure(timeout=2)
+            tester.testsequence.path_pop()
         # All outputs ON
         self._bp35.load_set(set_on=False, loads=())
 
@@ -273,7 +277,11 @@ class Main(tester.TestSequence):
         m.dmm_fanOn.measure(timeout=5)
         d.dcl_out.output(28.0, output=True)
         d.dcl_bat.output(4.0, output=True)
-        MeasureGroup((m.dmm_vbat, ) + m.arm_loads + (m.arm_battI, ), timeout=5)
+        MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
+        for ld in range(14):
+            tester.testsequence.path_push('L{}'.format(ld + 1))
+            m.arm_loads[ld].measure(timeout=5)
+            tester.testsequence.path_pop()
         m.ramp_batOCP.measure(timeout=5)
         d.dcl_bat.output(0.0)
 
