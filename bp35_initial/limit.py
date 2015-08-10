@@ -27,7 +27,7 @@ DATA = (
     ('BatOCP', 0, 6.0, 9.0, None, None),
     ('InOCP', 0, 11.6, None, None, None),
     ('Program', 0, -0.1, 0.1, None, None),
-    ('FixtureLock', 0, 20, None, None, None),
+    ('FixtureLock', 0, 1200, None, None, None),
     ('SwShort', 0, None, 20, None, None),
     ('Notify', 1, None, None, None, True),
     # Data reported by the ARM
