@@ -244,17 +244,17 @@ class Main(tester.TestSequence):
         All outputs are then left ON.
 
         """
-        self.fifo_push(((s.oVout, (0.0, ) + (12.8, ) * 14),  ))
+        self.fifo_push(((s.oVload, (0.0, ) + (12.8, ) * 14),  ))
         # All outputs OFF
         self._bp35.load_set(set_on=True, loads=())
         # A little load on the output.
         d.dcl_out.output(0.1, True)
-        m.dmm_voutOff.measure(timeout=2)
+        m.dmm_vloadOff.measure(timeout=2)
         # One at a time ON
         for ld in range(14):
             tester.testsequence.path_push('L{}'.format(ld + 1))
             self._bp35.load_set(set_on=True, loads=(ld, ))
-            m.dmm_vout.measure(timeout=2)
+            m.dmm_vload.measure(timeout=2)
             tester.testsequence.path_pop()
         # All outputs ON
         self._bp35.load_set(set_on=False, loads=())
