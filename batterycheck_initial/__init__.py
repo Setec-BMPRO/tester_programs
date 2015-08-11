@@ -29,7 +29,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
 _AVRDUDE = r'C:\Program Files\AVRdude\avrdude.exe'
 _AVR_HEX = 'BatteryCheckSupervisor-2.hex'
 
-_ARM_HEX = 'BatteryCheckControl_1.6.4079.hex'
+_ARM_HEX = 'BatteryCheckControl_1.7.4080.hex'
 
 _PYTHON27 = r'C:\Python27\pythonw.exe'
 

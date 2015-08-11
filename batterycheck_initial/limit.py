@@ -21,7 +21,7 @@ DATA = (
     # Bluetooth detector
     ('DetectBT', 0, -0.1, 0.1, None, None),
     # ARM Console readings
-    ('ARM_SwVer', 0, None, None, r'^1\.6\.4079$', None),
+    ('ARM_SwVer', 0, None, None, r'^1\.7\.4080$', None),
     ('ARM_Volt', 0, 11.5, 12.5, None, None),
     ('ARM_Curr', 0, -65.0, -60.0, None, None),
     ('Batt_Curr_Err', 0, -5.0, 5.0, None, None),
