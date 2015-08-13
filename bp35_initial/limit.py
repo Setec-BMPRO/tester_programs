@@ -11,7 +11,7 @@ DATA = (
     ('12Vpri', 0, 11.5, 13.0, None, None),
     ('5Vusb', 0, -4.5, 5.5, None, None),
     ('15Vs', 0, 11.5, 13.0, None, None),
-    ('Vload', 0, 12.3, 12.9, None, None),
+    ('Vload', 0, 12.0, 12.9, None, None),
     ('VloadOff', 0, 0.5, None, None, None),
     ('VbatIn', 0, 11.5, 12.5, None, None),
     ('Vbat', 0, 12.6, 13.0, None, None),

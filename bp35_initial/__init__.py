@@ -248,7 +248,7 @@ class Main(tester.TestSequence):
         # All outputs OFF
         self._bp35.load_set(set_on=True, loads=())
         # A little load on the output.
-        d.dcl_out.output(0.1, True)
+        d.dcl_out.output(1.0, True)
         m.dmm_vloadOff.measure(timeout=2)
         # One at a time ON
         for ld in range(14):
@@ -275,7 +275,7 @@ class Main(tester.TestSequence):
                     m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
-        d.dcl_out.output(28.0, output=True)
+        d.dcl_out.binary(1.0, 28.0, 5.0)
         d.dcl_bat.output(4.0, output=True)
         MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
         for ld in range(14):
