@@ -34,7 +34,8 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
+            ('VinAdj', self._step_vin_adj, None, True),
+            ('VoutAdj', self._step_vout_adj, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -70,7 +71,25 @@ class Main(tester.TestSequence):
         """Check physical instruments for errors."""
         d.error_check()
 
-    def _step_power_up(self):
-        """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oVin, 12.0), ))
-        t.pwr_up.run()
+    def _step_vin_adj(self):
+        """Adjust input voltage for common Iin = 1mA."""
+        self.fifo_push(((s.oIin, (0.5, ) * 15 + (1.0, ), ),
+                      (s.oIin, 1.02), ))
+        d.dcs_vin.output(22.0, True)
+        m.ramp_VinAdj.measure(timeout=5)
+        self.Isen = m.dmm_Isen.measure(timeout=5)[1][0]
+
+    def _step_vout_adj(self):
+        """Adjust output voltage to get 5V across the collector/emitter."""
+        self.fifo_push(((s.oVce1, (-4.5, ) * 15 + (-5.0, ), ),
+                      (s.oIout1, 0.75), ))
+        d.dcs_vout.output(4.95, True)
+        m.ramp_VoutAdj.measure(timeout=5)
+        self.Iout1 = m.dmm_Iout1.measure(timeout=5)[1][0]
+        self._step_cal_ctr()
+
+    def _step_cal_ctr(self):
+        """Calculate current transfer ratio."""
+        ctr = (self.Iout1 / self.Isen) * 100
+        s.oMirCtr.store(ctr)
+        m.dmm_ctr.measure()

@@ -6,6 +6,8 @@
         Measurements
 
 """
+from pydispatch import dispatcher
+
 import tester
 from tester.devlogical import *
 from tester.measure import *
@@ -52,8 +54,25 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        self.oMirCtr = sensor.Mirror()
+        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
+                           signal=tester.signals.TestRun.stop)
 
-        self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self.oIin = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
+        self.oVinAdj = sensor.Ramp(
+            stimulus=logical_devices.dcs_vin, sensor=self.oIin,
+            detect_limit=(limits['Iin'], ),
+            start=22.0, stop=24.0, step=0.05, delay=0.1)
+        self.oVce1 = sensor.Vdc(dmm, high=5, low=2, rng=10, res=0.001)
+        self.oVoutAdj = sensor.Ramp(
+            stimulus=logical_devices.dcs_vout, sensor=self.oVce1,
+            detect_limit=(limits['Vce'], ),
+            start=4.95, stop=7.0, step=0.05, delay=0.1)
+        self.oIout1 = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
+
+    def _reset(self):
+        """TestRun.stop: Empty the Mirror Sensors."""
+        self.oMirCtr.flush()
 
 
 class Measurements():
@@ -67,7 +86,12 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.dmm_Vin = Measurement(limits['Vin'], sense.oVin)
+        self.dmm_ctr = Measurement(limits['CTR'], sense.oMirCtr)
+
+        self.ramp_VinAdj = Measurement(limits['VinAdj'], sense.oVinAdj)
+        self.dmm_Isen = Measurement(limits['Isen'], sense.oIin)
+        self.ramp_VoutAdj = Measurement(limits['VoutAdj'], sense.oVoutAdj)
+        self.dmm_Iout1 = Measurement(limits['Iout'], sense.oIout1)
 
 
 class SubTests():
@@ -81,10 +105,5 @@ class SubTests():
            @param logical_devices Logical instruments used
 
         """
-        d = logical_devices
-        m = measurements
-        # PowerUp:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.75)), output=True)
-        msr1 = MeasureSubStep((m.dmm_Vin, m.dmm_3V3), timeout=5)
-        self.pwr_up = Step((dcs1, msr1, ))
+#        d = logical_devices
+#        m = measurements
