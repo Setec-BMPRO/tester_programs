@@ -2,24 +2,16 @@
 # -*- coding: utf-8 -*-
 """Trek2 Final Test Program."""
 
-import os
 import logging
+import time
 
 import tester
-import share.programmer
-import share.arm
 from . import support
 from . import limit
 
 MeasureGroup = tester.measure.group
 
 LIMIT_DATA = limit.DATA
-
-# Serial port for the ARM. Used by ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt': r'\\.\COM2',
-             }[os.name]
-
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -44,6 +36,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
+            ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -56,7 +49,6 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._armdev = share.arm.Console(port=_ARM_PORT)
         global d
         d = support.LogicalDevices(self._devices)
         global s
@@ -69,7 +61,6 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._armdev.close()
         global m
         m = None
         global d
@@ -96,3 +87,13 @@ class Main(tester.TestSequence):
 
         t.pwr_up.run()
 
+    def _step_canbus(self):
+        """Test the CAN Bus."""
+        self.fifo_push(
+            ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
+        m.trek2_can_bind.measure(timeout=5)
+        time.sleep(1)   # Let junk CAN messages come in
+        if self._fifo:
+            self._trek2.puts('0x10000000\r\n', preflush=1)
+        self._trek2.can_mode(True)
+        m.trek2_can_id.measure()
