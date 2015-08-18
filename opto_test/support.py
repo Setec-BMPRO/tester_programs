@@ -58,17 +58,29 @@ class Sensors():
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
 
-        self.oIin = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
+        self.oIsen = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
         self.oVinAdj = sensor.Ramp(
-            stimulus=logical_devices.dcs_vin, sensor=self.oIin,
-            detect_limit=(limits['Iin'], ),
-            start=22.0, stop=24.0, step=0.05, delay=0.1)
-        self.oVce1 = sensor.Vdc(dmm, high=5, low=2, rng=10, res=0.001)
-        self.oVoutAdj = sensor.Ramp(
-            stimulus=logical_devices.dcs_vout, sensor=self.oVce1,
-            detect_limit=(limits['Vce'], ),
-            start=4.95, stop=7.0, step=0.05, delay=0.1)
-        self.oIout1 = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
+            stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
+            detect_limit=(limits['Isen'], ),
+            start=22.0, stop=24.0, step=0.05, delay=0.1, reset=False)
+        # Generate a list of 20 collector-emitter voltage sensors.
+        self.Vce = []
+        for i in range(20):
+            s = sensor.Vdc(dmm, high=(i + 5), low=2, rng=10, res=0.001)
+            self.Vce.append(s)
+        # Generate a list of 20 VoutAdj ramp sensors.
+        self.VoutAdj = []
+        for i in range(20):
+            s = sensor.Ramp(
+                stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
+                detect_limit=(limits['Vce'], ),
+                start=5.0, stop=7.0, step=0.05, delay=0.1, reset=False)
+            self.VoutAdj.append(s)
+        # Generate a list of 20 Iout voltage sensors.
+        self.Iout = []
+        for i in range(20):
+            s = sensor.Vdc(dmm, high=(i + 5), low=1, rng=10, res=0.001)
+            self.Iout.append(s)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -89,21 +101,14 @@ class Measurements():
         self.dmm_ctr = Measurement(limits['CTR'], sense.oMirCtr)
 
         self.ramp_VinAdj = Measurement(limits['VinAdj'], sense.oVinAdj)
-        self.dmm_Isen = Measurement(limits['Isen'], sense.oIin)
-        self.ramp_VoutAdj = Measurement(limits['VoutAdj'], sense.oVoutAdj)
-        self.dmm_Iout1 = Measurement(limits['Iout'], sense.oIout1)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-#        d = logical_devices
-#        m = measurements
+        self.dmm_Iin = Measurement(limits['Iin'], sense.oIsen)
+        # Generate a tuple of 20 VoutAdj ramp measurements.
+        self.ramp_VoutAdj = ()
+        for sen in sense.VoutAdj:
+            m = Measurement(limits['VoutAdj'], sen)
+            self.ramp_VoutAdj += (m, )
+        # Generate a tuple of 20 Iout voltage measurements.
+        self.dmm_Iout = ()
+        for sen in sense.Iout:
+            m = Measurement(limits['Iout'], sen)
+            self.dmm_Iout += (m, )
