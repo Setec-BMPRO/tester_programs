@@ -75,7 +75,7 @@ class Main(tester.TestSequence):
             Measure Iin.
 
          """
-        self.fifo_push(((s.oIsen, (0.5, ) * 15 + (1.0, 1.01), ), ))
+        self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.002), ), ))
         d.dcs_vin.output(22.0, True)
         m.ramp_VinAdj.measure(timeout=5)
         self._Iin = m.dmm_Iin.measure(timeout=5)[1][0]
@@ -90,8 +90,8 @@ class Main(tester.TestSequence):
 
          """
         for i in range(20):
-            self.fifo_push(((s.Vce[i], (-4.5, ) * 10 + (-5.0, -5.1), ),
-                          (s.Iout[i], 0.75), (s.oIsen, 1.01), ))
+            self.fifo_push(((s.Vce[i], (-4.5, ) * 20 + (-5.0, -5.04), ),
+                          (s.Iout[i], 0.60), (s.oIsen, 1.005), ))
             d.dcs_vout.output(5.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj[i].measure(timeout=5)
