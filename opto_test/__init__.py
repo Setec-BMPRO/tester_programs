@@ -71,11 +71,11 @@ class Main(tester.TestSequence):
     def _step_in_adj(self):
         """Input adjust and measure.
 
-            Adjust input source voltage to get Iin = 1mA.
+            Adjust input dc source to get Iin = 1mA.
             Measure Iin.
 
          """
-        self.fifo_push(((s.oIsen, (0.5, ) * 15 + (1.0, 1.02), ), ))
+        self.fifo_push(((s.oIsen, (0.5, ) * 15 + (1.0, 1.01), ), ))
         d.dcs_vin.output(22.0, True)
         m.ramp_VinAdj.measure(timeout=5)
         self._Iin = m.dmm_Iin.measure(timeout=5)[1][0]
@@ -83,23 +83,26 @@ class Main(tester.TestSequence):
     def _step_out_adj(self):
         """Output adjust and measure.
 
-            Adjust output source voltage to get 5V across collector-emitter.
+            Adjust output dc source to get 5V across collector-emitter, measure Vce.
             Measure Iout.
+            Measure Iin.
             Calculate CTR.
 
          """
         for i in range(20):
-            self.fifo_push(((s.Vce[i], (-4.5, ) * 15 + (-5.0, ), ),
-                          (s.Iout[i], 0.75), ))
+            self.fifo_push(((s.Vce[i], (-4.5, ) * 10 + (-5.0, -5.1), ),
+                          (s.Iout[i], 0.75), (s.oIsen, 1.01), ))
             d.dcs_vout.output(5.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj[i].measure(timeout=5)
+            m.dmm_Vce[i].measure(timeout=5)
             self._Iout = m.dmm_Iout[i].measure(timeout=5)[1][0]
-            self._step_cal_ctr()
+            self._Iin = m.dmm_Iin.measure(timeout=5)[1][0]
+            self._cal_ctr()
             tester.testsequence.path_pop()
 
-    def _step_cal_ctr(self):
-        """Calculate current transfer ratio and measure."""
+    def _cal_ctr(self):
+        """Calculate current transfer ratio."""
         ctr = (self._Iout / self._Iin) * 100
         s.oMirCtr.store(ctr)
         m.dmm_ctr.measure()

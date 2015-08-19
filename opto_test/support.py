@@ -62,7 +62,7 @@ class Sensors():
         self.oVinAdj = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
             detect_limit=(limits['Isen'], ),
-            start=22.0, stop=24.0, step=0.05, delay=0.02, reset=False)
+            start=22.0, stop=24.0, step=0.01, delay=0.02, reset=False)
         # Generate a list of 20 collector-emitter voltage sensors.
         self.Vce = []
         for i in range(20):
@@ -73,7 +73,7 @@ class Sensors():
         for i in range(20):
             s = sensor.Ramp(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
-                detect_limit=(limits['Vce'], ),
+                detect_limit=(limits['Vsen'], ),
                 start=5.0, stop=7.0, step=0.1, delay=0.02, reset=False)
             self.VoutAdj.append(s)
         # Generate a list of 20 Iout voltage sensors.
@@ -100,8 +100,13 @@ class Measurements():
         """
         self.dmm_ctr = Measurement(limits['CTR'], sense.oMirCtr)
 
-        self.ramp_VinAdj = Measurement(limits['VinAdj'], sense.oVinAdj)
         self.dmm_Iin = Measurement(limits['Iin'], sense.oIsen)
+        self.ramp_VinAdj = Measurement(limits['VinAdj'], sense.oVinAdj)
+        # Generate a tuple of 20 collector-emitter voltage measurements.
+        self.dmm_Vce = ()
+        for sen in sense.Vce:
+            m = Measurement(limits['Vce'], sen)
+            self.dmm_Vce += (m, )
         # Generate a tuple of 20 VoutAdj ramp measurements.
         self.ramp_VoutAdj = ()
         for sen in sense.VoutAdj:
