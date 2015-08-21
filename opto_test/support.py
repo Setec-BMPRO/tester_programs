@@ -62,7 +62,7 @@ class Sensors():
         self.oVinAdj = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
             detect_limit=(limits['Isen'], ),
-            start=22.0, stop=24.0, step=0.01, delay=0.02, reset=False)
+            start=27.0, stop=30.0, step=0.01, delay=0.02, reset=False)
         # Generate a list of 20 collector-emitter voltage sensors.
         self.Vce = []
         for i in range(20):
@@ -74,7 +74,7 @@ class Sensors():
             s = sensor.Ramp(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
                 detect_limit=(limits['Vsen'], ),
-                start=5.0, stop=7.0, step=0.05, delay=0.02, reset=False)
+                start=5.0, stop=8.0, step=0.05, delay=0.02, reset=False)
             self.VoutAdj.append(s)
         # Generate a list of 20 Iout voltage sensors.
         self.Iout = []
