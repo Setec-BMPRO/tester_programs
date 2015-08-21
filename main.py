@@ -35,6 +35,7 @@ import geniusII_final
 import gsu3601ta_initial
 import gsu3601ta_final
 import mk7_final
+import opto_test
 import rm50_final
 import smu75070_final
 import spa_multi
@@ -163,6 +164,7 @@ def _main():
          gsu3601ta_initial.LIMIT_DATA),
         ('GSU360-1TA Final', gsu3601ta_final.Main, gsu3601ta_final.LIMIT_DATA),
         ('MK7-400-1 Final', mk7_final.Main, mk7_final.LIMIT_DATA),
+        ('Opto Test', opto_test.Main, opto_test.LIMIT_DATA),
         ('RM-50-24 Final', rm50_final.Main, rm50_final.LIMIT_DATA),
         ('Spa Multi RGB', spa_multi.Main, spa_multi.LIMIT_DATA_RGB),
         ('Spa Multi TRI', spa_multi.Main, spa_multi.LIMIT_DATA_TRI),
