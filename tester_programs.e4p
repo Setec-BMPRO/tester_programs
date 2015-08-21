@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
+<<<<<<< HEAD
 <!-- Saved: 2015-08-14, 10:33:25 -->
+=======
+<!-- Saved: 2015-08-20, 18:23:22 -->
+>>>>>>> 85f92529692095d66801250ac67c0998fdf51569
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -225,6 +229,7 @@
     <Other>bp35_initial/bp35_1.0.3156.bin</Other>
     <Other>trek2_initial/Trek2_1.0.110.bin</Other>
     <Other>batterycheck_initial/BatteryCheckSupervisor-2.hex</Other>
+    <Other>batterycheck_initial/BatteryCheckControl_1.7.4080.hex</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>
