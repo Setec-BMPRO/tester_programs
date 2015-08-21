@@ -99,21 +99,20 @@ class Measurements():
 
         """
         self.dmm_ctr = Measurement(limits['CTR'], sense.oMirCtr)
-
         self.dmm_Iin = Measurement(limits['Iin'], sense.oIsen)
         self.ramp_VinAdj = Measurement(limits['VinAdj'], sense.oVinAdj)
         # Generate a tuple of 20 collector-emitter voltage measurements.
-        self.dmm_Vce = ()
+        self.dmm_Vce = []
         for sen in sense.Vce:
             m = Measurement(limits['Vce'], sen)
-            self.dmm_Vce += (m, )
+            self.dmm_Vce.append(m)
         # Generate a tuple of 20 VoutAdj ramp measurements.
-        self.ramp_VoutAdj = ()
+        self.ramp_VoutAdj = []
         for sen in sense.VoutAdj:
             m = Measurement(limits['VoutAdj'], sen)
-            self.ramp_VoutAdj += (m, )
+            self.ramp_VoutAdj.append(m)
         # Generate a tuple of 20 Iout voltage measurements.
-        self.dmm_Iout = ()
+        self.dmm_Iout = []
         for sen in sense.Iout:
             m = Measurement(limits['Iout'], sen)
-            self.dmm_Iout += (m, )
+            self.dmm_Iout.append(m)

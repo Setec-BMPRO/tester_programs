@@ -10,5 +10,5 @@ DATA = (
     ('Vce', 1, -5.05, -4.99, None, None),
     ('VoutAdj', 1, 0, 99999, None, None),
     ('Iout', 1, 0.2, 1.2, None, None),
-    ('CTR', 1, 20, 120, None, None),
+    ('CTR', 1, 0, 100, None, None),
     )
