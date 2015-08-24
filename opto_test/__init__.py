@@ -41,7 +41,9 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('InputAdj', self._step_in_adj, None, True),
+            ('InputAdj1', self._step_in_adj_1, None, True),
+            ('OutputAdj', self._step_out_adj, None, True),
+            ('InputAdj10', self._step_in_adj_10, None, True),
             ('OutputAdj', self._step_out_adj, None, True),
             ('Email', self._step_email, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -53,6 +55,7 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         self._ctr_data = []
+        self._is1mA = True
 
     def open(self):
         """Prepare for testing."""
@@ -79,7 +82,7 @@ class Main(tester.TestSequence):
         """Check physical instruments for errors."""
         d.error_check()
 
-    def _step_in_adj(self):
+    def _step_in_adj_1(self):
         """Input adjust and measure.
 
             Adjust input dc source to get Iin = 1mA.
@@ -88,8 +91,21 @@ class Main(tester.TestSequence):
          """
         self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.001), ), ))
         d.dcs_vin.output(22.0, True)
-        m.ramp_VinAdj.measure(timeout=5)
-        m.dmm_Iin.measure(timeout=5)
+        m.ramp_VinAdj1.measure(timeout=5)
+        m.dmm_Iin1.measure(timeout=5)
+
+    def _step_in_adj_10(self):
+        """Input adjust and measure.
+
+            Adjust input dc source to get Iin = 10mA.
+            Measure Iin.
+
+         """
+        self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.01), ), ))
+        d.dcs_vin.output(31.0, True)
+        m.ramp_VinAdj10.measure(timeout=5)
+        m.dmm_Iin10.measure(timeout=5)
+        self._is1mA = False
 
     def _step_out_adj(self):
         """Output adjust and measure.
@@ -101,18 +117,28 @@ class Main(tester.TestSequence):
             Calculate CTR.
 
         """
-        self._ctr_data = []
+        self._ctr_data1 = []
+        self._ctr_data10 = []
         for i in range(20):
             self.fifo_push(((s.Vce[i], (-4.5, ) * 20 + (-5.0, -5.02), ),
-                          (s.Iout[i], 0.60), (s.oIsen, 1.003), ))
+                          (s.Iout[i], 0.6), ))
+            if self._is1mA:
+                self.fifo_push(((s.oIsen, 1.003), ))
+            else:
+                self.fifo_push(((s.oIsen, 10.03), ))
             d.dcs_vout.output(5.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj[i].measure(timeout=5)
             m.dmm_Vce[i].measure(timeout=5)
             i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
-            i_in = m.dmm_Iin.measure(timeout=5)[1][0]
-            ctr = (i_out / i_in) * 100
-            self._ctr_data.append(int(ctr))
+            if self._is1mA:
+                i_in = m.dmm_Iin1.measure(timeout=5)[1][0]
+                ctr = (i_out / i_in) * 100
+                self._ctr_data1.append(int(ctr))
+            else:
+                i_in = m.dmm_Iin10.measure(timeout=5)[1][0]
+                ctr = (i_out / i_in) * 100
+                self._ctr_data10.append(int(ctr))
             s.oMirCtr.store(ctr)
             m.dmm_ctr.measure()
             tester.testsequence.path_pop()

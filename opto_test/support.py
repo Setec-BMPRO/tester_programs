@@ -59,10 +59,14 @@ class Sensors():
                            signal=tester.signals.TestRun.stop)
 
         self.oIsen = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
-        self.oVinAdj = sensor.Ramp(
+        self.oVinAdj1 = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
-            detect_limit=(limits['Isen'], ),
-            start=27.0, stop=30.0, step=0.01, delay=0.02, reset=False)
+            detect_limit=(limits['Isen1'], ),
+            start=22.0, stop=24.0, step=0.01, delay=0.02, reset=False)
+        self.oVinAdj10 = sensor.Ramp(
+            stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
+            detect_limit=(limits['Isen10'], ),
+            start=31.0, stop=33.0, step=0.01, delay=0.02, reset=False)
         # Generate a list of 20 collector-emitter voltage sensors.
         self.Vce = []
         for i in range(20):
@@ -99,8 +103,10 @@ class Measurements():
 
         """
         self.dmm_ctr = Measurement(limits['CTR'], sense.oMirCtr)
-        self.dmm_Iin = Measurement(limits['Iin'], sense.oIsen)
-        self.ramp_VinAdj = Measurement(limits['VinAdj'], sense.oVinAdj)
+        self.dmm_Iin1 = Measurement(limits['Iin1'], sense.oIsen)
+        self.dmm_Iin10 = Measurement(limits['Iin10'], sense.oIsen)
+        self.ramp_VinAdj1 = Measurement(limits['VinAdj'], sense.oVinAdj1)
+        self.ramp_VinAdj10 = Measurement(limits['VinAdj'], sense.oVinAdj10)
         # Generate a tuple of 20 collector-emitter voltage measurements.
         self.dmm_Vce = []
         for sen in sense.Vce:
