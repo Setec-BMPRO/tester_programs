@@ -41,9 +41,9 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('InputAdj1', self._step_in_adj_1, None, True),
+            ('InputAdj', self._step_in_adj, None, True),
             ('OutputAdj', self._step_out_adj, None, True),
-            ('InputAdj10', self._step_in_adj_10, None, True),
+            ('InputAdj', self._step_in_adj, None, True),
             ('OutputAdj', self._step_out_adj, None, True),
             ('Email', self._step_email, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -83,30 +83,19 @@ class Main(tester.TestSequence):
         """Check physical instruments for errors."""
         d.error_check()
 
-    def _step_in_adj_1(self):
+    def _step_in_adj(self):
         """Input adjust and measure.
 
-            Adjust input dc source to get Iin = 1mA.
-            Measure Iin.
+            Adjust input dc source to get the required value of Iin.
 
          """
-        self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.001), ), ))
-        d.dcs_vin.output(22.0, True)
-        m.ramp_VinAdj1.measure(timeout=5)
-        m.dmm_Iin1.measure(timeout=5)
-
-    def _step_in_adj_10(self):
-        """Input adjust and measure.
-
-            Adjust input dc source to get Iin = 10mA.
-            Measure Iin.
-
-         """
-        self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.01), ), ))
-        d.dcs_vin.output(31.0, True)
-        m.ramp_VinAdj10.measure(timeout=5)
-        m.dmm_Iin10.measure(timeout=5)
-        self._is1mA = False
+        d.dcs_vin.output(0.0, True)
+        if self._is1mA:
+            self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0,), ), ))
+            m.ramp_VinAdj1.measure(timeout=5)
+        else:
+            self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0,), ), ))
+            m.ramp_VinAdj10.measure(timeout=5)
 
     def _step_out_adj(self):
         """Output adjust and measure.
@@ -136,6 +125,7 @@ class Main(tester.TestSequence):
                 i_in = m.dmm_Iin1.measure(timeout=5)[1][0]
                 ctr = (i_out / i_in) * 100
                 self._ctr_data1.append(int(ctr))
+                self._is1mA = False
             else:
                 i_in = m.dmm_Iin10.measure(timeout=5)[1][0]
                 ctr = (i_out / i_in) * 100
