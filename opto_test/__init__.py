@@ -41,10 +41,10 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('InputAdj', self._step_in_adj, None, True),
-            ('OutputAdj', self._step_out_adj, None, True),
-            ('InputAdj', self._step_in_adj, None, True),
-            ('OutputAdj', self._step_out_adj, None, True),
+            ('InputAdj', self._step_in_adj, True, True),
+            ('OutputAdj', self._step_out_adj, True, True),
+            ('InputAdj', self._step_in_adj, False, True),
+            ('OutputAdj', self._step_out_adj, False, True),
             ('Email', self._step_email, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -56,7 +56,6 @@ class Main(tester.TestSequence):
         self._limits = test_limits
         self._ctr_data1 = []
         self._ctr_data10 = []
-        self._is1mA = True
 
     def open(self):
         """Prepare for testing."""
@@ -83,21 +82,21 @@ class Main(tester.TestSequence):
         """Check physical instruments for errors."""
         d.error_check()
 
-    def _step_in_adj(self):
+    def _step_in_adj(self, _is1mA):
         """Input adjust and measure.
 
             Adjust input dc source to get the required value of Iin.
 
          """
         d.dcs_vin.output(0.0, True)
-        if self._is1mA:
+        if _is1mA:
             self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0,), ), ))
             m.ramp_VinAdj1.measure(timeout=5)
         else:
             self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0,), ), ))
             m.ramp_VinAdj10.measure(timeout=5)
 
-    def _step_out_adj(self):
+    def _step_out_adj(self, _is1mA):
         """Output adjust and measure.
 
             Adjust output DC source to get 5V across collector-emitter,
@@ -107,26 +106,21 @@ class Main(tester.TestSequence):
             Calculate CTR.
 
         """
-        self._ctr_data1 = []
-        self._ctr_data10 = []
         for i in range(20):
-            self.fifo_push(((s.Vce[i], (-4.5, ) * 20 + (-5.0, -5.02), ),
-                          (s.Iout[i], 0.6), ))
-            if self._is1mA:
-                self.fifo_push(((s.oIsen, 1.003), ))
-            else:
-                self.fifo_push(((s.oIsen, 10.03), ))
+            self.fifo_push(((s.Vce[i], (-4.5, ) * 20 + (-5.0, -5.02), ), ))
             d.dcs_vout.output(5.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj[i].measure(timeout=5)
             m.dmm_Vce[i].measure(timeout=5)
-            i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
-            if self._is1mA:
+            if _is1mA:
+                self.fifo_push(((s.Iout[i], 0.6), (s.oIsen, 1.003), ))
+                i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
                 i_in = m.dmm_Iin1.measure(timeout=5)[1][0]
                 ctr = (i_out / i_in) * 100
                 self._ctr_data1.append(int(ctr))
-                self._is1mA = False
             else:
+                self.fifo_push(((s.Iout[i], 7.5), (s.oIsen, 10.03), ))
+                i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
                 i_in = m.dmm_Iin10.measure(timeout=5)[1][0]
                 ctr = (i_out / i_in) * 100
                 self._ctr_data10.append(int(ctr))
@@ -150,7 +144,7 @@ class Main(tester.TestSequence):
         for ctr in self._ctr_data10:
             data += ',{}'.format(ctr)
         csv = header + '\r\n' + data + '\r\n'
-
+        self._logger.info('Csv Data: %s', csv)
         self._logger.info('Building email')
         outer = MIMEMultipart()
         outer['To'] = _RECIPIENT
