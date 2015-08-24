@@ -54,7 +54,8 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._ctr_data = []
+        self._ctr_data1 = []
+        self._ctr_data10 = []
         self._is1mA = True
 
     def open(self):
@@ -150,9 +151,13 @@ class Main(tester.TestSequence):
         now = datetime.datetime.now().isoformat()[:19]
         header = '"UUT","TestDateTime"'
         for i in range(20):
-            header += ',"CTR{}"'.format(i + 1)
+            header += ',"CTR{}_1"'.format(i + 1)
+        for i in range(20):
+            header += ',"CTR{}_10"'.format(i + 1)
         data = '"{}","{}"'.format(uut, now)
-        for ctr in self._ctr_data:
+        for ctr in self._ctr_data1:
+            data += ',{}'.format(ctr)
+        for ctr in self._ctr_data10:
             data += ',{}'.format(ctr)
         csv = header + '\r\n' + data + '\r\n'
 
