@@ -59,7 +59,7 @@ class Sensors():
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
 
-        self.oIsen = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
+        self.oIsen = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oVinAdj1 = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
             detect_limit=(limits['Isen1'], ),
@@ -67,24 +67,31 @@ class Sensors():
         self.oVinAdj10 = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
             detect_limit=(limits['Isen10'], ),
-            start=31.0, stop=33.0, step=0.01, delay=0.02, reset=False)
+            start=33.0, stop=35.0, step=0.01, delay=0.02, reset=False)
         # Generate a list of 20 collector-emitter voltage sensors.
         self.Vce = []
         for i in range(20):
             s = sensor.Vdc(dmm, high=(i + 5), low=2, rng=10, res=0.001)
             self.Vce.append(s)
-        # Generate a list of 20 VoutAdj ramp sensors.
-        self.VoutAdj = []
+        # Generate a list of 20 VoutAdj ramp sensors for 1mA and 10mA inputs.
+        self.VoutAdj1 = []
         for i in range(20):
             s = sensor.Ramp(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
                 detect_limit=(limits['Vsen'], ),
                 start=5.0, stop=8.0, step=0.05, delay=0.02, reset=False)
-            self.VoutAdj.append(s)
+            self.VoutAdj1.append(s)
+        self.VoutAdj10 = []
+        for i in range(20):
+            s = sensor.Ramp(
+                stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
+                detect_limit=(limits['Vsen'], ),
+                start=16.0, stop=22.0, step=0.05, delay=0.02, reset=False)
+            self.VoutAdj10.append(s)
         # Generate a list of 20 Iout voltage sensors.
         self.Iout = []
         for i in range(20):
-            s = sensor.Vdc(dmm, high=(i + 5), low=1, rng=10, res=0.001)
+            s = sensor.Vdc(dmm, high=(i + 5), low=1, rng=100, res=0.001)
             self.Iout.append(s)
 
         tester.TranslationContext = 'opto_test'
@@ -118,11 +125,15 @@ class Measurements():
         for sen in sense.Vce:
             m = Measurement(limits['Vce'], sen)
             self.dmm_Vce.append(m)
-        # Generate a tuple of 20 VoutAdj ramp measurements.
-        self.ramp_VoutAdj = []
-        for sen in sense.VoutAdj:
+        # Generate a tuple of 20 VoutAdj ramp measurements for 1mA and 10mA inputs.
+        self.ramp_VoutAdj1 = []
+        for sen in sense.VoutAdj1:
             m = Measurement(limits['VoutAdj'], sen)
-            self.ramp_VoutAdj.append(m)
+            self.ramp_VoutAdj1.append(m)
+        self.ramp_VoutAdj10 = []
+        for sen in sense.VoutAdj10:
+            m = Measurement(limits['VoutAdj'], sen)
+            self.ramp_VoutAdj10.append(m)
         # Generate a tuple of 20 Iout voltage measurements.
         self.dmm_Iout = []
         for sen in sense.Iout:

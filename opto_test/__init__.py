@@ -22,6 +22,7 @@ m = None        # Shortcut to Measurements
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
 _RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
+#_RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
 _SUBJECT = 'GEN8 Opto Test Data'
 _EMAIL_SERVER = 'smtp.core.setec.com.au'
 
@@ -95,9 +96,10 @@ class Main(tester.TestSequence):
             Adjust input dc source to get the required value of Iin.
 
          """
-        self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0,), ), ))
+        self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.003), ), ))
         d.dcs_vin.output(0.0, True)
         m.ramp_VinAdj1.measure(timeout=5)
+        m.dmm_Iin1.measure(timeout=5)[1][0]
 
     def _step_in_adj10(self):
         """Input adjust and measure.
@@ -105,9 +107,10 @@ class Main(tester.TestSequence):
             Adjust input dc source to get the required value of Iin.
 
          """
-        self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0,), ), ))
+        self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.03), ), ))
         d.dcs_vin.output(0.0, True)
         m.ramp_VinAdj10.measure(timeout=5)
+        m.dmm_Iin10.measure(timeout=5)[1][0]
 
     def _step_out_adj1(self):
         """Output adjust and measure.
@@ -124,7 +127,7 @@ class Main(tester.TestSequence):
                           (s.Iout[i], 0.6), (s.oIsen, 1.003), ))
             d.dcs_vout.output(5.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
-            m.ramp_VoutAdj[i].measure(timeout=5)
+            m.ramp_VoutAdj1[i].measure(timeout=5)
             m.dmm_Vce[i].measure(timeout=5)
             i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
             i_in = m.dmm_Iin1.measure(timeout=5)[1][0]
@@ -147,9 +150,9 @@ class Main(tester.TestSequence):
         for i in range(20):
             self.fifo_push(((s.Vce[i], (-4.5, ) * 20 + (-5.0, -5.02), ),
                           (s.Iout[i], 7.5), (s.oIsen, 10.03), ))
-            d.dcs_vout.output(5.0, True)
+            d.dcs_vout.output(16.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
-            m.ramp_VoutAdj[i].measure(timeout=5)
+            m.ramp_VoutAdj10[i].measure(timeout=5)
             m.dmm_Vce[i].measure(timeout=5)
             i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
             i_in = m.dmm_Iin10.measure(timeout=5)[1][0]

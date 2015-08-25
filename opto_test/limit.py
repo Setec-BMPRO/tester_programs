@@ -11,13 +11,14 @@ DATA = (
     # 1mA +/- 1%.
     ('Iin1', 1, 0.99, 1.01, None, None),
     # 10mA +/- 1%.
-    ('Iin10', 1, 9.9, 10.1, None, None),
+#    ('Iin10', 1, 9.9, 10.1, None, None),
+    ('Iin10', 1, 9.9, 10.5, None, None),
     # Set 0.02 back from -5.0V.
-    ('Vsen', 1, -4.98, None, None, None),
+    ('Vsen', 1, -4.97, None, None, None),
     # -5.0V +/- 1%.
     ('Vce', 1, -5.05, -4.95, None, None),
     ('VoutAdj', 1, 0, 99999, None, None),
-    ('Iout', 1, 0.0, 10.0, None, None),
-    ('CTR', 1, 0, 100, None, None),
-    ('SerNum', 0, None, None, r'^A[0-9]{4}$', None),
+    ('Iout', 1, 0.0, 20.0, None, None),
+    ('CTR', 1, 0, 200, None, None),
+    ('SerNum', 0, None, None, r'^A[0-9]{3}$', None),
     )
