@@ -13,6 +13,7 @@ from tester.devlogical import *
 from tester.measure import *
 
 sensor = tester.sensor
+translate = tester.translate
 
 
 class LogicalDevices():
@@ -86,6 +87,11 @@ class Sensors():
             s = sensor.Vdc(dmm, high=(i + 5), low=1, rng=10, res=0.001)
             self.Iout.append(s)
 
+        tester.TranslationContext = 'opto_test'
+        self.oSnEntry = sensor.DataEntry(
+            message=translate('msgSnEntry'),
+            caption=translate('capSnEntry'))
+
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
         self.oMirCtr.flush()
@@ -122,3 +128,4 @@ class Measurements():
         for sen in sense.Iout:
             m = Measurement(limits['Iout'], sen)
             self.dmm_Iout.append(m)
+        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)

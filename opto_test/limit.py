@@ -19,4 +19,5 @@ DATA = (
     ('VoutAdj', 1, 0, 99999, None, None),
     ('Iout', 1, 0.0, 10.0, None, None),
     ('CTR', 1, 0, 100, None, None),
+    ('SerNum', 0, None, None, r'^A[0-9]{4}$', None),
     )
