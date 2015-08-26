@@ -21,7 +21,8 @@ m = None        # Shortcut to Measurements
 
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
-_RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
+_RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
+#_RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
 #_RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
 _SUBJECT = 'GEN8 Opto Test Data'
 _EMAIL_SERVER = 'smtp.core.setec.com.au'
