@@ -86,7 +86,7 @@ class Sensors():
             s = sensor.Ramp(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
                 detect_limit=(limits['Vsen'], ),
-                start=16.0, stop=22.0, step=0.05, delay=0.02, reset=False)
+                start=16.0, stop=25.0, step=0.05, delay=0.02, reset=False)
             self.VoutAdj10.append(s)
         # Generate a list of 20 Iout voltage sensors.
         self.Iout = []
