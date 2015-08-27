@@ -9,7 +9,8 @@ DATA = (
     ('Isen10', 1, None, 9.95, None, None),
     ('VinAdj', 1, 0, 99999, None, None),
     # 1mA +/- 1%.
-    ('Iin1', 1, 0.99, 1.01, None, None),
+#    ('Iin1', 1, 0.99, 1.01, None, None),
+    ('Iin1', 1, 0.99, 1.05, None, None),
     # 10mA +/- 1%.
 #    ('Iin10', 1, 9.9, 10.1, None, None),
     ('Iin10', 1, 9.9, 10.5, None, None),
