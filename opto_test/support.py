@@ -63,48 +63,31 @@ class Sensors():
         self.oVinAdj1 = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
             detect_limit=(limits['Isen1'], ),
-            start=22.0, stop=24.0, step=0.01, delay=0.02, reset=False)
+            start=22.5, stop=24.0, step=0.01, delay=0.02, reset=False)
         self.oVinAdj10 = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
             detect_limit=(limits['Isen10'], ),
-            start=33.0, stop=35.0, step=0.01, delay=0.02, reset=False)
+            start=33.5, stop=35.0, step=0.01, delay=0.02, reset=False)
         # Generate a list of 20 collector-emitter voltage sensors.
         self.Vce = []
         for i in range(20):
-#            s = sensor.Vdc(dmm, high=(i + 5), low=2, rng=10, res=0.001)
             s = sensor.Vdc(dmm, high=(i + 5), low=2, rng=10, res=0.001, scale=-1)
             self.Vce.append(s)
-
         # Generate a list of 20 VoutAdj ramp sensors for 1mA and 10mA inputs.
-#        self.VoutAdj1 = []
-#        for i in range(20):
-#            s = sensor.Ramp(
-#                stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
-#                detect_limit=(limits['Vsen'], ),
-#                start=5.0, stop=8.0, step=0.05, delay=0.02, reset=False)
-#            self.VoutAdj1.append(s)
-#        self.VoutAdj10 = []
-#        for i in range(20):
-#            s = sensor.Ramp(
-#                stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
-#                detect_limit=(limits['Vsen'], ),
-#                start=16.0, stop=25.0, step=0.05, delay=0.02, reset=False)
-#            self.VoutAdj10.append(s)
         self.VoutAdj1 = []
         for i in range(20):
             s = sensor.Search(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
                 detect_limit=(limits['Vsen'],), response_limit=(limits['Vce'],),
-                left=5.0, right=8.0, resolution=0.1, delay=0.02, reset=False)
+                left=5.0, right=8.0, resolution=0.01, delay=0.1)
             self.VoutAdj1.append(s)
         self.VoutAdj10 = []
         for i in range(20):
             s = sensor.Search(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
                 detect_limit=(limits['Vsen'],), response_limit=(limits['Vce'],),
-                left=15.0, right=25.0, resolution=0.1, delay=0.02, reset=False)
+                left=15.0, right=25.0, resolution=0.01, delay=0.1)
             self.VoutAdj10.append(s)
-
         # Generate a list of 20 Iout voltage sensors.
         self.Iout = []
         for i in range(20):
