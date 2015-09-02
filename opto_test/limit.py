@@ -15,9 +15,12 @@ DATA = (
 #    ('Iin10', 1, 9.9, 10.1, None, None),
     ('Iin10', 1, 9.9, 10.5, None, None),
     # Set 0.02 back from -5.0V.
-    ('Vsen', 1, -4.97, None, None, None),
-    # -5.0V +/- 1%.
-    ('Vce', 1, -5.05, -4.95, None, None),
+#    ('Vsen', 1, -4.97, None, None, None),
+    ('Vsen', 1, 5.0, None, None, None),
+#    # -5.0V +/- 1%.
+#    ('Vce', 1, -5.05, -4.95, None, None),
+    # 5.0V +/- 1%.
+    ('Vce', 1, 4.95, 5.05, None, None),
     ('VoutAdj', 1, 0, 99999, None, None),
     ('Iout', 1, 0.0, 20.0, None, None),
     ('CTR', 1, 0, 200, None, None),

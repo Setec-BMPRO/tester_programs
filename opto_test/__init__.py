@@ -21,9 +21,9 @@ m = None        # Shortcut to Measurements
 
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
-_RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
+#_RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
 #_RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
-#_RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
+_RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
 _SUBJECT = 'GEN8 Opto Test Data'
 _EMAIL_SERVER = 'smtp.core.setec.com.au'
 
@@ -124,9 +124,9 @@ class Main(tester.TestSequence):
 
         """
         for i in range(20):
-            self.fifo_push(((s.Vce[i], (-4.5, ) * 20 + (-5.0, -5.02), ),
+            self.fifo_push(((s.Vce[i], (-5.3, -4.9, -5.02, -5.02)),
                           (s.Iout[i], 0.6), (s.oIsen, 1.003), ))
-            d.dcs_vout.output(5.0, True)
+            d.dcs_vout.output(0.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj1[i].measure(timeout=5)
             m.dmm_Vce[i].measure(timeout=5)
@@ -149,9 +149,9 @@ class Main(tester.TestSequence):
 
         """
         for i in range(20):
-            self.fifo_push(((s.Vce[i], (-4.5, ) * 20 + (-5.0, -5.02), ),
-                          (s.Iout[i], 7.5), (s.oIsen, 10.03), ))
-            d.dcs_vout.output(16.0, True)
+            self.fifo_push(((s.Vce[i], (-5.5, -4.8, -5.2, -4.94, -5.02, -5.02)),
+                          (s.Iout[i], 15.0), (s.oIsen, 10.03), ))
+            d.dcs_vout.output(0.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj10[i].measure(timeout=5)
             m.dmm_Vce[i].measure(timeout=5)
