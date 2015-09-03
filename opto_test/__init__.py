@@ -7,7 +7,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
-import time
 
 import tester
 from . import support
@@ -99,8 +98,7 @@ class Main(tester.TestSequence):
 
          """
         self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.003), ), ))
-        d.dcs_vin.output(0.0, True)
-        d.dcs_vin.linear(0.0, 22.0, 2.0, 0.1)
+        d.dcs_vin.output(15.0, True)
         m.ramp_VinAdj1.measure(timeout=2)
         m.dmm_Iin1.measure(timeout=2)[1][0]
 
@@ -111,12 +109,9 @@ class Main(tester.TestSequence):
 
          """
         self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.03), ), ))
-#        d.dcs_vin.linear(22.0, 33.0, 2.0, 0.1)
-        d.dcs_vin.output(0.0, True)
-        d.dcs_vin.linear(0.0, 33.0, 2.0, 0.1)
+        d.dcs_vin.output(15.0, True)
         m.ramp_VinAdj10.measure(timeout=2)
         m.dmm_Iin10.measure(timeout=2)[1][0]
-#        time.sleep(30)
 
     def _step_out_adj1(self):
         """Output adjust and measure.
