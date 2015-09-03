@@ -78,14 +78,14 @@ class Sensors():
         for i in range(20):
             s = sensor.Search(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
-                detect_limit=(limits['Vsen'],), response_limit=(limits['Vce'],),
+                detect_limit=(limits['Vsen'],), response_limit=(limits['VceAdj'],),
                 left=5.0, right=8.0, resolution=0.01, delay=0.1)
             self.VoutAdj1.append(s)
         self.VoutAdj10 = []
         for i in range(20):
             s = sensor.Search(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
-                detect_limit=(limits['Vsen'],), response_limit=(limits['Vce'],),
+                detect_limit=(limits['Vsen'],), response_limit=(limits['VceAdj'],),
                 left=15.0, right=25.0, resolution=0.01, delay=0.1)
             self.VoutAdj10.append(s)
         # Generate a list of 20 Iout voltage sensors.

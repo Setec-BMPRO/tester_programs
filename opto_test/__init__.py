@@ -7,6 +7,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
+import time
 
 import tester
 from . import support
@@ -43,12 +44,12 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('BoardNum', self._step_boardnum, None, True),
+            ('BoardNum', self._step_boardnum, None, False),
             ('InputAdj', self._step_in_adj1, None, True),
             ('OutputAdj', self._step_out_adj1, None, True),
             ('InputAdj', self._step_in_adj10, None, True),
             ('OutputAdj', self._step_out_adj10, None, True),
-            ('Email', self._step_email, None, True),
+            ('Email', self._step_email, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -99,8 +100,9 @@ class Main(tester.TestSequence):
          """
         self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.003), ), ))
         d.dcs_vin.output(0.0, True)
-        m.ramp_VinAdj1.measure(timeout=5)
-        m.dmm_Iin1.measure(timeout=5)[1][0]
+        d.dcs_vin.linear(0.0, 22.0, 2.0, 0.1)
+        m.ramp_VinAdj1.measure(timeout=2)
+        m.dmm_Iin1.measure(timeout=2)[1][0]
 
     def _step_in_adj10(self):
         """Input adjust and measure.
@@ -109,9 +111,12 @@ class Main(tester.TestSequence):
 
          """
         self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.03), ), ))
+#        d.dcs_vin.linear(22.0, 33.0, 2.0, 0.1)
         d.dcs_vin.output(0.0, True)
-        m.ramp_VinAdj10.measure(timeout=5)
-        m.dmm_Iin10.measure(timeout=5)[1][0]
+        d.dcs_vin.linear(0.0, 33.0, 2.0, 0.1)
+        m.ramp_VinAdj10.measure(timeout=2)
+        m.dmm_Iin10.measure(timeout=2)[1][0]
+#        time.sleep(30)
 
     def _step_out_adj1(self):
         """Output adjust and measure.
@@ -128,10 +133,10 @@ class Main(tester.TestSequence):
                           (s.Iout[i], 0.6), (s.oIsen, 1.003), ))
             d.dcs_vout.output(0.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
-            m.ramp_VoutAdj1[i].measure(timeout=5)
-            m.dmm_Vce[i].measure(timeout=5)
-            i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
-            i_in = m.dmm_Iin1.measure(timeout=5)[1][0]
+            m.ramp_VoutAdj1[i].measure(timeout=2)
+            m.dmm_Vce[i].measure(timeout=2)
+            i_out = m.dmm_Iout[i].measure(timeout=2)[1][0]
+            i_in = m.dmm_Iin1.measure(timeout=2)[1][0]
             ctr = (i_out / i_in) * 100
             self._ctr_data1.append(int(ctr))
             s.oMirCtr.store(ctr)
@@ -153,10 +158,10 @@ class Main(tester.TestSequence):
                           (s.Iout[i], 15.0), (s.oIsen, 10.03), ))
             d.dcs_vout.output(0.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
-            m.ramp_VoutAdj10[i].measure(timeout=5)
-            m.dmm_Vce[i].measure(timeout=5)
-            i_out = m.dmm_Iout[i].measure(timeout=5)[1][0]
-            i_in = m.dmm_Iin10.measure(timeout=5)[1][0]
+            m.ramp_VoutAdj10[i].measure(timeout=2)
+            m.dmm_Vce[i].measure(timeout=2)
+            i_out = m.dmm_Iout[i].measure(timeout=2)[1][0]
+            i_in = m.dmm_Iin10.measure(timeout=2)[1][0]
             ctr = (i_out / i_in) * 100
             self._ctr_data10.append(int(ctr))
             s.oMirCtr.store(ctr)
