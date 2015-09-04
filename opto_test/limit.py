@@ -14,7 +14,7 @@ DATA = (
     ('Iin10', 1, 9.9, 10.5, None, None),
     ('Vsen', 1, 5.0, None, None, None),
     # 5.0V +/- 1%.
-    ('VceAdj', 1, 4.99, 5.01, None, None),
+    ('VceAdj', 1, 4.99, 5.035, None, None),
     ('Vce', 1, 4.95, 5.05, None, None),
     ('VoutAdj', 1, 0, 99999, None, None),
     ('Iout', 1, 0.0, 20.0, None, None),

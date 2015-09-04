@@ -21,9 +21,9 @@ m = None        # Shortcut to Measurements
 
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
-#_RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
+_RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
 #_RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
-_RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
+#_RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
 _SUBJECT = 'GEN8 Opto Test Data'
 _EMAIL_SERVER = 'smtp.core.setec.com.au'
 
@@ -43,12 +43,12 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('BoardNum', self._step_boardnum, None, False),
+            ('BoardNum', self._step_boardnum, None, True),
             ('InputAdj', self._step_in_adj1, None, True),
             ('OutputAdj', self._step_out_adj1, None, True),
             ('InputAdj', self._step_in_adj10, None, True),
             ('OutputAdj', self._step_out_adj10, None, True),
-            ('Email', self._step_email, None, False),
+            ('Email', self._step_email, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -109,7 +109,7 @@ class Main(tester.TestSequence):
 
          """
         self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.03), ), ))
-        d.dcs_vin.output(15.0, True)
+        d.dcs_vin.output(20.0, True)
         m.ramp_VinAdj10.measure(timeout=2)
         m.dmm_Iin10.measure(timeout=2)[1][0]
 
