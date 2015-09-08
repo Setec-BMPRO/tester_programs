@@ -17,7 +17,7 @@ DATA = (
     # 5.0V +/- 1%.
     ('Vce', 1, 4.95, 5.05, None, None),
     ('VoutAdj', 1, 0, 99999, None, None),
-    ('Iout', 1, 0.0, 20.0, None, None),
-    ('CTR', 1, 0, 200, None, None),
+    ('Iout', 1, 0.0, 22.0, None, None),
+    ('CTR', 1, 0, 220, None, None),
     ('SerNum', 0, None, None, r'^A[0-9]{3}$', None),
     )
