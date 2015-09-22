@@ -6,8 +6,6 @@
         Measurements
 
 """
-from pydispatch import dispatcher
-
 import tester
 from tester.devlogical import *
 from tester.measure import *
@@ -31,7 +29,7 @@ class LogicalDevices():
 
         self.dcs_Vin = dcsource.DCSource(devices['DCS1'])
 
-        self.rla_ = relay.Relay(devices['RLA1'])   # ON == Asserted
+        self.dcl = dcload.DCLoad(devices['DCL1'])
 
 
     def error_check(self):
@@ -43,9 +41,8 @@ class LogicalDevices():
         # Switch off DC Sources
         for dcs in (self.dcs_Vin, ):
             dcs.output(0.0, False)
-        # Switch off all Relays
-        for rla in (self.rla_, ):
-            rla.set_off()
+        # Switch off DC Load
+        self.dcl.output(0.0, False)
 
 
 class Sensors():
@@ -60,21 +57,15 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-        # Mirror sensor for Programming result logging
-        self.oMirARM = sensor.Mirror()
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
-        self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self.oBrake = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
+        self.oLight = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         tester.TranslationContext = 'trs1_final'
-        self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
-
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensor."""
-        self.oMirARM.flush()
+        self.oNotifyPinOut = sensor.Notify(
+            message=translate('msgPinOut'),
+            caption=translate('capPinOut'))
+        self.oYesNoGreen = sensor.YesNo(
+            message=translate('IsLedGreen?'),
+            caption=translate('capLedGreen'))
 
 
 class Measurements():
@@ -88,7 +79,13 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.dmm_Vin = Measurement(limits['Vin'], sense.oVin)
+        self.dmm_brakeoff = Measurement(limits['BrakeOff'], sense.oBrake)
+        self.dmm_brakeon = Measurement(limits['BrakeOn'], sense.oBrake)
+        self.dmm_lightoff = Measurement(limits['LightOff'], sense.oLight)
+        self.dmm_lighton = Measurement(limits['LightOn'], sense.oLight)
+        self.ui_NotifyPinOut = Measurement(
+            limits['Notify'], sense.oNotifyPinOut)
+        self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
 
 
 class SubTests():
@@ -107,5 +104,11 @@ class SubTests():
         # PowerUp:
         dcs1 = DcSubStep(
             setting=((d.dcs_Vin, 12.0), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_Vin, ), timeout=5)
+        msr1 = MeasureSubStep((m.dmm_brakeoff, m.dmm_lightoff), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
+
+        # BreakAway:
+        ld1 = LoadSubStep( ((d.dcl, 1.0), ), output=True)
+        msr1 = MeasureSubStep((m.ui_NotifyPinOut, m.dmm_brakeon,
+                            m.dmm_lighton, m.ui_YesNoGreen), timeout=5)
+        self.brkaway = Step((ld1, msr1, ))

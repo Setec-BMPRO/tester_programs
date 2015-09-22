@@ -36,6 +36,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
+            ('BreakAway', self._step_breakaway, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -73,5 +74,12 @@ class Main(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oVin, 12.0), ))
+        self.fifo_push(((s.oVin, 12.0), (s.oBrake, 0.0), (s.oLight, 0.0), ))
         t.pwr_up.run()
+
+    def _step_breakaway(self):
+        """Measure under 'breakaway' condition."""
+        self.fifo_push(((s.oBrake, 12.0), (s.oLight, 12.0),
+                      (s.oGreen, (0.0, 12.0)), (s.oRed, (12.0, 0.0)),
+                      (s.oTimer, ((0.8,), (2.2,), )),  ))
+        t.brkaway.run()
