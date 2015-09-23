@@ -64,8 +64,9 @@ class Sensors():
         self.o5V = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self.oBrake = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
         self.oLight = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
-        self.oGreen = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
-        self.oRed = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.01)
+        self.oRemote = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
+        self.oGreen = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.01)
+        self.oRed = sensor.Vdc(dmm, high=7, low=1, rng=100, res=0.01)
 
         tbase = sensor.Timebase(
             range=10.0, main_mode=True, delay=0, centre_ref=False)
@@ -100,6 +101,8 @@ class Measurements():
         self.dmm_brakeon = Measurement(limits['BrakeOn'], sense.oBrake)
         self.dmm_lightoff = Measurement(limits['LightOff'], sense.oLight)
         self.dmm_lighton = Measurement(limits['LightOn'], sense.oLight)
+        self.dmm_remoteoff = Measurement(limits['BrakeOff'], sense.oRemote)
+        self.dmm_remoteon = Measurement(limits['BrakeOn'], sense.oRemote)
         self.dmm_greenoff = Measurement(limits['LedOff'], sense.oGreen)
         self.dmm_greenon = Measurement(limits['LedOn'], sense.oGreen)
         self.dmm_redoff = Measurement(limits['LedOff'], sense.oRed)
@@ -124,14 +127,14 @@ class SubTests():
         # PowerUp:
         dcs1 = DcSubStep(
             setting=((d.dcs_Vin, 12.0), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_Vin, m.dmm_brakeoff,
-                             m.dmm_lightoff), timeout=5)
+        msr1 = MeasureSubStep((m.dmm_Vin, m.dmm_brakeoff, m.dmm_lightoff,
+                             m.dmm_remoteoff), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
 
         # BreakAway:
         rly1 = RelaySubStep(((d.rla_brksw, True), ))
-        msr1 = MeasureSubStep((m.dmm_brakeon, m.dmm_lighton, m.dmm_greenon,
-                             m.dmm_redoff), timeout=5)
+        msr1 = MeasureSubStep((m.dmm_brakeon, m.dmm_lighton, m.dmm_remoteon,
+                             m.dmm_greenon, m.dmm_redoff), timeout=5)
         dcs1 = DcSubStep(
             setting=((d.dcs_Vin, 10.0), ))
         msr2 = MeasureSubStep((m.dmm_greenoff, m.dmm_redon), timeout=5)

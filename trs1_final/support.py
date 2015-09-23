@@ -59,6 +59,7 @@ class Sensors():
         dmm = logical_devices.dmm
         self.oBrake = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
         self.oLight = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
+        self.oRemote = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
         tester.TranslationContext = 'trs1_final'
         self.oNotifyPinOut = sensor.Notify(
             message=translate('msgPinOut'),
@@ -83,6 +84,8 @@ class Measurements():
         self.dmm_brakeon = Measurement(limits['BrakeOn'], sense.oBrake)
         self.dmm_lightoff = Measurement(limits['LightOff'], sense.oLight)
         self.dmm_lighton = Measurement(limits['LightOn'], sense.oLight)
+        self.dmm_remoteoff = Measurement(limits['BrakeOff'], sense.oRemote)
+        self.dmm_remoteon = Measurement(limits['BrakeOn'], sense.oRemote)
         self.ui_NotifyPinOut = Measurement(
             limits['Notify'], sense.oNotifyPinOut)
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
@@ -104,11 +107,11 @@ class SubTests():
         # PowerUp:
         dcs1 = DcSubStep(
             setting=((d.dcs_Vin, 12.0), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_brakeoff, m.dmm_lightoff), timeout=5)
+        msr1 = MeasureSubStep((m.dmm_brakeoff, m.dmm_lightoff, m.dmm_remoteoff), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
 
         # BreakAway:
         ld1 = LoadSubStep( ((d.dcl, 1.0), ), output=True)
-        msr1 = MeasureSubStep((m.ui_NotifyPinOut, m.dmm_brakeon,
-                            m.dmm_lighton, m.ui_YesNoGreen), timeout=5)
+        msr1 = MeasureSubStep((m.ui_NotifyPinOut, m.dmm_brakeon, m.dmm_lighton,
+                             m.dmm_remoteon, m.ui_YesNoGreen), timeout=5)
         self.brkaway = Step((ld1, msr1, ))
