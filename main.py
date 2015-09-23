@@ -26,6 +26,7 @@ import c15d15_final
 import c45a15_initial
 import c45a15_final
 import cmrsbp_all
+import cn101_initial
 import drifter_initial
 import drifter_final
 import etracII_initial
@@ -149,6 +150,7 @@ def _main():
         ('CMR8D-FIN', cmrsbp_all.Main, cmrsbp_all.LIMIT_DATA_8D),
         ('CMR13F-FIN', cmrsbp_all.Main, cmrsbp_all.LIMIT_DATA_13F),
         ('CMR17L-FIN', cmrsbp_all.Main, cmrsbp_all.LIMIT_DATA_17L),
+        ('CN101 Initial', cn101_initial.Main, cn101_initial.LIMIT_DATA),
         ('Drifter Initial', drifter_initial.Main, drifter_initial.LIMIT_DATA),
         ('Drifter Final', drifter_final.Main, drifter_final.LIMIT_DATA),
         ('Drifter BM Initial', drifter_initial.Main,
@@ -185,7 +187,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'Opto Test',
+        'CN101 Initial',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
