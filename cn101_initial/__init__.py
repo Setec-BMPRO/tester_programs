@@ -57,7 +57,9 @@ class Main(tester.TestSequence):
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
-            ('TestBlueTooth', self._step_test_bluetooth, None, True),
+            ('BlueTooth', self._step_bluetooth, None, True),
+            ('MotorControl', self._step_motor_control, None, True),
+            ('TankSense', self._step_tank_sense, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -174,7 +176,7 @@ class Main(tester.TestSequence):
         self._cn101.can_mode(True)
         m.cn101_can_id.measure()
 
-    def _step_test_bluetooth(self):
+    def _step_bluetooth(self):
         """Test the Bluetooth transmitter function."""
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
         if self._fifo:
@@ -184,3 +186,12 @@ class Main(tester.TestSequence):
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         s.oMirBT.store(0 if reply else 1)
         m.detectBT.measure()
+
+    def _step_motor_control(self):
+        """Activate awnings, slideouts and measure."""
+        self.fifo_push(((s.oAwnA, (12.0, 0.0)), (s.oAwnB, (12.0, 0.0)),
+                      (s.oSldA, (12.0, 0.0)), (s.oSldB, (12.0, 0.0)), ))
+        t.motctrl.run()
+
+    def _step_tank_sense(self):
+        """Activate tank sensors and read."""

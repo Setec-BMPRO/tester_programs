@@ -9,6 +9,10 @@ DATA = (
     ('Vin', 1, 11.5, 12.5, None, None),
     # 3.3 +/- 3%
     ('3V3', 1, 3.25, 3.35, None, None),
+    ('AwnOff', 1, 0.5, None, None, None),
+    ('AwnOn', 1, 11.5, 12.5, None, None),
+    ('SldOutOff', 1, 0.5, None, None, None),
+    ('SldOutOn', 1, 11.5, 12.5, None, None),
     ('Program', 2, -0.1, 0.1, None, None),
     # Serial Number entry
     ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
