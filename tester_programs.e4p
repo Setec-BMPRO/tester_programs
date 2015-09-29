@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-09-01, 14:20:33 -->
+<!-- Saved: 2015-09-29, 15:08:30 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -209,6 +209,13 @@
     <Source>opto_test/limit.py</Source>
     <Source>tester/sensor/search.py</Source>
     <Source>tester/sensor/test/test_search.py</Source>
+    <Source>bc15_final/support.py</Source>
+    <Source>bc15_final/__init__.py</Source>
+    <Source>bc15_final/limit.py</Source>
+    <Source>bc15_initial/support.py</Source>
+    <Source>bc15_initial/__init__.py</Source>
+    <Source>bc15_initial/limit.py</Source>
+    <Source>share/bc15.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
