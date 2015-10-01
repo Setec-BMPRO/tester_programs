@@ -485,7 +485,7 @@ class ArmConsoleGen1():
 
         """
         if command:
-            if self.simulation:     # Auto simulate the command echo
+            if self._port.simulation:     # Auto simulate the command echo
                 # Push echo at high priority so it is returned first
                 self.puts(command, preflush=1, priority=True)
             self._write_command(command)
