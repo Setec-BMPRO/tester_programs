@@ -25,9 +25,9 @@ class Console(ArmConsoleGen1):
 
     """Communications to BP35 console."""
 
-    def __init__(self, simulation=False, **kwargs):
+    def __init__(self, port):
         """Create console instance."""
-        super().__init__(dialect=1, simulation=simulation, **kwargs)
+        super().__init__(port, dialect=1)
         self.cmd_data = {
             # Read-Write values
             'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),

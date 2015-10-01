@@ -68,10 +68,13 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._bp35 = share.bp35.Console(
+        # Serial connection to the BP35 console
+        bp35_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
-        self._bp35.setPort(_ARM_PORT)
+        bp35_ser.setPort(_ARM_PORT)
+        # BP35 Console driver
+        self._bp35 = share.bp35.Console(bp35_ser)
 
     def open(self):
         """Prepare for testing."""

@@ -27,7 +27,6 @@ Implements the methods to expose ARM readings as Sensors.
 import logging
 import time
 
-from share.sim_serial import SimSerial
 import tester
 
 # Command trigger
@@ -295,36 +294,93 @@ class ParameterRaw(_Parameter):
         return value
 
 
-class ArmConsoleGen1(SimSerial):
+class ArmConsoleGen1():
 
     """Communications to First Generation ARM console."""
 
-    def __init__(self, dialect=0, simulation=False, **kwargs):
+    def __init__(self, port, dialect=0):
         """Initialise communications.
 
+        @param port Serial port to use
         @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
 
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
+        port.timeout = 10240 / port.baudrate  # Timeout of 1kB
+        self._port = port
         self._dialect = dialect
         self._can_tunnel = False        # CAN tunneling OFF
         self._read_key = None
         # Data readings: Key=Name, Value=Parameter
         self.cmd_data = {}
-        # Initialise the SimSerial()
-        super().__init__(simulation=simulation, **kwargs)
 
-    def setPort(self, port):
-        """Set serial port.
+####
+##  Start of Serial compatible interface
 
-        @param port Serial port to use.
-        Set an appropriate serial read timeout.
+    def open(self):
+        """Serial: Open serial port."""
+        self._port.open()
 
-        """
-        self._logger.debug('Set port: %s', port)
-        self.timeout = 10240 / self.baudrate  # Timeout of 1kB
-        super().setPort(port)
+    def puts(self):
+        """Serial: Put a string into the serial read-back buffer."""
+        self._port.puts()
+
+#    def read_serial(self, size=1):
+#        """Serial: Read the buffer, then the device."""
+#
+#    def write(self, data):
+#        """Serial: Write data bytes to the written-out queue."""
+#
+#    def inWaiting(self):
+#        """Serial: Return the number of bytes in the input buffer."""
+#
+#    def flush(self):
+#        """Serial: Wait until all output data has been sent."""
+#
+#    def flushInput(self):
+#        """Serial: Discard waiting input."""
+#
+#    def flushOutput(self):
+#        """Serial: Discard waiting output."""
+
+    def close(self):
+        """Serial: Close serial port."""
+        self._port.close()
+
+##  End of Serial compatible interface
+####
+
+####
+#   Console tunneling is only be available on Trek2 and CN101 (as of 2015-08).
+#       "TCC,<remote CAN ID>,3,<local CAN ID>,1
+#           Turns on console tunneling
+#       "RRC....                                                                                                            - response
+#       "TCC,<remote CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
+#           Outgoing DATA
+#       "RRC,<local CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
+#           Incoming DATA
+#       "TCC,<remote CAN ID>,3,<local CAN ID>,0
+#           Turns off console tunneling
+#       "RRC.....
+#
+#       <CAN ID> = 16 bit in 2 bytes big endian eg: "0,16"
+####
+
+#    def ct_open(self, target_id):
+#        """Open a CAN tunnel.
+#
+#        The console of the target device will be presented as if it where
+#        the console of this instance.
+#
+#        @param target_id CAN ID of the target device."""
+## TODO: Open the CAN tunnel
+#        self._can_tunnel = True
+#
+#    def ct_close(self):
+#        """Close the CAN tunnel."""
+## TODO: Close the CAN tunnel
+#        self._can_tunnel = False
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -334,13 +390,15 @@ class ArmConsoleGen1(SimSerial):
         """Sensor: Dummy OPC."""
         pass
 
-    def read(self):
+    def read_sensor(self):
         """Sensor: Read ARM data using the last defined key.
 
         @return Value
 
         """
         return self[self._read_key]
+
+    read = read_sensor      # or read_serial in CAN tunnel mode
 
     def __getitem__(self, key):
         """Read a value from the ARM.
@@ -393,7 +451,7 @@ class ArmConsoleGen1(SimSerial):
         self.action('$DEADBEA7 UNLOCK')
 
     def restart(self):
-        """Restart ARM (It must be unlocked)."""
+        """Restart ARM (It must be unlocked first)."""
         self._logger.debug('Restart')
         # We expect to see 2 banner lines after a restart
         self.action('RESTART', delay=0.5, expected=2)
@@ -446,17 +504,17 @@ class ArmConsoleGen1(SimSerial):
         """
         self._logger.debug('--> %s', repr(command))
         cmd_data = command.encode()
-        self.flushInput()
+        self._port.flushInput()
         # Send each byte with echo verification
         for a_byte in cmd_data:
             a_byte = bytes([a_byte])
-            self._write(a_byte)
-            echo = self._read(1)
+            self._port.write(a_byte)
+            echo = self._port.read(1)
             if echo != a_byte:
                 raise ArmError(
                     'Command echo error. Tx: {}, Rx: {}'.format(a_byte, echo))
         # And the command RUN, without echo
-        self._write(_CMD_RUN)
+        self._port.write(_CMD_RUN)
 
     def _read_response(self, expected):
         """Read a response.
@@ -467,7 +525,7 @@ class ArmConsoleGen1(SimSerial):
 
         """
         # Read until a timeout happens
-        buf = self._read(1024)
+        buf = self._port.read(1024)
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
         if buf.endswith(_CMD_PROMPT1):
@@ -492,30 +550,3 @@ class ArmConsoleGen1(SimSerial):
             raise ArmError(
                 'Expected {}, actual {}'.format(expected, response_count))
         return response
-
-    def ct_open(self, target_id):
-        """Open a CAN tunnel.
-
-        The console of the target device will be presented as if it where
-        the console of this instance.
-
-        @param target_id CAN ID of the target device."""
-# TODO: Open the CAN tunnel
-        self._can_tunnel = True
-
-    def ct_close(self):
-        """Close a CAN tunnel."""
-# TODO: Close the CAN tunnel
-        self._can_tunnel = False
-
-    def _read(self, size=1):
-        """Read characters from CAN tunnel or serial."""
-        if not self._can_tunnel:
-            return super().read(size)
-# TODO: Read the CAN tunnel
-
-    def _write(self, data):
-        """Write characters to CAN tunnel or serial."""
-        if not self._can_tunnel:
-            super().write(data)
-# TODO: Write to the CAN tunnel

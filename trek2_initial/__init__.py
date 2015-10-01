@@ -61,10 +61,13 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._trek2 = share.trek2.Console(
+        # Serial connection to the Trek2 console
+        trek2_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
-        self._trek2.setPort(_ARM_PORT)
+        trek2_ser.setPort(_ARM_PORT)
+        # BP35 Console driver
+        self._trek2 = share.trek2.Console(trek2_ser)
 
     def open(self):
         """Prepare for testing."""
