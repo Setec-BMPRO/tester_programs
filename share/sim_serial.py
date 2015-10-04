@@ -104,7 +104,6 @@ class SimSerial(_Simulator, serial.Serial):
         self._logger.debug('Open port')
         if not self.simulation:
             super().open()
-        self._isOpen = True
 
     def close(self):
         """Close port."""
@@ -114,7 +113,6 @@ class SimSerial(_Simulator, serial.Serial):
                 super().close()
             except:
                 pass
-        self._isOpen = False
 
     def makeDeviceName(self, port):
         return 'simulation'

@@ -70,7 +70,7 @@ class Main(tester.TestSequence):
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
         trek2_ser.setPort(_ARM_PORT)
-        # BP35 Console driver
+        # Trek2 Console driver
         self._trek2 = share.trek2.Console(trek2_ser)
 
     def open(self):

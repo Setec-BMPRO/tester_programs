@@ -28,6 +28,7 @@ import logging
 import time
 
 import tester
+import share.sim_serial
 
 # Command trigger
 _CMD_RUN = b'\r'
@@ -310,77 +311,21 @@ class ArmConsoleGen1():
         port.timeout = 10240 / port.baudrate  # Timeout of 1kB
         self._port = port
         self._dialect = dialect
-        self._can_tunnel = False        # CAN tunneling OFF
         self._read_key = None
         # Data readings: Key=Name, Value=Parameter
         self.cmd_data = {}
 
-####
-##  Start of Serial compatible interface
-
     def open(self):
-        """Serial: Open serial port."""
+        """Open serial port."""
         self._port.open()
 
     def puts(self):
-        """Serial: Put a string into the serial read-back buffer."""
+        """Put a string into the SimSerial read-back buffer."""
         self._port.puts()
 
-#    def read_serial(self, size=1):
-#        """Serial: Read the buffer, then the device."""
-#
-#    def write(self, data):
-#        """Serial: Write data bytes to the written-out queue."""
-#
-#    def inWaiting(self):
-#        """Serial: Return the number of bytes in the input buffer."""
-#
-#    def flush(self):
-#        """Serial: Wait until all output data has been sent."""
-#
-#    def flushInput(self):
-#        """Serial: Discard waiting input."""
-#
-#    def flushOutput(self):
-#        """Serial: Discard waiting output."""
-
     def close(self):
-        """Serial: Close serial port."""
+        """Close serial port."""
         self._port.close()
-
-##  End of Serial compatible interface
-####
-
-####
-#   Console tunneling is only be available on Trek2 and CN101 (as of 2015-08).
-#       "TCC,<remote CAN ID>,3,<local CAN ID>,1
-#           Turns on console tunneling
-#       "RRC....                                                                                                            - response
-#       "TCC,<remote CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
-#           Outgoing DATA
-#       "RRC,<local CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
-#           Incoming DATA
-#       "TCC,<remote CAN ID>,3,<local CAN ID>,0
-#           Turns off console tunneling
-#       "RRC.....
-#
-#       <CAN ID> = 16 bit in 2 bytes big endian eg: "0,16"
-####
-
-#    def ct_open(self, target_id):
-#        """Open a CAN tunnel.
-#
-#        The console of the target device will be presented as if it where
-#        the console of this instance.
-#
-#        @param target_id CAN ID of the target device."""
-## TODO: Open the CAN tunnel
-#        self._can_tunnel = True
-#
-#    def ct_close(self):
-#        """Close the CAN tunnel."""
-## TODO: Close the CAN tunnel
-#        self._can_tunnel = False
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -390,15 +335,13 @@ class ArmConsoleGen1():
         """Sensor: Dummy OPC."""
         pass
 
-    def read_sensor(self):
+    def read(self):
         """Sensor: Read ARM data using the last defined key.
 
         @return Value
 
         """
         return self[self._read_key]
-
-    read = read_sensor      # or read_serial in CAN tunnel mode
 
     def __getitem__(self, key):
         """Read a value from the ARM.
@@ -550,3 +493,119 @@ class ArmConsoleGen1():
             raise ArmError(
                 'Expected {}, actual {}'.format(expected, response_count))
         return response
+
+
+class CanId():
+
+    """A CAN Device ID."""
+
+    def __init__(self, device_id):
+        """Create a CAN ID instance."""
+        self._device_id = device_id
+
+    def _str(self):
+        """String representation of a Device ID.
+
+        @return ID as 2 bytes big-endian eg: "0,16"
+
+        """
+        return '{},{}'.format(
+            (self._device_id & 0xFF00) >> 8,
+            (self._device_id & 0xFF),
+            )
+
+
+class ArmConsoleGen1CanTunnel(ArmConsoleGen1):
+
+    """A CAN Tunnel to a First Generation ARM console.
+
+    Console tunneling is only available on Trek2 and CN101 (as of 2015-08).
+
+    A serial port is used to communicate with a Serial to CAN interface
+    device (A modified Trek2 inside a test fixture).
+
+    A SimSerial object is used to do input data buffering of the decoded
+    data received over the CAN Tunnel.
+
+    This object presents the same interface as a SimSerial object, and is
+    used as the 'port' by another ArmConsoleGen1 instance.
+
+    """
+
+    def __init__(self, port, local_id=16, dialect=0):
+        """Initialise communications.
+
+        @param port Serial port to connect to Serial to CAN interface.
+        @param my_id My CAN bus ID (16-bit).
+        @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
+
+        """
+        self._can_tunnel = False        # CAN tunneling OFF
+        self._local_id = CanId(local_id)
+        self._target_id = None
+        # Create & open a SimSerial in simulation mode.
+        # We can open it any time as there is no actual serial port.
+        self._buf_port = share.sim_serial.SimSerial(simulation=True)
+        self._buf_port.open()
+        super().__init__(port, dialect)
+
+    def open(self, target_id):
+        """Open a CAN tunnel.
+
+        @param target_id CAN ID of the target device.
+
+        """
+        self._target_id = target_id
+# TODO: Open the CAN tunnel
+#       "TCC,<remote CAN ID>,3,<local CAN ID>,1 CAN
+#           Turns on console tunneling
+#       "RRC....
+#           Response
+        self._target_id = CanId(target_id)
+        command = '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id)
+        self.action(command)
+        self._can_tunnel = True
+
+    def close(self):
+        """Close the CAN tunnel."""
+# TODO: Close the CAN tunnel
+#       "TCC,<remote CAN ID>,3,<local CAN ID>,0 CAN
+#           Turns off console tunneling
+#       "RRC....
+#           Response
+        command = '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id)
+        self.action(command)
+        self._can_tunnel = False
+
+    def puts(self, string_data, preflush=0, postflush=0, priority=False):
+        """Serial: Put a string into the _buf_port read-back buffer."""
+        self._buf_port.puts(string_data, preflush, postflush, priority)
+
+    def read_serial(self, size=1):
+        """Serial: Read the input buffer."""
+# TODO: Read any data from CAN Tunnel into _buf_port
+#       "RRC,<local CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
+#           Incoming DATA
+        self._buf_port.read(size)
+
+    def write(self, data):
+        """Serial: Write data bytes to the tunnel."""
+# TODO: Write data to CAN Tunnel
+#       "TCC,<remote CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
+#           Outgoing DATA
+
+    def inWaiting(self):
+        """Serial: Return the number of bytes in the input buffer."""
+        return self._buf_port.inWaiting()
+
+    def flush(self):
+        """Serial: Wait until all output data has been sent."""
+        self._buf_port.flush()
+
+    def flushInput(self):
+        """Serial: Discard waiting input."""
+        self._buf_port.flushInput()
+
+    def flushOutput(self):
+        """Serial: Discard waiting output."""
+        self._buf_port.flushOutput()
