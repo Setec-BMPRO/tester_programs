@@ -503,7 +503,7 @@ class CanId():
         """Create a CAN ID instance."""
         self._device_id = device_id
 
-    def _str(self):
+    def __str__(self):
         """String representation of a Device ID.
 
         @return ID as 2 bytes big-endian eg: "0,16"
@@ -555,13 +555,13 @@ class ArmConsoleGen1CanTunnel(ArmConsoleGen1):
         @param target_id CAN ID of the target device.
 
         """
-        self._target_id = target_id
+        super().open()
+        self._target_id = CanId(target_id)
 # TODO: Open the CAN tunnel
 #       "TCC,<remote CAN ID>,3,<local CAN ID>,1 CAN
 #           Turns on console tunneling
 #       "RRC....
 #           Response
-        self._target_id = CanId(target_id)
         command = '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id)
         self.action(command)
         self._can_tunnel = True
@@ -575,6 +575,7 @@ class ArmConsoleGen1CanTunnel(ArmConsoleGen1):
 #           Response
         command = '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id)
         self.action(command)
+        super().close()
         self._can_tunnel = False
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):

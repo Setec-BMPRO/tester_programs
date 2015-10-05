@@ -1,17 +1,27 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Trek2 Final Test Program."""
 
 import logging
 import time
+import os
 
 import tester
 from . import support
 from . import limit
+import share.arm_gen1
+import share.sim_serial
+
 
 MeasureGroup = tester.measure.group
 
 LIMIT_DATA = limit.DATA
+
+# Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
+_CAN_PORT = {'posix': '/dev/ttyUSB0',
+             'nt':    'COM10',
+             }[os.name]
+# Trek2 unit CAN Bus ID
+_TREK2_ID = 32
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -35,8 +45,9 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('CanBus', self._step_canbus, None, True),
+            ('PowerUp', self._step_power_up, None, False),
+            ('Tunnel', self._step_tunnel, None, True),
+            ('CanBus', self._step_canbus, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -45,6 +56,15 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
+        # Connection to the Serial-to-CAN Trek2 inside the fixture
+#        ser_can = share.sim_serial.SimSerial(
+#            simulation=self._fifo, baudrate=115200, timeout=0.1)
+        ser_can = share.sim_serial.SimSerial(
+            simulation=False, baudrate=115200, timeout=0.1)
+        # Set port separately, as we don't want it opened yet
+        ser_can.setPort(_CAN_PORT)
+        # CAN Console tunnel driver
+        self._tunnel = share.arm_gen1.ArmConsoleGen1CanTunnel(ser_can)
 
     def open(self):
         """Prepare for testing."""
@@ -84,8 +104,12 @@ class Main(tester.TestSequence):
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
         self.fifo_push(((s.oVin, 12.0), ))
-
         t.pwr_up.run()
+
+    def _step_tunnel(self):
+        """Open console tunnel."""
+        self._tunnel.open(_TREK2_ID)
+        self._tunnel.close()
 
     def _step_canbus(self):
         """Test the CAN Bus."""

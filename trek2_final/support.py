@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Trek2 Final Test Program.
+"""Trek2 Final Test Program.
 
         Logical Devices
         Sensors
         Measurements
 
 """
+
 import tester
 from tester.devlogical import *
 from tester.measure import *
@@ -30,8 +29,10 @@ class LogicalDevices():
 
         self.dmm = dmm.DMM(devices['DMM'])
 
-        self.dcs_Vcom = dcsource.DCSource(devices['DCS1']) # Power RS232 + Fixture Trek2.
-        self.dcs_Vin = dcsource.DCSource(devices['DCS2']) # Power unit under test.
+        # Power RS232 + Fixture Trek2.
+        self.dcs_Vcom = dcsource.DCSource(devices['DCS1'])
+        # Power unit under test.
+        self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
 
         self.rla_s1 = relay.Relay(devices['RLA3'])    # ON == Asserted
         self.rla_s2 = relay.Relay(devices['RLA4'])    # ON == Asserted
@@ -86,8 +87,10 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.ui_YesNoBklight = Measurement(limits['Notify'], sense.oYesNoBklight)
-        self.ui_YesNoLevel = Measurement(limits['Notify'], sense.oYesNoLevel)
+        self.ui_YesNoBklight = Measurement(
+            limits['Notify'], sense.oYesNoBklight)
+        self.ui_YesNoLevel = Measurement(
+            limits['Notify'], sense.oYesNoLevel)
 
 
 class SubTests():
@@ -104,6 +107,7 @@ class SubTests():
         d = logical_devices
 
         # PowerUp:
-        dcs1 = DcSubStep(setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.0)), output=True)
+        dcs1 = DcSubStep(
+            setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.0)),
+            output=True)
         self.pwr_up = Step((dcs1, ))
-
