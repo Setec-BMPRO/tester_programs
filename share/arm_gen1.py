@@ -316,7 +316,7 @@ class ArmConsoleGen1():
         self.cmd_data = {}
 
     def open(self):
-        """Open serial port."""
+        """Open port."""
         self._port.open()
 
     def puts(self):
@@ -532,47 +532,36 @@ class ArmConsoleGen1CanTunnel(ArmConsoleGen1):
 
     """
 
-    def __init__(self, port, local_id=16, dialect=0):
+    def __init__(self, port, local_id=16, target_id = 32, dialect=0):
         """Initialise communications.
 
         @param port Serial port to connect to Serial to CAN interface.
-        @param my_id My CAN bus ID (16-bit).
+        @param local_id My CAN bus ID (16-bit).
+        @param target_id Remote CAN bus ID (16-bit).
         @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
 
         """
         self._can_tunnel = False        # CAN tunneling OFF
         self._local_id = CanId(local_id)
-        self._target_id = None
+        self._target_id = CanId(target_id)
         # Create & open a SimSerial in simulation mode.
         # We can open it any time as there is no actual serial port.
         self._buf_port = share.sim_serial.SimSerial(simulation=True)
         self._buf_port.open()
+        self.baudrate = 115200
+        self.timeout = 0.1
+        self.simulation = False
         super().__init__(port, dialect)
 
-    def open(self, target_id):
-        """Open a CAN tunnel.
-
-        @param target_id CAN ID of the target device.
-
-        """
-        super().open()
-        self._target_id = CanId(target_id)
-# TODO: Open the CAN tunnel
-#       "TCC,<remote CAN ID>,3,<local CAN ID>,1 CAN
-#           Turns on console tunneling
-#       "RRC....
-#           Response
+    def open(self):
+        """Open a CAN tunnel."""
+        super().open()      # Open underlying console & serial port
         command = '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id)
         self.action(command)
         self._can_tunnel = True
 
     def close(self):
         """Close the CAN tunnel."""
-# TODO: Close the CAN tunnel
-#       "TCC,<remote CAN ID>,3,<local CAN ID>,0 CAN
-#           Turns off console tunneling
-#       "RRC....
-#           Response
         command = '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id)
         self.action(command)
         super().close()
@@ -582,7 +571,7 @@ class ArmConsoleGen1CanTunnel(ArmConsoleGen1):
         """Serial: Put a string into the _buf_port read-back buffer."""
         self._buf_port.puts(string_data, preflush, postflush, priority)
 
-    def read_serial(self, size=1):
+    def read(self, size=1):
         """Serial: Read the input buffer."""
 # TODO: Read any data from CAN Tunnel into _buf_port
 #       "RRC,<local CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>

@@ -64,7 +64,10 @@ class Main(tester.TestSequence):
         # Set port separately, as we don't want it opened yet
         ser_can.setPort(_CAN_PORT)
         # CAN Console tunnel driver
-        self._tunnel = share.arm_gen1.ArmConsoleGen1CanTunnel(ser_can)
+        self._tunnel = share.arm_gen1.ArmConsoleGen1CanTunnel(
+            port=ser_can, local_id=16, target_id = 32, dialect=0)
+        # Trek2 Console driver (using the CAN Tunnel)
+        self._trek2 = share.trek2.Console(port=self._tunnel)
 
     def open(self):
         """Prepare for testing."""
@@ -108,8 +111,11 @@ class Main(tester.TestSequence):
 
     def _step_tunnel(self):
         """Open console tunnel."""
-        self._tunnel.open(_TREK2_ID)
-        self._tunnel.close()
+        self._trek2.open()
+
+        self._trek2['SwVer']
+
+        self._trek2.close()
 
     def _step_canbus(self):
         """Test the CAN Bus."""
