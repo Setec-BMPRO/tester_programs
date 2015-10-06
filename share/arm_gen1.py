@@ -579,10 +579,27 @@ class ArmConsoleGen1CanTunnel(ArmConsoleGen1):
         self._buf_port.read(size)
 
     def write(self, data):
-        """Serial: Write data bytes to the tunnel."""
-# TODO: Write data to CAN Tunnel
+        """Serial: Write data bytes to the tunnel.
+
+        The maximum tunnel payload is 8 data bytes, so we must cut the
+        data into payload size chunks.
+
+        """
 #       "TCC,<remote CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
 #           Outgoing DATA
+        while len(data) > 0:
+            if len(data) > 8:           # Use 8 bytes max at a time
+                byte_data = data[:8]
+                byte_count = 8
+                data = data[8:]
+            else:
+                byte_data = data
+                byte_count = len(data)
+            byte_data = ','.join(str(c) for c in data)
+            command = '"TCC,{},4,{},{},{} CAN'.format(
+                self._target_id, self._local_id,
+                byte_count, byte_data)
+            self.action(command)
 
     def inWaiting(self):
         """Serial: Return the number of bytes in the input buffer."""
