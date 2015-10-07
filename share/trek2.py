@@ -129,16 +129,11 @@ class ConsoleCanTunnel(Console):
 
     def read(self, size=1):
         """Serial: Read the input buffer."""
-# TODO: Read any data from CAN Tunnel into _buf_port
-#       "RRC,<local CAN ID>,4,<NumBytes>,<B0>,<B1>,...<B7>
-#           Incoming DATA
-
-#        data = self._buf_port.read(size)
-
-#        data = self._port.read(1024)
-
-        data = self.action()
-
+        reply = self.action()   # read any CAN data
+        reply_bytes = self.decoder(reply)
+        self._logger.debug('read() reply_bytes %s', repr(reply_bytes))
+        self.puts(reply_bytes)  # push any CAN data into my buffer port
+        data = self._buf_port.read(size)    # now read from the buffer port
         self._logger.debug('read(%s) = %s', size, repr(data))
         return data
 
@@ -164,9 +159,9 @@ class ConsoleCanTunnel(Console):
                 self._target_id, byte_count, byte_data)
             reply = self.action(command, delay=0.2)
             self._logger.debug('write() reply %s', repr(reply))
-        # sending a command of        "TCC,32,4,1,83 CAN
-        # will result in a reply of   RRC,32,4,1,83
-# TODO: Decode the reply, and push bytes back into _buf_port
+            reply_bytes = self.decoder(reply)
+            self._logger.debug('write() reply_bytes %s', repr(reply_bytes))
+            self.puts(reply_bytes)  # push any CAN data into my buffer port
 
     def inWaiting(self):
         """Serial: Return the number of bytes in the input buffer."""
@@ -183,3 +178,40 @@ class ConsoleCanTunnel(Console):
     def flushOutput(self):
         """Serial: Discard waiting output."""
         self._buf_port.flushOutput()
+
+    def decoder(self, messages):
+        """Decode CAN packet messages.
+
+        @param message String, or List of Strings.
+        @return Decoded data string.
+
+        """
+        data = ''
+        if not isinstance(messages, list):
+            messages = [messages]
+        for item in messages:
+            data += self._decode(item)
+        return data
+
+    def _decode(self, message):
+        """Decode a single CAN packet messages.
+
+        @param message String.
+        @return Decoded data string.
+
+        """
+        data = ''
+        # Pattern to match a console data packet
+        pattern = ['RRC', str(self._target_id), '4']
+        pat_len = len(pattern)
+        chunks = message.split(',')     # Chop into CSV pieces
+        if chunks[:pat_len] == pattern: # if it's a console data packet
+            count = len(chunks) - pat_len   # chunks after the pattern
+            if count < 2:   # No data in the packet
+                return ''
+            byte_count = int(chunks[len(pattern)])
+            if byte_count + 1 != count: # Data count mismatch in the packet
+                return ''
+            for i in range(pat_len + 1, pat_len + 1 + byte_count):
+                data += chr(int(chunks[i]))
+        return data
