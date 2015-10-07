@@ -8,8 +8,7 @@ import os
 import tester
 from . import support
 from . import limit
-import share.arm_gen1
-import share.sim_serial
+import share.trek2
 
 
 MeasureGroup = tester.measure.group
@@ -64,8 +63,8 @@ class Main(tester.TestSequence):
         # Set port separately, as we don't want it opened yet
         ser_can.setPort(_CAN_PORT)
         # CAN Console tunnel driver
-        self._tunnel = share.arm_gen1.ArmConsoleGen1CanTunnel(
-            port=ser_can, local_id=16, target_id = 32, dialect=0)
+        self._tunnel = share.trek2.ConsoleCanTunnel(
+            port=ser_can, local_id=16, target_id = 32)
         # Trek2 Console driver (using the CAN Tunnel)
         self._trek2 = share.trek2.Console(port=self._tunnel)
 
