@@ -10,6 +10,7 @@
 import tester
 from tester.devlogical import *
 from tester.measure import *
+import share.trek2
 
 sensor = tester.sensor
 translate = tester.translate
@@ -56,7 +57,7 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
+    def __init__(self, logical_devices, limits, trek2):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
@@ -67,13 +68,21 @@ class Sensors():
 
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
 
-        tester.TranslationContext = 'trek2_initial'
+        tester.TranslationContext = 'trek2_final'
+        self.oYesNoSeg = sensor.YesNo(
+            message=translate('AreSegmentsOn?'),
+            caption=translate('capSegments'))
         self.oYesNoBklight = sensor.YesNo(
             message=translate('IsBacklightOk?'),
             caption=translate('capBacklight'))
+        self.oYesNoDisplay = sensor.YesNo(
+            message=translate('IsDisplayOk?'),
+            caption=translate('capDisplay'))
         self.oYesNoLevel = sensor.YesNo(
             message=translate('IsLevelOk?'),
             caption=translate('capLevel'))
+        self.oSwVer = share.trek2.Sensor(
+            trek2, 'SwVer', rdgtype=tester.sensor.ReadingString)
 
 
 class Measurements():
@@ -87,10 +96,15 @@ class Measurements():
            @param limits Product test limits
 
         """
+        self.ui_YesNoSeg = Measurement(
+            limits['Notify'], sense.oYesNoSeg)
         self.ui_YesNoBklight = Measurement(
             limits['Notify'], sense.oYesNoBklight)
+        self.ui_YesNoDisplay = Measurement(
+            limits['Notify'], sense.oYesNoDisplay)
         self.ui_YesNoLevel = Measurement(
             limits['Notify'], sense.oYesNoLevel)
+        self.trek2_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
 
 
 class SubTests():

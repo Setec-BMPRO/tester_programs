@@ -2,7 +2,6 @@
 """Trek2 Final Test Program."""
 
 import logging
-import time
 import os
 
 import tester
@@ -45,8 +44,9 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, False),
-            ('Tunnel', self._step_tunnel, None, True),
-            ('CanBus', self._step_canbus, None, False),
+            ('TunnelOpen', self._step_tunnel_open, None, True),
+            ('SwVersion', self._step_version, None, True),
+            ('TunnelClose', self._step_tunnel_close, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -64,7 +64,7 @@ class Main(tester.TestSequence):
         ser_can.setPort(_CAN_PORT)
         # CAN Console tunnel driver
         self._tunnel = share.trek2.ConsoleCanTunnel(
-            port=ser_can, local_id=16, target_id = 32)
+            port=ser_can, local_id=16, target_id=32)
         # Trek2 Console driver (using the CAN Tunnel)
         self._trek2 = share.trek2.Console(port=self._tunnel)
 
@@ -74,7 +74,7 @@ class Main(tester.TestSequence):
         global d
         d = support.LogicalDevices(self._devices)
         global s
-        s = support.Sensors(d, self._limits)
+        s = support.Sensors(d, self._limits, self._trek2)
         global m
         m = support.Measurements(s, self._limits)
         global t
@@ -108,21 +108,17 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oVin, 12.0), ))
         t.pwr_up.run()
 
-    def _step_tunnel(self):
+    def _step_tunnel_open(self):
         """Open console tunnel."""
         self._trek2.open()
 
-        self._trek2['SwVer']
+    def _step_version(self):
+        """Software version."""
+        self._trek2.testmode(True)
+        MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
+#        m.trek2_SwVer.measure()
+        self._trek2.testmode(False)
 
+    def _step_tunnel_close(self):
+        """Close console tunnel."""
         self._trek2.close()
-
-    def _step_canbus(self):
-        """Test the CAN Bus."""
-        self.fifo_push(
-            ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
-        m.trek2_can_bind.measure(timeout=5)
-        time.sleep(1)   # Let junk CAN messages come in
-        if self._fifo:
-            self._trek2.puts('0x10000000\r\n', preflush=1)
-        self._trek2.can_mode(True)
-        m.trek2_can_id.measure()

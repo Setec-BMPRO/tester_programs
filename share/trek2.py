@@ -16,10 +16,10 @@ ParameterHex = share.arm_gen1.ParameterHex
 ParameterCAN = share.arm_gen1.ParameterCAN
 ParameterRaw = share.arm_gen1.ParameterRaw
 
-# Test mode controlled by STATUS bit 31
+# "Test" mode controlled by STATUS bit 31
 _TEST_ON = (1 << 31)
 _TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
-# CAN Test mode controlled by STATUS bit 29
+# "CAN Print Packets" mode controlled by STATUS bit 29
 _CAN_ON = (1 << 29)
 _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 
@@ -143,20 +143,20 @@ class ConsoleCanTunnel(Console):
         The maximum tunnel payload is 8 data bytes, so we must cut the
         data into payload size chunks.
 
+        @param data Byte data to send.
+
         """
         self._logger.debug('write(%s)', repr(data))
         while len(data) > 0:
             if len(data) > 8:           # Use 8 bytes max at a time
                 byte_data = data[:8]
-                byte_count = 8
                 data = data[8:]
             else:
                 byte_data = data
-                byte_count = len(data)
                 data = b''
             byte_data = ','.join(str(c) for c in byte_data)
-            command = '"TCC,{},4,{},{} CAN'.format(
-                self._target_id, byte_count, byte_data)
+            command = '"TCC,{},4,{} CAN'.format(
+                self._target_id, byte_data)
             reply = self.action(command, delay=0.2)
             self._logger.debug('write() reply %s', repr(reply))
             reply_bytes = self.decoder(reply)
@@ -201,6 +201,8 @@ class ConsoleCanTunnel(Console):
 
         """
         data = ''
+        if message is None:
+            return data
         # Pattern to match a console data packet
         pattern = ['RRC', str(self._target_id), '4']
         pat_len = len(pattern)
