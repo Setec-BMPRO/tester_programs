@@ -92,7 +92,6 @@ class ConsoleCanTunnel(Console):
         @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
 
         """
-        self._can_tunnel = False        # CAN tunneling OFF
         self._local_id = '{},{}'.format(
             (local_id & 0xFF00) >> 8, (local_id & 0xFF) )
         self._target_id = target_id
@@ -109,19 +108,19 @@ class ConsoleCanTunnel(Console):
         """Open a CAN tunnel."""
         # Open underlying console & serial port
         super().open()
+        # Switch console echo OFF
+        self.echo(echo_enable=False)
         # Set filters to see all CAN traffic, Switch CAN test mode ON
         self.can_mode(True)
         # Open a console tunnel
         command = '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id)
         self.action(command, expected=1)
-        self._can_tunnel = True
 
     def close(self):
         """Close the CAN tunnel."""
         command = '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id)
         self.action(command, expected=1)
         super().close()
-        self._can_tunnel = False
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
         """Serial: Put a string into the _buf_port read-back buffer."""

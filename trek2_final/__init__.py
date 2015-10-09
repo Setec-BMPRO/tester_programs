@@ -111,6 +111,7 @@ class Main(tester.TestSequence):
     def _step_tunnel_open(self):
         """Open console tunnel."""
         self._trek2.open()
+        self._trek2.echo(echo_enable=False)
 
     def _step_version(self):
         """Software version."""

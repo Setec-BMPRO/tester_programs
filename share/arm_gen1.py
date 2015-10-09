@@ -39,9 +39,12 @@ _CMD_PROMPT1 = b'\r\n> '
 _CMD_PROMPT2 = '> '
 # Delay after a value set command
 _SET_DELAY = 0.3
+# Delay between character when console echo is OFF
+_INTER_CHAR_DELAY = 0.01
 
 # Dialect dependent commands
 #   Use the key name for lookup, then index by self._dialect
+#       eg: _DIALECT[key][self._dialect]
 # Dialect 0 = SX-750, GEN8
 # Dialect 1 = BatteryCheck, BP35, Trek2
 _DIALECT = {
@@ -310,9 +313,9 @@ class ArmConsoleGen1():
         port.timeout = 10240 / port.baudrate  # Timeout of 1kB
         self._port = port
         self._dialect = dialect
+        self._echo = True   # Character echo defaults to ON
         self._read_key = None
-        # Data readings: Key=Name, Value=Parameter
-        self.cmd_data = {}
+        self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
 
     def open(self):
         """Open port."""
@@ -417,6 +420,12 @@ class ArmConsoleGen1():
         self._logger.debug('Version is %s', verbld)
         return verbld
 
+    def echo(self, echo_enable):
+        """Control of console echo."""
+        self._logger.debug('Echo is %s', echo_enable)
+        self.action('{} ECHO'.format(int(echo_enable)))
+        self._echo = echo_enable
+
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response line(s).
 
@@ -427,7 +436,7 @@ class ArmConsoleGen1():
 
         """
         if command:
-            if self._port.simulation:     # Auto simulate the command echo
+            if self._port.simulation and self._echo:    # Auto simulate echo
                 # Push echo at high priority so it is returned first
                 self.puts(command, preflush=1, priority=True)
             self._write_command(command)
@@ -438,8 +447,9 @@ class ArmConsoleGen1():
     def _write_command(self, command):
         """Write a command.
 
-        The echo of each command character sent is read back.
-        The echo of _CMD_RUN is NOT expected, or read.
+        If echo is enabled, the echo of each command character sent is
+        read back. The echo of _CMD_RUN is NOT expected, or read.
+
         @param command Command string.
         @raises ArmError if the command does not echo.
 
@@ -451,10 +461,14 @@ class ArmConsoleGen1():
         for a_byte in cmd_data:
             a_byte = bytes([a_byte])
             self._port.write(a_byte)
-            echo = self._port.read(1)
-            if echo != a_byte:
-                raise ArmError(
-                    'Command echo error. Tx: {}, Rx: {}'.format(a_byte, echo))
+            if self._echo:
+                echo = self._port.read(1)
+                if echo != a_byte:
+                    raise ArmError(
+                        'Command echo error. Tx: {}, Rx: {}'.format(
+                            a_byte, echo))
+            else:
+                time.sleep(_INTER_CHAR_DELAY)
         # And the command RUN, without echo
         self._port.write(_CMD_RUN)
 
