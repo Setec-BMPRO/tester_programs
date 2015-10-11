@@ -111,7 +111,8 @@ class Main(tester.TestSequence):
     def _step_tunnel_open(self):
         """Open console tunnel."""
         self._trek2.open()
-        self._trek2.echo(echo_enable=False)
+        self._trek2.echo(echo_enable=False) # No command echo
+        self._trek2.send_delay(delay=0)     # No delay, so send as strings
 
     def _step_version(self):
         """Software version."""

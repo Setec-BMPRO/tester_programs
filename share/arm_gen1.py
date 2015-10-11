@@ -314,6 +314,7 @@ class ArmConsoleGen1():
         self._port = port
         self._dialect = dialect
         self._echo = True   # Character echo defaults to ON
+        self._send_delay = _INTER_CHAR_DELAY
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
 
@@ -426,6 +427,15 @@ class ArmConsoleGen1():
         self.action('{} ECHO'.format(int(echo_enable)))
         self._echo = echo_enable
 
+    def send_delay(self, delay=_INTER_CHAR_DELAY):
+        """Control of the delay between sent characters.
+
+        @param delay Inter-character send delay.
+
+        """
+        self._logger.debug('Inter-char delay is %s', delay)
+        self._send_delay = delay
+
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response line(s).
 
@@ -456,21 +466,25 @@ class ArmConsoleGen1():
         """
         self._logger.debug('--> %s', repr(command))
         cmd_data = command.encode()
-        self._port.flushInput()
-        # Send each byte with echo verification
-        for a_byte in cmd_data:
-            a_byte = bytes([a_byte])
-            self._port.write(a_byte)
-            if self._echo:
-                echo = self._port.read(1)
-                if echo != a_byte:
-                    raise ArmError(
-                        'Command echo error. Tx: {}, Rx: {}'.format(
-                            a_byte, echo))
-            else:
-                time.sleep(_INTER_CHAR_DELAY)
-        # And the command RUN, without echo
-        self._port.write(_CMD_RUN)
+        if (not self._echo) and (self._send_delay == 0):
+            # No echo or delay - send as a multi-byte lump
+            self._port.write(cmd_data + _CMD_RUN)
+        else:
+            self._port.flushInput()
+            # Send each byte with echo verification
+            for a_byte in cmd_data:
+                a_byte = bytes([a_byte])
+                self._port.write(a_byte)
+                if self._echo:
+                    echo = self._port.read(1)
+                    if echo != a_byte:
+                        raise ArmError(
+                            'Command echo error. Tx: {}, Rx: {}'.format(
+                                a_byte, echo))
+                else:
+                    time.sleep(self._send_delay)
+            # And the command RUN, without echo
+            self._port.write(_CMD_RUN)
 
     def _read_response(self, expected):
         """Read a response.
