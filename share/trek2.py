@@ -156,7 +156,7 @@ class ConsoleCanTunnel(Console):
             byte_data = ','.join(str(c) for c in byte_data)
             command = '"TCC,{},4,{} CAN'.format(
                 self._target_id, byte_data)
-            reply = self.action(command, delay=0.2)
+            reply = self.action(command, delay=0.25)
             self._logger.debug('write() reply %s', repr(reply))
             reply_bytes = self.decoder(reply)
             self._logger.debug('write() reply_bytes %s', repr(reply_bytes))
