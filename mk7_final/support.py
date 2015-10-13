@@ -55,13 +55,12 @@ class Sensors():
         self.o12V = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.o24V2 = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self.oPwrFail = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
-        tester.TranslationContext = 'mk7_final'
         self.oYesNoMains = sensor.YesNo(
-            message=translate('IsSwitchLightOn?'),
-            caption=translate('capSwitchLight'))
+            message=translate('mk7_final', 'IsSwitchLightOn?'),
+            caption=translate('mk7_final', 'capSwitchLight'))
         self.oNotifyPwrOff = sensor.Notify(
-            message=translate('msgSwitchOff'),
-            caption=translate('capSwitchOff'))
+            message=translate('mk7_final', 'msgSwitchOff'),
+            caption=translate('mk7_final', 'capSwitchOff'))
 
 
 class Measurements():

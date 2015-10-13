@@ -45,25 +45,24 @@ class Sensors():
         self.o12V_1 = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.o12V_2 = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.o12V_3 = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
-        tester.TranslationContext = 'ts3520_final'
         self.oNotifyStart = sensor.Notify(
-            message=translate('RemoveFuseSwitchOn'),
-            caption=translate('capSwitchOn'))
+            message=translate('ts3520_final', 'RemoveFuseSwitchOn'),
+            caption=translate('ts3520_final', 'capSwitchOn'))
         self.oNotifyFuse = sensor.Notify(
-            message=translate('ReplaceFuse'),
-            caption=translate('capReplaceFuse'))
+            message=translate('ts3520_final', 'ReplaceFuse'),
+            caption=translate('ts3520_final', 'capReplaceFuse'))
         self.oNotifyMains = sensor.Notify(
-            message=translate('SwitchOff'),
-            caption=translate('capSwitchOff'))
+            message=translate('ts3520_final', 'SwitchOff'),
+            caption=translate('ts3520_final', 'capSwitchOff'))
         self.oYesNoRed = sensor.YesNo(
-            message=translate('IsRedLedOn?'),
-            caption=translate('capRedLed'))
+            message=translate('ts3520_final', 'IsRedLedOn?'),
+            caption=translate('ts3520_final', 'capRedLed'))
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('IsGreenLedOn?'),
-            caption=translate('capGreenLed'))
+            message=translate('ts3520_final', 'IsGreenLedOn?'),
+            caption=translate('ts3520_final', 'capGreenLed'))
         self.oYesNoOff = sensor.YesNo(
-            message=translate('AreAllLightsOff?'),
-            caption=translate('capAllOff'))
+            message=translate('ts3520_final', 'AreAllLightsOff?'),
+            caption=translate('ts3520_final', 'capAllOff'))
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.o12V_1,
             detect_limit=(limits['inOCP'], ),

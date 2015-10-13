@@ -95,10 +95,9 @@ class Sensors():
         self.oVchge = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.001)
         self.oibat = sensor.Vdc(
             dmm, high=4, low=2, rng=0.1, res=0.000001, scale=100.0)
-        tester.TranslationContext = 'cmrsbp_sn'
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('cmrsbp_sn', 'msgSnEntry'),
+            caption=translate('cmrsbp_sn', 'capSnEntry'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

@@ -46,12 +46,9 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         self.o70V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
-
-        tester.TranslationContext = 'smu75070_final'
         self.oYesNoFan = sensor.YesNo(
-            message=translate('IsFanOn?'),
-            caption=translate('capFanOn'))
-
+            message=translate('smu75070_final', 'IsFanOn?'),
+            caption=translate('smu75070_final', 'capFanOn'))
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.o70V,
             detect_limit=(limits['inOCP'], ),

@@ -43,19 +43,18 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         self.oVout = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.001)
-        tester.TranslationContext = 'c15d15_final'
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('IsPowerLedGreen?'),
-            caption=translate('capPowerLed'))
+            message=translate('c15d15_final', 'IsPowerLedGreen?'),
+            caption=translate('c15d15_final', 'capPowerLed'))
         self.oYesNoYellowOff = sensor.YesNo(
-            message=translate('IsYellowLedOff?'),
-            caption=translate('capOutputLed'))
+            message=translate('c15d15_final', 'IsYellowLedOff?'),
+            caption=translate('c15d15_final', 'capOutputLed'))
         self.oNotifyYellow = sensor.Notify(
-            message=translate('WatchYellowLed'),
-            caption=translate('capOutputLed'))
+            message=translate('c15d15_final', 'WatchYellowLed'),
+            caption=translate('c15d15_final', 'capOutputLed'))
         self.oYesNoYellowOn = sensor.YesNo(
-            message=translate('IsYellowLedOn?'),
-            caption=translate('capOutputLed'))
+            message=translate('c15d15_final', 'IsYellowLedOn?'),
+            caption=translate('c15d15_final', 'capOutputLed'))
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['inOCP'], ),

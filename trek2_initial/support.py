@@ -73,10 +73,9 @@ class Sensors():
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self.oBkLght = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
-        tester.TranslationContext = 'trek2_initial'
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('trek2_initial', 'msgSnEntry'),
+            caption=translate('trek2_initial', 'capSnEntry'))
         self.oCANID = share.trek2.Sensor(
             trek2, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
         self.oCANBIND = share.trek2.Sensor(trek2, 'CAN_BIND')

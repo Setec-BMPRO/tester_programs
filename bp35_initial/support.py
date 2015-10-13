@@ -97,10 +97,9 @@ class Sensors():
             stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
             detect_limit=(limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
-        tester.TranslationContext = 'bp35_initial'
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('bp35_initial', 'msgSnEntry'),
+            caption=translate('bp35_initial', 'capSnEntry'))
         self.ARM_SwVer = share.bp35.Sensor(
             bp35, 'SwVer', rdgtype=tester.sensor.ReadingString)
         self.ARM_AcV = share.bp35.Sensor(bp35, 'AC_V')

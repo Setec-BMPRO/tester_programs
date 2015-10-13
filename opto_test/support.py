@@ -93,11 +93,9 @@ class Sensors():
         for i in range(20):
             s = sensor.Vdc(dmm, high=(i + 5), low=1, rng=100, res=0.001)
             self.Iout.append(s)
-
-        tester.TranslationContext = 'opto_test'
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('opto_test', 'msgSnEntry'),
+            caption=translate('opto_test', 'capSnEntry'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

@@ -58,19 +58,18 @@ class Sensors():
         self.oFuse8 = sensor.Vdc(dmm, high=8, low=1, rng=100, res=0.001)
         self.oBatt = sensor.Vdc(dmm, high=9, low=2, rng=100, res=0.001)
         self.oAlarm = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.01)
-        tester.TranslationContext = 'st3_final'
         self.oBarcode = sensor.DataEntry(
-            message=translate('ScanBarcode'),
-            caption=translate('capBarcode'))
+            message=translate('st3_final', 'ScanBarcode'),
+            caption=translate('st3_final', 'capBarcode'))
         self.oYesNoOrGr = sensor.YesNo(
-            message=translate('AreOrangeGreen?'),
-            caption=translate('capOrangeGreen'))
+            message=translate('st3_final', 'AreOrangeGreen?'),
+            caption=translate('st3_final', 'capOrangeGreen'))
         self.oYesNoRedOn = sensor.YesNo(
-            message=translate('RemoveBattFuseIsRedBlink?'),
-            caption=translate('capRed'))
+            message=translate('st3_final', 'RemoveBattFuseIsRedBlink?'),
+            caption=translate('st3_final', 'capRed'))
         self.oYesNoRedOff = sensor.YesNo(
-            message=translate('ReplaceBattFuseIsRedOff?'),
-            caption=translate('capRed'))
+            message=translate('st3_final', 'ReplaceBattFuseIsRedOff?'),
+            caption=translate('st3_final', 'capRed'))
         ocp_start, ocp_stop = limits['LoadOCPramp'].limit
         self.oLoadOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_Load, sensor=self.oLoad,

@@ -43,25 +43,24 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         self.o12V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        tester.TranslationContext = 'ts3020h_final'
         self.oNotifyStart = sensor.Notify(
-            message=translate('RemoveFuseSwitchOn'),
-            caption=translate('capSwitchOn'))
+            message=translate('ts3020h_final', 'RemoveFuseSwitchOn'),
+            caption=translate('ts3020h_final', 'capSwitchOn'))
         self.oNotifyFuse = sensor.Notify(
-            message=translate('ReplaceFuse'),
-            caption=translate('capReplaceFuse'))
+            message=translate('ts3020h_final', 'ReplaceFuse'),
+            caption=translate('ts3020h_final', 'capReplaceFuse'))
         self.oNotifyMains = sensor.Notify(
-            message=translate('SwitchOff'),
-            caption=translate('capSwitchOff'))
+            message=translate('ts3020h_final', 'SwitchOff'),
+            caption=translate('ts3020h_final', 'capSwitchOff'))
         self.oYesNoRed = sensor.YesNo(
-            message=translate('IsRedLedOn?'),
-            caption=translate('capRedLed'))
+            message=translate('ts3020h_final', 'IsRedLedOn?'),
+            caption=translate('ts3020h_final', 'capRedLed'))
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('IsGreenLedOn?'),
-            caption=translate('capGreenLed'))
+            message=translate('ts3020h_final', 'IsGreenLedOn?'),
+            caption=translate('ts3020h_final', 'capGreenLed'))
         self.oYesNoOff = sensor.YesNo(
-            message=translate('AreAllLightsOff?'),
-            caption=translate('capAllOff'))
+            message=translate('ts3020h_final', 'AreAllLightsOff?'),
+            caption=translate('ts3020h_final', 'capAllOff'))
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.o12V,
             detect_limit=(limits['inOCP'], ),

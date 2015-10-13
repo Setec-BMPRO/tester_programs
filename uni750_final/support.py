@@ -58,10 +58,9 @@ class Sensors():
         self.o3V3 = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.001)
         self.o5Vi = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
         self.oPGood = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.01)
-        tester.TranslationContext = 'uni750_final'
         self.oYesNoFan = sensor.YesNo(
-            message=translate('IsFanOn?'),
-            caption=translate('capFan'))
+            message=translate('uni750_final', 'IsFanOn?'),
+            caption=translate('uni750_final', 'capFan'))
 
 
 class Measurements():

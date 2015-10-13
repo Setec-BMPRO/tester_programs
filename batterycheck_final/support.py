@@ -38,15 +38,14 @@ class Sensors(object):
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
-        tester.TranslationContext = 'batterycheck_final'
         self.oMirBT = sensor.Mirror()
         self.oMirSwVer = sensor.Mirror(rdgtype=tester.sensor.ReadingString)
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
         self.o12V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('batterycheck_final', 'msgSnEntry'),
+            caption=translate('batterycheck_final', 'capSnEntry'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

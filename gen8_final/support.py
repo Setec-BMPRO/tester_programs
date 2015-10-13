@@ -54,13 +54,12 @@ class Sensors():
         self.o12V = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.o12V2 = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self.oPwrFail = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
-        tester.TranslationContext = 'gen8_final'
         self.oYesNoMains = sensor.YesNo(
-            message=translate('IsSwitchGreen?'),
-            caption=translate('capSwitchGreen'))
+            message=translate('gen8_final', 'IsSwitchGreen?'),
+            caption=translate('gen8_final', 'capSwitchGreen'))
         self.oNotifyPwrOff = sensor.Notify(
-            message=translate('msgSwitchOff'),
-            caption=translate('capSwitchOff'))
+            message=translate('gen8_final', 'msgSwitchOff'),
+            caption=translate('gen8_final', 'capSwitchOff'))
 
 
 class Measurements():

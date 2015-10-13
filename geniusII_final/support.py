@@ -62,13 +62,14 @@ class Sensors():
             stimulus=dclh, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
             start=32.0, stop=48.0, step=0.2, delay=0.1)
-        tester.TranslationContext = 'geniusII_final'
         self.oYesNoFuseOut = sensor.YesNo(
-            message=translate('RemoveBattFuseIsLedRedFlashing?'),
-            caption=translate('capLedRed'))
+            message=translate(
+                'geniusII_final', 'RemoveBattFuseIsLedRedFlashing?'),
+            caption=translate('geniusII_final', 'capLedRed'))
         self.oYesNoFuseIn = sensor.YesNo(
-            message=translate('ReplaceBattFuseIsLedGreen?'),
-            caption=translate('capLedRed'))
+            message=translate(
+                'geniusII_final', 'ReplaceBattFuseIsLedGreen?'),
+            caption=translate('geniusII_final', 'capLedRed'))
 
 
 class Measurements():

@@ -43,22 +43,21 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         self.o20V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        tester.TranslationContext = '_2040_final'
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('IsPowerLedGreen?'),
-            caption=translate('capPowerLed'))
+            message=translate('_2040_final', 'IsPowerLedGreen?'),
+            caption=translate('_2040_final', 'capPowerLed'))
         self.oYesNoDCOff = sensor.YesNo(
-            message=translate('IsDcRedLedOff?'),
-            caption=translate('capDcLed'))
+            message=translate('_2040_final', 'IsDcRedLedOff?'),
+            caption=translate('_2040_final', 'capDcLed'))
         self.oYesNoDCOn = sensor.YesNo(
-            message=translate('IsDcRedLedOn?'),
-            caption=translate('capDcLed'))
+            message=translate('_2040_final', 'IsDcRedLedOn?'),
+            caption=translate('_2040_final', 'capDcLed'))
         self.oYesNoACOff = sensor.YesNo(
-            message=translate('IsAcRedLedOff?'),
-            caption=translate('capAcLed'))
+            message=translate('_2040_final', 'IsAcRedLedOff?'),
+            caption=translate('_2040_final', 'capAcLed'))
         self.oYesNoACOn = sensor.YesNo(
-            message=translate('IsAcRedLedOn?'),
-            caption=translate('capAcLed'))
+            message=translate('_2040_final', 'IsAcRedLedOn?'),
+            caption=translate('_2040_final', 'capAcLed'))
 
 
 class Measurements():
