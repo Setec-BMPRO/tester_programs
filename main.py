@@ -41,11 +41,11 @@ import smu75070_final
 import spa_multi
 import spa_single
 import st3_final
-import trek2_initial
-import trek2_final
 import sx750_initial
 import sx750_safety
 import sx750_final
+import trek2_initial
+import trek2_final
 import ts3020h_initial
 import ts3020h_final
 import ts3520_final
@@ -185,7 +185,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'Trek2 Final',
+        'Dummy',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
