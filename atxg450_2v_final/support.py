@@ -56,13 +56,12 @@ class Sensors():
         self.on12V = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
         self.oPwrGood = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.oPwrFail = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
-        tester.TranslationContext = 'atxg450_2v_final'
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('IsSwitchGreen?'),
-            caption=translate('capSwitchGreen'))
+            message=translate('atxg450_2v_final', 'IsSwitchGreen?'),
+            caption=translate('atxg450_2v_final', 'capSwitchGreen'))
         self.oYesNoFan = sensor.YesNo(
-            message=translate('IsFanRunning?'),
-            caption=translate('capFan'))
+            message=translate('atxg450_2v_final', 'IsFanRunning?'),
+            caption=translate('atxg450_2v_final', 'capFan'))
         self.o24Vocp = sensor.Ramp(
             stimulus=logical_devices.dcl_24V, sensor=self.o24V,
             detect_limit=(limits['24Vinocp'], ),

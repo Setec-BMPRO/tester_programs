@@ -61,10 +61,9 @@ class Sensors(object):
         self.shunt = sensor.Vdc(
             dmm, high=3, low=1, rng=1, res=0.001, scale=-1250)
         self.relay = sensor.Res(dmm, high=2, low=2, rng=10000, res=0.01)
-        tester.TranslationContext = 'batterycheck_initial'
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('batterycheck_initial', 'msgSnEntry'),
+            caption=translate('batterycheck_initial', 'capSnEntry'))
 
 
 class Measurements(object):

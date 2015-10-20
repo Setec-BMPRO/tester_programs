@@ -62,13 +62,12 @@ class Sensors():
         self.o24v = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.oPwrGood = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
         self.oAcFail = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.01)
-        tester.TranslationContext = 'sx750_final'
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('IsLedGreen?'),
-            caption=translate('capLedGreen'))
+            message=translate('sx750_final', 'IsLedGreen?'),
+            caption=translate('sx750_final', 'capLedGreen'))
         self.oYesNoBlue = sensor.YesNo(
-            message=translate('IsLedBlue?'),
-            caption=translate('capLedBlue'))
+            message=translate('sx750_final', 'IsLedBlue?'),
+            caption=translate('sx750_final', 'capLedBlue'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

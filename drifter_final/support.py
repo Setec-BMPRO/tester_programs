@@ -43,22 +43,21 @@ class Sensors():
         self.oWaterPump = sensor.Vdc(dmm, high=1, low=2, rng=100, res=0.1)
         self.oBattSw = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.1)
         self.oUSB5V = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
-        tester.TranslationContext = 'drifter_final'
         self.oYesNoSeg = sensor.YesNo(
-            message=translate('AreSegmentsOn?'),
-            caption=translate('capSegments'))
+            message=translate('drifter_final', 'AreSegmentsOn?'),
+            caption=translate('drifter_final', 'capSegments'))
         self.oYesNoBklight = sensor.YesNo(
-            message=translate('IsBacklightOk?'),
-            caption=translate('capBacklight'))
+            message=translate('drifter_final', 'IsBacklightOk?'),
+            caption=translate('drifter_final', 'capBacklight'))
         self.oYesNoDisplay = sensor.YesNo(
-            message=translate('IsDisplayOk?'),
-            caption=translate('capDisplay'))
+            message=translate('drifter_final', 'IsDisplayOk?'),
+            caption=translate('drifter_final', 'capDisplay'))
         self.oNotifySwOff = sensor.Notify(
-            message=translate('msgSwitchOff'),
-            caption=translate('capSwitchOff'))
+            message=translate('drifter_final', 'msgSwitchOff'),
+            caption=translate('drifter_final', 'capSwitchOff'))
         self.oNotifySwOn = sensor.Notify(
-            message=translate('msgSwitchOn'),
-            caption=translate('capSwitchOn'))
+            message=translate('drifter_final', 'msgSwitchOn'),
+            caption=translate('drifter_final', 'capSwitchOn'))
 
 
 class Measurements():

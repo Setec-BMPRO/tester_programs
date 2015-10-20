@@ -79,12 +79,11 @@ class Sensors():
         self.oPWMShdn = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
         self.oVacOVShdn = sensor.Vdc(dmm, high=15, low=1, rng=100, res=0.01)
         vout_low, vout_high = limits['VoutSet'].limit
-        tester.TranslationContext = 'ts3020h_initial'
         self.oAdjVout = sensor.AdjustAnalog(
             sensor=self.oVout,
             low=vout_low, high=vout_high,
-            message=translate('AdjR130'),
-            caption=translate('capAdjOutput'))
+            message=translate('ts3020h_initial', 'AdjR130'),
+            caption=translate('ts3020h_initial', 'capAdjOutput'))
         self.oOVP = sensor.Ramp(
             stimulus=logical_devices.dcs_Vout, sensor=self.oSecShdn,
             detect_limit=(limits['inVP'], ),

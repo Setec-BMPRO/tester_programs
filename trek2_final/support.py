@@ -65,22 +65,19 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-
-        tester.TranslationContext = 'trek2_final'
         self.oYesNoSeg = sensor.YesNo(
-            message=translate('AreSegmentsOn?'),
-            caption=translate('capSegments'))
+            message=translate('trek2_final', 'AreSegmentsOn?'),
+            caption=translate('trek2_final', 'capSegments'))
         self.oYesNoBklight = sensor.YesNo(
-            message=translate('IsBacklightOk?'),
-            caption=translate('capBacklight'))
+            message=translate('trek2_final', 'IsBacklightOk?'),
+            caption=translate('trek2_final', 'capBacklight'))
         self.oYesNoDisplay = sensor.YesNo(
-            message=translate('IsDisplayOk?'),
-            caption=translate('capDisplay'))
+            message=translate('trek2_final', 'IsDisplayOk?'),
+            caption=translate('trek2_final', 'capDisplay'))
         self.oYesNoLevel = sensor.YesNo(
-            message=translate('IsLevelOk?'),
-            caption=translate('capLevel'))
+            message=translate('trek2_final', 'IsLevelOk?'),
+            caption=translate('trek2_final', 'capLevel'))
         self.oSwVer = share.trek2.Sensor(
             trek2, 'SwVer', rdgtype=tester.sensor.ReadingString)
 

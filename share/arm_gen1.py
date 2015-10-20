@@ -40,7 +40,7 @@ _CMD_PROMPT2 = '> '
 # Delay after a value set command
 _SET_DELAY = 0.3
 # Delay between character when console echo is OFF
-_INTER_CHAR_DELAY = 0.01
+_INTER_CHAR_DELAY = 0.001
 
 # Dialect dependent commands
 #   Use the key name for lookup, then index by self._dialect
