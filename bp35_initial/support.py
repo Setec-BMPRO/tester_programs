@@ -34,6 +34,7 @@ class LogicalDevices():
         self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
         self.dcs_vbat = dcsource.DCSource(devices['DCS2'])
         self.dcs_vaux = dcsource.DCSource(devices['DCS3'])
+        self.dcs_sreg = dcsource.DCSource(devices['DCS4'])
         self.dcl_out = dcload.DCLoad(devices['DCL1'])
         self.dcl_bat = dcload.DCLoad(devices['DCL5'])
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
@@ -51,7 +52,7 @@ class LogicalDevices():
         # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
         # Switch off DC Sources
-        for dcs in (self.dcs_vbat, self.dcs_vaux):
+        for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
             dcs.output(0.0, False)
         # Switch off DC Loads
         for ld in (self.dcl_out, self.dcl_bat):
@@ -76,6 +77,7 @@ class Sensors():
         dmm = logical_devices.dmm
         self.oMirPIC = sensor.Mirror()
         self.oMirARM = sensor.Mirror()
+        self.oMirVErr = sensor.Mirror()
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
         self.oLock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
@@ -87,6 +89,7 @@ class Sensors():
         self.oVpfc = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
         self.oVload = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.oVbat = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
+        self.oVsreg = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.o12Vpri = sensor.Vdc(dmm, high=5, low=2, rng=100, res=0.001)
         self.o3V3 = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.001)
         self.oFan = sensor.Vdc(dmm, high=7, low=5, rng=100, res=0.01)
@@ -128,6 +131,7 @@ class Sensors():
         """TestRun.stop: Empty the Mirror Sensors."""
         self.oMirPIC.flush()
         self.oMirARM.flush()
+        self.oMirVErr.flush()
 
 
 class Measurements():
@@ -143,6 +147,7 @@ class Measurements():
         """
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
+        self.srVErr = Measurement(limits['%ErrorV'], sense.oMirVErr)
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.oLock)
         self.dmm_sw1 = Measurement(limits['SwShort'], sense.osw1)
         self.dmm_sw2 = Measurement(limits['SwShort'], sense.osw2)
@@ -157,6 +162,7 @@ class Measurements():
         self.dmm_vloadOff = Measurement(limits['VloadOff'], sense.oVload)
         self.dmm_vbatin = Measurement(limits['VbatIn'], sense.oVbat)
         self.dmm_vbat = Measurement(limits['Vbat'], sense.oVbat)
+        self.dmm_vsreg = Measurement(limits['Vsreg'], sense.oVsreg)
         self.dmm_vaux = Measurement(limits['Vaux'], sense.oVbat)
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_fanOn = Measurement(limits['FanOn'], sense.oFan)

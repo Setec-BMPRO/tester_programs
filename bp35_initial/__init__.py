@@ -55,6 +55,7 @@ class Main(tester.TestSequence):
             ('ProgramPIC', self._step_program_pic, None, not fifo),
             ('ProgramARM', self._step_program_arm, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
+            ('SolarReg', self._step_solar_reg, None, True),
             ('Aux', self._step_aux, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
@@ -115,25 +116,27 @@ class Main(tester.TestSequence):
         """Prepare to run a test.
 
         Measure fixture lock and part detection microswitches.
-        Apply power to the unit's Battery terminals to power up the micros.
+        Apply power to the unit's Battery terminals and Solar Reg input
+        to power up the micros.
 
         """
         self.fifo_push(
             ((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
              (s.osw3, 100.0), (s.osw4, 100.0),
-             (s.oVbat, 12.0), (s.o3V3, 3.3),))
+             (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3), ))
         MeasureGroup(
             (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
              timeout=5)
-        # Apply DC Source to Battery terminals
+        # Apply DC Sources to Battery terminals and Solar Reg input
         d.dcs_vbat.output(12.4, True)
         d.rla_vbat.set_on()
-        MeasureGroup((m.dmm_vbatin, m.dmm_3V3, ), timeout=5)
+        d.dcs_sreg.output(12.4, True)
+        MeasureGroup((m.dmm_vbatin, m.dmm_3V3, m.dmm_3V3prog), timeout=5)
 
     def _step_program_pic(self):
         """Program the dsPIC device.
 
-        Device is powered by injected Battery voltage.
+        Device is powered by Solar Reg input voltage.
 
         """
         # Start the PIC programmer
@@ -206,6 +209,30 @@ class Main(tester.TestSequence):
             self._bp35.puts('1.0.10902.3156\r\n')
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
+
+    def _step_solar_reg(self):
+        """Test the Solar Regulator board.
+
+        Apply 20.0V to the input of Solar Regulator.
+        Set the output voltage to 13.65V.
+        Measure actual output voltage and calibrate if required.
+
+        """
+        self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
+        d.dcs_sreg.output(20.0)
+        vset = self._limits['VSet'].limit
+
+        vmeasured = m.dmm_vsreg.measure(timeout=5)[1][0]
+        err = ((vset - vmeasured) / vset) * 100
+        # Calibrate voltage if required
+        if err != self._limits['%ErrorV']:
+
+            vmeasured = m.dmm_vsreg.measure(timeout=5)[1][0]
+            err = ((vset - vmeasured) / vset) * 100
+        s.oMirVErr.store(err)
+        m.srVErr.measure()
+        # Remove Solar Reg input voltage
+        d.dcs_sreg.output(0.0, output=False)
 
     def _step_aux(self):
         """Apply Auxillary input and measure voltage and current."""

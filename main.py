@@ -185,7 +185,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'Trek2 Final',
+        'BP35 Initial',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
