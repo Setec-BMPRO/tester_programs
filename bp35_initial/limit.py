@@ -33,7 +33,7 @@ DATA = (
     ('SwShort', 0, None, 20, None, None),
     ('Notify', 1, None, None, None, True),
     # Data reported by the ARM
-    ('ARM-SwVer', 0, None, None, r'^1\.0\.10902\.3156$', None),
+    ('ARM-SwVer', 0, None, None, r'^1\.0\.11529\.3465$', None),
     ('ARM-AcV', 0, 235.0, 245.0, None, None),
     ('ARM-AcF', 0, 49.0, 51.0, None, None),
     ('ARM-PriT', 0, 8.0, 70.0, None, None),

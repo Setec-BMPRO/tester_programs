@@ -23,11 +23,13 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (1, 0, '')
+_HW_VER = (2, 0, 'A')
 # ARM software image file
-_ARM_BIN = 'bp35_1.0.3156.bin'
+_ARM_BIN = 'bp35_1.0.11529.3465.bin'
+# Soler Regulator Hardware version
+_SR_HW_VER = 1
 # dsPIC software image file
-_PIC_HEX = 'bp35sr_1.hex'
+_PIC_HEX = 'bp35sr_1.0.11518.126.hex'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -205,8 +207,9 @@ class Main(tester.TestSequence):
             self._bp35.puts('Banner1\r\nBanner2\r\n')
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
         self._bp35.defaults(_HW_VER, sernum)
+        self._bp35['SR_HW_VER'] = _SR_HW_VER
         if self._fifo:
-            self._bp35.puts('1.0.10902.3156\r\n')
+            self._bp35.puts('1.0.11529.3465\r\n')
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
 

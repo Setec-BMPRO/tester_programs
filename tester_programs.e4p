@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-09-01, 14:20:33 -->
+<!-- Saved: 2015-10-21, 12:55:18 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -223,11 +223,11 @@
     <Other>spa_multi/MFDtri_V103.hex</Other>
     <Other>sx750_initial/sx750_arm_3.1.2118.hex</Other>
     <Other>sx750_initial/sx750_pic_2.hex</Other>
-    <Other>bp35_initial/bp35sr_1.hex</Other>
-    <Other>bp35_initial/bp35_1.0.3156.bin</Other>
     <Other>trek2_initial/Trek2_1.0.110.bin</Other>
     <Other>batterycheck_initial/BatteryCheckSupervisor-2.hex</Other>
     <Other>batterycheck_initial/BatteryCheckControl_1.7.4080.hex</Other>
+    <Other>bp35_initial/bp35_1.0.11529.3465.bin</Other>
+    <Other>bp35_initial/bp35sr_1.0.11518.126.hex</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>
