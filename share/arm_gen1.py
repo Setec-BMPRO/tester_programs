@@ -322,9 +322,17 @@ class ArmConsoleGen1():
         """Open port."""
         self._port.open()
 
-    def puts(self):
-        """Put a string into the SimSerial read-back buffer."""
-        self._port.puts()
+    def puts(self, string_data, preflush=0, postflush=0, priority=False):
+        """Put a string into the read-back buffer.
+
+        @param string_data Data string, or tuple of data strings.
+        @param preflush Number of _FLUSH to be entered before the data.
+        @param postflush Number of _FLUSH to be entered after the data.
+        @param priority True to put in front of the buffer.
+        Note: _FLUSH is a marker to stop the flush of the data buffer.
+
+        """
+        self._port.puts(string_data, preflush, postflush, priority)
 
     def close(self):
         """Close serial port."""
