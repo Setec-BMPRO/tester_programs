@@ -224,7 +224,9 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
         d.dcs_sreg.output(20.0)
         vset = self._limits['Vset'].limit
+        iset = self._limits['Iset'].limit
         self._bp35['SR_VSET'] = vset
+        self._bp35['SR_ISET'] = iset
         vmeasured = m.dmm_vsregpre.measure(timeout=5)[1][0]
         self._bp35['SR_VCAL'] = vmeasured
         m.dmm_vsregpost.measure(timeout=5)

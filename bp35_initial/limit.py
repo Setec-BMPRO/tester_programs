@@ -21,8 +21,9 @@ DATA = (
     ('FanOn', 0, 12.0, 13.0, None, None),
     ('FanOff', 0, 0.5, None, None, None),
     ('3V3prog', 0, 3.2, 3.4, None, None),
-    # Solar Reg set voltage
+    # Solar Reg set output voltage and current
     ('Vset', 1, 13.65, None, None, None),
+    ('Iset', 1, 30.0, None, None, None),
     # Solar Reg measured voltage 13.65  +/- 6.0%
     ('VsetPre', 0, 13.65 * 0.94, 13.65 * 1.06, None, None),
     # Solar Reg measured voltage 13.65  +/- 3.0%

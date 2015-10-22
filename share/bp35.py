@@ -79,6 +79,8 @@ class Console(ArmConsoleGen1):
                 scale=1),
             'SR_VSET': ParameterFloat('SOLAR_REG_V', writeable=True,
                 scale=1000),
+            'SR_ISET': ParameterFloat('SOLAR_REG_I', writeable=True,
+                scale=1000),
             'SR_VCAL': ParameterFloat('SOLAR_REG_CAL_V_OUT', writeable=True,
                 scale=1000),
             }
