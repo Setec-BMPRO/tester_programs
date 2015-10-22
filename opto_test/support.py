@@ -71,22 +71,25 @@ class Sensors():
         # Generate a list of 20 collector-emitter voltage sensors.
         self.Vce = []
         for i in range(20):
-            s = sensor.Vdc(dmm, high=(i + 5), low=2, rng=10, res=0.0001, scale=-1)
+            s = sensor.Vdc(
+                dmm, high=(i + 5), low=2, rng=10, res=0.0001, scale=-1)
             self.Vce.append(s)
         # Generate a list of 20 VoutAdj ramp sensors for 1mA and 10mA inputs.
         self.VoutAdj1 = []
         for i in range(20):
             s = sensor.Search(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
-                detect_limit=(limits['Vsen'],), response_limit=(limits['VceAdj'],),
+                detect_limit=(
+                    limits['Vsen'],), response_limit=(limits['VceAdj'],),
                 start=4.7, stop=6.7, resolution=0.04, delay=0.1)
             self.VoutAdj1.append(s)
         self.VoutAdj10 = []
         for i in range(20):
             s = sensor.Search(
                 stimulus=logical_devices.dcs_vout, sensor=self.Vce[i],
-                detect_limit=(limits['Vsen'],), response_limit=(limits['VceAdj'],),
-                start=16.0, stop=26.0, resolution=0.04, delay=0.1)
+                detect_limit=(
+                    limits['Vsen'],), response_limit=(limits['VceAdj'],),
+                start=14.0, stop=26.0, resolution=0.04, delay=0.1)
             self.VoutAdj10.append(s)
         # Generate a list of 20 Iout voltage sensors.
         self.Iout = []
@@ -123,7 +126,7 @@ class Measurements():
         for sen in sense.Vce:
             m = Measurement(limits['Vce'], sen)
             self.dmm_Vce.append(m)
-        # Generate a tuple of 20 VoutAdj ramp measurements for 1mA and 10mA inputs.
+        # Generate tuple of 20 VoutAdj ramps for 1mA & 10mA inputs.
         self.ramp_VoutAdj1 = []
         for sen in sense.VoutAdj1:
             m = Measurement(limits['VoutAdj'], sen)

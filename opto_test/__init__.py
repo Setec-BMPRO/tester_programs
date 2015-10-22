@@ -22,8 +22,8 @@ m = None        # Shortcut to Measurements
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
 _RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
-#_RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
-#_RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
+# _RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
+# _RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
 _SUBJECT = 'GEN8 Opto Test Data'
 _EMAIL_SERVER = 'smtp.core.setec.com.au'
 
@@ -94,7 +94,7 @@ class Main(tester.TestSequence):
     def _step_in_adj1(self):
         """Input adjust and measure.
 
-            Adjust input dc source to get the required value of Iin.
+        Adjust input dc source to get the required value of Iin.
 
          """
         self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.003), ), ))
@@ -105,7 +105,7 @@ class Main(tester.TestSequence):
     def _step_in_adj10(self):
         """Input adjust and measure.
 
-            Adjust input dc source to get the required value of Iin.
+        Adjust input dc source to get the required value of Iin.
 
          """
         self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.03), ), ))
@@ -116,16 +116,17 @@ class Main(tester.TestSequence):
     def _step_out_adj1(self):
         """Output adjust and measure.
 
-            Adjust output DC source to get 5V across collector-emitter,
-            Measure Vce.
-            Measure Iout.
-            Measure Iin.
-            Calculate CTR.
+        Adjust output DC source to get 5V across collector-emitter,
+        Measure Vce.
+        Measure Iout.
+        Measure Iin.
+        Calculate CTR.
 
         """
         for i in range(20):
-            self.fifo_push(((s.Vce[i], (-5.3, -4.9, -5.02, -5.02)),
-                          (s.Iout[i], 0.6), (s.oIsen, 1.003), ))
+            self.fifo_push(
+                ((s.Vce[i], (-5.3, -4.9, -5.02, -5.02)),
+                 (s.Iout[i], 0.6), (s.oIsen, 1.003), ))
             d.dcs_vout.output(4.7, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj1[i].measure(timeout=2)
@@ -141,16 +142,17 @@ class Main(tester.TestSequence):
     def _step_out_adj10(self):
         """Output adjust and measure.
 
-            Adjust output DC source to get 5V across collector-emitter,
-            Measure Vce.
-            Measure Iout.
-            Measure Iin.
-            Calculate CTR.
+        Adjust output DC source to get 5V across collector-emitter,
+        Measure Vce.
+        Measure Iout.
+        Measure Iin.
+        Calculate CTR.
 
         """
         for i in range(20):
-            self.fifo_push(((s.Vce[i], (-5.5, -4.8, -5.2, -4.94, -5.02, -5.02)),
-                          (s.Iout[i], 15.0), (s.oIsen, 10.03), ))
+            self.fifo_push(
+                ((s.Vce[i], (-5.5, -4.8, -5.2, -4.94, -5.02, -5.02)),
+                 (s.Iout[i], 15.0), (s.oIsen, 10.03), ))
             d.dcs_vout.output(16.0, True)
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj10[i].measure(timeout=2)
