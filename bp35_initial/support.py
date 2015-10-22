@@ -77,7 +77,6 @@ class Sensors():
         dmm = logical_devices.dmm
         self.oMirPIC = sensor.Mirror()
         self.oMirARM = sensor.Mirror()
-        self.oMirVErr = sensor.Mirror()
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
         self.oLock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
@@ -130,7 +129,6 @@ class Sensors():
         """TestRun.stop: Empty the Mirror Sensors."""
         self.oMirPIC.flush()
         self.oMirARM.flush()
-        self.oMirVErr.flush()
 
 
 class Measurements():
@@ -146,7 +144,6 @@ class Measurements():
         """
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
-        self.srVErr = Measurement(limits['%ErrorV'], sense.oMirVErr)
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.oLock)
         self.dmm_sw1 = Measurement(limits['SwShort'], sense.osw1)
         self.dmm_sw2 = Measurement(limits['SwShort'], sense.osw2)
@@ -161,7 +158,8 @@ class Measurements():
         self.dmm_vloadOff = Measurement(limits['VloadOff'], sense.oVload)
         self.dmm_vbatin = Measurement(limits['VbatIn'], sense.oVbat)
         self.dmm_vbat = Measurement(limits['Vbat'], sense.oVbat)
-        self.dmm_vsreg = Measurement(limits['Vsreg'], sense.oVsreg)
+        self.dmm_vsregpre = Measurement(limits['VsetPre'], sense.oVsreg)
+        self.dmm_vsregpost = Measurement(limits['VsetPost'], sense.oVsreg)
         self.dmm_vaux = Measurement(limits['Vaux'], sense.oVbat)
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_fanOn = Measurement(limits['FanOn'], sense.oFan)

@@ -22,9 +22,11 @@ DATA = (
     ('FanOff', 0, 0.5, None, None, None),
     ('3V3prog', 0, 3.2, 3.4, None, None),
     # Solar Reg set voltage
-    ('VSet', 1, 13.65, None, None, None),
-    # Solar Reg measured voltage error +/- 3.0%
-    ('%ErrorV', 0, -3.0, 3.0, None, None),
+    ('Vset', 1, 13.65, None, None, None),
+    # Solar Reg measured voltage 13.65  +/- 6.0%
+    ('VsetPre', 0, 13.65 * 0.94, 13.65 * 1.06, None, None),
+    # Solar Reg measured voltage 13.65  +/- 3.0%
+    ('VsetPost', 0, 13.65 * 0.97, 13.65 * 1.03, None, None),
     ('OutOCP', 0, 32.0, 35.1, None, None),
     ('BatOCP', 0, 6.0, 9.0, None, None),
     ('InOCP', 0, 11.6, None, None, None),

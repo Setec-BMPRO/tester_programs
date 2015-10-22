@@ -75,7 +75,12 @@ class Console(ArmConsoleGen1):
             'CAN_ID': ParameterCAN('TQQ,32,0'),
             'CAN_STATS': ParameterRaw('', func=self.canstats),
             'SwVer': ParameterRaw('', func=self.version),
-            'SR_HW_VER': ParameterFloat('SOLAR_REG_HW_VERS', scale=1),
+            'SR_HW_VER': ParameterFloat('SOLAR_REG_HW_VERS', writeable=True,
+                scale=1),
+            'SR_VSET': ParameterFloat('SOLAR_REG_V', writeable=True,
+                scale=1000),
+            'SR_VCAL': ParameterFloat('SOLAR_REG_CAL_V_OUT', writeable=True,
+                scale=1000),
             }
         # Add in the 14 load switch current readings
         for i in range(1, 15):

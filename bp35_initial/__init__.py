@@ -223,17 +223,11 @@ class Main(tester.TestSequence):
         """
         self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
         d.dcs_sreg.output(20.0)
-        vset = self._limits['VSet'].limit
-
-        vmeasured = m.dmm_vsreg.measure(timeout=5)[1][0]
-        err = ((vset - vmeasured) / vset) * 100
-        # Calibrate voltage if required
-        if err != self._limits['%ErrorV']:
-
-            vmeasured = m.dmm_vsreg.measure(timeout=5)[1][0]
-            err = ((vset - vmeasured) / vset) * 100
-        s.oMirVErr.store(err)
-        m.srVErr.measure()
+        vset = self._limits['Vset'].limit
+        self._bp35['SR_VSET'] = vset
+        vmeasured = m.dmm_vsregpre.measure(timeout=5)[1][0]
+        self._bp35['SR_VCAL'] = vmeasured
+        m.dmm_vsregpost.measure(timeout=5)
         # Remove Solar Reg input voltage
         d.dcs_sreg.output(0.0, output=False)
 
