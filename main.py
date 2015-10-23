@@ -21,6 +21,7 @@ import batterycheck_final
 import bce4_final
 import bce282_final
 import bp35_initial
+import bp35_final
 import c15a15_final
 import c15d15_final
 import c45a15_initial
@@ -140,6 +141,7 @@ def _main():
         ('BCE282-12 Final', bce282_final.Main, bce282_final.LIMIT_DATA12),
         ('BCE282-24 Final', bce282_final.Main, bce282_final.LIMIT_DATA24),
         ('BP35 Initial', bp35_initial.Main, bp35_initial.LIMIT_DATA),
+        ('BP35 Final', bp35_final.Main, bp35_final.LIMIT_DATA),
         ('C15A-15 Final', c15a15_final.Main, c15a15_final.LIMIT_DATA),
         ('C15D-15(M) Final', c15d15_final.Main, c15d15_final.LIMIT_DATA),
         ('C45A-15(M) Initial', c45a15_initial.Main, c45a15_initial.LIMIT_DATA),
@@ -185,7 +187,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'BP35 Initial',
+        'BP35 Final',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
