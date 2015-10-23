@@ -132,7 +132,7 @@ class Main(tester.TestSequence):
         # Apply DC Sources to Battery terminals and Solar Reg input
         d.dcs_vbat.output(12.4, True)
         d.rla_vbat.set_on()
-        d.dcs_sreg.output(12.4, True)
+        d.dcs_sreg.output(20.0, True)
         MeasureGroup((m.dmm_vbatin, m.dmm_3V3, m.dmm_3V3prog), timeout=5)
 
     def _step_program_pic(self):
@@ -203,6 +203,7 @@ class Main(tester.TestSequence):
         self._bp35.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
+        time.sleep(1)
         if self._fifo:
             self._bp35.puts('Banner1\r\nBanner2\r\n')
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
@@ -216,13 +217,12 @@ class Main(tester.TestSequence):
     def _step_solar_reg(self):
         """Test the Solar Regulator board.
 
-        Apply 20.0V to the input of Solar Regulator.
-        Set the output voltage to 13.65V.
-        Measure actual output voltage and calibrate if required.
+        Set the Solar Reg output voltage to 13.65V.
+        Measure actual Solar Reg output voltage.
+        Calibrate and measure again.
 
         """
         self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
-        d.dcs_sreg.output(20.0)
         vset = self._limits['Vset'].limit
         iset = self._limits['Iset'].limit
         self._bp35['SR_VSET'] = vset
