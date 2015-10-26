@@ -2,7 +2,6 @@
 """BP35 Final Test Program."""
 
 import logging
-import time
 
 import tester
 from . import support
