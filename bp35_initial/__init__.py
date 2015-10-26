@@ -227,10 +227,13 @@ class Main(tester.TestSequence):
         iset = self._limits['Iset'].limit
         self._bp35['SR_VSET'] = vset
         self._bp35['SR_ISET'] = iset
+        time.sleep(2)
         vmeasured = m.dmm_vsregpre.measure(timeout=5)[1][0]
         self._bp35['SR_VCAL'] = vmeasured
+        time.sleep(1)
         m.dmm_vsregpost.measure(timeout=5)
         # Remove Solar Reg input voltage
+        time.sleep(1)
         d.dcs_sreg.output(0.0, output=False)
 
     def _step_aux(self):
