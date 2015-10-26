@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-10-23, 14:11:03 -->
+<!-- Saved: 2015-10-26, 12:13:07 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -200,8 +200,6 @@
     <Source>trek2_initial/limit.py</Source>
     <Source>share/trek2.py</Source>
     <Source>tester/_base.py</Source>
-    <Source>share/isplpc/device.py</Source>
-    <Source>share/isplpc/isp.py</Source>
     <Source>share/isplpc/__init__.py</Source>
     <Source>share/sim_serial.py</Source>
     <Source>opto_test/support.py</Source>
