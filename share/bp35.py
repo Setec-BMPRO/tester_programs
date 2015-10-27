@@ -83,6 +83,8 @@ class Console(ArmConsoleGen1):
                 scale=1000),
             'SR_VCAL': ParameterFloat('SOLAR_REG_CAL_V_OUT', writeable=True,
                 scale=1000),
+            'SR_DEL_CAL': ParameterBoolean('SOLAR_REG_DEL_CAL',
+                writeable=True),
             }
         # Add in the 14 load switch current readings
         for i in range(1, 15):

@@ -208,6 +208,7 @@ class Main(tester.TestSequence):
             self._bp35.puts('Banner1\r\nBanner2\r\n')
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
         self._bp35.defaults(_HW_VER, sernum)
+        self._bp35['SR_DEL_CAL'] = True
         self._bp35['SR_HW_VER'] = _SR_HW_VER
         if self._fifo:
             self._bp35.puts('1.0.11529.3465\r\n')
@@ -233,7 +234,6 @@ class Main(tester.TestSequence):
         time.sleep(1)
         m.dmm_vsregpost.measure(timeout=5)
         # Remove Solar Reg input voltage
-        time.sleep(1)
         d.dcs_sreg.output(0.0, output=False)
 
     def _step_aux(self):
