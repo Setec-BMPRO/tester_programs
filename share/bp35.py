@@ -67,6 +67,7 @@ class Console(ArmConsoleGen1):
             'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
             'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
+            'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
             # Other items
             'STATUS': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),

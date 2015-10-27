@@ -209,6 +209,10 @@ class Main(tester.TestSequence):
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
         self._bp35.defaults(_HW_VER, sernum)
         self._bp35['SR_DEL_CAL'] = True
+        d.dcs_sreg.output(0.0)
+        time.sleep(1)
+        d.dcs_sreg.output(20.0)
+        time.sleep(1)
         self._bp35['SR_HW_VER'] = _SR_HW_VER
         if self._fifo:
             self._bp35.puts('1.0.11529.3465\r\n')
@@ -224,6 +228,8 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
+        srtemp = self._bp35['SR_TEMP']
+        self._logger.debug('Temperature: %s', srtemp)
         vset = self._limits['Vset'].limit
         iset = self._limits['Iset'].limit
         self._bp35['SR_VSET'] = vset

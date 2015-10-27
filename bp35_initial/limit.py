@@ -46,7 +46,7 @@ DATA = (
     ('ARM-LoadI', 0, 0.1, 12.1, None, None),
     ('ARM-BattI', 0, 3.0, 5.0, None, None),
     ('ARM-AuxV', 0, 13.0, 13.8, None, None),
-    ('ARM-AuxI', 0, 0.0, 1.0, None, None),
+    ('ARM-AuxI', 0, 0.0, 1.1, None, None),
     # Serial Number entry
     ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
     ('CAN_ID', 0, None, None, r'^RRQ,32,0', None),
