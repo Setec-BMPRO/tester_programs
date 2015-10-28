@@ -3,6 +3,7 @@
 
 import logging
 import os
+import time
 
 import tester
 from . import support
@@ -116,8 +117,20 @@ class Main(tester.TestSequence):
         """Operational tests."""
         self._trek2.testmode(True)
         MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
-# TODO: Check water tank sensors
-#        m.trek2_SwVer.measure()
+        # No tank bars on
+        MeasureGroup(m.tank0)
+        # 1 tank bar on
+        d.rla_s1.set_on()
+        time.sleep(0.5)
+        MeasureGroup(m.tank1)
+        # 2 tank bars on
+        d.rla_s2.set_on()
+        time.sleep(0.5)
+        MeasureGroup(m.tank2)
+        # 3 tank bars on
+        d.rla_s3.set_on()
+        time.sleep(0.5)
+        MeasureGroup(m.tank3)
         self._trek2.testmode(False)
 
     def _step_tunnel_close(self):

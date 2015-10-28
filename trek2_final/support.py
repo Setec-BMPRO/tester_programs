@@ -33,7 +33,9 @@ class LogicalDevices():
         # Power unit under test.
         self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
         # As the water level rises the "switches" close. The order of switch
-        # closure doesn't matter, just the number closed.
+        # closure does not matter, just the number closed.
+        # The lowest bar always flashes. Closing these relays makes the other
+        # bars come on.
         self.rla_s1 = relay.Relay(devices['RLA3'])    # ON == Asserted
         self.rla_s2 = relay.Relay(devices['RLA4'])    # ON == Asserted
         self.rla_s3 = relay.Relay(devices['RLA5'])    # ON == Asserted
@@ -77,8 +79,10 @@ class Sensors():
         self.oYesNoLevel = sensor.YesNo(
             message=translate('trek2_final', 'IsLevelOk?'),
             caption=translate('trek2_final', 'capLevel'))
-#        self.oSwVer = share.trek2.Sensor(
-#            trek2, 'SwVer', rdgtype=tester.sensor.ReadingString)
+        self.tank1 = share.trek2.Sensor(trek2, 'TANK1')
+        self.tank2 = share.trek2.Sensor(trek2, 'TANK2')
+        self.tank3 = share.trek2.Sensor(trek2, 'TANK3')
+        self.tank4 = share.trek2.Sensor(trek2, 'TANK4')
 
 
 class Measurements():
@@ -100,7 +104,24 @@ class Measurements():
             limits['Notify'], sense.oYesNoDisplay)
         self.ui_YesNoLevel = Measurement(
             limits['Notify'], sense.oYesNoLevel)
-#        self.trek2_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
+        tank_sensors = (
+            sense.tank1, sense.tank2, sense.tank3, sense.tank4)
+        self.tank0 = []
+        lim = limits['Tank0']
+        for sens in tank_sensors:
+            self.tank0.append(Measurement(lim, sens))
+        self.tank1 = []
+        lim = limits['Tank1']
+        for sens in tank_sensors:
+            self.tank1.append(Measurement(lim, sens))
+        self.tank2 = []
+        lim = limits['Tank2']
+        for sens in tank_sensors:
+            self.tank2.append(Measurement(lim, sens))
+        self.tank3 = []
+        lim = limits['Tank3']
+        for sens in tank_sensors:
+            self.tank3.append(Measurement(lim, sens))
 
 
 class SubTests():
