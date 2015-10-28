@@ -81,6 +81,8 @@ class Main(tester.TestSequence):
         s = support.Sensors(d, self._limits, self._trek2)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
+        d.dcs_Vcom.output(12.0, output=True)
+        time.sleep(2)   # Allow OS to detect the new ports
 
     def close(self):
         """Finished testing."""
