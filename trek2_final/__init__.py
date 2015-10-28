@@ -44,7 +44,7 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, False),
+            ('PowerUp', self._step_power_up, None, True),
             ('TunnelOpen', self._step_tunnel_open, None, True),
             ('Test', self._step_test, None, True),
             ('TunnelClose', self._step_tunnel_close, None, True),
@@ -70,26 +70,21 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits, self._trek2)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
-        t = support.SubTests(d, m)
+        # Switch on the USB hub & Serial ports
+        d.dcs_Vcom.output(12.0, output=True)
+        time.sleep(2)   # Allow OS to detect the new ports
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
+        global d, s, m
         m = None
-        global d
         d = None
-        global s
         s = None
-        global t
-        t = None
 
     def safety(self, run=True):
         """Make the unit safe after a test."""
@@ -104,8 +99,8 @@ class Main(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oVin, 12.0), ))
-        t.pwr_up.run()
+        d.dcs_Vin.output(12.0, output=True)
+        time.sleep(9)           # Wait for CAN binding to finish
 
     def _step_tunnel_open(self):
         """Open console tunnel."""
@@ -117,19 +112,21 @@ class Main(tester.TestSequence):
         """Operational tests."""
         self._trek2.testmode(True)
         MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
+        self._trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
+        time.sleep(1)
         # No tank bars on
         MeasureGroup(m.tank0)
         # 1 tank bar on
         d.rla_s1.set_on()
-        time.sleep(0.5)
+        time.sleep(2)
         MeasureGroup(m.tank1)
         # 2 tank bars on
         d.rla_s2.set_on()
-        time.sleep(0.5)
+        time.sleep(2)
         MeasureGroup(m.tank2)
         # 3 tank bars on
         d.rla_s3.set_on()
-        time.sleep(0.5)
+        time.sleep(2)
         MeasureGroup(m.tank3)
         self._trek2.testmode(False)
 

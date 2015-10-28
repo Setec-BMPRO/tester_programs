@@ -122,21 +122,3 @@ class Measurements():
         lim = limits['Tank3']
         for sens in tank_sensors:
             self.tank3.append(Measurement(lim, sens))
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-        d = logical_devices
-        # PowerUp:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.0)), output=True)
-        self.pwr_up = Step((dcs1, ))

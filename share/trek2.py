@@ -41,6 +41,8 @@ class Console(ArmConsoleGen1):
             'CAN_BIND': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,16,0'),
+            'CONFIG': ParameterHex('CONFIG', writeable=True,
+                minimum=0, maximum=0xFFFF),
             'SwVer': ParameterRaw('', func=self.version),
             'TANK1': ParameterFloat('TANK_1_LEVEL'),
             'TANK2': ParameterFloat('TANK_2_LEVEL'),
