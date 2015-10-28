@@ -27,14 +27,13 @@ class LogicalDevices():
 
         """
         self._devices = devices
-
         self.dmm = dmm.DMM(devices['DMM'])
-
         # Power RS232 + Fixture Trek2.
         self.dcs_Vcom = dcsource.DCSource(devices['DCS1'])
         # Power unit under test.
         self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
-
+        # As the water level rises the "switches" close. The order of switch
+        # closure doesn't matter, just the number closed.
         self.rla_s1 = relay.Relay(devices['RLA3'])    # ON == Asserted
         self.rla_s2 = relay.Relay(devices['RLA4'])    # ON == Asserted
         self.rla_s3 = relay.Relay(devices['RLA5'])    # ON == Asserted
@@ -78,8 +77,8 @@ class Sensors():
         self.oYesNoLevel = sensor.YesNo(
             message=translate('trek2_final', 'IsLevelOk?'),
             caption=translate('trek2_final', 'capLevel'))
-        self.oSwVer = share.trek2.Sensor(
-            trek2, 'SwVer', rdgtype=tester.sensor.ReadingString)
+#        self.oSwVer = share.trek2.Sensor(
+#            trek2, 'SwVer', rdgtype=tester.sensor.ReadingString)
 
 
 class Measurements():
@@ -101,7 +100,7 @@ class Measurements():
             limits['Notify'], sense.oYesNoDisplay)
         self.ui_YesNoLevel = Measurement(
             limits['Notify'], sense.oYesNoLevel)
-        self.trek2_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
+#        self.trek2_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
 
 
 class SubTests():
@@ -116,9 +115,7 @@ class SubTests():
 
         """
         d = logical_devices
-
         # PowerUp:
         dcs1 = DcSubStep(
-            setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.0)),
-            output=True)
+            setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.0)), output=True)
         self.pwr_up = Step((dcs1, ))

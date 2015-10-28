@@ -27,9 +27,9 @@ _ARM_PORT = {'posix': '/dev/ttyUSB1',
              'nt':    'COM11',
              }[os.name]
 # Software image filename
-_ARM_BIN = 'Trek2_1.0.110.bin'
+_ARM_BIN = 'Trek2_1.0.11535.127.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (1, 0, '')
+_HW_VER = (1, 0, 'A')
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices

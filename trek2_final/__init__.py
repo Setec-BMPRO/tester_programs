@@ -45,7 +45,7 @@ class Main(tester.TestSequence):
         sequence = (
             ('PowerUp', self._step_power_up, None, False),
             ('TunnelOpen', self._step_tunnel_open, None, True),
-            ('SwVersion', self._step_version, None, True),
+            ('Test', self._step_test, None, True),
             ('TunnelClose', self._step_tunnel_close, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -56,10 +56,8 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         # Connection to the Serial-to-CAN Trek2 inside the fixture
-#        ser_can = share.sim_serial.SimSerial(
-#            simulation=self._fifo, baudrate=115200, timeout=0.1)
         ser_can = share.sim_serial.SimSerial(
-            simulation=False, baudrate=115200, timeout=0.1)
+            simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
         ser_can.setPort(_CAN_PORT)
         # CAN Console tunnel driver
@@ -114,10 +112,11 @@ class Main(tester.TestSequence):
         self._trek2.echo(echo_enable=False) # No command echo
         self._trek2.send_delay(delay=0)     # No delay, so send as strings
 
-    def _step_version(self):
-        """Software version."""
+    def _step_test(self):
+        """Operational tests."""
         self._trek2.testmode(True)
         MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
+# TODO: Check water tank sensors
 #        m.trek2_SwVer.measure()
         self._trek2.testmode(False)
 

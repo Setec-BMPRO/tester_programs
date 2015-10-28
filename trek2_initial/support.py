@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""Trek2 Initial Test Program.
+"""Trek2 Initial Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 from pydispatch import dispatcher
 
 import tester
@@ -33,9 +28,8 @@ class LogicalDevices():
         self.dcs_Vcom = dcsource.DCSource(devices['DCS1'])
         # Power unit under test.
         self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
-        self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
-        self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
-
+        self.rla_reset = relay.Relay(devices['RLA1'])
+        self.rla_boot = relay.Relay(devices['RLA2'])
 
     def error_check(self):
         """Check instruments for errors."""
