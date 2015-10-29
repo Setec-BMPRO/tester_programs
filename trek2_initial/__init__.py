@@ -72,6 +72,7 @@ class Main(tester.TestSequence):
         trek2_ser.setPort(_ARM_PORT)
         # Trek2 Console driver
         self._trek2 = share.trek2.Console(trek2_ser)
+        self.sernum = None
 
     def open(self):
         """Prepare for testing."""
@@ -104,7 +105,10 @@ class Main(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oVin, 12.0), (s.o3V3, 3.3), ))
+        dummy_sn = 'A1526040123'
+        self.fifo_push(
+            ((s.oSnEntry, (dummy_sn, )), (s.oVin, 12.0), (s.o3V3, 3.3), ))
+        self.sernum = m.ui_SnEntry.measure()[1][0]
         t.pwr_up.run()
 
     def _step_program(self):
@@ -140,16 +144,12 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        dummy_sn = 'A1526040123'
-        self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
-        sernum = m.ui_SnEntry.measure()[1][0]
         self._trek2.open()
-        # Reset micro.
-        d.rla_reset.pulse(0.1)
+        d.rla_reset.pulse(0.1)          # Reset micro.
         if self._fifo:
             self._trek2.puts('Banner1\r\nBanner2\r\n')
         self._trek2.action(None, delay=1, expected=2)   # Flush banner
-        self._trek2.defaults(_HW_VER, sernum)
+        self._trek2.defaults(_HW_VER, self.sernum)
         if self._fifo:
             self._trek2.puts('1.0.10892.110\r\n')
         m.trek2_SwVer.measure()
