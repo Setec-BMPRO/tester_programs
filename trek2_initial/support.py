@@ -69,7 +69,8 @@ class Sensors():
         self.oBkLght = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
         self.oSnEntry = sensor.DataEntry(
             message=translate('trek2_initial', 'msgSnEntry'),
-            caption=translate('trek2_initial', 'capSnEntry'))
+            caption=translate('trek2_initial', 'capSnEntry'),
+            timeout=300)
         self.oCANID = share.trek2.Sensor(
             trek2, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
         self.oCANBIND = share.trek2.Sensor(trek2, 'CAN_BIND')
