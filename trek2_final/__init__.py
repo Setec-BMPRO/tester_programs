@@ -46,7 +46,11 @@ class Main(tester.TestSequence):
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
             ('TunnelOpen', self._step_tunnel_open, None, True),
-            ('Test', self._step_test, None, True),
+            ('Display', self._step_display, None, True),
+            ('Tank0', self._step_tank0, None, True),
+            ('Tank1', self._step_tank1, None, True),
+            ('Tank2', self._step_tank2, None, True),
+            ('Tank3', self._step_tank3, None, True),
             ('TunnelClose', self._step_tunnel_close, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -107,28 +111,37 @@ class Main(tester.TestSequence):
         self._trek2.open()
         self._trek2.echo(echo_enable=False) # No command echo
         self._trek2.send_delay(delay=0)     # No delay, so send as strings
-
-    def _step_test(self):
-        """Operational tests."""
         self._trek2.testmode(True)
+
+    def _step_display(self):
+        """Display tests."""
         MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
-        self._trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
-        time.sleep(1)
-        # No tank bars on
-        MeasureGroup(m.tank0)
-        # 1 tank bar on
-        d.rla_s1.set_on()
-        time.sleep(2)
-        MeasureGroup(m.tank1)
-        # 2 tank bars on
-        d.rla_s2.set_on()
-        time.sleep(2)
-        MeasureGroup(m.tank2)
-        # 3 tank bars on
-        d.rla_s3.set_on()
-        time.sleep(2)
-        MeasureGroup(m.tank3)
         self._trek2.testmode(False)
+
+    def _step_tank0(self):
+        """Tank tests - Empty."""
+        self._trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
+        self._trek2['TANK_SPEED'] = 1.0     # Update interval
+        time.sleep(1)
+        MeasureGroup(m.tank0)
+
+    def _step_tank1(self):
+        """Tank tests - 1 sensor."""
+        d.rla_s1.set_on()
+        time.sleep(1)
+        MeasureGroup(m.tank1)
+
+    def _step_tank2(self):
+        """Tank tests - 2 sensors."""
+        d.rla_s2.set_on()
+        time.sleep(1)
+        MeasureGroup(m.tank2)
+
+    def _step_tank3(self):
+        """Tank tests - 3 sensors."""
+        d.rla_s3.set_on()
+        time.sleep(1)
+        MeasureGroup(m.tank3)
 
     def _step_tunnel_close(self):
         """Close console tunnel."""

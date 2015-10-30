@@ -33,7 +33,7 @@ class Console(ArmConsoleGen1):
         super().__init__(port, dialect=1)
         self.cmd_data = {
             # Read-Write values
-            'BACKLIGHT': ParameterFloat('BACKLIGHT', writeable=True,
+            'BACKLIGHT': ParameterFloat('BACKLIGHT_INTENSITY', writeable=True,
                 minimum=0, maximum=100, scale=1),
             # Other items
             'STATUS': ParameterHex('STATUS', writeable=True,
@@ -43,6 +43,9 @@ class Console(ArmConsoleGen1):
             'CAN_ID': ParameterCAN('TQQ,16,0'),
             'CONFIG': ParameterHex('CONFIG', writeable=True,
                 minimum=0, maximum=0xFFFF),
+            'TANK_SPEED': ParameterFloat('ADC_SCAN_INTERVAL_MSEC',
+                writeable=True,
+                minimum=0, maximum=10, scale=1000),
             'SwVer': ParameterRaw('', func=self.version),
             'TANK1': ParameterFloat('TANK_1_LEVEL'),
             'TANK2': ParameterFloat('TANK_2_LEVEL'),
@@ -120,12 +123,12 @@ class ConsoleCanTunnel(Console):
         self.can_mode(True)
         # Open a console tunnel
         command = '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id)
-        self.action(command, expected=1)
+        self.action(command)
 
     def close(self):
         """Close the CAN tunnel."""
         command = '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id)
-        self.action(command, expected=1)
+        self.action(command)
         super().close()
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
