@@ -54,8 +54,10 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramPIC', self._step_program_pic, None, not fifo),
-            ('ProgramARM', self._step_program_arm, None, not fifo),
+#            ('ProgramPIC', self._step_program_pic, None, not fifo),
+#            ('ProgramARM', self._step_program_arm, None, not fifo),
+            ('ProgramPIC', self._step_program_pic, None, False),
+            ('ProgramARM', self._step_program_arm, None, False),
             ('Initialise', self._step_initialise_arm, None, True),
             ('SolarReg', self._step_solar_reg, None, True),
             ('Aux', self._step_aux, None, True),
@@ -296,6 +298,13 @@ class Main(tester.TestSequence):
             tester.testsequence.path_pop()
         # All outputs ON
         self._bp35.load_set(set_on=False, loads=())
+        # Test Remote Load Isolator Switch
+        tester.testsequence.path_push('RemoteSw')
+        d.rla_loadsw.set_on()
+        m.dmm_vloadOff.measure(timeout=5)
+        d.rla_loadsw.set_off()
+        m.dmm_vload.measure(timeout=5)
+        tester.testsequence.path_pop()
 
     def _step_test_unit(self):
         """Test functions of the unit."""
