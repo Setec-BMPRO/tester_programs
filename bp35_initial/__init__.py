@@ -296,6 +296,13 @@ class Main(tester.TestSequence):
             tester.testsequence.path_pop()
         # All outputs ON
         self._bp35.load_set(set_on=False, loads=())
+        # Test Remote Load Isolator Switch
+        tester.testsequence.path_push('RemoteSw')
+        d.rla_loadsw.set_on()
+        m.dmm_vloadOff.measure(timeout=5)
+        d.rla_loadsw.set_off()
+        m.dmm_vload.measure(timeout=5)
+        tester.testsequence.path_pop()
 
     def _step_test_unit(self):
         """Test functions of the unit."""
