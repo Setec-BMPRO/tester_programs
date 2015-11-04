@@ -8,7 +8,7 @@ import tester
 from . import support
 from . import limit
 import share.ids500
-from share.simserial import SimSerial
+from share.sim_serial import SimSerial
 
 MeasureGroup = tester.measure.group
 

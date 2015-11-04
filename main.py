@@ -39,6 +39,9 @@ import gen8_initial
 import geniusII_final
 import gsu3601ta_initial
 import gsu3601ta_final
+import ids500_initial_sub
+import ids500_initial_main
+import ids500_final
 import mk7_final
 import opto_test
 import rm50_final
@@ -176,6 +179,11 @@ def _main():
         ('GSU360-1TA Initial', gsu3601ta_initial.Main,
          gsu3601ta_initial.LIMIT_DATA),
         ('GSU360-1TA Final', gsu3601ta_final.Main, gsu3601ta_final.LIMIT_DATA),
+        ('IDS500 Initial Micro', ids500_initial_sub.Main,
+         ids500_initial_sub.LIMIT_DATA),
+        ('IDS500 Initial Main', ids500_initial_main.Main,
+         ids500_initial_main.LIMIT_DATA),
+        ('IDS500 Final', ids500_final.Main, ids500_final.LIMIT_DATA),
         ('MK7-400-1 Final', mk7_final.Main, mk7_final.LIMIT_DATA),
         ('Opto Test', opto_test.Main, opto_test.LIMIT_DATA),
         ('RM-50-24 Final', rm50_final.Main, rm50_final.LIMIT_DATA),

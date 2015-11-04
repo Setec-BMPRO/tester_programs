@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-04, 22:08:44 -->
+<!-- Saved: 2015-11-04, 22:58:49 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -232,6 +232,15 @@
     <Source>bce282_initial/limit.py</Source>
     <Source>bce282_initial/msp.py</Source>
     <Source>share/btserver.py</Source>
+    <Source>ids500_final/__init__.py</Source>
+    <Source>ids500_final/support.py</Source>
+    <Source>ids500_initial_main/__init__.py</Source>
+    <Source>ids500_initial_main/support.py</Source>
+    <Source>ids500_initial_main/limit.py</Source>
+    <Source>ids500_initial_sub/__init__.py</Source>
+    <Source>ids500_initial_sub/support.py</Source>
+    <Source>ids500_final/limit.py</Source>
+    <Source>ids500_initial_sub/limit.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
@@ -251,6 +260,9 @@
     <Other>bp35_initial/bp35_1.0.11529.3465.bin</Other>
     <Other>bp35_initial/bp35sr_1.0.11518.126.hex</Other>
     <Other>trek2_initial/Trek2_1.0.11535.127.bin</Other>
+    <Other>cn101_initial/cn101_1.0.110.bin</Other>
+    <Other>bc15_initial/bc15_1.0.3156.bin</Other>
+    <Other>ids500_initial_sub/Main 1A.hex</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>

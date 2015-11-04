@@ -9,7 +9,7 @@ from . import support
 from . import limit
 import share.programmer
 import share.ids500
-from share.simserial import SimSerial
+from share.sim_serial import SimSerial
 
 
 LIMIT_DATA = limit.DATA
