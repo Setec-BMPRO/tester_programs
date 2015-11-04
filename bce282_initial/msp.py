@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-BCE282-12/24 Initial MSP430F2272 processor console driver.
+"""BCE282-12/24 Initial MSP430F2272 processor console driver.
 
 Communication via Serial port to the MSP430F2272 processor.
 
@@ -38,9 +36,8 @@ class Sensor(tester.sensor.Sensor):
         self._msp = msp
         self._key = key
         self._rdgtype = rdgtype
-        self._logger = logging.getLogger('.'.join(
-                                                 (__name__,
-                                                  self.__class__.__name__)))
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
         self._logger.debug('Created')
 
     def configure(self):
@@ -59,9 +56,8 @@ class Console():
 
     def __init__(self, port=0, baud=57600):
         """Open serial communications."""
-        self._logger = logging.getLogger('.'.join(
-                                                 (__name__,
-                                                  self.__class__.__name__)))
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
         self._port = port
         self._baud = baud
         self._ser = None
@@ -71,12 +67,12 @@ class Console():
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor ))
         self._data = {
-                'MSP-NvStatus': (self._getvalue,
-                                 ('nv-status PRINT', 1)),
-                'MSP-Vout':      (self._getvalue,
-                                 ('x-supply-voltage x@ print', _VOLTAGE_SCALE)),
-                'MSP-Iout':      (self._getvalue,
-                                 ('x-supply-current x@ print', _CURRENT_SCALE)),
+            'MSP-NvStatus': (self._getvalue,
+                             ('nv-status PRINT', 1)),
+            'MSP-Vout':      (self._getvalue,
+                             ('x-supply-voltage x@ print', _VOLTAGE_SCALE)),
+            'MSP-Iout':      (self._getvalue,
+                             ('x-supply-current x@ print', _CURRENT_SCALE)),
             }
 
     def open(self):
@@ -191,8 +187,7 @@ class Console():
             return reply
 
     def _readline(self):
-        """
-        Read a _EOL terminated line from the PIC.
+        """Read a _EOL terminated line from the PIC.
 
         Return string, with the _EOL removed.
         Upon read timeout, return None.
