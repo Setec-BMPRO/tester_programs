@@ -99,16 +99,15 @@ class Main(tester.TestSequence):
         d.dcs_vcom.output(0, False)
         m = d = s = t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            d.acsource.output(voltage=0.0, output=False)
-            d.dcl_out.output(2.0)
-            time.sleep(1)
-            d.discharge.pulse()
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        d.acsource.output(voltage=0.0, output=False)
+        d.dcl_out.output(2.0)
+        time.sleep(1)
+        d.discharge.pulse()
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -204,8 +203,7 @@ class Main(tester.TestSequence):
         # Reset micro.
         d.rla_reset.pulse(0.1)
         time.sleep(1)
-        if self._fifo:
-            self._bp35.puts('Banner1\r\nBanner2\r\n')
+        self._bp35_puts('Banner1\r\nBanner2\r\n')
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
         self._bp35.defaults(_HW_VER, sernum)
         self._bp35['SR_DEL_CAL'] = True
@@ -214,8 +212,7 @@ class Main(tester.TestSequence):
         d.dcs_sreg.output(20.0)
         time.sleep(1)
         self._bp35['SR_HW_VER'] = _SR_HW_VER
-        if self._fifo:
-            self._bp35.puts('1.0.11529.3465\r\n')
+        self._bp35_puts('1.0.11529.3465\r\n')
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
 
@@ -334,10 +331,14 @@ class Main(tester.TestSequence):
         """Test the Can Bus."""
         self.fifo_push(
             ((s.ARM_CANBIND, 0x10000000), (s.ARM_CANID, ('RRQ,32,0,7', )), ))
-        if self._fifo:
-            self._bp35.puts('junk\r\n')
+        self._bp35_puts('junk\r\n')
         m.arm_can_stats.measure()
-        if self._fifo:
-            self._bp35.puts('10000000\r\n', preflush=1)
+        self._bp35_puts('10000000\r\n', preflush=1)
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
+
+    def _bp35_puts(
+        self, string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the BP35 buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._bp35.puts(string_data, preflush, postflush, priority)

@@ -106,12 +106,11 @@ class Main(tester.TestSequence):
             self._logger.debug('Bluetooth server stopped')
         super().close()
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""

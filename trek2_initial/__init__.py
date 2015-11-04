@@ -92,12 +92,11 @@ class Main(tester.TestSequence):
         global m, d, s, t
         m = d = s = t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -146,12 +145,10 @@ class Main(tester.TestSequence):
         """Test the ARM device."""
         self._trek2.open()
         d.rla_reset.pulse(0.1)          # Reset micro.
-        if self._fifo:
-            self._trek2.puts('Banner1\r\nBanner2\r\n')
+        self._trek2_puts('Banner1\r\nBanner2\r\n')
         self._trek2.action(None, delay=1, expected=2)   # Flush banner
         self._trek2.defaults(_HW_VER, self.sernum)
-        if self._fifo:
-            self._trek2.puts('1.0.10892.110\r\n')
+        self._trek2_puts('1.0.10892.110\r\n')
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):
@@ -160,7 +157,12 @@ class Main(tester.TestSequence):
             ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
         m.trek2_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
-        if self._fifo:
-            self._trek2.puts('0x10000000\r\n', preflush=1)
+        self._trek2_puts('0x10000000\r\n', preflush=1)
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()
+
+    def _trek2_puts(
+        self, string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the Trek2 buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._trek2.puts(string_data, preflush, postflush, priority)

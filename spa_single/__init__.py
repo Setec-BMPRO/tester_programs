@@ -98,17 +98,12 @@ class Main(tester.TestSequence):
         s = None
         super().close()
 
-    def safety(self, run=True):
-        """Make the unit safe after a test.
-
-        AC Source OFF
-
-        """
-        self._logger.info('Safety(%s)', run)
-        if run:
-            d.acsource.output(voltage=0.0, output=False)
-            # Reset Logical Devices
-            d.reset()
+    def safety(self):
+        """Make the unit safe after a test."""
+        self._logger.info('Safety')
+        d.acsource.output(voltage=0.0, output=False)
+        # Reset Logical Devices
+        d.reset()
 
     def _step_poweron(self):
         """Initial Power-Up."""

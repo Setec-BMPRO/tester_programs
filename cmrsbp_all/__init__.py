@@ -6,9 +6,6 @@ import inspect
 import logging
 import datetime
 import time
-import serial
-import queue
-import threading
 
 import tester
 from . import support
@@ -16,6 +13,7 @@ from . import limit
 from . import cmrsbp
 from . import ev2200
 import share.programmer
+from share.sim_serial import SimSerial
 
 
 MeasureGroup = tester.measure.group
@@ -43,81 +41,6 @@ d = None        # Shortcut to Logical Devices
 s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
-
-
-class MockSerial():
-
-    """Simulated serial port for testing."""
-
-    def __init__(self, port=None, baudrate=9600, bytesize=8, parity='N',
-                 stopbits=1, timeout=None, xonxoff=False, rtscts=False,
-                 writeTimeout=None, dsrdtr=False, interCharTimeout=None):
-        """Create internal data storage queue."""
-        # Queue to hold data to be read by read()
-        self.in_queue = queue.Queue()
-        # Queue to hold data written by write()
-        self.out_queue = queue.Queue()
-        # Control of read() enable
-        self._enable = threading.Event()
-        self._enable.set()
-
-    def put(self, data):
-        """Put data into the read-back queue."""
-        self.in_queue.put(data)
-
-    def get(self):
-        """Get data from the written-out queue.
-
-        @return bytes
-
-        """
-        if not self.out_queue.empty():
-            data = self.out_queue.get()
-        else:
-            data = b''
-        return data
-
-    def flush(self):
-        """Flush both input and output queues."""
-        self.flushInput()
-        self.flushOutput()
-
-    def flushInput(self):
-        """Flush input queue."""
-        while not self.in_queue.empty():
-            self.in_queue.get()
-
-    def flushOutput(self):
-        """Flush output queue."""
-        while not self.out_queue.empty():
-            self.out_queue.get()
-
-    def enable(self):
-        """Enable reading of the read-back queue."""
-        self._enable.set()
-
-    def disable(self):
-        """Disable reading of the read-back queue."""
-        self._enable.clear()
-
-    def read(self, size=1):
-        """A non-blocking read.
-
-        @return bytes
-
-        """
-# FIXME: Honour the size argument
-        if self._enable.is_set() and not self.in_queue.empty():
-            data = self.in_queue.get()
-        else:
-            # FIXME: Should we use the timeout from the call to __init__() ?
-            time.sleep(0.1)
-            data = b''
-        return data
-
-    def write(self, data):
-        """Write data bytes to the written-out queue."""
-        self.out_queue.put(data)
 
 
 class Main(tester.TestSequence):
@@ -165,15 +88,12 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        if self._fifo:
-            self._cmr_ser = MockSerial()
-        else:
-            self._cmr_ser = serial.Serial(port=_CMR_PORT,
-                                          baudrate=9600, timeout=0.1)
+        self._cmr_ser = SimSerial(
+            port=_CMR_PORT, baudrate=9600, timeout=0.1)
         self._cmr = cmrsbp.CmrSbp(self._cmr_ser, data_timeout=10.0)
         if not self._isFin:
-            self._ev_ser = serial.Serial(port=_EV_PORT,
-                                         baudrate=9600, timeout=4.0)
+            self._ev_ser = SimSerial(
+                port=_EV_PORT, baudrate=9600, timeout=4.0)
             self._ev = ev2200.EV2200(self._ev_ser)
         global d
         d = support.LogicalDevices(self._devices)
@@ -204,12 +124,11 @@ class Main(tester.TestSequence):
         global t
         t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -395,13 +314,7 @@ class Main(tester.TestSequence):
                     sense_res = 450
                     full_charge = 17000
             data_str = _str.format(full_charge, half_cell, sense_res)
-            # hold serial data
-            self._cmr_ser.disable()
-            self._cmr_ser.put(data_str.encode())
-            # Timer to un-hold the serial port
-            ser_tim = threading.Timer(0.5, self._cmr_ser.enable)
-            ser_tim.start()
-
+            self._cmr_ser.puts(data_str)
         data = self._cmr.read()
         self._logger.debug('Received data: %s', data)
         return data

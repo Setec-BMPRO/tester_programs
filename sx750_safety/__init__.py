@@ -63,12 +63,11 @@ class Main(tester.TestSequence):
         s = None
         super().close()
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_gnd1(self):
         """Ground Continuity 1."""

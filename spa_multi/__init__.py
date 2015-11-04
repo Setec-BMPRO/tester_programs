@@ -112,7 +112,6 @@ class Main(tester.TestSequence):
         hexfilename = test_limits['Hex' + selection.parameter].limit
         self._logger.info('Create. Hex file "%s"', hexfilename)
         # Read Hex file
-# TODO: Get rid of this hard-coded pathname.
         hex = open('spa_multi/' + hexfilename, 'r')
         self._hexfile = ()
         for ln in hex.readlines():
@@ -160,17 +159,12 @@ class Main(tester.TestSequence):
         s = None
         super().close()
 
-    def safety(self, run=True):
-        """Make the unit safe after a test.
-
-        AC Source OFF
-
-        """
-        self._logger.info('Safety(%s)', run)
-        if run:
-            self._ac_in(0.0, output=False)
-            # Reset Logical Devices
-            d.reset()
+    def safety(self):
+        """Make the unit safe after a test."""
+        self._logger.info('Safety')
+        self._ac_in(0.0, output=False)
+        # Reset Logical Devices
+        d.reset()
 
     def _step_poweron(self):
         """Initial Power-Up.

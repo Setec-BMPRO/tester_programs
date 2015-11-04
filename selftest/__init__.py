@@ -63,12 +63,11 @@ class Main(tester.testsequence.TestSequence):
         s = None
         super().close()
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -105,7 +104,6 @@ class Main(tester.testsequence.TestSequence):
         if self._fifo:
             for src in s.dcs:
                 src.store((5.1, 10.2, 20.3, 35.4))
-
         for voltage, group in m.dmm_dcs:
             for src in d.dcs:
                 src.output(voltage=voltage, output=True)
@@ -126,7 +124,6 @@ class Main(tester.testsequence.TestSequence):
         if self._fifo:
             for _ in range(1, 8):
                 s.Shunt.store((0.005, 0.01, 0.02, 0.04))
-
         for load in d.dcl:
             for current, meas in m.dmm_Shunt:
                 load.output(current=current, output=True)
@@ -154,7 +151,6 @@ class Main(tester.testsequence.TestSequence):
         if self._fifo:
             for disch in s.disch:
                 disch.store((11.0, 0.0))
-
         d.disch.set_on()
         d.disch.opc()
         for disch in m.dmm_disch_on:

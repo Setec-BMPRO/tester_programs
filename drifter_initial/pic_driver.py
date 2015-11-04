@@ -20,8 +20,6 @@ _LINE_TMO = 4.0
 _VOLTAGE_SCALE = 0.001
 _CURRENT_SCALE = 0.001
 
-# FIXME: Add _VOLTAGE_SCALE here
-
 
 class TimeoutError(Exception):
 

@@ -9,13 +9,11 @@ sensor = tester.sensor
 
 # Scale factor for AC Input Current sensors.
 #   0R1 current sense resistor
-# FIXME: Put correct AC Current scale factor here.
 _AC_I_SCALE = 5.0
 
 # Scale factor for DSO LED Current sensors.
 #   0R1 current sense resistor
 #   Differential Amplifier
-# FIXME: Put correct DSO scale factor here.
 _DSO_LED_SCALE = 0.1
 
 

@@ -91,12 +91,11 @@ class Main(tester.TestSequence):
         d = None
         s = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            self._trek2.close()     # This is called even upon unit failures
-            d.reset()               # Reset Logical Devices
+        self._logger.info('Safety')
+        self._trek2.close()     # This is called even upon unit failures
+        d.reset()               # Reset Logical Devices
 
     def _step_error_check(self):
         """Check physical instruments for errors."""

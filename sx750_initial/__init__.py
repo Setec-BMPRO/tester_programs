@@ -81,27 +81,17 @@ class Main(tester.TestSequence):
         s = None
         super().close()
 
-    def safety(self, run=True):
-        """Make the unit safe after a test.
-
-            AC Source OFF
-            Outputs discharged
-            Inputs caps discharged
-
-        """
-        self._logger.info('Safety(%s)', run)
-        if run:
-            d.acsource.output(voltage=0.0, output=False)
-            d.dcl_5Vsb.output(1.0)
-            d.dcl_12V.output(5.0)
-            d.dcl_24V.output(5.0)
-            if self._fifo:
-                d.discharge.pulse(0.1)
-            else:
-                time.sleep(1)
-                d.discharge.pulse()
-            # Reset Logical Devices
-            d.reset()
+    def safety(self):
+        """Make the unit safe after a test."""
+        self._logger.info('Safety')
+        d.acsource.output(voltage=0.0, output=False)
+        d.dcl_5Vsb.output(1.0)
+        d.dcl_12V.output(5.0)
+        d.dcl_24V.output(5.0)
+        time.sleep(1)
+        d.discharge.pulse()
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""

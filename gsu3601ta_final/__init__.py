@@ -64,18 +64,14 @@ class Main(tester.TestSequence):
         global t
         t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Switch off AC Source
-            d.acsource.output(voltage=0.0, output=False)
-            # Discharge unit
-            d.dcl_24V.output(5.0, True)
-            if not self._fifo:
-                time.sleep(20.0)
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        d.acsource.output(voltage=0.0, output=False)
+        d.dcl_24V.output(5.0, True)
+        time.sleep(20.0)
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
