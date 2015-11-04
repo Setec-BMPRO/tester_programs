@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """BCE282-12/24 Final Program."""
 
+# FIXME: This program is not finished yet!
+
 import logging
 
 import tester

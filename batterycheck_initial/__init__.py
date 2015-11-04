@@ -82,7 +82,7 @@ class Main(tester.TestSequence):
         self._logger.debug('Starting bluetooth server')
         try:
             self._btserver = subprocess.Popen(
-                [_PYTHON27, 'btserver.py'], cwd=self._folder)
+                [_PYTHON27, '../share/btserver.py'], cwd=self._folder)
             self.btserver = jsonrpclib.Server('http://localhost:8888/')
         except FileNotFoundError:
             pass

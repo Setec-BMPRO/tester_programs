@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-04, 21:10:57 -->
+<!-- Saved: 2015-11-04, 22:08:44 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -113,7 +113,6 @@
     <Source>ts3520_final/limit.py</Source>
     <Source>ts3520_final/__init__.py</Source>
     <Source>ts3520_final/support.py</Source>
-    <Source>batterycheck_initial/btserver.py</Source>
     <Source>rm50_final/limit.py</Source>
     <Source>rm50_final/__init__.py</Source>
     <Source>rm50_final/support.py</Source>
@@ -221,7 +220,6 @@
     <Source>cn101_initial/__init__.py</Source>
     <Source>cn101_initial/limit.py</Source>
     <Source>share/cn101.py</Source>
-    <Source>cn101_initial/btserver.py</Source>
     <Source>trs1_initial/support.py</Source>
     <Source>trs1_initial/__init__.py</Source>
     <Source>trs1_initial/limit.py</Source>
@@ -233,6 +231,7 @@
     <Source>bce282_initial/tos-bsl.py</Source>
     <Source>bce282_initial/limit.py</Source>
     <Source>bce282_initial/msp.py</Source>
+    <Source>share/btserver.py</Source>
   </Sources>
   <Forms/>
   <Translations/>

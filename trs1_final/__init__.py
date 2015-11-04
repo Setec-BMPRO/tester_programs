@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Trs1 Final Test Program."""
 
+# FIXME: This program is not finished yet!
+
 import logging
 
 import tester
