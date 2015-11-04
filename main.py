@@ -50,6 +50,8 @@ import sx750_safety
 import sx750_final
 import trek2_initial
 import trek2_final
+import trs1_initial
+import trs1_final
 import ts3020h_initial
 import ts3020h_final
 import ts3520_final
@@ -185,6 +187,8 @@ def _main():
         ('SMU750-70 Final', smu75070_final.Main, smu75070_final.LIMIT_DATA),
         ('Trek2 Initial', trek2_initial.Main, trek2_initial.LIMIT_DATA),
         ('Trek2 Final', trek2_final.Main, trek2_final.LIMIT_DATA),
+        ('Trs1 Initial', trs1_initial.Main, trs1_initial.LIMIT_DATA),
+        ('Trs1 Final', trs1_final.Main, trs1_final.LIMIT_DATA),
         ('TS3020-H Initial', ts3020h_initial.Main, ts3020h_initial.LIMIT_DATA),
         ('TS3020-H Final', ts3020h_final.Main, ts3020h_final.LIMIT_DATA),
         ('TS3520 Final', ts3520_final.Main, ts3520_final.LIMIT_DATA),

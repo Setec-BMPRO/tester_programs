@@ -222,6 +222,12 @@
     <Source>cn101_initial/limit.py</Source>
     <Source>share/cn101.py</Source>
     <Source>cn101_initial/btserver.py</Source>
+    <Source>trs1_initial/support.py</Source>
+    <Source>trs1_initial/__init__.py</Source>
+    <Source>trs1_initial/limit.py</Source>
+    <Source>trs1_final/support.py</Source>
+    <Source>trs1_final/__init__.py</Source>
+    <Source>trs1_final/limit.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
