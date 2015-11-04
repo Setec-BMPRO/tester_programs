@@ -1,13 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-IDS-500 Initial Main Test Program.
+"""IDS-500 Initial Main Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 from pydispatch import dispatcher
 
 import tester.measure
@@ -26,22 +19,16 @@ class LogicalDevices():
 
         """
         self._devices = devices
-
         self.dmm = dmm.DMM(devices['DMM'])
-
         self.acsource = acsource.ACSource(devices['ACS'])
-
         self.discharge = discharge.Discharge(devices['DIS'])
-
         self.dcs_TecVset = dcsource.DCSource(devices['DCS1'])
         self.dcs_IsSet = dcsource.DCSource(devices['DCS2'])
         self.dcs_5V = dcsource.DCSource(devices['DCS3'])
-
         self.dcl_Tec = dcload.DCLoad(devices['DCL1'])
         self.dcl_15Vp = dcload.DCLoad(devices['DCL2'])
         self.dcl_15Vpsw = dcload.DCLoad(devices['DCL5'])
         self.dcl_5V = dcload.DCLoad(devices['DCL6'])
-
         self.rla_KeySw1 = relay.Relay(devices['RLA1'])
         self.rla_KeySw2 = relay.Relay(devices['RLA2'])
         self.rla_Emergency = relay.Relay(devices['RLA3'])
@@ -60,13 +47,10 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Source
         for dcs in (self.dcs_TecVset, self.dcs_IsSet, self.dcs_5V):
             dcs.output(0.0, False)
-        # Switch off DC Loads
         for ld in (self.dcl_Tec, self.dcl_15Vp, self.dcl_15Vpsw, self.dcl_5V):
             ld.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_KeySw1, self.rla_KeySw2, self.rla_Emergency,
                     self.rla_Crowbar, self.rla_EnableIS, self.rla_Interlock,
                     self.rla_Enable, self.rla_TecPhase, self.rla_LedSel0,
@@ -86,11 +70,11 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-
         self.oMirPIC = s_mirror.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
-
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.Lock = s_dmm.Res(dmm, high=18, low=3, rng=10000, res=1)
         self.oTec = s_dmm.Vdc(dmm, high=1, low=4, rng=100, res=0.001)
         self.oLdd = s_dmm.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
@@ -136,7 +120,6 @@ class Measurements():
         mes = tester.measure
         lim = limits
         sen = sense
-
         self.dmm_Lock = mes.Measurement(lim['FixtureLock'], sen.Lock)
         self.dmm_TecOff = mes.Measurement(lim['Off'], sen.oTec)
         self.dmm_TecVmonOff = mes.Measurement(lim['Off'], sen.oTecVmon)
@@ -173,14 +156,14 @@ class SubTests():
         m = measurements
 
         # PowerUp: Min load, input AC, measure.
-        ld1 = mes.LoadSubStep(((d.dcl_Tec, 0.1), (d.dcl_15Vp, 1.0),
-                               (d.dcl_15Vpsw, 0.0), (d.dcl_5V, 5.0)),
-                               output=True)
-        acs1 = mes.AcSubStep(acs=d.acsource, voltage=240.0, output=True,
-                             delay=1.0)
-        msr1 = mes.MeasureSubStep((m.dmm_Vbus, m.dmm_TecOff, m.dmm_TecVmonOff,
-                                   m.dmm_LddOff, m.dmm_IsVmonOff, m.dmm_15VOff,
-                                   m.dmm_m15VOff, m.dmm_15VpOff, m.dmm_5VOff,
-                                   m.dmm_15VpSwOff,  ), timeout=5)
+        ld1 = mes.LoadSubStep(
+            ((d.dcl_Tec, 0.1), (d.dcl_15Vp, 1.0),
+             (d.dcl_15Vpsw, 0.0), (d.dcl_5V, 5.0)),
+            output=True)
+        acs1 = mes.AcSubStep(
+            acs=d.acsource, voltage=240.0, output=True, delay=1.0)
+        msr1 = mes.MeasureSubStep(
+            (m.dmm_Vbus, m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff,
+             m.dmm_IsVmonOff, m.dmm_15VOff, m.dmm_m15VOff, m.dmm_15VpOff,
+             m.dmm_5VOff, m.dmm_15VpSwOff,  ), timeout=5)
         self.pwr_up = mes.Step((ld1, acs1, msr1))
-

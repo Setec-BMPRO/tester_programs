@@ -3,15 +3,12 @@
 
 import os
 import logging
-import time
-import serial
-import queue
-import threading
 
 import tester
 from . import support
 from . import limit
 import share.ids500
+from share.simserial import SimSerial
 
 MeasureGroup = tester.measure.group
 
@@ -30,77 +27,6 @@ d = None        # Shortcut to Logical Devices
 s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
-
-
-class MockSerial():
-
-    """Simulated serial port for testing."""
-
-    def __init__(self, port=None, baudrate=9600, bytesize=8, parity='N',
-                 stopbits=1, timeout=None, xonxoff=False, rtscts=False,
-                 writeTimeout=None, dsrdtr=False, interCharTimeout=None):
-        """Create internal data storage queue."""
-        # Queue to hold data to be read by read()
-        self.in_queue = queue.Queue()
-        # Queue to hold data written by write()
-        self.out_queue = queue.Queue()
-        # Control of read() enable
-        self._enable = threading.Event()
-        self._enable.set()
-
-    def put(self, data):
-        """Put data into the read-back queue."""
-        self.in_queue.put(data)
-
-    def get(self):
-        """Get data from the written-out queue."""
-        if not self.out_queue.empty():
-            data = self.out_queue.get()
-        else:
-            data = b''
-        return data
-
-    def flush(self):
-        """Flush both input and output queues."""
-        self.flushInput()
-        self.flushOutput()
-
-    def flushInput(self):
-        """Flush input queue."""
-        while not self.in_queue.empty():
-            self.in_queue.get()
-
-    def flushOutput(self):
-        """Flush output queue."""
-        while not self.out_queue.empty():
-            self.out_queue.get()
-
-    def enable(self):
-        """Enable reading of the read-back queue."""
-        self._enable.set()
-
-    def disable(self):
-        """Disable reading of the read-back queue."""
-        self._enable.clear()
-
-    def read(self, size=1):
-        """A non-blocking read.
-
-        @return bytes.
-
-        """
-# FIXME: Honour the size argument
-        if self._enable.is_set() and not self.in_queue.empty():
-            data = self.in_queue.get()
-        else:
-# FIXME: Should we use the timeout from the call to __init__() ?
-            time.sleep(0.1)
-            data = b''
-        return data
-
-    def write(self, data):
-        """Write data bytes to the written-out queue."""
-        self.out_queue.put(data)
 
 
 class Main(tester.TestSequence):
@@ -139,40 +65,26 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        if self._fifo:
-            self._pic_ser = MockSerial()
-        else:
-            self._pic_ser = serial.Serial(port=_PIC_PORT,
-                                          baudrate=19200, timeout=0.1)
+        self._pic_ser = SimSerial(port=_PIC_PORT, baudrate=19200, timeout=0.1)
         self._picdev = share.ids500.Console(self._pic_ser)
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits, self._picdev)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
         self._pic_ser.close()
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global d, s, m, t
+        m = d = s = t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -203,12 +115,7 @@ class Main(tester.TestSequence):
         t.key_sw12.run()
 
     def _step_tec(self):
-        """Check TEC.
-
-           Check led status.
-           Check voltages.
-
-        """
+        """Check TEC."""
         self.fifo_push(
             ((s.TecVset, 5.05), (s.TecVmon, (0.0, 4.99)),
              (s.Tec, (0.0, 15.0, -15.0)), (s.oYesNoPsu, True),

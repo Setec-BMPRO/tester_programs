@@ -47,15 +47,11 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Sources
         for dcs in (self.dcs_TecVset, self.dcs_IsSet, self.dcs_5V):
             dcs.output(0.0, False)
-        # Switch off DC Loads
         for ld in (self.dcl_Tec, self.dcl_15Vp, self.dcl_15VpSw, self.dcl_5V):
             ld.output(0.0, False)
-        # Switch off all Relays
         for rla in (
                 self.rla_MainsEnable, self.rla_15VpEnable, self.rla_Crowbar,
                 self.rla_Emergency, self.rla_EnableIs, self.rla_Interlock,
@@ -102,25 +98,24 @@ class Sensors():
             picdev, 'PIC-HwVerCheck', rdgtype=tester.sensor.ReadingString)
         self.oPic_SerChk = share.ids500.Sensor(
             picdev, 'PIC-SerCheck', rdgtype=tester.sensor.ReadingString)
-        tester.TranslationContext = 'ids500_final'
         self.oYesNoPsu = sensor.YesNo(
-            message=translate('IsPSULedGreen?'),
-            caption=translate('capPsuLed'))
+            message=translate('ids500_final', 'IsPSULedGreen?'),
+            caption=translate('ids500_final', 'capPsuLed'))
         self.oYesNoTecGreen = sensor.YesNo(
-            message=translate('IsTECLedGreen?'),
-            caption=translate('capTecGreenLed'))
+            message=translate('ids500_final', 'IsTECLedGreen?'),
+            caption=translate('ids500_final', 'capTecGreenLed'))
         self.oYesNoTecRed = sensor.YesNo(
-            message=translate('IsTECLedRed?'),
-            caption=translate('capTecRedLed'))
+            message=translate('ids500_final', 'IsTECLedRed?'),
+            caption=translate('ids500_final', 'capTecRedLed'))
         self.oYesNoLddGreen = sensor.YesNo(
-            message=translate('IsLDDLedGreen?'),
-            caption=translate('capLddGreenLed'))
+            message=translate('ids500_final', 'IsLDDLedGreen?'),
+            caption=translate('ids500_final', 'capLddGreenLed'))
         self.oYesNoLddRed = sensor.YesNo(
-            message=translate('IsLDDLedRed?'),
-            caption=translate('capLddRedLed'))
+            message=translate('ids500_final', 'IsLDDLedRed?'),
+            caption=translate('ids500_final', 'capLddRedLed'))
         self.oSerEntry = sensor.DataEntry(
-            message=translate('msgSerEntry'),
-            caption=translate('capSerEntry'))
+            message=translate('ids500_final', 'msgSerEntry'),
+            caption=translate('ids500_final', 'capSerEntry'))
         self.oOCP5V = sensor.Ramp(
             stimulus=logical_devices.dcl_5V, sensor=self.o5V,
             detect_limit=(limits['inOCP5V'], ),
