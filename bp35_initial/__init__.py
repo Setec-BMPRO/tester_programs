@@ -127,7 +127,7 @@ class Main(tester.TestSequence):
              (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3), ))
         MeasureGroup(
             (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
-             timeout=5)
+            timeout=5)
         # Apply DC Sources to Battery terminals and Solar Reg input
         d.dcs_vbat.output(12.4, True)
         d.rla_vbat.set_on()
@@ -279,7 +279,7 @@ class Main(tester.TestSequence):
         All outputs are then left ON.
 
         """
-        self.fifo_push(((s.oVload, (0.0, ) + (12.8, ) * 14),  ))
+        self.fifo_push(((s.oVload, (0.0, ) + (12.8, ) * 14), ))
         # All outputs OFF
         self._bp35.load_set(set_on=True, loads=())
         # A little load on the output.
@@ -314,7 +314,7 @@ class Main(tester.TestSequence):
                 sen.store(2.0)
         # m.arm_priT, [disabled because it has bugs...]
         MeasureGroup((m.arm_acv, m.arm_acf, m.arm_secT,
-                    m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
+                     m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
         self._bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
         d.dcl_out.binary(1.0, 28.0, 5.0)
@@ -337,8 +337,8 @@ class Main(tester.TestSequence):
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
 
-    def _bp35_puts(
-        self, string_data, preflush=0, postflush=0, priority=False):
+    def _bp35_puts(self,
+                   string_data, preflush=0, postflush=0, priority=False):
         """Push string data into the BP35 buffer only if FIFOs are enabled."""
         if self._fifo:
             self._bp35.puts(string_data, preflush, postflush, priority)

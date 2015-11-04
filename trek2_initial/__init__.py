@@ -161,8 +161,8 @@ class Main(tester.TestSequence):
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()
 
-    def _trek2_puts(
-        self, string_data, preflush=0, postflush=0, priority=False):
+    def _trek2_puts(self,
+                    string_data, preflush=0, postflush=0, priority=False):
         """Push string data into the Trek2 buffer only if FIFOs are enabled."""
         if self._fifo:
             self._trek2.puts(string_data, preflush, postflush, priority)
