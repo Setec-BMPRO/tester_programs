@@ -217,6 +217,11 @@
     <Source>bc15_initial/__init__.py</Source>
     <Source>bc15_initial/limit.py</Source>
     <Source>share/bc15.py</Source>
+    <Source>cn101_initial/support.py</Source>
+    <Source>cn101_initial/__init__.py</Source>
+    <Source>cn101_initial/limit.py</Source>
+    <Source>share/cn101.py</Source>
+    <Source>cn101_initial/btserver.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
