@@ -51,7 +51,6 @@ class Main(tester.TestSequence):
             ('Tank1', self._step_tank1, None, True),
             ('Tank2', self._step_tank2, None, True),
             ('Tank3', self._step_tank3, None, True),
-            ('TunnelClose', self._step_tunnel_close, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -85,6 +84,8 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
+        # Switch off the USB hub & Serial ports
+        d.dcs_Vcom.output(0.0, output=False)
         global d, s, m
         m = None
         d = None
@@ -94,8 +95,8 @@ class Main(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety(%s)', run)
         if run:
-            # Reset Logical Devices
-            d.reset()
+            self._trek2.close()     # This is called even upon unit failures
+            d.reset()               # Reset Logical Devices
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -142,7 +143,3 @@ class Main(tester.TestSequence):
         d.rla_s3.set_on()
         time.sleep(1)
         MeasureGroup(m.tank3)
-
-    def _step_tunnel_close(self):
-        """Close console tunnel."""
-        self._trek2.close()

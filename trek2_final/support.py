@@ -28,7 +28,7 @@ class LogicalDevices():
         """
         self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
-        # Power RS232 + Fixture Trek2.
+        # Power USB devices + Fixture Trek2.
         self.dcs_Vcom = dcsource.DCSource(devices['DCS1'])
         # Power unit under test.
         self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
@@ -46,9 +46,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
-        for dcs in (self.dcs_Vin, self.dcs_Vcom):
-            dcs.output(0.0, False)
+        # Switch off Vin DC Sources (Not Vcom, that runs the USB devices)
+        self.dcs_Vin.output(0.0, False)
         # Switch off all Relays
         for rla in (self.rla_s1, self.rla_s2, self.rla_s3):
             rla.set_off()
