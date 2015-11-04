@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""CN101 Initial Test Program.
+"""CN101 Initial Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 from pydispatch import dispatcher
 
 import tester
@@ -52,13 +47,11 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
         for dcs in (self.dcs_vin, self.dcs_vcom, self.dcs_awn):
             dcs.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_reset, self.rla_boot, self.rla_awnA,
-                   self.rla_awnB, self.rla_sldA, self.rla_sldB,
-                   self.rla_s1, self.rla_s2, self.rla_s3, self.rla_s4):
+                    self.rla_awnB, self.rla_sldA, self.rla_sldB,
+                    self.rla_s1, self.rla_s2, self.rla_s3, self.rla_s4):
             rla.set_off()
 
 
@@ -154,18 +147,16 @@ class SubTests():
             setting=((d.dcs_vcom, 12.0), (d.dcs_vin, 12.75)), output=True)
         msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3V3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
-
         # Awning:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_awn, 12.3), ), output=True)
+        dcs1 = DcSubStep(setting=((d.dcs_awn, 12.3), ), output=True)
         rly1 = RelaySubStep(
             relays=((d.rla_awnA, True), (d.rla_awnB, True),
-                   (d.rla_sldA, True), (d.rla_sldB, True)))
+                    (d.rla_sldA, True), (d.rla_sldB, True)))
         msr1 = MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn, m.dmm_sldAOn,
-                             m.dmm_sldBOn), timeout=5)
+                              m.dmm_sldBOn), timeout=5)
         rly2 = RelaySubStep(
             relays=((d.rla_awnA, False), (d.rla_awnB, False),
-                   (d.rla_sldA, False), (d.rla_sldB, False)))
+                    (d.rla_sldA, False), (d.rla_sldB, False)))
         msr2 = MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff, m.dmm_sldAOff,
-                             m.dmm_sldBOff), timeout=5)
+                              m.dmm_sldBOff), timeout=5)
         self.motctrl = Step((dcs1, rly1, msr1, rly2, msr2))

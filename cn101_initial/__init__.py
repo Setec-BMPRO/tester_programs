@@ -99,12 +99,11 @@ class Main(tester.TestSequence):
         global m, d, s, t
         m = d = s = t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -189,8 +188,9 @@ class Main(tester.TestSequence):
 
     def _step_motor_control(self):
         """Activate awnings, slideouts and measure."""
-        self.fifo_push(((s.oAwnA, (12.0, 0.0)), (s.oAwnB, (12.0, 0.0)),
-                      (s.oSldA, (12.0, 0.0)), (s.oSldB, (12.0, 0.0)), ))
+        self.fifo_push(
+            ((s.oAwnA, (12.0, 0.0)), (s.oAwnB, (12.0, 0.0)),
+             (s.oSldA, (12.0, 0.0)), (s.oSldB, (12.0, 0.0)), ))
         t.motctrl.run()
 
     def _step_tank_sense(self):

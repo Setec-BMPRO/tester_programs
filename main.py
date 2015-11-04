@@ -187,7 +187,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'CN101 Initial',
+        'Dummy',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
