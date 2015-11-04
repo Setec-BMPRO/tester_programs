@@ -43,26 +43,17 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m, self._limits)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -97,10 +88,10 @@ class Main(tester.TestSequence):
         """Measure OCP point."""
         if self._isbce12:
             self.fifo_push(((s.oVout, (13.4, ) * 15 + (13.0, ), ),
-                             (s.oVbat, (13.4, ) * 15 + (13.0, ), ), ))
+                            (s.oVbat, (13.4, ) * 15 + (13.0, ), ), ))
         else:
             self.fifo_push(((s.oVout, (27.3, ) * 8 + (26.0, ), ),
-                             (s.oVbat, (27.3, ) * 8 + (26.0, ), ), ))
+                            (s.oVbat, (27.3, ) * 8 + (26.0, ), ), ))
         m.ramp_OCPLoad.measure()
         d.dcl_Vout.output(0.0)
         m.ramp_OCPBatt.measure()

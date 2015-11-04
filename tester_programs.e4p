@@ -228,6 +228,11 @@
     <Source>trs1_final/support.py</Source>
     <Source>trs1_final/__init__.py</Source>
     <Source>trs1_final/limit.py</Source>
+    <Source>bce282_initial/support.py</Source>
+    <Source>bce282_initial/__init__.py</Source>
+    <Source>bce282_initial/tos-bsl.py</Source>
+    <Source>bce282_initial/limit.py</Source>
+    <Source>bce282_initial/msp.py</Source>
   </Sources>
   <Forms/>
   <Translations/>

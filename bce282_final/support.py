@@ -88,10 +88,8 @@ class SubTests():
         m = measurements
         # PowerUp: 200Vac, measure, 240Vac, measure.
         msr1 = MeasureSubStep((m.dmm_AlarmClosed, ), timeout=5)
-        acs1 = AcSubStep(
-            acs=d.acsource, voltage=200.0, output=True, delay=0.5)
-        ld = LoadSubStep(
-            ((d.dcl_Vout, 0.1), (d.dcl_Vbat, 0.0)), output=True)
+        acs1 = AcSubStep(acs=d.acsource, voltage=200.0, output=True, delay=0.5)
+        ld = LoadSubStep(((d.dcl_Vout, 0.1), (d.dcl_Vbat, 0.0)), output=True)
         msr2 = MeasureSubStep((m.dmm_VoutNL, ), timeout=5)
         acs2 = AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
         msr3 = MeasureSubStep(
