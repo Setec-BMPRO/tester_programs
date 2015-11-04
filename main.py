@@ -18,6 +18,8 @@ import _2040_initial
 import atxg450_2v_final
 import batterycheck_initial
 import batterycheck_final
+import bc15_initial
+import bc15_final
 import bce4_final
 import bce282_final
 import bp35_initial
@@ -136,6 +138,8 @@ def _main():
          batterycheck_initial.LIMIT_DATA),
         ('BatteryCheck Final', batterycheck_final.Main,
          batterycheck_final.LIMIT_DATA),
+        ('BC15 Initial', bc15_initial.Main, bc15_initial.LIMIT_DATA),
+        ('BC15 Final', bc15_final.Main, bc15_final.LIMIT_DATA),
         ('BCE4 Final', bce4_final.Main, bce4_final.LIMIT_DATA4),
         ('BCE5 Final', bce4_final.Main, bce4_final.LIMIT_DATA5),
         ('BCE282-12 Final', bce282_final.Main, bce282_final.LIMIT_DATA12),
@@ -187,7 +191,7 @@ def _main():
         )
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        'BP35 Initial',
+        'Dummy',
         per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)

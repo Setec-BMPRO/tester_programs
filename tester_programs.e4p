@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-10-30, 10:50:57 -->
+<!-- Saved: 2015-11-04, 21:10:57 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -210,6 +210,13 @@
     <Source>bp35_final/support.py</Source>
     <Source>bp35_final/__init__.py</Source>
     <Source>bp35_final/limit.py</Source>
+    <Source>bc15_final/support.py</Source>
+    <Source>bc15_final/__init__.py</Source>
+    <Source>bc15_final/limit.py</Source>
+    <Source>bc15_initial/support.py</Source>
+    <Source>bc15_initial/__init__.py</Source>
+    <Source>bc15_initial/limit.py</Source>
+    <Source>share/bc15.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
