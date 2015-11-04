@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Trs1 Final Program Limits."""
 
-
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('BrakeOff', 1, -0.1, 0.1, None, None),

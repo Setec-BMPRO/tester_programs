@@ -61,12 +61,11 @@ class Main(tester.TestSequence):
         global m, d, s, t
         m = d = s = t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -80,6 +79,6 @@ class Main(tester.TestSequence):
     def _step_breakaway(self):
         """Measure under 'breakaway' condition."""
         self.fifo_push(((s.oNotifyPinOut, True), (s.oBrake, 12.0),
-                      (s.oLight, 12.0), (s.oRemote, 12.0),
-                      (s.oYesNoGreen, True), ))
+                       (s.oLight, 12.0), (s.oRemote, 12.0),
+                       (s.oYesNoGreen, True), ))
         t.brkaway.run()

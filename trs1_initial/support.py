@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""Trs1 Initial Test Program.
+"""Trs1 Initial Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 import tester
 from tester.devlogical import *
 from tester.measure import *
@@ -25,13 +20,9 @@ class LogicalDevices():
         """
         self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
-
         self.dso = dso.DSO(devices['DSO'])
-
         self.dcs_Vin = dcsource.DCSource(devices['DCS1'])
-
         self.rla_brksw = relay.Relay(devices['RLA1'])   # ON == Asserted
-
 
     def error_check(self):
         """Check instruments for errors."""
@@ -39,10 +30,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
         for dcs in (self.dcs_Vin, ):
             dcs.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_brksw, ):
             rla.set_off()
 
@@ -67,7 +56,6 @@ class Sensors():
         self.oRemote = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
         self.oGreen = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.01)
         self.oRed = sensor.Vdc(dmm, high=7, low=1, rng=100, res=0.01)
-
         tbase = sensor.Timebase(
             range=10.0, main_mode=True, delay=0, centre_ref=False)
         trg = sensor.Trigger(
@@ -125,20 +113,17 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vin, 12.0), ), output=True)
+        dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True)
         msr1 = MeasureSubStep((m.dmm_Vin, m.dmm_brakeoff, m.dmm_lightoff,
-                             m.dmm_remoteoff), timeout=5)
+                              m.dmm_remoteoff), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
 
         # BreakAway:
         rly1 = RelaySubStep(((d.rla_brksw, True), ))
         msr1 = MeasureSubStep((m.dmm_brakeon, m.dmm_lighton, m.dmm_remoteon,
-                             m.dmm_greenon, m.dmm_redoff), timeout=5)
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vin, 10.0), ))
+                              m.dmm_greenon, m.dmm_redoff), timeout=5)
+        dcs1 = DcSubStep(setting=((d.dcs_Vin, 10.0), ))
         msr2 = MeasureSubStep((m.dmm_greenoff, m.dmm_redon), timeout=5)
-        dcs2 = DcSubStep(
-            setting=((d.dcs_Vin, 12.0), ))
+        dcs2 = DcSubStep(setting=((d.dcs_Vin, 12.0), ))
         msr3 = MeasureSubStep((m.dso_timerled, m.dso_timeout), timeout=5)
         self.brkaway = Step((rly1, msr1, dcs1, msr2, dcs2, msr3))

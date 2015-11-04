@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""Trs1 Final Test Program.
+"""Trs1 Final Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 import tester
 from tester.devlogical import *
 from tester.measure import *
@@ -26,11 +21,8 @@ class LogicalDevices():
         """
         self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
-
         self.dcs_Vin = dcsource.DCSource(devices['DCS1'])
-
         self.dcl = dcload.DCLoad(devices['DCL1'])
-
 
     def error_check(self):
         """Check instruments for errors."""
@@ -38,10 +30,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
         for dcs in (self.dcs_Vin, ):
             dcs.output(0.0, False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
 
 
@@ -105,13 +95,11 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vin, 12.0), ), output=True)
+        dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True)
         msr1 = MeasureSubStep((m.dmm_brakeoff, m.dmm_lightoff, m.dmm_remoteoff), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
-
         # BreakAway:
-        ld1 = LoadSubStep( ((d.dcl, 1.0), ), output=True)
+        ld1 = LoadSubStep(((d.dcl, 1.0), ), output=True)
         msr1 = MeasureSubStep((m.ui_NotifyPinOut, m.dmm_brakeon, m.dmm_lighton,
-                             m.dmm_remoteon, m.ui_YesNoGreen), timeout=5)
+                              m.dmm_remoteon, m.ui_YesNoGreen), timeout=5)
         self.brkaway = Step((ld1, msr1, ))
