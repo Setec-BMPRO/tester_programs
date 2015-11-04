@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""BC15 Initial Test Program.
+"""BC15 Initial Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 from pydispatch import dispatcher
 
 import tester
@@ -42,11 +37,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_reset, self.rla_boot):
             rla.set_off()
 
@@ -63,7 +55,6 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-
         self.oMirARM = sensor.Mirror()
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)

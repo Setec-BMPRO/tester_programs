@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""BC15 Final Test Program.
+"""BC15 Final Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 import tester
 from tester.devlogical import *
 from tester.measure import *
@@ -35,9 +30,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
 
 
@@ -55,7 +48,7 @@ class Sensors():
         dmm = logical_devices.dmm
 
         self.oVout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        tester.TranslationContext = 'bc15_initial'
+        tester.TranslationContext = 'bc15_final'
         self.oSnEntry = sensor.DataEntry(
             message=translate('msgSnEntry'),
             caption=translate('capSnEntry'))
@@ -89,10 +82,7 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerOn: Apply 240Vac, set min load, measure.
-        ld1 = LoadSubStep(
-            ((d.dcl, 1.0), ), output=True)
-        acs1 = AcSubStep(
-            acs=d.acsource, voltage=240.0, output=True, delay=1.0)
-        msr1 = MeasureSubStep(
-            (m.dmm_Vout, ), timeout=5)
+        ld1 = LoadSubStep(((d.dcl, 1.0), ), output=True)
+        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=1.0)
+        msr1 = MeasureSubStep((m.dmm_Vout, ), timeout=5)
         self.pwr_on = Step((ld1, acs1, msr1, ))

@@ -86,16 +86,15 @@ class Main(tester.TestSequence):
         d.dcs_vcom.output(0, False)
         m = d = s = t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            d.acsource.output(voltage=0.0, output=False)
-            d.dcl.output(2.0)
-            time.sleep(1)
-            d.discharge.pulse()
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        d.acsource.output(voltage=0.0, output=False)
+        d.dcl.output(2.0)
+        time.sleep(1)
+        d.discharge.pulse()
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -103,8 +102,7 @@ class Main(tester.TestSequence):
 
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
-        self.fifo_push(
-            ((s.olock, 10.0),  ))
+        self.fifo_push(((s.olock, 10.0), ))
         MeasureGroup((m.dmm_lock, ), timeout=5)
 
     def _step_program_arm(self):
@@ -157,15 +155,18 @@ class Main(tester.TestSequence):
         self._bc15.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        if self._fifo:
-            self._bc15.puts('Banner1\r\nBanner2\r\n')
+        self._bc15_puts('Banner1\r\nBanner2\r\n')
         self._bc15.action(None, delay=0.5, expected=2)  # Flush banner
         self._bc15.defaults(_HW_VER, sernum)
-        if self._fifo:
-            self._bc15.puts('1.0.10902.3156\r\n')
+        self._bc15_puts('1.0.10902.3156\r\n')
         m.arm_SwVer.measure()
 
     def _step_powerup(self):
         """Power up the Unit with 240Vac."""
-        self.fifo_push(
-            ((s.oACin, 240.0), (s.oVout, 12.0 ), ))
+        self.fifo_push(((s.oACin, 240.0), (s.oVout, 12.0), ))
+
+    def _bc15_puts(self,
+                   string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the BC15 buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._bc15.puts(string_data, preflush, postflush, priority)

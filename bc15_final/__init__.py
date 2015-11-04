@@ -58,12 +58,11 @@ class Main(tester.TestSequence):
         global m, d, s, t
         m = d = s = t = None
 
-    def safety(self, run=True):
+    def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety(%s)', run)
-        if run:
-            # Reset Logical Devices
-            d.reset()
+        self._logger.info('Safety')
+        # Reset Logical Devices
+        d.reset()
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -73,4 +72,3 @@ class Main(tester.TestSequence):
         """Power up the Unit and measure output with min load."""
         self.fifo_push(((s.oVout, 12.0), ))
         t.pwr_on.run()
-
