@@ -40,7 +40,10 @@ _CMD_PROMPT2 = '> '
 # Delay after a value set command
 _SET_DELAY = 0.3
 # Delay between character when console echo is OFF
-_INTER_CHAR_DELAY = 0.001
+# NOTE: This delay is very fussy...
+#       1ms will miss the T in a "TCC command about 1 in 5 test runs.
+#       2ms seems to be stable.
+_INTER_CHAR_DELAY = 0.002
 
 # Dialect dependent commands
 #   Use the key name for lookup, then index by self._dialect
@@ -482,9 +485,11 @@ class ArmConsoleGen1():
             # Send each byte with echo verification
             for a_byte in cmd_data:
                 a_byte = bytes([a_byte])
+#                self._logger.debug('Tx ---> %s', repr(a_byte))
                 self._port.write(a_byte)
                 if self._echo:
                     echo = self._port.read(1)
+#                    self._logger.debug('Rx <--- %s', repr(echo))
                     if echo != a_byte:
                         raise ArmError(
                             'Command echo error. Tx: {}, Rx: {}'.format(
@@ -493,6 +498,7 @@ class ArmConsoleGen1():
                     time.sleep(self._send_delay)
             # And the command RUN, without echo
             self._port.write(_CMD_RUN)
+#            self._logger.debug('Tx ---> %s', repr(_CMD_RUN))
 
     def _read_response(self, expected):
         """Read a response.
