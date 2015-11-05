@@ -4,11 +4,20 @@
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('ACin', 0, 235.0, 245.0, None, None),
-    ('Vout', 0, 12.0, 12.9, None, None),
+    ('Vbus', 0, 320.0, 340.0, None, None),
+    ('14Vpri', 0, 13.0, 15.0, None, None),
+    ('12Vs', 0, 11.5, 12.5, None, None),
+    ('5Vs', 0, 4.9, 5.1, None, None),
+    ('3V3', 0, 3.2, 3.4, None, None),
+    ('FanOn', 0, 0.5, None, None, None),
+    ('FanOff', 0, None, 11.0, None, None),
+    ('Vout', 0, 14.5, 15.5, None, None),
+    ('VoutOff', 0, 0.5, None, None, None),
     ('OCP', 0, 32.0, 35.1, None, None),
     ('InOCP', 0, 11.6, None, None, None),
     ('Program', 0, -0.1, 0.1, None, None),
-    ('FixtureLock', 0, 1200, None, None, None),
+    ('FixtureLock', 0, 20, None, None, None),
+    ('FanShort', 0, None, 100, None, None),
     ('Notify', 1, None, None, None, True),
     # Data reported by the ARM
     ('ARM-SwVer', 0, None, None, r'^1\.0\.10902\.3156$', None),

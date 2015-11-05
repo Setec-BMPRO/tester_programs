@@ -102,8 +102,9 @@ class Main(tester.TestSequence):
 
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
-        self.fifo_push(((s.olock, 10.0), ))
-        MeasureGroup((m.dmm_lock, ), timeout=5)
+        self.fifo_push(
+            ((s.olock, 0.0), (s.ofanshort, 99999.0), ))
+        MeasureGroup((m.dmm_lock, m.dmm_fanshort, ), timeout=5)
 
     def _step_program_arm(self):
         """Program the ARM device.
