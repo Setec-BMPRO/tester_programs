@@ -8,7 +8,8 @@ import logging
 
 import tester
 import share.programmer
-import share.arm
+from share.sim_serial import SimSerial
+import share.console
 from . import support
 from . import limit
 
@@ -20,9 +21,11 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt': r'\\.\COM1',
              }[os.name]
-
+# Software image filenames
 _ARM_HEX = 'sx750_arm_3.1.2118.hex'
 _PIC_HEX = 'sx750_pic_2.hex'
+# Reading to reading difference for PFC voltage stability
+_PFC_STABLE = 0.05
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -56,12 +59,15 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._armdev = None
+        # Serial connection to the ARM console
+        arm_ser = SimSerial(simulation=fifo, baudrate=57600)
+        # Set port separately, as we don't want it opened yet
+        arm_ser.setPort(_ARM_PORT)
+        self._armdev = share.console.ConsoleGen0(arm_ser)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._armdev = share.arm.Console(port=_ARM_PORT)
         global d
         d = support.LogicalDevices(self._devices)
         global s
@@ -93,6 +99,12 @@ class Main(tester.TestSequence):
         # Reset Logical Devices
         d.reset()
 
+    def _arm_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the Console buffer if FIFOs are enabled."""
+        if self._fifo:
+            self._armdev.puts(string_data, preflush, postflush, priority)
+
     def _step_error_check(self):
         """Check physical instruments for errors."""
         d.error_check()
@@ -104,12 +116,12 @@ class Main(tester.TestSequence):
         Check for presence of Snubber resistors.
 
         """
-        self.fifo_push(((s.Lock, 10.0), (s.Part, 10.0), (s.R601, 2000.0),
-                         (s.R602, 2000.0), (s.R609, 2000.0), (s.R608, 2000.0),
-                         ))
-        MeasureGroup((m.dmm_Lock, m.dmm_Part, m.dmm_R601,
-                      m.dmm_R602, m.dmm_R609, m.dmm_R608),
-                     2)
+        self.fifo_push(
+            ((s.Lock, 10.0), (s.Part, 10.0), (s.R601, 2000.0),
+             (s.R602, 2000.0), (s.R609, 2000.0), (s.R608, 2000.0), ))
+        MeasureGroup(
+            (m.dmm_Lock, m.dmm_Part, m.dmm_R601, m.dmm_R602, m.dmm_R609,
+             m.dmm_R608), 2)
 
     def _step_program_micros(self):
         """Program the ARM and PIC devices.
@@ -169,15 +181,14 @@ class Main(tester.TestSequence):
 
         """
         d.dcs_5Vsb.output(5.15, True)
-        if not self._fifo:
-            time.sleep(1)           # ARM startup delay
-            self._armdev.open()
+        time.sleep(1)           # ARM startup delay
+        self._armdev.open()
+        self._arm_puts('\r\r\r', preflush=1)
         self._armdev.defaults()
         # Switch everything off
         d.dcs_5Vsb.output(0, False)
         d.dcl_5Vsb.output(0.1)
-        if not self._fifo:
-            time.sleep(0.5)
+        time.sleep(0.5)
         d.dcl_5Vsb.output(0)
 
     def _step_powerup(self):
@@ -203,25 +214,32 @@ class Main(tester.TestSequence):
         d.rla_pson.set_on()
         self.fifo_push(((s.o12V, 12.34), (s.o24V, 24.34), (s.PGOOD, 0.123), ))
         MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
-        # Read and log ARM data readings
+        # ARM data readings
+        self._arm_puts('\r\r', preflush=1)
         self._armdev.unlock()
-        self.fifo_push(
-            ((s.ARM_AcDuty, 50.0), (s.ARM_AcPer, 50.0), (s.ARM_AcFreq, 50.0),
-             (s.ARM_AcVolt, 240.0), (s.ARM_PfcTrim, 50.0), (s.ARM_12V, 12.18),
-             (s.ARM_24V, 24.0), (s.ARM_SwVer, ('3.1.2118', )), ))
+        self._arm_puts(     # Console response strings
+            '50 %\r'        # ARM_AcDuty
+            '50000 ms\r'    # ARM_AcPer
+            '50 Hz\r'       # ARM_AcFreq
+            '240 Vrms\r'    # ARM_AcVolt
+            '50 %\r'        # ARM_PfcTrim
+            '12180 mV\r'    # ARM_12V
+            '24000 mV\r'    # ARM_24V
+            '3.1\r2118\r')  # ARM_SwVer
         MeasureGroup(
             (m.arm_AcDuty, m.arm_AcPer, m.arm_AcFreq, m.arm_AcVolt,
              m.arm_PfcTrim, m.arm_12V, m.arm_24V, m.arm_SwVer), )
-
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
-        self.fifo_push(((s.PFC, (432.0, 432.0,     # Initial reading
-                                  433.0, 433.0,     # After 1st cal
-                                  433.0, 433.0,     # 2nd reading
-                                  435.0, 435.0,     # Final value
-                                  )), ))
-        _PFC_STABLE = 0.05
+        self.fifo_push(
+            ((s.PFC,
+              (432.0, 432.0,     # Initial reading
+               433.0, 433.0,     # After 1st cal
+               433.0, 433.0,     # 2nd reading
+               435.0, 435.0,     # Final value
+               )), ))
         result, pfc = m.dmm_PFCpre.stable(_PFC_STABLE)
+        self._arm_puts('\r\r', preflush=1)
         self._armdev.cal_pfc(pfc)
         # Prevent a limit fail from failing the unit
         m.dmm_PFCpost.testlimit[0].position_fail = False
@@ -231,6 +249,7 @@ class Main(tester.TestSequence):
         if not result:
             self._logger.info('Retry PFC calibration')
             result, pfc = m.dmm_PFCpre.stable(_PFC_STABLE)
+            self._arm_puts('\r\r', preflush=1)
             self._armdev.cal_pfc(pfc)
             m.dmm_PFCpost.stable(_PFC_STABLE)
         # Leave the loads at zero
@@ -271,12 +290,13 @@ class Main(tester.TestSequence):
         _reg_check(
             dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
             reg_limit=self._limits['12V_reg'], max_load=32.0, peak_load=36.0)
-        self.fifo_push(((s.o12V, 12.34, ),
-                         # OPC SET: Push 32 reads before OCP detected
-                         (s.o12VinOCP, ((0.123, ) * 32 + (4.444, ))),
-                         # OCP CHECK: Push 37 reads before OCP detected
-                         (s.o12VinOCP, ((0.123, ) * 37 + (4.444, ))),
-                         ))
+        self.fifo_push(
+            ((s.o12V, 12.34, ),
+             # OPC SET: Push 32 reads before OCP detected
+             (s.o12VinOCP, ((0.123, ) * 32 + (4.444, ))),
+             # OCP CHECK: Push 37 reads before OCP detected
+             (s.o12VinOCP, ((0.123, ) * 37 + (4.444, ))),
+             ))
         _ocp_set(
             target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
             enable=d.ocp_pot.enable_12v, limit=self._limits['12V_ocp'])
@@ -305,12 +325,13 @@ class Main(tester.TestSequence):
         _reg_check(
             dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
             reg_limit=self._limits['24V_reg'], max_load=15.0, peak_load=18.0)
-        self.fifo_push(((s.o24V, 24.24),
-                         # OPC SET: Push 32 reads before OCP detected
-                         (s.o24VinOCP, ((0.123, ) * 32 + (4.444, ))),
-                         # OCP CHECK: Push 18 reads before OCP detected
-                         (s.o24VinOCP, ((0.123, ) * 18 + (4.444, ))),
-                         ))
+        self.fifo_push(
+            ((s.o24V, 24.24),
+             # OPC SET: Push 32 reads before OCP detected
+             (s.o24VinOCP, ((0.123, ) * 32 + (4.444, ))),
+             # OCP CHECK: Push 18 reads before OCP detected
+             (s.o24VinOCP, ((0.123, ) * 18 + (4.444, ))),
+             ))
         _ocp_set(
             target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
             enable=d.ocp_pot.enable_24v, limit=self._limits['24V_ocp'])
@@ -354,7 +375,6 @@ class Main(tester.TestSequence):
         # 5Vsb should have switched off
         m.dmm_5Voff.measure(1.0)
         m.rampAcStart.measure()
-
         d.acsource.output(95.0)
         if not self._fifo:
             time.sleep(1)

@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
 """BC15 ARM processor console driver."""
 
-import share.arm_gen1
+import share.console
 
 
-# Expose arm_gen1.Sensor as bc15.Sensor
-Sensor = share.arm_gen1.Sensor
+Sensor = share.console.Sensor
 
 # Some easier to use short names
-ArmConsoleGen1 = share.arm_gen1.ArmConsoleGen1
-ParameterBoolean = share.arm_gen1.ParameterBoolean
-ParameterFloat = share.arm_gen1.ParameterFloat
-ParameterHex = share.arm_gen1.ParameterHex
-ParameterRaw = share.arm_gen1.ParameterRaw
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
+ParameterHex = share.console.ParameterHex
+ParameterRaw = share.console.ParameterRaw
 
 # Test mode controlled by STATUS bit 31
 _TEST_ON = (1 << 31)
 _TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
 
 
-class Console(ArmConsoleGen1):
+class Console(share.console.ConsoleGen1):
 
     """Communications to BC15 console."""
 

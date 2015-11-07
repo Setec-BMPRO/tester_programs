@@ -3,25 +3,24 @@
 
 import time
 
-import share.arm_gen1
+import share.console
 
-# Expose arm_gen1.Sensor as bp35.Sensor
-Sensor = share.arm_gen1.Sensor
+
+Sensor = share.console.Sensor
 
 # Some easier to use short names
-ArmConsoleGen1 = share.arm_gen1.ArmConsoleGen1
-ParameterBoolean = share.arm_gen1.ParameterBoolean
-ParameterFloat = share.arm_gen1.ParameterFloat
-ParameterHex = share.arm_gen1.ParameterHex
-ParameterCAN = share.arm_gen1.ParameterCAN
-ParameterRaw = share.arm_gen1.ParameterRaw
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
+ParameterHex = share.console.ParameterHex
+ParameterCAN = share.console.ParameterCAN
+ParameterRaw = share.console.ParameterRaw
 
 # CAN Test mode controlled by STATUS bit 29
 _CAN_ON = (1 << 29)
 _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 
 
-class Console(ArmConsoleGen1):
+class Console(share.console.ConsoleGen1):
 
     """Communications to BP35 console."""
 
