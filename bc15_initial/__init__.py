@@ -8,9 +8,8 @@ import time
 
 import tester
 import share.isplpc
-import share.programmer
 from share.sim_serial import SimSerial
-import share.bc15
+from . import console
 from . import support
 from . import limit
 
@@ -61,10 +60,13 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._bc15 = share.bc15.Console(
+        # Serial connection to the BC15 console
+        bc15_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
-        self._bc15.setPort(_ARM_PORT)
+        bc15_ser.setPort(_ARM_PORT)
+        # BC15 Console driver
+        self._bc15 = console.Console(bc15_ser)
 
     def open(self):
         """Prepare for testing."""
@@ -77,10 +79,15 @@ class Main(tester.TestSequence):
         # Apply power to fixture Comms circuit.
         d.dcs_vcom.output(12.0, True)
 
+    def _bc15_puts(self,
+                   string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the BC15 buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._bc15.puts(string_data, preflush, postflush, priority)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._bc15.close()
         global m, d, s, t
         # Remove power from fixture circuit.
         d.dcs_vcom.output(0, False)
@@ -89,6 +96,7 @@ class Main(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._bc15.close()
         d.acsource.output(voltage=0.0, output=False)
         d.dcl.output(2.0)
         time.sleep(1)
@@ -164,9 +172,3 @@ class Main(tester.TestSequence):
     def _step_powerup(self):
         """Power up the Unit with 240Vac."""
         self.fifo_push(((s.oACin, 240.0), (s.oVout, 12.0), ))
-
-    def _bc15_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BC15 buffer only if FIFOs are enabled."""
-        if self._fifo:
-            self._bc15.puts(string_data, preflush, postflush, priority)

@@ -25,9 +25,9 @@ class Console(share.console.ConsoleGen1):
 
     """Communications to CN101 console."""
 
-    def __init__(self, simulation=False, **kwargs):
+    def __init__(self, port):
         """Create console instance."""
-        super().__init__(dialect=1, simulation=simulation, **kwargs)
+        super().__init__(port)
         self.cmd_data = {
             'STATUS': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),

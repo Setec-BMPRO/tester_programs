@@ -6,7 +6,7 @@ from pydispatch import dispatcher
 import tester
 from tester.devlogical import *
 from tester.measure import *
-import share.bc15
+from . import console
 
 sensor = tester.sensor
 translate = tester.translate
@@ -69,9 +69,9 @@ class Sensors():
         self.oSnEntry = sensor.DataEntry(
             message=translate('msgSnEntry'),
             caption=translate('capSnEntry'))
-        self.ARM_SwVer = share.bc15.Sensor(
+        self.ARM_SwVer = console.Console.Sensor(
             bc15, 'SwVer', rdgtype=tester.sensor.ReadingString)
-        self.ARM_AcV = share.bc15.Sensor(bc15, 'AC_V')
+        self.ARM_AcV = console.Console.Sensor(bc15, 'AC_V')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

@@ -43,7 +43,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
-            ('Program', self._step_program_micros, None, True),
+            ('Program', self._step_program_micros, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('5Vsb', self._step_reg_5v, None, True),
@@ -78,7 +78,6 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._armdev.close()
         global m
         m = None
         global d
@@ -90,6 +89,7 @@ class Main(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._armdev.close()
         d.acsource.output(voltage=0.0, output=False)
         d.dcl_5Vsb.output(1.0)
         d.dcl_12V.output(5.0)
@@ -146,12 +146,12 @@ class Main(tester.TestSequence):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         arm = share.programmer.ProgramARM(
-            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
+            _ARM_HEX, folder, s.oMirARM, _ARM_PORT)
         # Start the PIC programmer (takes about 6 sec)
         self._logger.info('Start PIC programmer')
         d.rla_pic.set_on()
         pic = share.programmer.ProgramPIC(
-            _PIC_HEX, folder, '10F320', s.oMirPIC, self._fifo)
+            _PIC_HEX, folder, '10F320', s.oMirPIC)
         # While programming, we also set OCP adjust to maximum.
         # (takes about 6 sec)
         self._logger.info('Reset digital pots')

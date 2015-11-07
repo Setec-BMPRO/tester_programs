@@ -8,6 +8,7 @@ import logging
 
 import tester
 import share.programmer
+#import share.isplpc
 from share.sim_serial import SimSerial
 import share.console
 from . import support
@@ -24,6 +25,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              }[os.name]
 # Software image filename
 _ARM_HEX = 'gen8_1.4.645.hex'
+#_ARM_BIN = 'gen8_1.4.645.bin'
 # Reading to reading difference for PFC voltage stability
 _PFC_STABLE = 0.05
 # Reading to reading difference for 12V voltage stability
@@ -45,7 +47,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('Program', self._step_program, None, True),
+            ('Program', self._step_program, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('5V', self._step_reg_5v, None, True),
@@ -61,7 +63,7 @@ class Main(tester.TestSequence):
         self._limits = test_limits
         # Serial connection to the ARM console
         arm_ser = SimSerial(simulation=fifo, baudrate=57600)
-        # Set port separately, as we don't want it opened yet
+        # Set port separately - don't open until after programming
         arm_ser.setPort(_ARM_PORT)
         self._armdev = share.console.ConsoleGen0(arm_ser)
 
@@ -80,7 +82,6 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._armdev.close()
         # Switch off fixture power
         global d
         d.dcs_10Vfixture.output(0.0, output=False)
@@ -94,6 +95,7 @@ class Main(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._armdev.close()
         d.acsource.output(voltage=0.0, output=False)
         d.dcl_5V.output(1.0)
         d.dcl_12V.output(5.0)
@@ -130,15 +132,36 @@ class Main(tester.TestSequence):
         d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5V.output(5.15, True)
-        self.fifo_push(((s.o5V, 5.05), (s.o3V3, 3.30), ))
         MeasureGroup((m.dmm_5V, m.dmm_3V3, ), timeout=2)
-        # Start the ARM programmer
-        self._logger.info('Start ARM programmer')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
+# <====> START Old Programmer
         arm = share.programmer.ProgramARM(
-            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
+            _ARM_HEX, folder, s.oMirARM, _ARM_PORT)
         arm.read()
+# <====> END Old Programmer
+# TODO: Get a .BIN version of the software and use this new programmer
+# <====> START New Programmer
+#        file = os.path.join(folder, _ARM_BIN)
+#        with open(file, 'rb') as infile:
+#            bindata = bytearray(infile.read())
+#        self._logger.debug('Read %d bytes from %s', len(bindata), file)
+#        try:
+#            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
+#            # Program the device
+#            pgm = share.isplpc.Programmer(
+#                ser, bindata, erase_only=False, verify=True, crpmode=False)
+#            try:
+#                pgm.program()
+#                s.oMirARM.store(0)
+#            except share.isplpc.ProgrammingError:
+#                s.oMirARM.store(1)
+#        finally:
+#            try:
+#                ser.close()
+#            except:
+#                pass
+# <====> END New Programmer
         m.pgmARM.measure()
         # Remove BOOT, reset micro, wait for ARM startup
         d.rla_boot.set_off()

@@ -97,13 +97,13 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._cn101.close()
         global m, d, s, t
         m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._cn101.close()
         # Reset Logical Devices
         d.reset()
 

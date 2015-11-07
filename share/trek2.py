@@ -28,7 +28,7 @@ class Console(share.console.ConsoleGen1):
 
     def __init__(self, port):
         """Create console instance."""
-        super().__init__(port, dialect=1)
+        super().__init__(port)
         self.cmd_data = {
             # Read-Write values
             'BACKLIGHT': ParameterFloat('BACKLIGHT_INTENSITY', writeable=True,
