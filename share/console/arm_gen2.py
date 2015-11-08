@@ -46,7 +46,7 @@ class ConsoleGen2():
         """Open port."""
         self._port.open()
         # Set a prompt that ends with a newline, so we can use readline()
-        self.action('{} PROMPT'.format(_CMD_PROMPT + r'\n'))
+        self.action('"{} PROMPT'.format(_CMD_PROMPT + r'\n'))
         self.action('0 ECHO')       # No console echo
         self._port.flushInput()
 

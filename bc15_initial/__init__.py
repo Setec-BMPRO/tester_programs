@@ -24,7 +24,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, '')
 # ARM software image file
-_ARM_BIN = 'bc15_1.0.3156.bin'
+_ARM_BIN = 'bc15_1.0.000.bin'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices

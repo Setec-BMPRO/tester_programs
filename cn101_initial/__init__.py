@@ -27,7 +27,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
 # Software image filename
-_ARM_BIN = 'cn101_1.0.110.bin'
+_ARM_BIN = 'cn101_1.0.000.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, '')
 
