@@ -22,7 +22,7 @@ from . import tester
 # Command termination character
 _CMD_RUN = b'\r'
 # Custom command prompt set on the console interface
-_CMD_PROMPT = '>'
+_CMD_PROMPT = 'OK'
 
 
 class ConsoleGen2():
@@ -37,7 +37,7 @@ class ConsoleGen2():
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        port.timeout = 10240 / port.baudrate  # Timeout of 1kB
+        port.timeout = 1000 / port.baudrate  # Timeout of 100 Bytes
         self._port = port
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
@@ -45,8 +45,10 @@ class ConsoleGen2():
     def open(self):
         """Open port."""
         self._port.open()
-        self.action('0 ECHO')       # No console echo
+        # Set a prompt that ends with a newline, so we can use readline()
         self.action('{} PROMPT'.format(_CMD_PROMPT + r'\n'))
+        self.action('0 ECHO')       # No console echo
+        self._port.flushInput()
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
         """Put a string into the read-back buffer.
@@ -172,16 +174,29 @@ class ConsoleGen2():
     def _read_response(self, expected):
         """Read a response.
 
+        Keep reading until we get a _CMD_PROMPT.
         @param expected Expected number of responses.
         @return Response (None / String / List of Strings).
         @raises ConsoleError If not enough response strings are seen.
 
         """
-        response = ''
-# FIXME: Keep reading until we get a _CMD_PROMPT
-#        while response != _CMD_PROMPT:
-#            response = self._port.readline()
-#        if response_count < expected:
-#            raise ConsoleError(
-#                'Expected {}, actual {}'.format(expected, response_count))
+        response = []
+        last_response = ''
+        while last_response != _CMD_PROMPT:
+            last_response = self._port.readline()
+            self._logger.debug('<--- %s', repr(last_response))
+            if last_response is None:
+                raise ConsoleError('No response')
+            last_response = last_response.decode(errors='ignore')
+            if last_response != _CMD_PROMPT:
+                response.append(last_response)
+        response_count = len(response)
+        if response_count == 0:     # No response -> None
+            response = None
+        if response_count == 1:     # 1 response -> String
+            response = response[0]
+        self._logger.debug('<-- %s', repr(response))
+        if response_count < expected:
+            raise ConsoleError(
+                'Expected {}, actual {}'.format(expected, response_count))
         return response

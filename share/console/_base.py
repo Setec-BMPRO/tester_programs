@@ -43,6 +43,11 @@ class Sensor(tester.sensor.Sensor):
         return (rdg, )
 
 
+class ParameterError(Exception):
+
+    """Parameter Error."""
+
+
 class _Parameter():
 
     """Parameter base class."""
@@ -65,7 +70,7 @@ class _Parameter():
 
         """
         if not self._writeable:
-            raise ValueError('Parameter is read-only')
+            raise ParameterError('Parameter is read-only')
         write_cmd = '{} "{} XN!'.format(value, self._cmd)
         func(write_cmd, delay=_SET_DELAY)
 
@@ -94,7 +99,7 @@ class ParameterBoolean(_Parameter):
 
         """
         if not isinstance(value, bool):
-            raise ValueError('value "{}" must be boolean'.format(value))
+            raise ParameterError('value "{}" must be boolean'.format(value))
         super().write(int(value), func)
 
     def read(self, func):
@@ -129,7 +134,7 @@ class ParameterFloat(_Parameter):
 
         """
         if value < self._min or value > self._max:
-            raise ValueError(
+            raise ParameterError(
                 'Value out of range {} - {}'.format(self._min, self._max))
         super().write(int(value * self._scale), func)
 
@@ -148,7 +153,7 @@ class ParameterFloat(_Parameter):
 
 class ParameterHex(_Parameter):
 
-    """Hex parameter type."""
+    """Hex parameter type with the older '$' prefix hex literal."""
 
     error_value = float('NaN')
 
@@ -168,11 +173,10 @@ class ParameterHex(_Parameter):
 
         """
         if value < self._min or value > self._max:
-            raise ValueError(
+            raise ParameterError(
                 'Value out of range {} - {}'.format(self._min, self._max))
         if not self._writeable:
-            raise ValueError('Parameter is read-only')
-# FIXME: Deal with the '$' vs '0x' options
+            raise ParameterError('Parameter is read-only')
         write_cmd = '${:08X} "{} XN!'.format(value, self._cmd)
         func(write_cmd, delay=_SET_DELAY)
 
@@ -189,6 +193,26 @@ class ParameterHex(_Parameter):
         return int(value, 16) & self._mask
 
 
+class ParameterHex0x(ParameterHex):
+
+    """Hex parameter type with the newer '0x' prefix hex literal."""
+
+    def write(self, value, func):
+        """Write parameter value.
+
+        @param value Data value.
+        @param func Function to use to write the value.
+
+        """
+        if value < self._min or value > self._max:
+            raise ParameterError(
+                'Value out of range {} - {}'.format(self._min, self._max))
+        if not self._writeable:
+            raise ParameterError('Parameter is read-only')
+        write_cmd = '0x{:08X} "{} XN!'.format(value, self._cmd)
+        func(write_cmd, delay=_SET_DELAY)
+
+
 class ParameterCAN(_Parameter):
 
     """CAN Parameter class."""
@@ -202,7 +226,7 @@ class ParameterCAN(_Parameter):
         @param func Function to use to write the value.
 
         """
-        raise ValueError('CAN parameters are read-only')
+        raise ParameterError('CAN parameters are read-only')
 
     def read(self, func):
         """Read parameter value.
@@ -241,7 +265,7 @@ class ParameterRaw(_Parameter):
         @param func Function to use to write the value.
 
         """
-        raise ValueError('Raw parameters are read-only')
+        raise ParameterError('Raw parameters are read-only')
 
     def read(self, func):
         """Read parameter value.
