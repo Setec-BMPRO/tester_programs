@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-07, 22:06:28 -->
+<!-- Saved: 2015-11-08, 22:01:50 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -246,6 +246,10 @@
     <Source>share/console/_base.py</Source>
     <Source>bc15_initial/console.py</Source>
     <Source>share/console/arm_gen2.py</Source>
+    <Source>share/console/test/test_base.py</Source>
+    <Source>share/console/test/__init__.py</Source>
+    <Source>share/__init__.py</Source>
+    <Source>testsuite.py</Source>
   </Sources>
   <Forms/>
   <Translations/>

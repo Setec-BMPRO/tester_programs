@@ -185,9 +185,10 @@ class ConsoleGen2():
         while last_response != _CMD_PROMPT:
             last_response = self._port.readline()
             self._logger.debug('<--- %s', repr(last_response))
-            if last_response is None:
+            if last_response == b'':
                 raise ConsoleError('No response')
             last_response = last_response.decode(errors='ignore')
+            last_response = last_response.replace('\r\n', '')
             if last_response != _CMD_PROMPT:
                 response.append(last_response)
         response_count = len(response)
