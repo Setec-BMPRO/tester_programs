@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-09, 16:50:36 -->
+<!-- Saved: 2015-11-09, 17:37:01 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -273,7 +273,7 @@
     <Other>gen8_initial/gen8_1.4.645.bin</Other>
     <Other>sx750_initial/sx750_arm_3.1.2118.bin</Other>
     <Other>cn101_initial/cn101_1.0.000.bin</Other>
-    <Other>bc15_initial/bc15_1.0.000.bin</Other>
+    <Other>bc15_initial/bc15_1.0.1231.bin</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>

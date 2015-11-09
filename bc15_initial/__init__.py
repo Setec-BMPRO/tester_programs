@@ -18,13 +18,9 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt':    'COM2',
-             }[os.name]
-# Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (1, 0, '')
+_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # ARM software image file
-_ARM_BIN = 'bc15_1.0.000.bin'
+_ARM_BIN = 'bc15_1.0.1231.bin'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -121,7 +117,6 @@ class Main(tester.TestSequence):
         """
         # Set BOOT active before RESET so the ARM boot-loader runs
         d.rla_boot.set_on()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -140,33 +135,24 @@ class Main(tester.TestSequence):
             except share.isplpc.ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            try:
-                ser.close()
-            except:
-                pass
+            ser.close()
         m.pgmARM.measure()
-        # Reset BOOT to ARM
+        # Remove BOOT signal from ARM
         d.rla_boot.set_off()
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
 
         Device is powered by injected Battery voltage.
-        Reset the device, set HW & SW versions & Serial number.
         Write Non-Volatile memory defaults.
 
         """
-        dummy_sn = 'A1526040123'
-        self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
-        sernum = m.ui_SnEntry.measure()[1][0]
-#        sernum = dummy_sn
-        self._bc15.open()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
+        time.sleep(1)
         self._bc15_puts('Banner1\r\nBanner2\r\n')
-        self._bc15.action(None, delay=0.5, expected=2)  # Flush banner
-        self._bc15.defaults(_HW_VER, sernum)
-        self._bc15_puts('1.0.10902.3156\r\n')
+        self._bc15.open()
+        self._bc15.defaults()
+        self._bc15_puts('1.0.11778.1231\r\n')
         m.arm_SwVer.measure()
 
     def _step_powerup(self):

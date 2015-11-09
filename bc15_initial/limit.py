@@ -11,8 +11,5 @@ DATA = (
     ('FixtureLock', 0, 1200, None, None, None),
     ('Notify', 1, None, None, None, True),
     # Data reported by the ARM
-    ('ARM-SwVer', 0, None, None, r'^1\.0\.10902\.3156$', None),
-    ('ARM-AcV', 0, 235.0, 245.0, None, None),
-    # Serial Number entry
-    ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
+    ('ARM-SwVer', 0, None, None, r'^1\.0\.11778\.1231$', None),
     )

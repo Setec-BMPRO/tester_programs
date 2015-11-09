@@ -21,7 +21,5 @@ class Console(share.console.ConsoleGen2):
         """Create console instance."""
         super().__init__(port)
         self.cmd_data = {
-            'STATUS': ParameterHex('STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000),
             'SwVer': ParameterRaw('', func=self.version),
             }

@@ -121,15 +121,17 @@ class ConsoleGen2():
         """
         self._logger.debug('Write factory defaults')
         self.unlock()
-        self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
-        self.action('"{} SET-SERIAL-ID'.format(sernum))
+        if hwver:
+            self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
+        if sernum:
+            self.action('"{} SET-SERIAL-ID'.format(sernum))
         self.action('NV-DEFAULT')
         self.nvwrite()
 
     def unlock(self):
         """Unlock the ARM."""
         self._logger.debug('Unlock')
-        self.action('$DEADBEA7 UNLOCK')
+        self.action('0xDEADBEA7 UNLOCK')
 
     def nvwrite(self):
         """Perform NV Memory Write."""
