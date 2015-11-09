@@ -24,6 +24,10 @@ class ConsoleTestCase(unittest.TestCase):
         global mycon
         mycon = console.ConsoleGen2(sim_ser)
 
+    @classmethod
+    def tearDownClass(cls):
+        mycon.close()
+
     def test_open(self):
         mycon.puts(
             'BC15\r\n'                          # BEGIN Startup messages

@@ -67,7 +67,7 @@ class Sensors():
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
-        self.ARM_SwVer = console.Console.Sensor(
+        self.ARM_SwVer = console.Sensor(
             bc15, 'SwVer', rdgtype=tester.sensor.ReadingString)
 
     def _reset(self):

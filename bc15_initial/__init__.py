@@ -149,10 +149,30 @@ class Main(tester.TestSequence):
         """
         d.rla_reset.pulse(0.1)
         time.sleep(1)
-        self._bc15_puts('Banner1\r\nBanner2\r\n')
+        self._bc15_puts(
+            'BC15\r\n'                          # BEGIN Startup messages
+            'Build date:       06/11/2015\r\n'
+            'Build time:       15:31:40\r\n'
+            'SystemCoreClock:  48000000\r\n'
+            'Software version: 1.0.11705.1203\r\n'
+            'nonvol: reading crc invalid at sector 14 offset 0\r\n'
+            'nonvol: reading nonvol2 OK at sector 15 offset 2304\r\n'
+            'Hardware version: 0.0.[00]\r\n'
+            'Serial number:    A9999999999\r\n'
+            'Please type help command.\r\n'
+            '> '                                # END Startup messages
+            '"OK\\n PROMPT\r\n'                 # 1st command echo
+            'OK\r\n'                            # and it's response
+            '0 ECHO\r\nOK\r\n'                  # ECHO command echo
+            'OK\r\n')                           # and it's response
+        self._bc15_puts(
+            'OK\r\n'                            # UNLOCK response
+            'OK\r\n'                            # NV-DEFAULT response
+            'OK\r\n'                            # NV-WRITE response
+            '1.0.11778.1231\r\nOK\r\n',         # SwVer response
+            preflush=1)
         self._bc15.open()
         self._bc15.defaults()
-        self._bc15_puts('1.0.11778.1231\r\n')
         m.arm_SwVer.measure()
 
     def _step_powerup(self):
