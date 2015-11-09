@@ -8,8 +8,8 @@ import logging
 
 import tester
 import share.programmer
-#import share.isplpc
 from share.sim_serial import SimSerial
+#from share.isplpc import Programmer, ProgrammingError
 import share.console
 from . import support
 from . import limit
@@ -135,12 +135,13 @@ class Main(tester.TestSequence):
         MeasureGroup((m.dmm_5V, m.dmm_3V3, ), timeout=2)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
+
 # <====> START Old Programmer
         arm = share.programmer.ProgramARM(
             _ARM_HEX, folder, s.oMirARM, _ARM_PORT)
         arm.read()
 # <====> END Old Programmer
-# TODO: Get a .BIN version of the software and use this new programmer
+
 # <====> START New Programmer
 #        file = os.path.join(folder, _ARM_BIN)
 #        with open(file, 'rb') as infile:
@@ -149,19 +150,17 @@ class Main(tester.TestSequence):
 #        try:
 #            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
 #            # Program the device
-#            pgm = share.isplpc.Programmer(
+#            pgm = Programmer(
 #                ser, bindata, erase_only=False, verify=True, crpmode=False)
 #            try:
 #                pgm.program()
 #                s.oMirARM.store(0)
-#            except share.isplpc.ProgrammingError:
+#            except ProgrammingError:
 #                s.oMirARM.store(1)
 #        finally:
-#            try:
-#                ser.close()
-#            except:
-#                pass
+#            ser.close()
 # <====> END New Programmer
+
         m.pgmARM.measure()
         # Remove BOOT, reset micro, wait for ARM startup
         d.rla_boot.set_off()

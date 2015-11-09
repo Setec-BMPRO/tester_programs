@@ -9,6 +9,7 @@ import logging
 import tester
 import share.programmer
 from share.sim_serial import SimSerial
+#from share.isplpc import Programmer, ProgrammingError
 import share.console
 from . import support
 from . import limit
@@ -23,6 +24,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              }[os.name]
 # Software image filenames
 _ARM_HEX = 'sx750_arm_3.1.2118.hex'
+#_ARM_BIN = 'sx750_arm_3.1.2118.bin'
 _PIC_HEX = 'sx750_pic_2.hex'
 # Reading to reading difference for PFC voltage stability
 _PFC_STABLE = 0.05
@@ -141,10 +143,12 @@ class Main(tester.TestSequence):
         d.dcs_PriCtl.output(12.0, True)
         self.fifo_push(((s.PriCtl, 12.34), (s.o5Vsb, 5.05), (s.o3V3, 3.21), ))
         MeasureGroup((m.dmm_PriCtl, m.dmm_5Vsb, m.dmm_3V3), 2)
-        # Start the ARM programmer (takes about 6 sec)
-        self._logger.info('Start ARM programmer')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
+
+# <====> START Old Programmer
+        # Start the ARM programmer (takes about 6 sec)
+        self._logger.info('Start ARM programmer')
         arm = share.programmer.ProgramARM(
             _ARM_HEX, folder, s.oMirARM, _ARM_PORT)
         # Start the PIC programmer (takes about 6 sec)
@@ -159,6 +163,41 @@ class Main(tester.TestSequence):
         # Wait for programming completion & read results
         arm.read()
         pic.read()
+# <====> END Old Programmer
+
+# <====> START New Programmer
+#        # Start the PIC programmer (takes about 6 sec)
+#        self._logger.info('Start PIC programmer')
+#        d.rla_pic.set_on()
+#        pic = share.programmer.ProgramPIC(
+#            _PIC_HEX, folder, '10F320', s.oMirPIC)
+#        # While programming, we also set OCP adjust to maximum.
+#        # (takes about 6 sec)
+#        self._logger.info('Reset digital pots')
+#        pot_worker = threading.Thread(target=self._pot_worker)
+#        pot_worker.start()
+#        self._logger.info('Program ARM')
+#        file = os.path.join(folder, _ARM_BIN)
+#        with open(file, 'rb') as infile:
+#            bindata = bytearray(infile.read())
+#        self._logger.debug('Read %d bytes from %s', len(bindata), file)
+#        try:
+#            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
+#            # Program the device
+#            pgm = Programmer(
+#                ser, bindata, erase_only=False, verify=True, crpmode=False)
+#            try:
+#                pgm.program()
+#                s.oMirARM.store(0)
+#            except ProgrammingError:
+#                s.oMirARM.store(1)
+#        finally:
+#            ser.close()
+#        # Wait for programming completion & read results
+#        pot_worker.join()
+#        pic.read()
+# <====> END New Programmer
+
         d.rla_pic.set_off()
         # 'Measure' the mirror sensors to check and log data
         MeasureGroup((m.pgmARM, m.pgmPIC))
@@ -380,6 +419,10 @@ class Main(tester.TestSequence):
             time.sleep(1)
         self.fifo_push(((s.ACFAIL, (5.01, ) * 30 + (0.123, )), ))
         m.rampAcStop.measure()
+
+    def _pot_worker(self):
+        """Thread worker to set the digital pots to maximum."""
+        d.ocp_pot.set_maximum()
 
 
 def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
