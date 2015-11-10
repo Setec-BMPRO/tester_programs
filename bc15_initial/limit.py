@@ -21,5 +21,5 @@ DATA = (
     ('FanShort', 0, None, 100, None, None),
     ('Notify', 1, None, None, None, True),
     # Data reported by the ARM
-    ('ARM-SwVer', 0, None, None, r'^1\.0\.11778\.1231$', None),
+    ('ARM-SwVer', 0, None, None, r'^1\.0\.11778\.1230$', None),
     )

@@ -20,7 +20,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # ARM software image file
-_ARM_BIN = 'bc15_1.0.1231.bin'
+_ARM_BIN = 'bc15_1.0.1230.bin'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
