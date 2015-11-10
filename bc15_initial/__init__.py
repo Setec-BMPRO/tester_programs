@@ -18,7 +18,7 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
+_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM12'}[os.name]
 # ARM software image file
 _ARM_BIN = 'bc15_1.0.1230.bin'
 
@@ -74,6 +74,7 @@ class Main(tester.TestSequence):
         t = support.SubTests(d, m)
         # Apply power to fixture Comms circuit.
         d.dcs_vcom.output(12.0, True)
+        time.sleep(1)       # Allow OS to detect USB serial port
 
     def _bc15_puts(self,
                    string_data, preflush=0, postflush=0, priority=False):
@@ -120,8 +121,10 @@ class Main(tester.TestSequence):
         d.dcs_3v3.output(9.0, True)
         self.fifo_push(((s.o3V3, 3.3), ))
         m.dmm_3V3.measure(timeout=5)
+        time.sleep(2)
         # Set BOOT active before RESET so the ARM boot-loader runs
         d.rla_boot.set_on()
+        time.sleep(1)
         d.rla_reset.pulse(0.1)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -144,7 +147,6 @@ class Main(tester.TestSequence):
         m.pgmARM.measure()
         # Remove BOOT signal from ARM
         d.rla_boot.set_off()
-        d.dcs_3v3.output(0.0)
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
@@ -155,7 +157,7 @@ class Main(tester.TestSequence):
         """
         d.dcs_3v3.output(9.0, True)
         d.rla_reset.pulse(0.1)
-        time.sleep(1)
+        time.sleep(0.5)
         self._bc15_puts(
             'BC15\r\n'                          # BEGIN Startup messages
             'Build date:       06/11/2015\r\n'
@@ -185,7 +187,7 @@ class Main(tester.TestSequence):
 
     def _step_powerup(self):
         """Power up the Unit with 240Vac and measure voltages."""
-        self.fifo_push(((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
-                         (s.o3V3, 3.3), (s.o15Vs, 15.0),
-                         (s.oVout, (2.7, 15.0)),  ))
+        self.fifo_push(
+            ((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
+             (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, (0.2, 15.0)), ))
         t.pwr_up.run()

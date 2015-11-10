@@ -37,13 +37,13 @@ class ConsoleGen2():
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        port.timeout = 1000 / port.baudrate  # Timeout of 100 Bytes
         self._port = port
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
 
     def open(self):
         """Open port."""
+        self._port.timeout = 1.0
         self._port.open()
         # Set a prompt that ends with a newline, so we can use readline()
         self.action('"{} PROMPT'.format(_CMD_PROMPT + r'\n'))
@@ -136,7 +136,7 @@ class ConsoleGen2():
     def nvwrite(self):
         """Perform NV Memory Write."""
         self._logger.debug('NV-Write')
-        self.action('NV-WRITE', delay=0.5)
+        self.action('NV-WRITE')
 
     def version(self):
         """Return software version."""
