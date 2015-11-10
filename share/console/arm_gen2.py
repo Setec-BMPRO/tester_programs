@@ -17,7 +17,6 @@ import logging
 import time
 
 from ._base import ConsoleError
-from . import tester
 
 # Command termination character
 _CMD_RUN = b'\r'
@@ -39,7 +38,7 @@ class ConsoleGen2():
             '.'.join((__name__, self.__class__.__name__)))
         self._port = port
         self._read_key = None
-        self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
+        self.stat_data = {}  # Data readings: Key=Name, Value=Reading
 
     def open(self):
         """Open port."""
@@ -77,40 +76,27 @@ class ConsoleGen2():
     def read(self):
         """Sensor: Read ARM data using the last defined key.
 
-        @return Value
+        @return Value.
 
         """
         return self[self._read_key]
 
     def __getitem__(self, key):
-        """Read a value from the ARM.
+        """Read a value from the data cache.
 
-        @return Reading ID
+        @return Reading value.
 
         """
-        try:
-            parameter = self.cmd_data[key]
-            reply = parameter.read(self.action)
-        except ConsoleError:
-            # Sensor uses this, so we must always return a valid reading
-            reply = parameter.error_value
-        return reply
+        return self.stat_data[key]
 
     def __setitem__(self, key, value):
-        """Write a value to the ARM.
+        """Write a value.
 
-        @param key Reading ID
+        @param key Reading ID.
         @param value Data value.
 
         """
-        try:
-            parameter = self.cmd_data[key]
-            parameter.write(value, self.action)
-        except ConsoleError:
-# FIXME: This does not setup the test results properly.
-#   We should be sending a TestLimit fail signal...
-            # This will make the unit fail the test
-            raise tester.measure.MeasurementFailedError
+        raise ConsoleError('Values are read-only')
 
     def defaults(self, hwver=None, sernum=None):
         """Write factory defaults into NV memory.
@@ -143,6 +129,18 @@ class ConsoleGen2():
         verbld = self.action('SW-VERSION?', expected=1)
         self._logger.debug('Version is %s', verbld)
         return verbld
+
+    def stat(self):
+        """Use STAT command to read (all) data values."""
+        self._logger.debug('Stat')
+        response = self.action('STAT')
+        for line in response:
+            if line[0] == '#':              # ignore comment lines
+                continue
+            line = line.split()[0]          # stop at the 1st space
+            line = line.split(sep='=')      # break the "key=value" pairs up
+            self.stat_data[line[0]] = line[1]
+        self._logger.debug('Stat read %s data values', len(self.stat_data))
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response line(s).

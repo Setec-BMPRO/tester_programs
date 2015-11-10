@@ -47,3 +47,55 @@ class ConsoleTestCase(unittest.TestCase):
             'OK\r\n'                            # and it's response
             )
         mycon.open()
+
+    def test_stat(self):
+        mycon.puts(
+            '# error blink count...\r\n'        # BEGIN Stat response
+            '# battery: solid\r\n'
+            '# polarity 1\r\n'
+            '# temperature 2\r\n'
+            '# short 3\r\n'
+            '# over volt 4\r\n'
+            '# under volt 5\r\n'
+            'used-data=0x91C\r\n'
+            'free-data=0x16E4\r\n'
+            'used-stack=0xD8\r\n'
+            'free-stack=0x160C\r\n'
+            'pri-temp=679 ;degCx10\r\n'
+            'sec-temp=252 ;degCx10\r\n'
+            'pulsing-open-volts=13722 ;mV (=N/A if not pulsing)\r\n'
+            'pulsing-open-current=18 ;mA (=N/A if not pulsing)\r\n'
+            'pulsing-closed-volts=13722 ;mV (=N/A if not pulsing)\r\n'
+            'pulsing-closed-current=18 ;mA (=N/A if not pulsing)\r\n'
+            'not-pulsing-volts=N/A ;mV (=N/A because pulsing)\r\n'
+            'not-pulsing-current=N/A ;mA (=N/A because pulsing)\r\n'
+            'batt-detect=OVERVOLT ;mV'
+                ' (NOINFO/NOBATT/SHORT/POLARITY/OVERVOLT)\r\n'
+            'volts-open-closed-rawadc=877 877\r\n'
+            'current-open-closed-rawadc=1 1\r\n'
+            'battdetect-open-closed-volts-rawadc=2 2\r\n'
+            'sec-temp-rawadc=929\r\n'
+            'overvolt-latch=0 ;(r) resets\r\n'
+            'fan-enable=0\r\n'
+            'dcdc-enable=1 ;(e) toggles\r\n'
+            'dcdcout-enable=1 ;(o) toggles\r\n'
+            'ps-on=0 ;(p) toggles\r\n'
+            'mv-set=13650 ;mV\r\n'
+            'ma-set=15000 ;mA\r\n'
+            'logm=0x0\r\n'
+            'mainloop-run=1\r\n'
+            'mainloop-ms=100\r\n'
+            'mainloop-errors=0\r\n'
+            'chemistry=AGM\r\n'
+            'chargemode=CHARGEHIGHAMP\r\n'
+            'chargestate=FLOAT\r\n'
+            '# LEDs: .=off *=on @=blinking\r\n'
+            '# Fault=red + Stage1=green (bi-color)\r\n'
+            '# SizeC=green + SizeD =yellow (bi-color)\r\n'
+            '# Fault__Stage1 2 3 4 5 6 ChemA B C D SizeA B C__D\r\n'
+            '# . * * * * * * * . . . . . * .\r\n'       # END Stat response
+            'OK\r\n'                            # and the final prompt
+            )
+        mycon.stat()
+        # Must have read correct number of values
+        self.assertEqual(len(mycon.stat_data), 31)
