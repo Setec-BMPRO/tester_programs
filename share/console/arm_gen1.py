@@ -27,7 +27,8 @@ Implements the methods to expose ARM readings as Sensors.
 import logging
 import time
 
-import tester
+from ._base import ConsoleError
+from . import tester
 
 # Command trigger
 _CMD_RUN = b'\r'
@@ -37,282 +38,27 @@ _CMD_SUFFIX = b' -> '
 _CMD_PROMPT1 = b'\r\n> '
 # Command prompt (before a response)
 _CMD_PROMPT2 = '> '
-# Delay after a value set command
-_SET_DELAY = 0.3
 # Delay between character when console echo is OFF
-_INTER_CHAR_DELAY = 0.001
+# NOTE: This delay is very fussy...
+#       1ms will miss the T in a "TCC command about 1 in 5 test runs.
+#       2ms seems to be stable.
+_INTER_CHAR_DELAY = 0.002
 
-# Dialect dependent commands
-#   Use the key name for lookup, then index by self._dialect
-#       eg: _DIALECT[key][self._dialect]
-# Dialect 0 = SX-750, GEN8
-# Dialect 1 = BatteryCheck, BP35, Trek2
-_DIALECT = {
-    'VERSION': ('X-SOFTWARE-VERSION x?', 'SW-VERSION?'),
-    'BUILD': ('X-BUILD-NUMBER x?', 'BUILD?'),
-    }
-# Dialect dependent features
-#   Dialect 1 has the 'SET-HW-VER' and 'SET-SERIAL-ID' commands.
-#   BatteryCheck has the 'SET-SERIAL-ID' command, but it works differently
-#   to the Dialect 1 units...
 
-
-class ArmError(Exception):
-
-    """ARM Command Echo or Response Error."""
-
-
-class Sensor(tester.sensor.Sensor):
-
-    """ARM console data exposed as a Sensor."""
-
-    def __init__(self, arm, key, rdgtype=tester.sensor.Reading, position=1):
-        """Create a sensor."""
-        super().__init__(arm, position)
-        self._arm = arm
-        self._key = key
-        self._rdgtype = rdgtype
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._logger.debug('Created')
-
-    def configure(self):
-        """Configure measurement."""
-        self._arm.configure(self._key)
-
-    def read(self):
-        """Take a reading.
-
-        @return Reading
-
-        """
-        rdg = self._rdgtype(value=super().read(), position=self.position)
-        return (rdg, )
-
-
-class _Parameter():
-
-    """Parameter base class."""
-
-    def __init__(self, command, writeable=False):
-        """Remember the command verb and writeable state."""
-        self._cmd = command
-        self._writeable = writeable
-
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        if not self._writeable:
-            raise ValueError('Parameter is read-only')
-        write_cmd = '{} "{} XN!'.format(value, self._cmd)
-        func(write_cmd, delay=_SET_DELAY)
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Function to use to read the value.
-        @return Data value.
-
-        """
-        read_cmd = '"{} XN?'.format(self._cmd)
-        return func(read_cmd, expected=1)
-
-
-class ParameterBoolean(_Parameter):
-
-    """Boolean parameter type."""
-
-    error_value = False
-
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        if not isinstance(value, bool):
-            raise ValueError('value "{}" must be boolean'.format(value))
-        super().write(int(value), func)
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Function to use to read the value.
-        @return Boolean data value.
-
-        """
-        return bool(super().read(func))
-
-
-class ParameterFloat(_Parameter):
-
-    """Float parameter type."""
-
-    error_value = float('NaN')
-
-    def __init__(self, command, writeable=False,
-                       minimum=0, maximum=1000, scale=1):
-        """Remember the scaling and data limits."""
-        super().__init__(command, writeable)
-        self._min = minimum
-        self._max = maximum
-        self._scale = scale
-
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        if value < self._min or value > self._max:
-            raise ValueError(
-                'Value out of range {} - {}'.format(self._min, self._max))
-        super().write(int(value * self._scale), func)
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Function to use to read the value.
-        @return Float data value.
-
-        """
-        value = super().read(func)
-        if value is None:
-            value = '0'
-        return int(value) / self._scale
-
-
-class ParameterHex(_Parameter):
-
-    """Hex parameter type."""
-
-    error_value = float('NaN')
-
-    def __init__(self, command, writeable=False,
-                 minimum=0, maximum=1000, mask=0xFFFFFFFF):
-        """Remember the data limits."""
-        super().__init__(command, writeable)
-        self._min = minimum
-        self._max = maximum
-        self._mask = mask
-
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        if value < self._min or value > self._max:
-            raise ValueError(
-                'Value out of range {} - {}'.format(self._min, self._max))
-        if not self._writeable:
-            raise ValueError('Parameter is read-only')
-        write_cmd = '${:08X} "{} XN!'.format(value, self._cmd)
-        func(write_cmd, delay=_SET_DELAY)
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Function to use to read the value.
-        @return Int data value.
-
-        """
-        value = super().read(func)
-        if value is None:
-            value = '0'
-        return int(value, 16) & self._mask
-
-
-class ParameterCAN(_Parameter):
-
-    """CAN Parameter class."""
-
-    error_value = ''
-
-    def write(self, value):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        raise ValueError('CAN parameters are read-only')
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Function to use to read the value.
-        @return String value.
-
-        """
-        can_cmd = '"{} CAN'.format(self._cmd)
-        value = func(can_cmd, expected=1)
-        if value is None:
-            value = ''
-        return value
-
-
-class ParameterRaw(_Parameter):
-
-    """Raw Parameter class.
-
-    Calls a function directly rather than generating command strings and
-    using console.action().
-
-    """
-
-    error_value = ''
-
-    def __init__(self, command, writeable=False, func=None):
-        """Remember function to call."""
-        super().__init__(command, writeable)
-        self._func = func
-
-    def write(self, value):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        raise ValueError('Raw parameters are read-only')
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Ignored.
-        @return String value.
-
-        """
-        value = self._func()
-        if value is None:
-            value = ''
-        return value
-
-
-class ArmConsoleGen1():
+class ConsoleGen1():
 
     """Communications to First Generation ARM console."""
 
-    def __init__(self, port, dialect=0):
+    def __init__(self, port):
         """Initialise communications.
 
-        @param port Serial port to use
-        @param dialect Command dialect to use (0=SX-750,GEN8, 1=TREK2,BP35)
+        @param port SimSerial port to use
 
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         port.timeout = 10240 / port.baudrate  # Timeout of 1kB
         self._port = port
-        self._dialect = dialect
         self._echo = True   # Character echo defaults to ON
         self._send_delay = _INTER_CHAR_DELAY
         self._read_key = None
@@ -363,7 +109,7 @@ class ArmConsoleGen1():
         try:
             parameter = self.cmd_data[key]
             reply = parameter.read(self.action)
-        except ArmError:
+        except ConsoleError:
             # Sensor uses this, so we must always return a valid reading
             reply = parameter.error_value
         return reply
@@ -378,7 +124,7 @@ class ArmConsoleGen1():
         try:
             parameter = self.cmd_data[key]
             parameter.write(value, self.action)
-        except ArmError:
+        except ConsoleError:
 # FIXME: This does not setup the test results properly.
 #   We should be sending a TestLimit fail signal...
             # This will make the unit fail the test
@@ -393,9 +139,8 @@ class ArmConsoleGen1():
         """
         self._logger.debug('Write factory defaults')
         self.unlock()
-        if self._dialect != 0:
-            self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
-            self.action('"{} SET-SERIAL-ID'.format(sernum))
+        self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
+        self.action('"{} SET-SERIAL-ID'.format(sernum))
         self.action('NV-DEFAULT')
         self.nvwrite()
 
@@ -417,15 +162,7 @@ class ArmConsoleGen1():
 
     def version(self):
         """Return software version."""
-        if self._dialect == 0:
-            ver_cmd = _DIALECT['VERSION'][self._dialect]
-            bld_cmd = _DIALECT['BUILD'][self._dialect]
-            ver = self.action(ver_cmd, expected=1)
-            bld = self.action(bld_cmd, expected=1)
-            verbld = '.'.join((ver, bld))
-        else:
-            ver_cmd = _DIALECT['VERSION'][self._dialect]
-            verbld = self.action(ver_cmd, expected=1)
+        verbld = self.action('SW-VERSION?', expected=1)
         self._logger.debug('Version is %s', verbld)
         return verbld
 
@@ -469,7 +206,7 @@ class ArmConsoleGen1():
         read back. The echo of _CMD_RUN is NOT expected, or read.
 
         @param command Command string.
-        @raises ArmError if the command does not echo.
+        @raises ConsoleError if the command does not echo.
 
         """
         self._logger.debug('--> %s', repr(command))
@@ -482,24 +219,27 @@ class ArmConsoleGen1():
             # Send each byte with echo verification
             for a_byte in cmd_data:
                 a_byte = bytes([a_byte])
+#                self._logger.debug('Tx ---> %s', repr(a_byte))
                 self._port.write(a_byte)
                 if self._echo:
                     echo = self._port.read(1)
+#                    self._logger.debug('Rx <--- %s', repr(echo))
                     if echo != a_byte:
-                        raise ArmError(
+                        raise ConsoleError(
                             'Command echo error. Tx: {}, Rx: {}'.format(
                                 a_byte, echo))
                 else:
                     time.sleep(self._send_delay)
             # And the command RUN, without echo
             self._port.write(_CMD_RUN)
+#            self._logger.debug('Tx ---> %s', repr(_CMD_RUN))
 
     def _read_response(self, expected):
         """Read a response.
 
         @param expected Expected number of responses.
         @return Response (None / String / List of Strings).
-        @raises ArmError If not enough response strings are seen.
+        @raises ConsoleError If not enough response strings are seen.
 
         """
         # Read until a timeout happens
@@ -525,6 +265,6 @@ class ArmConsoleGen1():
             response = None
         self._logger.debug('<-- %s', repr(response))
         if response_count < expected:
-            raise ArmError(
+            raise ConsoleError(
                 'Expected {}, actual {}'.format(expected, response_count))
         return response

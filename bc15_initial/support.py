@@ -6,7 +6,7 @@ from pydispatch import dispatcher
 import tester
 from tester.devlogical import *
 from tester.measure import *
-import share.bc15
+from . import console
 
 sensor = tester.sensor
 translate = tester.translate
@@ -78,13 +78,8 @@ class Sensors():
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
-        tester.TranslationContext = 'bc15_initial'
-        self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
-        self.ARM_SwVer = share.bc15.Sensor(
+        self.ARM_SwVer = console.Sensor(
             bc15, 'SwVer', rdgtype=tester.sensor.ReadingString)
-        self.ARM_AcV = share.bc15.Sensor(bc15, 'AC_V')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -116,9 +111,7 @@ class Measurements():
         self.dmm_vout = Measurement(limits['Vout'], sense.oVout)
         self.dmm_voutoff = Measurement(limits['VoutOff'], sense.oVout)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
-        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
-        self.arm_acv = Measurement(limits['ARM-AcV'], sense.ARM_AcV)
 
 
 class SubTests():

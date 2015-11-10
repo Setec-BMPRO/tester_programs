@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-04, 22:58:49 -->
+<!-- Saved: 2015-11-09, 17:37:01 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -138,7 +138,6 @@
     <Source>uni750_final/limit.py</Source>
     <Source>uni750_final/__init__.py</Source>
     <Source>uni750_final/support.py</Source>
-    <Source>share/arm.py</Source>
     <Source>drifter_initial/limit.py</Source>
     <Source>drifter_initial/pic_driver.py</Source>
     <Source>drifter_initial/__init__.py</Source>
@@ -189,7 +188,6 @@
     <Source>bp35_initial/support.py</Source>
     <Source>bp35_initial/__init__.py</Source>
     <Source>bp35_initial/limit.py</Source>
-    <Source>share/arm_gen1.py</Source>
     <Source>share/bp35.py</Source>
     <Source>trek2_final/support.py</Source>
     <Source>trek2_final/__init__.py</Source>
@@ -215,7 +213,6 @@
     <Source>bc15_initial/support.py</Source>
     <Source>bc15_initial/__init__.py</Source>
     <Source>bc15_initial/limit.py</Source>
-    <Source>share/bc15.py</Source>
     <Source>cn101_initial/support.py</Source>
     <Source>cn101_initial/__init__.py</Source>
     <Source>cn101_initial/limit.py</Source>
@@ -241,6 +238,18 @@
     <Source>ids500_initial_sub/support.py</Source>
     <Source>ids500_final/limit.py</Source>
     <Source>ids500_initial_sub/limit.py</Source>
+    <Source>share/isplpc/device.py</Source>
+    <Source>share/isplpc/isp.py</Source>
+    <Source>share/console/arm_gen1.py</Source>
+    <Source>share/console/__init__.py</Source>
+    <Source>share/console/arm_gen0.py</Source>
+    <Source>share/console/_base.py</Source>
+    <Source>bc15_initial/console.py</Source>
+    <Source>share/console/arm_gen2.py</Source>
+    <Source>share/console/test/test_base.py</Source>
+    <Source>share/console/test/__init__.py</Source>
+    <Source>share/__init__.py</Source>
+    <Source>testsuite.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
@@ -260,9 +269,11 @@
     <Other>bp35_initial/bp35_1.0.11529.3465.bin</Other>
     <Other>bp35_initial/bp35sr_1.0.11518.126.hex</Other>
     <Other>trek2_initial/Trek2_1.0.11535.127.bin</Other>
-    <Other>cn101_initial/cn101_1.0.110.bin</Other>
-    <Other>bc15_initial/bc15_1.0.3156.bin</Other>
     <Other>ids500_initial_sub/Main 1A.hex</Other>
+    <Other>gen8_initial/gen8_1.4.645.bin</Other>
+    <Other>sx750_initial/sx750_arm_3.1.2118.bin</Other>
+    <Other>cn101_initial/cn101_1.0.000.bin</Other>
+    <Other>bc15_initial/bc15_1.0.1231.bin</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>

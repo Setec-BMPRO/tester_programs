@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """CN101 ARM processor console driver."""
 
-import share.arm_gen1
+import share.console
 
 
-# Expose arm_gen1.Sensor as cn101.Sensor
-Sensor = share.arm_gen1.Sensor
+Sensor = share.console.Sensor
 
 # Some easier to use short names
-ArmConsoleGen1 = share.arm_gen1.ArmConsoleGen1
-ParameterBoolean = share.arm_gen1.ParameterBoolean
-ParameterFloat = share.arm_gen1.ParameterFloat
-ParameterHex = share.arm_gen1.ParameterHex
-ParameterCAN = share.arm_gen1.ParameterCAN
-ParameterRaw = share.arm_gen1.ParameterRaw
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
+ParameterHex = share.console.ParameterHex
+ParameterCAN = share.console.ParameterCAN
+ParameterRaw = share.console.ParameterRaw
 
 # Test mode controlled by STATUS bit 31
 _TEST_ON = (1 << 31)
@@ -23,13 +21,13 @@ _CAN_ON = (1 << 29)
 _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 
 
-class Console(ArmConsoleGen1):
+class Console(share.console.ConsoleGen1):
 
     """Communications to CN101 console."""
 
-    def __init__(self, simulation=False, **kwargs):
+    def __init__(self, port):
         """Create console instance."""
-        super().__init__(dialect=1, simulation=simulation, **kwargs)
+        super().__init__(port)
         self.cmd_data = {
             'STATUS': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),

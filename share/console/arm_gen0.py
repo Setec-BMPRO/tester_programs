@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""GEN8/SX-750 ARM processor console driver.
+"""GEN8 & SX-750 ARM processor console driver.
 
-Communication via Serial port to the ARM processor.
+Communication via SimSerial port to the ARM processor.
 
 """
 
-import serial
 import time
 import logging
 
-import tester
+from . import tester
 
 
 # Line terminator
@@ -17,97 +16,78 @@ _EOL = b'\r'
 # Timeouts
 _READ_TMO = 0.1
 _LINE_TMO = 4.0
+# Time to allow for a Non-Volatile memory write to complete
+_NV_DELAY = 0.5
 
 
-class Sensor(tester.sensor.Sensor):
-
-    """ARM console data exposed as a Sensor."""
-
-    def __init__(self, arm, key, rdgtype=tester.sensor.Reading, position=1):
-        """Create a sensor."""
-        super().__init__(arm, position)
-        self._arm = arm
-        self._key = key
-        self._rdgtype = rdgtype
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._logger.debug('Created')
-
-    def configure(self):
-        """Configure measurement."""
-        self._arm.configure(self._key)
-
-    def read(self):
-        """Take a reading.
-
-        @return Reading
-
-        """
-        rdg = self._rdgtype(value=super().read(), position=self.position)
-        return (rdg, )
-
-
-class Console():
+class ConsoleGen0():
 
     """Communications to ARM console."""
 
-    def __init__(self, port=0, baud=57600):
-        """Open serial communications."""
+    def __init__(self, port):
+        """Initialise communications.
+
+        @param port SimSerial port to use
+
+        """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
+        port.timeout = _READ_TMO
         self._port = port
-        self._baud = baud
-        self._ser = None
         self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor, StrKill ))
         self._data = {
-            'ARM-AcDuty':  (self._getvalue,
-                            ('X-AC-DETECTOR-DUTY', 1, '%')),
-            'ARM-AcPer':   (self._getvalue,
-                            ('X-AC-DETECTOR-PERIOD', 0.001, 'ms')),
-            'ARM-AcFreq':  (self._getvalue,
-                            ('X-AC-LINE-FREQUENCY', 1, 'Hz')),
-            'ARM-AcVolt':  (self._getvalue,
-                            ('X-AC-LINE-VOLTS', 1, 'Vrms')),
-            'ARM-PfcTrim': (self._getvalue,
-                            ('X-PFC-TRIM', 1, '%')),
-            'ARM-12VTrim': (self._getvalue,
-                            ('X-CONVERTER-VOLTS-TRIM', 1, '%')),
-            'ARM-5V':      (self._getvalue,
-                            ('X-RAIL-VOLTAGE-5V', 0.001, 'mV')),
-            'ARM-12V':     (self._getvalue,
-                            ('X-RAIL-VOLTAGE-12V', 0.001, 'mV')),
-            'ARM-24V':     (self._getvalue,
-                            ('X-RAIL-VOLTAGE-24V', 0.001, 'mV')),
-            'ARM-5Vadc':   (self._getvalue,
-                            ('X-ADC-5V-RAIL', 1, 'Counts')),
-            'ARM-12Vadc':  (self._getvalue,
-                            ('X-ADC-12V-RAIL', 1, 'Counts')),
-            'ARM-24Vadc':  (self._getvalue,
-                            ('X-ADC-24V-RAIL', 1, 'Counts')),
-            'ARM_SwVer':   (self.version, None),
+            'ARM-AcDuty':
+                (self._getvalue, ('X-AC-DETECTOR-DUTY', 1, '%')),
+            'ARM-AcPer':
+                (self._getvalue, ('X-AC-DETECTOR-PERIOD', 0.001, 'ms')),
+            'ARM-AcFreq':
+                (self._getvalue, ('X-AC-LINE-FREQUENCY', 1, 'Hz')),
+            'ARM-AcVolt':
+                (self._getvalue, ('X-AC-LINE-VOLTS', 1, 'Vrms')),
+            'ARM-PfcTrim':
+                (self._getvalue, ('X-PFC-TRIM', 1, '%')),
+            'ARM-12VTrim':
+                (self._getvalue, ('X-CONVERTER-VOLTS-TRIM', 1, '%')),
+            'ARM-5V':
+                (self._getvalue, ('X-RAIL-VOLTAGE-5V', 0.001, 'mV')),
+            'ARM-12V':
+                (self._getvalue, ('X-RAIL-VOLTAGE-12V', 0.001, 'mV')),
+            'ARM-24V':
+                (self._getvalue, ('X-RAIL-VOLTAGE-24V', 0.001, 'mV')),
+            'ARM-5Vadc':
+                (self._getvalue, ('X-ADC-5V-RAIL', 1, 'Counts')),
+            'ARM-12Vadc':
+                (self._getvalue, ('X-ADC-12V-RAIL', 1, 'Counts')),
+            'ARM-24Vadc':
+                (self._getvalue, ('X-ADC-24V-RAIL', 1, 'Counts')),
+            'ARM_SwVer':
+                (self.version, None),
             }
 
     def open(self):
-        """Open serial communications."""
+        """Open port."""
         self._logger.debug('Open')
-        if self._ser is None:
-            self._ser = serial.Serial(
-                self._port, self._baud, timeout=_READ_TMO)
-        self._flushInput()
+        self._port.open()
+
+    def puts(self, string_data, preflush=0, postflush=0, priority=False):
+        """Put a string into the read-back buffer.
+
+        @param string_data Data string, or tuple of data strings.
+        @param preflush Number of _FLUSH to be entered before the data.
+        @param postflush Number of _FLUSH to be entered after the data.
+        @param priority True to put in front of the buffer.
+        Note: _FLUSH is a marker to stop the flush of the data buffer.
+
+        """
+        self._port.puts(string_data, preflush, postflush, priority)
 
     def close(self):
         """Close serial communications."""
         self._logger.debug('Close')
-        if self._ser is None:
-            return
-        try:
-            self._ser.close()
-            self._ser = None
-        except Exception:
-            pass
+        self._port.close()
 
     def configure(self, cmd):
         """Sensor: Configure for next reading."""
@@ -138,10 +118,9 @@ class Console():
         cmd, scale, strkill = data
         reply = self._sendrecv('{} X?'.format(cmd))
         if reply is None:
-            value = -999.999
-        else:
-            reply = reply.replace(strkill, '')
-            value = float(reply) * scale
+            reply = 'NaN'
+        reply = reply.replace(strkill, '')
+        value = float(reply) * scale
         return value
 
     def defaults(self):
@@ -160,8 +139,7 @@ class Console():
     def _nvwrite(self):
         """Perform NV Memory Write."""
         self._sendrecv('NV-WRITE')
-        if self._ser is not None:
-            time.sleep(0.5)     # Allow the NV memory write to complete
+        time.sleep(_NV_DELAY)
 
     def version(self, param=None):
         """Return software version."""
@@ -184,7 +162,7 @@ class Console():
         self._nvwrite()
 
     def cal_12v(self, voltage):
-        """Calibrate 12V output.
+        """Calibrate 12V output (GEN8 only).
 
         12000 CAL-CONVERTER-VOLTS       (V in mV)
         NV-WRITE
@@ -197,8 +175,8 @@ class Console():
 
     def _flushInput(self):
         """Flush input (serial port and buffer)."""
-        if self._ser is not None:
-            self._ser.flushInput()
+        self._logger.debug('FlushInput')
+        self._port.flushInput()
         self._buf = b''
 
     def _sendrecv(self, command):
@@ -208,12 +186,11 @@ class Console():
 
         """
         self._writeline(command)
-        if self._ser is not None:
-            reply = self._readline()
-            if reply is None:
-                self._logger.debug('Timeout after %s', command)
-                self._limit.check(True)
-            return reply
+        reply = self._readline()
+        if reply is None:
+            self._logger.debug('Timeout after %s', command)
+            self._limit.check(True)
+        return reply
 
     def _readline(self):
         """Read a _EOL terminated line from the ARM.
@@ -222,10 +199,9 @@ class Console():
         Upon read timeout, return None.
 
         """
-
         tries = 0
         while True:
-            self._buf += self._ser.read(512)
+            self._buf += self._port.read(512)
             pos = self._buf.find(_EOL)
             if pos >= 0:
                 line, self._buf = self._buf[:pos], self._buf[pos + 1:]
@@ -240,5 +216,4 @@ class Console():
     def _writeline(self, line):
         """Write a _EOL terminated line to the ARM."""
         self._logger.debug('Send line: %s', repr(line))
-        if self._ser is not None:
-            self._ser.write(line.encode() + _EOL)
+        self._port.write(line.encode() + _EOL)

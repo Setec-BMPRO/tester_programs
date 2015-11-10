@@ -8,9 +8,8 @@ import time
 
 import tester
 import share.isplpc
-import share.programmer
 from share.sim_serial import SimSerial
-import share.bc15
+from . import console
 from . import support
 from . import limit
 
@@ -19,13 +18,9 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt':    'COM2',
-             }[os.name]
-# Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (1, 0, '')
+_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # ARM software image file
-_ARM_BIN = 'bc15_1.0.3156.bin'
+_ARM_BIN = 'bc15_1.0.1231.bin'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -61,10 +56,13 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._bc15 = share.bc15.Console(
+        # Serial connection to the BC15 console
+        bc15_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
-        self._bc15.setPort(_ARM_PORT)
+        bc15_ser.setPort(_ARM_PORT)
+        # BC15 Console driver
+        self._bc15 = console.Console(bc15_ser)
 
     def open(self):
         """Prepare for testing."""
@@ -77,10 +75,15 @@ class Main(tester.TestSequence):
         # Apply power to fixture Comms circuit.
         d.dcs_vcom.output(12.0, True)
 
+    def _bc15_puts(self,
+                   string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the BC15 buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._bc15.puts(string_data, preflush, postflush, priority)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._bc15.close()
         global m, d, s, t
         # Remove power from fixture circuit.
         d.dcs_vcom.output(0, False)
@@ -89,6 +92,7 @@ class Main(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._bc15.close()
         d.acsource.output(voltage=0.0, output=False)
         d.dcl.output(2.0)
         time.sleep(1)
@@ -114,7 +118,6 @@ class Main(tester.TestSequence):
         """
         # Set BOOT active before RESET so the ARM boot-loader runs
         d.rla_boot.set_on()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -133,41 +136,46 @@ class Main(tester.TestSequence):
             except share.isplpc.ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            try:
-                ser.close()
-            except:
-                pass
+            ser.close()
         m.pgmARM.measure()
-        # Reset BOOT to ARM
+        # Remove BOOT signal from ARM
         d.rla_boot.set_off()
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
 
         Device is powered by injected Battery voltage.
-        Reset the device, set HW & SW versions & Serial number.
         Write Non-Volatile memory defaults.
 
         """
-        dummy_sn = 'A1526040123'
-        self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
-        sernum = m.ui_SnEntry.measure()[1][0]
-#        sernum = dummy_sn
-        self._bc15.open()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
-        self._bc15_puts('Banner1\r\nBanner2\r\n')
-        self._bc15.action(None, delay=0.5, expected=2)  # Flush banner
-        self._bc15.defaults(_HW_VER, sernum)
-        self._bc15_puts('1.0.10902.3156\r\n')
+        time.sleep(1)
+        self._bc15_puts(
+            'BC15\r\n'                          # BEGIN Startup messages
+            'Build date:       06/11/2015\r\n'
+            'Build time:       15:31:40\r\n'
+            'SystemCoreClock:  48000000\r\n'
+            'Software version: 1.0.11705.1203\r\n'
+            'nonvol: reading crc invalid at sector 14 offset 0\r\n'
+            'nonvol: reading nonvol2 OK at sector 15 offset 2304\r\n'
+            'Hardware version: 0.0.[00]\r\n'
+            'Serial number:    A9999999999\r\n'
+            'Please type help command.\r\n'
+            '> '                                # END Startup messages
+            '"OK\\n PROMPT\r\n'                 # 1st command echo
+            'OK\r\n'                            # and it's response
+            '0 ECHO\r\nOK\r\n'                  # ECHO command echo
+            'OK\r\n')                           # and it's response
+        self._bc15_puts(
+            'OK\r\n'                            # UNLOCK response
+            'OK\r\n'                            # NV-DEFAULT response
+            'OK\r\n'                            # NV-WRITE response
+            '1.0.11778.1231\r\nOK\r\n',         # SwVer response
+            preflush=1)
+        self._bc15.open()
+        self._bc15.defaults()
         m.arm_SwVer.measure()
 
     def _step_powerup(self):
         """Power up the Unit with 240Vac."""
         self.fifo_push(((s.oACin, 240.0), (s.oVout, 12.0), ))
-
-    def _bc15_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BC15 buffer only if FIFOs are enabled."""
-        if self._fifo:
-            self._bc15.puts(string_data, preflush, postflush, priority)

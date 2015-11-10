@@ -6,8 +6,8 @@ from pydispatch import dispatcher
 import tester
 from tester.devlogical import *
 from tester.measure import *
+from share.console import Sensor as con_sensor
 
-import share.arm
 
 sensor = tester.sensor
 
@@ -79,19 +79,19 @@ class Sensors():
         self.Lock = sensor.Res(dmm, high=12, low=6, rng=10000, res=1)
         self.Part = sensor.Res(dmm, high=10, low=5, rng=1000, res=0.01)
         self.FanShort = sensor.Res(dmm, high=13, low=7, rng=1000, res=0.1)
-        self.ARM_AcDuty = share.arm.Sensor(armdev, 'ARM-AcDuty')
-        self.ARM_AcPer = share.arm.Sensor(armdev, 'ARM-AcPer')
-        self.ARM_AcFreq = share.arm.Sensor(armdev, 'ARM-AcFreq')
-        self.ARM_AcVolt = share.arm.Sensor(armdev, 'ARM-AcVolt')
-        self.ARM_PfcTrim = share.arm.Sensor(armdev, 'ARM-PfcTrim')
-        self.ARM_12VTrim = share.arm.Sensor(armdev, 'ARM-12VTrim')
-        self.ARM_5V = share.arm.Sensor(armdev, 'ARM-5V')
-        self.ARM_12V = share.arm.Sensor(armdev, 'ARM-12V')
-        self.ARM_24V = share.arm.Sensor(armdev, 'ARM-24V')
-        self.ARM_5Vadc = share.arm.Sensor(armdev, 'ARM-5Vadc')
-        self.ARM_12Vadc = share.arm.Sensor(armdev, 'ARM-12Vadc')
-        self.ARM_24Vadc = share.arm.Sensor(armdev, 'ARM-24Vadc')
-        self.ARM_SwVer = share.arm.Sensor(
+        self.ARM_AcDuty = con_sensor(armdev, 'ARM-AcDuty')
+        self.ARM_AcPer = con_sensor(armdev, 'ARM-AcPer')
+        self.ARM_AcFreq = con_sensor(armdev, 'ARM-AcFreq')
+        self.ARM_AcVolt = con_sensor(armdev, 'ARM-AcVolt')
+        self.ARM_PfcTrim = con_sensor(armdev, 'ARM-PfcTrim')
+        self.ARM_12VTrim = con_sensor(armdev, 'ARM-12VTrim')
+        self.ARM_5V = con_sensor(armdev, 'ARM-5V')
+        self.ARM_12V = con_sensor(armdev, 'ARM-12V')
+        self.ARM_24V = con_sensor(armdev, 'ARM-24V')
+        self.ARM_5Vadc = con_sensor(armdev, 'ARM-5Vadc')
+        self.ARM_12Vadc = con_sensor(armdev, 'ARM-12Vadc')
+        self.ARM_24Vadc = con_sensor(armdev, 'ARM-24Vadc')
+        self.ARM_SwVer = con_sensor(
             armdev, 'ARM_SwVer', rdgtype=tester.sensor.ReadingString)
 
     def _reset(self):

@@ -90,10 +90,15 @@ class Main(tester.TestSequence):
         # Apply power to fixture (Comms & Trek2) circuits.
         d.dcs_vcom.output(12.0, True)
 
+    def _bp35_puts(self,
+                   string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the BP35 buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._bp35.puts(string_data, preflush, postflush, priority)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._bp35.close()
         global m, d, s, t
         # Remove power from fixture circuits.
         d.dcs_vcom.output(0, False)
@@ -102,6 +107,7 @@ class Main(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._bp35.close()
         d.acsource.output(voltage=0.0, output=False)
         d.dcl_out.output(2.0)
         time.sleep(1)
@@ -279,7 +285,9 @@ class Main(tester.TestSequence):
         All outputs are then left ON.
 
         """
-        self.fifo_push(((s.oVload, (0.0, ) + (12.8, ) * 14), ))
+        self.fifo_push(
+            ((s.oVload, (0.0, ) + (12.8, ) * 14),
+             (s.oVload, (0.25, 12.34)),  ))
         # All outputs OFF
         self._bp35.load_set(set_on=True, loads=())
         # A little load on the output.
@@ -309,9 +317,6 @@ class Main(tester.TestSequence):
              (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
              (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 6 + (11.0, ), ), ))
         # (s.ARM_PriT, 26.0), [disabled because it has bugs...]
-        if self._fifo:
-            for sen in s.ARM_Loads:
-                sen.store(2.0)
         # m.arm_priT, [disabled because it has bugs...]
         MeasureGroup((m.arm_acv, m.arm_acf, m.arm_secT,
                      m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
@@ -320,6 +325,9 @@ class Main(tester.TestSequence):
         d.dcl_out.binary(1.0, 28.0, 5.0)
         d.dcl_bat.output(4.0, output=True)
         MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
+        if self._fifo:
+            for sen in s.ARM_Loads:
+                sen.store(2.0)
         for ld in range(14):
             tester.testsequence.path_push('L{}'.format(ld + 1))
             m.arm_loads[ld].measure(timeout=5)
@@ -336,9 +344,3 @@ class Main(tester.TestSequence):
         self._bp35_puts('10000000\r\n', preflush=1)
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
-
-    def _bp35_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BP35 buffer only if FIFOs are enabled."""
-        if self._fifo:
-            self._bp35.puts(string_data, preflush, postflush, priority)

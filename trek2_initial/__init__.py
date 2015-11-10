@@ -85,16 +85,22 @@ class Main(tester.TestSequence):
         d.dcs_Vcom.output(12.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports
 
+    def _trek2_puts(self,
+                    string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the Trek2 buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._trek2.puts(string_data, preflush, postflush, priority)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._trek2.close()
         global m, d, s, t
         m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._trek2.close()
         # Reset Logical Devices
         d.reset()
 
@@ -148,7 +154,7 @@ class Main(tester.TestSequence):
         self._trek2_puts('Banner1\r\nBanner2\r\n')
         self._trek2.action(None, delay=1, expected=2)   # Flush banner
         self._trek2.defaults(_HW_VER, self.sernum)
-        self._trek2_puts('1.0.10892.110\r\n')
+        self._trek2_puts('1.0.11535.127\r\n')
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):
@@ -160,9 +166,3 @@ class Main(tester.TestSequence):
         self._trek2_puts('0x10000000\r\n', preflush=1)
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()
-
-    def _trek2_puts(self,
-                    string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the Trek2 buffer only if FIFOs are enabled."""
-        if self._fifo:
-            self._trek2.puts(string_data, preflush, postflush, priority)

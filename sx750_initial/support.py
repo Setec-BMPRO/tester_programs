@@ -6,8 +6,9 @@ from pydispatch import dispatcher
 import tester
 from tester.devlogical import *
 from tester.measure import *
+from share.console import Sensor as con_sensor
 from . import digpot
-import share.arm
+
 
 sensor = tester.sensor
 
@@ -107,14 +108,14 @@ class Sensors():
             detect_limit=(limits['ACOK'], ),
             start=95.0, stop=75.0, step=-0.5, delay=0.3,
             reset=False, use_opc=False)
-        self.ARM_AcDuty = share.arm.Sensor(armdev, 'ARM-AcDuty')
-        self.ARM_AcPer = share.arm.Sensor(armdev, 'ARM-AcPer')
-        self.ARM_AcFreq = share.arm.Sensor(armdev, 'ARM-AcFreq')
-        self.ARM_AcVolt = share.arm.Sensor(armdev, 'ARM-AcVolt')
-        self.ARM_PfcTrim = share.arm.Sensor(armdev, 'ARM-PfcTrim')
-        self.ARM_12V = share.arm.Sensor(armdev, 'ARM-12V')
-        self.ARM_24V = share.arm.Sensor(armdev, 'ARM-24V')
-        self.ARM_SwVer = share.arm.Sensor(
+        self.ARM_AcDuty = con_sensor(armdev, 'ARM-AcDuty')
+        self.ARM_AcPer = con_sensor(armdev, 'ARM-AcPer')
+        self.ARM_AcFreq = con_sensor(armdev, 'ARM-AcFreq')
+        self.ARM_AcVolt = con_sensor(armdev, 'ARM-AcVolt')
+        self.ARM_PfcTrim = con_sensor(armdev, 'ARM-PfcTrim')
+        self.ARM_12V = con_sensor(armdev, 'ARM-12V')
+        self.ARM_24V = con_sensor(armdev, 'ARM-24V')
+        self.ARM_SwVer = con_sensor(
             armdev, 'ARM_SwVer', rdgtype=tester.sensor.ReadingString)
 
     def _reset(self):

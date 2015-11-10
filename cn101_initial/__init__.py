@@ -27,7 +27,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt':    'COM2',
              }[os.name]
 # Software image filename
-_ARM_BIN = 'cn101_1.0.110.bin'
+_ARM_BIN = 'cn101_1.0.000.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, '')
 
@@ -97,13 +97,13 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._cn101.close()
         global m, d, s, t
         m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._cn101.close()
         # Reset Logical Devices
         d.reset()
 

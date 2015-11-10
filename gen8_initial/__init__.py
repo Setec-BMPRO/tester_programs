@@ -8,7 +8,9 @@ import logging
 
 import tester
 import share.programmer
-import share.arm
+from share.sim_serial import SimSerial
+#from share.isplpc import Programmer, ProgrammingError
+import share.console
 from . import support
 from . import limit
 
@@ -21,8 +23,13 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt': r'\\.\COM6',
              }[os.name]
-
+# Software image filename
 _ARM_HEX = 'gen8_1.4.645.hex'
+#_ARM_BIN = 'gen8_1.4.645.bin'
+# Reading to reading difference for PFC voltage stability
+_PFC_STABLE = 0.05
+# Reading to reading difference for 12V voltage stability
+_12V_STABLE = 0.005
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -40,7 +47,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('Program', self._step_program, None, True),
+            ('Program', self._step_program, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('5V', self._step_reg_5v, None, True),
@@ -54,12 +61,15 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._armdev = None
+        # Serial connection to the ARM console
+        arm_ser = SimSerial(simulation=fifo, baudrate=57600)
+        # Set port separately - don't open until after programming
+        arm_ser.setPort(_ARM_PORT)
+        self._armdev = share.console.ConsoleGen0(arm_ser)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._armdev = share.arm.Console(port=_ARM_PORT)
         global d
         d = support.LogicalDevices(self._devices)
         global s
@@ -72,7 +82,6 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._armdev.close()
         # Switch off fixture power
         global d
         d.dcs_10Vfixture.output(0.0, output=False)
@@ -86,6 +95,7 @@ class Main(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._armdev.close()
         d.acsource.output(voltage=0.0, output=False)
         d.dcl_5V.output(1.0)
         d.dcl_12V.output(5.0)
@@ -94,6 +104,12 @@ class Main(tester.TestSequence):
         d.discharge.pulse()
         # Reset Logical Devices
         d.reset()
+
+    def _arm_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the Console buffer if FIFOs are enabled."""
+        if self._fifo:
+            self._armdev.puts(string_data, preflush, postflush, priority)
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -116,23 +132,40 @@ class Main(tester.TestSequence):
         d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5V.output(5.15, True)
-        self.fifo_push(((s.o5V, 5.05), (s.o3V3, 3.30), ))
         MeasureGroup((m.dmm_5V, m.dmm_3V3, ), timeout=2)
-        # Start the ARM programmer
-        self._logger.info('Start ARM programmer')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
+
+# <====> START Old Programmer
         arm = share.programmer.ProgramARM(
-            _ARM_HEX, folder, s.oMirARM, _ARM_PORT, fifo=self._fifo)
+            _ARM_HEX, folder, s.oMirARM, _ARM_PORT)
         arm.read()
+# <====> END Old Programmer
+
+# <====> START New Programmer
+#        file = os.path.join(folder, _ARM_BIN)
+#        with open(file, 'rb') as infile:
+#            bindata = bytearray(infile.read())
+#        self._logger.debug('Read %d bytes from %s', len(bindata), file)
+#        try:
+#            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
+#            # Program the device
+#            pgm = Programmer(
+#                ser, bindata, erase_only=False, verify=True, crpmode=False)
+#            try:
+#                pgm.program()
+#                s.oMirARM.store(0)
+#            except ProgrammingError:
+#                s.oMirARM.store(1)
+#        finally:
+#            ser.close()
+# <====> END New Programmer
+
         m.pgmARM.measure()
-        # Reset BOOT to ARM
+        # Remove BOOT, reset micro, wait for ARM startup
         d.rla_boot.set_off()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
-        # ARM startup delay
-        if not self._fifo:
-            time.sleep(1)
+        time.sleep(1)
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
@@ -143,8 +176,8 @@ class Main(tester.TestSequence):
         Unit is left unpowered.
 
         """
-        if not self._fifo:
-            self._armdev.open()
+        self._armdev.open()
+        self._arm_puts('\r\r\r', preflush=1)
         self._armdev.defaults()
         # Switch everything off
         d.dcs_5V.output(0.0, False)
@@ -183,20 +216,23 @@ class Main(tester.TestSequence):
         d.rla_12v2off.set_off()
         self.fifo_push(((s.o12V2, 12.12), ))
         m.dmm_12V2.measure(timeout=5)
-        # Read and log ARM data readings
+        # Unlock ARM
+        self._arm_puts('\r\r', preflush=1)
         self._armdev.unlock()
         # A little load so PFC voltage falls faster
         d.dcl_12V.output(1.0, output=True)
         d.dcl_24V.output(1.0, output=True)
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
-        self.fifo_push(((s.PFC, (432.0, 432.0,     # Initial reading
-                                  442.0, 442.0,     # After 1st cal
-                                  440.0, 440.0,     # 2nd reading
-                                  440.0, 440.0,     # Final reading
-                                  )), ))
-        _PFC_STABLE = 0.05
+        self.fifo_push(
+            ((s.PFC,
+              (432.0, 432.0,      # Initial reading
+               442.0, 442.0,      # After 1st cal
+               440.0, 440.0,      # 2nd reading
+               440.0, 440.0,      # Final reading
+               )), ))
         result, pfc = m.dmm_PFCpre.stable(_PFC_STABLE)
+        self._arm_puts('\r\r', preflush=1)
         self._armdev.cal_pfc(pfc)
         # Prevent a limit fail from failing the unit
         m.dmm_PFCpost1.testlimit[0].position_fail = False
@@ -205,6 +241,7 @@ class Main(tester.TestSequence):
         m.dmm_PFCpost1.testlimit[0].position_fail = True
         if not result:      # 1st retry
             self._logger.info('Retry1 PFC calibration')
+            self._arm_puts('\r\r', preflush=1)
             self._armdev.cal_pfc(pfc)
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost2.testlimit[0].position_fail = False
@@ -213,6 +250,7 @@ class Main(tester.TestSequence):
             m.dmm_PFCpost2.testlimit[0].position_fail = True
         if not result:      # 2nd retry
             self._logger.info('Retry2 PFC calibration')
+            self._arm_puts('\r\r', preflush=1)
             self._armdev.cal_pfc(pfc)
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost3.testlimit[0].position_fail = False
@@ -221,6 +259,7 @@ class Main(tester.TestSequence):
             m.dmm_PFCpost3.testlimit[0].position_fail = True
         if not result:      # 3rd retry
             self._logger.info('Retry3 PFC calibration')
+            self._arm_puts('\r\r', preflush=1)
             self._armdev.cal_pfc(pfc)
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost4.testlimit[0].position_fail = False
@@ -234,13 +273,15 @@ class Main(tester.TestSequence):
         d.dcl_24V.output(0.0)
         # Calibrate the 12V set voltage
         self._logger.info('Start 12V calibration')
-        self.fifo_push(((s.o12V, (12.34, 12.34,    # Initial reading
-                                   12.24, 12.24,     # After 1st cal
-                                   12.14, 12.14,     # 2nd reading
-                                   12.18, 12.18,     # Final reading
-                                   )), ))
-        _12V_STABLE = 0.005
+        self.fifo_push(
+            ((s.o12V,
+              (12.34, 12.34,     # Initial reading
+               12.24, 12.24,     # After 1st cal
+               12.14, 12.14,     # 2nd reading
+               12.18, 12.18,     # Final reading
+               )), ))
         result, v12 = m.dmm_12Vpre.stable(_12V_STABLE)
+        self._arm_puts('\r\r', preflush=1)
         self._armdev.cal_12v(v12)
         # Prevent a limit fail from failing the unit
         m.dmm_12Vset.testlimit[0].position_fail = False
@@ -250,15 +291,23 @@ class Main(tester.TestSequence):
         if not result:
             self._logger.info('Retry 12V calibration')
             result, v12 = m.dmm_12Vpre.stable(_12V_STABLE)
+            self._arm_puts('\r\r', preflush=1)
             self._armdev.cal_12v(v12)
             m.dmm_12Vset.stable(_12V_STABLE)
-        self.fifo_push(
-            ((s.ARM_AcDuty, 50.0), (s.ARM_AcPer, 50.0), (s.ARM_AcFreq, 50.0),
-             (s.ARM_AcVolt, 240.0), (s.ARM_PfcTrim, 50.0),
-             (s.ARM_12VTrim, 50.0), (s.ARM_5V, 5.05), (s.ARM_12V, 12.18),
-             (s.ARM_24V, 24.0), (s.ARM_5Vadc, 105.0), (s.ARM_12Vadc, 112.0),
-             (s.ARM_24Vadc, 124.0), (s.ARM_AcPer, 50.0),
-             (s.ARM_SwVer, ('1.4.645', )), ))
+        self._arm_puts(     # Console response strings
+            '50 %\r'        # ARM_AcDuty
+            '50000 ms\r'    # ARM_AcPer
+            '50 Hz\r'       # ARM_AcFreq
+            '240 Vrms\r'    # ARM_AcVolt
+            '50 %\r'        # ARM_PfcTrim
+            '50 %\r'        # ARM_12VTrim
+            '5050 mV\r'     # ARM_5V
+            '12180 mV\r'    # ARM_12V
+            '24000mV\r'     # ARM_24V
+            '105 Counts\r'  # ARM_5Vadc
+            '112 Counts\r'  # ARM_12Vadc
+            '124 Counts\r'  # ARM_24Vadc
+            '1.4\r645\r')   # ARM_SwVer
         MeasureGroup(
             (m.arm_AcDuty, m.arm_AcPer, m.arm_AcFreq, m.arm_AcVolt,
              m.arm_PfcTrim, m.arm_12VTrim, m.arm_5V, m.arm_12V, m.arm_24V,
