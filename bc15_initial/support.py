@@ -26,12 +26,14 @@ class LogicalDevices():
         self.dmm = dmm.DMM(devices['DMM'])
         self.acsource = acsource.ACSource(devices['ACS'])
         self.discharge = discharge.Discharge(devices['DIS'])
-        self.dcs_5Vs = dcsource.DCSource(devices['DCS1'])
-        self.dcs_out = dcsource.DCSource(devices['DCS2'])
-        self.dcs_outrev = dcsource.DCSource(devices['DCS3'])
+        self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
+        self.dcs_3v3 = dcsource.DCSource(devices['DCS2'])
+        self.dcs_out = dcsource.DCSource(devices['DCS3'])
+        self.dcs_outrev = dcsource.DCSource(devices['DCS4'])
         self.dcl = dcload.DCLoad(devices['DCL1'])
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
         self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
+        self.rla_outrev = relay.Relay(devices['RLA3'])    # ON == Asserted
 
     def error_check(self):
         """Check instruments for errors."""
@@ -41,9 +43,10 @@ class LogicalDevices():
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
         self.dcl.output(0.0, False)
-        for dcs in (self.dcs_5Vs, self.dcs_out, self.dcs_outrev):
+        for dcs in (self.dcs_vcom, self.dcs_3v3, self.dcs_out,
+                    self.dcs_outrev):
             dcs.output(0.0, output=False)
-        for rla in (self.rla_reset, self.rla_boot):
+        for rla in (self.rla_reset, self.rla_boot, self.rla_outrev):
             rla.set_off()
 
 
@@ -108,6 +111,7 @@ class Measurements():
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_fanon = Measurement(limits['FanOn'], sense.ofan)
         self.dmm_fanoff = Measurement(limits['FanOff'], sense.ofan)
+        self.dmm_15Vs = Measurement(limits['15Vs'], sense.o15Vs)
         self.dmm_vout = Measurement(limits['Vout'], sense.oVout)
         self.dmm_voutoff = Measurement(limits['VoutOff'], sense.oVout)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
@@ -125,3 +129,13 @@ class SubTests():
            @param logical_devices Logical instruments used
 
         """
+        # PowerUp: Apply 240Vac, measure.
+        acs1 = AcSubStep(
+            acs=d.acsource, voltage=240.0, output=True, delay=0.5)
+        msr1 = MeasureSubStep(
+            (m.dmm_acin, m.dmm_vbus, m.dmm_12Vs, m.dmm_3V3,
+              m.dmm_15Vs, m.dmm_voutoff, ), timeout=5)
+        dcs1 = DcSubStep(setting=((d.dcs_out, 13.0), ), output=True)
+        msr2 = MeasureSubStep(
+            (m.dmm_vout, ), timeout=5)
+        self.pwr_up = Step((acs1, msr1, dcs1, msr2, ))

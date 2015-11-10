@@ -107,15 +107,19 @@ class Main(tester.TestSequence):
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
         self.fifo_push(
-            ((s.olock, 0.0), (s.ofanshort, 99999.0), ))
+            ((s.olock, 0.0), (s.ofanshort, 3300.0), ))
         MeasureGroup((m.dmm_lock, m.dmm_fanshort, ), timeout=5)
 
     def _step_program_arm(self):
         """Program the ARM device.
 
-        Device is powered by injected Battery voltage.
+        3V3 is injected to power the ARM for programming.
 
         """
+        # Apply and check injected rail
+        d.dcs_3v3.output(9.0, True)
+        self.fifo_push(((s.o3V3, 3.3), ))
+        m.dmm_3V3.measure(timeout=5)
         # Set BOOT active before RESET so the ARM boot-loader runs
         d.rla_boot.set_on()
         d.rla_reset.pulse(0.1)
@@ -140,6 +144,7 @@ class Main(tester.TestSequence):
         m.pgmARM.measure()
         # Remove BOOT signal from ARM
         d.rla_boot.set_off()
+        d.dcs_3v3.output(0.0)
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
@@ -148,6 +153,7 @@ class Main(tester.TestSequence):
         Write Non-Volatile memory defaults.
 
         """
+        d.dcs_3v3.output(9.0, True)
         d.rla_reset.pulse(0.1)
         time.sleep(1)
         self._bc15_puts(
@@ -175,7 +181,10 @@ class Main(tester.TestSequence):
         self._bc15.open()
         self._bc15.defaults()
         m.arm_SwVer.measure()
+        d.dcs_3v3.output(0.0, False)
 
     def _step_powerup(self):
-        """Power up the Unit with 240Vac."""
-        self.fifo_push(((s.oACin, 240.0), (s.oVout, 12.0), ))
+        """Power up the Unit with 240Vac and measure voltages."""
+        self.fifo_push(((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
+                         (s.o3V3, 3.3), (s.oVout, (2.9, 12.0)),  ))
+        t.pwr_up.run()
