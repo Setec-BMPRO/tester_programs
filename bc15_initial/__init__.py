@@ -186,5 +186,6 @@ class Main(tester.TestSequence):
     def _step_powerup(self):
         """Power up the Unit with 240Vac and measure voltages."""
         self.fifo_push(((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
-                         (s.o3V3, 3.3), (s.oVout, (2.9, 12.0)),  ))
+                         (s.o3V3, 3.3), (s.o15Vs, 15.0),
+                         (s.oVout, (2.7, 15.0)),  ))
         t.pwr_up.run()

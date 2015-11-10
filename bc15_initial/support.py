@@ -76,7 +76,8 @@ class Sensors():
         self.o5Vs = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
         self.o3V3 = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.001)
         self.ofan = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
-        self.oVout = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
+        self.o15Vs = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
+        self.oVout = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
@@ -129,6 +130,8 @@ class SubTests():
            @param logical_devices Logical instruments used
 
         """
+        d = logical_devices
+        m = measurements
         # PowerUp: Apply 240Vac, measure.
         acs1 = AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
