@@ -87,6 +87,9 @@ class ConsoleGen2():
         @return Reading value.
 
         """
+        if key == 'SwVer':
+            return self.version()
+# FIXME: Check value type & return a Reading object
         return self.stat_data[key]
 
     def __setitem__(self, key, value):

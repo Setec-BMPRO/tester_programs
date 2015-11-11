@@ -94,9 +94,11 @@ class ProgramARM(_Programmer):
 
         hexfile: Full pathname of HEX file
         working_dir: Working directory.
-        device_type: PIC device type (eg: '10F320')
         sensor: Mirror sensor to store result (0=success, 1=failed)
         port: Serial port
+        baud: Baud rate
+        khz: Processor clock
+        wipe: Force erase of a protected device
         fifo: True if FIFO's are being used
 
         """

@@ -137,7 +137,8 @@ class SubTests():
         msr1 = MeasureSubStep(
             (m.dmm_acin, m.dmm_vbus, m.dmm_12Vs, m.dmm_3V3,
               m.dmm_15Vs, m.dmm_voutoff, ), timeout=5)
-        dcs1 = DcSubStep(setting=((d.dcs_out, 13.0), ), output=True)
-        msr2 = MeasureSubStep(
-            (m.dmm_vout, ), timeout=5)
-        self.pwr_up = Step((acs1, msr1, dcs1, msr2, ))
+#        dcs1 = DcSubStep(setting=((d.dcs_out, 13.0), ), output=True)
+#        msr2 = MeasureSubStep(
+#            (m.dmm_vout, ), timeout=5)
+#        self.pwr_up = Step((acs1, msr1, dcs1, msr2, ))
+        self.pwr_up = Step((acs1, msr1, ))

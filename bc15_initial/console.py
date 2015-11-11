@@ -23,3 +23,16 @@ class Console(share.console.ConsoleGen2):
         self.cmd_data = {
             'SwVer': ParameterRaw('', func=self.version),
             }
+
+    def ps_mode(self):
+        """Set the unit into Power Supply mode."""
+        self.action('0 MAINLOOP')
+        self.action('STOP')
+        self.action('15000 SETMA')
+        self.action('14400 SETMV')
+        self.action('0 0 PULSE')
+        self.action('RESETOVERVOLT')
+        self.action('1 SETDCDCEN')
+        self.action('1 SETPSON')
+        self.action('1 SETDCDCOUT')
+        self.action('0 SETPSON', delay=0.5)

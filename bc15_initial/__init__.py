@@ -136,7 +136,7 @@ class Main(tester.TestSequence):
             ser = SimSerial(port=_ARM_PORT, baudrate=115200)
             # Program the device
             pgm = share.isplpc.Programmer(
-                ser, bindata, erase_only=False, verify=True, crpmode=False)
+                ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:
                 pgm.program()
                 s.oMirARM.store(0)
@@ -178,7 +178,7 @@ class Main(tester.TestSequence):
             'OK\r\n'                            # UNLOCK response
             'OK\r\n'                            # NV-DEFAULT response
             'OK\r\n'                            # NV-WRITE response
-            '1.0.11778.1231\r\nOK\r\n',         # SwVer response
+            '1.0.11778.1230\r\nOK\r\n',         # SwVer response
             preflush=1)
         self._bc15.open()
         self._bc15.defaults()
@@ -191,3 +191,5 @@ class Main(tester.TestSequence):
             ((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
              (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, (0.2, 15.0)), ))
         t.pwr_up.run()
+        self._bc15_puts('OK\r\n' * 10)
+        self._bc15.ps_mode()
