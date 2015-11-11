@@ -29,7 +29,6 @@ class LogicalDevices():
         self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
         self.dcs_3v3 = dcsource.DCSource(devices['DCS2'])
         self.dcs_out = dcsource.DCSource(devices['DCS3'])
-        self.dcs_outrev = dcsource.DCSource(devices['DCS4'])
         self.dcl = dcload.DCLoad(devices['DCL1'])
         self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
         self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
