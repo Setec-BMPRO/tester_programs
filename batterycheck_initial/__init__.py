@@ -49,8 +49,8 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PreProgram', self._step_pre_program, None, True),
-            ('ProgramAVR', self._step_program_avr, None, True),
-            ('ProgramARM', self._step_program_arm, None, True),
+            ('ProgramAVR', self._step_program_avr, None, not fifo),
+            ('ProgramARM', self._step_program_arm, None, not fifo),
             ('InitialiseARM', self._step_initialise_arm, None, True),
             ('TestARM', self._step_test_arm, None, True),
             ('TestBlueTooth', self._step_test_bluetooth, None, True),
@@ -73,16 +73,15 @@ class Main(tester.TestSequence):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         if not self._fifo:
             self._armdev = arm.Console()
-        global d
+        global d, s, m
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._armdev)
-        global m
         m = support.Measurements(s, self._limits)
         self._logger.debug('Starting bluetooth server')
         try:
             self._btserver = subprocess.Popen(
-                [_PYTHON27, '../share/btserver.py'], cwd=self._folder)
+                [_PYTHON27, '../share/bluetooth/btserver.py'],
+                cwd=self._folder)
             self.btserver = jsonrpclib.Server('http://localhost:8888/')
         except FileNotFoundError:
             pass
@@ -93,12 +92,8 @@ class Main(tester.TestSequence):
         self._logger.info('Close')
         if not self._fifo:
             self._armdev.close()
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
+        global m, d, s
+        m = d = s = None
         if not self._fifo:
             self._logger.debug('Stopping bluetooth server')
             self.btserver.stop()
@@ -138,28 +133,25 @@ class Main(tester.TestSequence):
     def _step_program_avr(self):
         """Program the AVR ATtiny10 device."""
         d.rla_avr.set_on()
-        if self._fifo:
+        # Wait for the programmer to 'see' the 5V power
+        time.sleep(2)
+        avr_cmd = [
+            _AVRDUDE,
+            '-P', 'usb',
+            '-p', 't10',
+            '-c', 'avrisp2',
+            '-U', 'flash:w:' + _AVR_HEX,
+            '-U', 'fuse:w:0xfe:m',
+            ]
+        try:
+            console = subprocess.check_output(avr_cmd, cwd=self._folder)
             result = 0
-        else:
-            # Wait for the programmer to 'see' the 5V power
-            time.sleep(2)
-            avr_cmd = [
-                _AVRDUDE,
-                '-P', 'usb',
-                '-p', 't10',
-                '-c', 'avrisp2',
-                '-U', 'flash:w:' + _AVR_HEX,
-                '-U', 'fuse:w:0xfe:m',
-                ]
-            try:
-                console = subprocess.check_output(avr_cmd, cwd=self._folder)
-                result = 0
-                self._logger.debug(console)
-            except subprocess.CalledProcessError:
-                err_msg = '{} {}'.format(
-                    sys.exc_info()[0], sys.exc_info()[1])
-                result = 1
-                self._logger.warning(err_msg)
+            self._logger.debug(console)
+        except subprocess.CalledProcessError:
+            err_msg = '{} {}'.format(
+                sys.exc_info()[0], sys.exc_info()[1])
+            result = 1
+            self._logger.warning(err_msg)
         d.rla_avr.set_off()
         s.oMirAVR.store(result)
         m.pgmAVR.measure()
