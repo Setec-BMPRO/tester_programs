@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-10, 17:38:53 -->
+<!-- Saved: 2015-11-13, 13:08:35 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -259,7 +259,6 @@
     <Other>c45a15_initial/c45a-15.hex</Other>
     <Other>drifter_initial/Drifter-5.hex</Other>
     <Other>etracII_initial/etracII-2A.hex</Other>
-    <Other>gen8_initial/gen8_1.4.645.hex</Other>
     <Other>spa_multi/MFDrgb_V103.hex</Other>
     <Other>spa_multi/MFDtri_V103.hex</Other>
     <Other>sx750_initial/sx750_arm_3.1.2118.hex</Other>

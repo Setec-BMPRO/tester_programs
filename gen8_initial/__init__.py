@@ -7,9 +7,8 @@ import time
 import logging
 
 import tester
-import share.programmer
 from share.sim_serial import SimSerial
-#from share.isplpc import Programmer, ProgrammingError
+from share.isplpc import Programmer, ProgrammingError
 import share.console
 from . import support
 from . import limit
@@ -24,8 +23,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0',
              'nt': r'\\.\COM6',
              }[os.name]
 # Software image filename
-_ARM_HEX = 'gen8_1.4.645.hex'
-#_ARM_BIN = 'gen8_1.4.645.bin'
+_ARM_BIN = 'gen8_1.4.645.bin'
 # Reading to reading difference for PFC voltage stability
 _PFC_STABLE = 0.05
 # Reading to reading difference for 12V voltage stability
@@ -135,32 +133,21 @@ class Main(tester.TestSequence):
         MeasureGroup((m.dmm_5V, m.dmm_3V3, ), timeout=2)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-
-# <====> START Old Programmer
-        arm = share.programmer.ProgramARM(
-            _ARM_HEX, folder, s.oMirARM, _ARM_PORT)
-        arm.read()
-# <====> END Old Programmer
-
-# <====> START New Programmer
-#        file = os.path.join(folder, _ARM_BIN)
-#        with open(file, 'rb') as infile:
-#            bindata = bytearray(infile.read())
-#        self._logger.debug('Read %d bytes from %s', len(bindata), file)
-#        try:
-#            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-#            # Program the device
-#            pgm = Programmer(
-#                ser, bindata, erase_only=False, verify=True, crpmode=False)
-#            try:
-#                pgm.program()
-#                s.oMirARM.store(0)
-#            except ProgrammingError:
-#                s.oMirARM.store(1)
-#        finally:
-#            ser.close()
-# <====> END New Programmer
-
+        file = os.path.join(folder, _ARM_BIN)
+        with open(file, 'rb') as infile:
+            bindata = bytearray(infile.read())
+        self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        try:
+            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
+            pgm = Programmer(
+                ser, bindata, erase_only=False, verify=False, crpmode=None)
+            try:
+                pgm.program()
+                s.oMirARM.store(0)
+            except ProgrammingError:
+                s.oMirARM.store(1)
+        finally:
+            ser.close()
         m.pgmARM.measure()
         # Remove BOOT, reset micro, wait for ARM startup
         d.rla_boot.set_off()

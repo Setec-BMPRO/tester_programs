@@ -189,7 +189,7 @@ class ConsoleGen0():
         reply = self._readline()
         if reply is None:
             self._logger.debug('Timeout after %s', command)
-            self._limit.check(True)
+            self._limit.check(True, position=1)
         return reply
 
     def _readline(self):
@@ -211,7 +211,7 @@ class ConsoleGen0():
                 line = None
                 break
         self._logger.debug('Decode line: %s', repr(line))
-        return line.decode()
+        return line if line is None else line.decode(errors='ignore')
 
     def _writeline(self, line):
         """Write a _EOL terminated line to the ARM."""
