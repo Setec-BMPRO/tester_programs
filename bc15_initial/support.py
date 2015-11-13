@@ -42,8 +42,7 @@ class LogicalDevices():
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
         self.dcl.output(0.0, False)
-        for dcs in (self.dcs_vcom, self.dcs_3v3, self.dcs_out,
-                    self.dcs_outrev):
+        for dcs in (self.dcs_vcom, self.dcs_3v3, self.dcs_out):
             dcs.output(0.0, output=False)
         for rla in (self.rla_reset, self.rla_boot, self.rla_outrev):
             rla.set_off()

@@ -82,6 +82,31 @@ class Main(tester.TestSequence):
         if self._fifo:
             self._bc15.puts(string_data, preflush, postflush, priority)
 
+    def _bc15_putstartup(self):
+        """Push startup banner strings into fake serial port."""
+        self._bc15_puts(
+            'BC15\r\n'                          # BEGIN Startup messages
+            'Build date:       06/11/2015\r\n'
+            'Build time:       15:31:40\r\n'
+            'SystemCoreClock:  48000000\r\n'
+            'Software version: 1.0.11705.1203\r\n'
+            'nonvol: reading crc invalid at sector 14 offset 0\r\n'
+            'nonvol: reading nonvol2 OK at sector 15 offset 2304\r\n'
+            'Hardware version: 0.0.[00]\r\n'
+            'Serial number:    A9999999999\r\n'
+            'Please type help command.\r\n'
+            '> '                                # END Startup messages
+            '"OK\\n PROMPT\r\n'                 # 1st command echo
+            'OK\r\n'                            # and it's response
+            '0 ECHO\r\nOK\r\n'                  # ECHO command echo
+            'OK\r\n')                           # and it's response
+        self._bc15_puts(
+            'OK\r\n'                            # UNLOCK response
+            'OK\r\n'                            # NV-DEFAULT response
+            'OK\r\n'                            # NV-WRITE response
+            '1.0.11778.1230\r\nOK\r\n',         # SwVer response
+            preflush=1)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
@@ -107,8 +132,7 @@ class Main(tester.TestSequence):
 
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
-        self.fifo_push(
-            ((s.olock, 0.0), (s.ofanshort, 3300.0), ))
+        self.fifo_push(((s.olock, 0.0), (s.ofanshort, 3300.0), ))
         MeasureGroup((m.dmm_lock, m.dmm_fanshort, ), timeout=5)
 
     def _step_program_arm(self):
@@ -151,45 +175,28 @@ class Main(tester.TestSequence):
     def _step_initialise_arm(self):
         """Initialise the ARM device.
 
-        Device is powered by injected Battery voltage.
+        Device is powered by injected voltage.
         Write Non-Volatile memory defaults.
 
         """
         d.dcs_3v3.output(9.0, True)
         d.rla_reset.pulse(0.1)
         time.sleep(0.5)
-        self._bc15_puts(
-            'BC15\r\n'                          # BEGIN Startup messages
-            'Build date:       06/11/2015\r\n'
-            'Build time:       15:31:40\r\n'
-            'SystemCoreClock:  48000000\r\n'
-            'Software version: 1.0.11705.1203\r\n'
-            'nonvol: reading crc invalid at sector 14 offset 0\r\n'
-            'nonvol: reading nonvol2 OK at sector 15 offset 2304\r\n'
-            'Hardware version: 0.0.[00]\r\n'
-            'Serial number:    A9999999999\r\n'
-            'Please type help command.\r\n'
-            '> '                                # END Startup messages
-            '"OK\\n PROMPT\r\n'                 # 1st command echo
-            'OK\r\n'                            # and it's response
-            '0 ECHO\r\nOK\r\n'                  # ECHO command echo
-            'OK\r\n')                           # and it's response
-        self._bc15_puts(
-            'OK\r\n'                            # UNLOCK response
-            'OK\r\n'                            # NV-DEFAULT response
-            'OK\r\n'                            # NV-WRITE response
-            '1.0.11778.1230\r\nOK\r\n',         # SwVer response
-            preflush=1)
+        self._bc15_putstartup()
         self._bc15.open()
         self._bc15.defaults()
         m.arm_SwVer.measure()
+        self._bc15.close()
         d.dcs_3v3.output(0.0, False)
 
     def _step_powerup(self):
-        """Power up the Unit with 240Vac and measure voltages."""
+        """Power up the Unit with 240Vac and go to Power Supply mode."""
         self.fifo_push(
             ((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
              (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, (0.2, 15.0)), ))
         t.pwr_up.run()
+        self._bc15_putstartup()
+        self._bc15.open()
         self._bc15_puts('OK\r\n' * 10)
         self._bc15.ps_mode()
+        m.dmm_vout.measure()

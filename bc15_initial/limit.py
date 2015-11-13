@@ -12,7 +12,7 @@ DATA = (
     ('FanOn', 0, 0.5, None, None, None),
     ('FanOff', 0, None, 11.0, None, None),
     ('15Vs', 0, 14.5, 16.5, None, None),
-    ('Vout', 0, 14.5, 15.5, None, None),
+    ('Vout', 0, 14.3, 14.5, None, None),
     ('VoutOff', 0, 2.0, None, None, None),
     ('OCP', 0, 32.0, 35.1, None, None),
     ('InOCP', 0, 11.6, None, None, None),
