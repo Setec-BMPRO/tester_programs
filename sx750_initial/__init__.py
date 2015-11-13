@@ -5,11 +5,12 @@ import os
 import inspect
 import time
 import logging
+import threading
 
 import tester
 import share.programmer
 from share.sim_serial import SimSerial
-#from share.isplpc import Programmer, ProgrammingError
+from share.isplpc import Programmer, ProgrammingError
 import share.console
 from . import support
 from . import limit
@@ -19,12 +20,9 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt': r'\\.\COM1',
-             }[os.name]
+_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': r'\\.\COM1'}[os.name]
 # Software image filenames
-_ARM_HEX = 'sx750_arm_3.1.2118.hex'
-#_ARM_BIN = 'sx750_arm_3.1.2118.bin'
+_ARM_BIN = 'sx750_arm_3.1.2118.bin'
 _PIC_HEX = 'sx750_pic_2.hex'
 # Reading to reading difference for PFC voltage stability
 _PFC_STABLE = 0.05
@@ -70,22 +68,16 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits, self._armdev)
-        global m
         m = support.Measurements(s, self._limits)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
+        global m, d, s
+        m = d = s = None
         super().close()
 
     def safety(self):
@@ -145,12 +137,6 @@ class Main(tester.TestSequence):
         MeasureGroup((m.dmm_PriCtl, m.dmm_5Vsb, m.dmm_3V3), 2)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-
-# <====> START Old Programmer
-        # Start the ARM programmer (takes about 6 sec)
-        self._logger.info('Start ARM programmer')
-        arm = share.programmer.ProgramARM(
-            _ARM_HEX, folder, s.oMirARM, _ARM_PORT)
         # Start the PIC programmer (takes about 6 sec)
         self._logger.info('Start PIC programmer')
         d.rla_pic.set_on()
@@ -159,45 +145,28 @@ class Main(tester.TestSequence):
         # While programming, we also set OCP adjust to maximum.
         # (takes about 6 sec)
         self._logger.info('Reset digital pots')
-        d.ocp_pot.set_maximum()
+        pot_worker = threading.Thread(
+            target=self._pot_worker, name='PotReset')
+        pot_worker.start()
+        self._logger.info('Program ARM')
+        file = os.path.join(folder, _ARM_BIN)
+        with open(file, 'rb') as infile:
+            bindata = bytearray(infile.read())
+        self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        try:
+            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
+            pgm = Programmer(
+                ser, bindata, erase_only=False, verify=False, crpmode=None)
+            try:
+                pgm.program()
+                s.oMirARM.store(0)
+            except ProgrammingError:
+                s.oMirARM.store(1)
+        finally:
+            ser.close()
         # Wait for programming completion & read results
-        arm.read()
+        pot_worker.join()
         pic.read()
-# <====> END Old Programmer
-
-# <====> START New Programmer
-#        # Start the PIC programmer (takes about 6 sec)
-#        self._logger.info('Start PIC programmer')
-#        d.rla_pic.set_on()
-#        pic = share.programmer.ProgramPIC(
-#            _PIC_HEX, folder, '10F320', s.oMirPIC)
-#        # While programming, we also set OCP adjust to maximum.
-#        # (takes about 6 sec)
-#        self._logger.info('Reset digital pots')
-#        pot_worker = threading.Thread(target=self._pot_worker)
-#        pot_worker.start()
-#        self._logger.info('Program ARM')
-#        file = os.path.join(folder, _ARM_BIN)
-#        with open(file, 'rb') as infile:
-#            bindata = bytearray(infile.read())
-#        self._logger.debug('Read %d bytes from %s', len(bindata), file)
-#        try:
-#            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-#            # Program the device
-#            pgm = Programmer(
-#                ser, bindata, erase_only=False, verify=True, crpmode=False)
-#            try:
-#                pgm.program()
-#                s.oMirARM.store(0)
-#            except ProgrammingError:
-#                s.oMirARM.store(1)
-#        finally:
-#            ser.close()
-#        # Wait for programming completion & read results
-#        pot_worker.join()
-#        pic.read()
-# <====> END New Programmer
-
         d.rla_pic.set_off()
         # 'Measure' the mirror sensors to check and log data
         MeasureGroup((m.pgmARM, m.pgmPIC))

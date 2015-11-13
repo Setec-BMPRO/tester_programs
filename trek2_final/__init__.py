@@ -84,9 +84,9 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
+        global d, s, m
         # Switch off the USB hub & Serial ports
         d.dcs_Vcom.output(0.0, output=False)
-        global d, s, m
         m = None
         d = None
         s = None

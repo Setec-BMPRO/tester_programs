@@ -82,12 +82,12 @@ class Sensors():
         self.ACFAIL = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
         self.ACin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
-        self.Lock = sensor.Res(dmm, high=12, low=4, rng=1000, res=0.01)
-        self.Part = sensor.Res(dmm, high=13, low=4, rng=1000, res=0.01)
-        self.R601 = sensor.Res(dmm, high=14, low=5, rng=10000, res=0.01)
-        self.R602 = sensor.Res(dmm, high=15, low=5, rng=10000, res=0.01)
-        self.R609 = sensor.Res(dmm, high=16, low=6, rng=10000, res=0.01)
-        self.R608 = sensor.Res(dmm, high=17, low=6, rng=10000, res=0.01)
+        self.Lock = sensor.Res(dmm, high=12, low=4, rng=1000, res=1)
+        self.Part = sensor.Res(dmm, high=13, low=4, rng=1000, res=1)
+        self.R601 = sensor.Res(dmm, high=14, low=5, rng=10000, res=1)
+        self.R602 = sensor.Res(dmm, high=15, low=5, rng=10000, res=1)
+        self.R609 = sensor.Res(dmm, high=16, low=6, rng=10000, res=1)
+        self.R608 = sensor.Res(dmm, high=17, low=6, rng=10000, res=1)
         self.OCP12V = sensor.Ramp(
             stimulus=d.dcl_12V, sensor=self.o12VinOCP,
             detect_limit=(limits['12V_inOCP'], ),
