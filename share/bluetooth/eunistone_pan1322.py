@@ -10,8 +10,6 @@ import time
 import re
 import json
 
-from .sim_serial import SimSerial
-
 
 # Command to escape from streaming data mode
 _ESCAPE = '^^^'
@@ -31,7 +29,6 @@ class BtRadio():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._port = port
-        self._serport = None
         self._mac = None
         self._pin = None
         self._sernum = None
@@ -45,11 +42,10 @@ class BtRadio():
 
         """
         self._logger.debug('Open')
-        self._serport = SimSerial(
-            port=self._port, baudrate=115200,
-            timeout=2, writeTimeout=10, rtscts=True)
+        self._port.setRtsCts(True)
+        self._port.open()
         time.sleep(1)
-        self._serport.flushInput()
+        self._port.flushInput()
         for retry in range(0, 5):
             try:
                 self._cmdresp('AT+JRES')    # reset
@@ -63,9 +59,8 @@ class BtRadio():
     def close(self):
         """Close serial communications with BT Radio."""
         self._logger.debug('Close')
-        self._serport.setRtsCts(False)   # so close() does not hang
-        self._serport.close()
-        self._serport = None
+        self._port.setRtsCts(False)   # so close() does not hang
+        self._port.close()
 
     def _log(self, message):
         """Helper method to Log messages."""
@@ -73,12 +68,12 @@ class BtRadio():
 
     def _readline(self):
         """Read a line from the port and decode to a string."""
-        line = self._serport.readline().decode(errors='ignore')
+        line = self._port.readline().decode(errors='ignore')
         return line.replace('\r\n', '')
 
     def _write(self, data):
         """Encode data and write to the port."""
-        self._serport.write(data.encode())
+        self._port.write(data.encode())
 
     def _cmdresp(self, cmd):
         """Send a command to the modem and process the response.
@@ -86,17 +81,17 @@ class BtRadio():
         @raises BtError upon error.
 
         """
-        self._serport.flushInput()
+        self._port.flushInput()
         if cmd == _ESCAPE:
             time.sleep(1)       # need long guard time before first letter
             for _ in range(0, 3):
                 time.sleep(0.2) # need short guard time between letters
                 self._write('^')
         else:
-            self._log('--> {}'.format(cmd))
+            self._log('--> {!r}'.format(cmd))
             self._write(cmd + '\r\n')
         line = self._readline()
-        self._log('<-- {}'.format(line))
+        self._log('<-- {!r}'.format(line))
         # Request for firmware version returns only simple integer
         if cmd == 'AT+JRRI':
             if not re.search('^[0-9]+$', line):
@@ -133,6 +128,7 @@ class BtRadio():
         for retry in range(0, max_try):
             try:
                 self._cmdresp('AT+JDDS=0')  # start device scan
+                break
             except BtError:
                 continue
         if retry == max_try - 1:
@@ -140,7 +136,7 @@ class BtRadio():
         # Read responses until completed.
         for retry in range(0, 20):
             line = self._readline()
-            self._log('<--- {}'.format(line))
+            self._log('<--- {!r}'.format(line))
             if len(line) == 0:
                 continue
             if line == '+RDDSCNF=0':   # no more responses
@@ -166,7 +162,7 @@ class BtRadio():
         self._cmdresp('AT+JCCR=' + self._mac + ',01')
         for retry in range(0, 10):
             line = self._readline()
-            self._log('<--- {}'.format(line))
+            self._log('<--- {!r}'.format(line))
             if len(line) == 0:
                 continue
             # Device we are pairing to has asked for a pin code
@@ -179,7 +175,7 @@ class BtRadio():
                 self._log('Sending confirmation')
                 self._cmdresp('AT+JUCR=1')
                 continue
-            # Example of good pairing response: '+RCCRCNF=500,0000,0\r\n'
+            # Example of good pairing response: '+RCCRCNF=500,0000,0'
             # The first 500 is MTU and is 000 on error.
             # The ',0' on the end means good status and ',1' would be an error.
             if line[:9] == '+RCCRCNF=':
@@ -193,6 +189,7 @@ class BtRadio():
                 mtu = int(data[0])
                 if mtu == 500:
                     self._log('Now Paired, MTU {} bytes.'.format(mtu))
+                    return
                 self._log('Pairing failed.')
                 continue
         raise BtError('Unable to pair with device')
@@ -210,7 +207,7 @@ class BtRadio():
             line = self._readline()
             if len(line) == 0:
                 continue
-            self._log('<--- {}'.format(line))
+            self._log('<--- {!r}'.format(line))
             if line == '+RDII':    # good unpairing response
                 self._log('Now Un-Paired.')
                 return
@@ -250,11 +247,11 @@ class BtRadio():
             raise BtError('JSON-RPC requires streaming data mode')
         request = {
             'jsonrpc': '2.0', 'id': 8256,
-            'method': method, 'params': params, 'id': 8256}
+            'method': method, 'params': params}
         cmd = json.dumps(request)
-        self._log('JSONRPC request: %s', cmd)
-        self._serport.flushInput()
+        self._log('JSONRPC request: {!r}'.format(cmd))
+        self._port.flushInput()
         self._write(cmd + '\r')
         response = self._readline()
-        self._log('Readline:{}'.format(response))
+        self._log('<--- {!r}'.format(response))
         return json.loads(response)['result']
