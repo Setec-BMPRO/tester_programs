@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-13, 20:30:02 -->
+<!-- Saved: 2015-11-14, 18:05:28 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -248,10 +248,10 @@
     <Source>share/console/test/__init__.py</Source>
     <Source>share/__init__.py</Source>
     <Source>testsuite.py</Source>
-    <Source>share/bluetooth/btserver.py</Source>
     <Source>share/bluetooth/__init__.py</Source>
-    <Source>share/bluetooth/bcheck.py</Source>
     <Source>share/bluetooth/pictail_rn4020.py</Source>
+    <Source>share/bluetooth/jsonrpc_server.py</Source>
+    <Source>share/bluetooth/eunistone_pan1322.py</Source>
   </Sources>
   <Forms/>
   <Translations/>

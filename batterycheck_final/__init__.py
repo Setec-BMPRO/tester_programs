@@ -5,7 +5,7 @@ import os
 import logging
 
 import tester
-from share.bluetooth import BtCheck
+from share.bluetooth import BtRadio
 
 from . import support
 from . import limit
@@ -46,7 +46,7 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._bt = BtCheck(port=_BT_PORT)
+        self._bt = BtRadio(port=_BT_PORT)
         global d, s, m, t
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d)
@@ -56,13 +56,13 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._bt.btclose()
         global m, d, s, t
         m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._bt.close()
         # Reset Logical Devices
         d.reset()
 
@@ -100,23 +100,27 @@ class Main(tester.TestSequence):
             m.SerNumARM.measure()
             m.SwVerARM.measure()
         else:
-            self._bt.btopen()
             try:
-                _matched = self._bt.btscan(self._sernum)
-                s.oMirBT.store(_matched)
+                self._bt.open()
+                self._bt.scan(self._sernum)
+                s.oMirBT.store(True)
                 m.BTscan.measure()
-                _paired = self._bt.btpair()
+                self._bt.pair()
+                _paired = True
                 s.oMirBT.store(_paired)
                 m.BTpair.measure()
-                self._bt.btcon()
-                _info = self._bt.btinfo()
-                s.oMirBT.store(_info['SerialID'] == self._sernum)
-                m.SerNumARM.measure()
+                self._bt.data_mode_enter()
+                _info = self._bt.jsonrpc('GetSystemInfo')
+                # Typical response:
+                # { "HardwareVersion":"2.0", "SoftwareVersion":"1.3.3190",
+                #   "SerialID":"A1415030099"}
                 s.oMirSwVer.store((_info['SoftwareVersion'], ))
                 m.SwVerARM.measure()
+                s.oMirBT.store(_info['SerialID'] == self._sernum)
+                m.SerNumARM.measure()
             except Exception as err:
                 self._logger.debug('Exception raised: %s', repr(err))
             finally:
                 if _paired:
-                    self._bt.btesc()
-                    self._bt.btunpair()
+                    self._bt.data_mode_escape()
+                    self._bt.unpair()

@@ -43,8 +43,8 @@ def _logging_setup():
     hdlr = logging.StreamHandler()
     hdlr.setLevel(_CONSOLE_LOG_LEVEL)
     # create SMTP handler and set level
-    smtp_hdlr = logging.handlers.SMTPHandler(_EMAIL_SERVER, _EMAIL_FROM,
-                                             _EMAIL_TO, _EMAIL_SUBJECT)
+    smtp_hdlr = logging.handlers.SMTPHandler(
+        _EMAIL_SERVER, _EMAIL_FROM, _EMAIL_TO, _EMAIL_SUBJECT)
     smtp_hdlr.setLevel(logging.ERROR)
     # Log record formatter
     fmtr = logging.Formatter(_LOG_FORMAT)
@@ -111,8 +111,8 @@ class MyServer():
 
         """
         self._logger.debug('scan() called')
-        nearby_devices = bluetooth.discover_devices(flush_cache=True,
-                                                    lookup_names=True)
+        nearby_devices = bluetooth.discover_devices(
+            flush_cache=True, lookup_names=True)
         self._logger.debug('Scan results: %s', repr(nearby_devices))
         return nearby_devices
 
@@ -141,8 +141,8 @@ if __name__ == '__main__':
         logger.info('Creating server')
         myserver = MyServer(myevent)
         logger.info('Starting server')
-        mythread = threading.Thread(target=myserver.runner,
-                                    name='ServerThread')
+        mythread = threading.Thread(
+            target=myserver.runner, name='ServerThread')
         mythread.start()
         logger.info('Waiting for shutdown event')
         myevent.wait()

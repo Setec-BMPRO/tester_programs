@@ -10,9 +10,9 @@ import logging
 import jsonrpclib
 
 import tester
+import share.programmer
 from . import support
 from . import limit
-import share.programmer
 from . import arm
 
 MeasureGroup = tester.measure.group
@@ -22,9 +22,7 @@ LIMIT_DATA = limit.DATA
 _SHUNT_SCALE = 0.08     # Ishunt * this = DC Source voltage
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0',
-             'nt': r'\\.\COM2',
-             }[os.name]
+_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': r'\\.\COM2'}[os.name]
 
 _AVRDUDE = r'C:\Program Files\AVRdude\avrdude.exe'
 _AVR_HEX = 'BatteryCheckSupervisor-2.hex'
@@ -80,7 +78,7 @@ class Main(tester.TestSequence):
         self._logger.debug('Starting bluetooth server')
         try:
             self._btserver = subprocess.Popen(
-                [_PYTHON27, '../share/bluetooth/btserver.py'],
+                [_PYTHON27, '../share/bluetooth/jsonrpc_server.py'],
                 cwd=self._folder)
             self.btserver = jsonrpclib.Server('http://localhost:8888/')
         except FileNotFoundError:
@@ -124,8 +122,9 @@ class Main(tester.TestSequence):
         d.rla_reset.set_on()
         # Apply and check supply rails
         d.dcs_input.output(15.0, output=True)
-        self.fifo_push(((s.oSnEntry, ('A1429050001', )), (s.reg5V, 5.10),
-                        (s.reg12V, 12.00), (s.o3V3, 3.30), ))
+        self.fifo_push(
+            ((s.oSnEntry, ('A1429050001', )), (s.reg5V, 5.10),
+             (s.reg12V, 12.00), (s.o3V3, 3.30), ))
         result, sernum = m.ui_SnEntry.measure()
         self._sernum = sernum[0]
         tester.measure.group((m.dmm_reg5V, m.dmm_reg12V, m.dmm_3V3), 2)
@@ -171,7 +170,7 @@ class Main(tester.TestSequence):
         d.rla_boot.set_on()
         d.rla_reset.set_off()
         self._logger.debug('Wait for AVR to bootload ARM...')
-        time.sleep(6.5 if not self._fifo else 0.1)
+        time.sleep(6.5)
         d.rla_boot.set_off()
         # Connect ARM programming port
         d.rla_arm.set_on()
@@ -185,7 +184,7 @@ class Main(tester.TestSequence):
     def _step_initialise_arm(self):
         """Initialise the ARM device."""
         d.rla_reset.pulse_on(0.1)
-        time.sleep(2.0 if not self._fifo else 0.1)  # ARM startup delay
+        time.sleep(2.0)  # ARM startup delay
         if self._fifo:
             self._btmac = '11:22:33:44:55:66'
         else:
@@ -202,7 +201,7 @@ class Main(tester.TestSequence):
 
         """
         d.dcs_shunt.output(62.5 * _SHUNT_SCALE, True)
-        time.sleep(1.5 if not self._fifo else 0.1)  # ARM rdgs settle
+        time.sleep(1.5)  # ARM rdgs settle
         self.fifo_push(((s.shunt, 62.5 / 1250), (s.ARMcurr, -62.0), ))
         batt_curr, curr_ARM = MeasureGroup(
             (m.dmm_shunt, m.currARM), timeout=5)[1]
