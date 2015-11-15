@@ -7,7 +7,7 @@ import unittest
 # This is the overall project top level folder
 _TOP_LEVEL_DIR = None
 # Discover test files in this relative path
-_START_DIR = 'share'
+_START_DIR = 'programs.share'
 
 # Test files must match this pattern
 _TEST_PATTERN = 'test_*.py'
