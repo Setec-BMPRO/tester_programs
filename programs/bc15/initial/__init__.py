@@ -49,6 +49,7 @@ class Main(tester.TestSequence):
             ('ProgramARM', self._step_program_arm, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
+            ('Output', self._step_output, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -83,7 +84,7 @@ class Main(tester.TestSequence):
         if self._fifo:
             self._bc15.puts(string_data, preflush, postflush, priority)
 
-    def _bc15_putstartup(self):
+    def _bc15_putstartup(self, put_defaults):
         """Push startup banner strings into fake serial port."""
         self._bc15_puts(
             'BC15\r\n'                          # BEGIN Startup messages
@@ -101,12 +102,13 @@ class Main(tester.TestSequence):
             'OK\r\n'                            # and it's response
             '0 ECHO\r\nOK\r\n'                  # ECHO command echo
             'OK\r\n')                           # and it's response
-        self._bc15_puts(
-            'OK\r\n'                            # UNLOCK response
-            'OK\r\n'                            # NV-DEFAULT response
-            'OK\r\n'                            # NV-WRITE response
-            '1.0.11778.1230\r\nOK\r\n',         # SwVer response
-            preflush=1)
+        if put_defaults:
+            self._bc15_puts(
+                'OK\r\n'                        # UNLOCK response
+                'OK\r\n'                        # NV-DEFAULT response
+                'OK\r\n'                        # NV-WRITE response
+                '1.0.11778.1230\r\nOK\r\n',     # SwVer response
+                preflush=1)
 
     def close(self):
         """Finished testing."""
@@ -178,12 +180,13 @@ class Main(tester.TestSequence):
 
         Device is powered by injected voltage.
         Write Non-Volatile memory defaults.
+        Switch off the injected voltage.
 
         """
         d.dcs_3v3.output(9.0, True)
         d.rla_reset.pulse(0.1)
         time.sleep(0.5)
-        self._bc15_putstartup()
+        self._bc15_putstartup(True)
         self._bc15.open()
         self._bc15.defaults()
         m.arm_SwVer.measure()
@@ -191,13 +194,34 @@ class Main(tester.TestSequence):
         d.dcs_3v3.output(0.0, False)
 
     def _step_powerup(self):
-        """Power up the Unit with 240Vac and go to Power Supply mode."""
+        """Power up the Unit.
+
+        Power up with 240Vac.
+        Go into Power Supply mode.
+
+        """
         self.fifo_push(
             ((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
-             (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, (0.2, 14.4)), ))
+             (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, 0.2), ))
         t.pwr_up.run()
-        self._bc15_putstartup()
+        self._bc15_putstartup(False)
         self._bc15.open()
         self._bc15_puts('OK\r\n' * 10)
         self._bc15.ps_mode()
-        m.dmm_vout.measure()
+
+    def _step_output(self):
+        """Tests of the output.
+
+        Check the accuracy of the current sensor.
+
+        """
+        self.fifo_push(((s.oVout, 14.40), ))
+        d.dcl.output(2.0, True)
+        time.sleep(0.5)
+        self._bc15_puts(
+            'not-pulsing-volts=14432 ;mV \r\n'
+            'not-pulsing-current=1987 ;mA \r\n'
+            'OK\r\n'
+            )
+        self._bc15.stat()
+        MeasureGroup((m.dmm_vout, m.arm_vout, m.arm_2amp, m.arm_2amp_lucky, ))

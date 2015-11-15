@@ -81,8 +81,12 @@ class Sensors():
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
-        self.ARM_SwVer = console.Sensor(
+        self.arm_swver = console.Sensor(
             bc15, 'SwVer', rdgtype=tester.sensor.ReadingString)
+        self.arm_vout = console.Sensor(
+            bc15, 'not-pulsing-volts', scale=0.001)
+        self.arm_iout = console.Sensor(
+            bc15, 'not-pulsing-current', scale=0.001)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -115,7 +119,11 @@ class Measurements():
         self.dmm_vout = Measurement(limits['Vout'], sense.oVout)
         self.dmm_voutoff = Measurement(limits['VoutOff'], sense.oVout)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
-        self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
+        self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.arm_swver)
+        self.arm_vout = Measurement(limits['ARM-Vout'], sense.arm_vout)
+        self.arm_2amp = Measurement(limits['ARM-2amp'], sense.arm_iout)
+        self.arm_2amp_lucky = Measurement(
+            limits['ARM-2amp-Lucky'], sense.arm_iout)
 
 
 class SubTests():

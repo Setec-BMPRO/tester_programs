@@ -20,7 +20,12 @@ DATA = (
     ('Program', 0, -0.1, 0.1, None, None),
     ('FixtureLock', 0, 20, None, None, None),
     ('FanShort', 0, None, 100, None, None),
-    ('Notify', 1, None, None, None, True),
     # Data reported by the ARM
     ('ARM-SwVer', 0, None, None, r'^1\.0\.11778\.1230$', None),
+    ('ARM-Vout', 0, 14.3, 14.5, None, None),
+    ('ARM-2amp', 0, 0.5, 3.5, None, None),
+    # Why 'Lucky'?
+    #   The circuit specs are +/- 1.5A, and we hope to be lucky
+    #   and get units within +/- 1.0A ...
+    ('ARM-2amp-Lucky', 0, 1.0, 3.0, None, None),
     )

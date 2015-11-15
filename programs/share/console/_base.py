@@ -20,12 +20,16 @@ class Sensor(tester.sensor.Sensor):
 
     """Console data exposed as a Sensor."""
 
-    def __init__(self, arm, key, rdgtype=tester.sensor.Reading, position=1):
+    def __init__(self,
+            arm, key,
+            rdgtype=tester.sensor.Reading, position=1,
+            scale=1.0):
         """Create a sensor."""
         super().__init__(arm, position)
         self._arm = arm
         self._key = key
         self._rdgtype = rdgtype
+        self._scale = scale
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._logger.debug('Created')
@@ -40,7 +44,14 @@ class Sensor(tester.sensor.Sensor):
         @return Reading
 
         """
-        rdg = self._rdgtype(value=super().read(), position=self.position)
+        value = super().read()
+        try:
+            value = float(value) * self._scale
+        except ValueError:      # 'value' can be a N.N.N string
+            pass
+        except TypeError:       # or a non-numeric string
+            pass
+        rdg = self._rdgtype(value, position=self.position)
         return (rdg, )
 
 
