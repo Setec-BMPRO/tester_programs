@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Drifter(BM) Final Program Limits."""
 
 # Tuple ( Tuple (name, identity, low, high, string, boolean))

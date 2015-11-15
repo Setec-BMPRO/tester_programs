@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """MicroChip RN4020 PICTAIL driver.
 
 A Bluetooth 4.1 Low Energy development board with a USB serial interface.

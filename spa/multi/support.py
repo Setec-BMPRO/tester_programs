@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Spa RGB/TRI Initial Test Program."""
 
 import tester

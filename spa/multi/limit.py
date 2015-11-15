@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Spa RGB/TRI Test Program Limits."""
 
 # Test Limits for RGB

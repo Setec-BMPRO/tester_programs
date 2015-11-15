@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Utility Server - Texas Instruments EV220x Controller.
 
 Uses the TI EV2200 RS232 to SMBus unit to communicate with the

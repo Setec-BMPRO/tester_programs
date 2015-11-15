@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """ATXG-450-2V Final Test Program."""
 
 import logging

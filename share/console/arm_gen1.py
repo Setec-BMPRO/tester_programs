@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """1st Generation ARM Processor Console Driver.
 
 Communication is done with a Serial port to the ARM processor.

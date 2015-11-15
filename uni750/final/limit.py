@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """UNI-750 Final Program Limits."""
 
 # Tuple ( Tuple (name, identity, low, high, string, boolean))

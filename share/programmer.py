@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Programmer for ARM & PIC devices.
 
 Programming runs in the background on another thread.

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """2040 Test Programs."""
 
 __all__ = ['initial', 'final']

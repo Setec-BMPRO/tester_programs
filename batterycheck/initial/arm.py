@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """BatteryCheck communications to ARM processor.
 
 Communication via Serial port to the ARM processor.

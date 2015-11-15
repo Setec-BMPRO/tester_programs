@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """SX-750 Digital Pot Driver.
 
 12V and 24V OCP point adjustment.

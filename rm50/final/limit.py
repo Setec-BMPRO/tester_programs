@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """RM-50-24 Final Program Limits."""
 
 # Tuple ( Tuple (name, identity, low, high, string, boolean))

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Data Dictionary with timeout.
 
 Maintains a Dictionary of data, and implements a timeout such that some time

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Drifter Test Programs."""
 
 __all__ = ['initial', 'final']

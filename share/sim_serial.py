@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Serial Port with simulation ability.
 
 Data buffers are available to hold simulated input and output data.

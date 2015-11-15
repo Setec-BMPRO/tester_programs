@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Utility Server - CMR Listener.
 
 Listens to serial traffic from a CMR-SBP.

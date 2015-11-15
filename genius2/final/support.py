@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """GENIUS-II and GENIUS-II-H Final Test Program."""
 
 import tester

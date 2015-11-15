@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """BatteryCheck Initial Test Program."""
 
 import tester

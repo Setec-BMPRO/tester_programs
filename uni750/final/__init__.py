@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """UNI-750 Final Test Program."""
 
 import logging

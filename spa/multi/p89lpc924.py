@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Programmer module for P89LPC924 devices."""
 
 import time

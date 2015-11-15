@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Copyright (c) 2009 Geoffrey Foster.
 
 Permission is hereby granted, free of charge, to any person

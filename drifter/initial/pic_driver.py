@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Drifter Initial PIC processor console driver.
 
 Communication via Serial port to the PIC processor.

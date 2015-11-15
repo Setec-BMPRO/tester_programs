@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Trek2 ARM processor console driver."""
 
 import share.sim_serial

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """C45A-15 Test Programs."""
 
 __all__ = ['initial', 'final']

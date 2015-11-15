@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """WTSI200 Final Test Program."""
 
 from pydispatch import dispatcher

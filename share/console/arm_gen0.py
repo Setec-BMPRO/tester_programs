@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """GEN8 & SX-750 ARM processor console driver.
 
 Communication via SimSerial port to the ARM processor.

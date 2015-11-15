@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """GEN8 Initial Test Program Limits."""
 
 # Test Limits

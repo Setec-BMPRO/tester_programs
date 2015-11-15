@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """C15D-15 Final Test Program."""
 
 import tester

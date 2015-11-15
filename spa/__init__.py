@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Spa LED Driver Test Programs."""
 
 __all__ = ['single', 'multi']

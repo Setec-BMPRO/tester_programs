@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """GSU360-1TA Initial Program Limits."""
 
 # Tuple ( Tuple (name, identity, low, high, string, boolean))

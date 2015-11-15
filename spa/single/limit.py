@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Spa SINGLE Test Program Limits."""
 
 # Test Limits for SINGLE

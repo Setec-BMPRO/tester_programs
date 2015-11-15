@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """CN101 Initial Program Limits."""
 
 # CAN Bus is operational if status bit 28 is set

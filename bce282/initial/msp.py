@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """BCE282-12/24 Initial MSP430F2272 processor console driver.
 
 Communication via Serial port to the MSP430F2272 processor.

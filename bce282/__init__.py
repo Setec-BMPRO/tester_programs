@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """BCE282 Test Programs."""
 
 __all__ = ['initial', 'final']

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Spa RGB/TRI Initial Test Program.
 
 Call 'self.abort()' to stop program running at end of current step.

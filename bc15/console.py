@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """BC15 ARM processor console driver."""
 
 import share.console
