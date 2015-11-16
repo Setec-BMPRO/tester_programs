@@ -23,8 +23,10 @@ LIMIT_DATA = limit.DATA
 
 _SHUNT_SCALE = 0.08     # Ishunt * this = DC Source voltage
 
-# Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': r'\\.\COM2'}[os.name]
+# Serial port for the ARM programmer.
+_ARM_PGM = {'posix': '/dev/ttyUSB1', 'nt': r'\\.\COM2'}[os.name]
+# Serial port for the ARM console module.
+_ARM_CON = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
 _AVRDUDE = r'C:\Program Files\AVRdude\avrdude.exe'
 _AVR_HEX = 'BatteryCheckSupervisor-2.hex'
@@ -67,7 +69,7 @@ class Main(tester.TestSequence):
         # Serial connection to the console
         arm_ser = SimSerial(simulation=self._fifo, baudrate=9600)
         # Set port separately, as we don't want it opened yet
-        arm_ser.setPort(_ARM_PORT)
+        arm_ser.setPort(_ARM_CON)
         self._armdev = arm.Console(arm_ser)
 
     def open(self):
@@ -184,7 +186,7 @@ class Main(tester.TestSequence):
 # FIXME: Use the python ARM programmer.
         d.rla_arm.set_on()
         arm = ProgramARM(
-            _ARM_HEX, self._folder, s.oMirARM, _ARM_PORT,
+            _ARM_HEX, self._folder, s.oMirARM, _ARM_PGM,
             wipe=True, fifo=self._fifo)
         arm.read()
         m.pgmARM.measure()
