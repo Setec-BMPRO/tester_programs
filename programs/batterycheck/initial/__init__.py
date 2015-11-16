@@ -12,6 +12,7 @@ import jsonrpclib
 
 import tester
 from ...share.programmer import ProgramARM
+from ...share.sim_serial import SimSerial
 from . import support
 from . import limit
 from . import arm
@@ -62,16 +63,18 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         self._sernum = None
-        self._armdev = None
         self._btmac = None
+        # Serial connection to the console
+        arm_ser = SimSerial(simulation=self._fifo, baudrate=9600)
+        # Set port separately, as we don't want it opened yet
+        arm_ser.setPort(_ARM_PORT)
+        self._armdev = arm.Console(arm_ser)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
         self._folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        if not self._fifo:
-            self._armdev = arm.Console()
         global d, s, m
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._armdev)
@@ -86,11 +89,15 @@ class Main(tester.TestSequence):
             pass
         self._logger.debug('Connected to bluetooth server')
 
+    def _arm_puts(self,
+                 string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._armdev.puts(string_data, preflush, postflush, priority)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        if not self._fifo:
-            self._armdev.close()
         global m, d, s
         m = d = s = None
         if not self._fifo:
@@ -103,6 +110,7 @@ class Main(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
+        self._armdev.close()
         # Reset Logical Devices
         d.reset()
 
@@ -148,8 +156,7 @@ class Main(tester.TestSequence):
             result = 0
             self._logger.debug(console)
         except subprocess.CalledProcessError:
-            err_msg = '{} {}'.format(
-                sys.exc_info()[0], sys.exc_info()[1])
+            err_msg = '{} {}'.format(sys.exc_info()[0], sys.exc_info()[1])
             result = 1
             self._logger.warning(err_msg)
         d.rla_avr.set_off()
@@ -174,6 +181,7 @@ class Main(tester.TestSequence):
         time.sleep(6.5)
         d.rla_boot.set_off()
         # Connect ARM programming port
+# FIXME: Use the python ARM programmer.
         d.rla_arm.set_on()
         arm = ProgramARM(
             _ARM_HEX, self._folder, s.oMirARM, _ARM_PORT,
@@ -184,6 +192,7 @@ class Main(tester.TestSequence):
 
     def _step_initialise_arm(self):
         """Initialise the ARM device."""
+        self._armdev.open()
         d.rla_reset.pulse_on(0.1)
         time.sleep(2.0)  # ARM startup delay
         if self._fifo:
@@ -212,7 +221,7 @@ class Main(tester.TestSequence):
         if not self._fifo:
             self._armdev.alarm(True)
         self.fifo_push(
-            ((s.relay, 5.0), (s.ARMsoft, ('1.4.3334', )),
+            ((s.relay, 5.0), (s.ARMsoft, ('1.7.4080', )),
              (s.ARMvolt, 12.12), ))
         MeasureGroup((m.dmm_relay, m.currErr, m.softARM, m.voltARM))
         if not self._fifo:
@@ -222,10 +231,7 @@ class Main(tester.TestSequence):
     def _step_test_bluetooth(self):
         """Test the Bluetooth transmitter function."""
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
-        if self._fifo:
-            reply = True
-        else:
-            reply = self.btserver.detect(self._btmac)
+        reply = True if self._fifo else self.btserver.detect(self._btmac)
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         s.oMirBT.store(0 if reply else 1)
         m.detectBT.measure()

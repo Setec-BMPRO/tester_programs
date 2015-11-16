@@ -13,7 +13,6 @@ Values:
 
 """
 
-import serial
 import logging
 import time
 
@@ -60,11 +59,11 @@ class Console():
 
     """Communications link to ARM console."""
 
-    def __init__(self, port=0, baud=9600):
+    def __init__(self, port):
         """Open serial communications."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._ser = serial.Serial(port, baud, timeout=_READ_TMO)
+        self._ser = port
         # Limit used to record timeouts as fail readings
         self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
@@ -78,6 +77,29 @@ class Console():
             'ARM_SwVer': (self.version, None),
             'ARM_Mac': (self.mac, None),
             }
+
+    def open(self):
+        """Open serial communications."""
+        self._logger.debug('Open')
+        self._ser.timeout = _READ_TMO
+        self._ser.open()
+
+    def puts(self, string_data, preflush=0, postflush=0, priority=False):
+        """Put a string into the read-back buffer.
+
+        @param string_data Data string, or tuple of data strings.
+        @param preflush Number of _FLUSH to be entered before the data.
+        @param postflush Number of _FLUSH to be entered after the data.
+        @param priority True to put in front of the buffer.
+        Note: _FLUSH is a marker to stop the flush of the data buffer.
+
+        """
+        self._ser.puts(string_data, preflush, postflush, priority)
+
+    def close(self):
+        """Close serial communications."""
+        self._logger.debug('Close')
+        self._ser.close()
 
     def configure(self, cmd):
         """Sensor: Configure for next reading."""
@@ -162,14 +184,6 @@ class Console():
         self._sendrecv('4 X-SYSTEM-ENABLE X!')
         cmd = '{} ALARM-RELAY'.format(1 if new_state else 0)
         self._sendrecv(cmd)
-
-    def close(self):
-        """Close serial communications."""
-        self._logger.debug('Close')
-        try:
-            self._ser.close()
-        except Exception:
-            pass
 
     def _sendrecv(self, command):
         """Send a command, and read the response line.
