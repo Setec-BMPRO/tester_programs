@@ -21,7 +21,7 @@ DATA = (
     ('FixtureLock', 0, 20, None, None, None),
     ('FanShort', 0, None, 100, None, None),
     # Data reported by the ARM
-    ('ARM-SwVer', 0, None, None, r'^1\.0\.11778\.1230$', None),
+    ('ARM-SwVer', 0, None, None, r'^1\.0\.11881\.1274$', None),
     ('ARM-Vout', 0, 14.3, 14.5, None, None),
     ('ARM-2amp', 0, 0.5, 3.5, None, None),
     # Why 'Lucky'?
