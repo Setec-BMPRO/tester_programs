@@ -14,9 +14,6 @@ import tester
 #tester.sensor.DSO_DELAY = False
 from programs import PROGRAMS
 
-# The test program to run manually
-_PROGRAM_TO_RUN = 'Dummy'
-
 # Configuration of logger.
 _CONSOLE_LOG_LEVEL = logging.DEBUG
 _LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
@@ -62,6 +59,9 @@ def _main():
     fifo = config['DEFAULT'].getboolean('FIFO')
     if fifo is None:
         fifo = True
+    test_program = config['DEFAULT'].get('Program')
+    if test_program is None:
+        test_program = 'Dummy'
     use_progdata_limits = config['DEFAULT'].getboolean('UseProgDataLimits')
     if use_progdata_limits is None:
         use_progdata_limits = False
@@ -84,7 +84,7 @@ def _main():
                        signal=tester.signals.Status.result)
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        _PROGRAM_TO_RUN, per_panel=1, parameter=None, test_limits=[])
+        test_program, per_panel=1, parameter=None, test_limits=[])
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
     tst = tester.Tester(tester_type, PROGRAMS, fifo, use_progdata_limits)
