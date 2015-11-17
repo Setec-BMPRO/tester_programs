@@ -18,13 +18,6 @@ class Console(console.ConsoleGen2):
 
     """Communications to BC15 console."""
 
-    def __init__(self, port):
-        """Create console instance."""
-        super().__init__(port)
-        self.cmd_data = {
-            'SwVer': ParameterRaw('', func=self.version),
-            }
-
     def ps_mode(self):
         """Set the unit into Power Supply mode."""
         self.action('0 MAINLOOP')

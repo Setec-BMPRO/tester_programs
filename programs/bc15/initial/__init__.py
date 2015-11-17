@@ -50,6 +50,7 @@ class Main(tester.TestSequence):
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
+            ('Loaded', self._step_loaded, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -222,6 +223,24 @@ class Main(tester.TestSequence):
             'not-pulsing-volts=14432 ;mV \r\n'
             'not-pulsing-current=1987 ;mA \r\n'
             'OK\r\n'
+            '3\r\n'
+            'OK\r\n'
             )
         self._bc15.stat()
-        MeasureGroup((m.dmm_vout, m.arm_vout, m.arm_2amp, m.arm_2amp_lucky, ))
+        MeasureGroup(
+            (m.dmm_vout, m.arm_vout, m.arm_2amp, m.arm_2amp_lucky,
+             m.arm_switch, ))
+
+    def _step_loaded(self):
+        """Tests of the output."""
+        self.fifo_push(((s.oVout, 14.40), ))
+        d.dcl.output(14.0, True)
+        time.sleep(0.5)
+        self._bc15_puts(
+            'not-pulsing-volts=14432 ;mV \r\n'
+            'not-pulsing-current=14000 ;mA \r\n'
+            'OK\r\n'
+            )
+        self._bc15.stat()
+        MeasureGroup(
+            (m.dmm_vout, m.arm_vout, m.arm_14amp, ))

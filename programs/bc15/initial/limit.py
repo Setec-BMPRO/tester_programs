@@ -13,7 +13,7 @@ DATA = (
     ('FanOn', 0, 0.5, None, None, None),
     ('FanOff', 0, None, 11.0, None, None),
     ('15Vs', 0, 14.5, 16.5, None, None),
-    ('Vout', 0, 14.3, 14.5, None, None),
+    ('Vout', 0, 13.68, 15.12, None, None),        # +/- 5%
     ('VoutOff', 0, 2.0, None, None, None),
     ('OCP', 0, 32.0, 35.1, None, None),
     ('InOCP', 0, 11.6, None, None, None),
@@ -22,10 +22,12 @@ DATA = (
     ('FanShort', 0, None, 100, None, None),
     # Data reported by the ARM
     ('ARM-SwVer', 0, None, None, r'^1\.0\.11881\.1274$', None),
-    ('ARM-Vout', 0, 14.3, 14.5, None, None),
+    ('ARM-Vout', 0, 13.68, 15.12, None, None),
     ('ARM-2amp', 0, 0.5, 3.5, None, None),
     # Why 'Lucky'?
     #   The circuit specs are +/- 1.5A, and we hope to be lucky
     #   and get units within +/- 1.0A ...
     ('ARM-2amp-Lucky', 0, 1.0, 3.0, None, None),
+    ('ARM-14amp', 0, 13.3, 14.7, None, None),
+    ('ARM-switch', 0, 2.5, 3.5, None, None),
     )

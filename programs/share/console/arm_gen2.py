@@ -145,6 +145,9 @@ class ConsoleGen2():
             line = line.split(sep='=')      # break the "key=value" pairs up
             self.stat_data[line[0]] = line[1]
         self._logger.debug('Stat read %s data values', len(self.stat_data))
+        # Read the switch values and add to the data store
+        response = self.action('SW?')
+        self.stat_data['switch'] = response
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response line(s).

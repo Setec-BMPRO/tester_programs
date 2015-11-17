@@ -87,6 +87,7 @@ class Sensors():
             bc15, 'not-pulsing-volts', scale=0.001)
         self.arm_iout = console.Sensor(
             bc15, 'not-pulsing-current', scale=0.001)
+        self.arm_switch = console.Sensor(bc15, 'switch')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -124,6 +125,8 @@ class Measurements():
         self.arm_2amp = Measurement(limits['ARM-2amp'], sense.arm_iout)
         self.arm_2amp_lucky = Measurement(
             limits['ARM-2amp-Lucky'], sense.arm_iout)
+        self.arm_switch = Measurement(limits['ARM-switch'], sense.arm_switch)
+        self.arm_14amp = Measurement(limits['ARM-14amp'], sense.arm_iout)
 
 
 class SubTests():
