@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
-"""
-BCE282-12/24 Initial Test Program.
-        Logical Devices
-        Sensors
-        Measurements
+"""BCE282-12/24 Initial Test Program."""
 
-"""
-import tester.measure
+import tester
 from tester.devlogical import *
-from tester.sensor import *
+from tester.measure import *
 
 from . import msp
+
+sensor = tester.sensor
 
 
 class LogicalDevices():
@@ -26,19 +22,13 @@ class LogicalDevices():
 
         """
         self._devices = devices
-
         self.dmm = dmm.DMM(devices['DMM'])
-
         self.acsource = acsource.ACSource(devices['ACS'])
-
         self.discharge = discharge.Discharge(devices['DIS'])
-
         self.dcs_VccBias = dcsource.DCSource(devices['DCS1']) # Powers MSP430
         self.dcs_RS232 = dcsource.DCSource(devices['DCS2']) # Powers bootloader interface
-
         self.dcl_Vout = dcload.DCLoad(devices['DCL1'])
         self.dcl_Vbat = dcload.DCLoad(devices['DCL2'])
-
         self.rla_Prog = relay.Relay(devices['RLA1'])
 
     def error_check(self):
@@ -70,30 +60,30 @@ class Sensors():
         """
         dmm = logical_devices.dmm
 
-        self.Lock = s_dmm.Res(dmm, high=10, low=6, rng=10000, res=1)
-        self.oVac = s_dmm.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
-        self.oVbus = s_dmm.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
-        self.oVccPri = s_dmm.Vdc(dmm, high=3, low=2, rng=100, res=0.001)
-        self.oVccBias = s_dmm.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
-        self.oVbat = s_dmm.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
-        self.oAlarm = s_dmm.Res(dmm, high=9, low=5, rng=100, res=0.001)
-        self.oVout = s_dmm.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
-#        self.oRed = s_dmm.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
-#        self.oGreen = s_dmm.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
+        self.Lock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
+        self.oVac = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
+        self.oVbus = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
+        self.oVccPri = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.001)
+        self.oVccBias = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
+        self.oVbat = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
+        self.oAlarm = sensor.Res(dmm, high=9, low=5, rng=100, res=0.001)
+        self.oVout = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
+#        self.oRed = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
+#        self.oGreen = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
 
         self.oMsp_Status = msp.Sensor(mspdev, 'MSP-NvStatus')
         self.oMsp_Vout = msp.Sensor(mspdev, 'MSP-Vout')
 
 
         ocp_start, ocp_stop = limits['BattOCPramp'].limit
-        self.oBattOCP = s_ramp.Ramp(stimulus=logical_devices.dcl_Vbat,
+        self.oBattOCP = sensor.Ramp(stimulus=logical_devices.dcl_Vbat,
                                     sensor=self.oVbat,
                                     detect_limit=(limits['inOCP'], ),
                                     start=ocp_start, stop=ocp_stop, step=0.05,
                                     delay=0.05)
 
         ocp_start, ocp_stop = limits['OutOCPramp'].limit
-        self.oOutOCP = s_ramp.Ramp(stimulus=logical_devices.dcl_Vout,
+        self.oOutOCP = sensor.Ramp(stimulus=logical_devices.dcl_Vout,
                                     sensor=self.oVout,
                                     detect_limit=(limits['inOCP'], ),
                                     start=ocp_start, stop=ocp_stop, step=0.05,

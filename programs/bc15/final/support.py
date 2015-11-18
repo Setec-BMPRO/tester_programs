@@ -49,10 +49,9 @@ class Sensors():
         dmm = logical_devices.dmm
 
         self.oVout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        tester.TranslationContext = 'bc15_final'
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('bc15_final', 'msgSnEntry'),
+            caption=translate('bc15_final', 'capSnEntry'))
 
 
 class Measurements():

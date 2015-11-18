@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""BP35 Initial Test Program.
+"""BP35 Initial Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 from pydispatch import dispatcher
 
 import tester

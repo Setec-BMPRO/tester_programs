@@ -61,7 +61,9 @@ def _main():
         fifo = True
     test_program = config['DEFAULT'].get('Program')
     if test_program is None:
-        test_program = 'Dummy'
+        run_all = True
+    else:
+        run_all = False
     use_progdata_limits = config['DEFAULT'].getboolean('UseProgDataLimits')
     if use_progdata_limits is None:
         use_progdata_limits = False
@@ -79,26 +81,32 @@ def _main():
     # Receive Test Result signals here
     def test_result(result):
         logger.info('Test Result: %s', result)
-    dispatcher.connect(test_result,
-                       sender=tester.signals.Thread.tester,
-                       signal=tester.signals.Status.result)
-    # Make a TEST PROGRAM descriptor
-    pgm = tester.TestProgram(
-        test_program, per_panel=1, parameter=None, test_limits=[])
+    dispatcher.connect(
+        test_result,
+        sender=tester.signals.Thread.tester,
+        signal=tester.signals.Status.result)
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
     tst = tester.Tester(tester_type, PROGRAMS, fifo, use_progdata_limits)
     tst.start()
-    logger.info('Open Tester')
-    tst.open(pgm)
-#    Allows 2 seconds before fixture lock to remove board at ATE2
-    time.sleep(2)
-    logger.info('Running Test')
-    tst.test(('UUT1', ))
-#    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
-    time.sleep(2)
-    logger.info('Close Tester')
-    tst.close()
+    if run_all:
+        prog_list = PROGRAMS
+    else:
+        prog_list = ((test_program, ), )    # a single program group
+    for prog in prog_list:
+        test_program = prog[0]
+        # Make a TEST PROGRAM descriptor
+        pgm = tester.TestProgram(
+            test_program, per_panel=1, parameter=None, test_limits=[])
+        logger.info('#' * 80)
+        logger.info('Open Program %s', test_program)
+        tst.open(pgm)
+        logger.info('Running Test')
+        tst.test(('UUT1', ))
+    #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
+        logger.info('Close Program')
+        logger.info('#' * 80)
+        tst.close()
     logger.info('Stop Tester')
     tst.stop()
     tst.join()

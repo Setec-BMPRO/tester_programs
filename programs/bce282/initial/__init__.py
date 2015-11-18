@@ -33,7 +33,7 @@ class Main(tester.testsequence.TestSequence):
 
     """BCE282-12/24 Initial Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits):
+    def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param selection Product test program
@@ -45,14 +45,14 @@ class Main(tester.testsequence.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
-            ('ProgramMicro', self._step_program_micro, None, True),
+            ('ProgramMicro', self._step_program_micro, None, not fifo),
             ('PowerUp', self._step_power_up, None, False),
             ('Calibration', self._step_cal, None, False),
             ('OCP', self._step_ocp, None, False),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence)
+        super().__init__(selection, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices

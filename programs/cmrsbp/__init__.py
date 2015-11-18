@@ -86,10 +86,12 @@ class Main(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         self._cmr_ser = SimSerial(
+            simulation=self._fifo,
             port=_CMR_PORT, baudrate=9600, timeout=0.1)
         self._cmr = cmrsbp.CmrSbp(self._cmr_ser, data_timeout=10.0)
         if not self._isFin:
             self._ev_ser = SimSerial(
+                simulation=self._fifo,
                 port=_EV_PORT, baudrate=9600, timeout=4.0)
             self._ev = ev2200.EV2200(self._ev_ser)
         global d

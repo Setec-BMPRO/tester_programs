@@ -108,7 +108,7 @@ class Main(tester.TestSequence):
                 'OK\r\n'                        # UNLOCK response
                 'OK\r\n'                        # NV-DEFAULT response
                 'OK\r\n'                        # NV-WRITE response
-                '1.0.11778.1230\r\nOK\r\n',     # SwVer response
+                '1.0.11881.1274\r\nOK\r\n',     # SwVer response
                 preflush=1)
 
     def close(self):
@@ -231,17 +231,33 @@ class Main(tester.TestSequence):
             (m.dmm_vout, m.arm_vout, m.arm_2amp, m.arm_2amp_lucky,
              m.arm_switch, ))
         # Calibrate output voltage
+        self._bc15_puts(
+            'mv-set=14432 ;mV \r\n'
+            'not-pulsing-volts=14432 ;mV \r\n'
+            'OK\r\n'
+            '3\r\n'
+            'OK\r\n'
+            'set_volts_mv_num=902\r\n'
+            'set_volts_mv_den=14400\r\n'
+            'OK\r\n'
+            'OK\r\n'    # SET_VOLTS_MV_NUM CAL
+            'OK\r\n'    # NV-WRITE response
+            'OK\r\n'    # SET-MV response
+            )
         self._bc15.cal_vout(data[0])
+        self.fifo_push(((s.oVout, 14.40), ))
         m.dmm_vout_cal.measure()
 
     def _step_loaded(self):
         """Tests of the output."""
-        self.fifo_push(((s.oVout, 14.40), ))
+        self.fifo_push(((s.oVout, (14.4, ) * 10 + (11.0, ), ), ))
         d.dcl.output(14.0, True)
         time.sleep(0.5)
         self._bc15_puts(
             'not-pulsing-volts=14432 ;mV \r\n'
             'not-pulsing-current=14000 ;mA \r\n'
+            'OK\r\n'
+            '3\r\n'
             'OK\r\n'
             )
         self._bc15.stat()
