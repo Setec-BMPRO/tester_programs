@@ -232,7 +232,7 @@ class Main(tester.TestSequence):
              m.arm_switch, ))
         # Calibrate output voltage
         self._bc15_puts(
-            'mv-set=14432 ;mV \r\n'
+            'mv-set=14400 ;mV \r\n'
             'not-pulsing-volts=14432 ;mV \r\n'
             'OK\r\n'
             '3\r\n'

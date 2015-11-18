@@ -52,7 +52,7 @@ class Console(console.ConsoleGen2):
         # and millivolt setpoint.
         pwm = int(((mv_set * mv_num) / mv_den) + 0.5)
         # Calculate new numerator using measured voltage.
-        mv_num_new = int(((pwm * mv_den) / voltage) + 0.5)
+        mv_num_new = int(((pwm * mv_den) / (voltage * 1000)) + 0.5)
         # Write new numerator and save it.
         self.action('{} "SET_VOLTS_MV_NUM CAL'.format(mv_num_new))
         self.nvwrite()

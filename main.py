@@ -61,7 +61,11 @@ def _main():
         fifo = True
     test_program = config['DEFAULT'].get('Program')
     if test_program is None:
+        test_program = 'Dummy'
+    if test_program == 'ALL PROGRAMS':
         run_all = True
+        debug_gpib = True
+        fifo = True
     else:
         run_all = False
     use_progdata_limits = config['DEFAULT'].getboolean('UseProgDataLimits')
