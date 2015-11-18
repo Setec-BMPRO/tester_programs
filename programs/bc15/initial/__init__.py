@@ -227,9 +227,12 @@ class Main(tester.TestSequence):
             'OK\r\n'
             )
         self._bc15.stat()
-        MeasureGroup(
+        _, data = MeasureGroup(
             (m.dmm_vout, m.arm_vout, m.arm_2amp, m.arm_2amp_lucky,
              m.arm_switch, ))
+        # Calibrate output voltage
+        self._bc15.cal_vout(data[0])
+        m.dmm_vout_cal.measure()
 
     def _step_loaded(self):
         """Tests of the output."""
@@ -243,4 +246,4 @@ class Main(tester.TestSequence):
             )
         self._bc15.stat()
         MeasureGroup(
-            (m.dmm_vout, m.arm_vout, m.arm_14amp, ))
+            (m.dmm_vout, m.arm_vout, m.arm_14amp, m.ramp_ocp, ))

@@ -77,10 +77,10 @@ class Sensors():
         self.ofan = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self.o15Vs = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
         self.oVout = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
-        self.oOCP = sensor.Ramp(
+        self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
-            start=4.0, stop=10.0, step=0.5, delay=0.1)
+            start=10.0, stop=18.0, step=0.5, delay=0.1)
         self.arm_swver = console.Sensor(
             bc15, 'SwVer', rdgtype=tester.sensor.ReadingString)
         self.arm_vout = console.Sensor(
@@ -118,8 +118,9 @@ class Measurements():
         self.dmm_fanoff = Measurement(limits['FanOff'], sense.ofan)
         self.dmm_15Vs = Measurement(limits['15Vs'], sense.o15Vs)
         self.dmm_vout = Measurement(limits['Vout'], sense.oVout)
+        self.dmm_vout_cal = Measurement(limits['VoutCal'], sense.oVout)
         self.dmm_voutoff = Measurement(limits['VoutOff'], sense.oVout)
-        self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
+        self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.arm_swver)
         self.arm_vout = Measurement(limits['ARM-Vout'], sense.arm_vout)
         self.arm_2amp = Measurement(limits['ARM-2amp'], sense.arm_iout)

@@ -40,6 +40,7 @@ class ConsoleGen2():
         self._port = port
         self._read_key = None
         self.stat_data = {}  # Data readings: Key=Name, Value=Reading
+        self.cal_data = {}  # Calibration readings: Key=Name, Value=Setting
 
     def open(self):
         """Open port."""
@@ -91,7 +92,16 @@ class ConsoleGen2():
         if key == 'SwVer':
             return self.version()
 # FIXME: Check value type & return a Reading object
-        return self.stat_data[key]
+        value = 'NaN'
+        try:            # 1st try a data value
+            value = self.stat_data[key]
+        except KeyError:
+            pass
+        try:            # Next try a calibration value
+            value = self.cal_data[key]
+        except KeyError:
+            pass
+        return value
 
     def __setitem__(self, key, value):
         """Write a value.
@@ -148,6 +158,19 @@ class ConsoleGen2():
         # Read the switch values and add to the data store
         response = self.action('SW?')
         self.stat_data['switch'] = response
+
+    def cal_read(self):
+        """Use CAL? command to read (all) calibration values."""
+        self._logger.debug('Cal')
+        self.cal_data = {}
+        response = self.action('CAL?')
+        for line in response:
+            if line[0] == '#':              # ignore comment lines
+                continue
+            line = line.split()[0]          # stop at the 1st space
+            line = line.split(sep='=')      # break the "key=value" pairs up
+            self.cal_data[line[0]] = line[1]
+        self._logger.debug('Cal read %s values', len(self.cal_data))
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response line(s).
