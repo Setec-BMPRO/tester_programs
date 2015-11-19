@@ -165,10 +165,7 @@ class ConsoleGen2():
         self.cal_data = {}
         response = self.action('CAL?')
         for line in response:
-            if line[0] == '#':              # ignore comment lines
-                continue
-            line = line.split()[0]          # stop at the 1st space
-            line = line.split(sep='=')      # break the "key=value" pairs up
+            line = line.split()
             self.cal_data[line[0]] = line[1]
         self._logger.debug('Cal read %s values', len(self.cal_data))
 

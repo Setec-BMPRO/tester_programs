@@ -80,7 +80,7 @@ class Sensors():
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['InOCP'], ),
-            start=10.0, stop=18.0, step=0.5, delay=0.1)
+            start=14.0, stop=17.0, step=0.25, delay=0.1)
         self.arm_swver = console.Sensor(
             bc15, 'SwVer', rdgtype=tester.sensor.ReadingString)
         self.arm_vout = console.Sensor(

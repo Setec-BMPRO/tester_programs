@@ -237,8 +237,8 @@ class Main(tester.TestSequence):
             'OK\r\n'
             '3\r\n'
             'OK\r\n'
-            'set_volts_mv_num=902\r\n'
-            'set_volts_mv_den=14400\r\n'
+            'set_volts_mv_num                        902 \r\n'
+            'set_volts_mv_den                      14400 \r\n'
             'OK\r\n'
             'OK\r\n'    # SET_VOLTS_MV_NUM CAL
             'OK\r\n'    # NV-WRITE response
