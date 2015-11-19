@@ -250,7 +250,7 @@ class Main(tester.TestSequence):
 
     def _step_loaded(self):
         """Tests of the output."""
-        self.fifo_push(((s.oVout, (14.4, ) * 10 + (11.0, ), ), ))
+        self.fifo_push(((s.oVout, (14.4, ) * 5 + (11.0, ), ), ))
         d.dcl.output(14.0, True)
         time.sleep(0.5)
         self._bc15_puts(

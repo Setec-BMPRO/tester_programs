@@ -88,6 +88,7 @@ class Main(tester.TestSequence):
 
     def _step_boardnum(self):
         """Get the PCB number."""
+        self.fifo_push(((s.oSnEntry, ('999', )), ))
         result, brdnum = m.ui_SnEntry.measure()
         self._brdnum = brdnum[0]
 

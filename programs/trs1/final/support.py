@@ -51,13 +51,12 @@ class Sensors():
         self.oBrake = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
         self.oLight = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         self.oRemote = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
-        tester.TranslationContext = 'trs1_final'
         self.oNotifyPinOut = sensor.Notify(
-            message=translate('msgPinOut'),
-            caption=translate('capPinOut'))
+            message=translate('trs1_final', 'msgPinOut'),
+            caption=translate('trs1_final', 'capPinOut'))
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('IsLedGreen?'),
-            caption=translate('capLedGreen'))
+            message=translate('trs1_final', 'IsLedGreen?'),
+            caption=translate('trs1_final', 'capLedGreen'))
 
 
 class Measurements():

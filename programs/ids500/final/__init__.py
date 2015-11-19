@@ -57,7 +57,7 @@ class Main(tester.TestSequence):
         super().__init__(selection, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._HW = {'IDS500-FIN-06A': '06A'}[selection.name]
+        self._HW = {'IDS500 Final': '06A'}[selection.name]
         self._devices = physical_devices
         self._limits = test_limits
 

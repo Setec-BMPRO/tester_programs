@@ -49,11 +49,11 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         _isMicro, _isSyn, _isAux, _isBias, _isBus = {
-            'IDS500-INI-MICRO':  (True,  False, False, False, False),
-            'IDS500-INI-SYN':    (False,  True, False, False, False),
-            'IDS500-INI-AUX':    (False,  False, True, False, False),
-            'IDS500-INI-BIAS':   (False,  False, False, True, False),
-            'IDS500-INI-BUS':    (False,  False, False, False, True),
+            'IDS500 Initial Micro':   (True,  False, False, False, False),
+            'IDS500 Initial Synbuck': (False,  True, False, False, False),
+            'IDS500 Initial Aux':     (False,  False, True, False, False),
+            'IDS500 Initial Bias':    (False,  False, False, True, False),
+            'IDS500 Initial Bus':     (False,  False, False, False, True),
             }[selection.name]
         self._logger.debug(
             'Initial TestType: Micro %s, Synbuck %s, Aux %s,'
