@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-16, 17:27:40 -->
+<!-- Saved: 2015-11-20, 14:49:48 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -210,7 +210,6 @@
     <Source>programs/share/isplpc/device.py</Source>
     <Source>programs/share/bluetooth/eunistone_pan1322.py</Source>
     <Source>programs/share/bluetooth/__init__.py</Source>
-    <Source>programs/share/bluetooth/pictail_rn4020.py</Source>
     <Source>programs/share/bluetooth/jsonrpc_server.py</Source>
     <Source>programs/share/console/arm_gen1.py</Source>
     <Source>programs/share/console/arm_gen2.py</Source>
@@ -282,6 +281,7 @@
     <Source>programs/dummy/support.py</Source>
     <Source>programs/dummy/test_dummy.py</Source>
     <Source>programs/dummy/limit.py</Source>
+    <Source>programs/share/bluetooth/rn4020.py</Source>
   </Sources>
   <Forms/>
   <Translations/>

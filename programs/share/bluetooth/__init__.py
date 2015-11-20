@@ -5,4 +5,4 @@
 
 # Easy access to utility methods and classes
 from .eunistone_pan1322 import *
-from .pictail_rn4020 import *
+from .rn4020 import *

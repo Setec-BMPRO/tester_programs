@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""MicroChip RN4020 PICTAIL driver.
+"""MicroChip RN4020 driver.
 
-A Bluetooth 4.1 Low Energy development board with a USB serial interface.
+A Bluetooth 4.1 Low Energy (BLE) module.
+The RN4020 module is connected to a FTDI USB Serial interface.
 
 """
 
@@ -25,12 +26,12 @@ class BleRadio():
         self._port = port
 
     def open(self):
-        """Open serial communications with BLE Radio."""
+        """Open BLE Radio."""
         self._logger.debug('Open')
         self._port.open()
 
     def close(self):
-        """Close serial communications with BLE Radio."""
+        """Close BLE Radio."""
         self._logger.debug('Close')
         self._port.close()
 

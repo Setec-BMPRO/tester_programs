@@ -159,4 +159,4 @@ class SubTests():
                     (d.rla_sldA, False), (d.rla_sldB, False)))
         msr2 = MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff, m.dmm_sldAOff,
                               m.dmm_sldBOff), timeout=5)
-        self.motctrl = Step((dcs1, rly1, msr1, rly2, msr2))
+        self.motorcontrol = Step((dcs1, rly1, msr1, rly2, msr2))

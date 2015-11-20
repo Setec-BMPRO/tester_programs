@@ -26,7 +26,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # Software image filename
 _ARM_BIN = 'cn101_1.0.000.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (1, 0, '')
+_HW_VER = (1, 0, 'A')
 # Serial port for the Bluetooth module.
 _BLE_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM3'}[os.name]
 # Serial port for the Trek2 as the CAN Bus interface.
@@ -69,13 +69,27 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        # Serial connection to the console
+        # Serial connection to the CN101 console
         cn101_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
         cn101_ser.setPort(_ARM_PORT)
-        # Console driver
+        # CN101 Console driver
         self._cn101 = Console(cn101_ser)
+        # Serial connection to the Trek2 in the fixture (for the CAN bus)
+        trek2_ser = SimSerial(
+            simulation=self._fifo, baudrate=115200, timeout=0.1)
+        # Set port separately, as we don't want it opened yet
+        trek2_ser.setPort(_CAN_PORT)
+        # Trek2 Console driver
+        #  No, it's not a Trek2 console, but it has the same commands as one
+        self._trek2 = Console(trek2_ser)
+        # Serial connection to the BLE module
+        ble_ser = SimSerial(
+            simulation=self._fifo, baudrate=115200, timeout=0.1)
+        # Set port separately, as we don't want it opened yet
+        ble_ser.setPort(_BLE_PORT)
+        self._btmac = None
 
     def open(self):
         """Prepare for testing."""
@@ -116,9 +130,7 @@ class Main(tester.TestSequence):
 
     def _step_program(self):
         """Program the ARM device."""
-        # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -128,7 +140,6 @@ class Main(tester.TestSequence):
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
             ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-            # Program the device (LPC1549 has internal CRC for verification)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:
@@ -137,18 +148,13 @@ class Main(tester.TestSequence):
             except ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            try:
-                ser.close()
-            except:
-                pass
+            ser.close()
         m.pgmARM.measure()
-        # Reset BOOT to ARM
         d.rla_boot.set_off()
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        dummy_sn = 'A1526040123'
-        self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
+        self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
         self._cn101_puts('Banner1\r\nBanner2\r\n', postflush=1)
         for _ in range(5):
             self._cn101_puts('\r\n', postflush=1)
@@ -157,16 +163,14 @@ class Main(tester.TestSequence):
 
         sernum = m.ui_SnEntry.measure()[1][0]
         self._cn101.open()
-        # Reset micro.
-        d.rla_reset.pulse(0.1)
+        d.rla_reset.pulse(0.1)      # Reset ARM device
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
         self._cn101.defaults(_HW_VER, sernum)
         m.cn101_SwVer.measure()
-        _, response = m.cn101_BtMac.measure()
-        self._btmac = response[0]
+        self._btmac = m.cn101_BtMac.measure()[1][0]
 
     def _step_canbus(self):
-        """Test the CAN Bus."""
+        """Test the CAN Bus interface."""
         self.fifo_push(
             ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
         self._cn101_puts('0x10000000\r\n')
@@ -177,21 +181,14 @@ class Main(tester.TestSequence):
         m.cn101_can_id.measure()
 
     def _step_bluetooth(self):
-        """Test the Bluetooth transmitter function."""
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
-
-# FIXME: Scan bluetooth here
-
-#        self._logger.debug('Bluetooth MAC detected: %s', reply)
-#        s.oMirBT.store(0 if reply else 1)
-#        m.detectBT.measure()
+        """Test the Bluetooth interface."""
 
     def _step_motor_control(self):
-        """Activate awnings, slideouts and measure."""
+        """Activate awnings and slideouts."""
         self.fifo_push(
             ((s.oAwnA, (12.0, 0.0)), (s.oAwnB, (12.0, 0.0)),
              (s.oSldA, (12.0, 0.0)), (s.oSldB, (12.0, 0.0)), ))
-        t.motctrl.run()
+        t.motorcontrol.run()
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
