@@ -31,16 +31,16 @@ class LogicalDevices():
         self.dcs_vin = dcsource.DCSource(devices['DCS2'])
         # Power for Awnings.
         self.dcs_awn = dcsource.DCSource(devices['DCS3'])
-        self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
-        self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
-        self.rla_awnA = relay.Relay(devices['RLA3'])    # ON == Asserted
-        self.rla_awnB = relay.Relay(devices['RLA4'])    # ON == Asserted
-        self.rla_sldA = relay.Relay(devices['RLA5'])    # ON == Asserted
-        self.rla_sldB = relay.Relay(devices['RLA6'])    # ON == Asserted
-        self.rla_s1 = relay.Relay(devices['RLA7'])    # ON == Asserted
-        self.rla_s2 = relay.Relay(devices['RLA8'])    # ON == Asserted
-        self.rla_s3 = relay.Relay(devices['RLA9'])    # ON == Asserted
-        self.rla_s4 = relay.Relay(devices['RLA10'])    # ON == Asserted
+        self.rla_reset = relay.Relay(devices['RLA1'])
+        self.rla_boot = relay.Relay(devices['RLA2'])
+        self.rla_awnA = relay.Relay(devices['RLA3'])
+        self.rla_awnB = relay.Relay(devices['RLA4'])
+        self.rla_sldA = relay.Relay(devices['RLA5'])
+        self.rla_sldB = relay.Relay(devices['RLA6'])
+        self.rla_s1 = relay.Relay(devices['RLA7'])
+        self.rla_s2 = relay.Relay(devices['RLA8'])
+        self.rla_s3 = relay.Relay(devices['RLA9'])
+        self.rla_s4 = relay.Relay(devices['RLA10'])
 
     def error_check(self):
         """Check instruments for errors."""
@@ -82,10 +82,9 @@ class Sensors():
         self.oAwnB = sensor.Vdc(dmm, high=4, low=2, rng=100, res=0.01)
         self.oSldA = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
         self.oSldB = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.01)
-        tester.TranslationContext = 'cn101_initial'
         self.oSnEntry = sensor.DataEntry(
-            message=translate('msgSnEntry'),
-            caption=translate('capSnEntry'))
+            message=translate('cn101_initial', 'msgSnEntry'),
+            caption=translate('cn101_initial', 'capSnEntry'))
         self.oCANID = console.Sensor(
             cn101, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
         self.oCANBIND = console.Sensor(cn101, 'CAN_BIND')

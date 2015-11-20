@@ -8,8 +8,6 @@ import os
 import inspect
 import logging
 import time
-import subprocess
-import jsonrpclib
 
 import tester
 from ...share.isplpc import Programmer, ProgrammingError
@@ -29,8 +27,10 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 _ARM_BIN = 'cn101_1.0.000.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, '')
-
-_PYTHON27 = r'C:\Python27\pythonw.exe'
+# Serial port for the Bluetooth module.
+_BLE_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM3'}[os.name]
+# Serial port for the Trek2 as the CAN Bus interface.
+_CAN_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM4'}[os.name]
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -58,7 +58,7 @@ class Main(tester.TestSequence):
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
-            ('BlueTooth', self._step_bluetooth, None, True),
+            ('Bluetooth', self._step_bluetooth, None, True),
             ('MotorControl', self._step_motor_control, None, True),
             ('TankSense', self._step_tank_sense, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
@@ -69,29 +69,28 @@ class Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        self._cn101 = Console(
+        # Serial connection to the console
+        cn101_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
-        self._cn101.setPort(_ARM_PORT)
+        cn101_ser.setPort(_ARM_PORT)
+        # Console driver
+        self._cn101 = Console(cn101_ser)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         global d, s, m, t
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._limits, self._cn101)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
-        self._logger.debug('Starting bluetooth server')
-        try:
-            self._btserver = subprocess.Popen(
-                [_PYTHON27, '../share/btserver.py'], cwd=self._folder)
-            self.btserver = jsonrpclib.Server('http://localhost:8888/')
-        except FileNotFoundError:
-            pass
-        self._logger.debug('Connected to bluetooth server')
+
+    def _cn101_puts(self,
+                   string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._cn101.puts(string_data, preflush, postflush, priority)
 
     def close(self):
         """Finished testing."""
@@ -150,42 +149,42 @@ class Main(tester.TestSequence):
         """Test the ARM device."""
         dummy_sn = 'A1526040123'
         self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
+        self._cn101_puts('Banner1\r\nBanner2\r\n', postflush=1)
+        for _ in range(5):
+            self._cn101_puts('\r\n', postflush=1)
+        self._cn101_puts('1.0.10892.110\r\n', postflush=1)
+        self._cn101_puts('112233445566\r\n', postflush=1)
+
         sernum = m.ui_SnEntry.measure()[1][0]
         self._cn101.open()
         # Reset micro.
         d.rla_reset.pulse(0.1)
-        if self._fifo:
-            self._cn101.puts('Banner1\r\nBanner2\r\n')
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
         self._cn101.defaults(_HW_VER, sernum)
-        if self._fifo:
-            self._cn101.puts('1.0.10892.110\r\n')
         m.cn101_SwVer.measure()
-        if self._fifo:
-            self._cn101.puts('112233445566\r\n')
-        self._btmac = m.cn101_BtMac.measure()[1][0]
+        _, response = m.cn101_BtMac.measure()
+        self._btmac = response[0]
 
     def _step_canbus(self):
         """Test the CAN Bus."""
         self.fifo_push(
             ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
+        self._cn101_puts('0x10000000\r\n')
+
         m.cn101_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
-        if self._fifo:
-            self._cn101.puts('0x10000000\r\n', preflush=1)
         self._cn101.can_mode(True)
         m.cn101_can_id.measure()
 
     def _step_bluetooth(self):
         """Test the Bluetooth transmitter function."""
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
-        if self._fifo:
-            reply = True
-        else:
-            reply = self.btserver.detect(self._btmac)
-        self._logger.debug('Bluetooth MAC detected: %s', reply)
-        s.oMirBT.store(0 if reply else 1)
-        m.detectBT.measure()
+
+# FIXME: Scan bluetooth here
+
+#        self._logger.debug('Bluetooth MAC detected: %s', reply)
+#        s.oMirBT.store(0 if reply else 1)
+#        m.detectBT.measure()
 
     def _step_motor_control(self):
         """Activate awnings, slideouts and measure."""

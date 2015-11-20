@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""CN101 ARM processor console driver."""
+"""CN101 Console driver."""
 
 from ..share import console
 
@@ -20,6 +20,9 @@ _TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
 # CAN Test mode controlled by STATUS bit 29
 _CAN_ON = (1 << 29)
 _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
+# Bluetooth ready controlled by STATUS bit 27
+_BLE_ON = (1 << 27)
+_BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
 
 
 class Console(console.ConsoleGen1):
