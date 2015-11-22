@@ -35,6 +35,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerOn', self._step_poweron, None, True),
+            ('Load', self._step_loaded, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -71,5 +72,10 @@ class Main(tester.TestSequence):
 
     def _step_poweron(self):
         """Power up the Unit and measure output with min load."""
-        self.fifo_push(((s.oVout, 12.0), ))
+        self.fifo_push(((s.ps_mode, True), (s.vout, 14.40), ))
         t.pwr_on.run()
+
+    def _step_loaded(self):
+        """Load the Unit."""
+        self.fifo_push(((s.vout, (14.23, ) + (14.2, ) * 8 + (11.0, )), ))
+        t.load.run()
