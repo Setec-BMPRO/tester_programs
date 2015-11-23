@@ -90,9 +90,17 @@ class Main(tester.TestSequence):
         d.dcs_vcom.output(12.0, True)
 
     def _bp35_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BP35 buffer only if FIFOs are enabled."""
+                   string_data, preflush=0, postflush=1, priority=False,
+                   addcrlf=True):
+        """Push string data into the BP35 buffer.
+
+        Only push if FIFOs are enabled.
+        postflush=1 since the reader stops a flush marker or empty buffer.
+
+        """
         if self._fifo:
+            if addcrlf:
+                string_data = string_data + '\r\n'
             self._bp35.puts(string_data, preflush, postflush, priority)
 
     def close(self):
@@ -130,6 +138,7 @@ class Main(tester.TestSequence):
             ((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
              (s.osw3, 100.0), (s.osw4, 100.0),
              (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3), ))
+
         MeasureGroup(
             (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
             timeout=5)
@@ -162,9 +171,7 @@ class Main(tester.TestSequence):
         Device is powered by injected Battery voltage.
 
         """
-        # Set BOOT active before RESET so the ARM boot-loader runs
         d.rla_boot.set_on()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -174,7 +181,6 @@ class Main(tester.TestSequence):
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
             ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-            # Program the device (LPC1549 has internal CRC for verification)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:
@@ -183,12 +189,8 @@ class Main(tester.TestSequence):
             except ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            try:
-                ser.close()
-            except:
-                pass
+            ser.close()
         m.pgmARM.measure()
-        # Reset BOOT to ARM
         d.rla_boot.set_off()
 
     def _step_initialise_arm(self):
@@ -200,15 +202,18 @@ class Main(tester.TestSequence):
         Put device into manual control mode.
 
         """
-        dummy_sn = 'A1526040123'
-        self.fifo_push(((s.oSnEntry, (dummy_sn, )), ))
+        self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
+        for str in (('Banner1\r\nBanner2', ) +  # Banner lines
+                    ('', ) * 5 +                # defaults
+                    ('', ) * 2                  # SR setup
+                    ):
+            self._bp35_puts(str)
+        self._bp35_puts('1.0.11529.3465', postflush=0)  # SwVer measure
+
         sernum = m.ui_SnEntry.measure()[1][0]
-#        sernum = dummy_sn
         self._bp35.open()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
         time.sleep(1)
-        self._bp35_puts('Banner1\r\nBanner2\r\n')
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
         self._bp35.defaults(_HW_VER, sernum)
         self._bp35['SR_DEL_CAL'] = True
@@ -217,7 +222,6 @@ class Main(tester.TestSequence):
         d.dcs_sreg.output(20.0)
         time.sleep(1)
         self._bp35['SR_HW_VER'] = _SR_HW_VER
-        self._bp35_puts('1.0.11529.3465\r\n')
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
 
@@ -230,6 +234,7 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
+
         srtemp = self._bp35['SR_TEMP']
         self._logger.debug('Temperature: %s', srtemp)
         vset = self._limits['Vset'].limit
@@ -246,8 +251,9 @@ class Main(tester.TestSequence):
 
     def _step_aux(self):
         """Apply Auxillary input and measure voltage and current."""
-        self.fifo_push(((s.ARM_AuxV, 13.5), (s.ARM_AuxI, 0.35),
-                        (s.oVbat, 13.5), ))
+        self.fifo_push(
+            ((s.ARM_AuxV, 13.5), (s.ARM_AuxI, 0.35), (s.oVbat, 13.5), ))
+
         d.dcs_vaux.output(13.5, output=True)
         d.dcl_bat.output(0.5)
         self._bp35['AUX_RELAY'] = True
@@ -262,6 +268,7 @@ class Main(tester.TestSequence):
             ((s.oACin, 240.0), (s.o12Vpri, 12.5), (s.o5Vusb, 5.0),
              (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.oVbat, 12.8),
              (s.oVpfc, (415.0, 415.0), )))
+
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         MeasureGroup(
@@ -287,6 +294,7 @@ class Main(tester.TestSequence):
         self.fifo_push(
             ((s.oVload, (0.0, ) + (12.8, ) * 14),
              (s.oVload, (0.25, 12.34)),  ))
+
         # All outputs OFF
         self._bp35.load_set(set_on=True, loads=())
         # A little load on the output.
@@ -316,6 +324,7 @@ class Main(tester.TestSequence):
              (s.oFan, (0, 12.0)), (s.ARM_BattI, 4.0),
              (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 6 + (11.0, ), ), ))
         # (s.ARM_PriT, 26.0), [disabled because it has bugs...]
+
         # m.arm_priT, [disabled because it has bugs...]
         MeasureGroup((m.arm_acv, m.arm_acf, m.arm_secT,
                      m.arm_vout, m.arm_fan, m.dmm_fanOff), timeout=5)
@@ -336,10 +345,9 @@ class Main(tester.TestSequence):
 
     def _step_canbus(self):
         """Test the Can Bus."""
-        self.fifo_push(
-            ((s.ARM_CANBIND, 0x10000000), (s.ARM_CANID, ('RRQ,32,0,7', )), ))
-        self._bp35_puts('junk\r\n')
+        for str in ('junk', '', '0x10000000', '', 'RRQ,32,0,7'):
+            self._bp35_puts(str)
+
         m.arm_can_stats.measure()
-        self._bp35_puts('10000000\r\n', preflush=1)
         self._bp35.can_mode(True)
         m.arm_can_id.measure()
