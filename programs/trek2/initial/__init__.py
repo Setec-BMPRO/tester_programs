@@ -83,8 +83,13 @@ class Main(tester.TestSequence):
         time.sleep(2)   # Allow OS to detect the new ports
 
     def _trek2_puts(self,
-                    string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the Trek2 buffer only if FIFOs are enabled."""
+                    string_data, preflush=0, postflush=1, priority=False):
+        """Push string data into the Trek2 buffer.
+
+        Only if FIFOs are enabled.
+        postflush=1 since the reader stops at empty buffer or a flush marker.
+
+        """
         if self._fifo:
             self._trek2.puts(string_data, preflush, postflush, priority)
 
@@ -107,17 +112,15 @@ class Main(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        dummy_sn = 'A1526040123'
         self.fifo_push(
-            ((s.oSnEntry, (dummy_sn, )), (s.oVin, 12.0), (s.o3V3, 3.3), ))
+            ((s.oSnEntry, ('A1526040123', )), (s.oVin, 12.0), (s.o3V3, 3.3), ))
+
         self.sernum = m.ui_SnEntry.measure()[1][0]
         t.pwr_up.run()
 
     def _step_program(self):
         """Program the ARM device."""
-        # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
-        # Reset micro.
         d.rla_reset.pulse(0.1)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -127,7 +130,6 @@ class Main(tester.TestSequence):
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
             ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-            # Program the device (LPC1549 has internal CRC for verification)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:
@@ -136,30 +138,30 @@ class Main(tester.TestSequence):
             except ProgrammingError:
                 s.oMirARM.store(1)
         finally:
-            try:
-                ser.close()
-            except:
-                pass
+            ser.close()
         m.pgmARM.measure()
-        # Reset BOOT to ARM
         d.rla_boot.set_off()
 
     def _step_test_arm(self):
         """Test the ARM device."""
+        for str in (('Banner1\r\nBanner2\r\n', ) +
+                    ('\r\n', ) * 5 +
+                    ('1.0.11535.127\r\n', )):
+            self._trek2_puts(str)
+
         self._trek2.open()
-        d.rla_reset.pulse(0.1)          # Reset micro.
-        self._trek2_puts('Banner1\r\nBanner2\r\n')
-        self._trek2.action(None, delay=1, expected=2)   # Flush banner
+        d.rla_reset.pulse(0.1)
+        self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
         self._trek2.defaults(_HW_VER, self.sernum)
-        self._trek2_puts('1.0.11535.127\r\n')
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):
         """Test the CAN Bus."""
-        self.fifo_push(
-            ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
+        for str in ('0x10000000\r\n', '\r\n', '0x10000000\r\n',
+                    '\r\n', 'RRQ,16,0,7\r\n'):
+            self._trek2_puts(str)
+
         m.trek2_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
-        self._trek2_puts('0x10000000\r\n', preflush=1)
         self._trek2.can_mode(True)
         m.trek2_can_id.measure()
