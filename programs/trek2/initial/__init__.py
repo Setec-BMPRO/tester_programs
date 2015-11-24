@@ -83,14 +83,17 @@ class Main(tester.TestSequence):
         time.sleep(2)   # Allow OS to detect the new ports
 
     def _trek2_puts(self,
-                    string_data, preflush=0, postflush=1, priority=False):
+                    string_data, preflush=0, postflush=1, priority=False,
+                    addcrlf=True):
         """Push string data into the Trek2 buffer.
 
-        Only if FIFOs are enabled.
-        postflush=1 since the reader stops at empty buffer or a flush marker.
+        Only push if FIFOs are enabled.
+        postflush=1 since the reader stops a flush marker or empty buffer.
 
         """
         if self._fifo:
+            if addcrlf:
+                string_data = string_data + '\r\n'
             self._trek2.puts(string_data, preflush, postflush, priority)
 
     def close(self):
@@ -144,9 +147,9 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        for str in (('Banner1\r\nBanner2\r\n', ) +
-                    ('\r\n', ) * 5 +
-                    ('1.0.11535.127\r\n', )):
+        for str in (('Banner1\r\nBanner2', ) +  # Banner lines
+                    ('', ) * 5 +                # defaults
+                    ('1.0.11535.127', )):       # SwVer measure
             self._trek2_puts(str)
 
         self._trek2.open()
@@ -157,8 +160,7 @@ class Main(tester.TestSequence):
 
     def _step_canbus(self):
         """Test the CAN Bus."""
-        for str in ('0x10000000\r\n', '\r\n', '0x10000000\r\n',
-                    '\r\n', 'RRQ,16,0,7\r\n'):
+        for str in ('0x10000000', '', '0x10000000', '', 'RRQ,16,0,7'):
             self._trek2_puts(str)
 
         m.trek2_can_bind.measure(timeout=5)

@@ -145,12 +145,10 @@ class Main(tester.TestSequence):
         3V3 is injected to power the ARM for programming.
 
         """
-        # Apply and check injected rail
         d.dcs_3v3.output(9.0, True)
         self.fifo_push(((s.o3V3, 3.3), ))
         m.dmm_3V3.measure(timeout=5)
         time.sleep(2)
-        # Set BOOT active before RESET so the ARM boot-loader runs
         d.rla_boot.set_on()
         time.sleep(1)
         d.rla_reset.pulse(0.1)
@@ -162,7 +160,6 @@ class Main(tester.TestSequence):
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
         try:
             ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-            # Program the device
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:
@@ -173,7 +170,6 @@ class Main(tester.TestSequence):
         finally:
             ser.close()
         m.pgmARM.measure()
-        # Remove BOOT signal from ARM
         d.rla_boot.set_off()
 
     def _step_initialise_arm(self):

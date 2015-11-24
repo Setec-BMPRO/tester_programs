@@ -101,9 +101,17 @@ class Main(tester.TestSequence):
         t = support.SubTests(d, m)
 
     def _cn101_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the buffer only if FIFOs are enabled."""
+                    string_data, preflush=0, postflush=1, priority=False,
+                    addcrlf=True):
+        """Push string data into the CN101 buffer.
+
+        Only push if FIFOs are enabled.
+        postflush=1 since the reader stops a flush marker or empty buffer.
+
+        """
         if self._fifo:
+            if addcrlf:
+                string_data = string_data + '\r\n'
             self._cn101.puts(string_data, preflush, postflush, priority)
 
     def close(self):
@@ -126,6 +134,7 @@ class Main(tester.TestSequence):
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
         self.fifo_push(((s.oVin, 12.0), (s.o3V3, 3.3), ))
+
         t.pwr_up.run()
 
     def _step_program(self):
@@ -155,15 +164,15 @@ class Main(tester.TestSequence):
     def _step_test_arm(self):
         """Test the ARM device."""
         self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
-        self._cn101_puts('Banner1\r\nBanner2\r\n', postflush=1)
-        for _ in range(5):
-            self._cn101_puts('\r\n', postflush=1)
-        self._cn101_puts('1.0.10892.110\r\n', postflush=1)
-        self._cn101_puts('112233445566\r\n', postflush=1)
+        for str in (('Banner1\r\nBanner2', ) +
+                    ('', ) * 5 +
+                    ('1.0.10892.110', ) +
+                    ('112233445566', )):
+            self._cn101_puts(str)
 
         sernum = m.ui_SnEntry.measure()[1][0]
         self._cn101.open()
-        d.rla_reset.pulse(0.1)      # Reset ARM device
+        d.rla_reset.pulse(0.1)
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
         self._cn101.defaults(_HW_VER, sernum)
         m.cn101_SwVer.measure()
@@ -171,9 +180,8 @@ class Main(tester.TestSequence):
 
     def _step_canbus(self):
         """Test the CAN Bus interface."""
-        self.fifo_push(
-            ((s.oCANBIND, 0x10000000), (s.oCANID, ('RRQ,16,0,7', )), ))
-        self._cn101_puts('0x10000000\r\n')
+        for str in ('0x10000000', '', '0x10000000', '', 'RRQ,16,0,7'):
+            self._cn101_puts(str)
 
         m.cn101_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
@@ -188,6 +196,7 @@ class Main(tester.TestSequence):
         self.fifo_push(
             ((s.oAwnA, (12.0, 0.0)), (s.oAwnB, (12.0, 0.0)),
              (s.oSldA, (12.0, 0.0)), (s.oSldB, (12.0, 0.0)), ))
+
         t.motorcontrol.run()
 
     def _step_tank_sense(self):
