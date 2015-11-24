@@ -77,7 +77,7 @@ class Main(tester.TestSequence):
         t = support.SubTests(d, m)
         # Apply power to fixture Comms circuit.
         d.dcs_vcom.output(12.0, True)
-        time.sleep(1)       # Allow OS to detect USB serial port
+        time.sleep(2)       # Allow OS to detect USB serial port
 
     def _bc15_puts(self,
                    string_data, preflush=0, postflush=0, priority=False):
