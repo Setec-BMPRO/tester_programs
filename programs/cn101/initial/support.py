@@ -92,6 +92,10 @@ class Sensors():
             cn101, 'SwVer', rdgtype=tester.sensor.ReadingString)
         self.oBtMac = console.Sensor(
             cn101, 'BtMac', rdgtype=tester.sensor.ReadingString)
+        self.tank1 = console.Sensor(cn101, 'TANK1')
+        self.tank2 = console.Sensor(cn101, 'TANK2')
+        self.tank3 = console.Sensor(cn101, 'TANK3')
+        self.tank4 = console.Sensor(cn101, 'TANK4')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensor."""
@@ -110,10 +114,10 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
+        self.program = Measurement(limits['Program'], sense.oMirARM)
         self.detectBT = Measurement(limits['DetectBT'], sense.oMirBT)
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
-        self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
+        self.dmm_3v3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_awnAOff = Measurement(limits['AwnOff'], sense.oAwnA)
         self.dmm_awnBOff = Measurement(limits['AwnOff'], sense.oAwnB)
         self.dmm_awnAOn = Measurement(limits['AwnOn'], sense.oAwnA)
@@ -122,11 +126,15 @@ class Measurements():
         self.dmm_sldBOff = Measurement(limits['SldOutOff'], sense.oSldB)
         self.dmm_sldAOn = Measurement(limits['SldOutOn'], sense.oSldA)
         self.dmm_sldBOn = Measurement(limits['SldOutOn'], sense.oSldB)
-        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
+        self.ui_serialnum = Measurement(limits['SerNum'], sense.oSnEntry)
         self.cn101_can_id = Measurement(limits['CAN_ID'], sense.oCANID)
         self.cn101_can_bind = Measurement(limits['CAN_BIND'], sense.oCANBIND)
-        self.cn101_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
-        self.cn101_BtMac = Measurement(limits['BtMac'], sense.oBtMac)
+        self.cn101_swver = Measurement(limits['SwVer'], sense.oSwVer)
+        self.cn101_btmac = Measurement(limits['BtMac'], sense.oBtMac)
+        self.cn101_s1 = Measurement(limits['Tank'], sense.tank1)
+        self.cn101_s2 = Measurement(limits['Tank'], sense.tank2)
+        self.cn101_s3 = Measurement(limits['Tank'], sense.tank3)
+        self.cn101_s4 = Measurement(limits['Tank'], sense.tank4)
 
 
 class SubTests():
@@ -145,7 +153,7 @@ class SubTests():
         # PowerUp:
         dcs1 = DcSubStep(
             setting=((d.dcs_vcom, 12.0), (d.dcs_vin, 12.75)), output=True)
-        msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3V3), timeout=5)
+        msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
         # Awning:
         dcs1 = DcSubStep(setting=((d.dcs_awn, 12.3), ), output=True)

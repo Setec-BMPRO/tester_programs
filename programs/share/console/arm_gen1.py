@@ -216,6 +216,7 @@ class ConsoleGen1():
             # No echo or delay - send as a multi-byte lump
             self._port.write(cmd_data + _CMD_RUN)
         else:
+#            self._logger.debug('FlushInput')
             self._port.flushInput()
             # Send each byte with echo verification
             for a_byte in cmd_data:
@@ -245,6 +246,7 @@ class ConsoleGen1():
         """
         # Read until a timeout happens
         buf = self._port.read(1024)
+#        self._logger.debug('Rx <--- %s', repr(buf))
         if buf.startswith(_CMD_SUFFIX):
             buf = buf[len(_CMD_SUFFIX):]
         if buf.endswith(_CMD_PROMPT1):

@@ -40,6 +40,10 @@ class Console(console.ConsoleGen1):
             'CAN_ID': ParameterCAN('TQQ,16,0'),
             'SwVer': ParameterRaw('', func=self.version),
             'BtMac': ParameterRaw('', func=self.mac),
+            'TANK1': ParameterFloat('TANK_1_LEVEL'),
+            'TANK2': ParameterFloat('TANK_2_LEVEL'),
+            'TANK3': ParameterFloat('TANK_3_LEVEL'),
+            'TANK4': ParameterFloat('TANK_4_LEVEL'),
             }
 
     def testmode(self, state):

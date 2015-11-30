@@ -106,7 +106,7 @@ class Main(tester.TestSequence):
         """Push string data into the CN101 buffer.
 
         Only push if FIFOs are enabled.
-        postflush=1 since the reader stops a flush marker or empty buffer.
+        postflush=1 since the reader stops at a flush marker or empty buffer.
 
         """
         if self._fifo:
@@ -158,7 +158,7 @@ class Main(tester.TestSequence):
                 s.oMirARM.store(1)
         finally:
             ser.close()
-        m.pgmARM.measure()
+        m.program.measure()
         d.rla_boot.set_off()
 
     def _step_test_arm(self):
@@ -170,18 +170,19 @@ class Main(tester.TestSequence):
                     ('112233445566', )):
             self._cn101_puts(str)
 
-        sernum = m.ui_SnEntry.measure()[1][0]
+        sernum = m.ui_serialnum.measure()[1][0]
         self._cn101.open()
         d.rla_reset.pulse(0.1)
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
         self._cn101.defaults(_HW_VER, sernum)
-        m.cn101_SwVer.measure()
-        self._btmac = m.cn101_BtMac.measure()[1][0]
+        m.cn101_swver.measure()
+        self._btmac = m.cn101_btmac.measure()[1][0]
 
     def _step_canbus(self):
         """Test the CAN Bus interface."""
-        for str in ('0x10000000', '', '0x10000000', '', 'RRQ,16,0,7'):
+        for str in ('0x10000000', '', '0x10000000', ''):
             self._cn101_puts(str)
+        self._cn101_puts('RRQ,16,0,7', postflush=0)
 
         m.cn101_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
@@ -201,3 +202,9 @@ class Main(tester.TestSequence):
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
+        for str in (('4', ) * 4):
+            self._cn101_puts(str)
+
+        for rla in (d.rla_s1, d.rla_s2, d.rla_s3, d.rla_s4):
+            rla.set_on()
+        MeasureGroup((m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4, ))
