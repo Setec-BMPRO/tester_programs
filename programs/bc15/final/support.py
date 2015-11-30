@@ -49,8 +49,11 @@ class Sensors():
         dmm = logical_devices.dmm
         self.vout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.ps_mode = sensor.Notify(
-            message=translate('bc15_final', 'GoIntoPsMode'),
+            message=translate('bc15_final', 'GoToPsMode'),
             caption=translate('bc15_final', 'capPsMode'))
+        self.ch_mode = sensor.Notify(
+            message=translate('bc15_final', 'GoToChargeMode'),
+            caption=translate('bc15_final', 'capChargeMode'))
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.vout,
             detect_limit=(limits['InOCP'], ),
@@ -71,6 +74,7 @@ class Measurements():
         self.vout_nl = Measurement(limits['VoutNL'], sense.vout)
         self.vout = Measurement(limits['Vout'], sense.vout)
         self.ps_mode = Measurement(limits['Notify'], sense.ps_mode)
+        self.ch_mode = Measurement(limits['Notify'], sense.ch_mode)
         self.ocp = Measurement(limits['OCP'], sense.ocp)
 
 
@@ -94,7 +98,7 @@ class SubTests():
         msr1 = MeasureSubStep((m.ps_mode, m.vout_nl, ), timeout=5)
         self.pwr_on = Step((ld1, acs1, msr1, ))
         # Loaded:
-        #   Apply 10A load, measure
+        #   Apply 10A load, measure, enter Charger mode
         ld10 = LoadSubStep(((d.dcl, 10.0), ), output=True)
-        msr10 = MeasureSubStep((m.vout, m.ocp, ), timeout=5)
+        msr10 = MeasureSubStep((m.vout, m.ocp, m.ch_mode, ), timeout=5)
         self.load = Step((ld10, msr10, ))

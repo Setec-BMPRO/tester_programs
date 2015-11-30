@@ -207,6 +207,7 @@ class Main(tester.TestSequence):
         t.pwr_up.run()
         self._bc15.open()
         self._bc15.ps_mode()
+# FIXME: Save the "Power Supply" mode state in the unit (new command required)
 
     def _step_output(self):
         """Tests of the output.
