@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-11-20, 14:49:48 -->
+<!-- Saved: 2015-12-02, 16:15:07 -->
 <!-- Copyright (C) 2015 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -291,7 +291,6 @@
     <Other>programs/batterycheck/initial/BatteryCheckControl_1.7.4080.hex</Other>
     <Other>programs/batterycheck/initial/BatteryCheckSupervisor-2.hex</Other>
     <Other>programs/bp35/initial/bp35_1.0.11529.3465.bin</Other>
-    <Other>programs/bp35/initial/bp35sr_1.0.11518.126.hex</Other>
     <Other>programs/c45a15/initial/c45a-15.hex</Other>
     <Other>programs/cmrsbp/CMR-SBP-9.hex</Other>
     <Other>programs/cn101/initial/cn101_1.0.000.bin</Other>
@@ -306,6 +305,7 @@
     <Other>programs/sx750/initial/sx750_pic_2.hex</Other>
     <Other>programs/trek2/initial/Trek2_1.0.11535.127.bin</Other>
     <Other>programs/bc15/initial/bc15_1.0.1274.bin</Other>
+    <Other>programs/bp35/initial/bp35sr_1.0.12123.142.hex</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>

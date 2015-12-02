@@ -28,7 +28,7 @@ _ARM_BIN = 'bp35_1.0.11529.3465.bin'
 # Soler Regulator Hardware version
 _SR_HW_VER = 1
 # dsPIC software image file
-_PIC_HEX = 'bp35sr_1.0.11518.126.hex'
+_PIC_HEX = 'bp35sr_1.0.12123.142.hex'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
