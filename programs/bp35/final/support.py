@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""BP35 Final Test Program.
+"""BP35 Final Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
-import tester
+import sensor
 from tester.devlogical import *
 from tester.measure import *
-
-sensor = tester.sensor
 
 
 class LogicalDevices():

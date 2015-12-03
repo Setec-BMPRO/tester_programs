@@ -6,11 +6,9 @@ import os
 import inspect
 import logging
 import time
-
 import tester
 from . import support
 from . import limit
-
 from ...share.programmer import ProgramPIC
 
 LIMIT_DATA = limit.DATA

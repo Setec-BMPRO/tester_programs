@@ -8,10 +8,10 @@ import configparser
 import logging.handlers
 from pydispatch import dispatcher
 import time
-
 import gpib
 import tester
-#tester.sensor.DSO_DELAY = False
+#import sensor
+#sensor.DSO_DELAY = False
 from programs import PROGRAMS
 
 # Configuration of logger.

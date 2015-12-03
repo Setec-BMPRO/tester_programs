@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Trek2 Final Test Program.
+"""Trek2 Final Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from .. import console
 
-sensor = tester.sensor
 translate = tester.translate
 
 

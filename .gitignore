@@ -21,8 +21,8 @@ __pycache__/
 *.coverage
 *.api
 *.bas
-dummy
+sensor
 tester
+isplpc
 main.py.ini
 programs/dummy
-programs/share/isplpc

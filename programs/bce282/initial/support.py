@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 """BCE282-12/24 Initial Test Program."""
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
 from . import msp
-
-sensor = tester.sensor
 
 
 class LogicalDevices():

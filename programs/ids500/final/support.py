@@ -3,13 +3,12 @@
 """IDS-500 Final Test Program."""
 
 from pydispatch import dispatcher
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from .. import console
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -94,11 +93,11 @@ class Sensors():
         self.o5V = sensor.Vdc(dmm, high=12, low=1, rng=10, res=0.001)
         self.PwrOk = sensor.Vdc(dmm, high=13, low=2, rng=10, res=0.001)
         self.oPic_SwTstMode = console.Sensor(
-            picdev, 'PIC-SwTstMode', rdgtype=tester.sensor.ReadingString)
+            picdev, 'PIC-SwTstMode', rdgtype=sensor.ReadingString)
         self.oPic_HwVerChk = console.Sensor(
-            picdev, 'PIC-HwVerCheck', rdgtype=tester.sensor.ReadingString)
+            picdev, 'PIC-HwVerCheck', rdgtype=sensor.ReadingString)
         self.oPic_SerChk = console.Sensor(
-            picdev, 'PIC-SerCheck', rdgtype=tester.sensor.ReadingString)
+            picdev, 'PIC-SerCheck', rdgtype=sensor.ReadingString)
         self.oYesNoPsu = sensor.YesNo(
             message=translate('ids500_final', 'IsPSULedGreen?'),
             caption=translate('ids500_final', 'capPsuLed'))

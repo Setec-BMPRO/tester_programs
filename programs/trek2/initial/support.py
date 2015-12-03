@@ -4,12 +4,12 @@
 
 from pydispatch import dispatcher
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from .. import console
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -73,10 +73,10 @@ class Sensors():
             caption=translate('trek2_initial', 'capSnEntry'),
             timeout=300)
         self.oCANID = console.Sensor(
-            trek2, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
+            trek2, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.oCANBIND = console.Sensor(trek2, 'CAN_BIND')
         self.oSwVer = console.Sensor(
-            trek2, 'SwVer', rdgtype=tester.sensor.ReadingString)
+            trek2, 'SwVer', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensor."""

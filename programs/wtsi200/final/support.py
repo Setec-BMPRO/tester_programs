@@ -4,12 +4,10 @@
 
 from pydispatch import dispatcher
 import time
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-
-sensor = tester.sensor
 
 
 class LogicalDevices():

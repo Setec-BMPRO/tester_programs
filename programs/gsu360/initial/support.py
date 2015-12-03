@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 """GSU360-1TA Initial Test Program."""
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-
-sensor = tester.sensor
 
 
 class LogicalDevices():

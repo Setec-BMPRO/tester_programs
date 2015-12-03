@@ -9,7 +9,6 @@ import time
 import subprocess
 import logging
 import jsonrpclib
-
 import tester
 from ...share.programmer import ProgramARM
 from ...share.sim_serial import SimSerial

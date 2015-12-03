@@ -3,12 +3,10 @@
 """BCE4 Final Test Program."""
 
 import time
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-
-sensor = tester.sensor
 
 
 class LogicalDevices():

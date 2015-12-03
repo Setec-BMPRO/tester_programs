@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """Selfchecker Test Program."""
 
+import sensor
 import tester
 from tester.devlogical import *
 
 Measurement = tester.measure.Measurement
-sensor = tester.sensor
 
 
 class LogicalDevices(object):

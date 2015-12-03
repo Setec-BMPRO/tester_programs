@@ -5,9 +5,7 @@
 import logging
 import time
 
-import tester.testsequence
-import tester.measure
-import tester.sensor
+import tester
 
 from . import support
 from . import limit

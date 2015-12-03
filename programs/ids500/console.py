@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
-"""
-IDS-500 PIC processor console driver.
+"""IDS-500 PIC processor console driver.
 
 Communication via Serial port to the PIC processor.
 
@@ -11,9 +9,8 @@ Communication via Serial port to the PIC processor.
 import time
 import logging
 import re
-
-import tester.testlimit
-
+import sensor
+from tester.testlimit import LimitBoolean
 
 # Line terminator
 _EOL = b'\r\n'
@@ -32,18 +29,17 @@ class HwVerError(Exception):
     """Hardware Version Error."""
 
 
-class Sensor(tester.sensor.Sensor):
+class Sensor(sensor.Sensor):
 
     """PIC console data exposed as a Sensor."""
 
-    def __init__(self, pic, key, rdgtype=tester.sensor.Reading, position=1):
+    def __init__(self, pic, key, rdgtype=sensor.Reading, position=1):
         super().__init__(pic, position)
         self._pic = pic
         self._key = key
         self._rdgtype = rdgtype
-        self._logger = logging.getLogger('.'.join(
-                                                 (__name__,
-                                                  self.__class__.__name__)))
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
         self._logger.debug('Created')
 
     def configure(self):
@@ -79,22 +75,21 @@ class Console():
 
     def __init__(self, serport):
         """Open serial communications."""
-        self._logger = logging.getLogger('.'.join(
-                                                 (__name__,
-                                                  self.__class__.__name__)))
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
         self._serport = serport
         self._buf = b''
-        self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
+        self._limit = LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
         # Name -> (function, Command))
         self._data = {
-                      'PIC-SwTstMode': (self._getstring, None),
-                      'PIC-HwVerCheck': (self._getstring, '?,I,2'),
-                      'PIC-SerCheck': (self._getstring, '?,I,3'),
-                      'PIC-SwRev': (self._getstring, '?,I,1'),
-                      'PIC-MicroTemp': (self._getstring, '?,D,16'),
-                      }
+            'PIC-SwTstMode': (self._getstring, None),
+            'PIC-HwVerCheck': (self._getstring, '?,I,2'),
+            'PIC-SerCheck': (self._getstring, '?,I,3'),
+            'PIC-SwRev': (self._getstring, '?,I,1'),
+            'PIC-MicroTemp': (self._getstring, '?,D,16'),
+            }
 
     def configure(self, cmd):
         """Sensor: Configure for next reading."""

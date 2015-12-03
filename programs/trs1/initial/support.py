@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 """Trs1 Initial Test Program."""
 
-import tester
+import sensor
 from tester.devlogical import *
 from tester.measure import *
-
-sensor = tester.sensor
 
 
 class LogicalDevices():

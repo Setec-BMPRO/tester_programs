@@ -9,7 +9,7 @@ import logging
 
 import tester
 from ...share.sim_serial import SimSerial
-from ...share.isplpc import Programmer, ProgrammingError
+from isplpc import Programmer, ProgrammingError
 from ...share.console import ConsoleGen0
 from . import support
 from . import limit

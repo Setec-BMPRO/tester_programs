@@ -4,11 +4,11 @@
 
 from pydispatch import dispatcher
 
-import tester.measure
+import sensor
+import tester
 from tester.devlogical import *
 from tester.measure import *
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -40,7 +40,7 @@ class Sensors(object):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         self.oMirBT = sensor.Mirror()
-        self.oMirSwVer = sensor.Mirror(rdgtype=tester.sensor.ReadingString)
+        self.oMirSwVer = sensor.Mirror(rdgtype=sensor.ReadingString)
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
         self.o12V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)

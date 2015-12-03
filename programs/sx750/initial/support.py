@@ -3,15 +3,12 @@
 """SX-750 Initial Test Program."""
 
 from pydispatch import dispatcher
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from ...share.console import Sensor as con_sensor
 from . import digpot
-
-
-sensor = tester.sensor
 
 
 class LogicalDevices():
@@ -117,7 +114,7 @@ class Sensors():
         self.ARM_12V = con_sensor(armdev, 'ARM-12V')
         self.ARM_24V = con_sensor(armdev, 'ARM-24V')
         self.ARM_SwVer = con_sensor(
-            armdev, 'ARM_SwVer', rdgtype=tester.sensor.ReadingString)
+            armdev, 'ARM_SwVer', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

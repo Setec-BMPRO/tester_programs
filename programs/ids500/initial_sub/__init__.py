@@ -4,14 +4,12 @@
 
 import os
 import logging
-
 import tester
 from . import support
 from . import limit
 from ...share.programmer import ProgramPIC
 from ...share.sim_serial import SimSerial
 from ..console import Console
-
 
 LIMIT_DATA = limit.DATA
 

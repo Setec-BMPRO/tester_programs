@@ -3,12 +3,11 @@
 """BCE282-12/24 Final Program."""
 
 import time
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
-sensor = tester.sensor
 translate = tester.translate
 
 

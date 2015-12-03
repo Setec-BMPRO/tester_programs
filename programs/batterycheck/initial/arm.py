@@ -16,8 +16,8 @@ Values:
 import logging
 import time
 
+import sensor
 import tester
-
 
 # Line terminators
 _EOL_IN = b'\n'
@@ -30,11 +30,11 @@ _NVW = 1.0
 _READ_TMO = 2.0
 
 
-class Sensor(tester.sensor.Sensor):
+class Sensor(sensor.Sensor):
 
     """ARM console data exposed as a Sensor."""
 
-    def __init__(self, arm, key, rdgtype=tester.sensor.Reading, position=1):
+    def __init__(self, arm, key, rdgtype=sensor.Reading, position=1):
         """Create sensor."""
         super().__init__(arm, position)
         self._arm = arm

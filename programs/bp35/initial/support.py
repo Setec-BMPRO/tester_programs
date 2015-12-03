@@ -3,13 +3,12 @@
 """BP35 Initial Test Program."""
 
 from pydispatch import dispatcher
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from .. import console
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -99,7 +98,7 @@ class Sensors():
             message=translate('bp35_initial', 'msgSnEntry'),
             caption=translate('bp35_initial', 'capSnEntry'))
         self.ARM_SwVer = console.Sensor(
-            bp35, 'SwVer', rdgtype=tester.sensor.ReadingString)
+            bp35, 'SwVer', rdgtype=sensor.ReadingString)
         self.ARM_AcV = console.Sensor(bp35, 'AC_V')
         self.ARM_AcF = console.Sensor(bp35, 'AC_F')
         self.ARM_PriT = console.Sensor(bp35, 'PRI_T')
@@ -109,7 +108,7 @@ class Sensors():
         self.ARM_BattSw = console.Sensor(bp35, 'BATT_SWITCH')
         self.ARM_Fan = console.Sensor(bp35, 'FAN')
         self.ARM_CANID = console.Sensor(
-            bp35, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
+            bp35, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.ARM_CANBIND = console.Sensor(bp35, 'CAN_BIND')
         self.ARM_CANSTATS = console.Sensor(bp35, 'CAN_STATS')
         # Generate 14 load current sensors

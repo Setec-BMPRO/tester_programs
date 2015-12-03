@@ -3,9 +3,7 @@
 """Base classes for Serial Consoles."""
 
 import logging
-
-import tester
-
+import sensor
 
 # Delay after a value set command
 _SET_DELAY = 0.3
@@ -16,13 +14,13 @@ class ConsoleError(Exception):
     """Serial Command Echo or Response Error."""
 
 
-class Sensor(tester.sensor.Sensor):
+class Sensor(sensor.Sensor):
 
     """Console data exposed as a Sensor."""
 
     def __init__(self,
             arm, key,
-            rdgtype=tester.sensor.Reading, position=1,
+            rdgtype=sensor.Reading, position=1,
             scale=1.0):
         """Create a sensor."""
         super().__init__(arm, position)

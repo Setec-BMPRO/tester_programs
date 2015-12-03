@@ -8,9 +8,7 @@ import os
 import logging
 import time
 
-import tester.testsequence
-import tester.measure
-import tester.sensor
+import tester
 
 from . import msp
 from . import support

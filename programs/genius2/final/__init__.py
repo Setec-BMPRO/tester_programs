@@ -3,7 +3,6 @@
 """Final Test Program for GENIUS-II and GENIUS-II-H."""
 
 import logging
-
 import tester
 from . import support
 from . import limit

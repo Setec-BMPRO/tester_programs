@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """TS3020H Final Test Program."""
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -30,9 +30,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
 
 

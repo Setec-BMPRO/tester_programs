@@ -4,12 +4,12 @@
 
 from pydispatch import dispatcher
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from .. import console
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -86,12 +86,12 @@ class Sensors():
             message=translate('cn101_initial', 'msgSnEntry'),
             caption=translate('cn101_initial', 'capSnEntry'))
         self.oCANID = console.Sensor(
-            cn101, 'CAN_ID', rdgtype=tester.sensor.ReadingString)
+            cn101, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.oCANBIND = console.Sensor(cn101, 'CAN_BIND')
         self.oSwVer = console.Sensor(
-            cn101, 'SwVer', rdgtype=tester.sensor.ReadingString)
+            cn101, 'SwVer', rdgtype=sensor.ReadingString)
         self.oBtMac = console.Sensor(
-            cn101, 'BtMac', rdgtype=tester.sensor.ReadingString)
+            cn101, 'BtMac', rdgtype=sensor.ReadingString)
         self.tank1 = console.Sensor(cn101, 'TANK1')
         self.tank2 = console.Sensor(cn101, 'TANK2')
         self.tank3 = console.Sensor(cn101, 'TANK3')

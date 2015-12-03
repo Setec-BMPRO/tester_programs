@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """SMU750-70 Final Test Program."""
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -18,9 +18,7 @@ class LogicalDevices():
         """Create all Logical Instruments."""
         self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
-
         self.acsource = acsource.ACSource(devices['ACS'])
-
         dcl1 = dcload.DCLoad(devices['DCL1'])
         dcl2 = dcload.DCLoad(devices['DCL2'])
         dcl3 = dcload.DCLoad(devices['DCL3'])
@@ -33,9 +31,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Loads
         self.dcl.output(0.0, False)
 
 
@@ -64,7 +60,6 @@ class Measurements():
         """Create all Measurement instances."""
         self.dmm_70Von = Measurement(limits['70VOn'], sense.o70V)
         self.dmm_70Voff = Measurement(limits['70VOff'], sense.o70V)
-
         self.ui_YesNoFan = Measurement(limits['Notify'], sense.oYesNoFan)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
 

@@ -10,7 +10,7 @@ import logging
 import time
 
 import tester
-from ...share.isplpc import Programmer, ProgrammingError
+from isplpc import Programmer, ProgrammingError
 from ...share.sim_serial import SimSerial
 from ..console import Console
 from . import support

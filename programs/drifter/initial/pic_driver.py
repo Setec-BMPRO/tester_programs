@@ -9,8 +9,8 @@ Communication via Serial port to the PIC processor.
 import serial
 import time
 import logging
-
-import tester
+import sensor
+from tester.testlimit import LimitBoolean
 
 
 # Line terminator
@@ -27,11 +27,11 @@ class TimeoutError(Exception):
     """Read line Timeout."""
 
 
-class Sensor(tester.sensor.Sensor):
+class Sensor(sensor.Sensor):
 
     """PIC console data exposed as a Sensor."""
 
-    def __init__(self, pic, key, rdgtype=tester.sensor.Reading, position=1):
+    def __init__(self, pic, key, rdgtype=sensor.Reading, position=1):
         """Create sensor."""
         super().__init__(pic, position)
         self._pic = pic
@@ -67,7 +67,7 @@ class Console():
         self._baud = baud
         self._ser = None
         self._buf = b''
-        self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
+        self._limit = LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor ))

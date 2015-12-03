@@ -3,7 +3,6 @@
 """ATXG-450-2V Final Test Program."""
 
 import logging
-
 import tester
 from . import support
 from . import limit

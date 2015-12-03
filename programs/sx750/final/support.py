@@ -4,12 +4,11 @@
 
 import time
 from pydispatch import dispatcher
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -54,7 +53,8 @@ class Sensors():
         self.oMir12v = sensor.Mirror()
         self.oMir24v = sensor.Mirror()
         dispatcher.connect(
-            self._reset, sender=tester.signals.Thread.tester,
+            self._reset,
+            sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
         self.oInpRes = sensor.Res(dmm, high=1, low=1, rng=1000000, res=1)
         self.oIec = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)

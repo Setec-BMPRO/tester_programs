@@ -3,14 +3,12 @@
 """Drifter Initial Test Program."""
 
 from pydispatch import dispatcher
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
 from . import pic_driver
-
-sensor = tester.sensor
 
 
 class LogicalDevices():
@@ -60,8 +58,10 @@ class Sensors():
         self.oMirPIC = sensor.Mirror()
         self.oMirErrorV = sensor.Mirror()
         self.oMirErrorI = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oVsw = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.001)
         self.oVref = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.001)

@@ -3,12 +3,10 @@
 """RM-50-24 Final Test Program."""
 
 from pydispatch import dispatcher
-
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-
-sensor = tester.sensor
 
 
 class LogicalDevices():
@@ -56,8 +54,10 @@ class Sensors():
         self.oMirVdcDrop = sensor.Mirror()
         self.oMirPowNL = sensor.Mirror()
         self.oMirEff = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.Lock = sensor.Res(dmm, high=9, low=5, rng=10000, res=1)
         self.oRsense = sensor.Res(dmm, high=1, low=1, rng=10000, res=1)
         self.oVsense = sensor.Vdc(

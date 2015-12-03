@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 """Spa SINGLE Initial Test Program."""
 
-import tester
+import sensor
 from tester.devlogical import *
 from tester.measure import *
-
-sensor = tester.sensor
 
 # Scale factor for AC Input Current sensors.
 #   0R1 current sense resistor

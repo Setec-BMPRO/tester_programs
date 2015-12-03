@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """BC15 Final Test Program."""
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
-sensor = tester.sensor
 translate = tester.translate
 
 

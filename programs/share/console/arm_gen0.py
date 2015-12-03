@@ -8,9 +8,7 @@ Communication via SimSerial port to the ARM processor.
 
 import time
 import logging
-
-from . import tester
-
+import tester
 
 # Line terminator
 _EOL = b'\r'

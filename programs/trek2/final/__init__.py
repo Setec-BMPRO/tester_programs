@@ -5,7 +5,6 @@
 import logging
 import os
 import time
-
 import tester
 from ...share.sim_serial import SimSerial
 from . import support

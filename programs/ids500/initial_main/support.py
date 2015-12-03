@@ -3,10 +3,9 @@
 """IDS-500 Initial Main Test Program."""
 
 from pydispatch import dispatcher
-
-import tester.measure
+import sensor
+import tester
 from tester.devlogical import *
-from tester.sensor import *
 
 
 class LogicalDevices():
@@ -76,31 +75,31 @@ class Sensors():
             self._reset,
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
-        self.Lock = s_dmm.Res(dmm, high=18, low=3, rng=10000, res=1)
-        self.oTec = s_dmm.Vdc(dmm, high=1, low=4, rng=100, res=0.001)
-        self.oLdd = s_dmm.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
-        self.oTecVset = s_dmm.Vdc(dmm, high=3, low=7, rng=10, res=0.001)
-        self.oTecVmon = s_dmm.Vdc(dmm, high=4, low=7, rng=10, res=0.001)
-        self.oIsSet = s_dmm.Vdc(dmm, high=5, low=7, rng=10, res=0.001)
-        self.oIsIout = s_dmm.Vdc(dmm, high=6, low=7, rng=10, res=0.001)
-        self.oIsVmon = s_dmm.Vdc(dmm, high=7, low=7, rng=10, res=0.001)
-        self.oIsOut = s_dmm.Vdc(dmm, high=14, low=6, rng=10, res=0.001)
-        self.o15V = s_dmm.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
-        self.om15V = s_dmm.Vdc(dmm, high=9, low=3, rng=100, res=0.001)
-        self.o15Vp = s_dmm.Vdc(dmm, high=10, low=3, rng=100, res=0.001)
-        self.o15VpSw = s_dmm.Vdc(dmm, high=11, low=3, rng=100, res=0.001)
-        self.o5V = s_dmm.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
-        self.oPwrOk = s_dmm.Vdc(dmm, high=13, low=8, rng=100, res=0.01)
-        self.oActive = s_dmm.Vac(dmm, high=20, low=1, rng=1000, res=0.01)
-        self.oVbus = s_dmm.Vdc(dmm, high=15, low=2, rng=1000, res=0.01)
-        self.oRed = s_dmm.Vdc(dmm, high=16, low=7, rng=10, res=0.01)
-        self.oGreen = s_dmm.Vdc(dmm, high=17, low=7, rng=10, res=0.01)
-        self.oFan1 = s_dmm.Vdc(dmm, high=18, low=7, rng=100, res=0.001)
-        self.oFan2 = s_dmm.Vdc(dmm, high=19, low=7, rng=100, res=0.001)
-        self.oVsec13V = s_dmm.Vdc(dmm, high=21, low=7, rng=100, res=0.01)
-        self.o5VLddTec = s_dmm.Vdc(dmm, high=22, low=7, rng=10, res=0.01)
-        self.o5VuPAux = s_dmm.Vdc(dmm, high=23, low=7, rng=10, res=0.01)
-        self.o5VuP = s_dmm.Vdc(dmm, high=24, low=7, rng=10, res=0.01)
+        self.Lock = sensor.Res(dmm, high=18, low=3, rng=10000, res=1)
+        self.oTec = sensor.Vdc(dmm, high=1, low=4, rng=100, res=0.001)
+        self.oLdd = sensor.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
+        self.oTecVset = sensor.Vdc(dmm, high=3, low=7, rng=10, res=0.001)
+        self.oTecVmon = sensor.Vdc(dmm, high=4, low=7, rng=10, res=0.001)
+        self.oIsSet = sensor.Vdc(dmm, high=5, low=7, rng=10, res=0.001)
+        self.oIsIout = sensor.Vdc(dmm, high=6, low=7, rng=10, res=0.001)
+        self.oIsVmon = sensor.Vdc(dmm, high=7, low=7, rng=10, res=0.001)
+        self.oIsOut = sensor.Vdc(dmm, high=14, low=6, rng=10, res=0.001)
+        self.o15V = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
+        self.om15V = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.001)
+        self.o15Vp = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.001)
+        self.o15VpSw = sensor.Vdc(dmm, high=11, low=3, rng=100, res=0.001)
+        self.o5V = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
+        self.oPwrOk = sensor.Vdc(dmm, high=13, low=8, rng=100, res=0.01)
+        self.oActive = sensor.Vac(dmm, high=20, low=1, rng=1000, res=0.01)
+        self.oVbus = sensor.Vdc(dmm, high=15, low=2, rng=1000, res=0.01)
+        self.oRed = sensor.Vdc(dmm, high=16, low=7, rng=10, res=0.01)
+        self.oGreen = sensor.Vdc(dmm, high=17, low=7, rng=10, res=0.01)
+        self.oFan1 = sensor.Vdc(dmm, high=18, low=7, rng=100, res=0.001)
+        self.oFan2 = sensor.Vdc(dmm, high=19, low=7, rng=100, res=0.001)
+        self.oVsec13V = sensor.Vdc(dmm, high=21, low=7, rng=100, res=0.01)
+        self.o5VLddTec = sensor.Vdc(dmm, high=22, low=7, rng=10, res=0.01)
+        self.o5VuPAux = sensor.Vdc(dmm, high=23, low=7, rng=10, res=0.01)
+        self.o5VuP = sensor.Vdc(dmm, high=24, low=7, rng=10, res=0.01)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

@@ -3,14 +3,10 @@
 """GEN8 Initial Test Program."""
 
 from pydispatch import dispatcher
-
-import tester
+import sensor
 from tester.devlogical import *
 from tester.measure import *
 from ...share.console import Sensor as con_sensor
-
-
-sensor = tester.sensor
 
 
 class LogicalDevices():
@@ -65,8 +61,10 @@ class Sensors():
         dmm = d.dmm
         # Mirror sensor for Programming result logging
         self.oMirARM = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset,
+            sender=signals.Thread.tester,
+            signal=signals.TestRun.stop)
         self.o5V = sensor.Vdc(dmm, high=7, low=4, rng=10, res=0.001)
         self.o12V = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
         self.o12V2 = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
@@ -93,7 +91,7 @@ class Sensors():
         self.ARM_12Vadc = con_sensor(armdev, 'ARM-12Vadc')
         self.ARM_24Vadc = con_sensor(armdev, 'ARM-24Vadc')
         self.ARM_SwVer = con_sensor(
-            armdev, 'ARM_SwVer', rdgtype=tester.sensor.ReadingString)
+            armdev, 'ARM_SwVer', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensor."""

@@ -8,7 +8,6 @@ Call 'self.abort()' to stop program running at end of current step.
 """
 
 import logging
-
 import tester
 from . import support
 from . import limit

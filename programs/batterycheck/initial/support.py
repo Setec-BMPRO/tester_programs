@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck Initial Test Program."""
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from . import arm
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -51,7 +51,7 @@ class Sensors(object):
         self.ARMvolt = arm.Sensor(armdev, 'ARM_Volt')
         self.ARMcurr = arm.Sensor(armdev, 'ARM_Curr')
         self.ARMsoft = arm.Sensor(
-            armdev, 'ARM_SwVer', rdgtype=tester.sensor.ReadingString)
+            armdev, 'ARM_SwVer', rdgtype=sensor.ReadingString)
         self.oMirAVR = sensor.Mirror()
         self.oMirARM = sensor.Mirror()
         self.oMirBT = sensor.Mirror()

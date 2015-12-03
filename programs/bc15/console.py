@@ -4,7 +4,6 @@
 
 from ..share import console
 
-
 Sensor = console.Sensor
 
 # Some easier to use short names

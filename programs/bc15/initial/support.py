@@ -4,12 +4,12 @@
 
 from pydispatch import dispatcher
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 from . import console
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -82,7 +82,7 @@ class Sensors():
             detect_limit=(limits['InOCP'], ),
             start=14.0, stop=17.0, step=0.25, delay=0.1)
         self.arm_swver = console.Sensor(
-            bc15, 'SwVer', rdgtype=tester.sensor.ReadingString)
+            bc15, 'SwVer', rdgtype=sensor.ReadingString)
         self.arm_vout = console.Sensor(
             bc15, 'not-pulsing-volts', scale=0.001)
         self.arm_iout = console.Sensor(

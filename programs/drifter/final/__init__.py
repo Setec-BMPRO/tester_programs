@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 """Drifter Final Test Program."""
 
 import logging
-
 import tester
 from . import support
 from . import limit

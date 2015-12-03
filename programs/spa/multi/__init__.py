@@ -13,7 +13,6 @@ import queue
 import logging
 import traceback
 import serial
-
 import tester
 from . import support
 from . import limit

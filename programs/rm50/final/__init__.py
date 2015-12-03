@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 """RM-50-24 Final Test Program."""
 
 import logging
 import time
-
 import tester
 from . import support
 from . import limit

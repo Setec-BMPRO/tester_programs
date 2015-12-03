@@ -4,11 +4,11 @@
 
 from pydispatch import dispatcher
 
+import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
 
-sensor = tester.sensor
 translate = tester.translate
 
 
@@ -61,8 +61,10 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         self.oMirReg = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.oLock = sensor.Res(dmm, high=17, low=5, rng=10000, res=1)
         self.oFanConn = sensor.Res(dmm, high=6, low=6, rng=1000, res=1)
         self.oInrush = sensor.Res(dmm, high=1, low=2, rng=1000, res=0.1)
