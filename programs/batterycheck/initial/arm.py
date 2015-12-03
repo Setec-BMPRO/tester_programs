@@ -15,9 +15,8 @@ Values:
 
 import logging
 import time
-
 import sensor
-import tester
+from testlimit import LimitBoolean
 
 # Line terminators
 _EOL_IN = b'\n'
@@ -65,7 +64,7 @@ class Console():
             '.'.join((__name__, self.__class__.__name__)))
         self._ser = port
         # Limit used to record timeouts as fail readings
-        self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
+        self._limit = LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor, StrKill ))

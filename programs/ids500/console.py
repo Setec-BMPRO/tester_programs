@@ -10,7 +10,7 @@ import time
 import logging
 import re
 import sensor
-from tester.testlimit import LimitBoolean
+from testlimit import LimitBoolean
 
 # Line terminator
 _EOL = b'\r\n'

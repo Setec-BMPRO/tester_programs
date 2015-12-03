@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """CN101 Initial Program Limits."""
 
-from tester.testlimit import (
+from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_lo, lim_string, lim_boolean)
 

@@ -8,7 +8,7 @@ Communication via SimSerial port to the ARM processor.
 
 import time
 import logging
-import tester
+from testlimit import LimitBoolean
 
 # Line terminator
 _EOL = b'\r'
@@ -33,7 +33,7 @@ class ConsoleGen0():
             '.'.join((__name__, self.__class__.__name__)))
         port.timeout = _READ_TMO
         self._port = port
-        self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
+        self._limit = LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor, StrKill ))

@@ -10,7 +10,7 @@ import serial
 import time
 import logging
 import sensor
-from tester.testlimit import LimitBoolean
+from testlimit import LimitBoolean
 
 
 # Line terminator

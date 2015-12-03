@@ -10,7 +10,7 @@ import serial
 import time
 import logging
 import sensor
-import tester.testlimit
+from testlimit import LimitBoolean
 
 
 # Line terminator
@@ -63,7 +63,7 @@ class Console():
         self._baud = baud
         self._ser = None
         self._buf = b''
-        self._limit = tester.testlimit.LimitBoolean('SerialTimeout', 0, False)
+        self._limit = LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor ))
