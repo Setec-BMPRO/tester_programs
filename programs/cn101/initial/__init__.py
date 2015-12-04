@@ -22,15 +22,15 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
+_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM15'}[os.name]
 # Software image filename
-_ARM_BIN = 'cn101_1.0.000.bin'
+_ARM_BIN = 'cn101_1.0.11950.153.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, 'A')
 # Serial port for the Bluetooth module.
-_BLE_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM3'}[os.name]
+_BLE_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM14'}[os.name]
 # Serial port for the Trek2 as the CAN Bus interface.
-_CAN_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM4'}[os.name]
+_CAN_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM13'}[os.name]
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -99,6 +99,8 @@ class Main(tester.TestSequence):
         s = support.Sensors(d, self._limits, self._cn101)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
+        d.dcs_vcom.output(12.0, output=True)
+        time.sleep(5)   # Allow OS to detect the new ports
 
     def _cn101_puts(self,
                     string_data, preflush=0, postflush=1, priority=False,
