@@ -99,6 +99,8 @@ class Main(tester.TestSequence):
         s = support.Sensors(d, self._limits, self._cn101)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
+        d.dcs_vcom.output(12.0, output=True)
+        time.sleep(5)   # Allow OS to detect the new ports
 
     def _cn101_puts(self,
                     string_data, preflush=0, postflush=1, priority=False,
