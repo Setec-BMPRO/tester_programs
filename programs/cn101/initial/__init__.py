@@ -24,7 +24,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # Software image filename
-_ARM_BIN = 'cn101_1.0.000.bin'
+_ARM_BIN = 'cn101_1.0.11950.153.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, 'A')
 # Serial port for the Bluetooth module.
