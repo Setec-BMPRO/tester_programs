@@ -4,6 +4,7 @@
 
 from pydispatch import dispatcher
 import sensor
+import tester
 from tester.devlogical import *
 from tester.measure import *
 from ...share.console import Sensor as con_sensor
@@ -63,8 +64,8 @@ class Sensors():
         self.oMirARM = sensor.Mirror()
         dispatcher.connect(
             self._reset,
-            sender=signals.Thread.tester,
-            signal=signals.TestRun.stop)
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.o5V = sensor.Vdc(dmm, high=7, low=4, rng=10, res=0.001)
         self.o12V = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
         self.o12V2 = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
