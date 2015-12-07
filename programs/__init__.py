@@ -48,6 +48,9 @@ from . import wtsi200
 #           The ATE2 database (maximum of 50 characters)
 #   2) The class to use to create a program instance,
 #   3) Test limit data structure for testlimit.LimitSet()
+#
+#   Names listed in ALL_SKIP will not be run by the ALL PROGRAMS
+#   option in main.py
 
 PROGRAMS = (
     ('Dummy', dummy.Main, dummy.LIMIT_DATA),
@@ -117,4 +120,14 @@ PROGRAMS = (
     ('TS3520 Final', ts3520.final.Main, ts3520.final.LIMIT_DATA),
     ('UNI-750 Final', uni750.final.Main, uni750.final.LIMIT_DATA),
     ('WTSI200 Final', wtsi200.final.Main, wtsi200.final.LIMIT_DATA),
+    )
+
+# Skip these programs when running 'ALL PROGRAMS' in main.py
+ALL_SKIP = (
+    'CMR-INI', 'CMR-SD', 'CMR8D-FIN', 'CMR13F-FIN', 'CMR17L-FIN',
+    'IDS500 Initial Micro', 'IDS500 Initial Main', 'IDS500 Final',
+    'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
+    'SX-750 Safety',
+    'Trek2 Final',
+    'TS3020-H Initial',
     )
