@@ -12,7 +12,7 @@ import gpib
 import tester
 #import sensor
 #sensor.DSO_DELAY = False
-from programs import PROGRAMS
+from programs import PROGRAMS, ALL_SKIP
 
 # Configuration of logger.
 _CONSOLE_LOG_LEVEL = logging.DEBUG
@@ -99,10 +99,13 @@ def _main():
         prog_list = ((test_program, ), )    # a single program group
     for prog in prog_list:
         test_program = prog[0]
+        logger.info('#' * 80)
+        if run_all and test_program in ALL_SKIP:
+            logger.info('Skip Program %s', test_program)
+            continue
         # Make a TEST PROGRAM descriptor
         pgm = tester.TestProgram(
             test_program, per_panel=1, parameter=None, test_limits=[])
-        logger.info('#' * 80)
         logger.info('Open Program %s', test_program)
         tst.open(pgm)
         logger.info('Running Test')
