@@ -11,7 +11,7 @@ DATA = (
     ('Dso8', 1, 7.5, 8.5, None, None),
     ('Dso6', 1, 5.5, 6.5, None, None),
     ('Dso4', 1, 3.5, 4.5, None, None),
-    ('Dso2', 1, 1.5, 2.5, None, None),
+    ('Dso2', 1, 1.35, 2.5, None, None),
     ('Dcs5', 1, 4.5, 5.5, None, None),
     ('Dcs10', 1, 9.5, 10.5, None, None),
     ('Dcs20', 1, 19.5, 20.5, None, None),

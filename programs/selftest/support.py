@@ -92,7 +92,7 @@ class Sensors(object):
                              pos_slope=True)
         rdgs = []
         for ch in range(1, 5):
-            rdgs.append(sensor.Vavg(ch=ch, position=ch))
+            rdgs.append(sensor.Vavg(ch=ch))
         subchans1 = []
         for ch in range(1, 5):
             subchans1.append(sensor.Channel(ch=ch, mux=1, range=40.0,
