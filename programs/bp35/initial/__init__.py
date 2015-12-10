@@ -77,6 +77,7 @@ class Main(tester.TestSequence):
         bp35_ser.setPort(_ARM_PORT)
         # BP35 Console driver
         self._bp35 = Console(bp35_ser)
+        self.sernum = None
 
     def open(self):
         """Prepare for testing."""
@@ -139,6 +140,7 @@ class Main(tester.TestSequence):
              (s.osw3, 100.0), (s.osw4, 100.0),
              (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3), ))
 
+        self.sernum = m.ui_SnEntry.measure()[1][0]
         MeasureGroup(
             (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
             timeout=5)
@@ -210,12 +212,11 @@ class Main(tester.TestSequence):
             self._bp35_puts(str)
         self._bp35_puts('1.0.11529.3465', postflush=0)  # SwVer measure
 
-        sernum = m.ui_SnEntry.measure()[1][0]
         self._bp35.open()
         d.rla_reset.pulse(0.1)
         time.sleep(1)
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
-        self._bp35.defaults(_HW_VER, sernum)
+        self._bp35.defaults(_HW_VER, self.sernum)
         self._bp35['SR_DEL_CAL'] = True
         d.dcs_sreg.output(0.0)
         time.sleep(1)
