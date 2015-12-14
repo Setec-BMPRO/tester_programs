@@ -22,7 +22,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (2, 0, 'A')
+_HW_VER = (3, 0, 'A')
 # ARM software image file
 _ARM_BIN = 'bp35_1.0.11529.3465.bin'
 # Soler Regulator Hardware version
