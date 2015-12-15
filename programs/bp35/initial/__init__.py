@@ -220,7 +220,7 @@ class Main(tester.TestSequence):
         self._bp35['SR_DEL_CAL'] = True
         d.dcs_sreg.output(0.0)
         time.sleep(1)
-        d.dcs_sreg.output(20.0)
+        d.dcs_sreg.output(22.0)
         time.sleep(1)
         self._bp35['SR_HW_VER'] = _SR_HW_VER
         m.arm_SwVer.measure()
