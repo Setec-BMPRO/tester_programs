@@ -2,55 +2,59 @@
 # -*- coding: utf-8 -*-
 """BP35 Initial Program Limits."""
 
+from testlimit import (
+    lim_hilo, lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
+    lim_hi, lim_lo, lim_string, lim_boolean)
+
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
+# Solar Reg settings
+_SOLAR_VSET = 13.65
+_SOLAR_ISET = 30.0
 
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
-    ('ACin', 0, 235.0, 245.0, None, None),
-    ('Vpfc', 0, 401.0, 424.0, None, None),
-    ('12Vpri', 0, 11.5, 13.0, None, None),
-    ('5Vusb', 0, -4.5, 5.5, None, None),
-    ('15Vs', 0, 11.5, 13.0, None, None),
-    ('Vload', 0, 12.0, 12.9, None, None),
-    ('VloadOff', 0, 0.5, None, None, None),
-    ('VbatIn', 0, 11.5, 12.5, None, None),
-    ('Vbat', 0, 12.6, 13.0, None, None),
-    ('Vsreg', 0, 0, 9999, None, None),
-    ('Vaux', 0, 13.0, 13.8, None, None),
-    ('3V3', 0, 3.25, 3.35, None, None),
-    ('FanOn', 0, 12.0, 13.0, None, None),
-    ('FanOff', 0, 0.5, None, None, None),
-    ('3V3prog', 0, 3.2, 3.4, None, None),
+    lim_hilo_delta('ACin', 240.0, 5.0),
+    lim_hilo('Vpfc', 401.0, 424.0),
+    lim_hilo('12Vpri', 11.5, 13.0),
+    lim_hilo('5Vusb', -4.5, 5.5),
+    lim_hilo('15Vs', 11.5, 13.0),
+    lim_hilo('Vload', 12.0, 12.9),
+    lim_lo('VloadOff', 0.5),
+    lim_hilo_delta('VbatIn', 12.0, 0.5),
+    lim_hilo_delta('Vbat', 12.8, 0.2),
+    lim_hilo('Vsreg', 0, 9999),
+    lim_hilo_delta('Vaux', 13.4, 0.4),
+    lim_hilo_delta('3V3', 3.30, 0.05),
+    lim_hilo_delta('FanOn', 12.5, 0.5),
+    lim_lo('FanOff', 0.5),
+    lim_hilo_delta('3V3prog', 3.3, 0.1),
     # Solar Reg set output voltage and current
-    ('Vset', 1, 13.65, None, None, None),
-    ('Iset', 1, 30.0, None, None, None),
-    # Solar Reg measured voltage 13.65  +/- 6.0%
-    ('VsetPre', 0, 13.65 * 0.94, 13.65 * 1.06, None, None),
-    # Solar Reg measured voltage 13.65  +/- 3.0%
-    ('VsetPost', 0, 13.65 * 0.97, 13.65 * 1.03, None, None),
-    ('OutOCP', 0, 32.0, 35.1, None, None),
-    ('BatOCP', 0, 6.0, 9.0, None, None),
-    ('InOCP', 0, 11.6, None, None, None),
-    ('Program', 0, -0.1, 0.1, None, None),
-    ('FixtureLock', 0, 1200, None, None, None),
-    ('SwShort', 0, None, 20, None, None),
-    ('Notify', 1, None, None, None, True),
-    # Data reported by the ARM
-    ('ARM-SwVer', 0, None, None, r'^1\.0\.11529\.3465$', None),
-    ('ARM-AcV', 0, 230.0, 250.0, None, None),
-    ('ARM-AcF', 0, 49.0, 51.0, None, None),
-    ('ARM-PriT', 0, 8.0, 70.0, None, None),
-    ('ARM-SecT', 0, 8.0, 70.0, None, None),
-    ('ARM-Vout', 0, 12.0, 12.9, None, None),
-    ('ARM-Fan', 0, 0, 100, None, None),
-    ('ARM-LoadI', 0, 0.1, 12.1, None, None),
-    ('ARM-BattI', 0, 3.0, 5.0, None, None),
-    ('ARM-AuxV', 0, 13.0, 13.8, None, None),
-    ('ARM-AuxI', 0, 0.0, 1.1, None, None),
-    # Serial Number entry
-    ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
-    ('CAN_ID', 0, None, None, r'^RRQ,32,0', None),
-    ('CAN_BIND', 0, _CAN_BIND - 0.5, _CAN_BIND + 0.5, None, None),
-    ('CAN_STATS', 0, -0.5, 0.5, None, None),
+    lim_lo('Vset', _SOLAR_VSET),
+    lim_lo('Iset', _SOLAR_ISET),
+    lim_hilo_percent('VsetPre', _SOLAR_VSET, 6.0),
+    lim_hilo_percent('VsetPost', _SOLAR_VSET, 3.0),
+    lim_hilo('OutOCP', 32.0, 35.1),
+    lim_hilo('BatOCP', 6.0, 9.0),
+    lim_lo('InOCP', 11.6),
+    lim_hilo_int('Program', 0),
+    lim_lo('FixtureLock', 1200),
+    lim_hi('SwShort', 20),
+    lim_boolean('Notify', True),
+    lim_string('ARM-SwVer', r'^1\.0\.11529\.3465$'),
+    lim_hilo_delta('ARM-AcV', 240.0, 10.0),
+    lim_hilo_delta('ARM-AcF', 50.0, 1.0),
+    lim_hilo('ARM-PriT', 8.0, 70.0),
+    lim_hilo('ARM-SecT', 8.0, 70.0),
+    lim_hilo_delta('ARM-Vout', 12.45, 0.45),
+    lim_hilo('ARM-Fan', 0, 100),
+    lim_hilo('ARM-LoadI', 0.1, 12.1),
+    lim_hilo_delta('ARM-BattI', 4.0, 1.0),
+    lim_hilo_delta('ARM-AuxV', 13.4, 0.4),
+    lim_hilo('ARM-AuxI', 0.0, 1.1),
+    lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    lim_string('CAN_ID', r'^RRQ,32,0'),
+    lim_hilo_int('CAN_BIND', _CAN_BIND),
+    lim_hilo_int('CAN_STATS', 0),
+    lim_hilo_int('SOLAR_ALIVE', 1),
     )

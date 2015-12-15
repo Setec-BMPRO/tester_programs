@@ -119,6 +119,7 @@ class Sensors():
         self.ARM_BattI = console.Sensor(bp35, 'BATT_I')
         self.ARM_AuxV = console.Sensor(bp35, 'AUX_V')
         self.ARM_AuxI = console.Sensor(bp35, 'AUX_I')
+        self.ARM_solar_alive = console.Sensor(bp35, 'SR_ALIVE')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -180,16 +181,5 @@ class Measurements():
         self.arm_battI = Measurement(limits['ARM-BattI'], sense.ARM_BattI)
         self.arm_auxV = Measurement(limits['ARM-AuxV'], sense.ARM_AuxV)
         self.arm_auxI = Measurement(limits['ARM-AuxI'], sense.ARM_AuxI)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
+        self.arm_solar_alive = Measurement(
+            limits['SOLAR_ALIVE'], sense.ARM_solar_alive)

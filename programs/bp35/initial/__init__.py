@@ -86,7 +86,6 @@ class Main(tester.TestSequence):
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._limits, self._bp35)
         m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
         # Apply power to fixture (Comms & Trek2) circuits.
         d.dcs_vcom.output(12.0, True)
 
@@ -107,10 +106,10 @@ class Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s, t
+        global m, d, s
         # Remove power from fixture circuits.
         d.dcs_vcom.output(0, False)
-        m = d = s = t = None
+        m = d = s = None
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -235,7 +234,10 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
+        self._bp35_puts('1.0')
+        self._bp35_puts('275', postflush=0)
 
+        m.arm_solar_alive.measure()
         srtemp = self._bp35['SR_TEMP']
         self._logger.debug('Temperature: %s', srtemp)
         vset = self._limits['Vset'].limit
