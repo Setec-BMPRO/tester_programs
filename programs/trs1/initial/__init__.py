@@ -74,13 +74,14 @@ class Main(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oVin, 12.0), (s.oBrake, 0.0),
+        self.fifo_push(((s.oVin, 12.0), (s.oPin, 12.0), (s.oBrake, 0.0),
                        (s.oLight, 0.0), (s.oRemote, 0.0), ))
         t.pwr_up.run()
 
     def _step_breakaway(self):
         """Measure under 'breakaway' condition."""
-        self.fifo_push(((s.oBrake, 12.0), (s.oLight, 12.0), (s.oRemote, 12.0),
-                       (s.oGreen, (0.0, 12.0)), (s.oRed, (12.0, 0.0)),
-                       (s.oTimer, ((0.8,), (2.2,), )),  ))
+        self.fifo_push(((s.o5V, 5.0), (s.oBrake, 12.0), (s.oLight, 12.0),
+                         (s.oRemote, 12.0), (s.oGreen, (0.0, 12.0, 0.0)),
+                         (s.oRed, (12.0, 12.0, 0.0)), (s.oYesNoGreen, True),
+                         (s.oTimer, ((0.8,), (2.2,), )),  ))
         t.brkaway.run()
