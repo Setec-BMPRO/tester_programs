@@ -235,9 +235,10 @@ class Main(tester.TestSequence):
         """
         self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
         self._bp35_puts('1.0')
+        self._bp35_puts('0')
         self._bp35_puts('275', postflush=0)
 
-        m.arm_solar_alive.measure()
+        MeasureGroup((m.arm_solar_alive, m.arm_vout_ov, ))
         srtemp = self._bp35['SR_TEMP']
         self._logger.debug('Temperature: %s', srtemp)
         vset = self._limits['Vset'].limit
@@ -271,11 +272,18 @@ class Main(tester.TestSequence):
             ((s.oACin, 240.0), (s.o12Vpri, 12.5), (s.o5Vusb, 5.0),
              (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.oVbat, 12.8),
              (s.oVpfc, (415.0, 415.0), )))
+        for str in (('0', ) +
+                    ('', ) * 3
+                    ):
+            self._bp35_puts(str)
+        self._bp35_puts('0', postflush=0)
 
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
+        MeasureGroup((m.arm_vout_ov, ))
         MeasureGroup(
-            (m.dmm_acin, m.dmm_12Vpri, m.dmm_5Vusb, ), timeout=10)
+            (m.dmm_acin, m.dmm_12Vpri, m.dmm_5Vusb, ),
+            timeout=10)
         # Enable PFC & DCDC converters
         self._bp35.power_on()
         # Wait for PFC overshoot to settle
@@ -285,7 +293,10 @@ class Main(tester.TestSequence):
         d.rla_vbat.set_off()
         d.dcs_vbat.output(0.0, output=False)
         # Is it all still running?
-        MeasureGroup((m.dmm_3V3, m.dmm_15Vs, m.dmm_vbat), timeout=10)
+        MeasureGroup((m.arm_vout_ov, ))
+        MeasureGroup(
+            (m.dmm_3V3, m.dmm_15Vs, m.dmm_vbat),
+            timeout=10)
 
     def _step_output(self):
         """Test the output switches.

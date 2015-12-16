@@ -119,7 +119,8 @@ class Sensors():
         self.ARM_BattI = console.Sensor(bp35, 'BATT_I')
         self.ARM_AuxV = console.Sensor(bp35, 'AUX_V')
         self.ARM_AuxI = console.Sensor(bp35, 'AUX_I')
-        self.ARM_solar_alive = console.Sensor(bp35, 'SR_ALIVE')
+        self.arm_solar_alive = console.Sensor(bp35, 'SR_ALIVE')
+        self.arm_vout_ov = console.Sensor(bp35, 'VOUT_OV')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -182,4 +183,5 @@ class Measurements():
         self.arm_auxV = Measurement(limits['ARM-AuxV'], sense.ARM_AuxV)
         self.arm_auxI = Measurement(limits['ARM-AuxI'], sense.ARM_AuxI)
         self.arm_solar_alive = Measurement(
-            limits['SOLAR_ALIVE'], sense.ARM_solar_alive)
+            limits['SOLAR_ALIVE'], sense.arm_solar_alive)
+        self.arm_vout_ov = Measurement(limits['Vout_OV'], sense.arm_vout_ov)
