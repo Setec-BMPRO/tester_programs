@@ -246,6 +246,7 @@ class Main(tester.TestSequence):
         self._bp35['SR_VSET'] = vset
         self._bp35['SR_ISET'] = iset
         time.sleep(2)
+        self._bp35['VOUT_OV'] = 2     # OVP Latch reset
         vmeasured = m.dmm_vsregpre.measure(timeout=5)[1][0]
         self._bp35['SR_VCAL'] = vmeasured
         time.sleep(1)
