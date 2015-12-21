@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Trs1 Initial Test Program."""
+"""TRS1 Initial Test Program."""
 
 import sensor
 import tester
@@ -68,21 +68,21 @@ class Sensors():
         trg = sensor.Trigger(
             ch=1, level=1.0, normal_mode=True, pos_slope=True)
         rdgs = (sensor.Freq(ch=1), )
-        chan1 = (sensor.Channel(
-            ch=1, mux=1, range=16.0, offset=0,
-            dc_coupling=True, att=1, bwlim=True), )
-        chan2 = (sensor.Channel(
-            ch=1, mux=2, range=16.0, offset=0,
-            dc_coupling=True, att=1, bwlim=True), )
-        chan3 = (sensor.Channel(
-            ch=1, mux=3, range=40.0, offset=0,
-            dc_coupling=True, att=1, bwlim=True), )
-        self.oTp11 = sensor.DSO(
-            dso, chan1, tbase, trg, rdgs)
-        self.oTp3 = sensor.DSO(
-            dso, chan2, tbase, trg, rdgs)
-        self.oTp8 = sensor.DSO(
-            dso, chan3, tbase, trg, rdgs)
+        chan1 = (
+            sensor.Channel(
+                ch=1, mux=1, range=16.0, offset=0,
+                dc_coupling=True, att=1, bwlim=True), )
+        chan2 = (
+            sensor.Channel(
+                ch=1, mux=2, range=16.0, offset=0,
+                dc_coupling=True, att=1, bwlim=True), )
+        chan3 = (
+            sensor.Channel(
+                ch=1, mux=3, range=16.0, offset=0,
+                dc_coupling=True, att=1, bwlim=True), )
+        self.tp11 = sensor.DSO(dso, chan1, tbase, trg, rdgs)
+        self.tp3 = sensor.DSO(dso, chan2, tbase, trg, rdgs)
+        self.tp8 = sensor.DSO(dso, chan3, tbase, trg, rdgs)
 
 
 class Measurements():
@@ -97,7 +97,7 @@ class Measurements():
 
         """
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
-        self.dmm_pin = Measurement(limits['Vin'], sense.oPin)
+        self.dmm_pin = Measurement(limits['Pin'], sense.oPin)
         self.dmm_5V = Measurement(limits['5V'], sense.o5V)
         self.dmm_brakeoff = Measurement(limits['BrakeOff'], sense.oBrake)
         self.dmm_brakeon = Measurement(limits['BrakeOn'], sense.oBrake)
@@ -110,9 +110,9 @@ class Measurements():
         self.dmm_redoff = Measurement(limits['RedLedOff'], sense.oRed)
         self.dmm_redon = Measurement(limits['RedLedOn'], sense.oRed)
         self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
-        self.dso_tp11 = Measurement(limits['Freq1'], sense.oTp11)
-        self.dso_tp3 = Measurement(limits['Freq2'], sense.oTp3)
-        self.dso_tp8 = Measurement(limits['Freq1'], sense.oTp8)
+        self.dso_tp11 = Measurement(limits['Freq1'], sense.tp11)
+        self.dso_tp3 = Measurement(limits['Freq2'], sense.tp3)
+        self.dso_tp8 = Measurement(limits['Freq1'], sense.tp8)
 
 
 class SubTests():
@@ -129,19 +129,18 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        rly1 = RelaySubStep(((d.rla_pin, True), ))
-        dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True)
+        dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.5), ), output=True)
         msr1 = MeasureSubStep(
                 (m.dmm_vin, m.dmm_pin, m.dmm_brakeoff, m.dmm_lightoff,
                    m.dmm_remoteoff), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
 
         # BreakAway:
-        rly1 = RelaySubStep(((d.rla_pin, False), ))
+        rly1 = RelaySubStep(((d.rla_pin, True), ))
         msr1 = MeasureSubStep(
                 (m.dmm_5V, m.dmm_brakeon, m.dmm_lighton, m.dmm_remoteon,
                    m.dmm_greenon, m.dmm_redoff), timeout=5)
-        dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.0), ))
+        dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.5), ))
         msr2 = MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5)
         dcs2 = DcSubStep(setting=((d.dcs_Vin, 10.0), ))
         msr3 = MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5)
@@ -149,5 +148,5 @@ class SubTests():
         msr4 = MeasureSubStep((m.dmm_greenon, ), timeout=5)
         dcs4 = DcSubStep(setting=((d.dcs_Vin, 14.0), ))
         msr5 = MeasureSubStep((m.dso_tp11, m.dso_tp3, m.dso_tp8), timeout=5)
-        self.brkaway = Step((rly1, msr1, dcs1, msr2, dcs2, msr3,
-                              dcs3, msr4, dcs4, msr5))
+        self.brkaway = Step(
+            (rly1, msr1, dcs1, msr2, dcs2, msr3, dcs3, msr4, dcs4, msr5))
