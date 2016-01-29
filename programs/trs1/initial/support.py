@@ -70,15 +70,15 @@ class Sensors():
         rdgs = (sensor.Freq(ch=1), )
         chan1 = (
             sensor.Channel(
-                ch=1, mux=1, range=16.0, offset=0,
+                ch=1, mux=0, range=16.0, offset=0,
                 dc_coupling=True, att=1, bwlim=True), )
         chan2 = (
             sensor.Channel(
-                ch=1, mux=2, range=16.0, offset=0,
+                ch=1, mux=1, range=16.0, offset=0,
                 dc_coupling=True, att=1, bwlim=True), )
         chan3 = (
             sensor.Channel(
-                ch=1, mux=3, range=16.0, offset=0,
+                ch=1, mux=2, range=16.0, offset=0,
                 dc_coupling=True, att=1, bwlim=True), )
         self.tp11 = sensor.DSO(dso, chan1, tbase, trg, rdgs)
         self.tp3 = sensor.DSO(dso, chan2, tbase, trg, rdgs)
