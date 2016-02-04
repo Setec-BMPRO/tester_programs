@@ -149,6 +149,5 @@ class SubTests():
         dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.0), ))
         msr4 = MeasureSubStep((m.dmm_greenon, ), timeout=5)
         dcs4 = DcSubStep(setting=((d.dcs_Vin, 14.5), ))
-        msr5 = MeasureSubStep((m.dso_tp11, m.dso_tp3, m.dso_tp8), timeout=5)
         self.brkaway = Step(
-            (rly1, msr1, dcs1, msr2, dcs2, msr3, dcs3, msr4, dcs4, msr5))
+            (rly1, msr1, dcs1, msr2, dcs2, msr3, dcs3, msr4, dcs4))

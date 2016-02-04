@@ -79,10 +79,11 @@ class Main(tester.TestSequence):
     def _step_breakaway(self):
         """Measure under 'breakaway' condition."""
         self.fifo_push(
-            ((s.o5V, 5.0), (s.oBrake, 12.0), (s.oLight, 12.0),
+            ((s.oPin, 0.0), (s.o5V, 5.0), (s.oBrake, 12.0), (s.oLight, 12.0),
              (s.oRemote, 12.0), (s.oGreen, (0.0, 12.0, 0.0)),
              (s.oRed, (12.0, 12.0, 0.0)), (s.oYesNoGreen, True),
-             (s.tp11, ((0.8,),)), (s.tp3, ((1.1,),)), (s.tp8, ((2.2,),)),
+             (s.tp11, ((0.8,),)), (s.tp3, ((2.2,),)), (s.tp8, ((0.8,),)),
             ))
 
         t.brkaway.run()
+        MeasureGroup((m.dso_tp11, m.dso_tp3, m.dso_tp8), 5)
