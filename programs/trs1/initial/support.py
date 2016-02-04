@@ -64,7 +64,7 @@ class Sensors():
             message=translate('trs1_initial', 'IsGreenLedFlash?'),
             caption=translate('trs1_initial', 'capGreenLed'))
         tbase = sensor.Timebase(
-            range=10.0, main_mode=True, delay=0, centre_ref=False)
+            range=5.0, main_mode=True, delay=0, centre_ref=False)
         trg = sensor.Trigger(
             ch=1, level=1.0, normal_mode=True, pos_slope=True)
         rdgs = (sensor.Freq(ch=1), )
@@ -78,7 +78,7 @@ class Sensors():
                 dc_coupling=True, att=1, bwlim=True), )
         chan3 = (
             sensor.Channel(
-                ch=1, mux=2, range=16.0, offset=0,
+                ch=1, mux=2, range=16.0, offset=6.0,
                 dc_coupling=True, att=1, bwlim=True), )
         self.tp11 = sensor.DSO(dso, chan1, tbase, trg, rdgs)
         self.tp3 = sensor.DSO(dso, chan2, tbase, trg, rdgs)
