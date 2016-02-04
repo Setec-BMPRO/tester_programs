@@ -97,7 +97,8 @@ class Measurements():
 
         """
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
-        self.dmm_pin = Measurement(limits['Pin'], sense.oPin)
+        self.dmm_pinin = Measurement(limits['PinIn'], sense.oPin)
+        self.dmm_pinout = Measurement(limits['PinOut'], sense.oPin)
         self.dmm_5V = Measurement(limits['5V'], sense.o5V)
         self.dmm_brakeoff = Measurement(limits['BrakeOff'], sense.oBrake)
         self.dmm_brakeon = Measurement(limits['BrakeOn'], sense.oBrake)
@@ -129,24 +130,25 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
+        rly1 = RelaySubStep(((d.rla_pin, True), ))
         dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.5), ), output=True)
         msr1 = MeasureSubStep(
-                (m.dmm_vin, m.dmm_pin, m.dmm_brakeoff, m.dmm_lightoff,
+                (m.dmm_vin, m.dmm_pinin, m.dmm_brakeoff, m.dmm_lightoff,
                    m.dmm_remoteoff), timeout=5)
-        self.pwr_up = Step((dcs1, msr1, ))
+        self.pwr_up = Step((rly1, dcs1, msr1))
 
         # BreakAway:
-        rly1 = RelaySubStep(((d.rla_pin, True), ))
+        rly1 = RelaySubStep(((d.rla_pin, False), ))
         msr1 = MeasureSubStep(
-                (m.dmm_5V, m.dmm_brakeon, m.dmm_lighton, m.dmm_remoteon,
-                   m.dmm_greenon, m.dmm_redoff), timeout=5)
+                (m.dmm_pinout, m.dmm_5V, m.dmm_brakeon, m.dmm_lighton,
+                m.dmm_remoteon, m.dmm_greenon, m.dmm_redoff), timeout=5)
         dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.5), ))
         msr2 = MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5)
         dcs2 = DcSubStep(setting=((d.dcs_Vin, 10.0), ))
         msr3 = MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5)
         dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.0), ))
         msr4 = MeasureSubStep((m.dmm_greenon, ), timeout=5)
-        dcs4 = DcSubStep(setting=((d.dcs_Vin, 14.0), ))
+        dcs4 = DcSubStep(setting=((d.dcs_Vin, 14.5), ))
         msr5 = MeasureSubStep((m.dso_tp11, m.dso_tp3, m.dso_tp8), timeout=5)
         self.brkaway = Step(
             (rly1, msr1, dcs1, msr2, dcs2, msr3, dcs3, msr4, dcs4, msr5))

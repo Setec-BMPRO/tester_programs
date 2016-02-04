@@ -5,7 +5,8 @@
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('Vin', 1, 11.5, 12.5, None, None),
-    ('Pin', 1, 11.5, 12.5, None, None),
+    ('PinIn', 1, 11.5, 12.5, None, None),
+    ('PinOut', 1, 0.5, None, None, None),
     ('5V', 1, 4.9, 5.1, None, None),
     ('BrakeOff', 1, -0.1, 0.1, None, None),
     ('BrakeOn', 1, 11.5, 12.5, None, None),
@@ -17,7 +18,9 @@ DATA = (
     ('GrnLedOff', 1, None, 6.0, None, None),
     ('RedLedOn', 1, 0.5, None, None, None),
     ('RedLedOff', 1, None, 6.0, None, None),
+    # 0.8 +/- 0.2Hz
     ('Freq1', 1, 0.6, 1.0, None, None),
+    # 2.2 +/- 0.5Hz
     ('Freq2', 1, 1.7, 2.7, None, None),
     ('Notify', 2, None, None, None, True),
     )

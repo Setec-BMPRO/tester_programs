@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2015-12-04, 13:55:31 -->
-<!-- Copyright (C) 2015 ,  -->
+<!-- Saved: 2016-02-04, 11:29:55 -->
+<!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
@@ -227,6 +227,59 @@
     <Source>programs/dummy/test_dummy.py</Source>
     <Source>programs/dummy/limit.py</Source>
     <Source>programs/share/bluetooth/rn4020.py</Source>
+    <Source>tester/_base.py</Source>
+    <Source>tester/testsequence.py</Source>
+    <Source>tester/signals.py</Source>
+    <Source>tester/__init__.py</Source>
+    <Source>tester/testdata.py</Source>
+    <Source>tester/testrunner.py</Source>
+    <Source>tester/measure.py</Source>
+    <Source>tester/devphysical/dsoscpi.py</Source>
+    <Source>tester/devphysical/dcl3300a.py</Source>
+    <Source>tester/devphysical/dmmscpi.py</Source>
+    <Source>tester/devphysical/wt210.py</Source>
+    <Source>tester/devphysical/genf.py</Source>
+    <Source>tester/devphysical/gen4.py</Source>
+    <Source>tester/devphysical/signals.py</Source>
+    <Source>tester/devphysical/interface.py</Source>
+    <Source>tester/devphysical/__init__.py</Source>
+    <Source>tester/devphysical/gen2.py</Source>
+    <Source>tester/devphysical/gen3.py</Source>
+    <Source>tester/devphysical/acs6813b.py</Source>
+    <Source>tester/devphysical/dcs3645a.py</Source>
+    <Source>tester/devphysical/ar7564a.py</Source>
+    <Source>tester/devlogical/dcload.py</Source>
+    <Source>tester/devlogical/relay.py</Source>
+    <Source>tester/devlogical/_base.py</Source>
+    <Source>tester/devlogical/dmm.py</Source>
+    <Source>tester/devlogical/safety.py</Source>
+    <Source>tester/devlogical/__init__.py</Source>
+    <Source>tester/devlogical/acsource.py</Source>
+    <Source>tester/devlogical/power.py</Source>
+    <Source>tester/devlogical/discharge.py</Source>
+    <Source>tester/devlogical/dso.py</Source>
+    <Source>tester/devlogical/dcsource.py</Source>
+    <Source>tester/devlogical/fixturelock.py</Source>
+    <Source>sensor/_base.py</Source>
+    <Source>sensor/dmm.py</Source>
+    <Source>sensor/safety.py</Source>
+    <Source>sensor/ui.py</Source>
+    <Source>sensor/__init__.py</Source>
+    <Source>sensor/mirror.py</Source>
+    <Source>sensor/ramp.py</Source>
+    <Source>sensor/power.py</Source>
+    <Source>sensor/dso.py</Source>
+    <Source>sensor/search.py</Source>
+    <Source>sensor/test/test_dso.py</Source>
+    <Source>sensor/test/test_ramp.py</Source>
+    <Source>sensor/test/test_dmm.py</Source>
+    <Source>sensor/test/test_base.py</Source>
+    <Source>sensor/test/__init__.py</Source>
+    <Source>sensor/test/test_power.py</Source>
+    <Source>sensor/test/test_mirror.py</Source>
+    <Source>sensor/test/test_safety.py</Source>
+    <Source>sensor/test/test_ui.py</Source>
+    <Source>sensor/test/test_search.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
