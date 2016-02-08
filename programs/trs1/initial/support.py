@@ -64,21 +64,21 @@ class Sensors():
             message=translate('trs1_initial', 'IsGreenLedFlash?'),
             caption=translate('trs1_initial', 'capGreenLed'))
         tbase = sensor.Timebase(
-            range=5.0, main_mode=True, delay=0, centre_ref=False)
+            range=3.0, main_mode=True, delay=0, centre_ref=False)
         trg = sensor.Trigger(
             ch=1, level=1.0, normal_mode=True, pos_slope=True)
         rdgs = (sensor.Freq(ch=1), )
         chan1 = (
             sensor.Channel(
-                ch=1, mux=0, range=16.0, offset=0,
+                ch=1, mux=1, range=16.0, offset=0,
                 dc_coupling=True, att=1, bwlim=True), )
         chan2 = (
             sensor.Channel(
-                ch=1, mux=1, range=16.0, offset=0,
+                ch=1, mux=2, range=16.0, offset=0,
                 dc_coupling=True, att=1, bwlim=True), )
         chan3 = (
             sensor.Channel(
-                ch=1, mux=2, range=16.0, offset=6.0,
+                ch=1, mux=3, range=16.0, offset=6.0,
                 dc_coupling=True, att=1, bwlim=True), )
         self.tp11 = sensor.DSO(dso, chan1, tbase, trg, rdgs)
         self.tp3 = sensor.DSO(dso, chan2, tbase, trg, rdgs)
@@ -131,7 +131,7 @@ class SubTests():
         m = measurements
         # PowerUp:
         rly1 = RelaySubStep(((d.rla_pin, True), ))
-        dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.5), ), output=True)
+        dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True, delay=0.8)
         msr1 = MeasureSubStep(
                 (m.dmm_vin, m.dmm_pinin, m.dmm_brakeoff, m.dmm_lightoff,
                    m.dmm_remoteoff), timeout=5)
@@ -141,13 +141,16 @@ class SubTests():
         rly1 = RelaySubStep(((d.rla_pin, False), ))
         msr1 = MeasureSubStep(
                 (m.dmm_pinout, m.dmm_5V, m.dmm_brakeon, m.dmm_lighton,
-                m.dmm_remoteon, m.dmm_greenon, m.dmm_redoff), timeout=5)
-        dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.5), ))
+                m.dmm_remoteon), timeout=5)
+#        dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.0), ))
+        dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.3), ))
         msr2 = MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5)
         dcs2 = DcSubStep(setting=((d.dcs_Vin, 10.0), ))
         msr3 = MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5)
-        dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.0), ))
+#        dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.0), ))
+        dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.2), ))
         msr4 = MeasureSubStep((m.dmm_greenon, ), timeout=5)
-        dcs4 = DcSubStep(setting=((d.dcs_Vin, 14.5), ))
+#        dcs4 = DcSubStep(setting=((d.dcs_Vin, 14.0), ))
+        dcs4 = DcSubStep(setting=((d.dcs_Vin, 14.3), ))
         self.brkaway = Step(
             (rly1, msr1, dcs1, msr2, dcs2, msr3, dcs3, msr4, dcs4))
