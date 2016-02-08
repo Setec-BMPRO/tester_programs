@@ -41,7 +41,7 @@ DATA = (
     lim_lo('FixtureLock', 1200),
     lim_hi('SwShort', 20),
     lim_boolean('Notify', True),
-    lim_string('ARM-SwVer', r'^1\.0\.11529\.3465$'),
+    lim_string('ARM-SwVer', r'^1\.1\.12605\.3513$'),
     lim_hilo_delta('ARM-AcV', 240.0, 10.0),
     lim_hilo_delta('ARM-AcF', 50.0, 1.0),
     lim_hilo('ARM-PriT', 8.0, 70.0),

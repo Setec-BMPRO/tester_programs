@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-02-04, 11:29:55 -->
+<!-- Saved: 2016-02-08, 17:12:21 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -14,272 +14,272 @@
   <Email></Email>
   <Eol index="1"/>
   <Sources>
-    <Source>main.py</Source>
     <Source>__init__.py</Source>
-    <Source>testsuite.py</Source>
+    <Source>main.py</Source>
+    <Source>programs/_2040/__init__.py</Source>
+    <Source>programs/_2040/final/__init__.py</Source>
+    <Source>programs/_2040/final/limit.py</Source>
+    <Source>programs/_2040/final/support.py</Source>
+    <Source>programs/_2040/initial/__init__.py</Source>
+    <Source>programs/_2040/initial/limit.py</Source>
+    <Source>programs/_2040/initial/support.py</Source>
     <Source>programs/__init__.py</Source>
-    <Source>programs/spa/__init__.py</Source>
-    <Source>programs/spa/multi/__init__.py</Source>
-    <Source>programs/spa/multi/support.py</Source>
-    <Source>programs/spa/multi/p89lpc924.py</Source>
-    <Source>programs/spa/multi/limit.py</Source>
-    <Source>programs/spa/single/__init__.py</Source>
-    <Source>programs/spa/single/support.py</Source>
-    <Source>programs/spa/single/limit.py</Source>
-    <Source>programs/ts3020h/__init__.py</Source>
-    <Source>programs/ts3020h/final/__init__.py</Source>
-    <Source>programs/ts3020h/final/support.py</Source>
-    <Source>programs/ts3020h/final/limit.py</Source>
-    <Source>programs/ts3020h/initial/__init__.py</Source>
-    <Source>programs/ts3020h/initial/support.py</Source>
-    <Source>programs/ts3020h/initial/limit.py</Source>
-    <Source>programs/c15a15/__init__.py</Source>
-    <Source>programs/c15a15/final/__init__.py</Source>
-    <Source>programs/c15a15/final/support.py</Source>
-    <Source>programs/c15a15/final/limit.py</Source>
-    <Source>programs/rm50/__init__.py</Source>
-    <Source>programs/rm50/final/__init__.py</Source>
-    <Source>programs/rm50/final/support.py</Source>
-    <Source>programs/rm50/final/limit.py</Source>
-    <Source>programs/gsu360/__init__.py</Source>
-    <Source>programs/gsu360/final/__init__.py</Source>
-    <Source>programs/gsu360/final/support.py</Source>
-    <Source>programs/gsu360/final/limit.py</Source>
-    <Source>programs/gsu360/initial/__init__.py</Source>
-    <Source>programs/gsu360/initial/support.py</Source>
-    <Source>programs/gsu360/initial/limit.py</Source>
-    <Source>programs/uni750/__init__.py</Source>
-    <Source>programs/uni750/final/__init__.py</Source>
-    <Source>programs/uni750/final/support.py</Source>
-    <Source>programs/uni750/final/limit.py</Source>
+    <Source>programs/atxg450/__init__.py</Source>
+    <Source>programs/atxg450/final_2v/__init__.py</Source>
+    <Source>programs/atxg450/final_2v/limit.py</Source>
+    <Source>programs/atxg450/final_2v/support.py</Source>
+    <Source>programs/batterycheck/__init__.py</Source>
+    <Source>programs/batterycheck/final/__init__.py</Source>
+    <Source>programs/batterycheck/final/limit.py</Source>
+    <Source>programs/batterycheck/final/support.py</Source>
+    <Source>programs/batterycheck/initial/__init__.py</Source>
+    <Source>programs/batterycheck/initial/arm.py</Source>
+    <Source>programs/batterycheck/initial/limit.py</Source>
+    <Source>programs/batterycheck/initial/support.py</Source>
     <Source>programs/bc15/__init__.py</Source>
     <Source>programs/bc15/console.py</Source>
     <Source>programs/bc15/final/__init__.py</Source>
-    <Source>programs/bc15/final/support.py</Source>
     <Source>programs/bc15/final/limit.py</Source>
+    <Source>programs/bc15/final/support.py</Source>
     <Source>programs/bc15/initial/__init__.py</Source>
-    <Source>programs/bc15/initial/support.py</Source>
     <Source>programs/bc15/initial/limit.py</Source>
-    <Source>programs/trs1/__init__.py</Source>
-    <Source>programs/trs1/final/__init__.py</Source>
-    <Source>programs/trs1/final/support.py</Source>
-    <Source>programs/trs1/final/limit.py</Source>
-    <Source>programs/trs1/initial/__init__.py</Source>
-    <Source>programs/trs1/initial/support.py</Source>
-    <Source>programs/trs1/initial/limit.py</Source>
-    <Source>programs/c45a15/__init__.py</Source>
-    <Source>programs/c45a15/final/__init__.py</Source>
-    <Source>programs/c45a15/final/support.py</Source>
-    <Source>programs/c45a15/final/limit.py</Source>
-    <Source>programs/c45a15/initial/__init__.py</Source>
-    <Source>programs/c45a15/initial/support.py</Source>
-    <Source>programs/c45a15/initial/limit.py</Source>
-    <Source>programs/_2040/__init__.py</Source>
-    <Source>programs/_2040/final/__init__.py</Source>
-    <Source>programs/_2040/final/support.py</Source>
-    <Source>programs/_2040/final/limit.py</Source>
-    <Source>programs/_2040/initial/__init__.py</Source>
-    <Source>programs/_2040/initial/support.py</Source>
-    <Source>programs/_2040/initial/limit.py</Source>
+    <Source>programs/bc15/initial/support.py</Source>
+    <Source>programs/bce282/__init__.py</Source>
+    <Source>programs/bce282/final/__init__.py</Source>
+    <Source>programs/bce282/final/limit.py</Source>
+    <Source>programs/bce282/final/support.py</Source>
+    <Source>programs/bce282/initial/__init__.py</Source>
+    <Source>programs/bce282/initial/limit.py</Source>
+    <Source>programs/bce282/initial/msp.py</Source>
+    <Source>programs/bce282/initial/support.py</Source>
+    <Source>programs/bce282/initial/tos-bsl.py</Source>
+    <Source>programs/bce4/__init__.py</Source>
+    <Source>programs/bce4/final/__init__.py</Source>
+    <Source>programs/bce4/final/limit.py</Source>
+    <Source>programs/bce4/final/support.py</Source>
     <Source>programs/bp35/__init__.py</Source>
     <Source>programs/bp35/console.py</Source>
     <Source>programs/bp35/final/__init__.py</Source>
-    <Source>programs/bp35/final/support.py</Source>
     <Source>programs/bp35/final/limit.py</Source>
+    <Source>programs/bp35/final/support.py</Source>
     <Source>programs/bp35/initial/__init__.py</Source>
-    <Source>programs/bp35/initial/support.py</Source>
     <Source>programs/bp35/initial/limit.py</Source>
-    <Source>programs/batterycheck/__init__.py</Source>
-    <Source>programs/batterycheck/final/__init__.py</Source>
-    <Source>programs/batterycheck/final/support.py</Source>
-    <Source>programs/batterycheck/final/limit.py</Source>
-    <Source>programs/batterycheck/initial/__init__.py</Source>
-    <Source>programs/batterycheck/initial/support.py</Source>
-    <Source>programs/batterycheck/initial/arm.py</Source>
-    <Source>programs/batterycheck/initial/limit.py</Source>
-    <Source>programs/bce4/__init__.py</Source>
-    <Source>programs/bce4/final/__init__.py</Source>
-    <Source>programs/bce4/final/support.py</Source>
-    <Source>programs/bce4/final/limit.py</Source>
-    <Source>programs/drifter/__init__.py</Source>
-    <Source>programs/drifter/final/__init__.py</Source>
-    <Source>programs/drifter/final/support.py</Source>
-    <Source>programs/drifter/final/limit.py</Source>
-    <Source>programs/drifter/initial/__init__.py</Source>
-    <Source>programs/drifter/initial/support.py</Source>
-    <Source>programs/drifter/initial/pic_driver.py</Source>
-    <Source>programs/drifter/initial/limit.py</Source>
-    <Source>programs/genius2/__init__.py</Source>
-    <Source>programs/genius2/final/__init__.py</Source>
-    <Source>programs/genius2/final/support.py</Source>
-    <Source>programs/genius2/final/limit.py</Source>
-    <Source>programs/ids500/__init__.py</Source>
-    <Source>programs/ids500/console.py</Source>
-    <Source>programs/ids500/final/__init__.py</Source>
-    <Source>programs/ids500/final/support.py</Source>
-    <Source>programs/ids500/final/limit.py</Source>
-    <Source>programs/ids500/initial_sub/__init__.py</Source>
-    <Source>programs/ids500/initial_sub/support.py</Source>
-    <Source>programs/ids500/initial_sub/limit.py</Source>
-    <Source>programs/ids500/initial_main/__init__.py</Source>
-    <Source>programs/ids500/initial_main/support.py</Source>
-    <Source>programs/ids500/initial_main/limit.py</Source>
-    <Source>programs/selftest/__init__.py</Source>
-    <Source>programs/selftest/support.py</Source>
-    <Source>programs/selftest/limit.py</Source>
-    <Source>programs/cn101/__init__.py</Source>
-    <Source>programs/cn101/console.py</Source>
-    <Source>programs/cn101/initial/__init__.py</Source>
-    <Source>programs/cn101/initial/support.py</Source>
-    <Source>programs/cn101/initial/limit.py</Source>
-    <Source>programs/wtsi200/__init__.py</Source>
-    <Source>programs/wtsi200/final/__init__.py</Source>
-    <Source>programs/wtsi200/final/support.py</Source>
-    <Source>programs/wtsi200/final/limit.py</Source>
+    <Source>programs/bp35/initial/support.py</Source>
+    <Source>programs/c15a15/__init__.py</Source>
+    <Source>programs/c15a15/final/__init__.py</Source>
+    <Source>programs/c15a15/final/limit.py</Source>
+    <Source>programs/c15a15/final/support.py</Source>
+    <Source>programs/c15d15/__init__.py</Source>
+    <Source>programs/c15d15/final/__init__.py</Source>
+    <Source>programs/c15d15/final/limit.py</Source>
+    <Source>programs/c15d15/final/support.py</Source>
+    <Source>programs/c45a15/__init__.py</Source>
+    <Source>programs/c45a15/final/__init__.py</Source>
+    <Source>programs/c45a15/final/limit.py</Source>
+    <Source>programs/c45a15/final/support.py</Source>
+    <Source>programs/c45a15/initial/__init__.py</Source>
+    <Source>programs/c45a15/initial/limit.py</Source>
+    <Source>programs/c45a15/initial/support.py</Source>
     <Source>programs/cmrsbp/__init__.py</Source>
-    <Source>programs/cmrsbp/support.py</Source>
     <Source>programs/cmrsbp/cmrsbp.py</Source>
     <Source>programs/cmrsbp/ev2200.py</Source>
     <Source>programs/cmrsbp/limit.py</Source>
-    <Source>programs/opto_test/__init__.py</Source>
-    <Source>programs/opto_test/support.py</Source>
-    <Source>programs/opto_test/limit.py</Source>
-    <Source>programs/mk7400/__init__.py</Source>
-    <Source>programs/mk7400/final/__init__.py</Source>
-    <Source>programs/mk7400/final/support.py</Source>
-    <Source>programs/mk7400/final/limit.py</Source>
-    <Source>programs/share/timed_data.py</Source>
-    <Source>programs/share/ticker.py</Source>
-    <Source>programs/share/programmer.py</Source>
-    <Source>programs/share/__init__.py</Source>
-    <Source>programs/share/sim_serial.py</Source>
-    <Source>programs/share/bluetooth/eunistone_pan1322.py</Source>
-    <Source>programs/share/bluetooth/__init__.py</Source>
-    <Source>programs/share/bluetooth/jsonrpc_server.py</Source>
-    <Source>programs/share/console/arm_gen1.py</Source>
-    <Source>programs/share/console/arm_gen2.py</Source>
-    <Source>programs/share/console/__init__.py</Source>
-    <Source>programs/share/console/arm_gen0.py</Source>
-    <Source>programs/share/console/_base.py</Source>
-    <Source>programs/share/console/test/test_base.py</Source>
-    <Source>programs/share/console/test/__init__.py</Source>
+    <Source>programs/cmrsbp/support.py</Source>
+    <Source>programs/cn101/__init__.py</Source>
+    <Source>programs/cn101/console.py</Source>
+    <Source>programs/cn101/initial/__init__.py</Source>
+    <Source>programs/cn101/initial/limit.py</Source>
+    <Source>programs/cn101/initial/support.py</Source>
+    <Source>programs/drifter/__init__.py</Source>
+    <Source>programs/drifter/final/__init__.py</Source>
+    <Source>programs/drifter/final/limit.py</Source>
+    <Source>programs/drifter/final/support.py</Source>
+    <Source>programs/drifter/initial/__init__.py</Source>
+    <Source>programs/drifter/initial/limit.py</Source>
+    <Source>programs/drifter/initial/pic_driver.py</Source>
+    <Source>programs/drifter/initial/support.py</Source>
+    <Source>programs/dummy/__init__.py</Source>
+    <Source>programs/dummy/limit.py</Source>
+    <Source>programs/dummy/support.py</Source>
+    <Source>programs/dummy/test_dummy.py</Source>
+    <Source>programs/etrac/__init__.py</Source>
+    <Source>programs/etrac/initial/__init__.py</Source>
+    <Source>programs/etrac/initial/limit.py</Source>
+    <Source>programs/etrac/initial/support.py</Source>
     <Source>programs/gen8/__init__.py</Source>
     <Source>programs/gen8/final/__init__.py</Source>
-    <Source>programs/gen8/final/support.py</Source>
     <Source>programs/gen8/final/limit.py</Source>
+    <Source>programs/gen8/final/support.py</Source>
     <Source>programs/gen8/initial/__init__.py</Source>
-    <Source>programs/gen8/initial/support.py</Source>
     <Source>programs/gen8/initial/limit.py</Source>
-    <Source>programs/sx750/__init__.py</Source>
-    <Source>programs/sx750/final/__init__.py</Source>
-    <Source>programs/sx750/final/support.py</Source>
-    <Source>programs/sx750/final/limit.py</Source>
-    <Source>programs/sx750/safety/__init__.py</Source>
-    <Source>programs/sx750/safety/support.py</Source>
-    <Source>programs/sx750/safety/limit.py</Source>
-    <Source>programs/sx750/initial/digpot.py</Source>
-    <Source>programs/sx750/initial/__init__.py</Source>
-    <Source>programs/sx750/initial/support.py</Source>
-    <Source>programs/sx750/initial/limit.py</Source>
-    <Source>programs/ts3520/__init__.py</Source>
-    <Source>programs/ts3520/final/__init__.py</Source>
-    <Source>programs/ts3520/final/support.py</Source>
-    <Source>programs/ts3520/final/limit.py</Source>
+    <Source>programs/gen8/initial/support.py</Source>
+    <Source>programs/genius2/__init__.py</Source>
+    <Source>programs/genius2/final/__init__.py</Source>
+    <Source>programs/genius2/final/limit.py</Source>
+    <Source>programs/genius2/final/support.py</Source>
+    <Source>programs/gsu360/__init__.py</Source>
+    <Source>programs/gsu360/final/__init__.py</Source>
+    <Source>programs/gsu360/final/limit.py</Source>
+    <Source>programs/gsu360/final/support.py</Source>
+    <Source>programs/gsu360/initial/__init__.py</Source>
+    <Source>programs/gsu360/initial/limit.py</Source>
+    <Source>programs/gsu360/initial/support.py</Source>
+    <Source>programs/ids500/__init__.py</Source>
+    <Source>programs/ids500/console.py</Source>
+    <Source>programs/ids500/final/__init__.py</Source>
+    <Source>programs/ids500/final/limit.py</Source>
+    <Source>programs/ids500/final/support.py</Source>
+    <Source>programs/ids500/initial_main/__init__.py</Source>
+    <Source>programs/ids500/initial_main/limit.py</Source>
+    <Source>programs/ids500/initial_main/support.py</Source>
+    <Source>programs/ids500/initial_sub/__init__.py</Source>
+    <Source>programs/ids500/initial_sub/limit.py</Source>
+    <Source>programs/ids500/initial_sub/support.py</Source>
+    <Source>programs/mk7400/__init__.py</Source>
+    <Source>programs/mk7400/final/__init__.py</Source>
+    <Source>programs/mk7400/final/limit.py</Source>
+    <Source>programs/mk7400/final/support.py</Source>
+    <Source>programs/opto_test/__init__.py</Source>
+    <Source>programs/opto_test/limit.py</Source>
+    <Source>programs/opto_test/support.py</Source>
+    <Source>programs/rm50/__init__.py</Source>
+    <Source>programs/rm50/final/__init__.py</Source>
+    <Source>programs/rm50/final/limit.py</Source>
+    <Source>programs/rm50/final/support.py</Source>
+    <Source>programs/selftest/__init__.py</Source>
+    <Source>programs/selftest/limit.py</Source>
+    <Source>programs/selftest/support.py</Source>
+    <Source>programs/share/__init__.py</Source>
+    <Source>programs/share/bluetooth/__init__.py</Source>
+    <Source>programs/share/bluetooth/eunistone_pan1322.py</Source>
+    <Source>programs/share/bluetooth/jsonrpc_server.py</Source>
+    <Source>programs/share/bluetooth/rn4020.py</Source>
+    <Source>programs/share/console/__init__.py</Source>
+    <Source>programs/share/console/_base.py</Source>
+    <Source>programs/share/console/arm_gen0.py</Source>
+    <Source>programs/share/console/arm_gen1.py</Source>
+    <Source>programs/share/console/arm_gen2.py</Source>
+    <Source>programs/share/console/test/__init__.py</Source>
+    <Source>programs/share/console/test/test_base.py</Source>
+    <Source>programs/share/programmer.py</Source>
+    <Source>programs/share/sim_serial.py</Source>
+    <Source>programs/share/ticker.py</Source>
+    <Source>programs/share/timed_data.py</Source>
     <Source>programs/smu75070/__init__.py</Source>
     <Source>programs/smu75070/final/__init__.py</Source>
-    <Source>programs/smu75070/final/support.py</Source>
     <Source>programs/smu75070/final/limit.py</Source>
-    <Source>programs/bce282/__init__.py</Source>
-    <Source>programs/bce282/final/__init__.py</Source>
-    <Source>programs/bce282/final/support.py</Source>
-    <Source>programs/bce282/final/limit.py</Source>
-    <Source>programs/bce282/initial/msp.py</Source>
-    <Source>programs/bce282/initial/__init__.py</Source>
-    <Source>programs/bce282/initial/tos-bsl.py</Source>
-    <Source>programs/bce282/initial/support.py</Source>
-    <Source>programs/bce282/initial/limit.py</Source>
+    <Source>programs/smu75070/final/support.py</Source>
+    <Source>programs/spa/__init__.py</Source>
+    <Source>programs/spa/multi/__init__.py</Source>
+    <Source>programs/spa/multi/limit.py</Source>
+    <Source>programs/spa/multi/p89lpc924.py</Source>
+    <Source>programs/spa/multi/support.py</Source>
+    <Source>programs/spa/single/__init__.py</Source>
+    <Source>programs/spa/single/limit.py</Source>
+    <Source>programs/spa/single/support.py</Source>
+    <Source>programs/st3/__init__.py</Source>
+    <Source>programs/st3/final/__init__.py</Source>
+    <Source>programs/st3/final/limit.py</Source>
+    <Source>programs/st3/final/support.py</Source>
+    <Source>programs/sx750/__init__.py</Source>
+    <Source>programs/sx750/final/__init__.py</Source>
+    <Source>programs/sx750/final/limit.py</Source>
+    <Source>programs/sx750/final/support.py</Source>
+    <Source>programs/sx750/initial/__init__.py</Source>
+    <Source>programs/sx750/initial/digpot.py</Source>
+    <Source>programs/sx750/initial/limit.py</Source>
+    <Source>programs/sx750/initial/support.py</Source>
+    <Source>programs/sx750/safety/__init__.py</Source>
+    <Source>programs/sx750/safety/limit.py</Source>
+    <Source>programs/sx750/safety/support.py</Source>
     <Source>programs/trek2/__init__.py</Source>
     <Source>programs/trek2/console.py</Source>
     <Source>programs/trek2/final/__init__.py</Source>
-    <Source>programs/trek2/final/support.py</Source>
     <Source>programs/trek2/final/limit.py</Source>
+    <Source>programs/trek2/final/support.py</Source>
     <Source>programs/trek2/initial/__init__.py</Source>
-    <Source>programs/trek2/initial/support.py</Source>
     <Source>programs/trek2/initial/limit.py</Source>
-    <Source>programs/etrac/__init__.py</Source>
-    <Source>programs/etrac/initial/__init__.py</Source>
-    <Source>programs/etrac/initial/support.py</Source>
-    <Source>programs/etrac/initial/limit.py</Source>
-    <Source>programs/c15d15/__init__.py</Source>
-    <Source>programs/c15d15/final/__init__.py</Source>
-    <Source>programs/c15d15/final/support.py</Source>
-    <Source>programs/c15d15/final/limit.py</Source>
-    <Source>programs/atxg450/__init__.py</Source>
-    <Source>programs/atxg450/final_2v/__init__.py</Source>
-    <Source>programs/atxg450/final_2v/support.py</Source>
-    <Source>programs/atxg450/final_2v/limit.py</Source>
-    <Source>programs/st3/__init__.py</Source>
-    <Source>programs/st3/final/__init__.py</Source>
-    <Source>programs/st3/final/support.py</Source>
-    <Source>programs/st3/final/limit.py</Source>
-    <Source>programs/dummy/__init__.py</Source>
-    <Source>programs/dummy/support.py</Source>
-    <Source>programs/dummy/test_dummy.py</Source>
-    <Source>programs/dummy/limit.py</Source>
-    <Source>programs/share/bluetooth/rn4020.py</Source>
-    <Source>tester/_base.py</Source>
-    <Source>tester/testsequence.py</Source>
-    <Source>tester/signals.py</Source>
-    <Source>tester/__init__.py</Source>
-    <Source>tester/testdata.py</Source>
-    <Source>tester/testrunner.py</Source>
-    <Source>tester/measure.py</Source>
-    <Source>tester/devphysical/dsoscpi.py</Source>
-    <Source>tester/devphysical/dcl3300a.py</Source>
-    <Source>tester/devphysical/dmmscpi.py</Source>
-    <Source>tester/devphysical/wt210.py</Source>
-    <Source>tester/devphysical/genf.py</Source>
-    <Source>tester/devphysical/gen4.py</Source>
-    <Source>tester/devphysical/signals.py</Source>
-    <Source>tester/devphysical/interface.py</Source>
-    <Source>tester/devphysical/__init__.py</Source>
-    <Source>tester/devphysical/gen2.py</Source>
-    <Source>tester/devphysical/gen3.py</Source>
-    <Source>tester/devphysical/acs6813b.py</Source>
-    <Source>tester/devphysical/dcs3645a.py</Source>
-    <Source>tester/devphysical/ar7564a.py</Source>
-    <Source>tester/devlogical/dcload.py</Source>
-    <Source>tester/devlogical/relay.py</Source>
-    <Source>tester/devlogical/_base.py</Source>
-    <Source>tester/devlogical/dmm.py</Source>
-    <Source>tester/devlogical/safety.py</Source>
-    <Source>tester/devlogical/__init__.py</Source>
-    <Source>tester/devlogical/acsource.py</Source>
-    <Source>tester/devlogical/power.py</Source>
-    <Source>tester/devlogical/discharge.py</Source>
-    <Source>tester/devlogical/dso.py</Source>
-    <Source>tester/devlogical/dcsource.py</Source>
-    <Source>tester/devlogical/fixturelock.py</Source>
+    <Source>programs/trek2/initial/support.py</Source>
+    <Source>programs/trs1/__init__.py</Source>
+    <Source>programs/trs1/final/__init__.py</Source>
+    <Source>programs/trs1/final/limit.py</Source>
+    <Source>programs/trs1/final/support.py</Source>
+    <Source>programs/trs1/initial/__init__.py</Source>
+    <Source>programs/trs1/initial/limit.py</Source>
+    <Source>programs/trs1/initial/support.py</Source>
+    <Source>programs/ts3020h/__init__.py</Source>
+    <Source>programs/ts3020h/final/__init__.py</Source>
+    <Source>programs/ts3020h/final/limit.py</Source>
+    <Source>programs/ts3020h/final/support.py</Source>
+    <Source>programs/ts3020h/initial/__init__.py</Source>
+    <Source>programs/ts3020h/initial/limit.py</Source>
+    <Source>programs/ts3020h/initial/support.py</Source>
+    <Source>programs/ts3520/__init__.py</Source>
+    <Source>programs/ts3520/final/__init__.py</Source>
+    <Source>programs/ts3520/final/limit.py</Source>
+    <Source>programs/ts3520/final/support.py</Source>
+    <Source>programs/uni750/__init__.py</Source>
+    <Source>programs/uni750/final/__init__.py</Source>
+    <Source>programs/uni750/final/limit.py</Source>
+    <Source>programs/uni750/final/support.py</Source>
+    <Source>programs/wtsi200/__init__.py</Source>
+    <Source>programs/wtsi200/final/__init__.py</Source>
+    <Source>programs/wtsi200/final/limit.py</Source>
+    <Source>programs/wtsi200/final/support.py</Source>
+    <Source>sensor/__init__.py</Source>
     <Source>sensor/_base.py</Source>
     <Source>sensor/dmm.py</Source>
-    <Source>sensor/safety.py</Source>
-    <Source>sensor/ui.py</Source>
-    <Source>sensor/__init__.py</Source>
-    <Source>sensor/mirror.py</Source>
-    <Source>sensor/ramp.py</Source>
-    <Source>sensor/power.py</Source>
     <Source>sensor/dso.py</Source>
+    <Source>sensor/mirror.py</Source>
+    <Source>sensor/power.py</Source>
+    <Source>sensor/ramp.py</Source>
+    <Source>sensor/safety.py</Source>
     <Source>sensor/search.py</Source>
-    <Source>sensor/test/test_dso.py</Source>
-    <Source>sensor/test/test_ramp.py</Source>
-    <Source>sensor/test/test_dmm.py</Source>
-    <Source>sensor/test/test_base.py</Source>
     <Source>sensor/test/__init__.py</Source>
-    <Source>sensor/test/test_power.py</Source>
+    <Source>sensor/test/test_base.py</Source>
+    <Source>sensor/test/test_dmm.py</Source>
+    <Source>sensor/test/test_dso.py</Source>
     <Source>sensor/test/test_mirror.py</Source>
+    <Source>sensor/test/test_power.py</Source>
+    <Source>sensor/test/test_ramp.py</Source>
     <Source>sensor/test/test_safety.py</Source>
-    <Source>sensor/test/test_ui.py</Source>
     <Source>sensor/test/test_search.py</Source>
+    <Source>sensor/test/test_ui.py</Source>
+    <Source>sensor/ui.py</Source>
+    <Source>tester/__init__.py</Source>
+    <Source>tester/_base.py</Source>
+    <Source>tester/devlogical/__init__.py</Source>
+    <Source>tester/devlogical/_base.py</Source>
+    <Source>tester/devlogical/acsource.py</Source>
+    <Source>tester/devlogical/dcload.py</Source>
+    <Source>tester/devlogical/dcsource.py</Source>
+    <Source>tester/devlogical/discharge.py</Source>
+    <Source>tester/devlogical/dmm.py</Source>
+    <Source>tester/devlogical/dso.py</Source>
+    <Source>tester/devlogical/fixturelock.py</Source>
+    <Source>tester/devlogical/power.py</Source>
+    <Source>tester/devlogical/relay.py</Source>
+    <Source>tester/devlogical/safety.py</Source>
+    <Source>tester/devphysical/__init__.py</Source>
+    <Source>tester/devphysical/acs6813b.py</Source>
+    <Source>tester/devphysical/ar7564a.py</Source>
+    <Source>tester/devphysical/dcl3300a.py</Source>
+    <Source>tester/devphysical/dcs3645a.py</Source>
+    <Source>tester/devphysical/dmmscpi.py</Source>
+    <Source>tester/devphysical/dsoscpi.py</Source>
+    <Source>tester/devphysical/gen2.py</Source>
+    <Source>tester/devphysical/gen3.py</Source>
+    <Source>tester/devphysical/gen4.py</Source>
+    <Source>tester/devphysical/genf.py</Source>
+    <Source>tester/devphysical/interface.py</Source>
+    <Source>tester/devphysical/signals.py</Source>
+    <Source>tester/devphysical/wt210.py</Source>
+    <Source>tester/measure.py</Source>
+    <Source>tester/signals.py</Source>
+    <Source>tester/testdata.py</Source>
+    <Source>tester/testrunner.py</Source>
+    <Source>tester/testsequence.py</Source>
+    <Source>testsuite.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
@@ -288,7 +288,9 @@
   <Others>
     <Other>programs/batterycheck/initial/BatteryCheckControl_1.7.4080.hex</Other>
     <Other>programs/batterycheck/initial/BatteryCheckSupervisor-2.hex</Other>
-    <Other>programs/bp35/initial/bp35_1.0.11529.3465.bin</Other>
+    <Other>programs/bc15/initial/bc15_1.0.1274.bin</Other>
+    <Other>programs/bp35/initial/bp35_1.1.12605.3513.bin</Other>
+    <Other>programs/bp35/initial/bp35sr_1.0.12123.142.hex</Other>
     <Other>programs/c45a15/initial/c45a-15.hex</Other>
     <Other>programs/cmrsbp/CMR-SBP-9.hex</Other>
     <Other>programs/drifter/initial/Drifter-5.hex</Other>
@@ -301,8 +303,6 @@
     <Other>programs/sx750/initial/sx750_arm_3.1.2118.bin</Other>
     <Other>programs/sx750/initial/sx750_pic_2.hex</Other>
     <Other>programs/trek2/initial/Trek2_1.0.11535.127.bin</Other>
-    <Other>programs/bc15/initial/bc15_1.0.1274.bin</Other>
-    <Other>programs/bp35/initial/bp35sr_1.0.12123.142.hex</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>

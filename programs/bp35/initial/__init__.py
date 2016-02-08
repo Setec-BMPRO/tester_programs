@@ -24,7 +24,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (3, 0, 'A')
 # ARM software image file
-_ARM_BIN = 'bp35_1.0.11529.3465.bin'
+_ARM_BIN = 'bp35_1.1.12605.3513.bin'
 # Soler Regulator Hardware version
 _SR_HW_VER = 1
 # dsPIC software image file
