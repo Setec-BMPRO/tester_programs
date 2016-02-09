@@ -71,8 +71,9 @@ class Main(tester.TestSequence):
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
         self.fifo_push(
-            ((s.oVin, 12.0), (s.oPin, 12.0), (s.oBrake, 0.0),
-             (s.oLight, 0.0), (s.oRemote, 0.0), ))
+            ((s.oVin, 12.0), (s.oPin, 12.0), (s.o5V, 0.0), (s.oBrake, 0.0),
+             (s.oLight, 0.0), (s.oRemote, 0.0), (s.oGreen, 0.0),
+             (s.oRed, 0.0), ))
 
         t.pwr_up.run()
 
@@ -80,10 +81,19 @@ class Main(tester.TestSequence):
         """Measure under 'breakaway' condition."""
         self.fifo_push(
             ((s.oPin, 0.0), (s.o5V, 5.0), (s.oBrake, 12.0), (s.oLight, 12.0),
-             (s.oRemote, 12.0), (s.oGreen, (0.0, 12.0, 0.0)),
-             (s.oRed, (12.0, 12.0, 0.0)), (s.oYesNoGreen, True),
-             (s.tp11, ((0.8,),)), (s.tp3, ((2.2,),)), (s.tp8, ((0.8,),)),
+             (s.oRemote, 12.0), (s.oGreen, (7.0, 0.0)),
+             (s.oRed, (12.0, 0.0)), (s.oYesNoGreen, True),
+             (s.tp11, ((0.8,),)), (s.tp3, ((1.1,),)), (s.tp8, ((0.8,),)),
             ))
 
-        t.brkaway.run()
+        t.brkaway1.run()
+        tester.testsequence.path_push('14V')
+        t.brkaway2.run()
+        tester.testsequence.path_pop()
+        tester.testsequence.path_push('10V')
+        t.brkaway3.run()
+        tester.testsequence.path_pop()
+        tester.testsequence.path_push('11V')
+        t.brkaway4.run()
+        tester.testsequence.path_pop()
         MeasureGroup((m.dso_tp11, m.dso_tp3, m.dso_tp8), 5)
