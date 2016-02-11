@@ -24,8 +24,8 @@ DATA = (
     ('GrnLedOn', 1, -0.1, 0.1, None, None),
     # 0.8 +/- 0.2Hz
     ('FreqTP11', 1, 0.6, 1.0, None, None),
-# NOTE: Testing notes specify 2.2Hz +/- 0.5Hz, we get 1.1Hz
-    ('FreqTP3', 1, 0.7, 1.6, None, None),
+# NOTE: Testing notes specify 2.2Hz +/- 0.5Hz, we get 0.57Hz
+    ('FreqTP3', 1, 0.57 * 0.85, 0.57 * 1.15, None, None),
     # 0.8 +/- 0.2Hz
     ('FreqTP8', 1, 0.6, 1.0, None, None),
     ('Notify', 2, None, None, None, True),
