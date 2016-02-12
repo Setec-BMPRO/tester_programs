@@ -24,7 +24,8 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (3, 0, 'A')
 # ARM software image file
-_ARM_BIN = 'bp35_1.1.12605.3513.bin'
+_ARM_VER = '1.1.12605.3513'
+_ARM_BIN = 'bp35_' + _ARM_VER + '.bin'
 # Soler Regulator Hardware version
 _SR_HW_VER = 1
 # dsPIC software image file
@@ -209,7 +210,7 @@ class Main(tester.TestSequence):
                     ('', ) * 2                  # SR setup
                     ):
             self._bp35_puts(str)
-        self._bp35_puts('1.0.11529.3465', postflush=0)  # SwVer measure
+        self._bp35_puts(_ARM_VER, postflush=0)  # SwVer measure
 
         self._bp35.open()
         d.rla_reset.pulse(0.1)
@@ -355,7 +356,7 @@ class Main(tester.TestSequence):
             tester.testsequence.path_push('L{}'.format(ld + 1))
             m.arm_loads[ld].measure(timeout=5)
             tester.testsequence.path_pop()
-        m.ramp_batOCP.measure(timeout=5)
+        m.ramp_OCP.measure(timeout=5)
         d.dcl_bat.output(0.0)
 
     def _step_canbus(self):

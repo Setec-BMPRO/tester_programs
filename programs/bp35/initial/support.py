@@ -90,7 +90,7 @@ class Sensors():
         self.o5Vusb = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.o3V3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
-        self.oBatOCP = sensor.Ramp(
+        self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
             detect_limit=(limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
@@ -162,7 +162,7 @@ class Measurements():
         self.dmm_fanOn = Measurement(limits['FanOn'], sense.oFan)
         self.dmm_fanOff = Measurement(limits['FanOff'], sense.oFan)
         self.dmm_3V3prog = Measurement(limits['3V3prog'], sense.o3V3prog)
-        self.ramp_batOCP = Measurement(limits['BatOCP'], sense.oBatOCP)
+        self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
         self.arm_acv = Measurement(limits['ARM-AcV'], sense.ARM_AcV)
