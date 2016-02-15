@@ -146,12 +146,10 @@ class SubTests():
         msr1 = MeasureSubStep(
             (m.dmm_pinout, m.dmm_5VOn, m.dmm_brakeon, m.dmm_lighton,
              m.dmm_remoteon), timeout=5)
-#        dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.0), ))
         dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.2), ))
         msr2 = MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5)
         dcs2 = DcSubStep(setting=((d.dcs_Vin, 10.0), ))
         msr3 = MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5)
-#        dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.0), ))
         dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.2), ))
         msr4 = MeasureSubStep((m.dmm_greenon, ), timeout=5)
         self.brkaway1 = Step((rly1, msr1, ))

@@ -19,13 +19,13 @@ DATA = (
     ('RemoteOn', 1, 11.9, 12.1, None, None),
     ('RedLedOff', 1, 11.9, 12.1, None, None),
     ('RedLedOn', 1, -0.1, 0.1, None, None),
-# NOTE: Testing notes specify 12.0V +/- 100mV, we get 7V
-    ('GrnLedOff', 1, 6.5, 12.1, None, None),
+    # 6.8 +/- 1V
+    ('GrnLedOff', 1, 5.8, 7.8, None, None),
     ('GrnLedOn', 1, -0.1, 0.1, None, None),
     # 0.8 +/- 0.2Hz
     ('FreqTP11', 1, 0.6, 1.0, None, None),
-# NOTE: Testing notes specify 2.2Hz +/- 0.5Hz, we get 0.57Hz
-    ('FreqTP3', 1, 0.57 * 0.85, 0.57 * 1.15, None, None),
+    # 0.56 +/- 0.2Hz
+    ('FreqTP3', 1, 0.54, 0.58, None, None),
     # 0.8 +/- 0.2Hz
     ('FreqTP8', 1, 0.6, 1.0, None, None),
     ('Notify', 2, None, None, None, True),
