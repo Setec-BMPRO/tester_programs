@@ -32,7 +32,8 @@ _AVR_HEX = 'BatteryCheckSupervisor-2.hex'
 
 _ARM_HEX = 'BatteryCheckControl_1.7.4080.hex'
 
-_PYTHON27 = r'C:\Python27\pythonw.exe'
+#_PYTHON27 = r'C:\Python27\pythonw.exe'
+_PYTHON27 = r'C:\Python27\python.exe'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -83,9 +84,12 @@ class Main(tester.TestSequence):
         self._logger.debug('Starting bluetooth server')
         try:
             self._btserver = subprocess.Popen(
-                [_PYTHON27, '../share/bluetooth/jsonrpc_server.py'],
+#                [_PYTHON27, '../share/bluetooth/jsonrpc_server.py'],
+                [_PYTHON27, r'C:\TestGear\Python\tester_programs' +
+                            r'\programs\share\bluetooth\jsonrpc_server.py'],
                 cwd=self._folder)
             self.btserver = jsonrpclib.Server('http://localhost:8888/')
+            self.btserver.scan()
         except FileNotFoundError:
             pass
         self._logger.debug('Connected to bluetooth server')
