@@ -86,7 +86,6 @@ class Main(tester.TestSequence):
                 [_PYTHON27, '../../share/bluetooth/jsonrpc_server.py'],
                 cwd=self._folder)
             self.btserver = jsonrpclib.Server('http://localhost:8888/')
-            self.btserver.scan()
         except FileNotFoundError:
             pass
         self._logger.debug('Connected to bluetooth server')
