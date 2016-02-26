@@ -24,7 +24,8 @@ _CAN_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 # Software image filename
-_ARM_BIN = 'Trek2_1.0.11535.127.bin'
+_ARM_VER = '1.1.12666.127'
+_ARM_BIN = 'Trek2_' + _ARM_VER + '.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, 'A')
 
@@ -149,7 +150,7 @@ class Main(tester.TestSequence):
         """Test the ARM device."""
         for str in (('Banner1\r\nBanner2', ) +  # Banner lines
                     ('', ) * 5 +                # defaults
-                    ('1.0.11535.127', )):       # SwVer measure
+                    (_ARM_VER, )):       # SwVer measure
             self._trek2_puts(str)
 
         self._trek2.open()
