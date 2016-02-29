@@ -25,7 +25,7 @@ DATA = (
     # 0.8 +/- 0.2Hz
     ('FreqTP11', 1, 0.6, 1.0, None, None),
     # 0.56 +/- 0.2Hz
-    ('FreqTP3', 1, 0.54, 0.58, None, None),
+    ('FreqTP3', 1, 0.36, 0.76, None, None),
     # 0.8 +/- 0.2Hz
     ('FreqTP8', 1, 0.6, 1.0, None, None),
     ('Notify', 2, None, None, None, True),
