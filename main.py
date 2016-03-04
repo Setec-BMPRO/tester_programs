@@ -113,6 +113,7 @@ def _main():
     #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
         logger.info('Close Program')
         logger.info('#' * 80)
+        time.sleep(2)
         tst.close()
     logger.info('Stop Tester')
     tst.stop()
