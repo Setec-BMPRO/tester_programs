@@ -265,6 +265,7 @@ class Main(tester.TestSequence):
         self._bp35['AUX_RELAY'] = True
         MeasureGroup(
             (m.dmm_vaux, m.arm_auxV, m.arm_auxI), timeout=5)
+        self._bp35['AUX_RELAY'] = False
         d.dcs_vaux.output(0.0, output=False)
         d.dcl_bat.output(0.0)
 
