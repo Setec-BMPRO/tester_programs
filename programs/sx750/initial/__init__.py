@@ -134,9 +134,9 @@ class Main(tester.TestSequence):
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Apply and check injected rails
-        d.dcs_5Vsb.output(5.7, True)
+        d.dcs_5Vsb.output(5.75, True)
         d.dcs_PriCtl.output(12.0, True)
-        self.fifo_push(((s.PriCtl, 12.34), (s.o5Vsb, 5.7),
+        self.fifo_push(((s.PriCtl, 12.34), (s.o5Vsb, 5.75),
                         (s.o5Vsbunsw, 5.0), (s.o3V3, 3.21), ))
         MeasureGroup(
             (m.dmm_PriCtl, m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
@@ -202,9 +202,9 @@ class Main(tester.TestSequence):
         Unit is left unpowered.
 
         """
-        self.fifo_push(((s.o5Vsbunsw, 5.0), ))
-        d.dcs_5Vsb.output(5.15, True)
-        m.dmm_5Vunsw.measure(timeout=2)
+        self.fifo_push(((s.o5Vsb, 5.75), (s.o5Vsbunsw, 5.0), ))
+        d.dcs_5Vsb.output(5.75, True)
+        MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
         self._armdev.open()
         self._arm_puts('\r\r\r', preflush=1)
