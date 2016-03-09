@@ -5,6 +5,7 @@
 # Test Limits
 DATA = (
     ('5Voff', 0, -0.5, 0.5, None, None),
+    ('5Vext', 0, 5.5, 5.9, None, None),
     # 5.10 +/- 1.5%
     ('5Vsb_set', 0, 5.034, 5.177, None, None),
     # 5.10 +/- 5.5%

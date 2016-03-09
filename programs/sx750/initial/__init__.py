@@ -24,7 +24,8 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Software image filenames
 _ARM_BIN = 'sx750_arm_3.1.2118.bin'
-_PIC_HEX = 'sx750_pic_2.hex'
+_PIC_HEX1 = 'sx750_pic5Vsb_1.hex'
+_PIC_HEX2 = 'sx750_picPwrSw_2.hex'
 # Reading to reading difference for PFC voltage stability
 _PFC_STABLE = 0.05
 
@@ -121,10 +122,11 @@ class Main(tester.TestSequence):
     def _step_program_micros(self):
         """Program the ARM and PIC devices.
 
-        5Vsb is injected to power the ARM for programming.
-        PriCtl is injected to power the PIC for programming.
-        Both devices are programmed at the same time using 2 new threads.
-        While waiting, we set OCP digital pots to maximum.
+        5Vsb is injected to power the ARM and 5Vsb PIC for programming.
+        PriCtl is injected to power the PwrSw PIC for programming.
+        The 5Vsb PIC is programmed first.
+        Then ARM and PwrSw PIC are programmed at the same time using 2 new
+        threads. While waiting, we set OCP digital pots to maximum.
 
         Unit is left unpowered.
 
@@ -132,16 +134,28 @@ class Main(tester.TestSequence):
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Apply and check injected rails
-        d.dcs_5Vsb.output(5.15, True)
+        d.dcs_5Vsb.output(5.7, True)
         d.dcs_PriCtl.output(12.0, True)
-        self.fifo_push(((s.PriCtl, 12.34), (s.o5Vsb, 5.05), (s.o3V3, 3.21), ))
-        MeasureGroup((m.dmm_PriCtl, m.dmm_5Vsb, m.dmm_3V3), 2)
+        self.fifo_push(((s.PriCtl, 12.34), (s.o5Vsb, 5.7),
+                        (s.o5Vsbunsw, 5.0), (s.o3V3, 3.21), ))
+        MeasureGroup(
+            (m.dmm_PriCtl, m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        # Start the PIC programmer (takes about 6 sec)
-        self._logger.info('Start PIC programmer')
-        d.rla_pic.set_on()
-        pic = ProgramPIC(_PIC_HEX, folder, '10F320', s.oMirPIC)
+
+        # Start the PIC programmer for 5Vsb PIC (takes about 6 sec)
+        self._logger.info('Start PIC programmer - PIC1')
+        d.rla_pic1.set_on()
+        pic = ProgramPIC(_PIC_HEX1, folder, '10F320', s.oMirPIC)
+        pic.read()
+        d.rla_pic1.set_off()
+        # 'Measure' the mirror sensor to check and log data
+        m.pgmPIC.measure()
+
+        # Start the PIC programmer for PwrSw PIC (takes about 6 sec)
+        self._logger.info('Start PIC programmer - PIC2')
+        d.rla_pic2.set_on()
+        pic = ProgramPIC(_PIC_HEX2, folder, '10F320', s.oMirPIC)
         # While programming, we also set OCP adjust to maximum.
         # (takes about 6 sec)
         self._logger.info('Reset digital pots')
@@ -167,7 +181,7 @@ class Main(tester.TestSequence):
         # Wait for programming completion & read results
         pot_worker.join()
         pic.read()
-        d.rla_pic.set_off()
+        d.rla_pic2.set_off()
         # 'Measure' the mirror sensors to check and log data
         MeasureGroup((m.pgmARM, m.pgmPIC))
         # Reset BOOT to ARM
@@ -188,7 +202,9 @@ class Main(tester.TestSequence):
         Unit is left unpowered.
 
         """
+        self.fifo_push(((s.o5Vsbunsw, 5.0), ))
         d.dcs_5Vsb.output(5.15, True)
+        m.dmm_5Vunsw.measure(timeout=2)
         time.sleep(1)           # ARM startup delay
         self._armdev.open()
         self._arm_puts('\r\r\r', preflush=1)

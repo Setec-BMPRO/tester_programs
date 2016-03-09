@@ -26,7 +26,8 @@ class LogicalDevices():
         self.dcl_5Vsb = dcload.DCLoad(devices['DCL2'])
         self.dcl_12V = dcload.DCLoad(devices['DCL1'])
         self.dcl_24V = dcload.DCLoad(devices['DCL5'])
-        self.rla_pic = relay.Relay(devices['RLA1'])
+        self.rla_pic2 = relay.Relay(devices['RLA1'])
+        self.rla_pic1 = relay.Relay(devices['RLA7'])
         self.rla_boot = relay.Relay(devices['RLA2'])
         self.rla_pson = relay.Relay(devices['RLA3'])
         self.rla_pot_ud = relay.Relay(devices['RLA6'])
@@ -50,7 +51,8 @@ class LogicalDevices():
         for dcs in (self.dcs_PriCtl, self.dcs_5Vsb):
             dcs.output(0.0, False)
         # Switch off all Relays
-        for rla in (self.rla_pic, self.rla_boot, self.rla_pson):
+        for rla in (self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
+                     self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
             rla.set_off()
         # Disable digital pots
         self.ocp_pot.disable()
@@ -70,6 +72,7 @@ class Sensors():
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
         self.o5Vsb = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
+        self.o5Vsbunsw = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
         self.o12V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.o12VinOCP = sensor.Vdc(dmm, high=10, low=2, rng=100, res=0.01)
         self.o24V = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
@@ -133,6 +136,8 @@ class Measurements():
         self.pgmARM = Measurement(pgmlim, sense.oMirARM)
         self.pgmPIC = Measurement(pgmlim, sense.oMirPIC)
         self.dmm_5Voff = Measurement(limits['5Voff'], sense.o5Vsb)
+        self.dmm_5Vext = Measurement(limits['5Vext'], sense.o5Vsb)
+        self.dmm_5Vunsw = Measurement(limits['5Vsb'], sense.o5Vsbunsw)
         self.dmm_5Vsb_set = Measurement(limits['5Vsb_set'], sense.o5Vsb)
         self.dmm_5Vsb = Measurement(limits['5Vsb'], sense.o5Vsb)
         self.dmm_12V_set = Measurement(limits['12V_set'], sense.o12V)

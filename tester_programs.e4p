@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-02-29, 18:15:34 -->
+<!-- Saved: 2016-03-09, 16:47:05 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -280,6 +280,14 @@
     <Source>tester/testrunner.py</Source>
     <Source>tester/testsequence.py</Source>
     <Source>testsuite.py</Source>
+    <Source>testlimit/_base.py</Source>
+    <Source>testlimit/helpers.py</Source>
+    <Source>testlimit/__init__.py</Source>
+    <Source>testlimit/test/__init__.py</Source>
+    <Source>testlimit/test/test_testlimit.py</Source>
+    <Source>isplpc/isp.py</Source>
+    <Source>isplpc/device.py</Source>
+    <Source>isplpc/__init__.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
@@ -301,7 +309,6 @@
     <Other>programs/spa/multi/MFDrgb_V103.hex</Other>
     <Other>programs/spa/multi/MFDtri_V103.hex</Other>
     <Other>programs/sx750/initial/sx750_arm_3.1.2118.bin</Other>
-    <Other>programs/sx750/initial/sx750_pic_2.hex</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>
