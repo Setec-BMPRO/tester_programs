@@ -194,7 +194,7 @@ class SubTests():
         self.OV_UV = Step((msr1, ld1, msr2, ld2, dcs1))
         # PowerUp: Turn on at low voltage measure
         dcs1 = DcSubStep(
-            setting=((d.dcs_Vout, 0.0), (d.dcs_SecCtl2, 0.0), ))
+            setting=((d.dcs_Vout, 0.0), (d.dcs_SecCtl2, 0.0), ),  output=False)
         acs1 = AcSubStep(
             acs=d.acsource, voltage=100.0, output=True, delay=1.0)
         msr1 = MeasureSubStep(
