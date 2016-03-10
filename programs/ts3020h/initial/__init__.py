@@ -148,7 +148,7 @@ class Main(tester.TestSequence):
         Set output voltage, apply load and measure voltages.
 
         """
-#        self.fifo_push(((s.oAdjOutput, True), ))
+#        self.fifo_push(((s.oAdjVout, True), ))
         self.fifo_push(
             ((s.oVout, (13.77, 13.78, 13.79, 13.8, 13.8)), ))
         m.ui_AdjVout.measure()

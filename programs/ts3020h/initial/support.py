@@ -189,12 +189,10 @@ class SubTests():
         ld1 = LoadSubStep(((d.dcl, 0.5), ), output=True)
         msr2 = MeasureSubStep((m.ramp_UVP, ), timeout=5)
         ld2 = LoadSubStep(((d.dcl, 0.0),))
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vout, 0.0), (d.dcs_SecCtl2, 0.0), ))
-        self.OV_UV = Step((msr1, ld1, msr2, ld2, dcs1))
+        self.OV_UV = Step((msr1, ld1, msr2, ld2))
         # PowerUp: Turn on at low voltage measure
         dcs1 = DcSubStep(
-            setting=((d.dcs_Vout, 0.0), (d.dcs_SecCtl2, 0.0), ),  output=False)
+            setting=((d.dcs_Vout, 0.0), (d.dcs_SecCtl2, 0.0), ), output=False)
         acs1 = AcSubStep(
             acs=d.acsource, voltage=100.0, output=True, delay=1.0)
         msr1 = MeasureSubStep(
