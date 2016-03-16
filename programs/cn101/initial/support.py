@@ -29,8 +29,8 @@ class LogicalDevices():
         self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
         # Power unit under test.
         self.dcs_vin = dcsource.DCSource(devices['DCS2'])
-        # Power for Awnings.
-        self.dcs_awn = dcsource.DCSource(devices['DCS3'])
+        # Power for Awning and slideout.
+        self.dcs_awnsld = dcsource.DCSource(devices['DCS3'])
         self.rla_reset = relay.Relay(devices['RLA1'])
         self.rla_boot = relay.Relay(devices['RLA2'])
         self.rla_awnA = relay.Relay(devices['RLA3'])
@@ -48,7 +48,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        for dcs in (self.dcs_vin, self.dcs_vcom, self.dcs_awn):
+        for dcs in (self.dcs_vin, self.dcs_vcom, self.dcs_awnsld):
             dcs.output(0.0, False)
         for rla in (self.rla_reset, self.rla_boot, self.rla_awnA,
                     self.rla_awnB, self.rla_sldA, self.rla_sldB,
@@ -78,8 +78,8 @@ class Sensors():
             signal=tester.signals.TestRun.stop)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self.oAwnA = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)
-        self.oAwnB = sensor.Vdc(dmm, high=4, low=2, rng=100, res=0.01)
+        self.oAwnA = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
+        self.oAwnB = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         self.oSldA = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
         self.oSldB = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.01)
         self.oSnEntry = sensor.DataEntry(
@@ -155,8 +155,8 @@ class SubTests():
             setting=((d.dcs_vin, 12.75), ), output=True)
         msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
-        # Awning:
-        dcs1 = DcSubStep(setting=((d.dcs_awn, 12.3), ), output=True)
+        # MotorControl:
+        dcs1 = DcSubStep(setting=((d.dcs_awnsld, 12.5), ), output=True)
         rly1 = RelaySubStep(
             relays=((d.rla_awnA, True), (d.rla_awnB, True),
                     (d.rla_sldA, True), (d.rla_sldB, True)))
@@ -167,4 +167,5 @@ class SubTests():
                     (d.rla_sldA, False), (d.rla_sldB, False)))
         msr2 = MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff, m.dmm_sldAOff,
                               m.dmm_sldBOff), timeout=5)
-        self.motorcontrol = Step((dcs1, rly1, msr1, rly2, msr2))
+        dcs2 = DcSubStep(setting=((d.dcs_awnsld, 0.0), ))
+        self.motorcontrol = Step((dcs1, rly1, msr1, rly2, msr2, dcs2))
