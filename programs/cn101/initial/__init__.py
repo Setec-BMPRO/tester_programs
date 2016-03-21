@@ -24,8 +24,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM15'}[os.name]
 # ARM software image file
-#_ARM_BIN = 'cn101_1.0.11950.153.bin'
-_ARM_VER = '1.0.12619.163'
+_ARM_VER = '1.0.12904.169'
 _ARM_BIN = 'cn101_' + _ARM_VER + '.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, 'A')
@@ -59,9 +58,9 @@ class Main(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
+            ('Awning', self._step_awning, None, True),
             ('CanBus', self._step_canbus, None, True),
             ('Bluetooth', self._step_bluetooth, None, True),
-            ('MotorControl', self._step_motor_control, None, True),
             ('TankSense', self._step_tank_sense, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
@@ -170,7 +169,6 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
         for str in (('Banner1\r\nBanner2', ) +
                     ('', ) * 5 +
-#                    ('1.0.10892.110', ) +
                     (_ARM_VER, ) +
                     ('112233445566', )):
             self._cn101_puts(str)
@@ -182,6 +180,13 @@ class Main(tester.TestSequence):
         self._cn101.defaults(_HW_VER, sernum)
         m.cn101_swver.measure()
         self._btmac = m.cn101_btmac.measure()[1][0]
+
+    def _step_awning(self):
+        """Test Awning relay operation."""
+        self.fifo_push(
+            ((s.oAwnA, (0.0, 11.0)), (s.oAwnB, (0.0, 11.0)), ))
+
+        t.awn.run()
 
     def _step_canbus(self):
         """Test the CAN Bus interface."""
@@ -196,14 +201,6 @@ class Main(tester.TestSequence):
 
     def _step_bluetooth(self):
         """Test the Bluetooth interface."""
-
-    def _step_motor_control(self):
-        """Test Awning and Slideout control."""
-        self.fifo_push(
-            ((s.oAwnA, (12.0, 0.0)), (s.oAwnB, (12.0, 0.0)),
-             (s.oSldA, (12.0, 0.0)), (s.oSldB, (12.0, 0.0)), ))
-
-        t.motorcontrol.run()
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""

@@ -72,7 +72,7 @@ class Console(console.ConsoleGen1):
         @return MAC address
 
         """
-        mac = self.action('BT-MAC?', expected=1).strip()
+        mac = self.action('BLE-MAC?', expected=1).strip()
         parts = []
         for i in range(0, 12, 2):
             parts.append(mac[i:i+2])
