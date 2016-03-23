@@ -24,12 +24,12 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (3, 0, 'A')
 # ARM software image file
-_ARM_VER = '1.2.12876.3637'
+_ARM_VER = '1.2.12945.3750'
 _ARM_BIN = 'bp35_' + _ARM_VER + '.bin'
 # Soler Regulator Hardware version
 _SR_HW_VER = 1
 # dsPIC software image file
-_PIC_HEX = 'bp35sr_1.0.12123.142.hex'
+_PIC_HEX = 'bp35sr_1.1.12949.167.hex'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
