@@ -24,7 +24,7 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (3, 0, 'A')
 # ARM software image file
-_ARM_VER = '1.2.12945.3750'
+_ARM_VER = '1.2.12951.3751'
 _ARM_BIN = 'bp35_' + _ARM_VER + '.bin'
 # Soler Regulator Hardware version
 _SR_HW_VER = 1
@@ -244,10 +244,14 @@ class Main(tester.TestSequence):
         MeasureGroup((m.arm_solar_alive, m.arm_vout_ov, ))
         srtemp = self._bp35['SR_TEMP']
         self._logger.debug('Temperature: %s', srtemp)
-        vset = self._limits['Vset'].limit
-        iset = self._limits['Iset'].limit
-        self._bp35['SR_VSET'] = vset
-        self._bp35['SR_ISET'] = iset
+        vset = int(self._limits['Vset'].limit * 1000)
+        iset = int(self._limits['Iset'].limit * 1000)
+        # The SR needs both V & I set to zero after power up or it won't
+        # start up. You cannot send the V & I within 100ms of each other using
+        # the 2 console commands, so we use a new hacked command...
+        self._bp35.action('{} {} SOLAR-SETP-V-I'.format(0, 0))
+        # Now set the actual output settings
+        self._bp35.action('{} {} SOLAR-SETP-V-I'.format(vset, iset))
         time.sleep(2)
         self._bp35['VOUT_OV'] = 2     # OVP Latch reset
         vmeasured = m.dmm_vsregpre.measure(timeout=5)[1][0]
