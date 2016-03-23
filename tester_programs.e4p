@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-03-21, 18:13:53 -->
+<!-- Saved: 2016-03-23, 16:17:52 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -15,6 +15,9 @@
   <Eol index="1"/>
   <Sources>
     <Source>__init__.py</Source>
+    <Source>isplpc/__init__.py</Source>
+    <Source>isplpc/device.py</Source>
+    <Source>isplpc/isp.py</Source>
     <Source>main.py</Source>
     <Source>programs/_2040/__init__.py</Source>
     <Source>programs/_2040/final/__init__.py</Source>
@@ -279,15 +282,12 @@
     <Source>tester/testdata.py</Source>
     <Source>tester/testrunner.py</Source>
     <Source>tester/testsequence.py</Source>
-    <Source>testsuite.py</Source>
+    <Source>testlimit/__init__.py</Source>
     <Source>testlimit/_base.py</Source>
     <Source>testlimit/helpers.py</Source>
-    <Source>testlimit/__init__.py</Source>
     <Source>testlimit/test/__init__.py</Source>
     <Source>testlimit/test/test_testlimit.py</Source>
-    <Source>isplpc/isp.py</Source>
-    <Source>isplpc/device.py</Source>
-    <Source>isplpc/__init__.py</Source>
+    <Source>testsuite.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
@@ -297,7 +297,8 @@
     <Other>programs/batterycheck/initial/BatteryCheckControl_1.7.4080.hex</Other>
     <Other>programs/batterycheck/initial/BatteryCheckSupervisor-2.hex</Other>
     <Other>programs/bc15/initial/bc15_1.0.1274.bin</Other>
-    <Other>programs/bp35/initial/bp35sr_1.0.12123.142.hex</Other>
+    <Other>programs/bp35/initial/bp35_1.2.12945.3750.bin</Other>
+    <Other>programs/bp35/initial/bp35sr_1.1.12949.167.hex</Other>
     <Other>programs/c45a15/initial/c45a-15.hex</Other>
     <Other>programs/cmrsbp/CMR-SBP-9.hex</Other>
     <Other>programs/drifter/initial/Drifter-5.hex</Other>

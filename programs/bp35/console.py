@@ -105,6 +105,7 @@ class Console(console.ConsoleGen1):
         time.sleep(1)
         self['DCDC_EN'] = True
         time.sleep(1)
+        self['VOUT_OV'] = 2     # OVP Latch reset
         self['LOAD_DIS'] = False
 
     def load_set(self, set_on=True, loads=()):

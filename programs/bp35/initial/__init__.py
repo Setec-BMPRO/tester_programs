@@ -190,6 +190,8 @@ class Main(tester.TestSequence):
                 s.oMirARM.store(0)
             except ProgrammingError:
                 s.oMirARM.store(1)
+        except:
+            raise
         finally:
             ser.close()
         m.pgmARM.measure()
