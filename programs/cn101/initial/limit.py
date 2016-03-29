@@ -12,7 +12,8 @@ _CAN_BIND = 1 << 28
 
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
-    lim_hilo_delta('Vin', 12.0, 0.5),
+    lim_lo('Part', 20.0),
+    lim_hilo_delta('Vin', 8.0, 0.5),
     lim_hilo_percent('3V3', 3.30, 3.0),
     lim_lo('AwnOff', 0.5),
     lim_hi('AwnOn', 10.0),
@@ -21,9 +22,11 @@ DATA = (
     lim_string('CAN_ID', r'^RRQ,16,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
     lim_string('SwVer', r'^1\.0\.12904\.169$'),
+#    lim_string(
+#        'BtMac', r'^[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}$'),
     lim_string(
-        'BtMac', r'^[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}$'),
+        'BtMac', r'^[0-F]{2}:[0-F]{2}:[0-F]{2}:[0-F]{2}:[0-F]{2}:[0-F]{2}$'),
     lim_hilo_int('DetectBT', 0),
-    lim_hilo_int('Tank', 4),
+    lim_hilo_int('Tank', 5),
     lim_boolean('Notify', True),
     )

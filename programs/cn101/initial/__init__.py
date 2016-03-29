@@ -55,6 +55,7 @@ class Main(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
+            ('PartCheck', self._step_part_check, None, True),
             ('PowerUp', self._step_power_up, None, True),
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
@@ -134,9 +135,14 @@ class Main(tester.TestSequence):
         """Check physical instruments for errors."""
         d.error_check()
 
+    def _step_part_check(self):
+        """Measure Part detection microswitches."""
+        self.fifo_push(((s.microsw, 10.0), (s.sw1, 10.0), (s.sw2, 10.0), ))
+        MeasureGroup((m.dmm_microsw, m.dmm_sw1, m.dmm_sw2), 5)
+
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oVin, 12.0), (s.o3V3, 3.3), ))
+        self.fifo_push(((s.oVin, 8.0), (s.o3V3, 3.3), ))
 
         t.pwr_up.run()
 
@@ -170,7 +176,8 @@ class Main(tester.TestSequence):
         for str in (('Banner1\r\nBanner2', ) +
                     ('', ) * 5 +
                     (_ARM_VER, ) +
-                    ('112233445566', )):
+#                    ('112233445566', )):
+                    ('001EC030BC15', )):
             self._cn101_puts(str)
 
         sernum = m.ui_serialnum.measure()[1][0]
@@ -204,7 +211,7 @@ class Main(tester.TestSequence):
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
-        for str in (('4', ) * 4):
+        for str in (('5', ) * 4):
             self._cn101_puts(str)
 
         for rla in (d.rla_s1, d.rla_s2, d.rla_s3, d.rla_s4):

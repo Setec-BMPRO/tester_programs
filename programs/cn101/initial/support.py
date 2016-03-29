@@ -45,7 +45,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        for dcs in (self.dcs_vin, self.dcs_vcom, self.dcs_awnsld):
+        for dcs in (self.dcs_vin, self.dcs_vcom, self.dcs_awn):
             dcs.output(0.0, False)
         for rla in (self.rla_reset, self.rla_boot, self.rla_awn,
                     self.rla_s1, self.rla_s2, self.rla_s3, self.rla_s4):
@@ -72,6 +72,9 @@ class Sensors():
             self._reset,
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
+        self.microsw = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
+        self.sw1 = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
+        self.sw2 = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self.oAwnA = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
@@ -108,6 +111,9 @@ class Measurements():
            @param limits Product test limits
 
         """
+        self.dmm_microsw = Measurement(limits['Part'], sense.microsw)
+        self.dmm_sw1 = Measurement(limits['Part'], sense.sw1)
+        self.dmm_sw2 = Measurement(limits['Part'], sense.sw2)
         self.program = Measurement(limits['Program'], sense.oMirARM)
         self.detectBT = Measurement(limits['DetectBT'], sense.oMirBT)
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
@@ -142,11 +148,11 @@ class SubTests():
         m = measurements
         # PowerUp:
         dcs1 = DcSubStep(
-            setting=((d.dcs_vin, 12.75), ), output=True)
+            setting=((d.dcs_vin, 8.0), ), output=True)
         msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
         # Awning:
-        dcs1 = DcSubStep(setting=((d.dcs_awn, 12.5), ), output=True)
+        dcs1 = DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True)
         msr1 = MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5)
         rly1 = RelaySubStep(relays=((d.rla_awn, True), ))
         msr2 = MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn), timeout=5)
