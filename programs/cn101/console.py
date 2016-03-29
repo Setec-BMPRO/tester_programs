@@ -36,7 +36,7 @@ class Console(console.ConsoleGen1):
                 minimum=0, maximum=0xF0000000),
             'CAN_BIND': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-            'CAN_ID': ParameterCAN('TQQ,16,0'),
+            'CAN_ID': ParameterCAN('TQQ,36,0'),
             'SwVer': ParameterRaw('', func=self.version),
             'BtMac': ParameterRaw('', func=self.mac),
             'TANK1': ParameterFloat('TANK_1_LEVEL'),

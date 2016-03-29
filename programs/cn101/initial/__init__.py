@@ -176,7 +176,6 @@ class Main(tester.TestSequence):
         for str in (('Banner1\r\nBanner2', ) +
                     ('', ) * 5 +
                     (_ARM_VER, ) +
-#                    ('112233445566', )):
                     ('001EC030BC15', )):
             self._cn101_puts(str)
 
@@ -186,6 +185,7 @@ class Main(tester.TestSequence):
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
         self._cn101.defaults(_HW_VER, sernum)
         m.cn101_swver.measure()
+        time.sleep(5)
         self._btmac = m.cn101_btmac.measure()[1][0]
 
     def _step_awning(self):
@@ -199,7 +199,7 @@ class Main(tester.TestSequence):
         """Test the CAN Bus interface."""
         for str in ('0x10000000', '', '0x10000000', ''):
             self._cn101_puts(str)
-        self._cn101_puts('RRQ,16,0,7', postflush=0)
+        self._cn101_puts('RRQ,36,0,7', postflush=0)
 
         m.cn101_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
@@ -216,4 +216,5 @@ class Main(tester.TestSequence):
 
         for rla in (d.rla_s1, d.rla_s2, d.rla_s3, d.rla_s4):
             rla.set_on()
+        time.sleep(10)
         MeasureGroup((m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4, ))

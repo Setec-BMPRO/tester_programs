@@ -148,7 +148,7 @@ class SubTests():
         m = measurements
         # PowerUp:
         dcs1 = DcSubStep(
-            setting=((d.dcs_vin, 8.0), ), output=True)
+            setting=((d.dcs_vin, 8.7), ), output=True)
         msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
         # Awning:
