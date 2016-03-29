@@ -214,6 +214,12 @@ class Main(tester.TestSequence):
             self._bp35_puts(str)
         self._bp35_puts(_ARM_VER, postflush=0)  # SwVer measure
 
+# FIXME: Remove power to microprocessor and start again.
+        d.dcs_vbat.output(0.0)
+        time.sleep(2.0)
+        d.dcs_vbat.output(12.4)
+        time.sleep(2.0)
+
         self._bp35.open()
         d.rla_reset.pulse(0.1)
         time.sleep(1)
