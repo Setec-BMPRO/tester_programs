@@ -43,8 +43,6 @@ DATA = (
     ('ACOK', 0, -0.5, 0.5, None, None),
     ('3V3', 0, 3.2, 3.4, None, None),
     ('ACin', 0, 230, 250, None, None),
-    ('ACstart', 0, 85, 90, None, None),
-    ('ACstop', 0, 75, 85, None, None),
     ('PFCpre', 0, 400, 440, None, None),
     ('PFCpost', 0, 434, 436, None, None),
     ('OCP12pre', 0, 34, 38, None, None),

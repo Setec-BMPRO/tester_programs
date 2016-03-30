@@ -99,16 +99,6 @@ class Sensors():
             detect_limit=(limits['24V_inOCP'], ),
             start=18.3 * 0.9, stop=18.3 * 1.1, step=0.1, delay=0,
             reset=True, use_opc=True)
-        self.AcStart = sensor.Ramp(
-            stimulus=d.acsource, sensor=self.ACFAIL,
-            detect_limit=(limits['ACFAIL'], ),
-            start=75.0, stop=95.0, step=0.5, delay=0.3,
-            reset=False, use_opc=False)
-        self.AcStop = sensor.Ramp(
-            stimulus=d.acsource, sensor=self.ACFAIL,
-            detect_limit=(limits['ACOK'], ),
-            start=95.0, stop=75.0, step=-0.5, delay=0.3,
-            reset=False, use_opc=False)
         self.ARM_AcDuty = con_sensor(armdev, 'ARM-AcDuty')
         self.ARM_AcPer = con_sensor(armdev, 'ARM-AcPer')
         self.ARM_AcFreq = con_sensor(armdev, 'ARM-AcFreq')
@@ -164,8 +154,6 @@ class Measurements():
         self.dmm_R608 = Measurement(limits['Snubber'], sense.R608)
         self.rampOcp12V = Measurement(limits['12V_OCPchk'], sense.OCP12V)
         self.rampOcp24V = Measurement(limits['24V_OCPchk'], sense.OCP24V)
-        self.rampAcStart = Measurement(limits['ACstart'], sense.AcStart)
-        self.rampAcStop = Measurement(limits['ACstop'], sense.AcStop)
         self.arm_AcDuty = Measurement(limits['ARM-AcDuty'], sense.ARM_AcDuty)
         self.arm_AcPer = Measurement(limits['ARM-AcPer'], sense.ARM_AcPer)
         self.arm_AcFreq = Measurement(limits['ARM-AcFreq'], sense.ARM_AcFreq)

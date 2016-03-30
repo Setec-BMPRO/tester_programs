@@ -52,7 +52,6 @@ class Main(tester.TestSequence):
             ('12V', self._step_reg_12v, None, True),
             ('24V', self._step_reg_24v, None, True),
             ('PeakPower', self._step_peak_power, None, True),
-            ('AC', self._step_acstart, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -384,26 +383,6 @@ class Main(tester.TestSequence):
         d.dcl_24V.output(0)
         d.dcl_12V.output(0)
         d.dcl_5Vsb.output(0)
-
-    def _step_acstart(self):
-        """Measure AC Start / Stop voltages."""
-        # A little load so PFC voltage falls faster
-        d.dcl_5Vsb.output(0.05)
-        d.dcl_12V.output(1.0)
-        d.dcl_24V.output(1.0)
-        # Switch off the unit
-        d.acsource.output(75.0)
-        self.fifo_push(((s.ACFAIL, 0.123), (s.o5Vsb, 0.055),
-                        (s.ACFAIL, (0.123, ) * 25 + (4.99, ))))
-        m.dmm_ACOK.measure(2)
-        # 5Vsb should have switched off
-        m.dmm_5Voff.measure(1.0)
-        m.rampAcStart.measure()
-        d.acsource.output(95.0)
-        if not self._fifo:
-            time.sleep(1)
-        self.fifo_push(((s.ACFAIL, (5.01, ) * 30 + (0.123, )), ))
-        m.rampAcStop.measure()
 
     def _pot_worker(self):
         """Thread worker to set the digital pots to maximum."""
