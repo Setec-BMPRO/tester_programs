@@ -12,6 +12,7 @@ import time
 import tester
 from isplpc import Programmer, ProgrammingError
 from ...share.sim_serial import SimSerial
+from ...share.bluetooth.rn4020 import BleRadio
 from ..console import Console
 from . import support
 from . import limit
@@ -22,14 +23,14 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM15'}[os.name]
+_ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM15'}[os.name]
 # ARM software image file
 _ARM_VER = '1.0.12904.169'
 _ARM_BIN = 'cn101_' + _ARM_VER + '.bin'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, 'A')
 # Serial port for the Bluetooth module.
-_BLE_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM14'}[os.name]
+_BLE_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM14'}[os.name]
 # Serial port for the Trek2 as the CAN Bus interface.
 _CAN_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM13'}[os.name]
 
@@ -91,6 +92,7 @@ class Main(tester.TestSequence):
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
         ble_ser.setPort(_BLE_PORT)
+        self._ble = BleRadio(ble_ser)
         self._btmac = None
 
     def open(self):
@@ -183,6 +185,7 @@ class Main(tester.TestSequence):
         self._cn101.open()
         d.rla_reset.pulse(0.1)
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
+#        self._cn101.action(None, delay=1)   # Flush banner
         self._cn101.defaults(_HW_VER, sernum)
         m.cn101_swver.measure()
         time.sleep(5)
@@ -199,7 +202,7 @@ class Main(tester.TestSequence):
         """Test the CAN Bus interface."""
         for str in ('0x10000000', '', '0x10000000', ''):
             self._cn101_puts(str)
-        self._cn101_puts('RRQ,36,0,7', postflush=0)
+        self._cn101_puts('RRQ,32,0,7', postflush=0)
 
         m.cn101_can_bind.measure(timeout=5)
         time.sleep(1)   # Let junk CAN messages come in
@@ -208,13 +211,24 @@ class Main(tester.TestSequence):
 
     def _step_bluetooth(self):
         """Test the Bluetooth interface."""
+        self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
+        if self._fifo:
+            reply = True
+        else:
+            self._ble.open()
+            reply = self._ble.scan(self._btmac)
+            self._ble.close()
+        self._logger.debug('Bluetooth MAC detected: %s', reply)
+        s.oMirBT.store(reply)
+        m.detectBT.measure()
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
-        for str in (('5', ) * 4):
+        for str in (('5', ) * 5):
             self._cn101_puts(str)
 
         for rla in (d.rla_s1, d.rla_s2, d.rla_s3, d.rla_s4):
             rla.set_on()
-        time.sleep(10)
-        MeasureGroup((m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4, ))
+        self._cn101['ADC_SCAN'] = 100
+        time.sleep(0.1)
+        MeasureGroup((m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4))

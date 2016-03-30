@@ -36,13 +36,14 @@ class Console(console.ConsoleGen1):
                 minimum=0, maximum=0xF0000000),
             'CAN_BIND': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-            'CAN_ID': ParameterCAN('TQQ,36,0'),
+            'CAN_ID': ParameterCAN('TQQ,32,0'),
             'SwVer': ParameterRaw('', func=self.version),
             'BtMac': ParameterRaw('', func=self.mac),
             'TANK1': ParameterFloat('TANK_1_LEVEL'),
             'TANK2': ParameterFloat('TANK_2_LEVEL'),
             'TANK3': ParameterFloat('TANK_3_LEVEL'),
             'TANK4': ParameterFloat('TANK_4_LEVEL'),
+            'ADC_SCAN': ParameterFloat('ADC_SCAN_INTERVAL_MSEC', writeable=True),
             }
 
     def testmode(self, state):
@@ -73,9 +74,5 @@ class Console(console.ConsoleGen1):
 
         """
         mac = self.action('BLE-MAC?', expected=1).strip()
-        parts = []
-        for i in range(0, 12, 2):
-            parts.append(mac[i:i+2])
-        mac = ':'.join(parts)
         self._logger.debug('MAC address is %s', mac)
         return mac
