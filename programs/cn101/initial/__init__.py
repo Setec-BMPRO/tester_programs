@@ -62,8 +62,8 @@ class Main(tester.TestSequence):
             ('TestArm', self._step_test_arm, None, True),
             ('Awning', self._step_awning, None, True),
             ('CanBus', self._step_canbus, None, True),
-            ('Bluetooth', self._step_bluetooth, None, True),
             ('TankSense', self._step_tank_sense, None, True),
+            ('Bluetooth', self._step_bluetooth, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -209,6 +209,17 @@ class Main(tester.TestSequence):
         self._cn101.can_mode(True)
         m.cn101_can_id.measure()
 
+    def _step_tank_sense(self):
+        """Activate tank sensors and read."""
+        for str in (('5', ) * 5):
+            self._cn101_puts(str)
+
+        for rla in (d.rla_s1, d.rla_s2, d.rla_s3, d.rla_s4):
+            rla.set_on()
+        self._cn101['ADC_SCAN'] = 100
+        time.sleep(0.2)
+        MeasureGroup((m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4))
+
     def _step_bluetooth(self):
         """Test the Bluetooth interface."""
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
@@ -221,14 +232,3 @@ class Main(tester.TestSequence):
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         s.oMirBT.store(reply)
         m.detectBT.measure()
-
-    def _step_tank_sense(self):
-        """Activate tank sensors and read."""
-        for str in (('5', ) * 5):
-            self._cn101_puts(str)
-
-        for rla in (d.rla_s1, d.rla_s2, d.rla_s3, d.rla_s4):
-            rla.set_on()
-        self._cn101['ADC_SCAN'] = 100
-        time.sleep(0.1)
-        MeasureGroup((m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4))

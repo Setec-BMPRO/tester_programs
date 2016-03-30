@@ -148,7 +148,7 @@ class SubTests():
         m = measurements
         # PowerUp:
         dcs1 = DcSubStep(
-            setting=((d.dcs_vin, 8.7), ), output=True)
+            setting=((d.dcs_vin, 8.6), ), output=True)
         msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
         # Awning:
@@ -156,5 +156,6 @@ class SubTests():
         msr1 = MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5)
         rly1 = RelaySubStep(relays=((d.rla_awn, True), ))
         msr2 = MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn), timeout=5)
+        rly2 = RelaySubStep(relays=((d.rla_awn, False), ))
         dcs2 = DcSubStep(setting=((d.dcs_awn, 0.0), ))
-        self.awn = Step((dcs1, msr1, rly1, msr2, dcs2))
+        self.awn = Step((dcs1, msr1, rly1, msr2, rly2, dcs2))
