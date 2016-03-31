@@ -63,6 +63,8 @@ class BleRadio():
         """Open BLE Radio."""
         self._logger.debug('Open')
         self._port.open()
+        # First remove 'CMD' response and other rubbish characters at startup.
+        self._cmdresp('')
         self._cmdresp(_CMD_VER)
 
     def close(self):
@@ -110,7 +112,7 @@ class BleRadio():
         """
         self._port.flushInput()
         self._log('--> {!r}'.format(cmd))
-        self._write(cmd + '\r\n')
+        self._write(cmd + '\r')
         reply = self._readline()
         self._log('<-- {!r}'.format(reply))
         try:    # Lookup any expected reponse
