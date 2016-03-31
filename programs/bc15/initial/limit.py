@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """BC15 Initial Program Limits."""
 
+BIN_VERSION = '1.0.12537.1514'      # Software binary version
+
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('ACin', 0, 235.0, 245.0, None, None),
@@ -22,7 +24,8 @@ DATA = (
     ('FixtureLock', 0, 20, None, None, None),
     ('FanShort', 0, None, 100, None, None),
     # Data reported by the ARM
-    ('ARM-SwVer', 0, None, None, r'^1\.0\.11881\.1274$', None),
+    ('ARM-SwVer', 0, None, None,
+        '^{}$'.format(BIN_VERSION.replace('.', r'\.')), None),
     ('ARM-Vout', 0, 14.40 * 0.95, 14.40 * 1.05, None, None),
     ('ARM-2amp', 0, 0.5, 3.5, None, None),
     # Why 'Lucky'?

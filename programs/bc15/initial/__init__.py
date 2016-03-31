@@ -21,7 +21,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM12'}[os.name]
 # ARM software image file
-_ARM_BIN = 'bc15_1.0.1274.bin'
+_ARM_BIN = 'bc15_{}.bin'.format(limit.BIN_VERSION)
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -92,7 +92,7 @@ class Main(tester.TestSequence):
             'Build date:       06/11/2015\r\n'
             'Build time:       15:31:40\r\n'
             'SystemCoreClock:  48000000\r\n'
-            'Software version: 1.0.11705.1203\r\n'
+            'Software version: {}\r\n'
             'nonvol: reading crc invalid at sector 14 offset 0\r\n'
             'nonvol: reading nonvol2 OK at sector 15 offset 2304\r\n'
             'Hardware version: 0.0.[00]\r\n'
@@ -102,13 +102,15 @@ class Main(tester.TestSequence):
             '"OK\\n PROMPT\r\n'                 # 1st command echo
             'OK\r\n'                            # and it's response
             '0 ECHO\r\nOK\r\n'                  # ECHO command echo
-            'OK\r\n')                           # and it's response
+            'OK\r\n'.format(limit.BIN_VERSION)
+            )                           # and it's response
         if put_defaults:
             self._bc15_puts(
                 'OK\r\n'                        # UNLOCK response
                 'OK\r\n'                        # NV-DEFAULT response
                 'OK\r\n'                        # NV-WRITE response
-                '1.0.11881.1274\r\nOK\r\n',     # SwVer response
+                '{}\r\nOK\r\n'.format(limit.BIN_VERSION),
+                                                # SwVer response
                 preflush=1)
 
     def close(self):
