@@ -33,7 +33,7 @@ DATA = (
 
 DATA_8D = (
     ('VbatIn', 1, 12.8, 15.0, None, None),
-    ('ErrV', 1, -0.01, 0.031, None, None),
+    ('ErrV', 1, -0.03, 0.03, None, None),
     ('CycleCnt', 1, 0.5, 20.5, None, None),
     ('RelrnFlg', 1, None, None, None, False),
     ('RotarySw', 1, 255, 257, None, None),
@@ -46,7 +46,7 @@ DATA_8D = (
 
 DATA_13F = (
     ('VbatIn', 1, 12.8, 15.0, None, None),
-    ('ErrV', 1, -0.01, 0.031, None, None),
+    ('ErrV', 1, -0.03, 0.03, None, None),
     ('CycleCnt', 1, 0.5, 20.5, None, None),
     ('RelrnFlg', 1, None, None, None, False),
     ('RotarySw', 1, 255, 257, None, None),
@@ -59,7 +59,7 @@ DATA_13F = (
 
 DATA_17L = (
     ('VbatIn', 1, 12.8, 15.0, None, None),
-    ('ErrV', 1, -0.01, 0.031, None, None),
+    ('ErrV', 1, -0.03, 0.03, None, None),
     ('CycleCnt', 1, 0.5, 20.5, None, None),
     ('RelrnFlg', 1, None, None, None, False),
     ('RotarySw', 1, 255, 257, None, None),
