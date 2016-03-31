@@ -72,6 +72,7 @@ PROGRAMS = (
     ('BCE282-24 Final', bce282.final.Main, bce282.final.LIMIT_DATA24),
     ('BP35 Initial', bp35.initial.Main, bp35.initial.LIMIT_DATA),
     ('BP35 Final', bp35.final.Main, bp35.final.LIMIT_DATA),
+    ('C15A-15 Initial', c15a15.initial.Main, c15a15.initial.LIMIT_DATA),
     ('C15A-15 Final', c15a15.final.Main, c15a15.final.LIMIT_DATA),
     ('C15D-15(M) Final', c15d15.final.Main, c15d15.final.LIMIT_DATA),
     ('C45A-15(M) Initial', c45a15.initial.Main, c45a15.initial.LIMIT_DATA),
