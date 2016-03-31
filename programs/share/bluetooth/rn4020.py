@@ -63,8 +63,11 @@ class BleRadio():
         """Open BLE Radio."""
         self._logger.debug('Open')
         self._port.open()
-        # First remove 'CMD' response and other rubbish characters at startup.
-        self._cmdresp('')
+        # Remove 'CMD' response and other rubbish characters at power up.
+        try:
+            self._cmdresp('')
+        except BleError as err:
+            self._log('Any rubbish characters? {}'.format(err))
         self._cmdresp(_CMD_VER)
 
     def close(self):
