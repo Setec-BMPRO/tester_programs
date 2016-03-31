@@ -7,7 +7,7 @@ from testlimit import lim_hilo, lim_hilo_percent, lim_hi, lim_lo
 # Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     lim_hilo('AcMin', 85, 95),
-    lim_hilo('VbusMin', 125, 135),
+    lim_hilo('VbusMin', 120, 135),
     lim_hilo('VccMin', 7, 14),
     lim_hilo('Ac', 230, 245),
     lim_hilo('Vbus', 330, 350),
