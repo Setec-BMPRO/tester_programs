@@ -25,8 +25,8 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM15'}[os.name]
 # ARM software image file
-_ARM_VER = '1.0.12904.169'
-_ARM_BIN = 'cn101_' + _ARM_VER + '.bin'
+_ARM_BIN = 'cn101_{}.bin'.format(limit.BIN_VERSION)
+
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 _HW_VER = (1, 0, 'A')
 # Serial port for the Bluetooth module.
@@ -89,7 +89,7 @@ class Main(tester.TestSequence):
         self._trek2 = Console(trek2_ser)
         # Serial connection to the BLE module
         ble_ser = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=0.1)
+            simulation=self._fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.setPort(_BLE_PORT)
         self._ble = BleRadio(ble_ser)
@@ -177,15 +177,15 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
         for str in (('Banner1\r\nBanner2', ) +
                     ('', ) * 5 +
-                    (_ARM_VER, ) +
+                    (limit.BIN_VERSION, ) +
                     ('001EC030BC15', )):
             self._cn101_puts(str)
 
         sernum = m.ui_serialnum.measure()[1][0]
         self._cn101.open()
         d.rla_reset.pulse(0.1)
-        self._cn101.action(None, delay=1, expected=2)   # Flush banner
 #        self._cn101.action(None, delay=1)   # Flush banner
+        self._cn101.action(None, delay=1, expected=2)   # Flush banner
         self._cn101.defaults(_HW_VER, sernum)
         m.cn101_swver.measure()
         time.sleep(5)
@@ -214,11 +214,8 @@ class Main(tester.TestSequence):
         for str in (('5', ) * 5):
             self._cn101_puts(str)
 
-        for rla in (d.rla_s1, d.rla_s2, d.rla_s3, d.rla_s4):
-            rla.set_on()
         self._cn101['ADC_SCAN'] = 100
-        time.sleep(0.2)
-        MeasureGroup((m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4))
+        t.tank.run()
 
     def _step_bluetooth(self):
         """Test the Bluetooth interface."""

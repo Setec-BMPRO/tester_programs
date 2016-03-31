@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """CN101 Initial Program Limits."""
 
+BIN_VERSION = '1.0.12904.169'      # Software binary version
+
 from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_lo, lim_hi, lim_string, lim_boolean)
@@ -21,7 +23,7 @@ DATA = (
     lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     lim_string('CAN_ID', r'^RRQ,32,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
-    lim_string('SwVer', r'^1\.0\.12904\.169$'),
+    lim_string('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
     lim_string('BtMac', r'^[0-F]{12}$'),
     lim_boolean('DetectBT', True),
     lim_hilo_int('Tank', 5),

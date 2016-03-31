@@ -159,3 +159,10 @@ class SubTests():
         rly2 = RelaySubStep(relays=((d.rla_awn, False), ))
         dcs2 = DcSubStep(setting=((d.dcs_awn, 0.0), ))
         self.awn = Step((dcs1, msr1, rly1, msr2, rly2, dcs2))
+
+        # TankSense:
+        rly1 = RelaySubStep(relays=((d.rla_s1, True), (d.rla_s2, True),
+                            (d.rla_s3, True), (d.rla_s4, True), ), delay=0.2)
+        msr1 = MeasureSubStep(
+                    (m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4), timeout=5)
+        self.tank = Step((rly1, msr1,))
