@@ -67,7 +67,7 @@ class BleRadio():
         try:
             self._cmdresp('')
         except BleError as err:
-            self._log('Any rubbish characters? {}'.format(err))
+            self._log('Received: {}'.format(err))
         self._cmdresp(_CMD_VER)
 
     def close(self):

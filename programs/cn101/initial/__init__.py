@@ -94,6 +94,7 @@ class Main(tester.TestSequence):
         ble_ser.setPort(_BLE_PORT)
         self._ble = BleRadio(ble_ser)
         self._btmac = None
+        self._sernum = None
 
     def open(self):
         """Prepare for testing."""
@@ -144,8 +145,10 @@ class Main(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oVin, 8.0), (s.o3V3, 3.3), ))
+        self.fifo_push(((s.oSnEntry, ('A1526040123', )), (s.oVin, 8.0),
+                        (s.o3V3, 3.3), ))
 
+        self._sernum = m.ui_serialnum.measure()[1][0]
         t.pwr_up.run()
 
     def _step_program(self):
@@ -174,29 +177,20 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
         for str in (('Banner1\r\nBanner2', ) +
                     ('', ) * 5 +
                     (limit.BIN_VERSION, ) +
                     ('001EC030BC15', )):
             self._cn101_puts(str)
 
-        sernum = m.ui_serialnum.measure()[1][0]
         self._cn101.open()
         d.rla_reset.pulse(0.1)
 #        self._cn101.action(None, delay=1)   # Flush banner
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
-        self._cn101.defaults(_HW_VER, sernum)
+        self._cn101.defaults(_HW_VER, self._sernum)
         m.cn101_swver.measure()
         time.sleep(5)
         self._btmac = m.cn101_btmac.measure()[1][0]
-
-    def _step_awning(self):
-        """Test Awning relay operation."""
-        self.fifo_push(
-            ((s.oAwnA, (0.0, 11.0)), (s.oAwnB, (0.0, 11.0)), ))
-
-        t.awn.run()
 
     def _step_canbus(self):
         """Test the CAN Bus interface."""
@@ -208,6 +202,13 @@ class Main(tester.TestSequence):
         time.sleep(1)   # Let junk CAN messages come in
         self._cn101.can_mode(True)
         m.cn101_can_id.measure()
+
+    def _step_awning(self):
+        """Test Awning relay operation."""
+        self.fifo_push(
+            ((s.oAwnA, (0.0, 11.0)), (s.oAwnB, (0.0, 11.0)), ))
+
+        t.awn.run()
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
