@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 """BP35 Initial Program Limits."""
 
+ARM_VERSION = '1.2.12951.3751'      # ARM versions
+ARM_HW_VER = (3, 0, 'A')
+PIC_VERSION = '1.1.12949.167'       # Solar Regulator versions
+PIC_HW_VER = 1
+
 from testlimit import (
     lim_hilo, lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_hi, lim_lo, lim_string, lim_boolean)
@@ -40,7 +45,7 @@ DATA = (
     lim_lo('FixtureLock', 1200),
     lim_hi('SwShort', 20),
     lim_boolean('Notify', True),
-    lim_string('ARM-SwVer', r'^1\.2\.12951\.3751$'),
+    lim_string('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
     lim_hilo_delta('ARM-AcV', 240.0, 10.0),
     lim_hilo_delta('ARM-AcF', 50.0, 1.0),
     lim_hilo('ARM-PriT', 8.0, 70.0),

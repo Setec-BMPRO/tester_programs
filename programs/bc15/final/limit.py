@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """BC15 Final Program Limits."""
 
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
+from testlimit import lim_hilo_delta, lim_hilo_percent, lim_lo, lim_boolean
+
 DATA = (
-    ('Notify', 1, None, None, None, True),
-    ('VoutNL', 0, 13.85 * 0.99, 13.85 * 1.01, None, None),
-    ('Vout', 0, 13.85 * 0.95, 13.85 * 1.05, None, None),
-    ('InOCP', 0, 12.0, None, None, None),
-    ('OCP', 0, 14.0 - 2.0, 14.0 + 2.0, None, None),
+    lim_boolean('Notify', True),
+    lim_hilo_percent('VoutNL', 13.85, 1.0),
+    lim_hilo_percent('Vout', 13.85, 5.0),
+    lim_lo('InOCP', 12.0),
+    lim_hilo_delta('OCP', 14.0, 2.0),
     )

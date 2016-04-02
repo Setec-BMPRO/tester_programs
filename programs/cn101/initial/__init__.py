@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """CN101 Initial Test Program."""
 
-# FIXME: This program is not finished yet!
-
 import os
 import inspect
 import logging

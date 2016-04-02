@@ -2,12 +2,15 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck Final Test Program Limits."""
 
-# Tuple ( Tuple (name, identity, low, high, string, boolean))
+ARM_VERSION = '1.7.4080'        # Software binary version
+
+from testlimit import lim_hilo_delta, lim_string, lim_boolean
+
 DATA = (
-    ('12V', 0, 11.9, 12.1, None, None),
-    ('BTscan', 0, None, None, None, True),
-    ('BTpair', 0, None, None, None, True),
-    ('ARMSerNum', 0, None, None, None, True),
-    ('ARMSwVer', 0, None, None, r'^1\.4\.3334$', None),
-    ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
+    lim_hilo_delta('12V', 12.0, 0.1),
+    lim_boolean('BTscan', True),
+    lim_boolean('BTpair', True),
+    lim_boolean('ARMSerNum', True),
+    lim_string('ARMSwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
+    lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     )

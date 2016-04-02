@@ -10,7 +10,7 @@ import subprocess
 import logging
 import jsonrpclib
 import tester
-from ...share.programmer import ProgramARM
+from isplpc import Programmer, ProgrammingError
 from ...share.sim_serial import SimSerial
 from . import support
 from . import limit
@@ -27,10 +27,12 @@ _ARM_PGM = {'posix': '/dev/ttyUSB1', 'nt': r'\\.\COM2'}[os.name]
 # Serial port for the ARM console module.
 _ARM_CON = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
-_AVRDUDE = r'C:\Program Files\AVRdude\avrdude.exe'
-_AVR_HEX = 'BatteryCheckSupervisor-2.hex'
+_AVRDUDE = {
+    'posix': 'avrdude',
+    'nt': r'C:\Program Files\AVRdude\avrdude.exe',
+    }[os.name]
 
-_ARM_HEX = 'BatteryCheckControl_1.7.4080.hex'
+_ARM_BIN = 'BatteryCheckControl_{}.bin'.format(limit.ARM_VERSION)
 
 _PYTHON27 = r'C:\Python27\pythonw.exe'
 
@@ -128,13 +130,14 @@ class Main(tester.TestSequence):
         5V Reg and 12V Reg are generated to program the ATtiny10.
 
         """
+        self.fifo_push(
+            ((s.oSnEntry, ('A1429050001', )), (s.reg5V, 5.10),
+             (s.reg12V, 12.00), (s.o3V3, 3.30), ))
+
         # Hold the ARM device in reset before power-on
         d.rla_reset.set_on()
         # Apply and check supply rails
         d.dcs_input.output(15.0, output=True)
-        self.fifo_push(
-            ((s.oSnEntry, ('A1429050001', )), (s.reg5V, 5.10),
-             (s.reg12V, 12.00), (s.o3V3, 3.30), ))
         result, sernum = m.ui_SnEntry.measure()
         self._sernum = sernum[0]
         tester.measure.group((m.dmm_reg5V, m.dmm_reg12V, m.dmm_3V3), 2)
@@ -149,7 +152,7 @@ class Main(tester.TestSequence):
             '-P', 'usb',
             '-p', 't10',
             '-c', 'avrisp2',
-            '-U', 'flash:w:' + _AVR_HEX,
+            '-U', 'flash:w:' + limit.AVR_HEX,
             '-U', 'fuse:w:0xfe:m',
             ]
         try:
@@ -169,8 +172,7 @@ class Main(tester.TestSequence):
         d.dcs_input.output(output=True)
 
     def _step_program_arm(self):
-        """
-        Program the ARM device.
+        """Program the ARM device.
 
         The AVR will force the ARM into boot-loader mode 6.5sec
         after loss of the 5Hz heartbeat signal on BOOT.
@@ -181,13 +183,26 @@ class Main(tester.TestSequence):
         self._logger.debug('Wait for AVR to bootload ARM...')
         time.sleep(6.5)
         d.rla_boot.set_off()
-        # Connect ARM programming port
-# FIXME: Use the python ARM programmer.
-        d.rla_arm.set_on()
-        arm = ProgramARM(
-            _ARM_HEX, self._folder, s.oMirARM, _ARM_PGM,
-            wipe=True, fifo=self._fifo)
-        arm.read()
+        d.rla_arm.set_on()      # Connect ARM programming port
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        file = os.path.join(folder, _ARM_BIN)
+        with open(file, 'rb') as infile:
+            bindata = bytearray(infile.read())
+        self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        try:
+            ser = SimSerial(port=_ARM_PGM, baudrate=115200)
+            pgm = Programmer(
+                ser, bindata, erase_only=False, verify=False, crpmode=False)
+            try:
+                pgm.program()
+                s.oMirARM.store(0)
+            except ProgrammingError:
+                s.oMirARM.store(1)
+        except:
+            raise
+        finally:
+            ser.close()
         m.pgmARM.measure()
         d.rla_arm.set_off()
 
@@ -204,16 +219,19 @@ class Main(tester.TestSequence):
             self._btmac = self._armdev.mac()
 
     def _step_test_arm(self):
-        """
-        Get data from the ARM device.
+        """Get data from the ARM device.
 
         Simulate and read back battery current from the ARM.
         Test the alarm relay.
 
         """
+        self.fifo_push(
+            ((s.relay, 5.0), (s.ARMsoft, ('1.7.4080', )),
+             (s.ARMvolt, 12.12),
+             (s.shunt, 62.5 / 1250), (s.ARMcurr, -62.0), ))
+
         d.dcs_shunt.output(62.5 * _SHUNT_SCALE, True)
         time.sleep(1.5)  # ARM rdgs settle
-        self.fifo_push(((s.shunt, 62.5 / 1250), (s.ARMcurr, -62.0), ))
         batt_curr, curr_ARM = MeasureGroup(
             (m.dmm_shunt, m.currARM), timeout=5)[1]
         # Compare simulated battery current against ARM reading, in %
@@ -221,9 +239,6 @@ class Main(tester.TestSequence):
         s.oMirCurrErr.store(percent_error)
         if not self._fifo:
             self._armdev.alarm(True)
-        self.fifo_push(
-            ((s.relay, 5.0), (s.ARMsoft, ('1.7.4080', )),
-             (s.ARMvolt, 12.12), ))
         MeasureGroup((m.dmm_relay, m.currErr, m.softARM, m.voltARM))
         if not self._fifo:
             self._armdev.alarm(False)

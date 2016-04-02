@@ -23,9 +23,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Software image filenames
-_ARM_BIN = 'sx750_arm_3.1.2118.bin'
-_PIC_HEX1 = 'sx750_pic5Vsb_1.hex'
-_PIC_HEX2 = 'sx750_picPwrSw_2.hex'
+_ARM_BIN = 'sx750_arm_{}.bin'.format(limit.BIN_VERSION)
 # Reading to reading difference for PFC voltage stability
 _PFC_STABLE = 0.05
 
@@ -145,7 +143,7 @@ class Main(tester.TestSequence):
         # Start the PIC programmer for 5Vsb PIC (takes about 6 sec)
         self._logger.info('Start PIC programmer - PIC1')
         d.rla_pic1.set_on()
-        pic = ProgramPIC(_PIC_HEX1, folder, '10F320', s.oMirPIC)
+        pic = ProgramPIC(limit.PIC_HEX1, folder, '10F320', s.oMirPIC)
         pic.read()
         d.rla_pic1.set_off()
         # 'Measure' the mirror sensor to check and log data
@@ -154,7 +152,7 @@ class Main(tester.TestSequence):
         # Start the PIC programmer for PwrSw PIC (takes about 6 sec)
         self._logger.info('Start PIC programmer - PIC2')
         d.rla_pic2.set_on()
-        pic = ProgramPIC(_PIC_HEX2, folder, '10F320', s.oMirPIC)
+        pic = ProgramPIC(limit.PIC_HEX2, folder, '10F320', s.oMirPIC)
         # While programming, we also set OCP adjust to maximum.
         # (takes about 6 sec)
         self._logger.info('Reset digital pots')
@@ -247,8 +245,9 @@ class Main(tester.TestSequence):
             '240 Vrms\r'    # ARM_AcVolt
             '50 %\r'        # ARM_PfcTrim
             '12180 mV\r'    # ARM_12V
-            '24000 mV\r'    # ARM_24V
-            '3.1\r2118\r')  # ARM_SwVer
+            '24000 mV\r')   # ARM_24V
+        self._arm_puts(limit.BIN_VERSION[:3] + '\r')    # ARM SwVer
+        self._arm_puts(limit.BIN_VERSION[4:] + '\r')    # ARM BuildNo
         MeasureGroup(
             (m.arm_AcDuty, m.arm_AcPer, m.arm_AcFreq, m.arm_AcVolt,
              m.arm_PfcTrim, m.arm_12V, m.arm_24V, m.arm_SwVer), )

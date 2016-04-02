@@ -24,10 +24,7 @@ _CAN_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 # Software image filename
-_ARM_VER = '1.1.12666.127'
-_ARM_BIN = 'Trek2_' + _ARM_VER + '.bin'
-# Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (1, 0, 'A')
+_ARM_BIN = 'Trek2_{}.bin'.format(limit.BIN_VERSION)
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -150,13 +147,13 @@ class Main(tester.TestSequence):
         """Test the ARM device."""
         for str in (('Banner1\r\nBanner2', ) +  # Banner lines
                     ('', ) * 5 +                # defaults
-                    (_ARM_VER, )):       # SwVer measure
+                    (limit.BIN_VERSION, )):     # SwVer measure
             self._trek2_puts(str)
 
         self._trek2.open()
         d.rla_reset.pulse(0.1)
         self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
-        self._trek2.defaults(_HW_VER, self.sernum)
+        self._trek2.defaults(limit.HW_VER, self.sernum)
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):

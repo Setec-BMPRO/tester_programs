@@ -22,7 +22,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM6'}[os.name]
 # Software image filename
-_ARM_BIN = 'gen8_1.4.645.bin'
+_ARM_BIN = 'gen8_{}.bin'.format(limit.BIN_VERSION)
 # Reading to reading difference for PFC voltage stability
 _PFC_STABLE = 0.05
 # Reading to reading difference for 12V voltage stability
@@ -292,8 +292,9 @@ class Main(tester.TestSequence):
             '24000mV\r'     # ARM_24V
             '105 Counts\r'  # ARM_5Vadc
             '112 Counts\r'  # ARM_12Vadc
-            '124 Counts\r'  # ARM_24Vadc
-            '1.4\r645\r')   # ARM_SwVer
+            '124 Counts\r') # ARM_24Vadc
+        self._arm_puts(limit.BIN_VERSION[:3] + '\r')    # ARM SwVer
+        self._arm_puts(limit.BIN_VERSION[4:] + '\r')    # ARM BuildNo
         MeasureGroup(
             (m.arm_AcDuty, m.arm_AcPer, m.arm_AcFreq, m.arm_AcVolt,
              m.arm_PfcTrim, m.arm_12VTrim, m.arm_5V, m.arm_12V, m.arm_24V,

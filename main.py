@@ -10,8 +10,6 @@ from pydispatch import dispatcher
 import time
 import gpib
 import tester
-#import sensor
-#sensor.DSO_DELAY = False
 from programs import PROGRAMS, ALL_SKIP
 
 # Configuration of logger.

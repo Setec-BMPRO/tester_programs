@@ -21,15 +21,10 @@ LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
-# Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (3, 0, 'A')
 # ARM software image file
-_ARM_VER = '1.2.12951.3751'
-_ARM_BIN = 'bp35_' + _ARM_VER + '.bin'
-# Soler Regulator Hardware version
-_SR_HW_VER = 1
+_ARM_BIN = 'bp35_{}.bin'.format(limit.ARM_VERSION)
 # dsPIC software image file
-_PIC_HEX = 'bp35sr_1.1.12949.167.hex'
+_PIC_HEX = 'bp35sr_{}.hex'.format(limit.PIC_VERSION)
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -138,7 +133,8 @@ class Main(tester.TestSequence):
         self.fifo_push(
             ((s.oLock, 10.0), (s.osw1, 100.0), (s.osw2, 100.0),
              (s.osw3, 100.0), (s.osw4, 100.0),
-             (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3), ))
+             (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3),
+             (s.oSnEntry, ('A1626010123', )), ))
 
         self.sernum = m.ui_SnEntry.measure()[1][0]
         MeasureGroup(
@@ -212,9 +208,10 @@ class Main(tester.TestSequence):
                     ('', ) * 2                  # SR setup
                     ):
             self._bp35_puts(str)
-        self._bp35_puts(_ARM_VER, postflush=0)  # SwVer measure
+        self._bp35_puts(limit.ARM_VERSION, postflush=0)  # SwVer measure
 
 # FIXME: Remove power to microprocessor and start again.
+#       Needed when upgrading a programmed unit.
         d.dcs_vbat.output(0.0)
         time.sleep(2.0)
         d.dcs_vbat.output(12.4)
@@ -224,13 +221,13 @@ class Main(tester.TestSequence):
         d.rla_reset.pulse(0.1)
         time.sleep(1)
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
-        self._bp35.defaults(_HW_VER, self.sernum)
+        self._bp35.defaults(limit.ARM_HW_VER, self.sernum)
         self._bp35['SR_DEL_CAL'] = True
         d.dcs_sreg.output(0.0)
         time.sleep(1)
         d.dcs_sreg.output(22.0)
         time.sleep(1)
-        self._bp35['SR_HW_VER'] = _SR_HW_VER
+        self._bp35['SR_HW_VER'] = limit.PIC_HW_VER
         m.arm_SwVer.measure()
         self._bp35.manual_mode()
 
@@ -288,7 +285,8 @@ class Main(tester.TestSequence):
              (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.oVbat, 12.8),
              (s.oVpfc, (415.0, 415.0), )))
         for str in (('0', ) +
-                    ('', ) * 3
+                    ('', ) * 3 +
+                    ('0', )
                     ):
             self._bp35_puts(str)
         self._bp35_puts('0', postflush=0)

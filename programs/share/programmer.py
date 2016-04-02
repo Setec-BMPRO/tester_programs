@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Programmer for ARM & PIC devices.
+"""Programmer for PIC devices.
 
 Programming runs in the background on another thread.
 When you are ready to read the result, call ProgramXXX.read()
@@ -20,9 +20,6 @@ _SUCCESS = 0
 _FAILURE = 1
 
 # Programmer binaries.
-_ARM_BINARY = {'posix': 'lpc21isp',
-               'nt': r'C:\Program Files\ARM\lpc21isp.exe',
-               }[os.name]
 _PIC_BINARY = {'posix': 'pickit3',
                'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
                }[os.name]
@@ -82,35 +79,6 @@ class _Programmer():
             self._result_q.put((False, console))
         except subprocess.CalledProcessError:
             self._result_q.put((True, sys.exc_info()[1]))
-
-
-class ProgramARM(_Programmer):
-
-    """ARM programmer using a serial port."""
-
-    def __init__(self, hexfile, working_dir, sensor,
-                 port, baud=115200, khz=12000,
-                 wipe=False, fifo=False):
-        """Create the programmer worker and start it running.
-
-        hexfile: Full pathname of HEX file
-        working_dir: Working directory.
-        sensor: Mirror sensor to store result (0=success, 1=failed)
-        port: Serial port
-        baud: Baud rate
-        khz: Processor clock
-        wipe: Force erase of a protected device
-        fifo: True if FIFO's are being used
-
-        """
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._logger.debug('Created')
-        command = [_ARM_BINARY]
-        if wipe:
-            command += ['-wipe']
-        command += [hexfile, port, str(baud), str(khz)]
-        super().__init__(command, working_dir, sensor, fifo)
 
 
 class ProgramPIC(_Programmer):

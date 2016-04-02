@@ -11,8 +11,6 @@ from testlimit import (
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
 
-
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     lim_lo('Part', 20.0),
     lim_hilo_delta('Vin', 8.0, 0.5),

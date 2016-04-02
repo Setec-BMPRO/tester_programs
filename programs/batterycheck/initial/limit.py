@@ -2,28 +2,25 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck Test Program Limits."""
 
+ARM_VERSION = '1.7.4080'        # Software binary version
+AVR_HEX = 'BatteryCheckSupervisor-2.hex'
+
+from testlimit import (
+    lim_hilo, lim_hilo_delta, lim_hilo_int, lim_lo, lim_string)
+
 # Test Limits
 DATA = (
-    # Serial Number entry
-    ('SerNum', 0, None, None, r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$', None),
-    # 3.3
-    ('3V3', 0, 3.2, 3.4, None, None),
-    # 5 +/- 100mV
-    ('5VReg', 0, 4.9, 5.1, None, None),
-    # 12 +/- 100mV
-    ('12VReg', 0, 11.9, 12.1, None, None),
-    # Shunt current
-    ('shunt', 0, -65.0, -60.0, None, None),
-    # Relay
-    ('Relay', 0, 100, None, None, None),
-    # Programmers
-    ('PgmAVR', 0, -0.1, 0.1, None, None),
-    ('PgmARM', 0, -0.1, 0.1, None, None),
-    # Bluetooth detector
-    ('DetectBT', 0, -0.1, 0.1, None, None),
-    # ARM Console readings
-    ('ARM_SwVer', 0, None, None, r'^1\.7\.4080$', None),
-    ('ARM_Volt', 0, 11.5, 12.5, None, None),
-    ('ARM_Curr', 0, -65.0, -60.0, None, None),
-    ('Batt_Curr_Err', 0, -5.0, 5.0, None, None),
+    lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    lim_hilo_delta('3V3', 3.3, 0.1),
+    lim_hilo_delta('5VReg', 5.0, 0.1),
+    lim_hilo_delta('12VReg', 12.0, 0.1),
+    lim_hilo('shunt', -65.0, -60.0),
+    lim_lo('Relay', 100),
+    lim_hilo_int('PgmAVR', 0),
+    lim_hilo_int('PgmARM', 0),
+    lim_hilo_int('DetectBT', 0),
+    lim_string('ARM_SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
+    lim_hilo_delta('ARM_Volt', 12.0, 0.5),
+    lim_hilo('ARM_Curr', -65.0, -60.0),
+    lim_hilo_delta('Batt_Curr_Err', 0, 5.0),
     )

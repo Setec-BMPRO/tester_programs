@@ -129,7 +129,7 @@ class Main(tester.TestSequence):
         self._bt_puts(
             '{"jsonrpc": "2.0","id": 8256,'
             '"result": {"HardwareVersion": "2.0",'
-            '"SoftwareVersion": "1.4.3334",'
+            '"SoftwareVersion": "' + limit.ARM_VERSION + '",'
             '"SerialID": "A1509020010"}}', preflush=1)
         _info = self._bt.jsonrpc('GetSystemInfo')
         s.oMirSwVer.store((_info['SoftwareVersion'], ))

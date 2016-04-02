@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """BP35 Final Program Limits."""
 
+from testlimit import lim_hilo_delta
 
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
-    ('Vbat', 0, 12.6, 13.0, None, None),
+    lim_hilo_delta('Vbat', 12.8, 0.2),
     )
