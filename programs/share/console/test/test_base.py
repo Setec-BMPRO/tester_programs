@@ -97,6 +97,7 @@ class ConsoleTestCase(unittest.TestCase):
             '# . * * * * * * * . . . . . * .\r\n'       # END Stat response
             'OK\r\n'                            # and the final prompt
             )
+        mycon.puts('3\r\nOK\r\n')      # SW? response
         mycon.stat()
         # Must have read correct number of values
-        self.assertEqual(len(mycon.stat_data), 31)
+        self.assertEqual(len(mycon.stat_data), 32)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-02, 19:07:29 -->
+<!-- Saved: 2016-04-03, 19:45:08 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -162,11 +162,13 @@
     <Source>programs/share/bluetooth/rn4020.py</Source>
     <Source>programs/share/console/__init__.py</Source>
     <Source>programs/share/console/_base.py</Source>
+    <Source>programs/share/console/_protocol.py</Source>
     <Source>programs/share/console/arm_gen0.py</Source>
     <Source>programs/share/console/arm_gen1.py</Source>
     <Source>programs/share/console/arm_gen2.py</Source>
     <Source>programs/share/console/test/__init__.py</Source>
     <Source>programs/share/console/test/test_base.py</Source>
+    <Source>programs/share/console/test/test_protocol.py</Source>
     <Source>programs/share/programmer.py</Source>
     <Source>programs/share/sim_serial.py</Source>
     <Source>programs/share/ticker.py</Source>
