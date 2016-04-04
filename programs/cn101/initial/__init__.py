@@ -91,7 +91,6 @@ class Main(tester.TestSequence):
         # Set port separately, as we don't want it opened yet
         ble_ser.setPort(_BLE_PORT)
         self._ble = BleRadio(ble_ser)
-        self._btmac = None
         self._sernum = None
 
     def open(self):
@@ -177,8 +176,7 @@ class Main(tester.TestSequence):
         """Test the ARM device."""
         for str in (('Banner1\r\nBanner2', ) +
                     ('', ) * 5 +
-                    (limit.BIN_VERSION, ) +
-                    ('001EC030BC15', )):
+                    (limit.BIN_VERSION, )):
             self._cn101_puts(str)
 
         self._cn101.open()
@@ -187,8 +185,6 @@ class Main(tester.TestSequence):
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
         self._cn101.defaults(_HW_VER, self._sernum)
         m.cn101_swver.measure()
-        time.sleep(5)
-        self._btmac = m.cn101_btmac.measure()[1][0]
 
     def _step_canbus(self):
         """Test the CAN Bus interface."""
@@ -210,20 +206,24 @@ class Main(tester.TestSequence):
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
-        for str in (('5', ) * 5):
+        for str in (('5', ) * 4):
             self._cn101_puts(str)
+        self._cn101_puts('5', postflush=0)
 
         self._cn101['ADC_SCAN'] = 100
         t.tank.run()
 
     def _step_bluetooth(self):
         """Test the Bluetooth interface."""
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
+        self._cn101_puts('001EC030BC15', )
+        t.rst.run()
+        _btmac = m.cn101_btmac.measure()[1][0]
+        self._logger.debug('Scanning for Bluetooth MAC: "%s"', _btmac)
         if self._fifo:
             reply = True
         else:
             self._ble.open()
-            reply = self._ble.scan(self._btmac)
+            reply = self._ble.scan(_btmac)
             self._ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         s.oMirBT.store(reply)

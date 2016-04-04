@@ -151,6 +151,12 @@ class SubTests():
             setting=((d.dcs_vin, 8.6), ), output=True)
         msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5)
         self.pwr_up = Step((dcs1, msr1, ))
+        # PowerReset:
+        dcs1 = DcSubStep(
+            setting=((d.dcs_vin, 0.0), ), delay=0.5)
+        dcs2 = DcSubStep(
+            setting=((d.dcs_vin, 12.0), ), delay=5.0)
+        self.rst = Step((dcs1, dcs2, ))
         # Awning:
         dcs1 = DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True)
         msr1 = MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5)
