@@ -8,6 +8,7 @@ from ..share import console
 Sensor = console.Sensor
 
 # Some easier to use short names
+ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 ParameterHex = console.ParameterHex
@@ -30,36 +31,47 @@ class Console(console.ConsoleGen1):
             # Read-Write values
             'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
             'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
-            'VOUT': ParameterFloat('CONVERTER_VOLTS_SETPOINT', writeable=True,
+            'VOUT': ParameterFloat(
+                'CONVERTER_VOLTS_SETPOINT', writeable=True,
                 minimum=0.0, maximum=14.0, scale=1000),
-            'IOUT': ParameterFloat('CONVERTER_CURRENT_SETPOINT',
-                writeable=True, minimum=15.0, maximum=35.0, scale=1000),
-            'LOAD_DIS': ParameterFloat('LOAD_SWITCHES_INHIBITED',
-                writeable=True, minimum=0, maximum=1, scale=1),
-            'FAN': ParameterFloat('FAN_SPEED', writeable=True,
+            'IOUT': ParameterFloat(
+                'CONVERTER_CURRENT_SETPOINT', writeable=True,
+                minimum=15.0, maximum=35.0, scale=1000),
+            'LOAD_DIS': ParameterFloat(
+                'LOAD_SWITCHES_INHIBITED', writeable=True,
+                minimum=0, maximum=1, scale=1),
+            'FAN': ParameterFloat(
+                'FAN_SPEED', writeable=True,
                 minimum=0, maximum=100, scale=10),
             'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
             'CAN_EN': ParameterBoolean('CAN_BUS_POWER_ENABLE', writeable=True),
             '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
             'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
-            'LOAD_SET': ParameterFloat('LOAD_SWITCH_STATE_0', writeable=True,
+            'LOAD_SET': ParameterFloat(
+                'LOAD_SWITCH_STATE_0', writeable=True,
                 minimum=0, maximum=0x0FFFFFFF, scale=1),
-            'VOUT_OV': ParameterFloat('CONVERTER_OVERVOLT', writeable=True,
+            'VOUT_OV': ParameterFloat(
+                'CONVERTER_OVERVOLT', writeable=True,
                 minimum=0, maximum=2, scale=1),
-            'MODE': ParameterFloat('SLEEPMODE', writeable=True,
+            'MODE': ParameterFloat(
+                'SLEEPMODE', writeable=True,
                 minimum=0, maximum=3, scale=1),
-            'SR_HW_VER': ParameterFloat('SOLAR_REG_HW_VERS', writeable=True,
+            'SR_HW_VER': ParameterFloat(
+                'SOLAR_REG_HW_VERS', writeable=True,
                 scale=1),
-            'SR_VSET': ParameterFloat('SOLAR_REG_V', writeable=True,
+            'SR_VSET': ParameterFloat(
+                'SOLAR_REG_V', writeable=True,
                 scale=1000),
-            'SR_ISET': ParameterFloat('SOLAR_REG_I', writeable=True,
+            'SR_ISET': ParameterFloat(
+                'SOLAR_REG_I', writeable=True,
                 scale=1000),
-            'SR_VCAL': ParameterFloat('SOLAR_REG_CAL_V_OUT', writeable=True,
+            'SR_VCAL': ParameterFloat(
+                'SOLAR_REG_CAL_V_OUT', writeable=True,
                 scale=1000),
-            'SR_DEL_CAL': ParameterBoolean('SOLAR_REG_DEL_CAL',
-                writeable=True),
+            'SR_DEL_CAL': ParameterBoolean(
+                'SOLAR_REG_DEL_CAL', writeable=True),
             # Read-only values
-            'SwVer': ParameterRaw('', func=self.version),
+            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
             'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
             'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
             'PRI_T': ParameterFloat('PRIMARY_TEMPERATURE', scale=10),
@@ -78,10 +90,19 @@ class Console(console.ConsoleGen1):
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
             'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
             'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
+            # Write-only values
+            'SER_ID': ParameterString(
+                'SET-SERIAL-ID', writeable=True, readable=False,
+                write_format='"{} {}'),
+            'HW_VER': ParameterString(
+                'SET-HW-VER', writeable=True, readable=False,
+                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
             # Other items
-            'STATUS': ParameterHex('STATUS', writeable=True,
+            'STATUS': ParameterHex(
+                'STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),
-            'CAN_BIND': ParameterHex('STATUS', writeable=True,
+            'CAN_BIND': ParameterHex(
+                'STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,32,0'),
             'CAN_STATS': ParameterRaw('', func=self.canstats),

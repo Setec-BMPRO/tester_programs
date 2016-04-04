@@ -98,7 +98,7 @@ class Sensors():
             message=translate('bp35_initial', 'msgSnEntry'),
             caption=translate('bp35_initial', 'capSnEntry'))
         self.ARM_SwVer = console.Sensor(
-            bp35, 'SwVer', rdgtype=sensor.ReadingString)
+            bp35, 'SW_VER', rdgtype=sensor.ReadingString)
         self.ARM_AcV = console.Sensor(bp35, 'AC_V')
         self.ARM_AcF = console.Sensor(bp35, 'AC_F')
         self.ARM_PriT = console.Sensor(bp35, 'PRI_T')

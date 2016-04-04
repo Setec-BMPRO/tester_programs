@@ -62,15 +62,22 @@ class _Parameter():
 
     """Parameter base class."""
 
-    def __init__(self, command, writeable=False):
+    def __init__(self, command, writeable=False, readable=True,
+                       write_format='{} "{} XN!',
+                       read_format='"{} XN?'):
         """Initialise the parameter.
 
         @param command Command verb of this parameter.
         @param writeable True if this parameter can be written.
+        @param write_format Format string for writing (value, self._cmd)
+        @param read_format Format string for reading (self._cmd)
 
         """
         self._cmd = command
         self._writeable = writeable
+        self._readable = readable
+        self._wr_fmt = write_format
+        self._rd_fmt = read_format
 
     def write(self, value, func):
         """Write parameter value.
@@ -80,8 +87,8 @@ class _Parameter():
 
         """
         if not self._writeable:
-            raise ParameterError('Parameter is read-only')
-        write_cmd = '{} "{} XN!'.format(value, self._cmd)
+            raise ParameterError('Parameter is not writeable')
+        write_cmd = self._wr_fmt.format(value, self._cmd)
         func(write_cmd, delay=_SET_DELAY)
 
     def read(self, func):
@@ -91,8 +98,35 @@ class _Parameter():
         @return Data value string.
 
         """
-        read_cmd = '"{} XN?'.format(self._cmd)
+        if not self._readable:
+            raise ParameterError('Parameter is not readable')
+        read_cmd = self._rd_fmt.format(self._cmd)
         return func(read_cmd, expected=1)
+
+
+class ParameterString(_Parameter):
+
+    """String parameter type."""
+
+    error_value = ''
+
+    def write(self, value, func):
+        """Write parameter value.
+
+        @param value Data value.
+        @param func Function to use to write the value.
+
+        """
+        super().write(value, func)
+
+    def read(self, func):
+        """Read parameter value.
+
+        @param func Function to use to read the value.
+        @return String data value.
+
+        """
+        return super().read(func)
 
 
 class ParameterBoolean(_Parameter):
@@ -128,10 +162,10 @@ class ParameterFloat(_Parameter):
 
     error_value = float('NaN')
 
-    def __init__(self, command, writeable=False,
+    def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, scale=1):
         """Remember the scaling and data limits."""
-        super().__init__(command, writeable)
+        super().__init__(command, writeable, readable)
         self._min = minimum
         self._max = maximum
         self._scale = scale
@@ -167,10 +201,12 @@ class ParameterHex(_Parameter):
 
     error_value = float('NaN')
 
-    def __init__(self, command, writeable=False,
-                 minimum=0, maximum=1000, mask=0xFFFFFFFF):
+    def __init__(self, command, writeable=False, readable=True,
+                       minimum=0, maximum=1000, mask=0xFFFFFFFF,
+                       write_format='${:08X} "{} XN!'):
         """Remember the data limits."""
-        super().__init__(command, writeable)
+        super().__init__(
+            command, writeable, readable, write_format=write_format)
         self._min = minimum
         self._max = maximum
         self._mask = mask
@@ -185,10 +221,7 @@ class ParameterHex(_Parameter):
         if value < self._min or value > self._max:
             raise ParameterError(
                 'Value out of range {} - {}'.format(self._min, self._max))
-        if not self._writeable:
-            raise ParameterError('Parameter is read-only')
-        write_cmd = '${:08X} "{} XN!'.format(value, self._cmd)
-        func(write_cmd, delay=_SET_DELAY)
+        super().write(int(value), func)
 
     def read(self, func):
         """Read parameter value.
@@ -207,20 +240,12 @@ class ParameterHex0x(ParameterHex):
 
     """Hex parameter type with the newer '0x' prefix hex literal."""
 
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        if value < self._min or value > self._max:
-            raise ParameterError(
-                'Value out of range {} - {}'.format(self._min, self._max))
-        if not self._writeable:
-            raise ParameterError('Parameter is read-only')
-        write_cmd = '0x{:08X} "{} XN!'.format(value, self._cmd)
-        func(write_cmd, delay=_SET_DELAY)
+    def __init__(self, command, writeable=False, readable=True,
+                       minimum=0, maximum=1000, mask=0xFFFFFFFF):
+        """Remember the data limits."""
+        super().__init__(
+            command, writeable, readable,
+            minimum, maximum, mask, write_format='0x{:08X} "{} XN!')
 
 
 class ParameterCAN(_Parameter):
@@ -228,6 +253,10 @@ class ParameterCAN(_Parameter):
     """CAN Parameter class."""
 
     error_value = ''
+
+    def __init__(self, command, writeable=False):
+        """Set a new read_format."""
+        super().__init__(command, writeable, read_format='"{} CAN')
 
     def write(self, value):
         """Write parameter value.
@@ -245,8 +274,7 @@ class ParameterCAN(_Parameter):
         @return String value.
 
         """
-        can_cmd = '"{} CAN'.format(self._cmd)
-        value = func(can_cmd, expected=1)
+        value = super().read(func)
         if value is None:
             value = ''
         return value

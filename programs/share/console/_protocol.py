@@ -112,7 +112,6 @@ class BaseConsole():
 
     def open(self):
         """Open port."""
-        self._logger.debug('Open')
         self._port.open()
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
@@ -128,7 +127,6 @@ class BaseConsole():
 
     def close(self):
         """Close serial communications."""
-        self._logger.debug('Close')
         self._port.close()
 
     def action(self, command=None, delay=0, expected=0):
@@ -142,6 +140,8 @@ class BaseConsole():
 
         """
         if command:
+            if self._port.simulation:   # Auto simulate the command echo
+                self._port.puts(command, preflush=1, priority=True)
             self._port.flushInput()
             self._write_command(command)
         if delay:

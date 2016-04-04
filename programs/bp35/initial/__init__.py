@@ -221,7 +221,11 @@ class Main(tester.TestSequence):
         d.rla_reset.pulse(0.1)
         time.sleep(1)
         self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
-        self._bp35.defaults(limit.ARM_HW_VER, self.sernum)
+        self._bp35.unlock()
+        self._bp35['HW_VER'] = limit.ARM_HW_VER
+        self._bp35['SER_ID'] = self.sernum
+        self._bp35.nvdefault()
+        self._bp35.nvwrite()
         self._bp35['SR_DEL_CAL'] = True
         d.dcs_sreg.output(0.0)
         time.sleep(1)

@@ -130,20 +130,6 @@ class ConsoleGen1():
             # This will make the unit fail the test
             raise tester.measure.MeasurementFailedError
 
-    def defaults(self, hwver=None, sernum=None):
-        """Write factory defaults into NV memory.
-
-        @param hwver Tuple (Major [1-255], Minor [1-255], Mod [character]).
-        @param sernum Serial number string.
-
-        """
-        self._logger.debug('Write factory defaults')
-        self.unlock()
-        self.action('{0[0]} {0[1]} "{0[2]} SET-HW-VER'.format(hwver))
-        self.action('"{} SET-SERIAL-ID'.format(sernum))
-        self.action('NV-DEFAULT')
-        self.nvwrite()
-
     def unlock(self):
         """Unlock the ARM."""
         self._logger.debug('Unlock')
@@ -155,16 +141,15 @@ class ConsoleGen1():
         # We expect to see 2 banner lines after a restart
         self.action('RESTART', delay=0.5, expected=2)
 
+    def nvdefault(self):
+        """Set NV Defaults."""
+        self._logger.debug('NV-Default')
+        self.action('NV-DEFAULT')
+
     def nvwrite(self):
         """Perform NV Memory Write."""
         self._logger.debug('NV-Write')
         self.action('NV-WRITE', delay=0.5)
-
-    def version(self):
-        """Return software version."""
-        verbld = self.action('SW-VERSION?', expected=1)
-        self._logger.debug('Version is %s', verbld)
-        return verbld
 
     def echo(self, echo_enable):
         """Control of console echo."""
