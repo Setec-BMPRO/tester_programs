@@ -206,7 +206,8 @@ class Main(tester.TestSequence):
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
-        for str in (('5', ) * 4):
+        self._cn101_puts('')
+        for str in (('5', ) * 3):
             self._cn101_puts(str)
         self._cn101_puts('5', postflush=0)
 
