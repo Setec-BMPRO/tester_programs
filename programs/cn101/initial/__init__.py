@@ -25,8 +25,6 @@ _ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM15'}[os.name]
 # ARM software image file
 _ARM_BIN = 'cn101_{}.bin'.format(limit.BIN_VERSION)
 
-# Hardware version (Major [1-255], Minor [1-255], Mod [character])
-_HW_VER = (1, 0, 'A')
 # Serial port for the Bluetooth module.
 _BLE_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM14'}[os.name]
 # Serial port for the Trek2 as the CAN Bus interface.
@@ -181,9 +179,12 @@ class Main(tester.TestSequence):
 
         self._cn101.open()
         d.rla_reset.pulse(0.1)
-#        self._cn101.action(None, delay=1)   # Flush banner
         self._cn101.action(None, delay=1, expected=2)   # Flush banner
-        self._cn101.defaults(_HW_VER, self._sernum)
+        self._cn101.unlock()
+        self._cn101['HW_VER'] = limit.HW_VER
+        self._cn101['SER_ID'] = self._sernum
+        self._cn101.nvdefault()
+        self._cn101.nvwrite()
         m.cn101_swver.measure()
 
     def _step_canbus(self):

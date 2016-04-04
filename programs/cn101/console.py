@@ -7,6 +7,7 @@ from ..share import console
 Sensor = console.Sensor
 
 # Some easier to use short names
+ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 ParameterHex = console.ParameterHex
@@ -32,18 +33,25 @@ class Console(console.ConsoleGen1):
         """Create console instance."""
         super().__init__(port)
         self.cmd_data = {
+            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+            'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
             'STATUS': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),
             'CAN_BIND': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,32,0'),
-            'SwVer': ParameterRaw('', func=self.version),
-            'BtMac': ParameterRaw('', func=self.mac),
             'TANK1': ParameterFloat('TANK_1_LEVEL'),
             'TANK2': ParameterFloat('TANK_2_LEVEL'),
             'TANK3': ParameterFloat('TANK_3_LEVEL'),
             'TANK4': ParameterFloat('TANK_4_LEVEL'),
-            'ADC_SCAN': ParameterFloat('ADC_SCAN_INTERVAL_MSEC', writeable=True),
+            'ADC_SCAN': ParameterFloat(
+                'ADC_SCAN_INTERVAL_MSEC', writeable=True),
+            'SER_ID': ParameterString(
+                'SET-SERIAL-ID', writeable=True, readable=False,
+                write_format='"{} {}'),
+            'HW_VER': ParameterString(
+                'SET-HW-VER', writeable=True, readable=False,
+                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
             }
 
     def testmode(self, state):
@@ -66,13 +74,3 @@ class Console(console.ConsoleGen1):
         else:
             value = _CAN_OFF & reply
         self['STATUS'] = value
-
-    def mac(self, param=None):
-        """Read the Bluetooth MAC adderess.
-
-        @return MAC address
-
-        """
-        mac = self.action('BLE-MAC?', expected=1).strip()
-        self._logger.debug('MAC address is %s', mac)
-        return mac

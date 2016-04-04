@@ -76,7 +76,7 @@ class Sensors():
             trek2, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.oCANBIND = console.Sensor(trek2, 'CAN_BIND')
         self.oSwVer = console.Sensor(
-            trek2, 'SwVer', rdgtype=sensor.ReadingString)
+            trek2, 'SW_VER', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensor."""

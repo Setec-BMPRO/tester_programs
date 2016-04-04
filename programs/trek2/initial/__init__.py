@@ -153,7 +153,11 @@ class Main(tester.TestSequence):
         self._trek2.open()
         d.rla_reset.pulse(0.1)
         self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
-        self._trek2.defaults(limit.HW_VER, self.sernum)
+        self._trek2.unlock()
+        self._trek2['HW_VER'] = limit.HW_VER
+        self._trek2['SER_ID'] = self.sernum
+        self._trek2.nvdefault()
+        self._trek2.nvwrite()
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):

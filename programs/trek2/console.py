@@ -9,6 +9,7 @@ from ..share import console
 Sensor = console.Sensor
 
 # Some easier to use short names
+ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 ParameterHex = console.ParameterHex
@@ -31,10 +32,15 @@ class Console(console.ConsoleGen1):
         """Create console instance."""
         super().__init__(port)
         self.cmd_data = {
-            # Read-Write values
             'BACKLIGHT': ParameterFloat('BACKLIGHT_INTENSITY', writeable=True,
                 minimum=0, maximum=100, scale=1),
-            # Other items
+            'SER_ID': ParameterString(
+                'SET-SERIAL-ID', writeable=True, readable=False,
+                write_format='"{} {}'),
+            'HW_VER': ParameterString(
+                'SET-HW-VER', writeable=True, readable=False,
+                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
             'STATUS': ParameterHex('STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),
             'CAN_BIND': ParameterHex('STATUS', writeable=True,
@@ -45,7 +51,6 @@ class Console(console.ConsoleGen1):
             'TANK_SPEED': ParameterFloat('ADC_SCAN_INTERVAL_MSEC',
                 writeable=True,
                 minimum=0, maximum=10, scale=1000),
-            'SwVer': ParameterRaw('', func=self.version),
             'TANK1': ParameterFloat('TANK_1_LEVEL'),
             'TANK2': ParameterFloat('TANK_2_LEVEL'),
             'TANK3': ParameterFloat('TANK_3_LEVEL'),

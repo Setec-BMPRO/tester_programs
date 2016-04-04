@@ -86,9 +86,9 @@ class Sensors():
             cn101, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.oCANBIND = console.Sensor(cn101, 'CAN_BIND')
         self.oSwVer = console.Sensor(
-            cn101, 'SwVer', rdgtype=sensor.ReadingString)
+            cn101, 'SW_VER', rdgtype=sensor.ReadingString)
         self.oBtMac = console.Sensor(
-            cn101, 'BtMac', rdgtype=sensor.ReadingString)
+            cn101, 'BT_MAC', rdgtype=sensor.ReadingString)
         self.tank1 = console.Sensor(cn101, 'TANK1')
         self.tank2 = console.Sensor(cn101, 'TANK2')
         self.tank3 = console.Sensor(cn101, 'TANK3')

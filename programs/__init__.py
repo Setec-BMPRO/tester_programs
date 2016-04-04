@@ -127,6 +127,7 @@ PROGRAMS = (
 ALL_SKIP = (
     'CMR-INI', 'CMR-SD', 'CMR8D-FIN', 'CMR13F-FIN', 'CMR17L-FIN',
     'IDS500 Initial Micro', 'IDS500 Initial Main', 'IDS500 Final',
+    'RM-50-24 Final',
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',
     'Trek2 Final',

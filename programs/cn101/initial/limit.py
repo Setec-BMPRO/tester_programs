@@ -3,6 +3,7 @@
 """CN101 Initial Program Limits."""
 
 BIN_VERSION = '1.0.12904.169'      # Software binary version
+HW_VER = (1, 0, 'A')
 
 from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int,

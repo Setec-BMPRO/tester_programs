@@ -59,7 +59,7 @@ DATA = (
     lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     lim_string('CAN_ID', r'^RRQ,32,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
-    lim_hilo_int('CAN_STATS', 0),
+    lim_hilo('CAN_STATS', 0, 0xFFFFFFFF),
     lim_hilo_int('SOLAR_ALIVE', 1),
     lim_hilo_int('Vout_OV', 0),     # Over-voltage not triggered
     )

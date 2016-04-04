@@ -73,7 +73,7 @@ class Main(tester.TestSequence):
         bp35_ser.setPort(_ARM_PORT)
         # BP35 Console driver
         self._bp35 = Console(bp35_ser)
-        self.sernum = None
+        self._sernum = None
 
     def open(self):
         """Prepare for testing."""
@@ -136,7 +136,7 @@ class Main(tester.TestSequence):
              (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3),
              (s.oSnEntry, ('A1626010123', )), ))
 
-        self.sernum = m.ui_SnEntry.measure()[1][0]
+        self._sernum = m.ui_SnEntry.measure()[1][0]
         MeasureGroup(
             (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
             timeout=5)
@@ -219,11 +219,10 @@ class Main(tester.TestSequence):
 
         self._bp35.open()
         d.rla_reset.pulse(0.1)
-        time.sleep(1)
-        self._bp35.action(None, delay=0.5, expected=2)  # Flush banner
+        self._bp35.action(None, delay=1.5, expected=2)  # Flush banner
         self._bp35.unlock()
         self._bp35['HW_VER'] = limit.ARM_HW_VER
-        self._bp35['SER_ID'] = self.sernum
+        self._bp35['SER_ID'] = self._sernum
         self._bp35.nvdefault()
         self._bp35.nvwrite()
         self._bp35['SR_DEL_CAL'] = True
@@ -376,7 +375,7 @@ class Main(tester.TestSequence):
 
     def _step_canbus(self):
         """Test the Can Bus."""
-        for str in ('junk', '', '0x10000000', '', 'RRQ,32,0,7'):
+        for str in ('0', '', '0x10000000', '', 'RRQ,32,0,7'):
             self._bp35_puts(str)
 
         m.arm_can_stats.measure()

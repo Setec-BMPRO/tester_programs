@@ -28,7 +28,6 @@ class Console(console.ConsoleGen1):
         """Create console instance."""
         super().__init__(port)
         self.cmd_data = {
-            # Read-Write values
             'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
             'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
             'VOUT': ParameterFloat(
@@ -70,7 +69,6 @@ class Console(console.ConsoleGen1):
                 scale=1000),
             'SR_DEL_CAL': ParameterBoolean(
                 'SOLAR_REG_DEL_CAL', writeable=True),
-            # Read-only values
             'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
             'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
             'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
@@ -90,14 +88,12 @@ class Console(console.ConsoleGen1):
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
             'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
             'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
-            # Write-only values
             'SER_ID': ParameterString(
                 'SET-SERIAL-ID', writeable=True, readable=False,
                 write_format='"{} {}'),
             'HW_VER': ParameterString(
                 'SET-HW-VER', writeable=True, readable=False,
                 write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-            # Other items
             'STATUS': ParameterHex(
                 'STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000),
@@ -105,7 +101,7 @@ class Console(console.ConsoleGen1):
                 'STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,32,0'),
-            'CAN_STATS': ParameterRaw('', func=self.canstats),
+            'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
             }
         # Add in the 14 load switch current readings
         for i in range(1, 15):
@@ -158,8 +154,3 @@ class Console(console.ConsoleGen1):
         else:
             value = _CAN_OFF & reply
         self['STATUS'] = value
-
-    def canstats(self):
-        """Read CAN Status Data."""
-        self.action('CANSTATS?', expected=1)
-        return '0'

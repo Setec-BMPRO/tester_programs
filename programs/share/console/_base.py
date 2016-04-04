@@ -203,10 +203,12 @@ class ParameterHex(_Parameter):
 
     def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, mask=0xFFFFFFFF,
-                       write_format='${:08X} "{} XN!'):
+                       write_format='${:08X} "{} XN!',
+                       read_format='"{} XN?'):
         """Remember the data limits."""
         super().__init__(
-            command, writeable, readable, write_format=write_format)
+            command, writeable, readable,
+            write_format=write_format, read_format=read_format)
         self._min = minimum
         self._max = maximum
         self._mask = mask
