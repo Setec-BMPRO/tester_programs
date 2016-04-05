@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """BP35 Initial Program Limits."""
 
-ARM_VERSION = '1.2.12951.3751'      # ARM versions
+ARM_VERSION = '1.2.12971.3776'      # ARM versions
 ARM_HW_VER = (3, 0, 'A')
 PIC_VERSION = '1.1.12949.167'       # Solar Regulator versions
 PIC_HW_VER = 1
