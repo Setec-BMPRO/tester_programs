@@ -8,6 +8,10 @@ import sensor
 # Delay after a value set command
 _SET_DELAY = 0.3
 
+# Default read/write format strings (For the X-Register based consoles)
+_DEF_WRITE = '{} "{} XN!'
+_DEF_READ = '"{} XN?'
+
 
 class ConsoleError(Exception):
 
@@ -63,8 +67,8 @@ class _Parameter():
     """Parameter base class."""
 
     def __init__(self, command, writeable=False, readable=True,
-                       write_format='{} "{} XN!',
-                       read_format='"{} XN?'):
+                       write_format=_DEF_WRITE,
+                       read_format=_DEF_READ):
         """Initialise the parameter.
 
         @param command Command verb of this parameter.
@@ -163,7 +167,9 @@ class ParameterFloat(_Parameter):
     error_value = float('NaN')
 
     def __init__(self, command, writeable=False, readable=True,
-                       minimum=0, maximum=1000, scale=1):
+                       minimum=0, maximum=1000, scale=1,
+                       write_format=_DEF_WRITE,
+                       read_format=_DEF_READ):
         """Remember the scaling and data limits."""
         super().__init__(command, writeable, readable)
         self._min = minimum

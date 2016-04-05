@@ -63,6 +63,7 @@ class ConsoleGen1():
         self._send_delay = _INTER_CHAR_DELAY
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
+        self.ignore = ()    # Tuple of string to remove from responses
 
     def open(self):
         """Open port."""
@@ -241,6 +242,9 @@ class ConsoleGen1():
                 response.remove('')
             for i in range(len(response)):
                 resp = response[i]
+                for thing in self.ignore:   # Remove ignored strings
+                    if thing in resp:
+                        response[i] = resp.replace(thing, '')
                 if resp.startswith(_CMD_PROMPT2):
                     response[i] = resp[len(_CMD_PROMPT2):]
             # Reduce a List of 1 string to just a string
