@@ -93,6 +93,8 @@ class Sensors():
         self.ARM_24Vadc = con_sensor(armdev, 'ARM-24Vadc')
         self.ARM_SwVer = con_sensor(
             armdev, 'ARM_SwVer', rdgtype=sensor.ReadingString)
+        self.ARM_SwBld = con_sensor(
+            armdev, 'ARM_SwBld', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensor."""
@@ -147,3 +149,4 @@ class Measurements():
         self.arm_12Vadc = Measurement(limits['ARM-12Vadc'], sense.ARM_12Vadc)
         self.arm_24Vadc = Measurement(limits['ARM-24Vadc'], sense.ARM_24Vadc)
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
+        self.arm_SwBld = Measurement(limits['ARM-SwBld'], sense.ARM_SwBld)

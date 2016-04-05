@@ -10,7 +10,7 @@ import logging
 import tester
 from ...share.sim_serial import SimSerial
 from isplpc import Programmer, ProgrammingError
-from ...share.console import ConsoleGen0
+from ..console import Console
 from . import support
 from . import limit
 
@@ -62,7 +62,7 @@ class Main(tester.TestSequence):
         arm_ser = SimSerial(simulation=fifo, baudrate=57600)
         # Set port separately - don't open until after programming
         arm_ser.setPort(_ARM_PORT)
-        self._armdev = ConsoleGen0(arm_ser)
+        self._armdev = Console(arm_ser)
 
     def open(self):
         """Prepare for testing."""
@@ -103,9 +103,17 @@ class Main(tester.TestSequence):
         d.reset()
 
     def _arm_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the Console buffer if FIFOs are enabled."""
+                  string_data, preflush=0, postflush=1, priority=False,
+                  addcr=True):
+        """Push string data into the buffer.
+
+        Only push if FIFOs are enabled.
+        postflush=1 since the reader stops a flush marker or empty buffer.
+
+        """
         if self._fifo:
+            if addcr:
+                string_data = string_data + '\r'
             self._armdev.puts(string_data, preflush, postflush, priority)
 
     def _step_error_check(self):
@@ -163,8 +171,8 @@ class Main(tester.TestSequence):
 
         """
         self._armdev.open()
-        self._arm_puts('\r\r\r', preflush=1)
-        self._armdev.defaults()
+        self._armdev.unlock()
+        self._armdev.nvwrite()
         # Switch everything off
         d.dcs_5V.output(0.0, False)
         d.dcl_5V.output(0.1, True)
@@ -203,7 +211,6 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.o12V2, 12.12), ))
         m.dmm_12V2.measure(timeout=5)
         # Unlock ARM
-        self._arm_puts('\r\r', preflush=1)
         self._armdev.unlock()
         # A little load so PFC voltage falls faster
         d.dcl_12V.output(1.0, output=True)
@@ -218,8 +225,8 @@ class Main(tester.TestSequence):
                440.0, 440.0,      # Final reading
                )), ))
         result, pfc = m.dmm_PFCpre.stable(_PFC_STABLE)
-        self._arm_puts('\r\r', preflush=1)
-        self._armdev.cal_pfc(pfc)
+        self._armdev['CAL_PFC'] = pfc
+        self._armdev.nvwrite()
         # Prevent a limit fail from failing the unit
         m.dmm_PFCpost1.testlimit[0].position_fail = False
         result, pfc = m.dmm_PFCpost1.stable(_PFC_STABLE)
@@ -227,8 +234,8 @@ class Main(tester.TestSequence):
         m.dmm_PFCpost1.testlimit[0].position_fail = True
         if not result:      # 1st retry
             self._logger.info('Retry1 PFC calibration')
-            self._arm_puts('\r\r', preflush=1)
-            self._armdev.cal_pfc(pfc)
+            self._armdev['CAL_PFC'] = pfc
+            self._armdev.nvwrite()
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost2.testlimit[0].position_fail = False
             result, pfc = m.dmm_PFCpost2.stable(_PFC_STABLE)
@@ -236,8 +243,8 @@ class Main(tester.TestSequence):
             m.dmm_PFCpost2.testlimit[0].position_fail = True
         if not result:      # 2nd retry
             self._logger.info('Retry2 PFC calibration')
-            self._arm_puts('\r\r', preflush=1)
-            self._armdev.cal_pfc(pfc)
+            self._armdev['CAL_PFC'] = pfc
+            self._armdev.nvwrite()
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost3.testlimit[0].position_fail = False
             result, pfc = m.dmm_PFCpost3.stable(_PFC_STABLE)
@@ -245,8 +252,8 @@ class Main(tester.TestSequence):
             m.dmm_PFCpost3.testlimit[0].position_fail = True
         if not result:      # 3rd retry
             self._logger.info('Retry3 PFC calibration')
-            self._arm_puts('\r\r', preflush=1)
-            self._armdev.cal_pfc(pfc)
+            self._armdev['CAL_PFC'] = pfc
+            self._armdev.nvwrite()
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost4.testlimit[0].position_fail = False
             result, pfc = m.dmm_PFCpost4.stable(_PFC_STABLE)
@@ -267,8 +274,8 @@ class Main(tester.TestSequence):
                12.18, 12.18,     # Final reading
                )), ))
         result, v12 = m.dmm_12Vpre.stable(_12V_STABLE)
-        self._arm_puts('\r\r', preflush=1)
-        self._armdev.cal_12v(v12)
+        self._armdev['CAL_12V'] = v12
+        self._armdev.nvwrite()
         # Prevent a limit fail from failing the unit
         m.dmm_12Vset.testlimit[0].position_fail = False
         result, v12 = m.dmm_12Vset.stable(_12V_STABLE)
@@ -277,28 +284,30 @@ class Main(tester.TestSequence):
         if not result:
             self._logger.info('Retry 12V calibration')
             result, v12 = m.dmm_12Vpre.stable(_12V_STABLE)
-            self._arm_puts('\r\r', preflush=1)
-            self._armdev.cal_12v(v12)
+            self._armdev['CAL_12V'] = v12
+            self._armdev.nvwrite()
             m.dmm_12Vset.stable(_12V_STABLE)
-        self._arm_puts(     # Console response strings
-            '50 %\r'        # ARM_AcDuty
-            '50000 ms\r'    # ARM_AcPer
-            '50 Hz\r'       # ARM_AcFreq
-            '240 Vrms\r'    # ARM_AcVolt
-            '50 %\r'        # ARM_PfcTrim
-            '50 %\r'        # ARM_12VTrim
-            '5050 mV\r'     # ARM_5V
-            '12180 mV\r'    # ARM_12V
-            '24000mV\r'     # ARM_24V
-            '105 Counts\r'  # ARM_5Vadc
-            '112 Counts\r'  # ARM_12Vadc
-            '124 Counts\r') # ARM_24Vadc
-        self._arm_puts(limit.BIN_VERSION[:3] + '\r')    # ARM SwVer
-        self._arm_puts(limit.BIN_VERSION[4:] + '\r')    # ARM BuildNo
+        for str in (('50 %', ) +        # ARM_AcDuty
+                    ('50000 ms', ) +    # ARM_AcPer
+                    ('50 Hz', ) +       # ARM_AcFreq
+                    ('240 Vrms', ) +    # ARM_AcVolt
+                    ('50 %', ) +        # ARM_PfcTrim
+                    ('50 %', ) +        # ARM_12VTrim
+                    ('5050 mV', ) +     # ARM_5V
+                    ('12180 mV', ) +    # ARM_12V
+                    ('24000 mV', ) +    # ARM_24V
+                    ('105 Counts', ) +  # ARM_5Vadc
+                    ('112 Counts', ) +  # ARM_12Vadc
+                    ('124 Counts', )    # ARM_24Vadc
+                    ):
+            self._arm_puts(str)
+        self._arm_puts(limit.BIN_VERSION[:3])    # ARM SwVer
+        self._arm_puts(limit.BIN_VERSION[4:])    # ARM BuildNo
         MeasureGroup(
             (m.arm_AcDuty, m.arm_AcPer, m.arm_AcFreq, m.arm_AcVolt,
              m.arm_PfcTrim, m.arm_12VTrim, m.arm_5V, m.arm_12V, m.arm_24V,
-             m.arm_5Vadc, m.arm_12Vadc, m.arm_24Vadc, m.arm_SwVer), )
+             m.arm_5Vadc, m.arm_12Vadc, m.arm_24Vadc,
+             m.arm_SwVer, m.arm_SwBld), )
 
     def _step_reg_5v(self):
         """Check regulation of the 5V.

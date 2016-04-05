@@ -43,7 +43,9 @@ DATA = (
     lim_hilo_delta('ARM-5V', 5.0, 1.0),
     lim_hilo_delta('ARM-12V', 12.0, 1.0),
     lim_hilo_delta('ARM-24V', 24.0, 2.0),
-    lim_string('ARM-SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
+    lim_string(
+        'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
+    lim_string('ARM-SwBld', '^{}.0$'.format(BIN_VERSION[4:])),
     lim_lo('ARM-5Vadc', 999999),
     lim_lo('ARM-12Vadc', 999999),
     lim_lo('ARM-24Vadc', 999999),
