@@ -155,7 +155,7 @@ class SubTests():
         dcs1 = DcSubStep(
             setting=((d.dcs_vin, 0.0), ), delay=1.0)
         dcs2 = DcSubStep(
-            setting=((d.dcs_vin, 12.0), ), delay=10.0)
+            setting=((d.dcs_vin, 12.0), ), delay=15.0)
         self.rst = Step((dcs1, dcs2, ))
         # Awning:
         dcs1 = DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True)
