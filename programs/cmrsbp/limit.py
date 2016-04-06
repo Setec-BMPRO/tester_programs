@@ -42,7 +42,7 @@ DATA_8D = (
     ('StateOfCharge', 1, 89.5, 110.5, None, None),
     ('Halfcell', 1, 350.0, 450.0, None, None),
     ('VFCcalStatus', 1, None, None, None, True),
-    ('SerNum', 0, None, None, '9999', None),
+    ('SerNum', 0, None, None, r'.', None),
     )
 
 DATA_13F = (
@@ -67,8 +67,8 @@ DATA_17L = (
     ('RotarySw', 1, 255, 257, None, None),
     ('SenseRes', 1, 400.0, 460.0, None, None),
     ('Capacity', 1, 15500.0, 20000.0, None, None),
-    ('StateOfCharge', 1, 89.5, 110.5, None, None),
+    ('StateOfCharge', 1, 30.0, None, None, None),
     ('Halfcell', 1, 350.0, 450.0, None, None),
     ('VFCcalStatus', 1, None, None, None, True),
-    ('SerNum', 0, None, None, '9999', None),
+    ('SerNum', 0, None, None, r'.', None),
     )

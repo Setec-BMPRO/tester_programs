@@ -269,7 +269,8 @@ class Main(tester.TestSequence):
                               m.cmr_RelrnFlg, m.cmr_Sw, m.cmr_SenseRes,
                               m.cmr_Capacity, m.cmr_RelStateCharge,
                               m.cmr_Halfcell, m.cmr_VFCcalStatus,
-                              m.cmr_SerNum), )
+#                              m.cmr_SerNum), )
+                                ), )
 
     def _read_data(self):
         """Read data broadcast from PIC.
