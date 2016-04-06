@@ -115,7 +115,6 @@ PROGRAMS = (
     ('Trek2 Initial', trek2.initial.Main, trek2.initial.LIMIT_DATA),
     ('Trek2 Final', trek2.final.Main, trek2.final.LIMIT_DATA),
     ('TRS1 Initial', trs1.initial.Main, trs1.initial.LIMIT_DATA),
-    ('TRS1 Final', trs1.final.Main, trs1.final.LIMIT_DATA),
     ('TS3020-H Initial', ts3020h.initial.Main, ts3020h.initial.LIMIT_DATA),
     ('TS3020-H Final', ts3020h.final.Main, ts3020h.final.LIMIT_DATA),
     ('TS3520 Final', ts3520.final.Main, ts3520.final.LIMIT_DATA),

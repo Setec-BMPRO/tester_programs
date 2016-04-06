@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-06, 13:49:50 -->
+<!-- Saved: 2016-04-06, 17:34:39 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -210,9 +210,6 @@
     <Source>programs/trek2/initial/limit.py</Source>
     <Source>programs/trek2/initial/support.py</Source>
     <Source>programs/trs1/__init__.py</Source>
-    <Source>programs/trs1/final/__init__.py</Source>
-    <Source>programs/trs1/final/limit.py</Source>
-    <Source>programs/trs1/final/support.py</Source>
     <Source>programs/trs1/initial/__init__.py</Source>
     <Source>programs/trs1/initial/limit.py</Source>
     <Source>programs/trs1/initial/support.py</Source>
