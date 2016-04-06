@@ -27,7 +27,7 @@ Implements the methods to expose ARM readings as Sensors.
 
 import logging
 import time
-from ._base import ConsoleError
+from .protocol import ConsoleError
 import tester
 
 # Command trigger

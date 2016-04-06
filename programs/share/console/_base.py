@@ -13,11 +13,6 @@ _DEF_WRITE = '{} "{} XN!'
 _DEF_READ = '"{} XN?'
 
 
-class ConsoleError(Exception):
-
-    """Serial Command Echo or Response Error."""
-
-
 class Sensor(sensor.Sensor):
 
     """Console data exposed as a Sensor."""
@@ -47,6 +42,7 @@ class Sensor(sensor.Sensor):
 
         """
         value = super().read()
+# FIXME: Numeric ReadingString values should not covert to float()
         try:
             value = float(value) * self._scale
         except ValueError:      # 'value' can be a N.N.N string
@@ -171,7 +167,8 @@ class ParameterFloat(_Parameter):
                        write_format=_DEF_WRITE,
                        read_format=_DEF_READ):
         """Remember the scaling and data limits."""
-        super().__init__(command, writeable, readable)
+        super().__init__(
+            command, writeable, readable, write_format, read_format)
         self._min = minimum
         self._max = maximum
         self._scale = scale
@@ -198,7 +195,7 @@ class ParameterFloat(_Parameter):
         value = super().read(func)
         if value is None:
             value = '0'
-        return int(value) / self._scale
+        return float(value) / self._scale
 
 
 class ParameterHex(_Parameter):
@@ -213,8 +210,7 @@ class ParameterHex(_Parameter):
                        read_format='"{} XN?'):
         """Remember the data limits."""
         super().__init__(
-            command, writeable, readable,
-            write_format=write_format, read_format=read_format)
+            command, writeable, readable, write_format, read_format)
         self._min = minimum
         self._max = maximum
         self._mask = mask
