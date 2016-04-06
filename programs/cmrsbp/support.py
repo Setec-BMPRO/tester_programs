@@ -88,6 +88,7 @@ class Sensors():
         self.oMirErrV = sensor.Mirror()
         self.oMirErrI = sensor.Mirror()
         self.oMirTemp = sensor.Mirror()
+        self.oMirSerNum = sensor.Mirror(rdgtype=sensor.ReadingString)
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
         self.ovbatIn = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
@@ -116,6 +117,7 @@ class Sensors():
         self.oMirErrV.flush()
         self.oMirErrI.flush()
         self.oMirTemp.flush()
+        self.oMirSerNum.flush()
 
 
 class MeasureInit():
@@ -177,6 +179,7 @@ class MeasureFin():
         self.cmr_Halfcell = Measurement(limits['Halfcell'], sense.oMirHalfCell)
         self.cmr_VFCcalStatus = Measurement(
             limits['VFCcalStatus'], sense.oMirVFCcalStatus)
+        self.cmr_SerNum = Measurement(limits['SerNum'], sense.oMirSerNum)
 
 
 class SubTestInit():

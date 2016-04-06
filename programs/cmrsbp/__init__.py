@@ -263,10 +263,13 @@ class Main(tester.TestSequence):
         s.oMirHalfCell.store(cmr_data['HALF CELL READING'])
         status = self.bit_status(cmr_data['PACK STATUS AND CONFIG'], 7)
         s.oMirVFCcalStatus.store(status)
+        self._limits['SerNum'].limit = self.uuts[0]
+        s.oMirSerNum.store(str(cmr_data['SERIAL NUMBER']))
         tester.measure.group((m.cmr_vbatIn, m.cmr_ErrV, m.cmr_CycleCnt,
                               m.cmr_RelrnFlg, m.cmr_Sw, m.cmr_SenseRes,
                               m.cmr_Capacity, m.cmr_RelStateCharge,
-                              m.cmr_Halfcell, m.cmr_VFCcalStatus), )
+                              m.cmr_Halfcell, m.cmr_VFCcalStatus,
+                              m.cmr_SerNum), )
 
     def _read_data(self):
         """Read data broadcast from PIC.
@@ -294,7 +297,7 @@ class Main(tester.TestSequence):
 #SENSE RESISTOR READING,{}
 #CHARGE INPUT READING,0
 #ROTARY SWITCH READING,256
-#SERIAL NUMBER,0
+#SERIAL NUMBER,1234
 """
             sense_res = 250
             full_charge = 13000
