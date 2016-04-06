@@ -9,15 +9,16 @@ Sensor = console.Sensor
 # Some easier to use short names
 ParameterString = console.ParameterString
 ParameterFloat = console.ParameterFloat
+ParameterBoolean = console.ParameterBoolean
 
 
-class Console(console.ConsoleGen1):
+class Console(console.Variable, console.BaseConsole):
 
     """Communications to GEN8 console."""
 
-    def __init__(self, port):
+    def __init__(self, port, timeout=2.0, verbose=False):
         """Create console instance."""
-        super().__init__(port)
+        super().__init__(port, timeout, verbose)
         rfmt = '{} X?'      # 1st generation console read format string
         self.cmd_data = {
             'ARM-AcDuty': ParameterFloat(
@@ -48,6 +49,10 @@ class Console(console.ConsoleGen1):
             'CAL_12V': ParameterFloat(
                 'CAL-CONVERTER-VOLTS', writeable=True, readable=False,
                 scale=1000, write_format='{0} {1}'),
+            'UNLOCK': ParameterString('UNLOCK',
+                writeable=True, readable=False, write_format='{} {}'),
+            'NVWRITE': ParameterBoolean('NVWRITE',
+                writeable=True, readable=False, write_format='{1}'),
             }
         # Strings to ignore in responses
         self.ignore = (' %', ' ms', ' Hz', ' Vrms', ' mV', ' Counts')

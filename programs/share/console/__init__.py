@@ -16,12 +16,13 @@ class Variable():
 
     """Console variable reader-writer processor."""
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialise."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
+        super().__init__(*args, **kwargs)
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -49,11 +50,12 @@ class Variable():
         try:
             parameter = self.cmd_data[key]
             reply = parameter.read(self.action)
-# FIXME:
+# FIXME: Deal with errors in a better way
 #   If we raise a ConsoleError here, the test result will be SYSTEM ERROR
 #   instead of a FAIL. Return an 'error' reading value to get a test FAIL.
 #   There must be a cleaner way to do this using exceptions...
-        except ConsoleError:
+        except ConsoleError as err:
+            self._logger.debug('__getitem__ caught ConsoleError %s', err)
             # Sensor uses this, so we must always return a valid reading
             reply = parameter.error_value
         return reply
@@ -68,9 +70,10 @@ class Variable():
         try:
             parameter = self.cmd_data[key]
             parameter.write(value, self.action)
-# FIXME:
+# FIXME: Deal with errors in a better way
 #   If we raise a ConsoleError here, the test result will be SYSTEM ERROR
 #   instead of a FAIL.
 #   This exception will make the unit FAIL the test.
-        except ConsoleError:
+        except ConsoleError as err:
+            self._logger.debug('__setitem__ caught ConsoleError %s', err)
             raise tester.measure.MeasurementFailedError

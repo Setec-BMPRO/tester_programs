@@ -182,13 +182,16 @@ class BaseConsole():
         # Read bytes until the command prompt is seen.
         buf = bytearray()           # Buffer for the response bytes
         while _CMD_PROMPT not in buf:
-            readsize = max(1, self._port.inWaiting())
-            data = self._port.read(readsize)
+# TODO: Maybe we can read more than 1 byte at a time...?
+#   Doing so makes it hard to use the SimSerial simulation, since this
+#   console does NOT call flushInput(), so the flush markers cannot be used to
+#   limit the inWaiting() response.
+            data = self._port.read(1)
             if self._verbose:
                 self._logger.debug('Read <-- %s', repr(data))
             if len(data) == 0:              # No data means a timeout
                 raise ConsoleResponseError('Response timeout')
-            buf = buf.join([data])
+            buf += data
             buf = buf.replace(b'\n', b'')   # Remove all '\n'
         buf = buf.replace(_CMD_PROMPT, b'') # Remove the command prompt
         buf = buf.replace(_RES_SUFFIX, b'') # Remove any ' -> '
