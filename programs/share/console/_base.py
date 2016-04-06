@@ -13,11 +13,6 @@ _DEF_WRITE = '{} "{} XN!'
 _DEF_READ = '"{} XN?'
 
 
-class ConsoleError(Exception):
-
-    """Serial Command Echo or Response Error."""
-
-
 class Sensor(sensor.Sensor):
 
     """Console data exposed as a Sensor."""

@@ -5,7 +5,7 @@
 
 # Easy access to utility methods and classes
 from ._base import *
-from ._protocol import *
+from .protocol import *
 from .arm_gen0 import *
 from .arm_gen1 import *
 from .arm_gen2 import *
@@ -14,7 +14,7 @@ import tester
 
 class Variable():
 
-    """Console variable processor."""
+    """Console variable reader-writer processor."""
 
     def __init__(self):
         """Initialise."""
