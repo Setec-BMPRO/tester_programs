@@ -34,21 +34,15 @@ DATA = (
     lim_hilo_delta('PFCpost4', 440.0, 0.8),
     lim_hilo_delta('PFCpost', 440.0, 0.9),
     # Data reported by the ARM
-    lim_lo('ARM-AcDuty', 100),
-    lim_lo('ARM-AcPer', 100),
     lim_hilo_delta('ARM-AcFreq', 50, 10),
     lim_lo('ARM-AcVolt', 300),
-    lim_lo('ARM-PfcTrim', 100),
-    lim_lo('ARM-12VTrim', 100),
     lim_hilo_delta('ARM-5V', 5.0, 1.0),
     lim_hilo_delta('ARM-12V', 12.0, 1.0),
     lim_hilo_delta('ARM-24V', 24.0, 2.0),
     lim_string(
         'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
     lim_string('ARM-SwBld', '^{}.0$'.format(BIN_VERSION[4:])),
-    lim_lo('ARM-5Vadc', 999999),
-    lim_lo('ARM-12Vadc', 999999),
-    lim_lo('ARM-24Vadc', 999999),
+    #
     lim_lo('PartCheck', 20),    # Microswitches on C106, C107, D2
     lim_hi('FanShort', 20),     # Solder bridge on fan connector
     lim_lo('FixtureLock', 20),

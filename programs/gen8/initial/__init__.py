@@ -215,18 +215,11 @@ class Main(tester.TestSequence):
                )), ))
         for _ in range(9):      # Push response prompts
             self._arm_puts('')
-        for str in (('50 %', ) +        # ARM_AcDuty
-                    ('50000 ms', ) +    # ARM_AcPer
-                    ('50 Hz', ) +       # ARM_AcFreq
-                    ('240 Vrms', ) +    # ARM_AcVolt
-                    ('50 %', ) +        # ARM_PfcTrim
-                    ('50 %', ) +        # ARM_12VTrim
-                    ('5050 mV', ) +     # ARM_5V
-                    ('12180 mV', ) +    # ARM_12V
-                    ('24000 mV', ) +    # ARM_24V
-                    ('105 Counts', ) +  # ARM_5Vadc
-                    ('112 Counts', ) +  # ARM_12Vadc
-                    ('124 Counts', )    # ARM_24Vadc
+        for str in (('50Hz ', ) +       # ARM_AcFreq
+                    ('240Vrms ', ) +    # ARM_AcVolt
+                    ('5050mV ', ) +     # ARM_5V
+                    ('12180mV ', ) +    # ARM_12V
+                    ('24000mV ', )      # ARM_24V
                     ):
             self._arm_puts(str)
         self._arm_puts(limit.BIN_VERSION[:3])    # ARM SwVer
@@ -311,9 +304,8 @@ class Main(tester.TestSequence):
             self._armdev['NVWRITE'] = True
             m.dmm_12Vset.stable(_12V_STABLE)
         MeasureGroup(
-            (m.arm_AcDuty, m.arm_AcPer, m.arm_AcFreq, m.arm_AcVolt,
-             m.arm_PfcTrim, m.arm_12VTrim, m.arm_5V, m.arm_12V, m.arm_24V,
-             m.arm_5Vadc, m.arm_12Vadc, m.arm_24Vadc,
+            (m.arm_AcFreq, m.arm_AcVolt,
+             m.arm_5V, m.arm_12V, m.arm_24V,
              m.arm_SwVer, m.arm_SwBld), )
 
     def _step_reg_5v(self):
