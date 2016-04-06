@@ -108,6 +108,7 @@ class BaseConsole():
             '.'.join((__name__, self.__class__.__name__)))
         self._port = port
         self._port.timeout = timeout
+        self.ignore = ()    # Tuple of strings to remove from responses
         self._verbose = verbose
 
     def open(self):
@@ -191,6 +192,8 @@ class BaseConsole():
             buf = buf.replace(b'\n', b'')   # Remove all '\n'
         buf = buf.replace(_CMD_PROMPT, b'') # Remove the command prompt
         buf = buf.replace(_RES_SUFFIX, b'') # Remove any ' -> '
+        for pattern in self.ignore:         # Remove ignored strings
+            buf = buf.replace(pattern.encode(), b'')
         # Decode and split response lines from the byte buffer
         response = buf.decode(errors='ignore').splitlines()
         while '' in response:       # Remove empty lines
