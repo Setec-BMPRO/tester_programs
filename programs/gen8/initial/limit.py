@@ -41,7 +41,7 @@ DATA = (
     lim_hilo_delta('ARM-24V', 24.0, 2.0),
     lim_string(
         'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
-    lim_string('ARM-SwBld', '^{}.0$'.format(BIN_VERSION[4:])),
+    lim_string('ARM-SwBld', '^{}$'.format(BIN_VERSION[4:])),
     #
     lim_lo('PartCheck', 20),    # Microswitches on C106, C107, D2
     lim_hi('FanShort', 20),     # Solder bridge on fan connector

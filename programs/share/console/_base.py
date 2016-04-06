@@ -42,13 +42,8 @@ class Sensor(sensor.Sensor):
 
         """
         value = super().read()
-# FIXME: Numeric ReadingString values should not covert to float()
-        try:
+        if self._rdgtype is sensor.Reading:
             value = float(value) * self._scale
-        except ValueError:      # 'value' can be a N.N.N string
-            pass
-        except TypeError:       # or a non-numeric string
-            pass
         rdg = self._rdgtype(value, position=self.position)
         return (rdg, )
 

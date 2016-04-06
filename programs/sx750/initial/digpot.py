@@ -7,7 +7,7 @@ Both devices share UP/~DOWN pin.
 Each has a ~ChipSelect pin.
 Pins are driven by opto-couplers, driven by Tester relay drive lines.
 All lines have 22k pull up to '5Vcc' of the unit.
-NOTE: UP on the pots REDUCES the OCP point!
+Note that UP on the pots REDUCES the OCP point!
 
 Pot UP Procedure (OCP DOWN):
     Both CS and UD are high (off)

@@ -43,7 +43,7 @@ from . import wtsi200
 #
 #   Each Tuple holds 3 items:
 #   1) Name of the program,
-#       NOTE: This name must match the entry in:
+#       Note that this name must match the entry in:
 #           The ATE4 storage system (No size limit)
 #           The ATE2 database (maximum of 50 characters)
 #   2) The class to use to create a program instance,

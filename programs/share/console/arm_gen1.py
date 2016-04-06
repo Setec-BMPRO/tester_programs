@@ -39,9 +39,11 @@ _CMD_PROMPT1 = b'\r\n> '
 # Command prompt (before a response)
 _CMD_PROMPT2 = '> '
 # Delay between character when console echo is OFF
-# NOTE: This delay is very fussy...
-#       1ms will miss the T in a "TCC command about 1 in 5 test runs.
-#       2ms seems to be stable.
+# This delay is very fussy...
+#   1ms will miss the T in a "TCC command about 1 in 5 test runs.
+#   2ms seems to be stable.
+# Investigation shows that time.sleep() <= 1ms doesn't do anything! Only delays
+# >1ms are implemented.
 _INTER_CHAR_DELAY = 0.002
 
 
@@ -126,7 +128,7 @@ class ConsoleGen1():
             parameter = self.cmd_data[key]
             parameter.write(value, self.action)
         except ConsoleError:
-# FIXME: This does not setup the test results properly.
+# This does not setup the test results properly.
 #   We should be sending a TestLimit fail signal...
             # This will make the unit fail the test
             raise tester.measure.MeasurementFailedError
