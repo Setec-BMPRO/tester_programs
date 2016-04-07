@@ -99,15 +99,14 @@ class Sensors():
             detect_limit=(limits['24V_inOCP'], ),
             start=18.3 * 0.9, stop=18.3 * 1.1, step=0.1, delay=0,
             reset=True, use_opc=True)
-        self.ARM_AcDuty = con_sensor(armdev, 'ARM-AcDuty')
-        self.ARM_AcPer = con_sensor(armdev, 'ARM-AcPer')
         self.ARM_AcFreq = con_sensor(armdev, 'ARM-AcFreq')
         self.ARM_AcVolt = con_sensor(armdev, 'ARM-AcVolt')
-        self.ARM_PfcTrim = con_sensor(armdev, 'ARM-PfcTrim')
         self.ARM_12V = con_sensor(armdev, 'ARM-12V')
         self.ARM_24V = con_sensor(armdev, 'ARM-24V')
         self.ARM_SwVer = con_sensor(
             armdev, 'ARM_SwVer', rdgtype=sensor.ReadingString)
+        self.ARM_SwBld = con_sensor(
+            armdev, 'ARM_SwBld', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -154,12 +153,9 @@ class Measurements():
         self.dmm_R608 = Measurement(limits['Snubber'], sense.R608)
         self.rampOcp12V = Measurement(limits['12V_OCPchk'], sense.OCP12V)
         self.rampOcp24V = Measurement(limits['24V_OCPchk'], sense.OCP24V)
-        self.arm_AcDuty = Measurement(limits['ARM-AcDuty'], sense.ARM_AcDuty)
-        self.arm_AcPer = Measurement(limits['ARM-AcPer'], sense.ARM_AcPer)
         self.arm_AcFreq = Measurement(limits['ARM-AcFreq'], sense.ARM_AcFreq)
         self.arm_AcVolt = Measurement(limits['ARM-AcVolt'], sense.ARM_AcVolt)
-        self.arm_PfcTrim = Measurement(
-            limits['ARM-PfcTrim'], sense.ARM_PfcTrim)
         self.arm_12V = Measurement(limits['ARM-12V'], sense.ARM_12V)
         self.arm_24V = Measurement(limits['ARM-24V'], sense.ARM_24V)
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
+        self.arm_SwBld = Measurement(limits['ARM-SwBld'], sense.ARM_SwBld)

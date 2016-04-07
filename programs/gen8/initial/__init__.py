@@ -23,10 +23,6 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM6'}[os.name]
 # Software image filename
 _ARM_BIN = 'gen8_{}.bin'.format(limit.BIN_VERSION)
-# Reading to reading difference for PFC voltage stability
-_PFC_STABLE = 0.05
-# Reading to reading difference for 12V voltage stability
-_12V_STABLE = 0.005
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -67,11 +63,9 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits, self._armdev)
-        global m
         m = support.Measurements(s, self._limits)
         # Switch on fixture power
         d.dcs_10Vfixture.output(10.0, output=True)
@@ -80,13 +74,9 @@ class Main(tester.TestSequence):
         """Finished testing."""
         self._logger.info('Close')
         # Switch off fixture power
-        global d
+        global d, m, s
         d.dcs_10Vfixture.output(0.0, output=False)
-        global m
-        m = None
-        d = None
-        global s
-        s = None
+        m = d = s = None
         super().close()
 
     def safety(self):
@@ -105,12 +95,7 @@ class Main(tester.TestSequence):
     def _arm_puts(self,
                   string_data, preflush=0, postflush=0, priority=False,
                   addprompt=True):
-        """Push string data into the buffer.
-
-        Only push if FIFOs are enabled.
-        postflush=1 since the reader stops a flush marker or empty buffer.
-
-        """
+        """Push string data into the buffer, if FIFOs are enabled."""
         if self._fifo:
             if addprompt:
                 string_data = string_data + '\r> '
@@ -145,8 +130,8 @@ class Main(tester.TestSequence):
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
         try:
-            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=None)
             try:
@@ -194,11 +179,9 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.ACin, 240.0), (s.o5V, 5.05), (s.o12Vpri, 12.12),
-             (s.o12V, 0.12), (s.o12V2, 0.12), (s.o24V, 0.24),
-             (s.PWRFAIL, 0.0), ))
-        self.fifo_push(((s.o5V, 5.11), (s.o12V2, 0.12), (s.o24V, 23.23), ))
-        self.fifo_push(((s.o12V2, 12.12), ))
+            ((s.ACin, 240.0), (s.o5V, (5.05, 5.11, )), (s.o12Vpri, 12.12),
+             (s.o12V, 0.12), (s.o12V2, (0.12, 0.12, 12.12, )),
+             (s.o24V, (0.24, 23.23, )), (s.PWRFAIL, 0.0), ))
         self.fifo_push(
             ((s.PFC,
               (432.0, 432.0,      # Initial reading
@@ -247,12 +230,12 @@ class Main(tester.TestSequence):
         d.dcl_24V.output(1.0, output=True)
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
-        result, pfc = m.dmm_PFCpre.stable(_PFC_STABLE)
+        result, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
         self._armdev['CAL_PFC'] = pfc
         self._armdev['NVWRITE'] = True
         # Prevent a limit fail from failing the unit
         m.dmm_PFCpost1.testlimit[0].position_fail = False
-        result, pfc = m.dmm_PFCpost1.stable(_PFC_STABLE)
+        result, pfc = m.dmm_PFCpost1.stable(limit.PFC_STABLE)
         # Allow a limit fail to fail the unit
         m.dmm_PFCpost1.testlimit[0].position_fail = True
         if not result:      # 1st retry
@@ -261,7 +244,7 @@ class Main(tester.TestSequence):
             self._armdev['NVWRITE'] = True
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost2.testlimit[0].position_fail = False
-            result, pfc = m.dmm_PFCpost2.stable(_PFC_STABLE)
+            result, pfc = m.dmm_PFCpost2.stable(limit.PFC_STABLE)
             # Allow a limit fail to fail the unit
             m.dmm_PFCpost2.testlimit[0].position_fail = True
         if not result:      # 2nd retry
@@ -270,7 +253,7 @@ class Main(tester.TestSequence):
             self._armdev['NVWRITE'] = True
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost3.testlimit[0].position_fail = False
-            result, pfc = m.dmm_PFCpost3.stable(_PFC_STABLE)
+            result, pfc = m.dmm_PFCpost3.stable(limit.PFC_STABLE)
             # Allow a limit fail to fail the unit
             m.dmm_PFCpost3.testlimit[0].position_fail = True
         if not result:      # 3rd retry
@@ -279,34 +262,33 @@ class Main(tester.TestSequence):
             self._armdev['NVWRITE'] = True
             # Prevent a limit fail from failing the unit
             m.dmm_PFCpost4.testlimit[0].position_fail = False
-            result, pfc = m.dmm_PFCpost4.stable(_PFC_STABLE)
+            result, pfc = m.dmm_PFCpost4.stable(limit.PFC_STABLE)
             # Allow a limit fail to fail the unit
             m.dmm_PFCpost4.testlimit[0].position_fail = True
         # A final PFC setup check
-        m.dmm_PFCpost.stable(_PFC_STABLE)
+        m.dmm_PFCpost.stable(limit.PFC_STABLE)
         # no load for 12V calibration
         d.dcl_12V.output(0.0)
         d.dcl_24V.output(0.0)
         # Calibrate the 12V set voltage
         self._logger.info('Start 12V calibration')
-        result, v12 = m.dmm_12Vpre.stable(_12V_STABLE)
+        result, v12 = m.dmm_12Vpre.stable(limit.V12_STABLE)
         self._armdev['CAL_12V'] = v12
         self._armdev['NVWRITE'] = True
         # Prevent a limit fail from failing the unit
         m.dmm_12Vset.testlimit[0].position_fail = False
-        result, v12 = m.dmm_12Vset.stable(_12V_STABLE)
+        result, v12 = m.dmm_12Vset.stable(limit.V12_STABLE)
         # Allow a limit fail to fail the unit
         m.dmm_12Vset.testlimit[0].position_fail = True
         if not result:
             self._logger.info('Retry 12V calibration')
-            result, v12 = m.dmm_12Vpre.stable(_12V_STABLE)
+            result, v12 = m.dmm_12Vpre.stable(limit.V12_STABLE)
             self._armdev['CAL_12V'] = v12
             self._armdev['NVWRITE'] = True
-            m.dmm_12Vset.stable(_12V_STABLE)
+            m.dmm_12Vset.stable(limit.V12_STABLE)
         MeasureGroup(
             (m.arm_AcFreq, m.arm_AcVolt,
-             m.arm_5V, m.arm_12V, m.arm_24V,
-             m.arm_SwVer, m.arm_SwBld), )
+             m.arm_5V, m.arm_12V, m.arm_24V, m.arm_SwVer, m.arm_SwBld), )
 
     def _step_reg_5v(self):
         """Check regulation of the 5V.

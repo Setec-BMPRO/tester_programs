@@ -113,8 +113,7 @@ class ConsoleGen1():
             parameter = self.cmd_data[key]
             reply = parameter.read(self.action)
         except ConsoleError:
-            # Sensor uses this, so we must always return a valid reading
-            reply = parameter.error_value
+            raise tester.measure.MeasurementFailedError
         return reply
 
     def __setitem__(self, key, value):
@@ -128,9 +127,6 @@ class ConsoleGen1():
             parameter = self.cmd_data[key]
             parameter.write(value, self.action)
         except ConsoleError:
-# This does not setup the test results properly.
-#   We should be sending a TestLimit fail signal...
-            # This will make the unit fail the test
             raise tester.measure.MeasurementFailedError
 
     def unlock(self):

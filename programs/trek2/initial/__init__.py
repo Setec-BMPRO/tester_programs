@@ -129,8 +129,8 @@ class Main(tester.TestSequence):
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
         try:
-            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:
@@ -145,10 +145,10 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        for str in (('Banner1\r\nBanner2', ) +  # Banner lines
-                    ('', ) * 5 +                # defaults
-                    (limit.BIN_VERSION, )):     # SwVer measure
-            self._trek2_puts(str)
+        for str in (('Banner1\r\nBanner2', ) +
+                    ('', ) * 5 ):
+            self._cn101_puts(str)
+        self._cn101_puts(limit.BIN_VERSION, postflush=0)
 
         self._trek2.open()
         d.rla_reset.pulse(0.1)

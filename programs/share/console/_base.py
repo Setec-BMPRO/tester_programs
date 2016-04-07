@@ -103,8 +103,6 @@ class ParameterString(_Parameter):
 
     """String parameter type."""
 
-    error_value = ''
-
     def write(self, value, func):
         """Write parameter value.
 
@@ -127,8 +125,6 @@ class ParameterString(_Parameter):
 class ParameterBoolean(_Parameter):
 
     """Boolean parameter type."""
-
-    error_value = False
 
     def write(self, value, func):
         """Write parameter value.
@@ -154,8 +150,6 @@ class ParameterBoolean(_Parameter):
 class ParameterFloat(_Parameter):
 
     """Float parameter type."""
-
-    error_value = float('NaN')
 
     def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, scale=1,
@@ -196,8 +190,6 @@ class ParameterFloat(_Parameter):
 class ParameterHex(_Parameter):
 
     """Hex parameter type with the older '$' prefix hex literal."""
-
-    error_value = float('NaN')
 
     def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, mask=0xFFFFFFFF,
@@ -251,8 +243,6 @@ class ParameterCAN(_Parameter):
 
     """CAN Parameter class."""
 
-    error_value = ''
-
     def __init__(self, command, writeable=False):
         """Set a new read_format."""
         super().__init__(command, writeable, read_format='"{} CAN')
@@ -287,8 +277,6 @@ class ParameterRaw(_Parameter):
     using console.action().
 
     """
-
-    error_value = ''
 
     def __init__(self, command, writeable=False, func=None):
         """Remember function to call."""

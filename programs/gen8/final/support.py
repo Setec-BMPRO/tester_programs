@@ -94,38 +94,45 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: Apply 240Vac, set min load, measure.
-        ld = LoadSubStep(
-            ((d.dcl_5V, 0.0), (d.dcl_24V, 0.1), (d.dcl_12V, 3.5),
-             (d.dcl_12V2, 0.5)), output=True)
-        acs = AcSubStep(
-            acs=d.acsource, voltage=240.0, output=True, delay=1.0)
-        msr1 = MeasureSubStep(
-            (m.dmm_5V, m.dmm_24Voff, m.dmm_12Voff, ), timeout=5)
-        rly1 = RelaySubStep(((d.rla_12V2off, True), ))
-        msr2 = MeasureSubStep((m.dmm_12V2off, ), timeout=5)
-        self.pwr_up = Step((ld, acs, msr1, rly1, msr2))
+        self.pwr_up = Step((
+            LoadSubStep(
+                ((d.dcl_5V, 0.0), (d.dcl_24V, 0.1), (d.dcl_12V, 3.5),
+                 (d.dcl_12V2, 0.5)), output=True),
+            AcSubStep(
+                acs=d.acsource, voltage=240.0, output=True, delay=1.0),
+            MeasureSubStep(
+                (m.dmm_5V, m.dmm_24Voff, m.dmm_12Voff, ), timeout=5),
+            RelaySubStep(((d.rla_12V2off, True), )),
+            MeasureSubStep((m.dmm_12V2off, ), timeout=5),
+            ))
         # PowerOn: Turn on, measure at min load.
-        rly1 = RelaySubStep(((d.rla_pson, True), ))
-        msr1 = MeasureSubStep(
-            (m.dmm_24Von, m.dmm_12Von, m.dmm_12V2off,
-             m.dmm_PwrFailOff, ), timeout=5)
-        rly2 = RelaySubStep(((d.rla_12V2off, False), ))
-        msr2 = MeasureSubStep((m.dmm_12V2on, m.dmm_Iecon, ), timeout=5)
-        msr3 = MeasureSubStep((m.ui_YesNoMains, ))
-        self.pwr_on = Step((rly1, msr1, rly2, msr2, msr3))
+        self.pwr_on = Step((
+            RelaySubStep(((d.rla_pson, True), )),
+            MeasureSubStep(
+                (m.dmm_24Von, m.dmm_12Von, m.dmm_12V2off,
+                 m.dmm_PwrFailOff, ), timeout=5),
+            RelaySubStep(((d.rla_12V2off, False), )),
+            MeasureSubStep((m.dmm_12V2on, m.dmm_Iecon, ), timeout=5),
+            MeasureSubStep((m.ui_YesNoMains, )),
+            ))
         # Full Load: Apply full load, measure.
         # 115Vac Full Load: 115Vac, measure.
-        ld = LoadSubStep(
-            ((d.dcl_5V, 2.5), (d.dcl_24V, 5.0),
-             (d.dcl_12V, 15.0), (d.dcl_12V2, 7.0)), delay=0.5)
-        msr1 = MeasureSubStep(
+        mss = MeasureSubStep(
             (m.dmm_5V, m.dmm_24Von, m.dmm_12Von, m.dmm_12V2on,), timeout=5)
-        acs = AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5)
-        self.full_load = Step((ld, msr1))
-        self.full_load_115 = Step((acs, msr1))
+        self.full_load = Step((
+            LoadSubStep(
+                ((d.dcl_5V, 2.5), (d.dcl_24V, 5.0),
+                 (d.dcl_12V, 15.0), (d.dcl_12V2, 7.0)), delay=0.5),
+            mss,
+            ))
+        self.full_load_115 = Step((
+            AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5),
+            mss,
+            ))
         # PowerOff: Set min load, switch off, measure.
-        ld = LoadSubStep(
-            ((d.dcl_5V, 0.5), (d.dcl_24V, 0.5), (d.dcl_12V, 4.0)))
-        msr1 = MeasureSubStep(
-            (m.ui_NotifyPwrOff, m.dmm_Iecoff, m.dmm_24Voff,))
-        self.pwr_off = Step((ld, msr1,))
+        self.pwr_off = Step((
+            LoadSubStep(
+                ((d.dcl_5V, 0.5), (d.dcl_24V, 0.5), (d.dcl_12V, 4.0))),
+            MeasureSubStep(
+                (m.ui_NotifyPwrOff, m.dmm_Iecoff, m.dmm_24Voff,)),
+            ))

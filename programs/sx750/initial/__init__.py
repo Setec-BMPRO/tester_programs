@@ -12,7 +12,7 @@ import tester
 from ...share.programmer import ProgramPIC
 from ...share.sim_serial import SimSerial
 from isplpc import Programmer, ProgrammingError
-from ...share.console import ConsoleGen0
+from ..console import Console
 from . import support
 from . import limit
 
@@ -24,8 +24,6 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Software image filenames
 _ARM_BIN = 'sx750_arm_{}.bin'.format(limit.BIN_VERSION)
-# Reading to reading difference for PFC voltage stability
-_PFC_STABLE = 0.05
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -62,7 +60,7 @@ class Main(tester.TestSequence):
         arm_ser = SimSerial(simulation=fifo, baudrate=57600)
         # Set port separately, as we don't want it opened yet
         arm_ser.setPort(_ARM_PORT)
-        self._armdev = ConsoleGen0(arm_ser)
+        self._armdev = Console(arm_ser, verbose=False)
 
     def open(self):
         """Prepare for testing."""
@@ -93,9 +91,12 @@ class Main(tester.TestSequence):
         d.reset()
 
     def _arm_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the Console buffer if FIFOs are enabled."""
+                  string_data, preflush=0, postflush=0, priority=False,
+                  addprompt=True):
+        """Push string data into the buffer, if FIFOs are enabled."""
         if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r> '
             self._armdev.puts(string_data, preflush, postflush, priority)
 
     def _step_error_check(self):
@@ -110,8 +111,8 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.Lock, 10.0), (s.Part, 10.0), (s.R601, 2000.0),
-             (s.R602, 2000.0), (s.R609, 2000.0), (s.R608, 2000.0), ))
+            ((s.Lock, 10.1), (s.Part, 10.2), (s.R601, 2001.0),
+             (s.R602, 2002.0), (s.R609, 2003.0), (s.R608, 2004.0), ))
         MeasureGroup(
             (m.dmm_Lock, m.dmm_Part, m.dmm_R601, m.dmm_R602, m.dmm_R609,
              m.dmm_R608), 2)
@@ -128,13 +129,15 @@ class Main(tester.TestSequence):
         Unit is left unpowered.
 
         """
+        self.fifo_push(
+            ((s.PriCtl, 12.34), (s.o5Vsb, 5.75), (s.o5Vsbunsw, 5.01),
+             (s.o3V3, 3.21), ))
+
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5Vsb.output(5.75, True)
         d.dcs_PriCtl.output(12.0, True)
-        self.fifo_push(((s.PriCtl, 12.34), (s.o5Vsb, 5.75),
-                        (s.o5Vsbunsw, 5.0), (s.o3V3, 3.21), ))
         MeasureGroup(
             (m.dmm_PriCtl, m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
         folder = os.path.dirname(
@@ -164,8 +167,8 @@ class Main(tester.TestSequence):
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
         try:
-            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=None)
             try:
@@ -199,13 +202,16 @@ class Main(tester.TestSequence):
         Unit is left unpowered.
 
         """
-        self.fifo_push(((s.o5Vsb, 5.75), (s.o5Vsbunsw, 5.0), ))
+        self.fifo_push(((s.o5Vsb, 5.75), (s.o5Vsbunsw, 5.01), ))
+        for _ in range(2):      # Push response prompts
+            self._arm_puts('')
+
         d.dcs_5Vsb.output(5.75, True)
         MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
         self._armdev.open()
-        self._arm_puts('\r\r\r', preflush=1)
-        self._armdev.defaults()
+        self._armdev['UNLOCK'] = '$DEADBEA7'
+        self._armdev['NVWRITE'] = True
         # Switch everything off
         d.dcs_5Vsb.output(0, False)
         d.dcl_5Vsb.output(0.1)
@@ -222,58 +228,59 @@ class Main(tester.TestSequence):
         Unit is left running at 240Vac, no load.
 
         """
-        d.acsource.output(voltage=240.0, output=True)
-        # A little load so PFC voltage falls faster
-        d.dcl_12V.output(1.0)
-        d.dcl_24V.output(1.0)
-        self.fifo_push(((s.ACin, 240.0), (s.PriCtl, 12.34), (s.o5Vsb, 5.05),
-                        (s.o12V, 0.12), (s.o24V, 0.24), (s.ACFAIL, 5.0), ))
-        MeasureGroup((m.dmm_ACin, m.dmm_PriCtl, m.dmm_5Vsb_set,
-                      m.dmm_12Voff, m.dmm_24Voff, m.dmm_ACFAIL),
-                     2)
-        # Switch all outputs ON
-        d.rla_pson.set_on()
-        self.fifo_push(((s.o12V, 12.34), (s.o24V, 24.34), (s.PGOOD, 0.123), ))
-        MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
-        # ARM data readings
-        self._arm_puts('\r\r', preflush=1)
-        self._armdev.unlock()
-        self._arm_puts(     # Console response strings
-            '50 %\r'        # ARM_AcDuty
-            '50000 ms\r'    # ARM_AcPer
-            '50 Hz\r'       # ARM_AcFreq
-            '240 Vrms\r'    # ARM_AcVolt
-            '50 %\r'        # ARM_PfcTrim
-            '12180 mV\r'    # ARM_12V
-            '24000 mV\r')   # ARM_24V
-        self._arm_puts(limit.BIN_VERSION[:3] + '\r')    # ARM SwVer
-        self._arm_puts(limit.BIN_VERSION[4:] + '\r')    # ARM BuildNo
-        MeasureGroup(
-            (m.arm_AcDuty, m.arm_AcPer, m.arm_AcFreq, m.arm_AcVolt,
-             m.arm_PfcTrim, m.arm_12V, m.arm_24V, m.arm_SwVer), )
-        # Calibrate the PFC set voltage
-        self._logger.info('Start PFC calibration')
         self.fifo_push(
-            ((s.PFC,
+            ((s.ACin, 240.0), (s.PriCtl, 12.34), (s.o5Vsb, 5.05),
+             (s.o12V, (0.12, 12.34)), (s.o24V, (0.24, 24.34)),
+             (s.ACFAIL, 5.0), (s.PGOOD, 0.123),
+             (s.PFC,
               (432.0, 432.0,     # Initial reading
                433.0, 433.0,     # After 1st cal
                433.0, 433.0,     # 2nd reading
                435.0, 435.0,     # Final value
                )), ))
-        result, pfc = m.dmm_PFCpre.stable(_PFC_STABLE)
-        self._arm_puts('\r\r', preflush=1)
-        self._armdev.cal_pfc(pfc)
+        self._arm_puts('')
+        for str in (('50Hz ', ) +       # ARM_AcFreq
+                    ('240Vrms ', ) +    # ARM_AcVolt
+                    ('12180mV ', ) +    # ARM_12V
+                    ('24000mV ', )      # ARM_24V
+                    ):
+            self._arm_puts(str)
+        self._arm_puts(limit.BIN_VERSION[:3])    # ARM SwVer
+        self._arm_puts(limit.BIN_VERSION[4:])    # ARM BuildNo
+        for _ in range(4):      # Push response prompts
+            self._arm_puts('')
+
+        d.acsource.output(voltage=240.0, output=True)
+        # A little load so PFC voltage falls faster
+        d.dcl_12V.output(1.0)
+        d.dcl_24V.output(1.0)
+        MeasureGroup(
+            (m.dmm_ACin, m.dmm_PriCtl, m.dmm_5Vsb_set, m.dmm_12Voff,
+             m.dmm_24Voff, m.dmm_ACFAIL), 2)
+        # Switch all outputs ON
+        d.rla_pson.set_on()
+        MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
+        # ARM data readings
+        self._armdev['UNLOCK'] = '$DEADBEA7'
+        MeasureGroup(
+            (m.arm_AcFreq, m.arm_AcVolt, m.arm_12V, m.arm_24V,
+             m.arm_SwVer, m.arm_SwBld), )
+        # Calibrate the PFC set voltage
+        self._logger.info('Start PFC calibration')
+        result, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
+        self._armdev['CAL_PFC'] = pfc
+        self._armdev['NVWRITE'] = True
         # Prevent a limit fail from failing the unit
         m.dmm_PFCpost.testlimit[0].position_fail = False
-        result, pfc = m.dmm_PFCpost.stable(_PFC_STABLE)
+        result, pfc = m.dmm_PFCpost.stable(limit.PFC_STABLE)
         # Allow a limit fail to fail the unit
         m.dmm_PFCpost.testlimit[0].position_fail = True
         if not result:
             self._logger.info('Retry PFC calibration')
-            result, pfc = m.dmm_PFCpre.stable(_PFC_STABLE)
-            self._arm_puts('\r\r', preflush=1)
-            self._armdev.cal_pfc(pfc)
-            m.dmm_PFCpost.stable(_PFC_STABLE)
+            result, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
+            self._armdev['CAL_PFC'] = pfc
+            self._armdev['NVWRITE'] = True
+            m.dmm_PFCpost.stable(limit.PFC_STABLE)
         # Leave the loads at zero
         d.dcl_12V.output(0)
         d.dcl_24V.output(0)
@@ -288,7 +295,8 @@ class Main(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(((s.o5Vsb, (5.20, 5.15, 5.14, 5.10)), ))
+        self.fifo_push(((s.o5Vsb, (5.20, 5.15, 5.14, 5.10, )), ))
+
         _reg_check(
             dmm_out=m.dmm_5Vsb, dcl_out=d.dcl_5Vsb,
             reg_limit=self._limits['5Vsb_reg'], max_load=2.0, peak_load=2.5)
@@ -308,17 +316,17 @@ class Main(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(((s.o12V, (12.34, 12.25, 12.10, 12.00)), ))
+        self.fifo_push(
+            ((s.o12V, (12.34, 12.25, 12.10, 12.00, 12.34, )),
+             # OPC SET: Push 32 reads before OCP detected
+             # OCP CHECK: Push 37 reads before OCP detected
+             (s.o12VinOCP, ((0.123, ) * 32 + (4.444, )) +
+                           ((0.123, ) * 37 + (4.444, ))),
+             ))
+
         _reg_check(
             dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
             reg_limit=self._limits['12V_reg'], max_load=32.0, peak_load=36.0)
-        self.fifo_push(
-            ((s.o12V, 12.34, ),
-             # OPC SET: Push 32 reads before OCP detected
-             (s.o12VinOCP, ((0.123, ) * 32 + (4.444, ))),
-             # OCP CHECK: Push 37 reads before OCP detected
-             (s.o12VinOCP, ((0.123, ) * 37 + (4.444, ))),
-             ))
         _ocp_set(
             target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
             enable=d.ocp_pot.enable_12v, limit=self._limits['12V_ocp'])
@@ -343,17 +351,17 @@ class Main(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(((s.o24V, (24.44, 24.33, 24.22, 24.11)), ))
+        self.fifo_push(
+            ((s.o24V, (24.44, 24.33, 24.22, 24.11, 24.24)),
+             # OPC SET: Push 32 reads before OCP detected
+             # OCP CHECK: Push 18 reads before OCP detected
+             (s.o24VinOCP, ((0.123, ) * 32 + (4.444, )) +
+                           ((0.123, ) * 18 + (4.444, ))),
+             ))
+
         _reg_check(
             dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
             reg_limit=self._limits['24V_reg'], max_load=15.0, peak_load=18.0)
-        self.fifo_push(
-            ((s.o24V, 24.24),
-             # OPC SET: Push 32 reads before OCP detected
-             (s.o24VinOCP, ((0.123, ) * 32 + (4.444, ))),
-             # OCP CHECK: Push 18 reads before OCP detected
-             (s.o24VinOCP, ((0.123, ) * 18 + (4.444, ))),
-             ))
         _ocp_set(
             target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
             enable=d.ocp_pot.enable_24v, limit=self._limits['24V_ocp'])
@@ -372,12 +380,13 @@ class Main(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        d.dcl_5Vsb.binary(0.0, 2.5, 1.0)
-        d.dcl_12V.binary(0.0, 36.0, 2.0)
-        d.dcl_24V.binary(0.0, 18.0, 2.0)
         self.fifo_push(
             ((s.o5Vsb, 5.15), (s.o12V, 12.22), (s.o24V, 24.44),
              (s.PGOOD, 0.15)))
+
+        d.dcl_5Vsb.binary(0.0, 2.5, 1.0)
+        d.dcl_12V.binary(0.0, 36.0, 2.0)
+        d.dcl_24V.binary(0.0, 18.0, 2.0)
         MeasureGroup((m.dmm_5Vsb, m.dmm_12V, m.dmm_24V, m.dmm_PGOOD), 2)
         d.dcl_24V.output(0)
         d.dcl_12V.output(0)

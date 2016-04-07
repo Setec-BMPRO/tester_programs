@@ -109,25 +109,30 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: 240Vac, measure.
-        ld1 = LoadSubStep(
-            ((d.dcl_5v, 0.0), (d.dcl_12v, 0.1), (d.dcl_24v, 0.1)), output=True)
-        msr1 = MeasureSubStep((m.dmm_Iecoff, ), timeout=5)
-        acs1 = AcSubStep(
-            acs=d.acsource, voltage=240.0, frequency=50,
-            output=True, delay=0.5)
-        msr2 = MeasureSubStep(
-            (m.dmm_Iec, m.dmm_5v, m.dmm_12voff, m.ui_YesNoGreen), timeout=5)
-        self.pwr_up = Step((ld1, msr1, acs1, msr2))
+        self.pwr_up = Step((
+            LoadSubStep(
+                ((d.dcl_5v, 0.0), (d.dcl_12v, 0.1), (d.dcl_24v, 0.1)),
+                 output=True),
+            MeasureSubStep((m.dmm_Iecoff, ), timeout=5),
+            AcSubStep(
+                acs=d.acsource, voltage=240.0, frequency=50,
+                output=True, delay=0.5),
+            MeasureSubStep(
+                (m.dmm_Iec, m.dmm_5v, m.dmm_12voff, m.ui_YesNoGreen),
+                 timeout=5),
+            ))
         # PowerOn:
-        rly1 = RelaySubStep(((d.rla_PwrOn, True), ))
-        msr1 = MeasureSubStep(
-            (m.ui_YesNoBlue, m.dmm_5v, m.dmm_PwrGood, m.dmm_AcFail, ),
-            timeout=5)
-        self.pwr_on = Step((rly1, msr1,))
+        self.pwr_on = Step((
+            RelaySubStep(((d.rla_PwrOn, True), )),
+            MeasureSubStep(
+                (m.ui_YesNoBlue, m.dmm_5v, m.dmm_PwrGood, m.dmm_AcFail, ),
+                timeout=5),
+            ))
         # Load: Apply loads, measure.
-        ld1 = LoadSubStep(
-            ((d.dcl_5v, 2.0), (d.dcl_12v, 32.0), (d.dcl_24v, 15.0)),
-            output=True)
-        msr1 = MeasureSubStep(
-            (m.dmm_5vfl, m.dmm_PwrGood, m.dmm_AcFail, ), timeout=2)
-        self.load = Step((ld1, msr1,))
+        self.load = Step((
+            LoadSubStep(
+                ((d.dcl_5v, 2.0), (d.dcl_12v, 32.0), (d.dcl_24v, 15.0)),
+                output=True),
+            MeasureSubStep(
+                (m.dmm_5vfl, m.dmm_PwrGood, m.dmm_AcFail, ), timeout=2),
+            ))

@@ -190,8 +190,8 @@ class Main(tester.TestSequence):
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        ser = SimSerial(port=_ARM_PGM, baudrate=115200)
         try:
-            ser = SimSerial(port=_ARM_PGM, baudrate=115200)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:

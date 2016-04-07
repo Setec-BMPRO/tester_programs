@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-06, 17:34:39 -->
+<!-- Saved: 2016-04-07, 08:56:46 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -163,7 +163,6 @@
     <Source>programs/share/bluetooth/rn4020.py</Source>
     <Source>programs/share/console/__init__.py</Source>
     <Source>programs/share/console/_base.py</Source>
-    <Source>programs/share/console/arm_gen0.py</Source>
     <Source>programs/share/console/arm_gen1.py</Source>
     <Source>programs/share/console/arm_gen2.py</Source>
     <Source>programs/share/console/protocol.py</Source>
@@ -191,6 +190,7 @@
     <Source>programs/st3/final/limit.py</Source>
     <Source>programs/st3/final/support.py</Source>
     <Source>programs/sx750/__init__.py</Source>
+    <Source>programs/sx750/console.py</Source>
     <Source>programs/sx750/final/__init__.py</Source>
     <Source>programs/sx750/final/limit.py</Source>
     <Source>programs/sx750/final/support.py</Source>

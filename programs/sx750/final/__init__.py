@@ -43,26 +43,17 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -78,6 +69,7 @@ class Main(tester.TestSequence):
     def _step_inres(self):
         """Verify that the hand loaded input discharge resistors are there."""
         self.fifo_push(((s.oInpRes, 70000), ))
+
         m.dmm_InpRes.measure(timeout=5)
 
     def _step_powerup(self):
@@ -87,14 +79,17 @@ class Main(tester.TestSequence):
         Measure voltages.
 
         """
-        self.fifo_push(((s.oIec, (0.0, 240.0)), (s.o5v, 5.1),
-                        (s.o12v, 0.0), (s.oYesNoGreen, True)))
+        self.fifo_push(
+            ((s.oIec, (0.0, 240.0)), (s.o5v, 5.1), (s.o12v, 0.0),
+             (s.oYesNoGreen, True)))
+
         t.pwr_up.run()
 
     def _step_poweron(self):
         """Enable all outputs and check that the LED goes blue."""
-        self.fifo_push(((s.oYesNoBlue, True), (s.o5v, 5.1),
-                         (s.oPwrGood, 0.1), (s.oAcFail, 5.1), ))
+        self.fifo_push(
+            ((s.oYesNoBlue, True), (s.o5v, 5.1), (s.oPwrGood, 0.1),
+             (s.oAcFail, 5.1), ))
 
         t.pwr_on.run()
 
@@ -103,6 +98,7 @@ class Main(tester.TestSequence):
         self.fifo_push(
             ((s.o5v, 5.1), (s.o12v, (12.2, 12.1)), (s.o24v, (24.2, 24.1)),
              (s.oPwrGood, 0.1), (s.oAcFail, 5.1), ))
+
         nl12v, nl24v = MeasureGroup((m.dmm_12von, m.dmm_24von, ))[1]
         t.load.run()
         fl12v, fl24v = MeasureGroup((m.dmm_12vfl, m.dmm_24vfl, ))[1]

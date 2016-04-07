@@ -69,12 +69,12 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         # Serial connection to the CN101 console
-        cn101_ser = SimSerial(
+        self._cn101_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
-        cn101_ser.setPort(_ARM_PORT)
+        self._cn101_ser.setPort(_ARM_PORT)
         # CN101 Console driver
-        self._cn101 = Console(cn101_ser)
+        self._cn101 = Console(self._cn101_ser)
         # Serial connection to the Trek2 in the fixture (for the CAN bus)
         trek2_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
@@ -156,8 +156,8 @@ class Main(tester.TestSequence):
         with open(file, 'rb') as infile:
             bindata = bytearray(infile.read())
         self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
         try:
-            ser = SimSerial(port=_ARM_PORT, baudrate=115200)
             pgm = Programmer(
                 ser, bindata, erase_only=False, verify=False, crpmode=False)
             try:
@@ -173,9 +173,9 @@ class Main(tester.TestSequence):
     def _step_test_arm(self):
         """Test the ARM device."""
         for str in (('Banner1\r\nBanner2', ) +
-                    ('', ) * 5 +
-                    (limit.BIN_VERSION, )):
+                    ('', ) * 5 ):
             self._cn101_puts(str)
+        self._cn101_puts(limit.BIN_VERSION, postflush=0)
 
         self._cn101.open()
         d.rla_reset.pulse(0.1)

@@ -4,6 +4,11 @@
 
 BIN_VERSION = '1.4.645'     # Software binary version
 
+# Reading to reading difference for PFC voltage stability
+PFC_STABLE = 0.05
+# Reading to reading difference for 12V voltage stability
+V12_STABLE = 0.005
+
 from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_lo, lim_hi, lim_hilo, lim_string)

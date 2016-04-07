@@ -6,6 +6,9 @@ BIN_VERSION = '3.1.2118'        # Software versions
 PIC_HEX1 = 'sx750_pic5Vsb_1.hex'
 PIC_HEX2 = 'sx750_picPwrSw_2.hex'
 
+# Reading to reading difference for PFC voltage stability
+PFC_STABLE = 0.05
+
 from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int, lim_hilo,
     lim_lo, lim_hi, lim_string)
@@ -46,14 +49,14 @@ DATA = (
     lim_hilo_delta('OCP24post', 18.2, 0.1),
     lim_lo('OCP24step', 0.058),
     # Data reported by the ARM
-    lim_lo('ARM-AcDuty', 999),
-    lim_lo('ARM-AcPer', 999),
     lim_lo('ARM-AcFreq', 999),
     lim_lo('ARM-AcVolt', 999),
-    lim_lo('ARM-PfcTrim', 999),
     lim_lo('ARM-12V', 999),
     lim_lo('ARM-24V', 999),
-    lim_string('ARM-SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
+    lim_string(
+        'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
+    lim_string('ARM-SwBld', '^{}$'.format(BIN_VERSION[4:])),
+    #
     lim_lo('FixtureLock', 20),
     lim_lo('PartCheck', 20),            # Microswitches on C612, C613, D404
     lim_hilo('Snubber', 1000, 3000),    # Snubbing resistors
