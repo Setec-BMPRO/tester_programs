@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-08, 17:48:04 -->
+<!-- Saved: 2016-04-08, 22:51:21 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -173,6 +173,8 @@
     <Source>programs/share/console/test/test_protocol.py</Source>
     <Source>programs/share/programmer.py</Source>
     <Source>programs/share/sim_serial.py</Source>
+    <Source>programs/share/test/__init__.py</Source>
+    <Source>programs/share/test/test_can_tunnel.py</Source>
     <Source>programs/share/ticker.py</Source>
     <Source>programs/share/timed_data.py</Source>
     <Source>programs/smu75070/__init__.py</Source>
