@@ -100,7 +100,8 @@ class Console(console.Variable, console.BadUartConsole):
             'CAN_BIND': ParameterHex(
                 'STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-            'CAN_ID': ParameterCAN('TQQ,32,0'),
+            'CAN': ParameterString('CAN',
+                writeable=True, write_format='"{} {}'),
             'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
             'UNLOCK': ParameterString('UNLOCK',
                 writeable=True, readable=False, write_format='{} {}'),
@@ -150,8 +151,14 @@ class Console(console.Variable, console.BadUartConsole):
             value = value & mask | bits
         self['LOAD_SET'] = value
 
-    def can_mode(self, state):
-        """Enable or disable CAN Test Mode."""
+    def can_testmode(self, state):
+        """Enable or disable CAN Test Mode.
+
+        Once test mode is active, all CAN packets received will display onto
+        the console. This means that the Command-Response protocol cannot
+        be used any more as it breaks with the extra asynchronous messages.
+
+        """
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
         reply = self['STATUS']

@@ -97,17 +97,15 @@ class BaseConsole():
 
     """
 
-    def __init__(self, port, timeout=2.0, verbose=False):
+    def __init__(self, port, verbose=False):
         """Initialise communications.
 
         @param port SimSerial instance to use
-        @param timeout Serial port timeout in sec
 
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._port = port
-        self._port.timeout = timeout
         self.ignore = ()    # Tuple of strings to remove from responses
         self._verbose = verbose
 

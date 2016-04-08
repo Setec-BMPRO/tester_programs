@@ -69,11 +69,12 @@ class Sensors():
            @param limits Product test limits
 
         """
+        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
+                           signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
         self.oMirPIC = sensor.Mirror()
         self.oMirARM = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.oLock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
         self.osw1 = sensor.Res(dmm, high=17, low=7, rng=1000000, res=1)
         self.osw2 = sensor.Res(dmm, high=18, low=7, rng=1000000, res=1)
@@ -106,8 +107,6 @@ class Sensors():
         self.ARM_BattType = console.Sensor(bp35, 'BATT_TYPE')
         self.ARM_BattSw = console.Sensor(bp35, 'BATT_SWITCH')
         self.ARM_Fan = console.Sensor(bp35, 'FAN')
-        self.ARM_CANID = console.Sensor(
-            bp35, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.ARM_CANBIND = console.Sensor(bp35, 'CAN_BIND')
         # Generate 14 load current sensors
         self.ARM_Loads = []
@@ -124,6 +123,7 @@ class Sensors():
         """TestRun.stop: Empty the Mirror Sensors."""
         self.oMirPIC.flush()
         self.oMirARM.flush()
+        self.oMirCAN.flush()
 
 
 class Measurements():
@@ -139,6 +139,7 @@ class Measurements():
         """
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
+        self.rx_can = Measurement(limits['CAN_RX'], sense.oMirCAN)
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.oLock)
         self.dmm_sw1 = Measurement(limits['SwShort'], sense.osw1)
         self.dmm_sw2 = Measurement(limits['SwShort'], sense.osw2)
@@ -168,7 +169,6 @@ class Measurements():
         self.arm_secT = Measurement(limits['ARM-SecT'], sense.ARM_SecT)
         self.arm_vout = Measurement(limits['ARM-Vout'], sense.ARM_Vout)
         self.arm_fan = Measurement(limits['ARM-Fan'], sense.ARM_Fan)
-        self.arm_can_id = Measurement(limits['CAN_ID'], sense.ARM_CANID)
         self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.ARM_CANBIND)
         # Generate 14 load current measurements
         self.arm_loads = ()

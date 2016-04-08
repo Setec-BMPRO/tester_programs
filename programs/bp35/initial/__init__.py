@@ -25,6 +25,8 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 _ARM_BIN = 'bp35_{}.bin'.format(limit.ARM_VERSION)
 # dsPIC software image file
 _PIC_HEX = 'bp35sr_{}.hex'.format(limit.PIC_VERSION)
+# CAN echo request messages
+_CAN_ECHO = 'TQQ,32,0'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -67,12 +69,12 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         # Serial connection to the BP35 console
-        bp35_ser = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=0.1)
+        self._bp35_ser = SimSerial(
+            simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bp35_ser.setPort(_ARM_PORT)
+        self._bp35_ser.setPort(_ARM_PORT)
         # BP35 Console driver
-        self._bp35 = Console(bp35_ser)
+        self._bp35 = Console(self._bp35_ser)
         self._sernum = None
 
     def open(self):
@@ -198,12 +200,12 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
-        for str in (('Banner1\r\nBanner2', ) +  # Banner lines
-                    ('', ) * 5 +                # defaults
-                    ('', ) * 2 +                # SR setup
-                    (limit.ARM_VERSION, ) +     # Sw version
-                    ('', ) * 4                  # Manual mode
-                    ):
+        for str in (
+                ('Banner1\r\nBanner2', ) +  # Banner lines
+                ('', ) + ('success', ) * 2 + ('', ) * 4 +
+                (limit.ARM_VERSION, ) +
+                ('', ) * 4                  # Manual mode
+                ):
             self._bp35_puts(str)
 
 # FIXME: Remove power to microprocessor and start again.
@@ -367,9 +369,16 @@ class Main(tester.TestSequence):
 
     def _step_canbus(self):
         """Test the Can Bus."""
-        for str in ('0x18000000', '', '0x18000000', '', 'RRQ,32,0,7'):
+        for str in ('0x18000000', '', '0x18000000', ''):
             self._bp35_puts(str)
+        self._bp35_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
-        m.arm_can_bind.measure()
-        self._bp35.can_mode(True)
-        m.arm_can_id.measure()
+        m.arm_can_bind.measure(timeout=10)
+        self._bp35.can_testmode(True)
+        # From here on, Command-Response mode is broken by the CAN debug messages!
+        self._logger.debug('CAN Echo Request --> %s', repr(_CAN_ECHO))
+        self._bp35['CAN'] = _CAN_ECHO
+        echo_reply = self._bp35_ser.readline().decode(errors='ignore')
+        self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
+        s.oMirCAN.store(echo_reply)
+        m.rx_can.measure()

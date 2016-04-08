@@ -5,9 +5,6 @@
 import logging
 import sensor
 
-# Delay after a value set command
-_SET_DELAY = 0.3
-
 # Default read/write format strings (For the X-Register based consoles)
 _DEF_WRITE = '{} "{} XN!'
 _DEF_READ = '"{} XN?'
@@ -84,7 +81,7 @@ class _Parameter():
         if not self._writeable:
             raise ParameterError('Parameter is not writeable')
         write_cmd = self._wr_fmt.format(value, self._cmd)
-        func(write_cmd, delay=_SET_DELAY)
+        func(write_cmd)
 
     def read(self, func):
         """Read parameter value.
