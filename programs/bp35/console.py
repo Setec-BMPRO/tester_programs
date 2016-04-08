@@ -20,7 +20,7 @@ _CAN_ON = (1 << 29)
 _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 
 
-class Console(console.ConsoleGen1):
+class Console(console.Variable, console.BadUartConsole):
 
     """Communications to BP35 console."""
 
@@ -102,6 +102,12 @@ class Console(console.ConsoleGen1):
                 minimum=0, maximum=0xF0000000, mask=(1 << 28)),
             'CAN_ID': ParameterCAN('TQQ,32,0'),
             'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
+            'UNLOCK': ParameterString('UNLOCK',
+                writeable=True, readable=False, write_format='{} {}'),
+            'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+                writeable=True, readable=False, write_format='{1}'),
+            'NVWRITE': ParameterBoolean('NV-WRITE',
+                writeable=True, readable=False, write_format='{1}'),
             }
         # Add in the 14 load switch current readings
         for i in range(1, 15):
@@ -145,7 +151,7 @@ class Console(console.ConsoleGen1):
         self['LOAD_SET'] = value
 
     def can_mode(self, state):
-        """Enable or disable CAN Communications Mode."""
+        """Enable or disable CAN Test Mode."""
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
         reply = self['STATUS']

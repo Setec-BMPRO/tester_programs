@@ -101,7 +101,6 @@ class Sensors():
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
         self.ARM_AcV = console.Sensor(bp35, 'AC_V')
         self.ARM_AcF = console.Sensor(bp35, 'AC_F')
-        self.ARM_PriT = console.Sensor(bp35, 'PRI_T')
         self.ARM_SecT = console.Sensor(bp35, 'SEC_T')
         self.ARM_Vout = console.Sensor(bp35, 'BUS_V')
         self.ARM_BattType = console.Sensor(bp35, 'BATT_TYPE')
@@ -110,7 +109,6 @@ class Sensors():
         self.ARM_CANID = console.Sensor(
             bp35, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.ARM_CANBIND = console.Sensor(bp35, 'CAN_BIND')
-        self.ARM_CANSTATS = console.Sensor(bp35, 'CAN_STATS')
         # Generate 14 load current sensors
         self.ARM_Loads = []
         for i in range(1, 15):
@@ -167,13 +165,11 @@ class Measurements():
         self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
         self.arm_acv = Measurement(limits['ARM-AcV'], sense.ARM_AcV)
         self.arm_acf = Measurement(limits['ARM-AcF'], sense.ARM_AcF)
-        self.arm_priT = Measurement(limits['ARM-PriT'], sense.ARM_PriT)
         self.arm_secT = Measurement(limits['ARM-SecT'], sense.ARM_SecT)
         self.arm_vout = Measurement(limits['ARM-Vout'], sense.ARM_Vout)
         self.arm_fan = Measurement(limits['ARM-Fan'], sense.ARM_Fan)
         self.arm_can_id = Measurement(limits['CAN_ID'], sense.ARM_CANID)
         self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.ARM_CANBIND)
-        self.arm_can_stats = Measurement(limits['CAN_STATS'], sense.ARM_CANSTATS)
         # Generate 14 load current measurements
         self.arm_loads = ()
         for sen in sense.ARM_Loads:
