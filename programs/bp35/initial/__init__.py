@@ -369,7 +369,7 @@ class Main(tester.TestSequence):
 
     def _step_canbus(self):
         """Test the Can Bus."""
-        for str in ('0x18000000', '', '0x18000000', ''):
+        for str in ('0x10000000', '', '0x10000000', '', ''):
             self._bp35_puts(str)
         self._bp35_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 

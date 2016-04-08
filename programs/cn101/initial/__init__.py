@@ -24,11 +24,12 @@ LIMIT_DATA = limit.DATA
 _ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM15'}[os.name]
 # ARM software image file
 _ARM_BIN = 'cn101_{}.bin'.format(limit.BIN_VERSION)
-
 # Serial port for the Bluetooth module.
 _BLE_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM14'}[os.name]
 # Serial port for the Trek2 as the CAN Bus interface.
-_CAN_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM13'}[os.name]
+#_CAN_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM13'}[os.name]
+# CAN echo request messages
+_CAN_ECHO = 'TQQ,32,0'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -57,9 +58,9 @@ class Main(tester.TestSequence):
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
             ('Awning', self._step_awning, None, True),
-            ('CanBus', self._step_canbus, None, True),
             ('TankSense', self._step_tank_sense, None, True),
             ('Bluetooth', self._step_bluetooth, None, True),
+            ('CanBus', self._step_canbus, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -70,19 +71,11 @@ class Main(tester.TestSequence):
         self._limits = test_limits
         # Serial connection to the CN101 console
         self._cn101_ser = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=0.1)
+            simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         self._cn101_ser.setPort(_ARM_PORT)
         # CN101 Console driver
         self._cn101 = Console(self._cn101_ser)
-        # Serial connection to the Trek2 in the fixture (for the CAN bus)
-        trek2_ser = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=0.1)
-        # Set port separately, as we don't want it opened yet
-        trek2_ser.setPort(_CAN_PORT)
-        # Trek2 Console driver
-        #  No, it's not a Trek2 console, but it has the same commands as one
-        self._trek2 = Console(trek2_ser)
         # Serial connection to the BLE module
         ble_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1, rtscts=True)
@@ -103,17 +96,12 @@ class Main(tester.TestSequence):
         time.sleep(5)   # Allow OS to detect the new ports
 
     def _cn101_puts(self,
-                    string_data, preflush=0, postflush=1, priority=False,
-                    addcrlf=True):
-        """Push string data into the CN101 buffer.
-
-        Only push if FIFOs are enabled.
-        postflush=1 since the reader stops at a flush marker or empty buffer.
-
-        """
+                   string_data, preflush=0, postflush=0, priority=False,
+                   addprompt=True):
+        """Push string data into the BP35 buffer if FIFOs are enabled."""
         if self._fifo:
-            if addcrlf:
-                string_data = string_data + '\r\n'
+            if addprompt:
+                string_data = string_data + '\r\n> '
             self._cn101.puts(string_data, preflush, postflush, priority)
 
     def close(self):
@@ -140,8 +128,8 @@ class Main(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(((s.oSnEntry, ('A1526040123', )), (s.oVin, 8.0),
-                        (s.o3V3, 3.3), ))
+        self.fifo_push(
+            ((s.oSnEntry, ('A1526040123', )), (s.oVin, 8.0), (s.o3V3, 3.3), ))
 
         self._sernum = m.ui_serialnum.measure()[1][0]
         t.pwr_up.run()
@@ -179,38 +167,25 @@ class Main(tester.TestSequence):
 
         self._cn101.open()
         d.rla_reset.pulse(0.1)
-        self._cn101.action(None, delay=1, expected=2)   # Flush banner
-        self._cn101.unlock()
+        self._cn101.action(None, delay=1.5, expected=2)   # Flush banner
+        self._cn101['UNLOCK'] = '$DEADBEA7'
         self._cn101['HW_VER'] = limit.HW_VER
         self._cn101['SER_ID'] = self._sernum
-        self._cn101.nvdefault()
-        self._cn101.nvwrite()
+        self._cn101['NVDEFAULT'] = True
+        self._cn101['NVWRITE'] = True
         m.cn101_swver.measure()
-
-    def _step_canbus(self):
-        """Test the CAN Bus interface."""
-        for str in ('0x10000000', '', '0x10000000', ''):
-            self._cn101_puts(str)
-        self._cn101_puts('RRQ,32,0,7', postflush=0)
-
-        m.cn101_can_bind.measure(timeout=5)
-        time.sleep(1)   # Let junk CAN messages come in
-        self._cn101.can_mode(True)
-        m.cn101_can_id.measure()
 
     def _step_awning(self):
         """Test Awning relay operation."""
         self.fifo_push(
             ((s.oAwnA, (0.0, 11.0)), (s.oAwnB, (0.0, 11.0)), ))
 
-        t.awn.run()
+        t.awning.run()
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
-        self._cn101_puts('')
-        for str in (('5', ) * 3):
+        for str in (('', ) + ('5', ) * 4):
             self._cn101_puts(str)
-        self._cn101_puts('5', postflush=0)
 
         self._cn101['ADC_SCAN'] = 100
         t.tank.run()
@@ -218,7 +193,8 @@ class Main(tester.TestSequence):
     def _step_bluetooth(self):
         """Test the Bluetooth interface."""
         self._cn101_puts('001EC030BC15', )
-        t.rst.run()
+
+        t.reset.run()
         _btmac = m.cn101_btmac.measure()[1][0]
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', _btmac)
         if self._fifo:
@@ -230,3 +206,19 @@ class Main(tester.TestSequence):
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         s.oMirBT.store(reply)
         m.detectBT.measure()
+
+    def _step_canbus(self):
+        """Test the CAN interface."""
+        for str in ('0x10000000', '', '0x10000000', '', ''):
+            self._cn101_puts(str)
+        self._cn101_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
+
+        m.cn101_can_bind.measure(timeout=10)
+        self._cn101.can_testmode(True)
+        # From here on, Command-Response mode is broken by the CAN debug messages!
+        self._logger.debug('CAN Echo Request --> %s', repr(_CAN_ECHO))
+        self._cn101['CAN'] = _CAN_ECHO
+        echo_reply = self._cn101_ser.readline().decode(errors='ignore')
+        self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
+        s.oMirCAN.store(echo_reply)
+        m.cn101_rx_can.measure()

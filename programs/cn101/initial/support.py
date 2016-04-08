@@ -64,14 +64,14 @@ class Sensors():
            @param cn101 cn101 ARM console driver
 
         """
-        dmm = logical_devices.dmm
-        # Mirror sensor for Programming result logging
-        self.oMirARM = sensor.Mirror()
-        self.oMirBT = sensor.Mirror()
         dispatcher.connect(
             self._reset,
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
+        dmm = logical_devices.dmm
+        self.oMirARM = sensor.Mirror()
+        self.oMirBT = sensor.Mirror()
+        self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.microsw = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
         self.sw1 = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
         self.sw2 = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
@@ -82,8 +82,6 @@ class Sensors():
         self.oSnEntry = sensor.DataEntry(
             message=translate('cn101_initial', 'msgSnEntry'),
             caption=translate('cn101_initial', 'capSnEntry'))
-        self.oCANID = console.Sensor(
-            cn101, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.oCANBIND = console.Sensor(cn101, 'CAN_BIND')
         self.oSwVer = console.Sensor(
             cn101, 'SW_VER', rdgtype=sensor.ReadingString)
@@ -123,14 +121,14 @@ class Measurements():
         self.dmm_awnAOn = Measurement(limits['AwnOn'], sense.oAwnA)
         self.dmm_awnBOn = Measurement(limits['AwnOn'], sense.oAwnB)
         self.ui_serialnum = Measurement(limits['SerNum'], sense.oSnEntry)
-        self.cn101_can_id = Measurement(limits['CAN_ID'], sense.oCANID)
-        self.cn101_can_bind = Measurement(limits['CAN_BIND'], sense.oCANBIND)
         self.cn101_swver = Measurement(limits['SwVer'], sense.oSwVer)
         self.cn101_btmac = Measurement(limits['BtMac'], sense.oBtMac)
         self.cn101_s1 = Measurement(limits['Tank'], sense.tank1)
         self.cn101_s2 = Measurement(limits['Tank'], sense.tank2)
         self.cn101_s3 = Measurement(limits['Tank'], sense.tank3)
         self.cn101_s4 = Measurement(limits['Tank'], sense.tank4)
+        self.cn101_can_bind = Measurement(limits['CAN_BIND'], sense.oCANBIND)
+        self.cn101_rx_can = Measurement(limits['CAN_RX'], sense.oMirCAN)
 
 
 class SubTests():
@@ -147,28 +145,29 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_vin, 8.6), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5)
-        self.pwr_up = Step((dcs1, msr1, ))
+        self.pwr_up = Step((
+            DcSubStep(setting=((d.dcs_vin, 8.6), ), output=True),
+            MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5),
+            ))
         # PowerReset:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_vin, 0.0), ), delay=1.0)
-        dcs2 = DcSubStep(
-            setting=((d.dcs_vin, 12.0), ), delay=15.0)
-        self.rst = Step((dcs1, dcs2, ))
+        self.reset = Step((
+            DcSubStep(setting=((d.dcs_vin, 0.0), ), delay=1.0),
+            DcSubStep(setting=((d.dcs_vin, 12.0), ), delay=15.0),
+            ))
         # Awning:
-        dcs1 = DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5)
-        rly1 = RelaySubStep(relays=((d.rla_awn, True), ))
-        msr2 = MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn), timeout=5)
-        rly2 = RelaySubStep(relays=((d.rla_awn, False), ))
-        dcs2 = DcSubStep(setting=((d.dcs_awn, 0.0), ))
-        self.awn = Step((dcs1, msr1, rly1, msr2, rly2, dcs2))
-
+        self.awning = Step((
+            DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True),
+            MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5),
+            RelaySubStep(relays=((d.rla_awn, True), )),
+            MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn), timeout=5),
+            RelaySubStep(relays=((d.rla_awn, False), )),
+            DcSubStep(setting=((d.dcs_awn, 0.0), )),
+            ))
         # TankSense:
-        rly1 = RelaySubStep(relays=((d.rla_s1, True), (d.rla_s2, True),
-                            (d.rla_s3, True), (d.rla_s4, True), ), delay=0.2)
-        msr1 = MeasureSubStep(
-                    (m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4), timeout=5)
-        self.tank = Step((rly1, msr1,))
+        self.tank = Step((
+            RelaySubStep(
+                relays=((d.rla_s1, True), (d.rla_s2, True),
+                        (d.rla_s3, True), (d.rla_s4, True), ), delay=0.2),
+            MeasureSubStep(
+                (m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4), timeout=5),
+            ))
