@@ -129,6 +129,5 @@ ALL_SKIP = (
     'RM-50-24 Final',
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',
-    'Trek2 Final',
     'TS3020-H Initial',
     )

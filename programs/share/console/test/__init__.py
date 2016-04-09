@@ -25,6 +25,7 @@ def logging_setup():
         fmtr = logging.Formatter(_LOG_FORMAT)
         # Connect it all together
         hdlr.setFormatter(fmtr)
-        logging.root.addHandler(hdlr)
+        if not logging.root.hasHandlers():
+            logging.root.addHandler(hdlr)
         logging.root.setLevel(logging.DEBUG)
         _SETUP = True

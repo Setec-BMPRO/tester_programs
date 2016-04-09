@@ -21,7 +21,7 @@ DATA = (
     lim_hilo('BkLghtOn', 3.465, 4.545),     # 40mA = 4V with 100R (1%)
     lim_hilo_int('Program', 0),
     lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    lim_string('CAN_ID', r'^RRQ,16,0'),
+    lim_string('CAN_RX', r'^RRQ,16,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
     lim_string('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
     lim_boolean('Notify', True),

@@ -18,6 +18,8 @@ ParameterRaw = console.ParameterRaw
 # CAN Test mode controlled by STATUS bit 29
 _CAN_ON = (1 << 29)
 _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
+# "CAN Bound" is STATUS bit 28
+_CAN_BOUND = (1 << 28)
 
 
 class Console(console.Variable, console.BadUartConsole):
@@ -98,7 +100,7 @@ class Console(console.Variable, console.BadUartConsole):
                 'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
             'CAN_BIND': ParameterHex(
                 'STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000, mask=(1 << 28)),
+                minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
             'CAN': ParameterString('CAN',
                 writeable=True, write_format='"{} {}'),
             'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),

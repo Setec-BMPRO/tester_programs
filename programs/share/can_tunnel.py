@@ -61,7 +61,8 @@ class ConsoleCanTunnel():
 
     """
 
-    def __init__(self, port, local_id=16, target_id=32):
+    def __init__(self, port, local_id=16, target_id=32,
+                 simulation=False, verbose=False):
         """Initialise communications.
 
         @param port SimSerial port to connect to Serial to CAN interface.
@@ -73,6 +74,8 @@ class ConsoleCanTunnel():
         self._local_id = '{},{}'.format(
             (local_id & 0xFF00) >> 8, (local_id & 0xFF) )
         self._target_id = target_id
+        self.simulation = simulation
+        self.verbose = verbose
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         # Create & open a SimSerial in simulation mode.
@@ -88,7 +91,6 @@ class ConsoleCanTunnel():
         self.port.flushInput()
         no_echo = '0 ECHO'
         reply = self.action(no_echo, get_response=True)
-        self._logger.debug('<-- %s', repr(reply))
         if reply is None or reply[:6] != no_echo:
             raise TunnelError
         # Set filters to see all CAN traffic
@@ -134,7 +136,8 @@ class ConsoleCanTunnel():
         @param command Command string.
 
         """
-        self._logger.debug('--> %s', repr(command))
+        if self.verbose:
+            self._logger.debug('--> %s', repr(command))
         cmd_data = command.encode()
         for a_byte in cmd_data:             # write 1 byte at a time...
             a_byte = bytes([a_byte])
@@ -149,14 +152,16 @@ class ConsoleCanTunnel():
 
         """
         buf = self.port.readline()
-        self._logger.debug('Rx <--- %s', repr(buf))
+        if self.verbose:
+            self._logger.debug('Rx <--- %s', repr(buf))
         if len(buf) > 0:
             response = buf.decode(errors='ignore')
             response = response.replace('\r\n', '')
             response = response.replace('"', '')
         else:
             response = None
-        self._logger.debug('<-- %s', repr(response))
+        if self.verbose:
+            self._logger.debug('<-- %s', repr(response))
         return response
 
     def _decoder(self, messages):
@@ -208,11 +213,14 @@ class ConsoleCanTunnel():
     def read(self, size=1):
         """Serial: Read the input buffer."""
         reply = self.action(get_response=True)  # read any CAN data
-        reply_bytes = self._decoder(reply)
-        self._logger.debug('read() reply_bytes %s', repr(reply_bytes))
-        self.puts(reply_bytes)  # push any CAN data into my buffer port
+        if reply:
+            reply_bytes = self._decoder(reply)
+            if self.verbose:
+                self._logger.debug('read() reply_bytes %s', repr(reply_bytes))
+            self.puts(reply_bytes)  # push any CAN data into my buffer port
         data = self._buf_port.read(size)    # now read from the buffer port
-        self._logger.debug('read(%s) = %s', size, repr(data))
+        if self.verbose:
+            self._logger.debug('read(%s) = %s', size, repr(data))
         return data
 
     def write(self, data):
@@ -224,7 +232,8 @@ class ConsoleCanTunnel():
         @param data Byte data to send.
 
         """
-        self._logger.debug('write(%s)', repr(data))
+        if self.verbose:
+            self._logger.debug('write(%s)', repr(data))
         while len(data) > 0:
             if len(data) > 8:           # Use 8 bytes max at a time
                 byte_data = data[:8]
@@ -235,8 +244,9 @@ class ConsoleCanTunnel():
             byte_data = ','.join(str(c) for c in byte_data)
             command = '"TCC,{},4,{} CAN'.format(self._target_id, byte_data)
             reply = self.action(command, delay=0.25, get_response=True)
-            reply_bytes = self._decoder(reply)
-            self.puts(reply_bytes)  # push any CAN data into my buffer port
+            if reply:
+                reply_bytes = self._decoder(reply)
+                self.puts(reply_bytes)  # push any CAN data into my buffer port
 
     def inWaiting(self):
         """Serial: Return the number of bytes in the input buffer."""

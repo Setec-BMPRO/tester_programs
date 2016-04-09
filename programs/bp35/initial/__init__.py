@@ -183,8 +183,6 @@ class Main(tester.TestSequence):
                 s.oMirARM.store(0)
             except ProgrammingError:
                 s.oMirARM.store(1)
-        except:
-            raise
         finally:
             ser.close()
         m.pgmARM.measure()
@@ -375,7 +373,7 @@ class Main(tester.TestSequence):
 
         m.arm_can_bind.measure(timeout=10)
         self._bp35.can_testmode(True)
-        # From here on, Command-Response mode is broken by the CAN debug messages!
+        # From here, Command-Response mode is broken by the CAN debug messages!
         self._logger.debug('CAN Echo Request --> %s', repr(_CAN_ECHO))
         self._bp35['CAN'] = _CAN_ECHO
         echo_reply = self._bp35_ser.readline().decode(errors='ignore')

@@ -7,9 +7,10 @@ import os
 import time
 import tester
 from ...share.sim_serial import SimSerial
+from ...share.can_tunnel import ConsoleCanTunnel
 from . import support
 from . import limit
-from ..console import Console, ConsoleCanTunnel
+from ..console import TunnelConsole
 
 
 MeasureGroup = tester.measure.group
@@ -18,8 +19,6 @@ LIMIT_DATA = limit.DATA
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
 _CAN_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
-# Trek2 unit CAN Bus ID
-_TREK2_ID = 32
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -46,10 +45,10 @@ class Main(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('TunnelOpen', self._step_tunnel_open, None, True),
             ('Display', self._step_display, None, True),
-            ('Tank0', self._step_tank0, None, True),
             ('Tank1', self._step_tank1, None, True),
             ('Tank2', self._step_tank2, None, True),
             ('Tank3', self._step_tank3, None, True),
+            ('Tank4', self._step_tank4, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -60,14 +59,13 @@ class Main(tester.TestSequence):
         self._limits = test_limits
         # Connection to the Serial-to-CAN Trek2 inside the fixture
         ser_can = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=0.1)
+            simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         ser_can.setPort(_CAN_PORT)
         # CAN Console tunnel driver
-        self._tunnel = ConsoleCanTunnel(
-            port=ser_can, local_id=16, target_id=32)
+        self._tunnel = ConsoleCanTunnel(port=ser_can, simulation=fifo)
         # Trek2 Console driver (using the CAN Tunnel)
-        self._trek2 = Console(port=self._tunnel)
+        self._trek2 = TunnelConsole(port=self._tunnel)
 
     def open(self):
         """Prepare for testing."""
@@ -80,15 +78,22 @@ class Main(tester.TestSequence):
         d.dcs_Vcom.output(12.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports
 
+    def _trek2_puts(self,
+                    string_data, preflush=0, postflush=0, priority=False,
+                    addprompt=True):
+        """Push string data into the buffer if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
+            self._trek2.puts(string_data, preflush, postflush, priority)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
         global d, s, m
         # Switch off the USB hub & Serial ports
         d.dcs_Vcom.output(0.0, output=False)
-        m = None
-        d = None
-        s = None
+        m = d = s = None
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -107,37 +112,59 @@ class Main(tester.TestSequence):
 
     def _step_tunnel_open(self):
         """Open console tunnel."""
+        self._tunnel.port.puts('0 ECHO -> \r\n> ', preflush=1)
+        self._tunnel.port.puts('0x10000000\r\n', preflush=1)
+        self._trek2_puts('0x10000000')
+        self._trek2_puts('')
+
         self._trek2.open()
-        self._trek2.echo(echo_enable=False) # No command echo
-        self._trek2.send_delay(delay=0)     # No delay, so send as strings
         self._trek2.testmode(True)
 
     def _step_display(self):
         """Display tests."""
+        for sens in (s.oYesNoSeg, s.oYesNoBklight, ):
+            self.fifo_push(((sens, True), ))
+        self._trek2_puts('0x10000000')
+        self._trek2_puts('')
+
         MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
         self._trek2.testmode(False)
 
-    def _step_tank0(self):
-        """Tank tests - Empty."""
-        self._trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
-        self._trek2['TANK_SPEED'] = 1.0     # Update interval
-        time.sleep(1)
-        MeasureGroup(m.tank0)
-
     def _step_tank1(self):
-        """Tank tests - 1 sensor."""
-        d.rla_s1.set_on()
+        """Tank tests - Empty."""
+        for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
+            self.fifo_push(((sens, 1), ))
+        self._trek2_puts('')
+        self._trek2_puts('')
+
+        self._trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
+        self._trek2['TANK_SPEED'] = 1.0     # Change update interval
         time.sleep(1)
         MeasureGroup(m.tank1)
 
     def _step_tank2(self):
-        """Tank tests - 2 sensors."""
-        d.rla_s2.set_on()
+        for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
+            self.fifo_push(((sens, 2), ))
+
+        """Tank tests - 1 sensor."""
+        d.rla_s1.set_on()
         time.sleep(1)
         MeasureGroup(m.tank2)
 
     def _step_tank3(self):
-        """Tank tests - 3 sensors."""
-        d.rla_s3.set_on()
+        """Tank tests - 2 sensors."""
+        for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
+            self.fifo_push(((sens, 3), ))
+
+        d.rla_s2.set_on()
         time.sleep(1)
         MeasureGroup(m.tank3)
+
+    def _step_tank4(self):
+        """Tank tests - 3 sensors."""
+        for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
+            self.fifo_push(((sens, 4), ))
+
+        d.rla_s3.set_on()
+        time.sleep(1)
+        MeasureGroup(m.tank4)

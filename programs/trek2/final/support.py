@@ -90,20 +90,14 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.ui_YesNoSeg = Measurement(
-            limits['Notify'], sense.oYesNoSeg)
+        self.ui_YesNoSeg = Measurement(limits['Notify'], sense.oYesNoSeg)
         self.ui_YesNoBklight = Measurement(
             limits['Notify'], sense.oYesNoBklight)
         self.ui_YesNoDisplay = Measurement(
             limits['Notify'], sense.oYesNoDisplay)
-        self.ui_YesNoLevel = Measurement(
-            limits['Notify'], sense.oYesNoLevel)
+        self.ui_YesNoLevel = Measurement(limits['Notify'], sense.oYesNoLevel)
         tank_sensors = (
             sense.tank1, sense.tank2, sense.tank3, sense.tank4)
-        self.tank0 = []
-        lim = limits['Tank0']
-        for sens in tank_sensors:
-            self.tank0.append(Measurement(lim, sens))
         self.tank1 = []
         lim = limits['Tank1']
         for sens in tank_sensors:
@@ -116,3 +110,7 @@ class Measurements():
         lim = limits['Tank3']
         for sens in tank_sensors:
             self.tank3.append(Measurement(lim, sens))
+        self.tank4 = []
+        lim = limits['Tank4']
+        for sens in tank_sensors:
+            self.tank4.append(Measurement(lim, sens))

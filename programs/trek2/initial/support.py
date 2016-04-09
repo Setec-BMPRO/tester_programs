@@ -58,13 +58,13 @@ class Sensors():
            @param trek2 Trek2 ARM console driver
 
         """
-        dmm = logical_devices.dmm
-        # Mirror sensor for Programming result logging
-        self.oMirARM = sensor.Mirror()
         dispatcher.connect(
             self._reset,
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
+        dmm = logical_devices.dmm
+        self.oMirARM = sensor.Mirror()
+        self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self.oBkLght = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
@@ -72,8 +72,6 @@ class Sensors():
             message=translate('trek2_initial', 'msgSnEntry'),
             caption=translate('trek2_initial', 'capSnEntry'),
             timeout=300)
-        self.oCANID = console.Sensor(
-            trek2, 'CAN_ID', rdgtype=sensor.ReadingString)
         self.oCANBIND = console.Sensor(trek2, 'CAN_BIND')
         self.oSwVer = console.Sensor(
             trek2, 'SW_VER', rdgtype=sensor.ReadingString)
@@ -95,12 +93,12 @@ class Measurements():
 
         """
         self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
+        self.rx_can = Measurement(limits['CAN_RX'], sense.oMirCAN)
         self.dmm_Vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_BkLghtOff = Measurement(limits['BkLghtOff'], sense.oBkLght)
         self.dmm_BkLghtOn = Measurement(limits['BkLghtOn'], sense.oBkLght)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
-        self.trek2_can_id = Measurement(limits['CAN_ID'], sense.oCANID)
         self.trek2_can_bind = Measurement(limits['CAN_BIND'], sense.oCANBIND)
         self.trek2_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
 
@@ -119,7 +117,9 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.75)), output=True)
-        msr1 = MeasureSubStep((m.dmm_Vin, m.dmm_3V3), timeout=5)
-        self.pwr_up = Step((dcs1, msr1, ))
+        self.pwr_up = Step((
+            DcSubStep(
+                setting=((d.dcs_Vcom, 12.0), (d.dcs_Vin, 12.75)), output=True),
+            MeasureSubStep((m.dmm_Vin, m.dmm_3V3), timeout=5),
+            ))
+

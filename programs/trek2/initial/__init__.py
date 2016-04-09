@@ -10,7 +10,7 @@ import time
 import tester
 from isplpc import Programmer, ProgrammingError
 from ...share.sim_serial import SimSerial
-from ..console import Console
+from ..console import DirectConsole
 from . import support
 from . import limit
 
@@ -25,6 +25,8 @@ _CAN_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
 _ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 # Software image filename
 _ARM_BIN = 'Trek2_{}.bin'.format(limit.BIN_VERSION)
+# CAN echo request messages
+_CAN_ECHO = 'TQQ,16,0'
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -61,12 +63,12 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         # Serial connection to the Trek2 console
-        trek2_ser = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=0.1)
+        self._trek2_ser = SimSerial(
+            simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trek2_ser.setPort(_ARM_PORT)
+        self._trek2_ser.setPort(_ARM_PORT)
         # Trek2 Console driver
-        self._trek2 = Console(trek2_ser)
+        self._trek2 = DirectConsole(self._trek2_ser)
         self.sernum = None
 
     def open(self):
@@ -81,17 +83,12 @@ class Main(tester.TestSequence):
         time.sleep(2)   # Allow OS to detect the new ports
 
     def _trek2_puts(self,
-                    string_data, preflush=0, postflush=1, priority=False,
-                    addcrlf=True):
-        """Push string data into the Trek2 buffer.
-
-        Only push if FIFOs are enabled.
-        postflush=1 since the reader stops a flush marker or empty buffer.
-
-        """
+                    string_data, preflush=0, postflush=0, priority=False,
+                    addprompt=True):
+        """Push string data into the buffer if FIFOs are enabled."""
         if self._fifo:
-            if addcrlf:
-                string_data = string_data + '\r\n'
+            if addprompt:
+                string_data = string_data + '\r\n> '
             self._trek2.puts(string_data, preflush, postflush, priority)
 
     def close(self):
@@ -145,27 +142,35 @@ class Main(tester.TestSequence):
 
     def _step_test_arm(self):
         """Test the ARM device."""
-        for str in (('Banner1\r\nBanner2', ) +
-                    ('', ) * 5 ):
-            self._cn101_puts(str)
-        self._cn101_puts(limit.BIN_VERSION, postflush=0)
+        for str in (
+                ('Banner1\r\nBanner2', ) +  # Banner lines
+                ('', ) + ('success', ) * 2 + ('', ) * 2 +
+                (limit.BIN_VERSION, )
+                ):
+            self._trek2_puts(str)
 
         self._trek2.open()
         d.rla_reset.pulse(0.1)
-        self._trek2.action(None, delay=1, expected=2)   # Flush banner lines
-        self._trek2.unlock()
+        self._trek2.action(None, delay=1.5, expected=2)  # Flush banner
+        self._trek2['UNLOCK'] = '$DEADBEA7'
         self._trek2['HW_VER'] = limit.HW_VER
         self._trek2['SER_ID'] = self.sernum
-        self._trek2.nvdefault()
-        self._trek2.nvwrite()
+        self._trek2['NVDEFAULT'] = True
+        self._trek2['NVWRITE'] = True
         m.trek2_SwVer.measure()
 
     def _step_canbus(self):
-        """Test the CAN Bus."""
-        for str in ('0x10000000', '', '0x10000000', '', 'RRQ,16,0,7'):
+        """Test the Can Bus."""
+        for str in ('0x10000000', '', '0x10000000', '', ''):
             self._trek2_puts(str)
+        self._trek2_puts('RRQ,16,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
-        m.trek2_can_bind.measure(timeout=5)
-        time.sleep(1)   # Let junk CAN messages come in
-        self._trek2.can_mode(True)
-        m.trek2_can_id.measure()
+        m.trek2_can_bind.measure(timeout=10)
+        self._trek2.can_testmode(True)
+        # From here, Command-Response mode is broken by the CAN debug messages!
+        self._logger.debug('CAN Echo Request --> %s', repr(_CAN_ECHO))
+        self._trek2['CAN'] = _CAN_ECHO
+        echo_reply = self._trek2_ser.readline().decode(errors='ignore')
+        self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
+        s.oMirCAN.store(echo_reply)
+        m.rx_can.measure()
