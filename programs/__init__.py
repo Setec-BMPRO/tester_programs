@@ -74,6 +74,7 @@ PROGRAMS = (
     ('BP35 Final', bp35.final.Main, bp35.final.LIMIT_DATA),
     ('C15A-15 Initial', c15a15.initial.Main, c15a15.initial.LIMIT_DATA),
     ('C15A-15 Final', c15a15.final.Main, c15a15.final.LIMIT_DATA),
+    ('C15D-15(M) Initial', c15d15.initial.Main, c15d15.initial.LIMIT_DATA),
     ('C15D-15(M) Final', c15d15.final.Main, c15d15.final.LIMIT_DATA),
     ('C45A-15(M) Initial', c45a15.initial.Main, c45a15.initial.LIMIT_DATA),
     ('C45A-15(M) Final', c45a15.final.Main, c45a15.final.LIMIT_DATA),

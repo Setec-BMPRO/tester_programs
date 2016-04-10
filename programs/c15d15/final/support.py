@@ -28,11 +28,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Source
         self.dcs_Input.output(0.0, False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
-        # Switch off all Relays
         self.rla_load.set_off()
 
 
@@ -60,6 +57,7 @@ class Sensors():
             stimulus=logical_devices.dcl, sensor=self.oVout,
             detect_limit=(limits['inOCP'], ),
             start=0.0, stop=0.5, step=0.05, delay=0.2)
+            # Adds to a resistor load!
 
 
 class Measurements():
@@ -68,20 +66,16 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
-        self.dmm_Vout = Measurement(
-            limits['Vout'], sense.oVout)
-        self.dmm_Voutfl = Measurement(
-            limits['Voutfl'], sense.oVout)
-        self.ui_YesNoGreen = Measurement(
-            limits['Notify'], sense.oYesNoGreen)
+        self.dmm_Vout = Measurement(limits['Vout'], sense.oVout)
+        self.dmm_Voutfl = Measurement(limits['Voutfl'], sense.oVout)
+        self.ui_YesNoGreen = Measurement(limits['Notify'], sense.oYesNoGreen)
         self.ui_YesNoYellowOff = Measurement(
             limits['Notify'], sense.oYesNoYellowOff)
         self.ui_NotifyYellow = Measurement(
             limits['Notify'], sense.oNotifyYellow)
         self.ui_YesNoYellowOn = Measurement(
             limits['Notify'], sense.oYesNoYellowOn)
-        self.ramp_OCP = Measurement(
-            limits['OCP'], sense.oOCP)
+        self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
 
 
 class SubTests():
@@ -92,35 +86,35 @@ class SubTests():
         """Create SubTest Step instances."""
         d = logical_devices
         m = measurements
-
         # PowerUp: Apply DC Input, measure.
-        dcs = DcSubStep(setting=((d.dcs_Input, 12.0), ), output=True)
-        ld = LoadSubStep(((d.dcl, 0.0), ), output=True)
-        msr = MeasureSubStep(
-            (m.dmm_Vout, m.ui_YesNoGreen, m.ui_YesNoYellowOff,
-             m.ui_NotifyYellow,), timeout=5)
-        self.pwr_up = Step((dcs, ld, msr))
-
+        self.pwr_up = Step((
+            DcSubStep(setting=((d.dcs_Input, 12.0), ), output=True),
+            LoadSubStep(((d.dcl, 0.0), ), output=True),
+            MeasureSubStep(
+                (m.dmm_Vout, m.ui_YesNoGreen, m.ui_YesNoYellowOff,
+                 m.ui_NotifyYellow,), timeout=5),
+            ))
         # OCP:
-        rly1 = RelaySubStep(((d.rla_load, True), ))
-        msr1 = MeasureSubStep((m.ramp_OCP, ), timeout=5)
-        rly2 = RelaySubStep(((d.rla_load, False), ))
-        msr2 = MeasureSubStep((m.ui_YesNoYellowOn, m.dmm_Vout, ), timeout=5)
-        self.ocp = Step((rly1, msr1, rly2, msr2))
-
+        self.ocp = Step((
+            RelaySubStep(((d.rla_load, True), )),
+            MeasureSubStep((m.ramp_OCP, ), timeout=5),
+            RelaySubStep(((d.rla_load, False), )),
+            MeasureSubStep((m.ui_YesNoYellowOn, m.dmm_Vout, ), timeout=5),
+            ))
         # FullLoad: full load, measure, recover.
-        ld = LoadSubStep(((d.dcl, 1.18), ), output=True)
-        msr = MeasureSubStep((m.dmm_Voutfl, ), timeout=5)
-        self.full_load = Step((ld, msr))
-
+        self.full_load = Step((
+            LoadSubStep(((d.dcl, 1.18), ), output=True),
+            MeasureSubStep((m.dmm_Voutfl, ), timeout=5),
+            ))
         # Recover: Input off and on.
-        ld = LoadSubStep(((d.dcl, 0.0), ))
-        dcs1 = DcSubStep(setting=((d.dcs_Input, 0.0), ), delay=1)
-        dcs2 = DcSubStep(setting=((d.dcs_Input, 12.0), ))
-        msr = MeasureSubStep((m.dmm_Vout, ), timeout=5)
-        self.recover = Step((ld, dcs1, dcs2, msr))
-
+        self.recover = Step((
+            LoadSubStep(((d.dcl, 0.0), )),
+            DcSubStep(setting=((d.dcs_Input, 0.0), ), delay=1),
+            DcSubStep(setting=((d.dcs_Input, 12.0), )),
+            MeasureSubStep((m.dmm_Vout, ), timeout=5),
+            ))
         # PowerOff: Input DC off, discharge.
-        ld = LoadSubStep(((d.dcl, 1.0), ))
-        dcs = DcSubStep(setting=((d.dcs_Input, 0.0), ), delay=2)
-        self.pwr_off = Step((ld, dcs))
+        self.pwr_off = Step((
+            LoadSubStep(((d.dcl, 1.0), )),
+            DcSubStep(setting=((d.dcs_Input, 0.0), ), delay=2),
+            ))

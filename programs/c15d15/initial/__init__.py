@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""C15D-15 Final Test Program."""
+"""C15D-15 Initial Test Program."""
 
 import logging
 import tester
@@ -8,6 +8,8 @@ from . import support
 from . import limit
 
 LIMIT_DATA = limit.DATA
+
+MeasureGroup = tester.measure.group
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -18,7 +20,7 @@ t = None        # Shortcut to SubTests
 
 class Main(tester.TestSequence):
 
-    """C15D-15 Final Test Program."""
+    """C15D-15 Initial Test Program."""
 
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
@@ -27,9 +29,7 @@ class Main(tester.TestSequence):
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
             ('OCP', self._step_ocp, None, True),
-            ('FullLoad', self._step_full_load, None, True),
-            ('Recover', self._step_recover, None, True),
-            ('PowerOff', self._step_power_off, None, True),
+            ('Charging', self._step_charging, None, True),
             ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -42,22 +42,20 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m, t
+        global d, s, m
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s, t
-        m = d = s = t = None
+        global m, d, s
+        m = d = s = None
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):
@@ -66,33 +64,33 @@ class Main(tester.TestSequence):
         d.error_check()
 
     def _step_power_up(self):
-        """Power up with 12Vdc, measure output, check Green and Yellow leds."""
+        """Power up."""
         self.fifo_push(
-            ((s.oVout, 15.5), (s.oYesNoGreen, True),
-             (s.oYesNoYellowOff, True), (s.oNotifyYellow, True),))
+            ((s.vin, 30.0), (s.vcc, 13.0), (s.vout, 15.5),
+             (s.led_green, 10.0), (s.led_yellow, 0.2), ))
 
-        t.pwr_up.run()
+        d.dcl.output(0.0, output=True)
+        d.dcs_input.output(limit.VIN_SET, output=True)
+        MeasureGroup(
+            (m.dmm_vin, m.dmm_vcc, m.dmm_vout_nl, m.dmm_green_on,
+             m.dmm_yellow_off, ), timeout=5)
 
     def _step_ocp(self):
         """Measure OCP point."""
+        self.fifo_push(((s.vout, (15.5, ) * 22 + (13.5, ), ), ))
+
+        m.ramp_ocp.measure()
+        d.dcl.output(0.0)
+
+    def _step_charging(self):
+        """Load into OCP for charging check."""
         self.fifo_push(
-            ((s.oVout, (15.5, ) * 5 + (13.5, ), ),
-             (s.oYesNoYellowOn, True), (s.oVout, 15.5), ))
+            ((s.vout, (13.5, 15.5, )),
+             (s.led_green, 10.0), (s.led_yellow, 10.0), ))
 
-        t.ocp.run()
-
-    def _step_full_load(self):
-        """Measure output at full load."""
-        self.fifo_push(((s.oVout, 4.0), ))
-
-        t.full_load.run()
-
-    def _step_recover(self):
-        """Recover from full load."""
-        self.fifo_push(((s.oVout, 15.5), ))
-
-        t.recover.run()
-
-    def _step_power_off(self):
-        """Input DC off and discharge."""
-        t.pwr_off.run()
+        d.rla_load.set_on()
+        MeasureGroup(
+            (m.dmm_vout_ocp, m.dmm_green_on, m.dmm_yellow_on, ),
+            timeout=5)
+        d.rla_load.set_off()
+        MeasureGroup((m.dmm_vout_nl, ), timeout=5)

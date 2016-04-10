@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """C15D-15 Final Program Limits."""
 
-# Tuple ( Tuple (name, identity, low, high, string, boolean))
+from testlimit import lim_hilo, lim_hilo_percent, lim_lo, lim_boolean
+
 DATA = (
-    ('Vout', 1, 15.2, 15.8, None, None),
-    ('Voutfl', 1, 5.0, None, None, None),
-    ('OCP', 1, 0.0, 0.4, None, None),
-    ('inOCP', 1, 13.6, None, None, None),
-    ('Notify', 2, None, None, None, True),
+    lim_hilo_percent('Vout', 15.0, 2.0),
+    lim_lo('Voutfl', 5.0),
+    lim_hilo('OCP', 0.0, 0.4),  # Adds to a resistor load!
+    lim_lo('inOCP', 13.6),
+    lim_boolean('Notify', True),
     )
