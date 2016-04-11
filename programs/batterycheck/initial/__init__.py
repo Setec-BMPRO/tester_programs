@@ -8,10 +8,10 @@ import inspect
 import time
 import subprocess
 import logging
-import jsonrpclib
 import tester
 from isplpc import Programmer, ProgrammingError
 from ...share.sim_serial import SimSerial
+from ...share.bluetooth import BtRadio
 from . import support
 from . import limit
 from . import arm
@@ -34,7 +34,7 @@ _AVRDUDE = {
 
 _ARM_BIN = 'BatteryCheckControl_{}.bin'.format(limit.ARM_VERSION)
 
-_PYTHON27 = r'C:\Python27\pythonw.exe'
+_BT_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM4'}[os.name]
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -66,31 +66,30 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         self._sernum = None
-        self._btmac = None
         # Serial connection to the console
         arm_ser = SimSerial(simulation=self._fifo, baudrate=9600)
         # Set port separately, as we don't want it opened yet
         arm_ser.setPort(_ARM_CON)
         self._armdev = arm.Console(arm_ser)
+        self._btport = None
+        self._bt = None
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
         self._folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
+        # Serial connection to the BT device
+        self._btport = SimSerial(
+            simulation=self._fifo, baudrate=115200, timeout=2, writeTimeout=10)
+        # Set port separately, as we don't want it opened yet
+        self._btport.setPort(_BT_PORT)
+        # BT Radio driver
+        self._bt = BtRadio(self._btport)
         global d, s, m
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._armdev)
         m = support.Measurements(s, self._limits)
-        self._logger.debug('Starting bluetooth server')
-        try:
-            self._btserver = subprocess.Popen(
-                [_PYTHON27, '../../share/bluetooth/jsonrpc_server.py'],
-                cwd=self._folder)
-            self.btserver = jsonrpclib.Server('http://localhost:8888/')
-        except FileNotFoundError:
-            pass
-        self._logger.debug('Connected to bluetooth server')
 
     def _arm_puts(self,
                  string_data, preflush=0, postflush=0, priority=False):
@@ -98,16 +97,17 @@ class Main(tester.TestSequence):
         if self._fifo:
             self._armdev.puts(string_data, preflush, postflush, priority)
 
+    def _bt_puts(self,
+                 string_data, preflush=0, postflush=0, priority=False):
+        """Push string data into the BT buffer only if FIFOs are enabled."""
+        if self._fifo:
+            self._btport.puts(string_data, preflush, postflush, priority)
+
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
         global m, d, s
         m = d = s = None
-        if not self._fifo:
-            self._logger.debug('Stopping bluetooth server')
-            self.btserver.stop()
-            self._btserver.wait()
-            self._logger.debug('Bluetooth server stopped')
         super().close()
 
     def safety(self):
@@ -131,7 +131,7 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.oSnEntry, ('A1429050001', )), (s.reg5V, 5.10),
+            ((s.oSnEntry, ('A1509020010', )), (s.reg5V, 5.10),
              (s.reg12V, 12.00), (s.o3V3, 3.30), ))
 
         # Hold the ARM device in reset before power-on
@@ -211,12 +211,9 @@ class Main(tester.TestSequence):
         self._armdev.open()
         d.rla_reset.pulse_on(0.1)
         time.sleep(2.0)  # ARM startup delay
-        if self._fifo:
-            self._btmac = '11:22:33:44:55:66'
-        else:
+        if not self._fifo:
             self._armdev.defaults()
             self._armdev.set_serial(self._sernum)
-            self._btmac = self._armdev.mac()
 
     def _step_test_arm(self):
         """Get data from the ARM device.
@@ -226,7 +223,7 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.relay, 5.0), (s.ARMsoft, ('1.7.4080', )),
+            ((s.relay, 5.0), (s.ARMsoft, (limit.ARM_VERSION, )),
              (s.ARMvolt, 12.12),
              (s.shunt, 62.5 / 1250), (s.ARMcurr, -62.0), ))
 
@@ -245,9 +242,21 @@ class Main(tester.TestSequence):
         d.dcs_shunt.output(0.0, False)
 
     def _step_test_bluetooth(self):
-        """Test the Bluetooth transmitter function."""
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', self._btmac)
-        reply = True if self._fifo else self.btserver.detect(self._btmac)
-        self._logger.debug('Bluetooth MAC detected: %s', reply)
-        s.oMirBT.store(0 if reply else 1)
-        m.detectBT.measure()
+        """Test the Bluetooth transmitter function.
+
+        Scan for BT device and match against serial number.
+
+        """
+        d.rla_reset.pulse_on(0.1)
+        time.sleep(2.0)  # ARM startup delay
+        self._logger.debug('Scan for Serial Number: "%s"', self._sernum)
+        self._bt_puts('OK\r\n', preflush=2)
+        self._bt_puts('OK\r\n', preflush=1)
+        self._bt.open()
+        self._bt_puts('OK\r\n', preflush=1)
+        self._bt_puts('+RDDSRES=112233445566,BCheck A1509020010,2,3\r\n')
+        self._bt_puts('+RDDSCNF=0\r\n')
+        reply = self._bt.scan(self._sernum)
+        s.oMirBT.store(reply)
+        m.BTscan.measure()
+        self._bt.close()

@@ -6,7 +6,8 @@ ARM_VERSION = '1.7.4080'        # Software binary version
 AVR_HEX = 'BatteryCheckSupervisor-2.hex'
 
 from testlimit import (
-    lim_hilo, lim_hilo_delta, lim_hilo_int, lim_lo, lim_string)
+    lim_hilo, lim_hilo_delta, lim_hilo_int, lim_lo, lim_string,
+    lim_boolean)
 
 # Test Limits
 DATA = (
@@ -23,4 +24,5 @@ DATA = (
     lim_hilo_delta('ARM_Volt', 12.0, 0.5),
     lim_hilo('ARM_Curr', -65.0, -60.0),
     lim_hilo_delta('Batt_Curr_Err', 0, 5.0),
+    lim_boolean('BTscan', True),
     )

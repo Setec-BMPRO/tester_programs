@@ -86,3 +86,4 @@ class Measurements(object):
         self.dmm_shunt = Measurement(limits['shunt'], sense.shunt)
         self.dmm_relay = Measurement(limits['Relay'], sense.relay)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
+        self.BTscan = Measurement(limits['BTscan'], sense.oMirBT)
