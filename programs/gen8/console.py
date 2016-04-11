@@ -16,12 +16,12 @@ class Console(console.Variable, console.BaseConsole):
 
     """Communications to GEN8 console."""
 
-    def __init__(self, port, timeout=2.0, verbose=False):
+    def __init__(self, port, verbose=False):
         """Create console instance."""
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
         console.Variable.__init__(self)
-        console.BaseConsole.__init__(self, port, timeout, verbose)
+        console.BaseConsole.__init__(self, port, verbose)
         rfmt = '{} X?'      # 1st generation console read format string
         self.cmd_data = {
             'ARM-AcFreq': ParameterFloat(

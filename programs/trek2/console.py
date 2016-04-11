@@ -99,7 +99,7 @@ class _Console():
         self['STATUS'] = value
 
 
-class DirectConsole(_Console, console.Variable, console.BadUartConsole):
+class DirectConsole(console.Variable, _Console, console.BadUartConsole):
 
     """Console for a direct connection to a Trek2."""
 
@@ -107,12 +107,12 @@ class DirectConsole(_Console, console.Variable, console.BadUartConsole):
         """Create console instance."""
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
-        _Console.__init__(self)
         console.Variable.__init__(self)
+        _Console.__init__(self)
         console.BadUartConsole.__init__(self, port)
 
 
-class TunnelConsole(_Console, console.Variable, console.BaseConsole):
+class TunnelConsole(console.Variable, _Console, console.BaseConsole):
 
     """Console for a CAN tunneled connection to a Trek2.
 
@@ -124,6 +124,6 @@ class TunnelConsole(_Console, console.Variable, console.BaseConsole):
         """Create console instance."""
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
-        _Console.__init__(self)
         console.Variable.__init__(self)
+        _Console.__init__(self)
         console.BaseConsole.__init__(self, port)

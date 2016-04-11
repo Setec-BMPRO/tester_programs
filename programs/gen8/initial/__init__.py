@@ -55,7 +55,7 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         # Serial connection to the ARM console
-        arm_ser = SimSerial(simulation=fifo, baudrate=57600)
+        arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
         arm_ser.setPort(_ARM_PORT)
         self._armdev = Console(arm_ser, verbose=False)
