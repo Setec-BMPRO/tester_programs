@@ -103,13 +103,13 @@ class DirectConsole(console.Variable, _Console, console.BadUartConsole):
 
     """Console for a direct connection to a Trek2."""
 
-    def __init__(self, port):
+    def __init__(self, port, verbose=False):
         """Create console instance."""
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
         console.Variable.__init__(self)
         _Console.__init__(self)
-        console.BadUartConsole.__init__(self, port)
+        console.BadUartConsole.__init__(self, port, verbose)
 
 
 class TunnelConsole(console.Variable, _Console, console.BaseConsole):
@@ -120,10 +120,10 @@ class TunnelConsole(console.Variable, _Console, console.BaseConsole):
 
     """
 
-    def __init__(self, port):
+    def __init__(self, port, verbose=False):
         """Create console instance."""
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
         console.Variable.__init__(self)
         _Console.__init__(self)
-        console.BaseConsole.__init__(self, port)
+        console.BaseConsole.__init__(self, port, verbose)

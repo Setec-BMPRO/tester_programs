@@ -167,6 +167,7 @@ class Main(tester.TestSequence):
 
         m.trek2_can_bind.measure(timeout=10)
         self._trek2.can_testmode(True)
+        time.sleep(2)   # Let other CAN messages come in...
         # From here, Command-Response mode is broken by the CAN debug messages!
         self._logger.debug('CAN Echo Request --> %s', repr(_CAN_ECHO))
         self._trek2['CAN'] = _CAN_ECHO

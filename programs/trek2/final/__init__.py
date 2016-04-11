@@ -63,9 +63,10 @@ class Main(tester.TestSequence):
         # Set port separately, as we don't want it opened yet
         ser_can.setPort(_CAN_PORT)
         # CAN Console tunnel driver
-        self._tunnel = ConsoleCanTunnel(port=ser_can, simulation=fifo)
+        self._tunnel = ConsoleCanTunnel(
+            port=ser_can, simulation=fifo, verbose=True)
         # Trek2 Console driver (using the CAN Tunnel)
-        self._trek2 = TunnelConsole(port=self._tunnel)
+        self._trek2 = TunnelConsole(port=self._tunnel, verbose=True)
 
     def open(self):
         """Prepare for testing."""
@@ -112,8 +113,9 @@ class Main(tester.TestSequence):
 
     def _step_tunnel_open(self):
         """Open console tunnel."""
-        self._tunnel.port.puts('0 ECHO -> \r\n> ', preflush=1)
-        self._tunnel.port.puts('0x10000000\r\n', preflush=1)
+        if self._fifo:
+            self._tunnel.port.puts('0 ECHO -> \r\n> ', preflush=1)
+            self._tunnel.port.puts('0x10000000\r\n', preflush=1)
         self._trek2_puts('0x10000000')
         self._trek2_puts('')
 

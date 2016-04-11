@@ -61,7 +61,8 @@ class ConsoleCanTunnel():
 
     """
 
-    def __init__(self, port, local_id=16, target_id=32,
+    def __init__(self,
+                 port, local_id=16, target_id=32,
                  simulation=False, verbose=False):
         """Initialise communications.
 
@@ -95,6 +96,7 @@ class ConsoleCanTunnel():
             raise TunnelError
         # Set filters to see all CAN traffic
         self.action('"RF,ALL CAN')
+        time.sleep(0.1)
         self.port.flushInput()
         # Switch CAN Print Packet mode ON
         try:
@@ -103,10 +105,17 @@ class ConsoleCanTunnel():
             self.action('0x{:08X} "STATUS XN!'.format(new_status))
         except:
             raise TunnelError('CAN Print Mode failed')
+        time.sleep(0.1)
         self.port.flushInput()
         # Open a console tunnel
-        self.action(
-            '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id))
+        try:
+            self.action(
+                '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id))
+        except:
+            raise TunnelError('CAN Tunnel Mode failed')
+        time.sleep(0.1)
+        self.port.flushInput()
+        self._logger.debug('CAN Tunnel opened')
 
     def close(self):
         """Close the CAN tunnel."""
