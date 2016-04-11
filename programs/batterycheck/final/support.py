@@ -66,23 +66,3 @@ class Measurements(object):
         self.SwVerARM = Measurement(limits['ARMSwVer'], sense.oMirSwVer)
         self.dmm_12V = Measurement(limits['12V'], sense.o12V)
         self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-        d = logical_devices
-        m = measurements
-
-        # PowerUp:
-        dcs1 = DcSubStep(setting=((d.dcs_input, 12.0),), output=True)
-        msr1 = MeasureSubStep((m.dmm_12V, ), timeout=5)
-        self.pwr_up = Step((dcs1, msr1))

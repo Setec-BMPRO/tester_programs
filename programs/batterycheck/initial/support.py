@@ -48,10 +48,10 @@ class Sensors(object):
     def __init__(self, logical_devices, armdev):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
-        self.ARMvolt = arm.Sensor(armdev, 'ARM_Volt')
-        self.ARMcurr = arm.Sensor(armdev, 'ARM_Curr')
+        self.ARMvolt = arm.Sensor(armdev, 'VOLTAGE')
+        self.ARMcurr = arm.Sensor(armdev, 'CURRENT')
         self.ARMsoft = arm.Sensor(
-            armdev, 'ARM_SwVer', rdgtype=sensor.ReadingString)
+            armdev, 'SW_VER', rdgtype=sensor.ReadingString)
         self.oMirAVR = sensor.Mirror()
         self.oMirARM = sensor.Mirror()
         self.oMirBT = sensor.Mirror()

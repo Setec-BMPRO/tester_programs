@@ -89,10 +89,12 @@ class ConsoleCanTunnel():
         # Open underlying serial port
         self.port.open()
         # Switch console echo OFF
+# FIXME: I think that 'No Echo' will still echo the '\r' as '\r\n', in which
+#       case it isn't really 'No Echo', is it?...
         self.port.flushInput()
-        no_echo = '0 ECHO'
-        reply = self.action(no_echo, get_response=True)
-        if reply is None or reply[:6] != no_echo:
+        no_echo_cmd = '0 ECHO'
+        reply = self.action(no_echo_cmd, get_response=True)
+        if reply is None or reply[:6] != no_echo_cmd:
             raise TunnelError
         # Set filters to see all CAN traffic
         self.action('"RF,ALL CAN')
@@ -104,17 +106,22 @@ class ConsoleCanTunnel():
             new_status = _CAN_ON | int(reply, 16)
             self.action('0x{:08X} "STATUS XN!'.format(new_status))
         except:
-            raise TunnelError('CAN Print Mode failed')
+            raise TunnelError('Set CAN print mode failed')
         time.sleep(0.1)
         self.port.flushInput()
         # Open a console tunnel
         try:
             self.action(
-                '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id))
+                '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id),
+                get_response=True)  # Read the \r\n
+            # and the RCC response
+            reply = self.action(delay=0.2, get_response=True)
+            expected = 'RRC,{},3,{},1'.format(self._target_id, self._local_id)
+            if reply != expected:
+                raise TunnelError(
+                    'Bad CAN tunnel mode reply: {}'.format(reply))
         except:
             raise TunnelError('CAN Tunnel Mode failed')
-        time.sleep(0.1)
-        self.port.flushInput()
         self._logger.debug('CAN Tunnel opened')
 
     def close(self):
@@ -124,68 +131,37 @@ class ConsoleCanTunnel():
         self.port.close()
 
     def action(self, command=None, delay=0, get_response=False):
-        """Send a command, and read the response line(s).
+        """Send a command, and read the response.
 
         @param command Command string.
         @param delay Delay between sending command and reading response.
         @param get_response True if a response should be read back.
-        @return Response.
+        @return Response line.
 
         """
         if command:
-            self._write_command(command)
+            if self.verbose:
+                self._logger.debug('--> %s', repr(command))
+            cmd_data = command.encode()
+            for a_byte in cmd_data:             # write 1 byte at a time...
+                a_byte = bytes([a_byte])
+                self.port.write(a_byte)
+                time.sleep(_INTER_CHAR_DELAY)   # ...with a gap between each
+            self.port.write(b'\r')
         if delay:
             time.sleep(delay)
         if get_response:
-            return self._read_response()
-
-    def _write_command(self, command, flush=False):
-        """Write a command to the non-tunnel console.
-
-        @param command Command string.
-
-        """
-        if self.verbose:
-            self._logger.debug('--> %s', repr(command))
-        cmd_data = command.encode()
-        for a_byte in cmd_data:             # write 1 byte at a time...
-            a_byte = bytes([a_byte])
-            self.port.write(a_byte)
-            time.sleep(_INTER_CHAR_DELAY)   # ...with a gap between each byte
-        self.port.write(b'\r')
-
-    def _read_response(self):
-        """Read a response from the non-tunnel console.
-
-        @return Response.
-
-        """
-        buf = self.port.readline()
-        if self.verbose:
-            self._logger.debug('Rx <--- %s', repr(buf))
-        if len(buf) > 0:
-            response = buf.decode(errors='ignore')
-            response = response.replace('\r\n', '')
-            response = response.replace('"', '')
-        else:
+            buf = self.port.readline()
             response = None
-        if self.verbose:
-            self._logger.debug('<-- %s', repr(response))
-        return response
-
-    def _decoder(self, messages):
-        """Decode CAN packet messages.
-
-        @param message String, or List of Strings.
-        @return Decoded data string.
-
-        """
-        data = ''
-        if not isinstance(messages, list):
-            messages = [messages]
-        for item in messages:
-            data += self._decode(item)
-        return data
+            if self.verbose:
+                self._logger.debug('Rx <--- %s', repr(buf))
+            if len(buf) > 0:
+                response = buf.decode(errors='ignore')
+                response = response.replace('\r\n', '')
+                response = response.replace('"', '')
+            if self.verbose:
+                self._logger.debug('<-- %s', repr(response))
+            return response
 
     def _decode(self, message):
         """Decode a single CAN packet messages.
@@ -223,7 +199,7 @@ class ConsoleCanTunnel():
         """Serial: Read the input buffer."""
         reply = self.action(get_response=True)  # read any CAN data
         if reply:
-            reply_bytes = self._decoder(reply)
+            reply_bytes = self._decode(reply)
             if self.verbose:
                 self._logger.debug('read() reply_bytes %s', repr(reply_bytes))
             self.puts(reply_bytes)  # push any CAN data into my buffer port
@@ -252,9 +228,9 @@ class ConsoleCanTunnel():
                 data = b''
             byte_data = ','.join(str(c) for c in byte_data)
             command = '"TCC,{},4,{} CAN'.format(self._target_id, byte_data)
-            reply = self.action(command, delay=0.25, get_response=True)
+            reply = self.action(command, delay=0.2, get_response=True)
             if reply:
-                reply_bytes = self._decoder(reply)
+                reply_bytes = self._decode(reply)
                 self.puts(reply_bytes)  # push any CAN data into my buffer port
 
     def inWaiting(self):

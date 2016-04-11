@@ -12,15 +12,13 @@ import tester
 from isplpc import Programmer, ProgrammingError
 from ...share.sim_serial import SimSerial
 from ...share.bluetooth import BtRadio
+from ..console import Console
 from . import support
 from . import limit
-from . import arm
 
 MeasureGroup = tester.measure.group
 
 LIMIT_DATA = limit.DATA
-
-_SHUNT_SCALE = 0.08     # Ishunt * this = DC Source voltage
 
 # Serial port for the ARM programmer.
 _ARM_PGM = {'posix': '/dev/ttyUSB1', 'nt': r'\\.\COM2'}[os.name]
@@ -67,40 +65,43 @@ class Main(tester.TestSequence):
         self._limits = test_limits
         self._sernum = None
         # Serial connection to the console
-        arm_ser = SimSerial(simulation=self._fifo, baudrate=9600)
+        self._arm_ser = SimSerial(
+            simulation=self._fifo, baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
-        arm_ser.setPort(_ARM_CON)
-        self._armdev = arm.Console(arm_ser)
-        self._btport = None
-        self._bt = None
-
-    def open(self):
-        """Prepare for testing."""
-        self._logger.info('Open')
-        self._folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self._arm_ser.setPort(_ARM_CON)
+        self._armdev = Console(self._arm_ser)
         # Serial connection to the BT device
         self._btport = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=2, writeTimeout=10)
+            simulation=self._fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         self._btport.setPort(_BT_PORT)
         # BT Radio driver
         self._bt = BtRadio(self._btport)
+
+    def open(self):
+        """Prepare for testing."""
+        self._logger.info('Open')
         global d, s, m
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._armdev)
         m = support.Measurements(s, self._limits)
 
     def _arm_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the buffer only if FIFOs are enabled."""
+                   string_data, preflush=0, postflush=0, priority=False,
+                   addprompt=True):
+        """Push string data into the buffer if FIFOs are enabled."""
         if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
             self._armdev.puts(string_data, preflush, postflush, priority)
 
     def _bt_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BT buffer only if FIFOs are enabled."""
+                 string_data, preflush=0, postflush=0, priority=False,
+                   addcrlf=True):
+        """Push string data into the buffer only if FIFOs are enabled."""
         if self._fifo:
+            if addcrlf:
+                string_data = string_data + '\r\n'
             self._btport.puts(string_data, preflush, postflush, priority)
 
     def close(self):
@@ -140,13 +141,15 @@ class Main(tester.TestSequence):
         d.dcs_input.output(15.0, output=True)
         result, sernum = m.ui_SnEntry.measure()
         self._sernum = sernum[0]
-        tester.measure.group((m.dmm_reg5V, m.dmm_reg12V, m.dmm_3V3), 2)
+        MeasureGroup((m.dmm_reg5V, m.dmm_reg12V, m.dmm_3V3), 2)
 
     def _step_program_avr(self):
         """Program the AVR ATtiny10 device."""
         d.rla_avr.set_on()
         # Wait for the programmer to 'see' the 5V power
         time.sleep(2)
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
         avr_cmd = [
             _AVRDUDE,
             '-P', 'usb',
@@ -156,7 +159,7 @@ class Main(tester.TestSequence):
             '-U', 'fuse:w:0xfe:m',
             ]
         try:
-            console = subprocess.check_output(avr_cmd, cwd=self._folder)
+            console = subprocess.check_output(avr_cmd, cwd=folder)
             result = 0
             self._logger.debug(console)
         except subprocess.CalledProcessError:
@@ -199,8 +202,6 @@ class Main(tester.TestSequence):
                 s.oMirARM.store(0)
             except ProgrammingError:
                 s.oMirARM.store(1)
-        except:
-            raise
         finally:
             ser.close()
         m.pgmARM.measure()
@@ -208,12 +209,21 @@ class Main(tester.TestSequence):
 
     def _step_initialise_arm(self):
         """Initialise the ARM device."""
+        for str in (
+                ('Banner1\r\nBanner2', ) +  # Banner lines
+                ('', ) * 3
+                ):
+            self._arm_puts(str)
+
         self._armdev.open()
         d.rla_reset.pulse_on(0.1)
         time.sleep(2.0)  # ARM startup delay
-        if not self._fifo:
-            self._armdev.defaults()
-            self._armdev.set_serial(self._sernum)
+        self._armdev['UNLOCK'] = '$DEADBEA7'
+        self._armdev['NVWRITE'] = True
+        time.sleep(1.0)  # NVWRITE delay
+        self._armdev['SER_ID'] = self._sernum
+        self._armdev['NVWRITE'] = True
+        time.sleep(1.0)  # NVWRITE delay
 
     def _step_test_arm(self):
         """Get data from the ARM device.
@@ -223,22 +233,27 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.relay, 5.0), (s.ARMsoft, (limit.ARM_VERSION, )),
-             (s.ARMvolt, 12.12),
-             (s.shunt, 62.5 / 1250), (s.ARMcurr, -62.0), ))
+            ((s.relay, 5.0), (s.shunt, 62.5 / 1250), ))
+        for str in (('-62000mA', ) +
+                    ('', ) * 2 +
+                    (limit.ARM_VERSION, ) +
+                    ('12120', ) +
+                    ('', )
+                    ):
+            self._arm_puts(str)
 
-        d.dcs_shunt.output(62.5 * _SHUNT_SCALE, True)
+        d.dcs_shunt.output(62.5 * limit.SHUNT_SCALE, True)
         time.sleep(1.5)  # ARM rdgs settle
         batt_curr, curr_ARM = MeasureGroup(
             (m.dmm_shunt, m.currARM), timeout=5)[1]
         # Compare simulated battery current against ARM reading, in %
         percent_error = ((batt_curr - curr_ARM) / batt_curr) * 100
         s.oMirCurrErr.store(percent_error)
-        if not self._fifo:
-            self._armdev.alarm(True)
+        # Disable alarm process so it won't switch the relay back
+        self._armdev['SYS_EN'] = 4
+        self._armdev['ALARM-RELAY'] = True
         MeasureGroup((m.dmm_relay, m.currErr, m.softARM, m.voltARM))
-        if not self._fifo:
-            self._armdev.alarm(False)
+        self._armdev['ALARM-RELAY'] = False
         d.dcs_shunt.output(0.0, False)
 
     def _step_test_bluetooth(self):
@@ -247,15 +262,16 @@ class Main(tester.TestSequence):
         Scan for BT device and match against serial number.
 
         """
+        self._bt_puts('OK', preflush=2)
+        self._bt_puts('OK', preflush=1)
+        self._bt_puts('OK', preflush=1)
+        self._bt_puts('+RDDSRES=112233445566,BCheck A1509020010,2,3')
+        self._bt_puts('+RDDSCNF=0')
+
         d.rla_reset.pulse_on(0.1)
         time.sleep(2.0)  # ARM startup delay
         self._logger.debug('Scan for Serial Number: "%s"', self._sernum)
-        self._bt_puts('OK\r\n', preflush=2)
-        self._bt_puts('OK\r\n', preflush=1)
         self._bt.open()
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('+RDDSRES=112233445566,BCheck A1509020010,2,3\r\n')
-        self._bt_puts('+RDDSCNF=0\r\n')
         reply = self._bt.scan(self._sernum)
         s.oMirBT.store(reply)
         m.BTscan.measure()

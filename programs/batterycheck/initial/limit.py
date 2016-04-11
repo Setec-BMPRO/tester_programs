@@ -9,6 +9,8 @@ from testlimit import (
     lim_hilo, lim_hilo_delta, lim_hilo_int, lim_lo, lim_string,
     lim_boolean)
 
+SHUNT_SCALE = 0.08     # Ishunt * this = DC Source voltage
+
 # Test Limits
 DATA = (
     lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
