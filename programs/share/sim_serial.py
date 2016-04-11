@@ -26,17 +26,12 @@ class _Simulator():
 
     """Serial port simulation abilities."""
 
-    def __init__(self, simulation=False, **kwargs):
+    def __init__(self):
         """Create internal data storage queue."""
-        self.simulation = simulation
-        if self.simulation:
-            kwargs['port'] = None   # Prevent a real port from being opened
         # Data buffer for data to be read by read()
         self._in_buf = array(_ARRAY_TYPE)
         # Data buffer for data written by write()
         self._out_buf = array(_ARRAY_TYPE)
-        # Initialise the serial.Serial
-        super().__init__(**kwargs)
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
         """Put a string into the read-back buffer.
@@ -93,8 +88,13 @@ class SimSerial(_Simulator, serial.Serial):
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._logger.debug('Created. Simulation = %s', simulation)
-        super().__init__(           # Initialise the _Simulator()
-            simulation=simulation,
+        self.simulation = simulation
+        if simulation:
+            port = None     # Prevent a real port from being opened
+        # Call __init__() methods directly, since we cannot use super() as
+        # the arguments don't match
+        _Simulator.__init__(self)
+        serial.Serial.__init__(self,
             port=port, baudrate=baudrate, bytesize=bytesize, parity=parity,
             stopbits=stopbits, timeout=timeout, xonxoff=xonxoff,
             rtscts=rtscts, writeTimeout=writeTimeout, dsrdtr=dsrdtr,

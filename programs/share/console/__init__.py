@@ -14,13 +14,12 @@ class Variable():
 
     """Console variable reader-writer processor."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         """Initialise."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
-        super().__init__(*args, **kwargs)
 
     def configure(self, key):
         """Sensor: Configure for next reading."""

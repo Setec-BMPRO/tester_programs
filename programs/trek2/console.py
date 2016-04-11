@@ -28,9 +28,8 @@ class _Console():
 
     """Base class for a Trek2 console."""
 
-    def __init__(self, port):
+    def __init__(self):
         """Create console instance."""
-        super().__init__(port)
         self.cmd_data = {
             'UNLOCK': ParameterString('UNLOCK',
                 writeable=True, readable=False, write_format='{} {}'),
@@ -104,6 +103,14 @@ class DirectConsole(_Console, console.Variable, console.BadUartConsole):
 
     """Console for a direct connection to a Trek2."""
 
+    def __init__(self, port):
+        """Create console instance."""
+        # Call __init__() methods directly, since we cannot use super() as
+        # the arguments don't match
+        _Console.__init__(self)
+        console.Variable.__init__(self)
+        console.BadUartConsole.__init__(self, port)
+
 
 class TunnelConsole(_Console, console.Variable, console.BaseConsole):
 
@@ -112,3 +119,11 @@ class TunnelConsole(_Console, console.Variable, console.BaseConsole):
     The CAN tunnel does not need the BadUartConsole stuff.
 
     """
+
+    def __init__(self, port):
+        """Create console instance."""
+        # Call __init__() methods directly, since we cannot use super() as
+        # the arguments don't match
+        _Console.__init__(self)
+        console.Variable.__init__(self)
+        console.BaseConsole.__init__(self, port)

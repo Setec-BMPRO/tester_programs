@@ -31,7 +31,10 @@ class Console(console.Variable, console.BadUartConsole):
 
     def __init__(self, port):
         """Create console instance."""
-        super().__init__(port)
+        # Call __init__() methods directly, since we cannot use super() as
+        # the arguments don't match
+        console.Variable.__init__(self)
+        console.BadUartConsole.__init__(self, port)
         self.cmd_data = {
             'UNLOCK': ParameterString('UNLOCK',
                 writeable=True, readable=False, write_format='{} {}'),
