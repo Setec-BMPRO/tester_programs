@@ -219,6 +219,7 @@ class Main(tester.TestSequence):
         self._logger.debug('CAN Echo Request --> %s', repr(_CAN_ECHO))
         self._cn101['CAN'] = _CAN_ECHO
         echo_reply = self._cn101_ser.readline().decode(errors='ignore')
+        echo_reply = echo_reply.replace('\r\n', '')
         self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
         s.oMirCAN.store(echo_reply)
         m.cn101_rx_can.measure()
