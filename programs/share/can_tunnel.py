@@ -102,7 +102,7 @@ class ConsoleCanTunnel():
         try:
             reply = self.action('"STATUS XN?')
             new_status = _CAN_ON | int(reply, 16)
-            self.action('0x{:08X} "STATUS XN!'.format(new_status))
+            self.action('${:08X} "STATUS XN!'.format(new_status))
         except:
             raise TunnelError('Set CAN print mode failed')
         # Open a console tunnel

@@ -2,31 +2,28 @@
 # -*- coding: utf-8 -*-
 """TRS1 Initial Program Limits."""
 
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
+from testlimit import lim_hilo_delta, lim_boolean, lim_lo, lim_hilo
+
 DATA = (
-    ('Vin', 1, 11.0, 12.5, None, None),
-    ('BrkawayPinIn', 1, 11.0, 12.5, None, None),
-    ('BrkawayPinOut', 1, 0.1, None, None, None),
-    ('5VOff', 1, 0.1, None, None, None),
-    ('TP8Off', 1, 0.1, None, None, None),
-    ('TP9Off', 1, 0.1, None, None, None),
-    ('5VOn', 1, 4.9, 5.1, None, None),
-    ('BrakeOff', 1, -0.1, 0.1, None, None),
-    ('BrakeOn', 1, 11.9, 12.1, None, None),
-    ('LightOff', 1, -0.3, 0.3, None, None),
-    ('LightOn', 1, 11.7, 12.3, None, None),
-    ('RemoteOff', 1, -0.1, 0.1, None, None),
-    ('RemoteOn', 1, 11.9, 12.1, None, None),
-    ('RedLedOff', 1, 11.9, 12.1, None, None),
-    ('RedLedOn', 1, -0.1, 0.1, None, None),
-    # 6.8 +/- 1V
-    ('GrnLedOff', 1, 5.8, 7.8, None, None),
-    ('GrnLedOn', 1, -0.1, 0.1, None, None),
-    # 0.8 +/- 0.2Hz
-    ('FreqTP11', 1, 0.6, 1.0, None, None),
-    # 0.56 +/- 0.2Hz
-    ('FreqTP3', 1, 0.36, 0.76, None, None),
-    # 0.8 +/- 0.2Hz
-    ('FreqTP8', 1, 0.6, 1.0, None, None),
-    ('Notify', 2, None, None, None, True),
+    lim_hilo('Vin', 11.0, 12.5),
+    lim_hilo('BrkawayPinIn', 11.0, 12.5),
+    lim_lo('BrkawayPinOut', 0.1),
+    lim_lo('5VOff', 0.1),
+    lim_lo('TP8Off', 0.1),
+    lim_lo('TP9Off', 0.1),
+    lim_hilo_delta('5VOn', 5.0, 0.1),
+    lim_lo('BrakeOff', 0.1),
+    lim_hilo_delta('BrakeOn', 12.0, 0.1),
+    lim_lo('LightOff', 0.3),
+    lim_hilo_delta('LightOn', 12.0, 0.3),
+    lim_lo('RemoteOff', 0.1),
+    lim_hilo_delta('RemoteOn', 12.0, 0.1),
+    lim_hilo_delta('RedLedOff', 12.0, 0.1),
+    lim_lo('RedLedOn', 0.1),
+    lim_hilo_delta('GrnLedOff', 6.8, 1.0),
+    lim_lo('GrnLedOn', 0.1),
+    lim_hilo_delta('FreqTP11', 0.8, 0.2),
+    lim_hilo_delta('FreqTP3', 0.56, 0.2),
+    lim_hilo_delta('FreqTP8', 0.8, 0.2),
+    lim_boolean('Notify', True),
     )

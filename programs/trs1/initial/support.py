@@ -133,26 +133,32 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        rly1 = RelaySubStep(((d.rla_pin, True), ))
-        dcs1 = DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True, delay=0.8)
-        msr1 = MeasureSubStep(
-            (m.dmm_vin, m.dmm_pinin, m.dmm_5VOff, m.dmm_brakeoff,
-             m.dmm_lightoff, m.dmm_remoteoff, m.dmm_tp8off,
-             m.dmm_tp9off), timeout=5)
-        self.pwr_up = Step((rly1, dcs1, msr1))
-
+        self.pwr_up = Step((
+            RelaySubStep(((d.rla_pin, True), )),
+            DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True, delay=0.8),
+            MeasureSubStep(
+                (m.dmm_vin, m.dmm_pinin, m.dmm_5VOff, m.dmm_brakeoff,
+                 m.dmm_lightoff, m.dmm_remoteoff, m.dmm_tp8off,
+                 m.dmm_tp9off), timeout=5),
+            ))
         # BreakAway:
-        rly1 = RelaySubStep(((d.rla_pin, False), ))
-        msr1 = MeasureSubStep(
-            (m.dmm_pinout, m.dmm_5VOn, m.dmm_brakeon, m.dmm_lighton,
-             m.dmm_remoteon), timeout=5)
-        dcs1 = DcSubStep(setting=((d.dcs_Vin, 14.2), ))
-        msr2 = MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5)
-        dcs2 = DcSubStep(setting=((d.dcs_Vin, 10.0), ))
-        msr3 = MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5)
-        dcs3 = DcSubStep(setting=((d.dcs_Vin, 11.2), ))
-        msr4 = MeasureSubStep((m.dmm_greenon, ), timeout=5)
-        self.brkaway1 = Step((rly1, msr1, ))
-        self.brkaway2 = Step((dcs1, msr2, ))
-        self.brkaway3 = Step((dcs2, msr3, ))
-        self.brkaway4 = Step((dcs3, msr4, dcs1))
+        self.brkaway1 = Step((
+            RelaySubStep(((d.rla_pin, False), )),
+            MeasureSubStep(
+                (m.dmm_pinout, m.dmm_5VOn, m.dmm_brakeon, m.dmm_lighton,
+                 m.dmm_remoteon), timeout=5),
+            ))
+        self.brkaway2 = Step((
+            DcSubStep(setting=((d.dcs_Vin, 14.2), )),
+            MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5),
+            ))
+        self.brkaway3 = Step((
+            DcSubStep(setting=((d.dcs_Vin, 10.0), )),
+            MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5),
+            ))
+        self.brkaway4 = Step((
+            DcSubStep(setting=((d.dcs_Vin, 11.2), )),
+            MeasureSubStep((m.dmm_greenon, ), timeout=5),
+            DcSubStep(setting=((d.dcs_Vin, 14.2), )),
+            ))
+

@@ -115,7 +115,11 @@ class Main(tester.TestSequence):
         """Open console tunnel."""
         if self._fifo:
             self._tunnel.port.puts('0 ECHO -> \r\n> ', preflush=1)
-            self._tunnel.port.puts('0x10000000\r\n', preflush=1)
+            self._tunnel.port.puts('\r\n')
+            self._tunnel.port.puts('0x10000000\r\n')
+            self._tunnel.port.puts('\r\n')
+            self._tunnel.port.puts('\r\n')
+            self._tunnel.port.puts('RRC,32,3,0,16,1\r\n')
         self._trek2_puts('0x10000000')
         self._trek2_puts('')
 

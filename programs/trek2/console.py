@@ -42,6 +42,8 @@ class _Console():
                 'SET-HW-VER', writeable=True, readable=False,
                 write_format='{0[0]} {0[1]} "{0[2]} {1}'),
             'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+            'PROMPT': ParameterString(
+                'PROMPT', writeable=True, write_format='"{} {}'),
             'STATUS': ParameterHex(
                 'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
             'CAN_BIND': ParameterHex(
