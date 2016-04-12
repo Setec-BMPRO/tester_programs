@@ -11,8 +11,6 @@ ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 ParameterHex = console.ParameterHex
-ParameterCAN = console.ParameterCAN
-ParameterRaw = console.ParameterRaw
 
 # "Test" mode controlled by STATUS bit 31
 _TEST_ON = (1 << 31)

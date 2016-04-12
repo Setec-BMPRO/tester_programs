@@ -6,7 +6,7 @@ import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-from . import arm
+from .. import console
 
 translate = tester.translate
 
@@ -48,9 +48,9 @@ class Sensors(object):
     def __init__(self, logical_devices, armdev):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
-        self.ARMvolt = arm.Sensor(armdev, 'VOLTAGE')
-        self.ARMcurr = arm.Sensor(armdev, 'CURRENT')
-        self.ARMsoft = arm.Sensor(
+        self.ARMvolt = console.Sensor(armdev, 'VOLTAGE')
+        self.ARMcurr = console.Sensor(armdev, 'CURRENT')
+        self.ARMsoft = console.Sensor(
             armdev, 'SW_VER', rdgtype=sensor.ReadingString)
         self.oMirAVR = sensor.Mirror()
         self.oMirARM = sensor.Mirror()

@@ -93,35 +93,29 @@ class ConsoleCanTunnel():
 #       case it isn't really 'No Echo', is it?...
         self.port.flushInput()
         no_echo_cmd = '0 ECHO'
-        reply = self.action(no_echo_cmd, get_response=True)
+        reply = self.action(no_echo_cmd)
         if reply is None or reply[:6] != no_echo_cmd:
             raise TunnelError
         # Set filters to see all CAN traffic
         self.action('"RF,ALL CAN')
-        time.sleep(0.1)
-        self.port.flushInput()
         # Switch CAN Print Packet mode ON
         try:
-            reply = self.action('"STATUS XN?', get_response=True)
+            reply = self.action('"STATUS XN?')
             new_status = _CAN_ON | int(reply, 16)
             self.action('0x{:08X} "STATUS XN!'.format(new_status))
         except:
             raise TunnelError('Set CAN print mode failed')
-        time.sleep(0.1)
-        self.port.flushInput()
         # Open a console tunnel
         try:
             self.action(
-                '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id),
-                get_response=True)  # Read the \r\n
-            # and the RCC response
-            reply = self.action(delay=0.2, get_response=True)
-            expected = 'RRC,{},3,{},1'.format(self._target_id, self._local_id)
-            if reply != expected:
-                raise TunnelError(
-                    'Bad CAN tunnel mode reply: {}'.format(reply))
+                '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id))
+            reply = self.action(delay=0.2)  # RRC... is expected
         except:
             raise TunnelError('CAN Tunnel Mode failed')
+        expected = 'RRC,{},3,{},1'.format(self._target_id, self._local_id)
+        if reply != expected:
+            raise TunnelError(
+                'Bad CAN tunnel mode reply: {}'.format(reply))
         self._logger.debug('CAN Tunnel opened')
 
     def close(self):
@@ -130,7 +124,7 @@ class ConsoleCanTunnel():
             '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id))
         self.port.close()
 
-    def action(self, command=None, delay=0, get_response=False):
+    def action(self, command=None, delay=0, get_response=True):
         """Send a command, and read the response.
 
         @param command Command string.
@@ -157,6 +151,8 @@ class ConsoleCanTunnel():
                 self._logger.debug('Rx <--- %s', repr(buf))
             if len(buf) > 0:
                 response = buf.decode(errors='ignore')
+                response = response.replace(' -> ', '')
+                response = response.replace(' \r\n', '')
                 response = response.replace('\r\n', '')
                 response = response.replace('"', '')
             if self.verbose:
@@ -197,7 +193,7 @@ class ConsoleCanTunnel():
 
     def read(self, size=1):
         """Serial: Read the input buffer."""
-        reply = self.action(get_response=True)  # read any CAN data
+        reply = self.action()       # read any CAN data
         if reply:
             reply_bytes = self._decode(reply)
             if self.verbose:
@@ -228,7 +224,7 @@ class ConsoleCanTunnel():
                 data = b''
             byte_data = ','.join(str(c) for c in byte_data)
             command = '"TCC,{},4,{} CAN'.format(self._target_id, byte_data)
-            reply = self.action(command, delay=0.2, get_response=True)
+            reply = self.action(command, delay=0.2)
             if reply:
                 reply_bytes = self._decode(reply)
                 self.puts(reply_bytes)  # push any CAN data into my buffer port

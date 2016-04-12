@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-10, 17:55:34 -->
+<!-- Saved: 2016-04-12, 17:26:07 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -37,7 +37,6 @@
     <Source>programs/batterycheck/final/limit.py</Source>
     <Source>programs/batterycheck/final/support.py</Source>
     <Source>programs/batterycheck/initial/__init__.py</Source>
-    <Source>programs/batterycheck/initial/arm.py</Source>
     <Source>programs/batterycheck/initial/limit.py</Source>
     <Source>programs/batterycheck/initial/support.py</Source>
     <Source>programs/bc15/__init__.py</Source>
@@ -163,7 +162,6 @@
     <Source>programs/share/__init__.py</Source>
     <Source>programs/share/bluetooth/__init__.py</Source>
     <Source>programs/share/bluetooth/eunistone_pan1322.py</Source>
-    <Source>programs/share/bluetooth/jsonrpc_server.py</Source>
     <Source>programs/share/bluetooth/rn4020.py</Source>
     <Source>programs/share/can_tunnel.py</Source>
     <Source>programs/share/console/__init__.py</Source>
