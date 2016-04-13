@@ -40,6 +40,7 @@ class Console(console.Variable, console.BadUartConsole):
                 writeable=True, readable=False, write_format='{1}'),
             'CAL_I_SLOPE': ParameterFloat('CAL-I-SLOPE',
                 writeable=True, readable=False, scale=1000,
+                minimum=-200000, maximum=200000,
                 write_format='{} {}'),
             'CAL_V_SLOPE': ParameterFloat('CAL-V-SLOPE',
                 writeable=True, readable=False, scale=1000,

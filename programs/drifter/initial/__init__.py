@@ -60,20 +60,29 @@ class Main(tester.TestSequence):
             simulation=self._fifo, baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
         self._pic_ser.setPort(_PIC_PORT)
-        self._picdev = Console(self._pic_ser)
+        self._pic = Console(self._pic_ser)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
         d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits, self._picdev)
+        s = support.Sensors(d, self._limits, self._pic)
         m = support.Measurements(s, self._limits)
+
+    def _pic_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False,
+                  addprompt=True):
+        """Push string data into the buffer if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
+            self._pic.puts(string_data, preflush, postflush, priority)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._picdev.close()
+        self._pic.close()
         global m, d, s
         m = d = s = None
 
@@ -120,41 +129,51 @@ class Main(tester.TestSequence):
         self.fifo_push(
             ((s.pic_Status, 0), (s.oVsw, 3.3), (s.oVref, 3.3),
              (s.o3V3, -2.7), (s.o0V8, -0.8), ))
+        for str in (
+                ('', ) * 2 +
+                ('Banner1\r\nBanner2', ) +
+                ('', ) * 2
+                ):
+            self._pic_puts(str)
 
         d.dcs_RS232.output(10.0, output=True)
         time.sleep(4)
-        self._picdev.open()
-        self._picdev['UNLOCK'] = _UNLOCK_KEY
-        self._picdev['NVDEFAULT'] = True
-        self._picdev['RESTART'] = True
+        self._pic.open()
+        self._pic['UNLOCK'] = _UNLOCK_KEY
+        self._pic['NVDEFAULT'] = True
+        self._pic['RESTART'] = True
         time.sleep(4)
-        self._picdev['UNLOCK'] = _UNLOCK_KEY
+        self._pic['UNLOCK'] = _UNLOCK_KEY
         m.pic_Status.measure(timeout=5)
-        self._picdev['APS_DISABLE'] = 1
+        self._pic['APS_DISABLE'] = 1
         MeasureGroup(
             (m.dmm_Vsw, m.dmm_Vref, m.dmm_3V3, m.dmm_0V8, ), timeout=5)
 
     def _step_calibrate(self):
         """Calibrate zero current, voltage, high current."""
         self.fifo_push(
-            ((s.oVin, 12.0), (s.pic_ZeroChk, -35), (s.pic_Status, 0),
-             (s.pic_Vin, (11.95, 11.98)),
-             (s.pic_isense, (-89.0, -89.9)), (s.oIsense, 0.090),
-             (s.pic_Status, 0), (s.oVin, 12.0), (s.oVcc, 3.3),
-             (s.pic_Vfactor, 20000), (s.pic_Ifactor, 15000),
-             (s.pic_Ioffset, -8), (s.pic_Ithreshold, 160), ))
+            ((s.oVin, 12.0), (s.oIsense, 0.090),
+             (s.oVin, 12.0), (s.oVcc, 3.3), ))
+        for str in (
+                ('', '-35', '', '', '', ) +
+                ('11950', '', '', '11980', ) +
+                ('-89000', '', '', '-89900', ) +
+                ('', ) +
+                ('20000', '15000', '-8', '160', )
+                ):
+            self._pic_puts(str)
 
         # Simulate zero current
         d.rla_ZeroCal.set_on()
         time.sleep(0.2)
-        self._picdev['CAL_RELOAD'] = True
+        self._pic['CAL_RELOAD'] = True
         time.sleep(10)
         m.pic_ZeroChk.measure(timeout=5)
         # Auto-zero the PIC current
-        self._picdev['CAL_I_ZERO'] = True
+        self._pic['CAL_I_ZERO'] = True
         # Assign forced offset & threshold for current display
-        self._picdev['CAL_OFFSET_CURRENT'] = limit.FORCE_OFFSET
-        self._picdev['ZERO-CURRENT-DISPLAY-THRESHOLD'] = limit.FORCE_THRESHOLD
+        self._pic['CAL_OFFSET_CURRENT'] = limit.FORCE_OFFSET
+        self._pic['ZERO-CURRENT-DISPLAY-THRESHOLD'] = limit.FORCE_THRESHOLD
         # Calibrate voltage
         dmm_vin = m.dmm_vin.measure(timeout=5)[1][0]
         pic_vin = m.pic_vin.measure(timeout=5)[1][0]
@@ -163,12 +182,12 @@ class Main(tester.TestSequence):
         m.ErrorV.measure()
         # Adjust voltage if required
         if err != self._limits['%CalV']:
-            self._picdev['CAL_V_SLOPE'] = dmm_vin
+            self._pic['CAL_V_SLOPE'] = dmm_vin
         d.rla_ZeroCal.set_off()
         # Simulate a high current
         d.dcs_SlopeCal.output(17.1, output=True)
         time.sleep(0.2)
-        self._picdev['CAL_RELOAD'] = True
+        self._pic['CAL_RELOAD'] = True
         time.sleep(10)
         # This will check any voltage adjust done above
         # ...we are using this CAL_RELOAD to save 10sec
@@ -185,8 +204,8 @@ class Main(tester.TestSequence):
         m.ErrorI.measure()
         # Adjust current if required
         if err != self._limits['%CalI']:
-            self._picdev['CAL_I_SLOPE'] = dmm_isense
-            self._picdev['CAL_RELOAD'] = True
+            self._pic['CAL_I_SLOPE'] = dmm_isense
+            self._pic['CAL_RELOAD'] = True
             time.sleep(10)
             pic_isense = m.pic_isense.measure(timeout=5)[1][0]
             err = ((dmm_isense - pic_isense) / dmm_isense) * 100
@@ -194,7 +213,7 @@ class Main(tester.TestSequence):
             m.CalI.measure()
         d.dcs_SlopeCal.output(0.0, output=False)
         # Write all adjusted parameters in a single write
-        self._picdev['NVWRITE'] = True
+        self._pic['NVWRITE'] = True
         time.sleep(5)
         # Read internal settings
         MeasureGroup((
