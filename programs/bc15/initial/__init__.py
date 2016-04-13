@@ -60,12 +60,12 @@ class Main(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         # Serial connection to the BC15 console
-        bc15_ser = SimSerial(
+        self._bc15_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1)
         # Set port separately, as we don't want it opened yet
-        bc15_ser.setPort(_ARM_PORT)
+        self._bc15_ser.setPort(_ARM_PORT)
         # BC15 Console driver
-        self._bc15 = console.Console(bc15_ser)
+        self._bc15 = console.Console(self._bc15_ser)
 
     def open(self):
         """Prepare for testing."""

@@ -89,7 +89,7 @@ class ConsoleCanTunnel():
         # Open underlying serial port
         self.port.open()
         # Switch console echo OFF
-# FIXME: I think that 'No Echo' will still echo the '\r' as '\r\n', in which
+# FIXME: 'No Echo' will still echo the '\r' as '\r\n', in which
 #       case it isn't really 'No Echo', is it?...
         self.port.flushInput()
         no_echo_cmd = '0 ECHO'
@@ -112,7 +112,7 @@ class ConsoleCanTunnel():
             reply = self.action(delay=0.2)  # RRC... is expected
         except:
             raise TunnelError('CAN Tunnel Mode failed')
-        expected = 'RRC,{},3,{},1'.format(self._target_id, self._local_id)
+        expected = 'RRC,{},3,3,{},1'.format(self._target_id, self._local_id)
         if reply != expected:
             raise TunnelError(
                 'Bad CAN tunnel mode reply: {}'.format(reply))
@@ -182,7 +182,8 @@ class ConsoleCanTunnel():
                 return ''
             for i in range(pat_len + 1, pat_len + 1 + byte_count):
                 data += chr(int(chunks[i]))
-        self._logger.debug('Decode %s => %s', repr(message), repr(data))
+        if self.verbose:
+            self._logger.debug('Decode %s => %s', repr(message), repr(data))
         return data
 
 ####    START of SimSerial compatible interface      ####
@@ -193,12 +194,15 @@ class ConsoleCanTunnel():
 
     def read(self, size=1):
         """Serial: Read the input buffer."""
-        reply = self.action()       # read any CAN data
-        if reply:
-            reply_bytes = self._decode(reply)
-            if self.verbose:
-                self._logger.debug('read() reply_bytes %s', repr(reply_bytes))
-            self.puts(reply_bytes)  # push any CAN data into my buffer port
+        while self.port.inWaiting():
+            reply = self.action()       # read any CAN data
+            if reply:
+                reply_bytes = self._decode(reply)
+                if self.verbose:
+                    self._logger.debug(
+                        'read() reply_bytes %s', repr(reply_bytes))
+                self.puts(reply_bytes)  # push any CAN data into buffer port
+                time.sleep(0.1)
         data = self._buf_port.read(size)    # now read from the buffer port
         if self.verbose:
             self._logger.debug('read(%s) = %s', size, repr(data))

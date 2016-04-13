@@ -64,9 +64,9 @@ class Main(tester.TestSequence):
         ser_can.setPort(_CAN_PORT)
         # CAN Console tunnel driver
         self._tunnel = ConsoleCanTunnel(
-            port=ser_can, simulation=fifo, verbose=True)
+            port=ser_can, simulation=fifo, verbose=False)
         # Trek2 Console driver (using the CAN Tunnel)
-        self._trek2 = TunnelConsole(port=self._tunnel, verbose=True)
+        self._trek2 = TunnelConsole(port=self._tunnel, verbose=False)
 
     def open(self):
         """Prepare for testing."""
