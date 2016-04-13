@@ -127,12 +127,11 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.pic_Status, 0), (s.oVsw, 3.3), (s.oVref, 3.3),
-             (s.o3V3, -2.7), (s.o0V8, -0.8), ))
+            ((s.oVsw, 3.3), (s.oVref, 3.3), (s.o3V3, -2.7), (s.o0V8, -0.8), ))
         for str in (
                 ('', ) * 2 +
                 ('Banner1\r\nBanner2', ) +
-                ('', ) * 2
+                ('', '0', '')
                 ):
             self._pic_puts(str)
 
@@ -151,13 +150,11 @@ class Main(tester.TestSequence):
 
     def _step_calibrate(self):
         """Calibrate zero current, voltage, high current."""
-        self.fifo_push(
-            ((s.oVin, 12.0), (s.oIsense, 0.090),
-             (s.oVin, 12.0), (s.oVcc, 3.3), ))
+        self.fifo_push(((s.oVin, 12.0), (s.oIsense, 0.090), (s.oVcc, 3.3), ))
         for str in (
-                ('', '-35', '', '', '', ) +
-                ('11950', '', '', '11980', ) +
-                ('-89000', '', '', '-89900', ) +
+                ('-35', '', '', '', ) +
+                ('11950', '', '11980', ) +
+                ('-89000', '', '-89900', ) +
                 ('', ) +
                 ('20000', '15000', '-8', '160', )
                 ):
@@ -166,8 +163,7 @@ class Main(tester.TestSequence):
         # Simulate zero current
         d.rla_ZeroCal.set_on()
         time.sleep(0.2)
-        self._pic['CAL_RELOAD'] = True
-        time.sleep(10)
+        self._cal_reload()
         m.pic_ZeroChk.measure(timeout=5)
         # Auto-zero the PIC current
         self._pic['CAL_I_ZERO'] = True
@@ -180,22 +176,22 @@ class Main(tester.TestSequence):
         err = ((dmm_vin - pic_vin) / dmm_vin) * 100
         s.oMirErrorV.store(err)
         m.ErrorV.measure()
+        adjust_vcal = (err != self._limits['%CalV'])
         # Adjust voltage if required
-        if err != self._limits['%CalV']:
+        if adjust_vcal:
             self._pic['CAL_V_SLOPE'] = dmm_vin
         d.rla_ZeroCal.set_off()
         # Simulate a high current
         d.dcs_SlopeCal.output(17.1, output=True)
         time.sleep(0.2)
-        self._pic['CAL_RELOAD'] = True
-        time.sleep(10)
-        # This will check any voltage adjust done above
-        # ...we are using this CAL_RELOAD to save 10sec
-        dmm_vin = m.dmm_vin.measure(timeout=5)[1][0]
-        pic_vin = m.pic_vin.measure(timeout=5)[1][0]
-        err = ((dmm_vin - pic_vin) / dmm_vin) * 100
-        s.oMirErrorV.store(err)
-        m.CalV.measure()
+        self._cal_reload()
+        if adjust_vcal:
+            # This will check any voltage adjust done above
+            # ...we are using this CAL_RELOAD to save 10sec
+            pic_vin = m.pic_vin.measure(timeout=5)[1][0]
+            err = ((dmm_vin - pic_vin) / dmm_vin) * 100
+            s.oMirErrorV.store(err)
+            m.CalV.measure()
         # Now we proceed to calibrate the current
         dmm_isense = m.dmm_isense.measure(timeout=5)[1][0]
         pic_isense = m.pic_isense.measure(timeout=5)[1][0]
@@ -205,8 +201,7 @@ class Main(tester.TestSequence):
         # Adjust current if required
         if err != self._limits['%CalI']:
             self._pic['CAL_I_SLOPE'] = dmm_isense
-            self._pic['CAL_RELOAD'] = True
-            time.sleep(10)
+            self._cal_reload()
             pic_isense = m.pic_isense.measure(timeout=5)[1][0]
             err = ((dmm_isense - pic_isense) / dmm_isense) * 100
             s.oMirErrorI.store(err)
@@ -219,3 +214,10 @@ class Main(tester.TestSequence):
         MeasureGroup((
             m.pic_Vfactor, m.pic_Ifactor, m.pic_Ioffset, m.pic_Ithreshold, ),
             timeout=5)
+
+    def _cal_reload(self):
+        """Re-Load data readings."""
+        self._pic_puts('', priority=True)
+
+        self._pic['CAL_RELOAD'] = True
+        time.sleep(10)
