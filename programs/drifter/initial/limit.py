@@ -2,36 +2,40 @@
 # -*- coding: utf-8 -*-
 """Drifter(BM) Initial Program Limits."""
 
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
+from testlimit import (lim_hilo, lim_hilo_delta, lim_hilo_int, lim_string)
+
+FORCE_OFFSET = -8
+FORCE_THRESHOLD = 160
+
 _COMMON = (
-    ('Vin', 0, 11.9, 12.1, None, None),
-    ('Vsw', 0, -100, 100, None, None),
-    ('Vref', 0, -100, 100, None, None),
-    ('Vcc', 0, 3.23, 3.37, None, None),
-    ('Isense', 0, -95, -85, None, None),
-    ('3V3', 0, -2.8, -2.5, None, None),
-    ('Program', 0, -0.1, 0.1, None, None),
-    ('%ErrorV', 0, -2.24, 2.24, None, None),
-    ('%CalV', 0, -0.36, 0.36, None, None),
-    ('%ErrorI', 0, -2.15, 2.15, None, None),
-    ('%CalI', 0, -0.50, 0.50, None, None),
+    lim_hilo_delta('Vin', 12.0, 0.1),
+    lim_hilo_delta('Vsw', 0, 100),
+    lim_hilo_delta('Vref', 0, 100),
+    lim_hilo_delta('Vcc', 3.30, 0.07),
+    lim_hilo_delta('Isense', -90, 5),
+    lim_hilo('3V3', -2.8, -2.5),
+    lim_hilo_int('Program', 0),
+    lim_hilo_delta('%ErrorV', 0, 2.24),
+    lim_hilo_delta('%CalV', 0, 0.36),
+    lim_hilo_delta('%ErrorI', 0, 2.15),
+    lim_hilo_delta('%CalI', 0, 0.50),
     # Data reported by the PIC
-    ('Status 0', 0, -0.1, 0.1, None, None),
-    ('ZeroChk', 0, -65.0, 65.0, None, None),
-    ('PicVin', 0, 11.5, 12.5, None, None),
-    ('PicIsense', 0, -95, -85, None, None),
-    ('Vfactor', 0, 19000, 21000, None, None),
-    ('Ifactor', 0, 14000, 16000, None, None),
-    ('Ioffset', 0, -8.01, -8, None, None),
-    ('Ithreshold', 0, 160, 160.01, None, None),
+    lim_hilo_int('PicStatus 0', 0),
+    lim_hilo_delta('PicZeroChk', 0, 65.0),
+    lim_hilo_delta('PicVin', 12.0, 0.5),
+    lim_hilo_delta('PicIsense', -90, 5),
+    lim_hilo_delta('PicVfactor', 20000, 1000),
+    lim_hilo_delta('PicIfactor', 15000, 1000),
+    lim_hilo('PicIoffset', -8.01, -8),
+    lim_hilo('PicIthreshold', 160, 160.01),
     )
 
 DATA = _COMMON + (
-    ('Software', 0, None, None, 'Drifter-5.hex', None),
-    ('0V8', 0, -1.2, -0.4, None, None),
+    lim_string('Software', 'Drifter-5.hex'),
+    lim_hilo('0V8', -1.2, -0.4),
     )
 
 DATA_BM = _COMMON + (
-    ('Software', 0, None, None, 'DrifterBM-2.hex', None),
-    ('0V8', 0, -1.4, -0.6, None, None),
+    lim_string('Software', 'DrifterBM-2.hex'),
+    lim_hilo('0V8', -1.4, -0.6),
     )

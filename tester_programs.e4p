@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-12, 17:26:07 -->
+<!-- Saved: 2016-04-13, 14:24:47 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -100,6 +100,7 @@
     <Source>programs/cn101/initial/limit.py</Source>
     <Source>programs/cn101/initial/support.py</Source>
     <Source>programs/drifter/__init__.py</Source>
+    <Source>programs/drifter/console.py</Source>
     <Source>programs/drifter/final/__init__.py</Source>
     <Source>programs/drifter/final/limit.py</Source>
     <Source>programs/drifter/final/support.py</Source>
