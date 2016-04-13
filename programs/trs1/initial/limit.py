@@ -18,7 +18,7 @@ DATA = (
     lim_hilo_delta('LightOn', 12.0, 0.3),
     lim_lo('RemoteOff', 0.1),
     lim_hilo_delta('RemoteOn', 12.0, 0.1),
-    lim_hilo_delta('RedLedOff', 12.0, 0.1),
+    lim_hilo_delta('RedLedOff', 12.0, 1.0),
     lim_lo('RedLedOn', 0.1),
     lim_hilo_delta('GrnLedOff', 6.8, 1.0),
     lim_lo('GrnLedOn', 0.1),
