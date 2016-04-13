@@ -157,12 +157,15 @@ class CmrSbp():
                 if len(line) > 0:
                     key = self._scan_line(line, tdata)
                     if state == 3 and key == 'BATTERY MODE':
+                        self._logger.debug('Start data block')
                         state = 2
                     if state == 2 and key == 'SERIAL NUMBER':
+                        self._logger.debug('End data block')
                         state = 1
                 pos = buf.find('\n')
             if self._read.is_set():
                 self._read.clear()
+                self._logger.debug('Starting data read')
                 state = 3
                 timeup.clear()
                 tmr = threading.Timer(20.0, timeup.set)
@@ -176,9 +179,11 @@ class CmrSbp():
             if state == 1:
                 tmr.cancel()
                 state = 0
+                self._logger.debug('Data read completed')
                 self.ResultQ.put((None, tdata.data))  # this will be valid data
             if state > 0 and timeup.is_set():
                 state = 0
+                self._logger.debug('Data read timeout')
                 self.ResultQ.put((None, tdata.data))  # this will be empty data
         try:
             tdata.cancel()
