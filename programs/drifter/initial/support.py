@@ -7,7 +7,7 @@ import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-from ..console import Console
+from .. import console
 
 
 class LogicalDevices():
@@ -69,14 +69,14 @@ class Sensors():
             dmm, high=5, low=1, rng=10, res=0.00001, scale=-1000.0)
         self.o3V3 = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
         self.o0V8 = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.001)
-        self.pic_Status = Console.Sensor(picdev, 'NVSTATUS')
-        self.pic_ZeroChk = Console.Sensor(picdev, 'ZERO_CURRENT')
-        self.pic_Vin = Console.Sensor(picdev, 'VOLTAGE')
-        self.pic_isense = Console.Sensor(picdev, 'CURRENT')
-        self.pic_Vfactor = Console.Sensor(picdev, 'V_FACTOR')
-        self.pic_Ifactor = Console.Sensor(picdev, 'I_FACTOR')
-        self.pic_Ioffset = Console.Sensor(picdev, 'CAL_OFFSET_CURRENT')
-        self.pic_Ithreshold = Console.Sensor(
+        self.pic_Status = console.Sensor(picdev, 'NVSTATUS')
+        self.pic_ZeroChk = console.Sensor(picdev, 'ZERO_CURRENT')
+        self.pic_Vin = console.Sensor(picdev, 'VOLTAGE')
+        self.pic_isense = console.Sensor(picdev, 'CURRENT')
+        self.pic_Vfactor = console.Sensor(picdev, 'V_FACTOR')
+        self.pic_Ifactor = console.Sensor(picdev, 'I_FACTOR')
+        self.pic_Ioffset = console.Sensor(picdev, 'CAL_OFFSET_CURRENT')
+        self.pic_Ithreshold = console.Sensor(
             picdev, 'ZERO-CURRENT-DISPLAY-THRESHOLD')
 
     def _reset(self):
@@ -112,7 +112,7 @@ class Measurements():
         self.pic_Status = Measurement(limits['PicStatus 0'], sense.pic_Status)
         self.pic_ZeroChk = Measurement(limits['PicZeroChk'], sense.pic_ZeroChk)
         self.pic_vin = Measurement(limits['PicVin'], sense.pic_Vin)
-        self.pic_isense = Measurement(limits['PicIsense'], sense.opic_isense)
+        self.pic_isense = Measurement(limits['PicIsense'], sense.pic_isense)
         self.pic_Vfactor = Measurement(limits['PicVfactor'], sense.pic_Vfactor)
         self.pic_Ifactor = Measurement(limits['PicIfactor'], sense.pic_Ifactor)
         self.pic_Ioffset = Measurement(limits['PicIoffset'], sense.pic_Ioffset)

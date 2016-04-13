@@ -57,7 +57,7 @@ class Main(tester.TestSequence):
         self._limits = test_limits
         # Serial connection to the console
         self._pic_ser = SimSerial(
-            simulation=self._fifo, baudrate=9600, timeout=2)
+            simulation=self._fifo, baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
         self._pic_ser.setPort(_PIC_PORT)
         self._picdev = Console(self._pic_ser)
@@ -196,15 +196,7 @@ class Main(tester.TestSequence):
         # Write all adjusted parameters in a single write
         self._picdev['NVWRITE'] = True
         time.sleep(5)
-#        # Restart the unit
-#        d.dcs_Vin.output(0.0)
-#        time.sleep(0.5)
-#        d.dcs_Vin.output(12.0)
-#        time.sleep(4)
-#        MeasureGroup((m.dmm_vin, m.dmm_Vcc), timeout=5)
-#        self._picdev['UNLOCK'] = _UNLOCK_KEY
         # Read internal settings
-        m.pic_Vfactor.measure(timeout=5)
-        m.pic_Ifactor.measure(timeout=5)
-        m.pic_Ioffset.measure(timeout=5)
-        m.pic_Ithreshold.measure(timeout=5)
+        MeasureGroup((
+            m.pic_Vfactor, m.pic_Ifactor, m.pic_Ioffset, m.pic_Ithreshold, ),
+            timeout=5)

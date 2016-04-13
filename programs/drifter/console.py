@@ -12,7 +12,7 @@ ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 
 
-class Console(console.Variable, console.BaseUartConsole):
+class Console(console.Variable, console.BadUartConsole):
 
     """Communications to Drifter console."""
 
@@ -21,7 +21,7 @@ class Console(console.Variable, console.BaseUartConsole):
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
         console.Variable.__init__(self)
-        console.BadUartConsole.__init__(self, port)
+        console.BadUartConsole.__init__(self, port, verbose=False)
         self.cmd_data = {
             'UNLOCK': ParameterString('UNLOCK',
                 writeable=True, readable=False, write_format='{} {}'),
@@ -29,7 +29,7 @@ class Console(console.Variable, console.BaseUartConsole):
                 writeable=True, readable=False, write_format='{1}'),
             'NVWRITE': ParameterBoolean('NV-WRITE',
                 writeable=True, readable=False, write_format='{1}'),
-            'NVSTATUS': ParameterBoolean('NV-STATUS PRINT', read_format='{1}'),
+            'NVSTATUS': ParameterFloat('NV-STATUS PRINT', read_format='{}'),
             'RESTART': ParameterBoolean('RESTART',
                 writeable=True, readable=False, write_format='{1}'),
             'APS_DISABLE': ParameterFloat('APS-DISABLE',
@@ -45,7 +45,7 @@ class Console(console.Variable, console.BaseUartConsole):
                 writeable=True, readable=False, scale=1000,
                 write_format='{} {}'),
             'CAL_OFFSET_CURRENT': ParameterFloat('X-CAL-OFFSET-CURRENT',
-                writeable=True, scale=1000,
+                writeable=True, scale=1, minimum=-1000,
                 write_format='{} {} X!', read_format='{} X?'),
             'VOLTAGE': ParameterFloat('X-VOLTS-FILTERED',
                 scale=1000, read_format='{} X?'),
@@ -55,12 +55,12 @@ class Console(console.Variable, console.BaseUartConsole):
                 scale=1, read_format='{} X?'),
             'ZERO-CURRENT-DISPLAY-THRESHOLD': ParameterFloat(
                 'X-ZERO-CURRENT-DISPLAY-THRESHOLD',
-                writeable=True, scale=1000,
+                writeable=True, scale=1, minimum=-1000,
                 write_format='{} {} X!', read_format='{} X?'),
             'V_FACTOR': ParameterFloat('X-CAL-FACTOR-VOLTS',
                 read_format='{} X?'),
             'I_FACTOR': ParameterFloat('X-CAL-FACTOR-CURRENT',
                 read_format='{} X?'),
             }
-#        # Strings to ignore in responses
-#        self.ignore = (' ', 'mV', 'mA')
+        # Strings to ignore in responses
+        self.ignore = (' ', )

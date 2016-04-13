@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-13, 14:24:47 -->
+<!-- Saved: 2016-04-13, 17:14:58 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -106,7 +106,6 @@
     <Source>programs/drifter/final/support.py</Source>
     <Source>programs/drifter/initial/__init__.py</Source>
     <Source>programs/drifter/initial/limit.py</Source>
-    <Source>programs/drifter/initial/pic_driver.py</Source>
     <Source>programs/drifter/initial/support.py</Source>
     <Source>programs/dummy/__init__.py</Source>
     <Source>programs/dummy/limit.py</Source>
