@@ -180,6 +180,7 @@ class MeasureFin():
         self.cmr_VFCcalStatus = Measurement(
             limits['VFCcalStatus'], sense.oMirVFCcalStatus)
         self.cmr_SerNum = Measurement(limits['SerNum'], sense.oMirSerNum)
+        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
 
 
 class SubTestInit():
