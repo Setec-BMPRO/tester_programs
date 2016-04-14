@@ -32,10 +32,6 @@ class LogicalDevices():
         self.dcs_vbat = dcsource.DCSourceParallel(
             (dcs_vbat1, dcs_vbat2, dcs_vbat3,))
         self.dcl_ibat = dcload.DCLoad(devices['DCL1'])
-        self.rla_Bit0 = relay.Relay(devices['RLA1'])
-        self.rla_Bit1 = relay.Relay(devices['RLA2'])
-        self.rla_Bit2 = relay.Relay(devices['RLA3'])
-        self.rla_Bit3 = relay.Relay(devices['RLA4'])
         self.rla_vbat = relay.Relay(devices['RLA5'])
         self.rla_PicReset = relay.Relay(devices['RLA6'])
         self.rla_Prog = relay.Relay(devices['RLA7'])
@@ -57,8 +53,7 @@ class LogicalDevices():
         # Switch off DC Load
         self.dcl_ibat.output(0.0)
         # Switch off all Relays
-        for rla in (self.rla_Bit0, self.rla_Bit1, self.rla_Bit2,
-                    self.rla_Bit3, self.rla_Pic, self.rla_Erase):
+        for rla in (self.rla_Pic, self.rla_Erase):
             rla.set_off()
 
 
@@ -77,7 +72,6 @@ class Sensors():
         self.oMirvbatIn = sensor.Mirror()
         self.oMirCycleCnt = sensor.Mirror()
         self.oMirRelrnFlg = sensor.Mirror()
-        self.oMirSw = sensor.Mirror()
         self.oMirSenseRes = sensor.Mirror()
         self.oMirCapacity = sensor.Mirror()
         self.oMirRelStateCharge = sensor.Mirror()
@@ -106,7 +100,6 @@ class Sensors():
         self.oMirvbatIn.flush()
         self.oMirCycleCnt.flush()
         self.oMirRelrnFlg.flush()
-        self.oMirSw.flush()
         self.oMirSenseRes.flush()
         self.oMirCapacity.flush()
         self.oMirRelStateCharge.flush()
@@ -134,11 +127,7 @@ class MeasureInit():
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.cmr_SenseRes = Measurement(limits['SenseRes'], sense.oMirSenseRes)
         self.cmr_Halfcell = Measurement(limits['Halfcell'], sense.oMirHalfCell)
-        self.cmr_VChgeOff = Measurement(limits['VChgeOff'], sense.oMirVChge)
         self.cmr_VChgeOn = Measurement(limits['VChgeOn'], sense.oMirVChge)
-        self.cmr_Sw02 = Measurement(limits['Bits0+2'], sense.oMirSw)
-        self.cmr_Sw13 = Measurement(limits['Bits1+3'], sense.oMirSw)
-        self.cmr_SwOff = Measurement(limits['BitsOff'], sense.oMirSw)
         self.bq_ErrVUncal = Measurement(limits['ErrVUncal'], sense.oMirErrV)
         self.bq_ErrIUncal = Measurement(limits['ErrIUncal'], sense.oMirErrI)
         self.bq_Temp = Measurement(limits['BQ-Temp'], sense.oMirTemp)
@@ -180,6 +169,7 @@ class MeasureFin():
         self.cmr_VFCcalStatus = Measurement(
             limits['VFCcalStatus'], sense.oMirVFCcalStatus)
         self.cmr_SerNum = Measurement(limits['SerNum'], sense.oMirSerNum)
+        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
 
 
 class SubTestInit():
@@ -196,63 +186,29 @@ class SubTestInit():
         d = logical_devices
         m = measurements
         # PowerUp: Check, Apply Batt In, measure.
-        msr1 = MeasureSubStep((m.dmm_NoFinal, ), timeout=5)
-        rly1 = RelaySubStep(((d.rla_Bit0, True), (d.rla_vbat, True), ))
-        rly2 = RelaySubStep(((d.rla_vbat, True), ))
-        rly3 = RelaySubStep(((d.rla_PicReset, True), ), delay=2)
-        rly4 = RelaySubStep(((d.rla_EVM, True), ))
-        dcs1 = DcSubStep(setting=((d.dcs_vbat, 12.20), ), output=True)
-        msr2 = MeasureSubStep((m.dmm_vbat, m.dmm_Vcc, ), timeout=5)
-        self.pwrup = Step((msr1, rly1, dcs1, msr2))
-        self.pwrup_sd = Step((msr1, rly2, dcs1, rly3, rly4))
+        self.pwrup = Step((
+            MeasureSubStep((m.dmm_NoFinal, ), timeout=5),
+            RelaySubStep(((d.rla_vbat, True), )),
+            DcSubStep(setting=((d.dcs_vbat, 12.20), ), output=True),
+            MeasureSubStep((m.dmm_vbat, m.dmm_Vcc, ), timeout=5),
+            ))
         # PowerComms: Power Comms, connect.
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vcom, 12.0), ), output=True, delay=15)
-        rly1 = RelaySubStep(
-            ((d.rla_Bit0, False), (d.rla_Pic, True)), delay=2)
-        self.pwr_comms = Step((dcs1, rly1))
-        # RotarySw: Simulate Bits 0/2 on, 1/3 on and all off.
-        dcs1 = DcSubStep(setting=((d.dcs_Vchg, 12.6), ), output=True)
-        rly1 = RelaySubStep(
-            ((d.rla_Bit0, True), (d.rla_Bit2, True), (d.rla_Bit1, False),
-             (d.rla_Bit3, False)), delay=15)
-        rly2 = RelaySubStep(
-            ((d.rla_Bit1, True), (d.rla_Bit3, True), (d.rla_Bit0, False),
-             (d.rla_Bit2, False)), delay=15)
-        rly3 = RelaySubStep(
-            ((d.rla_Bit0, False), (d.rla_Bit1, False), (d.rla_Bit2, False),
-             (d.rla_Bit3, False)), delay=15)
-        self.sw02 = Step((dcs1, rly1))
-        self.sw13 = Step((rly2, ))
-        self.swoff = Step((rly3, ))
+        self.pwr_comms = Step((
+            DcSubStep(setting=((d.dcs_Vcom, 12.0), ), output=True),
+            DcSubStep(setting=((d.dcs_Vchg, 12.6), ), output=True, delay=15),
+            RelaySubStep(((d.rla_Pic, True), ), delay=2),
+            ))
         # CheckVcharge: Switch off vbat, measure
-        dcs1 = DcSubStep(setting=((d.dcs_vbat, 0.0), ))
-        rly1 = RelaySubStep(((d.rla_vbat, False), ))
-        msr1 = MeasureSubStep((m.dmm_vbatChge, m.dmm_Vcc), timeout=5)
-        rly2 = RelaySubStep(((d.rla_vbat, True), ))
-        self.chk_vch = Step((dcs1, rly1, msr1, rly2))
+        self.chk_vch = Step((
+            DcSubStep(setting=((d.dcs_vbat, 0.0), )),
+            RelaySubStep(((d.rla_vbat, False), )),
+            MeasureSubStep((m.dmm_vbatChge, m.dmm_Vcc), timeout=5),
+            RelaySubStep(((d.rla_vbat, True), )),
+            ))
         # CalSetup:
-        dcs1 = DcSubStep(setting=((d.dcs_vbat, 12.20), (d.dcs_Vchg, 0.0)))
-        rly1 = RelaySubStep(
-            ((d.rla_Pic, False), (d.rla_PicReset, True), ), delay=2)
-        rly2 = RelaySubStep(((d.rla_EVM, True), ))
-        self.cal_setup = Step((dcs1, rly1, rly2))
-
-
-class SubTestFin():
-
-    """Final SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-        d = logical_devices
-        # StartUp:  Power comms, connect.
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Vcom, 12.0), ), output=True, delay=1)
-        rly1 = RelaySubStep(((d.rla_Pic, True), ))
-        self.startup = Step((dcs1, rly1))
+        self.cal_setup = Step((
+            DcSubStep(setting=((d.dcs_vbat, 12.20), (d.dcs_Vchg, 0.0))),
+            RelaySubStep(
+                ((d.rla_Pic, False), (d.rla_PicReset, True), ), delay=2),
+            RelaySubStep(((d.rla_EVM, True), )),
+            ))
