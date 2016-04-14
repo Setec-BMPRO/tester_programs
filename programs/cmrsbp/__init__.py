@@ -169,7 +169,6 @@ class MainInitial(_Main):
             ('PowerUp', self._step_power_up, None, True),
             ('Program', self._step_program, None, True),
             ('CheckPicValues', self._step_check_pic_vals, None, True),
-            ('CheckRotarySw', self._step_check_sw, None, True),
             ('CheckVcharge', self._step_check_vchge, None, True),
             ('CalBQvolts', self._step_calv, None, True),
             ('CalBQcurrent', self._step_cali, None, True),
@@ -244,25 +243,12 @@ class MainInitial(_Main):
         s.oMirSenseRes.store(cmr_data['SENSE RESISTOR READING'])
         s.oMirHalfCell.store(cmr_data['HALF CELL READING'])
         s.oMirVChge.store(cmr_data['CHARGE INPUT READING'])
-        tester.measure.group((m.cmr_SenseRes, m.cmr_Halfcell, m.cmr_VChgeOff),)
-
-    def _step_check_sw(self):
-        """Simulate rotary switch positions, read PIC and check values."""
-        _positions = (t.sw02, t.sw13, t.swoff)
-        _measurements = (m.cmr_Sw02, m.cmr_Sw13, m.cmr_SwOff)
-        for pos, meas in zip(_positions, _measurements):
-            pos.run()
-            cmr_data = self._read_data()
-            s.oMirSw.store(cmr_data['ROTARY SWITCH READING'] - 256)
-            meas.measure()
+        tester.measure.group((m.cmr_SenseRes, m.cmr_Halfcell, m.cmr_VChgeOn),)
 
     def _step_check_vchge(self):
         """Check Vcharge."""
         self.fifo_push(((s.ovbat, 12.0), (s.oVcc, 3.3), ))
 
-        cmr_data = self._read_data()
-        s.oMirVChge.store(cmr_data['CHARGE INPUT READING'])
-        m.cmr_VChgeOn.measure()
         t.chk_vch.run()
 
     def _step_calv(self):
