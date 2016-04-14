@@ -13,6 +13,7 @@ In 'simulation' mode, the port device is not accessed at all.
 """
 
 import serial
+import threading
 import logging
 from array import array
 
@@ -32,6 +33,8 @@ class _Simulator():
         self._in_buf = array(_ARRAY_TYPE)
         # Data buffer for data written by write()
         self._out_buf = array(_ARRAY_TYPE)
+        # Thread-safe locking control of the data buffer
+        self._lock = threading.Lock()
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
         """Put a string into the read-back buffer.
@@ -44,22 +47,31 @@ class _Simulator():
 
         """
         self._logger.debug('puts() %s', repr(string_data))
-        newdata = array(_ARRAY_TYPE)
-        for _ in range(preflush):
-            newdata.append(_FLUSH)
-        for dat in string_data.encode():
-            newdata.append(dat)
-        for _ in range(postflush):
-            newdata.append(_FLUSH)
-        if priority:    # LIFO - put into start of buffer
-            newdata.extend(self._in_buf)
-            self._in_buf = newdata
-        else:           # FIFO - add onto end of buffer
-            self._in_buf.extend(newdata)
+        self._lock.acquire()
+        try:
+            newdata = array(_ARRAY_TYPE)
+            for _ in range(preflush):
+                newdata.append(_FLUSH)
+            for dat in string_data.encode():
+                newdata.append(dat)
+            for _ in range(postflush):
+                newdata.append(_FLUSH)
+            if priority:    # LIFO - put into start of buffer
+                newdata.extend(self._in_buf)
+                self._in_buf = newdata
+            else:           # FIFO - add onto end of buffer
+                self._in_buf.extend(newdata)
+        finally:
+            self._lock.release()
 
     def _in_buf_len(self):
         """Calculate number of data bytes waiting in the input buffer."""
-        return len(self._in_buf) - self._in_buf.count(_FLUSH)
+        self._lock.acquire()
+        try:
+            buf_len = len(self._in_buf) - self._in_buf.count(_FLUSH)
+        finally:
+            self._lock.release()
+        return buf_len
 
     def get(self):
         """Get data from the written-out buffer.
@@ -67,9 +79,13 @@ class _Simulator():
         @return Bytes from the output capture buffer.
 
         """
-        data = bytearray()
-        while len(self._out_buf) > 0:
-            data.extend([self._out_buf.pop(0)])
+        self._lock.acquire()
+        try:
+            data = bytearray()
+            while len(self._out_buf) > 0:
+                data.extend([self._out_buf.pop(0)])
+        finally:
+            self._lock.release()
         return data
 
 

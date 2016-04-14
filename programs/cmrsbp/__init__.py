@@ -6,6 +6,7 @@ import os
 import inspect
 import logging
 import datetime
+import threading
 import time
 import tester
 from . import support
@@ -140,10 +141,10 @@ class _Main(tester.TestSequence):
                     sense_res = 450
                     full_charge = 17000
             data_str = _str.format(full_charge, half_cell, sense_res)
-            self._cmr_ser.puts(data_str)
-# FIXME: To be able to simulate, we need to trigger the read 1st by calling
-#   _cmr.read(), THEN push the data using _cmr_ser.puts()
-#   Is SimSerial thread safe?...
+            def myputs():   # This will push the later when timer is done
+                self._cmr_ser.puts(data_str)
+            tmr = threading.Timer(0.5, myputs)
+            tmr.start()     # Push data once we are inside _cmr.read()
         data = self._cmr.read()
         self._logger.debug('Received data: %s', data)
         return data
