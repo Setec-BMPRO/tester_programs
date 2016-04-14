@@ -125,7 +125,7 @@ class _Main(tester.TestSequence):
 #SENSE RESISTOR READING,{}
 #CHARGE INPUT READING,0
 #ROTARY SWITCH READING,256
-#SERIAL NUMBER,1234
+#SERIAL NUMBER,0778
 """
             sense_res = 250
             full_charge = 13000
@@ -384,6 +384,10 @@ class MainFinal(_Main):
 
     def _step_startup(self):
         """Power comms interface, connect to PIC."""
+        self.fifo_push(((s.oSnEntry, ('G240166F0778', )), ))
+
+        result, (sernum, ) = m.ui_SnEntry.measure()
+        self._limits['SerNum'].limit = str(int(sernum[-4:]))
         d.dcs_Vcom.output(12.0, output=True)
         time.sleep(1)
         d.rla_Pic.set_on()
@@ -406,11 +410,8 @@ class MainFinal(_Main):
         s.oMirHalfCell.store(cmr_data['HALF CELL READING'])
         status = _bit_status(cmr_data['PACK STATUS AND CONFIG'], 7)
         s.oMirVFCcalStatus.store(status)
-        self._limits['SerNum'].limit = self.uuts[0]
         s.oMirSerNum.store(str(cmr_data['SERIAL NUMBER']))
         MeasureGroup(
             (m.cmr_vbatIn, m.cmr_ErrV, m.cmr_CycleCnt, m.cmr_RelrnFlg,
              m.cmr_Sw, m.cmr_SenseRes, m.cmr_Capacity, m.cmr_RelStateCharge,
-             m.cmr_Halfcell, m.cmr_VFCcalStatus,
-#             m.cmr_SerNum), )
-            ), )
+             m.cmr_Halfcell, m.cmr_VFCcalStatus, m.cmr_SerNum), )
