@@ -4,34 +4,37 @@
 
 BIN_VERSION = '1.0.12537.1514'      # Software binary version
 
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
+from testlimit import (
+    lim_lo, lim_hi,
+    lim_hilo, lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
+    lim_string)
+
 DATA = (
-    ('ACin', 0, 235.0, 245.0, None, None),
-    ('Vbus', 0, 325.0, 345.0, None, None),
-    ('14Vpri', 0, 13.0, 15.0, None, None),
-    ('12Vs', 0, 11.7, 13.0, None, None),
-    ('5Vs', 0, 4.9, 5.1, None, None),
-    ('3V3', 0, 3.20, 3.35, None, None),
-    ('FanOn', 0, 0.5, None, None, None),
-    ('FanOff', 0, None, 11.0, None, None),
-    ('15Vs', 0, 14.5, 16.5, None, None),
-    ('Vout', 0, 14.40 * 0.95, 14.40 * 1.05, None, None),
-    ('VoutCal', 0, 14.40 * 0.99, 14.40 * 1.01, None, None),
-    ('VoutOff', 0, 2.0, None, None, None),
-    ('OCP', 0, 15.0 * 0.95, 15.0 * 1.05, None, None),
-    ('InOCP', 0, 12.0, None, None, None),
-    ('Program', 0, -0.1, 0.1, None, None),
-    ('FixtureLock', 0, 20, None, None, None),
-    ('FanShort', 0, None, 100, None, None),
+    lim_hilo_delta('ACin', 240.0, 5.0),
+    lim_hilo_delta('Vbus', 335.0, 10.0),
+    lim_hilo_delta('14Vpri', 14.0, 1.0),
+    lim_hilo('12Vs', 11.7, 13.0),
+    lim_hilo_delta('5Vs', 5.0, 0.1),
+    lim_hilo('3V3', 3.20, 3.35),
+    lim_lo('FanOn', 0.5),
+    lim_hi('FanOff', 11.0),
+    lim_hilo_delta('15Vs', 15.5, 1.0),
+    lim_hilo_percent('Vout', 14.40, 5.0),
+    lim_hilo_percent('VoutCal', 14.40, 1.0),
+    lim_lo('VoutOff', 2.0),
+    lim_hilo_percent('OCP', 15.0, 5.0),
+    lim_lo('InOCP', 12.0),
+    lim_hilo_int('Program', 0),
+    lim_lo('FixtureLock', 20),
+    lim_hi('FanShort', 100),
     # Data reported by the ARM
-    ('ARM-SwVer', 0, None, None,
-        '^{}$'.format(BIN_VERSION.replace('.', r'\.')), None),
-    ('ARM-Vout', 0, 14.40 * 0.95, 14.40 * 1.05, None, None),
-    ('ARM-2amp', 0, 0.5, 3.5, None, None),
+    lim_string('ARM-SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
+    lim_hilo_percent('ARM-Vout', 14.40, 5.0),
+    lim_hilo('ARM-2amp', 0.5, 3.5),
     # Why 'Lucky'?
     #   The circuit specs are +/- 1.5A, and we hope to be lucky
     #   and get units within +/- 1.0A ...
-    ('ARM-2amp-Lucky', 0, 1.0, 3.0, None, None),
-    ('ARM-14amp', 0, 12.0, 16.0, None, None),
-    ('ARM-switch', 0, 2.5, 3.5, None, None),
+    lim_hilo_delta('ARM-2amp-Lucky', 2.0, 1.0),
+    lim_hilo_delta('ARM-14amp', 14.0, 2.0),
+    lim_hilo_int('ARM-switch', 3),
     )

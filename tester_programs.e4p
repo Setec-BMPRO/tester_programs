@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-13, 17:14:58 -->
+<!-- Saved: 2016-04-15, 13:52:47 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -166,10 +166,8 @@
     <Source>programs/share/can_tunnel.py</Source>
     <Source>programs/share/console/__init__.py</Source>
     <Source>programs/share/console/_base.py</Source>
-    <Source>programs/share/console/arm_gen2.py</Source>
     <Source>programs/share/console/protocol.py</Source>
     <Source>programs/share/console/test/__init__.py</Source>
-    <Source>programs/share/console/test/test_base.py</Source>
     <Source>programs/share/console/test/test_protocol.py</Source>
     <Source>programs/share/programmer.py</Source>
     <Source>programs/share/sim_serial.py</Source>

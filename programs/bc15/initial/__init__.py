@@ -27,7 +27,6 @@ _ARM_BIN = 'bc15_{}.bin'.format(limit.BIN_VERSION)
 d = None        # Shortcut to Logical Devices
 s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
 
 
 class Main(tester.TestSequence):
@@ -61,7 +60,7 @@ class Main(tester.TestSequence):
         self._limits = test_limits
         # Serial connection to the BC15 console
         self._bc15_ser = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=0.1)
+            simulation=self._fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         self._bc15_ser.setPort(_ARM_PORT)
         # BC15 Console driver
@@ -70,19 +69,21 @@ class Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m, t
+        global d, s, m
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._limits, self._bc15)
         m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
         # Apply power to fixture Comms circuit.
         d.dcs_vcom.output(12.0, True)
         time.sleep(2)       # Allow OS to detect USB serial port
 
     def _bc15_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BC15 buffer only if FIFOs are enabled."""
+                   string_data, preflush=0, postflush=0, priority=False,
+                   addprompt=True):
+        """Push string data into the buffer if FIFOs are enabled."""
         if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
             self._bc15.puts(string_data, preflush, postflush, priority)
 
     def _bc15_putstartup(self, put_defaults):
@@ -92,34 +93,27 @@ class Main(tester.TestSequence):
             'Build date:       06/11/2015\r\n'
             'Build time:       15:31:40\r\n'
             'SystemCoreClock:  48000000\r\n'
-            'Software version: {}\r\n'
+            'Software version: 1.2.3.456\r\n'
             'nonvol: reading crc invalid at sector 14 offset 0\r\n'
             'nonvol: reading nonvol2 OK at sector 15 offset 2304\r\n'
             'Hardware version: 0.0.[00]\r\n'
             'Serial number:    A9999999999\r\n'
-            'Please type help command.\r\n'
-            '> '                                # END Startup messages
-            '"OK\\n PROMPT\r\n'                 # 1st command echo
-            'OK\r\n'                            # and it's response
-            '0 ECHO\r\nOK\r\n'                  # ECHO command echo
-            'OK\r\n'.format(limit.BIN_VERSION)
-            )                           # and it's response
+            'Please type help command.'         # END Startup messages
+            )
         if put_defaults:
-            self._bc15_puts(
-                'OK\r\n'                        # UNLOCK response
-                'OK\r\n'                        # NV-DEFAULT response
-                'OK\r\n'                        # NV-WRITE response
-                '{}\r\nOK\r\n'.format(limit.BIN_VERSION),
-                                                # SwVer response
-                preflush=1)
+            for str in (
+                ('OK', ) * 3 +
+                ('{}'.format(limit.BIN_VERSION), )
+                ):
+                self._bc15_puts(str)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s, t
+        global m, d, s
         # Remove power from fixture circuit.
         d.dcs_vcom.output(0, False)
-        m = d = s = t = None
+        m = d = s = None
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -139,6 +133,7 @@ class Main(tester.TestSequence):
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
         self.fifo_push(((s.olock, 0.0), (s.ofanshort, 3300.0), ))
+
         MeasureGroup((m.dmm_lock, m.dmm_fanshort, ), timeout=5)
 
     def _step_program_arm(self):
@@ -188,7 +183,10 @@ class Main(tester.TestSequence):
         d.rla_reset.pulse(0.1)
         time.sleep(0.5)
         self._bc15.open()
-        self._bc15.defaults()
+        self._bc15.action(None, delay=1.5, expected=10)  # Flush banner
+        self._bc15['UNLOCK'] = '0xDEADBEA7'
+        self._bc15['NVDEFAULT'] = True
+        self._bc15['NVWRITE'] = True
         m.arm_SwVer.measure()
         self._bc15.close()
         d.dcs_3v3.output(0.0, False)
@@ -204,10 +202,15 @@ class Main(tester.TestSequence):
             ((s.oACin, 240.0), (s.oVbus, 330.0), (s.o12Vs, 12.0),
              (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, 0.2), ))
         self._bc15_putstartup(False)
-        self._bc15_puts('OK\r\n' * 10, preflush=1)
+        for str in (('', ) * 10):
+            self._bc15_puts(str)
 
-        t.pwr_up.run()
+        d.acsource.output(voltage=240.0, output=True)
+        MeasureGroup(
+            (m.dmm_acin, m.dmm_vbus, m.dmm_12Vs, m.dmm_3V3,
+             m.dmm_15Vs, m.dmm_voutoff, ), timeout=5)
         self._bc15.open()
+        self._bc15.action(None, delay=1.5, expected=10)  # Flush banner
         self._bc15.ps_mode()
 # FIXME: Save the "Power Supply" mode state in the unit (new command required)
 
@@ -218,21 +221,15 @@ class Main(tester.TestSequence):
 
         """
         self.fifo_push(((s.oVout, 14.40), ))
-        self._bc15_puts(    # Measurements
-            'not-pulsing-volts=14432 ;mV \r\n'
-            'not-pulsing-current=1987 ;mA \r\n'
-            'OK\r\n'
-            '3\r\nOK\r\n'
-            )
-        self._bc15_puts(    # Voltage calibration
-            'mv-set=14400 ;mV \r\n'
-            'not-pulsing-volts=14432 ;mV \r\n'
-            'OK\r\n'
-            '3\r\nOK\r\n'
+        self._bc15_puts(
+            'not-pulsing-volts=14432 ;mV \r\nnot-pulsing-current=1987 ;mA ')
+        self._bc15_puts('3')
+        self._bc15_puts('mv-set=14400 ;mV \r\nnot-pulsing-volts=14432 ;mV ')
+        self._bc15_puts(
             'set_volts_mv_num                        902 \r\n'
-            'set_volts_mv_den                      14400 \r\n'
-            'OK\r\nOK\r\nOK\r\nOK\r\n'
-            )
+            'set_volts_mv_den                      14400 ')
+        for str in (('', ) * 3):
+            self._bc15_puts(str)
 
         d.dcl.output(2.0, True)
         time.sleep(0.5)
@@ -249,14 +246,9 @@ class Main(tester.TestSequence):
         """Tests of the output."""
         self.fifo_push(((s.oVout, (14.4, ) * 5 + (11.0, ), ), ))
         self._bc15_puts(
-            'not-pulsing-volts=14432 ;mV \r\n'
-            'not-pulsing-current=14000 ;mA \r\n'
-            'OK\r\n'
-            '3\r\nOK\r\n'
-            )
+            'not-pulsing-volts=14432 ;mV \r\nnot-pulsing-current=14000 ;mA ')
 
         d.dcl.output(14.0, True)
         time.sleep(0.5)
         self._bc15.stat()
-        MeasureGroup(
-            (m.dmm_vout, m.arm_vout, m.arm_14amp, m.ramp_ocp, ))
+        MeasureGroup((m.dmm_vout, m.arm_vout, m.arm_14amp, m.ramp_ocp, ))

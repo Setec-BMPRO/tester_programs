@@ -82,12 +82,12 @@ class Sensors():
             detect_limit=(limits['InOCP'], ),
             start=14.0, stop=17.0, step=0.25, delay=0.1)
         self.arm_swver = console.Sensor(
-            bc15, 'SwVer', rdgtype=sensor.ReadingString)
+            bc15, 'SW_VER', rdgtype=sensor.ReadingString)
         self.arm_vout = console.Sensor(
             bc15, 'not-pulsing-volts', scale=0.001)
         self.arm_iout = console.Sensor(
             bc15, 'not-pulsing-current', scale=0.001)
-        self.arm_switch = console.Sensor(bc15, 'switch')
+        self.arm_switch = console.Sensor(bc15, 'SWITCH')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -128,25 +128,3 @@ class Measurements():
             limits['ARM-2amp-Lucky'], sense.arm_iout)
         self.arm_switch = Measurement(limits['ARM-switch'], sense.arm_switch)
         self.arm_14amp = Measurement(limits['ARM-14amp'], sense.arm_iout)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-        d = logical_devices
-        m = measurements
-        # PowerUp: Apply 240Vac, measure.
-        acs1 = AcSubStep(
-            acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr1 = MeasureSubStep(
-            (m.dmm_acin, m.dmm_vbus, m.dmm_12Vs, m.dmm_3V3,
-              m.dmm_15Vs, m.dmm_voutoff, ), timeout=5)
-        self.pwr_up = Step((acs1, msr1, ))

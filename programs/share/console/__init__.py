@@ -6,7 +6,6 @@
 # Easy access to utility methods and classes
 from ._base import *
 from .protocol import *
-from .arm_gen2 import *
 import tester
 
 
