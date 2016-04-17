@@ -82,6 +82,7 @@ class Sensors():
         self.oMirErrV = sensor.Mirror()
         self.oMirErrI = sensor.Mirror()
         self.oMirTemp = sensor.Mirror()
+        self.oMirSw = sensor.Mirror()
         self.oMirSerNum = sensor.Mirror(rdgtype=sensor.ReadingString)
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
