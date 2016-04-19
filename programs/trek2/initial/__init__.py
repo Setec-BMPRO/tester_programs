@@ -20,9 +20,9 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
-_CAN_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
+_CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 # Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
+_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
 # Software image filename
 _ARM_BIN = 'Trek2_{}.bin'.format(limit.BIN_VERSION)
 # CAN echo request messages
