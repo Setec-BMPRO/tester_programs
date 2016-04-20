@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-04-15, 13:52:47 -->
+<!-- Saved: 2016-04-20, 16:27:15 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -199,6 +199,7 @@
     <Source>programs/sx750/initial/__init__.py</Source>
     <Source>programs/sx750/initial/digpot.py</Source>
     <Source>programs/sx750/initial/limit.py</Source>
+    <Source>programs/sx750/initial/pic10f320_programmer/hex_reader.py</Source>
     <Source>programs/sx750/initial/support.py</Source>
     <Source>programs/sx750/safety/__init__.py</Source>
     <Source>programs/sx750/safety/limit.py</Source>
@@ -312,6 +313,8 @@
     <Other>programs/ids500/initial_sub/Main 1A.hex</Other>
     <Other>programs/spa/multi/MFDrgb_V103.hex</Other>
     <Other>programs/spa/multi/MFDtri_V103.hex</Other>
+    <Other>programs/sx750/initial/pic10f320_programmer/pic10f320_images.h</Other>
+    <Other>programs/sx750/initial/pic10f320_programmer/pic10f320_programmer.ino</Other>
     <Other>programs/sx750/initial/sx750_arm_3.1.2118.bin</Other>
   </Others>
   <MainScript>main.py</MainScript>
