@@ -38,7 +38,8 @@ DATA_8D = (
     ('StateOfCharge', 1, 89.5, 110.5, None, None),
     ('Halfcell', 1, 350.0, 450.0, None, None),
     ('VFCcalStatus', 1, None, None, None, True),
-    ('SerNum', 0, None, None, r'.', None),
+    ('SerNum', 0, None, None,
+                    r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$', None),
     )
 
 DATA_13F = (
@@ -52,7 +53,8 @@ DATA_13F = (
     ('StateOfCharge', 1, 89.5, 110.5, None, None),
     ('Halfcell', 1, 350.0, 450.0, None, None),
     ('VFCcalStatus', 1, None, None, None, True),
-    ('SerNum', 0, None, None, r'.', None),
+    ('SerNum', 0, None, None,
+                    r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$', None),
     )
 
 DATA_17L = (
@@ -66,5 +68,6 @@ DATA_17L = (
     ('StateOfCharge', 1, 30.0, None, None, None),
     ('Halfcell', 1, 350.0, 450.0, None, None),
     ('VFCcalStatus', 1, None, None, None, True),
-    ('SerNum', 0, None, None, r'.', None),
+    ('SerNum', 0, None, None,
+                        r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$', None),
     )
