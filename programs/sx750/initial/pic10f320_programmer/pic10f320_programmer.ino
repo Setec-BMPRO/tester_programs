@@ -6,6 +6,30 @@
 
   Measurements have shown that digitalWrite() takes 6usec to complete, so any required
   delay under that can be ignored.
+
+  SX-750 Digital Pot Driver.
+    12V and 24V OCP point adjustment.
+    Both devices share UP/~DOWN pin.
+    Each has a ~ChipSelect pin.
+    Pins are driven by opto-couplers, driven by digital outputs.
+    All lines have 22k pull up to '5Vcc' of the unit.
+    Note that UP on the pots REDUCES the OCP point.
+  Pot UP Procedure (OCP DOWN):
+    Both CS and UD are high (off)
+    Set UD off (off = UP)
+    Set CS on
+    Set UD on
+    Pulse UD off-on (setting moves when turn off happens)
+    Set CS off (UD on here causes a write to EEPROM)
+    Set UD off
+  Pot DOWN Procedure (OCP UP):
+    Both CS and UD are high (off)
+    Set UD on (on = DOWN)
+    Set CS on
+    Pulse UD on-off (setting moves when turn off happens)
+    Set CS off (UD off here causes a write to EEPROM)
+  WriteLock device function is not used or enabled.
+
  */
 
 // Response to the version query command
@@ -25,12 +49,19 @@ const char *RES_VER = "\"DEVICE=1,PWRSW=2A,5VSB=1A\"";
 
 const char *PROMPT    = "\r\n> ";        // Command prompt
 // Commands are:
-const char *CMD_NONE = "";               // Empty command
+const char *CMD_NONE  = "";              // Empty command
 const char *CMD_VER   = "VERSION?";      // Show the versions
-const char *CMD_PWSW  = "PROGRAM-PWRSW"; // Program using the PWRSW firmware image
-const char *CMD_5VSB  = "PROGRAM-5VSB";  // Program using the 5VSB firmware image
 const char *CMD_DEBUG = "1 DEBUG";       // Switch ON debug messages
 const char *CMD_QUIET = "0 DEBUG";       // Switch OFF debug messages
+
+const char *CMD_PWSW  = "PROGRAM-PWRSW"; // Program using the PWRSW firmware image
+const char *CMD_5VSB  = "PROGRAM-5VSB";  // Program using the 5VSB firmware image
+
+const char *CMD_MAX   = "POT-MAX";       // Set both digital pots to maximum
+const char *CMD_EN_12 = "12 POT-ENABLE"; // Enable 12V digital pot
+const char *CMD_EN_24 = "24 POT-ENABLE"; // Enable 24V digital pot
+const char *CMD_STEP  = "POT-STEP";      // Step digital pot down 1 step
+const char *CMD_DIS   = "POT-DISABLE";   // Disable digital pots
 
 // Debug level storage
 boolean debug = false;
@@ -51,11 +82,15 @@ const byte PIC_PROGRAM   = 0x08;  // Begin Internally Timed Programming
 const byte PIC_ERASE     = 0x09;  // Bulk Erase Program Memory
 #define    PIC_320_ID    0x29A0   // Device ID of a PIC10F320
 
-// PIC device delays
-#define DELAY_TENTH     250       // usec, Vpp to clock/data
+// PIC device delays in usec
+#define DELAY_TENTH     250       // Vpp to clock/data
 #define DELAY_TPINTP    2500      // Time for a program memory write to complete
 #define DELAY_TPINTC    5000      // Time for a configuration memory write to complete
 #define DELAY_TERAB     5000      // Time for a bulk erase
+
+// Digital Pot delays in usec
+#define DELAY_POT       100       // Delay after each transition
+
 
 // The setup function runs once when you press reset or power the board
 void setup() {
@@ -66,12 +101,13 @@ void setup() {
     pinMode(PIN_POT_UD, OUTPUT);
     pinMode(PIN_POT_CS12, OUTPUT);
     pinMode(PIN_POT_CS24, OUTPUT);
-    Serial.begin(9600);
+    Serial.begin(115200);
     Serial.println("SETEC PIC10F320 Programmer");
     Serial.println(RES_VER);
     Serial.print("Ready for commands");
     Serial.print(PROMPT);
 }
+
 
 // The loop function runs over and over again forever
 void loop() {
@@ -104,6 +140,16 @@ void loop() {
             debug = false;
         else if (cmd == CMD_NONE)
             debug = debug;
+        else if (cmd == CMD_MAX)
+            potMaximum();
+        else if (cmd == CMD_EN_12)
+            potEnable(PIN_POT_CS12);
+        else if (cmd == CMD_EN_24)
+            potEnable(PIN_POT_CS24);
+        else if (cmd == CMD_STEP)
+            potStep();
+        else if (cmd == CMD_DIS)
+            potDisable();
         else
             Serial.print("Unknown command");
         // Always turn off the outputs
@@ -125,6 +171,32 @@ void ledFlasher() {
             ledState = LOW;
         digitalWrite(PIN_LED, ledState);
     }
+}
+
+// Set both Digital Pots to maximum
+void potMaximum() {
+    potEnable(PIN_POT_CS12);
+    potEnable(PIN_POT_CS24);
+
+
+}
+
+// Enable a Digital Pot for subsequent adjustment
+void potEnable(byte enablePin) {
+
+    
+}
+
+// Step a digital Pot down 1 step
+void potStep() {
+
+    
+}
+
+// Disable adjustment of both Digital Pots
+void potDisable() {
+
+    
 }
 
 // Process a device
