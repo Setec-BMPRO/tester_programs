@@ -45,9 +45,9 @@ const char *RES_VER = "\"DEVICE=1,PWRSW=2A,5VSB=1A\"";
 #define PIN_POT_UD      5                // Digital Pot Up/Down
 #define PIN_POT_CS12    6                // Digital Pot 12V Chip Select
 #define PIN_POT_CS24    7                // Digital Pot 24V Chip Select
-#define PIN_LED        13                // Arduino LED
 
 const char *PROMPT    = "\r\n> ";        // Command prompt
+const char *RESP_OK   = "OK";            // Command OK response
 // Commands are:
 const char *CMD_NONE  = "";              // Empty command
 const char *CMD_VER   = "VERSION?";      // Show the versions
@@ -97,14 +97,13 @@ void setup() {
     pinMode(PIN_VPP, OUTPUT);
     pinMode(PIN_DATA, OUTPUT);
     pinMode(PIN_CLOCK, OUTPUT);
-    pinMode(PIN_LED, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
     pinMode(PIN_POT_UD, OUTPUT);
     pinMode(PIN_POT_CS12, OUTPUT);
     pinMode(PIN_POT_CS24, OUTPUT);
     Serial.begin(115200);
-    Serial.println("SETEC PIC10F320 Programmer");
-    Serial.println(RES_VER);
-    Serial.print("Ready for commands");
+    Serial.println("SETEC SX-750 Device Programmer");
+    Serial.print(RES_VER);
     Serial.print(PROMPT);
 }
 
@@ -169,34 +168,51 @@ void ledFlasher() {
             ledState = HIGH;
         else
             ledState = LOW;
-        digitalWrite(PIN_LED, ledState);
+        digitalWrite(LED_BUILTIN, ledState);
     }
 }
 
-// Set both Digital Pots to maximum
+// Set both Digital Pots UP to maximum
 void potMaximum() {
-    potEnable(PIN_POT_CS12);
-    potEnable(PIN_POT_CS24);
-
-
+    potWrite(PIN_POT_UD, LOW);
+    potWrite(PIN_POT_CS12, HIGH);
+    potWrite(PIN_POT_CS24, HIGH);
+    for (byte i = 0; i < 64; i++) {     // Step UP 64 times
+        potWrite(PIN_POT_UD, HIGH);
+        potWrite(PIN_POT_UD, LOW);      // The setting changes here
+    }
+    potWrite(PIN_POT_CS12, LOW);
+    potWrite(PIN_POT_CS24, LOW);
+    Serial.print(RESP_OK);
 }
 
-// Enable a Digital Pot for subsequent adjustment
+// Enable a Digital Pot for DOWN adjustment
 void potEnable(byte enablePin) {
-
-    
+    potWrite(PIN_POT_UD, HIGH);
+    potWrite(enablePin, HIGH);
+    Serial.print(RESP_OK);
 }
 
-// Step a digital Pot down 1 step
+// Step a digital Pot DOWN 1 step
 void potStep() {
-
-    
+    if (digitalRead(PIN_POT_UD) == LOW)
+        potWrite(PIN_POT_UD, HIGH);
+    potWrite(PIN_POT_UD, LOW);          // The setting changes here
+    Serial.print(RESP_OK);
 }
 
-// Disable adjustment of both Digital Pots
+// Disable DOWN adjustment of both Digital Pots
 void potDisable() {
+    potWrite(PIN_POT_UD, LOW);
+    potWrite(PIN_POT_CS12, LOW);
+    potWrite(PIN_POT_CS24, LOW);
+    Serial.print(RESP_OK);
+}
 
-    
+// Write a Digital Pot signal line, with subsequent delay
+void potWrite(byte pin, byte state) {
+    digitalWrite(pin, state);
+    delayMicroseconds(DELAY_POT);   // Wait after a signal change
 }
 
 // Process a device
@@ -213,7 +229,7 @@ void process(const unsigned configuration, const unsigned rowCount, const unsign
         return;
     if (configure(configuration))
         return;
-    Serial.print("Success");
+    Serial.print(RESP_OK);
 }
 
 // Detect the device
