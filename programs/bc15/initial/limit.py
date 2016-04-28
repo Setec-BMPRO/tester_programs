@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """BC15 Initial Program Limits."""
 
-BIN_VERSION = '1.0.12537.1514'      # Software binary version
+BIN_VERSION = '1.0.13136.1528'      # Software binary version
 
 from testlimit import (
     lim_lo, lim_hi,
