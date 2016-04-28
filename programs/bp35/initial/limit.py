@@ -52,7 +52,7 @@ DATA = (
     lim_hilo('ARM-LoadI', 0.1, 12.1),
     lim_hilo_delta('ARM-BattI', 4.0, 1.0),
     lim_hilo_delta('ARM-AuxV', 13.4, 0.4),
-    lim_hilo('ARM-AuxI', 0.0, 1.1),
+    lim_hilo('ARM-AuxI', 0.0, 1.5),
     lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     lim_string('CAN_RX', r'^RRQ,32,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
