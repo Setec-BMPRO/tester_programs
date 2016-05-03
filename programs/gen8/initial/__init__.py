@@ -343,12 +343,12 @@ class Main(tester.TestSequence):
 
         d.dcl_12V.output(4.0)
         _reg_check(
-            dmm_out=m.dmm_24V, dcl_out=d.dcl_24V, max_load=5.0, peak_load=6.0)
+            dmm_out=m.dmm_24V, dcl_out=d.dcl_24V, max_load=5.0, peak_load=6.0, fet=True)
         d.dcl_24V.output(0)
         d.dcl_12V.output(0)
 
 
-def _reg_check(dmm_out, dcl_out, max_load, peak_load):
+def _reg_check(dmm_out, dcl_out, max_load, peak_load, fet=False):
     """Check regulation of an output.
 
     dmm_out: Measurement instance for output voltage.
@@ -369,7 +369,8 @@ def _reg_check(dmm_out, dcl_out, max_load, peak_load):
     tester.testsequence.path_push('MaxLoad')
     dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
     dmm_out.measure()
-    m.dmm_Vdsfet.measure()
+    if fet:
+        m.dmm_Vdsfet.measure(timeout=5)
     tester.testsequence.path_pop()
     tester.testsequence.path_push('PeakLoad')
     dcl_out.output(peak_load)

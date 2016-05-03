@@ -28,7 +28,7 @@ DATA = (
     lim_lo('24Voff', 0.5),
     lim_hilo_delta('24Vpre', 24.0, 2.0),    # 24V +/- 2.0V (TestEng estimate)
     lim_hilo('24V', 22.80, 25.68),          # 24.0 +7% -5%
-    lim_lo('VdsQ103', 0.1),
+    lim_lo('VdsQ103', 0.17),
     lim_hilo_percent('3V3', 3.30, 10.0),    # 3.30 +/- 10% (TestEng estimate)
     lim_lo('PWRFAIL', 0.5),
     lim_hilo_delta('InputFuse', 240, 10),
