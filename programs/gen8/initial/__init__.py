@@ -321,7 +321,7 @@ class Main(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(((s.o12V, (12.34, 12.25, 12.00)), ))
+        self.fifo_push(((s.o12V, (12.34, 12.25, 12.00)), (s.oVdsfet, 0.05), ))
 
         d.dcl_24V.output(0.1)
         _reg_check(
@@ -339,7 +339,7 @@ class Main(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(((s.o24V, (24.33, 24.22, 24.11)), ))
+        self.fifo_push(((s.o24V, (24.33, 24.22, 24.11)), (s.oVdsfet, 0.05), ))
 
         d.dcl_12V.output(4.0)
         _reg_check(
@@ -369,6 +369,7 @@ def _reg_check(dmm_out, dcl_out, max_load, peak_load):
     tester.testsequence.path_push('MaxLoad')
     dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
     dmm_out.measure()
+    m.dmm_Vdsfet.measure()
     tester.testsequence.path_pop()
     tester.testsequence.path_push('PeakLoad')
     dcl_out.output(peak_load)
