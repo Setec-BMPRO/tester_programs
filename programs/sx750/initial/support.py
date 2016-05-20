@@ -22,6 +22,7 @@ class LogicalDevices():
         self.dmm = dmm.DMM(devices['DMM'])
         self.discharge = discharge.Discharge(devices['DIS'])
         self.dcs_PriCtl = dcsource.DCSource(devices['DCS1'])
+        self.dcs_Arduino = dcsource.DCSource(devices['DCS2'])
         self.dcs_5Vsb = dcsource.DCSource(devices['DCS3'])
         self.dcl_5Vsb = dcload.DCLoad(devices['DCL2'])
         self.dcl_12V = dcload.DCLoad(devices['DCL1'])
@@ -48,7 +49,7 @@ class LogicalDevices():
         for ld in (self.dcl_5Vsb, self.dcl_12V, self.dcl_24V):
             ld.output(0.0)
         # Switch off DC Sources
-        for dcs in (self.dcs_PriCtl, self.dcs_5Vsb):
+        for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb):
             dcs.output(0.0, False)
         # Switch off all Relays
         for rla in (self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
@@ -62,7 +63,7 @@ class Sensors():
 
     """SX-750 Sensors."""
 
-    def __init__(self, logical_devices, limits, armdev):
+    def __init__(self, logical_devices, limits, armdev, arddev):
         """Create all Sensor instances."""
         d = logical_devices
         dmm = d.dmm
@@ -99,6 +100,20 @@ class Sensors():
             detect_limit=(limits['24V_inOCP'], ),
             start=18.3 * 0.9, stop=18.3 * 1.1, step=0.1, delay=0,
             reset=True, use_opc=True)
+        self.PGM_5Vsb = con_sensor(
+            arddev, 'PGM_5VSB', rdgtype=sensor.ReadingString)
+        self.PGM_PwrSw = con_sensor(
+            arddev, 'PGM_PWRSW', rdgtype=sensor.ReadingString)
+        self.PotMax = con_sensor(
+            arddev, 'POT_MAX', rdgtype=sensor.ReadingString)
+        self.Pot12Enable = con_sensor(
+            arddev, '12_POT_ENABLE', rdgtype=sensor.ReadingString)
+        self.Pot24Enable = con_sensor(
+            arddev, '24_POT_ENABLE', rdgtype=sensor.ReadingString)
+        self.PotStep = con_sensor(
+            arddev, 'POT_STEP', rdgtype=sensor.ReadingString)
+        self.PotDisable = con_sensor(
+            arddev, 'POT_DISABLE', rdgtype=sensor.ReadingString)
         self.ARM_AcFreq = con_sensor(armdev, 'ARM-AcFreq')
         self.ARM_AcVolt = con_sensor(armdev, 'ARM-AcVolt')
         self.ARM_12V = con_sensor(armdev, 'ARM-12V')
@@ -153,6 +168,13 @@ class Measurements():
         self.dmm_R608 = Measurement(limits['Snubber'], sense.R608)
         self.rampOcp12V = Measurement(limits['12V_OCPchk'], sense.OCP12V)
         self.rampOcp24V = Measurement(limits['24V_OCPchk'], sense.OCP24V)
+        self.pgm_5vsb = Measurement(limits['Reply'], sense.PGM_5Vsb)
+        self.pgm_pwrsw = Measurement(limits['Reply'], sense.PGM_PwrSw)
+        self.pot_max = Measurement(limits['Reply'], sense.PotMax)
+        self.pot12_enable = Measurement(limits['Reply'], sense.Pot12Enable)
+        self.pot24_enable = Measurement(limits['Reply'], sense.Pot24Enable)
+        self.pot_step = Measurement(limits['Reply'], sense.PotStep)
+        self.pot_disable = Measurement(limits['Reply'], sense.PotDisable)
         self.arm_AcFreq = Measurement(limits['ARM-AcFreq'], sense.ARM_AcFreq)
         self.arm_AcVolt = Measurement(limits['ARM-AcVolt'], sense.ARM_AcVolt)
         self.arm_12V = Measurement(limits['ARM-12V'], sense.ARM_12V)

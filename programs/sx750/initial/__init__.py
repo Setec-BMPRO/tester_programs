@@ -13,6 +13,7 @@ from ...share.programmer import ProgramPIC
 from ...share.sim_serial import SimSerial
 from isplpc import Programmer, ProgrammingError
 from ..console import Console
+from .arduino import Arduino
 from . import support
 from . import limit
 
@@ -22,6 +23,8 @@ LIMIT_DATA = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+# Serial port for the Arduino.
+_ARDUINO_PORT = {'posix': '/dev/ttyACM0', 'nt': 'COM18'}[os.name]
 # Software image filenames
 _ARM_BIN = 'sx750_arm_{}.bin'.format(limit.BIN_VERSION)
 
@@ -41,6 +44,7 @@ class Main(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
+            ('Program', self._step_arduino, None, False),
             ('Program', self._step_program_micros, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
@@ -61,13 +65,18 @@ class Main(tester.TestSequence):
         # Set port separately, as we don't want it opened yet
         arm_ser.setPort(_ARM_PORT)
         self._armdev = Console(arm_ser, verbose=False)
+        # Serial connection to the Arduino console
+        ard_ser = SimSerial(simulation=fifo, baudrate=115200, timeout=2.0)
+        # Set port separately, as we don't want it opened yet
+        ard_ser.setPort(_ARDUINO_PORT)
+        self._arddev = Arduino(ard_ser, verbose=False)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
         d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits, self._armdev)
+        s = support.Sensors(d, self._limits, self._armdev, self._arddev)
         m = support.Measurements(s, self._limits)
 
     def close(self):
@@ -99,6 +108,15 @@ class Main(tester.TestSequence):
                 string_data = string_data + '\r> '
             self._armdev.puts(string_data, preflush, postflush, priority)
 
+    def _ard_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False,
+                  addprompt=True):
+        """Push string data into the buffer, if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r> '
+            self._arddev.puts(string_data, preflush, postflush, priority)
+
     def _step_error_check(self):
         """Check physical instruments for errors."""
         d.error_check()
@@ -116,6 +134,77 @@ class Main(tester.TestSequence):
         MeasureGroup(
             (m.dmm_Lock, m.dmm_Part, m.dmm_R601, m.dmm_R602, m.dmm_R609,
              m.dmm_R608), 2)
+
+    def _step_arduino(self):
+        """Program the ARM and PIC devices.
+
+         5Vsb is injected and the ARM is programmed.
+         The 5Vsb and PwrSw PIC's are powered and programmed by the Arduino.
+         The OCP digital pots are set to maximum with the Arduino.
+
+         Unit is left unpowered.
+
+         """
+        self.fifo_push(
+            ((s.o5Vsb, 5.75), (s.o5Vsbunsw, (5.0, 5.0)), (s.o3V3, 3.21), ))
+
+        # Set BOOT active before power-on so the ARM boot-loader runs
+        d.rla_boot.set_on()
+        # Apply and check injected rails
+        d.dcs_5Vsb.output(5.75, True)
+        MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self._logger.info('Program ARM')
+        file = os.path.join(folder, _ARM_BIN)
+        with open(file, 'rb') as infile:
+            bindata = bytearray(infile.read())
+        self._logger.debug('Read %d bytes from %s', len(bindata), file)
+        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
+        try:
+            pgm = Programmer(
+                ser, bindata, erase_only=False, verify=False, crpmode=None)
+            try:
+                pgm.program()
+                s.oMirARM.store(0)
+            except ProgrammingError:
+                s.oMirARM.store(1)
+        finally:
+            ser.close()
+        m.pgmARM.measure()
+        # Reset BOOT to ARM
+        d.rla_boot.set_off()
+
+        # Push response prompts
+        for _ in range(2):      # Push response prompts
+            self._ard_puts('OK')
+        d.dcs_Arduino.output(12.0, True)
+        m.dmm_5Vunsw.measure(timeout=2)
+        self._arddev.open()
+        time.sleep(2)        # Wait for the banner to be received
+        self._logger.info('Start programming PIC1')
+        d.rla_pic1.set_on()
+        tester.testsequence.path_push('PIC-5Vsb')
+        m.pgm_5vsb.measure()
+        tester.testsequence.path_pop()
+        d.rla_pic1.set_off()
+        self._logger.info('Start programming PIC2')
+        d.rla_pic2.set_on()
+        tester.testsequence.path_push('PIC-PwrSw')
+        m.pgm_pwrsw.measure()
+        tester.testsequence.path_pop()
+        d.rla_pic2.set_off()
+
+        self._logger.info('Reset digital pots')
+        pot_worker = threading.Thread(
+            target=self._pot_worker, name='PotReset')
+        pot_worker.start()
+        pot_worker.join()
+        # Discharge the 5Vsb to stop the ARM
+        d.dcs_5Vsb.output(0, False)
+        d.dcl_5Vsb.output(0.1)
+        time.sleep(0.5)
+        d.dcl_5Vsb.output(0)
 
     def _step_program_micros(self):
         """Program the ARM and PIC devices.

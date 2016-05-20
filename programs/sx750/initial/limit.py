@@ -61,4 +61,5 @@ DATA = (
     lim_lo('PartCheck', 20),            # Microswitches on C612, C613, D404
     lim_hilo('Snubber', 1000, 3000),    # Snubbing resistors
     lim_hilo_int('Program', 0),
+    lim_string('Reply', '^OK$'),
     )
