@@ -316,6 +316,7 @@
     <Other>programs/sx750/initial/pic10f320_programmer/pic10f320_images.h</Other>
     <Other>programs/sx750/initial/pic10f320_programmer/pic10f320_programmer.ino</Other>
     <Other>programs/sx750/initial/sx750_arm_3.1.2118.bin</Other>
+    <Other>programs/trek2/initial/Trek2_1.2.13305.132.bin</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """Trek2 Initial Program Limits."""
 
-BIN_VERSION = '1.1.12666.127'      # Software binary version
+BIN_VERSION = '1.2.13305.132'      # Software binary version
 
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-HW_VER = (1, 0, 'A')
+HW_VER = (2, 0, 'D')
 
 from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int, lim_hilo,

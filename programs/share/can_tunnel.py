@@ -89,8 +89,6 @@ class ConsoleCanTunnel():
         # Open underlying serial port
         self.port.open()
         # Switch console echo OFF
-# FIXME: 'No Echo' will still echo the '\r' as '\r\n', in which
-#       case it isn't really 'No Echo', is it?...
         self.port.flushInput()
         no_echo_cmd = '0 ECHO'
         reply = self.action(no_echo_cmd)

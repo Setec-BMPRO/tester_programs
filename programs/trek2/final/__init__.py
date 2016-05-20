@@ -18,7 +18,7 @@ MeasureGroup = tester.measure.group
 LIMIT_DATA = limit.DATA
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
-_CAN_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
+_CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -92,14 +92,14 @@ class Main(tester.TestSequence):
         """Finished testing."""
         self._logger.info('Close')
         global d, s, m
-        # Switch off the USB hub & Serial ports
-        d.dcs_Vcom.output(0.0, output=False)
         m = d = s = None
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         self._trek2.close()     # This is called even upon unit failures
+        # Switch off the USB hub & Serial ports
+        d.dcs_Vcom.output(0.0, output=False)
         d.reset()               # Reset Logical Devices
 
     def _step_error_check(self):
