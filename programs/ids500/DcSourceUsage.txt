@@ -1,0 +1,12 @@
+IDS-500 DC Source Usage
+
+ASSY    DCS1            DCS2    DCS3    DCS4        DCS5    DCS6        DCS7    DCS21
+=========================================================================================
+Aux     TE_Enable Rail  -       -       -           Fan     -           -       -
+Bias    -               -       -       -           Fan     -           -       Vcc
+Bus     Vcc             -       -       -           Fan     Ext Fan     -       Vpri_Ctl
+Main    TEC_VSET        IS_Set  5V      -           -       -           -       -
+Micro   Vcc             -       -       Programmer  -       -           -       -
+Synbuck Vsec5VLDDTEC    LDDISet TECVset Programmer  Fan     -           -       -
+
+Final   TEC_VSET        IS_Set  5V      -           -       -           -       -
