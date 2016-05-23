@@ -15,6 +15,7 @@ from testlimit import (
 
 # Test Limits
 DATA = (
+    lim_hilo('8.5V Arduino', 8.1, 8.9),
     lim_lo('5Voff', 0.5),
     lim_hilo('5Vext', 5.5, 5.9),
     lim_hilo_percent('5Vsb_set', 5.10, 1.5),

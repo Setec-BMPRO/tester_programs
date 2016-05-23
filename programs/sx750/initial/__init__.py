@@ -24,7 +24,7 @@ LIMIT_DATA = limit.DATA
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Serial port for the Arduino.
-_ARDUINO_PORT = {'posix': '/dev/ttyACM0', 'nt': 'COM18'}[os.name]
+_ARDUINO_PORT = {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name]
 # Software image filenames
 _ARM_BIN = 'sx750_arm_{}.bin'.format(limit.BIN_VERSION)
 
@@ -90,6 +90,7 @@ class Main(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         self._armdev.close()
+        self._arddev.close()
         d.acsource.output(voltage=0.0, output=False)
         d.dcl_5Vsb.output(1.0)
         d.dcl_12V.output(5.0)
@@ -138,15 +139,43 @@ class Main(tester.TestSequence):
     def _step_arduino(self):
         """Program the ARM and PIC devices.
 
-         5Vsb is injected and the ARM is programmed.
          The 5Vsb and PwrSw PIC's are powered and programmed by the Arduino.
          The OCP digital pots are set to maximum with the Arduino.
+         5Vsb is injected and the ARM is programmed.
 
          Unit is left unpowered.
 
          """
         self.fifo_push(
-            ((s.o5Vsb, 5.75), (s.o5Vsbunsw, (5.0, 5.0)), (s.o3V3, 3.21), ))
+            ((s.o8V5Ard, 8.5), (s.o5Vsb, 5.75), (s.o5Vsbunsw, (5.0,) * 2),
+            (s.o3V3, 3.21), ))
+        # Push response prompts
+        for _ in range(2):      # Push response prompts
+            self._ard_puts('OK')
+        d.dcs_Arduino.output(12.0, True)
+        m.dmm_8V5Ard.measure(2)
+        time.sleep(1)
+        self._arddev.open()
+        time.sleep(2)        # Wait for the banner to be received
+        self._logger.info('Start programming PIC1')
+        d.rla_pic1.set_on()
+        m.dmm_5Vunsw.measure(timeout=2)
+        tester.testsequence.path_push('PIC-5Vsb')
+        m.pgm_5vsb.measure()
+        tester.testsequence.path_pop()
+        d.rla_pic1.set_off()
+        self._logger.info('Start programming PIC2')
+        d.rla_pic2.set_on()
+        time.sleep(0.1)
+        tester.testsequence.path_push('PIC-PwrSw')
+        m.pgm_pwrsw.measure()
+        tester.testsequence.path_pop()
+        d.rla_pic2.set_off()
+        self._logger.info('Reset digital pots')
+        tester.testsequence.path_push('SET-POT-MAX')
+        m.pot_max.measure()
+        tester.testsequence.path_pop()
+        d.rla_pic2.set_off()
 
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
@@ -174,32 +203,6 @@ class Main(tester.TestSequence):
         m.pgmARM.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
-
-        # Push response prompts
-        for _ in range(2):      # Push response prompts
-            self._ard_puts('OK')
-        d.dcs_Arduino.output(12.0, True)
-        m.dmm_5Vunsw.measure(timeout=2)
-        self._arddev.open()
-        time.sleep(2)        # Wait for the banner to be received
-        self._logger.info('Start programming PIC1')
-        d.rla_pic1.set_on()
-        tester.testsequence.path_push('PIC-5Vsb')
-        m.pgm_5vsb.measure()
-        tester.testsequence.path_pop()
-        d.rla_pic1.set_off()
-        self._logger.info('Start programming PIC2')
-        d.rla_pic2.set_on()
-        tester.testsequence.path_push('PIC-PwrSw')
-        m.pgm_pwrsw.measure()
-        tester.testsequence.path_pop()
-        d.rla_pic2.set_off()
-
-        self._logger.info('Reset digital pots')
-        pot_worker = threading.Thread(
-            target=self._pot_worker, name='PotReset')
-        pot_worker.start()
-        pot_worker.join()
         # Discharge the 5Vsb to stop the ARM
         d.dcs_5Vsb.output(0, False)
         d.dcl_5Vsb.output(0.1)
@@ -412,6 +415,9 @@ class Main(tester.TestSequence):
              (s.o12VinOCP, ((0.123, ) * 32 + (4.444, )) +
                            ((0.123, ) * 37 + (4.444, ))),
              ))
+        # Push response prompts
+        for _ in range(35):      # Push response prompts
+            self._ard_puts('OK')
 
         _reg_check(
             dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
@@ -419,6 +425,9 @@ class Main(tester.TestSequence):
         _ocp_set(
             target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
             enable=d.ocp_pot.enable_12v, limit=self._limits['12V_ocp'])
+#        _ocp_set_arduino(
+#            target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
+#            enable=m.pot12_enable, limit=self._limits['12V_ocp'])
         tester.testsequence.path_push('OCPcheck')
         d.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
         m.rampOcp12V.measure()
@@ -447,6 +456,9 @@ class Main(tester.TestSequence):
              (s.o24VinOCP, ((0.123, ) * 32 + (4.444, )) +
                            ((0.123, ) * 18 + (4.444, ))),
              ))
+        # Push response prompts
+        for _ in range(35):      # Push response prompts
+            self._ard_puts('OK')
 
         _reg_check(
             dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
@@ -454,6 +466,9 @@ class Main(tester.TestSequence):
         _ocp_set(
             target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
             enable=d.ocp_pot.enable_24v, limit=self._limits['24V_ocp'])
+#        _ocp_set_arduino(
+#            target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
+#            enable=m.pot24_enable, limit=self._limits['24V_ocp'])
         tester.testsequence.path_push('OCPcheck')
         d.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
         m.rampOcp24V.measure()
@@ -526,6 +541,36 @@ def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
     dmm_out.testlimit[0].check(volt, 1)
     tester.testsequence.path_pop()
 
+def _ocp_set_arduino(target, load, dmm, detect, enable, limit):
+    """Set OCP of an output.
+
+    target: Target setpoint in Amp.
+    load: Load instrument.
+    dmm: Measurement of output voltage.
+    detect: Measurement of 'In OCP'.
+    enable: Measurement to call to enable digital pot.
+    limit: Limit to check OCP pot setting.
+
+    Adjust OCP by setting the desired current, then lowering the digital pot
+    setting until OCP triggers. The Arduino changes the digital pot setting.
+    Unit is left running at no load.
+
+    """
+    tester.testsequence.path_push('OCPset')
+    load.output(target)
+    dmm.measure()
+    detect.configure()
+    detect.opc()
+    enable.measure()
+    setting = 0
+    for setting in range(63, 0, -1):
+        m.pot_step.measure()
+        if detect.testlimit[0] == detect.read()[0]:
+            break
+    m.pot_disable.measure()
+    load.output(0.0)
+    limit.check(setting, 1)
+    tester.testsequence.path_pop()
 
 def _ocp_set(target, load, dmm, detect, enable, limit):
     """Set OCP of an output.
