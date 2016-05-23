@@ -12,7 +12,8 @@
     Both devices share UP/~DOWN pin.
     Each has a ~ChipSelect pin.
     Pins are driven by opto-couplers, driven by digital outputs.
-    All lines have 22k pull up to '5Vcc' of the unit.
+    All optocoupler outputs have 1k pull up to '5V' in the Fixture.
+    A digital output low make a pin high (setting moves).
     Note that UP on the pots REDUCES the OCP point.
   Pot UP Procedure (OCP DOWN):
     Both CS and UD are high (off)
@@ -135,8 +136,10 @@ void loop() {
             debug = true;
             Serial.println("Debug messages ON");
         }
-        else if (cmd == CMD_QUIET)
-            debug = false;
+        else if (cmd == CMD_QUIET) {
+            debug = false; 
+            Serial.print("Debug messages OFF");
+        }
         else if (cmd == CMD_NONE)
             debug = debug;
         else if (cmd == CMD_MAX)

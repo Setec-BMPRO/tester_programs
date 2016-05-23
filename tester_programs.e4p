@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-05-17, 11:39:44 -->
+<!-- Saved: 2016-05-12, 15:55:08 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -197,6 +197,7 @@
     <Source>programs/sx750/final/limit.py</Source>
     <Source>programs/sx750/final/support.py</Source>
     <Source>programs/sx750/initial/__init__.py</Source>
+    <Source>programs/sx750/initial/arduino.py</Source>
     <Source>programs/sx750/initial/digpot.py</Source>
     <Source>programs/sx750/initial/limit.py</Source>
     <Source>programs/sx750/initial/pic10f320_programmer/hex_reader.py</Source>
