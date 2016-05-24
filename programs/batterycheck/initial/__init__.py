@@ -67,13 +67,13 @@ class Initial(tester.TestSequence):
         self._arm_ser = SimSerial(
             simulation=self._fifo, baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
-        self._arm_ser.setPort(_ARM_CON)
+        self._arm_ser.port = _ARM_CON
         self._armdev = Console(self._arm_ser)
         # Serial connection to the BT device
         self._btport = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        self._btport.setPort(_BT_PORT)
+        self._btport.port = _BT_PORT
         # BT Radio driver
         self._bt = BtRadio(self._btport)
 

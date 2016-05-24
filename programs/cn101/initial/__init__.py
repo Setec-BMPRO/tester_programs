@@ -72,14 +72,14 @@ class Initial(tester.TestSequence):
         self._cn101_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self._cn101_ser.setPort(_ARM_PORT)
+        self._cn101_ser.port = _ARM_PORT
         # CN101 Console driver
         self._cn101 = Console(self._cn101_ser)
         # Serial connection to the BLE module
         ble_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.setPort(_BLE_PORT)
+        ble_ser.port = _BLE_PORT
         self._ble = BleRadio(ble_ser)
         self._sernum = None
 

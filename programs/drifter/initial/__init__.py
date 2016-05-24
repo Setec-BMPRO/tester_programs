@@ -58,7 +58,7 @@ class Initial(tester.TestSequence):
         self._pic_ser = SimSerial(
             simulation=self._fifo, baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
-        self._pic_ser.setPort(_PIC_PORT)
+        self._pic_ser.port = _PIC_PORT
         self._pic = Console(self._pic_ser)
 
     def open(self):

@@ -62,7 +62,7 @@ class Initial(tester.TestSequence):
         self._bc15_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        self._bc15_ser.setPort(_ARM_PORT)
+        self._bc15_ser.port = _ARM_PORT
         # BC15 Console driver
         self._bc15 = console.Console(self._bc15_ser)
 

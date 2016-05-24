@@ -71,7 +71,7 @@ class Initial(tester.TestSequence):
         self._bp35_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self._bp35_ser.setPort(_ARM_PORT)
+        self._bp35_ser.port = _ARM_PORT
         # BP35 Console driver
         self._bp35 = Console(self._bp35_ser)
         self._sernum = None

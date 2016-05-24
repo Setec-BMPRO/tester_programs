@@ -66,7 +66,7 @@ class Initial(tester.TestSequence):
         self._trek2_ser = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self._trek2_ser.setPort(_ARM_PORT)
+        self._trek2_ser.port = _ARM_PORT
         # Trek2 Console driver
         self._trek2 = DirectConsole(self._trek2_ser)
         self.sernum = None

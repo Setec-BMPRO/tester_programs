@@ -57,7 +57,7 @@ class Initial(tester.TestSequence):
         # Serial connection to the ARM console
         arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
-        arm_ser.setPort(_ARM_PORT)
+        arm_ser.port = _ARM_PORT
         self._armdev = Console(arm_ser, verbose=False)
 
     def open(self):

@@ -131,19 +131,6 @@ class SimSerial(_Simulator, serial.Serial):
             except:
                 pass
 
-#    def setPort(self, port):
-#        """Assign serial port."""
-#        if hasattr(super(), 'setPort'): # Is this PySerial 2
-#            print('YES it has setPort()')
-#            super().setPort(self, port)
-#        if hasattr(super(), 'port'):    # Is this PySerial 3+
-#            print('YES it has port')
-#            print('...port is', super().port)
-#            print('super().port is', type(super().port))
-#            print('super().__dict__ is', super().__dict__)
-#            print('super().__attr__ is', super().__attr__)
-#            super().port = port
-
     def makeDeviceName(self, port):
         return 'simulation'
 

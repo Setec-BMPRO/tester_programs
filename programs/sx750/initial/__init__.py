@@ -62,12 +62,12 @@ class Initial(tester.TestSequence):
         # Serial connection to the ARM console
         arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.setPort(_ARM_PORT)
+        arm_ser.port = _ARM_PORT
         self._armdev = Console(arm_ser, verbose=False)
         # Serial connection to the Arduino console
         ard_ser = SimSerial(simulation=fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.setPort(_ARDUINO_PORT)
+        ard_ser.port = _ARDUINO_PORT
         self._arddev = Arduino(ard_ser, verbose=False)
 
     def open(self):

@@ -60,7 +60,7 @@ class Final(tester.TestSequence):
         ser_can = SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        ser_can.setPort(_CAN_PORT)
+        ser_can.port = _CAN_PORT
         # CAN Console tunnel driver
         self._tunnel = ConsoleCanTunnel(
             port=ser_can, simulation=fifo, verbose=False)
@@ -118,7 +118,7 @@ class Final(tester.TestSequence):
             self._tunnel.port.puts('0x10000000\r\n')
             self._tunnel.port.puts('\r\n')
             self._tunnel.port.puts('\r\n')
-            self._tunnel.port.puts('RRC,32,3,0,16,1\r\n')
+            self._tunnel.port.puts('RRC,32,3,3,0,16,1\r\n')
         self._trek2_puts('0x10000000')
         self._trek2_puts('')
 
