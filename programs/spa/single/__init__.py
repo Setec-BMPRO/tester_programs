@@ -15,7 +15,7 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+SGL_LIMIT = limit.DATA
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -41,7 +41,7 @@ _AC_VSET_MAX = 40.0
 #     Average operating current at 10.5V must be between 650 mA ~ 880 mA.
 
 
-class Main(tester.TestSequence):
+class InitialSingle(tester.TestSequence):
 
     """Spa SINGLE Initial Test Program."""
 

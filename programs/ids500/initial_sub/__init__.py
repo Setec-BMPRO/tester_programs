@@ -5,13 +5,12 @@
 import os
 import logging
 import tester
+from share import ProgramPIC, SimSerial
 from . import support
 from . import limit
-from share.programmer import ProgramPIC
-from share.sim_serial import SimSerial
 from ..console import Console
 
-LIMIT_DATA = limit.DATA
+INI_SUB_LIMIT = limit.DATA
 
 # Serial port for the PIC.
 _PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
@@ -30,7 +29,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class InitialSub(tester.TestSequence):
 
     """IDS-500 Initial Subboard Test Program."""
 

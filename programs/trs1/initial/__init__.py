@@ -9,7 +9,7 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -18,7 +18,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """Trs1 Initial Test Program."""
 

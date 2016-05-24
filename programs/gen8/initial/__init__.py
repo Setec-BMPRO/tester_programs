@@ -8,7 +8,7 @@ import time
 import logging
 
 import tester
-from share.sim_serial import SimSerial
+from share import SimSerial
 from isplpc import Programmer, ProgrammingError
 from ..console import Console
 from . import support
@@ -17,7 +17,7 @@ from . import limit
 MeasureGroup = tester.measure.group
 
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM6'}[os.name]
@@ -30,7 +30,7 @@ s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """GEN8 Initial Test Program."""
 

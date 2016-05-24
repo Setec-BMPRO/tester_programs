@@ -7,16 +7,15 @@ import inspect
 import logging
 import time
 import tester
+from share import ProgramPIC, SimSerial
 from . import support
 from . import limit
-from share.programmer import ProgramPIC
-from share.sim_serial import SimSerial
 from ..console import Console
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
-LIMIT_DATA_BM = limit.DATA_BM
+INI_LIMIT = limit.DATA
+INI_LIMIT_BM = limit.DATA_BM
 
 # Serial port for the PIC.
 _PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
@@ -28,7 +27,7 @@ s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """Drifter Initial Test Program."""
 

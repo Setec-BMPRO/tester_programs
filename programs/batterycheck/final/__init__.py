@@ -5,12 +5,11 @@
 import os
 import logging
 import tester
-from share.sim_serial import SimSerial
-from share.bluetooth import BtRadio, BtError
+from share import SimSerial, BtRadio, BtError
 from . import support
 from . import limit
 
-LIMIT_DATA = limit.DATA
+FIN_LIMIT = limit.DATA
 
 _BT_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM9'}[os.name]
 
@@ -21,7 +20,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final(tester.TestSequence):
 
     """BatteryCheck Final Test Program."""
 

@@ -68,16 +68,3 @@ class RepeatTimer(threading.Thread):
     def cancel(self):
         """Stop the timer."""
         self._myevent.set()
-
-
-def _main():
-    """Test routines."""
-    def hello():
-        """Target function."""
-        print('Hello World!')
-
-    rpt = RepeatTimer(1.0, hello, 5)
-    rpt.start()
-
-if __name__ == '__main__':
-    _main()

@@ -9,8 +9,7 @@ import time
 
 import tester
 from isplpc import Programmer, ProgrammingError
-from share.sim_serial import SimSerial
-from share.bluetooth.rn4020 import BleRadio
+from share import SimSerial, BleRadio
 from ..console import Console
 from . import support
 from . import limit
@@ -18,7 +17,7 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM15'}[os.name]
@@ -38,7 +37,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """CN101 Initial Test Program."""
 

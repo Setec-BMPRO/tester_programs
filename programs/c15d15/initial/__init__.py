@@ -7,7 +7,7 @@ import tester
 from . import support
 from . import limit
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 MeasureGroup = tester.measure.group
 
@@ -18,7 +18,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """C15D-15 Initial Test Program."""
 

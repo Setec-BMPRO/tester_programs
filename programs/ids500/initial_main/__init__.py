@@ -11,7 +11,7 @@ from . import support
 from . import limit
 
 
-LIMIT_DATA = limit.DATA
+INI_MAIN_LIMIT = limit.DATA
 
 
 # These are module level variable to avoid having to use 'self.' everywhere.
@@ -21,7 +21,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.testsequence.TestSequence):
+class InitialMain(tester.testsequence.TestSequence):
 
     """IDS-500 Initial Main Test Program."""
 

@@ -9,12 +9,11 @@ import datetime
 import threading
 import time
 import tester
+from share import ProgramPIC, SimSerial
 from . import support
 from . import limit
 from . import cmrsbp
 from . import ev2200
-from share.programmer import ProgramPIC
-from share.sim_serial import SimSerial
 
 MeasureGroup = tester.measure.group
 
@@ -150,7 +149,7 @@ class _Main(tester.TestSequence):
         return data
 
 
-class MainInitial(_Main):
+class Initial(_Main):
 
     """CMR-SBP Initial Test Program."""
 
@@ -284,7 +283,7 @@ class MainInitial(_Main):
         d.dcl_ibat.output(0.0)
 
 
-class MainSerialDate(_Main):
+class SerialDate(_Main):
 
     """CMR-SBP SerialDate Test Program."""
 
@@ -338,7 +337,7 @@ class MainSerialDate(_Main):
         self._ev.sn_date(datecode=current_date, serialno=sernum[0])
 
 
-class MainFinal(_Main):
+class Final(_Main):
 
     """CMR-SBP Final Test Program."""
 

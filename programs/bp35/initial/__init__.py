@@ -9,15 +9,14 @@ import time
 
 import tester
 from isplpc import Programmer, ProgrammingError
-from share.programmer import ProgramPIC
-from share.sim_serial import SimSerial
+from share import ProgramPIC, SimSerial
 from ..console import Console
 from . import support
 from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
@@ -35,7 +34,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """BP35 Initial Test Program."""
 

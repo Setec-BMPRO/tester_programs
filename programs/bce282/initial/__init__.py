@@ -14,8 +14,8 @@ from . import msp
 from . import support
 from . import limit
 
-LIMIT_DATA12 = limit.DATA12       # BCE282-12 limits
-LIMIT_DATA24 = limit.DATA24       # BCE282-24 limits
+INI_LIMIT_12 = limit.DATA12       # BCE282-12 limits
+INI_LIMIT_24 = limit.DATA24       # BCE282-24 limits
 
 # Serial port for MSP430 console.
 _MSP430_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
@@ -27,7 +27,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.testsequence.TestSequence):
+class Initial(tester.testsequence.TestSequence):
 
     """BCE282-12/24 Initial Test Program."""
 

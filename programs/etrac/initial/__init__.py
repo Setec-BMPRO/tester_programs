@@ -6,13 +6,13 @@ import os
 import inspect
 import logging
 import tester
-from share.programmer import ProgramPIC
+from share import ProgramPIC
 from . import support
 from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 _PIC_HEX = 'etracII-2A.hex'
 
@@ -24,7 +24,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """ETrac-II Initial Test Program."""
 

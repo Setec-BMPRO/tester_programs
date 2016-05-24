@@ -8,7 +8,7 @@ import tester
 from . import support
 from . import limit
 
-LIMIT_DATA = limit.DATA
+FIN_LIMIT = limit.DATA
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -17,7 +17,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.testsequence.TestSequence):
+class Final(tester.testsequence.TestSequence):
 
     """C45A-15 Final Test Program."""
 

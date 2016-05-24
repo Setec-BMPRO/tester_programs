@@ -17,7 +17,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final(tester.TestSequence):
 
     """BCE4/5 Final Test Program."""
 

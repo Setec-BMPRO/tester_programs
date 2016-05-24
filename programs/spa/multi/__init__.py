@@ -20,8 +20,8 @@ from . import p89lpc924
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA_RGB = limit.DATA_RGB
-LIMIT_DATA_TRI = limit.DATA_TRI
+RGB_LIMIT = limit.DATA_RGB
+TRI_LIMIT = limit.DATA_TRI
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -81,7 +81,7 @@ _FIRMWARE_RESET_WAIT_TIME = 0.5
 #   TRI:    Blue, White, Green.
 
 
-class Main(tester.TestSequence):
+class InitialMulti(tester.TestSequence):
 
     """Spa RGB/TRI Initial Test Program."""
 

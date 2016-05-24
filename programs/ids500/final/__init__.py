@@ -5,14 +5,14 @@
 import os
 import logging
 import tester
+from share import SimSerial
 from . import support
 from . import limit
 from ..console import Console
-from share.sim_serial import SimSerial
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+FIN_LIMIT = limit.DATA
 
 # Serial port for the PIC.
 _PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
@@ -26,7 +26,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final(tester.TestSequence):
 
     """IDS-500 Final Test Program."""
 

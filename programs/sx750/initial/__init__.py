@@ -9,8 +9,7 @@ import logging
 import threading
 
 import tester
-from share.programmer import ProgramPIC
-from share.sim_serial import SimSerial
+from share import ProgramPIC, SimSerial
 from isplpc import Programmer, ProgrammingError
 from ..console import Console
 from .arduino import Arduino
@@ -19,7 +18,7 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
@@ -34,7 +33,7 @@ s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """SX-750 Initial Test Program."""
 

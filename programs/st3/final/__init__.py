@@ -8,8 +8,8 @@ import tester
 from . import support
 from . import limit
 
-LIMIT_DATA20 = limit.DATA20     # ST20 limits
-LIMIT_DATA35 = limit.DATA35     # ST35 limits
+FIN20_LIMIT = limit.DATA20     # ST20 limits
+FIN35_LIMIT = limit.DATA35     # ST35 limits
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -18,7 +18,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final(tester.TestSequence):
 
     """STxx-III Final Test Program."""
 

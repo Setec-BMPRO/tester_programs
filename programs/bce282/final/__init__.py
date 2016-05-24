@@ -9,8 +9,8 @@ import tester
 from . import support
 from . import limit
 
-LIMIT_DATA12 = limit.DATA12       # BCE282-12 limits
-LIMIT_DATA24 = limit.DATA24       # BCE282-24 limits
+FIN_LIMIT_12 = limit.DATA12       # BCE282-12 limits
+FIN_LIMIT_24 = limit.DATA24       # BCE282-24 limits
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -19,7 +19,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final(tester.TestSequence):
 
     """BCE282-12/24 Final Test Program."""
 

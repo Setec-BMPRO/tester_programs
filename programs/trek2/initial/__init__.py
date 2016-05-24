@@ -9,7 +9,7 @@ import time
 
 import tester
 from isplpc import Programmer, ProgrammingError
-from share.sim_serial import SimSerial
+from share import SimSerial
 from ..console import DirectConsole
 from . import support
 from . import limit
@@ -17,7 +17,7 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
 _CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
@@ -35,7 +35,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """Trek2 Initial Test Program."""
 

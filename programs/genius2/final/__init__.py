@@ -9,8 +9,8 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA         # GENIUS-II limits
-LIMIT_DATA_H = limit.DATA_H     # GENIUS-II-H limits
+FIN_LIMIT = limit.DATA         # GENIUS-II limits
+FIN_LIMIT_H = limit.DATA_H     # GENIUS-II-H limits
 
 
 # These are module level variable to avoid having to use 'self.' everywhere.
@@ -20,7 +20,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final(tester.TestSequence):
 
     """GENIUS-II Final Test Program."""
 

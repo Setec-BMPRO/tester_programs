@@ -12,7 +12,7 @@ import tester
 from . import support
 from . import limit
 
-LIMIT_DATA = limit.DATA
+SAF_LIMIT = limit.DATA
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -20,7 +20,7 @@ s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
 
 
-class Main(tester.TestSequence):
+class Safety(tester.TestSequence):
 
     """SX-750 Safety Test Program."""
 

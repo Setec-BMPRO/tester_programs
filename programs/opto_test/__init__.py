@@ -12,7 +12,7 @@ import tester
 from . import support
 from . import limit
 
-LIMIT_DATA = limit.DATA
+LIMIT = limit.DATA
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices

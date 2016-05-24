@@ -7,7 +7,7 @@ import tester
 from . import support
 from . import limit
 
-LIMIT_DATA = limit.DATA
+FIN2V_LIMIT = limit.DATA
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -16,7 +16,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final2V(tester.TestSequence):
 
     """ATXG-450-2V Final Test Program."""
 

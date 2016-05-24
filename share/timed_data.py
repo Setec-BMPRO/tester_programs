@@ -11,10 +11,10 @@ import threading
 import copy
 import logging
 
-from . import ticker
+from .ticker import RepeatTimer
 
 
-class Store():
+class TimedStore():
 
     """Dictionary with timeout.
 
@@ -38,7 +38,7 @@ class Store():
         self.clear()
         # Create a data timer thread
         self._tick = 0.5              # The tick interval to use for timing
-        self._rpt = ticker.RepeatTimer(self._tick, self._tick_handler)
+        self._rpt = RepeatTimer(self._tick, self._tick_handler)
         self._rpt.start()
 
     def clear(self):
@@ -113,22 +113,3 @@ class Store():
         """Stop the timer."""
         self._logger.debug('cancel')
         self._rpt.cancel()
-
-
-if __name__ == '__main__':
-    import time
-    logging.basicConfig(
-        format='%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s',
-        level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
-
-    dst = Store(template={'a': 0, 'b': 0, 'c': 0}, timeout=5.0)
-    dst['a'] = 1
-    dst['b'] = 2
-    dst['c'] = 3
-    logger.info(len(dst))
-    logger.info(dst.data)
-    time.sleep(6)
-    logger.info(len(dst))
-    logger.info(dst.data)
-    dst.cancel()

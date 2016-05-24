@@ -9,8 +9,8 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
-LIMIT_DATA_BM = limit.DATA_BM
+FIN_LIMIT = limit.DATA
+FIN_LIMIT_BM = limit.DATA_BM
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -19,7 +19,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Final(tester.TestSequence):
 
     """Drifter Final Test Program."""
 

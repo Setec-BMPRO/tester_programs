@@ -10,15 +10,14 @@ import subprocess
 import logging
 import tester
 from isplpc import Programmer, ProgrammingError
-from share.sim_serial import SimSerial
-from share.bluetooth import BtRadio
+from share import SimSerial, BtRadio
 from ..console import Console
 from . import support
 from . import limit
 
 MeasureGroup = tester.measure.group
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 # Serial port for the ARM programmer.
 _ARM_PGM = {'posix': '/dev/ttyUSB1', 'nt': r'\\.\COM2'}[os.name]
@@ -40,7 +39,7 @@ s = None        # Shortcut to Sensors
 m = None        # Shortcut to Measurements
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """BatteryCheck Initial Test Program."""
 

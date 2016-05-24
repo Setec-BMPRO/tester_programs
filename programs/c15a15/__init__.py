@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """C15A-15 Test Programs."""
 
-__all__ = ['initial', 'final']
-
 # Easy access to utility methods and classes
-from . import *
+from .initial import *
+from .final import *

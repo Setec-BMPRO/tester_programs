@@ -7,11 +7,11 @@ import inspect
 import logging
 import time
 import tester
+from share import ProgramPIC
 from . import support
 from . import limit
-from share.programmer import ProgramPIC
 
-LIMIT_DATA = limit.DATA
+INI_LIMIT = limit.DATA
 
 _PIC_HEX = 'c45a-15.hex'
 
@@ -24,7 +24,7 @@ m = None        # Shortcut to Measurements
 t = None        # Shortcut to SubTests
 
 
-class Main(tester.TestSequence):
+class Initial(tester.TestSequence):
 
     """C45A-15 Initial Test Program."""
 
