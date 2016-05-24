@@ -6,8 +6,8 @@ import logging
 import os
 import time
 import tester
-from ...share.sim_serial import SimSerial
-from ...share.can_tunnel import ConsoleCanTunnel
+from share.sim_serial import SimSerial
+from share.can_tunnel import ConsoleCanTunnel
 from . import support
 from . import limit
 from ..console import TunnelConsole

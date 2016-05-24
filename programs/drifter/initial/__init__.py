@@ -9,8 +9,8 @@ import time
 import tester
 from . import support
 from . import limit
-from ...share.programmer import ProgramPIC
-from ...share.sim_serial import SimSerial
+from share.programmer import ProgramPIC
+from share.sim_serial import SimSerial
 from ..console import Console
 
 MeasureGroup = tester.measure.group

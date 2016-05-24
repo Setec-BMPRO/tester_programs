@@ -5,8 +5,8 @@
 import os
 import logging
 import tester
-from ...share.sim_serial import SimSerial
-from ...share.bluetooth import BtRadio, BtError
+from share.sim_serial import SimSerial
+from share.bluetooth import BtRadio, BtError
 from . import support
 from . import limit
 

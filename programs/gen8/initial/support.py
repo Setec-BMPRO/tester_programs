@@ -7,7 +7,7 @@ import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-from ...share.console import Sensor as con_sensor
+from share.console import Sensor as con_sensor
 
 
 class LogicalDevices():

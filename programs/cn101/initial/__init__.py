@@ -9,8 +9,8 @@ import time
 
 import tester
 from isplpc import Programmer, ProgrammingError
-from ...share.sim_serial import SimSerial
-from ...share.bluetooth.rn4020 import BleRadio
+from share.sim_serial import SimSerial
+from share.bluetooth.rn4020 import BleRadio
 from ..console import Console
 from . import support
 from . import limit

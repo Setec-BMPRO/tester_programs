@@ -9,8 +9,8 @@ import logging
 import threading
 
 import tester
-from ...share.programmer import ProgramPIC
-from ...share.sim_serial import SimSerial
+from share.programmer import ProgramPIC
+from share.sim_serial import SimSerial
 from isplpc import Programmer, ProgrammingError
 from ..console import Console
 from .arduino import Arduino

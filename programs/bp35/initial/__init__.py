@@ -9,8 +9,8 @@ import time
 
 import tester
 from isplpc import Programmer, ProgrammingError
-from ...share.programmer import ProgramPIC
-from ...share.sim_serial import SimSerial
+from share.programmer import ProgramPIC
+from share.sim_serial import SimSerial
 from ..console import Console
 from . import support
 from . import limit

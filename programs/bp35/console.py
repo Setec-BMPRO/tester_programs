@@ -3,7 +3,7 @@
 """BP35 ARM processor console driver."""
 
 import time
-from ..share import console
+from share import console
 
 Sensor = console.Sensor
 

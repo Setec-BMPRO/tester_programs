@@ -8,7 +8,7 @@ import tester
 from . import support
 from . import limit
 from ..console import Console
-from ...share.sim_serial import SimSerial
+from share.sim_serial import SimSerial
 
 MeasureGroup = tester.measure.group
 

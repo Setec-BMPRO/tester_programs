@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-05-12, 15:55:08 -->
+<!-- Saved: 2016-05-24, 14:43:41 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -159,22 +159,6 @@
     <Source>programs/selftest/__init__.py</Source>
     <Source>programs/selftest/limit.py</Source>
     <Source>programs/selftest/support.py</Source>
-    <Source>programs/share/__init__.py</Source>
-    <Source>programs/share/bluetooth/__init__.py</Source>
-    <Source>programs/share/bluetooth/eunistone_pan1322.py</Source>
-    <Source>programs/share/bluetooth/rn4020.py</Source>
-    <Source>programs/share/can_tunnel.py</Source>
-    <Source>programs/share/console/__init__.py</Source>
-    <Source>programs/share/console/_base.py</Source>
-    <Source>programs/share/console/protocol.py</Source>
-    <Source>programs/share/console/test/__init__.py</Source>
-    <Source>programs/share/console/test/test_protocol.py</Source>
-    <Source>programs/share/programmer.py</Source>
-    <Source>programs/share/sim_serial.py</Source>
-    <Source>programs/share/test/__init__.py</Source>
-    <Source>programs/share/test/test_can_tunnel.py</Source>
-    <Source>programs/share/ticker.py</Source>
-    <Source>programs/share/timed_data.py</Source>
     <Source>programs/smu75070/__init__.py</Source>
     <Source>programs/smu75070/final/__init__.py</Source>
     <Source>programs/smu75070/final/limit.py</Source>
@@ -256,6 +240,22 @@
     <Source>sensor/test/test_search.py</Source>
     <Source>sensor/test/test_ui.py</Source>
     <Source>sensor/ui.py</Source>
+    <Source>share/__init__.py</Source>
+    <Source>share/bluetooth/__init__.py</Source>
+    <Source>share/bluetooth/eunistone_pan1322.py</Source>
+    <Source>share/bluetooth/rn4020.py</Source>
+    <Source>share/can_tunnel.py</Source>
+    <Source>share/console/__init__.py</Source>
+    <Source>share/console/_base.py</Source>
+    <Source>share/console/protocol.py</Source>
+    <Source>share/console/test/__init__.py</Source>
+    <Source>share/console/test/test_protocol.py</Source>
+    <Source>share/programmer.py</Source>
+    <Source>share/sim_serial.py</Source>
+    <Source>share/test/__init__.py</Source>
+    <Source>share/test/test_can_tunnel.py</Source>
+    <Source>share/ticker.py</Source>
+    <Source>share/timed_data.py</Source>
     <Source>tester/__init__.py</Source>
     <Source>tester/_base.py</Source>
     <Source>tester/devlogical/__init__.py</Source>

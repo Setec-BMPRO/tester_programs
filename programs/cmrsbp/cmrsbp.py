@@ -39,7 +39,7 @@ import sys
 import threading
 import queue
 import logging
-from ..share import timed_data
+from share import timed_data
 
 
 _DATAMAP = {

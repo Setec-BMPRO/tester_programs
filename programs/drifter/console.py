@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Drifter console driver."""
 
-from ..share import console
+from share import console
 
 Sensor = console.Sensor
 

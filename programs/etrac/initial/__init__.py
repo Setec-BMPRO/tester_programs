@@ -6,7 +6,7 @@ import os
 import inspect
 import logging
 import tester
-from ...share.programmer import ProgramPIC
+from share.programmer import ProgramPIC
 from . import support
 from . import limit
 

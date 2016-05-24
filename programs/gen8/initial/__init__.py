@@ -8,7 +8,7 @@ import time
 import logging
 
 import tester
-from ...share.sim_serial import SimSerial
+from share.sim_serial import SimSerial
 from isplpc import Programmer, ProgrammingError
 from ..console import Console
 from . import support

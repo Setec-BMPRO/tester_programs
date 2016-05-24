@@ -10,8 +10,8 @@ import subprocess
 import logging
 import tester
 from isplpc import Programmer, ProgrammingError
-from ...share.sim_serial import SimSerial
-from ...share.bluetooth import BtRadio
+from share.sim_serial import SimSerial
+from share.bluetooth import BtRadio
 from ..console import Console
 from . import support
 from . import limit

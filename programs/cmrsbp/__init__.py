@@ -13,8 +13,8 @@ from . import support
 from . import limit
 from . import cmrsbp
 from . import ev2200
-from ..share.programmer import ProgramPIC
-from ..share.sim_serial import SimSerial
+from share.programmer import ProgramPIC
+from share.sim_serial import SimSerial
 
 MeasureGroup = tester.measure.group
 

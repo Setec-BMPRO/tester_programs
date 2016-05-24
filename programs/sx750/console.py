@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """SX-750 ARM processor console driver."""
 
-from ..share import console
+from share import console
 
 Sensor = console.Sensor
 
