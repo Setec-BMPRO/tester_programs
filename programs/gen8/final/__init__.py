@@ -42,26 +42,17 @@ class Final(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""

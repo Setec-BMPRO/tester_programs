@@ -73,12 +73,7 @@ class Final(tester.TestSequence):
         m.dmm_InpRes.measure(timeout=5)
 
     def _step_powerup(self):
-        """
-        Switch on unit at 240Vac, no load, not enabled.
-
-        Measure voltages.
-
-        """
+        """Switch on unit at 240Vac, no load, not enabled."""
         self.fifo_push(
             ((s.oIec, (0.0, 240.0)), (s.o5v, 5.1), (s.o12v, 0.0),
              (s.oYesNoGreen, True)))
