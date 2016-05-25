@@ -139,20 +139,22 @@ class Initial(tester.TestSequence):
         """Program the ARM and PIC devices.
 
          The 5Vsb and PwrSw PIC's are powered and programmed by the Arduino.
-         The OCP digital pots are set to maximum with the Arduino.
+         The OCP digital pots are powered by PriCtl and set to maximum
+         with the Arduino.
          5Vsb is injected and the ARM is programmed.
 
          Unit is left unpowered.
 
          """
         self.fifo_push(
-            ((s.o8V5Ard, 8.5), (s.o5Vsb, 5.75), (s.o5Vsbunsw, (5.0,) * 2),
-            (s.o3V3, 3.21), ))
+            ((s.o8V5Ard, 8.5), (s.PriCtl, 12.34), (s.o5Vsb, 5.75),
+            (s.o5Vsbunsw, (5.0,) * 2), (s.o3V3, 3.21), ))
         # Push response prompts
         for _ in range(2):      # Push response prompts
             self._ard_puts('OK')
         d.dcs_Arduino.output(12.0, True)
-        m.dmm_8V5Ard.measure(2)
+        d.dcs_PriCtl.output(12.0, True)
+        MeasureGroup((m.dmm_PriCtl, m.dmm_8V5Ard), 2)
         time.sleep(1)
         self._arddev.open()
         time.sleep(2)        # Wait for the banner to be received
@@ -174,7 +176,6 @@ class Initial(tester.TestSequence):
         tester.testsequence.path_push('SET-POT-MAX')
         m.pot_max.measure()
         tester.testsequence.path_pop()
-        d.rla_pic2.set_off()
 
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
@@ -517,27 +518,23 @@ def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
     tester.testsequence.path_push('NoLoad')
     dcl_out.output(0.0)
     dcl_out.opc()
-    volt00 = dmm_out.read()[0]
-    dmm_out.testlimit[0].check(volt00, 1)
+    volt00 = dmm_out.measure().reading1
     tester.testsequence.path_pop()
     tester.testsequence.path_push('MaxLoad')
     dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
-    volt = dmm_out.read()[0]
-    dmm_out.testlimit[0].check(volt, 1)
+    dmm_out.measure()
     tester.testsequence.path_pop()
     tester.testsequence.path_push('LoadReg')
     dcl_out.output(peak_load * 0.95)
     dcl_out.opc()
-    volt = dmm_out.read()[0]
-    dmm_out.testlimit[0].check(volt, 1)
+    volt = dmm_out.measure().reading1
     load_reg = 100.0 * (volt00 - volt) / volt00
     reg_limit.check(load_reg, 1)
     tester.testsequence.path_pop()
     tester.testsequence.path_push('PeakLoad')
     dcl_out.output(peak_load)
     dcl_out.opc()
-    volt = dmm_out.read()[0]
-    dmm_out.testlimit[0].check(volt, 1)
+    dmm_out.measure()
     tester.testsequence.path_pop()
 
 def _ocp_set_arduino(target, load, dmm, detect, enable, limit):
@@ -564,7 +561,7 @@ def _ocp_set_arduino(target, load, dmm, detect, enable, limit):
     setting = 0
     for setting in range(63, 0, -1):
         m.pot_step.measure()
-        if detect.testlimit[0] == detect.read()[0]:
+        if detect.measure().result:
             break
     m.pot_disable.measure()
     load.output(0.0)
@@ -596,7 +593,7 @@ def _ocp_set(target, load, dmm, detect, enable, limit):
     setting = 0
     for setting in range(63, 0, -1):
         d.ocp_pot.step()
-        if detect.testlimit[0] == detect.read()[0]:
+        if detect.measure().result:
             break
     d.ocp_pot.disable()
     load.output(0.0)

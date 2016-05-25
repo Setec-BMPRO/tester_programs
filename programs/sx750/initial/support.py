@@ -149,10 +149,12 @@ class Measurements():
         self.dmm_12V = Measurement(limits['12V'], sense.o12V)
         self.dmm_12Voff = Measurement(limits['12Voff'], sense.o12V)
         self.dmm_12V_inOCP = Measurement(limits['12V_inOCP'], sense.o12VinOCP)
+        limits['12V_inOCP'].position_fail = False
         self.dmm_24V = Measurement(limits['24V'], sense.o24V)
         self.dmm_24V_set = Measurement(limits['24V_set'], sense.o24V)
         self.dmm_24Voff = Measurement(limits['24Voff'], sense.o24V)
         self.dmm_24V_inOCP = Measurement(limits['24V_inOCP'], sense.o24VinOCP)
+        limits['24V_inOCP'].position_fail = False
         self.dmm_PriCtl = Measurement(limits['PriCtl'], sense.PriCtl)
         self.dmm_PFCpre = Measurement(limits['PFCpre'], sense.PFC)
         self.dmm_PFCpost = Measurement(limits['PFCpost'], sense.PFC)
