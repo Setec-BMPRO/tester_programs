@@ -113,7 +113,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.oSnEntry, ('A1526040123', )), (s.oVin, 12.0), (s.o3V3, 3.3), ))
 
-        self.sernum = m.ui_SnEntry.measure()[1][0]
+        self.sernum = m.ui_SnEntry.measure().reading1
         t.pwr_up.run()
 
     def _step_program(self):

@@ -138,8 +138,7 @@ class Initial(tester.TestSequence):
         d.rla_reset.set_on()
         # Apply and check supply rails
         d.dcs_input.output(15.0, output=True)
-        result, sernum = m.ui_SnEntry.measure()
-        self._sernum = sernum[0]
+        self._sernum = m.ui_SnEntry.measure().reading1
         MeasureGroup((m.dmm_reg5V, m.dmm_reg12V, m.dmm_3V3), 2)
 
     def _step_program_avr(self):
@@ -244,7 +243,7 @@ class Initial(tester.TestSequence):
         d.dcs_shunt.output(62.5 * limit.SHUNT_SCALE, True)
         time.sleep(1.5)  # ARM rdgs settle
         batt_curr, curr_ARM = MeasureGroup(
-            (m.dmm_shunt, m.currARM), timeout=5)[1]
+            (m.dmm_shunt, m.currARM), timeout=5).readings
         # Compare simulated battery current against ARM reading, in %
         percent_error = ((batt_curr - curr_ARM) / batt_curr) * 100
         s.oMirCurrErr.store(percent_error)

@@ -170,8 +170,8 @@ class Initial(tester.TestSequence):
         self._pic['CAL_OFFSET_CURRENT'] = limit.FORCE_OFFSET
         self._pic['ZERO-CURRENT-DISPLAY-THRESHOLD'] = limit.FORCE_THRESHOLD
         # Calibrate voltage
-        dmm_vin = m.dmm_vin.measure(timeout=5)[1][0]
-        pic_vin = m.pic_vin.measure(timeout=5)[1][0]
+        dmm_vin = m.dmm_vin.measure(timeout=5).reading1
+        pic_vin = m.pic_vin.measure(timeout=5).reading1
         err = ((dmm_vin - pic_vin) / dmm_vin) * 100
         s.oMirErrorV.store(err)
         m.ErrorV.measure()
@@ -187,13 +187,13 @@ class Initial(tester.TestSequence):
         if adjust_vcal:
             # This will check any voltage adjust done above
             # ...we are using this CAL_RELOAD to save 10sec
-            pic_vin = m.pic_vin.measure(timeout=5)[1][0]
+            pic_vin = m.pic_vin.measure(timeout=5).reading1
             err = ((dmm_vin - pic_vin) / dmm_vin) * 100
             s.oMirErrorV.store(err)
             m.CalV.measure()
         # Now we proceed to calibrate the current
-        dmm_isense = m.dmm_isense.measure(timeout=5)[1][0]
-        pic_isense = m.pic_isense.measure(timeout=5)[1][0]
+        dmm_isense = m.dmm_isense.measure(timeout=5).reading1
+        pic_isense = m.pic_isense.measure(timeout=5).reading1
         err = ((dmm_isense - pic_isense) / dmm_isense) * 100
         s.oMirErrorI.store(err)
         m.ErrorI.measure()
@@ -201,7 +201,7 @@ class Initial(tester.TestSequence):
         if err != self._limits['%CalI']:
             self._pic['CAL_I_SLOPE'] = dmm_isense
             self._cal_reload()
-            pic_isense = m.pic_isense.measure(timeout=5)[1][0]
+            pic_isense = m.pic_isense.measure(timeout=5).reading1
             err = ((dmm_isense - pic_isense) / dmm_isense) * 100
             s.oMirErrorI.store(err)
             m.CalI.measure()

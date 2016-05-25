@@ -255,7 +255,7 @@ class Initial(_Main):
         self.fifo_push(((s.ovbat, 12.0), ))
 
         t.cal_setup.run()
-        dmm_vbat = m.dmm_vbat.measure(timeout=5)[1][0]
+        dmm_vbat = m.dmm_vbat.measure(timeout=5).reading1
         ev_data = self._ev.read_vit()
         s.oMirErrV.store(dmm_vbat - ev_data['Voltage'])
         s.oMirTemp.store(ev_data['Temperature'])
@@ -271,7 +271,7 @@ class Initial(_Main):
         self.fifo_push(((s.oibat, 0.02), ))
 
         d.dcl_ibat.output(2.0, True)
-        dmm_ibat = m.dmm_ibat.measure(timeout=5)[1][0]
+        dmm_ibat = m.dmm_ibat.measure(timeout=5).reading1
         time.sleep(3.0)
         ev_data = self._ev.read_vit()
         s.oMirErrI.store(dmm_ibat - ev_data['Current'])
@@ -372,7 +372,7 @@ class Final(_Main):
         """Power comms interface, connect to PIC."""
         self.fifo_push(((s.oSnEntry, ('G240166F0778', )), ))
 
-        result, (sernum, ) = m.ui_SnEntry.measure()
+        sernum = m.ui_SnEntry.measure().reading1
         self._limits['SerNum'].limit = str(int(sernum[-4:]))
         d.dcs_Vcom.output(12.0, output=True)
         time.sleep(1)
@@ -382,7 +382,7 @@ class Final(_Main):
         """Read data broadcast from the PIC and verify values."""
         self.fifo_push(((s.ovbatIn, 13.72), ))
 
-        dmm_vbatIn = m.dmm_vbatIn.measure(timeout=5)[1][0]
+        dmm_vbatIn = m.dmm_vbatIn.measure(timeout=5).reading1
         cmr_data = self._read_data()
         s.oMirvbatIn.store(cmr_data['VOLTAGE'])
         s.oMirErrV.store(dmm_vbatIn - cmr_data['VOLTAGE'])

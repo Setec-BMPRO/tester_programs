@@ -76,29 +76,3 @@ class Measurements():
         self.ps_mode = Measurement(limits['Notify'], sense.ps_mode)
         self.ch_mode = Measurement(limits['Notify'], sense.ch_mode)
         self.ocp = Measurement(limits['OCP'], sense.ocp)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-        d = logical_devices
-        m = measurements
-        # PowerOn:
-        #   Apply 240Vac, enter Power Supply mode, set load, measure.
-        ld1 = LoadSubStep(((d.dcl, 1.0), ), output=True)
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=1.0)
-        msr1 = MeasureSubStep((m.ps_mode, m.vout_nl, ), timeout=5)
-        self.pwr_on = Step((ld1, acs1, msr1, ))
-        # Loaded:
-        #   Apply 10A load, measure, enter Charger mode
-        ld10 = LoadSubStep(((d.dcl, 10.0), ), output=True)
-        msr10 = MeasureSubStep((m.vout, m.ocp, m.ch_mode, ), timeout=5)
-        self.load = Step((ld10, msr10, ))

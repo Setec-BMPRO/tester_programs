@@ -168,9 +168,9 @@ class Initial(tester.TestSequence):
         t.load.run()
         # Measure load regulation
         d.dcl.output(0.0)
-        noload = m.dmm_Vout.measure(timeout=5)[1][0]
+        noload = m.dmm_Vout.measure(timeout=5).reading1
         d.dcl.output(24.0)
-        fullload = m.dmm_Vout.measure(timeout=5)[1][0]
+        fullload = m.dmm_Vout.measure(timeout=5).reading1
         reg = ((noload - fullload) / noload) * 100
         s.oMirReg.store(reg)
         m.dmm_reg.measure()

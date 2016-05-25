@@ -41,26 +41,17 @@ class Final(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -85,7 +76,7 @@ class Final(tester.TestSequence):
 
     def _step_ocp(self):
         """Measure OCP point."""
-        self.fifo_push(((s.o70V, (70.0, ) * 3 + (69.2, ), ), ))
+        self.fifo_push(((s.o70V, (70.0, ) * 15 + (69.2, ), ), ))
         m.ramp_OCP.measure()
 
     def _step_shutdown(self):

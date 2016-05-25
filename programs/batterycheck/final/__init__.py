@@ -92,8 +92,7 @@ class Final(tester.TestSequence):
         match = (sn_lim == self._sernum)
         sn_lim.position_fail = True
         if not match:   # Display pop-up box to enter serial number.
-            result, sernum = m.ui_SnEntry.measure()
-            self._sernum = sernum[0]
+            self._sernum = m.ui_SnEntry.measure().reading1
         d.dcs_input.output(12.0, output=True)
         m.dmm_12V.measure(timeout=5)
 

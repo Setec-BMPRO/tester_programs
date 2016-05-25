@@ -233,38 +233,22 @@ class Initial(tester.TestSequence):
         result, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
         self._armdev['CAL_PFC'] = pfc
         self._armdev['NVWRITE'] = True
-        # Prevent a limit fail from failing the unit
-        m.dmm_PFCpost1.testlimit[0].position_fail = False
         result, pfc = m.dmm_PFCpost1.stable(limit.PFC_STABLE)
-        # Allow a limit fail to fail the unit
-        m.dmm_PFCpost1.testlimit[0].position_fail = True
         if not result:      # 1st retry
             self._logger.info('Retry1 PFC calibration')
             self._armdev['CAL_PFC'] = pfc
             self._armdev['NVWRITE'] = True
-            # Prevent a limit fail from failing the unit
-            m.dmm_PFCpost2.testlimit[0].position_fail = False
             result, pfc = m.dmm_PFCpost2.stable(limit.PFC_STABLE)
-            # Allow a limit fail to fail the unit
-            m.dmm_PFCpost2.testlimit[0].position_fail = True
         if not result:      # 2nd retry
             self._logger.info('Retry2 PFC calibration')
             self._armdev['CAL_PFC'] = pfc
             self._armdev['NVWRITE'] = True
-            # Prevent a limit fail from failing the unit
-            m.dmm_PFCpost3.testlimit[0].position_fail = False
             result, pfc = m.dmm_PFCpost3.stable(limit.PFC_STABLE)
-            # Allow a limit fail to fail the unit
-            m.dmm_PFCpost3.testlimit[0].position_fail = True
         if not result:      # 3rd retry
             self._logger.info('Retry3 PFC calibration')
             self._armdev['CAL_PFC'] = pfc
             self._armdev['NVWRITE'] = True
-            # Prevent a limit fail from failing the unit
-            m.dmm_PFCpost4.testlimit[0].position_fail = False
             result, pfc = m.dmm_PFCpost4.stable(limit.PFC_STABLE)
-            # Allow a limit fail to fail the unit
-            m.dmm_PFCpost4.testlimit[0].position_fail = True
         # A final PFC setup check
         m.dmm_PFCpost.stable(limit.PFC_STABLE)
         # no load for 12V calibration

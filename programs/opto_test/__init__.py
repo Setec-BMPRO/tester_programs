@@ -87,9 +87,9 @@ class Main(tester.TestSequence):
 
     def _step_boardnum(self):
         """Get the PCB number."""
-        self.fifo_push(((s.oSnEntry, ('999', )), ))
-        result, brdnum = m.ui_SnEntry.measure()
-        self._brdnum = brdnum[0]
+        self.fifo_push(((s.oSnEntry, ('A999', )), ))
+
+        self._brdnum = m.ui_SnEntry.measure().reading1
 
     def _step_in_adj1(self):
         """Input adjust and measure.
@@ -100,7 +100,7 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oIsen, (0.5, ) * 30 + (1.0, 1.003), ), ))
         d.dcs_vin.output(22.5, True)
         m.ramp_VinAdj1.measure(timeout=2)
-        m.dmm_Iin1.measure(timeout=2)[1][0]
+        m.dmm_Iin1.measure(timeout=2).reading1
 
     def _step_in_adj10(self):
         """Input adjust and measure.
@@ -111,7 +111,7 @@ class Main(tester.TestSequence):
         self.fifo_push(((s.oIsen, (5.0, ) * 30 + (10.0, 10.03), ), ))
         d.dcs_vin.output(35.5, True)
         m.ramp_VinAdj10.measure(timeout=2)
-        m.dmm_Iin10.measure(timeout=2)[1][0]
+        m.dmm_Iin10.measure(timeout=2).reading1
 
     def _step_out_adj1(self):
         """Output adjust and measure.
@@ -131,8 +131,8 @@ class Main(tester.TestSequence):
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj1[i].measure(timeout=2)
             m.dmm_Vce[i].measure(timeout=2)
-            i_out = m.dmm_Iout[i].measure(timeout=2)[1][0]
-            i_in = m.dmm_Iin1.measure(timeout=2)[1][0]
+            i_out = m.dmm_Iout[i].measure(timeout=2).reading1
+            i_in = m.dmm_Iin1.measure(timeout=2).reading1
             ctr = (i_out / i_in) * 100
             self._ctr_data1.append(int(ctr))
             s.oMirCtr.store(ctr)
@@ -157,8 +157,8 @@ class Main(tester.TestSequence):
             tester.testsequence.path_push('Opto{}'.format(i + 1))
             m.ramp_VoutAdj10[i].measure(timeout=2)
             m.dmm_Vce[i].measure(timeout=2)
-            i_out = m.dmm_Iout[i].measure(timeout=2)[1][0]
-            i_in = m.dmm_Iin10.measure(timeout=2)[1][0]
+            i_out = m.dmm_Iout[i].measure(timeout=2).reading1
+            i_in = m.dmm_Iin10.measure(timeout=2).reading1
             ctr = (i_out / i_in) * 100
             self._ctr_data10.append(int(ctr))
             s.oMirCtr.store(ctr)

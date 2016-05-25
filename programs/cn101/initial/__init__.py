@@ -130,7 +130,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.oSnEntry, ('A1526040123', )), (s.oVin, 8.0), (s.o3V3, 3.3), ))
 
-        self._sernum = m.ui_serialnum.measure()[1][0]
+        self._sernum = m.ui_serialnum.measure().reading1
         t.pwr_up.run()
 
     def _step_program(self):
@@ -194,7 +194,7 @@ class Initial(tester.TestSequence):
         self._cn101_puts('001EC030BC15', )
 
         t.reset.run()
-        _btmac = m.cn101_btmac.measure()[1][0]
+        _btmac = m.cn101_btmac.measure().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', _btmac)
         if self._fifo:
             reply = True

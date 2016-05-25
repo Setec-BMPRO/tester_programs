@@ -68,7 +68,7 @@ class Final(tester.TestSequence):
     def _step_power_up(self):
         """Power up with 12Vdc, measure output, check Green and Yellow leds."""
         self.fifo_push(
-            ((s.oVout, 15.5), (s.oYesNoGreen, True),
+            ((s.oVout, 15.0), (s.oYesNoGreen, True),
              (s.oYesNoYellowOff, True), (s.oNotifyYellow, True),))
 
         t.pwr_up.run()
@@ -76,8 +76,8 @@ class Final(tester.TestSequence):
     def _step_ocp(self):
         """Measure OCP point."""
         self.fifo_push(
-            ((s.oVout, (15.5, ) * 5 + (13.5, ), ),
-             (s.oYesNoYellowOn, True), (s.oVout, 15.5), ))
+            ((s.oVout, (15.0, ) * 5 + (13.5, ), ),
+             (s.oYesNoYellowOn, True), (s.oVout, 15.0), ))
 
         t.ocp.run()
 
@@ -89,7 +89,7 @@ class Final(tester.TestSequence):
 
     def _step_recover(self):
         """Recover from full load."""
-        self.fifo_push(((s.oVout, 15.5), ))
+        self.fifo_push(((s.oVout, 15.0), ))
 
         t.recover.run()
 

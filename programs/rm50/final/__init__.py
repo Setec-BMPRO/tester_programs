@@ -102,10 +102,11 @@ class Final(tester.TestSequence):
         self.fifo_push(
             ((s.o24Vdcin, 23.6), (s.o24Vdcin, 24.0), (s.o24Vdcout, 23.65), ))
         d.dcl_dcout.output(2.1, True)
-        val = m.dmm_24Vdcin.measure(timeout=5)[1][0]
+        val = m.dmm_24Vdcin.measure(timeout=5).reading1
         # Slightly higher dc input to compensate for drop in fixture cabling
         d.dcs_24V.output(24.0 + (24.0 - val))
-        vals = MeasureGroup((m.dmm_24Vdcin, m.dmm_24Vdcout), timeout=5)[1]
+        vals = MeasureGroup(
+            (m.dmm_24Vdcin, m.dmm_24Vdcout), timeout=5).readings
         s.oMirVdcDrop.store(vals[0] - vals[1])
         m.dmm_vdcDrop.measure()
         d.dcs_24V.output(0.0, output=False)
@@ -151,9 +152,9 @@ class Final(tester.TestSequence):
         self.fifo_push(
             ((s.oInputPow, 59.0), (s.o24V, 24.0), (s.oCurrshunt, 0.0021), ))
         d.dcl_out.output(2.1)
-        inp_pwr_fl = m.dmm_powerFL.measure(timeout=5)[1][0]
-        out_volts_fl = m.dmm_24Vfl.measure(timeout=5)[1][0]
-        out_curr_fl = m.dmm_currShunt.measure(timeout=5)[1][0]
+        inp_pwr_fl = m.dmm_powerFL.measure(timeout=5).reading1
+        out_volts_fl = m.dmm_24Vfl.measure(timeout=5).reading1
+        out_curr_fl = m.dmm_currShunt.measure(timeout=5).reading1
         eff = 100 * out_volts_fl * out_curr_fl / inp_pwr_fl
         s.oMirEff.store(eff)
         m.dmm_eff.measure()

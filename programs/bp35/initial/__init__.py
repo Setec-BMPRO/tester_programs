@@ -132,7 +132,7 @@ class Initial(tester.TestSequence):
              (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3),
              (s.oSnEntry, ('A1626010123', )), ))
 
-        self._sernum = m.ui_SnEntry.measure()[1][0]
+        self._sernum = m.ui_SnEntry.measure().reading1
         MeasureGroup(
             (m.dmm_lock, m.dmm_sw1, m.dmm_sw2, m.dmm_sw3, m.dmm_sw4, ),
             timeout=5)
@@ -256,7 +256,7 @@ class Initial(tester.TestSequence):
                 ))
         time.sleep(2)
         self._bp35['VOUT_OV'] = 2     # OVP Latch reset
-        vmeasured = m.dmm_vsregpre.measure(timeout=5)[1][0]
+        vmeasured = m.dmm_vsregpre.measure(timeout=5).reading1
         self._bp35['SR_VCAL'] = vmeasured
         time.sleep(1)
         m.dmm_vsregpost.measure(timeout=5)

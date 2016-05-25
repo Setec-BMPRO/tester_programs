@@ -124,9 +124,13 @@ class Measurements():
         self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_PFCpre = Measurement(limits['PFCpre'], sense.PFC)
         self.dmm_PFCpost1 = Measurement(limits['PFCpost1'], sense.PFC)
+        limits['PFCpost1'].position_fail = False
         self.dmm_PFCpost2 = Measurement(limits['PFCpost2'], sense.PFC)
+        limits['PFCpost2'].position_fail = False
         self.dmm_PFCpost3 = Measurement(limits['PFCpost3'], sense.PFC)
+        limits['PFCpost3'].position_fail = False
         self.dmm_PFCpost4 = Measurement(limits['PFCpost4'], sense.PFC)
+        limits['PFCpost4'].position_fail = False
         self.dmm_PFCpost = Measurement(limits['PFCpost'], sense.PFC)
         self.dmm_PWRFAIL = Measurement(limits['PWRFAIL'], sense.PWRFAIL)
         self.arm_AcFreq = Measurement(limits['ARM-AcFreq'], sense.ARM_AcFreq)

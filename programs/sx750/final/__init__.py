@@ -99,9 +99,9 @@ class Final(tester.TestSequence):
             ((s.o5v, 5.1), (s.o12v, (12.2, 12.1)), (s.o24v, (24.2, 24.1)),
              (s.oPwrGood, 0.1), (s.oAcFail, 5.1), ))
 
-        nl12v, nl24v = MeasureGroup((m.dmm_12von, m.dmm_24von, ))[1]
+        nl12v, nl24v = MeasureGroup((m.dmm_12von, m.dmm_24von, )).readings
         t.load.run()
-        fl12v, fl24v = MeasureGroup((m.dmm_12vfl, m.dmm_24vfl, ))[1]
+        fl12v, fl24v = MeasureGroup((m.dmm_12vfl, m.dmm_24vfl, )).readings
         if self.running:
             reg12v = 100 * (nl12v - fl12v) / nl12v
             reg24v = 100 * (nl24v - fl24v) / nl24v

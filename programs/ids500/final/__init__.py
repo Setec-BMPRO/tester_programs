@@ -119,7 +119,7 @@ class Final(tester.TestSequence):
              (s.oYesNoTecGreen, True), (s.oYesNoTecRed, True), ))
         t.tec_pre.run()
         Vset, Vmon, Vtec = MeasureGroup(
-            (m.dmm_TecVset, m.dmm_TecVmon, m.dmm_Tec), timeout=5)[1]
+            (m.dmm_TecVset, m.dmm_TecVmon, m.dmm_Tec), timeout=5).readings
         self._logger.debug('Vset:%s, Vmon:%s, Vtec:%s', Vset, Vmon, Vtec)
         s.oMirTecErr.store(Vtec - (Vset * 3))
         m.TecErr.measure()
@@ -140,11 +140,13 @@ class Final(tester.TestSequence):
              (s.oYesNoLddGreen, True), (s.oYesNoLddRed, True), ))
         t.ldd_06V.run()
         Iset, Iout, Imon = MeasureGroup(
-            (m.dmm_IsSet06V, m.dmm_IsOut06V, m.dmm_IsIout06V), timeout=5)[1]
+            (m.dmm_IsSet06V, m.dmm_IsOut06V, m.dmm_IsIout06V),
+            timeout=5).readings
         self._ldd_err(Iset, Iout, Imon)
         t.ldd_5V.run()
         Iset, Iout, Imon = MeasureGroup(
-            (m.dmm_IsSet5V, m.dmm_IsOut5V, m.dmm_IsIout5V), timeout=5)[1]
+            (m.dmm_IsSet5V, m.dmm_IsOut5V, m.dmm_IsIout5V),
+            timeout=5).readings
         for name in ('SetMonErr', 'SetOutErr', 'MonOutErr'):
             self._limits[name].limit = (-0.7, 0.7)
         self._ldd_err(Iset, Iout, Imon)

@@ -148,9 +148,9 @@ class Initial(tester.TestSequence):
         self.fifo_push(((s.oVout, (16.0, 15.8)), ))
         d.dcl.output(0.0, True)
         d.rla_Load.set_on()
-        noload = m.dmm_Vout.measure(timeout=5)[1][0]
+        noload = m.dmm_Vout.measure(timeout=5).reading1
         d.dcl.output(3.0)
-        fullload = m.dmm_Vout.measure(timeout=5)[1][0]
+        fullload = m.dmm_Vout.measure(timeout=5).reading1
         reg = ((fullload - noload) / noload) * 100
         s.oMirReg.store(reg)
         m.loadReg.measure()

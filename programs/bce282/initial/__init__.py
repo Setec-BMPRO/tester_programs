@@ -125,8 +125,8 @@ class Initial(tester.testsequence.TestSequence):
         self._msp.defaults()
         m.msp_Status.measure(timeout=5)
         self._msp.test_mode_enable()
-#        dmm_Vout = m.dmm_Vout.measure(timeout=5)[1][0]
-#        msp_Vout = m.msp_Vout.measure(timeout=5)[1][0]
+#        dmm_Vout = m.dmm_Vout.measure(timeout=5).reading1
+#        msp_Vout = m.msp_Vout.measure(timeout=5).reading1
 
     def _step_ocp(self):
         """Measure Vout and Vbat OCP points."""

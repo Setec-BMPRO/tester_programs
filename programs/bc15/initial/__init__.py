@@ -234,11 +234,11 @@ class Initial(tester.TestSequence):
         d.dcl.output(2.0, True)
         time.sleep(0.5)
         self._bc15.stat()
-        _, data = MeasureGroup(
+        vout = MeasureGroup(
             (m.dmm_vout, m.arm_vout, m.arm_2amp, m.arm_2amp_lucky,
-             m.arm_switch, ))
+             m.arm_switch, )).reading1
         # Calibrate output voltage
-        self._bc15.cal_vout(data[0])
+        self._bc15.cal_vout(vout)
         self.fifo_push(((s.oVout, 14.40), ))
         m.dmm_vout_cal.measure()
 

@@ -47,17 +47,16 @@ class Final(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m, t
+        global d, s, m
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s, t
-        m = d = s = t = None
+        global m, d, s
+        m = d = s = None
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -71,10 +70,17 @@ class Final(tester.TestSequence):
 
     def _step_poweron(self):
         """Power up the Unit and measure output with min load."""
-        self.fifo_push(((s.ps_mode, True), (s.vout, 14.40), ))
-        t.pwr_on.run()
+        self.fifo_push(((s.ps_mode, True), (s.vout, 13.80), ))
+
+        d.dcl.output(1.0, output=True)
+        d.acsource.output(240.0, output=True)
+        MeasureGroup((m.ps_mode, m.vout_nl, ), timeout=5)
 
     def _step_loaded(self):
         """Load the Unit."""
-        self.fifo_push(((s.vout, (14.23, ) + (14.2, ) * 8 + (11.0, )), ))
-        t.load.run()
+        self.fifo_push(
+            ((s.vout, (14.23, ) + (14.2, ) * 8 + (11.0, )),
+            (s.ch_mode, True), ))
+
+        d.dcl.output(10.0)
+        MeasureGroup((m.vout, m.ocp, m.ch_mode, ), timeout=5)
