@@ -24,18 +24,18 @@ class Console(console.Variable, console.BaseConsole):
         console.BaseConsole.__init__(self, port, verbose)
         rfmt = '{} X?'      # 1st generation console read format string
         self.cmd_data = {
-            'ARM-AcFreq': ParameterFloat(
+            'AcFreq': ParameterFloat(
                 'X-AC-LINE-FREQUENCY', read_format=rfmt),
-            'ARM-AcVolt': ParameterFloat('X-AC-LINE-VOLTS', read_format=rfmt),
-            'ARM-5V': ParameterFloat(
+            'AcVolt': ParameterFloat('X-AC-LINE-VOLTS', read_format=rfmt),
+            '5V': ParameterFloat(
                 'X-RAIL-VOLTAGE-5V', scale=1000, read_format=rfmt),
-            'ARM-12V': ParameterFloat(
+            '12V': ParameterFloat(
                 'X-RAIL-VOLTAGE-12V', scale=1000, read_format=rfmt),
-            'ARM-24V': ParameterFloat(
+            '24V': ParameterFloat(
                 'X-RAIL-VOLTAGE-24V', scale=1000, read_format=rfmt),
-            'ARM_SwVer': ParameterString(
+            'SwVer': ParameterString(
                 'X-SOFTWARE-VERSION', read_format=rfmt),
-            'ARM_SwBld': ParameterString('X-BUILD-NUMBER', read_format=rfmt),
+            'SwBld': ParameterString('X-BUILD-NUMBER', read_format=rfmt),
             'CAL_PFC': ParameterFloat(
                 'CAL-PFC-BUS-VOLTS', writeable=True, readable=False,
                 scale=1000, write_format='{0} {1}'),
