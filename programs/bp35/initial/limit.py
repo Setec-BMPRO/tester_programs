@@ -1,15 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """BP35 Initial Program Limits."""
-
-ARM_VERSION = '1.2.12971.3776'      # ARM versions
-ARM_HW_VER = (3, 0, 'A')
-PIC_VERSION = '1.1.12949.167'       # Solar Regulator versions
-PIC_HW_VER = 1
+import os
 
 from testlimit import (
     lim_hilo, lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
-    lim_hi, lim_lo, lim_string, lim_boolean)
+    lim_lo, lim_string, lim_boolean)
+
+ARM_VERSION = '1.2.13351.3801'      # ARM versions
+ARM_HW_VER = (3, 0, 'A')
+ARM_HW_VER5 = (5, 0, 'A')
+PIC_VERSION = '1.1.12949.167'       # Solar Regulator versions
+PIC_HW_VER = 1
+
+# Serial port for the ARM. Used by programmer and ARM comms module.
+ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
+# ARM software image file
+ARM_BIN = 'bp35_{}.bin'.format(ARM_VERSION)
+# dsPIC software image file
+PIC_HEX = 'bp35sr_{}.hex'.format(PIC_VERSION)
+# CAN echo request messages
+CAN_ECHO = 'TQQ,32,0'
 
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
@@ -17,8 +28,11 @@ _CAN_BIND = 1 << 28
 SOLAR_VSET = 13.650
 SOLAR_ISET = 30.0
 
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
+    lim_hilo_int('Program', 0),
+    lim_lo('FixtureLock', 1200),
+    lim_boolean('Notify', True),
+    lim_hilo_delta('HwVer5', 1000.0, 250.0),
     lim_hilo_delta('ACin', 240.0, 5.0),
     lim_hilo('Vpfc', 401.0, 424.0),
     lim_hilo('12Vpri', 11.5, 13.0),
@@ -39,10 +53,6 @@ DATA = (
     lim_hilo_percent('VsetPost', SOLAR_VSET, 3.0),
     lim_hilo('OCP', 6.0, 9.0),
     lim_lo('InOCP', 11.6),
-    lim_hilo_int('Program', 0),
-    lim_lo('FixtureLock', 1200),
-    lim_hi('SwShort', 20),
-    lim_boolean('Notify', True),
     lim_string('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
     lim_hilo_delta('ARM-AcV', 240.0, 10.0),
     lim_hilo_delta('ARM-AcF', 50.0, 1.0),

@@ -2,12 +2,18 @@
 # -*- coding: utf-8 -*-
 """BP35 Initial Test Program."""
 
+import os
+import inspect
+import time
 from pydispatch import dispatcher
+
 import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-from .. import console
+from share import SimSerial, ProgramARM
+from . import limit
+from ..console import Console, Sensor as con_sensor
 
 translate = tester.translate
 
@@ -16,13 +22,14 @@ class LogicalDevices():
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def __init__(self, devices, fifo):
         """Create all Logical Instruments.
 
            @param devices Physical instruments of the Tester
 
         """
         self._devices = devices
+        self._fifo = fifo
         self.dmm = dmm.DMM(devices['DMM'])
         self.acsource = acsource.ACSource(devices['ACS'])
         self.discharge = discharge.Discharge(devices['DIS'])
@@ -37,6 +44,27 @@ class LogicalDevices():
         self.rla_pic = relay.Relay(devices['RLA3'])     # PIC programmer
         self.rla_loadsw = relay.Relay(devices['RLA4'])
         self.rla_vbat = relay.Relay(devices['RLA5'])
+        # ARM device programmer
+        file = os.path.join(os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe()))),
+            limit.ARM_BIN)
+        self.programmer = ProgramARM(limit.ARM_PORT, file, crpmode=False)
+        # Serial connection to the BP35 console
+        self.bp35_ser = SimSerial(
+            simulation=fifo, baudrate=115200, timeout=5.0)
+        # Set port separately, as we don't want it opened yet
+        self.bp35_ser.port = limit.ARM_PORT
+        # BP35 Console driver
+        self.bp35 = Console(self.bp35_ser)
+
+    def bp35_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False,
+                  addprompt=True):
+        """Push string data into the BP35 buffer if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
+            self.bp35.puts(string_data, preflush, postflush, priority)
 
     def error_check(self):
         """Check instruments for errors."""
@@ -44,8 +72,12 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
+        self.bp35.close()
         # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
+        self.dcl_out.output(2.0)
+        time.sleep(1)
+        self.discharge.pulse()
         # Switch off DC Sources
         for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
             dcs.output(0.0, False)
@@ -62,7 +94,7 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits, bp35):
+    def __init__(self, logical_devices, limits):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
@@ -72,14 +104,10 @@ class Sensors():
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
+        bp35 = logical_devices.bp35
         self.oMirPIC = sensor.Mirror()
-        self.oMirARM = sensor.Mirror()
         self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.oLock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
-        self.osw1 = sensor.Res(dmm, high=17, low=7, rng=1000000, res=1)
-        self.osw2 = sensor.Res(dmm, high=18, low=7, rng=1000000, res=1)
-        self.osw3 = sensor.Res(dmm, high=19, low=7, rng=1000000, res=1)
-        self.osw4 = sensor.Res(dmm, high=19, low=8, rng=1000000, res=1)
         self.oACin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.oVpfc = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
         self.oVload = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
@@ -91,6 +119,7 @@ class Sensors():
         self.o5Vusb = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.o3V3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self.hardware = sensor.Res(dmm, high=12, low=4, rng=1000000, res=1)
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
             detect_limit=(limits['InOCP'], ),
@@ -98,31 +127,30 @@ class Sensors():
         self.oSnEntry = sensor.DataEntry(
             message=translate('bp35_initial', 'msgSnEntry'),
             caption=translate('bp35_initial', 'capSnEntry'))
-        self.ARM_SwVer = console.Sensor(
+        self.ARM_SwVer = con_sensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self.ARM_AcV = console.Sensor(bp35, 'AC_V')
-        self.ARM_AcF = console.Sensor(bp35, 'AC_F')
-        self.ARM_SecT = console.Sensor(bp35, 'SEC_T')
-        self.ARM_Vout = console.Sensor(bp35, 'BUS_V')
-        self.ARM_BattType = console.Sensor(bp35, 'BATT_TYPE')
-        self.ARM_BattSw = console.Sensor(bp35, 'BATT_SWITCH')
-        self.ARM_Fan = console.Sensor(bp35, 'FAN')
-        self.ARM_CANBIND = console.Sensor(bp35, 'CAN_BIND')
+        self.ARM_AcV = con_sensor(bp35, 'AC_V')
+        self.ARM_AcF = con_sensor(bp35, 'AC_F')
+        self.ARM_SecT = con_sensor(bp35, 'SEC_T')
+        self.ARM_Vout = con_sensor(bp35, 'BUS_V')
+        self.ARM_BattType = con_sensor(bp35, 'BATT_TYPE')
+        self.ARM_BattSw = con_sensor(bp35, 'BATT_SWITCH')
+        self.ARM_Fan = con_sensor(bp35, 'FAN')
+        self.ARM_CANBIND = con_sensor(bp35, 'CAN_BIND')
         # Generate 14 load current sensors
         self.ARM_Loads = []
         for i in range(1, 15):
-            s = console.Sensor(bp35, 'LOAD_{}'.format(i))
+            s = con_sensor(bp35, 'LOAD_{}'.format(i))
             self.ARM_Loads.append(s)
-        self.ARM_BattI = console.Sensor(bp35, 'BATT_I')
-        self.ARM_AuxV = console.Sensor(bp35, 'AUX_V')
-        self.ARM_AuxI = console.Sensor(bp35, 'AUX_I')
-        self.arm_solar_alive = console.Sensor(bp35, 'SR_ALIVE')
-        self.arm_vout_ov = console.Sensor(bp35, 'VOUT_OV')
+        self.ARM_BattI = con_sensor(bp35, 'BATT_I')
+        self.ARM_AuxV = con_sensor(bp35, 'AUX_V')
+        self.ARM_AuxI = con_sensor(bp35, 'AUX_I')
+        self.arm_solar_alive = con_sensor(bp35, 'SR_ALIVE')
+        self.arm_vout_ov = con_sensor(bp35, 'VOUT_OV')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
         self.oMirPIC.flush()
-        self.oMirARM.flush()
         self.oMirCAN.flush()
 
 
@@ -137,14 +165,11 @@ class Measurements():
            @param limits Product test limits
 
         """
+        self.hardware5 = Measurement(limits['HwVer5'], sense.hardware)
+        limits['HwVer5'].position_fail = False
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
-        self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
         self.rx_can = Measurement(limits['CAN_RX'], sense.oMirCAN)
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.oLock)
-        self.dmm_sw1 = Measurement(limits['SwShort'], sense.osw1)
-        self.dmm_sw2 = Measurement(limits['SwShort'], sense.osw2)
-        self.dmm_sw3 = Measurement(limits['SwShort'], sense.osw3)
-        self.dmm_sw4 = Measurement(limits['SwShort'], sense.osw4)
         self.dmm_acin = Measurement(limits['ACin'], sense.oACin)
         self.dmm_vpfc = Measurement(limits['Vpfc'], sense.oVpfc)
         self.dmm_12Vpri = Measurement(limits['12Vpri'], sense.o12Vpri)
