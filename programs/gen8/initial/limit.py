@@ -4,7 +4,7 @@
 
 import os
 from testlimit import (
-    lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
+    lim_hilo_delta, lim_hilo_percent,
     lim_lo, lim_hi, lim_hilo, lim_string)
 
 BIN_VERSION = '1.4.645'     # Software binary version
@@ -20,6 +20,9 @@ ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
 
 # Test Limits
 DATA = (
+    lim_lo('PartCheck', 20),    # Microswitches on C106, C107, D2
+    lim_hi('FanShort', 20),     # Solder bridge on fan connector
+    lim_lo('FixtureLock', 20),
     lim_lo('5Voff', 0.5),
     lim_hilo_percent('5Vset', 5.10, 1.0),
     lim_hilo_percent('5V', 5.10, 2.0),
@@ -44,7 +47,6 @@ DATA = (
     lim_hilo_delta('PFCpost3', 440.0, 0.8),
     lim_hilo_delta('PFCpost4', 440.0, 0.8),
     lim_hilo_delta('PFCpost', 440.0, 0.9),
-    # Data reported by the ARM
     lim_hilo_delta('ARM-AcFreq', 50, 10),
     lim_lo('ARM-AcVolt', 300),
     lim_hilo_delta('ARM-5V', 5.0, 1.0),
@@ -52,9 +54,4 @@ DATA = (
     lim_hilo_delta('ARM-24V', 24.0, 2.0),
     lim_string('SwVer', '^{0}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
     lim_string('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
-    #
-    lim_lo('PartCheck', 20),    # Microswitches on C106, C107, D2
-    lim_hi('FanShort', 20),     # Solder bridge on fan connector
-    lim_lo('FixtureLock', 20),
-    lim_hilo_int('Program', 0),
     )

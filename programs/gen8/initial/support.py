@@ -8,7 +8,7 @@ import tester
 from tester.devlogical import *
 from tester.measure import *
 from share import Sensor as con_sensor
-from share import SimSerial
+from share import SimSerial, ProgramARM
 from . import limit
 from ..console import Console
 
@@ -35,6 +35,11 @@ class LogicalDevices():
         self.rla_12v2off = relay.Relay(devices['RLA2'])  # ON == 12V2 off
         self.rla_boot = relay.Relay(devices['RLA3'])     # ON == Asserted
         self.rla_reset = relay.Relay(devices['RLA4'])    # ON == Asserted
+        # ARM device programmer
+        file = os.path.join(os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe()))),
+            limit.ARM_BIN)
+        self.programmer = ProgramARM(limit.ARM_PORT, file)
         # Serial connection to the ARM console
         arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
@@ -49,6 +54,16 @@ class LogicalDevices():
             if addprompt:
                 string_data = string_data + '\r> '
             self.arm.puts(string_data, preflush, postflush, priority)
+
+    def arm_calpfc(self, voltage):
+        """Issue PFC calibration commands."""
+        self.arm['CAL_PFC'] = voltage
+        self.arm['NVWRITE'] = True
+
+    def arm_cal12v(self, voltage):
+        """Issue 12V calibration commands."""
+        self.arm['CAL_12V'] = voltage
+        self.arm['NVWRITE'] = True
 
     def error_check(self):
         """Check instruments for errors."""
@@ -93,7 +108,6 @@ class Sensors():
             self._reset,
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
-        self.mirarm = sensor.Mirror()
         self.o5v = sensor.Vdc(dmm, high=7, low=4, rng=10, res=0.001)
         self.o12v = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
         self.o12v2 = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
@@ -132,7 +146,6 @@ class Measurements():
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.lock)
         self.dmm_part = Measurement(limits['PartCheck'], sense.part)
         self.dmm_fanshort = Measurement(limits['FanShort'], sense.fanshort)
-        self.pgmarm = Measurement(limits['Program'], sense.mirarm)
         self.dmm_acin = Measurement(limits['InputFuse'], sense.acin)
         self.dmm_12vpri = Measurement(limits['12Vpri'], sense.o12vpri)
         self.dmm_5vset = Measurement(limits['5Vset'], sense.o5v)

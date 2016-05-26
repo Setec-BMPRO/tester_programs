@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 """GEN8 Initial Test Program."""
 
-import os
-import inspect
 import time
 import logging
 
 import tester
-from share import SimSerial
-from isplpc import Programmer, ProgrammingError
 from . import support
 from . import limit
 
@@ -61,9 +57,9 @@ class Initial(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
+        global d, m, s
         # Switch off fixture power
         d.dcs_10vfixture.output(0.0, output=False)
-        global d, m, s
         m = d = s = None
         super().close()
 
@@ -95,24 +91,8 @@ class Initial(tester.TestSequence):
         # Apply and check injected rails
         d.dcs_5v.output(5.15, True)
         MeasureGroup((m.dmm_5v, m.dmm_3v3, ), timeout=2)
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        file = os.path.join(folder, limit.ARM_BIN)
-        with open(file, 'rb') as infile:
-            bindata = bytearray(infile.read())
-        self._logger.debug('Read %d bytes from %s', len(bindata), file)
-        ser = SimSerial(port=limit.ARM_PORT, baudrate=115200)
-        try:
-            pgm = Programmer(
-                ser, bindata, erase_only=False, verify=False, crpmode=None)
-            try:
-                pgm.program()
-                m.pgmarm.sensor.store(0)
-            except ProgrammingError:
-                m.pgmarm.sensor.store(1)
-        finally:
-            ser.close()
-        m.pgmarm.measure()
+        # Program the ARM device
+        d.programmer.program()
         # Remove BOOT, reset micro, wait for ARM startup
         d.rla_boot.set_off()
         d.rla_reset.pulse(0.1)
@@ -145,7 +125,6 @@ class Initial(tester.TestSequence):
         240Vac is applied.
         PFC voltage is calibrated.
         12V is calibrated.
-        ARM data readings are logged.
         Unit is left running at 240Vac, no load.
 
         """
@@ -201,23 +180,19 @@ class Initial(tester.TestSequence):
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         result, pfc = m.dmm_pfcpre.stable(limit.PFC_STABLE)
-        d.arm['CAL_PFC'] = pfc
-        d.arm['NVWRITE'] = True
+        d.arm_calpfc(pfc)
         result, pfc = m.dmm_pfcpost1.stable(limit.PFC_STABLE)
         if not result:      # 1st retry
             self._logger.info('Retry1 PFC calibration')
-            d.arm['CAL_PFC'] = pfc
-            d.arm['NVWRITE'] = True
+            d.arm_calpfc(pfc)
             result, pfc = m.dmm_pfcpost2.stable(limit.PFC_STABLE)
         if not result:      # 2nd retry
             self._logger.info('Retry2 PFC calibration')
-            d.arm['CAL_PFC'] = pfc
-            d.arm['NVWRITE'] = True
+            d.arm_calpfc(pfc)
             result, pfc = m.dmm_pfcpost3.stable(limit.PFC_STABLE)
         if not result:      # 3rd retry
             self._logger.info('Retry3 PFC calibration')
-            d.arm['CAL_PFC'] = pfc
-            d.arm['NVWRITE'] = True
+            d.arm_calpfc(pfc)
             result, pfc = m.dmm_pfcpost4.stable(limit.PFC_STABLE)
         # A final PFC setup check
         m.dmm_pfcpost.stable(limit.PFC_STABLE)
@@ -226,8 +201,7 @@ class Initial(tester.TestSequence):
         # Calibrate the 12V set voltage
         self._logger.info('Start 12V calibration')
         result, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
-        d.arm['CAL_12V'] = v12
-        d.arm['NVWRITE'] = True
+        d.arm_calpfc(v12)
         # Prevent a limit fail from failing the unit
         m.dmm_12vset.testlimit[0].position_fail = False
         result, v12 = m.dmm_12vset.stable(limit.V12_STABLE)
@@ -236,8 +210,7 @@ class Initial(tester.TestSequence):
         if not result:
             self._logger.info('Retry 12V calibration')
             result, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
-            d.arm['CAL_12V'] = v12
-            d.arm['NVWRITE'] = True
+            d.arm_calpfc(v12)
             m.dmm_12vset.stable(limit.V12_STABLE)
         MeasureGroup(
             (m.arm_acfreq, m.arm_acvolt,

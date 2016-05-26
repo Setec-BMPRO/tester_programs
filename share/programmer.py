@@ -13,6 +13,11 @@ import subprocess
 import threading
 import queue
 import logging
+import testlimit
+import sensor
+import isplpc
+from tester.measure import Measurement
+from share import SimSerial
 
 
 # Result values to store into the mirror sensor
@@ -105,3 +110,53 @@ class ProgramPIC(_Programmer):
                    '/M',
                    '/Y']
         super().__init__(command, working_dir, sensor, fifo)
+
+
+class ProgramARM():
+
+    """ARM programmer using the isplpc package."""
+
+    def __init__(self, port, filename,
+        baudrate=115200, limitname='Program',
+        erase_only=False, verify=False, crpmode=None):
+        """Create a programmer.
+
+        @param port Serial port to use
+        @param filename Software image filename
+        @param baudrate Serial baudrate
+        @param limitname Testlimit name
+        @param erase_only True: Device should be erased only.
+        @param verify True: Verify the programmed device.
+        @param crpmode Code Protection:
+                        True: ON, False: OFF, None: per 'bindata'.
+
+        """
+        self._port = port
+        self._baudrate = baudrate
+        self._limitname = limitname
+        self._erase_only = erase_only
+        self._verify = verify
+        self._crpmode = crpmode
+        with open(filename, 'rb') as infile:
+            self._bindata = bytearray(infile.read())
+        self._arm = Measurement(
+            testlimit.lim_hilo_int(limitname, _SUCCESS), sensor.Mirror())
+
+    def program(self):
+        """Program a device."""
+        ser = SimSerial(port=self._port, baudrate=self._baudrate)
+        try:
+            pgm = isplpc.Programmer(
+                ser,
+                self._bindata,
+                erase_only=self._erase_only,
+                verify=self._verify,
+                crpmode=self._crpmode)
+            try:
+                pgm.program()
+                self._arm.sensor.store(_SUCCESS)
+            except isplpc.ProgrammingError:
+                self._arm.sensor.store(_FAILURE)
+        finally:
+            ser.close()
+        self._arm.measure()
