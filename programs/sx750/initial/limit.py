@@ -18,7 +18,7 @@ ARM_BIN = 'sx750_arm_{}.bin'.format(BIN_VERSION)
 PFC_STABLE = 0.05
 
 from testlimit import (
-    lim_hilo_delta, lim_hilo_percent, lim_hilo,
+    lim_hilo_delta, lim_hilo_percent, lim_hilo, lim_hilo_int,
     lim_lo, lim_hi, lim_string)
 
 # Test Limits
@@ -70,4 +70,5 @@ DATA = (
     lim_lo('PartCheck', 20),            # Microswitches on C612, C613, D404
     lim_hilo('Snubber', 1000, 3000),    # Snubbing resistors
     lim_string('Reply', '^OK$'),
+    lim_hilo_int('Program', 0)
     )

@@ -187,8 +187,7 @@ class Measurements():
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
         # Programming results
-        pgmlim = limits['Program']
-        self.pgmPIC = Measurement(pgmlim, sense.oMirPIC)
+        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.dmm_5Voff = Measurement(limits['5Voff'], sense.o5Vsb)
         self.dmm_5Vext = Measurement(limits['5Vext'], sense.o5Vsb)
         self.dmm_5Vunsw = Measurement(limits['5Vsb'], sense.o5Vsbunsw)
