@@ -201,7 +201,7 @@ class Initial(tester.TestSequence):
         # Calibrate the 12V set voltage
         self._logger.info('Start 12V calibration')
         result, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
-        d.arm_calpfc(v12)
+        d.arm_cal12v(v12)
         # Prevent a limit fail from failing the unit
         m.dmm_12vset.testlimit[0].position_fail = False
         result, v12 = m.dmm_12vset.stable(limit.V12_STABLE)
@@ -210,7 +210,7 @@ class Initial(tester.TestSequence):
         if not result:
             self._logger.info('Retry 12V calibration')
             result, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
-            d.arm_calpfc(v12)
+            d.arm_cal12v(v12)
             m.dmm_12vset.stable(limit.V12_STABLE)
         MeasureGroup(
             (m.arm_acfreq, m.arm_acvolt,

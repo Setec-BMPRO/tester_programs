@@ -139,8 +139,9 @@ class ProgramARM():
         self._crpmode = crpmode
         with open(filename, 'rb') as infile:
             self._bindata = bytearray(infile.read())
-        self._arm = Measurement(
-            testlimit.lim_hilo_int(limitname, _SUCCESS), sensor.Mirror())
+        limit = testlimit.LimitHiLo(
+            limitname, 0, (_SUCCESS - 0.5, _SUCCESS + 0.5))
+        self._arm = Measurement(limit, sensor.Mirror())
 
     def program(self):
         """Program a device."""
