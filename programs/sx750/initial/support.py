@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """SX-750 Initial Test Program."""
+import os
+import inspect
 
 from pydispatch import dispatcher
 import sensor
@@ -8,6 +10,10 @@ import tester
 from tester.devlogical import *
 from tester.measure import *
 from share.console import Sensor as con_sensor
+from share import SimSerial, ProgramARM
+from . import limit
+from ..console import Console
+from .arduino import Arduino
 from . import digpot
 
 
@@ -15,9 +21,10 @@ class LogicalDevices():
 
     """SX-750 Logical Devices."""
 
-    def __init__(self, devices):
+    def __init__(self, devices, fifo):
         """Create all Logical Instruments."""
         self._devices = devices
+        self._fifo = fifo
         self.acsource = acsource.ACSource(devices['ACS'])
         self.dmm = dmm.DMM(devices['DMM'])
         self.discharge = discharge.Discharge(devices['DIS'])
@@ -36,6 +43,44 @@ class LogicalDevices():
         self.rla_pot_24 = relay.Relay(devices['RLA4'])
         self.ocp_pot = digpot.OCPAdjust(
             self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24)
+        # ARM device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        file = os.path.join(folder, limit.ARM_BIN)
+        self.programmer = ProgramARM(limit.ARM_PORT, file)
+        # Serial connection to the ARM console
+        arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
+        # Set port separately, as we don't want it opened yet
+        arm_ser.port = limit.ARM_PORT
+        self.arm = Console(arm_ser, verbose=False)
+        # Serial connection to the Arduino console
+        ard_ser = SimSerial(simulation=fifo, baudrate=115200, timeout=2.0)
+        # Set port separately, as we don't want it opened yet
+        ard_ser.port = limit.ARDUINO_PORT
+        self.ard = Arduino(ard_ser, verbose=False)
+
+    def arm_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False,
+                  addprompt=True):
+        """Push string data into the buffer, if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r> '
+            self.arm.puts(string_data, preflush, postflush, priority)
+
+    def ard_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False,
+                  addprompt=True):
+        """Push string data into the buffer, if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r> '
+            self.ard.puts(string_data, preflush, postflush, priority)
+
+    def arm_calpfc(self, voltage):
+        """Issue PFC calibration commands."""
+        self.arm['CAL_PFC'] = voltage
+        self.arm['NVWRITE'] = True
 
     def error_check(self):
         """Check instruments for errors."""
@@ -43,8 +88,15 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
+        self.arm.close()
+        self.ard.close()
         # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
+        self.dcl_5Vsb.output(1.0)
+        self.dcl_12V.output(5.0)
+        self.dcl_24V.output(5.0)
+        time.sleep(1)
+        self.discharge.pulse()
         # Switch off DC Loads
         for ld in (self.dcl_5Vsb, self.dcl_12V, self.dcl_24V):
             ld.output(0.0)
@@ -63,12 +115,11 @@ class Sensors():
 
     """SX-750 Sensors."""
 
-    def __init__(self, logical_devices, limits, armdev, arddev):
+    def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         d = logical_devices
         dmm = d.dmm
         # Mirror sensors for Programming result logging
-        self.oMirARM = sensor.Mirror()
         self.oMirPIC = sensor.Mirror()
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
@@ -102,31 +153,30 @@ class Sensors():
             start=18.3 * 0.9, stop=18.3 * 1.1, step=0.1, delay=0,
             reset=True, use_opc=True)
         self.PGM_5Vsb = con_sensor(
-            arddev, 'PGM_5VSB', rdgtype=sensor.ReadingString)
+            d.ard, 'PGM_5VSB', rdgtype=sensor.ReadingString)
         self.PGM_PwrSw = con_sensor(
-            arddev, 'PGM_PWRSW', rdgtype=sensor.ReadingString)
+            d.ard, 'PGM_PWRSW', rdgtype=sensor.ReadingString)
         self.PotMax = con_sensor(
-            arddev, 'POT_MAX', rdgtype=sensor.ReadingString)
+            d.ard, 'POT_MAX', rdgtype=sensor.ReadingString)
         self.Pot12Enable = con_sensor(
-            arddev, '12_POT_ENABLE', rdgtype=sensor.ReadingString)
+            d.ard, '12_POT_ENABLE', rdgtype=sensor.ReadingString)
         self.Pot24Enable = con_sensor(
-            arddev, '24_POT_ENABLE', rdgtype=sensor.ReadingString)
+            d.ard, '24_POT_ENABLE', rdgtype=sensor.ReadingString)
         self.PotStep = con_sensor(
-            arddev, 'POT_STEP', rdgtype=sensor.ReadingString)
+            d.ard, 'POT_STEP', rdgtype=sensor.ReadingString)
         self.PotDisable = con_sensor(
-            arddev, 'POT_DISABLE', rdgtype=sensor.ReadingString)
-        self.ARM_AcFreq = con_sensor(armdev, 'ARM-AcFreq')
-        self.ARM_AcVolt = con_sensor(armdev, 'ARM-AcVolt')
-        self.ARM_12V = con_sensor(armdev, 'ARM-12V')
-        self.ARM_24V = con_sensor(armdev, 'ARM-24V')
+            d.ard, 'POT_DISABLE', rdgtype=sensor.ReadingString)
+        self.ARM_AcFreq = con_sensor(d.arm, 'ARM-AcFreq')
+        self.ARM_AcVolt = con_sensor(d.arm, 'ARM-AcVolt')
+        self.ARM_12V = con_sensor(d.arm, 'ARM-12V')
+        self.ARM_24V = con_sensor(d.arm, 'ARM-24V')
         self.ARM_SwVer = con_sensor(
-            armdev, 'ARM_SwVer', rdgtype=sensor.ReadingString)
+            d.arm, 'ARM_SwVer', rdgtype=sensor.ReadingString)
         self.ARM_SwBld = con_sensor(
-            armdev, 'ARM_SwBld', rdgtype=sensor.ReadingString)
+            d.arm, 'ARM_SwBld', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirARM.flush()
         self.oMirPIC.flush()
 
 
@@ -138,7 +188,6 @@ class Measurements():
         """Create all Measurement instances."""
         # Programming results
         pgmlim = limits['Program']
-        self.pgmARM = Measurement(pgmlim, sense.oMirARM)
         self.pgmPIC = Measurement(pgmlim, sense.oMirPIC)
         self.dmm_5Voff = Measurement(limits['5Voff'], sense.o5Vsb)
         self.dmm_5Vext = Measurement(limits['5Vext'], sense.o5Vsb)

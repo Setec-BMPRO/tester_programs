@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """SX-750 Initial Test Program Limits."""
+import os
 
 BIN_VERSION = '3.1.2118'        # Software versions
 PIC_HEX1 = 'sx750_pic5Vsb_1.hex'
 PIC_HEX2 = 'sx750_picPwrSw_2.hex'
 
+# Serial port for the ARM. Used by programmer and ARM comms module.
+ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+# Serial port for the Arduino.
+ARDUINO_PORT = {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name]
+# Software image filenames
+ARM_BIN = 'sx750_arm_{}.bin'.format(BIN_VERSION)
+
 # Reading to reading difference for PFC voltage stability
 PFC_STABLE = 0.05
 
 from testlimit import (
-    lim_hilo_delta, lim_hilo_percent, lim_hilo_int, lim_hilo,
+    lim_hilo_delta, lim_hilo_percent, lim_hilo,
     lim_lo, lim_hi, lim_string)
 
 # Test Limits
@@ -61,6 +69,5 @@ DATA = (
     lim_lo('FixtureLock', 20),
     lim_lo('PartCheck', 20),            # Microswitches on C612, C613, D404
     lim_hilo('Snubber', 1000, 3000),    # Snubbing resistors
-    lim_hilo_int('Program', 0),
     lim_string('Reply', '^OK$'),
     )

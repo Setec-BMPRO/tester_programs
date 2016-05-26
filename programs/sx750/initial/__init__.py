@@ -9,23 +9,13 @@ import logging
 import threading
 
 import tester
-from share import ProgramPIC, SimSerial
-from isplpc import Programmer, ProgrammingError
-from ..console import Console
-from .arduino import Arduino
+from share import ProgramPIC
 from . import support
 from . import limit
 
 MeasureGroup = tester.measure.group
 
 INI_LIMIT = limit.DATA
-
-# Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
-# Serial port for the Arduino.
-_ARDUINO_PORT = {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name]
-# Software image filenames
-_ARM_BIN = 'sx750_arm_{}.bin'.format(limit.BIN_VERSION)
 
 # These are module level variable to avoid having to use 'self.' everywhere.
 d = None        # Shortcut to Logical Devices
@@ -59,23 +49,13 @@ class Initial(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        # Serial connection to the ARM console
-        arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
-        # Set port separately, as we don't want it opened yet
-        arm_ser.port = _ARM_PORT
-        self._armdev = Console(arm_ser, verbose=False)
-        # Serial connection to the Arduino console
-        ard_ser = SimSerial(simulation=fifo, baudrate=115200, timeout=2.0)
-        # Set port separately, as we don't want it opened yet
-        ard_ser.port = _ARDUINO_PORT
-        self._arddev = Arduino(ard_ser, verbose=False)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits, self._armdev, self._arddev)
+        d = support.LogicalDevices(self._devices, self._fifo)
+        s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
 
     def close(self):
@@ -88,34 +68,7 @@ class Initial(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        self._armdev.close()
-        self._arddev.close()
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl_5Vsb.output(1.0)
-        d.dcl_12V.output(5.0)
-        d.dcl_24V.output(5.0)
-        time.sleep(1)
-        d.discharge.pulse()
-        # Reset Logical Devices
         d.reset()
-
-    def _arm_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
-        """Push string data into the buffer, if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r> '
-            self._armdev.puts(string_data, preflush, postflush, priority)
-
-    def _ard_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
-        """Push string data into the buffer, if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r> '
-            self._arddev.puts(string_data, preflush, postflush, priority)
 
     def _step_error_check(self):
         """Check physical instruments for errors."""
@@ -151,7 +104,7 @@ class Initial(tester.TestSequence):
             (s.o5Vsbunsw, (5.0,) * 2), (s.o3V3, 3.21), ))
         # Push response prompts
         for _ in range(2):      # Push response prompts
-            self._ard_puts('OK')
+            d.ard_puts('OK')
         d.dcs_Arduino.output(12.0, True)
         d.dcs_PriCtl.output(12.0, True)
         MeasureGroup((m.dmm_PriCtl, m.dmm_8V5Ard), 2)
@@ -176,31 +129,13 @@ class Initial(tester.TestSequence):
         tester.testsequence.path_push('SET-POT-MAX')
         m.pot_max.measure()
         tester.testsequence.path_pop()
-
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5Vsb.output(5.75, True)
         MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self._logger.info('Program ARM')
-        file = os.path.join(folder, _ARM_BIN)
-        with open(file, 'rb') as infile:
-            bindata = bytearray(infile.read())
-        self._logger.debug('Read %d bytes from %s', len(bindata), file)
-        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-        try:
-            pgm = Programmer(
-                ser, bindata, erase_only=False, verify=False, crpmode=None)
-            try:
-                pgm.program()
-                s.oMirARM.store(0)
-            except ProgrammingError:
-                s.oMirARM.store(1)
-        finally:
-            ser.close()
-        m.pgmARM.measure()
+        # Program the ARM device
+        d.programmer.program()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
         # Discharge the 5Vsb to stop the ARM
@@ -254,28 +189,14 @@ class Initial(tester.TestSequence):
         pot_worker = threading.Thread(
             target=self._pot_worker, name='PotReset')
         pot_worker.start()
-        self._logger.info('Program ARM')
-        file = os.path.join(folder, _ARM_BIN)
-        with open(file, 'rb') as infile:
-            bindata = bytearray(infile.read())
-        self._logger.debug('Read %d bytes from %s', len(bindata), file)
-        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-        try:
-            pgm = Programmer(
-                ser, bindata, erase_only=False, verify=False, crpmode=None)
-            try:
-                pgm.program()
-                s.oMirARM.store(0)
-            except ProgrammingError:
-                s.oMirARM.store(1)
-        finally:
-            ser.close()
+        # Program the ARM device
+        d.programmer.program()
         # Wait for programming completion & read results
         pot_worker.join()
         pic.read()
         d.rla_pic2.set_off()
         # 'Measure' the mirror sensors to check and log data
-        MeasureGroup((m.pgmARM, m.pgmPIC))
+        MeasureGroup((m.pgmPIC, ))
         # Reset BOOT to ARM
         d.rla_boot.set_off()
         # Discharge the 5Vsb to stop the ARM
@@ -296,14 +217,14 @@ class Initial(tester.TestSequence):
         """
         self.fifo_push(((s.o5Vsb, 5.75), (s.o5Vsbunsw, 5.01), ))
         for _ in range(2):      # Push response prompts
-            self._arm_puts('')
+            d.arm_puts('')
 
         d.dcs_5Vsb.output(5.75, True)
         MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
-        self._armdev.open()
-        self._armdev['UNLOCK'] = '$DEADBEA7'
-        self._armdev['NVWRITE'] = True
+        d.arm.open()
+        d.arm['UNLOCK'] = '$DEADBEA7'
+        d.arm['NVWRITE'] = True
         # Switch everything off
         d.dcs_5Vsb.output(0, False)
         d.dcl_5Vsb.output(0.1)
@@ -330,17 +251,17 @@ class Initial(tester.TestSequence):
                433.0, 433.0,     # 2nd reading
                435.0, 435.0,     # Final value
                )), ))
-        self._arm_puts('')
+        d.arm_puts('')
         for str in (('50Hz ', ) +       # ARM_AcFreq
                     ('240Vrms ', ) +    # ARM_AcVolt
                     ('12180mV ', ) +    # ARM_12V
                     ('24000mV ', )      # ARM_24V
                     ):
-            self._arm_puts(str)
-        self._arm_puts(limit.BIN_VERSION[:3])    # ARM SwVer
-        self._arm_puts(limit.BIN_VERSION[4:])    # ARM BuildNo
+            d.arm_puts(str)
+        d.arm_puts(limit.BIN_VERSION[:3])    # ARM SwVer
+        d.arm_puts(limit.BIN_VERSION[4:])    # ARM BuildNo
         for _ in range(4):      # Push response prompts
-            self._arm_puts('')
+            d.arm_puts('')
 
         d.acsource.output(voltage=240.0, output=True)
         # A little load so PFC voltage falls faster
@@ -353,15 +274,14 @@ class Initial(tester.TestSequence):
         d.rla_pson.set_on()
         MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
         # ARM data readings
-        self._armdev['UNLOCK'] = '$DEADBEA7'
+        d.arm['UNLOCK'] = '$DEADBEA7'
         MeasureGroup(
             (m.arm_AcFreq, m.arm_AcVolt, m.arm_12V, m.arm_24V,
              m.arm_SwVer, m.arm_SwBld), )
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         result, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
-        self._armdev['CAL_PFC'] = pfc
-        self._armdev['NVWRITE'] = True
+        d.arm_calpfc(pfc)
         # Prevent a limit fail from failing the unit
         m.dmm_PFCpost.testlimit[0].position_fail = False
         result, pfc = m.dmm_PFCpost.stable(limit.PFC_STABLE)
@@ -370,8 +290,7 @@ class Initial(tester.TestSequence):
         if not result:
             self._logger.info('Retry PFC calibration')
             result, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
-            self._armdev['CAL_PFC'] = pfc
-            self._armdev['NVWRITE'] = True
+            d.arm_calpfc(pfc)
             m.dmm_PFCpost.stable(limit.PFC_STABLE)
         # Leave the loads at zero
         d.dcl_12V.output(0)
@@ -417,7 +336,7 @@ class Initial(tester.TestSequence):
              ))
         # Push response prompts
         for _ in range(35):      # Push response prompts
-            self._ard_puts('OK')
+            d.ard_puts('OK')
 
         _reg_check(
             dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
@@ -458,7 +377,7 @@ class Initial(tester.TestSequence):
              ))
         # Push response prompts
         for _ in range(35):      # Push response prompts
-            self._ard_puts('OK')
+            d.ard_puts('OK')
 
         _reg_check(
             dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
