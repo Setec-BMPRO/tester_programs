@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 """GEN8 Initial Test Program."""
 
-from pydispatch import dispatcher
+import os
+import inspect
+
 import sensor
-import tester
 from tester.devlogical import *
 from tester.measure import *
-from share import Sensor as con_sensor
-from share import SimSerial, ProgramARM
+from share import Sensor as con_sensor, SimSerial, ProgramARM
 from . import limit
 from ..console import Console
 
@@ -104,10 +104,6 @@ class Sensors():
         """Create all Sensor instances."""
         d = logical_devices
         dmm = d.dmm
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
         self.o5v = sensor.Vdc(dmm, high=7, low=4, rng=10, res=0.001)
         self.o12v = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
         self.o12v2 = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
@@ -131,10 +127,6 @@ class Sensors():
             d.arm, 'SwVer', rdgtype=sensor.ReadingString)
         self.arm_swbld = con_sensor(
             d.arm, 'SwBld', rdgtype=sensor.ReadingString)
-
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensor."""
-        self.mirarm.flush()
 
 
 class Measurements():
