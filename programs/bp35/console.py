@@ -57,7 +57,7 @@ class Console(console.Variable, console.BadUartConsole):
             'VOUT_OV': ParameterFloat(
                 'CONVERTER_OVERVOLT', writeable=True,
                 minimum=0, maximum=2, scale=1),
-            'MODE': ParameterFloat(
+            'SET_MODE': ParameterFloat(
                 'SLEEPMODE', writeable=True,
                 minimum=0, maximum=3, scale=1),
             'SR_HW_VER': ParameterFloat(
@@ -93,6 +93,7 @@ class Console(console.Variable, console.BadUartConsole):
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
             'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
             'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
+            'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
             'SER_ID': ParameterString(
                 'SET-SERIAL-ID', writeable=True, readable=False,
                 write_format='"{} {}'),
@@ -107,8 +108,8 @@ class Console(console.Variable, console.BadUartConsole):
             'CAN': ParameterString('CAN',
                 writeable=True, write_format='"{} {}'),
             'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
-            'UNLOCK': ParameterString('UNLOCK',
-                writeable=True, readable=False, write_format='{} {}'),
+            'UNLOCK': ParameterBoolean('UNLOCK DEADBEA7',
+                writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
                 writeable=True, readable=False, write_format='{1}'),
             'NVWRITE': ParameterBoolean('NV-WRITE',
@@ -121,8 +122,10 @@ class Console(console.Variable, console.BadUartConsole):
 
     def manual_mode(self):
         """Enter manual control mode."""
-        self['MODE'] = 3
-        time.sleep(2)           # Takes 1.0 - 2.0 sec to enter the mode
+        self['SET_MODE'] = 3
+        mode = 0
+        while mode != 0x10000:      # Wait for the operating mode to change
+            mode = self['OPERATING_MODE']
         self['VOUT'] = 12.8
         self['IOUT'] = 35.0
         self['VOUT_OV'] = 2     # OVP Latch reset
@@ -130,9 +133,9 @@ class Console(console.Variable, console.BadUartConsole):
     def power_on(self):
         """Power ON the converter circuits."""
         self['PFC_EN'] = True
-        time.sleep(1)
+        time.sleep(0.5)
         self['DCDC_EN'] = True
-        time.sleep(1)
+        time.sleep(0.5)
         self['VOUT_OV'] = 2     # OVP Latch reset
         self['LOAD_DIS'] = False
 
@@ -154,6 +157,18 @@ class Console(console.Variable, console.BadUartConsole):
             bits = code << (load * 2)
             value = value & mask | bits
         self['LOAD_SET'] = value
+
+
+    def solar_set(self, voltage, current):
+        """Set the state of Solar Regulator.
+
+        @param voltage Voltage setpoint
+        @param current Current setpoint
+
+        """
+        self.action(
+            '{} {} SOLAR-SETP-V-I'.format(
+                int(voltage * 1000), int(current * 1000)))
 
     def can_testmode(self, state):
         """Enable or disable CAN Test Mode.

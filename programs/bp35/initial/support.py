@@ -39,8 +39,8 @@ class LogicalDevices():
         self.dcs_sreg = dcsource.DCSource(devices['DCS4'])
         self.dcl_out = dcload.DCLoad(devices['DCL1'])
         self.dcl_bat = dcload.DCLoad(devices['DCL5'])
-        self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
-        self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
+        self.rla_reset = relay.Relay(devices['RLA1'])
+        self.rla_boot = relay.Relay(devices['RLA2'])
         self.rla_pic = relay.Relay(devices['RLA3'])     # PIC programmer
         self.rla_loadsw = relay.Relay(devices['RLA4'])
         self.rla_vbat = relay.Relay(devices['RLA5'])
@@ -73,7 +73,7 @@ class LogicalDevices():
     def reset(self):
         """Reset instruments."""
         self.bp35.close()
-        # Switch off AC Source
+        # Switch off AC Source & discharge the unit
         self.acsource.output(voltage=0.0, output=False)
         self.dcl_out.output(2.0)
         time.sleep(1)

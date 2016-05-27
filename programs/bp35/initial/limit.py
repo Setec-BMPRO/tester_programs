@@ -27,6 +27,9 @@ _CAN_BIND = 1 << 28
 # Solar Reg settings
 SOLAR_VSET = 13.650
 SOLAR_ISET = 30.0
+SOLAR_VIN = 20.0
+# Injected Vbat
+VBAT_IN = 12.4
 
 DATA = (
     lim_hilo_int('Program', 0),
@@ -48,7 +51,6 @@ DATA = (
     lim_hilo_delta('FanOn', 12.5, 0.5),
     lim_lo('FanOff', 0.5),
     lim_hilo_delta('3V3prog', 3.3, 0.1),
-    # Solar Reg set output voltage and current
     lim_hilo_percent('VsetPre', SOLAR_VSET, 6.0),
     lim_hilo_percent('VsetPost', SOLAR_VSET, 3.0),
     lim_hilo('OCP', 6.0, 9.0),
