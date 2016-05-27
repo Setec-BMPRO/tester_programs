@@ -94,11 +94,11 @@ class Initial(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.oLock, 10.0), (s.hardware, 1000),
-             (s.oVbat, 12.0), (s.o3V3, 3.3), (s.o3V3prog, 3.3),
-             (s.oSnEntry, ('A1626010123', )), ))
+            ((s.lock, 10.0), (s.hardware, 1000),
+             (s.vbat, 12.0), (s.o3v3, 3.3), (s.o3v3prog, 3.3),
+             (s.sernum, ('A1626010123', )), ))
 
-        self._sernum = m.ui_SnEntry.measure().reading1
+        self._sernum = m.ui_sernum.measure().reading1
         m.dmm_lock.measure(timeout=5)
         # Detect the hardware version & choose correct HW_VER values
         if m.hardware5.measure().result:
@@ -111,7 +111,7 @@ class Initial(tester.TestSequence):
         d.dcs_vbat.output(limit.VBAT_IN, True)
         d.rla_vbat.set_on()
         d.dcs_sreg.output(limit.SOLAR_VIN, True)
-        MeasureGroup((m.dmm_vbatin, m.dmm_3V3, m.dmm_3V3prog), timeout=5)
+        MeasureGroup((m.dmm_vbatin, m.dmm_3v3, m.dmm_3v3prog), timeout=5)
 
     def _step_program_pic(self):
         """Program the dsPIC device.
@@ -123,10 +123,10 @@ class Initial(tester.TestSequence):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_pic.set_on()
         pic = ProgramPIC(
-            limit.PIC_HEX, folder, '33FJ16GS402', s.oMirPIC, self._fifo)
+            limit.PIC_HEX, folder, '33FJ16GS402', s.mir_pic, self._fifo)
         pic.read()
         d.rla_pic.set_off()
-        m.pgmPIC.measure()
+        m.pgmpic.measure()
         d.dcs_sreg.output(0.0)  # Switch off the Solar
 
     def _step_program_arm(self):
@@ -149,7 +149,7 @@ class Initial(tester.TestSequence):
         Put device into manual control mode.
 
         """
-        self.fifo_push(((s.oSnEntry, ('A1526040123', )), ))
+        self.fifo_push(((s.sernum, ('A1526040123', )), ))
         for str in (
                 ('Banner1\r\nBanner2', ) +  # Banner lines
                 ('', ) + ('success', ) * 2 + ('', ) * 4 +
@@ -158,46 +158,33 @@ class Initial(tester.TestSequence):
                 ):
             d.bp35_puts(str)
 
-# FIXME: Remove power to microprocessor and start again.
-#       Needed when upgrading a programmed unit.
-        d.dcs_vbat.output(0.0)
-        time.sleep(2.0)
-        d.dcs_vbat.output(limit.VBAT_IN)
-        time.sleep(2.0)
-
         d.bp35.open()
         d.rla_reset.pulse(0.1)
+        d.dcs_sreg.output(limit.SOLAR_VIN)
         d.bp35.action(None, delay=1.5, expected=2)  # Flush banner
         d.bp35['UNLOCK'] = True
         d.bp35['HW_VER'] = self._hwver
         d.bp35['SER_ID'] = self._sernum
         d.bp35['NVDEFAULT'] = True
         d.bp35['NVWRITE'] = True
-        d.dcs_sreg.output(limit.SOLAR_VIN)
-# FIXME: Is this the correct time?...
-        time.sleep(1)
         d.bp35['SR_DEL_CAL'] = True
         d.bp35['SR_HW_VER'] = limit.PIC_HW_VER
-        m.arm_SwVer.measure()
+        # Restart required because of HW_VER setting
+        d.rla_reset.pulse(0.1)
+        d.bp35.action(None, delay=1.5, expected=2)  # Flush banner
+        d.bp35['UNLOCK'] = True
+        m.arm_swver.measure()
         d.bp35.manual_mode()
 
     def _step_solar_reg(self):
-        """Test the Solar Regulator board.
-
-        Set the Solar Reg output voltage to 13.65V.
-        Measure actual Solar Reg output voltage.
-        Calibrate and measure again.
-
-        """
-        self.fifo_push(((s.oVsreg, (13.0, 13.5)), ))
+        """Test & Calibrate the Solar Regulator board."""
+        self.fifo_push(((s.vsreg, (13.0, 13.5)), ))
         for str in (('1.0', '0', '200') +   # Solar alive, Vout OV, SR Temp
                     ('0', ) * 4             # 2 x Solar VI, Vout OV, SR Cal
                     ):
             d.bp35_puts(str)
 
         MeasureGroup((m.arm_solar_alive, m.arm_vout_ov, ))
-        srtemp = d.bp35['SR_TEMP']
-        self._logger.debug('Temperature: %s', srtemp)
         # The SR needs V & I set to zero after power up or it won't start.
         d.bp35.solar_set(0, 0)
         # Now set the actual output settings
@@ -212,14 +199,14 @@ class Initial(tester.TestSequence):
 
     def _step_aux(self):
         """Apply Auxiliary input."""
-        self.fifo_push(((s.oVbat, 13.5), ))
+        self.fifo_push(((s.vbat, 13.5), ))
         for str in (('', '13500', '350', '')):
-             d.bp35_puts(str)
+            d.bp35_puts(str)
 
         d.dcs_vaux.output(13.5, output=True)
         d.dcl_bat.output(0.5)
         d.bp35['AUX_RELAY'] = True
-        MeasureGroup((m.dmm_vaux, m.arm_auxV, m.arm_auxI), timeout=5)
+        MeasureGroup((m.dmm_vaux, m.arm_auxv, m.arm_auxi), timeout=5)
         d.bp35['AUX_RELAY'] = False
         d.dcs_vaux.output(0.0, output=False)
         d.dcl_bat.output(0.0)
@@ -227,8 +214,8 @@ class Initial(tester.TestSequence):
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac."""
         self.fifo_push(
-            ((s.oACin, 240.0), (s.o12Vpri, 12.5), (s.o3V3, 3.3),
-            (s.o15Vs, 12.5), (s.oVbat, 12.8), (s.oVpfc, (415.0, 415.0), )))
+            ((s.acin, 240.0), (s.pri12v, 12.5), (s.o3v3, 3.3),
+            (s.o15Vs, 12.5), (s.vbat, 12.8), (s.vpfc, (415.0, 415.0), )))
         for str in (('0', ) +
                     ('', ) * 4 +
                     ('0', )
@@ -238,7 +225,7 @@ class Initial(tester.TestSequence):
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         m.arm_vout_ov.measure()
-        MeasureGroup((m.dmm_acin, m.dmm_12Vpri), timeout=10)
+        MeasureGroup((m.dmm_acin, m.dmm_pri12v), timeout=10)
         # Enable PFC & DCDC converters
         d.bp35.power_on()
         # Wait for PFC overshoot to settle
@@ -249,7 +236,7 @@ class Initial(tester.TestSequence):
         d.dcs_vbat.output(0.0, output=False)
         # Is it now running on it's own?
         m.arm_vout_ov.measure()
-        MeasureGroup((m.dmm_3V3, m.dmm_15Vs, m.dmm_vbat), timeout=10)
+        MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vbat), timeout=10)
 
     def _step_output(self):
         """Test the output switches.
@@ -258,7 +245,7 @@ class Initial(tester.TestSequence):
         All outputs are then left ON.
 
         """
-        self.fifo_push(((s.oVload, (0.0, ) + (12.8, ) * 14),  ))
+        self.fifo_push(((s.vload, (0.0, ) + (12.8, ) * 14), ))
         for str in (('', ) * (1 + 14 + 1)):
             d.bp35_puts(str)
 
@@ -278,7 +265,7 @@ class Initial(tester.TestSequence):
 
     def _step_remote_sw(self):
         """Test Remote Load Isolator Switch."""
-        self.fifo_push(((s.oVload, (0.25, 12.34)), ))
+        self.fifo_push(((s.vload, (0.25, 12.34)), ))
 
         d.rla_loadsw.set_on()
         m.dmm_vloadOff.measure(timeout=5)
@@ -288,10 +275,10 @@ class Initial(tester.TestSequence):
     def _step_ocp(self):
         """Test functions of the unit."""
         self.fifo_push(
-            ((s.oFan, (0, 12.0)),
-             (s.oVbat, 12.8), (s.oVbat, (12.8, ) * 6 + (11.0, ), ), ))
+            ((s.fan, (0, 12.0)),
+             (s.vbat, 12.8), (s.vbat, (12.8, ) * 6 + (11.0, ), ), ))
         if self._fifo:
-            for sen in s.ARM_Loads:
+            for sen in s.arm_loads:
                 sen.store(2.0)
         for str in (('240', '50000', '350', '12800', '500', '', '4000')):
             d.bp35_puts(str)
@@ -308,7 +295,7 @@ class Initial(tester.TestSequence):
             tester.testsequence.path_push('L{}'.format(ld + 1))
             m.arm_loads[ld].measure(timeout=5)
             tester.testsequence.path_pop()
-        m.ramp_OCP.measure(timeout=5)
+        m.ramp_ocp.measure(timeout=5)
         d.dcl_bat.output(0.0)
 
     def _step_canbus(self):
@@ -325,5 +312,5 @@ class Initial(tester.TestSequence):
         echo_reply = d.bp35_ser.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
-        s.oMirCAN.store(echo_reply)
+        s.mir_can.store(echo_reply)
         m.rx_can.measure()

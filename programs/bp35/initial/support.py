@@ -13,7 +13,7 @@ from tester.devlogical import *
 from tester.measure import *
 from share import SimSerial, ProgramARM
 from . import limit
-from ..console import Console, Sensor as con_sensor
+from ..console import Console, Sensor as ConSensor
 
 translate = tester.translate
 
@@ -105,52 +105,50 @@ class Sensors():
                            signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
         bp35 = logical_devices.bp35
-        self.oMirPIC = sensor.Mirror()
-        self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
-        self.oLock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
-        self.oACin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
-        self.oVpfc = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
-        self.oVload = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        self.oVbat = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
-        self.oVsreg = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
-        self.o12Vpri = sensor.Vdc(dmm, high=5, low=2, rng=100, res=0.001)
-        self.o3V3 = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.001)
-        self.oFan = sensor.Vdc(dmm, high=7, low=5, rng=100, res=0.01)
-        self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
-        self.o3V3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self.mir_pic = sensor.Mirror()
+        self.mir_can = sensor.Mirror(rdgtype=sensor.ReadingString)
+        self.acin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
+        self.vpfc = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
+        self.vload = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
+        self.vbat = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
+        self.vsreg = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
+        self.pri12v = sensor.Vdc(dmm, high=5, low=2, rng=100, res=0.001)
+        self.o3v3 = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.001)
+        self.fan = sensor.Vdc(dmm, high=7, low=5, rng=100, res=0.01)
         self.hardware = sensor.Res(dmm, high=8, low=4, rng=1000000, res=1)
-        self.oOCP = sensor.Ramp(
-            stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
+        self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
+        self.lock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
+        self.o3v3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self.ocp = sensor.Ramp(
+            stimulus=logical_devices.dcl_bat, sensor=self.vbat,
             detect_limit=(limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
-        self.oSnEntry = sensor.DataEntry(
+        self.sernum = sensor.DataEntry(
             message=translate('bp35_initial', 'msgSnEntry'),
             caption=translate('bp35_initial', 'capSnEntry'))
-        self.ARM_SwVer = con_sensor(
+        self.arm_swver = ConSensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self.ARM_AcV = con_sensor(bp35, 'AC_V')
-        self.ARM_AcF = con_sensor(bp35, 'AC_F')
-        self.ARM_SecT = con_sensor(bp35, 'SEC_T')
-        self.ARM_Vout = con_sensor(bp35, 'BUS_V')
-        self.ARM_BattType = con_sensor(bp35, 'BATT_TYPE')
-        self.ARM_BattSw = con_sensor(bp35, 'BATT_SWITCH')
-        self.ARM_Fan = con_sensor(bp35, 'FAN')
-        self.ARM_CANBIND = con_sensor(bp35, 'CAN_BIND')
+        self.arm_acv = ConSensor(bp35, 'AC_V')
+        self.arm_acf = ConSensor(bp35, 'AC_F')
+        self.arm_sect = ConSensor(bp35, 'SEC_T')
+        self.arm_vout = ConSensor(bp35, 'BUS_V')
+        self.arm_fan = ConSensor(bp35, 'FAN')
+        self.arm_canbind = ConSensor(bp35, 'CAN_BIND')
         # Generate 14 load current sensors
-        self.ARM_Loads = []
+        self.arm_loads = []
         for i in range(1, 15):
-            s = con_sensor(bp35, 'LOAD_{}'.format(i))
-            self.ARM_Loads.append(s)
-        self.ARM_BattI = con_sensor(bp35, 'BATT_I')
-        self.ARM_AuxV = con_sensor(bp35, 'AUX_V')
-        self.ARM_AuxI = con_sensor(bp35, 'AUX_I')
-        self.arm_solar_alive = con_sensor(bp35, 'SR_ALIVE')
-        self.arm_vout_ov = con_sensor(bp35, 'VOUT_OV')
+            s = ConSensor(bp35, 'LOAD_{}'.format(i))
+            self.arm_loads.append(s)
+        self.arm_bati = ConSensor(bp35, 'BATT_I')
+        self.arm_auxv = ConSensor(bp35, 'AUX_V')
+        self.arm_auxi = ConSensor(bp35, 'AUX_I')
+        self.arm_solar_alive = ConSensor(bp35, 'SR_ALIVE')
+        self.arm_vout_ov = ConSensor(bp35, 'VOUT_OV')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirPIC.flush()
-        self.oMirCAN.flush()
+        self.mir_pic.flush()
+        self.mir_can.flush()
 
 
 class Measurements():
@@ -166,41 +164,41 @@ class Measurements():
         """
         self.hardware5 = Measurement(limits['HwVer5'], sense.hardware)
         limits['HwVer5'].position_fail = False
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
-        self.rx_can = Measurement(limits['CAN_RX'], sense.oMirCAN)
-        self.dmm_lock = Measurement(limits['FixtureLock'], sense.oLock)
-        self.dmm_acin = Measurement(limits['ACin'], sense.oACin)
-        self.dmm_vpfc = Measurement(limits['Vpfc'], sense.oVpfc)
-        self.dmm_12Vpri = Measurement(limits['12Vpri'], sense.o12Vpri)
-        self.dmm_15Vs = Measurement(limits['15Vs'], sense.o15Vs)
-        self.dmm_vload = Measurement(limits['Vload'], sense.oVload)
-        self.dmm_vloadOff = Measurement(limits['VloadOff'], sense.oVload)
-        self.dmm_vbatin = Measurement(limits['VbatIn'], sense.oVbat)
-        self.dmm_vbat = Measurement(limits['Vbat'], sense.oVbat)
-        self.dmm_vsregpre = Measurement(limits['VsetPre'], sense.oVsreg)
-        self.dmm_vsregpost = Measurement(limits['VsetPost'], sense.oVsreg)
-        self.dmm_vaux = Measurement(limits['Vaux'], sense.oVbat)
-        self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
-        self.dmm_fanOn = Measurement(limits['FanOn'], sense.oFan)
-        self.dmm_fanOff = Measurement(limits['FanOff'], sense.oFan)
-        self.dmm_3V3prog = Measurement(limits['3V3prog'], sense.o3V3prog)
-        self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
-        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
-        self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
-        self.arm_acv = Measurement(limits['ARM-AcV'], sense.ARM_AcV)
-        self.arm_acf = Measurement(limits['ARM-AcF'], sense.ARM_AcF)
-        self.arm_secT = Measurement(limits['ARM-SecT'], sense.ARM_SecT)
-        self.arm_vout = Measurement(limits['ARM-Vout'], sense.ARM_Vout)
-        self.arm_fan = Measurement(limits['ARM-Fan'], sense.ARM_Fan)
-        self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.ARM_CANBIND)
+        self.pgmpic = Measurement(limits['Program'], sense.mir_pic)
+        self.rx_can = Measurement(limits['CAN_RX'], sense.mir_can)
+        self.dmm_lock = Measurement(limits['FixtureLock'], sense.lock)
+        self.dmm_acin = Measurement(limits['ACin'], sense.acin)
+        self.dmm_vpfc = Measurement(limits['Vpfc'], sense.vpfc)
+        self.dmm_pri12v = Measurement(limits['12Vpri'], sense.pri12v)
+        self.dmm_15vs = Measurement(limits['15Vs'], sense.o15Vs)
+        self.dmm_vload = Measurement(limits['Vload'], sense.vload)
+        self.dmm_vloadOff = Measurement(limits['VloadOff'], sense.vload)
+        self.dmm_vbatin = Measurement(limits['VbatIn'], sense.vbat)
+        self.dmm_vbat = Measurement(limits['Vbat'], sense.vbat)
+        self.dmm_vsregpre = Measurement(limits['VsetPre'], sense.vsreg)
+        self.dmm_vsregpost = Measurement(limits['VsetPost'], sense.vsreg)
+        self.dmm_vaux = Measurement(limits['Vaux'], sense.vbat)
+        self.dmm_3v3 = Measurement(limits['3V3'], sense.o3v3)
+        self.dmm_fanOn = Measurement(limits['FanOn'], sense.fan)
+        self.dmm_fanOff = Measurement(limits['FanOff'], sense.fan)
+        self.dmm_3v3prog = Measurement(limits['3V3prog'], sense.o3v3prog)
+        self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
+        self.ui_sernum = Measurement(limits['SerNum'], sense.sernum)
+        self.arm_swver = Measurement(limits['ARM-SwVer'], sense.arm_swver)
+        self.arm_acv = Measurement(limits['ARM-AcV'], sense.arm_acv)
+        self.arm_acf = Measurement(limits['ARM-AcF'], sense.arm_acf)
+        self.arm_secT = Measurement(limits['ARM-SecT'], sense.arm_sect)
+        self.arm_vout = Measurement(limits['ARM-Vout'], sense.arm_vout)
+        self.arm_fan = Measurement(limits['ARM-Fan'], sense.arm_fan)
+        self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.arm_canbind)
         # Generate 14 load current measurements
         self.arm_loads = ()
-        for sen in sense.ARM_Loads:
+        for sen in sense.arm_loads:
             m = Measurement(limits['ARM-LoadI'], sen)
             self.arm_loads += (m, )
-        self.arm_battI = Measurement(limits['ARM-BattI'], sense.ARM_BattI)
-        self.arm_auxV = Measurement(limits['ARM-AuxV'], sense.ARM_AuxV)
-        self.arm_auxI = Measurement(limits['ARM-AuxI'], sense.ARM_AuxI)
+        self.arm_battI = Measurement(limits['ARM-BattI'], sense.arm_bati)
+        self.arm_auxv = Measurement(limits['ARM-AuxV'], sense.arm_auxv)
+        self.arm_auxi = Measurement(limits['ARM-AuxI'], sense.arm_auxi)
         self.arm_solar_alive = Measurement(
             limits['SOLAR_ALIVE'], sense.arm_solar_alive)
         self.arm_vout_ov = Measurement(limits['Vout_OV'], sense.arm_vout_ov)
