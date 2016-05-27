@@ -109,7 +109,7 @@ class Initial(tester.TestSequence):
         d.dcs_PriCtl.output(12.0, True)
         MeasureGroup((m.dmm_PriCtl, m.dmm_8V5Ard), 2)
         time.sleep(1)
-        self._arddev.open()
+        d.ard.open()
         time.sleep(2)        # Wait for the banner to be received
         self._logger.info('Start programming PIC1')
         d.rla_pic1.set_on()
