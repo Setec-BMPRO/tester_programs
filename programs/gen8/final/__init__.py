@@ -53,11 +53,11 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):
@@ -69,6 +69,7 @@ class Final(tester.TestSequence):
         """Switch on at 240Vac, not enabled, measure output at min load."""
         self.fifo_push(
             ((s.o5V, 5.1), (s.o24V, 0.0), (s.o12V, 0.0), (s.o12V2, 0.0), ))
+
         t.pwr_up.run()
 
     def _step_power_on(self):
@@ -77,22 +78,26 @@ class Final(tester.TestSequence):
             ((s.o24V, 24.0), (s.o12V, 12.0), (s.o12V2, 0.0),
              (s.oPwrFail, 24.1), (s.o12V2, 12.0), (s.oYesNoMains, True),
              (s.oIec, 240.0), ))
+
         t.pwr_on.run()
 
     def _step_full_load(self):
         """Measure outputs at full-load."""
         self.fifo_push(
             ((s.o5V, 5.1), (s.o24V, 24.1), (s.o12V, 12.1), (s.o12V2, 12.2)))
+
         t.full_load.run()
 
     def _step_115v(self):
         """Measure outputs at 115Vac in, full-load."""
         self.fifo_push(
             ((s.o5V, 5.1), (s.o24V, 24.1), (s.o12V, 12.1), (s.o12V2, 12.2)))
+
         t.full_load_115.run()
 
     def _step_power_off(self):
         """Switch off unit, measure gpo and 24V voltages."""
         self.fifo_push(
             ((s.oNotifyPwrOff, True), (s.oIec, 0.0), (s.o24V, 0.0)))
+
         t.pwr_off.run()

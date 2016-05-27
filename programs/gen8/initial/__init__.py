@@ -9,14 +9,10 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 INI_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -77,7 +73,8 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.lock, 10.0), (s.part, 10.0), (s.fanshort, 200.0), ))
 
-        MeasureGroup((m.dmm_lock, m.dmm_part, m.dmm_fanshort, ), timeout=2)
+        tester.MeasureGroup(
+            (m.dmm_lock, m.dmm_part, m.dmm_fanshort, ), timeout=2)
 
     def _step_program(self):
         """Program the ARM device.
@@ -90,7 +87,7 @@ class Initial(tester.TestSequence):
         d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5v.output(5.15, True)
-        MeasureGroup((m.dmm_5v, m.dmm_3v3, ), timeout=2)
+        tester.MeasureGroup((m.dmm_5v, m.dmm_3v3, ), timeout=2)
         # Program the ARM device
         d.programmer.program()
         # Remove BOOT, reset micro, wait for ARM startup
@@ -159,7 +156,7 @@ class Initial(tester.TestSequence):
         d.arm_puts(limit.BIN_VERSION[4:])    # ARM BuildNo
 
         d.acsource.output(voltage=240.0, output=True)
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_acin, m.dmm_5vset, m.dmm_12vpri, m.dmm_12voff,
              m.dmm_12v2off, m.dmm_24voff, m.dmm_pwrfail, ), timeout=5)
         # Hold the 12V2 off
@@ -168,7 +165,7 @@ class Initial(tester.TestSequence):
         d.loads(i12=0.1)
         # Switch all outputs ON
         d.rla_pson.set_on()
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_5vset, m.dmm_12v2off, m.dmm_24vpre, ), timeout=5)
         # Switch on the 12V2
         d.rla_12v2off.set_off()
@@ -212,7 +209,7 @@ class Initial(tester.TestSequence):
             result, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
             d.arm_cal12v(v12)
             m.dmm_12vset.stable(limit.V12_STABLE)
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.arm_acfreq, m.arm_acvolt,
              m.arm_5v, m.arm_12v, m.arm_24v, m.arm_swver, m.arm_swbld), )
 

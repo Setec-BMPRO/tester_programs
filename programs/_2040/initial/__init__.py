@@ -3,18 +3,15 @@
 """2040 Initial Test Program."""
 
 import logging
-import time
+
 import tester
 from . import support
 from . import limit
 
 INI_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Initial(tester.TestSequence):
@@ -48,35 +45,22 @@ class Initial(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl_Vout.output(1.0)
-        time.sleep(1)
-        d.discharge.pulse()
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):
@@ -93,6 +77,7 @@ class Initial(tester.TestSequence):
     def _step_sec_check(self):
         """Apply External DC voltage to output and measure voltages."""
         self.fifo_push(((s.oVout, 20.0), (s.oSD, 20.0), (s.oGreen, 17.0), ))
+
         t.sec_chk.run()
 
     def _step_dcpower_on(self):
@@ -106,6 +91,7 @@ class Initial(tester.TestSequence):
             ((s.oDCin, (10.0, 40.0, 25.0)), (s.oGreen, 17.0),
              (s.oRedDC, (12.0, 2.5)), (s.oVccDC, (12.0,) * 3),
              (s.oVout, (20.0, ) * 15 + (18.0, ), ), (s.oSD, 4.0),))
+
         t.dcpwr_on.run()
 
     def _step_acpower_on(self):
@@ -119,4 +105,5 @@ class Initial(tester.TestSequence):
             ((s.oACin, (90.0, 265.0, 240.0)), (s.oGreen, 17.0),
              (s.oRedAC, 12.0), (s.oVbus, (130.0, 340)),
              (s.oVccAC, (13.0,) * 3), (s.oVout, (20.0, ) * 15 + (18.0, ), ), ))
+
         t.acpwr_on.run()

@@ -3,19 +3,15 @@
 """BP35 Final Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 FIN_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Final(tester.TestSequence):
@@ -46,23 +42,22 @@ class Final(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m, t
+        global d, s, m
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s, t
-        m = d = s = t = None
+        global m, d, s
+        m = d = s = None
+        super().close()
+
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):
@@ -71,5 +66,7 @@ class Final(tester.TestSequence):
 
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac and measure output voltages."""
-        self.fifo_push(((s.oVbat, 12.8), ))
-        t.pwr_up.run()
+        self.fifo_push(((s.vbat, 12.8), ))
+
+        d.acsource.output(voltage=240.0, output=True)
+        m.dmm_vbat.measure(timeout=10)
