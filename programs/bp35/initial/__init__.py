@@ -150,13 +150,15 @@ class Initial(tester.TestSequence):
 
         """
         self.fifo_push(((s.sernum, ('A1526040123', )), ))
-        for str in (
+        for dat in (
                 ('Banner1\r\nBanner2', ) +  # Banner lines
                 ('', ) + ('success', ) * 2 + ('', ) * 4 +
+                ('Banner1\r\nBanner2', ) +  # Banner lines
+                ('', ) +
                 (limit.ARM_VERSION, ) +
                 ('', ) + ('0x10000', ) + ('', ) * 3     # Manual mode
-                ):
-            d.bp35_puts(str)
+            ):
+            d.bp35_puts(dat)
 
         d.bp35.open()
         d.rla_reset.pulse(0.1)
@@ -179,10 +181,11 @@ class Initial(tester.TestSequence):
     def _step_solar_reg(self):
         """Test & Calibrate the Solar Regulator board."""
         self.fifo_push(((s.vsreg, (13.0, 13.5)), ))
-        for str in (('1.0', '0', '200') +   # Solar alive, Vout OV, SR Temp
-                    ('0', ) * 4             # 2 x Solar VI, Vout OV, SR Cal
-                    ):
-            d.bp35_puts(str)
+        for dat in (
+                ('1.0', '0') +      # Solar alive, Vout OV
+                ('0', ) * 4         # 2 x Solar VI, Vout OV, SR Cal
+            ):
+            d.bp35_puts(dat)
 
         MeasureGroup((m.arm_solar_alive, m.arm_vout_ov, ))
         # The SR needs V & I set to zero after power up or it won't start.
@@ -200,10 +203,10 @@ class Initial(tester.TestSequence):
     def _step_aux(self):
         """Apply Auxiliary input."""
         self.fifo_push(((s.vbat, 13.5), ))
-        for str in (('', '13500', '350', '')):
-            d.bp35_puts(str)
+        for dat in ('', '13500', '350', ''):
+            d.bp35_puts(dat)
 
-        d.dcs_vaux.output(13.5, output=True)
+        d.dcs_vaux.output(limit.VAUX_IN, output=True)
         d.dcl_bat.output(0.5)
         d.bp35['AUX_RELAY'] = True
         MeasureGroup((m.dmm_vaux, m.arm_auxv, m.arm_auxi), timeout=5)
@@ -215,22 +218,18 @@ class Initial(tester.TestSequence):
         """Power-Up the Unit with 240Vac."""
         self.fifo_push(
             ((s.acin, 240.0), (s.pri12v, 12.5), (s.o3v3, 3.3),
-            (s.o15Vs, 12.5), (s.vbat, 12.8), (s.vpfc, (415.0, 415.0), )))
-        for str in (('0', ) +
-                    ('', ) * 4 +
-                    ('0', )
-                    ):
-            d.bp35_puts(str)
+             (s.o15Vs, 12.5), (s.vbat, 12.8), (s.vpfc, (415.0, 415.0), )))
+        for dat in ('', ) * 4 + ('0', ) * 2:
+            d.bp35_puts(dat)
 
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
-        m.arm_vout_ov.measure()
         MeasureGroup((m.dmm_acin, m.dmm_pri12v), timeout=10)
         # Enable PFC & DCDC converters
         d.bp35.power_on()
         # Wait for PFC overshoot to settle
-        _PFC_STABLE = 0.05
-        m.dmm_vpfc.stable(_PFC_STABLE)
+        m.dmm_vpfc.stable(limit.PFC_STABLE)
+        m.arm_vout_ov.measure()
         # Remove injected Battery voltage
         d.rla_vbat.set_off()
         d.dcs_vbat.output(0.0, output=False)
@@ -246,8 +245,8 @@ class Initial(tester.TestSequence):
 
         """
         self.fifo_push(((s.vload, (0.0, ) + (12.8, ) * 14), ))
-        for str in (('', ) * (1 + 14 + 1)):
-            d.bp35_puts(str)
+        for dat in ('', ) * (1 + 14 + 1):
+            d.bp35_puts(dat)
 
         # All outputs OFF
         d.bp35.load_set(set_on=True, loads=())
@@ -255,9 +254,9 @@ class Initial(tester.TestSequence):
         d.dcl_out.output(1.0, True)
         m.dmm_vloadOff.measure(timeout=2)
         # One at a time ON
-        for ld in range(14):
-            tester.testsequence.path_push('L{}'.format(ld + 1))
-            d.bp35.load_set(set_on=True, loads=(ld, ))
+        for load in range(14):
+            tester.testsequence.path_push('L{}'.format(load + 1))
+            d.bp35.load_set(set_on=True, loads=(load, ))
             m.dmm_vload.measure(timeout=2)
             tester.testsequence.path_pop()
         # All outputs ON
@@ -280,8 +279,8 @@ class Initial(tester.TestSequence):
         if self._fifo:
             for sen in s.arm_loads:
                 sen.store(2.0)
-        for str in (('240', '50000', '350', '12800', '500', '', '4000')):
-            d.bp35_puts(str)
+        for dat in ('240', '50000', '350', '12800', '500', '', '4000'):
+            d.bp35_puts(dat)
 
         MeasureGroup(
             (m.arm_acv, m.arm_acf, m.arm_secT, m.arm_vout, m.arm_fan,
@@ -291,17 +290,17 @@ class Initial(tester.TestSequence):
         d.dcl_out.binary(1.0, 28.0, 5.0)
         d.dcl_bat.output(4.0, output=True)
         MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
-        for ld in range(14):
-            tester.testsequence.path_push('L{}'.format(ld + 1))
-            m.arm_loads[ld].measure(timeout=5)
+        for load in range(14):
+            tester.testsequence.path_push('L{}'.format(load + 1))
+            m.arm_loads[load].measure(timeout=5)
             tester.testsequence.path_pop()
         m.ramp_ocp.measure(timeout=5)
         d.dcl_bat.output(0.0)
 
     def _step_canbus(self):
         """Test the Can Bus."""
-        for str in ('0x10000000', '', '0x10000000', '', ''):
-            d.bp35_puts(str)
+        for dat in ('0x10000000', '', '0x10000000', '', ''):
+            d.bp35_puts(dat)
         d.bp35_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
         m.arm_can_bind.measure(timeout=10)

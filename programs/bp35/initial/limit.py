@@ -28,8 +28,11 @@ _CAN_BIND = 1 << 28
 SOLAR_VSET = 13.650
 SOLAR_ISET = 30.0
 SOLAR_VIN = 20.0
-# Injected Vbat
+# Injected Vbat & Vaux
 VBAT_IN = 12.4
+VAUX_IN = 13.5
+# PFC settling level
+PFC_STABLE = 0.05
 
 DATA = (
     lim_hilo_int('Program', 0),
