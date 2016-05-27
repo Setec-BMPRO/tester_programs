@@ -39,7 +39,6 @@ DATA = (
     lim_hilo_delta('ACin', 240.0, 5.0),
     lim_hilo('Vpfc', 401.0, 424.0),
     lim_hilo('12Vpri', 11.5, 13.0),
-    lim_hilo('5Vusb', -4.5, 5.5),
     lim_hilo('15Vs', 11.5, 13.0),
     lim_hilo('Vload', 12.0, 12.9),
     lim_lo('VloadOff', 0.5),
