@@ -233,9 +233,8 @@ class Initial(tester.TestSequence):
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac."""
         self.fifo_push(
-            ((s.oACin, 240.0), (s.o12Vpri, 12.5), (s.o5Vusb, 5.0),
-             (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.oVbat, 12.8),
-             (s.oVpfc, (415.0, 415.0), )))
+            ((s.oACin, 240.0), (s.o12Vpri, 12.5), (s.o3V3, 3.3),
+            (s.o15Vs, 12.5), (s.oVbat, 12.8), (s.oVpfc, (415.0, 415.0), )))
         for str in (('0', ) +
                     ('', ) * 4 +
                     ('0', )
@@ -245,7 +244,7 @@ class Initial(tester.TestSequence):
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         MeasureGroup((m.arm_vout_ov, ))
-        MeasureGroup((m.dmm_acin, m.dmm_12Vpri, m.dmm_5Vusb, ), timeout=10)
+        MeasureGroup((m.dmm_acin, m.dmm_12Vpri), timeout=10)
         # Enable PFC & DCDC converters
         d.bp35.power_on()
         # Wait for PFC overshoot to settle

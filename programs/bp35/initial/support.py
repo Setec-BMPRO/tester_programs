@@ -116,10 +116,9 @@ class Sensors():
         self.o12Vpri = sensor.Vdc(dmm, high=5, low=2, rng=100, res=0.001)
         self.o3V3 = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.001)
         self.oFan = sensor.Vdc(dmm, high=7, low=5, rng=100, res=0.01)
-        self.o5Vusb = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.o3V3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
-        self.hardware = sensor.Res(dmm, high=12, low=4, rng=1000000, res=1)
+        self.hardware = sensor.Res(dmm, high=8, low=4, rng=1000000, res=1)
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.oVbat,
             detect_limit=(limits['InOCP'], ),
@@ -173,7 +172,6 @@ class Measurements():
         self.dmm_acin = Measurement(limits['ACin'], sense.oACin)
         self.dmm_vpfc = Measurement(limits['Vpfc'], sense.oVpfc)
         self.dmm_12Vpri = Measurement(limits['12Vpri'], sense.o12Vpri)
-        self.dmm_5Vusb = Measurement(limits['5Vusb'], sense.o5Vusb)
         self.dmm_15Vs = Measurement(limits['15Vs'], sense.o15Vs)
         self.dmm_vload = Measurement(limits['Vload'], sense.oVload)
         self.dmm_vloadOff = Measurement(limits['VloadOff'], sense.oVload)
