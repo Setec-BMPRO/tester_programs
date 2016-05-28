@@ -3,7 +3,6 @@
 """IDS-500 Initial Main Test Program."""
 
 import logging
-import time
 
 import tester
 from . import support
@@ -61,13 +60,6 @@ class InitialMain(tester.testsequence.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl_Tec.output(0.1)
-        d.dcl_15Vp.output(1.0)
-        d.dcl_15Vpsw.output(0.0)
-        d.dcl_5V.output(5.0)
-        time.sleep(1)
-        d.discharge.pulse()
         d.reset()
 
     def _step_error_check(self):

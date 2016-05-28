@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """RM-50-24 Final Test Program."""
 
+import time
 from pydispatch import dispatcher
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -31,14 +33,13 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Source
+        self.dcl_out.output(2.1)
+        time.sleep(1)
+        self.discharge.pulse()
         self.dcs_24V.output(0.0, False)
-        # Switch off DC Loads
         for ld in (self.dcl_out, self.dcl_dcout):
             ld.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_rsense, ):
             rla.set_off()
 

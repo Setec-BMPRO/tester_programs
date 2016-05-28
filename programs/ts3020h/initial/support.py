@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 """TS3020H Initial Test Program."""
 
+import time
 from pydispatch import dispatcher
 
 import sensor
 import tester
 from tester.devlogical import *
 from tester.measure import *
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -38,12 +37,13 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
+        self.acsource.output(voltage=0.0, output=False)
+        self.dcl.output(5.0)
+        time.sleep(1)
+        self.discharge.pulse()
         for dcs in (self.dcs_Vout, self.dcs_SecCtl2):
             dcs.output(0.0, False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_Fuse, self.rla_Fan):
             rla.set_off()
 
@@ -85,8 +85,8 @@ class Sensors():
         self.oAdjVout = sensor.AdjustAnalog(
             sensor=self.oVout,
             low=vout_low, high=vout_high,
-            message=translate('ts3020h_initial', 'AdjR130'),
-            caption=translate('ts3020h_initial', 'capAdjOutput'))
+            message=tester.translate('ts3020h_initial', 'AdjR130'),
+            caption=tester.translate('ts3020h_initial', 'capAdjOutput'))
         self.oOVP = sensor.Ramp(
             stimulus=logical_devices.dcs_Vout, sensor=self.oSecShdn,
             detect_limit=(limits['inVP'], ),

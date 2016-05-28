@@ -4,7 +4,6 @@
 
 import logging
 
-import time
 import tester
 from . import support
 from . import limit
@@ -69,10 +68,6 @@ class Initial(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl.output(5.0)
-        time.sleep(1)
-        d.discharge.pulse()
         d.reset()
 
     def _step_error_check(self):

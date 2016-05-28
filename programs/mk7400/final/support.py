@@ -32,12 +32,9 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Loads
         for ld in (self.dcl_12V, self.dcl_24V, self.dcl_5V, self.dcl_24V2):
             ld.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_24V2off, self.rla_pson):
             rla.set_off()
 

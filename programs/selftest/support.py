@@ -51,15 +51,11 @@ class LogicalDevices(object):
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acs.output(voltage=0.0, output=False)
-        # Switch off DC Loads
         for ld in self.dcl:
             ld.output(0.0)
-        # Switch off DC Sources
         for dcs in self.dcs:
             dcs.output(0.0, False)
-        # Switch off all Relays
         for rla in self.rly:
             rla.set_off()
 

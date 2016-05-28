@@ -4,6 +4,7 @@
 
 from pydispatch import dispatcher
 import time
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -30,6 +31,11 @@ class LogicalDevices():
         self.rla_tank3S2 = relay.Relay(devices['RLA8'])
         self.rla_tank3S1 = relay.Relay(devices['RLA9'])
         self.rla_trigg = relay.Relay(devices['RLA10'])
+        self._all_relays = (
+            self.rla_tank1S3, self.rla_tank1S2, self.rla_tank1S1,
+            self.rla_tank2S3, self.rla_tank2S2, self.rla_tank2S1,
+            self.rla_tank3S3, self.rla_tank3S2, self.rla_tank3S1,
+            self.rla_trigg)
 
     def error_check(self):
         """Check instruments for errors."""
@@ -37,14 +43,9 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
         for dcs in (self.dcs_12V, self.dcs_3V3):
             dcs.output(0.0, False)
-        # Switch off all Relays
-        for rla in (self.rla_tank1S3, self.rla_tank1S2, self.rla_tank1S1,
-                    self.rla_tank2S3, self.rla_tank2S2, self.rla_tank2S1,
-                    self.rla_tank3S3, self.rla_tank3S2, self.rla_tank3S1,
-                    self.rla_trigg):
+        for rla in self._all_relays:
             rla.set_off()
 
 

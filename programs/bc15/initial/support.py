@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """BC15 Initial Test Program."""
 
+import time
 from pydispatch import dispatcher
 
 import sensor
@@ -42,6 +43,9 @@ class LogicalDevices():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
+        self.dcl.output(2.0)
+        time.sleep(1)
+        self.discharge.pulse()
         self.dcl.output(0.0, False)
         for dcs in (self.dcs_vcom, self.dcs_3v3, self.dcs_out):
             dcs.output(0.0, output=False)

@@ -3,6 +3,7 @@
 """IDS-500 Final Test Program."""
 
 from pydispatch import dispatcher
+
 import sensor
 import tester
 from tester.devlogical import *

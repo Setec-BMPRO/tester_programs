@@ -74,13 +74,10 @@ class LogicalDevices():
         self.dcl_out.output(2.0)
         time.sleep(1)
         self.discharge.pulse()
-        # Switch off DC Sources
         for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
             dcs.output(0.0, False)
-        # Switch off DC Loads
         for ld in (self.dcl_out, self.dcl_bat):
             ld.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_reset, self.rla_boot, self.rla_pic,
                     self.rla_loadsw, self.rla_vbat):
             rla.set_off()

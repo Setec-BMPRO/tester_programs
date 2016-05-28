@@ -4,6 +4,7 @@
 
 import time
 from pydispatch import dispatcher
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -32,14 +33,11 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
         self.dcl_12v.output(10)
         time.sleep(0.5)
-        # Switch off DC Loads
         for ld in (self.dcl_12v, self.dcl_24v, self.dcl_5v):
             ld.output(0.0, output=False)
-        # Switch off Relay
         self.rla_PwrOn.set_off()
 
 

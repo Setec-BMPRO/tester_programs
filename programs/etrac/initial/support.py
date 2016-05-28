@@ -3,6 +3,7 @@
 """ETrac-II Initial Test Program."""
 
 from pydispatch import dispatcher
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -32,9 +33,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Source
         self.dcs_Vin.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_SS, self.rla_Prog, self.rla_BattLoad):
             rla.set_off()
 

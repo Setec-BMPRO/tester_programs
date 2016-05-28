@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """C45A-15 Initial Test Program."""
 
+import time
 from pydispatch import dispatcher
 
 import sensor
@@ -38,12 +39,13 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
+        self.acsource.output(voltage=0.0, output=False)
+        self.dcl.output(5.0)
+        time.sleep(1)
+        self.discharge.pulse()
         for dcs in (self.dcs_Vout, self.dcs_Vbias, self.dcs_VsecBias):
             dcs.output(0.0, False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_Load, self.rla_CMR, self.rla_Prog):
             rla.set_off()
 

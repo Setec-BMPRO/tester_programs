@@ -3,6 +3,7 @@
 """Drifter Initial Test Program."""
 
 from pydispatch import dispatcher
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -34,10 +35,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
         for dcs in (self.dcs_RS232, self.dcs_SlopeCal, self.dcs_Vin):
             dcs.output(0.0, output=False)
-        # Switch off all Relays
         for rla in (self.rla_Prog, self.rla_ZeroCal):
             rla.set_off()
 

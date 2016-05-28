@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Initial Main Test Program."""
 
+import time
+
 from pydispatch import dispatcher
 import sensor
 import tester
@@ -47,6 +49,13 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
+        self.acsource.output(voltage=0.0, output=False)
+        self.dcl_Tec.output(0.1)
+        self.dcl_15Vp.output(1.0)
+        self.dcl_15Vpsw.output(0.0)
+        self.dcl_5V.output(5.0)
+        time.sleep(1)
+        self.discharge.pulse()
         for dcs in (self.dcs_TecVset, self.dcs_IsSet, self.dcs_5V):
             dcs.output(0.0, False)
         for ld in (self.dcl_Tec, self.dcl_15Vp, self.dcl_15Vpsw, self.dcl_5V):

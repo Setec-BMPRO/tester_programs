@@ -92,6 +92,7 @@ class Initial(tester.TestSequence):
         """Finished testing."""
         self._logger.info('Close')
         global m, d, s, t
+        d.dcs_Vcom.output(0.0, output=False)
         m = d = s = t = None
 
     def safety(self):

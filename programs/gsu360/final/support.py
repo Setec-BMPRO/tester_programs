@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """GSU360-1TA Final Test Program."""
 
+import time
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -25,7 +27,9 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Load
+        self.acsource.output(voltage=0.0, output=False)
+        self.dcl_24V.output(5.0, True)
+        time.sleep(20.0)    # Allow time to discharge
         self.dcl_24V.output(0.0, False)
 
 

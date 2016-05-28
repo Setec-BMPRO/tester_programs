@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """SX-750 Initial Test Program."""
+
 import os
 import inspect
-
 from pydispatch import dispatcher
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -90,24 +91,19 @@ class LogicalDevices():
         """Reset instruments."""
         self.arm.close()
         self.ard.close()
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
         self.dcl_5Vsb.output(1.0)
         self.dcl_12V.output(5.0)
         self.dcl_24V.output(5.0)
         time.sleep(1)
         self.discharge.pulse()
-        # Switch off DC Loads
         for ld in (self.dcl_5Vsb, self.dcl_12V, self.dcl_24V):
             ld.output(0.0)
-        # Switch off DC Sources
         for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb):
             dcs.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
                      self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
             rla.set_off()
-        # Disable digital pots
         self.ocp_pot.disable()
 
 

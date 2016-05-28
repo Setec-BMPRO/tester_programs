@@ -61,10 +61,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        self.trek2.close()     # This is called even upon unit failures
-        # Switch off Vin DC Sources (Not Vcom, that runs the USB devices)
+        self.trek2.close()
         self.dcs_Vin.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_s1, self.rla_s2, self.rla_s3):
             rla.set_off()
 

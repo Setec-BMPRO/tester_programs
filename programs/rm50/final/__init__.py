@@ -63,10 +63,6 @@ class Final(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl_out.output(2.1)
-        time.sleep(1)
-        d.discharge.pulse()
         d.reset()
 
     def _step_error_check(self):

@@ -54,7 +54,6 @@ class Final(tester.TestSequence):
         m = d = s = None
         super().close()
 
-
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')

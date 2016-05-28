@@ -7,8 +7,6 @@ import tester
 from tester.devlogical import *
 from tester.measure import *
 
-translate = tester.translate
-
 
 class LogicalDevices():
 
@@ -33,11 +31,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Source
         self.dcs_PwrOn.output(0.0, output=False)
-        # Switch off DC Loads
         for ld in (self.dcl_24V, self.dcl_15V, self.dcl_12V,
                    self.dcl_5V, self.dcl_3V3):
             ld.output(0.0, False)
@@ -60,8 +55,8 @@ class Sensors():
         self.o5Vi = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
         self.oPGood = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.01)
         self.oYesNoFan = sensor.YesNo(
-            message=translate('uni750_final', 'IsFanOn?'),
-            caption=translate('uni750_final', 'capFan'))
+            message=tester.translate('uni750_final', 'IsFanOn?'),
+            caption=tester.translate('uni750_final', 'capFan'))
 
 
 class Measurements():

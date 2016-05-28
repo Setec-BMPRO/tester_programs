@@ -38,7 +38,6 @@ class LogicalDevices():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Sources
         for dcs in (self.dcs_dcin, self.dcs_Vout):
             dcs.output(0.0, False)
         self.dcl_Vout.output(1.0)

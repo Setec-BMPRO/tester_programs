@@ -33,10 +33,8 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        for dcs in (self.dcs_Vin, ):
-            dcs.output(0.0, False)
-        for rla in (self.rla_pin, ):
-            rla.set_off()
+        self.dcs_Vin.output(0.0, False)
+        self.rla_pin.set_off()
 
 
 class Sensors():

@@ -94,7 +94,6 @@ class InitialSingle(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
         d.reset()
 
     def _step_poweron(self):

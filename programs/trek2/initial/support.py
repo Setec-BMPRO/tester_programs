@@ -38,10 +38,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Sources
-        for dcs in (self.dcs_Vin, self.dcs_Vcom):
-            dcs.output(0.0, False)
-        # Switch off all Relays
+        self.dcs_Vin.output(0.0, False)
         for rla in (self.rla_reset, self.rla_boot):
             rla.set_off()
 

@@ -118,10 +118,6 @@ class Initial(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         self._bc15.close()
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl.output(2.0)
-        time.sleep(1)
-        d.discharge.pulse()
         d.reset()
 
     def _step_error_check(self):

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """BCE282-12/24 Initial Test Program."""
 
+import time
+
 import sensor
 import tester
 from tester.devlogical import *
@@ -36,13 +38,15 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Source
+        self.acsource.output(voltage=0.0, output=False)
+        self.dcl_Vout.output(2.0)
+        self.dcl_Vbat.output(2.0)
+        time.sleep(1)
+        self.discharge.pulse()
         for dcs in (self.dcs_VccBias, self.dcs_RS232):
             dcs.output(0.0, False)
-        # Switch off DC Loads
         for ld in (self.dcl_Vout, self.dcl_Vbat, ):
             ld.output(0.0, False)
-        # Switch off Relay
         self.rla_Prog.set_off()
 
 

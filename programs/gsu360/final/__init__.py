@@ -3,7 +3,6 @@
 """GSU360-1TA Final Test Program."""
 
 import logging
-import time
 
 import tester
 from . import support
@@ -57,9 +56,6 @@ class Final(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl_24V.output(5.0, True)
-        time.sleep(20.0)
         d.reset()
 
     def _step_error_check(self):

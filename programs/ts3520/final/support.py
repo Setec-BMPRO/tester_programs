@@ -7,8 +7,6 @@ import tester
 from tester.devlogical import *
 from tester.measure import *
 
-translate = tester.translate
-
 
 class LogicalDevices():
 
@@ -30,9 +28,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
 
 
@@ -47,23 +43,23 @@ class Sensors():
         self.o12V_2 = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.o12V_3 = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self.oNotifyStart = sensor.Notify(
-            message=translate('ts3520_final', 'RemoveFuseSwitchOn'),
-            caption=translate('ts3520_final', 'capSwitchOn'))
+            message=tester.translate('ts3520_final', 'RemoveFuseSwitchOn'),
+            caption=tester.translate('ts3520_final', 'capSwitchOn'))
         self.oNotifyFuse = sensor.Notify(
-            message=translate('ts3520_final', 'ReplaceFuse'),
-            caption=translate('ts3520_final', 'capReplaceFuse'))
+            message=tester.translate('ts3520_final', 'ReplaceFuse'),
+            caption=tester.translate('ts3520_final', 'capReplaceFuse'))
         self.oNotifyMains = sensor.Notify(
-            message=translate('ts3520_final', 'SwitchOff'),
-            caption=translate('ts3520_final', 'capSwitchOff'))
+            message=tester.translate('ts3520_final', 'SwitchOff'),
+            caption=tester.translate('ts3520_final', 'capSwitchOff'))
         self.oYesNoRed = sensor.YesNo(
-            message=translate('ts3520_final', 'IsRedLedOn?'),
-            caption=translate('ts3520_final', 'capRedLed'))
+            message=tester.translate('ts3520_final', 'IsRedLedOn?'),
+            caption=tester.translate('ts3520_final', 'capRedLed'))
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('ts3520_final', 'IsGreenLedOn?'),
-            caption=translate('ts3520_final', 'capGreenLed'))
+            message=tester.translate('ts3520_final', 'IsGreenLedOn?'),
+            caption=tester.translate('ts3520_final', 'capGreenLed'))
         self.oYesNoOff = sensor.YesNo(
-            message=translate('ts3520_final', 'AreAllLightsOff?'),
-            caption=translate('ts3520_final', 'capAllOff'))
+            message=tester.translate('ts3520_final', 'AreAllLightsOff?'),
+            caption=tester.translate('ts3520_final', 'capAllOff'))
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.o12V_1,
             detect_limit=(limits['inOCP'], ),

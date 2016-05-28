@@ -77,11 +77,8 @@ class LogicalDevices():
         self.loads(i5=1.0, i12=5.0, i24=5.0)
         time.sleep(0.5)
         self.discharge.pulse()
-        # Switch off DC Loads
         self.loads(i5=0, i12=0, i24=0)
-        # Switch off DC Source
         self.dcs_5v.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_12v2off, self.rla_pson,
                     self.rla_reset, self.rla_boot):
             rla.set_off()
