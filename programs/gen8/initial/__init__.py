@@ -53,7 +53,7 @@ class Initial(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global d, m, s
+        global d, s, m
         # Switch off fixture power
         d.dcs_10vfixture.output(0.0, output=False)
         m = d = s = None

@@ -28,11 +28,8 @@ _ARM_BIN = 'Trek2_{}.bin'.format(limit.BIN_VERSION)
 # CAN echo request messages
 _CAN_ECHO = 'TQQ,16,0'
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Initial(tester.TestSequence):
@@ -101,7 +98,6 @@ class Initial(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         self._trek2.close()
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

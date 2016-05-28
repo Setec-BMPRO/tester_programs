@@ -4,6 +4,7 @@
 
 import os
 import logging
+
 import tester
 from share import SimSerial, BtRadio, BtError
 from . import support
@@ -13,11 +14,8 @@ FIN_LIMIT = limit.DATA
 
 _BT_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM9'}[os.name]
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Final(tester.TestSequence):
@@ -69,12 +67,12 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         self._bt.close()
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

@@ -3,6 +3,7 @@
 """C15D-15 Initial Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
@@ -11,11 +12,8 @@ INI_LIMIT = limit.DATA
 
 MeasureGroup = tester.measure.group
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -52,6 +50,7 @@ class Initial(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""

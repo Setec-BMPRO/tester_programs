@@ -6,6 +6,7 @@ import os
 import inspect
 import logging
 import time
+
 import tester
 from share import ProgramPIC, SimSerial
 from . import support
@@ -21,10 +22,8 @@ INI_LIMIT_BM = limit.DATA_BM
 _PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 _UNLOCK_KEY = 'XDEADBEA7'
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -84,11 +83,11 @@ class Initial(tester.TestSequence):
         self._pic.close()
         global m, d, s
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

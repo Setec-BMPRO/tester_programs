@@ -4,6 +4,7 @@
 
 import os
 import logging
+
 import tester
 from share import SimSerial
 from . import support
@@ -19,11 +20,8 @@ _PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
 _NEW_PSU  =  False
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -76,11 +74,11 @@ class Final(tester.TestSequence):
         self._pic_ser.close()
         global d, s, m, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

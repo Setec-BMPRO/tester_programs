@@ -23,10 +23,8 @@ _ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM12'}[os.name]
 # ARM software image file
 _ARM_BIN = 'bc15_{}.bin'.format(limit.BIN_VERSION)
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -114,6 +112,7 @@ class Initial(tester.TestSequence):
         # Remove power from fixture circuit.
         d.dcs_vcom.output(0, False)
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -123,7 +122,6 @@ class Initial(tester.TestSequence):
         d.dcl.output(2.0)
         time.sleep(1)
         d.discharge.pulse()
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

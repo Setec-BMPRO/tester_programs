@@ -33,10 +33,8 @@ _ARM_BIN = 'BatteryCheckControl_{}.bin'.format(limit.ARM_VERSION)
 
 _BT_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM4'}[os.name]
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -114,7 +112,6 @@ class Initial(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         self._armdev.close()
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

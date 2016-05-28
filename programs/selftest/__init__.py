@@ -3,6 +3,7 @@
 """Selfchecker Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
@@ -11,10 +12,8 @@ MeasureGroup = tester.measure.group
 
 LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Main(tester.testsequence.TestSequence):
@@ -45,28 +44,21 @@ class Main(tester.testsequence.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d)
-        global m
         m = support.Measurements(s, self._limits)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
+        global m, d, s
+        m = d = s = None
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

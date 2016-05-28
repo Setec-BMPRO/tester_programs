@@ -4,17 +4,15 @@
 
 import logging
 import time
+
 import tester
 from . import support
 from . import limit
 
 FIN_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -43,26 +41,18 @@ class Final(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global m, d, s, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -70,7 +60,6 @@ class Final(tester.TestSequence):
         d.acsource.output(voltage=0.0, output=False)
         d.dcl_24V.output(5.0, True)
         time.sleep(20.0)
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

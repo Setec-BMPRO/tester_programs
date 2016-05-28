@@ -8,17 +8,15 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
+
 import tester
 from . import support
 from . import limit
 
 LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
 _RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
@@ -74,11 +72,11 @@ class Main(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

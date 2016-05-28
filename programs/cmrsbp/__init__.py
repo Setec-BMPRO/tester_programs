@@ -8,6 +8,7 @@ import logging
 import datetime
 import threading
 import time
+
 import tester
 from share import ProgramPIC, SimSerial
 from . import support
@@ -30,12 +31,8 @@ _EV_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Serial port for the CMR.
 _CMR_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
 
-
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 def _bit_status(num, check_bit):
@@ -88,11 +85,11 @@ class _Main(tester.TestSequence):
         self._cmr_ser.close()
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):

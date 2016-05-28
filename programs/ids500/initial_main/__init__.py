@@ -6,19 +6,14 @@ import logging
 import time
 
 import tester
-
 from . import support
 from . import limit
 
 
 INI_MAIN_LIMIT = limit.DATA
 
-
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class InitialMain(tester.testsequence.TestSequence):
@@ -61,6 +56,7 @@ class InitialMain(tester.testsequence.TestSequence):
         self._logger.info('Close')
         global d, s, m, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
@@ -72,7 +68,6 @@ class InitialMain(tester.testsequence.TestSequence):
         d.dcl_5V.output(5.0)
         time.sleep(1)
         d.discharge.pulse()
-        # Reset Logical Devices
         d.reset()
 
     def _step_error_check(self):
