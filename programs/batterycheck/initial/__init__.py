@@ -52,7 +52,6 @@ class Initial(tester.TestSequence):
             ('InitialiseARM', self._step_initialise_arm, None, True),
             ('TestARM', self._step_test_arm, None, True),
             ('TestBlueTooth', self._step_test_bluetooth, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -113,11 +112,6 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self._armdev.close()
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_pre_program(self):
         """Prepare for Programming.

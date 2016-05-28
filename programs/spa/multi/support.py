@@ -23,7 +23,6 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dso = dso.DSO(devices['DSO'])
         self.acsource = acsource.ACSource(devices['ACS'])
@@ -35,10 +34,6 @@ class LogicalDevices():
         self.rla_isp = relay.Relay(devices['RLA1'])
         # Relay to reset all 4 uCs
         self.rla_rst = relay.Relay(devices['RLA2'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

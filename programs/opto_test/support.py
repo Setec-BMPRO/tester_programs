@@ -26,14 +26,9 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dcs_vin = dcsource.DCSource(devices['DCS1'])
         self.dcs_vout = dcsource.DCSource(devices['DCS2'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

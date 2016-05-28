@@ -22,7 +22,6 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dcs_Vchg = dcsource.DCSource(devices['DCS1'])
         self.dcs_Vcom = dcsource.DCSource(devices['DCS2'])
@@ -39,10 +38,6 @@ class LogicalDevices():
         self.rla_Pic = relay.Relay(devices['RLA9'])    # Connect to PIC
         # Apply 5V to Vdd for Erasing PIC
         self.rla_Erase = relay.Relay(devices['RLA10'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

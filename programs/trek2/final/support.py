@@ -19,7 +19,6 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self._fifo = fifo
         dcsource = tester.devlogical.dcsource
         relay = tester.devlogical.relay
@@ -54,10 +53,6 @@ class LogicalDevices():
             if addprompt:
                 string_data = string_data + '\r\n> '
             self.trek2.puts(string_data, preflush, postflush, priority)
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

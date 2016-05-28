@@ -28,7 +28,6 @@ class Final(tester.TestSequence):
             ('FullLoad', self._step_full_load, None, True),
             ('OCP', self._step_ocp, None, True),
             ('Poweroff', self._step_power_off, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -58,11 +57,6 @@ class Final(tester.TestSequence):
         self._logger.info('Safety')
         d.reset()
 
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
-
     def _step_fuse_check(self):
         """
         Powerup with output fuse removed, measure output off.
@@ -73,25 +67,30 @@ class Final(tester.TestSequence):
         self.fifo_push(
             ((s.oNotifyStart, True), (s.o12V, 0.0), (s.oYesNoRed, True),
              (s.oNotifyFuse, True), ))
+
         t.fuse_check.run()
 
     def _step_power_up(self):
         """Switch on unit at 240Vac, measure output voltages at no load."""
         self.fifo_push(((s.o12V, 13.8), (s.oYesNoGreen, True), ))
+
         t.pwr_up.run()
 
     def _step_full_load(self):
         """Measure outputs at full-load."""
         self.fifo_push(((s.o12V, 13.6), ))
+
         t.full_load.run()
 
     def _step_ocp(self):
         """Measure OCP point."""
         self.fifo_push(((s.o12V, (13.4, ) * 15 + (13.0, ), ), ))
+
         m.ramp_OCP.measure()
 
     def _step_power_off(self):
         """Switch off unit, measure output voltage."""
         self.fifo_push(
             ((s.oNotifyMains, True), (s.o12V, 0.0), (s.oYesNoOff, True), ))
+
         t.pwr_off.run()

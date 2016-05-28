@@ -27,7 +27,6 @@ class Final(tester.TestSequence):
             ('FullLoad', self._step_full_load, None, True),
             ('OCP', self._step_ocp, None, True),
             ('Shutdown', self._step_shutdown, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -56,11 +55,6 @@ class Final(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_power_up(self):
         """Switch on at 240Vac, measure output at min load."""

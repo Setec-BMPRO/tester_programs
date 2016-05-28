@@ -17,7 +17,6 @@ class LogicalDevices(object):
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dcs_input = dcsource.DCSource(devices['DCS1'])  # Fixture power
         self.dcs_shunt = dcsource.DCSource(devices['DCS2'])  # Shunt signal
@@ -33,10 +32,6 @@ class LogicalDevices(object):
         for rla in (self.rla_avr, self.rla_reset,
                     self.rla_boot, self.rla_arm):
             rla.set_off()
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
 
 class Sensors(object):

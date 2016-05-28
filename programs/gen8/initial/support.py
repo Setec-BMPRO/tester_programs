@@ -19,7 +19,6 @@ class LogicalDevices():
 
     def __init__(self, devices, fifo):
         """Create all Logical Instruments."""
-        self._devices = devices
         self._fifo = fifo
         self.acsource = tester.ACSource(devices['ACS'])
         self.dmm = tester.DMM(devices['DMM'])
@@ -64,10 +63,6 @@ class LogicalDevices():
         """Issue 12V calibration commands."""
         self.arm['CAL_12V'] = voltage
         self.arm['NVWRITE'] = True
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

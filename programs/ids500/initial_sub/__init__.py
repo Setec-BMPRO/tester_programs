@@ -62,7 +62,6 @@ class InitialSub(tester.TestSequence):
             ('KeySw1', self._step_key_switch1, None, _isAux),
             ('Program', self._step_program, None, _isMicro),
             ('Comms', self._step_comms, None, _isMicro),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -90,10 +89,6 @@ class InitialSub(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_pwrup_micro(self):
         """Apply input DC and measure."""

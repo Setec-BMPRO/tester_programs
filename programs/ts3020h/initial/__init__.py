@@ -40,7 +40,6 @@ class Initial(tester.TestSequence):
             ('AdjOutput', self._step_adj_output, None, True),
             ('Load', self._step_load, None, True),
             ('InputOV', self._step_input_ov, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -69,10 +68,6 @@ class Initial(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed."""

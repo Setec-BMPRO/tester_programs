@@ -16,15 +16,10 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dcs_Isense = dcsource.DCSource(devices['DCS1'])
         self.dcs_12V = dcsource.DCSource(devices['DCS2'])
         self.dcs_Level = dcsource.DCSource(devices['DCS3'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

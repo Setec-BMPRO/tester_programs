@@ -31,7 +31,6 @@ class Initial(tester.TestSequence):
             ('5V', self._step_reg_5v, None, True),
             ('12V', self._step_reg_12v, None, True),
             ('24V', self._step_reg_24v, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -63,10 +62,6 @@ class Initial(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check instruments for errors."""
-        d.error_check()
 
     def _step_part_detect(self):
         """Measure Part detection microswitches."""

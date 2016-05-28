@@ -28,7 +28,6 @@ class Final(tester.TestSequence):
             ('ACPowerOn', self._step_acpower_on, None, True),
             ('ACLoad', self._step_acload, None, True),
             ('Recover', self._step_recover, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -57,11 +56,6 @@ class Final(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_dcpower_on(self):
         """Startup with DC Input, measure output at no load."""

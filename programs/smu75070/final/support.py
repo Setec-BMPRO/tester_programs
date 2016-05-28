@@ -16,7 +16,6 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.acsource = acsource.ACSource(devices['ACS'])
         dcl1 = dcload.DCLoad(devices['DCL1'])
@@ -24,10 +23,6 @@ class LogicalDevices():
         dcl3 = dcload.DCLoad(devices['DCL3'])
         dcl4 = dcload.DCLoad(devices['DCL4'])
         self.dcl = dcload.DCLoadParallel(((dcl1, 1), (dcl2, 1), (dcl3, 1), (dcl4, 1)))
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

@@ -51,7 +51,6 @@ class Initial(tester.TestSequence):
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
             ('CanBus', self._step_canbus, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -100,10 +99,6 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self._trek2.close()
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""

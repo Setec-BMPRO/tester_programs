@@ -23,7 +23,6 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         # Power RS232 + Fixture Trek2.
         self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
@@ -38,10 +37,6 @@ class LogicalDevices():
         self.rla_s2 = relay.Relay(devices['RLA5'])
         self.rla_s3 = relay.Relay(devices['RLA6'])
         self.rla_s4 = relay.Relay(devices['RLA7'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

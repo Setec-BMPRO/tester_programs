@@ -32,7 +32,6 @@ class Main(tester.testsequence.TestSequence):
             ('DCLoad', self._step_dcload, None, True),
             ('RelayDriver', self._step_relaydriver, None, True),
             ('Discharge', self._step_discharge, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -60,11 +59,6 @@ class Main(tester.testsequence.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_checker(self):
         """Test Checker Voltages."""

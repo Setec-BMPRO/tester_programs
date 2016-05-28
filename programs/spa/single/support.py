@@ -24,17 +24,12 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dso = dso.DSO(devices['DSO'])
         self.acsource = acsource.ACSource(devices['ACS'])
         # DC Source that power the test fixture
         self.dcsAuxPos = dcsource.DCSource(devices['DCS4'])
         self.dcsAuxNeg = dcsource.DCSource(devices['DCS3'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

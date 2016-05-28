@@ -48,7 +48,6 @@ class Initial(tester.TestSequence):
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
             ('Loaded', self._step_loaded, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -119,10 +118,6 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self._bc15.close()
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""

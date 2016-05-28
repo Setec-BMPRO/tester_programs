@@ -37,7 +37,6 @@ class Final(tester.TestSequence):
             ('Tank2', self._step_tank2, None, True),
             ('Tank3', self._step_tank3, None, True),
             ('Tank4', self._step_tank4, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -62,7 +61,7 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global d, s, m
         # Switch off the USB hub & Serial ports
-        self.dcs_Vcom.output(0.0, output=False)
+        d.dcs_Vcom.output(0.0, output=False)
         m = d = s = None
         super().close()
 
@@ -70,10 +69,6 @@ class Final(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""

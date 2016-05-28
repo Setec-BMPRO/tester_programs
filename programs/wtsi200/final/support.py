@@ -17,7 +17,6 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dso = dso.DSO(devices['DSO'])
         self.dcs_12V = dcsource.DCSource(devices['DCS1'])
         self.dcs_3V3 = dcsource.DCSource(devices['DCS2'])
@@ -36,10 +35,6 @@ class LogicalDevices():
             self.rla_tank2S3, self.rla_tank2S2, self.rla_tank2S1,
             self.rla_tank3S3, self.rla_tank3S2, self.rla_tank3S1,
             self.rla_trigg)
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""
@@ -132,7 +127,9 @@ class SubTests():
         self.d = d
         m = measurements
         dispatcher.connect(
-            self.trigg, sender=m.dso_TankLevel1._sensor, signal=tester.SigDso)
+            self.dso_trigger,
+            sender=m.dso_TankLevel1.sensor,
+            signal=tester.SigDso)
         # PowerOn: Apply 12Vdc, measure.
         dcs = DcSubStep(
             setting=((d.dcs_12V, 12.0), (d.dcs_3V3, 3.3), ),
@@ -173,7 +170,7 @@ class SubTests():
              (d.rla_tank3S1, False)))
         self.tank3 = Step((rly1, msr1, rly2, msr2, rly3, msr3, rly4))
 
-    def trigg(self):
+    def dso_trigger(self):
         """DSO Ready handler."""
         self.d.rla_trigg.set_on()
         time.sleep(0.25)

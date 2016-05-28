@@ -28,7 +28,6 @@ class Final2V(tester.TestSequence):
             ('FullLoad', self._step_full_load, None, True),
             ('OCP', self._step_ocp, None, True),
             ('PowerFail', self._step_power_fail, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -57,11 +56,6 @@ class Final2V(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_power_up(self):
         """Switch on unit at 240Vac, not enabled, measure output voltages."""

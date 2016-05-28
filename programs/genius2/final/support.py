@@ -16,7 +16,6 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.acsource = acsource.ACSource(devices['ACS'])
         # This DC Source simulates the battery voltage
@@ -26,10 +25,6 @@ class LogicalDevices():
         self.dcl = dcload.DCLoadParallel(((dcl_vout, 29), (dcl_vbat, 14)))
         self.dclh = dcload.DCLoadParallel(((dcl_vout, 5), (dcl_vbat, 30)))
         self.rla_RemoteSw = relay.Relay(devices['RLA1'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

@@ -92,10 +92,6 @@ class _Main(tester.TestSequence):
         self._logger.info('Safety')
         d.reset()
 
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
-
     def _read_data(self):
         """Read data broadcast from PIC.
 
@@ -168,7 +164,6 @@ class Initial(_Main):
             ('CheckVcharge', self._step_check_vchge, None, True),
             ('CalBQvolts', self._step_calv, None, True),
             ('CalBQcurrent', self._step_cali, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -297,7 +292,6 @@ class SerialDate(_Main):
         self._limits = test_limits
         sequence = (
             ('SerialDate', self._step_sn_date, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -352,7 +346,6 @@ class Final(_Main):
         sequence = (
             ('Startup', self._step_startup, None, True),
             ('Verify', self._step_verify, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

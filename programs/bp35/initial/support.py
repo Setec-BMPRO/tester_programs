@@ -24,7 +24,6 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
@@ -61,10 +60,6 @@ class LogicalDevices():
             if addprompt:
                 string_data = string_data + '\r\n> '
             self.bp35.puts(string_data, preflush, postflush, priority)
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

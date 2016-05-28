@@ -17,16 +17,11 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = tester.devlogical.dmm.DMM(devices['DMM'])
         self.acsource = acsource.ACSource(devices['ACS'])
         self.dcl_Load = dcload.DCLoad(devices['DCL1'])
         self.dcl_Batt = dcload.DCLoad(devices['DCL5'])
         self.rla_BattSw = relay.Relay(devices['RLA1'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

@@ -32,7 +32,6 @@ class Safety(tester.TestSequence):
             ('Gnd2', self._step_gnd2, None, True),
             ('Gnd3', self._step_gnd3, None, True),
             ('HiPot', self._step_hipot, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -80,8 +79,3 @@ class Safety(tester.TestSequence):
         """HiPot Test."""
         self.fifo_push(((s.acw, 3.0), ))
         m.acw.measure()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()

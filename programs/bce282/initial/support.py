@@ -22,7 +22,6 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.acsource = acsource.ACSource(devices['ACS'])
         self.discharge = discharge.Discharge(devices['DIS'])
@@ -31,10 +30,6 @@ class LogicalDevices():
         self.dcl_Vout = dcload.DCLoad(devices['DCL1'])
         self.dcl_Vbat = dcload.DCLoad(devices['DCL2'])
         self.rla_Prog = relay.Relay(devices['RLA1'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

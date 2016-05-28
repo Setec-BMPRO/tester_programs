@@ -99,7 +99,6 @@ class InitialMulti(tester.TestSequence):
             ('Green35', self._step_green35, None, True),
             ('Green10', self._step_green10, None, True),
             ('Reset', self._step_firmware_reset, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -342,11 +341,6 @@ class InitialMulti(tester.TestSequence):
         time.sleep(_FIRMWARE_RESET_TIME)
         self._ac_in(vset, ramp=False, correct=False)
         time.sleep(_FIRMWARE_RESET_WAIT_TIME)
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _colour_change(self, vset=12.0, msg=None, correct=True):
         """Colour Change.

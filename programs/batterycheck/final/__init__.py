@@ -29,7 +29,6 @@ class Final(tester.TestSequence):
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
             ('TestBlueTooth', self._step_test_bluetooth, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -74,11 +73,6 @@ class Final(tester.TestSequence):
         self._logger.info('Safety')
         self._bt.close()
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_power_up(self):
         """Power the battery check."""

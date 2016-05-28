@@ -15,7 +15,6 @@ class LogicalDevices(object):
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dso = dso.DSO(devices['DSO'])
         # DC Sources
@@ -44,10 +43,6 @@ class LogicalDevices(object):
             self.rly.append(relay.Relay(devices['RLA{}'.format(num)]))
         # Discharge
         self.disch = discharge.Discharge(devices['DIS'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

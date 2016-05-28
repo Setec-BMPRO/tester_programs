@@ -14,7 +14,6 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.acsource = acsource.ACSource(devices['ACS'])
         # This DC Source drives the Remote AC Switch
@@ -24,10 +23,6 @@ class LogicalDevices():
         self.dcl_12V = dcload.DCLoad(devices['DCL3'])
         self.dcl_5V = dcload.DCLoad(devices['DCL4'])
         self.dcl_3V3 = dcload.DCLoad(devices['DCL5'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

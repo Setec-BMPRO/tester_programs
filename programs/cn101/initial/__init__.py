@@ -57,7 +57,6 @@ class Initial(tester.TestSequence):
             ('TankSense', self._step_tank_sense, None, True),
             ('Bluetooth', self._step_bluetooth, None, True),
             ('CanBus', self._step_canbus, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -112,10 +111,6 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self._cn101.close()
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_part_check(self):
         """Measure Part detection microswitches."""

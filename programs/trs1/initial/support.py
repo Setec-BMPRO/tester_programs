@@ -20,16 +20,11 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self.dmm = dmm.DMM(devices['DMM'])
         self.dso = dso.DSO(devices['DSO'])
         self.dcs_Vin = dcsource.DCSource(devices['DCS4'])
         # Pin for breakaway switch.
         self.rla_pin = relay.Relay(devices['RLA5'])   # ON == Asserted
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""

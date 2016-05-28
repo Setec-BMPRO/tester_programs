@@ -28,7 +28,6 @@ class Final(tester.TestSequence):
         sequence = (
             ('DisplayCheck', self._step_displ_check, None, True),
             ('SwitchCheck', self._step_sw_check, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -57,11 +56,6 @@ class Final(tester.TestSequence):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_displ_check(self):
         """Apply DC Input voltage and check the display."""
