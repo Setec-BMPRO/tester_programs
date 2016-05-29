@@ -50,7 +50,6 @@ class LogicalDevices():
         self.cmr_ser.close()
         for dcs in (self.dcs_vbat, self.dcs_Vchg, self.dcs_Vcom):
             dcs.output(0.0, False)
-        self.dcs_Vcom.output(0.0, False)
         self.dcl_ibat.output(0.0)
         for rla in (self.rla_Pic, self.rla_Erase):
             rla.set_off()
