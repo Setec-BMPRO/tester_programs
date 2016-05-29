@@ -45,7 +45,6 @@ class Sensors():
 
            @param logical_devices Logical instruments used
            @param limits Product test limits
-           @param trek2 Trek2 ARM console driver
 
         """
         dmm = logical_devices.dmm
