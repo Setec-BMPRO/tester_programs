@@ -3,6 +3,7 @@
 """Selfchecker Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
@@ -11,10 +12,8 @@ MeasureGroup = tester.measure.group
 
 LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Main(tester.testsequence.TestSequence):
@@ -33,7 +32,6 @@ class Main(tester.testsequence.TestSequence):
             ('DCLoad', self._step_dcload, None, True),
             ('RelayDriver', self._step_relaydriver, None, True),
             ('Discharge', self._step_discharge, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -45,34 +43,22 @@ class Main(tester.testsequence.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d)
-        global m
         m = support.Measurements(s, self._limits)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
+        global m, d, s
+        m = d = s = None
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_checker(self):
         """Test Checker Voltages."""

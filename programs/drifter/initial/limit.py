@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 """Drifter(BM) Initial Program Limits."""
 
-from testlimit import (lim_hilo, lim_hilo_delta, lim_hilo_int, lim_string)
+import os
+
+from testlimit import lim_hilo, lim_hilo_delta, lim_hilo_int, lim_string
+
+# Serial port for the PIC.
+PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
 FORCE_OFFSET = -8
 FORCE_THRESHOLD = 160

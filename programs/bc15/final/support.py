@@ -2,12 +2,8 @@
 # -*- coding: utf-8 -*-
 """BC15 Final Test Program."""
 
-import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
-
-translate = tester.translate
+import sensor
 
 
 class LogicalDevices():
@@ -20,14 +16,9 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcl = dcload.DCLoad(devices['DCL1'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcl = tester.DCLoad(devices['DCL1'])
 
     def reset(self):
         """Reset instruments."""
@@ -49,11 +40,11 @@ class Sensors():
         dmm = logical_devices.dmm
         self.vout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.ps_mode = sensor.Notify(
-            message=translate('bc15_final', 'GoToPsMode'),
-            caption=translate('bc15_final', 'capPsMode'))
+            message=tester.translate('bc15_final', 'GoToPsMode'),
+            caption=tester.translate('bc15_final', 'capPsMode'))
         self.ch_mode = sensor.Notify(
-            message=translate('bc15_final', 'GoToChargeMode'),
-            caption=translate('bc15_final', 'capChargeMode'))
+            message=tester.translate('bc15_final', 'GoToChargeMode'),
+            caption=tester.translate('bc15_final', 'capChargeMode'))
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl, sensor=self.vout,
             detect_limit=(limits['InOCP'], ),
@@ -71,6 +62,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.vout_nl = Measurement(limits['VoutNL'], sense.vout)
         self.vout = Measurement(limits['Vout'], sense.vout)
         self.ps_mode = Measurement(limits['Notify'], sense.ps_mode)

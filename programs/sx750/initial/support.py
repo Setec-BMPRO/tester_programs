@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """SX-750 Initial Test Program."""
+
 import os
 import inspect
-
+import time
 from pydispatch import dispatcher
+
+import share
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
-from share.console import Sensor as con_sensor
-from share import SimSerial, ProgramARM
 from . import limit
-from ..console import Console
-from .arduino import Arduino
+from . import arduino
 from . import digpot
+from .. import console
 
 
 class LogicalDevices():
@@ -23,45 +22,46 @@ class LogicalDevices():
 
     def __init__(self, devices, fifo):
         """Create all Logical Instruments."""
-        self._devices = devices
         self._fifo = fifo
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.discharge = discharge.Discharge(devices['DIS'])
-        self.dcs_PriCtl = dcsource.DCSource(devices['DCS1'])
-        self.dcs_Arduino = dcsource.DCSource(devices['DCS2'])
-        self.dcs_5Vsb = dcsource.DCSource(devices['DCS3'])
-        self.dcl_5Vsb = dcload.DCLoad(devices['DCL2'])
-        self.dcl_12V = dcload.DCLoad(devices['DCL1'])
-        self.dcl_24V = dcload.DCLoad(devices['DCL5'])
-        self.rla_pic2 = relay.Relay(devices['RLA1'])
-        self.rla_pic1 = relay.Relay(devices['RLA7'])
-        self.rla_boot = relay.Relay(devices['RLA2'])
-        self.rla_pson = relay.Relay(devices['RLA3'])
-        self.rla_pot_ud = relay.Relay(devices['RLA6'])
-        self.rla_pot_12 = relay.Relay(devices['RLA5'])
-        self.rla_pot_24 = relay.Relay(devices['RLA4'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.discharge = tester.Discharge(devices['DIS'])
+        self.dcs_PriCtl = tester.DCSource(devices['DCS1'])
+        self.dcs_Arduino = tester.DCSource(devices['DCS2'])
+        self.dcs_5Vsb = tester.DCSource(devices['DCS3'])
+        self.dcl_5Vsb = tester.DCLoad(devices['DCL2'])
+        self.dcl_12V = tester.DCLoad(devices['DCL1'])
+        self.dcl_24V = tester.DCLoad(devices['DCL5'])
+        self.rla_pic2 = tester.Relay(devices['RLA1'])
+        self.rla_pic1 = tester.Relay(devices['RLA7'])
+        self.rla_boot = tester.Relay(devices['RLA2'])
+        self.rla_pson = tester.Relay(devices['RLA3'])
+        self.rla_pot_ud = tester.Relay(devices['RLA6'])
+        self.rla_pot_12 = tester.Relay(devices['RLA5'])
+        self.rla_pot_24 = tester.Relay(devices['RLA4'])
         self.ocp_pot = digpot.OCPAdjust(
             self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24)
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         file = os.path.join(folder, limit.ARM_BIN)
-        self.programmer = ProgramARM(limit.ARM_PORT, file)
+        self.programmer = share.ProgramARM(limit.ARM_PORT, file)
         # Serial connection to the ARM console
-        arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
+        arm_ser = share.SimSerial(
+            simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = limit.ARM_PORT
-        self.arm = Console(arm_ser, verbose=False)
+        self.arm = console.Console(arm_ser, verbose=False)
         # Serial connection to the Arduino console
-        ard_ser = SimSerial(simulation=fifo, baudrate=115200, timeout=2.0)
+        ard_ser = share.SimSerial(
+            simulation=fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = limit.ARDUINO_PORT
-        self.ard = Arduino(ard_ser, verbose=False)
+        self.ard = arduino.Arduino(ard_ser, verbose=False)
 
     def arm_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
+                 string_data, preflush=0, postflush=0, priority=False,
+                 addprompt=True):
         """Push string data into the buffer, if FIFOs are enabled."""
         if self._fifo:
             if addprompt:
@@ -69,8 +69,8 @@ class LogicalDevices():
             self.arm.puts(string_data, preflush, postflush, priority)
 
     def ard_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
+                 string_data, preflush=0, postflush=0, priority=False,
+                 addprompt=True):
         """Push string data into the buffer, if FIFOs are enabled."""
         if self._fifo:
             if addprompt:
@@ -82,32 +82,24 @@ class LogicalDevices():
         self.arm['CAL_PFC'] = voltage
         self.arm['NVWRITE'] = True
 
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
-
     def reset(self):
         """Reset instruments."""
         self.arm.close()
         self.ard.close()
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
         self.dcl_5Vsb.output(1.0)
         self.dcl_12V.output(5.0)
         self.dcl_24V.output(5.0)
         time.sleep(1)
         self.discharge.pulse()
-        # Switch off DC Loads
         for ld in (self.dcl_5Vsb, self.dcl_12V, self.dcl_24V):
             ld.output(0.0)
-        # Switch off DC Sources
         for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb):
             dcs.output(0.0, False)
-        # Switch off all Relays
-        for rla in (self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
-                     self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
+        for rla in (
+                self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
+                self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
             rla.set_off()
-        # Disable digital pots
         self.ocp_pot.disable()
 
 
@@ -121,8 +113,10 @@ class Sensors():
         dmm = d.dmm
         # Mirror sensors for Programming result logging
         self.oMirPIC = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.o5Vsb = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
         self.o5Vsbunsw = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
         self.o8V5Ard = sensor.Vdc(dmm, high=19, low=3, rng=100, res=0.001)
@@ -152,27 +146,27 @@ class Sensors():
             detect_limit=(limits['24V_inOCP'], ),
             start=18.3 * 0.9, stop=18.3 * 1.1, step=0.1, delay=0,
             reset=True, use_opc=True)
-        self.PGM_5Vsb = con_sensor(
+        self.PGM_5Vsb = console.Sensor(
             d.ard, 'PGM_5VSB', rdgtype=sensor.ReadingString)
-        self.PGM_PwrSw = con_sensor(
+        self.PGM_PwrSw = console.Sensor(
             d.ard, 'PGM_PWRSW', rdgtype=sensor.ReadingString)
-        self.PotMax = con_sensor(
+        self.PotMax = console.Sensor(
             d.ard, 'POT_MAX', rdgtype=sensor.ReadingString)
-        self.Pot12Enable = con_sensor(
+        self.Pot12Enable = console.Sensor(
             d.ard, '12_POT_ENABLE', rdgtype=sensor.ReadingString)
-        self.Pot24Enable = con_sensor(
+        self.Pot24Enable = console.Sensor(
             d.ard, '24_POT_ENABLE', rdgtype=sensor.ReadingString)
-        self.PotStep = con_sensor(
+        self.PotStep = console.Sensor(
             d.ard, 'POT_STEP', rdgtype=sensor.ReadingString)
-        self.PotDisable = con_sensor(
+        self.PotDisable = console.Sensor(
             d.ard, 'POT_DISABLE', rdgtype=sensor.ReadingString)
-        self.ARM_AcFreq = con_sensor(d.arm, 'ARM-AcFreq')
-        self.ARM_AcVolt = con_sensor(d.arm, 'ARM-AcVolt')
-        self.ARM_12V = con_sensor(d.arm, 'ARM-12V')
-        self.ARM_24V = con_sensor(d.arm, 'ARM-24V')
-        self.ARM_SwVer = con_sensor(
+        self.ARM_AcFreq = console.Sensor(d.arm, 'ARM-AcFreq')
+        self.ARM_AcVolt = console.Sensor(d.arm, 'ARM-AcVolt')
+        self.ARM_12V = console.Sensor(d.arm, 'ARM-12V')
+        self.ARM_24V = console.Sensor(d.arm, 'ARM-24V')
+        self.ARM_SwVer = console.Sensor(
             d.arm, 'ARM_SwVer', rdgtype=sensor.ReadingString)
-        self.ARM_SwBld = con_sensor(
+        self.ARM_SwBld = console.Sensor(
             d.arm, 'ARM_SwBld', rdgtype=sensor.ReadingString)
 
     def _reset(self):
@@ -186,52 +180,65 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
-        # Programming results
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
-        self.dmm_5Voff = Measurement(limits['5Voff'], sense.o5Vsb)
-        self.dmm_5Vext = Measurement(limits['5Vext'], sense.o5Vsb)
-        self.dmm_5Vunsw = Measurement(limits['5Vsb'], sense.o5Vsbunsw)
-        self.dmm_5Vsb_set = Measurement(limits['5Vsb_set'], sense.o5Vsb)
-        self.dmm_5Vsb = Measurement(limits['5Vsb'], sense.o5Vsb)
-        self.dmm_12V_set = Measurement(limits['12V_set'], sense.o12V)
-        self.dmm_12V = Measurement(limits['12V'], sense.o12V)
-        self.dmm_12Voff = Measurement(limits['12Voff'], sense.o12V)
-        self.dmm_12V_inOCP = Measurement(limits['12V_inOCP'], sense.o12VinOCP)
-        limits['12V_inOCP'].position_fail = False
-        limits['12V_inOCP'].send_signal = False
-        self.dmm_24V = Measurement(limits['24V'], sense.o24V)
-        self.dmm_24V_set = Measurement(limits['24V_set'], sense.o24V)
-        self.dmm_24Voff = Measurement(limits['24Voff'], sense.o24V)
-        self.dmm_24V_inOCP = Measurement(limits['24V_inOCP'], sense.o24VinOCP)
-        limits['24V_inOCP'].position_fail = False
-        limits['24V_inOCP'].send_signal = False
-        self.dmm_PriCtl = Measurement(limits['PriCtl'], sense.PriCtl)
-        self.dmm_PFCpre = Measurement(limits['PFCpre'], sense.PFC)
-        self.dmm_PFCpost = Measurement(limits['PFCpost'], sense.PFC)
-        self.dmm_ACin = Measurement(limits['ACin'], sense.ACin)
-        self.dmm_PGOOD = Measurement(limits['PGOOD'], sense.PGOOD)
-        self.dmm_ACFAIL = Measurement(limits['ACFAIL'], sense.ACFAIL)
-        self.dmm_ACOK = Measurement(limits['ACOK'], sense.ACFAIL)
-        self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
-        self.dmm_Lock = Measurement(limits['FixtureLock'], sense.Lock)
-        self.dmm_Part = Measurement(limits['PartCheck'], sense.Part)
-        self.dmm_R601 = Measurement(limits['Snubber'], sense.R601)
-        self.dmm_R602 = Measurement(limits['Snubber'], sense.R602)
-        self.dmm_R609 = Measurement(limits['Snubber'], sense.R609)
-        self.dmm_R608 = Measurement(limits['Snubber'], sense.R608)
-        self.rampOcp12V = Measurement(limits['12V_OCPchk'], sense.OCP12V)
-        self.rampOcp24V = Measurement(limits['24V_OCPchk'], sense.OCP24V)
-        self.dmm_8V5Ard = Measurement(limits['8.5V Arduino'], sense.o8V5Ard)
-        self.pgm_5vsb = Measurement(limits['Reply'], sense.PGM_5Vsb)
-        self.pgm_pwrsw = Measurement(limits['Reply'], sense.PGM_PwrSw)
-        self.pot_max = Measurement(limits['Reply'], sense.PotMax)
-        self.pot12_enable = Measurement(limits['Reply'], sense.Pot12Enable)
-        self.pot24_enable = Measurement(limits['Reply'], sense.Pot24Enable)
-        self.pot_step = Measurement(limits['Reply'], sense.PotStep)
-        self.pot_disable = Measurement(limits['Reply'], sense.PotDisable)
-        self.arm_AcFreq = Measurement(limits['ARM-AcFreq'], sense.ARM_AcFreq)
-        self.arm_AcVolt = Measurement(limits['ARM-AcVolt'], sense.ARM_AcVolt)
-        self.arm_12V = Measurement(limits['ARM-12V'], sense.ARM_12V)
-        self.arm_24V = Measurement(limits['ARM-24V'], sense.ARM_24V)
-        self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
-        self.arm_SwBld = Measurement(limits['ARM-SwBld'], sense.ARM_SwBld)
+        self._limits = limits
+        self.pgmPIC = self._maker('Program', sense.oMirPIC)
+        self.dmm_5Voff = self._maker('5Voff', sense.o5Vsb)
+        self.dmm_5Vext = self._maker('5Vext', sense.o5Vsb)
+        self.dmm_5Vunsw = self._maker('5Vsb', sense.o5Vsbunsw)
+        self.dmm_5Vsb_set = self._maker('5Vsb_set', sense.o5Vsb)
+        self.dmm_5Vsb = self._maker('5Vsb', sense.o5Vsb)
+        self.dmm_12V_set = self._maker('12V_set', sense.o12V)
+        self.dmm_12V = self._maker('12V', sense.o12V)
+        self.dmm_12Voff = self._maker('12Voff', sense.o12V)
+        self.dmm_12V_inOCP = self._maker(
+            '12V_inOCP', sense.o12VinOCP, silent=True)
+        self.dmm_24V = self._maker('24V', sense.o24V)
+        self.dmm_24V_set = self._maker('24V_set', sense.o24V)
+        self.dmm_24Voff = self._maker('24Voff', sense.o24V)
+        self.dmm_24V_inOCP = self._maker(
+            '24V_inOCP', sense.o24VinOCP, silent=True)
+        self.dmm_PriCtl = self._maker('PriCtl', sense.PriCtl)
+        self.dmm_PFCpre = self._maker('PFCpre', sense.PFC)
+        self.dmm_PFCpost = self._maker('PFCpost', sense.PFC)
+        self.dmm_ACin = self._maker('ACin', sense.ACin)
+        self.dmm_PGOOD = self._maker('PGOOD', sense.PGOOD)
+        self.dmm_ACFAIL = self._maker('ACFAIL', sense.ACFAIL)
+        self.dmm_ACOK = self._maker('ACOK', sense.ACFAIL)
+        self.dmm_3V3 = self._maker('3V3', sense.o3V3)
+        self.dmm_Lock = self._maker('FixtureLock', sense.Lock)
+        self.dmm_Part = self._maker('PartCheck', sense.Part)
+        self.dmm_R601 = self._maker('Snubber', sense.R601)
+        self.dmm_R602 = self._maker('Snubber', sense.R602)
+        self.dmm_R609 = self._maker('Snubber', sense.R609)
+        self.dmm_R608 = self._maker('Snubber', sense.R608)
+        self.rampOcp12V = self._maker('12V_OCPchk', sense.OCP12V)
+        self.rampOcp24V = self._maker('24V_OCPchk', sense.OCP24V)
+        self.dmm_8V5Ard = self._maker('8.5V Arduino', sense.o8V5Ard)
+        self.pgm_5vsb = self._maker('Reply', sense.PGM_5Vsb)
+        self.pgm_pwrsw = self._maker('Reply', sense.PGM_PwrSw)
+        self.pot_max = self._maker('Reply', sense.PotMax)
+        self.pot12_enable = self._maker('Reply', sense.Pot12Enable)
+        self.pot24_enable = self._maker('Reply', sense.Pot24Enable)
+        self.pot_step = self._maker('Reply', sense.PotStep)
+        self.pot_disable = self._maker('Reply', sense.PotDisable)
+        self.arm_AcFreq = self._maker('ARM-AcFreq', sense.ARM_AcFreq)
+        self.arm_AcVolt = self._maker('ARM-AcVolt', sense.ARM_AcVolt)
+        self.arm_12V = self._maker('ARM-12V', sense.ARM_12V)
+        self.arm_24V = self._maker('ARM-24V', sense.ARM_24V)
+        self.arm_SwVer = self._maker('ARM-SwVer', sense.ARM_SwVer)
+        self.arm_SwBld = self._maker('ARM-SwBld', sense.ARM_SwBld)
+
+    def _maker(self, limitname, sensor, silent=False):
+        """Helper to create a Measurement.
+
+        @param limitname Test Limit name
+        @param sensor Sensor to use
+        @param silent True to suppress position_fail & send_signal
+        @return tester.Measurement instance
+
+        """
+        lim = self._limits[limitname]
+        if silent:
+            lim.position_fail = False
+            lim.send_signal = False
+        return tester.Measurement(lim, sensor)

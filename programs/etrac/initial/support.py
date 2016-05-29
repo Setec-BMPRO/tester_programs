@@ -3,10 +3,9 @@
 """ETrac-II Initial Test Program."""
 
 from pydispatch import dispatcher
+
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 
 class LogicalDevices():
@@ -19,22 +18,15 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dcs_Vin = dcsource.DCSource(devices['DCS1'])
-        self.rla_SS = relay.Relay(devices['RLA1'])
-        self.rla_Prog = relay.Relay(devices['RLA2'])
-        self.rla_BattLoad = relay.Relay(devices['RLA3'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_Vin = tester.DCSource(devices['DCS1'])
+        self.rla_SS = tester.Relay(devices['RLA1'])
+        self.rla_Prog = tester.Relay(devices['RLA2'])
+        self.rla_BattLoad = tester.Relay(devices['RLA3'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Source
         self.dcs_Vin.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_SS, self.rla_Prog, self.rla_BattLoad):
             rla.set_off()
 
@@ -76,6 +68,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.dmm_Vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_Vin2 = Measurement(limits['Vin2'], sense.oVin2)
@@ -98,14 +91,14 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        rly1 = RelaySubStep(((d.rla_SS, True), ))
-        dcs1 = DcSubStep(setting=((d.dcs_Vin, 13.0),), output=True)
-        msr1 = MeasureSubStep(
+        rly1 = tester.RelaySubStep(((d.rla_SS, True), ))
+        dcs1 = tester.DcSubStep(setting=((d.dcs_Vin, 13.0),), output=True)
+        msr1 = tester.MeasureSubStep(
             (m.dmm_Vin, m.dmm_Vin2, m.dmm_5V, ), timeout=10)
-        self.pwr_up = Step((rly1, dcs1, msr1))
+        self.pwr_up = tester.SubStep((rly1, dcs1, msr1))
         # Load:
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_5Vusb, m.dmm_Vbat, ), timeout=10)
-        rly1 = RelaySubStep(((d.rla_BattLoad, True), ))
-        msr2 = MeasureSubStep((m.dmm_Vbat, ), timeout=10)
-        self.load = Step((msr1, rly1, msr2))
+        rly1 = tester.RelaySubStep(((d.rla_BattLoad, True), ))
+        msr2 = tester.MeasureSubStep((m.dmm_Vbat, ), timeout=10)
+        self.load = tester.SubStep((msr1, rly1, msr2))

@@ -3,22 +3,15 @@
 """IDS-500 Initial Main Test Program."""
 
 import logging
-import time
 
 import tester
-
 from . import support
 from . import limit
 
-
 INI_MAIN_LIMIT = limit.DATA
 
-
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class InitialMain(tester.testsequence.TestSequence):
@@ -38,7 +31,6 @@ class InitialMain(tester.testsequence.TestSequence):
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
             ('PowerUp', self._step_power_up, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -61,27 +53,17 @@ class InitialMain(tester.testsequence.TestSequence):
         self._logger.info('Close')
         global d, s, m, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl_Tec.output(0.1)
-        d.dcl_15Vp.output(1.0)
-        d.dcl_15Vpsw.output(0.0)
-        d.dcl_5V.output(5.0)
-        time.sleep(1)
-        d.discharge.pulse()
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed."""
         self._fifo_push(((s.Lock, 10.0), ))
+
         m.dmm_Lock.measure(timeout=5)
 
     def _step_power_up(self):
@@ -90,4 +72,5 @@ class InitialMain(tester.testsequence.TestSequence):
             ((s.oVbus, 340.0), (s.oTec, 0.0), (s.oTecVmon, 0.0),
              (s.oLdd, 0.0), (s.oIsVmon, 0.0), (s.o15V, 0.0), (s.om15V, 0.0),
              (s.o15Vp, 0.0), (s.o15VpSw, 0.0), (s.o5V, 0.0), ))
+
         t.pwr_up.run()

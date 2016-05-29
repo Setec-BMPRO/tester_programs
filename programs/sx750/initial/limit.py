@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """SX-750 Initial Test Program Limits."""
+
 import os
+
+from testlimit import (
+    lim_hilo_delta, lim_hilo_percent, lim_hilo, lim_hilo_int,
+    lim_lo, lim_hi, lim_string
+    )
 
 BIN_VERSION = '3.1.2118'        # Software versions
 PIC_HEX1 = 'sx750_pic5Vsb_1.hex'
@@ -16,10 +22,6 @@ ARM_BIN = 'sx750_arm_{}.bin'.format(BIN_VERSION)
 
 # Reading to reading difference for PFC voltage stability
 PFC_STABLE = 0.05
-
-from testlimit import (
-    lim_hilo_delta, lim_hilo_percent, lim_hilo, lim_hilo_int,
-    lim_lo, lim_hi, lim_string)
 
 # Test Limits
 DATA = (

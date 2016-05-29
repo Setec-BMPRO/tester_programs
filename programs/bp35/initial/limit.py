@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """BP35 Initial Program Limits."""
+
 import os
 
 from testlimit import (
@@ -38,7 +39,7 @@ DATA = (
     lim_hilo_int('Program', 0),
     lim_lo('FixtureLock', 1200),
     lim_boolean('Notify', True),
-    lim_hilo_delta('HwVer5', 1000.0, 250.0),
+    lim_hilo_delta('HwVer5', 3200.0, 250.0),
     lim_hilo_delta('ACin', 240.0, 5.0),
     lim_hilo('Vpfc', 401.0, 424.0),
     lim_hilo('12Vpri', 11.5, 13.0),

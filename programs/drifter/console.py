@@ -23,8 +23,8 @@ class Console(console.Variable, console.BadUartConsole):
         console.Variable.__init__(self)
         console.BadUartConsole.__init__(self, port, verbose=False)
         self.cmd_data = {
-            'UNLOCK': ParameterString('UNLOCK',
-                writeable=True, readable=False, write_format='{} {}'),
+            'UNLOCK': ParameterBoolean('XDEADBEA7 UNLOCK',
+                writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-WRITE-DEFAULT',
                 writeable=True, readable=False, write_format='{1}'),
             'NVWRITE': ParameterBoolean('NV-WRITE',

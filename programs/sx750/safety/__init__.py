@@ -8,16 +8,15 @@ Call 'self.abort()' to stop program running at end of current step.
 """
 
 import logging
+
 import tester
 from . import support
 from . import limit
 
 SAF_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Safety(tester.TestSequence):
@@ -33,7 +32,6 @@ class Safety(tester.TestSequence):
             ('Gnd2', self._step_gnd2, None, True),
             ('Gnd3', self._step_gnd3, None, True),
             ('HiPot', self._step_hipot, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -45,28 +43,21 @@ class Safety(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global m, d, s
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d)
-        global m
         m = support.Measurements(s, self._limits)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
+        global m, d, s
+        m = d = s = None
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
     def _step_gnd1(self):
@@ -88,8 +79,3 @@ class Safety(tester.TestSequence):
         """HiPot Test."""
         self.fifo_push(((s.acw, 3.0), ))
         m.acw.measure()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()

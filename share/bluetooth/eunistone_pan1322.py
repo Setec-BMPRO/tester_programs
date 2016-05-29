@@ -43,7 +43,7 @@ class BtRadio():
 
         """
         self._logger.debug('Open')
-        self._port.setRtsCts(True)
+        self._port.rtscts = True
         self._port.open()
         time.sleep(1)
         self._port.flushInput()
@@ -60,7 +60,7 @@ class BtRadio():
     def close(self):
         """Close serial communications with BT Radio."""
         self._logger.debug('Close')
-        self._port.setRtsCts(False)   # so close() does not hang
+        self._port.rtscts = False   # so close() does not hang
         self._port.close()
 
     def _log(self, message):

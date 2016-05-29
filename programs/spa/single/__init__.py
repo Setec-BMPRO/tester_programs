@@ -9,6 +9,7 @@ Call 'self.abort()' to stop program running at end of current step.
 
 import time
 import logging
+
 import tester
 from . import support
 from . import limit
@@ -17,10 +18,8 @@ MeasureGroup = tester.measure.group
 
 SGL_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 # Scale factor for AC Input.
 #   AC Source setting = AC Setting * factor
@@ -56,7 +55,6 @@ class InitialSingle(tester.TestSequence):
             ('Led24', self._step_led24, None, True),
             ('Led32', self._step_led32, None, True),
             ('Led35', self._step_led35, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -74,11 +72,9 @@ class InitialSingle(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d)
-        global m
         m = support.Measurements(s, self._limits)
         # Switch on DC Source that power the test fixture
         d.dcsAuxPos.output(voltage=15.0, output=True)
@@ -87,22 +83,16 @@ class InitialSingle(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
+        global m, d, s
         # Switch off DC Source that power the test fixture
         for dc in (d.dcsAuxPos, d.dcsAuxNeg):
             dc.output(voltage=0.0, output=False)
-        d = None
-        global s
-        s = None
+        m = d = s = None
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        # Reset Logical Devices
         d.reset()
 
     def _step_poweron(self):
@@ -179,11 +169,6 @@ class InitialSingle(tester.TestSequence):
         self._ac_in(35.0)
         MeasureGroup((m.dmm_AcVin35, m.dso_led, m.dmm_AcIin1_35,
                       m.dmm_AcIin2_35, m.dmm_AcIin3_35, m.dmm_AcIin4_35))
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _ac_in(self, vset, output=True, ramp=True, correct=True):
         """Set the AC Source for the target input voltage."""

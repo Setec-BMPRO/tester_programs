@@ -2,28 +2,16 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Final Test Program."""
 
-import os
 import logging
+
 import tester
-from share import SimSerial
 from . import support
 from . import limit
-from ..console import Console
-
-MeasureGroup = tester.measure.group
 
 FIN_LIMIT = limit.DATA
 
-# Serial port for the PIC.
-_PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
-
-_NEW_PSU  =  False
-
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -49,43 +37,34 @@ class Final(tester.TestSequence):
             ('OCP', self._step_ocp, None, True),
             ('Comms', self._step_comms, None, True),
             ('EmergStop', self._step_emerg_stop, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._HW = {'IDS500 Final': '06A'}[selection.name]
         self._devices = physical_devices
         self._limits = test_limits
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._pic_ser = SimSerial(port=_PIC_PORT, baudrate=19200, timeout=0.1)
-        self._picdev = Console(self._pic_ser)
         global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits, self._picdev)
+        s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._pic_ser.close()
         global d, s, m, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_power_up(self):
         """Set min loads, apply input AC and measure voltages."""
@@ -93,6 +72,7 @@ class Final(tester.TestSequence):
             ((s.Tec, 0.0), (s.TecVmon, 0.0), (s.Ldd, 0.0), (s.IsVmon, 0.0),
              (s.o15V, 0.0), (s.o_15V, 0.0), (s.o15Vp, 0.0), (s.o15VpSw, 0.0),
              (s.o5V, 0.0), ))
+
         t.pwr_up.run()
 
     def _step_key_switch1(self):
@@ -101,6 +81,7 @@ class Final(tester.TestSequence):
             ((s.Tec, 0.0), (s.TecVmon, 0.0), (s.Ldd, 0.0), (s.IsVmon, 0.0),
              (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 15.0),
              (s.o15VpSw, 0.0), (s.o5V, 5.0), ))
+
         t.key_sw1.run()
 
     def _step_key_switch12(self):
@@ -109,6 +90,7 @@ class Final(tester.TestSequence):
             ((s.Tec, 0.0), (s.TecVmon, 0.0), (s.Ldd, 0.0), (s.IsVmon, 0.0),
              (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 15.0),
              (s.o15VpSw, 15.0), (s.o5V, 5.0), ))
+
         t.key_sw12.run()
 
     def _step_tec(self):
@@ -117,8 +99,9 @@ class Final(tester.TestSequence):
             ((s.TecVset, 5.05), (s.TecVmon, (0.0, 4.99)),
              (s.Tec, (0.0, 15.0, -15.0)), (s.oYesNoPsu, True),
              (s.oYesNoTecGreen, True), (s.oYesNoTecRed, True), ))
+
         t.tec_pre.run()
-        Vset, Vmon, Vtec = MeasureGroup(
+        Vset, Vmon, Vtec = tester.MeasureGroup(
             (m.dmm_TecVset, m.dmm_TecVmon, m.dmm_Tec), timeout=5).readings
         self._logger.debug('Vset:%s, Vmon:%s, Vtec:%s', Vset, Vmon, Vtec)
         s.oMirTecErr.store(Vtec - (Vset * 3))
@@ -138,13 +121,14 @@ class Final(tester.TestSequence):
             ((s.IsVmon, (2.0,) * 3), (s.IsSet, (0.6, 5.0)),
              (s.IsIout, (0.0, 0.601, 5.01)), (s.IsOut, (0.0, 0.00602, 0.0502)),
              (s.oYesNoLddGreen, True), (s.oYesNoLddRed, True), ))
+
         t.ldd_06V.run()
-        Iset, Iout, Imon = MeasureGroup(
+        Iset, Iout, Imon = tester.MeasureGroup(
             (m.dmm_IsSet06V, m.dmm_IsOut06V, m.dmm_IsIout06V),
             timeout=5).readings
         self._ldd_err(Iset, Iout, Imon)
         t.ldd_5V.run()
-        Iset, Iout, Imon = MeasureGroup(
+        Iset, Iout, Imon = tester.MeasureGroup(
             (m.dmm_IsSet5V, m.dmm_IsOut5V, m.dmm_IsIout5V),
             timeout=5).readings
         for name in ('SetMonErr', 'SetOutErr', 'MonOutErr'):
@@ -173,6 +157,7 @@ class Final(tester.TestSequence):
              (s.o15VpSw, (15.0, ) * 21 + (11.9,), ),
              (s.Tec, (15.0, ) * 21 + (11.9,), ),
              (s.o15Vp, (15.0,) * 3), ))
+
         _subtests = (t.ocp_5V, t.ocp_15Vp, t.ocp_15VpSw, t.ocp_tec)
         for sbtst in _subtests:
             sbtst.run()
@@ -181,26 +166,24 @@ class Final(tester.TestSequence):
     def _step_comms(self):
         """Write HW version, enter serial number."""
         self.fifo_push(((s.oSerEntry, ('A1504010034',)), ))
-        self._picdev.sw_test_mode()
         if self._fifo:
-            self._pic_ser.put(b'Software Test Mode Entered\r\n' +
-                              b'\r\nSetting Change Done\r\n\n')
-        m.pic_SwTstMode.measure()
-        self._picdev.write_hwver(self._HW)
-        self._limits['HwVerCheck'].limit = self._HW
-        if self._fifo:
-            self._pic_ser.put(b'I,  2, 06A,Hardware Revision\r\n')
-        m.pic_HwVerChk.measure()
-        result, sernum = m.ui_SerEntry.measure()
-        self._limits['SerCheck'].limit = sernum[0]
-        if self._fifo:
-            if _NEW_PSU:
-                self._pic_ser.put(b'\r\nSetting Change Done\r\n\n')
+            d.pic_ser.put(b'Software Test Mode Entered\r\n' +
+                          b'\r\nSetting Change Done\r\n\n')
+            d.pic_ser.put(b'I,  2, 06A,Hardware Revision\r\n')
+            if limit.NEW_PSU:
+                d.pic_ser.put(b'\r\nSetting Change Done\r\n\n')
             else:
-                self._pic_ser.put(b'M, 6,Setting is Protected\r\n')
-        self._picdev.write_ser(sernum[0])
-        if self._fifo:
-            self._pic_ser.put(b'I,  3, A1504010034,Serial Number\r\n')
+                d.pic_ser.put(b'M, 6,Setting is Protected\r\n')
+            d.pic_ser.put(b'I,  3, A1504010034,Serial Number\r\n')
+
+        d.pic.sw_test_mode()
+        m.pic_SwTstMode.measure()
+        d.pic.write_hwver(limit.HW_REV)
+        self._limits['HwVerCheck'].limit = limit.HW_REV
+        m.pic_HwVerChk.measure()
+        sernum = m.ui_SerEntry.measure().reading1
+        self._limits['SerCheck'].limit = sernum
+        d.pic.write_ser(sernum)
         m.pic_SerChk.measure()
 
     def _step_emerg_stop(self):
@@ -209,4 +192,5 @@ class Final(tester.TestSequence):
             ((s.Tec, 0.0), (s.TecVmon, 0.0), (s.Ldd, 0.0), (s.IsVmon, 0.0),
              (s.o15V, 0.0), (s.o_15V, 0.0), (s.o15Vp, 0.0), (s.o15VpSw, 0.0),
              (s.o5V, 0.0), ))
+
         t.emg_stop.run()

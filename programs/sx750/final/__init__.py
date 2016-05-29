@@ -3,6 +3,7 @@
 """SX-750 Final Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
@@ -11,11 +12,8 @@ MeasureGroup = tester.measure.group
 
 FIN_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -31,7 +29,6 @@ class Final(tester.TestSequence):
             ('PowerUp', self._step_powerup, None, True),
             ('PowerOn', self._step_poweron, None, True),
             ('Load', self._step_load, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -54,17 +51,12 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_inres(self):
         """Verify that the hand loaded input discharge resistors are there."""

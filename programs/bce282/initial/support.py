@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """BCE282-12/24 Initial Test Program."""
 
+import time
+
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 from . import msp
 
@@ -20,29 +20,26 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.discharge = discharge.Discharge(devices['DIS'])
-        self.dcs_VccBias = dcsource.DCSource(devices['DCS1']) # Powers MSP430
-        self.dcs_RS232 = dcsource.DCSource(devices['DCS2']) # Powers bootloader interface
-        self.dcl_Vout = dcload.DCLoad(devices['DCL1'])
-        self.dcl_Vbat = dcload.DCLoad(devices['DCL2'])
-        self.rla_Prog = relay.Relay(devices['RLA1'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
+        self.dcs_VccBias = tester.DCSource(devices['DCS1']) # Powers MSP430
+        self.dcs_RS232 = tester.DCSource(devices['DCS2']) # Powers bootloader interface
+        self.dcl_Vout = tester.DCLoad(devices['DCL1'])
+        self.dcl_Vbat = tester.DCLoad(devices['DCL2'])
+        self.rla_Prog = tester.Relay(devices['RLA1'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off DC Source
+        self.acsource.output(voltage=0.0, output=False)
+        self.dcl_Vout.output(2.0)
+        self.dcl_Vbat.output(2.0)
+        time.sleep(1)
+        self.discharge.pulse()
         for dcs in (self.dcs_VccBias, self.dcs_RS232):
             dcs.output(0.0, False)
-        # Switch off DC Loads
         for ld in (self.dcl_Vout, self.dcl_Vbat, ):
             ld.output(0.0, False)
-        # Switch off Relay
         self.rla_Prog.set_off()
 
 
@@ -100,26 +97,24 @@ class Measurements():
            @param limits Product test limits
 
         """
-        mes = tester.measure
+        Measurement = tester.Measurement
         lim = limits
         sen = sense
 
-        self.dmm_Lock = mes.Measurement(lim['FixtureLock'], sen.Lock)
-        self.dmm_VccBiasExt = mes.Measurement(lim['VccBiasExt'], sen.oVccBias)
-        self.dmm_Vac = mes.Measurement(lim['Vac'], sen.oVac)
-        self.dmm_Vbus = mes.Measurement(lim['Vbus'], sen.oVbus)
-        self.dmm_VccPri = mes.Measurement(lim['VccPri'], sen.oVccPri)
-        self.dmm_VccBias = mes.Measurement(lim['VccBias'], sen.oVccBias)
-        self.dmm_VbatOff = mes.Measurement(lim['VbatOff'], sen.oVbat)
-        self.dmm_AlarmClosed = mes.Measurement(lim['AlarmClosed'], sen.oAlarm)
-        self.dmm_AlarmOpen = mes.Measurement(lim['AlarmOpen'], sen.oAlarm)
-        self.dmm_Vout = mes.Measurement(lim['VoutPreCal'], sen.oVout)
-
-        self.msp_Status = mes.Measurement(lim['Status 0'], sen.oMsp_Status)
-        self.msp_Vout = mes.Measurement(lim['MspVout'], sen.oMsp_Vout)
-
-        self.ramp_BattOCP = mes.Measurement(lim['BattOCP'], sen.oBattOCP)
-        self.ramp_OutOCP = mes.Measurement(lim['OutOCP'], sen.oOutOCP)
+        self.dmm_Lock = Measurement(lim['FixtureLock'], sen.Lock)
+        self.dmm_VccBiasExt = Measurement(lim['VccBiasExt'], sen.oVccBias)
+        self.dmm_Vac = Measurement(lim['Vac'], sen.oVac)
+        self.dmm_Vbus = Measurement(lim['Vbus'], sen.oVbus)
+        self.dmm_VccPri = Measurement(lim['VccPri'], sen.oVccPri)
+        self.dmm_VccBias = Measurement(lim['VccBias'], sen.oVccBias)
+        self.dmm_VbatOff = Measurement(lim['VbatOff'], sen.oVbat)
+        self.dmm_AlarmClosed = Measurement(lim['AlarmClosed'], sen.oAlarm)
+        self.dmm_AlarmOpen = Measurement(lim['AlarmOpen'], sen.oAlarm)
+        self.dmm_Vout = Measurement(lim['VoutPreCal'], sen.oVout)
+        self.msp_Status = Measurement(lim['Status 0'], sen.oMsp_Status)
+        self.msp_Vout = Measurement(lim['MspVout'], sen.oMsp_Vout)
+        self.ramp_BattOCP = Measurement(lim['BattOCP'], sen.oBattOCP)
+        self.ramp_OutOCP = Measurement(lim['OutOCP'], sen.oOutOCP)
 
 
 class SubTests():
@@ -133,22 +128,19 @@ class SubTests():
            @param logical_devices Logical instruments used
 
         """
-        mes = tester.measure
         d = logical_devices
         m = measurements
-
         # ProgSetup:
-        dcs1 = mes.DcSubStep(setting=((d.dcs_RS232, 9.0),
+        dcs1 = tester.DcSubStep(setting=((d.dcs_RS232, 9.0),
                             (d.dcs_VccBias, 15.0), ), output=True, delay=1)
-        msr1 = mes.MeasureSubStep((m.dmm_VccBiasExt, ), timeout=5)
-        self.prog_setup = mes.Step((dcs1, msr1))
-
+        msr1 = tester.MeasureSubStep((m.dmm_VccBiasExt, ), timeout=5)
+        self.prog_setup = tester.SubStep((dcs1, msr1))
         # PowerUp: Apply 240Vac, set min load, measure.
-        acs1 = mes.AcSubStep(acs=d.acsource, voltage=240.0, output=True,
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=240.0, output=True,
                                   delay=1.0)
-        ld1 = mes.LoadSubStep(((d.dcl_Vbat, 0.1), ), output=True)
-        msr1 = mes.MeasureSubStep((m.dmm_Vac, m.dmm_Vbus, m.dmm_VccPri,
+        ld1 = tester.LoadSubStep(((d.dcl_Vbat, 0.1), ), output=True)
+        msr1 = tester.MeasureSubStep((m.dmm_Vac, m.dmm_Vbus, m.dmm_VccPri,
                                    m.dmm_VccBias, m.dmm_VbatOff,
                                    m.dmm_AlarmClosed, ), timeout=5)
-        ld2 = mes.LoadSubStep(((d.dcl_Vbat, 0.0), ))
-        self.pwr_up = mes.Step((acs1, ld1, msr1, ld2))
+        ld2 = tester.LoadSubStep(((d.dcl_Vbat, 0.0), ))
+        self.pwr_up = tester.SubStep((acs1, ld1, msr1, ld2))

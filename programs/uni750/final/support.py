@@ -4,10 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -16,28 +12,20 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
         # This DC Source drives the Remote AC Switch
-        self.dcs_PwrOn = dcsource.DCSource(devices['DCS1'])
-        self.dcl_24V = dcload.DCLoad(devices['DCL1'])
-        self.dcl_15V = dcload.DCLoad(devices['DCL2'])
-        self.dcl_12V = dcload.DCLoad(devices['DCL3'])
-        self.dcl_5V = dcload.DCLoad(devices['DCL4'])
-        self.dcl_3V3 = dcload.DCLoad(devices['DCL5'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dcs_PwrOn = tester.DCSource(devices['DCS1'])
+        self.dcl_24V = tester.DCLoad(devices['DCL1'])
+        self.dcl_15V = tester.DCLoad(devices['DCL2'])
+        self.dcl_12V = tester.DCLoad(devices['DCL3'])
+        self.dcl_5V = tester.DCLoad(devices['DCL4'])
+        self.dcl_3V3 = tester.DCLoad(devices['DCL5'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Source
         self.dcs_PwrOn.output(0.0, output=False)
-        # Switch off DC Loads
         for ld in (self.dcl_24V, self.dcl_15V, self.dcl_12V,
                    self.dcl_5V, self.dcl_3V3):
             ld.output(0.0, False)
@@ -60,8 +48,8 @@ class Sensors():
         self.o5Vi = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
         self.oPGood = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.01)
         self.oYesNoFan = sensor.YesNo(
-            message=translate('uni750_final', 'IsFanOn?'),
-            caption=translate('uni750_final', 'capFan'))
+            message=tester.translate('uni750_final', 'IsFanOn?'),
+            caption=tester.translate('uni750_final', 'capFan'))
 
 
 class Measurements():
@@ -70,6 +58,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_AcUnsw = Measurement(limits['AcUnsw'], sense.oAcUnsw)
         self.dmm_AcSwOff = Measurement(limits['AcSwOff'], sense.oAcSw)
         self.dmm_AcSwOn = Measurement(limits['AcSwOn'], sense.oAcSw)
@@ -93,24 +82,24 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: Apply 240Vac, measure.
-        acs = AcSubStep(
+        acs = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr = MeasureSubStep((m.dmm_AcUnsw, m.dmm_AcSwOff, ), timeout=5)
-        self.pwr_up = Step((acs, msr))
+        msr = tester.MeasureSubStep((m.dmm_AcUnsw, m.dmm_AcSwOff, ), timeout=5)
+        self.pwr_up = tester.SubStep((acs, msr))
         # PowerOn: Set min load, switch on, measure.
-        ld = LoadSubStep(
+        ld = tester.LoadSubStep(
             ((d.dcl_24V, 3.0), (d.dcl_15V, 1.0), (d.dcl_12V, 2.0),
              (d.dcl_5V, 1.0), (d.dcl_3V3, 1.0)), output=True)
-        dcs = DcSubStep(setting=((d.dcs_PwrOn, 12.0), ), output=True)
-        msr = MeasureSubStep(
+        dcs = tester.DcSubStep(setting=((d.dcs_PwrOn, 12.0), ), output=True)
+        msr = tester.MeasureSubStep(
             (m.dmm_AcSwOn, m.ui_YesNoFan, m.dmm_24V, m.dmm_15V, m.dmm_12V,
              m.dmm_5V, m.dmm_3V3, m.dmm_5Vi, m.dmm_PGood, ), timeout=5)
-        self.pwr_on = Step((ld, dcs, msr))
+        self.pwr_on = tester.SubStep((ld, dcs, msr))
         # Full Load: Apply full load, measure.
-        ld = LoadSubStep(
+        ld = tester.LoadSubStep(
             ((d.dcl_24V, 13.5), (d.dcl_15V, 7.5), (d.dcl_12V, 20.0),
              (d.dcl_5V, 10.0), (d.dcl_3V3, 5.0)))
-        msr = MeasureSubStep(
+        msr = tester.MeasureSubStep(
             (m.dmm_24V, m.dmm_15V, m.dmm_12V, m.dmm_5V, m.dmm_3V3, m.dmm_5Vi,
              m.dmm_PGood, ), timeout=5)
-        self.full_load = Step((ld, msr))
+        self.full_load = tester.SubStep((ld, msr))

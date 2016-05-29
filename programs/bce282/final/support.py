@@ -5,8 +5,6 @@
 import time
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -17,15 +15,10 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcl_Vout = dcload.DCLoad(devices['DCL1'])
-        self.dcl_Vbat = dcload.DCLoad(devices['DCL2'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcl_Vout = tester.DCLoad(devices['DCL1'])
+        self.dcl_Vbat = tester.DCLoad(devices['DCL2'])
 
     def reset(self):
         """Reset instruments."""
@@ -67,6 +60,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_VoutNL = Measurement(limits['VoutNL'], sense.oVout)
         self.dmm_VbatNL = Measurement(limits['VbatNL'], sense.oVbat)
         self.dmm_Vout = Measurement(limits['Vout'], sense.oVout)
@@ -87,18 +81,18 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: 200Vac, measure, 240Vac, measure.
-        msr1 = MeasureSubStep((m.dmm_AlarmClosed, ), timeout=5)
-        acs1 = AcSubStep(acs=d.acsource, voltage=200.0, output=True, delay=0.5)
-        ld = LoadSubStep(((d.dcl_Vout, 0.1), (d.dcl_Vbat, 0.0)), output=True)
-        msr2 = MeasureSubStep((m.dmm_VoutNL, ), timeout=5)
-        acs2 = AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
-        msr3 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep((m.dmm_AlarmClosed, ), timeout=5)
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=200.0, output=True, delay=0.5)
+        ld = tester.LoadSubStep(((d.dcl_Vout, 0.1), (d.dcl_Vbat, 0.0)), output=True)
+        msr2 = tester.MeasureSubStep((m.dmm_VoutNL, ), timeout=5)
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
+        msr3 = tester.MeasureSubStep(
             (m.dmm_VoutNL, m.dmm_VbatNL, m.dmm_AlarmOpen), timeout=5)
-        self.power_up = Step((msr1, acs1, ld, msr2, acs2, msr3))
+        self.power_up = tester.SubStep((msr1, acs1, ld, msr2, acs2, msr3))
         # Full Load: load, measure.
-        ld1 = LoadSubStep(((d.dcl_Vbat, 0.5), ))
-        msr1 = MeasureSubStep((m.ui_YesNoGreen, ), timeout=5)
-        ld2 = LoadSubStep(
+        ld1 = tester.LoadSubStep(((d.dcl_Vbat, 0.5), ))
+        msr1 = tester.MeasureSubStep((m.ui_YesNoGreen, ), timeout=5)
+        ld2 = tester.LoadSubStep(
             ((d.dcl_Vbat, 0.0), (d.dcl_Vout, limits['FullLoad'].limit)))
-        msr2 = MeasureSubStep((m.dmm_Vout, m.dmm_Vbat), timeout=5)
-        self.full_load = Step((ld1, msr1, ld2, msr2))
+        msr2 = tester.MeasureSubStep((m.dmm_Vout, m.dmm_Vbat), timeout=5)
+        self.full_load = tester.SubStep((ld1, msr1, ld2, msr2))

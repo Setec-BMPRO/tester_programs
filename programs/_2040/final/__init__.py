@@ -3,17 +3,15 @@
 """2040 Final Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
 
 FIN_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -30,7 +28,6 @@ class Final(tester.TestSequence):
             ('ACPowerOn', self._step_acpower_on, None, True),
             ('ACLoad', self._step_acload, None, True),
             ('Recover', self._step_recover, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -42,46 +39,29 @@ class Final(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
 
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
-
     def _step_dcpower_on(self):
-        """Startup with DC Input, measure output at no load.
-
-        Check AC Power led.
-
-        """
+        """Startup with DC Input, measure output at no load."""
         self.fifo_push(
             ((s.o20V, 20.0), (s.oYesNoGreen, True), (s.o20V, 20.0), ))
+
         t.dcpwr_on.run()
 
     def _step_dcload(self):
@@ -91,11 +71,13 @@ class Final(tester.TestSequence):
 
         """
         self.fifo_push(((s.o20V, 20.0), (s.oYesNoDCOff, True), ))
+
         t.full_load.run()
 
     def _step_acpower_on(self):
         """Startup with AC Input, measure output at no load."""
         self.fifo_push(((s.o20V, 20.0), ))
+
         t.acpwr_on.run()
 
     def _step_acload(self):
@@ -107,9 +89,11 @@ class Final(tester.TestSequence):
         self.fifo_push(
             ((s.o20V, 20.0), (s.oYesNoACOff, True),
              (s.o20V, 0.0), (s.oYesNoACOn, True), ))
+
         t.peak_load.run()
 
     def _step_recover(self):
         """Check recovery after shutdown."""
         self.fifo_push(((s.o20V, 0.0), (s.o20V, 20.0), ))
+
         t.recover.run()

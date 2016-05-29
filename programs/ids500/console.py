@@ -9,8 +9,9 @@ Communication via Serial port to the PIC processor.
 import time
 import logging
 import re
+
 import sensor
-from testlimit import LimitBoolean
+import testlimit
 
 # Line terminator
 _EOL = b'\r\n'
@@ -57,6 +58,7 @@ class ConsoleResult():
     """Representation of a data string from the console."""
 
     def __init__(self, data):
+        """Create a Result."""
         self.type, self.index, self.value, self.text = (None, None, None, None)
         if data[0:2] in ('I,', 'D,', 'S,'):
             data = data.replace(' ', '')
@@ -79,7 +81,7 @@ class Console():
             '.'.join((__name__, self.__class__.__name__)))
         self._serport = serport
         self._buf = b''
-        self._limit = LimitBoolean('SerialTimeout', 0, False)
+        self._limit = testlimit.LimitBoolean('SerialTimeout', 0, False)
         self._read_cmd = None
         # Data readings:
         # Name -> (function, Command))

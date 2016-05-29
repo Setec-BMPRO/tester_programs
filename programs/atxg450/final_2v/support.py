@@ -4,8 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -16,26 +14,19 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
         # This DC Source controls the PS_ON signal (12V == Unit OFF)
-        self.dcs_PsOn = dcsource.DCSource(devices['DCS1'])
-        self.dcl_24V = dcload.DCLoad(devices['DCL1'])
-        self.dcl_12V = dcload.DCLoad(devices['DCL2'])
-        self.dcl_5V = dcload.DCLoad(devices['DCL3'])
-        self.dcl_3V3 = dcload.DCLoad(devices['DCL4'])
-        self.dcl_5Vsb = dcload.DCLoad(devices['DCL5'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dcs_PsOn = tester.DCSource(devices['DCS1'])
+        self.dcl_24V = tester.DCLoad(devices['DCL1'])
+        self.dcl_12V = tester.DCLoad(devices['DCL2'])
+        self.dcl_5V = tester.DCLoad(devices['DCL3'])
+        self.dcl_3V3 = tester.DCLoad(devices['DCL4'])
+        self.dcl_5Vsb = tester.DCLoad(devices['DCL5'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Loads
         for ld in (self.dcl_24V, self.dcl_12V, self.dcl_5V,
                    self.dcl_3V3, self.dcl_5Vsb):
             ld.output(0.0, False)
@@ -91,6 +82,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_5Vsb = Measurement(limits['5Vsb'], sense.o5Vsb)
         self.dmm_24Voff = Measurement(limits['24Voff'], sense.o24V)
         self.dmm_12Voff = Measurement(limits['12Voff'], sense.o12V)
@@ -125,38 +117,38 @@ class SubTests():
         m = measurements
 
         # PowerUp: Disable PS_ON, apply 240Vac, measure.
-        dcs = DcSubStep(((d.dcs_PsOn, 12.0), ), output=True, delay=0.1)
-        acs = AcSubStep(
+        dcs = tester.DcSubStep(((d.dcs_PsOn, 12.0), ), output=True, delay=0.1)
+        acs = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr = MeasureSubStep(
+        msr = tester.MeasureSubStep(
             (m.dmm_5Vsb, m.ui_YesNoGreen, m.dmm_24Voff, m.dmm_12Voff,
              m.dmm_5Voff, m.dmm_3V3off, m.dmm_n12Voff, m.dmm_PwrGoodOff,
              m.dmm_PwrFailOff), timeout=5)
-        self.pwr_up = Step((dcs, acs, msr))
+        self.pwr_up = tester.SubStep((dcs, acs, msr))
 
         # SwitchOn: Min load, enable PS_ON, measure.
-        ld = LoadSubStep(((d.dcl_12V, 1.0), (d.dcl_24V, 1.0), (d.dcl_5V, 1.0)))
-        dcs = DcSubStep(((d.dcs_PsOn, 0.0), ), output=True, delay=0.1)
-        msr = MeasureSubStep(
+        ld = tester.LoadSubStep(((d.dcl_12V, 1.0), (d.dcl_24V, 1.0), (d.dcl_5V, 1.0)))
+        dcs = tester.DcSubStep(((d.dcs_PsOn, 0.0), ), output=True, delay=0.1)
+        msr = tester.MeasureSubStep(
             (m.dmm_24Von, m.dmm_12Von, m.dmm_5Von, m.dmm_3V3on, m.dmm_n12Von,
              m.dmm_PwrGoodOn, m.dmm_PwrFailOn, m.ui_YesNoFan), timeout=5)
-        self.sw_on = Step((ld, dcs, msr))
+        self.sw_on = tester.SubStep((ld, dcs, msr))
 
         # Full Load: Apply full load, measure.
-        ld = LoadSubStep(
+        ld = tester.LoadSubStep(
             ((d.dcl_5Vsb, 1.0), (d.dcl_24V, 5.0), (d.dcl_5V, 10.0),
              (d.dcl_12V, 10.0), (d.dcl_3V3, 10.0)), delay=0.5)
-        msr = MeasureSubStep(
+        msr = tester.MeasureSubStep(
             (m.dmm_5Vsb, m.dmm_24Von, m.dmm_12Von, m.dmm_5Von, m.dmm_3V3on,
              m.dmm_n12Von, m.dmm_PwrGoodOn, m.dmm_PwrFailOn), timeout=5)
-        self.full_load = Step((ld, msr))
+        self.full_load = tester.SubStep((ld, msr))
 
         # PowerFail: Switch AC off, measure.
-        acs = AcSubStep(acs=d.acsource, voltage=0.0, output=False, delay=0.5)
-        msr1 = MeasureSubStep((m.dmm_PwrFailOff, ))
-        self.pwr_fail = Step((acs, msr1,))
+        acs = tester.AcSubStep(acs=d.acsource, voltage=0.0, output=False, delay=0.5)
+        msr1 = tester.MeasureSubStep((m.dmm_PwrFailOff, ))
+        self.pwr_fail = tester.SubStep((acs, msr1,))
 
         # Re-Start unit after OCP by using PS_ON.
-        dcs1 = DcSubStep(((d.dcs_PsOn, 12.0), ), output=True, delay=0.5)
-        dcs2 = DcSubStep(((d.dcs_PsOn, 0.0), ), output=True, delay=2.0)
-        self.restart = Step((dcs1, dcs2,))
+        dcs1 = tester.DcSubStep(((d.dcs_PsOn, 12.0), ), output=True, delay=0.5)
+        dcs2 = tester.DcSubStep(((d.dcs_PsOn, 0.0), ), output=True, delay=2.0)
+        self.restart = tester.SubStep((dcs1, dcs2,))

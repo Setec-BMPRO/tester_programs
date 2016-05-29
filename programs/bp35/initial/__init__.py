@@ -8,11 +8,9 @@ import logging
 import time
 
 import tester
-from share import ProgramPIC
+import share
 from . import support
 from . import limit
-
-MeasureGroup = tester.measure.group
 
 INI_LIMIT = limit.DATA
 
@@ -47,7 +45,6 @@ class Initial(tester.TestSequence):
             ('RemoteSw', self._step_remote_sw, None, True),
             ('OCP', self._step_ocp, None, True),
             ('CanBus', self._step_canbus, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -75,15 +72,12 @@ class Initial(tester.TestSequence):
         # Remove power from fixture circuits.
         d.dcs_vcom.output(0, False)
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_prepare(self):
         """Prepare to run a test.
@@ -111,7 +105,8 @@ class Initial(tester.TestSequence):
         d.dcs_vbat.output(limit.VBAT_IN, True)
         d.rla_vbat.set_on()
         d.dcs_sreg.output(limit.SOLAR_VIN, True)
-        MeasureGroup((m.dmm_vbatin, m.dmm_3v3, m.dmm_3v3prog), timeout=5)
+        tester.MeasureGroup(
+            (m.dmm_vbatin, m.dmm_3v3, m.dmm_3v3prog), timeout=5)
 
     def _step_program_pic(self):
         """Program the dsPIC device.
@@ -122,7 +117,7 @@ class Initial(tester.TestSequence):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_pic.set_on()
-        pic = ProgramPIC(
+        pic = share.ProgramPIC(
             limit.PIC_HEX, folder, '33FJ16GS402', s.mir_pic, self._fifo)
         pic.read()
         d.rla_pic.set_off()
@@ -187,7 +182,7 @@ class Initial(tester.TestSequence):
             ):
             d.bp35_puts(dat)
 
-        MeasureGroup((m.arm_solar_alive, m.arm_vout_ov, ))
+        tester.MeasureGroup((m.arm_solar_alive, m.arm_vout_ov, ))
         # The SR needs V & I set to zero after power up or it won't start.
         d.bp35.solar_set(0, 0)
         # Now set the actual output settings
@@ -209,7 +204,7 @@ class Initial(tester.TestSequence):
         d.dcs_vaux.output(limit.VAUX_IN, output=True)
         d.dcl_bat.output(0.5)
         d.bp35['AUX_RELAY'] = True
-        MeasureGroup((m.dmm_vaux, m.arm_auxv, m.arm_auxi), timeout=5)
+        tester.MeasureGroup((m.dmm_vaux, m.arm_auxv, m.arm_auxi), timeout=5)
         d.bp35['AUX_RELAY'] = False
         d.dcs_vaux.output(0.0, output=False)
         d.dcl_bat.output(0.0)
@@ -224,7 +219,7 @@ class Initial(tester.TestSequence):
 
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
-        MeasureGroup((m.dmm_acin, m.dmm_pri12v), timeout=10)
+        tester.MeasureGroup((m.dmm_acin, m.dmm_pri12v), timeout=10)
         # Enable PFC & DCDC converters
         d.bp35.power_on()
         # Wait for PFC overshoot to settle
@@ -235,7 +230,7 @@ class Initial(tester.TestSequence):
         d.dcs_vbat.output(0.0, output=False)
         # Is it now running on it's own?
         m.arm_vout_ov.measure()
-        MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vbat), timeout=10)
+        tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vbat), timeout=10)
 
     def _step_output(self):
         """Test the output switches.
@@ -282,14 +277,14 @@ class Initial(tester.TestSequence):
         for dat in ('240', '50000', '350', '12800', '500', '', '4000'):
             d.bp35_puts(dat)
 
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.arm_acv, m.arm_acf, m.arm_secT, m.arm_vout, m.arm_fan,
              m.dmm_fanOff), timeout=5)
         d.bp35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
         d.dcl_out.binary(1.0, 28.0, 5.0)
         d.dcl_bat.output(4.0, output=True)
-        MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
+        tester.MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
         for load in range(14):
             tester.testsequence.path_push('L{}'.format(load + 1))
             m.arm_loads[load].measure(timeout=5)

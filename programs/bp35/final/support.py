@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 """BP35 Final Test Program."""
 
+import tester
 import sensor
-from tester.devlogical import *
-from tester.measure import *
 
 
 class LogicalDevices():
@@ -17,17 +16,11 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
 
 
@@ -42,8 +35,8 @@ class Sensors():
            @param limits Product test limits
 
         """
-        dmm = logical_devices.dmm
-        self.oVbat = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
+        self.vbat = sensor.Vdc(
+            logical_devices.dmm, high=1, low=1, rng=100, res=0.001)
 
 
 class Measurements():
@@ -57,24 +50,4 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.dmm_vbat = Measurement(limits['Vbat'], sense.oVbat)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-        d = logical_devices
-        m = measurements
-        # PowerUp:  Apply input AC, measure.
-        acs1 = AcSubStep(
-            acs=d.acsource, voltage=240.0, output=True, delay=1.0)
-        msr1 = MeasureSubStep((m.dmm_vbat, ), timeout=10)
-        self.pwr_up = Step((acs1, msr1))
+        self.dmm_vbat = tester.Measurement(limits['Vbat'], sense.vbat)

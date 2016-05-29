@@ -3,13 +3,12 @@
 """IDS-500 Final Test Program."""
 
 from pydispatch import dispatcher
-import sensor
-import tester
-from tester.devlogical import *
-from tester.measure import *
-from .. import console
 
-translate = tester.translate
+import share
+import tester
+import sensor
+from . import limit
+from .. import console
 
 
 class LogicalDevices():
@@ -22,31 +21,30 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcs_TecVset = dcsource.DCSource(devices['DCS1'])
-        self.dcs_IsSet = dcsource.DCSource(devices['DCS2'])
-        self.dcs_5V = dcsource.DCSource(devices['DCS3'])
-        self.dcl_Tec = dcload.DCLoad(devices['DCL2'])
-        self.dcl_15Vp = dcload.DCLoad(devices['DCL3'])
-        self.dcl_15VpSw = dcload.DCLoad(devices['DCL4'])
-        self.dcl_5V = dcload.DCLoad(devices['DCL5'])
-        self.rla_MainsEnable = relay.Relay(devices['RLA1'])
-        self.rla_15VpEnable = relay.Relay(devices['RLA2'])
-        self.rla_Emergency = relay.Relay(devices['RLA3'])
-        self.rla_Crowbar = relay.Relay(devices['RLA4'])
-        self.rla_EnableIs = relay.Relay(devices['RLA5'])
-        self.rla_Interlock = relay.Relay(devices['RLA6'])
-        self.rla_Enable = relay.Relay(devices['RLA7'])
-        self.rla_TecPhase = relay.Relay(devices['RLA8'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcs_TecVset = tester.DCSource(devices['DCS1'])
+        self.dcs_IsSet = tester.DCSource(devices['DCS2'])
+        self.dcs_5V = tester.DCSource(devices['DCS3'])
+        self.dcl_Tec = tester.DCLoad(devices['DCL2'])
+        self.dcl_15Vp = tester.DCLoad(devices['DCL3'])
+        self.dcl_15VpSw = tester.DCLoad(devices['DCL4'])
+        self.dcl_5V = tester.DCLoad(devices['DCL5'])
+        self.rla_MainsEnable = tester.Relay(devices['RLA1'])
+        self.rla_15VpEnable = tester.Relay(devices['RLA2'])
+        self.rla_Emergency = tester.Relay(devices['RLA3'])
+        self.rla_Crowbar = tester.Relay(devices['RLA4'])
+        self.rla_EnableIs = tester.Relay(devices['RLA5'])
+        self.rla_Interlock = tester.Relay(devices['RLA6'])
+        self.rla_Enable = tester.Relay(devices['RLA7'])
+        self.rla_TecPhase = tester.Relay(devices['RLA8'])
+        self.pic_ser = share.SimSerial(
+            port=limit.PIC_PORT, baudrate=19200, timeout=0.1)
+        self.picdev = console.Console(self.pic_ser)
 
     def reset(self):
         """Reset instruments."""
+        self.pic_ser.close()
         self.acsource.output(voltage=0.0, output=False)
         for dcs in (self.dcs_TecVset, self.dcs_IsSet, self.dcs_5V):
             dcs.output(0.0, False)
@@ -63,7 +61,7 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits, picdev):
+    def __init__(self, logical_devices, limits):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
@@ -71,6 +69,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        picdev = logical_devices.picdev
         self.oMirTecErr = sensor.Mirror()
         self.oMirTecVmonErr = sensor.Mirror()
         self.oMirIsErr = sensor.Mirror()
@@ -99,23 +98,23 @@ class Sensors():
         self.oPic_SerChk = console.Sensor(
             picdev, 'PIC-SerCheck', rdgtype=sensor.ReadingString)
         self.oYesNoPsu = sensor.YesNo(
-            message=translate('ids500_final', 'IsPSULedGreen?'),
-            caption=translate('ids500_final', 'capPsuLed'))
+            message=tester.translate('ids500_final', 'IsPSULedGreen?'),
+            caption=tester.translate('ids500_final', 'capPsuLed'))
         self.oYesNoTecGreen = sensor.YesNo(
-            message=translate('ids500_final', 'IsTECLedGreen?'),
-            caption=translate('ids500_final', 'capTecGreenLed'))
+            message=tester.translate('ids500_final', 'IsTECLedGreen?'),
+            caption=tester.translate('ids500_final', 'capTecGreenLed'))
         self.oYesNoTecRed = sensor.YesNo(
-            message=translate('ids500_final', 'IsTECLedRed?'),
-            caption=translate('ids500_final', 'capTecRedLed'))
+            message=tester.translate('ids500_final', 'IsTECLedRed?'),
+            caption=tester.translate('ids500_final', 'capTecRedLed'))
         self.oYesNoLddGreen = sensor.YesNo(
-            message=translate('ids500_final', 'IsLDDLedGreen?'),
-            caption=translate('ids500_final', 'capLddGreenLed'))
+            message=tester.translate('ids500_final', 'IsLDDLedGreen?'),
+            caption=tester.translate('ids500_final', 'capLddGreenLed'))
         self.oYesNoLddRed = sensor.YesNo(
-            message=translate('ids500_final', 'IsLDDLedRed?'),
-            caption=translate('ids500_final', 'capLddRedLed'))
+            message=tester.translate('ids500_final', 'IsLDDLedRed?'),
+            caption=tester.translate('ids500_final', 'capLddRedLed'))
         self.oSerEntry = sensor.DataEntry(
-            message=translate('ids500_final', 'msgSerEntry'),
-            caption=translate('ids500_final', 'capSerEntry'))
+            message=tester.translate('ids500_final', 'msgSerEntry'),
+            caption=tester.translate('ids500_final', 'capSerEntry'))
         self.oOCP5V = sensor.Ramp(
             stimulus=logical_devices.dcl_5V, sensor=self.o5V,
             detect_limit=(limits['inOCP5V'], ),
@@ -151,6 +150,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.TecErr = Measurement(limits['TecErr'], sense.oMirTecErr)
         self.TecVmonErr = Measurement(
             limits['TecVmonErr'], sense.oMirTecVmonErr)
@@ -219,91 +219,91 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: Set min loads, Input AC, measure.
-        ld1 = LoadSubStep(
+        ld1 = tester.LoadSubStep(
             ((d.dcl_Tec, 0.0), (d.dcl_15Vp, 1.0), (d.dcl_15VpSw, 0.0),
              (d.dcl_5V, 5.0)), output=True)
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=2.0)
-        msr1 = MeasureSubStep(
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=2.0)
+        msr1 = tester.MeasureSubStep(
             (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
              m.dmm_15VOff, m.dmm__15VOff, m.dmm_15VpOff, m.dmm_15VpSwOff,
              m.dmm_5VOff, ),
              timeout=5)
-        self.pwr_up = Step((ld1, acs1, msr1))
+        self.pwr_up = tester.SubStep((ld1, acs1, msr1))
         # KeySw: Turn on KeySwitches, measure.
-        rly1 = RelaySubStep(((d.rla_MainsEnable, True), ))
-        msr1 = MeasureSubStep(
+        rly1 = tester.RelaySubStep(((d.rla_MainsEnable, True), ))
+        msr1 = tester.MeasureSubStep(
             (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
              m.dmm_15V, m.dmm__15V, m.dmm_15Vp, m.dmm_15VpSwOff, m.dmm_5V, ),
              timeout=5)
-        rly2 = RelaySubStep(((d.rla_15VpEnable, True), ))
-        msr2 = MeasureSubStep(
+        rly2 = tester.RelaySubStep(((d.rla_15VpEnable, True), ))
+        msr2 = tester.MeasureSubStep(
             (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
              m.dmm_15V, m.dmm__15V, m.dmm_15Vp, m.dmm_15VpSw, m.dmm_5V, ),
              timeout=5)
-        self.key_sw1 = Step((rly1, msr1, ))
-        self.key_sw12 = Step((rly2, msr2, ))
+        self.key_sw1 = tester.SubStep((rly1, msr1, ))
+        self.key_sw12 = tester.SubStep((rly2, msr2, ))
         # TEC:  Enable, measure.
-        dcs1 = DcSubStep(setting=((d.dcs_5V, 5.0), ), output=True)
-        rly1 = RelaySubStep(((d.rla_Enable, True), ))
-        dcs2 = DcSubStep(setting=((d.dcs_TecVset, 0.0), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_TecOff, m.dmm_TecVmon0V, ), timeout=5)
-        ld1 = LoadSubStep(((d.dcl_Tec, 0.3), ))
-        dcs3 = DcSubStep(setting=((d.dcs_TecVset, 5.0), ), delay=0.1)
-        msr2 = MeasureSubStep(
+        dcs1 = tester.DcSubStep(setting=((d.dcs_5V, 5.0), ), output=True)
+        rly1 = tester.RelaySubStep(((d.rla_Enable, True), ))
+        dcs2 = tester.DcSubStep(setting=((d.dcs_TecVset, 0.0), ), output=True)
+        msr1 = tester.MeasureSubStep((m.dmm_TecOff, m.dmm_TecVmon0V, ), timeout=5)
+        ld1 = tester.LoadSubStep(((d.dcl_Tec, 0.3), ))
+        dcs3 = tester.DcSubStep(setting=((d.dcs_TecVset, 5.0), ), delay=0.1)
+        msr2 = tester.MeasureSubStep(
             (m.ui_YesNoPsu, m.ui_YesNoTecGreen, ), timeout=5)
-        rly2 = RelaySubStep(((d.rla_TecPhase, True), ))
-        msr3 = MeasureSubStep(
+        rly2 = tester.RelaySubStep(((d.rla_TecPhase, True), ))
+        msr3 = tester.MeasureSubStep(
             (m.dmm_TecPhase, m.ui_YesNoTecRed, ), timeout=5)
-        rly3 = RelaySubStep(((d.rla_TecPhase, False), ))
-        self.tec_pre = Step((dcs1, rly1, dcs2, msr1, ld1, dcs3))
-        self.tec_post = Step((msr2, rly2, msr3, rly3))
+        rly3 = tester.RelaySubStep(((d.rla_TecPhase, False), ))
+        self.tec_pre = tester.SubStep((dcs1, rly1, dcs2, msr1, ld1, dcs3))
+        self.tec_post = tester.SubStep((msr2, rly2, msr3, rly3))
         # LDD:  Enable, measure.
-        dcs1 = DcSubStep(setting=((d.dcs_IsSet, 0.0), ), output=True)
-        rly1 = RelaySubStep(
+        dcs1 = tester.DcSubStep(setting=((d.dcs_IsSet, 0.0), ), output=True)
+        rly1 = tester.RelaySubStep(
             ((d.rla_Crowbar, True), (d.rla_Interlock, True),
              (d.rla_EnableIs, True), ))
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_IsVmon, m.dmm_IsOut0V, m.dmm_IsIout0V, ), timeout=5)
-        dcs2 = DcSubStep(setting=((d.dcs_IsSet, 0.6), ), delay=1)
-        msr2 = MeasureSubStep((m.dmm_IsVmon, ), timeout=5)
-        msr3 = MeasureSubStep((m.ui_YesNoLddGreen, ), timeout=5)
-        dcs3 = DcSubStep(setting=((d.dcs_IsSet, 5.0), ), delay=1)
-        msr4 = MeasureSubStep((m.dmm_IsVmon, ), timeout=5)
-        msr5 = MeasureSubStep((m.ui_YesNoLddRed, ), timeout=5)
-        dcs4 = DcSubStep(setting=((d.dcs_IsSet, 0.0), ), output=False)
-        rly2 = RelaySubStep(
+        dcs2 = tester.DcSubStep(setting=((d.dcs_IsSet, 0.6), ), delay=1)
+        msr2 = tester.MeasureSubStep((m.dmm_IsVmon, ), timeout=5)
+        msr3 = tester.MeasureSubStep((m.ui_YesNoLddGreen, ), timeout=5)
+        dcs3 = tester.DcSubStep(setting=((d.dcs_IsSet, 5.0), ), delay=1)
+        msr4 = tester.MeasureSubStep((m.dmm_IsVmon, ), timeout=5)
+        msr5 = tester.MeasureSubStep((m.ui_YesNoLddRed, ), timeout=5)
+        dcs4 = tester.DcSubStep(setting=((d.dcs_IsSet, 0.0), ), output=False)
+        rly2 = tester.RelaySubStep(
             ((d.rla_Crowbar, False), (d.rla_Interlock, False),
              (d.rla_EnableIs, False),))
-        self.ldd_06V = Step((dcs1, rly1, msr1, dcs2, msr2))
-        self.ldd_5V = Step((msr3, dcs3, msr4))
-        self.ldd_off = Step((msr5, dcs4, rly2))
+        self.ldd_06V = tester.SubStep((dcs1, rly1, msr1, dcs2, msr2))
+        self.ldd_5V = tester.SubStep((msr3, dcs3, msr4))
+        self.ldd_off = tester.SubStep((msr5, dcs4, rly2))
         # OCP:
-        ld1 = LoadSubStep(
+        ld1 = tester.LoadSubStep(
             ((d.dcl_Tec, 0.0), (d.dcl_15Vp, 1.0), (d.dcl_15VpSw, 0.0),
              (d.dcl_5V, 5.0)))
-        msr1 = MeasureSubStep((m.ramp_OCP5V, ), timeout=5)
-        msr2 = MeasureSubStep((m.ramp_OCP15Vp, ), timeout=5)
-        msr3 = MeasureSubStep((m.ramp_OCP15VpSw, ), timeout=5)
-        dcs1 = DcSubStep(setting=((d.dcs_TecVset, 5.0), ), delay=1)
-        ld2 = LoadSubStep(((d.dcl_Tec, 0.5), ), delay=1)
-        msr4 = MeasureSubStep((m.ramp_OCPTec, ), timeout=5)
-        dcs2 = DcSubStep(setting=((d.dcs_5V, 0.0), ))
-        acs1 = AcSubStep(acs=d.acsource, voltage=0.0, delay=3.5)
-        acs2 = AcSubStep(acs=d.acsource, voltage=240.0, delay=1.0)
-        dcs3 = DcSubStep(setting=((d.dcs_5V, 5.0), ))
-        msr5 = MeasureSubStep((m.dmm_15Vp, ), timeout=5)
-        self.ocp_5V = Step((ld1, msr1))
-        self.ocp_15Vp = Step((msr2, ))
-        self.ocp_15VpSw = Step((msr3, ))
-        self.ocp_tec = Step((dcs1, ld2, msr4))
-        self.restart = Step((ld1, dcs2, acs1, acs2, dcs3, msr5))
+        msr1 = tester.MeasureSubStep((m.ramp_OCP5V, ), timeout=5)
+        msr2 = tester.MeasureSubStep((m.ramp_OCP15Vp, ), timeout=5)
+        msr3 = tester.MeasureSubStep((m.ramp_OCP15VpSw, ), timeout=5)
+        dcs1 = tester.DcSubStep(setting=((d.dcs_TecVset, 5.0), ), delay=1)
+        ld2 = tester.LoadSubStep(((d.dcl_Tec, 0.5), ), delay=1)
+        msr4 = tester.MeasureSubStep((m.ramp_OCPTec, ), timeout=5)
+        dcs2 = tester.DcSubStep(setting=((d.dcs_5V, 0.0), ))
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=0.0, delay=3.5)
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=1.0)
+        dcs3 = tester.DcSubStep(setting=((d.dcs_5V, 5.0), ))
+        msr5 = tester.MeasureSubStep((m.dmm_15Vp, ), timeout=5)
+        self.ocp_5V = tester.SubStep((ld1, msr1))
+        self.ocp_15Vp = tester.SubStep((msr2, ))
+        self.ocp_15VpSw = tester.SubStep((msr3, ))
+        self.ocp_tec = tester.SubStep((dcs1, ld2, msr4))
+        self.restart = tester.SubStep((ld1, dcs2, acs1, acs2, dcs3, msr5))
         # EmergStop:
-        ld1 = LoadSubStep(
+        ld1 = tester.LoadSubStep(
             ((d.dcl_Tec, 0.0), (d.dcl_15Vp, 1.0), (d.dcl_15VpSw, 0.0),
              (d.dcl_5V, 5.0)))
-        rly1 = RelaySubStep(((d.rla_Emergency, True), ), delay=1)
-        msr1 = MeasureSubStep(
+        rly1 = tester.RelaySubStep(((d.rla_Emergency, True), ), delay=1)
+        msr1 = tester.MeasureSubStep(
             (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
              m.dmm_15VOff, m.dmm__15VOff, m.dmm_15VpOff, m.dmm_15VpSwOff,
              m.dmm_5VOff, ), timeout=5)
-        self.emg_stop = Step((ld1, rly1, msr1))
+        self.emg_stop = tester.SubStep((ld1, rly1, msr1))

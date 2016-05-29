@@ -4,8 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -16,30 +14,21 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
         # This DC Source simulates the battery voltage
-        self.dcs_Vbat = dcsource.DCSource(devices['DCS1'])
-        dcl_vout = dcload.DCLoad(devices['DCL1'])
-        dcl_vbat = dcload.DCLoad(devices['DCL3'])
-        self.dcl = dcload.DCLoadParallel(((dcl_vout, 29), (dcl_vbat, 14)))
-        self.dclh = dcload.DCLoadParallel(((dcl_vout, 5), (dcl_vbat, 30)))
-        self.rla_RemoteSw = relay.Relay(devices['RLA1'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dcs_Vbat = tester.DCSource(devices['DCS1'])
+        dcl_vout = tester.DCLoad(devices['DCL1'])
+        dcl_vbat = tester.DCLoad(devices['DCL3'])
+        self.dcl = tester.DCLoadParallel(((dcl_vout, 29), (dcl_vbat, 14)))
+        self.dclh = tester.DCLoadParallel(((dcl_vout, 5), (dcl_vbat, 30)))
+        self.rla_RemoteSw = tester.Relay(devices['RLA1'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Loads
         self.dcl.output(0.0)
-        # Switch off DC Source
         self.dcs_Vbat.output(0.0, False)
-        # Switch off Relay
         self.rla_RemoteSw.set_off()
 
 
@@ -79,6 +68,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_InpRes = Measurement(limits['InRes'], sense.oInpRes)
         self.dmm_Vout = Measurement(limits['Vout'], sense.oVout)
         self.dmm_VoutOff = Measurement(limits['VoutOff'], sense.oVout)
@@ -103,28 +93,28 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerOn: 240Vac, wait for Vout to start, measure.
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True)
-        msr1 = MeasureSubStep((m.dmm_Vout, m.dmm_Vbat), timeout=10)
-        self.pwr_on = Step((acs1, msr1))
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=240.0, output=True)
+        msr1 = tester.MeasureSubStep((m.dmm_Vout, m.dmm_Vbat), timeout=10)
+        self.pwr_on = tester.SubStep((acs1, msr1))
         # Shutdown: Apply overload to shutdown, recovery.
-        ld1 = LoadSubStep(((d.dcl, 47.0), ), output=True)
-        ld2 = LoadSubStep(((d.dclh, 47.0), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_VoutOff, ), timeout=10)
-        ld3 = LoadSubStep(((d.dcl, 0.0), ), )
-        ld4 = LoadSubStep(((d.dclh, 0.0), ), )
-        msr2 = MeasureSubStep(
+        ld1 = tester.LoadSubStep(((d.dcl, 47.0), ), output=True)
+        ld2 = tester.LoadSubStep(((d.dclh, 47.0), ), output=True)
+        msr1 = tester.MeasureSubStep((m.dmm_VoutOff, ), timeout=10)
+        ld3 = tester.LoadSubStep(((d.dcl, 0.0), ), )
+        ld4 = tester.LoadSubStep(((d.dclh, 0.0), ), )
+        msr2 = tester.MeasureSubStep(
             (m.dmm_VoutStartup, m.dmm_Vout, m.dmm_Vbat,), timeout=10)
-        self.shdn = Step((ld1, msr1, ld3, msr2))
-        self.shdnH = Step((ld2, msr1, ld4, msr2))
+        self.shdn = tester.SubStep((ld1, msr1, ld3, msr2))
+        self.shdnH = tester.SubStep((ld2, msr1, ld4, msr2))
         # RemoteSw: load, measure.
-        acs1 = AcSubStep(acs=d.acsource, voltage=0.0)
-        ld1 = LoadSubStep(((d.dcl, 2.0), ), delay=1)
-        ld2 = LoadSubStep(((d.dcl, 0.1), ))
-        dcs1 = DcSubStep(setting=((d.dcs_Vbat, 12.6),), output=True)
-        msr1 = MeasureSubStep((m.dmm_VbatExt, m.dmm_VoutExt, ), timeout=5)
-        rly1 = RelaySubStep(((d.rla_RemoteSw, True), ))
-        msr2 = MeasureSubStep((m.dmm_VoutOff, ), timeout=10)
-        rly2 = RelaySubStep(((d.rla_RemoteSw, False), ))
-        msr3 = MeasureSubStep((m.dmm_VoutExt, ), timeout=5)
-        self.remote_sw = Step(
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=0.0)
+        ld1 = tester.LoadSubStep(((d.dcl, 2.0), ), delay=1)
+        ld2 = tester.LoadSubStep(((d.dcl, 0.1), ))
+        dcs1 = tester.DcSubStep(setting=((d.dcs_Vbat, 12.6),), output=True)
+        msr1 = tester.MeasureSubStep((m.dmm_VbatExt, m.dmm_VoutExt, ), timeout=5)
+        rly1 = tester.RelaySubStep(((d.rla_RemoteSw, True), ))
+        msr2 = tester.MeasureSubStep((m.dmm_VoutOff, ), timeout=10)
+        rly2 = tester.RelaySubStep(((d.rla_RemoteSw, False), ))
+        msr3 = tester.MeasureSubStep((m.dmm_VoutExt, ), timeout=5)
+        self.remote_sw = tester.SubStep(
             (acs1, ld1, ld2, dcs1, msr1, rly1, msr2, rly2, msr3))

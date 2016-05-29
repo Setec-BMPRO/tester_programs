@@ -5,6 +5,7 @@
 # FIXME: This program is not finished yet!
 
 import logging
+
 import tester
 from . import support
 from . import limit
@@ -12,11 +13,8 @@ from . import limit
 FIN_LIMIT_12 = limit.DATA12       # BCE282-12 limits
 FIN_LIMIT_24 = limit.DATA24       # BCE282-24 limits
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -31,7 +29,6 @@ class Final(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('FullLoad', self._step_full_load, None, True),
             ('OCP', self._step_ocp, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -56,17 +53,12 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_power_up(self):
         """Power up unit."""

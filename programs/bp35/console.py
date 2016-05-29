@@ -108,7 +108,7 @@ class Console(console.Variable, console.BadUartConsole):
             'CAN': ParameterString('CAN',
                 writeable=True, write_format='"{} {}'),
             'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
-            'UNLOCK': ParameterBoolean('UNLOCK DEADBEA7',
+            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
                 writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
                 writeable=True, readable=False, write_format='{1}'),

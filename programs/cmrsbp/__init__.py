@@ -8,34 +8,20 @@ import logging
 import datetime
 import threading
 import time
+
+import share
 import tester
-from share import ProgramPIC, SimSerial
 from . import support
 from . import limit
-from . import cmrsbp
 from . import ev2200
-
-MeasureGroup = tester.measure.group
 
 LIMIT_DATA = limit.DATA             # CMR-SBP Initial and SerDate limits
 LIMIT_DATA_8D = limit.DATA_8D       # CMR-SBP-8-D-NiMH Final limits
 LIMIT_DATA_13F = limit.DATA_13F     # CMR-SBP-13-F-NiMH Final limits
 LIMIT_DATA_17L = limit.DATA_17L     # CMR-SBP-17-LiFePO4 Final limits
 
-
-_PIC_HEX = 'CMR-SBP-9.hex'
-
-# Serial port for the EV2200.
-_EV_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
-# Serial port for the CMR.
-_CMR_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
-
-
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 def _bit_status(num, check_bit):
@@ -73,31 +59,21 @@ class _Main(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('BaseOpen')
-        self._cmr_ser = SimSerial(
-            simulation=self._fifo,
-            port=_CMR_PORT, baudrate=9600, timeout=0.1)
-        self._cmr = cmrsbp.CmrSbp(self._cmr_ser, data_timeout=10.0)
         global d, s
-        d = support.LogicalDevices(self._devices)
+        d = support.LogicalDevices(self._devices, self._fifo)
         s = support.Sensors(d, self._limits)
 
     def close(self):
         """Finished testing."""
         self._logger.info('BaseClose')
-        self._cmr.close()
-        self._cmr_ser.close()
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _read_data(self):
         """Read data broadcast from PIC.
@@ -140,11 +116,11 @@ class _Main(tester.TestSequence):
                     sense_res = 450
                     full_charge = 17000
             data_str = _str.format(full_charge, half_cell, sense_res)
-            def myputs():   # This will push the later when timer is done
-                self._cmr_ser.puts(data_str)
+            def myputs():   # This will push the data when timer is done
+                d.cmr_ser.puts(data_str)
             tmr = threading.Timer(0.5, myputs)
             tmr.start()     # Push data once we are inside _cmr.read()
-        data = self._cmr.read()
+        data = d.cmr.read()
         self._logger.debug('Received data: %s', data)
         return data
 
@@ -171,7 +147,6 @@ class Initial(_Main):
             ('CheckVcharge', self._step_check_vchge, None, True),
             ('CalBQvolts', self._step_calv, None, True),
             ('CalBQcurrent', self._step_cali, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -180,9 +155,9 @@ class Initial(_Main):
         """Prepare for testing."""
         super().open()
         self._logger.info('Open')
-        self._ev_ser = SimSerial(
+        self._ev_ser = share.SimSerial(
             simulation=self._fifo,
-            port=_EV_PORT, baudrate=9600, timeout=4.0)
+            port=limit.EV_PORT, baudrate=9600, timeout=4.0)
         self._ev = ev2200.EV2200(self._ev_ser)
         global m, t
         m = support.MeasureInit(s, self._limits)
@@ -220,11 +195,10 @@ class Initial(_Main):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         d.rla_Prog.set_on()
-        pic = ProgramPIC(
-            hexfile=_PIC_HEX, working_dir=folder,
+        pic = share.ProgramPIC(
+            hexfile=limit.PIC_HEX, working_dir=folder,
             device_type='18F252', sensor=s.oMirPIC,
             fifo=self._fifo)
-        # Wait for programming completion & read results
         pic.read()
         d.rla_Prog.set_off()
         d.rla_Erase.set_off()
@@ -300,7 +274,6 @@ class SerialDate(_Main):
         self._limits = test_limits
         sequence = (
             ('SerialDate', self._step_sn_date, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -309,9 +282,9 @@ class SerialDate(_Main):
         """Prepare for testing."""
         super().open()
         self._logger.info('Open')
-        self._ev_ser = SimSerial(
+        self._ev_ser = share.SimSerial(
             simulation=self._fifo,
-            port=_EV_PORT, baudrate=9600, timeout=4.0)
+            port=limit.EV_PORT, baudrate=9600, timeout=4.0)
         self._ev = ev2200.EV2200(self._ev_ser)
         global m
         m = support.MeasureInit(s, self._limits)
@@ -332,9 +305,9 @@ class SerialDate(_Main):
         d.rla_PicReset.set_on()
         time.sleep(2)
         d.rla_EVM.set_on()
-        result, sernum = m.ui_SnEntry.measure()
+        sernum = m.ui_SnEntry.measure().reading1
         current_date = datetime.date.today().isoformat()
-        self._ev.sn_date(datecode=current_date, serialno=sernum[0])
+        self._ev.sn_date(datecode=current_date, serialno=sernum)
 
 
 class Final(_Main):
@@ -355,7 +328,6 @@ class Final(_Main):
         sequence = (
             ('Startup', self._step_startup, None, True),
             ('Verify', self._step_verify, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -397,7 +369,7 @@ class Final(_Main):
         status = _bit_status(cmr_data['PACK STATUS AND CONFIG'], 7)
         s.oMirVFCcalStatus.store(status)
         s.oMirSerNum.store(str(cmr_data['SERIAL NUMBER']))
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.cmr_vbatIn, m.cmr_ErrV, m.cmr_CycleCnt, m.cmr_RelrnFlg,
              m.cmr_Sw, m.cmr_SenseRes, m.cmr_Capacity, m.cmr_RelStateCharge,
              m.cmr_Halfcell, m.cmr_VFCcalStatus, m.cmr_SerNum), )

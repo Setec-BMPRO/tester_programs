@@ -4,8 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -20,23 +18,16 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dso = dso.DSO(devices['DSO'])
-        self.dcs_Vin = dcsource.DCSource(devices['DCS4'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dso = tester.DSO(devices['DSO'])
+        self.dcs_Vin = tester.DCSource(devices['DCS4'])
         # Pin for breakaway switch.
-        self.rla_pin = relay.Relay(devices['RLA5'])   # ON == Asserted
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.rla_pin = tester.Relay(devices['RLA5'])   # ON == Asserted
 
     def reset(self):
         """Reset instruments."""
-        for dcs in (self.dcs_Vin, ):
-            dcs.output(0.0, False)
-        for rla in (self.rla_pin, ):
-            rla.set_off()
+        self.dcs_Vin.output(0.0, False)
+        self.rla_pin.set_off()
 
 
 class Sensors():
@@ -96,6 +87,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_pinin = Measurement(limits['BrkawayPinIn'], sense.oPin)
         self.dmm_pinout = Measurement(limits['BrkawayPinOut'], sense.oPin)
@@ -133,32 +125,32 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp:
-        self.pwr_up = Step((
-            RelaySubStep(((d.rla_pin, True), )),
-            DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True, delay=0.8),
-            MeasureSubStep(
+        self.pwr_up = tester.SubStep((
+            tester.RelaySubStep(((d.rla_pin, True), )),
+            tester.DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True, delay=0.8),
+            tester.MeasureSubStep(
                 (m.dmm_vin, m.dmm_pinin, m.dmm_5VOff, m.dmm_brakeoff,
                  m.dmm_lightoff, m.dmm_remoteoff, m.dmm_tp8off,
                  m.dmm_tp9off), timeout=5),
             ))
         # BreakAway:
-        self.brkaway1 = Step((
-            RelaySubStep(((d.rla_pin, False), )),
-            MeasureSubStep(
+        self.brkaway1 = tester.SubStep((
+            tester.RelaySubStep(((d.rla_pin, False), )),
+            tester.MeasureSubStep(
                 (m.dmm_pinout, m.dmm_5VOn, m.dmm_brakeon, m.dmm_lighton,
                  m.dmm_remoteon), timeout=5),
             ))
-        self.brkaway2 = Step((
-            DcSubStep(setting=((d.dcs_Vin, 14.2), )),
-            MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5),
+        self.brkaway2 = tester.SubStep((
+            tester.DcSubStep(setting=((d.dcs_Vin, 14.2), )),
+            tester.MeasureSubStep((m.dmm_redoff, m.ui_YesNoGreen), timeout=5),
             ))
-        self.brkaway3 = Step((
-            DcSubStep(setting=((d.dcs_Vin, 10.0), )),
-            MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5),
+        self.brkaway3 = tester.SubStep((
+            tester.DcSubStep(setting=((d.dcs_Vin, 10.0), )),
+            tester.MeasureSubStep((m.dmm_redon, m.dmm_greenoff), timeout=5),
             ))
-        self.brkaway4 = Step((
-            DcSubStep(setting=((d.dcs_Vin, 11.2), )),
-            MeasureSubStep((m.dmm_greenon, ), timeout=5),
-            DcSubStep(setting=((d.dcs_Vin, 14.2), )),
+        self.brkaway4 = tester.SubStep((
+            tester.DcSubStep(setting=((d.dcs_Vin, 11.2), )),
+            tester.MeasureSubStep((m.dmm_greenon, ), timeout=5),
+            tester.DcSubStep(setting=((d.dcs_Vin, 14.2), )),
             ))
 

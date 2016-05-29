@@ -5,6 +5,7 @@
 import os
 import inspect
 import logging
+
 import tester
 from share import ProgramPIC
 from . import support
@@ -17,11 +18,8 @@ INI_LIMIT = limit.DATA
 _PIC_HEX = 'etracII-2A.hex'
 
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Initial(tester.TestSequence):
@@ -42,7 +40,6 @@ class Initial(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('Program', self._step_program, None, True),
             ('Load', self._step_load, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -54,36 +51,23 @@ class Initial(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global m, d, s, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_power_up(self):
         """Apply input DC and measure voltages."""

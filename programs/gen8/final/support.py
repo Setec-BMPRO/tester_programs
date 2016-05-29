@@ -2,12 +2,8 @@
 # -*- coding: utf-8 -*-
 """GEN8 Final Test Program."""
 
-import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
-
-translate = tester.translate
+import sensor
 
 
 class LogicalDevices():
@@ -16,28 +12,20 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcl_24V = dcload.DCLoad(devices['DCL1'])
-        self.dcl_12V = dcload.DCLoad(devices['DCL2'])
-        self.dcl_12V2 = dcload.DCLoad(devices['DCL3'])
-        self.dcl_5V = dcload.DCLoad(devices['DCL4'])
-        self.rla_12V2off = relay.Relay(devices['RLA2'])
-        self.rla_pson = relay.Relay(devices['RLA3'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcl_24V = tester.DCLoad(devices['DCL1'])
+        self.dcl_12V = tester.DCLoad(devices['DCL2'])
+        self.dcl_12V2 = tester.DCLoad(devices['DCL3'])
+        self.dcl_5V = tester.DCLoad(devices['DCL4'])
+        self.rla_12V2off = tester.Relay(devices['RLA2'])
+        self.rla_pson = tester.Relay(devices['RLA3'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Loads
         for ld in (self.dcl_12V, self.dcl_24V, self.dcl_5V, self.dcl_12V2):
             ld.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_12V2off, self.rla_pson):
             rla.set_off()
 
@@ -56,11 +44,11 @@ class Sensors():
         self.o12V2 = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self.oPwrFail = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
         self.oYesNoMains = sensor.YesNo(
-            message=translate('gen8_final', 'IsSwitchGreen?'),
-            caption=translate('gen8_final', 'capSwitchGreen'))
+            message=tester.translate('gen8_final', 'IsSwitchGreen?'),
+            caption=tester.translate('gen8_final', 'capSwitchGreen'))
         self.oNotifyPwrOff = sensor.Notify(
-            message=translate('gen8_final', 'msgSwitchOff'),
-            caption=translate('gen8_final', 'capSwitchOff'))
+            message=tester.translate('gen8_final', 'msgSwitchOff'),
+            caption=tester.translate('gen8_final', 'capSwitchOff'))
 
 
 class Measurements():
@@ -69,20 +57,31 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
-        self.dmm_Iecon = Measurement(limits['Iecon'], sense.oIec)
-        self.dmm_Iecoff = Measurement(limits['Iecoff'], sense.oIec)
-        self.dmm_5V = Measurement(limits['5V'], sense.o5V)
-        self.dmm_24Voff = Measurement(limits['24Voff'], sense.o24V)
-        self.dmm_12Voff = Measurement(limits['12Voff'], sense.o12V)
-        self.dmm_12V2off = Measurement(limits['12V2off'], sense.o12V2)
-        self.dmm_24Von = Measurement(limits['24Von'], sense.o24V)
-        self.dmm_12Von = Measurement(limits['12Von'], sense.o12V)
-        self.dmm_12V2on = Measurement(limits['12V2on'], sense.o12V2)
-        self.dmm_PwrFailOff = Measurement(
-            limits['PwrFailOff'], sense.oPwrFail)
-        self.ui_YesNoMains = Measurement(limits['Notify'], sense.oYesNoMains)
-        self.ui_NotifyPwrOff = Measurement(
-            limits['Notify'], sense.oNotifyPwrOff)
+        self._limits = limits
+        self.dmm_Iecon = self._maker('Iecon', sense.oIec)
+        self.dmm_Iecoff = self._maker('Iecoff', sense.oIec)
+        self.dmm_5V = self._maker('5V', sense.o5V)
+        self.dmm_24Voff = self._maker('24Voff', sense.o24V)
+        self.dmm_12Voff = self._maker('12Voff', sense.o12V)
+        self.dmm_12V2off = self._maker('12V2off', sense.o12V2)
+        self.dmm_24Von = self._maker('24Von', sense.o24V)
+        self.dmm_12Von = self._maker('12Von', sense.o12V)
+        self.dmm_12V2on = self._maker('12V2on', sense.o12V2)
+        self.dmm_PwrFailOff = self._maker('PwrFailOff', sense.oPwrFail)
+        self.ui_YesNoMains = self._maker('Notify', sense.oYesNoMains)
+        self.ui_NotifyPwrOff = self._maker('Notify', sense.oNotifyPwrOff)
+
+    def _maker(self, limitname, sensor, position_fail=True):
+        """Create a Measurement.
+
+        @param limitname Test Limit name
+        @param sensor Sensor to use
+        @return tester.Measurement instance
+
+        """
+        if not position_fail:
+            self._limits[limitname].position_fail = False
+        return tester.Measurement(self._limits[limitname], sensor)
 
 
 class SubTests():
@@ -94,45 +93,45 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: Apply 240Vac, set min load, measure.
-        self.pwr_up = Step((
-            LoadSubStep(
+        self.pwr_up = tester.SubStep((
+            tester.LoadSubStep(
                 ((d.dcl_5V, 0.0), (d.dcl_24V, 0.1), (d.dcl_12V, 3.5),
                  (d.dcl_12V2, 0.5)), output=True),
-            AcSubStep(
+            tester.AcSubStep(
                 acs=d.acsource, voltage=240.0, output=True, delay=1.0),
-            MeasureSubStep(
+            tester.MeasureSubStep(
                 (m.dmm_5V, m.dmm_24Voff, m.dmm_12Voff, ), timeout=5),
-            RelaySubStep(((d.rla_12V2off, True), )),
-            MeasureSubStep((m.dmm_12V2off, ), timeout=5),
+            tester.RelaySubStep(((d.rla_12V2off, True), )),
+            tester.MeasureSubStep((m.dmm_12V2off, ), timeout=5),
             ))
         # PowerOn: Turn on, measure at min load.
-        self.pwr_on = Step((
-            RelaySubStep(((d.rla_pson, True), )),
-            MeasureSubStep(
+        self.pwr_on = tester.SubStep((
+            tester.RelaySubStep(((d.rla_pson, True), )),
+            tester.MeasureSubStep(
                 (m.dmm_24Von, m.dmm_12Von, m.dmm_12V2off,
                  m.dmm_PwrFailOff, ), timeout=5),
-            RelaySubStep(((d.rla_12V2off, False), )),
-            MeasureSubStep((m.dmm_12V2on, m.dmm_Iecon, ), timeout=5),
-            MeasureSubStep((m.ui_YesNoMains, )),
+            tester.RelaySubStep(((d.rla_12V2off, False), )),
+            tester.MeasureSubStep((m.dmm_12V2on, m.dmm_Iecon, ), timeout=5),
+            tester.MeasureSubStep((m.ui_YesNoMains, )),
             ))
         # Full Load: Apply full load, measure.
         # 115Vac Full Load: 115Vac, measure.
-        mss = MeasureSubStep(
+        mss = tester.MeasureSubStep(
             (m.dmm_5V, m.dmm_24Von, m.dmm_12Von, m.dmm_12V2on,), timeout=5)
-        self.full_load = Step((
-            LoadSubStep(
+        self.full_load = tester.SubStep((
+            tester.LoadSubStep(
                 ((d.dcl_5V, 2.5), (d.dcl_24V, 5.0),
                  (d.dcl_12V, 15.0), (d.dcl_12V2, 7.0)), delay=0.5),
             mss,
             ))
-        self.full_load_115 = Step((
-            AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5),
+        self.full_load_115 = tester.SubStep((
+            tester.AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5),
             mss,
             ))
         # PowerOff: Set min load, switch off, measure.
-        self.pwr_off = Step((
-            LoadSubStep(
+        self.pwr_off = tester.SubStep((
+            tester.LoadSubStep(
                 ((d.dcl_5V, 0.5), (d.dcl_24V, 0.5), (d.dcl_12V, 4.0))),
-            MeasureSubStep(
+            tester.MeasureSubStep(
                 (m.ui_NotifyPwrOff, m.dmm_Iecoff, m.dmm_24Voff,)),
             ))

@@ -3,8 +3,7 @@
 """C15A-15 Initial Test Program."""
 
 import sensor
-from tester.devlogical import *
-from tester.measure import *
+import tester
 
 
 class LogicalDevices():
@@ -13,23 +12,15 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcl = dcload.DCLoad(devices['DCL5'])
-        self.rla_load = relay.Relay(devices['RLA2'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcl = tester.DCLoad(devices['DCL5'])
+        self.rla_load = tester.Relay(devices['RLA2'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
-        # Switch off DC Load
         self.dcl.output(0.0, False)
-        # Switch off Relay
         self.rla_load.set_off()
 
 
@@ -58,6 +49,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_vin90 = Measurement(limits['AcMin'], sense.vin)
         self.dmm_vin = Measurement(limits['Ac'], sense.vin)
         self.dmm_vbus90 = Measurement(limits['VbusMin'], sense.vbus)
@@ -80,37 +72,36 @@ class SubTests():
         """Create SubTest Step instances."""
         d = logical_devices
         m = measurements
-
         # PowerUp: Apply 90Vac, measure.
-        self.pwr_90 = Step(
-            (AcSubStep(acs=d.acsource, voltage=90.0, output=True, delay=0.5),
-             LoadSubStep(((d.dcl, 0.0), ), output=True),
-             MeasureSubStep(
+        self.pwr_90 = tester.SubStep((
+            tester.AcSubStep(acs=d.acsource, voltage=90.0, output=True, delay=0.5),
+            tester.LoadSubStep(((d.dcl, 0.0), ), output=True),
+            tester.MeasureSubStep(
                 (m.dmm_vin90, m.dmm_vbus90, m.dmm_vcc90, m.dmm_vout,
                  m.dmm_green_on, m.dmm_yellow_off),
                 timeout=5),
-             ))
+            ))
         # PowerUp: Apply 240Vac, measure.
-        self.pwr_240 = Step(
-            (AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5),
-             MeasureSubStep(
+        self.pwr_240 = tester.SubStep((
+            tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5),
+            tester.MeasureSubStep(
                 (m.dmm_vin, m.dmm_vbus, m.dmm_vcc, m.dmm_vout,
                  m.dmm_green_on, m.dmm_yellow_off),
                 timeout=5),
-             ))
+            ))
         # OCP:
-        self.ocp = Step(
-            (LoadSubStep(((d.dcl, 0.9), )),
-             MeasureSubStep((m.dmm_vout, m.ramp_ocp)),
-             LoadSubStep(((d.dcl, 0.0), )),
-             RelaySubStep(((d.rla_load, True), ), delay=1.0),
-             MeasureSubStep(
+        self.ocp = tester.SubStep((
+            tester.LoadSubStep(((d.dcl, 0.9), )),
+            tester.MeasureSubStep((m.dmm_vout, m.ramp_ocp)),
+            tester.LoadSubStep(((d.dcl, 0.0), )),
+            tester.RelaySubStep(((d.rla_load, True), ), delay=1.0),
+            tester.MeasureSubStep(
                 (m.dmm_yellow_on, m.dmm_green_on, m.dmm_vout_ocp)),
-             RelaySubStep(((d.rla_load, False), )),
-             MeasureSubStep((m.dmm_vout, ), timeout=2.0),
-             ))
+            tester.RelaySubStep(((d.rla_load, False), )),
+            tester.MeasureSubStep((m.dmm_vout, ), timeout=2.0),
+            ))
         # PowerOff:
-        self.pwr_off = Step(
-            (LoadSubStep(((d.dcl, 1.0),)),
-             AcSubStep(acs=d.acsource, voltage=0.0, output=False, delay=2),
-             ))
+        self.pwr_off = tester.SubStep((
+            tester.LoadSubStep(((d.dcl, 1.0),)),
+            tester.AcSubStep(acs=d.acsource, voltage=0.0, output=False, delay=2),
+            ))

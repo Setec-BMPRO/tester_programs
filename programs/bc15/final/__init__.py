@@ -3,19 +3,15 @@
 """BC15 Final Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 FIN_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Final(tester.TestSequence):
@@ -35,7 +31,6 @@ class Final(tester.TestSequence):
         sequence = (
             ('PowerOn', self._step_poweron, None, True),
             ('Load', self._step_loaded, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -57,16 +52,12 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_poweron(self):
         """Power up the Unit and measure output with min load."""
@@ -74,13 +65,13 @@ class Final(tester.TestSequence):
 
         d.dcl.output(1.0, output=True)
         d.acsource.output(240.0, output=True)
-        MeasureGroup((m.ps_mode, m.vout_nl, ), timeout=5)
+        tester.MeasureGroup((m.ps_mode, m.vout_nl, ), timeout=5)
 
     def _step_loaded(self):
         """Load the Unit."""
         self.fifo_push(
             ((s.vout, (14.23, ) + (14.2, ) * 8 + (11.0, )),
-            (s.ch_mode, True), ))
+             (s.ch_mode, True), ))
 
         d.dcl.output(10.0)
-        MeasureGroup((m.vout, m.ocp, m.ch_mode, ), timeout=5)
+        tester.MeasureGroup((m.vout, m.ocp, m.ch_mode, ), timeout=5)

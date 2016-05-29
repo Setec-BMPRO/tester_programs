@@ -2,12 +2,19 @@
 # -*- coding: utf-8 -*-
 """BC15 Initial Program Limits."""
 
-BIN_VERSION = '1.0.13136.1528'      # Software binary version
+import os
 
 from testlimit import (
     lim_lo, lim_hi,
     lim_hilo, lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_string)
+
+BIN_VERSION = '1.0.13136.1528'      # Software binary version
+
+# Serial port for the ARM. Used by programmer and ARM comms module.
+ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM12'}[os.name]
+# ARM software image file
+ARM_BIN = 'bc15_{}.bin'.format(BIN_VERSION)
 
 DATA = (
     lim_hilo_delta('ACin', 240.0, 5.0),
@@ -24,7 +31,6 @@ DATA = (
     lim_lo('VoutOff', 2.0),
     lim_hilo_percent('OCP', 15.0, 5.0),
     lim_lo('InOCP', 12.0),
-    lim_hilo_int('Program', 0),
     lim_lo('FixtureLock', 20),
     lim_hi('FanShort', 100),
     # Data reported by the ARM

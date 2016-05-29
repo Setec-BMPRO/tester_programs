@@ -4,8 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -16,17 +14,12 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        _dcl_12Va = dcload.DCLoad(devices['DCL1'])
-        _dcl_12Vb = dcload.DCLoad(devices['DCL2'])
-        self.dcl = dcload.DCLoadParallel(
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        _dcl_12Va = tester.DCLoad(devices['DCL1'])
+        _dcl_12Vb = tester.DCLoad(devices['DCL2'])
+        self.dcl = tester.DCLoadParallel(
             ((_dcl_12Va, 12.5), (_dcl_12Vb, 12.5)))
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
 
     def reset(self):
         """Reset instruments."""
@@ -72,6 +65,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_12Voff = Measurement(limits['12Voff'], sense.o12V)
         self.dmm_12V = Measurement(limits['12V'], sense.o12V)
         self.dmm_12Vfl = Measurement(limits['12Vfl'], sense.o12V)
@@ -93,25 +87,25 @@ class SubTests():
         d = logical_devices
         m = measurements
         # OutputFuseCheck: Remove output fuse, Mains on, measure, restore fuse.
-        msr1 = MeasureSubStep((m.ui_NotifyStart, ))
-        acs1 = AcSubStep(
+        msr1 = tester.MeasureSubStep((m.ui_NotifyStart, ))
+        acs1 = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr2 = MeasureSubStep((m.dmm_12Voff, m.ui_YesNoRed), timeout=5)
-        acs2 = AcSubStep(
+        msr2 = tester.MeasureSubStep((m.dmm_12Voff, m.ui_YesNoRed), timeout=5)
+        acs2 = tester.AcSubStep(
             acs=d.acsource, voltage=0.0, output=True, delay=0.5)
-        msr3 = MeasureSubStep((m.ui_NotifyFuse, ))
-        self.fuse_check = Step((msr1, acs1, msr2, acs2, msr3))
+        msr3 = tester.MeasureSubStep((m.ui_NotifyFuse, ))
+        self.fuse_check = tester.SubStep((msr1, acs1, msr2, acs2, msr3))
         # PowerUp: Apply 240Vac, measure.
-        acs = AcSubStep(
+        acs = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr = MeasureSubStep((m.dmm_12V, m.ui_YesNoGreen), timeout=5)
-        self.pwr_up = Step((acs, msr))
+        msr = tester.MeasureSubStep((m.dmm_12V, m.ui_YesNoGreen), timeout=5)
+        self.pwr_up = tester.SubStep((acs, msr))
         # FullLoad: Full load, measure.
-        ld = LoadSubStep(((d.dcl, 25.0),), output=True)
-        msr = MeasureSubStep((m.dmm_12Vfl, ), timeout=5)
-        self.full_load = Step((ld, msr))
+        ld = tester.LoadSubStep(((d.dcl, 25.0),), output=True)
+        msr = tester.MeasureSubStep((m.dmm_12Vfl, ), timeout=5)
+        self.full_load = tester.SubStep((ld, msr))
         # PowerOff: Switch mains off, measure.
-        acs = AcSubStep(acs=d.acsource, voltage=0.0, delay=0.5)
-        msr = MeasureSubStep(
+        acs = tester.AcSubStep(acs=d.acsource, voltage=0.0, delay=0.5)
+        msr = tester.MeasureSubStep(
             (m.ui_NotifyMains, m.dmm_12Voff, m.ui_YesNoOff), timeout=5)
-        self.pwr_off = Step((acs, msr))
+        self.pwr_off = tester.SubStep((acs, msr))

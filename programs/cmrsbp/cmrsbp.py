@@ -39,7 +39,8 @@ import sys
 import threading
 import queue
 import logging
-from share import TimedStore
+
+import share
 
 
 _DATAMAP = {
@@ -134,7 +135,7 @@ class CmrSbp():
             data_timeout = self._serargs['data_timeout']
             serport = self._serargs['serport']
             serport.flushInput()
-            tdata = TimedStore(data_template, data_timeout)
+            tdata = share.TimedStore(data_template, data_timeout)
             run = True
         except Exception:
             err = ' '.join(

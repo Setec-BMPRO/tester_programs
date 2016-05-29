@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 """Drifter(BM) Final Program Limits."""
 
+from testlimit import lim_hilo_delta, lim_lo, lim_hi, lim_boolean
+
 # Tuple ( Tuple (name, identity, low, high, string, boolean))
 _COMMON = (
-    ('SwOff', 1, 1.0, None, None, None),
-    ('SwOn', 1, None, 10.0, None, None),
-    ('USB5V', 1, 4.75, 5.25, None, None, None),
-    ('Notify', 2, None, None, None, True),
+    lim_lo('SwOff', 1.0),
+    lim_hi('SwOn', 10.0),
+    lim_hilo_delta('USB5V', 5.00, 0.25),
+    lim_boolean('Notify', True),
     )
 
 DATA = _COMMON

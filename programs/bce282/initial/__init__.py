@@ -6,10 +6,8 @@
 
 import os
 import logging
-import time
 
 import tester
-
 from . import msp
 from . import support
 from . import limit
@@ -20,11 +18,8 @@ INI_LIMIT_24 = limit.DATA24       # BCE282-24 limits
 # Serial port for MSP430 console.
 _MSP430_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Initial(tester.testsequence.TestSequence):
@@ -47,7 +42,6 @@ class Initial(tester.testsequence.TestSequence):
             ('PowerUp', self._step_power_up, None, False),
             ('Calibration', self._step_cal, None, False),
             ('OCP', self._step_ocp, None, False),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -74,21 +68,12 @@ class Initial(tester.testsequence.TestSequence):
         self._msp.close()
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl_Vout.output(2.0)
-        d.dcl_Vbat.output(2.0)
-        time.sleep(1)
-        d.discharge.pulse()
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed."""

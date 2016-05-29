@@ -3,17 +3,15 @@
 """C15A-15 Initial Test Program."""
 
 import logging
+
 import tester
 from . import support
 from . import limit
 
 INI_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Initial(tester.TestSequence):
@@ -29,7 +27,6 @@ class Initial(tester.TestSequence):
             ('Power240', self._step_power_240, None, True),
             ('OCP', self._step_ocp, None, True),
             ('PowerOff', self._step_power_off, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -52,16 +49,12 @@ class Initial(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_power_90(self):
         """Power up at 90Vac."""

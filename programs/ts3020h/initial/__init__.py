@@ -3,7 +3,7 @@
 """TS3020H Initial Test Program."""
 
 import logging
-import time
+
 import tester
 from . import support
 from . import limit
@@ -12,11 +12,8 @@ MeasureGroup = tester.measure.group
 
 INI_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Initial(tester.TestSequence):
@@ -43,7 +40,6 @@ class Initial(tester.TestSequence):
             ('AdjOutput', self._step_adj_output, None, True),
             ('Load', self._step_load, None, True),
             ('InputOV', self._step_input_ov, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -55,40 +51,23 @@ class Initial(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d
+        global m, d, s, t
         d = support.LogicalDevices(self._devices)
-        global s
         s = support.Sensors(d, self._limits)
-        global m
         m = support.Measurements(s, self._limits)
-        global t
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m
-        m = None
-        global d
-        d = None
-        global s
-        s = None
-        global t
-        t = None
+        global m, d, s, t
+        m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl.output(5.0)
-        time.sleep(1)
-        d.discharge.pulse()
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed."""

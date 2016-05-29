@@ -4,10 +4,9 @@
 
 import time
 from pydispatch import dispatcher
+
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -18,28 +17,20 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self._devices = devices
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcl_12v = dcload.DCLoad(devices['DCL1'])
-        self.dcl_24v = dcload.DCLoad(devices['DCL2'])
-        self.dcl_5v = dcload.DCLoad(devices['DCL3'])
-        self.rla_PwrOn = relay.Relay(devices['RLA1'])
-
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcl_12v = tester.DCLoad(devices['DCL1'])
+        self.dcl_24v = tester.DCLoad(devices['DCL2'])
+        self.dcl_5v = tester.DCLoad(devices['DCL3'])
+        self.rla_PwrOn = tester.Relay(devices['RLA1'])
 
     def reset(self):
         """Reset instruments."""
-        # Switch off AC Source
         self.acsource.output(voltage=0.0, output=False)
         self.dcl_12v.output(10)
         time.sleep(0.5)
-        # Switch off DC Loads
         for ld in (self.dcl_12v, self.dcl_24v, self.dcl_5v):
             ld.output(0.0, output=False)
-        # Switch off Relay
         self.rla_PwrOn.set_off()
 
 
@@ -82,6 +73,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.reg12v = Measurement(limits['Reg12V'], sense.oMir12v)
         self.reg24v = Measurement(limits['Reg24V'], sense.oMir24v)
         self.dmm_InpRes = Measurement(limits['InRes'], sense.oInpRes)
@@ -109,30 +101,30 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: 240Vac, measure.
-        self.pwr_up = Step((
-            LoadSubStep(
+        self.pwr_up = tester.SubStep((
+            tester.LoadSubStep(
                 ((d.dcl_5v, 0.0), (d.dcl_12v, 0.1), (d.dcl_24v, 0.1)),
                  output=True),
-            MeasureSubStep((m.dmm_Iecoff, ), timeout=5),
-            AcSubStep(
+            tester.MeasureSubStep((m.dmm_Iecoff, ), timeout=5),
+            tester.AcSubStep(
                 acs=d.acsource, voltage=240.0, frequency=50,
                 output=True, delay=0.5),
-            MeasureSubStep(
+            tester.MeasureSubStep(
                 (m.dmm_Iec, m.dmm_5v, m.dmm_12voff, m.ui_YesNoGreen),
                  timeout=5),
             ))
         # PowerOn:
-        self.pwr_on = Step((
-            RelaySubStep(((d.rla_PwrOn, True), )),
-            MeasureSubStep(
+        self.pwr_on = tester.SubStep((
+            tester.RelaySubStep(((d.rla_PwrOn, True), )),
+            tester.MeasureSubStep(
                 (m.ui_YesNoBlue, m.dmm_5v, m.dmm_PwrGood, m.dmm_AcFail, ),
                 timeout=5),
             ))
         # Load: Apply loads, measure.
-        self.load = Step((
-            LoadSubStep(
+        self.load = tester.SubStep((
+            tester.LoadSubStep(
                 ((d.dcl_5v, 2.0), (d.dcl_12v, 32.0), (d.dcl_24v, 15.0)),
                 output=True),
-            MeasureSubStep(
+            tester.MeasureSubStep(
                 (m.dmm_5vfl, m.dmm_PwrGood, m.dmm_AcFail, ), timeout=2),
             ))

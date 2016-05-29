@@ -7,15 +7,11 @@ import inspect
 import time
 from pydispatch import dispatcher
 
-import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
-from share import SimSerial, ProgramARM
+import share
+import sensor
 from . import limit
-from ..console import Console, Sensor as ConSensor
-
-translate = tester.translate
+from .. import console
 
 
 class LogicalDevices():
@@ -28,34 +24,33 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._devices = devices
         self._fifo = fifo
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.discharge = discharge.Discharge(devices['DIS'])
-        self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
-        self.dcs_vbat = dcsource.DCSource(devices['DCS2'])
-        self.dcs_vaux = dcsource.DCSource(devices['DCS3'])
-        self.dcs_sreg = dcsource.DCSource(devices['DCS4'])
-        self.dcl_out = dcload.DCLoad(devices['DCL1'])
-        self.dcl_bat = dcload.DCLoad(devices['DCL5'])
-        self.rla_reset = relay.Relay(devices['RLA1'])
-        self.rla_boot = relay.Relay(devices['RLA2'])
-        self.rla_pic = relay.Relay(devices['RLA3'])     # PIC programmer
-        self.rla_loadsw = relay.Relay(devices['RLA4'])
-        self.rla_vbat = relay.Relay(devices['RLA5'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
+        self.dcs_vcom = tester.DCSource(devices['DCS1'])
+        self.dcs_vbat = tester.DCSource(devices['DCS2'])
+        self.dcs_vaux = tester.DCSource(devices['DCS3'])
+        self.dcs_sreg = tester.DCSource(devices['DCS4'])
+        self.dcl_out = tester.DCLoad(devices['DCL1'])
+        self.dcl_bat = tester.DCLoad(devices['DCL5'])
+        self.rla_reset = tester.Relay(devices['RLA1'])
+        self.rla_boot = tester.Relay(devices['RLA2'])
+        self.rla_pic = tester.Relay(devices['RLA3'])     # PIC programmer
+        self.rla_loadsw = tester.Relay(devices['RLA4'])
+        self.rla_vbat = tester.Relay(devices['RLA5'])
         # ARM device programmer
         file = os.path.join(os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe()))),
             limit.ARM_BIN)
-        self.programmer = ProgramARM(limit.ARM_PORT, file, crpmode=False)
+        self.programmer = share.ProgramARM(limit.ARM_PORT, file, crpmode=False)
         # Serial connection to the BP35 console
-        self.bp35_ser = SimSerial(
+        self.bp35_ser = share.SimSerial(
             simulation=fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         self.bp35_ser.port = limit.ARM_PORT
         # BP35 Console driver
-        self.bp35 = Console(self.bp35_ser)
+        self.bp35 = console.Console(self.bp35_ser)
 
     def bp35_puts(self,
                   string_data, preflush=0, postflush=0, priority=False,
@@ -66,10 +61,6 @@ class LogicalDevices():
                 string_data = string_data + '\r\n> '
             self.bp35.puts(string_data, preflush, postflush, priority)
 
-    def error_check(self):
-        """Check instruments for errors."""
-        self._devices.error()
-
     def reset(self):
         """Reset instruments."""
         self.bp35.close()
@@ -78,13 +69,10 @@ class LogicalDevices():
         self.dcl_out.output(2.0)
         time.sleep(1)
         self.discharge.pulse()
-        # Switch off DC Sources
         for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
             dcs.output(0.0, False)
-        # Switch off DC Loads
         for ld in (self.dcl_out, self.dcl_bat):
             ld.output(0.0, False)
-        # Switch off all Relays
         for rla in (self.rla_reset, self.rla_boot, self.rla_pic,
                     self.rla_loadsw, self.rla_vbat):
             rla.set_off()
@@ -124,26 +112,26 @@ class Sensors():
             detect_limit=(limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
         self.sernum = sensor.DataEntry(
-            message=translate('bp35_initial', 'msgSnEntry'),
-            caption=translate('bp35_initial', 'capSnEntry'))
-        self.arm_swver = ConSensor(
+            message=tester.translate('bp35_initial', 'msgSnEntry'),
+            caption=tester.translate('bp35_initial', 'capSnEntry'))
+        self.arm_swver = console.Sensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self.arm_acv = ConSensor(bp35, 'AC_V')
-        self.arm_acf = ConSensor(bp35, 'AC_F')
-        self.arm_sect = ConSensor(bp35, 'SEC_T')
-        self.arm_vout = ConSensor(bp35, 'BUS_V')
-        self.arm_fan = ConSensor(bp35, 'FAN')
-        self.arm_canbind = ConSensor(bp35, 'CAN_BIND')
+        self.arm_acv = console.Sensor(bp35, 'AC_V')
+        self.arm_acf = console.Sensor(bp35, 'AC_F')
+        self.arm_sect = console.Sensor(bp35, 'SEC_T')
+        self.arm_vout = console.Sensor(bp35, 'BUS_V')
+        self.arm_fan = console.Sensor(bp35, 'FAN')
+        self.arm_canbind = console.Sensor(bp35, 'CAN_BIND')
         # Generate 14 load current sensors
         self.arm_loads = []
         for i in range(1, 15):
-            s = ConSensor(bp35, 'LOAD_{}'.format(i))
+            s = console.Sensor(bp35, 'LOAD_{}'.format(i))
             self.arm_loads.append(s)
-        self.arm_bati = ConSensor(bp35, 'BATT_I')
-        self.arm_auxv = ConSensor(bp35, 'AUX_V')
-        self.arm_auxi = ConSensor(bp35, 'AUX_I')
-        self.arm_solar_alive = ConSensor(bp35, 'SR_ALIVE')
-        self.arm_vout_ov = ConSensor(bp35, 'VOUT_OV')
+        self.arm_bati = console.Sensor(bp35, 'BATT_I')
+        self.arm_auxv = console.Sensor(bp35, 'AUX_V')
+        self.arm_auxi = console.Sensor(bp35, 'AUX_I')
+        self.arm_solar_alive = console.Sensor(bp35, 'SR_ALIVE')
+        self.arm_vout_ov = console.Sensor(bp35, 'VOUT_OV')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -162,43 +150,55 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.hardware5 = Measurement(limits['HwVer5'], sense.hardware)
-        limits['HwVer5'].position_fail = False
-        self.pgmpic = Measurement(limits['Program'], sense.mir_pic)
-        self.rx_can = Measurement(limits['CAN_RX'], sense.mir_can)
-        self.dmm_lock = Measurement(limits['FixtureLock'], sense.lock)
-        self.dmm_acin = Measurement(limits['ACin'], sense.acin)
-        self.dmm_vpfc = Measurement(limits['Vpfc'], sense.vpfc)
-        self.dmm_pri12v = Measurement(limits['12Vpri'], sense.pri12v)
-        self.dmm_15vs = Measurement(limits['15Vs'], sense.o15Vs)
-        self.dmm_vload = Measurement(limits['Vload'], sense.vload)
-        self.dmm_vloadOff = Measurement(limits['VloadOff'], sense.vload)
-        self.dmm_vbatin = Measurement(limits['VbatIn'], sense.vbat)
-        self.dmm_vbat = Measurement(limits['Vbat'], sense.vbat)
-        self.dmm_vsregpre = Measurement(limits['VsetPre'], sense.vsreg)
-        self.dmm_vsregpost = Measurement(limits['VsetPost'], sense.vsreg)
-        self.dmm_vaux = Measurement(limits['Vaux'], sense.vbat)
-        self.dmm_3v3 = Measurement(limits['3V3'], sense.o3v3)
-        self.dmm_fanOn = Measurement(limits['FanOn'], sense.fan)
-        self.dmm_fanOff = Measurement(limits['FanOff'], sense.fan)
-        self.dmm_3v3prog = Measurement(limits['3V3prog'], sense.o3v3prog)
-        self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
-        self.ui_sernum = Measurement(limits['SerNum'], sense.sernum)
-        self.arm_swver = Measurement(limits['ARM-SwVer'], sense.arm_swver)
-        self.arm_acv = Measurement(limits['ARM-AcV'], sense.arm_acv)
-        self.arm_acf = Measurement(limits['ARM-AcF'], sense.arm_acf)
-        self.arm_secT = Measurement(limits['ARM-SecT'], sense.arm_sect)
-        self.arm_vout = Measurement(limits['ARM-Vout'], sense.arm_vout)
-        self.arm_fan = Measurement(limits['ARM-Fan'], sense.arm_fan)
-        self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.arm_canbind)
+        self._limits = limits
+        self.hardware5 = self._maker('HwVer5', sense.hardware, False)
+        self.pgmpic = self._maker('Program', sense.mir_pic)
+        self.rx_can = self._maker('CAN_RX', sense.mir_can)
+        self.dmm_lock = self._maker('FixtureLock', sense.lock)
+        self.dmm_acin = self._maker('ACin', sense.acin)
+        self.dmm_vpfc = self._maker('Vpfc', sense.vpfc)
+        self.dmm_pri12v = self._maker('12Vpri', sense.pri12v)
+        self.dmm_15vs = self._maker('15Vs', sense.o15Vs)
+        self.dmm_vload = self._maker('Vload', sense.vload)
+        self.dmm_vloadOff = self._maker('VloadOff', sense.vload)
+        self.dmm_vbatin = self._maker('VbatIn', sense.vbat)
+        self.dmm_vbat = self._maker('Vbat', sense.vbat)
+        self.dmm_vsregpre = self._maker('VsetPre', sense.vsreg)
+        self.dmm_vsregpost = self._maker('VsetPost', sense.vsreg)
+        self.dmm_vaux = self._maker('Vaux', sense.vbat)
+        self.dmm_3v3 = self._maker('3V3', sense.o3v3)
+        self.dmm_fanOn = self._maker('FanOn', sense.fan)
+        self.dmm_fanOff = self._maker('FanOff', sense.fan)
+        self.dmm_3v3prog = self._maker('3V3prog', sense.o3v3prog)
+        self.ramp_ocp = self._maker('OCP', sense.ocp)
+        self.ui_sernum = self._maker('SerNum', sense.sernum)
+        self.arm_swver = self._maker('ARM-SwVer', sense.arm_swver)
+        self.arm_acv = self._maker('ARM-AcV', sense.arm_acv)
+        self.arm_acf = self._maker('ARM-AcF', sense.arm_acf)
+        self.arm_secT = self._maker('ARM-SecT', sense.arm_sect)
+        self.arm_vout = self._maker('ARM-Vout', sense.arm_vout)
+        self.arm_fan = self._maker('ARM-Fan', sense.arm_fan)
+        self.arm_can_bind = self._maker('CAN_BIND', sense.arm_canbind)
         # Generate 14 load current measurements
         self.arm_loads = ()
         for sen in sense.arm_loads:
-            m = Measurement(limits['ARM-LoadI'], sen)
+            m = self._maker('ARM-LoadI', sen)
             self.arm_loads += (m, )
-        self.arm_battI = Measurement(limits['ARM-BattI'], sense.arm_bati)
-        self.arm_auxv = Measurement(limits['ARM-AuxV'], sense.arm_auxv)
-        self.arm_auxi = Measurement(limits['ARM-AuxI'], sense.arm_auxi)
-        self.arm_solar_alive = Measurement(
-            limits['SOLAR_ALIVE'], sense.arm_solar_alive)
-        self.arm_vout_ov = Measurement(limits['Vout_OV'], sense.arm_vout_ov)
+        self.arm_battI = self._maker('ARM-BattI', sense.arm_bati)
+        self.arm_auxv = self._maker('ARM-AuxV', sense.arm_auxv)
+        self.arm_auxi = self._maker('ARM-AuxI', sense.arm_auxi)
+        self.arm_solar_alive = self._maker(
+            'SOLAR_ALIVE', sense.arm_solar_alive)
+        self.arm_vout_ov = self._maker('Vout_OV', sense.arm_vout_ov)
+
+    def _maker(self, limitname, sensor, position_fail=True):
+        """Create a Measurement.
+
+        @param limitname Test Limit name
+        @param sensor Sensor to use
+        @return tester.Measurement instance
+
+        """
+        if not position_fail:
+            self._limits[limitname].position_fail = False
+        return tester.Measurement(self._limits[limitname], sensor)

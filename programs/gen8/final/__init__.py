@@ -9,11 +9,8 @@ from . import limit
 
 FIN_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-t = None        # Shortcut to SubTests
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -30,7 +27,6 @@ class Final(tester.TestSequence):
             ('FullLoad', self._step_full_load, None, True),
             ('115V', self._step_115v, None, True),
             ('Poweroff', self._step_power_off, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -53,22 +49,18 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s, t
         m = d = s = t = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        self._devices.interface.reset()
-        d.error_check()
 
     def _step_power_up(self):
         """Switch on at 240Vac, not enabled, measure output at min load."""
         self.fifo_push(
             ((s.o5V, 5.1), (s.o24V, 0.0), (s.o12V, 0.0), (s.o12V2, 0.0), ))
+
         t.pwr_up.run()
 
     def _step_power_on(self):
@@ -77,22 +69,26 @@ class Final(tester.TestSequence):
             ((s.o24V, 24.0), (s.o12V, 12.0), (s.o12V2, 0.0),
              (s.oPwrFail, 24.1), (s.o12V2, 12.0), (s.oYesNoMains, True),
              (s.oIec, 240.0), ))
+
         t.pwr_on.run()
 
     def _step_full_load(self):
         """Measure outputs at full-load."""
         self.fifo_push(
             ((s.o5V, 5.1), (s.o24V, 24.1), (s.o12V, 12.1), (s.o12V2, 12.2)))
+
         t.full_load.run()
 
     def _step_115v(self):
         """Measure outputs at 115Vac in, full-load."""
         self.fifo_push(
             ((s.o5V, 5.1), (s.o24V, 24.1), (s.o12V, 12.1), (s.o12V2, 12.2)))
+
         t.full_load_115.run()
 
     def _step_power_off(self):
         """Switch off unit, measure gpo and 24V voltages."""
         self.fifo_push(
             ((s.oNotifyPwrOff, True), (s.oIec, 0.0), (s.o24V, 0.0)))
+
         t.pwr_off.run()

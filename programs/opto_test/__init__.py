@@ -8,17 +8,15 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
+
 import tester
 from . import support
 from . import limit
 
 LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
-
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
 _RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
@@ -48,8 +46,7 @@ class Main(tester.TestSequence):
             ('OutputAdj', self._step_out_adj1, None, True),
             ('InputAdj', self._step_in_adj10, None, True),
             ('OutputAdj', self._step_out_adj10, None, True),
-            ('Email', self._step_email, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
+            ('Email', self._step_email, None, not fifo),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -74,16 +71,12 @@ class Main(tester.TestSequence):
         self._logger.info('Close')
         global m, d, s
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        # Reset Logical Devices
         d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
 
     def _step_boardnum(self):
         """Get the PCB number."""

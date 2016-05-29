@@ -2,31 +2,17 @@
 # -*- coding: utf-8 -*-
 """BC15 Initial Test Program."""
 
-import os
-import inspect
 import logging
 import time
 
 import tester
-from isplpc import Programmer, ProgrammingError
-from share import SimSerial
-from .. import console
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 INI_LIMIT = limit.DATA
 
-# Serial port for the ARM. Used by programmer and ARM comms module.
-_ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM12'}[os.name]
-# ARM software image file
-_ARM_BIN = 'bc15_{}.bin'.format(limit.BIN_VERSION)
-
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -50,7 +36,6 @@ class Initial(tester.TestSequence):
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
             ('Loaded', self._step_loaded, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -58,37 +43,35 @@ class Initial(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
-        # Serial connection to the BC15 console
-        self._bc15_ser = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=2)
-        # Set port separately, as we don't want it opened yet
-        self._bc15_ser.port = _ARM_PORT
-        # BC15 Console driver
-        self._bc15 = console.Console(self._bc15_ser)
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits, self._bc15)
+        d = support.LogicalDevices(self._devices, self._fifo)
+        s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         # Apply power to fixture Comms circuit.
         d.dcs_vcom.output(12.0, True)
         time.sleep(2)       # Allow OS to detect USB serial port
 
-    def _bc15_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False,
-                   addprompt=True):
-        """Push string data into the buffer if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self._bc15.puts(string_data, preflush, postflush, priority)
+    def close(self):
+        """Finished testing."""
+        self._logger.info('Close')
+        global m, d, s
+        # Remove power from fixture circuit.
+        d.dcs_vcom.output(0, False)
+        m = d = s = None
+        super().close()
+
+    def safety(self):
+        """Make the unit safe after a test."""
+        self._logger.info('Safety')
+        d.reset()
 
     def _bc15_putstartup(self, put_defaults):
         """Push startup banner strings into fake serial port."""
-        self._bc15_puts(
+        d.bc15_puts(
             'BC15\r\n'                          # BEGIN Startup messages
             'Build date:       06/11/2015\r\n'
             'Build time:       15:31:40\r\n'
@@ -105,36 +88,13 @@ class Initial(tester.TestSequence):
                 ('OK', ) * 3 +
                 ('{}'.format(limit.BIN_VERSION), )
                 ):
-                self._bc15_puts(str)
-
-    def close(self):
-        """Finished testing."""
-        self._logger.info('Close')
-        global m, d, s
-        # Remove power from fixture circuit.
-        d.dcs_vcom.output(0, False)
-        m = d = s = None
-
-    def safety(self):
-        """Make the unit safe after a test."""
-        self._logger.info('Safety')
-        self._bc15.close()
-        d.acsource.output(voltage=0.0, output=False)
-        d.dcl.output(2.0)
-        time.sleep(1)
-        d.discharge.pulse()
-        # Reset Logical Devices
-        d.reset()
-
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
+                d.bc15_puts(str)
 
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
         self.fifo_push(((s.olock, 0.0), (s.ofanshort, 3300.0), ))
 
-        MeasureGroup((m.dmm_lock, m.dmm_fanshort, ), timeout=5)
+        tester.MeasureGroup((m.dmm_lock, m.dmm_fanshort, ), timeout=5)
 
     def _step_program_arm(self):
         """Program the ARM device.
@@ -149,24 +109,7 @@ class Initial(tester.TestSequence):
         d.rla_boot.set_on()
         time.sleep(1)
         d.rla_reset.pulse(0.1)
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        file = os.path.join(folder, _ARM_BIN)
-        with open(file, 'rb') as infile:
-            bindata = bytearray(infile.read())
-        self._logger.debug('Read %d bytes from %s', len(bindata), file)
-        ser = SimSerial(port=_ARM_PORT, baudrate=115200)
-        try:
-            pgm = Programmer(
-                ser, bindata, erase_only=False, verify=False, crpmode=False)
-            try:
-                pgm.program()
-                s.oMirARM.store(0)
-            except ProgrammingError:
-                s.oMirARM.store(1)
-        finally:
-            ser.close()
-        m.pgmARM.measure()
+        d.programmer.program()
         d.rla_boot.set_off()
 
     def _step_initialise_arm(self):
@@ -182,13 +125,13 @@ class Initial(tester.TestSequence):
         d.dcs_3v3.output(9.0, True)
         d.rla_reset.pulse(0.1)
         time.sleep(0.5)
-        self._bc15.open()
-        self._bc15.action(None, delay=1.5, expected=10)  # Flush banner
-        self._bc15['UNLOCK'] = '0xDEADBEA7'
-        self._bc15['NVDEFAULT'] = True
-        self._bc15['NVWRITE'] = True
+        d.bc15.open()
+        d.bc15.action(None, delay=1.5, expected=10)  # Flush banner
+        d.bc15['UNLOCK'] = True
+        d.bc15['NVDEFAULT'] = True
+        d.bc15['NVWRITE'] = True
         m.arm_SwVer.measure()
-        self._bc15.close()
+        d.bc15.close()
         d.dcs_3v3.output(0.0, False)
 
     def _step_powerup(self):
@@ -203,15 +146,15 @@ class Initial(tester.TestSequence):
              (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, 0.2), ))
         self._bc15_putstartup(False)
         for str in (('', ) * 10):
-            self._bc15_puts(str)
+            d.bc15_puts(str)
 
         d.acsource.output(voltage=240.0, output=True)
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_acin, m.dmm_vbus, m.dmm_12Vs, m.dmm_3V3,
              m.dmm_15Vs, m.dmm_voutoff, ), timeout=5)
-        self._bc15.open()
-        self._bc15.action(None, delay=1.5, expected=10)  # Flush banner
-        self._bc15.ps_mode()
+        d.bc15.open()
+        d.bc15.action(None, delay=1.5, expected=10)  # Flush banner
+        d.bc15.ps_mode()
 # FIXME: Save the "Power Supply" mode state in the unit (new command required)
 
     def _step_output(self):
@@ -221,34 +164,35 @@ class Initial(tester.TestSequence):
 
         """
         self.fifo_push(((s.oVout, 14.40), ))
-        self._bc15_puts(
+        d.bc15_puts(
             'not-pulsing-volts=14432 ;mV \r\nnot-pulsing-current=1987 ;mA ')
-        self._bc15_puts('3')
-        self._bc15_puts('mv-set=14400 ;mV \r\nnot-pulsing-volts=14432 ;mV ')
-        self._bc15_puts(
+        d.bc15_puts('3')
+        d.bc15_puts('mv-set=14400 ;mV \r\nnot-pulsing-volts=14432 ;mV ')
+        d.bc15_puts(
             'set_volts_mv_num                        902 \r\n'
             'set_volts_mv_den                      14400 ')
         for str in (('', ) * 3):
-            self._bc15_puts(str)
+            d.bc15_puts(str)
 
         d.dcl.output(2.0, True)
         time.sleep(0.5)
-        self._bc15.stat()
-        vout = MeasureGroup(
+        d.bc15.stat()
+        vout = tester.MeasureGroup(
             (m.dmm_vout, m.arm_vout, m.arm_2amp, m.arm_2amp_lucky,
              m.arm_switch, )).reading1
         # Calibrate output voltage
-        self._bc15.cal_vout(vout)
+        d.bc15.cal_vout(vout)
         self.fifo_push(((s.oVout, 14.40), ))
         m.dmm_vout_cal.measure()
 
     def _step_loaded(self):
         """Tests of the output."""
         self.fifo_push(((s.oVout, (14.4, ) * 5 + (11.0, ), ), ))
-        self._bc15_puts(
+        d.bc15_puts(
             'not-pulsing-volts=14432 ;mV \r\nnot-pulsing-current=14000 ;mA ')
 
         d.dcl.output(14.0, True)
         time.sleep(0.5)
-        self._bc15.stat()
-        MeasureGroup((m.dmm_vout, m.arm_vout, m.arm_14amp, m.ramp_ocp, ))
+        d.bc15.stat()
+        tester.MeasureGroup(
+            (m.dmm_vout, m.arm_vout, m.arm_14amp, m.ramp_ocp, ))

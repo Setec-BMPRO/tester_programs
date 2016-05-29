@@ -8,19 +8,15 @@ import time
 import logging
 import threading
 
+import share
 import tester
-from share import ProgramPIC
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 INI_LIMIT = limit.DATA
 
-# These are module level variable to avoid having to use 'self.' everywhere.
-d = None        # Shortcut to Logical Devices
-s = None        # Shortcut to Sensors
-m = None        # Shortcut to Measurements
+# These are module level variables to avoid having to use 'self.' everywhere.
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -41,7 +37,6 @@ class Initial(tester.TestSequence):
             ('12V', self._step_reg_12v, None, True),
             ('24V', self._step_reg_24v, None, True),
             ('PeakPower', self._step_peak_power, None, True),
-            ('ErrorCheck', self._step_error_check, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -70,10 +65,6 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         d.reset()
 
-    def _step_error_check(self):
-        """Check physical instruments for errors."""
-        d.error_check()
-
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed.
 
@@ -84,7 +75,8 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.Lock, 10.1), (s.Part, 10.2), (s.R601, 2001.0),
              (s.R602, 2002.0), (s.R609, 2003.0), (s.R608, 2004.0), ))
-        MeasureGroup(
+
+        tester.MeasureGroup(
             (m.dmm_Lock, m.dmm_Part, m.dmm_R601, m.dmm_R602, m.dmm_R609,
              m.dmm_R608), 2)
 
@@ -102,12 +94,12 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.o8V5Ard, 8.5), (s.PriCtl, 12.34), (s.o5Vsb, 5.75),
             (s.o5Vsbunsw, (5.0,) * 2), (s.o3V3, 3.21), ))
-        # Push response prompts
         for _ in range(2):      # Push response prompts
             d.ard_puts('OK')
+
         d.dcs_Arduino.output(12.0, True)
         d.dcs_PriCtl.output(12.0, True)
-        MeasureGroup((m.dmm_PriCtl, m.dmm_8V5Ard), 2)
+        tester.MeasureGroup((m.dmm_PriCtl, m.dmm_8V5Ard), 2)
         time.sleep(1)
         d.ard.open()
         time.sleep(2)        # Wait for the banner to be received
@@ -133,7 +125,7 @@ class Initial(tester.TestSequence):
         d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5Vsb.output(5.75, True)
-        MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
+        tester.MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
         # Program the ARM device
         d.programmer.program()
         # Reset BOOT to ARM
@@ -165,7 +157,7 @@ class Initial(tester.TestSequence):
         # Apply and check injected rails
         d.dcs_5Vsb.output(5.75, True)
         d.dcs_PriCtl.output(12.0, True)
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_PriCtl, m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -173,7 +165,7 @@ class Initial(tester.TestSequence):
         # Start the PIC programmer for 5Vsb PIC (takes about 6 sec)
         self._logger.info('Start PIC programmer - PIC1')
         d.rla_pic1.set_on()
-        pic = ProgramPIC(limit.PIC_HEX1, folder, '10F320', s.oMirPIC)
+        pic = share.ProgramPIC(limit.PIC_HEX1, folder, '10F320', s.oMirPIC)
         pic.read()
         d.rla_pic1.set_off()
         # 'Measure' the mirror sensor to check and log data
@@ -182,7 +174,7 @@ class Initial(tester.TestSequence):
         # Start the PIC programmer for PwrSw PIC (takes about 6 sec)
         self._logger.info('Start PIC programmer - PIC2')
         d.rla_pic2.set_on()
-        pic = ProgramPIC(limit.PIC_HEX2, folder, '10F320', s.oMirPIC)
+        pic = share.ProgramPIC(limit.PIC_HEX2, folder, '10F320', s.oMirPIC)
         # While programming, we also set OCP adjust to maximum.
         # (takes about 6 sec)
         self._logger.info('Reset digital pots')
@@ -195,8 +187,8 @@ class Initial(tester.TestSequence):
         pot_worker.join()
         pic.read()
         d.rla_pic2.set_off()
-        # 'Measure' the mirror sensors to check and log data
-        MeasureGroup((m.pgmPIC, ))
+        # 'Measure' the mirror sensor to check and log data
+        m.pgmPIC.measure()
         # Reset BOOT to ARM
         d.rla_boot.set_off()
         # Discharge the 5Vsb to stop the ARM
@@ -220,10 +212,10 @@ class Initial(tester.TestSequence):
             d.arm_puts('')
 
         d.dcs_5Vsb.output(5.75, True)
-        MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
+        tester.MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
         d.arm.open()
-        d.arm['UNLOCK'] = '$DEADBEA7'
+        d.arm['UNLOCK'] = True
         d.arm['NVWRITE'] = True
         # Switch everything off
         d.dcs_5Vsb.output(0, False)
@@ -267,15 +259,15 @@ class Initial(tester.TestSequence):
         # A little load so PFC voltage falls faster
         d.dcl_12V.output(1.0)
         d.dcl_24V.output(1.0)
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_ACin, m.dmm_PriCtl, m.dmm_5Vsb_set, m.dmm_12Voff,
              m.dmm_24Voff, m.dmm_ACFAIL), 2)
         # Switch all outputs ON
         d.rla_pson.set_on()
-        MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
+        tester.MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
         # ARM data readings
-        d.arm['UNLOCK'] = '$DEADBEA7'
-        MeasureGroup(
+        d.arm['UNLOCK'] = True
+        tester.MeasureGroup(
             (m.arm_AcFreq, m.arm_AcVolt, m.arm_12V, m.arm_24V,
              m.arm_SwVer, m.arm_SwBld), )
         # Calibrate the PFC set voltage
@@ -375,7 +367,6 @@ class Initial(tester.TestSequence):
              (s.o24VinOCP, ((0.123, ) * 32 + (4.444, )) +
                            ((0.123, ) * 18 + (4.444, ))),
              ))
-        # Push response prompts
         for _ in range(35):      # Push response prompts
             d.ard_puts('OK')
 
@@ -407,10 +398,10 @@ class Initial(tester.TestSequence):
             ((s.o5Vsb, 5.15), (s.o12V, 12.22), (s.o24V, 24.44),
              (s.PGOOD, 0.15)))
 
-        d.dcl_5Vsb.binary(0.0, 2.5, 1.0)
-        d.dcl_12V.binary(0.0, 36.0, 2.0)
-        d.dcl_24V.binary(0.0, 18.0, 2.0)
-        MeasureGroup((m.dmm_5Vsb, m.dmm_12V, m.dmm_24V, m.dmm_PGOOD), 2)
+        d.dcl_5Vsb.binary(start=0.0, end=2.5, step=1.0)
+        d.dcl_12V.binary(start=0.0, end=36.0, step=2.0)
+        d.dcl_24V.binary(start=0.0, end=18.0, step=2.0)
+        tester.MeasureGroup((m.dmm_5Vsb, m.dmm_12V, m.dmm_24V, m.dmm_PGOOD), 2)
         d.dcl_24V.output(0)
         d.dcl_12V.output(0)
         d.dcl_5Vsb.output(0)
