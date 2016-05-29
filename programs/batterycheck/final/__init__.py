@@ -2,17 +2,14 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck Final Test Program."""
 
-import os
 import logging
 
+import share
 import tester
-from share import SimSerial, BtRadio, BtError
 from . import support
 from . import limit
 
 FIN_LIMIT = limit.DATA
-
-_BT_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM9'}[os.name]
 
 # These are module level variables to avoid having to use 'self.' everywhere.
 d = s = m = None
@@ -37,29 +34,14 @@ class Final(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
         self._sernum = None
-        self._btport = None
-        self._bt = None
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        # Serial connection to the BT device
-        self._btport = SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=2)
-        # Set port separately, as we don't want it opened yet
-        self._btport.port = _BT_PORT
-        # BT Radio driver
-        self._bt = BtRadio(self._btport)
         global d, s, m
-        d = support.LogicalDevices(self._devices)
+        d = support.LogicalDevices(self._devices, self._fifo)
         s = support.Sensors(d)
         m = support.Measurements(s, self._limits)
-
-    def _bt_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BT buffer only if FIFOs are enabled."""
-        if self._fifo:
-            self._btport.puts(string_data, preflush, postflush, priority)
 
     def close(self):
         """Finished testing."""
@@ -71,7 +53,6 @@ class Final(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        self._bt.close()
         d.reset()
 
     def _step_power_up(self):
@@ -94,44 +75,44 @@ class Final(tester.TestSequence):
         Scan for BT devices and match against serial number.
 
         """
-        self._bt_puts('OK\r\n', preflush=2)
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('+RDDSRES=112233445566,BCheck A1509020010,2,3\r\n')
-        self._bt_puts('+RDDSCNF=0\r\n')
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('+RPCI=\r\n') # Ask for PIN
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('+RUCE=\r\n') # Ask for 6-digit verify
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('+RCCRCNF=500,0000,0\r\n') # Pair response
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts(
+        d.bt_puts('OK\r\n', preflush=2)
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts('+RDDSRES=112233445566,BCheck A1509020010,2,3\r\n')
+        d.bt_puts('+RDDSCNF=0\r\n')
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts('+RPCI=\r\n') # Ask for PIN
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts('+RUCE=\r\n') # Ask for 6-digit verify
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts('+RCCRCNF=500,0000,0\r\n') # Pair response
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts(
             '{"jsonrpc": "2.0","id": 8256,'
             '"result": {"HardwareVersion": "2.0",'
             '"SoftwareVersion": "' + limit.ARM_VERSION + '",'
             '"SerialID": "A1509020010"}}\r\n', preflush=1)
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('OK\r\n', preflush=1)
-        self._bt_puts('+RDII\r\n')
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts('OK\r\n', preflush=1)
+        d.bt_puts('+RDII\r\n')
 
         self._logger.debug('Testing Bluetooth Serial: "%s"', self._sernum)
-        self._bt.open()
-        found = self._bt.scan(self._sernum)
+        d.bt.open()
+        found = d.bt.scan(self._sernum)
         s.oMirBT.store(found)
         m.BTscan.measure()
         try:
-            self._bt.pair()
-        except BtError:
+            d.bt.pair()
+        except share.BtError:
             _paired = False
         _paired = True
         s.oMirBT.store(_paired)
         m.BTpair.measure()
-        self._bt.data_mode_enter()
-        _info = self._bt.jsonrpc('GetSystemInfo')
+        d.bt.data_mode_enter()
+        _info = d.bt.jsonrpc('GetSystemInfo')
         s.oMirSwVer.store((_info['SoftwareVersion'], ))
         m.SwVerARM.measure()
         s.oMirBT.store(_info['SerialID'] == self._sernum)
         m.SerNumARM.measure()
-        self._bt.data_mode_escape()
-        self._bt.unpair()
+        d.bt.data_mode_escape()
+        d.bt.unpair()

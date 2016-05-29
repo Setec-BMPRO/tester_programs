@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck Final Test Program Limits."""
 
-ARM_VERSION = '1.7.4080'        # Software binary version
+import os
 
 from testlimit import lim_hilo_delta, lim_string, lim_boolean
+
+ARM_VERSION = '1.7.4080'        # Software binary version
+
+BT_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM9'}[os.name]
 
 DATA = (
     lim_hilo_delta('12V', 12.0, 0.1),
