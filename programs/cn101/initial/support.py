@@ -2,45 +2,74 @@
 # -*- coding: utf-8 -*-
 """CN101 Initial Test Program."""
 
+import os
+import inspect
 from pydispatch import dispatcher
 
-import sensor
+import share
 import tester
-from tester.devlogical import *
-from tester.measure import *
+import sensor
+from . import limit
 from .. import console
-
-translate = tester.translate
 
 
 class LogicalDevices():
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def __init__(self, devices, fifo):
         """Create all Logical Instruments.
 
            @param devices Physical instruments of the Tester
 
         """
-        self.dmm = dmm.DMM(devices['DMM'])
+        self._fifo = fifo
+        self.dmm = tester.DMM(devices['DMM'])
         # Power RS232 + Fixture Trek2.
-        self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
+        self.dcs_vcom = tester.DCSource(devices['DCS1'])
         # Power unit under test.
-        self.dcs_vin = dcsource.DCSource(devices['DCS2'])
+        self.dcs_vin = tester.DCSource(devices['DCS2'])
         # Power for Awning.
-        self.dcs_awn = dcsource.DCSource(devices['DCS3'])
-        self.rla_reset = relay.Relay(devices['RLA1'])
-        self.rla_boot = relay.Relay(devices['RLA2'])
-        self.rla_awn = relay.Relay(devices['RLA3'])
-        self.rla_s1 = relay.Relay(devices['RLA4'])
-        self.rla_s2 = relay.Relay(devices['RLA5'])
-        self.rla_s3 = relay.Relay(devices['RLA6'])
-        self.rla_s4 = relay.Relay(devices['RLA7'])
+        self.dcs_awn = tester.DCSource(devices['DCS3'])
+        self.rla_reset = tester.Relay(devices['RLA1'])
+        self.rla_boot = tester.Relay(devices['RLA2'])
+        self.rla_awn = tester.Relay(devices['RLA3'])
+        self.rla_s1 = tester.Relay(devices['RLA4'])
+        self.rla_s2 = tester.Relay(devices['RLA5'])
+        self.rla_s3 = tester.Relay(devices['RLA6'])
+        self.rla_s4 = tester.Relay(devices['RLA7'])
+        # ARM device programmer
+        file = os.path.join(os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe()))),
+            limit.ARM_BIN)
+        self.programmer = share.ProgramARM(limit.ARM_PORT, file, crpmode=False)
+        # Serial connection to the CN101 console
+        self.cn101_ser = share.SimSerial(
+            simulation=self._fifo, baudrate=115200, timeout=5.0)
+        # Set port separately, as we don't want it opened yet
+        self.cn101_ser.port = limit.ARM_PORT
+        # CN101 Console driver
+        self.cn101 = console.Console(self.cn101_ser)
+        # Serial connection to the BLE module
+        ble_ser = share.SimSerial(
+            simulation=self._fifo, baudrate=115200, timeout=0.1, rtscts=True)
+        # Set port separately, as we don't want it opened yet
+        ble_ser.port = limit.BLE_PORT
+        self.ble = share.BleRadio(ble_ser)
+
+    def cn101_puts(self,
+                   string_data, preflush=0, postflush=0, priority=False,
+                   addprompt=True):
+        """Push string data into the BP35 buffer if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
+            self.cn101.puts(string_data, preflush, postflush, priority)
 
     def reset(self):
         """Reset instruments."""
-        for dcs in (self.dcs_vin, self.dcs_vcom, self.dcs_awn):
+        self.cn101.close()
+        for dcs in (self.dcs_vin, self.dcs_awn):
             dcs.output(0.0, False)
         for rla in (self.rla_reset, self.rla_boot, self.rla_awn,
                     self.rla_s1, self.rla_s2, self.rla_s3, self.rla_s4):
@@ -51,12 +80,11 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits, cn101):
+    def __init__(self, logical_devices, limits):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
            @param limits Product test limits
-           @param cn101 cn101 ARM console driver
 
         """
         dispatcher.connect(
@@ -64,7 +92,7 @@ class Sensors():
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
-        self.oMirARM = sensor.Mirror()
+        cn101 = logical_devices.cn101
         self.oMirBT = sensor.Mirror()
         self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.microsw = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
@@ -75,8 +103,8 @@ class Sensors():
         self.oAwnA = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
         self.oAwnB = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         self.oSnEntry = sensor.DataEntry(
-            message=translate('cn101_initial', 'msgSnEntry'),
-            caption=translate('cn101_initial', 'capSnEntry'))
+            message=tester.translate('cn101_initial', 'msgSnEntry'),
+            caption=tester.translate('cn101_initial', 'capSnEntry'))
         self.oCANBIND = console.Sensor(cn101, 'CAN_BIND')
         self.oSwVer = console.Sensor(
             cn101, 'SW_VER', rdgtype=sensor.ReadingString)
@@ -89,7 +117,6 @@ class Sensors():
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensor."""
-        self.oMirARM.flush()
         self.oMirBT.flush()
 
 
@@ -104,10 +131,10 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.dmm_microsw = Measurement(limits['Part'], sense.microsw)
         self.dmm_sw1 = Measurement(limits['Part'], sense.sw1)
         self.dmm_sw2 = Measurement(limits['Part'], sense.sw2)
-        self.program = Measurement(limits['Program'], sense.oMirARM)
         self.detectBT = Measurement(limits['DetectBT'], sense.oMirBT)
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_3v3 = Measurement(limits['3V3'], sense.o3V3)
@@ -139,30 +166,25 @@ class SubTests():
         """
         d = logical_devices
         m = measurements
-        # PowerUp:
-        self.pwr_up = Step((
-            DcSubStep(setting=((d.dcs_vin, 8.6), ), output=True),
-            MeasureSubStep((m.dmm_vin, m.dmm_3v3), timeout=5),
-            ))
         # PowerReset:
-        self.reset = Step((
-            DcSubStep(setting=((d.dcs_vin, 0.0), ), delay=1.0),
-            DcSubStep(setting=((d.dcs_vin, 12.0), ), delay=15.0),
+        self.reset = tester.Step((
+            tester.DcSubStep(setting=((d.dcs_vin, 0.0), ), delay=1.0),
+            tester.DcSubStep(setting=((d.dcs_vin, 12.0), ), delay=15.0),
             ))
         # Awning:
-        self.awning = Step((
-            DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True),
-            MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5),
-            RelaySubStep(relays=((d.rla_awn, True), )),
-            MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn), timeout=5),
-            RelaySubStep(relays=((d.rla_awn, False), )),
-            DcSubStep(setting=((d.dcs_awn, 0.0), )),
+        self.awning = tester.Step((
+            tester.DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True),
+            tester.MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5),
+            tester.RelaySubStep(relays=((d.rla_awn, True), )),
+            tester.MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn), timeout=5),
+            tester.RelaySubStep(relays=((d.rla_awn, False), )),
+            tester.DcSubStep(setting=((d.dcs_awn, 0.0), )),
             ))
         # TankSense:
-        self.tank = Step((
-            RelaySubStep(
+        self.tank = tester.Step((
+            tester.RelaySubStep(
                 relays=((d.rla_s1, True), (d.rla_s2, True),
                         (d.rla_s3, True), (d.rla_s4, True), ), delay=0.2),
-            MeasureSubStep(
+            tester.MeasureSubStep(
                 (m.cn101_s1, m.cn101_s2, m.cn101_s3, m.cn101_s4), timeout=5),
             ))
