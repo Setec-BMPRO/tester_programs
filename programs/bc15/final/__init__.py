@@ -8,8 +8,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 FIN_LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -67,13 +65,13 @@ class Final(tester.TestSequence):
 
         d.dcl.output(1.0, output=True)
         d.acsource.output(240.0, output=True)
-        MeasureGroup((m.ps_mode, m.vout_nl, ), timeout=5)
+        tester.MeasureGroup((m.ps_mode, m.vout_nl, ), timeout=5)
 
     def _step_loaded(self):
         """Load the Unit."""
         self.fifo_push(
             ((s.vout, (14.23, ) + (14.2, ) * 8 + (11.0, )),
-            (s.ch_mode, True), ))
+             (s.ch_mode, True), ))
 
         d.dcl.output(10.0)
-        MeasureGroup((m.vout, m.ocp, m.ch_mode, ), timeout=5)
+        tester.MeasureGroup((m.vout, m.ocp, m.ch_mode, ), timeout=5)

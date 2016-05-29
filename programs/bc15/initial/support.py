@@ -2,47 +2,69 @@
 # -*- coding: utf-8 -*-
 """BC15 Initial Test Program."""
 
+import os
+import inspect
 import time
-from pydispatch import dispatcher
 
-import sensor
+import share
 import tester
-from tester.devlogical import *
-from tester.measure import *
-from . import console
-
-translate = tester.translate
+import sensor
+from . import limit
+from .. import console
 
 
 class LogicalDevices():
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def __init__(self, devices, fifo):
         """Create all Logical Instruments.
 
            @param devices Physical instruments of the Tester
 
         """
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.discharge = discharge.Discharge(devices['DIS'])
-        self.dcs_vcom = dcsource.DCSource(devices['DCS1'])
-        self.dcs_3v3 = dcsource.DCSource(devices['DCS2'])
-        self.dcs_out = dcsource.DCSource(devices['DCS3'])
-        self.dcl = dcload.DCLoad(devices['DCL1'])
-        self.rla_reset = relay.Relay(devices['RLA1'])   # ON == Asserted
-        self.rla_boot = relay.Relay(devices['RLA2'])    # ON == Asserted
-        self.rla_outrev = relay.Relay(devices['RLA3'])    # ON == Asserted
+        self._fifo = fifo
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
+        self.dcs_vcom = tester.DCSource(devices['DCS1'])
+        self.dcs_3v3 = tester.DCSource(devices['DCS2'])
+        self.dcs_out = tester.DCSource(devices['DCS3'])
+        self.dcl = tester.DCLoad(devices['DCL1'])
+        self.rla_reset = tester.Relay(devices['RLA1'])
+        self.rla_boot = tester.Relay(devices['RLA2'])
+        self.rla_outrev = tester.Relay(devices['RLA3'])
+        # ARM device programmer
+        file = os.path.join(os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe()))),
+            limit.ARM_BIN)
+        self.programmer = share.ProgramARM(limit.ARM_PORT, file, crpmode=False)
+        # Serial connection to the BC15 console
+        bc15_ser = share.SimSerial(
+            simulation=fifo, baudrate=115200, timeout=2)
+        # Set port separately, as we don't want it opened yet
+        bc15_ser.port = limit.ARM_PORT
+        # BC15 Console driver
+        self.bc15 = console.Console(bc15_ser)
+
+    def bc15_puts(self,
+                  string_data, preflush=0, postflush=0, priority=False,
+                  addprompt=True):
+        """Push string data into the buffer if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
+            self.bc15.puts(string_data, preflush, postflush, priority)
 
     def reset(self):
         """Reset instruments."""
+        self.bc15.close()
         self.acsource.output(voltage=0.0, output=False)
         self.dcl.output(2.0)
         time.sleep(1)
         self.discharge.pulse()
         self.dcl.output(0.0, False)
-        for dcs in (self.dcs_vcom, self.dcs_3v3, self.dcs_out):
+        for dcs in (self.dcs_3v3, self.dcs_out):
             dcs.output(0.0, output=False)
         for rla in (self.rla_reset, self.rla_boot, self.rla_outrev):
             rla.set_off()
@@ -52,7 +74,7 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits, bc15):
+    def __init__(self, logical_devices, limits):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
@@ -60,11 +82,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-        self.oMirARM = sensor.Mirror()
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
+        bc15 = logical_devices.bc15
         self.olock = sensor.Res(dmm, high=12, low=5, rng=10000, res=1)
         self.ofanshort = sensor.Res(dmm, high=13, low=6, rng=10000, res=1)
         self.oACin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
@@ -88,10 +106,6 @@ class Sensors():
             bc15, 'not-pulsing-current', scale=0.001)
         self.arm_switch = console.Sensor(bc15, 'SWITCH')
 
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirARM.flush()
-
 
 class Measurements():
 
@@ -104,7 +118,7 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.pgmARM = Measurement(limits['Program'], sense.oMirARM)
+        Measurement = tester.Measurement
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.olock)
         self.dmm_fanshort = Measurement(limits['FanShort'], sense.ofanshort)
         self.dmm_acin = Measurement(limits['ACin'], sense.oACin)
