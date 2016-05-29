@@ -37,8 +37,8 @@ class Console(console.Variable, console.BaseConsole):
             'CAL_PFC': ParameterFloat(
                 'CAL-PFC-BUS-VOLTS', writeable=True, readable=False,
                 scale=1000, write_format='{0} {1}'),
-            'UNLOCK': ParameterString('UNLOCK',
-                writeable=True, readable=False, write_format='{} {}'),
+            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+                writeable=True, readable=False, write_format='{1}'),
             'NVWRITE': ParameterBoolean('NV-WRITE',
                 writeable=True, readable=False, write_format='{1}'),
             }

@@ -103,7 +103,7 @@ class Initial(tester.TestSequence):
             d.arm_puts('')
 
         d.arm.open()
-        d.arm['UNLOCK'] = '$DEADBEA7'
+        d.arm['UNLOCK'] = True
         d.arm['NVWRITE'] = True
         # Switch everything off
         d.dcs_5v.output(0.0, False)
@@ -166,7 +166,7 @@ class Initial(tester.TestSequence):
         d.rla_12v2off.set_off()
         m.dmm_12v2.measure(timeout=5)
         # Unlock ARM
-        d.arm['UNLOCK'] = '$DEADBEA7'
+        d.arm['UNLOCK'] = True
         # A little load so PFC voltage falls faster
         d.loads(i12=1.0, i24=1.0)
         # Calibrate the PFC set voltage

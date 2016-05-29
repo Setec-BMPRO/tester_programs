@@ -216,7 +216,7 @@ class Initial(tester.TestSequence):
         MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
         d.arm.open()
-        d.arm['UNLOCK'] = '$DEADBEA7'
+        d.arm['UNLOCK'] = True
         d.arm['NVWRITE'] = True
         # Switch everything off
         d.dcs_5Vsb.output(0, False)
@@ -267,7 +267,7 @@ class Initial(tester.TestSequence):
         d.rla_pson.set_on()
         MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
         # ARM data readings
-        d.arm['UNLOCK'] = '$DEADBEA7'
+        d.arm['UNLOCK'] = True
         MeasureGroup(
             (m.arm_AcFreq, m.arm_AcVolt, m.arm_12V, m.arm_24V,
              m.arm_SwVer, m.arm_SwBld), )

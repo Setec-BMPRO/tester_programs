@@ -207,7 +207,7 @@ class Initial(tester.TestSequence):
         self._armdev.open()
         d.rla_reset.pulse_on(0.1)
         time.sleep(2.0)  # ARM startup delay
-        self._armdev['UNLOCK'] = '$DEADBEA7'
+        self._armdev['UNLOCK'] = True
         self._armdev['NVWRITE'] = True
         time.sleep(1.0)  # NVWRITE delay
         self._armdev['SER_ID'] = self._sernum
