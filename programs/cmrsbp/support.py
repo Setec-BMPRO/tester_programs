@@ -4,43 +4,50 @@
 
 from pydispatch import dispatcher
 
-import sensor
+import share
 import tester
-from tester.devlogical import *
-from tester.measure import *
-
-translate = tester.translate
+import sensor
+from . import limit
+from . import cmrsbp
 
 
 class LogicalDevices():
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def __init__(self, devices, fifo):
         """Create all Logical Instruments.
 
            @param devices Physical instruments of the Tester
 
         """
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dcs_Vchg = dcsource.DCSource(devices['DCS1'])
-        self.dcs_Vcom = dcsource.DCSource(devices['DCS2'])
-        dcs_vbat1 = dcsource.DCSource(devices['DCS3'])
-        dcs_vbat2 = dcsource.DCSource(devices['DCS4'])
-        dcs_vbat3 = dcsource.DCSource(devices['DCS5'])
-        self.dcs_vbat = dcsource.DCSourceParallel(
+        self._fifo = fifo
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_Vchg = tester.DCSource(devices['DCS1'])
+        self.dcs_Vcom = tester.DCSource(devices['DCS2'])
+        dcs_vbat1 = tester.DCSource(devices['DCS3'])
+        dcs_vbat2 = tester.DCSource(devices['DCS4'])
+        dcs_vbat3 = tester.DCSource(devices['DCS5'])
+        self.dcs_vbat = tester.DCSourceParallel(
             (dcs_vbat1, dcs_vbat2, dcs_vbat3,))
-        self.dcl_ibat = dcload.DCLoad(devices['DCL1'])
-        self.rla_vbat = relay.Relay(devices['RLA5'])
-        self.rla_PicReset = relay.Relay(devices['RLA6'])
-        self.rla_Prog = relay.Relay(devices['RLA7'])
-        self.rla_EVM = relay.Relay(devices['RLA8'])    # Enables the EV2200
-        self.rla_Pic = relay.Relay(devices['RLA9'])    # Connect to PIC
+        self.dcl_ibat = tester.DCLoad(devices['DCL1'])
+        self.rla_vbat = tester.Relay(devices['RLA5'])
+        self.rla_PicReset = tester.Relay(devices['RLA6'])
+        self.rla_Prog = tester.Relay(devices['RLA7'])
+        self.rla_EVM = tester.Relay(devices['RLA8'])    # Enables the EV2200
+        self.rla_Pic = tester.Relay(devices['RLA9'])    # Connect to PIC
         # Apply 5V to Vdd for Erasing PIC
-        self.rla_Erase = relay.Relay(devices['RLA10'])
+        self.rla_Erase = tester.Relay(devices['RLA10'])
+        # Serial connection to data monitor
+        self.cmr_ser = share.SimSerial(
+            simulation=self._fifo,
+            port=limit.CMR_PORT, baudrate=9600, timeout=0.1)
+        self.cmr = cmrsbp.CmrSbp(self.cmr_ser, data_timeout=10.0)
 
     def reset(self):
         """Reset instruments."""
+        self.cmr.close()
+        self.cmr_ser.close()
         for dcs in (self.dcs_vbat, self.dcs_Vchg, self.dcs_Vcom):
             dcs.output(0.0, False)
         self.dcs_Vcom.output(0.0, False)
@@ -76,8 +83,10 @@ class Sensors():
         self.oMirTemp = sensor.Mirror()
         self.oMirSw = sensor.Mirror()
         self.oMirSerNum = sensor.Mirror(rdgtype=sensor.ReadingString)
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.ovbatIn = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self.ovbat = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.0001)
         self.oVcc = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.001)
@@ -85,8 +94,8 @@ class Sensors():
         self.oibat = sensor.Vdc(
             dmm, high=4, low=2, rng=0.1, res=0.000001, scale=100.0)
         self.oSnEntry = sensor.DataEntry(
-            message=translate('cmrsbp_sn', 'msgSnEntry'),
-            caption=translate('cmrsbp_sn', 'capSnEntry'))
+            message=tester.translate('cmrsbp_sn', 'msgSnEntry'),
+            caption=tester.translate('cmrsbp_sn', 'capSnEntry'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -117,6 +126,7 @@ class MeasureInit():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.cmr_SenseRes = Measurement(limits['SenseRes'], sense.oMirSenseRes)
         self.cmr_Halfcell = Measurement(limits['Halfcell'], sense.oMirHalfCell)
@@ -148,6 +158,7 @@ class MeasureFin():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.dmm_vbatIn = Measurement(limits['VbatIn'], sense.ovbatIn)
         self.cmr_vbatIn = Measurement(limits['VbatIn'], sense.oMirvbatIn)
         self.cmr_ErrV = Measurement(limits['ErrV'], sense.oMirErrV)
@@ -179,29 +190,31 @@ class SubTestInit():
         d = logical_devices
         m = measurements
         # PowerUp: Check, Apply Batt In, measure.
-        self.pwrup = Step((
-            MeasureSubStep((m.dmm_NoFinal, ), timeout=5),
-            RelaySubStep(((d.rla_vbat, True), )),
-            DcSubStep(setting=((d.dcs_vbat, 12.20), ), output=True),
-            MeasureSubStep((m.dmm_vbat, m.dmm_Vcc, ), timeout=5),
+        self.pwrup = tester.Step((
+            tester.MeasureSubStep((m.dmm_NoFinal, ), timeout=5),
+            tester.RelaySubStep(((d.rla_vbat, True), )),
+            tester.DcSubStep(setting=((d.dcs_vbat, 12.20), ), output=True),
+            tester.MeasureSubStep((m.dmm_vbat, m.dmm_Vcc, ), timeout=5),
             ))
         # PowerComms: Power Comms, connect.
-        self.pwr_comms = Step((
-            DcSubStep(setting=((d.dcs_Vcom, 12.0), ), output=True),
-            DcSubStep(setting=((d.dcs_Vchg, 12.6), ), output=True, delay=15),
-            RelaySubStep(((d.rla_Pic, True), ), delay=2),
+        self.pwr_comms = tester.Step((
+            tester.DcSubStep(setting=((d.dcs_Vcom, 12.0), ), output=True),
+            tester.DcSubStep(
+                setting=((d.dcs_Vchg, 12.6), ), output=True, delay=15),
+            tester.RelaySubStep(((d.rla_Pic, True), ), delay=2),
             ))
         # CheckVcharge: Switch off vbat, measure
-        self.chk_vch = Step((
-            DcSubStep(setting=((d.dcs_vbat, 0.0), )),
-            RelaySubStep(((d.rla_vbat, False), )),
-            MeasureSubStep((m.dmm_vbatChge, m.dmm_Vcc), timeout=5),
-            RelaySubStep(((d.rla_vbat, True), )),
+        self.chk_vch = tester.Step((
+            tester.DcSubStep(setting=((d.dcs_vbat, 0.0), )),
+            tester.RelaySubStep(((d.rla_vbat, False), )),
+            tester.MeasureSubStep((m.dmm_vbatChge, m.dmm_Vcc), timeout=5),
+            tester.RelaySubStep(((d.rla_vbat, True), )),
             ))
         # CalSetup:
-        self.cal_setup = Step((
-            DcSubStep(setting=((d.dcs_vbat, 12.20), (d.dcs_Vchg, 0.0))),
-            RelaySubStep(
+        self.cal_setup = tester.Step((
+            tester.DcSubStep(
+                setting=((d.dcs_vbat, 12.20), (d.dcs_Vchg, 0.0))),
+            tester.RelaySubStep(
                 ((d.rla_Pic, False), (d.rla_PicReset, True), ), delay=2),
-            RelaySubStep(((d.rla_EVM, True), )),
+            tester.RelaySubStep(((d.rla_EVM, True), )),
             ))

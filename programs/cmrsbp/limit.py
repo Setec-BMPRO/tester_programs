@@ -2,6 +2,15 @@
 # -*- coding: utf-8 -*-
 """CMR-SBP ALL Test Program Limits."""
 
+import os
+
+PIC_HEX = 'CMR-SBP-9.hex'
+
+# Serial port for the EV2200.
+EV_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+# Serial port for the CMR.
+CMR_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
+
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('Vbat', 1, 11.90, 12.10, None, None),
