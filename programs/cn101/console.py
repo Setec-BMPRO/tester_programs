@@ -36,7 +36,7 @@ class Console(console.Variable, console.BadUartConsole):
         console.Variable.__init__(self)
         console.BadUartConsole.__init__(self, port)
         self.cmd_data = {
-            'UNLOCK': ParameterString('$DEADBEA7 UNLOCK',
+            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
                 writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
                 writeable=True, readable=False, write_format='{1}'),

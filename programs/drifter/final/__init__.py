@@ -8,8 +8,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 FIN_LIMIT = limit.DATA
 FIN_LIMIT_BM = limit.DATA_BM
 
@@ -62,6 +60,7 @@ class Final(tester.TestSequence):
         self.fifo_push(
             ((s.oYesNoSeg, True), (s.oYesNoBklight, True),
              (s.oYesNoDisplay, True), ))
+
         t.displ_check.run()
 
     def _step_sw_check(self):
@@ -71,7 +70,7 @@ class Final(tester.TestSequence):
              (s.oNotifySwOn, True), (s.oWaterPump, 11.0), (s.oBattSw, 11.0),
              (s.oUSB5V, 5.0), ))
 
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.ui_NotifySwOff, m.dmm_PumpOff, m.dmm_BattDisconn,
              m.ui_NotifySwOn, m.dmm_PumpOn, m.dmm_BattConnect, m.dmm_USB5V),
             timeout=5)

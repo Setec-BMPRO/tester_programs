@@ -29,7 +29,7 @@ class _Console():
     def __init__(self):
         """Create console instance."""
         self.cmd_data = {
-            'UNLOCK': ParameterString('$DEADBEA7 UNLOCK',
+            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
                 writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
                 writeable=True, readable=False, write_format='{1}'),

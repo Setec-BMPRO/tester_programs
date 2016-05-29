@@ -4,10 +4,10 @@
 
 from pydispatch import dispatcher
 
-import sensor
+import share
 import tester
-from tester.devlogical import *
-from tester.measure import *
+import sensor
+from . import limit
 from .. import console
 
 
@@ -15,21 +15,38 @@ class LogicalDevices():
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def __init__(self, devices, fifo):
         """Create all Logical Instruments.
 
            @param devices Physical instruments of the Tester
 
         """
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dcs_RS232 = dcsource.DCSource(devices['DCS1'])
-        self.dcs_SlopeCal = dcsource.DCSource(devices['DCS2'])
-        self.dcs_Vin = dcsource.DCSource(devices['DCS3'])
-        self.rla_Prog = relay.Relay(devices['RLA1'])
-        self.rla_ZeroCal = relay.Relay(devices['RLA2'])
+        self._fifo = fifo
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_RS232 = tester.DCSource(devices['DCS1'])
+        self.dcs_SlopeCal = tester.DCSource(devices['DCS2'])
+        self.dcs_Vin = tester.DCSource(devices['DCS3'])
+        self.rla_Prog = tester.Relay(devices['RLA1'])
+        self.rla_ZeroCal = tester.Relay(devices['RLA2'])
+        # Serial connection to the console
+        pic_ser = share.SimSerial(
+            simulation=self._fifo, baudrate=9600, timeout=5)
+        # Set port separately, as we don't want it opened yet
+        pic_ser.port = limit.PIC_PORT
+        self.pic = console.Console(pic_ser)
+
+    def pic_puts(self,
+                 string_data, preflush=0, postflush=0, priority=False,
+                 addprompt=True):
+        """Push string data into the buffer if FIFOs are enabled."""
+        if self._fifo:
+            if addprompt:
+                string_data = string_data + '\r\n> '
+            self.pic.puts(string_data, preflush, postflush, priority)
 
     def reset(self):
         """Reset instruments."""
+        self.pic.close()
         for dcs in (self.dcs_RS232, self.dcs_SlopeCal, self.dcs_Vin):
             dcs.output(0.0, output=False)
         for rla in (self.rla_Prog, self.rla_ZeroCal):
@@ -40,7 +57,7 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits, picdev):
+    def __init__(self, logical_devices, limits):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
@@ -52,6 +69,7 @@ class Sensors():
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
+        pic = logical_devices.pic
         self.oMirPIC = sensor.Mirror()
         self.oMirErrorV = sensor.Mirror()
         self.oMirErrorI = sensor.Mirror()
@@ -63,15 +81,15 @@ class Sensors():
             dmm, high=5, low=1, rng=10, res=0.00001, scale=-1000.0)
         self.o3V3 = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
         self.o0V8 = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.001)
-        self.pic_Status = console.Sensor(picdev, 'NVSTATUS')
-        self.pic_ZeroChk = console.Sensor(picdev, 'ZERO_CURRENT')
-        self.pic_Vin = console.Sensor(picdev, 'VOLTAGE')
-        self.pic_isense = console.Sensor(picdev, 'CURRENT')
-        self.pic_Vfactor = console.Sensor(picdev, 'V_FACTOR')
-        self.pic_Ifactor = console.Sensor(picdev, 'I_FACTOR')
-        self.pic_Ioffset = console.Sensor(picdev, 'CAL_OFFSET_CURRENT')
+        self.pic_Status = console.Sensor(pic, 'NVSTATUS')
+        self.pic_ZeroChk = console.Sensor(pic, 'ZERO_CURRENT')
+        self.pic_Vin = console.Sensor(pic, 'VOLTAGE')
+        self.pic_isense = console.Sensor(pic, 'CURRENT')
+        self.pic_Vfactor = console.Sensor(pic, 'V_FACTOR')
+        self.pic_Ifactor = console.Sensor(pic, 'I_FACTOR')
+        self.pic_Ioffset = console.Sensor(pic, 'CAL_OFFSET_CURRENT')
         self.pic_Ithreshold = console.Sensor(
-            picdev, 'ZERO-CURRENT-DISPLAY-THRESHOLD')
+            pic, 'ZERO-CURRENT-DISPLAY-THRESHOLD')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -91,6 +109,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.ErrorV = Measurement(limits['%ErrorV'], sense.oMirErrorV)
         self.CalV = Measurement(limits['%CalV'], sense.oMirErrorV)

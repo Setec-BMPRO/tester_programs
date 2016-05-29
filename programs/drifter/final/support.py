@@ -2,12 +2,8 @@
 # -*- coding: utf-8 -*-
 """Drifter Final Test Program."""
 
-import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
-
-translate = tester.translate
+import sensor
 
 
 class LogicalDevices():
@@ -16,10 +12,10 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dcs_Isense = dcsource.DCSource(devices['DCS1'])
-        self.dcs_12V = dcsource.DCSource(devices['DCS2'])
-        self.dcs_Level = dcsource.DCSource(devices['DCS3'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_Isense = tester.DCSource(devices['DCS1'])
+        self.dcs_12V = tester.DCSource(devices['DCS2'])
+        self.dcs_Level = tester.DCSource(devices['DCS3'])
 
     def reset(self):
         """Reset instruments."""
@@ -38,20 +34,20 @@ class Sensors():
         self.oBattSw = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.1)
         self.oUSB5V = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
         self.oYesNoSeg = sensor.YesNo(
-            message=translate('drifter_final', 'AreSegmentsOn?'),
-            caption=translate('drifter_final', 'capSegments'))
+            message=tester.translate('drifter_final', 'AreSegmentsOn?'),
+            caption=tester.translate('drifter_final', 'capSegments'))
         self.oYesNoBklight = sensor.YesNo(
-            message=translate('drifter_final', 'IsBacklightOk?'),
-            caption=translate('drifter_final', 'capBacklight'))
+            message=tester.translate('drifter_final', 'IsBacklightOk?'),
+            caption=tester.translate('drifter_final', 'capBacklight'))
         self.oYesNoDisplay = sensor.YesNo(
-            message=translate('drifter_final', 'IsDisplayOk?'),
-            caption=translate('drifter_final', 'capDisplay'))
+            message=tester.translate('drifter_final', 'IsDisplayOk?'),
+            caption=tester.translate('drifter_final', 'capDisplay'))
         self.oNotifySwOff = sensor.Notify(
-            message=translate('drifter_final', 'msgSwitchOff'),
-            caption=translate('drifter_final', 'capSwitchOff'))
+            message=tester.translate('drifter_final', 'msgSwitchOff'),
+            caption=tester.translate('drifter_final', 'capSwitchOff'))
         self.oNotifySwOn = sensor.Notify(
-            message=translate('drifter_final', 'msgSwitchOn'),
-            caption=translate('drifter_final', 'capSwitchOn'))
+            message=tester.translate('drifter_final', 'msgSwitchOn'),
+            caption=tester.translate('drifter_final', 'capSwitchOn'))
 
 
 class Measurements():
@@ -60,6 +56,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_PumpOff = Measurement(
             limits['SwOff'], sense.oWaterPump)
         self.dmm_PumpOn = Measurement(
@@ -92,16 +89,17 @@ class SubTests():
         m = measurements
 
         # DisplayCheck: Apply power, check display.
-        dcs1 = DcSubStep(
-            setting=((d.dcs_Isense, 0.2), ), output=True, delay=0.5)
-        dcs2 = DcSubStep(
-            setting=((d.dcs_12V, 12.0), ), output=True, delay=5)
-        msr1 = MeasureSubStep(
-            (m.ui_YesNoSeg, m.ui_YesNoBklight, ))
-        dcs3 = DcSubStep(
-            setting=((d.dcs_Isense, 0.0), (d.dcs_12V, 0.0), ),
-            output=False, delay=1)
-        dcs4 = DcSubStep(
-            setting=((d.dcs_12V, 12.0), ), output=True, delay=5)
-        msr2 = MeasureSubStep((m.ui_YesNoDisplay, ))
-        self.displ_check = Step((dcs1, dcs2, msr1, dcs3, dcs4, msr2))
+        self.displ_check = tester.Step((
+            tester.DcSubStep(
+                setting=((d.dcs_Isense, 0.2), ), output=True, delay=0.5),
+            tester.DcSubStep(
+                setting=((d.dcs_12V, 12.0), ), output=True, delay=5),
+            tester.MeasureSubStep(
+                (m.ui_YesNoSeg, m.ui_YesNoBklight, )),
+            tester.DcSubStep(
+                setting=((d.dcs_Isense, 0.0), (d.dcs_12V, 0.0), ),
+                output=False, delay=1),
+            tester.DcSubStep(
+                setting=((d.dcs_12V, 12.0), ), output=True, delay=5),
+            tester.MeasureSubStep((m.ui_YesNoDisplay, )),
+            ))

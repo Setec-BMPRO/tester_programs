@@ -23,7 +23,7 @@ class Console(console.Variable, console.BaseConsole):
         console.Variable.__init__(self)
         console.BaseConsole.__init__(self, port, verbose)
         self.cmd_data = {
-            'UNLOCK': ParameterString('0xDEADBEA7 UNLOCK',
+            'UNLOCK': ParameterBoolean('0xDEADBEA7 UNLOCK',
                 writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
                 writeable=True, readable=False, write_format='{1}'),
