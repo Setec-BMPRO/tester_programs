@@ -190,28 +190,28 @@ class SubTestInit():
         d = logical_devices
         m = measurements
         # PowerUp: Check, Apply Batt In, measure.
-        self.pwrup = tester.Step((
+        self.pwrup = tester.SubStep((
             tester.MeasureSubStep((m.dmm_NoFinal, ), timeout=5),
             tester.RelaySubStep(((d.rla_vbat, True), )),
             tester.DcSubStep(setting=((d.dcs_vbat, 12.20), ), output=True),
             tester.MeasureSubStep((m.dmm_vbat, m.dmm_Vcc, ), timeout=5),
             ))
         # PowerComms: Power Comms, connect.
-        self.pwr_comms = tester.Step((
+        self.pwr_comms = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_Vcom, 12.0), ), output=True),
             tester.DcSubStep(
                 setting=((d.dcs_Vchg, 12.6), ), output=True, delay=15),
             tester.RelaySubStep(((d.rla_Pic, True), ), delay=2),
             ))
         # CheckVcharge: Switch off vbat, measure
-        self.chk_vch = tester.Step((
+        self.chk_vch = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_vbat, 0.0), )),
             tester.RelaySubStep(((d.rla_vbat, False), )),
             tester.MeasureSubStep((m.dmm_vbatChge, m.dmm_Vcc), timeout=5),
             tester.RelaySubStep(((d.rla_vbat, True), )),
             ))
         # CalSetup:
-        self.cal_setup = tester.Step((
+        self.cal_setup = tester.SubStep((
             tester.DcSubStep(
                 setting=((d.dcs_vbat, 12.20), (d.dcs_Vchg, 0.0))),
             tester.RelaySubStep(

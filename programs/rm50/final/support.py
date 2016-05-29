@@ -7,8 +7,6 @@ from pydispatch import dispatcher
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 
 class LogicalDevices():
@@ -17,14 +15,14 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.pwr = power.Power(devices['PWR'])
-        self.dcs_24V = dcsource.DCSource(devices['DCS1'])
-        self.dcl_out = dcload.DCLoad(devices['DCL1'])
-        self.dcl_dcout = dcload.DCLoad(devices['DCL5'])
-        self.rla_rsense = relay.Relay(devices['RLA1'])
-        self.discharge = discharge.Discharge(devices['DIS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.pwr = tester.Power(devices['PWR'])
+        self.dcs_24V = tester.DCSource(devices['DCS1'])
+        self.dcl_out = tester.DCLoad(devices['DCL1'])
+        self.dcl_dcout = tester.DCLoad(devices['DCL5'])
+        self.rla_rsense = tester.Relay(devices['RLA1'])
+        self.discharge = tester.Discharge(devices['DIS'])
 
     def reset(self):
         """Reset instruments."""
@@ -82,6 +80,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_vdcDrop = Measurement(limits['Vdrop'], sense.oMirVdcDrop)
         self.dmm_eff = Measurement(limits['Eff'], sense.oMirEff)
         self.dmm_Lock = Measurement(limits['uSwitch'], sense.Lock)
@@ -108,36 +107,36 @@ class SubTests():
         d = logical_devices
         m = measurements
         # DCInputLeakage: DC input, measure input current.
-        msr1 = MeasureSubStep((m.dmm_Rsense, ), timeout=5)
-        rly = RelaySubStep(((d.rla_rsense, True), ))
-        dcs = DcSubStep(setting=((d.dcs_24V, 24.0), ), output=True)
-        msr2 = MeasureSubStep((m.dmm_Vsense, ), timeout=5)
-        self.dcinp_leak = Step((msr1, rly, dcs, msr2))
+        msr1 = tester.MeasureSubStep((m.dmm_Rsense, ), timeout=5)
+        rly = tester.RelaySubStep(((d.rla_rsense, True), ))
+        dcs = tester.DcSubStep(setting=((d.dcs_24V, 24.0), ), output=True)
+        msr2 = tester.MeasureSubStep((m.dmm_Vsense, ), timeout=5)
+        self.dcinp_leak = tester.SubStep((msr1, rly, dcs, msr2))
         # ACInput: Set AC input, measure at no load and full load.
-        acs1 = AcSubStep(
+        acs1 = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, frequency=50,
             output=True, delay=0.5)
-        acs2 = AcSubStep(
+        acs2 = tester.AcSubStep(
             acs=d.acsource, voltage=110.0, frequency=60, delay=0.5)
-        acs3 = AcSubStep(
+        acs3 = tester.AcSubStep(
             acs=d.acsource, voltage=90.0, frequency=60, delay=0.5)
-        ld1 = LoadSubStep(((d.dcl_out, 0.0), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_24Vnl, ), timeout=5)
-        ld2 = LoadSubStep(((d.dcl_out, 2.1), ))
-        msr2 = MeasureSubStep((m.dmm_24Vfl, ), timeout=5)
-        self.acinput_240V = Step((ld1, acs1, msr1, ld2, msr2))
-        self.acinput_110V = Step((ld1, acs2, msr1, ld2, msr2))
-        self.acinput_90V = Step((ld1, acs3, msr1, ld2, msr2))
+        ld1 = tester.LoadSubStep(((d.dcl_out, 0.0), ), output=True)
+        msr1 = tester.MeasureSubStep((m.dmm_24Vnl, ), timeout=5)
+        ld2 = tester.LoadSubStep(((d.dcl_out, 2.1), ))
+        msr2 = tester.MeasureSubStep((m.dmm_24Vfl, ), timeout=5)
+        self.acinput_240V = tester.SubStep((ld1, acs1, msr1, ld2, msr2))
+        self.acinput_110V = tester.SubStep((ld1, acs2, msr1, ld2, msr2))
+        self.acinput_90V = tester.SubStep((ld1, acs3, msr1, ld2, msr2))
         # OCP: Ocp, turn off.
-        acs1 = AcSubStep(
+        acs1 = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, frequency=50, delay=0.5)
-        msr1 = MeasureSubStep((m.dmm_24Vpl, m.ramp_OCP, ), timeout=5)
-        acs2 = AcSubStep(acs=d.acsource, voltage=0.0)
-        ld1 = LoadSubStep(((d.dcl_out, 2.1), ), delay=1)
-        msr2 = MeasureSubStep((m.dmm_24Voff, ), timeout=5)
-        self.ocp = Step((acs1, msr1, acs2, ld1, msr2))
+        msr1 = tester.MeasureSubStep((m.dmm_24Vpl, m.ramp_OCP, ), timeout=5)
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=0.0)
+        ld1 = tester.LoadSubStep(((d.dcl_out, 2.1), ), delay=1)
+        msr2 = tester.MeasureSubStep((m.dmm_24Voff, ), timeout=5)
+        self.ocp = tester.SubStep((acs1, msr1, acs2, ld1, msr2))
         # NoLoadPower: Startup at no load, measure input power.
-        acs = AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
-        ld = LoadSubStep(((d.dcl_out, 0.05), ), delay=0.5)
-        msr = MeasureSubStep((m.dmm_24Vnl, m.dmm_powerNL, ), timeout=5)
-        self.pow_nl = Step((acs, ld, msr))
+        acs = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
+        ld = tester.LoadSubStep(((d.dcl_out, 0.05), ), delay=0.5)
+        msr = tester.MeasureSubStep((m.dmm_24Vnl, m.dmm_powerNL, ), timeout=5)
+        self.pow_nl = tester.SubStep((acs, ld, msr))

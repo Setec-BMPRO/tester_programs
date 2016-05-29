@@ -13,11 +13,12 @@ import subprocess
 import threading
 import queue
 import logging
+
+import tester
 import testlimit
 import sensor
 import isplpc
-from tester.measure import Measurement
-from share import SimSerial
+import share
 
 
 # Result values to store into the mirror sensor
@@ -141,11 +142,11 @@ class ProgramARM():
             self._bindata = bytearray(infile.read())
         limit = testlimit.LimitHiLo(
             limitname, 0, (_SUCCESS - 0.5, _SUCCESS + 0.5))
-        self._arm = Measurement(limit, sensor.Mirror())
+        self._arm = tester.Measurement(limit, sensor.Mirror())
 
     def program(self):
         """Program a device."""
-        ser = SimSerial(port=self._port, baudrate=self._baudrate)
+        ser = share.SimSerial(port=self._port, baudrate=self._baudrate)
         try:
             pgm = isplpc.Programmer(
                 ser,

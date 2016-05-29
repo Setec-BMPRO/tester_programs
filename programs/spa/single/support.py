@@ -3,8 +3,7 @@
 """Spa SINGLE Initial Test Program."""
 
 import sensor
-from tester.devlogical import *
-from tester.measure import *
+import tester
 
 # Scale factor for AC Input Current sensors.
 #   0R1 current sense resistor
@@ -24,12 +23,12 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dso = dso.DSO(devices['DSO'])
-        self.acsource = acsource.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dso = tester.DSO(devices['DSO'])
+        self.acsource = tester.ACSource(devices['ACS'])
         # DC Source that power the test fixture
-        self.dcsAuxPos = dcsource.DCSource(devices['DCS4'])
-        self.dcsAuxNeg = dcsource.DCSource(devices['DCS3'])
+        self.dcsAuxPos = tester.DCSource(devices['DCS4'])
+        self.dcsAuxNeg = tester.DCSource(devices['DCS3'])
 
     def reset(self):
         """Reset instruments."""
@@ -81,6 +80,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         # AC Input Voltages for all UUTs
         self.dmm_AcVin10 = Measurement(limits['AcVin10'], sense.oAcVin)
         self.dmm_AcVin12 = Measurement(limits['AcVin12'], sense.oAcVin)

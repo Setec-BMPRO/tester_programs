@@ -7,8 +7,6 @@ import time
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 
 class LogicalDevices():
@@ -17,19 +15,19 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dso = dso.DSO(devices['DSO'])
-        self.dcs_12V = dcsource.DCSource(devices['DCS1'])
-        self.dcs_3V3 = dcsource.DCSource(devices['DCS2'])
-        self.rla_tank1S3 = relay.Relay(devices['RLA1'])
-        self.rla_tank1S2 = relay.Relay(devices['RLA2'])
-        self.rla_tank1S1 = relay.Relay(devices['RLA3'])
-        self.rla_tank2S3 = relay.Relay(devices['RLA4'])
-        self.rla_tank2S2 = relay.Relay(devices['RLA5'])
-        self.rla_tank2S1 = relay.Relay(devices['RLA6'])
-        self.rla_tank3S3 = relay.Relay(devices['RLA7'])
-        self.rla_tank3S2 = relay.Relay(devices['RLA8'])
-        self.rla_tank3S1 = relay.Relay(devices['RLA9'])
-        self.rla_trigg = relay.Relay(devices['RLA10'])
+        self.dso = tester.DSO(devices['DSO'])
+        self.dcs_12V = tester.DCSource(devices['DCS1'])
+        self.dcs_3V3 = tester.DCSource(devices['DCS2'])
+        self.rla_tank1S3 = tester.Relay(devices['RLA1'])
+        self.rla_tank1S2 = tester.Relay(devices['RLA2'])
+        self.rla_tank1S1 = tester.Relay(devices['RLA3'])
+        self.rla_tank2S3 = tester.Relay(devices['RLA4'])
+        self.rla_tank2S2 = tester.Relay(devices['RLA5'])
+        self.rla_tank2S1 = tester.Relay(devices['RLA6'])
+        self.rla_tank3S3 = tester.Relay(devices['RLA7'])
+        self.rla_tank3S2 = tester.Relay(devices['RLA8'])
+        self.rla_tank3S1 = tester.Relay(devices['RLA9'])
+        self.rla_trigg = tester.Relay(devices['RLA10'])
         self._all_relays = (
             self.rla_tank1S3, self.rla_tank1S2, self.rla_tank1S1,
             self.rla_tank2S3, self.rla_tank2S2, self.rla_tank2S1,
@@ -73,6 +71,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         lims = {
             'tankL1': (
                 limits['T1level1'], limits['T2level1'], limits['T3level1']),
@@ -131,44 +130,44 @@ class SubTests():
             sender=m.dso_TankLevel1.sensor,
             signal=tester.SigDso)
         # PowerOn: Apply 12Vdc, measure.
-        dcs = DcSubStep(
+        dcs = tester.DcSubStep(
             setting=((d.dcs_12V, 12.0), (d.dcs_3V3, 3.3), ),
             output=True, delay=1)
-        msr = MeasureSubStep((m.dso_TankLevel1, ))
-        self.pwr_on = Step((dcs, msr, ))
+        msr = tester.MeasureSubStep((m.dso_TankLevel1, ))
+        self.pwr_on = tester.SubStep((dcs, msr, ))
         # Tank1: Vary levels, measure.
-        rly1 = RelaySubStep(((d.rla_tank1S3, True), ))
-        msr1 = MeasureSubStep((m.dso_Tank1Level2, ))
-        rly2 = RelaySubStep(((d.rla_tank1S2, True), ))
-        msr2 = MeasureSubStep((m.dso_Tank1Level3, ))
-        rly3 = RelaySubStep(((d.rla_tank1S1, True), ))
-        msr3 = MeasureSubStep((m.dso_Tank1Level4, ))
-        rly4 = RelaySubStep(
+        rly1 = tester.RelaySubStep(((d.rla_tank1S3, True), ))
+        msr1 = tester.MeasureSubStep((m.dso_Tank1Level2, ))
+        rly2 = tester.RelaySubStep(((d.rla_tank1S2, True), ))
+        msr2 = tester.MeasureSubStep((m.dso_Tank1Level3, ))
+        rly3 = tester.RelaySubStep(((d.rla_tank1S1, True), ))
+        msr3 = tester.MeasureSubStep((m.dso_Tank1Level4, ))
+        rly4 = tester.RelaySubStep(
             ((d.rla_tank1S3, False), (d.rla_tank1S2, False),
              (d.rla_tank1S1, False)))
-        self.tank1 = Step((rly1, msr1, rly2, msr2, rly3, msr3, rly4))
+        self.tank1 = tester.SubStep((rly1, msr1, rly2, msr2, rly3, msr3, rly4))
         # Tank2: Vary levels, measure.
-        rly1 = RelaySubStep(((d.rla_tank2S3, True), ))
-        msr1 = MeasureSubStep((m.dso_Tank2Level2, ))
-        rly2 = RelaySubStep(((d.rla_tank2S2, True), ))
-        msr2 = MeasureSubStep((m.dso_Tank2Level3, ))
-        rly3 = RelaySubStep(((d.rla_tank2S1, True), ))
-        msr3 = MeasureSubStep((m.dso_Tank2Level4, ))
-        rly4 = RelaySubStep(
+        rly1 = tester.RelaySubStep(((d.rla_tank2S3, True), ))
+        msr1 = tester.MeasureSubStep((m.dso_Tank2Level2, ))
+        rly2 = tester.RelaySubStep(((d.rla_tank2S2, True), ))
+        msr2 = tester.MeasureSubStep((m.dso_Tank2Level3, ))
+        rly3 = tester.RelaySubStep(((d.rla_tank2S1, True), ))
+        msr3 = tester.MeasureSubStep((m.dso_Tank2Level4, ))
+        rly4 = tester.RelaySubStep(
             ((d.rla_tank2S3, False), (d.rla_tank2S2, False),
              (d.rla_tank2S1, False)))
-        self.tank2 = Step((rly1, msr1, rly2, msr2, rly3, msr3, rly4))
+        self.tank2 = tester.SubStep((rly1, msr1, rly2, msr2, rly3, msr3, rly4))
         # Tank3: Vary levels, measure.
-        rly1 = RelaySubStep(((d.rla_tank3S3, True), ))
-        msr1 = MeasureSubStep((m.dso_Tank3Level2, ))
-        rly2 = RelaySubStep(((d.rla_tank3S2, True), ))
-        msr2 = MeasureSubStep((m.dso_Tank3Level3, ))
-        rly3 = RelaySubStep(((d.rla_tank3S1, True), ))
-        msr3 = MeasureSubStep((m.dso_Tank3Level4, ))
-        rly4 = RelaySubStep(
+        rly1 = tester.RelaySubStep(((d.rla_tank3S3, True), ))
+        msr1 = tester.MeasureSubStep((m.dso_Tank3Level2, ))
+        rly2 = tester.RelaySubStep(((d.rla_tank3S2, True), ))
+        msr2 = tester.MeasureSubStep((m.dso_Tank3Level3, ))
+        rly3 = tester.RelaySubStep(((d.rla_tank3S1, True), ))
+        msr3 = tester.MeasureSubStep((m.dso_Tank3Level4, ))
+        rly4 = tester.RelaySubStep(
             ((d.rla_tank3S3, False), (d.rla_tank3S2, False),
              (d.rla_tank3S1, False)))
-        self.tank3 = Step((rly1, msr1, rly2, msr2, rly3, msr3, rly4))
+        self.tank3 = tester.SubStep((rly1, msr1, rly2, msr2, rly3, msr3, rly4))
 
     def dso_trigger(self):
         """DSO Ready handler."""

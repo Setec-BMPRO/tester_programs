@@ -167,12 +167,12 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerReset:
-        self.reset = tester.Step((
+        self.reset = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_vin, 0.0), ), delay=1.0),
             tester.DcSubStep(setting=((d.dcs_vin, 12.0), ), delay=15.0),
             ))
         # Awning:
-        self.awning = tester.Step((
+        self.awning = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True),
             tester.MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5),
             tester.RelaySubStep(relays=((d.rla_awn, True), )),
@@ -181,7 +181,7 @@ class SubTests():
             tester.DcSubStep(setting=((d.dcs_awn, 0.0), )),
             ))
         # TankSense:
-        self.tank = tester.Step((
+        self.tank = tester.SubStep((
             tester.RelaySubStep(
                 relays=((d.rla_s1, True), (d.rla_s2, True),
                         (d.rla_s3, True), (d.rla_s4, True), ), delay=0.2),

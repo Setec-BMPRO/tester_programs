@@ -7,8 +7,6 @@ from pydispatch import dispatcher
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 
 class LogicalDevices():
@@ -21,14 +19,14 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dcs_Vout = dcsource.DCSource(devices['DCS3'])
-        self.dcs_SecCtl2 = dcsource.DCSource(devices['DCS2'])
-        self.dcl = dcload.DCLoad(devices['DCL1'])
-        self.rla_Fuse = relay.Relay(devices['RLA4'])
-        self.rla_Fan = relay.Relay(devices['RLA6'])
-        self.discharge = discharge.Discharge(devices['DIS'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_Vout = tester.DCSource(devices['DCS3'])
+        self.dcs_SecCtl2 = tester.DCSource(devices['DCS2'])
+        self.dcl = tester.DCLoad(devices['DCL1'])
+        self.rla_Fuse = tester.Relay(devices['RLA4'])
+        self.rla_Fan = tester.Relay(devices['RLA6'])
+        self.discharge = tester.Discharge(devices['DIS'])
 
     def reset(self):
         """Reset instruments."""
@@ -107,6 +105,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.dmm_reg = Measurement(limits['Reg'], sense.oMirReg)
         self.dmm_Lock = Measurement(limits['FixtureLock'], sense.oLock)
         self.dmm_FanConn = Measurement(limits['FanConn'], sense.oFanConn)
@@ -160,72 +159,72 @@ class SubTests():
         d = logical_devices
         m = measurements
         # FuseCheck: Apply ext Vout and SecCtl2, measure.
-        dcs1 = DcSubStep(
+        dcs1 = tester.DcSubStep(
             setting=((d.dcs_Vout, 13.8), (d.dcs_SecCtl2, 13.8), ), output=True)
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_VoutExt, m.dmm_SecCtl2Ext, m.dmm_SecCtlExt, ), timeout=5)
-        rly1 = RelaySubStep(((d.rla_Fuse, True), ))
-        msr2 = MeasureSubStep(
+        rly1 = tester.RelaySubStep(((d.rla_Fuse, True), ))
+        msr2 = tester.MeasureSubStep(
             (m.dmm_GreenOn, m.dmm_RedOff), timeout=5)
-        rly2 = RelaySubStep(((d.rla_Fuse, False), ))
-        msr3 = MeasureSubStep(
+        rly2 = tester.RelaySubStep(((d.rla_Fuse, False), ))
+        msr3 = tester.MeasureSubStep(
             (m.dmm_GreenOff, m.dmm_RedOn), timeout=5)
-        self.fuse_check = Step(
+        self.fuse_check = tester.SubStep(
             (dcs1, msr1, rly1, msr2, rly2, msr3))
         # FanCheck: Activate fan, measure.
-        msr1 = MeasureSubStep((m.dmm_FanOff, ), timeout=5)
-        rly1 = RelaySubStep(((d.rla_Fan, True), ))
-        msr2 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep((m.dmm_FanOff, ), timeout=5)
+        rly1 = tester.RelaySubStep(((d.rla_Fan, True), ))
+        msr2 = tester.MeasureSubStep(
             (m.dmm_FanOn, m.dmm_SecShdnOff), timeout=10)
-        rly2 = RelaySubStep(((d.rla_Fan, False), ))
-        self.fan_check = Step((msr1, rly1, msr2, rly2))
+        rly2 = tester.RelaySubStep(((d.rla_Fan, False), ))
+        self.fan_check = tester.SubStep((msr1, rly1, msr2, rly2))
         # VoltageProtect: Measure OVP and UVP.
-        msr1 = MeasureSubStep((m.ramp_OVP, ), timeout=5)
-        ld1 = LoadSubStep(((d.dcl, 0.5), ), output=True)
-        msr2 = MeasureSubStep((m.ramp_UVP, ), timeout=5)
-        ld2 = LoadSubStep(((d.dcl, 0.0),))
-        self.OV_UV = Step((msr1, ld1, msr2, ld2))
+        msr1 = tester.MeasureSubStep((m.ramp_OVP, ), timeout=5)
+        ld1 = tester.LoadSubStep(((d.dcl, 0.5), ), output=True)
+        msr2 = tester.MeasureSubStep((m.ramp_UVP, ), timeout=5)
+        ld2 = tester.LoadSubStep(((d.dcl, 0.0),))
+        self.OV_UV = tester.SubStep((msr1, ld1, msr2, ld2))
         # PowerUp: Turn on at low voltage measure
-        dcs1 = DcSubStep(
+        dcs1 = tester.DcSubStep(
             setting=((d.dcs_Vout, 0.0), (d.dcs_SecCtl2, 0.0), ), output=False)
-        acs1 = AcSubStep(
+        acs1 = tester.AcSubStep(
             acs=d.acsource, voltage=100.0, output=True, delay=1.0)
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_VacMin, m.dmm_AcDetOn, m.dmm_InrushOn, m.dmm_Vbus,
              m.dmm_VoutPre, m.dmm_SecCtl, m.dmm_SecCtl2, ), timeout=5)
-        acs2 = AcSubStep(acs=d.acsource, voltage=0.0)
-        self.pwr_up = Step((dcs1, acs1, msr1, acs2))
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=0.0)
+        self.pwr_up = tester.SubStep((dcs1, acs1, msr1, acs2))
         # MainsCheck: Turn on, min load, measure.
-        ld1 = LoadSubStep(((d.dcl, 0.5), ), output=True)
-        acs1 = AcSubStep(acs=d.acsource, voltage=75.0, delay=2.0)
-        msr1 = MeasureSubStep((m.dmm_AcDetOff, ), timeout=7)
-        acs2 = AcSubStep(acs=d.acsource, voltage=94.0,  delay=0.5)
-        msr2 = MeasureSubStep((m.dmm_AcDetOn, ), timeout=7)
-        acs3 = AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
-        msr3 = MeasureSubStep(
+        ld1 = tester.LoadSubStep(((d.dcl, 0.5), ), output=True)
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=75.0, delay=2.0)
+        msr1 = tester.MeasureSubStep((m.dmm_AcDetOff, ), timeout=7)
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=94.0,  delay=0.5)
+        msr2 = tester.MeasureSubStep((m.dmm_AcDetOn, ), timeout=7)
+        acs3 = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
+        msr3 = tester.MeasureSubStep(
             (m.dmm_Vac, m.dmm_AcDetOn, m.dmm_Vbias, m.dmm_SecCtl,
              m.dmm_VoutPre, ), timeout=5)
-        self.mains_chk = Step(
+        self.mains_chk = tester.SubStep(
             (ld1, acs1, msr1, acs2, msr2, acs3, msr3))
         # Load: Load, measure, overload, shutdown.
-        ld1 = LoadSubStep(((d.dcl, 16.0), ))
-        msr1 = MeasureSubStep(
+        ld1 = tester.LoadSubStep(((d.dcl, 16.0), ))
+        msr1 = tester.MeasureSubStep(
             (m.dmm_Vbus, m.dmm_Vbias, m.dmm_SecCtl, m.dmm_SecCtl2,
              m.dmm_Vout, ), timeout=5)
-        ld2 = LoadSubStep(((d.dcl, 30.05),), delay=1)
-        msr2 = MeasureSubStep((m.dmm_VoutOff, ), timeout=10)
-        acs1 = AcSubStep(acs=d.acsource, voltage=0.0)
-        ld3 = LoadSubStep(((d.dcl, 0.0), ))
-        self.load = Step((ld1, msr1))
-        self.shutdown = Step((ld2, msr2, acs1, ld3))
+        ld2 = tester.LoadSubStep(((d.dcl, 30.05),), delay=1)
+        msr2 = tester.MeasureSubStep((m.dmm_VoutOff, ), timeout=10)
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=0.0)
+        ld3 = tester.LoadSubStep(((d.dcl, 0.0), ))
+        self.load = tester.SubStep((ld1, msr1))
+        self.shutdown = tester.SubStep((ld2, msr2, acs1, ld3))
         # InputOV: Apply input overvoltage, shutdown.
-        ld1 = LoadSubStep(((d.dcl, 0.5), ))
-        acs1 = AcSubStep(
+        ld1 = tester.LoadSubStep(((d.dcl, 0.5), ))
+        acs1 = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_pwmShdnOn, m.dmm_vacShdnOn, ), timeout=8)
-        acs2 = AcSubStep(acs=d.acsource, voltage=300.0, delay=0.5)
-        msr2 = MeasureSubStep(
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=300.0, delay=0.5)
+        msr2 = tester.MeasureSubStep(
             (m.dmm_pwmShdnOff, m.dmm_vacShdnOn, ), timeout=8)
-        acs4 = AcSubStep(acs=d.acsource, voltage=0.0)
-        self.inp_ov = Step((ld1, acs1, msr1, acs2, msr2, acs4))
+        acs4 = tester.AcSubStep(acs=d.acsource, voltage=0.0)
+        self.inp_ov = tester.SubStep((ld1, acs1, msr1, acs2, msr2, acs4))

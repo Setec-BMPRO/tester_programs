@@ -93,7 +93,7 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: Apply 240Vac, set min load, measure.
-        self.pwr_up = tester.Step((
+        self.pwr_up = tester.SubStep((
             tester.LoadSubStep(
                 ((d.dcl_5V, 0.0), (d.dcl_24V, 0.1), (d.dcl_12V, 3.5),
                  (d.dcl_12V2, 0.5)), output=True),
@@ -105,7 +105,7 @@ class SubTests():
             tester.MeasureSubStep((m.dmm_12V2off, ), timeout=5),
             ))
         # PowerOn: Turn on, measure at min load.
-        self.pwr_on = tester.Step((
+        self.pwr_on = tester.SubStep((
             tester.RelaySubStep(((d.rla_pson, True), )),
             tester.MeasureSubStep(
                 (m.dmm_24Von, m.dmm_12Von, m.dmm_12V2off,
@@ -118,18 +118,18 @@ class SubTests():
         # 115Vac Full Load: 115Vac, measure.
         mss = tester.MeasureSubStep(
             (m.dmm_5V, m.dmm_24Von, m.dmm_12Von, m.dmm_12V2on,), timeout=5)
-        self.full_load = tester.Step((
+        self.full_load = tester.SubStep((
             tester.LoadSubStep(
                 ((d.dcl_5V, 2.5), (d.dcl_24V, 5.0),
                  (d.dcl_12V, 15.0), (d.dcl_12V2, 7.0)), delay=0.5),
             mss,
             ))
-        self.full_load_115 = tester.Step((
+        self.full_load_115 = tester.SubStep((
             tester.AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5),
             mss,
             ))
         # PowerOff: Set min load, switch off, measure.
-        self.pwr_off = tester.Step((
+        self.pwr_off = tester.SubStep((
             tester.LoadSubStep(
                 ((d.dcl_5V, 0.5), (d.dcl_24V, 0.5), (d.dcl_12V, 4.0))),
             tester.MeasureSubStep(

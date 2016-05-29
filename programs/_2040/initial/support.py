@@ -116,14 +116,14 @@ class SubTests():
         d = logical_devices
         m = measurements
         # SecCheck: Apply Ext Vout, measure.
-        self.sec_chk = tester.Step((
+        self.sec_chk = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_Vout, 20.0), ), output=True),
             tester.MeasureSubStep(
                 (m.dmm_VoutExt, m.dmm_SDOff, m.dmm_GreenOn, ), timeout=5),
             tester.DcSubStep(setting=((d.dcs_Vout, 0.0), )),
             ))
         # DCPowerOn: Apply DC power, measure, OCP.
-        self.dcpwr_on = tester.Step((
+        self.dcpwr_on = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_dcin, 10.25), ), output=True),
             tester.MeasureSubStep(
                 (m.dmm_DCmin, m.dmm_VccDC, m.dmm_Vout,
@@ -143,7 +143,7 @@ class SubTests():
                 setting=((d.dcs_dcin, 0.0), ), output=False, delay=2),
             ))
         # ACPowerOn: Apply AC power, measure, OCP.
-        self.acpwr_on = tester.Step((
+        self.acpwr_on = tester.SubStep((
             tester.AcSubStep(
                 acs=d.acsource, voltage=90.0, output=True, delay=0.5),
             tester.MeasureSubStep(

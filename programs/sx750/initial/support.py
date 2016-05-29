@@ -4,18 +4,16 @@
 
 import os
 import inspect
+import time
 from pydispatch import dispatcher
 
+import share
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
-from share.console import Sensor as con_sensor
-from share import SimSerial, ProgramARM
 from . import limit
-from ..console import Console
-from .arduino import Arduino
+from . import arduino
 from . import digpot
+from .. import console
 
 
 class LogicalDevices():
@@ -25,43 +23,45 @@ class LogicalDevices():
     def __init__(self, devices, fifo):
         """Create all Logical Instruments."""
         self._fifo = fifo
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.discharge = discharge.Discharge(devices['DIS'])
-        self.dcs_PriCtl = dcsource.DCSource(devices['DCS1'])
-        self.dcs_Arduino = dcsource.DCSource(devices['DCS2'])
-        self.dcs_5Vsb = dcsource.DCSource(devices['DCS3'])
-        self.dcl_5Vsb = dcload.DCLoad(devices['DCL2'])
-        self.dcl_12V = dcload.DCLoad(devices['DCL1'])
-        self.dcl_24V = dcload.DCLoad(devices['DCL5'])
-        self.rla_pic2 = relay.Relay(devices['RLA1'])
-        self.rla_pic1 = relay.Relay(devices['RLA7'])
-        self.rla_boot = relay.Relay(devices['RLA2'])
-        self.rla_pson = relay.Relay(devices['RLA3'])
-        self.rla_pot_ud = relay.Relay(devices['RLA6'])
-        self.rla_pot_12 = relay.Relay(devices['RLA5'])
-        self.rla_pot_24 = relay.Relay(devices['RLA4'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.discharge = tester.Discharge(devices['DIS'])
+        self.dcs_PriCtl = tester.DCSource(devices['DCS1'])
+        self.dcs_Arduino = tester.DCSource(devices['DCS2'])
+        self.dcs_5Vsb = tester.DCSource(devices['DCS3'])
+        self.dcl_5Vsb = tester.DCLoad(devices['DCL2'])
+        self.dcl_12V = tester.DCLoad(devices['DCL1'])
+        self.dcl_24V = tester.DCLoad(devices['DCL5'])
+        self.rla_pic2 = tester.Relay(devices['RLA1'])
+        self.rla_pic1 = tester.Relay(devices['RLA7'])
+        self.rla_boot = tester.Relay(devices['RLA2'])
+        self.rla_pson = tester.Relay(devices['RLA3'])
+        self.rla_pot_ud = tester.Relay(devices['RLA6'])
+        self.rla_pot_12 = tester.Relay(devices['RLA5'])
+        self.rla_pot_24 = tester.Relay(devices['RLA4'])
         self.ocp_pot = digpot.OCPAdjust(
             self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24)
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         file = os.path.join(folder, limit.ARM_BIN)
-        self.programmer = ProgramARM(limit.ARM_PORT, file)
+        self.programmer = share.ProgramARM(limit.ARM_PORT, file)
         # Serial connection to the ARM console
-        arm_ser = SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
+        arm_ser = share.SimSerial(
+            simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = limit.ARM_PORT
-        self.arm = Console(arm_ser, verbose=False)
+        self.arm = console.Console(arm_ser, verbose=False)
         # Serial connection to the Arduino console
-        ard_ser = SimSerial(simulation=fifo, baudrate=115200, timeout=2.0)
+        ard_ser = share.SimSerial(
+            simulation=fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = limit.ARDUINO_PORT
-        self.ard = Arduino(ard_ser, verbose=False)
+        self.ard = arduino.Arduino(ard_ser, verbose=False)
 
     def arm_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
+                 string_data, preflush=0, postflush=0, priority=False,
+                 addprompt=True):
         """Push string data into the buffer, if FIFOs are enabled."""
         if self._fifo:
             if addprompt:
@@ -69,8 +69,8 @@ class LogicalDevices():
             self.arm.puts(string_data, preflush, postflush, priority)
 
     def ard_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
+                 string_data, preflush=0, postflush=0, priority=False,
+                 addprompt=True):
         """Push string data into the buffer, if FIFOs are enabled."""
         if self._fifo:
             if addprompt:
@@ -96,8 +96,9 @@ class LogicalDevices():
             ld.output(0.0)
         for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb):
             dcs.output(0.0, False)
-        for rla in (self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
-                     self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
+        for rla in (
+                self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
+                self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
             rla.set_off()
         self.ocp_pot.disable()
 
@@ -143,27 +144,27 @@ class Sensors():
             detect_limit=(limits['24V_inOCP'], ),
             start=18.3 * 0.9, stop=18.3 * 1.1, step=0.1, delay=0,
             reset=True, use_opc=True)
-        self.PGM_5Vsb = con_sensor(
+        self.PGM_5Vsb = console.Sensor(
             d.ard, 'PGM_5VSB', rdgtype=sensor.ReadingString)
-        self.PGM_PwrSw = con_sensor(
+        self.PGM_PwrSw = console.Sensor(
             d.ard, 'PGM_PWRSW', rdgtype=sensor.ReadingString)
-        self.PotMax = con_sensor(
+        self.PotMax = console.Sensor(
             d.ard, 'POT_MAX', rdgtype=sensor.ReadingString)
-        self.Pot12Enable = con_sensor(
+        self.Pot12Enable = console.Sensor(
             d.ard, '12_POT_ENABLE', rdgtype=sensor.ReadingString)
-        self.Pot24Enable = con_sensor(
+        self.Pot24Enable = console.Sensor(
             d.ard, '24_POT_ENABLE', rdgtype=sensor.ReadingString)
-        self.PotStep = con_sensor(
+        self.PotStep = console.Sensor(
             d.ard, 'POT_STEP', rdgtype=sensor.ReadingString)
-        self.PotDisable = con_sensor(
+        self.PotDisable = console.Sensor(
             d.ard, 'POT_DISABLE', rdgtype=sensor.ReadingString)
-        self.ARM_AcFreq = con_sensor(d.arm, 'ARM-AcFreq')
-        self.ARM_AcVolt = con_sensor(d.arm, 'ARM-AcVolt')
-        self.ARM_12V = con_sensor(d.arm, 'ARM-12V')
-        self.ARM_24V = con_sensor(d.arm, 'ARM-24V')
-        self.ARM_SwVer = con_sensor(
+        self.ARM_AcFreq = console.Sensor(d.arm, 'ARM-AcFreq')
+        self.ARM_AcVolt = console.Sensor(d.arm, 'ARM-AcVolt')
+        self.ARM_12V = console.Sensor(d.arm, 'ARM-12V')
+        self.ARM_24V = console.Sensor(d.arm, 'ARM-24V')
+        self.ARM_SwVer = console.Sensor(
             d.arm, 'ARM_SwVer', rdgtype=sensor.ReadingString)
-        self.ARM_SwBld = con_sensor(
+        self.ARM_SwBld = console.Sensor(
             d.arm, 'ARM_SwBld', rdgtype=sensor.ReadingString)
 
     def _reset(self):
@@ -177,6 +178,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         # Programming results
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.dmm_5Voff = Measurement(limits['5Voff'], sense.o5Vsb)

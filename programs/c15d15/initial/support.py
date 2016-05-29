@@ -4,8 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 from . import limit
 
 translate = tester.translate
@@ -17,10 +15,10 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = tester.devlogical.dmm.DMM(devices['DMM'])
-        self.dcs_input = dcsource.DCSource(devices['DCS1'])
-        self.dcl = dcload.DCLoad(devices['DCL1'])
-        self.rla_load = relay.Relay(devices['RLA1'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_input = tester.DCSource(devices['DCS1'])
+        self.dcl = tester.DCLoad(devices['DCL1'])
+        self.rla_load = tester.Relay(devices['RLA1'])
 # FIXME: Remove RLA1,3 from fixture. Move RLA2 to RLA1
 
     def reset(self):
@@ -55,6 +53,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_vin = Measurement(limits['Vin'], sense.vin)
         self.dmm_vcc = Measurement(limits['Vcc'], sense.vcc)
         self.dmm_vout_nl = Measurement(limits['VoutNL'], sense.vout)

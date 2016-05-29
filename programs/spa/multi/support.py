@@ -3,8 +3,7 @@
 """Spa RGB/TRI Initial Test Program."""
 
 import sensor
-from tester.devlogical import *
-from tester.measure import *
+import tester
 
 
 # Scale factor for AC Input Current sensors.
@@ -23,17 +22,17 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dso = dso.DSO(devices['DSO'])
-        self.acsource = acsource.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dso = tester.DSO(devices['DSO'])
+        self.acsource = tester.ACSource(devices['ACS'])
         # DC Source that power the test fixture
-        self.dcsFixture = dcsource.DCSource(devices['DCS1'])
-        self.dcsAuxPos = dcsource.DCSource(devices['DCS4'])
-        self.dcsAuxNeg = dcsource.DCSource(devices['DCS3'])
+        self.dcsFixture = tester.DCSource(devices['DCS1'])
+        self.dcsAuxPos = tester.DCSource(devices['DCS4'])
+        self.dcsAuxNeg = tester.DCSource(devices['DCS3'])
         # Relay to drive the Arduino reset generator
-        self.rla_isp = relay.Relay(devices['RLA1'])
+        self.rla_isp = tester.Relay(devices['RLA1'])
         # Relay to reset all 4 uCs
-        self.rla_rst = relay.Relay(devices['RLA2'])
+        self.rla_rst = tester.Relay(devices['RLA2'])
 
     def reset(self):
         """Reset instruments."""
@@ -120,6 +119,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         # Programming results
         pgmlim = limits['Program']
         self.pgm1 = Measurement(pgmlim, sense.oMir1)

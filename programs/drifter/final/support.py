@@ -89,7 +89,7 @@ class SubTests():
         m = measurements
 
         # DisplayCheck: Apply power, check display.
-        self.displ_check = tester.Step((
+        self.displ_check = tester.SubStep((
             tester.DcSubStep(
                 setting=((d.dcs_Isense, 0.2), ), output=True, delay=0.5),
             tester.DcSubStep(

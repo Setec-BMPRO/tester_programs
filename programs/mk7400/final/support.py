@@ -4,8 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -16,14 +14,14 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcl_24V = dcload.DCLoad(devices['DCL1'])
-        self.dcl_12V = dcload.DCLoad(devices['DCL2'])
-        self.dcl_24V2 = dcload.DCLoad(devices['DCL3'])
-        self.dcl_5V = dcload.DCLoad(devices['DCL4'])
-        self.rla_24V2off = relay.Relay(devices['RLA2'])
-        self.rla_pson = relay.Relay(devices['RLA3'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcl_24V = tester.DCLoad(devices['DCL1'])
+        self.dcl_12V = tester.DCLoad(devices['DCL2'])
+        self.dcl_24V2 = tester.DCLoad(devices['DCL3'])
+        self.dcl_5V = tester.DCLoad(devices['DCL4'])
+        self.rla_24V2off = tester.Relay(devices['RLA2'])
+        self.rla_pson = tester.Relay(devices['RLA3'])
 
     def reset(self):
         """Reset instruments."""
@@ -62,6 +60,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_AuxOn = Measurement(limits['ACon'], sense.oAux)
         self.dmm_AuxOff = Measurement(limits['ACoff'], sense.oAux)
         self.dmm_AuxSwOn = Measurement(limits['ACon'], sense.oAuxSw)
@@ -88,39 +87,39 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: Apply 240Vac, set min load, measure.
-        rly1 = RelaySubStep(((d.rla_24V2off, True), ))
-        ld = LoadSubStep(
+        rly1 = tester.RelaySubStep(((d.rla_24V2off, True), ))
+        ld = tester.LoadSubStep(
             ((d.dcl_5V, 0.5), (d.dcl_12V, 0.5), (d.dcl_24V, 0.5),
              (d.dcl_24V2, 0.5), ), output=True)
-        acs = AcSubStep(
+        acs = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_5V, m.dmm_24Voff, m.dmm_12Voff, m.dmm_24V2off, ), timeout=5)
-        self.pwr_up = Step((rly1, ld, acs, msr1, ))
+        self.pwr_up = tester.SubStep((rly1, ld, acs, msr1, ))
         # PowerOn: Turn on, measure at min load.
-        rly1 = RelaySubStep(((d.rla_pson, True), ))
-        msr1 = MeasureSubStep(
+        rly1 = tester.RelaySubStep(((d.rla_pson, True), ))
+        msr1 = tester.MeasureSubStep(
             (m.dmm_24Von, m.dmm_12Von, m.dmm_24V2off, m.dmm_PwrFailOff, ),
             timeout=5)
-        rly2 = RelaySubStep(((d.rla_24V2off, False), ))
-        msr2 = MeasureSubStep(
+        rly2 = tester.RelaySubStep(((d.rla_24V2off, False), ))
+        msr2 = tester.MeasureSubStep(
             (m.dmm_24V2on, m.dmm_AuxOn, m.dmm_AuxSwOn, ), timeout=5)
-        msr3 = MeasureSubStep((m.ui_YesNoMains, ))
-        self.pwr_on = Step((rly1, msr1, rly2, msr2, msr3, ))
+        msr3 = tester.MeasureSubStep((m.ui_YesNoMains, ))
+        self.pwr_on = tester.SubStep((rly1, msr1, rly2, msr2, msr3, ))
         # Full Load: Apply full load, measure.
         # 115Vac Full Load: 115Vac, measure.
-        ld = LoadSubStep(
+        ld = tester.LoadSubStep(
             ((d.dcl_5V, 2.0), (d.dcl_12V, 10.0),
              (d.dcl_24V, 6.5), (d.dcl_24V2, 4.5), ))
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_5V, m.dmm_24Von, m.dmm_12Von, m.dmm_24V2on, ), timeout=5)
-        acs = AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5)
-        self.full_load = Step((ld, msr1, ))
-        self.full_load_115 = Step((acs, msr1, ))
+        acs = tester.AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5)
+        self.full_load = tester.SubStep((ld, msr1, ))
+        self.full_load_115 = tester.SubStep((acs, msr1, ))
         # PowerOff: Set min load, switch off, measure.
-        ld = LoadSubStep(
+        ld = tester.LoadSubStep(
             ((d.dcl_5V, 0.5), (d.dcl_12V, 0.5),
              (d.dcl_24V, 0.5), (d.dcl_24V2, 0.5), ))
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.ui_NotifyPwrOff, m.dmm_AuxOff, m.dmm_AuxSwOff,  m.dmm_24Voff, ))
-        self.pwr_off = Step((ld, msr1, ))
+        self.pwr_off = tester.SubStep((ld, msr1, ))

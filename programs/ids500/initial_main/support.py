@@ -149,7 +149,7 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: Min load, input AC, measure.
-        self.pwr_up = tester.Step((
+        self.pwr_up = tester.SubStep((
             tester.LoadSubStep(
                 ((d.dcl_Tec, 0.1), (d.dcl_15Vp, 1.0),
                  (d.dcl_15Vpsw, 0.0), (d.dcl_5V, 5.0)),

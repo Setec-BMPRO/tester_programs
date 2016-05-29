@@ -75,14 +75,14 @@ class SubTests():
         d = logical_devices
         m = measurements
         # DCPowerOn: Apply DC Input, measure.
-        self.dcpwr_on = tester.Step((
+        self.dcpwr_on = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_Input, 10.0), ), output=True),
             tester.MeasureSubStep((m.dmm_20V, m.ui_YesNoGreen, ), timeout=5),
             tester.DcSubStep(setting=((d.dcs_Input, 35.0), )),
             tester.MeasureSubStep((m.dmm_20V, ), timeout=5),
             ))
         # DCLoad: Full load, measure, discharge, power off.
-        self.full_load = tester.Step((
+        self.full_load = tester.SubStep((
             tester.LoadSubStep(((d.dcl_Output, 2.0),), output=True),
             tester.MeasureSubStep(
                 (m.dmm_20Vload, m.ui_YesNoDCOff, ), timeout=5),
@@ -90,14 +90,14 @@ class SubTests():
                 setting=((d.dcs_Input, 0.0), ), output=False, delay=5),
             ))
         # ACPowerOn: Apply AC Input, measure.
-        self.acpwr_on = tester.Step((
+        self.acpwr_on = tester.SubStep((
             tester.LoadSubStep(((d.dcl_Output, 0.0),)),
             tester.AcSubStep(
                 acs=d.acsource, voltage=240.0, output=True, delay=0.5),
             tester.MeasureSubStep((m.dmm_20V, ), timeout=5),
             ))
         # ACLoad: Peak load, measure, shutdown.
-        self.peak_load = tester.Step((
+        self.peak_load = tester.SubStep((
             tester.LoadSubStep(((d.dcl_Output, 3.5),)),
             tester.MeasureSubStep(
                 (m.dmm_20Vload, m.ui_YesNoACOff, ), timeout=5),
@@ -105,7 +105,7 @@ class SubTests():
             tester.MeasureSubStep((m.dmm_20Voff, m.ui_YesNoACOn, ), timeout=5),
             ))
         # Recover: AC off, load off, AC on.
-        self.recover = tester.Step((
+        self.recover = tester.SubStep((
             tester.AcSubStep(acs=d.acsource, voltage=0.0, delay=0.5),
             tester.MeasureSubStep((m.dmm_20Voff, ), timeout=5),
             tester.LoadSubStep(((d.dcl_Output, 0.0),)),

@@ -4,9 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-
-Measurement = tester.measure.Measurement
 
 
 class LogicalDevices(object):
@@ -15,34 +12,34 @@ class LogicalDevices(object):
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dso = dso.DSO(devices['DSO'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dso = tester.DSO(devices['DSO'])
         # DC Sources
-        dcs1 = dcsource.DCSource(devices['DCS1'])
-        dcs2 = dcsource.DCSource(devices['DCS2'])
-        dcs3 = dcsource.DCSource(devices['DCS3'])
-        dcs4 = dcsource.DCSource(devices['DCS4'])
-        dcs5 = dcsource.DCSource(devices['DCS5'])
-        dcs6 = dcsource.DCSource(devices['DCS6'])
-        dcs7 = dcsource.DCSource(devices['DCS7'])
+        dcs1 = tester.DCSource(devices['DCS1'])
+        dcs2 = tester.DCSource(devices['DCS2'])
+        dcs3 = tester.DCSource(devices['DCS3'])
+        dcs4 = tester.DCSource(devices['DCS4'])
+        dcs5 = tester.DCSource(devices['DCS5'])
+        dcs6 = tester.DCSource(devices['DCS6'])
+        dcs7 = tester.DCSource(devices['DCS7'])
         self.dcs = (dcs1, dcs2, dcs3, dcs4, dcs5, dcs6, dcs7)
         # AC Source
-        self.acs = acsource.ACSource(devices['ACS'])
+        self.acs = tester.ACSource(devices['ACS'])
         # DC Loads
-        dcl1 = dcload.DCLoad(devices['DCL1'])
-        dcl2 = dcload.DCLoad(devices['DCL2'])
-        dcl3 = dcload.DCLoad(devices['DCL3'])
-        dcl4 = dcload.DCLoad(devices['DCL4'])
-        dcl5 = dcload.DCLoad(devices['DCL5'])
-        dcl6 = dcload.DCLoad(devices['DCL6'])
-        dcl7 = dcload.DCLoad(devices['DCL7'])
+        dcl1 = tester.DCLoad(devices['DCL1'])
+        dcl2 = tester.DCLoad(devices['DCL2'])
+        dcl3 = tester.DCLoad(devices['DCL3'])
+        dcl4 = tester.DCLoad(devices['DCL4'])
+        dcl5 = tester.DCLoad(devices['DCL5'])
+        dcl6 = tester.DCLoad(devices['DCL6'])
+        dcl7 = tester.DCLoad(devices['DCL7'])
         self.dcl = (dcl1, dcl2, dcl3, dcl4, dcl5, dcl6, dcl7)
         # Relay Drivers
         self.rly = []
         for num in range(1, 23):
-            self.rly.append(relay.Relay(devices['RLA{}'.format(num)]))
+            self.rly.append(tester.Relay(devices['RLA{}'.format(num)]))
         # Discharge
-        self.disch = discharge.Discharge(devices['DIS'])
+        self.disch = tester.Discharge(devices['DIS'])
 
     def reset(self):
         """Reset instruments."""
@@ -134,6 +131,7 @@ class Measurements(object):
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         # Self Checker Voltages
         self.dmm_check_v = []
         self.dmm_check_v.append(Measurement(limits['12V'], sense.check12))

@@ -10,8 +10,6 @@
 from pydispatch import dispatcher
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -26,9 +24,9 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dcs_vin = dcsource.DCSource(devices['DCS1'])
-        self.dcs_vout = dcsource.DCSource(devices['DCS2'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_vin = tester.DCSource(devices['DCS1'])
+        self.dcs_vout = tester.DCSource(devices['DCS2'])
 
     def reset(self):
         """Reset instruments."""
@@ -109,6 +107,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.dmm_ctr = Measurement(limits['CTR'], sense.oMirCtr)
         self.dmm_Iin1 = Measurement(limits['Iin1'], sense.oIsen)
         self.dmm_Iin10 = Measurement(limits['Iin10'], sense.oIsen)

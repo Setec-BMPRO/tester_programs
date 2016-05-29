@@ -20,20 +20,18 @@ class LogicalDevices():
 
         """
         self._fifo = fifo
-        dcsource = tester.devlogical.dcsource
-        relay = tester.devlogical.relay
-        self.dmm = tester.devlogical.dmm.DMM(devices['DMM'])
+        self.dmm = tester.DMM(devices['DMM'])
         # Power USB devices + Fixture Trek2.
-        self.dcs_Vcom = dcsource.DCSource(devices['DCS1'])
+        self.dcs_Vcom = tester.DCSource(devices['DCS1'])
         # Power unit under test.
-        self.dcs_Vin = dcsource.DCSource(devices['DCS2'])
+        self.dcs_Vin = tester.DCSource(devices['DCS2'])
         # As the water level rises the "switches" close. The order of switch
         # closure does not matter, just the number closed.
         # The lowest bar always flashes. Closing these relays makes the other
         # bars come on.
-        self.rla_s1 = relay.Relay(devices['RLA3'])
-        self.rla_s2 = relay.Relay(devices['RLA4'])
-        self.rla_s3 = relay.Relay(devices['RLA5'])
+        self.rla_s1 = tester.Relay(devices['RLA3'])
+        self.rla_s2 = tester.Relay(devices['RLA4'])
+        self.rla_s3 = tester.Relay(devices['RLA5'])
         # Connection to the Serial-to-CAN Trek2 inside the fixture
         ser_can = share.SimSerial(
             simulation=fifo, baudrate=115200, timeout=5.0)

@@ -3,8 +3,7 @@
 """SX-750 Safety Test Program."""
 
 import sensor
-from tester.devlogical import *
-from tester.measure import *
+import tester
 
 
 class LogicalDevices():
@@ -13,7 +12,7 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.st = safety.SafetyTester(devices['SAF'])
+        self.st = tester.SafetyTester(devices['SAF'])
 
     def reset(self):
         """Reset instruments."""
@@ -40,6 +39,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.gnd1 = Measurement(limits['gnd'], sense.gnd1)
         self.gnd2 = Measurement(limits['gnd'], sense.gnd2)
         self.gnd3 = Measurement(limits['gnd'], sense.gnd3)

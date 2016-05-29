@@ -4,8 +4,6 @@
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -16,10 +14,10 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.rla_Bus = relay.Relay(devices['RLA1'])
-        self.dcl = dcload.DCLoad(devices['DCL1'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.rla_Bus = tester.Relay(devices['RLA1'])
+        self.dcl = tester.DCLoad(devices['DCL1'])
 
     def reset(self):
         """Reset instruments."""
@@ -56,6 +54,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.dmm_Vstart = Measurement(limits['Vstart'], sense.oVout)
         self.dmm_Vout = Measurement(limits['Vout'], sense.oVout)
         self.dmm_Vshdn = Measurement(limits['Vshdn'], sense.oVout)
@@ -76,36 +75,36 @@ class SubTests():
         m = measurements
 
         # PowerUp: Apply 240Vac, measure.
-        acs = AcSubStep(
+        acs = tester.AcSubStep(
             acs=d.acsource, voltage=240.0, output=True, delay=0.5)
-        msr = MeasureSubStep((m.dmm_Vstart, m.ui_YesNoGreen), timeout=5)
-        self.pwr_up = Step((acs, msr))
+        msr = tester.MeasureSubStep((m.dmm_Vstart, m.ui_YesNoGreen), timeout=5)
+        self.pwr_up = tester.SubStep((acs, msr))
 
         # ConnectCMR: Apply 240Vac, measure.
-        rly = RelaySubStep(((d.rla_Bus, True), ))
-        msr = MeasureSubStep(
+        rly = tester.RelaySubStep(((d.rla_Bus, True), ))
+        msr = tester.MeasureSubStep(
             (m.ui_YesNoYellow, m.dmm_Vout, m.ui_YesNoRed), timeout=8)
-        self.connect_cmr = Step((rly, msr))
+        self.connect_cmr = tester.SubStep((rly, msr))
 
         # Load: startup load, full load, shutdown load.
-        ld1 = LoadSubStep(((d.dcl, 0.3), ), output=True)
-        msr1 = MeasureSubStep((m.dmm_Vout, ), timeout=5)
-        ld2 = LoadSubStep(((d.dcl, 2.8),), delay=2)
-        msr2 = MeasureSubStep((m.dmm_Vout, ), timeout=5)
-        ld3 = LoadSubStep(((d.dcl, 3.5), ))
-        msr3 = MeasureSubStep((m.dmm_Vshdn, ), timeout=5)
-        self.load = Step((ld1, msr1, ld2, msr2, ld3, msr3))
+        ld1 = tester.LoadSubStep(((d.dcl, 0.3), ), output=True)
+        msr1 = tester.MeasureSubStep((m.dmm_Vout, ), timeout=5)
+        ld2 = tester.LoadSubStep(((d.dcl, 2.8),), delay=2)
+        msr2 = tester.MeasureSubStep((m.dmm_Vout, ), timeout=5)
+        ld3 = tester.LoadSubStep(((d.dcl, 3.5), ))
+        msr3 = tester.MeasureSubStep((m.dmm_Vshdn, ), timeout=5)
+        self.load = tester.SubStep((ld1, msr1, ld2, msr2, ld3, msr3))
 
         # Restart: Switch mains off, measure.
-        acs1 = AcSubStep(acs=d.acsource, voltage=0.0)
-        ld1 = LoadSubStep(((d.dcl, 2.8),), delay=5)
-        ld2 = LoadSubStep(((d.dcl, 0.0),), delay=10)
-        acs2 = AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
-        msr = MeasureSubStep((m.dmm_Vstart, ), timeout=5)
-        self.restart = Step((acs1, ld1, ld2, acs2, msr))
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=0.0)
+        ld1 = tester.LoadSubStep(((d.dcl, 2.8),), delay=5)
+        ld2 = tester.LoadSubStep(((d.dcl, 0.0),), delay=10)
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
+        msr = tester.MeasureSubStep((m.dmm_Vstart, ), timeout=5)
+        self.restart = tester.SubStep((acs1, ld1, ld2, acs2, msr))
 
         # PowerOff: Discharge, switch off, measure.
-        ld = LoadSubStep(((d.dcl, 2.8), ))
-        acs = AcSubStep(acs=d.acsource, voltage=0.0)
-        msr = MeasureSubStep((m.dmm_Voff, m.ui_NotifyOff), timeout=5)
-        self.pwr_off = Step((ld, acs, msr))
+        ld = tester.LoadSubStep(((d.dcl, 2.8), ))
+        acs = tester.AcSubStep(acs=d.acsource, voltage=0.0)
+        msr = tester.MeasureSubStep((m.dmm_Voff, m.ui_NotifyOff), timeout=5)
+        self.pwr_off = tester.SubStep((ld, acs, msr))

@@ -3,10 +3,9 @@
 """STxx-III Final Test Program."""
 
 import time
+
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 translate = tester.translate
 
@@ -17,11 +16,11 @@ class LogicalDevices():
 
     def __init__(self, devices):
         """Create all Logical Instruments."""
-        self.dmm = tester.devlogical.dmm.DMM(devices['DMM'])
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dcl_Load = dcload.DCLoad(devices['DCL1'])
-        self.dcl_Batt = dcload.DCLoad(devices['DCL5'])
-        self.rla_BattSw = relay.Relay(devices['RLA1'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dcl_Load = tester.DCLoad(devices['DCL1'])
+        self.dcl_Batt = tester.DCLoad(devices['DCL5'])
+        self.rla_BattSw = tester.Relay(devices['RLA1'])
 
     def reset(self):
         """Reset instruments."""
@@ -80,6 +79,7 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
+        Measurement = tester.Measurement
         self.barcode = Measurement(limits['FuseLabel'], sense.oBarcode)
         self.dmm_Load = Measurement(limits['Vout'], sense.oLoad)
         self.dmm_Boost = Measurement(limits['Vboost'], sense.oLoad)
@@ -111,20 +111,20 @@ class SubTests():
         d = logical_devices
         m = measurements
         # PowerUp: 240Vac, measure.
-        acs1 = AcSubStep(acs=d.acsource, voltage=240.0, output=True)
-        msr1 = MeasureSubStep(
+        acs1 = tester.AcSubStep(acs=d.acsource, voltage=240.0, output=True)
+        msr1 = tester.MeasureSubStep(
             (m.dmm_Boost, m.dmm_Fuse1, m.dmm_Fuse2, m.dmm_Fuse3, m.dmm_Fuse4,
              m.dmm_Fuse5, m.dmm_Fuse6, m.dmm_Fuse7, m.dmm_Fuse8,
              m.dmm_Batt, m.ui_YesNoOrGr, ), timeout=10)
-        self.power_up = Step((acs1, msr1, ))
+        self.power_up = tester.SubStep((acs1, msr1, ))
         # Battery: Load, SwitchOff, measure, SwitchOn,
         #           PullFuse, measure, ReplaceFuse, measure, unload
-        dcl1 = LoadSubStep(
+        dcl1 = tester.LoadSubStep(
             ((d.dcl_Batt, 2.0), (d.dcl_Load, 0.0), ), output=True)
-        rla1 = RelaySubStep(((d.rla_BattSw, True), ))
-        msr1 = MeasureSubStep((m.dmm_BattFuseOut, ), timeout=5)
-        dcl2 = LoadSubStep(((d.dcl_Batt, 0.0), ))
-        rla2 = RelaySubStep(((d.rla_BattSw, False), ), delay=0.5)
-        msr2 = MeasureSubStep(
+        rla1 = tester.RelaySubStep(((d.rla_BattSw, True), ))
+        msr1 = tester.MeasureSubStep((m.dmm_BattFuseOut, ), timeout=5)
+        dcl2 = tester.LoadSubStep(((d.dcl_Batt, 0.0), ))
+        rla2 = tester.RelaySubStep(((d.rla_BattSw, False), ), delay=0.5)
+        msr2 = tester.MeasureSubStep(
             (m.dmm_BattFuseIn, m.ui_YesNoRedOn, m.ui_YesNoRedOff, ), timeout=5)
-        self.battery = Step((dcl1, rla1, msr1, dcl2, rla2, msr2, ))
+        self.battery = tester.SubStep((dcl1, rla1, msr1, dcl2, rla2, msr2, ))

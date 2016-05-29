@@ -133,12 +133,12 @@ class SubTests():
         msr2 = tester.MeasureSubStep(
             (m.dmm_20VL, m.dmm__20V, m.dmm_5VOff, m.dmm_15V, m.dmm__15V,
              m.dmm_15VpOff, m.dmm_15VpSwOff, m.dmm_PwrGoodOff, ), timeout=5)
-        self.pwrup_micro = tester.Step((dcs1, msr1))
-        self.pwrup_aux = tester.Step((dcs2, acs1, msr2))
+        self.pwrup_micro = tester.SubStep((dcs1, msr1))
+        self.pwrup_aux = tester.SubStep((dcs2, acs1, msr2))
         # KeySw: Turn on KeySwitches, measure.
         dcs1 = tester.DcSubStep(setting=((d.dcs_Vcc, 5.0),), output=True)
         rly1 = tester.RelaySubStep(((d.rla_EnAux, True), ))
         msr1 = tester.MeasureSubStep(
             (m.dmm_5V, m.dmm_15V, m.dmm__15V, m.dmm_15Vp, m.dmm_15VpSwOff,
              m.dmm_PwrGood, ), timeout=5)
-        self.key_sw1 = tester.Step((dcs1, rly1, msr1))
+        self.key_sw1 = tester.SubStep((dcs1, rly1, msr1))

@@ -7,8 +7,6 @@ from pydispatch import dispatcher
 
 import sensor
 import tester
-from tester.devlogical import *
-from tester.measure import *
 
 
 class LogicalDevices():
@@ -21,16 +19,16 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self.acsource = acsource.ACSource(devices['ACS'])
-        self.dmm = dmm.DMM(devices['DMM'])
-        self.dcs_Vout = dcsource.DCSource(devices['DCS1'])
-        self.dcs_Vbias = dcsource.DCSource(devices['DCS2'])
-        self.dcs_VsecBias = dcsource.DCSource(devices['DCS3'])
-        self.dcl = dcload.DCLoad(devices['DCL1'])
-        self.rla_Load = relay.Relay(devices['RLA1'])
-        self.rla_CMR = relay.Relay(devices['RLA2'])
-        self.rla_Prog = relay.Relay(devices['RLA4'])
-        self.discharge = discharge.Discharge(devices['DIS'])
+        self.acsource = tester.ACSource(devices['ACS'])
+        self.dmm = tester.DMM(devices['DMM'])
+        self.dcs_Vout = tester.DCSource(devices['DCS1'])
+        self.dcs_Vbias = tester.DCSource(devices['DCS2'])
+        self.dcs_VsecBias = tester.DCSource(devices['DCS3'])
+        self.dcl = tester.DCLoad(devices['DCL1'])
+        self.rla_Load = tester.Relay(devices['RLA1'])
+        self.rla_CMR = tester.Relay(devices['RLA2'])
+        self.rla_Prog = tester.Relay(devices['RLA4'])
+        self.discharge = tester.Discharge(devices['DIS'])
 
     def reset(self):
         """Reset instruments."""
@@ -99,6 +97,7 @@ class Measurements():
            @param limits Product test limits
 
         """
+        Measurement = tester.Measurement
         self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.loadReg = Measurement(limits['Reg'], sense.oMirReg)
         self.dmm_Lock = Measurement(limits['FixtureLock'], sense.oLock)
@@ -142,36 +141,36 @@ class SubTests():
         d = logical_devices
         m = measurements
         # SecCheck: Apply external voltages, measure.
-        dcs1 = DcSubStep(
+        dcs1 = tester.DcSubStep(
             setting=((d.dcs_Vout, 12.0),), output=True)
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_VoutPreExt, m.dmm_VsenseOff, m.dmm_VoutExt, ), timeout=5)
-        dcs2 = DcSubStep(setting=(
+        dcs2 = tester.DcSubStep(setting=(
             (d.dcs_VsecBias, 12.0), ), output=True, delay=1)
-        msr2 = MeasureSubStep(
+        msr2 = tester.MeasureSubStep(
             (m.dmm_Vref, m.dmm_VsenseOn, m.dmm_VoutExt,), timeout=5)
-        self.sec_chk = Step((dcs1, msr1, dcs2, msr2))
+        self.sec_chk = tester.SubStep((dcs1, msr1, dcs2, msr2))
         # OVP: Reset the PIC device and measure OVP.
-        dcs1 = DcSubStep(setting=((d.dcs_VsecBias, 0.0), ), delay=0.5)
-        msr1 = MeasureSubStep((m.dmm_VrefOff, ), timeout=5)
-        dcs2 = DcSubStep(setting=((d.dcs_VsecBias, 12.0), ))
-        msr2 = MeasureSubStep((m.dmm_GreenOn, ), timeout=5)
-        dcs3 = DcSubStep(setting=((d.dcs_Vbias, 12.0), ))
-        msr3 = MeasureSubStep((m.dmm_Vcc, m.ramp_OVP), timeout=5)
-        dcs4 = DcSubStep(
+        dcs1 = tester.DcSubStep(setting=((d.dcs_VsecBias, 0.0), ), delay=0.5)
+        msr1 = tester.MeasureSubStep((m.dmm_VrefOff, ), timeout=5)
+        dcs2 = tester.DcSubStep(setting=((d.dcs_VsecBias, 12.0), ))
+        msr2 = tester.MeasureSubStep((m.dmm_GreenOn, ), timeout=5)
+        dcs3 = tester.DcSubStep(setting=((d.dcs_Vbias, 12.0), ))
+        msr3 = tester.MeasureSubStep((m.dmm_Vcc, m.ramp_OVP), timeout=5)
+        dcs4 = tester.DcSubStep(
             setting=((d.dcs_Vout, 0.0), (d.dcs_Vbias, 0.0),
                      (d.dcs_VsecBias, 0.0)), output=False, delay=1)
-        self.OVP = Step((dcs1, msr1, dcs2, msr2, dcs3, msr3, dcs4))
+        self.OVP = tester.SubStep((dcs1, msr1, dcs2, msr2, dcs3, msr3, dcs4))
         # PowerUp: Apply 95Vac, 240Vac, measure.
-        acs1 = AcSubStep(
+        acs1 = tester.AcSubStep(
             acs=d.acsource, voltage=95.0, output=True, delay=0.5)
-        msr1 = MeasureSubStep(
+        msr1 = tester.MeasureSubStep(
             (m.dmm_VacStart, m.dmm_Vcc, m.dmm_Vref, m.dmm_GreenOn,
              m.dmm_YellowOff, m.dmm_RedOff, m.dmm_VoutLow, m.dmm_VsenseLow, ),
             timeout=5)
-        acs2 = AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
-        msr2 = MeasureSubStep((m.dmm_Vac, m.dmm_VoutLow, ), timeout=5)
-        rly1 = RelaySubStep(((d.rla_CMR, True), ))
-        msr3 = MeasureSubStep(
+        acs2 = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
+        msr2 = tester.MeasureSubStep((m.dmm_Vac, m.dmm_VoutLow, ), timeout=5)
+        rly1 = tester.RelaySubStep(((d.rla_CMR, True), ))
+        msr3 = tester.MeasureSubStep(
             (m.dmm_YellowOn, m.dmm_Vout, m.dmm_RedOn, ), timeout=12)
-        self.pwr_up = Step((acs1, msr1, acs2, msr2, rly1, msr3))
+        self.pwr_up = tester.SubStep((acs1, msr1, acs2, msr2, rly1, msr3))
