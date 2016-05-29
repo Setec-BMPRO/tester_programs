@@ -113,8 +113,10 @@ class Sensors():
         dmm = d.dmm
         # Mirror sensors for Programming result logging
         self.oMirPIC = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset,
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.o5Vsb = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
         self.o5Vsbunsw = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
         self.o8V5Ard = sensor.Vdc(dmm, high=19, low=3, rng=100, res=0.001)
@@ -178,53 +180,65 @@ class Measurements():
 
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
-        Measurement = tester.Measurement
-        # Programming results
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
-        self.dmm_5Voff = Measurement(limits['5Voff'], sense.o5Vsb)
-        self.dmm_5Vext = Measurement(limits['5Vext'], sense.o5Vsb)
-        self.dmm_5Vunsw = Measurement(limits['5Vsb'], sense.o5Vsbunsw)
-        self.dmm_5Vsb_set = Measurement(limits['5Vsb_set'], sense.o5Vsb)
-        self.dmm_5Vsb = Measurement(limits['5Vsb'], sense.o5Vsb)
-        self.dmm_12V_set = Measurement(limits['12V_set'], sense.o12V)
-        self.dmm_12V = Measurement(limits['12V'], sense.o12V)
-        self.dmm_12Voff = Measurement(limits['12Voff'], sense.o12V)
-        self.dmm_12V_inOCP = Measurement(limits['12V_inOCP'], sense.o12VinOCP)
-        limits['12V_inOCP'].position_fail = False
-        limits['12V_inOCP'].send_signal = False
-        self.dmm_24V = Measurement(limits['24V'], sense.o24V)
-        self.dmm_24V_set = Measurement(limits['24V_set'], sense.o24V)
-        self.dmm_24Voff = Measurement(limits['24Voff'], sense.o24V)
-        self.dmm_24V_inOCP = Measurement(limits['24V_inOCP'], sense.o24VinOCP)
-        limits['24V_inOCP'].position_fail = False
-        limits['24V_inOCP'].send_signal = False
-        self.dmm_PriCtl = Measurement(limits['PriCtl'], sense.PriCtl)
-        self.dmm_PFCpre = Measurement(limits['PFCpre'], sense.PFC)
-        self.dmm_PFCpost = Measurement(limits['PFCpost'], sense.PFC)
-        self.dmm_ACin = Measurement(limits['ACin'], sense.ACin)
-        self.dmm_PGOOD = Measurement(limits['PGOOD'], sense.PGOOD)
-        self.dmm_ACFAIL = Measurement(limits['ACFAIL'], sense.ACFAIL)
-        self.dmm_ACOK = Measurement(limits['ACOK'], sense.ACFAIL)
-        self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
-        self.dmm_Lock = Measurement(limits['FixtureLock'], sense.Lock)
-        self.dmm_Part = Measurement(limits['PartCheck'], sense.Part)
-        self.dmm_R601 = Measurement(limits['Snubber'], sense.R601)
-        self.dmm_R602 = Measurement(limits['Snubber'], sense.R602)
-        self.dmm_R609 = Measurement(limits['Snubber'], sense.R609)
-        self.dmm_R608 = Measurement(limits['Snubber'], sense.R608)
-        self.rampOcp12V = Measurement(limits['12V_OCPchk'], sense.OCP12V)
-        self.rampOcp24V = Measurement(limits['24V_OCPchk'], sense.OCP24V)
-        self.dmm_8V5Ard = Measurement(limits['8.5V Arduino'], sense.o8V5Ard)
-        self.pgm_5vsb = Measurement(limits['Reply'], sense.PGM_5Vsb)
-        self.pgm_pwrsw = Measurement(limits['Reply'], sense.PGM_PwrSw)
-        self.pot_max = Measurement(limits['Reply'], sense.PotMax)
-        self.pot12_enable = Measurement(limits['Reply'], sense.Pot12Enable)
-        self.pot24_enable = Measurement(limits['Reply'], sense.Pot24Enable)
-        self.pot_step = Measurement(limits['Reply'], sense.PotStep)
-        self.pot_disable = Measurement(limits['Reply'], sense.PotDisable)
-        self.arm_AcFreq = Measurement(limits['ARM-AcFreq'], sense.ARM_AcFreq)
-        self.arm_AcVolt = Measurement(limits['ARM-AcVolt'], sense.ARM_AcVolt)
-        self.arm_12V = Measurement(limits['ARM-12V'], sense.ARM_12V)
-        self.arm_24V = Measurement(limits['ARM-24V'], sense.ARM_24V)
-        self.arm_SwVer = Measurement(limits['ARM-SwVer'], sense.ARM_SwVer)
-        self.arm_SwBld = Measurement(limits['ARM-SwBld'], sense.ARM_SwBld)
+        self._limits = limits
+        self.pgmPIC = self._maker('Program', sense.oMirPIC)
+        self.dmm_5Voff = self._maker('5Voff', sense.o5Vsb)
+        self.dmm_5Vext = self._maker('5Vext', sense.o5Vsb)
+        self.dmm_5Vunsw = self._maker('5Vsb', sense.o5Vsbunsw)
+        self.dmm_5Vsb_set = self._maker('5Vsb_set', sense.o5Vsb)
+        self.dmm_5Vsb = self._maker('5Vsb', sense.o5Vsb)
+        self.dmm_12V_set = self._maker('12V_set', sense.o12V)
+        self.dmm_12V = self._maker('12V', sense.o12V)
+        self.dmm_12Voff = self._maker('12Voff', sense.o12V)
+        self.dmm_12V_inOCP = self._maker(
+            '12V_inOCP', sense.o12VinOCP, silent=True)
+        self.dmm_24V = self._maker('24V', sense.o24V)
+        self.dmm_24V_set = self._maker('24V_set', sense.o24V)
+        self.dmm_24Voff = self._maker('24Voff', sense.o24V)
+        self.dmm_24V_inOCP = self._maker(
+            '24V_inOCP', sense.o24VinOCP, silent=True)
+        self.dmm_PriCtl = self._maker('PriCtl', sense.PriCtl)
+        self.dmm_PFCpre = self._maker('PFCpre', sense.PFC)
+        self.dmm_PFCpost = self._maker('PFCpost', sense.PFC)
+        self.dmm_ACin = self._maker('ACin', sense.ACin)
+        self.dmm_PGOOD = self._maker('PGOOD', sense.PGOOD)
+        self.dmm_ACFAIL = self._maker('ACFAIL', sense.ACFAIL)
+        self.dmm_ACOK = self._maker('ACOK', sense.ACFAIL)
+        self.dmm_3V3 = self._maker('3V3', sense.o3V3)
+        self.dmm_Lock = self._maker('FixtureLock', sense.Lock)
+        self.dmm_Part = self._maker('PartCheck', sense.Part)
+        self.dmm_R601 = self._maker('Snubber', sense.R601)
+        self.dmm_R602 = self._maker('Snubber', sense.R602)
+        self.dmm_R609 = self._maker('Snubber', sense.R609)
+        self.dmm_R608 = self._maker('Snubber', sense.R608)
+        self.rampOcp12V = self._maker('12V_OCPchk', sense.OCP12V)
+        self.rampOcp24V = self._maker('24V_OCPchk', sense.OCP24V)
+        self.dmm_8V5Ard = self._maker('8.5V Arduino', sense.o8V5Ard)
+        self.pgm_5vsb = self._maker('Reply', sense.PGM_5Vsb)
+        self.pgm_pwrsw = self._maker('Reply', sense.PGM_PwrSw)
+        self.pot_max = self._maker('Reply', sense.PotMax)
+        self.pot12_enable = self._maker('Reply', sense.Pot12Enable)
+        self.pot24_enable = self._maker('Reply', sense.Pot24Enable)
+        self.pot_step = self._maker('Reply', sense.PotStep)
+        self.pot_disable = self._maker('Reply', sense.PotDisable)
+        self.arm_AcFreq = self._maker('ARM-AcFreq', sense.ARM_AcFreq)
+        self.arm_AcVolt = self._maker('ARM-AcVolt', sense.ARM_AcVolt)
+        self.arm_12V = self._maker('ARM-12V', sense.ARM_12V)
+        self.arm_24V = self._maker('ARM-24V', sense.ARM_24V)
+        self.arm_SwVer = self._maker('ARM-SwVer', sense.ARM_SwVer)
+        self.arm_SwBld = self._maker('ARM-SwBld', sense.ARM_SwBld)
+
+    def _maker(self, limitname, sensor, silent=False):
+        """Helper to create a Measurement.
+
+        @param limitname Test Limit name
+        @param sensor Sensor to use
+        @param silent True to suppress position_fail & send_signal
+        @return tester.Measurement instance
+
+        """
+        lim = self._limits[limitname]
+        if silent:
+            lim.position_fail = False
+            lim.send_signal = False
+        return tester.Measurement(lim, sensor)
