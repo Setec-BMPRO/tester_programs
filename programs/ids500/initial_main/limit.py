@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Initial Main Program Limits."""
 
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
+from testlimit import lim_lo, lim_hilo_delta
+
 DATA = (
-    ('Vbus', 1, 330.0, 350.0, None, None),
-    ('Off', 1, -1.5, 1.5, None, None),
-    ('FixtureLock', 0, 20, None, None, None),
+    lim_hilo_delta('Vbus', 340.0, 10.0),
+    lim_hilo_delta('Off', 0, 1.5),
+    lim_lo('FixtureLock', 20),
     )

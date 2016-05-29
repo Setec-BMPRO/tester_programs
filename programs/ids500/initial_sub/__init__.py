@@ -2,25 +2,14 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Initial Subboard Test Program."""
 
-import os
 import logging
 
+import share
 import tester
-from share import ProgramPIC, SimSerial
 from . import support
 from . import limit
-from ..console import Console
 
 INI_SUB_LIMIT = limit.DATA
-
-# Serial port for the PIC.
-_PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
-
-_PIC_HEX = 'Main 1A.hex'
-
-_HEX_DIR = {'posix': '/opt/setec/ate4/ids500_initial_sub',
-            'nt': r'C:\TestGear\TcpServer\ids500_initial_sub',
-            }[os.name]
 
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -43,6 +32,7 @@ class InitialSub(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices
         self._limits = test_limits
+# FIXME: Make a class for each PCB - Like in the CMRSBP program
         _isMicro, _isSyn, _isAux, _isBias, _isBus = {
             'IDS500 Initial Micro':   (True,  False, False, False, False),
             'IDS500 Initial Synbuck': (False,  True, False, False, False),
@@ -69,18 +59,15 @@ class InitialSub(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        self._pic_ser = SimSerial(port=_PIC_PORT, baudrate=19200, timeout=0.1)
-        self._picdev = Console(self._pic_ser)
         global d, s, m, t
         d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits, self._picdev)
+        s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        self._pic_ser.close()
         global d, s, m, t
         m = d = s = t = None
         super().close()
@@ -93,14 +80,17 @@ class InitialSub(tester.TestSequence):
     def _step_pwrup_micro(self):
         """Apply input DC and measure."""
         self.fifo_push(((s.oVsec5VuP, 5.0), ))
+
         t.pwrup_micro.run()
 
     def _step_program(self):
         """Program the PIC micro."""
         self._logger.info('Start PIC programmer')
         d.rla_Prog.set_on()
-        pic = ProgramPIC(
-            hexfile=_PIC_HEX, working_dir=_HEX_DIR, device_type='18F4520',
+        pic = share.ProgramPIC(
+            hexfile=limit.PIC_HEX,
+            working_dir=limit.HEX_DIR,
+            device_type='18F4520',
             sensor=s.oMirPIC, fifo=self._fifo)
         # Wait for programming completion & read results
         pic.read()
@@ -109,12 +99,11 @@ class InitialSub(tester.TestSequence):
 
     def _step_comms(self):
         """Communicate with the PIC console."""
-        self._picdev._flush()
         if self._fifo:
-            self._pic_ser.put(b'I, 1, 2,Software Revision\r\n')
+            d.pic_ser.put(b'I, 1, 2,Software Revision\r\n')
+            d.pic_ser.put(b'D, 16, 25,MICRO Temp.(C)\r\n')
+
         m.pic_SwRev.measure()
-        if self._fifo:
-            self._pic_ser.put(b'D, 16, 25,MICRO Temp.(C)\r\n')
         m.pic_MicroTemp.measure()
 
     def _step_pwrup_aux(self):
@@ -123,6 +112,7 @@ class InitialSub(tester.TestSequence):
             ((s.o20VL, 21.0), (s.o_20V, -21.0), (s.o5V, 0.0),(s.o15V, 15.0),
              (s.o_15V, -15.0), (s.o15Vp, 0.0), (s.o15VpSw, 0.0),
              (s.oPwrGood, 0.0), ))
+
         t.pwrup_aux.run()
 
     def _step_key_switch1(self):
@@ -130,4 +120,5 @@ class InitialSub(tester.TestSequence):
         self.fifo_push(
             ((s.o5V, 5.0), (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 15.0),
              (s.o15VpSw, 0.0), (s.oPwrGood, 5.0), ))
+
         t.key_sw1.run()

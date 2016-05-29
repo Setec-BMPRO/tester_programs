@@ -2,6 +2,15 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Final Program Limits."""
 
+import os
+
+# Serial port for the PIC.
+PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+
+NEW_PSU  =  False
+
+HW_REV = '06A'
+
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('TecOff', 1, -1.5, 1.5, None, None),

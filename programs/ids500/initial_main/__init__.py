@@ -8,7 +8,6 @@ import tester
 from . import support
 from . import limit
 
-
 INI_MAIN_LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -64,6 +63,7 @@ class InitialMain(tester.testsequence.TestSequence):
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed."""
         self._fifo_push(((s.Lock, 10.0), ))
+
         m.dmm_Lock.measure(timeout=5)
 
     def _step_power_up(self):
@@ -72,4 +72,5 @@ class InitialMain(tester.testsequence.TestSequence):
             ((s.oVbus, 340.0), (s.oTec, 0.0), (s.oTecVmon, 0.0),
              (s.oLdd, 0.0), (s.oIsVmon, 0.0), (s.o15V, 0.0), (s.om15V, 0.0),
              (s.o15Vp, 0.0), (s.o15VpSw, 0.0), (s.o5V, 0.0), ))
+
         t.pwr_up.run()
