@@ -72,20 +72,20 @@ class LogicalDevices():
         self.loads(i5=1.0, i12=5.0, i24=5.0)
         time.sleep(0.5)
         self.discharge.pulse()
-        self.loads(i5=0, i12=0, i24=0)
+        self.loads(i5=0, i12=0, i24=0, output=False)
         self.dcs_5v.output(0.0, False)
         for rla in (self.rla_12v2off, self.rla_pson,
                     self.rla_reset, self.rla_boot):
             rla.set_off()
 
-    def loads(self, i5=None, i12=None, i24=None):
+    def loads(self, i5=None, i12=None, i24=None, output=True):
         """Set output loads."""
-        if i5:
-            self.dcl_5v.output(i5, output=True)
-        if i12:
-            self.dcl_12v.output(i12, output=True)
-        if i24:
-            self.dcl_24v.output(i24, output=True)
+        if i5 is not None:
+            self.dcl_5v.output(i5, output)
+        if i12 is not None:
+            self.dcl_12v.output(i12, output)
+        if i24 is not None:
+            self.dcl_24v.output(i24, output)
 
 
 class Sensors():
