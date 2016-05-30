@@ -121,10 +121,17 @@ PROGRAMS = (
 # Skip these programs when running 'ALL PROGRAMS' in main.py
 #   because they will not pass in simulation mode.
 ALL_SKIP = (
-    'CMR-INI', 'CMR-SD', 'CMR8D-FIN', 'CMR17L-FIN',
+    # Due to use of the EV2200
+    'CMR-INI', 'CMR-SD',
+    # Due to the hard-coded fifo_push data (CMR13F-FIN works)
+    'CMR8D-FIN', 'CMR17L-FIN',
+    # Unfinished programs
     'IDS500 Initial Micro', 'IDS500 Initial Main', 'IDS500 Final',
-    'RM-50-24 Final',
+    # Obsolete and unused programs
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',
+    # ATE3 has no Power meter. Using ATE4 causes GEN4 serial errors.
+    'RM-50-24 Final',
+    # The voltage adjuster will not simulate
     'TS3020-H Initial',
     )
