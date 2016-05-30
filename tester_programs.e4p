@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-05-28, 20:56:36 -->
+<!-- Saved: 2016-05-30, 20:52:11 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -110,7 +110,6 @@
     <Source>programs/dummy/__init__.py</Source>
     <Source>programs/dummy/limit.py</Source>
     <Source>programs/dummy/support.py</Source>
-    <Source>programs/dummy/test_dummy.py</Source>
     <Source>programs/etrac/__init__.py</Source>
     <Source>programs/etrac/initial/__init__.py</Source>
     <Source>programs/etrac/initial/limit.py</Source>

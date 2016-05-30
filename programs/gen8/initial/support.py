@@ -23,7 +23,7 @@ class LogicalDevices():
         self.acsource = tester.ACSource(devices['ACS'])
         self.dmm = tester.DMM(devices['DMM'])
         self.discharge = tester.Discharge(devices['DIS'])
-        self.dcs_10vfixture = tester.DCSource(devices['DCS1'])
+        self.dcs_fixture = tester.DCSource(devices['DCS1'])
         self.dcs_5v = tester.DCSource(devices['DCS2'])
         self.dcl_24v = tester.DCLoad(devices['DCL1'])
         self.dcl_12v = tester.DCLoadParallel(
@@ -55,12 +55,20 @@ class LogicalDevices():
             self.arm.puts(string_data, preflush, postflush, priority)
 
     def arm_calpfc(self, voltage):
-        """Issue PFC calibration commands."""
+        """Issue PFC calibration commands.
+
+        @param voltage Measured PFC bus voltage
+
+        """
         self.arm['CAL_PFC'] = voltage
         self.arm['NVWRITE'] = True
 
     def arm_cal12v(self, voltage):
-        """Issue 12V calibration commands."""
+        """Issue 12V calibration commands.
+
+        @param voltage Measured 12V rail voltage
+
+        """
         self.arm['CAL_12V'] = voltage
         self.arm['NVWRITE'] = True
 
@@ -74,13 +82,21 @@ class LogicalDevices():
         self.discharge.pulse()
         self.loads(i5=0, i12=0, i24=0, output=False)
         self.dcs_5v.output(0.0, False)
-        for rla in (self.rla_12v2off, self.rla_pson,
-                    self.rla_reset, self.rla_boot):
+        for rla in (
+                self.rla_12v2off, self.rla_pson,
+                self.rla_reset, self.rla_boot,
+                ):
             rla.set_off()
-        self.rla_pson.opc()
 
     def loads(self, i5=None, i12=None, i24=None, output=True):
-        """Set output loads."""
+        """Set output loads.
+
+        @param i5 5V load current
+        @param i12 12V load current
+        @param i24 24V load current
+        @param output True to enable the load
+
+        """
         if i5 is not None:
             self.dcl_5v.output(i5, output)
         if i12 is not None:
@@ -95,8 +111,7 @@ class Sensors():
 
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
-        d = logical_devices
-        dmm = d.dmm
+        dmm = logical_devices.dmm
         self.o5v = sensor.Vdc(dmm, high=7, low=4, rng=10, res=0.001)
         self.o12v = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
         self.o12v2 = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
@@ -111,15 +126,16 @@ class Sensors():
         self.part = sensor.Res(dmm, high=10, low=5, rng=1000, res=0.01)
         self.fanshort = sensor.Res(dmm, high=13, low=7, rng=1000, res=0.1)
         self.vdsfet = sensor.Vdc(dmm, high=14, low=8, rng=100, res=0.001)
-        self.arm_acfreq = console.Sensor(d.arm, 'AcFreq')
-        self.arm_acvolt = console.Sensor(d.arm, 'AcVolt')
-        self.arm_5v = console.Sensor(d.arm, '5V')
-        self.arm_12v = console.Sensor(d.arm, '12V')
-        self.arm_24v = console.Sensor(d.arm, '24V')
+        arm = logical_devices.arm
+        self.arm_acfreq = console.Sensor(arm, 'AcFreq')
+        self.arm_acvolt = console.Sensor(arm, 'AcVolt')
+        self.arm_5v = console.Sensor(arm, '5V')
+        self.arm_12v = console.Sensor(arm, '12V')
+        self.arm_24v = console.Sensor(arm, '24V')
         self.arm_swver = console.Sensor(
-            d.arm, 'SwVer', rdgtype=sensor.ReadingString)
+            arm, 'SwVer', rdgtype=sensor.ReadingString)
         self.arm_swbld = console.Sensor(
-            d.arm, 'SwBld', rdgtype=sensor.ReadingString)
+            arm, 'SwBld', rdgtype=sensor.ReadingString)
 
 
 class Measurements():
@@ -168,7 +184,7 @@ class Measurements():
 
         @param limitname Test Limit name
         @param sensor Sensor to use
-        @return tester.Measurement instance
+        @return A tester.Measurement instance
 
         """
         if not position_fail:

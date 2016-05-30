@@ -25,7 +25,7 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PartDetect', self._step_part_detect, None, True),
-            ('Program', self._step_program, None, not fifo),
+            ('Program', self._step_program, None, True),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('5V', self._step_reg_5v, None, True),
@@ -47,14 +47,14 @@ class Initial(tester.TestSequence):
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         # Switch on fixture power
-        d.dcs_10vfixture.output(10.0, output=True)
+        d.dcs_fixture.output(10.0, output=True)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
         global d, s, m
         # Switch off fixture power
-        d.dcs_10vfixture.output(0.0, output=False)
+        d.dcs_fixture.output(0.0, output=False)
         m = d = s = None
         super().close()
 
@@ -78,13 +78,18 @@ class Initial(tester.TestSequence):
         Unit is left running the new code.
 
         """
+        self.fifo_push(((s.o5v, 5.10), (s.o3v3, 3.30), ))
+
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5v.output(5.15, True)
         tester.MeasureGroup((m.dmm_5v, m.dmm_3v3, ), timeout=2)
-        # Program the ARM device
-        d.programmer.program()
+        if self._fifo:
+            self._logger.info(
+                '**** Programming skipped due to active FIFOs ****')
+        else:
+            d.programmer.program()
         # Remove BOOT, reset micro, wait for ARM startup
         d.rla_boot.set_off()
         d.rla_reset.pulse(0.1)
