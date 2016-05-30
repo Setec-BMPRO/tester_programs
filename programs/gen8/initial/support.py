@@ -77,6 +77,7 @@ class LogicalDevices():
         for rla in (self.rla_12v2off, self.rla_pson,
                     self.rla_reset, self.rla_boot):
             rla.set_off()
+        self.rla_pson.opc()
 
     def loads(self, i5=None, i12=None, i24=None, output=True):
         """Set output loads."""
