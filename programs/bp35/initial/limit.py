@@ -72,5 +72,7 @@ DATA = (
     lim_string('CAN_RX', r'^RRQ,32,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
     lim_hilo_int('SOLAR_ALIVE', 1),
+    lim_hilo_int('SOLAR_RELAY', 1),
+    lim_hilo_int('SOLAR_ERROR', 0),
     lim_hilo_int('Vout_OV', 0),     # Over-voltage not triggered
     )

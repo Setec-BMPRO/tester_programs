@@ -131,6 +131,8 @@ class Sensors():
         self.arm_auxv = console.Sensor(bp35, 'AUX_V')
         self.arm_auxi = console.Sensor(bp35, 'AUX_I')
         self.arm_solar_alive = console.Sensor(bp35, 'SR_ALIVE')
+        self.arm_solar_relay = console.Sensor(bp35, 'SR_RELAY')
+        self.arm_solar_error = console.Sensor(bp35, 'SR_ERROR')
         self.arm_vout_ov = console.Sensor(bp35, 'VOUT_OV')
 
     def _reset(self):
@@ -189,6 +191,10 @@ class Measurements():
         self.arm_auxi = self._maker('ARM-AuxI', sense.arm_auxi)
         self.arm_solar_alive = self._maker(
             'SOLAR_ALIVE', sense.arm_solar_alive)
+        self.arm_solar_relay = self._maker(
+            'SOLAR_RELAY', sense.arm_solar_relay)
+        self.arm_solar_error = self._maker(
+            'SOLAR_ERROR', sense.arm_solar_error)
         self.arm_vout_ov = self._maker('Vout_OV', sense.arm_vout_ov)
 
     def _maker(self, limitname, sensor, position_fail=True):

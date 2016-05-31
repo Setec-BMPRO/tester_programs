@@ -93,6 +93,8 @@ class Console(console.Variable, console.BadUartConsole):
             'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
             'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
             'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
+            'SR_ERROR': ParameterFloat('SOLAR_REG_ERRORCODE'),
+            'SR_RELAY': ParameterFloat('SOLAR_REG_RELAY'),
             'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
             'SER_ID': ParameterString(
                 'SET-SERIAL-ID', writeable=True, readable=False,

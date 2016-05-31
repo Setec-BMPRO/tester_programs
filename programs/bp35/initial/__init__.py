@@ -178,7 +178,9 @@ class Initial(tester.TestSequence):
         self.fifo_push(((s.vsreg, (13.0, 13.5)), ))
         for dat in (
                 ('1.0', '0') +      # Solar alive, Vout OV
-                ('0', ) * 4         # 2 x Solar VI, Vout OV, SR Cal
+                ('0', ) * 3 +       # 2 x Solar VI, Vout OV
+                ('0', '1') +        # Errorcode, Relay
+                ('0', )             # SR Cal
             ):
             d.bp35_puts(dat)
 
@@ -189,6 +191,8 @@ class Initial(tester.TestSequence):
         d.bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(2)           # Wait for the Solar to start & overshoot
         d.bp35['VOUT_OV'] = 2   # Reset OVP Latch because the Solar overshot
+        # Check that Solar Reg is error-free & the relay is ON
+        tester.MeasureGroup((m.arm_solar_error, m.arm_solar_relay, ))
         vmeasured = m.dmm_vsregpre.measure(timeout=5).reading1
         d.bp35['SR_VCAL'] = vmeasured   # Calibrate voltage setpoint
         time.sleep(1)
