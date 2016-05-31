@@ -82,11 +82,12 @@ class ConsoleCanTunnel():
         # Create & open a SimSerial in simulation mode.
         # We can open it any time as there is no actual serial port.
         self._buf_port = SimSerial(simulation=True)
-        self._buf_port.open()
 
     def open(self):
         """Open the CAN tunnel."""
-        # Open underlying serial port
+        self._logger.info('Open CAN tunnel buffer port')
+        self._buf_port.open()
+        self._logger.info('Open CAN tunnel serial port')
         self.port.open()
         # Switch console echo OFF
         self.port.flushInput()
@@ -120,7 +121,11 @@ class ConsoleCanTunnel():
         """Close the CAN tunnel."""
         self.action(
             '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id))
+        self._logger.info('Close CAN tunnel serial port')
         self.port.close()
+        self._logger.info('Close CAN tunnel buffer port')
+        self._buf_port.close()
+        self._logger.debug('CAN Tunnel closed')
 
     def action(self, command=None, delay=0, get_response=True):
         """Send a command, and read the response.

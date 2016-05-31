@@ -118,13 +118,13 @@ class SimSerial(_Simulator, serial.Serial):
 
     def open(self):
         """Open port."""
-        self._logger.debug('Open port')
+        self._logger.debug('Open port "%s"', self.port)
         if not self.simulation:
             super().open()
 
     def close(self):
         """Close port."""
-        self._logger.debug('Close port')
+        self._logger.debug('Close port "%s"', self.port)
         if not self.simulation:
             try:
                 super().close()

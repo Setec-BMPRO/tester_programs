@@ -97,22 +97,26 @@ def _main():
         prog_list = ((test_program, ), )    # a single program group
     for prog in prog_list:
         test_program = prog[0]
-        logger.info('#' * 80)
+        logger.info('#' * 40)
+        logger.info('Create Program "%s"', test_program)
         if run_all and test_program in ALL_SKIP:
-            logger.info('Skip Program %s', test_program)
+            logger.info('Skip Program "%s"', test_program)
             continue
         # Make a TEST PROGRAM descriptor
         pgm = tester.TestProgram(
             test_program, per_panel=1, parameter=None, test_limits=[])
-        logger.info('Open Program %s', test_program)
+        logger.info('#' * 40)
+        logger.info('Open Program "%s"', test_program)
         tst.open(pgm)
+        logger.info('#' * 40)
         logger.info('Running Test')
         tst.test(('UUT1', ))
     #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
+        logger.info('#' * 40)
         logger.info('Close Program')
-        logger.info('#' * 80)
         time.sleep(2)
         tst.close()
+        logger.info('#' * 40)
     logger.info('Stop Tester')
     tst.stop()
     tst.join()
