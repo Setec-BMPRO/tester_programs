@@ -127,7 +127,7 @@ class ConsoleCanTunnel():
         self._buf_port.close()
         self._logger.debug('CAN Tunnel closed')
 
-    def action(self, command=None, delay=0, get_response=True):
+    def action(self, command=None, delay=0.1, get_response=True):
         """Send a command, and read the response.
 
         @param command Command string.
