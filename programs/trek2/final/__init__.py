@@ -61,7 +61,6 @@ class Final(tester.TestSequence):
         self._logger.info('Close')
         global d, s, m
         # Switch off the USB hub & Serial ports
-        d.tunnel.close()
         d.dcs_Vcom.output(0.0, output=False)
         m = d = s = None
         super().close()
