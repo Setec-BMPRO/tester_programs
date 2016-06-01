@@ -39,13 +39,15 @@ class _Simulator():
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
         """Put a string into the read-back buffer.
 
-        @param string_data Data string, or tuple of data strings.
+        @param string_data Data string.
         @param preflush Number of _FLUSH to be entered before the data.
         @param postflush Number of _FLUSH to be entered after the data.
         @param priority True to put in front of the buffer.
         Note: _FLUSH is a marker to stop the flush of the data buffer.
 
         """
+        if len(string_data) == 0 and preflush == 0 and postflush == 0:
+            return          # Nothing to do...
         self._logger.debug('puts() %s', repr(string_data))
         self._lock.acquire()
         try:
