@@ -52,16 +52,11 @@ class Final(tester.TestSequence):
         d = support.LogicalDevices(self._devices, self._fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
-        # Switch on the USB hub & Serial ports
-        d.dcs_Vcom.output(12.0, output=True)
-        time.sleep(2)   # Allow OS to detect the new ports
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
         global d, s, m
-        # Switch off the USB hub & Serial ports
-        d.dcs_Vcom.output(0.0, output=False)
         m = d = s = None
         super().close()
 
@@ -72,6 +67,8 @@ class Final(tester.TestSequence):
 
     def _step_power_up(self):
         """Apply input 12Vdc and measure voltages."""
+        # Switch on the USB hub & Serial ports
+        d.dcs_Vcom.output(12.0, output=True)
         d.dcs_Vin.output(12.0, output=True)
         time.sleep(9)           # Wait for CAN binding to finish
 
@@ -108,7 +105,7 @@ class Final(tester.TestSequence):
         d.trek2_puts('')
 
         d.trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
-        d.trek2['TANK_SPEED'] = 1.0     # Change update interval
+        d.trek2['TANK_SPEED'] = 0.1     # Change update interval
         time.sleep(1)
         tester.MeasureGroup(m.tank1)
 
