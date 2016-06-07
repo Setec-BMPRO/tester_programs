@@ -8,7 +8,7 @@ from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int, lim_hilo,
     lim_lo, lim_string, lim_boolean)
 
-BIN_VERSION = '1.2.13347.138'   # Software binary version
+BIN_VERSION = '1.3.13347.138'   # Software binary version
 
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 HW_VER = (2, 0, 'E')
