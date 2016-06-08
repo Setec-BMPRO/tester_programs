@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """CMR-SBP ALL Test Program."""
 
+import os
+import inspect
 from pydispatch import dispatcher
 
 import share
@@ -43,6 +45,12 @@ class LogicalDevices():
             simulation=self._fifo,
             port=limit.CMR_PORT, baudrate=9600, timeout=0.1)
         self.cmr = cmrsbp.CmrSbp(self.cmr_ser, data_timeout=10.0)
+        # PIC device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self.program_pic = share.ProgramPIC(
+            limit.PIC_HEX, folder, '18F252', self.rla_Prog)
+
 
     def reset(self):
         """Reset instruments."""
@@ -75,7 +83,6 @@ class Sensors():
         self.oMirRelStateCharge = sensor.Mirror()
         self.oMirHalfCell = sensor.Mirror()
         self.oMirVFCcalStatus = sensor.Mirror()
-        self.oMirPIC = sensor.Mirror()
         self.oMirVChge = sensor.Mirror()
         self.oMirErrV = sensor.Mirror()
         self.oMirErrI = sensor.Mirror()
@@ -106,7 +113,6 @@ class Sensors():
         self.oMirRelStateCharge.flush()
         self.oMirHalfCell.flush()
         self.oMirVFCcalStatus.flush()
-        self.oMirPIC.flush()
         self.oMirVChge.flush()
         self.oMirErrV.flush()
         self.oMirErrI.flush()
@@ -126,7 +132,6 @@ class MeasureInit():
 
         """
         Measurement = tester.Measurement
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.cmr_SenseRes = Measurement(limits['SenseRes'], sense.oMirSenseRes)
         self.cmr_Halfcell = Measurement(limits['Halfcell'], sense.oMirHalfCell)
         self.cmr_VChgeOn = Measurement(limits['VChgeOn'], sense.oMirVChge)

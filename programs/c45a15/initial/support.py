@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 """C45A-15 Initial Test Program."""
 
+import os
+import inspect
 import time
 from pydispatch import dispatcher
 
-import sensor
 import tester
+import sensor
+import share
+from . import limit
 
 
 class LogicalDevices():
@@ -29,6 +33,12 @@ class LogicalDevices():
         self.rla_CMR = tester.Relay(devices['RLA2'])
         self.rla_Prog = tester.Relay(devices['RLA4'])
         self.discharge = tester.Discharge(devices['DIS'])
+        # PIC device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self.program_pic = share.ProgramPIC(
+            limit.PIC_HEX, folder, '16F684', self.rla_Prog)
+
 
     def reset(self):
         """Reset instruments."""
@@ -55,7 +65,6 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-        self.oMirPIC = sensor.Mirror()
         self.oMirReg = sensor.Mirror()
         dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
                            signal=tester.signals.TestRun.stop)
@@ -82,7 +91,6 @@ class Sensors():
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirPIC.flush()
         self.oMirReg.flush()
 
 
@@ -98,7 +106,6 @@ class Measurements():
 
         """
         Measurement = tester.Measurement
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.loadReg = Measurement(limits['Reg'], sense.oMirReg)
         self.dmm_Lock = Measurement(limits['FixtureLock'], sense.oLock)
         self.dmm_VacStart = Measurement(limits['VacStart'], sense.oVac)

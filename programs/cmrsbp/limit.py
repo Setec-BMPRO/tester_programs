@@ -25,7 +25,6 @@ DATA = (
     ('SenseRes', 1, 220, 280, None, None),
     ('Halfcell', 1, 100, 120, None, None),
     ('VChgeOn', 1, 300, 400, None, None),
-    ('Program', 2, -0.1, 0.1, None, None),
     ('ErrVUncal', 1, -0.5, 0.5, None, None),
     ('ErrIUncal', 1, -0.060, 0.060, None, None),
     # 298K nominal +/- 2.5K in Kelvin (25C +/- 2.5C in Celsius).
