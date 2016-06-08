@@ -16,7 +16,7 @@ from . import limit
 INI_LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = None
+d = s = m = t = None
 
 
 class Initial(tester.TestSequence):
@@ -29,8 +29,8 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
-            ('Program', self._step_arduino, None, False),
-            ('Program', self._step_program_micros, None, not fifo),
+            ('Program', self._step_arduino, None, True),
+            ('Program', self._step_program_micros, None, False),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('5Vsb', self._step_reg_5v, None, True),
@@ -48,16 +48,17 @@ class Initial(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m
+        global d, s, m, t
         d = support.LogicalDevices(self._devices, self._fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
+        t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s
-        m = d = s = None
+        global d, s, m, t
+        d = s = m = t = None
         super().close()
 
     def safety(self):
@@ -92,15 +93,20 @@ class Initial(tester.TestSequence):
 
          """
         self.fifo_push(
-            ((s.o8V5Ard, 8.5), (s.PriCtl, 12.34), (s.o5Vsb, 5.75),
-            (s.o5Vsbunsw, (5.0,) * 2), (s.o3V3, 3.21), ))
+            ((s.o5Vsb, 5.75), (s.o5Vsbunsw, (5.0,) * 2), (s.o3V3, 3.21),
+            (s.o8V5Ard, 8.5), (s.PriCtl, 12.34),))
         for _ in range(2):      # Push response prompts
             d.ard_puts('OK')
 
-        d.dcs_Arduino.output(12.0, True)
-        d.dcs_PriCtl.output(12.0, True)
-        tester.MeasureGroup((m.dmm_PriCtl, m.dmm_8V5Ard), 2)
-        time.sleep(1)
+        # Set BOOT active before power-on so the ARM boot-loader runs
+        d.rla_boot.set_on()
+        # Apply and check injected rails
+        t.ext_pwron.run()
+        # Program the ARM device
+        d.programmer.program()
+        # Reset BOOT to ARM
+        d.rla_boot.set_off()
+        # Program the PIC devices
         d.ard.open()
         time.sleep(2)        # Wait for the banner to be received
         self._logger.info('Start programming PIC1')
@@ -121,20 +127,8 @@ class Initial(tester.TestSequence):
         tester.testsequence.path_push('SET-POT-MAX')
         m.pot_max.measure()
         tester.testsequence.path_pop()
-        # Set BOOT active before power-on so the ARM boot-loader runs
-        d.rla_boot.set_on()
-        # Apply and check injected rails
-        d.dcs_5Vsb.output(5.75, True)
-        tester.MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
-        # Program the ARM device
-        d.programmer.program()
-        # Reset BOOT to ARM
-        d.rla_boot.set_off()
-        # Discharge the 5Vsb to stop the ARM
-        d.dcs_5Vsb.output(0, False)
-        d.dcl_5Vsb.output(0.1)
-        time.sleep(0.5)
-        d.dcl_5Vsb.output(0)
+        # Switch off rails and discharge the 5Vsb to stop the ARM
+        t.ext_pwroff.run()
 
     def _step_program_micros(self):
         """Program the ARM and PIC devices.
@@ -155,7 +149,7 @@ class Initial(tester.TestSequence):
         # Set BOOT active before power-on so the ARM boot-loader runs
         d.rla_boot.set_on()
         # Apply and check injected rails
-        d.dcs_5Vsb.output(5.75, True)
+        d.dcs_5Vsb.output(9.0, True)
         d.dcs_PriCtl.output(12.0, True)
         tester.MeasureGroup(
             (m.dmm_PriCtl, m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)

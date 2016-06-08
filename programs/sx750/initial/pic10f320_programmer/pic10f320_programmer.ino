@@ -11,24 +11,19 @@
     12V and 24V OCP point adjustment.
     Both devices share UP/~DOWN pin.
     Each has a ~ChipSelect pin.
-    Pins are driven by opto-couplers, driven by digital outputs.
+    Pins are driven by opto-couplers, driven by Arduino digital outputs.
     All optocoupler outputs have 1k pull up to '5V' in the Fixture.
-    A digital output low make a pin high (setting moves).
-    Note that UP on the pots REDUCES the OCP point.
-  Pot UP Procedure (OCP DOWN):
-    Both CS and UD are high (off)
-    Set UD off (off = UP)
-    Set CS on
-    Set UD on
-    Pulse UD off-on (setting moves when turn off happens)
-    Set CS off (UD on here causes a write to EEPROM)
-    Set UD off
-  Pot DOWN Procedure (OCP UP):
-    Both CS and UD are high (off)
-    Set UD on (on = DOWN)
-    Set CS on
-    Pulse UD on-off (setting moves when turn off happens)
-    Set CS off (UD off here causes a write to EEPROM)
+    A pin of MCP4021 goes low when an Arduino digital output goes high.
+    Note that incrementing the pots REDUCES the OCP point.
+  Pot Increment Procedure (Reduce OCP):
+    With UD high, set CS low.
+    Pulse UD low-high (setting moves after low-high).
+    With UD high, set CS high (This causes a write to EEPROM).
+  Pot Decrement Procedure (Increase OCP):
+    With UD low, set CS low.
+    Set UD high (setting moves after low-high).
+    Pulse UD low-high for next decrement if required.
+    With UD high, set CS high (This causes a write to EEPROM).
   WriteLock device function is not used or enabled.
 
  */
@@ -91,7 +86,8 @@ const byte PIC_ERASE     = 0x09;  // Bulk Erase Program Memory
 
 // Digital Pot delays in usec
 #define DELAY_POT       100       // Delay after each transition
-
+#define POT_LOW         HIGH
+#define POT_HIGH        LOW
 
 // The setup function runs once when you press reset or power the board
 void setup() {
@@ -177,38 +173,37 @@ void ledFlasher() {
 
 // Set both Digital Pots UP to maximum
 void potMaximum() {
-    potWrite(PIN_POT_UD, LOW);
-    potWrite(PIN_POT_CS12, HIGH);
-    potWrite(PIN_POT_CS24, HIGH);
+    potWrite(PIN_POT_UD, POT_HIGH);
+    potWrite(PIN_POT_CS12, POT_LOW);
+    potWrite(PIN_POT_CS24, POT_LOW);
     for (byte i = 0; i < 64; i++) {     // Step UP 64 times
-        potWrite(PIN_POT_UD, HIGH);
-        potWrite(PIN_POT_UD, LOW);      // The setting changes here
+        potWrite(PIN_POT_UD, POT_LOW);
+        potWrite(PIN_POT_UD, POT_HIGH);      // The setting changes here
     }
-    potWrite(PIN_POT_CS12, LOW);
-    potWrite(PIN_POT_CS24, LOW);
+    potWrite(PIN_POT_CS12, POT_HIGH);
+    potWrite(PIN_POT_CS24, POT_HIGH);
     Serial.print(RESP_OK);
 }
 
 // Enable a Digital Pot for DOWN adjustment
 void potEnable(byte enablePin) {
-    potWrite(PIN_POT_UD, HIGH);
-    potWrite(enablePin, HIGH);
+    potWrite(PIN_POT_UD, POT_LOW);
+    potWrite(enablePin, POT_LOW);
     Serial.print(RESP_OK);
 }
 
 // Step a digital Pot DOWN 1 step
 void potStep() {
-    if (digitalRead(PIN_POT_UD) == LOW)
-        potWrite(PIN_POT_UD, HIGH);
-    potWrite(PIN_POT_UD, LOW);          // The setting changes here
+    potWrite(PIN_POT_UD, POT_LOW);
+    potWrite(PIN_POT_UD, POT_HIGH);          // The setting changes here
     Serial.print(RESP_OK);
 }
 
 // Disable DOWN adjustment of both Digital Pots
 void potDisable() {
-    potWrite(PIN_POT_UD, LOW);
-    potWrite(PIN_POT_CS12, LOW);
-    potWrite(PIN_POT_CS24, LOW);
+    potWrite(PIN_POT_UD, POT_HIGH);
+    potWrite(PIN_POT_CS12, POT_HIGH);
+    potWrite(PIN_POT_CS24, POT_HIGH);
     Serial.print(RESP_OK);
 }
 

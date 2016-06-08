@@ -242,3 +242,33 @@ class Measurements():
             lim.position_fail = False
             lim.send_signal = False
         return tester.Measurement(lim, sensor)
+
+
+class SubTests():
+
+    """SubTest Steps."""
+
+    def __init__(self, logical_devices, measurements):
+        """Create SubTest Step instances.
+
+           @param measurements Measurements used
+           @param logical_devices Logical instruments used
+
+        """
+        d = logical_devices
+        m = measurements
+        # ExtPowerOn: Apply and check injected rails.
+        dcs1 = tester.DcSubStep(
+            setting=((d.dcs_5Vsb, 9.0), (d.dcs_PriCtl, 12.0),
+                        (d.dcs_Arduino, 12.0), ), output=True)
+        msr1 = tester.MeasureSubStep(
+            (m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3, m.dmm_PriCtl,
+            m.dmm_8V5Ard,), timeout=5)
+        self.ext_pwron = tester.SubStep((dcs1, msr1, ))
+
+        # ExtPowerOff: # Switch off rails, discharge the 5Vsb to stop the ARM.
+        dcs1 = tester.DcSubStep(
+            setting=((d.dcs_5Vsb, 0.0), (d.dcs_PriCtl, 0.0), ), output=False)
+        ld1 = tester.LoadSubStep(((d.dcl_5Vsb, 0.1), ), output=True, delay=0.5)
+        ld2 = tester.LoadSubStep(((d.dcl_5Vsb, 0.0), ), output=False)
+        self.ext_pwroff = tester.SubStep((dcs1, ld1, ld2))
