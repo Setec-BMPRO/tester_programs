@@ -111,6 +111,7 @@ class Initial(tester.TestSequence):
         time.sleep(2)        # Wait for the banner to be received
         self._logger.info('Start programming PIC1')
         d.rla_pic1.set_on()
+        d.rla_pic1.opc()
         m.dmm_5Vunsw.measure(timeout=2)
         tester.testsequence.path_push('PIC-5Vsb')
         m.pgm_5vsb.measure()
@@ -118,7 +119,7 @@ class Initial(tester.TestSequence):
         d.rla_pic1.set_off()
         self._logger.info('Start programming PIC2')
         d.rla_pic2.set_on()
-        time.sleep(0.1)
+        d.rla_pic2.opc()
         tester.testsequence.path_push('PIC-PwrSw')
         m.pgm_pwrsw.measure()
         tester.testsequence.path_pop()
@@ -205,7 +206,7 @@ class Initial(tester.TestSequence):
         for _ in range(2):      # Push response prompts
             d.arm_puts('')
 
-        d.dcs_5Vsb.output(5.75, True)
+        d.dcs_5Vsb.output(9.0, True)
         tester.MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
         d.arm.open()
@@ -327,12 +328,12 @@ class Initial(tester.TestSequence):
         _reg_check(
             dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
             reg_limit=self._limits['12V_reg'], max_load=32.0, peak_load=36.0)
-        _ocp_set(
-            target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
-            enable=d.ocp_pot.enable_12v, limit=self._limits['12V_ocp'])
-#        _ocp_set_arduino(
+#        _ocp_set(
 #            target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
-#            enable=m.pot12_enable, limit=self._limits['12V_ocp'])
+#            enable=d.ocp_pot.enable_12v, limit=self._limits['12V_ocp'])
+        _ocp_set_arduino(
+            target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
+            enable=m.pot12_enable, limit=self._limits['12V_ocp'])
         tester.testsequence.path_push('OCPcheck')
         d.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
         m.rampOcp12V.measure()
@@ -367,12 +368,12 @@ class Initial(tester.TestSequence):
         _reg_check(
             dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
             reg_limit=self._limits['24V_reg'], max_load=15.0, peak_load=18.0)
-        _ocp_set(
-            target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
-            enable=d.ocp_pot.enable_24v, limit=self._limits['24V_ocp'])
-#        _ocp_set_arduino(
+#        _ocp_set(
 #            target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
-#            enable=m.pot24_enable, limit=self._limits['24V_ocp'])
+#            enable=d.ocp_pot.enable_24v, limit=self._limits['24V_ocp'])
+        _ocp_set_arduino(
+            target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
+            enable=m.pot24_enable, limit=self._limits['24V_ocp'])
         tester.testsequence.path_push('OCPcheck')
         d.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
         m.rampOcp24V.measure()

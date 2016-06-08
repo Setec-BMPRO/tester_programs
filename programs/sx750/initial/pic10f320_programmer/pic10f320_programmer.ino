@@ -18,7 +18,8 @@
   Pot Increment Procedure (Reduce OCP):
     With UD high, set CS low.
     Pulse UD low-high (setting moves after low-high).
-    With UD high, set CS high (This causes a write to EEPROM).
+    Set UD low, then set CS high (This causes a write to EEPROM).
+    Wait 5mS to write to eeprom and set UD high.
   Pot Decrement Procedure (Increase OCP):
     With UD low, set CS low.
     Set UD high (setting moves after low-high).
@@ -86,6 +87,7 @@ const byte PIC_ERASE     = 0x09;  // Bulk Erase Program Memory
 
 // Digital Pot delays in usec
 #define DELAY_POT       100       // Delay after each transition
+#define POT_WRITE       5000      // Time for a eeprom write
 #define POT_LOW         HIGH
 #define POT_HIGH        LOW
 
@@ -180,8 +182,11 @@ void potMaximum() {
         potWrite(PIN_POT_UD, POT_LOW);
         potWrite(PIN_POT_UD, POT_HIGH);      // The setting changes here
     }
+    potWrite(PIN_POT_UD, POT_LOW);
     potWrite(PIN_POT_CS12, POT_HIGH);
     potWrite(PIN_POT_CS24, POT_HIGH);
+    delayMicroseconds(POT_WRITE);
+    potWrite(PIN_POT_UD, POT_HIGH);
     Serial.print(RESP_OK);
 }
 
