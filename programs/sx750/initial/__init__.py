@@ -2,13 +2,9 @@
 # -*- coding: utf-8 -*-
 """SX-750 Initial Test Program."""
 
-import os
-import inspect
 import time
 import logging
-import threading
 
-import share
 import tester
 from . import support
 from . import limit
@@ -29,8 +25,7 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('FixtureLock', self._step_fixture_lock, None, True),
-            ('Program', self._step_arduino, None, True),
-            ('Program', self._step_program_micros, None, False),
+            ('Program', self._step_program_micros, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('5Vsb', self._step_reg_5v, None, True),
@@ -81,7 +76,7 @@ class Initial(tester.TestSequence):
             (m.dmm_Lock, m.dmm_Part, m.dmm_R601, m.dmm_R602, m.dmm_R609,
              m.dmm_R608), 2)
 
-    def _step_arduino(self):
+    def _step_program_micros(self):
         """Program the ARM and PIC devices.
 
          The 5Vsb and PwrSw PIC's are powered and programmed by the Arduino.
@@ -130,68 +125,6 @@ class Initial(tester.TestSequence):
         tester.testsequence.path_pop()
         # Switch off rails and discharge the 5Vsb to stop the ARM
         t.ext_pwroff.run()
-
-    def _step_program_micros(self):
-        """Program the ARM and PIC devices.
-
-        5Vsb is injected to power the ARM and 5Vsb PIC for programming.
-        PriCtl is injected to power the PwrSw PIC for programming.
-        The 5Vsb PIC is programmed first.
-        Then ARM and PwrSw PIC are programmed at the same time using 2 new
-        threads. While waiting, we set OCP digital pots to maximum.
-
-        Unit is left unpowered.
-
-        """
-        self.fifo_push(
-            ((s.PriCtl, 12.34), (s.o5Vsb, 5.75), (s.o5Vsbunsw, 5.01),
-             (s.o3V3, 3.21), ))
-
-        # Set BOOT active before power-on so the ARM boot-loader runs
-        d.rla_boot.set_on()
-        # Apply and check injected rails
-        d.dcs_5Vsb.output(9.0, True)
-        d.dcs_PriCtl.output(12.0, True)
-        tester.MeasureGroup(
-            (m.dmm_PriCtl, m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3), 2)
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-
-        # Start the PIC programmer for 5Vsb PIC (takes about 6 sec)
-        self._logger.info('Start PIC programmer - PIC1')
-        d.rla_pic1.set_on()
-        pic = share.ProgramPIC(limit.PIC_HEX1, folder, '10F320', s.oMirPIC)
-        pic.read()
-        d.rla_pic1.set_off()
-        # 'Measure' the mirror sensor to check and log data
-        m.pgmPIC.measure()
-
-        # Start the PIC programmer for PwrSw PIC (takes about 6 sec)
-        self._logger.info('Start PIC programmer - PIC2')
-        d.rla_pic2.set_on()
-        pic = share.ProgramPIC(limit.PIC_HEX2, folder, '10F320', s.oMirPIC)
-        # While programming, we also set OCP adjust to maximum.
-        # (takes about 6 sec)
-        self._logger.info('Reset digital pots')
-        pot_worker = threading.Thread(
-            target=self._pot_worker, name='PotReset')
-        pot_worker.start()
-        # Program the ARM device
-        d.programmer.program()
-        # Wait for programming completion & read results
-        pot_worker.join()
-        pic.read()
-        d.rla_pic2.set_off()
-        # 'Measure' the mirror sensor to check and log data
-        m.pgmPIC.measure()
-        # Reset BOOT to ARM
-        d.rla_boot.set_off()
-        # Discharge the 5Vsb to stop the ARM
-        d.dcs_5Vsb.output(0, False)
-        d.dcl_5Vsb.output(0.1)
-        time.sleep(0.5)
-        d.dcl_5Vsb.output(0)
-        d.dcs_PriCtl.output(0, False)
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
@@ -328,10 +261,7 @@ class Initial(tester.TestSequence):
         _reg_check(
             dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
             reg_limit=self._limits['12V_reg'], max_load=32.0, peak_load=36.0)
-#        _ocp_set(
-#            target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
-#            enable=d.ocp_pot.enable_12v, limit=self._limits['12V_ocp'])
-        _ocp_set_arduino(
+        _ocp_set(
             target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
             enable=m.pot12_enable, limit=self._limits['12V_ocp'])
         tester.testsequence.path_push('OCPcheck')
@@ -368,10 +298,7 @@ class Initial(tester.TestSequence):
         _reg_check(
             dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
             reg_limit=self._limits['24V_reg'], max_load=15.0, peak_load=18.0)
-#        _ocp_set(
-#            target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
-#            enable=d.ocp_pot.enable_24v, limit=self._limits['24V_ocp'])
-        _ocp_set_arduino(
+        _ocp_set(
             target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
             enable=m.pot24_enable, limit=self._limits['24V_ocp'])
         tester.testsequence.path_push('OCPcheck')
@@ -400,10 +327,6 @@ class Initial(tester.TestSequence):
         d.dcl_24V.output(0)
         d.dcl_12V.output(0)
         d.dcl_5Vsb.output(0)
-
-    def _pot_worker(self):
-        """Thread worker to set the digital pots to maximum."""
-        d.ocp_pot.set_maximum()
 
 
 def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
@@ -442,7 +365,7 @@ def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
     dmm_out.measure()
     tester.testsequence.path_pop()
 
-def _ocp_set_arduino(target, load, dmm, detect, enable, limit):
+def _ocp_set(target, load, dmm, detect, enable, limit):
     """Set OCP of an output.
 
     target: Target setpoint in Amp.
@@ -469,38 +392,6 @@ def _ocp_set_arduino(target, load, dmm, detect, enable, limit):
         if detect.measure().result:
             break
     m.pot_disable.measure()
-    load.output(0.0)
-    limit.check(setting, 1)
-    tester.testsequence.path_pop()
-
-def _ocp_set(target, load, dmm, detect, enable, limit):
-    """Set OCP of an output.
-
-    target: Target setpoint in Amp.
-    load: Load instrument.
-    dmm: Measurement of output voltage.
-    detect: Measurement of 'In OCP'.
-    enable: Method to call to enable digital pot.
-    limit: Limit to check OCP pot setting.
-
-    Adjust OCP by setting the desired current, then lowering the digital pot
-    setting until OCP triggers.
-    Unit is left running at no load.
-
-    """
-    tester.testsequence.path_push('OCP')
-    load.output(target)
-    volt = dmm.read()[0]
-    dmm.testlimit[0].check(volt, 1)
-    detect.configure()
-    detect.opc()
-    enable()
-    setting = 0
-    for setting in range(63, 0, -1):
-        d.ocp_pot.step()
-        if detect.measure().result:
-            break
-    d.ocp_pot.disable()
     load.output(0.0)
     limit.check(setting, 1)
     tester.testsequence.path_pop()
