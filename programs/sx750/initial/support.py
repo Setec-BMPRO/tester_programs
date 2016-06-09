@@ -11,7 +11,6 @@ import sensor
 import tester
 from . import limit
 from . import arduino
-from . import digpot
 from .. import console
 
 
@@ -38,8 +37,6 @@ class LogicalDevices():
         self.rla_pot_ud = tester.Relay(devices['RLA6'])
         self.rla_pot_12 = tester.Relay(devices['RLA5'])
         self.rla_pot_24 = tester.Relay(devices['RLA4'])
-        self.ocp_pot = digpot.OCPAdjust(
-            self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24)
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -100,7 +97,6 @@ class LogicalDevices():
                 self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
                 self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
             rla.set_off()
-        self.ocp_pot.disable()
 
 
 class Sensors():
@@ -171,7 +167,6 @@ class Measurements():
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
         self._limits = limits
-        self.pgmPIC = self._maker('Program', sense.oMirPIC)
         self.dmm_5Voff = self._maker('5Voff', sense.o5Vsb)
         self.dmm_5Vext = self._maker('5Vext', sense.o5Vsb)
         self.dmm_5Vunsw = self._maker('5Vsb', sense.o5Vsbunsw)

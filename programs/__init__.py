@@ -123,8 +123,6 @@ PROGRAMS = (
 ALL_SKIP = (
     # Due to use of the EV2200
     'CMR-INI', 'CMR-SD',
-    # Due to the hard-coded fifo_push data (CMR13F-FIN works)
-    'CMR8D-FIN', 'CMR17L-FIN',
     # Unfinished programs
     'IDS500 Initial Micro', 'IDS500 Initial Main', 'IDS500 Final',
     # Obsolete and unused programs

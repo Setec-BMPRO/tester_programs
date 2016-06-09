@@ -331,7 +331,14 @@ class Final(_Main):
 
     def _step_startup(self):
         """Power comms interface, connect to PIC."""
-        self.fifo_push(((s.oSnEntry, ('G240166F0778', )), ))
+        sernum_limit = self._limits['SerNum'].limit
+        if '40214' in sernum_limit:
+            sernum_push = 'G240214F1234'
+        if '40166' in sernum_limit:
+            sernum_push = 'G240166F1234'
+        if '403' in sernum_limit:
+            sernum_push = 'G240323F1234'
+        self.fifo_push(((s.oSnEntry, (sernum_push, )), ))
 
         sernum = m.ui_SnEntry.measure().reading1
         self._limits['SerNum'].limit = str(int(sernum[-4:]))
