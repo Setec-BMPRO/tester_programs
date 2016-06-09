@@ -9,7 +9,6 @@ import tester
 import testlimit
 import sensor
 import isplpc
-import share
 
 
 # Result values to store into the mirror sensor
@@ -107,7 +106,7 @@ class ProgramARM():
         into bootloader mode (Assert BOOT, pulse RESET).
 
         """
-        ser = share.SimSerial(port=self._port, baudrate=self._baudrate)
+        ser = tester.SimSerial(port=self._port, baudrate=self._baudrate)
         try:
             if self._boot_relay:
                 self._boot_relay.set_on()

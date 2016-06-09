@@ -50,7 +50,7 @@ class LogicalDevices():
         self.program_pic = share.ProgramPIC(
             limit.PIC_HEX, folder, '33FJ16GS402', self.rla_pic)
         # Serial connection to the BP35 console
-        self.bp35_ser = share.SimSerial(
+        self.bp35_ser = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         self.bp35_ser.port = limit.ARM_PORT

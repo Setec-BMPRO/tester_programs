@@ -7,7 +7,6 @@ import datetime
 import threading
 import time
 
-import share
 import tester
 from . import support
 from . import limit
@@ -153,7 +152,7 @@ class Initial(_Main):
         """Prepare for testing."""
         super().open()
         self._logger.info('Open')
-        self._ev_ser = share.SimSerial(
+        self._ev_ser = tester.SimSerial(
             simulation=self._fifo,
             port=limit.EV_PORT, baudrate=9600, timeout=4.0)
         self._ev = ev2200.EV2200(self._ev_ser)
@@ -271,7 +270,7 @@ class SerialDate(_Main):
         """Prepare for testing."""
         super().open()
         self._logger.info('Open')
-        self._ev_ser = share.SimSerial(
+        self._ev_ser = tester.SimSerial(
             simulation=self._fifo,
             port=limit.EV_PORT, baudrate=9600, timeout=4.0)
         self._ev = ev2200.EV2200(self._ev_ser)

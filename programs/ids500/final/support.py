@@ -4,7 +4,6 @@
 
 from pydispatch import dispatcher
 
-import share
 import tester
 import sensor
 from . import limit
@@ -38,7 +37,7 @@ class LogicalDevices():
         self.rla_Interlock = tester.Relay(devices['RLA6'])
         self.rla_Enable = tester.Relay(devices['RLA7'])
         self.rla_TecPhase = tester.Relay(devices['RLA8'])
-        self.pic_ser = share.SimSerial(
+        self.pic_ser = tester.SimSerial(
             port=limit.PIC_PORT, baudrate=19200, timeout=0.1)
         self.picdev = console.Console(self.pic_ser)
 

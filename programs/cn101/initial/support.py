@@ -46,14 +46,14 @@ class LogicalDevices():
             limit.ARM_PORT, file, crpmode=False,
             boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # Serial connection to the CN101 console
-        self.cn101_ser = share.SimSerial(
+        self.cn101_ser = tester.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         self.cn101_ser.port = limit.ARM_PORT
         # CN101 Console driver
         self.cn101 = console.Console(self.cn101_ser)
         # Serial connection to the BLE module
-        ble_ser = share.SimSerial(
+        ble_ser = tester.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = limit.BLE_PORT

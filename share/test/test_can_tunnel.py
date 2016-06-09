@@ -3,7 +3,7 @@
 """UnitTest for CAN Tunneled console."""
 
 import unittest
-from ..sim_serial import SimSerial
+import tester
 from . import logging_setup
 
 console = None      # Console module
@@ -21,7 +21,7 @@ class TunnelTestCase(unittest.TestCase):
         from .. import can_tunnel as console_module
         global console
         console = console_module
-        sim_ser = SimSerial(simulation=True)
+        sim_ser = tester.SimSerial(simulation=True)
         global mycon
         mycon = console.ConsoleCanTunnel(sim_ser)
 

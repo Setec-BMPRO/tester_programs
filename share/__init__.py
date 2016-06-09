@@ -7,6 +7,5 @@ from .bluetooth import *
 from .console import *
 from .can_tunnel import *
 from .programmer import *
-from .sim_serial import *
 from .ticker import *
 from .timed_data import *

@@ -33,7 +33,7 @@ class LogicalDevices():
         self.rla_s2 = tester.Relay(devices['RLA4'])
         self.rla_s3 = tester.Relay(devices['RLA5'])
         # Connection to the Serial-to-CAN Trek2 inside the fixture
-        ser_can = share.SimSerial(
+        ser_can = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         ser_can.port = limit.CAN_PORT

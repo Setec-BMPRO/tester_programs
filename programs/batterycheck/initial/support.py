@@ -32,13 +32,13 @@ class LogicalDevices(object):
             limit.ARM_BIN)
         self.programmer = share.ProgramARM(limit.ARM_PGM, file, crpmode=False)
         # Serial connection to the console
-        arm_ser = share.SimSerial(
+        arm_ser = tester.SimSerial(
             simulation=self._fifo, baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = limit.ARM_CON
         self.arm = console.Console(arm_ser)
         # Serial connection to the BT device
-        self.btport = share.SimSerial(
+        self.btport = tester.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         self.btport.port = limit.BT_PORT

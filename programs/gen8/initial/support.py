@@ -42,7 +42,7 @@ class LogicalDevices():
             limit.ARM_PORT, file,
             boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # Serial connection to the ARM console
-        arm_ser = share.SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
+        arm_ser = tester.SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
         arm_ser.port = limit.ARM_PORT
         self.arm = console.Console(arm_ser, verbose=False)

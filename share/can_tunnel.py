@@ -31,7 +31,8 @@ The required process to run a tunnel...
 
 import logging
 import time
-from .sim_serial import SimSerial
+
+import tester
 
 # "CAN Print Packets" mode controlled by STATUS bit 29
 _CAN_ON = (1 << 29)
@@ -81,7 +82,7 @@ class ConsoleCanTunnel():
             '.'.join((__name__, self.__class__.__name__)))
         # Create & open a SimSerial in simulation mode.
         # We can open it any time as there is no actual serial port.
-        self._buf_port = SimSerial(simulation=True)
+        self._buf_port = tester.SimSerial(simulation=True)
 
     def open(self):
         """Open the CAN tunnel."""

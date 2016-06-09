@@ -31,7 +31,7 @@ class LogicalDevices():
         self.rla_Prog = tester.Relay(devices['RLA10'])
         self.rla_EnAux = tester.Relay(devices['RLA1'])
         self.rla_En15VpSw = tester.Relay(devices['RLA2'])
-        self.pic_ser = share.SimSerial(
+        self.pic_ser = tester.SimSerial(
             port=limit.PIC_PORT, baudrate=19200, timeout=0.1)
         self.pic = console.Console(self.pic_ser)
         # PIC device programmer

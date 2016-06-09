@@ -20,7 +20,7 @@ class LogicalDevices(object):
         self.dmm = tester.DMM(devices['DMM'])
         self.dcs_input = tester.DCSource(devices['DCS1'])
         # Serial connection to the BT device
-        self.btport = share.SimSerial(
+        self.btport = tester.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         self.btport.port = limit.BT_PORT

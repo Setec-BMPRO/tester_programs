@@ -41,7 +41,7 @@ class LogicalDevices():
         # Apply 5V to Vdd for Erasing PIC
         self.rla_Erase = tester.Relay(devices['RLA10'])
         # Serial connection to data monitor
-        self.cmr_ser = share.SimSerial(
+        self.cmr_ser = tester.SimSerial(
             simulation=self._fifo,
             port=limit.CMR_PORT, baudrate=9600, timeout=0.1)
         self.cmr = cmrsbp.CmrSbp(self.cmr_ser, data_timeout=10.0)

@@ -42,7 +42,7 @@ class LogicalDevices():
             limit.ARM_PORT, file, crpmode=False,
             boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # Serial connection to the BC15 console
-        bc15_ser = share.SimSerial(
+        bc15_ser = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         bc15_ser.port = limit.ARM_PORT

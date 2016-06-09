@@ -5,7 +5,7 @@
 import unittest
 
 # This is the overall project top level folder
-_TOP_LEVEL_DIR = None
+_TOP_LEVEL_DIR = '.'
 # Discover test files in this relative path
 _START_DIR = 'share'
 

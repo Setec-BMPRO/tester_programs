@@ -37,7 +37,7 @@ class LogicalDevices():
             limit.ARM_PORT, file, crpmode=False,
             boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # Serial connection to the Trek2 console
-        self.trek2_ser = share.SimSerial(
+        self.trek2_ser = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         self.trek2_ser.port = limit.ARM_PORT

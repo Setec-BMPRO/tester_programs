@@ -3,7 +3,7 @@
 """UnitTest for protocol."""
 
 import unittest
-from ...sim_serial import SimSerial
+import tester
 from . import logging_setup
 
 console = None      # Console module
@@ -21,7 +21,7 @@ class BaseConsoleTestCase(unittest.TestCase):
         from ... import console as console_module
         global console
         console = console_module
-        sim_ser = SimSerial(simulation=True)
+        sim_ser = tester.SimSerial(simulation=True)
         global mycon
         mycon = console.BaseConsole(sim_ser, verbose=True)
 
@@ -61,7 +61,7 @@ class BadUartConsoleTestCase(unittest.TestCase):
         from ... import console as console_module
         global console
         console = console_module
-        sim_ser = SimSerial(simulation=True)
+        sim_ser = tester.SimSerial(simulation=True)
         global mycon
         mycon = console.BadUartConsole(sim_ser, verbose=True)
 

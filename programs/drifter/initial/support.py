@@ -36,7 +36,7 @@ class LogicalDevices():
         self.program_pic = share.ProgramPIC(
             limits['Software'].limit, folder, '18F87J93', self.rla_Prog)
         # Serial connection to the console
-        pic_ser = share.SimSerial(
+        pic_ser = tester.SimSerial(
             simulation=self._fifo, baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
         pic_ser.port = limit.PIC_PORT
