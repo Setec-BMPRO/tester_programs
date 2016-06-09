@@ -36,7 +36,7 @@ class LogicalDevices():
         self.dcl_bat = tester.DCLoad(devices['DCL5'])
         self.rla_reset = tester.Relay(devices['RLA1'])
         self.rla_boot = tester.Relay(devices['RLA2'])
-        self.rla_pic = tester.Relay(devices['RLA3'])     # PIC programmer
+        self.rla_pic = tester.Relay(devices['RLA3'])
         self.rla_loadsw = tester.Relay(devices['RLA4'])
         self.rla_vbat = tester.Relay(devices['RLA5'])
         # ARM device programmer
@@ -44,7 +44,8 @@ class LogicalDevices():
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         file = os.path.join(folder, limit.ARM_BIN)
         self.program_arm = share.ProgramARM(
-            limit.ARM_PORT, file, crpmode=False)
+            limit.ARM_PORT, file, crpmode=False,
+            boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # PIC device programmer
         self.program_pic = share.ProgramPIC(
             limit.PIC_HEX, folder, '33FJ16GS402', self.rla_pic)

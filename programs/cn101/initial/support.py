@@ -42,7 +42,9 @@ class LogicalDevices():
         file = os.path.join(os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe()))),
             limit.ARM_BIN)
-        self.programmer = share.ProgramARM(limit.ARM_PORT, file, crpmode=False)
+        self.programmer = share.ProgramARM(
+            limit.ARM_PORT, file, crpmode=False,
+            boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # Serial connection to the CN101 console
         self.cn101_ser = share.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=5.0)

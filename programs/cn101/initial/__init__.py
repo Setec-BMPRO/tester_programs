@@ -89,10 +89,7 @@ class Initial(tester.TestSequence):
 
     def _step_program(self):
         """Program the ARM device."""
-        d.rla_boot.set_on()
-        d.rla_reset.pulse(0.1)
         d.programmer.program()
-        d.rla_boot.set_off()
 
     def _step_test_arm(self):
         """Test the ARM device."""

@@ -70,7 +70,8 @@ class ProgramARM():
 
     def __init__(self, port, filename,
         baudrate=115200, limitname='Program',
-        erase_only=False, verify=False, crpmode=None):
+        erase_only=False, verify=False, crpmode=None,
+        boot_relay=None, reset_relay=None):
         """Create a programmer.
 
         @param port Serial port to use
@@ -81,6 +82,8 @@ class ProgramARM():
         @param verify True: Verify the programmed device
         @param crpmode Code Protection:
                         True: ON, False: OFF, None: per 'bindata'
+        @param boot_relay Relay device to assert BOOT to the ARM
+        @param reset_relay Relay device to assert RESET to the ARM
 
         """
         self._port = port
@@ -89,6 +92,8 @@ class ProgramARM():
         self._erase_only = erase_only
         self._verify = verify
         self._crpmode = crpmode
+        self._boot_relay = boot_relay
+        self._reset_relay = reset_relay
         with open(filename, 'rb') as infile:
             self._bindata = bytearray(infile.read())
         limit = testlimit.LimitHiLo(
@@ -96,9 +101,18 @@ class ProgramARM():
         self._arm = tester.Measurement(limit, sensor.Mirror())
 
     def program(self):
-        """Program a device."""
+        """Program a device.
+
+        If BOOT or RESET relay devices are available, use them to put the chip
+        into bootloader mode (Assert BOOT, pulse RESET).
+
+        """
         ser = share.SimSerial(port=self._port, baudrate=self._baudrate)
         try:
+            if self._boot_relay:
+                self._boot_relay.set_on()
+            if self._reset_relay:
+                self._reset_relay.pulse(0.1)
             pgm = isplpc.program_arm(
                 ser,
                 self._bindata,
@@ -112,4 +126,6 @@ class ProgramARM():
                 self._arm.sensor.store(_FAILURE)
         finally:
             ser.close()
+            if self._boot_relay:
+                self._boot_relay.set_off()
         self._arm.measure()

@@ -120,10 +120,7 @@ class Initial(tester.TestSequence):
         Device is powered by injected Battery voltage.
 
         """
-        d.rla_boot.set_on()
-        d.rla_reset.pulse(0.1)
         d.program_arm.program()
-        d.rla_boot.set_off()
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
