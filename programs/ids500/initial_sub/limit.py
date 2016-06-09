@@ -9,10 +9,6 @@ PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
 PIC_HEX = 'Main 1A.hex'
 
-HEX_DIR = {'posix': '/opt/setec/ate4/ids500_initial_sub',
-            'nt': r'C:\TestGear\TcpServer\ids500_initial_sub',
-            }[os.name]
-
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('5V', 1, 4.95, 5.05, None, None),

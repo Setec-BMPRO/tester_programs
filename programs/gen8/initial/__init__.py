@@ -80,8 +80,6 @@ class Initial(tester.TestSequence):
         """
         self.fifo_push(((s.o5v, 5.10), (s.o3v3, 3.30), ))
 
-        # Set BOOT active before power-on so the ARM boot-loader runs
-        d.rla_boot.set_on()
         # Apply and check injected rails
         d.dcs_5v.output(5.15, True)
         tester.MeasureGroup((m.dmm_5v, m.dmm_3v3, ), timeout=2)
@@ -90,8 +88,7 @@ class Initial(tester.TestSequence):
                 '**** Programming skipped due to active FIFOs ****')
         else:
             d.programmer.program()
-        # Remove BOOT, reset micro, wait for ARM startup
-        d.rla_boot.set_off()
+        # Reset micro, wait for ARM startup
         d.rla_reset.pulse(0.1)
         time.sleep(1)
 

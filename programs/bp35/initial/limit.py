@@ -36,7 +36,6 @@ VAUX_IN = 13.5
 PFC_STABLE = 0.05
 
 DATA = (
-    lim_hilo_int('Program', 0),
     lim_lo('FixtureLock', 1200),
     lim_boolean('Notify', True),
     lim_hilo_delta('HwVer5', 3200.0, 250.0),

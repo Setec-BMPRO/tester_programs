@@ -102,15 +102,12 @@ class Initial(tester.TestSequence):
         3V3 is injected to power the ARM for programming.
 
         """
-        d.dcs_3v3.output(9.0, True)
         self.fifo_push(((s.o3V3, 3.3), ))
+
+        d.dcs_3v3.output(9.0, True)
         m.dmm_3V3.measure(timeout=5)
         time.sleep(2)
-        d.rla_boot.set_on()
-        time.sleep(1)
-        d.rla_reset.pulse(0.1)
         d.programmer.program()
-        d.rla_boot.set_off()
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.

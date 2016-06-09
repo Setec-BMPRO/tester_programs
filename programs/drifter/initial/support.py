@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Drifter Initial Test Program."""
 
+import os
+import inspect
 from pydispatch import dispatcher
 
 import share
@@ -15,7 +17,7 @@ class LogicalDevices():
 
     """Logical Devices."""
 
-    def __init__(self, devices, fifo):
+    def __init__(self, devices, limits, fifo):
         """Create all Logical Instruments.
 
            @param devices Physical instruments of the Tester
@@ -28,6 +30,11 @@ class LogicalDevices():
         self.dcs_Vin = tester.DCSource(devices['DCS3'])
         self.rla_Prog = tester.Relay(devices['RLA1'])
         self.rla_ZeroCal = tester.Relay(devices['RLA2'])
+        # PIC device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self.program_pic = share.ProgramPIC(
+            limits['Software'].limit, folder, '18F87J93', self.rla_Prog)
         # Serial connection to the console
         pic_ser = share.SimSerial(
             simulation=self._fifo, baudrate=9600, timeout=5)
@@ -70,7 +77,6 @@ class Sensors():
             signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
         pic = logical_devices.pic
-        self.oMirPIC = sensor.Mirror()
         self.oMirErrorV = sensor.Mirror()
         self.oMirErrorI = sensor.Mirror()
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
@@ -93,7 +99,6 @@ class Sensors():
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirPIC.flush()
         self.oMirErrorV.flush()
         self.oMirErrorI.flush()
 
@@ -110,7 +115,6 @@ class Measurements():
 
         """
         Measurement = tester.Measurement
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.ErrorV = Measurement(limits['%ErrorV'], sense.oMirErrorV)
         self.CalV = Measurement(limits['%CalV'], sense.oMirErrorV)
         self.ErrorI = Measurement(limits['%ErrorI'], sense.oMirErrorI)

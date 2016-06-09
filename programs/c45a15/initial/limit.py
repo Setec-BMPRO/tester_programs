@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 """C45A-15 Initial Program Limits."""
 
+PIC_HEX = 'c45a-15.hex'
+
+OCP_PERCENT_REG = 0.015
+
 # Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('VacStart', 1, 92.0, 98.0, None, None),

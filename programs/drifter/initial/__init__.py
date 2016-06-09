@@ -2,12 +2,9 @@
 # -*- coding: utf-8 -*-
 """Drifter Initial Test Program."""
 
-import os
-import inspect
 import logging
 import time
 
-import share
 import tester
 from . import support
 from . import limit
@@ -35,7 +32,7 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, True),
+            ('Program', self._step_program, None, not fifo),
             ('CalPre', self._step_cal_pre, None, True),
             ('Calibrate', self._step_calibrate, None, True),
             )
@@ -50,7 +47,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self._limits, self._fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
 
@@ -76,19 +73,7 @@ class Initial(tester.TestSequence):
 
     def _step_program(self):
         """Program the PIC device."""
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        d.rla_Prog.set_on()
-        hexfile = self._limits['Software'].limit
-        self._logger.debug('HexFile "%s"', hexfile)
-        pic = share.ProgramPIC(
-            hexfile=hexfile, working_dir=folder,
-            device_type='18F87J93', sensor=s.oMirPIC,
-            fifo=self._fifo)
-        # Wait for programming completion & read results
-        pic.read()
-        d.rla_Prog.set_off()
-        m.pgmPIC.measure()
+        d.program_pic.program()
 
     def _step_cal_pre(self):
         """Setup the PIC device for calibration.

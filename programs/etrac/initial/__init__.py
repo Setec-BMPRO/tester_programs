@@ -2,20 +2,15 @@
 # -*- coding: utf-8 -*-
 """ETrac-II Initial Test Program."""
 
-import os
-import inspect
 import logging
 
 import tester
-from share import ProgramPIC
 from . import support
 from . import limit
 
 MeasureGroup = tester.measure.group
 
 INI_LIMIT = limit.DATA
-
-_PIC_HEX = 'etracII-2A.hex'
 
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -38,7 +33,7 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, True),
+            ('Program', self._step_program, None, not fifo),
             ('Load', self._step_load, None, True),
             )
         # Set the Test Sequence in my base instance
@@ -73,24 +68,15 @@ class Initial(tester.TestSequence):
         """Apply input DC and measure voltages."""
         self.fifo_push(((s.oVin, 13.0), (s.oVin2, 12.0),
                          (s.o5V, 5.0), ))
+
         t.pwr_up.run()
 
     def _step_program(self):
         """Program the PIC micro."""
-        self._logger.info('Start PIC programmer')
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        d.rla_Prog.set_on()
-        pic = ProgramPIC(
-            hexfile=_PIC_HEX, working_dir=folder,
-            device_type='16F1828', sensor=s.oMirPIC,
-            fifo=self._fifo)
-        # Wait for programming completion & read results
-        pic.read()
-        d.rla_Prog.set_off()
-        m.pgmPIC.measure()
+        d.program_pic.program()
 
     def _step_load(self):
         """Load and measure voltages."""
         self.fifo_push(((s.o5Vusb, 5.1), (s.oVbat, (8.45, 8.4)), ))
+
         t.load.run()

@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """CMR-SBP ALL Test Program."""
 
-import os
-import inspect
 import logging
 import datetime
 import threading
@@ -142,7 +140,7 @@ class Initial(_Main):
         self._limits = test_limits
         sequence = (
             ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, True),
+            ('Program', self._step_program, None, not fifo),
             ('CheckPicValues', self._step_check_pic_vals, None, True),
             ('CheckVcharge', self._step_check_vchge, None, True),
             ('CalBQvolts', self._step_calv, None, True),
@@ -191,16 +189,7 @@ class Initial(_Main):
 
         d.rla_Erase.set_on()
         m.dmm_VErase.measure(timeout=5)
-        self._logger.info('Start PIC programmer')
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        d.rla_Prog.set_on()
-        pic = share.ProgramPIC(
-            hexfile=limit.PIC_HEX, working_dir=folder,
-            device_type='18F252', sensor=s.oMirPIC,
-            fifo=self._fifo)
-        pic.read()
-        d.rla_Prog.set_off()
+        d.program_pic.program()
         d.rla_Erase.set_off()
         m.pgmPIC.measure()
 

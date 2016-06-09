@@ -36,14 +36,19 @@ class LogicalDevices():
         self.dcl_bat = tester.DCLoad(devices['DCL5'])
         self.rla_reset = tester.Relay(devices['RLA1'])
         self.rla_boot = tester.Relay(devices['RLA2'])
-        self.rla_pic = tester.Relay(devices['RLA3'])     # PIC programmer
+        self.rla_pic = tester.Relay(devices['RLA3'])
         self.rla_loadsw = tester.Relay(devices['RLA4'])
         self.rla_vbat = tester.Relay(devices['RLA5'])
         # ARM device programmer
-        file = os.path.join(os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe()))),
-            limit.ARM_BIN)
-        self.programmer = share.ProgramARM(limit.ARM_PORT, file, crpmode=False)
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        file = os.path.join(folder, limit.ARM_BIN)
+        self.program_arm = share.ProgramARM(
+            limit.ARM_PORT, file, crpmode=False,
+            boot_relay=self.rla_boot, reset_relay=self.rla_reset)
+        # PIC device programmer
+        self.program_pic = share.ProgramPIC(
+            limit.PIC_HEX, folder, '33FJ16GS402', self.rla_pic)
         # Serial connection to the BP35 console
         self.bp35_ser = share.SimSerial(
             simulation=fifo, baudrate=115200, timeout=5.0)
@@ -93,7 +98,6 @@ class Sensors():
                            signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
         bp35 = logical_devices.bp35
-        self.mir_pic = sensor.Mirror()
         self.mir_can = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.acin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.vpfc = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
@@ -137,7 +141,6 @@ class Sensors():
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
-        self.mir_pic.flush()
         self.mir_can.flush()
 
 
@@ -154,7 +157,6 @@ class Measurements():
         """
         self._limits = limits
         self.hardware5 = self._maker('HwVer5', sense.hardware, False)
-        self.pgmpic = self._maker('Program', sense.mir_pic)
         self.rx_can = self._maker('CAN_RX', sense.mir_can)
         self.dmm_lock = self._maker('FixtureLock', sense.lock)
         self.dmm_acin = self._maker('ACin', sense.acin)

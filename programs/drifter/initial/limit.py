@@ -19,7 +19,6 @@ _COMMON = (
     lim_hilo_delta('Vcc', 3.30, 0.07),
     lim_hilo_delta('Isense', -90, 5),
     lim_hilo('3V3', -2.8, -2.5),
-    lim_hilo_int('Program', 0),
     lim_hilo_delta('%ErrorV', 0, 2.24),
     lim_hilo_delta('%CalV', 0, 0.36),
     lim_hilo_delta('%ErrorI', 0, 2.15),

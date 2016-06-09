@@ -30,15 +30,17 @@ class LogicalDevices():
             ((tester.DCLoad(devices['DCL2']), 12),
              (tester.DCLoad(devices['DCL3']), 10)))
         self.dcl_5v = tester.DCLoad(devices['DCL4'])
-        self.rla_pson = tester.Relay(devices['RLA1'])     # ON == Enable unit
-        self.rla_12v2off = tester.Relay(devices['RLA2'])  # ON == 12V2 off
-        self.rla_boot = tester.Relay(devices['RLA3'])     # ON == Asserted
-        self.rla_reset = tester.Relay(devices['RLA4'])    # ON == Asserted
+        self.rla_pson = tester.Relay(devices['RLA1'])
+        self.rla_12v2off = tester.Relay(devices['RLA2'])
+        self.rla_boot = tester.Relay(devices['RLA3'])
+        self.rla_reset = tester.Relay(devices['RLA4'])
         # ARM device programmer
         file = os.path.join(os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe()))),
             limit.ARM_BIN)
-        self.programmer = share.ProgramARM(limit.ARM_PORT, file)
+        self.programmer = share.ProgramARM(
+            limit.ARM_PORT, file,
+            boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # Serial connection to the ARM console
         arm_ser = share.SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming

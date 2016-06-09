@@ -4,7 +4,6 @@
 
 import logging
 
-import share
 import tester
 from . import support
 from . import limit
@@ -47,7 +46,7 @@ class InitialSub(tester.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_pwrup_micro, None, _isMicro),
+            ('PowerUp', self._step_pwrup_micro, None, _isMicro and not fifo),
             ('PowerUp', self._step_pwrup_aux, None, _isAux),
             ('KeySw1', self._step_key_switch1, None, _isAux),
             ('Program', self._step_program, None, _isMicro),
@@ -85,17 +84,7 @@ class InitialSub(tester.TestSequence):
 
     def _step_program(self):
         """Program the PIC micro."""
-        self._logger.info('Start PIC programmer')
-        d.rla_Prog.set_on()
-        pic = share.ProgramPIC(
-            hexfile=limit.PIC_HEX,
-            working_dir=limit.HEX_DIR,
-            device_type='18F4520',
-            sensor=s.oMirPIC, fifo=self._fifo)
-        # Wait for programming completion & read results
-        pic.read()
-        d.rla_Prog.set_off()
-        m.pgmPIC.measure()
+        d.program_pic.program()
 
     def _step_comms(self):
         """Communicate with the PIC console."""

@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 """ETrac-II Initial Test Program."""
 
-from pydispatch import dispatcher
+import os
+import inspect
 
 import sensor
 import tester
+import share
+from . import limit
 
 
 class LogicalDevices():
@@ -23,6 +26,11 @@ class LogicalDevices():
         self.rla_SS = tester.Relay(devices['RLA1'])
         self.rla_Prog = tester.Relay(devices['RLA2'])
         self.rla_BattLoad = tester.Relay(devices['RLA3'])
+        # PIC device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self.program_pic = share.ProgramPIC(
+            limit.PIC_HEX, folder, '16F1828', self.rla_Prog)
 
     def reset(self):
         """Reset instruments."""
@@ -43,18 +51,11 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-        self.oMirPIC = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oVin2 = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.001)
         self.o5V = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
         self.o5Vusb = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.001)
         self.oVbat = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.001)
-
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirPIC.flush()
 
 
 class Measurements():
@@ -69,7 +70,6 @@ class Measurements():
 
         """
         Measurement = tester.Measurement
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.dmm_Vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_Vin2 = Measurement(limits['Vin2'], sense.oVin2)
         self.dmm_5V = Measurement(limits['5V'], sense.o5V)

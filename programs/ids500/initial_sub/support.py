@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Initial Subboard Test Program."""
 
-from pydispatch import dispatcher
+import os
+import inspect
 
 import share
 import tester
@@ -33,6 +34,11 @@ class LogicalDevices():
         self.pic_ser = share.SimSerial(
             port=limit.PIC_PORT, baudrate=19200, timeout=0.1)
         self.pic = console.Console(self.pic_ser)
+        # PIC device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self.program_pic = share.ProgramPIC(
+            limit.PIC_HEX, folder, '18F4520', self.rla_Prog)
 
     def reset(self):
         """Reset instruments."""
@@ -54,11 +60,6 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         pic = logical_devices.pic
-        self.oMirPIC = sensor.Mirror()
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
         self.Lock = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
         self.oVsec5VuP = sensor.Vdc(dmm, high=19, low=1, rng=10, res=0.001)
         self.o5V = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
@@ -75,10 +76,6 @@ class Sensors():
         self.oPic_SwRev = console.ids500.Sensor(pic, 'PIC-SwRev')
         self.oPic_MicroTemp = console.ids500.Sensor(pic, 'PIC-MicroTemp')
 
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirPIC.flush()
-
 
 class Measurements():
 
@@ -92,7 +89,6 @@ class Measurements():
 
         """
         Measurement = tester.Measurement
-        self.pgmPIC = Measurement(limits['Program'], sense.oMirPIC)
         self.dmm_Lock = Measurement(limits['FixtureLock'], sense.Lock)
         self.dmm_Vsec5VuP = Measurement(limits['5V'], sense.oVsec5VuP)
         self.dmm_5VOff = Measurement(limits['5VOff'], sense.o5V)

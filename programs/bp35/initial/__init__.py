@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 """BP35 Initial Test Program."""
 
-import os
-import inspect
 import logging
 import time
 
 import tester
-import share
 from . import support
 from . import limit
 
@@ -114,14 +111,7 @@ class Initial(tester.TestSequence):
         Device is powered by Solar Reg input voltage.
 
         """
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        d.rla_pic.set_on()
-        pic = share.ProgramPIC(
-            limit.PIC_HEX, folder, '33FJ16GS402', s.mir_pic, self._fifo)
-        pic.read()
-        d.rla_pic.set_off()
-        m.pgmpic.measure()
+        d.program_pic.program()
         d.dcs_sreg.output(0.0)  # Switch off the Solar
 
     def _step_program_arm(self):
@@ -130,10 +120,7 @@ class Initial(tester.TestSequence):
         Device is powered by injected Battery voltage.
 
         """
-        d.rla_boot.set_on()
-        d.rla_reset.pulse(0.1)
-        d.programmer.program()
-        d.rla_boot.set_off()
+        d.program_arm.program()
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
