@@ -79,7 +79,7 @@ class Initial(tester.TestSequence):
     def _step_program_micros(self):
         """Program the ARM and PIC devices.
 
-         The 5Vsb and PwrSw PIC's are powered and programmed by the Arduino.
+         The 5Vsb and PwrSw PIC's are programmed by the Arduino.
          The OCP digital pots are powered by PriCtl and set to maximum
          with the Arduino.
          5Vsb is injected and the ARM is programmed.
@@ -97,32 +97,19 @@ class Initial(tester.TestSequence):
         d.rla_boot.set_on()
         # Apply and check injected rails
         t.ext_pwron.run()
-        # Program the ARM device
-        d.programmer.program()
-        # Reset BOOT to ARM
-        d.rla_boot.set_off()
-        # Program the PIC devices
+        d.programmer.program()  # Program the ARM device
         d.ard.open()
-        time.sleep(2)        # Wait for the banner to be received
-        self._logger.info('Start programming PIC1')
+        time.sleep(2)        # Wait for Arduino to start
         d.rla_pic1.set_on()
         d.rla_pic1.opc()
         m.dmm_5Vunsw.measure(timeout=2)
-        tester.testsequence.path_push('PIC-5Vsb')
         m.pgm_5vsb.measure()
-        tester.testsequence.path_pop()
         d.rla_pic1.set_off()
-        self._logger.info('Start programming PIC2')
         d.rla_pic2.set_on()
         d.rla_pic2.opc()
-        tester.testsequence.path_push('PIC-PwrSw')
         m.pgm_pwrsw.measure()
-        tester.testsequence.path_pop()
         d.rla_pic2.set_off()
-        self._logger.info('Reset digital pots')
-        tester.testsequence.path_push('SET-POT-MIN')
         m.pot_min.measure()
-        tester.testsequence.path_pop()
         # Switch off rails and discharge the 5Vsb to stop the ARM
         t.ext_pwroff.run()
 

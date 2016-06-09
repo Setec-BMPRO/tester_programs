@@ -5,7 +5,6 @@
 import os
 import inspect
 import time
-from pydispatch import dispatcher
 
 import share
 import sensor
@@ -45,7 +44,8 @@ class LogicalDevices():
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         file = os.path.join(folder, limit.ARM_BIN)
-        self.programmer = share.ProgramARM(limit.ARM_PORT, file)
+        self.programmer = share.ProgramARM(
+            limit.ARM_PORT, file, boot_relay=self.rla_boot)
         # Serial connection to the ARM console
         arm_ser = share.SimSerial(
             simulation=fifo, baudrate=57600, timeout=2.0)
@@ -111,12 +111,6 @@ class Sensors():
         """Create all Sensor instances."""
         d = logical_devices
         dmm = d.dmm
-        # Mirror sensors for Programming result logging
-        self.oMirPIC = sensor.Mirror()
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
         self.o5Vsb = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
         self.o5Vsbunsw = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
         self.o8V5Ard = sensor.Vdc(dmm, high=19, low=3, rng=100, res=0.001)
@@ -168,10 +162,6 @@ class Sensors():
             d.arm, 'ARM_SwVer', rdgtype=sensor.ReadingString)
         self.ARM_SwBld = console.Sensor(
             d.arm, 'ARM_SwBld', rdgtype=sensor.ReadingString)
-
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirPIC.flush()
 
 
 class Measurements():
@@ -251,24 +241,27 @@ class SubTests():
     def __init__(self, logical_devices, measurements):
         """Create SubTest Step instances.
 
-           @param measurements Measurements used
            @param logical_devices Logical instruments used
+           @param measurements Measurements used
 
         """
         d = logical_devices
         m = measurements
         # ExtPowerOn: Apply and check injected rails.
-        dcs1 = tester.DcSubStep(
-            setting=((d.dcs_5Vsb, 9.0), (d.dcs_PriCtl, 12.0),
-                        (d.dcs_Arduino, 12.0), ), output=True)
-        msr1 = tester.MeasureSubStep(
-            (m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3, m.dmm_PriCtl,
-            m.dmm_8V5Ard,), timeout=5)
-        self.ext_pwron = tester.SubStep((dcs1, msr1, ))
+        self.ext_pwron = tester.SubStep((
+            tester.DcSubStep(
+                setting=((d.dcs_5Vsb, 9.0), (d.dcs_PriCtl, 12.0),
+                         (d.dcs_Arduino, 12.0), ), output=True),
+            tester.MeasureSubStep(
+                (m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3, m.dmm_PriCtl,
+                 m.dmm_8V5Ard,), timeout=5),
+        ))
 
         # ExtPowerOff: # Switch off rails, discharge the 5Vsb to stop the ARM.
-        dcs1 = tester.DcSubStep(
-            setting=((d.dcs_5Vsb, 0.0), (d.dcs_PriCtl, 0.0), ), output=False)
-        ld1 = tester.LoadSubStep(((d.dcl_5Vsb, 0.1), ), output=True, delay=0.5)
-        ld2 = tester.LoadSubStep(((d.dcl_5Vsb, 0.0), ), output=False)
-        self.ext_pwroff = tester.SubStep((dcs1, ld1, ld2))
+        self.ext_pwroff = tester.SubStep((
+            tester.DcSubStep(
+                setting=((d.dcs_5Vsb, 0.0), (d.dcs_PriCtl, 0.0), ),
+                output=False),
+            tester.LoadSubStep(((d.dcl_5Vsb, 0.1), ), output=True, delay=0.5),
+            tester.LoadSubStep(((d.dcl_5Vsb, 0.0), ), output=False),
+        ))
