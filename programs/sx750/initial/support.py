@@ -150,8 +150,8 @@ class Sensors():
             d.ard, 'PGM_5VSB', rdgtype=sensor.ReadingString)
         self.PGM_PwrSw = console.Sensor(
             d.ard, 'PGM_PWRSW', rdgtype=sensor.ReadingString)
-        self.PotMax = console.Sensor(
-            d.ard, 'POT_MAX', rdgtype=sensor.ReadingString)
+        self.PotMin = console.Sensor(
+            d.ard, 'POT_MIN', rdgtype=sensor.ReadingString)
         self.Pot12Enable = console.Sensor(
             d.ard, '12_POT_ENABLE', rdgtype=sensor.ReadingString)
         self.Pot24Enable = console.Sensor(
@@ -216,7 +216,7 @@ class Measurements():
         self.dmm_8V5Ard = self._maker('8.5V Arduino', sense.o8V5Ard)
         self.pgm_5vsb = self._maker('Reply', sense.PGM_5Vsb)
         self.pgm_pwrsw = self._maker('Reply', sense.PGM_PwrSw)
-        self.pot_max = self._maker('Reply', sense.PotMax)
+        self.pot_min = self._maker('Reply', sense.PotMin)
         self.pot12_enable = self._maker('Reply', sense.Pot12Enable)
         self.pot24_enable = self._maker('Reply', sense.Pot24Enable)
         self.pot_step = self._maker('Reply', sense.PotStep)

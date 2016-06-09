@@ -54,10 +54,11 @@ const char *CMD_QUIET = "0 DEBUG";       // Switch OFF debug messages
 const char *CMD_PWSW  = "PROGRAM-PWRSW"; // Program using the PWRSW firmware image
 const char *CMD_5VSB  = "PROGRAM-5VSB";  // Program using the 5VSB firmware image
 
-const char *CMD_MAX   = "POT-MAX";       // Set both digital pots to maximum
+const char *CMD_MAX   = "POT-MAX";       // Increment both digital pots to maximum
+const char *CMD_MIN   = "POT-MIN";       // Decrement both digital pots to minimum
 const char *CMD_EN_12 = "12 POT-ENABLE"; // Enable 12V digital pot
 const char *CMD_EN_24 = "24 POT-ENABLE"; // Enable 24V digital pot
-const char *CMD_STEP  = "POT-STEP";      // Step digital pot down 1 step
+const char *CMD_STEP  = "POT-STEP";      // Increment digital pot by 1 step
 const char *CMD_DIS   = "POT-DISABLE";   // Disable digital pots
 
 // Debug level storage
@@ -140,14 +141,16 @@ void loop() {
         }
         else if (cmd == CMD_NONE)
             debug = debug;
+        else if (cmd == CMD_MIN)
+            potMinimum();
         else if (cmd == CMD_MAX)
             potMaximum();
         else if (cmd == CMD_EN_12)
-            potEnable(PIN_POT_CS12);
+            potEnableUp(PIN_POT_CS12);
         else if (cmd == CMD_EN_24)
-            potEnable(PIN_POT_CS24);
+            potEnableUp(PIN_POT_CS24);
         else if (cmd == CMD_STEP)
-            potStep();
+            potStepUp();
         else if (cmd == CMD_DIS)
             potDisable();
         else
@@ -173,7 +176,7 @@ void ledFlasher() {
     }
 }
 
-// Set both Digital Pots UP to maximum
+// Increment both Digital Pots to maximum
 void potMaximum() {
     potWrite(PIN_POT_UD, POT_HIGH);
     potWrite(PIN_POT_CS12, POT_LOW);
@@ -182,33 +185,47 @@ void potMaximum() {
         potWrite(PIN_POT_UD, POT_LOW);
         potWrite(PIN_POT_UD, POT_HIGH);      // The setting changes here
     }
-    potWrite(PIN_POT_UD, POT_LOW);
     potWrite(PIN_POT_CS12, POT_HIGH);
     potWrite(PIN_POT_CS24, POT_HIGH);
-    delayMicroseconds(POT_WRITE);
-    potWrite(PIN_POT_UD, POT_HIGH);
     Serial.print(RESP_OK);
 }
 
-// Enable a Digital Pot for DOWN adjustment
-void potEnable(byte enablePin) {
+// Decrement both Digital Pots to minimum
+void potMinimum() {
     potWrite(PIN_POT_UD, POT_LOW);
+    potWrite(PIN_POT_CS12, POT_LOW);
+    potWrite(PIN_POT_CS24, POT_LOW);
+    for (byte i = 0; i < 64; i++) {     // Step DOWN 64 times
+        potWrite(PIN_POT_UD, POT_LOW);
+        potWrite(PIN_POT_UD, POT_HIGH);      // The setting changes here
+    }
+    potWrite(PIN_POT_UD, POT_HIGH);
+    potWrite(PIN_POT_CS12, POT_HIGH);
+    potWrite(PIN_POT_CS24, POT_HIGH);
+    Serial.print(RESP_OK);
+}
+
+// Enable a Digital Pot for increment adjustment
+void potEnableUp(byte enablePin) {
+    potWrite(PIN_POT_UD, POT_HIGH);
     potWrite(enablePin, POT_LOW);
     Serial.print(RESP_OK);
 }
 
-// Step a digital Pot DOWN 1 step
-void potStep() {
+// Increment a digital Pot by 1 step
+void potStepUp() {
     potWrite(PIN_POT_UD, POT_LOW);
     potWrite(PIN_POT_UD, POT_HIGH);          // The setting changes here
     Serial.print(RESP_OK);
 }
 
-// Disable DOWN adjustment of both Digital Pots
+// Disable increment adjustment of both Digital Pots
 void potDisable() {
-    potWrite(PIN_POT_UD, POT_HIGH);
+    potWrite(PIN_POT_UD, POT_LOW);
     potWrite(PIN_POT_CS12, POT_HIGH);
     potWrite(PIN_POT_CS24, POT_HIGH);
+    delayMicroseconds(POT_WRITE);
+    potWrite(PIN_POT_UD, POT_HIGH);
     Serial.print(RESP_OK);
 }
 

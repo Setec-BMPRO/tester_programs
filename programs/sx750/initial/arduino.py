@@ -33,8 +33,8 @@ class Arduino(console.Variable, console.BaseConsole):
                 'PROGRAM-5VSB', read_format='{}'),
             'PGM_PWRSW': ParameterString(
                 'PROGRAM-PWRSW', read_format='{}'),
-            'POT_MAX': ParameterString(
-                'POT-MAX', read_format='{}'),
+            'POT_MIN': ParameterString(
+                'POT-MIN', read_format='{}'),
             '12_POT_ENABLE': ParameterString(
                 '12 POT-ENABLE', read_format='{}'),
             '24_POT_ENABLE': ParameterString(

@@ -125,8 +125,8 @@ class Initial(tester.TestSequence):
         tester.testsequence.path_pop()
         d.rla_pic2.set_off()
         self._logger.info('Reset digital pots')
-        tester.testsequence.path_push('SET-POT-MAX')
-        m.pot_max.measure()
+        tester.testsequence.path_push('SET-POT-MIN')
+        m.pot_min.measure()
         tester.testsequence.path_pop()
         # Switch off rails and discharge the 5Vsb to stop the ARM
         t.ext_pwroff.run()
