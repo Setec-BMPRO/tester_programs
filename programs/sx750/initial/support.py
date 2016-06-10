@@ -30,13 +30,10 @@ class LogicalDevices():
         self.dcl_5Vsb = tester.DCLoad(devices['DCL2'])
         self.dcl_12V = tester.DCLoad(devices['DCL1'])
         self.dcl_24V = tester.DCLoad(devices['DCL5'])
-        self.rla_pic2 = tester.Relay(devices['RLA1'])
-        self.rla_pic1 = tester.Relay(devices['RLA7'])
-        self.rla_boot = tester.Relay(devices['RLA2'])
+        self.rla_pic1 = tester.Relay(devices['RLA1'])
+        self.rla_pic2 = tester.Relay(devices['RLA2'])
         self.rla_pson = tester.Relay(devices['RLA3'])
-        self.rla_pot_ud = tester.Relay(devices['RLA6'])
-        self.rla_pot_12 = tester.Relay(devices['RLA5'])
-        self.rla_pot_24 = tester.Relay(devices['RLA4'])
+        self.rla_boot = tester.Relay(devices['RLA4'])
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -94,8 +91,7 @@ class LogicalDevices():
         for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb):
             dcs.output(0.0, False)
         for rla in (
-                self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson,
-                self.rla_pot_ud, self.rla_pot_12, self.rla_pot_24):
+                self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson):
             rla.set_off()
 
 
