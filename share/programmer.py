@@ -112,7 +112,7 @@ class ProgramARM():
                 self._boot_relay.set_on()
             if self._reset_relay:
                 self._reset_relay.pulse(0.1)
-            pgm = isplpc.program_arm(
+            pgm = isplpc.Programmer(
                 ser,
                 self._bindata,
                 erase_only=self._erase_only,
