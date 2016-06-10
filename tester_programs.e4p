@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-06-10, 09:14:57 -->
+<!-- Saved: 2016-06-10, 11:05:40 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -280,6 +280,7 @@
     <Source>tester/devphysical/genf.py</Source>
     <Source>tester/devphysical/interface.py</Source>
     <Source>tester/devphysical/signals.py</Source>
+    <Source>tester/devphysical/sim_serial.py</Source>
     <Source>tester/devphysical/wt210.py</Source>
     <Source>tester/measure.py</Source>
     <Source>tester/signals.py</Source>

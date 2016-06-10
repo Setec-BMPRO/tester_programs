@@ -33,14 +33,14 @@ class Arduino(console.Variable, console.BaseConsole):
                 'PROGRAM-5VSB', read_format='{}'),
             'PGM_PWRSW': ParameterString(
                 'PROGRAM-PWRSW', read_format='{}'),
-            'POT_MIN': ParameterString(
-                'POT-MIN', read_format='{}'),
-            '12_POT_ENABLE': ParameterString(
-                '12 POT-ENABLE', read_format='{}'),
-            '24_POT_ENABLE': ParameterString(
-                '24 POT-ENABLE', read_format='{}'),
-            'POT_STEP': ParameterString(
-                'POT-STEP', read_format='{}'),
-            'POT_DISABLE': ParameterString(
-                'POT-DISABLE', read_format='{}'),
+            'OCP_MAX': ParameterString(
+                'OCP-MAX', read_format='{}'),
+            '12_OCP_UNLOCK': ParameterString(
+                '12 OCP-UNLOCK', read_format='{}'),
+            '24_OCP_UNLOCK': ParameterString(
+                '24 OCP-UNLOCK', read_format='{}'),
+            'OCP_STEP_DN': ParameterString(
+                'OCP-STEP-DN', read_format='{}'),
+            'OCP_LOCK': ParameterString(
+                'OCP-LOCK', read_format='{}'),
             }

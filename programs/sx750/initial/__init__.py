@@ -79,11 +79,10 @@ class Initial(tester.TestSequence):
     def _step_program_micros(self):
         """Program the ARM and PIC devices.
 
-         The 5Vsb and PwrSw PIC's are programmed by the Arduino.
-         The OCP digital pots are powered by PriCtl and set to maximum
-         with the Arduino.
-         5Vsb is injected and the ARM is programmed.
-
+         5Vsb is injected to power the ARM and 5Vsb PIC. PriCtl is injected
+         to power the PwrSw PIC and digital pots.
+         The ARM is programmed.
+         The PIC's are programmed and the digital pots are set for maximum OCP.
          Unit is left unpowered.
 
          """
@@ -109,7 +108,7 @@ class Initial(tester.TestSequence):
         d.rla_pic2.opc()
         m.pgm_pwrsw.measure()
         d.rla_pic2.set_off()
-        m.pot_min.measure()
+        m.ocp_max.measure()
         # Switch off rails and discharge the 5Vsb to stop the ARM
         t.ext_pwroff.run()
 
@@ -118,7 +117,6 @@ class Initial(tester.TestSequence):
 
         5Vsb is injected to power the ARM.
         The ARM is initialised via the serial port.
-
         Unit is left unpowered.
 
         """
@@ -144,7 +142,6 @@ class Initial(tester.TestSequence):
         240Vac is applied.
         ARM data readings are logged.
         PFC voltage is calibrated.
-
         Unit is left running at 240Vac, no load.
 
         """
@@ -209,7 +206,6 @@ class Initial(tester.TestSequence):
         Min = 0, Max = 2.0A, Peak = 2.5A
         Load = 3%, Line = 0.5%, Temp = 1.0%
         Load regulation measured from 0A to 95% of rated current
-
         Unit is left running at no load.
 
         """
@@ -230,7 +226,6 @@ class Initial(tester.TestSequence):
         Pre Adjustment Range    34.0 - 38.0A
         Post adjustment range   36.2 - 36.6A
         Adjustment resolution   116mA/step
-
         Unit is left running at no load.
 
         """
@@ -250,7 +245,7 @@ class Initial(tester.TestSequence):
             reg_limit=self._limits['12V_reg'], max_load=32.0, peak_load=36.0)
         _ocp_set(
             target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
-            enable=m.pot12_enable, limit=self._limits['12V_ocp'])
+            enable=m.ocp12_unlock, limit=self._limits['12V_ocp'])
         tester.testsequence.path_push('OCPcheck')
         d.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
         m.rampOcp12V.measure()
@@ -268,7 +263,6 @@ class Initial(tester.TestSequence):
         Pre Adjustment Range    17.0 - 19.0A
         Post adjustment range   18.1 - 18.3A
         Adjustment resolution   58mA/step
-
         Unit is left running at no load.
 
         """
@@ -287,7 +281,7 @@ class Initial(tester.TestSequence):
             reg_limit=self._limits['24V_reg'], max_load=15.0, peak_load=18.0)
         _ocp_set(
             target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
-            enable=m.pot24_enable, limit=self._limits['24V_ocp'])
+            enable=m.ocp24_unlock, limit=self._limits['24V_ocp'])
         tester.testsequence.path_push('OCPcheck')
         d.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
         m.rampOcp24V.measure()
@@ -299,7 +293,6 @@ class Initial(tester.TestSequence):
         """Check operation at Peak load.
 
         5Vsb @ 2.5A, 12V @ 36.0A, 24V @ 18.0A
-
         Unit is left running at no load.
 
         """
@@ -324,7 +317,6 @@ def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
     reg_limit: TestLimit for Load Regulation.
     max_load: Maximum output load.
     peak_load: Peak output load.
-
     Unit is left running at peak load.
 
     """
@@ -362,9 +354,9 @@ def _ocp_set(target, load, dmm, detect, enable, limit):
     enable: Measurement to call to enable digital pot.
     limit: Limit to check OCP pot setting.
 
-    Adjust OCP by setting the desired current, then lowering the digital pot
-    setting until OCP triggers. The Arduino changes the digital pot setting.
-    Unit is left running at no load.
+    OCP has been set to maximum in the programming step. Apply the desired load
+    current, then lower the OCP setting until OCP triggers.
+    The unit is left running at no load.
 
     """
     tester.testsequence.path_push('OCPset')
@@ -375,10 +367,10 @@ def _ocp_set(target, load, dmm, detect, enable, limit):
     enable.measure()
     setting = 0
     for setting in range(63, 0, -1):
-        m.pot_step.measure()
+        m.ocp_step_dn.measure()
         if detect.measure().result:
             break
-    m.pot_disable.measure()
+    m.ocp_lock.measure()
     load.output(0.0)
     limit.check(setting, 1)
     tester.testsequence.path_pop()

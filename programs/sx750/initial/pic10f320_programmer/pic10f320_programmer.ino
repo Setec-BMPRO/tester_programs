@@ -54,12 +54,11 @@ const char *CMD_QUIET = "0 DEBUG";       // Switch OFF debug messages
 const char *CMD_PWSW  = "PROGRAM-PWRSW"; // Program using the PWRSW firmware image
 const char *CMD_5VSB  = "PROGRAM-5VSB";  // Program using the 5VSB firmware image
 
-const char *CMD_MAX   = "POT-MAX";       // Increment both digital pots to maximum
-const char *CMD_MIN   = "POT-MIN";       // Decrement both digital pots to minimum
-const char *CMD_EN_12 = "12 POT-ENABLE"; // Enable 12V digital pot
-const char *CMD_EN_24 = "24 POT-ENABLE"; // Enable 24V digital pot
-const char *CMD_STEP  = "POT-STEP";      // Increment digital pot by 1 step
-const char *CMD_DIS   = "POT-DISABLE";   // Disable digital pots
+const char *CMD_POT_MIN   = "OCP-MAX";        // Set OCP to maximum by setting pots to min
+const char *CMD_EN_12     = "12 OCP-UNLOCK";  // Enable 12V digital pot
+const char *CMD_EN_24     = "24 OCP-UNLOCK";  // Enable 24V digital pot
+const char *CMD_STEP      = "OCP-STEP-DN";    // Reduce OCP point by incrementing pot 1 step
+const char *CMD_DIS       = "OCP-LOCK";       // Disable digital pots
 
 // Debug level storage
 boolean debug = false;
@@ -141,10 +140,8 @@ void loop() {
         }
         else if (cmd == CMD_NONE)
             debug = debug;
-        else if (cmd == CMD_MIN)
+        else if (cmd == CMD_POT_MIN)
             potMinimum();
-        else if (cmd == CMD_MAX)
-            potMaximum();
         else if (cmd == CMD_EN_12)
             potEnableUp(PIN_POT_CS12);
         else if (cmd == CMD_EN_24)
@@ -176,21 +173,7 @@ void ledFlasher() {
     }
 }
 
-// Increment both Digital Pots to maximum
-void potMaximum() {
-    potWrite(PIN_POT_UD, POT_HIGH);
-    potWrite(PIN_POT_CS12, POT_LOW);
-    potWrite(PIN_POT_CS24, POT_LOW);
-    for (byte i = 0; i < 64; i++) {     // Step UP 64 times
-        potWrite(PIN_POT_UD, POT_LOW);
-        potWrite(PIN_POT_UD, POT_HIGH);      // The setting changes here
-    }
-    potWrite(PIN_POT_CS12, POT_HIGH);
-    potWrite(PIN_POT_CS24, POT_HIGH);
-    Serial.print(RESP_OK);
-}
-
-// Decrement both Digital Pots to minimum
+// Decrement both Digital Pots to minimum (OCP up)
 void potMinimum() {
     potWrite(PIN_POT_UD, POT_LOW);
     potWrite(PIN_POT_CS12, POT_LOW);
@@ -212,7 +195,7 @@ void potEnableUp(byte enablePin) {
     Serial.print(RESP_OK);
 }
 
-// Increment a digital Pot by 1 step
+// Increment a digital Pot by 1 step (OCP down)
 void potStepUp() {
     potWrite(PIN_POT_UD, POT_LOW);
     potWrite(PIN_POT_UD, POT_HIGH);          // The setting changes here
