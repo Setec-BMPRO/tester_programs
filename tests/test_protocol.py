@@ -18,7 +18,7 @@ class BaseConsoleTestCase(unittest.TestCase):
     def setUpClass(cls):
         """Hack import to get complete code coverage measurement."""
         logging_setup()
-        from ... import console as console_module
+        import share.console as console_module
         global console
         console = console_module
         sim_ser = tester.SimSerial(simulation=True)
@@ -58,7 +58,7 @@ class BadUartConsoleTestCase(unittest.TestCase):
     def setUpClass(cls):
         """Hack import to get complete code coverage measurement."""
         logging_setup()
-        from ... import console as console_module
+        import share.console as console_module
         global console
         console = console_module
         sim_ser = tester.SimSerial(simulation=True)

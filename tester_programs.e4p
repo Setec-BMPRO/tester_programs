@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-06-11, 14:13:06 -->
+<!-- Saved: 2016-06-12, 19:48:18 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -220,13 +220,12 @@
     <Source>share/console/__init__.py</Source>
     <Source>share/console/_base.py</Source>
     <Source>share/console/protocol.py</Source>
-    <Source>share/console/test/__init__.py</Source>
-    <Source>share/console/test/test_protocol.py</Source>
     <Source>share/programmer.py</Source>
-    <Source>share/test/__init__.py</Source>
-    <Source>share/test/test_can_tunnel.py</Source>
     <Source>share/ticker.py</Source>
     <Source>share/timed_data.py</Source>
+    <Source>tests/__init__.py</Source>
+    <Source>tests/test_can_tunnel.py</Source>
+    <Source>tests/test_protocol.py</Source>
     <Source>testsuite.py</Source>
   </Sources>
   <Forms/>

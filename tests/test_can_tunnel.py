@@ -18,7 +18,7 @@ class TunnelTestCase(unittest.TestCase):
     def setUpClass(cls):
         """Hack import to get complete code coverage measurement."""
         logging_setup()
-        from .. import can_tunnel as console_module
+        import share.can_tunnel as console_module
         global console
         console = console_module
         sim_ser = tester.SimSerial(simulation=True)
