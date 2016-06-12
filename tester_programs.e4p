@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-06-10, 11:05:40 -->
+<!-- Saved: 2016-06-11, 14:13:06 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -15,9 +15,6 @@
   <Eol index="1"/>
   <Sources>
     <Source>__init__.py</Source>
-    <Source>isplpc/__init__.py</Source>
-    <Source>isplpc/device.py</Source>
-    <Source>isplpc/isp.py</Source>
     <Source>main.py</Source>
     <Source>programs/_2040/__init__.py</Source>
     <Source>programs/_2040/final/__init__.py</Source>
@@ -107,9 +104,6 @@
     <Source>programs/drifter/initial/__init__.py</Source>
     <Source>programs/drifter/initial/limit.py</Source>
     <Source>programs/drifter/initial/support.py</Source>
-    <Source>programs/dummy/__init__.py</Source>
-    <Source>programs/dummy/limit.py</Source>
-    <Source>programs/dummy/support.py</Source>
     <Source>programs/etrac/__init__.py</Source>
     <Source>programs/etrac/initial/__init__.py</Source>
     <Source>programs/etrac/initial/limit.py</Source>
@@ -218,26 +212,6 @@
     <Source>programs/wtsi200/final/__init__.py</Source>
     <Source>programs/wtsi200/final/limit.py</Source>
     <Source>programs/wtsi200/final/support.py</Source>
-    <Source>sensor/__init__.py</Source>
-    <Source>sensor/_base.py</Source>
-    <Source>sensor/dmm.py</Source>
-    <Source>sensor/dso.py</Source>
-    <Source>sensor/mirror.py</Source>
-    <Source>sensor/power.py</Source>
-    <Source>sensor/ramp.py</Source>
-    <Source>sensor/safety.py</Source>
-    <Source>sensor/search.py</Source>
-    <Source>sensor/test/__init__.py</Source>
-    <Source>sensor/test/test_base.py</Source>
-    <Source>sensor/test/test_dmm.py</Source>
-    <Source>sensor/test/test_dso.py</Source>
-    <Source>sensor/test/test_mirror.py</Source>
-    <Source>sensor/test/test_power.py</Source>
-    <Source>sensor/test/test_ramp.py</Source>
-    <Source>sensor/test/test_safety.py</Source>
-    <Source>sensor/test/test_search.py</Source>
-    <Source>sensor/test/test_ui.py</Source>
-    <Source>sensor/ui.py</Source>
     <Source>share/__init__.py</Source>
     <Source>share/bluetooth/__init__.py</Source>
     <Source>share/bluetooth/eunistone_pan1322.py</Source>
@@ -253,45 +227,6 @@
     <Source>share/test/test_can_tunnel.py</Source>
     <Source>share/ticker.py</Source>
     <Source>share/timed_data.py</Source>
-    <Source>tester/__init__.py</Source>
-    <Source>tester/_base.py</Source>
-    <Source>tester/devlogical/__init__.py</Source>
-    <Source>tester/devlogical/_base.py</Source>
-    <Source>tester/devlogical/acsource.py</Source>
-    <Source>tester/devlogical/dcload.py</Source>
-    <Source>tester/devlogical/dcsource.py</Source>
-    <Source>tester/devlogical/discharge.py</Source>
-    <Source>tester/devlogical/dmm.py</Source>
-    <Source>tester/devlogical/dso.py</Source>
-    <Source>tester/devlogical/fixturelock.py</Source>
-    <Source>tester/devlogical/power.py</Source>
-    <Source>tester/devlogical/relay.py</Source>
-    <Source>tester/devlogical/safety.py</Source>
-    <Source>tester/devphysical/__init__.py</Source>
-    <Source>tester/devphysical/acs6813b.py</Source>
-    <Source>tester/devphysical/ar7564a.py</Source>
-    <Source>tester/devphysical/dcl3300a.py</Source>
-    <Source>tester/devphysical/dcs3645a.py</Source>
-    <Source>tester/devphysical/dmmscpi.py</Source>
-    <Source>tester/devphysical/dsoscpi.py</Source>
-    <Source>tester/devphysical/gen2.py</Source>
-    <Source>tester/devphysical/gen3.py</Source>
-    <Source>tester/devphysical/gen4.py</Source>
-    <Source>tester/devphysical/genf.py</Source>
-    <Source>tester/devphysical/interface.py</Source>
-    <Source>tester/devphysical/signals.py</Source>
-    <Source>tester/devphysical/sim_serial.py</Source>
-    <Source>tester/devphysical/wt210.py</Source>
-    <Source>tester/measure.py</Source>
-    <Source>tester/signals.py</Source>
-    <Source>tester/testdata.py</Source>
-    <Source>tester/testrunner.py</Source>
-    <Source>tester/testsequence.py</Source>
-    <Source>testlimit/__init__.py</Source>
-    <Source>testlimit/_base.py</Source>
-    <Source>testlimit/helpers.py</Source>
-    <Source>testlimit/test/__init__.py</Source>
-    <Source>testlimit/test/test_testlimit.py</Source>
     <Source>testsuite.py</Source>
   </Sources>
   <Forms/>
@@ -317,7 +252,7 @@
     <Other>programs/sx750/initial/sx750_arm_3.1.2118.bin</Other>
     <Other>programs/trek2/initial/Trek2_1.3.13347.138.bin</Other>
   </Others>
-  <MainScript>main.py</MainScript>
+  <MainScript>testsuite.py</MainScript>
   <Vcs>
     <VcsType>Git</VcsType>
     <VcsOptions>

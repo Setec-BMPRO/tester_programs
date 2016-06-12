@@ -23,7 +23,7 @@ class TunnelTestCase(unittest.TestCase):
         console = console_module
         sim_ser = tester.SimSerial(simulation=True)
         global mycon
-        mycon = console.ConsoleCanTunnel(sim_ser)
+        mycon = console.ConsoleCanTunnel(sim_ser, verbose=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -36,8 +36,10 @@ class TunnelTestCase(unittest.TestCase):
 
     def test_2_open_ok(self):
         """Successful open."""
-        mycon.port.puts('0 ECHO -> \r\n> ', preflush=1)
-        mycon.port.puts('0x10000000\r\n', preflush=1)
+        mycon.port.puts('0 ECHO -> \r\n', preflush=1)
+        mycon.port.puts('\r\n')
+        mycon.port.puts('0x10000000\r\n\r\n')
+        mycon.port.puts('\r\nRRC,32,3,3,0,16,1\r\n')
         mycon.open()
 
     def test_3_writeread(self):

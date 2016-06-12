@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Product Test Programs."""
 
-from . import dummy
 from . import selftest
 
 from . import _2040
@@ -53,7 +52,6 @@ from . import wtsi200
 #   option in main.py
 
 PROGRAMS = (
-    ('Dummy', dummy.Main, dummy.LIMIT_DATA),
     ('Self-Test', selftest.Main, selftest.LIMIT),
     ('2040 Final', _2040.Final, _2040.FIN_LIMIT),
     ('2040 Initial', _2040.Initial, _2040.INI_LIMIT),

@@ -4,22 +4,11 @@
 
 import unittest
 
-# This is the overall project top level folder
-_TOP_LEVEL_DIR = '.'
-# Discover test files in this relative path
-_START_DIR = 'share'
-
-# Test files must match this pattern
-_TEST_PATTERN = 'test_*.py'
-
 
 def suite():
     """Define the test suite by discovering all test files."""
     testsuite = unittest.defaultTestLoader.discover(
-        top_level_dir=_TOP_LEVEL_DIR,
-        start_dir=_START_DIR,
-        pattern=_TEST_PATTERN
-        )
+        start_dir='.', pattern='test_*.py')
     return testsuite
 
 if __name__ == '__main__':
