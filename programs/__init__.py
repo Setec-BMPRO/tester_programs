@@ -126,8 +126,6 @@ ALL_SKIP = (
     # Obsolete and unused programs
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',
-    # ATE3 has no Power meter. Using ATE4 causes GEN4 serial errors.
-    'RM-50-24 Final',
     # The voltage adjuster will not simulate
     'TS3020-H Initial',
     )
