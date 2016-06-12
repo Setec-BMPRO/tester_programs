@@ -15,6 +15,7 @@ __pycache__/
 *.coverage
 *.api
 *.bas
+Ui_*.py
 sensor
 testlimit
 tester
