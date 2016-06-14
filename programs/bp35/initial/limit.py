@@ -10,7 +10,7 @@ from testlimit import (
 
 ARM_VERSION = '1.2.13351.3801'      # ARM versions
 ARM_HW_VER = (3, 0, 'A')
-ARM_HW_VER5 = (5, 0, 'A')
+ARM_HW_VER5 = (6, 0, 'A')
 PIC_VERSION = '1.1.12949.167'       # Solar Regulator versions
 PIC_HW_VER = 1
 

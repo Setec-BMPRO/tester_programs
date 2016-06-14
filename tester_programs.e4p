@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-06-12, 21:44:44 -->
+<!-- Saved: 2016-06-14, 11:37:44 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -212,7 +212,6 @@
     <Source>programs/wtsi200/final/__init__.py</Source>
     <Source>programs/wtsi200/final/limit.py</Source>
     <Source>programs/wtsi200/final/support.py</Source>
-    <Source>programs/wtsi200/initial/Ui_start.py</Source>
     <Source>programs/wtsi200/initial/__init__.py</Source>
     <Source>programs/wtsi200/initial/gui.py</Source>
     <Source>programs/wtsi200/initial/main.py</Source>

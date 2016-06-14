@@ -16,9 +16,4 @@ __pycache__/
 *.api
 *.bas
 Ui_*.py
-sensor
-testlimit
-tester
-isplpc
 main.py.ini
-programs/dummy
