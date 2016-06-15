@@ -196,8 +196,27 @@ def _ev_cmd_err(lsb, msb):
             err1 += ' - ' + err2
         raise Ev2200Error(err1)
 
+#programs.cmrsbp.ev2200.EV2200:MainThread:DEBUG:Dumping EEPROM
+#0000: 7F 3C 0A 00 14 05 00 00  00 00 80 3E 80 00 00 00   .<...... ...>....
+#0010: 00 00 E0 2E 31 00 00 00  00 00 A0 0F 8A 02 8A 02   ....1... ........
+#0020: 0A 20 53 45 54 45 43 20  50 2F 4C 00 00 00 C0 FE   . SETEC  P/L.....
+#0030: 07 43 4D 52 2D 53 42 50  D4 30 C8 32 60 D7 00 A0   .CMR-SBP .0.2`...
+#0040: 04 4E 69 4D 68 C0 40 1F  0A 20 00 9C A1 FF 07 07   .NiMh.@. . ......
+#0050: 07 35 2D BE 12 FF 00 00  00 00 00 00 00 00 00 00   .5-..... ........
+#0060: 00 00 00 20 A0 50 20 4E  12 7A 00 50 14 D3 2C CF   ... .P N .z.P..,.
+#0070: 44 CB 04 29 30 2A 00 00  F8 2A 00 00 00 00 5A A5   D..)0*.. .*....Z.
 
-# FIXME: _dumper() doesn't work in python3 yet
+#SAMPLE_DATA = (
+#    b'\x7F\x3C\x0A\x00\x14\x05\x00\x00\x00\x00\x80\x3E\x80\x00\x00\x00'
+#    b'\x00\x00\xE0\x2E\x31\x00\x00\x00\x00\x00\xA0\x0F\x8A\x02\x8A\x02'
+#    b'\x0A\x20\x53\x45\x54\x45\x43\x20\x50\x2F\x4C\x00\x00\x00\xC0\xFE'
+#    b'\x07\x43\x4D\x52\x2D\x53\x42\x50\xD4\x30\xC8\x32\x60\xD7\x00\xA0'
+#    b'\x04\x4E\x69\x4D\x68\xC0\x40\x1F\x0A\x20\x00\x9C\xA1\xFF\x07\x07'
+#    b'\x07\x35\x2D\xBE\x12\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+#    b'\x00\x00\x00\x20\xA0\x50\x20\x4E\x12\x7A\x00\x50\x14\xD3\x2C\xCF'
+#    b'\x44\xCB\x04\x29\x30\x2A\x00\x00\xF8\x2A\x00\x00\x00\x00\x5A\xA5'
+#    )
+
 def _dumper(raw_data):
     """Data Validity Checker."""
     field_list = """\
@@ -219,17 +238,17 @@ def _dumper(raw_data):
         H Fast-Charging Current (mAh) [4000]
         H Maintenance Charging Current (mA) [650]
         H Pre-Charge Current (mA) [650]
-        11p Manufacturer Name [" SETEC P/L"]
+        11p Manufacturer Name [b' SETEC P/L']
         B Light Discharge Current [0]
         H Reserved [0]
         h Maximum Overcharge (note SIGNED!) (mAh) [-320]
-        8p Device Name ["CMR-SBP"]
+        8p Device Name [b'CMR-SBP']
         H Last Measured Discharge [-]
         H Pack Capacity [13000]
         h Cycle Count Threshold (note SIGNED!) [-10400]
         B Reserved [0]
         B Pack Configuration [160]
-        5p Device Chemistry ["NiMh"]
+        5p Device Chemistry [b'NiMh']
         B MaxT DeltaT [192]
         H Overload Current (mA)  [8000]
         B Overvoltage Margin [10]
@@ -280,30 +299,28 @@ def _dumper(raw_data):
         if desc.endswith(']'):
             desc, checkval = desc.rsplit('[', 1)
             checkval = checkval[:-1]
-        # print '%02x' % offset, fieldspec, desc, `checkval`
+#        print('%02x' % offset, fieldspec, desc, checkval)
         fields.append([fieldspec, offset, desc, checkval])
         offset += dlen
 
     structdef = '<' + ''.join([x[0] for x in fields])
     assert struct.calcsize(structdef) == 0x80
 
-    msg = ''.join([chr(x) for x in raw_data])
-
     dump_ok = 0
-    vals = struct.unpack(structdef, msg)
+    vals = struct.unpack(structdef, raw_data)
     for i in zip(fields, vals):
         checkval = i[0][3]
         explain = 'OK'
         if checkval == '-':
-            explain = "OK: calibration value"
+            explain = 'OK: calibration value'
         elif checkval is not None:
             checkval = eval(checkval)
             if checkval != i[1]:
-                explain = " Error, expected %s" % checkval
+                explain = ' Error, expected %s' % checkval
         else:
-            explain = "!!! NOT CHECKED !!!"
+            explain = '!!! NOT CHECKED !!!'
         if not explain.startswith('OK') or dump_ok:
-            print("0x%02x = %s (%s) %s" % (i[0][1], i[1], i[0][2], explain))
+            print('0x%02x = %s (%s) %s' % (i[0][1], i[1], i[0][2], explain))
 
 
 class EV2200():
