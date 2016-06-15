@@ -190,7 +190,6 @@ class Initial(_Main):
         m.dmm_VErase.measure(timeout=5)
         d.program_pic.program()
         d.rla_Erase.set_off()
-        m.pgmPIC.measure()
 
     def _step_check_pic_vals(self):
         """Check some values from the PIC.
