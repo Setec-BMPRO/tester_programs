@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-06-14, 16:00:09 -->
+<!-- Saved: 2016-06-16, 15:29:53 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -259,7 +259,7 @@
     <Other>programs/sx750/initial/sx750_arm_3.1.2118.bin</Other>
     <Other>programs/trek2/initial/Trek2_1.3.13347.138.bin</Other>
   </Others>
-  <MainScript>testsuite.py</MainScript>
+  <MainScript>main.py</MainScript>
   <Vcs>
     <VcsType>Git</VcsType>
     <VcsOptions>

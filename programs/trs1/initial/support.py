@@ -4,6 +4,7 @@
 
 import sensor
 import tester
+from . import limit
 
 translate = tester.translate
 
@@ -34,11 +35,10 @@ class Sensors():
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
+    def __init__(self, logical_devices):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
-           @param limits Product test limits
 
         """
         dmm = logical_devices.dmm
@@ -80,7 +80,6 @@ class Measurements():
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_5Voff = Measurement(limits['5VOff'], sense.o5V)
         self.dmm_5Von = Measurement(limits['5VOn'], sense.o5V)
-        self.dmm_redoff = Measurement(limits['RedOff'], sense.oRed)
         self.dmm_brakeoff = Measurement(limits['BrakeOff'], sense.oBrake)
         self.dmm_brakeon = Measurement(limits['BrakeOn'], sense.oBrake)
         self.dmm_lightoff = Measurement(limits['LightOff'], sense.oLight)
@@ -106,7 +105,7 @@ class SubTests():
         """
         d = logical_devices
         m = measurements
-        # PowerUp:
+        # PowerUp: Apply input voltage, measue.
         self.pwr_up = tester.SubStep((
             tester.RelaySubStep(((d.rla_pin, True), )),
             tester.DcSubStep(setting=((d.dcs_Vin, 12.0), ), output=True,
@@ -115,24 +114,18 @@ class SubTests():
                 (m.dmm_vinoff, m.dmm_5Voff, m.dmm_brakeoff, m.dmm_lightoff,
                  m.dmm_remoteoff), timeout=5),
             ))
-        # BreakAway:
-        self.brkaway1 = tester.SubStep((
+        # BreakAway: Remove pin, measure.
+        self.brkaway = tester.SubStep((
             tester.RelaySubStep(((d.rla_pin, False), )),
             tester.MeasureSubStep(
                 (m.dmm_vin, m.dmm_5Von, m.dmm_brakeon, m.dmm_lighton,
-                 m.dmm_remoteon, m.ui_YesNoGreen), timeout=5),
+                 m.dmm_remoteon, m.dmm_redoff, m.dso_tp3, m.ui_YesNoGreen),
+                 timeout=5),
             ))
-        self.brkaway2 = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_Vin, 14.2), )),
-            tester.MeasureSubStep((m.dmm_redoff, ), timeout=5),
-            ))
-        self.brkaway3 = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_Vin, 10.0), )),
+        # BattLow: Low batt voltage, measure.
+        self.lowbatt = tester.SubStep((
+            tester.DcSubStep(setting=((d.dcs_Vin, limit.LOW_BATT_L), )),
             tester.MeasureSubStep((m.dmm_redon, ), timeout=5),
-            ))
-        self.brkaway4 = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_Vin, 11.2), )),
+            tester.DcSubStep(setting=((d.dcs_Vin, limit.LOW_BATT_U), )),
             tester.MeasureSubStep((m.dmm_redoff, ), timeout=5),
-            tester.DcSubStep(setting=((d.dcs_Vin, 14.2), )),
             ))
-
