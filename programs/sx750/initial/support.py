@@ -27,6 +27,7 @@ class LogicalDevices():
         self.dcs_PriCtl = tester.DCSource(devices['DCS1'])
         self.dcs_Arduino = tester.DCSource(devices['DCS2'])
         self.dcs_5Vsb = tester.DCSource(devices['DCS3'])
+        self.dcs_Vcom = tester.DCSource(devices['DCS4'])
         self.dcl_5Vsb = tester.DCLoad(devices['DCL2'])
         self.dcl_12V = tester.DCLoad(devices['DCL1'])
         self.dcl_24V = tester.DCLoad(devices['DCL5'])
@@ -88,7 +89,8 @@ class LogicalDevices():
         self.discharge.pulse()
         for ld in (self.dcl_5Vsb, self.dcl_12V, self.dcl_24V):
             ld.output(0.0)
-        for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb):
+        for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb,
+              self.dcs_Vcom):
             dcs.output(0.0, False)
         for rla in (
                 self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson):
