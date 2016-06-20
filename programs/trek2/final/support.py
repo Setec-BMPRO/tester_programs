@@ -81,12 +81,6 @@ class Sensors():
         self.oYesNoBklight = sensor.YesNo(
             message=tester.translate('trek2_final', 'IsBacklightOk?'),
             caption=tester.translate('trek2_final', 'capBacklight'))
-        self.oYesNoDisplay = sensor.YesNo(
-            message=tester.translate('trek2_final', 'IsDisplayOk?'),
-            caption=tester.translate('trek2_final', 'capDisplay'))
-        self.oYesNoLevel = sensor.YesNo(
-            message=tester.translate('trek2_final', 'IsLevelOk?'),
-            caption=tester.translate('trek2_final', 'capLevel'))
         self.tank1 = console.Sensor(trek2, 'TANK1')
         self.tank2 = console.Sensor(trek2, 'TANK2')
         self.tank3 = console.Sensor(trek2, 'TANK3')
@@ -108,25 +102,21 @@ class Measurements():
             limits['Notify'], sense.oYesNoSeg)
         self.ui_YesNoBklight = tester.Measurement(
             limits['Notify'], sense.oYesNoBklight)
-        self.ui_YesNoDisplay = tester.Measurement(
-            limits['Notify'], sense.oYesNoDisplay)
-        self.ui_YesNoLevel = tester.Measurement(
-            limits['Notify'], sense.oYesNoLevel)
         tank_sensors = (
             sense.tank1, sense.tank2, sense.tank3, sense.tank4)
-        self.tank1 = []
-        lim = limits['Tank1']
+        self.level1 = []
+        lim = limits['Level1']
         for sens in tank_sensors:
-            self.tank1.append(tester.Measurement(lim, sens))
-        self.tank2 = []
-        lim = limits['Tank2']
+            self.level1.append(tester.Measurement(lim, sens))
+        self.level2 = []
+        lim = limits['Level2']
         for sens in tank_sensors:
-            self.tank2.append(tester.Measurement(lim, sens))
-        self.tank3 = []
-        lim = limits['Tank3']
+            self.level2.append(tester.Measurement(lim, sens))
+        self.level3 = []
+        lim = limits['Level3']
         for sens in tank_sensors:
-            self.tank3.append(tester.Measurement(lim, sens))
-        self.tank4 = []
-        lim = limits['Tank4']
+            self.level3.append(tester.Measurement(lim, sens))
+        self.level4 = []
+        lim = limits['Level4']
         for sens in tank_sensors:
-            self.tank4.append(tester.Measurement(lim, sens))
+            self.level4.append(tester.Measurement(lim, sens))

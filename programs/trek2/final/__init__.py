@@ -33,10 +33,10 @@ class Final(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('TunnelOpen', self._step_tunnel_open, None, True),
             ('Display', self._step_display, None, True),
-            ('Tank1', self._step_tank1, None, True),
-            ('Tank2', self._step_tank2, None, True),
-            ('Tank3', self._step_tank3, None, True),
-            ('Tank4', self._step_tank4, None, True),
+            ('TestAllTanksA', self._step_tanksA, None, True),
+            ('TestAllTanksB', self._step_tanksB, None, True),
+            ('TestAllTanksC', self._step_tanksC, None, True),
+            ('TestAllTanksD', self._step_tanksD, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -97,7 +97,7 @@ class Final(tester.TestSequence):
         tester.MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
         d.trek2.testmode(False)
 
-    def _step_tank1(self):
+    def _step_tanksA(self):
         """Tank tests - Empty."""
         for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
             self.fifo_push(((sens, 1), ))
@@ -106,32 +106,32 @@ class Final(tester.TestSequence):
 
         d.trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
         d.trek2['TANK_SPEED'] = 0.1     # Change update interval
-        time.sleep(1)
-        tester.MeasureGroup(m.tank1)
+        time.sleep(2)
+        tester.MeasureGroup(m.level1)
 
-    def _step_tank2(self):
+    def _step_tanksB(self):
         for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
             self.fifo_push(((sens, 2), ))
 
         """Tank tests - 1 sensor."""
         d.rla_s1.set_on()
-        time.sleep(1)
-        tester.MeasureGroup(m.tank2)
+        time.sleep(2)
+        tester.MeasureGroup(m.level2)
 
-    def _step_tank3(self):
+    def _step_tanksC(self):
         """Tank tests - 2 sensors."""
         for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
             self.fifo_push(((sens, 3), ))
 
         d.rla_s2.set_on()
-        time.sleep(1)
-        tester.MeasureGroup(m.tank3)
+        time.sleep(2)
+        tester.MeasureGroup(m.level3)
 
-    def _step_tank4(self):
+    def _step_tanksD(self):
         """Tank tests - 3 sensors."""
         for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
             self.fifo_push(((sens, 4), ))
 
         d.rla_s3.set_on()
-        time.sleep(1)
-        tester.MeasureGroup(m.tank4)
+        time.sleep(2)
+        tester.MeasureGroup(m.level4)
