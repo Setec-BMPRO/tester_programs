@@ -8,8 +8,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -22,11 +20,13 @@ class Main(tester.testsequence.TestSequence):
 
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
+        # True if running on ATE2 tester
+        self._is_ate2 = (physical_devices.tester_type == 'ATE2')
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Checker', self._step_checker, None, True),
-            ('DSO', self._step_dso, None, True),
+            ('DSO', self._step_dso, None, not self._is_ate2),
             ('ACSource', self._step_acsource, None, True),
             ('DCSource', self._step_dcsource, None, True),
             ('DCLoad', self._step_dcload, None, True),
@@ -44,8 +44,8 @@ class Main(tester.testsequence.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d)
+        d = support.LogicalDevices(self._devices, self._is_ate2)
+        s = support.Sensors(d, self._is_ate2)
         m = support.Measurements(s, self._limits)
 
     def close(self):
@@ -66,8 +66,9 @@ class Main(tester.testsequence.TestSequence):
             s.check12.store(11.8)
             for voltage in s.check5:
                 voltage.store(5.1)
+
         d.acs.output(voltage=240, frequency=50, output=True)
-        MeasureGroup(m.dmm_check_v, timeout=2)
+        tester.MeasureGroup(m.dmm_check_v, timeout=2)
 
     def _step_dso(self):
         """Test DSO."""
@@ -78,6 +79,7 @@ class Main(tester.testsequence.TestSequence):
                 subch.store(((8.0, 6.0, 4.0, 2.0),))
                 for shield in s.shield:
                     shield.store(0.1)
+
         for shield in m.dmm_shield_off:
             shield.measure(timeout=1.0)
         for meas in m.dso_subchan:
@@ -90,15 +92,17 @@ class Main(tester.testsequence.TestSequence):
         if self._fifo:
             for src in s.dcs:
                 src.store((5.1, 10.2, 20.3, 35.4))
+
         for voltage, group in m.dmm_dcs:
             for src in d.dcs:
                 src.output(voltage=voltage, output=True)
                 src.opc()
-            MeasureGroup(group)
+            tester.MeasureGroup(group)
 
     def _step_acsource(self):
         """Test AC Source."""
         self.fifo_push(((s.Acs, (120, 240)), ))
+
         d.acs.configure(ocp='MAX', rng=300)
         for voltage, meas in m.dmm_Acs:
             d.acs.output(voltage=voltage, frequency=50, output=True)
@@ -109,7 +113,8 @@ class Main(tester.testsequence.TestSequence):
         """Test DC Loads."""
         if self._fifo:
             for _ in range(1, 8):
-                s.Shunt.store((0.005, 0.01, 0.02, 0.04))
+                s.shunt.store((5e-3, 10e-3, 20e-3, 40e-3))
+
         for load in d.dcl:
             for current, meas in m.dmm_Shunt:
                 load.output(current=current, output=True)
@@ -123,6 +128,7 @@ class Main(tester.testsequence.TestSequence):
             s.Rla12V.store(11.9)
             for _ in range(23):
                 s.Rla.store((0.7, 12.1))
+
         m.dmm_Rla12V.measure(timeout=1.0)
         for rly in d.rly:
             rly.set_on()
@@ -137,6 +143,7 @@ class Main(tester.testsequence.TestSequence):
         if self._fifo:
             for disch in s.disch:
                 disch.store((11.0, 0.0))
+
         d.disch.set_on()
         d.disch.opc()
         for disch in m.dmm_disch_on:
