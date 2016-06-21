@@ -35,8 +35,11 @@ class LogicalDevices(object):
         dcl4 = tester.DCLoad(devices['DCL4'])
         dcl5 = tester.DCLoad(devices['DCL5'])
         dcl6 = tester.DCLoad(devices['DCL6'])
-        dcl7 = tester.DCLoad(devices['DCL7'])
-        self.dcl = (dcl1, dcl2, dcl3, dcl4, dcl5, dcl6, dcl7, )
+        if is_ate2:
+            self.dcl = (dcl1, dcl2, dcl3, dcl4, dcl5, dcl6, )
+        else:
+            dcl7 = tester.DCLoad(devices['DCL7'])
+            self.dcl = (dcl1, dcl2, dcl3, dcl4, dcl5, dcl6, dcl7, )
         # Relay Drivers
         self.rly = []
         for num in range(1, 23):
