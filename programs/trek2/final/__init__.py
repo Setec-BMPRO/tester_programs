@@ -106,17 +106,17 @@ class Final(tester.TestSequence):
 
         d.trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
         d.trek2['TANK_SPEED'] = 0.1     # Change update interval
-        time.sleep(2)
-        tester.MeasureGroup(m.level1)
+        time.sleep(1)
+        tester.MeasureGroup(m.level1, timeout=12)
 
     def _step_tanksB(self):
+        """Tank tests - 1 sensor."""
         for sens in (s.tank1, s.tank2, s.tank3, s.tank4, ):
             self.fifo_push(((sens, 2), ))
 
-        """Tank tests - 1 sensor."""
         d.rla_s1.set_on()
         time.sleep(2)
-        tester.MeasureGroup(m.level2)
+        tester.MeasureGroup(m.level2, timeout=12)
 
     def _step_tanksC(self):
         """Tank tests - 2 sensors."""
@@ -125,7 +125,7 @@ class Final(tester.TestSequence):
 
         d.rla_s2.set_on()
         time.sleep(2)
-        tester.MeasureGroup(m.level3)
+        tester.MeasureGroup(m.level3, timeout=12)
 
     def _step_tanksD(self):
         """Tank tests - 3 sensors."""
@@ -134,4 +134,4 @@ class Final(tester.TestSequence):
 
         d.rla_s3.set_on()
         time.sleep(2)
-        tester.MeasureGroup(m.level4)
+        tester.MeasureGroup(m.level4, timeout=10)
