@@ -81,10 +81,11 @@ class Sensors():
         self.oYesNoBklight = sensor.YesNo(
             message=tester.translate('trek2_final', 'IsBacklightOk?'),
             caption=tester.translate('trek2_final', 'capBacklight'))
-        self.tank1 = console.Sensor(trek2, 'TANK1')
-        self.tank2 = console.Sensor(trek2, 'TANK2')
-        self.tank3 = console.Sensor(trek2, 'TANK3')
-        self.tank4 = console.Sensor(trek2, 'TANK4')
+        tank1 = console.Sensor(trek2, 'TANK1')
+        tank2 = console.Sensor(trek2, 'TANK2')
+        tank3 = console.Sensor(trek2, 'TANK3')
+        tank4 = console.Sensor(trek2, 'TANK4')
+        self.otanks = (tank1, tank2, tank3, tank4)
 
 
 class Measurements():
@@ -98,25 +99,18 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.ui_YesNoSeg = tester.Measurement(
+        Measurement = tester.Measurement
+
+        self.ui_YesNoSeg = Measurement(
             limits['Notify'], sense.oYesNoSeg)
-        self.ui_YesNoBklight = tester.Measurement(
+        self.ui_YesNoBklight = Measurement(
             limits['Notify'], sense.oYesNoBklight)
-        tank_sensors = (
-            sense.tank1, sense.tank2, sense.tank3, sense.tank4)
-        self.level1 = []
-        lim = limits['Level1']
-        for sens in tank_sensors:
-            self.level1.append(tester.Measurement(lim, sens))
-        self.level2 = []
-        lim = limits['Level2']
-        for sens in tank_sensors:
-            self.level2.append(tester.Measurement(lim, sens))
-        self.level3 = []
-        lim = limits['Level3']
-        for sens in tank_sensors:
-            self.level3.append(tester.Measurement(lim, sens))
-        self.level4 = []
-        lim = limits['Level4']
-        for sens in tank_sensors:
-            self.level4.append(tester.Measurement(lim, sens))
+        self.arm_level1 = []
+        self.arm_level2 = []
+        self.arm_level3 = []
+        self.arm_level4 = []
+        for sens in sense.otanks:
+            self.arm_level1.append(Measurement(limits['ARM-level1'], sens))
+            self.arm_level2.append(Measurement(limits['ARM-level2'], sens))
+            self.arm_level3.append(Measurement(limits['ARM-level3'], sens))
+            self.arm_level4.append(Measurement(limits['ARM-level4'], sens))

@@ -12,8 +12,8 @@ CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 DATA = (
     lim_hilo_delta('Vin', 12.0, 0.5),
     lim_boolean('Notify', True),
-    lim_hilo_int('Level1', 1),
-    lim_hilo_int('Level2', 2),
-    lim_hilo_int('Level3', 3),
-    lim_hilo_int('Level4', 4),
+    lim_hilo_int('ARM-level1', 1),
+    lim_hilo_int('ARM-level2', 2),
+    lim_hilo_int('ARM-level3', 3),
+    lim_hilo_int('ARM-level4', 4),
     )
