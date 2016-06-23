@@ -11,7 +11,7 @@ from . import limit
 LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = None
+d = s = m = t = None
 
 
 class Main(tester.testsequence.TestSequence):
@@ -25,9 +25,9 @@ class Main(tester.testsequence.TestSequence):
         # Define the (linear) Test Sequence
         #    (Name, Target, Args, Enabled)
         sequence = (
+            ('ACSource', self._step_acsource, None, True),
             ('Checker', self._step_checker, None, True),
             ('DSO', self._step_dso, None, not self._is_ate2),
-            ('ACSource', self._step_acsource, None, True),
             ('DCSource', self._step_dcsource, None, True),
             ('DCLoad', self._step_dcload, None, True),
             ('RelayDriver', self._step_relaydriver, None, True),
@@ -43,16 +43,17 @@ class Main(tester.testsequence.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m
+        global d, s, m, t
         d = support.LogicalDevices(self._devices, self._is_ate2)
         s = support.Sensors(d, self._is_ate2)
         m = support.Measurements(s, self._limits)
+        t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s
-        m = d = s = None
+        global m, d, s, t
+        m = d = s = t = None
         super().close()
 
     def safety(self):
@@ -60,95 +61,102 @@ class Main(tester.testsequence.TestSequence):
         self._logger.info('Safety')
         d.reset()
 
-    def _step_checker(self):
-        """Test Checker Voltages."""
-        if self._fifo:
-            s.check12.store(11.8)
-            for voltage in s.check5:
-                voltage.store(5.1)
+    def _step_acsource(self):
+        """Apply AC inputs to Fixture and measure ac voltages."""
+        self.fifo_push(((s.oAcs, (120, 240)), ))
+        d.acsource.configure(ocp='MAX', rng=300)
+        t.acs.run()
 
-        d.acs.output(voltage=240, frequency=50, output=True)
-        tester.MeasureGroup(m.dmm_check_v, timeout=2)
+    def _step_checker(self):
+        """With 240Vac input applied, measure Fixture dc voltages."""
+        self.fifo_push(
+            ((s.o12V, 12.0), (s.o5Va, 5.0), (s.o5Vb, 5.0), (s.o5Vc, 5.0),
+             (s.o5Vd, 5.0), (s.o5Ve, 5.0), ))
+        t.check.run()
 
     def _step_dso(self):
-        """Test DSO."""
+        """Test DSO.
+
+        Measure all DSO input connector shields off.
+        The 4 channels are connected to 8V, 6V, 4V, 2V from the Fixture.
+        For each subchannel in turn, measure voltages on all 4 inputs and
+        measure all shields on.
+
+        """
+        self.fifo_push(((s.oShield1, 6.0), (s.oShield2, 6.0),
+                (s.oShield3, 6.0), (s.oShield4, 6.0), ))
         if self._fifo:
-            for shield in s.shield:
-                shield.store(6.0)
             for subch in s.subchan:
                 subch.store(((8.0, 6.0, 4.0, 2.0),))
-                for shield in s.shield:
-                    shield.store(0.1)
-
-        for shield in m.dmm_shield_off:
-            shield.measure(timeout=1.0)
+                self.fifo_push(((s.oShield1, 0.0), (s.oShield2, 0.0),
+                        (s.oShield3, 0.0), (s.oShield4, 0.0), ))
+        t.shld_off.run()
         for meas in m.dso_subchan:
-            meas.measure(timeout=1.0)
-            for shield in m.dmm_shield_on:
-                shield.measure(timeout=1.0)
+            meas.measure(timeout=5.0)
+            t.shld_on.run()
 
     def _step_dcsource(self):
-        """Test DC Sources."""
+        """Test DC Sources.
+
+        Set all DC Sources together in the steps 5V, 10V, 20V, 35V
+        After each step measure voltages on all DC Sources.
+
+        """
         if self._fifo:
             for src in s.dcs:
-                src.store((5.1, 10.2, 20.3, 35.4))
-
-        for voltage, group in m.dmm_dcs:
+                src.store((5.0, 10.0, 20.0, 35.0))
+        for step, group in m.dmm_dcs:
             for src in d.dcs:
-                src.output(voltage=voltage, output=True)
+                src.output(voltage=step, output=True)
                 src.opc()
             tester.MeasureGroup(group)
 
-    def _step_acsource(self):
-        """Test AC Source."""
-        self.fifo_push(((s.Acs, (120, 240)), ))
-
-        d.acs.configure(ocp='MAX', rng=300)
-        for voltage, meas in m.dmm_Acs:
-            d.acs.output(voltage=voltage, frequency=50, output=True)
-            d.acs.opc()
-            meas.measure(timeout=1.0)
-
     def _step_dcload(self):
-        """Test DC Loads."""
-        if self._fifo:
-            for _ in range(1, 8):
-                s.shunt.store((5e-3, 10e-3, 20e-3, 40e-3))
+        """Test DC Loads.
 
+        All DC Loads are connected via a 1mR shunt to the Fixture 5V/50A PSU.
+        Set each DC Load in turn to 5A, 10A, 20A, 40A and measure the
+        actual current through the shunt for the DC Load.
+
+        """
+        self.fifo_push(
+            ((s.oShunt, (5e-3, 10e-3, 20e-3, 40e-3) * 7), ))
         for load in d.dcl:
             for current, meas in m.dmm_Shunt:
                 load.output(current=current, output=True)
                 load.opc()
-                meas.measure(timeout=1.0)
+                meas.measure(timeout=5.0)
             load.output(current=0.0, output=False)
 
     def _step_relaydriver(self):
-        """Test Relay Drivers."""
-        if self._fifo:
-            s.Rla12V.store(11.9)
-            for _ in range(23):
-                s.Rla.store((0.7, 12.1))
+        """Test Relay Drivers.
 
+        Measure Relay Driver 12V supply.
+        Switch on/off each Relay Driver in turn and measure.
+
+        """
+        self.fifo_push(
+            ((s.oRla12V, 12.0), (s.oRla, (0.5, 12.0) * 22), ))
         m.dmm_Rla12V.measure(timeout=1.0)
-        for rly in d.rly:
+        for rly in d.relays:
             rly.set_on()
             rly.opc()
-            m.dmm_RlaOn.measure(timeout=1.0)
+            m.dmm_RlaOn.measure(timeout=5.0)
             rly.set_off()
             rly.opc()
-            m.dmm_RlaOff.measure(timeout=1.0)
+            m.dmm_RlaOff.measure(timeout=5.0)
 
     def _step_discharge(self):
-        """Test Discharge."""
-        if self._fifo:
-            for disch in s.disch:
-                disch.store((11.0, 0.0))
+        """Test Discharge.
 
-        d.disch.set_on()
-        d.disch.opc()
-        for disch in m.dmm_disch_on:
-            disch.measure()
-        d.disch.set_off()
-        d.disch.opc()
-        for disch in m.dmm_disch_off:
-            disch.measure()
+        Switch Discharger on/off and measure.
+
+        """
+        self.fifo_push(((s.oDisch1, (10.0, 0.0)), (s.oDisch2, (10.0, 0.0)),
+                        (s.oDisch3, (10.0, 0.0)), ))
+        d.discharger.set_on()
+        d.discharger.opc()
+        t.disch_on.run()
+        d.discharger.set_off()
+        d.discharger.opc()
+        t.disch_off.run()
