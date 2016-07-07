@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-06-16, 15:29:53 -->
+<!-- Saved: 2016-06-30, 17:06:15 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -250,7 +250,6 @@
     <Other>programs/drifter/initial/DrifterBM-2.hex</Other>
     <Other>programs/etrac/initial/etracII-2A.hex</Other>
     <Other>programs/gen8/initial/gen8_1.4.645.bin</Other>
-    <Other>programs/ids500/initial_sub/Main 1A.hex</Other>
     <Other>programs/spa/multi/MFDrgb_V103.hex</Other>
     <Other>programs/spa/multi/MFDtri_V103.hex</Other>
     <Other>programs/spa/multi/spa_reset/spa_reset.ino</Other>
