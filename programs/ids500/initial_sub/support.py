@@ -501,11 +501,12 @@ class SubTestAux():
             ))
         # OCP:  OCP, AuxTemp.
         self.ocp = tester.SubStep((
-            tester.MeasureSubStep((m.ramp_OCP5V, ), timeout=5),
-            tester.LoadSubStep(((d.dcl_5V, 0.0), )),
+            tester.MeasureSubStep((m.dmm_5V, m.ramp_OCP5V, ), timeout=5),
+            tester.LoadSubStep(((d.dcl_5V, 0.0), ), output=False),
             tester.RelaySubStep(((d.rla_enAux, False), ), delay=1),
             tester.RelaySubStep(((d.rla_enAux, True), )),
-            tester.MeasureSubStep((m.ramp_OCP15Vp, m.dmm_auxtemp,), timeout=5),
+            tester.MeasureSubStep(
+                    (m.dmm_15Vp, m.ramp_OCP15Vp, m.dmm_auxtemp,), timeout=5),
             ))
 
 

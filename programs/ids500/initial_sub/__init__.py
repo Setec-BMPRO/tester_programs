@@ -157,7 +157,7 @@ class InitialAux(_Main):
         """Apply 5V to ENABLE_Aux, ENABLE +15VPSW and measure voltages."""
         self.fifo_push(
             ((s.o5V, 5.0), (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 15.0),
-             (s.o15VpSw, (0.0, 14.2)), (s.oPwrGood, 5.0), ))
+             (s.o15VpSw, (0.0, 15.0)), (s.oPwrGood, 5.0), ))
         t.key_sws.run()
 
     def _step_acurrent(self):
@@ -168,8 +168,8 @@ class InitialAux(_Main):
 
     def _step_ocp(self):
         """Measure OCP and voltage a/c R657 with 5V applied via a 100k."""
-        self.fifo_push(((s.o5V, (5.0, ) * 11 + (4.7, ), ),
-                (s.o15Vp, (15.0, ) * 21 + (14.1, ), ), (s.oAuxTemp, 3.5)))
+        self.fifo_push(((s.o5V, (5.0, ) * 20 + (4.7, ), ),
+                (s.o15Vp, (15.0, ) * 30 + (14.1, ), ), (s.oAuxTemp, 3.5)))
         t.ocp.run()
 
 

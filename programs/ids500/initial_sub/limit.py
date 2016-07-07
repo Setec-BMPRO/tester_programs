@@ -25,7 +25,7 @@ DATA_AUX = (
     ('15VpOff', 1, 0.5, None, None, None),
     ('15Vp', 1, 14.25, 15.75, None, None),
     ('15VpSwOff', 1, 0.5, None, None, None),
-    ('15VpSw', 1, 13.48, 14.85, None, None),
+    ('15VpSw', 1, 14.25, 15.75, None, None),
     ('20VL', 1, 18.0, 25.0, None, None),
     ('-20V', 1, -25.0, -18.0, None, None),
     ('15V', 1, 14.25, 15.75, None, None),
