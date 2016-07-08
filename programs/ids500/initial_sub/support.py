@@ -236,11 +236,11 @@ class SensorAux():
         self.oOCP5V = sensor.Ramp(
             stimulus=logical_devices.dcl_5V, sensor=self.o5V,
             detect_limit=(limits['InOCP5V'], ),
-            start=6.0, stop=11.0, step=0.1, delay=0.2)
+            start=6.0, stop=11.0, step=0.1, delay=0.1)
         self.oOCP15Vp = sensor.Ramp(
             stimulus=logical_devices.dcl_15Vp, sensor=self.o15Vp,
             detect_limit=(limits['InOCP15Vp'], ),
-            start=6.0, stop=11.0, step=0.05, delay=0.2)
+            start=6.0, stop=11.0, step=0.1, delay=0.1)
 
 
 class SensorBias():
@@ -498,6 +498,7 @@ class SubTestAux():
             tester.MeasureSubStep((m.dmm_ac5V_2, m.dmm_ac15V_1, ), timeout=5),
             tester.LoadSubStep(((d.dcl_15Vp, 4.0), )),
             tester.MeasureSubStep((m.dmm_ac5V_2, m.dmm_ac15V_2, ), timeout=5),
+            tester.LoadSubStep(((d.dcl_5V, 0.0), (d.dcl_15Vp, 0.0), )),
             ))
         # OCP:  OCP, AuxTemp.
         self.ocp = tester.SubStep((
