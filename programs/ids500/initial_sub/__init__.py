@@ -221,7 +221,7 @@ class InitialBias(_Main):
         """Measure OCP."""
         self.fifo_push(((s.o12Vsbraw, (13.0, ) * 4 + (12.5, 0.0), ), ))
         tester.MeasureGroup(
-                (m.dmm_12Vsbraw, m.ramp_OCP, m.dmm_12Vsbraw2,),timeout=5)
+                (m.dmm_12Vsbraw, m.ramp_OCP, m.dmm_12Vsbraw2,),timeout=1)
 
 
 class InitialBus(_Main):

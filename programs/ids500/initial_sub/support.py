@@ -262,7 +262,7 @@ class SensorBias():
         self.oOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_12Vsbraw, sensor=self.o12Vsbraw,
             detect_limit=(limits['InOCP'], ),
-            start=1.5, stop=2.3, step=0.1, delay=0.1)
+            start=1.5, stop=2.3, step=0.1, delay=0.1, reset=False)
 
 
 class SensorBus():
@@ -535,7 +535,7 @@ class SubTestBus():
             ))
         # TecLddStartup: Enable, load, measure.
         self.tl_startup = tester.SubStep((
-            tester.RelaySubStep(((d.rla_enT, True), (d.rla_enBC20, True),
+            tester.RelaySubStep(((d.rla_enBC20, True), (d.rla_enT, True),
                     (d.rla_enBC9, True), (d.rla_enL, True), )),
             tester.LoadSubStep(((d.dcl_20VT, 0.0), (d.dcl_9V, 0.0),
                         (d.dcl_20VL, 0.0), (d.dcl__20, 0.0), ), output=True),
