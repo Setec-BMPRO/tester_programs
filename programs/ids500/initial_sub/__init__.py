@@ -297,7 +297,7 @@ class InitialSyn(_Main):
             ('TecEnable', self._step_tec_enable, None, True),
             ('TecReverse', self._step_tec_rev, None, True),
             ('LddEnable', self._step_ldd_enable, None, True),
-            ('ISSetAdj', self._step_ldd_set_adj, None, True),
+            ('ISSetAdj', self._step_ISset_adj, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -347,12 +347,20 @@ class InitialSyn(_Main):
     def _step_ldd_enable(self):
         """Enable LDD, set dc input and measure voltages."""
         self.fifo_push(
-            ((s.oLdd, (0.0, 0.65, 1.3)), (s.oLddIout, (0.0, 0.006, 0.05)),
+            ((s.oLdd, (0.0, 0.65, 1.3)), (s.oLddShunt, (0.0, 0.006, 0.05)),
             (s.oLddImon, (0.0, 0.6, 5.0)), ))
         t.ldd_en.run()
 
-    def _step_ldd_set_adj(self):
-        """Adjust LDD."""
-        self.fifo_push(((s.oLddIset, 5.0), (s.oLddIout, 0.05), ))
+    def _step_ISset_adj(self):
+        """Set LDD current and adjust for accuracy of output."""
+        # To test adjuster, add delay to Adj sensor and make NoDelays False.
+        self.fifo_push(((s.oLddIset, 5.01),
+                    (s.oAdjLdd, True),
+                    (s.oLddShunt, (0.0495, 0.0495, 0.05005)), ))
         d.dcs_lddiset.output(5.0, True)
-        tester.MeasureGroup((m.dmm_lddIset, m.dmm_ISIout5V, ),timeout=5)
+        setI = m.dmm_ISIset5V.measure(timeout=5).reading1 * 10
+        lo_lim = setI - (setI * 0.2/100)
+        hi_lim = setI + (setI * 0.2/100)
+        self._limits['AdjLimits'].limit = (lo_lim, hi_lim)
+        tester.MeasureGroup((m.dmm_ISIout50A, m.ui_AdjLdd,
+                                    m.dmm_ISIoutPost, ),timeout=2)

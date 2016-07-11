@@ -120,6 +120,7 @@ class LogicalDevBus():
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
+# TODO: Change dcs_prictl to DCS2
         self.dcs_prictl = tester.DCSource(devices['DCS4'])
         self.dcs_fan = tester.DCSource(devices['DCS5'])
         self.dcl_20VT = tester.DCLoad(devices['DCL1'])
@@ -304,12 +305,19 @@ class SensorSyn():
         self.oLdd = sensor.Vdc(dmm, high=21, low=1, rng=100, res=0.001)
         self.oLddVmon = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.001)
         self.oLddImon = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.001)
-        self.oLddIset = sensor.Vdc(dmm, high=7, low=1, rng=100, res=0.001)
-        self.oLddIout = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
+        self.oLddShunt = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001,
+                                                            scale=1000)
         self.o20VT = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
         self.o9V = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.001)
         self.o_20V = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.001)
         self.oFault = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.001)
+        self.oLddIset = sensor.Vdc(dmm, high=7, low=1, rng=100, res=0.001)
+        lo_lim, hi_lim = limits['AdjLimits'].limit
+        self.oAdjLdd = sensor.AdjustAnalog(
+            sensor=self.oLddShunt,
+            low=lo_lim, high=hi_lim,
+            message=tester.translate('IDS500 Initial Syn', 'AdjR489'),
+            caption=tester.translate('IDS500 Initial Syn', 'capAdjLdd'))
 
 
 class MeasureMicro():
@@ -450,10 +458,12 @@ class MeasureSyn():
         self.dmm_lddImon0V = Measurement(limits['LddImon0V'], sense.oLddImon)
         self.dmm_lddImon0V6 = Measurement(limits['LddImon0V6'], sense.oLddImon)
         self.dmm_lddImon5V = Measurement(limits['LddImon5V'], sense.oLddImon)
-        self.dmm_ISIout0V = Measurement(limits['ISIout0V'], sense.oLddIout)
-        self.dmm_ISIout0V6 = Measurement(limits['ISIout0V6'], sense.oLddIout)
-        self.dmm_ISIout5V = Measurement(limits['ISIout5V'], sense.oLddIout)
-        self.dmm_lddIset = Measurement(limits['ISIset5VRange'], sense.oLddIset)
+        self.dmm_ISIout0A = Measurement(limits['ISIout0A'], sense.oLddShunt)
+        self.dmm_ISIout6A = Measurement(limits['ISIout6A'], sense.oLddShunt)
+        self.dmm_ISIout50A = Measurement(limits['ISIout50A'], sense.oLddShunt)
+        self.dmm_ISIset5V = Measurement(limits['ISIset5V'], sense.oLddIset)
+        self.ui_AdjLdd = Measurement(limits['Notify'], sense.oAdjLdd)
+        self.dmm_ISIoutPost = Measurement(limits['AdjLimits'], sense.oLddShunt)
 
 
 class SubTestAux():
@@ -603,12 +613,12 @@ class SubTestSyn():
                     (d.rla_lddcrowbar, True), (d.rla_lddtest, True), )),
             tester.DcSubStep(setting=((d.dcs_lddiset, 0.0), ), output=True),
             tester.MeasureSubStep(
-                (m.dmm_ldd0V, m.dmm_ISIout0V, m.dmm_lddImon0V,), timeout=5),
+                (m.dmm_ldd0V, m.dmm_ISIout0A, m.dmm_lddImon0V,), timeout=5),
             tester.DcSubStep(setting=((d.dcs_lddiset, 0.6), )),
             tester.MeasureSubStep(
-                (m.dmm_ldd0V6, m.dmm_ISIout0V6, m.dmm_lddImon0V6,),timeout=5),
+                (m.dmm_ldd0V6, m.dmm_ISIout6A, m.dmm_lddImon0V6,),timeout=5),
             tester.DcSubStep(setting=((d.dcs_lddiset, 5.0), )),
             tester.MeasureSubStep(
-                (m.dmm_ldd5V, m.dmm_ISIout5V, m.dmm_lddImon5V,), timeout=5),
+                (m.dmm_ldd5V, m.dmm_ISIout50A, m.dmm_lddImon5V,), timeout=5),
             tester.DcSubStep(setting=((d.dcs_lddiset, 0.0), )),
             ))
