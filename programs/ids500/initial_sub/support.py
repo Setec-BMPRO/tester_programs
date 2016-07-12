@@ -120,7 +120,6 @@ class LogicalDevBus():
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
-# TODO: Change dcs_prictl to DCS2
         self.dcs_prictl = tester.DCSource(devices['DCS4'])
         self.dcs_fan = tester.DCSource(devices['DCS5'])
         self.dcl_20VT = tester.DCLoad(devices['DCL1'])

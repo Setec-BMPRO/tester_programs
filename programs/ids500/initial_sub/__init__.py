@@ -66,7 +66,7 @@ class InitialMicro(_Main):
         self._limits = test_limits
         sequence = (
             ('Program', self._step_program, None, True),
-            ('Comms', self._step_comms, None, True),
+            ('Comms', self._step_comms, None, False),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -101,6 +101,7 @@ class InitialMicro(_Main):
                 ):
             d.pic_puts(str)
 # FIXME: Console requires return + line feed. Override write/read functions.
+        d.pic.open()
         m.swrev.measure().reading1
         m.microtemp.measure().reading1
 
@@ -146,7 +147,7 @@ class InitialAux(_Main):
         super().close()
 
     def _step_pwrup(self):
-        """Check Fixture Lock, apply 240Vac and measure voltages."""
+        """Check Fixture Lock, power up internal IDS-500 for 400V rail."""
         self.fifo_push(
             ((s.olock, 0.0), (s.o20VL, 21.0), (s.o_20V, -21.0), (s.o5V, 0.0),
              (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 0.0),
@@ -211,7 +212,7 @@ class InitialBias(_Main):
         super().close()
 
     def _step_pwrup(self):
-        """Check Fixture Lock, apply 240Vac and measure voltages."""
+        """Check Fixture Lock, power up internal IDS-500 for 400V rail."""
         self.fifo_push(((s.olock, 0.0), (s.o400V, 400.0), (s.oPVcc, 14.0), ))
         m.dmm_lock.measure(timeout=5)
         d.acsource.output(voltage=240.0, output=True)
@@ -263,7 +264,7 @@ class InitialBus(_Main):
         super().close()
 
     def _step_pwrup(self):
-        """Check Fixture Lock, apply 240Vac and measure voltage."""
+        """Check Fixture Lock, power up internal IDS-500 for 400V rail."""
         self.fifo_push(((s.olock, 0.0), (s.o400V, 400.0), ))
         t.pwrup.run()
 
@@ -326,7 +327,7 @@ class InitialSyn(_Main):
             d.program_picSyn.program()
 
     def _step_pwrup(self):
-        """Apply 240Vac and measure voltages."""
+        """Power up internal IDS-500 for 20VT,-20V and 9V rails and measure."""
         self.fifo_push(
             ((s.o20VT, 20.0), (s.o_20V, -20.0), (s.o9V, 9.0), (s.oTec, 0.0),
             (s.oLdd, 0.0), (s.oLddVmon, 0.0), (s.oLddImon, 0.0),
