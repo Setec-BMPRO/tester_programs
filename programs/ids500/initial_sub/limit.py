@@ -75,9 +75,9 @@ DATA_BUS = (
     )
 
 DATA_SYN = (
-    ('20VT', 1, 18.5, 22.0, None, None),
-    ('-20V', 1, -22.0, -18.0, None, None),
-    ('9V', 1, 8.0, 11.0, None, None),
+    ('20VT', 1, 22.0, 24.0, None, None),
+    ('-20V', 1, -25.0, -22.0, None, None),
+    ('9V', 1, 10.8, 12.0, None, None),
     ('TecOff', 1, -0.5, 0.5, None, None),
     ('Tec0V', 1, -0.5, 1.0, None, None),
     ('Tec2V5', 1, 7.3, 7.8, None, None),

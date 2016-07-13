@@ -305,11 +305,10 @@ class SensorSyn():
         self.oLddVmon = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
         self.oLddImon = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
         self.oLddShunt = sensor.Vdc(dmm, high=8, low=4, rng=0.1, res=0.0001,
-                                                            scale=1000)
+                                                        scale=1000, nplc=10)
         self.o20VT = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
         self.o9V = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.001)
         self.o_20V = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.001)
-        self.oFault = sensor.Vdc(dmm, high=4, low=1, rng=10, res=0.001)
         self.oLddIset = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.001)
         lo_lim, hi_lim = limits['AdjLimits'].limit
         self.oAdjLdd = sensor.AdjustAnalog(
