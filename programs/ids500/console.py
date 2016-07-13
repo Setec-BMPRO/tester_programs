@@ -27,4 +27,6 @@ class Console(console.Variable, console.BaseConsole):
                 '?,I,1', read_format='{}'),
             'PIC-MicroTemp': ParameterString(
                 '?,D,16', read_format='{}'),
+            'PIC-Dump': ParameterString(
+                '?', read_format='{}'),
             }

@@ -5,7 +5,7 @@
 import os
 
 # Serial port for the PIC.
-PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM17'}[os.name]
+PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 
 PIC_HEX_MIC = 'ids_picMic_2.hex'
 PIC_HEX_SYN = 'ids_picSyn_2.hex'

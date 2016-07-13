@@ -66,7 +66,7 @@ class InitialMicro(_Main):
         self._limits = test_limits
         sequence = (
             ('Program', self._step_program, None, True),
-            ('Comms', self._step_comms, None, False),
+            ('Comms', self._step_comms, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
