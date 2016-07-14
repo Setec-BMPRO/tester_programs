@@ -69,6 +69,7 @@ class LogicalDevAux():
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
         self.dcs_5Vfix = tester.DCSource(devices['DCS1'])
         self.dcs_fan = tester.DCSource(devices['DCS5'])
         self.dcl_5V = tester.DCLoad(devices['DCL1'])
@@ -79,6 +80,8 @@ class LogicalDevAux():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
+        time.sleep(2)
+        self.discharge.pulse()
         for dcs in (self.dcs_5Vfix, self.dcs_fan):
             dcs.output(0.0, False)
         for dcl in (self.dcl_5V, self.dcl_15Vp, ):
@@ -100,6 +103,7 @@ class LogicalDevBias():
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
         self.dcs_fan = tester.DCSource(devices['DCS5'])
         self.dcl_12Vsbraw = tester.DCLoad(devices['DCL1'])
 
@@ -107,6 +111,7 @@ class LogicalDevBias():
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
         time.sleep(2)
+        self.discharge.pulse()
         self.dcs_fan.output(0.0, False)
         self.dcl_12Vsbraw.output(0.0, False)
 
@@ -124,6 +129,7 @@ class LogicalDevBus():
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
         self.dcs_prictl = tester.DCSource(devices['DCS4'])
         self.dcs_fan = tester.DCSource(devices['DCS5'])
         self.dcl_20VT = tester.DCLoad(devices['DCL1'])
@@ -162,6 +168,7 @@ class LogicalDevSyn():
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
         self.dcs_vsec5Vlddtec = tester.DCSource(devices['DCS1'])
         self.dcs_lddiset = tester.DCSource(devices['DCS2'])
         self.dcs_tecvset = tester.DCSource(devices['DCS3'])
@@ -185,6 +192,8 @@ class LogicalDevSyn():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
+        time.sleep(2)
+        self.discharge.pulse()
         for dcs in (self.dcs_vsec5Vlddtec, self.dcs_lddiset, self.dcs_tecvset,
                     self.dcs_fan):
             dcs.output(0.0, False)

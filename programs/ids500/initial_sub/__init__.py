@@ -66,7 +66,7 @@ class InitialMicro(_Main):
         self._limits = test_limits
         sequence = (
             ('Program', self._step_program, None, True),
-            ('Comms', self._step_comms, None, True),
+            ('Comms', self._step_comms, None, False),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -75,11 +75,11 @@ class InitialMicro(_Main):
         """Prepare for testing."""
         super().open()
         self._logger.info('Open')
-        d.rla_comm.set_on()
         global d, m, s
         d = support.LogicalDevMicro(self._devices, self._fifo)
         s = support.SensorMicro(d, self._limits)
         m = support.MeasureMicro(s, self._limits)
+        d.rla_comm.set_on()
 
     def close(self):
         """Finished testing."""

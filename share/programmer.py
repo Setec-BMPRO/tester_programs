@@ -4,6 +4,7 @@
 
 import os
 import subprocess
+import logging
 
 import tester
 import testlimit
@@ -37,6 +38,8 @@ class ProgramPIC():
         @param limitname Testlimit name
 
         """
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
         self._command = [
             _PIC_BINARY,
             '/P{}'.format(device_type),
@@ -57,7 +60,8 @@ class ProgramPIC():
             self._relay.set_on()
             subprocess.check_output(self._command, cwd=self._working_dir)
             self._pic.sensor.store(_SUCCESS)
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as err:
+            self._logger.debug('Error: %s', err.output)
             self._pic.sensor.store(_FAILURE)
         self._relay.set_off()
         self._pic.measure()
