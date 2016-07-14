@@ -75,6 +75,7 @@ class InitialMicro(_Main):
         """Prepare for testing."""
         super().open()
         self._logger.info('Open')
+        d.rla_comm.set_on()
         global d, m, s
         d = support.LogicalDevMicro(self._devices, self._fifo)
         s = support.SensorMicro(d, self._limits)
@@ -147,7 +148,7 @@ class InitialAux(_Main):
         super().close()
 
     def _step_pwrup(self):
-        """Check Fixture Lock, power up internal IDS-500 for 400V rail."""
+        """Check Fixture Lock, power up internal IDS-500 for 20VL, -20V rails."""
         self.fifo_push(
             ((s.olock, 0.0), (s.o20VL, 21.0), (s.o_20V, -21.0), (s.o5V, 0.0),
              (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 0.0),
@@ -327,9 +328,9 @@ class InitialSyn(_Main):
             d.program_picSyn.program()
 
     def _step_pwrup(self):
-        """Power up internal IDS-500 for 20VT,-20V and 9V rails and measure."""
+        """Power up internal IDS-500 for 20VT,-20V, 9V rails and measure."""
         self.fifo_push(
-            ((s.o20VT, 20.0), (s.o_20V, -20.0), (s.o9V, 9.0), (s.oTec, 0.0),
+            ((s.o20VT, 23.0), (s.o_20V, -23.0), (s.o9V, 11.0), (s.oTec, 0.0),
             (s.oLdd, 0.0), (s.oLddVmon, 0.0), (s.oLddImon, 0.0),
             (s.oTecVmon, 0.0), (s.oTecVset, 0.0), ))
         t.pwrup.run()
@@ -353,8 +354,16 @@ class InitialSyn(_Main):
         t.ldd_en.run()
 
     def _step_ISset_adj(self):
-        """Set LDD current and adjust for accuracy of output."""
-        # To test adjuster, add delay to Adj sensor and make NoDelays False.
+        """ISset adjustment.
+
+         Set LDD current to 50A.
+         Calculate adjustment limits from measured current setting.
+         Adjust pot R489 for accuracy of LDD output current.
+         Measure LDD output current with calculated limits.
+         For FIFO testing, add delay to Adj sensor and make NoDelays False.
+
+         """
+
         self.fifo_push(((s.oLddIset, 5.01),
                     (s.oAdjLdd, True),
                     (s.oLddShunt, (0.0495, 0.0495, 0.05005)), ))
@@ -363,5 +372,6 @@ class InitialSyn(_Main):
         lo_lim = setI - (setI * 0.2/100)
         hi_lim = setI + (setI * 0.2/100)
         self._limits['AdjLimits'].limit = (lo_lim, hi_lim)
-        tester.MeasureGroup((m.dmm_ISIout50A, m.ui_AdjLdd,
-                                    m.dmm_ISIoutPost, ),timeout=2)
+        s.oAdjLdd.low = lo_lim
+        s.oAdjLdd.high = hi_lim
+        tester.MeasureGroup((m.ui_AdjLdd, m.dmm_ISIoutPost, ),timeout=1)

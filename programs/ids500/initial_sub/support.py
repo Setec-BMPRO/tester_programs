@@ -4,6 +4,7 @@
 
 import os
 import inspect
+import time
 
 import share
 import tester
@@ -25,6 +26,7 @@ class LogicalDevMicro():
         self.dmm = tester.DMM(devices['DMM'])
         self.dcs_vcc = tester.DCSource(devices['DCS1'])
         self.rla_mic = tester.Relay(devices['RLA10'])
+        self.rla_comm = tester.Relay(devices['RLA13'])
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -50,7 +52,8 @@ class LogicalDevMicro():
         """Reset instruments."""
         self.pic.close()
         self.dcs_vcc.output(0.0, False)
-        self.rla_mic.set_off()
+        for rla in (self.rla_mic, self.rla_comm, ):
+            rla.set_off()
 
 
 class LogicalDevAux():
@@ -103,6 +106,7 @@ class LogicalDevBias():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
+        time.sleep(2)
         self.dcs_fan.output(0.0, False)
         self.dcl_12Vsbraw.output(0.0, False)
 
@@ -134,6 +138,8 @@ class LogicalDevBus():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
+        time.sleep(2)
+        self.discharge.pulse()
         for dcs in (self.dcs_prictl, self.dcs_fan, ):
             dcs.output(0.0, False)
         for dcl in (self.dcl_20VT, self.dcl_9V, self.dcl_20VL,
@@ -305,7 +311,7 @@ class SensorSyn():
         self.oLddVmon = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
         self.oLddImon = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
         self.oLddShunt = sensor.Vdc(dmm, high=8, low=4, rng=0.1, res=0.0001,
-                                                        scale=1000, nplc=10)
+                                               scale=1000, nplc=10)
         self.o20VT = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
         self.o9V = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.001)
         self.o_20V = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.001)
