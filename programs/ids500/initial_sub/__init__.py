@@ -374,4 +374,4 @@ class InitialSyn(_Main):
         self._limits['AdjLimits'].limit = (lo_lim, hi_lim)
         s.oAdjLdd.low = lo_lim
         s.oAdjLdd.high = hi_lim
-        tester.MeasureGroup((m.ui_AdjLdd, m.dmm_ISIoutPost, ),timeout=1)
+        tester.MeasureGroup((m.ui_AdjLdd, m.dmm_ISIoutPost, ),timeout=2)

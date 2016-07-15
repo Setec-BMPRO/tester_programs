@@ -82,7 +82,7 @@ class LogicalDevAux():
         self.acsource.output(voltage=0.0, output=False)
         time.sleep(2)
         self.discharge.pulse()
-        for dcs in (self.dcs_5Vfix, self.dcs_fan):
+        for dcs in (self.dcs_5Vfix, self.dcs_fan, ):
             dcs.output(0.0, False)
         for dcl in (self.dcl_5V, self.dcl_15Vp, ):
             dcl.output(0.0, False)
@@ -173,14 +173,12 @@ class LogicalDevSyn():
         self.dcs_lddiset = tester.DCSource(devices['DCS2'])
         self.dcs_tecvset = tester.DCSource(devices['DCS3'])
         self.dcs_fan = tester.DCSource(devices['DCS5'])
-        self.dcl_tecout = tester.DCLoad(devices['DCL5'])
         self.rla_enTec = tester.Relay(devices['RLA1'])
         self.rla_enIs = tester.Relay(devices['RLA2'])
         self.rla_lddcrowbar = tester.Relay(devices['RLA3'])
         self.rla_interlock = tester.Relay(devices['RLA4'])
         self.rla_lddtest = tester.Relay(devices['RLA5'])
         self.rla_tecphase = tester.Relay(devices['RLA6'])
-        self.rla_fault = tester.Relay(devices['RLA11'])
         self.rla_enable = tester.Relay(devices['RLA12'])
         self.rla_syn = tester.Relay(devices['RLA7'])
         # PIC device programmer
@@ -197,10 +195,9 @@ class LogicalDevSyn():
         for dcs in (self.dcs_vsec5Vlddtec, self.dcs_lddiset, self.dcs_tecvset,
                     self.dcs_fan):
             dcs.output(0.0, False)
-        self.dcl_tecout.output(0.0, False)
         for rla in (self.rla_enTec, self.rla_enIs, self.rla_lddcrowbar,
                     self.rla_interlock, self.rla_lddtest, self.rla_tecphase,
-                    self.rla_fault, self.rla_enable, self.rla_syn):
+                    self.rla_enable, self.rla_syn):
             rla.set_off()
 
 
@@ -598,7 +595,7 @@ class SubTestSyn():
             tester.MeasureSubStep(
                 (m.dmm_20VT, m.dmm__20V, m.dmm_9V, m.dmm_tecOff, m.dmm_lddOff,
                 m.dmm_lddVmonOff, m.dmm_lddImonOff, m.dmm_tecVmonOff,
-                m.dmm_tecVsetOff), timeout=5),
+                m.dmm_tecVsetOff), timeout=2),
             ))
         # TecEnable: Enable, set, measure
         self.tec_en = tester.SubStep((
@@ -606,19 +603,19 @@ class SubTestSyn():
             tester.RelaySubStep(((d.rla_enable, True), ), delay=0.5),
             tester.RelaySubStep(((d.rla_enTec, True), ), delay=0.5),
             tester.DcSubStep(setting=((d.dcs_tecvset, 0.0), ), output=True),
-            tester.MeasureSubStep((m.dmm_tecVmon0V, m.dmm_tec0V,), timeout=5),
+            tester.MeasureSubStep((m.dmm_tecVmon0V, m.dmm_tec0V,), timeout=2),
             tester.DcSubStep(setting=((d.dcs_tecvset, 2.5), )),
-            tester.MeasureSubStep((m.dmm_tecVmon2V5, m.dmm_tec2V5,),timeout=5),
+            tester.MeasureSubStep((m.dmm_tecVmon2V5, m.dmm_tec2V5,),timeout=2),
             tester.DcSubStep(setting=((d.dcs_tecvset, 5.0), )),
-            tester.MeasureSubStep((m.dmm_tecVmon5V, m.dmm_tec5V,), timeout=5),
+            tester.MeasureSubStep((m.dmm_tecVmon5V, m.dmm_tec5V,), timeout=2),
             ))
         # TecReverse: Reverse, measure
         self.tec_rv = tester.SubStep((
             tester.RelaySubStep(((d.rla_tecphase, False), )),
             tester.MeasureSubStep(
-                        (m.dmm_tecVmon5V, m.dmm_tec5Vrev, ), timeout=5),
+                        (m.dmm_tecVmon5V, m.dmm_tec5Vrev, ), timeout=2),
             tester.RelaySubStep(((d.rla_tecphase, True), )),
-            tester.MeasureSubStep((m.dmm_tecVmon5V, m.dmm_tec5V,), timeout=5),
+            tester.MeasureSubStep((m.dmm_tecVmon5V, m.dmm_tec5V,), timeout=2),
             ))
         # LddEnable: Enable, set, measure
         self.ldd_en = tester.SubStep((
@@ -626,12 +623,12 @@ class SubTestSyn():
                     (d.rla_lddcrowbar, True), (d.rla_lddtest, True), )),
             tester.DcSubStep(setting=((d.dcs_lddiset, 0.0), ), output=True),
             tester.MeasureSubStep(
-                (m.dmm_ldd0V, m.dmm_ISIout0A, m.dmm_lddImon0V,), timeout=5),
+                (m.dmm_ldd0V, m.dmm_ISIout0A, m.dmm_lddImon0V,), timeout=2),
             tester.DcSubStep(setting=((d.dcs_lddiset, 0.6), )),
             tester.MeasureSubStep(
-                (m.dmm_ldd0V6, m.dmm_ISIout6A, m.dmm_lddImon0V6,),timeout=5),
+                (m.dmm_ldd0V6, m.dmm_ISIout6A, m.dmm_lddImon0V6,),timeout=2),
             tester.DcSubStep(setting=((d.dcs_lddiset, 5.0), )),
             tester.MeasureSubStep(
-                (m.dmm_ldd5V, m.dmm_ISIout50A, m.dmm_lddImon5V,), timeout=5),
+                (m.dmm_ldd5V, m.dmm_ISIout50A, m.dmm_lddImon5V,), timeout=2),
             tester.DcSubStep(setting=((d.dcs_lddiset, 0.0), )),
             ))
