@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """IDS-500 PIC processor console driver."""
+import time
 
 from share import console
 
@@ -11,10 +12,14 @@ ParameterString = console.ParameterString
 ParameterFloat = console.ParameterFloat
 ParameterBoolean = console.ParameterBoolean
 
+class ConsoleResponseError():
+
+    """Console Response Error."""
+
 
 class Console(console.Variable, console.BaseConsole):
 
-    """Communications to Drifter console."""
+    """Communications to IDS-500 console."""
 
     def __init__(self, port, verbose=False):
         """Create console instance."""
@@ -27,6 +32,56 @@ class Console(console.Variable, console.BaseConsole):
                 '?,I,1', read_format='{}'),
             'PIC-MicroTemp': ParameterString(
                 '?,D,16', read_format='{}'),
-            'PIC-Dump': ParameterString(
-                '?', read_format='{}'),
+            'PIC-Clear': ParameterString(
+                '', read_format='{}'),
             }
+
+    def clear_port(self):
+        """Discard unwanted strings when the port is opened"""
+        self._logger.debug('Discard unwanted strings')
+        self['PIC-Clear']
+        self['PIC-Clear']
+        self['PIC-Clear']
+
+    def action(self, command=None, delay=0, expected=0):
+        """Send a command, and read the response.
+
+        Overrides BaseConsole().
+        @param command Command string.
+        @param delay Delay between sending command and reading response.
+        @param expected Expected number of responses.
+        @return Response (None / String).
+
+        """
+        self._write_command(command)
+        if delay:
+            time.sleep(delay)
+        return self._read_response(expected)
+
+    def _write_command(self, command):
+        """Write a command.
+
+        Overrides BaseConsole().
+        @param command Command string.
+
+        """
+        # Send the command with a '\r\n'
+        cmd_data = command.encode()
+        self._logger.debug('Cmd --> %s', repr(cmd_data))
+        self._port.write(cmd_data + b'\r\n')
+
+    def _read_response(self, expected):
+        """Read the response to a command.
+
+        Overrides BaseConsole().
+        @param expected Expected number of responses.
+        @return Response (None / String).
+
+        """
+        data = self._port.readline()
+        data = data.replace(b'\r\n', b'')   # Remove '\r\n'
+        response = data.replace(b' ', b'')  # Remove whitespaces
+        self._logger.debug('Response <-- %s', repr(response))
+        if len(response) == 0:
+            response = None
+        return response

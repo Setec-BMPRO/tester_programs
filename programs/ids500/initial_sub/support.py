@@ -34,7 +34,7 @@ class LogicalDevMicro():
             limit.PIC_HEX_MIC, folder, '18F4520', self.rla_mic)
         # Serial connection to the console to communicate with the PIC
         pic_ser = tester.SimSerial(
-            simulation=self._fifo, baudrate=19200, timeout=0.1)
+            simulation=self._fifo, baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         pic_ser.port = limit.PIC_PORT
         self.pic = console.Console(pic_ser)
@@ -45,7 +45,7 @@ class LogicalDevMicro():
         """Push string data into the buffer, if FIFOs are enabled."""
         if self._fifo:
             if addprompt:
-                string_data = string_data + '\r> '
+                string_data = string_data + '\r\n'
             self.pic.puts(string_data, preflush, postflush, priority)
 
     def reset(self):
@@ -343,8 +343,8 @@ class MeasureMicro():
         """
         Measurement = tester.Measurement
         self.dmm_vsec5VuP = Measurement(limits['5V'], sense.oVsec5VuP)
-        self.swrev = Measurement(limits['Comms'], sense.oSwRev)
-        self.microtemp = Measurement(limits['Comms'], sense.oMicroTemp)
+        self.swrev = Measurement(limits['SwRev'], sense.oSwRev)
+        self.microtemp = Measurement(limits['MicroTemp'], sense.oMicroTemp)
 
 
 class MeasureAux():

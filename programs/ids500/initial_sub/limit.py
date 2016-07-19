@@ -13,10 +13,8 @@ PIC_HEX_SYN = 'ids_picSyn_2.hex'
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA_MIC = (
     ('5V', 1, 4.95, 5.05, None, None),
-    ('Comms', 1, None, None, r'.', None),
-    ('SwRev', 1, 1.5, 2.5, None, None),
-    ('MicroTemp', 1, 8.0, 30.0, None, None),
-    ('Program', 2, -0.1, 0.1, None, None),
+    ('SwRev', 1, None, None, r'I,1,[0-9],' + r'.', None),
+    ('MicroTemp', 1, None, None, r'D,16,[0-9][0-9],' + r'.', None),
     )
 
 DATA_AUX = (

@@ -35,6 +35,10 @@ class _Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         super().__init__(selection, sequence, fifo)
 
+    def open(self):
+        """Prepare for testing."""
+        self._logger.info('BaseOpen')
+
     def close(self):
         """Finished testing."""
         self._logger.info('BaseClose')
@@ -66,7 +70,7 @@ class InitialMicro(_Main):
         self._limits = test_limits
         sequence = (
             ('Program', self._step_program, None, True),
-            ('Comms', self._step_comms, None, False),
+            ('Comms', self._step_comms, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -97,14 +101,16 @@ class InitialMicro(_Main):
     def _step_comms(self):
         """Communicate with the PIC console."""
         for str in (
+                ('', ) +
+                ('M,1,Incorrectformat!Type?.?forhelp', ) +
+                ('M,3,UnknownCommand!Type?.?forhelp', ) +
                 ('I, 1, 2,Software Revision', ) +
-                ('D, 16, 25,MICRO Temp.(C)', )
+                ('D, 16, 24,MICRO Temp.(C)', )
                 ):
             d.pic_puts(str)
-# FIXME: Console requires return + line feed. Override write/read functions.
         d.pic.open()
-        m.swrev.measure().reading1
-        m.microtemp.measure().reading1
+        d.pic.clear_port()
+        tester.MeasureGroup((m.swrev, m.microtemp, ), timeout=2)
 
 
 class InitialAux(_Main):
