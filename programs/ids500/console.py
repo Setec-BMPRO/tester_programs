@@ -80,7 +80,8 @@ class Console(console.Variable, console.BaseConsole):
         """
         data = self._port.readline()
         data = data.replace(b'\r\n', b'')   # Remove '\r\n'
-        response = data.replace(b' ', b'')  # Remove whitespaces
+        data = data.replace(b' ', b'')      # Remove whitespaces
+        response = data.decode()
         self._logger.debug('Response <-- %s', repr(response))
         if len(response) == 0:
             response = None
