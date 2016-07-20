@@ -89,6 +89,8 @@ PROGRAMS = (
     ('GEN8 Initial', gen8.Initial, gen8.INI_LIMIT),
     ('GENIUS-II Final', genius2.Final, genius2.FIN_LIMIT),
     ('GENIUS-II-H Final', genius2.Final, genius2.FIN_LIMIT_H),
+    ('GENIUS-II Initial', genius2.Initial, genius2.INI_LIMIT),
+    ('GENIUS-II-H Initial', genius2.Initial, genius2.INI_LIMIT_H),
     ('GSU360-1TA Initial', gsu360.Initial, gsu360.INI_LIMIT),
     ('GSU360-1TA Final', gsu360.Final, gsu360.FIN_LIMIT),
     ('IDS500 Initial Micro', ids500.InitialMicro, ids500.INI_MIC_LIMIT),
