@@ -18,7 +18,7 @@ DATA_MIC = (
     )
 
 DATA_AUX = (
-    ('5V', 1, 4.95, 5.05, None, None),
+    ('5V', 1, 4.90, 5.10, None, None),
     ('5VOff', 1, 0.5, None, None, None),
     ('15VpOff', 1, 0.5, None, None, None),
     ('15Vp', 1, 14.25, 15.75, None, None),
