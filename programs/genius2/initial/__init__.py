@@ -32,7 +32,7 @@ class Initial(tester.TestSequence):
             ('PowerUp', self._step_powerup, None, True),
             ('VoutAdj', self._step_vout_adj, None, True),
             ('ShutDown', self._step_shutdown, None, True),
-            ('OCP', self._step_ocp, None, True),
+            ('OCP', self._step_ocp, None, False),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -94,16 +94,17 @@ class Initial(tester.TestSequence):
 
          """
 
-        self.fifo_push(((s.oAdjVout, True), (s.ovout, (13.65, 13.65, 13.65)),
+        self.fifo_push(((s.oAdjVout, True), (s.ovout, (13.65, 13.65, )),
                     (s.ovbatctl, 13.0), (s.ovbat, 13.65), (s.ovdd, 5.0), ))
         tester.MeasureGroup((m.ui_AdjVout, m.dmm_vout, m.dmm_vbatctl,
                             m.dmm_vbat, m.dmm_vdd, ),timeout=2)
 
     def _step_shutdown(self):
-        """Shutdown."""
+        """Test fan on/off and shutdown."""
 
-        self.fifo_push(((s.ovbat, 13.65), ))
-        tester.MeasureGroup((m.dmm_vbat, ),timeout=5)
+        self.fifo_push(((s.ofan, (0.0, 12.5)), (s.ovout, (13.65, 0.0, 13.65)),
+                            (s.ovcc, 0.0), ))
+        t.Shdn.run()
 
     def _step_ocp(self):
         """
@@ -112,13 +113,14 @@ class Initial(tester.TestSequence):
         Shutdown and recover.
 
         """
-        self.fifo_push(((s.oVout, (13.5, ) * 11 + (13.0, ), ),
-                        (s.oVout, (0.1, 13.6, 13.6)), (s.oVbat, 13.6)))
+        self.fifo_push(((s.ovout, (13.5, ) * 11 + (13.0, ), ),
+#                        (s.ovout, (0.1, 13.6, 13.6)),
+                        (s.ovbat, 13.6)))
         d.dcl.output(0.0, output=True)
         d.dcl.binary(0.0, 32.0, 5.0)
         if self._isH:
             m.ramp_OCP_H.measure()
-            t.shdnH.run()
+#            t.shdnH.run()
         else:
             m.ramp_OCP.measure()
-            t.shdn.run()
+#            t.shdn.run()

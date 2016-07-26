@@ -85,11 +85,11 @@ class Sensors():
             message=tester.translate('GENIUS-II Initial', 'AdjR39'),
             caption=tester.translate('GENIUS-II Initial', 'capAdjVout'))
         self.oOCP = sensor.Ramp(
-            stimulus=dcl, sensor=self.oVout,
+            stimulus=dcl, sensor=self.ovout,
             detect_limit=(limits['InOCP'], ),
             start=32.0, stop=48.0, step=0.2, delay=0.1)
         self.oOCP_H = sensor.Ramp(
-            stimulus=dclh, sensor=self.oVout,
+            stimulus=dclh, sensor=self.ovout,
             detect_limit=(limits['InOCP'], ),
             start=32.0, stop=48.0, step=0.2, delay=0.1)
 
@@ -105,16 +105,20 @@ class Measurements():
         self.dmm_vbatctl = Measurement(limits['VbatCtl'], sense.ovbatctl)
         self.dmm_vdd = Measurement(limits['Vdd'], sense.ovdd)
         self.dmm_vout = Measurement(limits['Vout'], sense.ovout)
+        self.dmm_voutoff = Measurement(limits['VoutOff'], sense.ovout)
         self.dmm_vaux = Measurement(limits['Vaux'], sense.ovaux)
         self.dmm_flyld = Measurement(limits['FlyLead'], sense.oflyld)
         self.dmm_acin = Measurement(limits['AcIn'], sense.oacin)
         self.dmm_vbus = Measurement(limits['Vbus'], sense.ovbus)
         self.dmm_vcc = Measurement(limits['Vcc'], sense.ovcc)
+        self.dmm_vccoff = Measurement(limits['VccOff'], sense.ovcc)
         self.dmm_vbatpre = Measurement(limits['VoutPre'], sense.ovbat)
         self.dmm_vbat = Measurement(limits['Vbat'], sense.ovbat)
         self.dmm_voutpre = Measurement(limits['VoutPre'], sense.ovout)
         self.dmm_vout = Measurement(limits['Vout'], sense.ovout)
         self.dmm_vctl = Measurement(limits['Vctl'], sense.ovctl)
+        self.dmm_fanoff = Measurement(limits['FanOff'], sense.ofan)
+        self.dmm_fanon = Measurement(limits['FanOn'], sense.ofan)
         self.ui_AdjVout = Measurement(limits['Notify'], sense.oAdjVout)
         self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
         self.ramp_OCP_H = Measurement(limits['OCP'], sense.oOCP_H)
@@ -145,4 +149,16 @@ class SubTests():
             tester.MeasureSubStep((m.dmm_acin, m.dmm_vbus, m.dmm_vcc,
                                 m.dmm_vbatpre, m.dmm_voutpre, m.dmm_vdd,
                                 m.dmm_vctl), timeout=5),
+            ))
+        # Shutdown:
+        self.Shdn = tester.SubStep((
+            tester.MeasureSubStep((m.dmm_fanoff, ), timeout=5),
+            tester.RelaySubStep(((d.rla_fan, True), )),
+            tester.MeasureSubStep((m.dmm_fanon, ), timeout=5),
+            tester.RelaySubStep(((d.rla_fan, False), )),
+            tester.MeasureSubStep((m.dmm_vout, ), timeout=5),
+            tester.RelaySubStep(((d.rla_shdwn2, True), )),
+            tester.MeasureSubStep((m.dmm_vccoff, m.dmm_voutoff, ), timeout=5),
+            tester.RelaySubStep(((d.rla_shdwn2, False), )),
+            tester.MeasureSubStep((m.dmm_vout, ), timeout=5),
             ))
