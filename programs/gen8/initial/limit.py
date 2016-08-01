@@ -21,7 +21,7 @@ ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
 
 # Test Limits
 DATA = (
-    lim_lo('PartCheck', 20),    # Microswitches on C106, C107, D2
+    lim_lo('PartCheck', 100),    # Microswitches on C106, C107, D2
     lim_hi('FanShort', 20),     # Solder bridge on fan connector
     lim_lo('FixtureLock', 20),
     lim_lo('5Voff', 0.5),
