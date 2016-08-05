@@ -8,8 +8,8 @@ from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_lo, lim_hi, lim_string, lim_boolean)
 
-BIN_VERSION = '1.0.12904.169'      # Software binary version
-HW_VER = (1, 0, 'A')
+BIN_VERSION = '1.1.13665.176'      # Software binary version
+HW_VER = (4, 0, 'A')
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM15'}[os.name]

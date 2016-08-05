@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-07-20, 19:23:17 -->
+<!-- Saved: 2016-08-05, 14:21:00 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -248,6 +248,7 @@
     <Other>programs/bp35/initial/bp35_1.2.13351.3801.bin</Other>
     <Other>programs/c45a15/initial/c45a-15.hex</Other>
     <Other>programs/cmrsbp/CMR-SBP-9.hex</Other>
+    <Other>programs/cn101/initial/cn101_1.1.13665.176.bin</Other>
     <Other>programs/drifter/initial/Drifter-5.hex</Other>
     <Other>programs/drifter/initial/DrifterBM-2.hex</Other>
     <Other>programs/etrac/initial/etracII-2A.hex</Other>
