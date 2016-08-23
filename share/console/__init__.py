@@ -6,6 +6,7 @@
 from ._base import *
 from .protocol import *
 import tester
+import testlimit
 
 # Result values to store into the mirror sensors
 _SUCCESS = 0
