@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 """Serial Console Drivers."""
 
-
 # Easy access to utility methods and classes
 from ._base import *
 from .protocol import *
 import tester
+import testlimit
+
+# Result values to store into the mirror sensors
+_SUCCESS = 0
+_FAILURE = 1
 
 
 class Variable():
@@ -19,6 +23,9 @@ class Variable():
             '.'.join((__name__, self.__class__.__name__)))
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
+        limit = testlimit.LimitHiLo(
+            'Comms', 0, (_SUCCESS - 0.5, _SUCCESS + 0.5))
+        self._comms = tester.Measurement(limit, sensor.Mirror())
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -48,7 +55,8 @@ class Variable():
             reply = parameter.read(self.action)
         except ConsoleError as err:
             self._logger.debug('Caught ConsoleError %s', err)
-            raise tester.measure.MeasurementFailedError
+            self._comms.sensor.store(_FAILURE)
+            self._comms.measure()   # Generates a test FAIL result
         return reply
 
     def __setitem__(self, key, value):
@@ -63,4 +71,5 @@ class Variable():
             parameter.write(value, self.action)
         except ConsoleError as err:
             self._logger.debug('Caught ConsoleError %s', err)
-            raise tester.measure.MeasurementFailedError
+            self._comms.sensor.store(_FAILURE)
+            self._comms.measure()   # Generates a test FAIL result
