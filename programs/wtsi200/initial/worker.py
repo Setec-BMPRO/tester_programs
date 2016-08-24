@@ -32,20 +32,17 @@ class Worker(object):
             self._message(str(err) + '\n')
 
     def _get_hex_file(self):
-        try:
-            input_file = open(self.filename, 'r')
-            body = input_file.read()
-            lexer = shlex.shlex(body)
-            #Considers ':' to be whitespace and not a token
-            lexer.whitespace += ':'
-            #Put all data bytes of the program into a text string
-            for item in lexer:
-                item = item[8:-2]
-                self.text_string += item
-            self._logger.debug('Byte string> %s', self.text_string)
-            input_file.close()
-        except Exception:
-            raise
+        input_file = open(self.filename, 'r')
+        body = input_file.read()
+        lexer = shlex.shlex(body)
+        #Considers ':' to be whitespace and not a token
+        lexer.whitespace += ':'
+        #Put all data bytes of the program into a text string
+        for item in lexer:
+            item = item[8:-2]
+            self.text_string += item
+        self._logger.debug('Byte string> %s', self.text_string)
+        input_file.close()
 
     def _make_program_file(self):
         output_file = open('wtsi200/myprogram.h', 'w')

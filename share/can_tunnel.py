@@ -103,15 +103,15 @@ class ConsoleCanTunnel():
             reply = self.action('"STATUS XN?')
             new_status = _CAN_ON | int(reply, 16)
             self.action('${:08X} "STATUS XN!'.format(new_status))
-        except:
-            raise TunnelError('Set CAN print mode failed')
+        except Exception as exc:
+            raise TunnelError('Set CAN print mode failed') from exc
         # Open a console tunnel
         try:
             self.action(
                 '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id))
             reply = self.action(delay=0.2)  # RRC... is expected
-        except:
-            raise TunnelError('CAN Tunnel Mode failed')
+        except Exception as exc:
+            raise TunnelError('CAN Tunnel Mode failed') from exc
         expected = 'RRC,{},3,3,{},1'.format(self._target_id, self._local_id)
         if reply != expected:
             raise TunnelError(
