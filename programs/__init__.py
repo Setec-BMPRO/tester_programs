@@ -22,6 +22,7 @@ from . import gen8
 from . import genius2
 from . import gsu360
 from . import ids500
+from . import j35
 from . import mk7400
 from . import opto_test
 from . import rm50
@@ -100,6 +101,8 @@ PROGRAMS = (
     ('IDS500 Initial Syn', ids500.InitialSyn, ids500.INI_SYN_LIMIT),
     ('IDS500 Initial Main', ids500.InitialMain, ids500.INI_MAIN_LIMIT),
     ('IDS500 Final', ids500.Final, ids500.FIN_LIMIT),
+    ('J35 Initial', j35.Initial, j35.INI_LIMIT),
+    ('J35 Final', j35.Final, j35.FIN_LIMIT),
     ('MK7-400-1 Final', mk7400.Final, mk7400.FIN_LIMIT),
     ('Opto Test', opto_test.Main, opto_test.LIMIT),
     ('RM-50-24 Final', rm50.Final, rm50.FIN_LIMIT),

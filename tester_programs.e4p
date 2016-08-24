@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-07-20, 19:23:17 -->
+<!-- Saved: 2016-07-29, 16:00:59 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -141,6 +141,14 @@
     <Source>programs/ids500/initial_sub/__init__.py</Source>
     <Source>programs/ids500/initial_sub/limit.py</Source>
     <Source>programs/ids500/initial_sub/support.py</Source>
+    <Source>programs/j35/__init__.py</Source>
+    <Source>programs/j35/console.py</Source>
+    <Source>programs/j35/final/__init__.py</Source>
+    <Source>programs/j35/final/limit.py</Source>
+    <Source>programs/j35/final/support.py</Source>
+    <Source>programs/j35/initial/__init__.py</Source>
+    <Source>programs/j35/initial/limit.py</Source>
+    <Source>programs/j35/initial/support.py</Source>
     <Source>programs/mk7400/__init__.py</Source>
     <Source>programs/mk7400/final/__init__.py</Source>
     <Source>programs/mk7400/final/limit.py</Source>
