@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """CN101 Console driver."""
 
+import tester
+import testlimit
+import sensor
 from share import console
 
 Sensor = console.Sensor
@@ -23,6 +26,10 @@ _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 # Bluetooth ready controlled by STATUS bit 27
 _BLE_ON = (1 << 27)
 _BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
+
+# Result values to store into the mirror sensors
+_SUCCESS = 0
+_FAILURE = 1
 
 
 class Console(console.Variable, console.BadUartConsole):
@@ -90,3 +97,22 @@ class Console(console.Variable, console.BadUartConsole):
         else:
             value = _CAN_OFF & reply
         self['STATUS'] = value
+
+    def action(self, command=None, delay=0, expected=0):
+        """Send a command, and read the response.
+
+        @param command Command string.
+        @param delay Delay between sending command and reading response.
+        @param expected Expected number of responses.
+        @return Response (None / String / ListOfStrings).
+        """
+        comms = tester.Measurement(
+            testlimit.LimitHiLo('Action', 0, (_SUCCESS - 0.5, _SUCCESS + 0.5)),
+            sensor.Mirror())
+        try:
+            reply = super().action(command, delay, expected)
+        except console.ConsoleError as err:
+            self._logger.debug('Caught ConsoleError %s', err)
+            comms.sensor.store(_FAILURE)
+            comms.measure()   # Generates a test FAIL result
+        return reply
