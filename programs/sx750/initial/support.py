@@ -202,7 +202,7 @@ class Measurements():
         self.ocp_max = self._maker('Reply', sense.ocpMax)
         self.ocp12_unlock = self._maker('Reply', sense.ocp12Unlock)
         self.ocp24_unlock = self._maker('Reply', sense.ocp24Unlock)
-        self.ocp_step_dn = self._maker('Reply', sense.ocpStepDn)
+        self.ocp_step_dn = self._maker('Reply', sense.ocpStepDn, silent=True)
         self.ocp_lock = self._maker('Reply', sense.ocpLock)
         self.arm_AcFreq = self._maker('ARM-AcFreq', sense.ARM_AcFreq)
         self.arm_AcVolt = self._maker('ARM-AcVolt', sense.ARM_AcVolt)
