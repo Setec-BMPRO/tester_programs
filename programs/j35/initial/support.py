@@ -93,7 +93,7 @@ class Sensors():
         dmm = logical_devices.dmm
         j35 = logical_devices.j35
         self.mir_can = sensor.Mirror(rdgtype=sensor.ReadingString)
-        self.olock = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
+        self.olock = sensor.Res(dmm, high=17, low=8, rng=10000, res=0.1)
         self.oacin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self.ovbus = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.1)
         self.o12Vpri = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)

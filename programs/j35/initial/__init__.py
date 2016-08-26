@@ -58,7 +58,7 @@ class Initial(tester.TestSequence):
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
         # Apply power to fixture (Comms & CN101) circuits.
-        d.dcs_vcom.output(12.0, True)
+        d.dcs_vcom.output(9.0, True)
 
     def close(self):
         """Finished testing."""
@@ -137,18 +137,20 @@ class Initial(tester.TestSequence):
 
     def _step_aux(self):
         """Test Auxiliary input."""
-        self.fifo_push(((s.oaux, 12.8), (s.ovbat, 12.8), (s.oair, 12.8), ))
+        self.fifo_push(((s.oaux, 12.8), (s.oair, 12.8), ))
         for dat in ('', '12500', '1100', ''):
             d.j35_puts(dat)
 
-        d.dcs_vaux.output(12.8, output=True)
+        d.dcs_vbat.output(0.0)
+        d.dcs_vaux.output(12.8, True)
         d.dcl_bat.output(0.5)
-        tester.MeasureGroup((m.dmm_vaux, m.dmm_vbat, m.dmm_vair), timeout=5)
         d.j35['AUX_RELAY'] = True
-        tester.MeasureGroup((m.arm_auxv, m.arm_auxi), timeout=5)
+        tester.MeasureGroup((m.dmm_vaux, m.dmm_vair, m.arm_auxv,
+                                m.arm_auxi), timeout=5)
         d.j35['AUX_RELAY'] = False
         d.dcs_vaux.output(0.0, output=False)
         d.dcl_bat.output(0.0)
+        d.dcs_vbat.output(12.5)
 
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac.
@@ -172,7 +174,7 @@ class Initial(tester.TestSequence):
         d.j35.power_on()
         m.arm_vout_ov.measure()
         # Remove injected Battery voltage
-        d.dcs_vbat.output(0.0, output=False)
+        d.dcs_vbat.output(0.0, False)
         # Is it now running on it's own?
         m.arm_vout_ov.measure()
         tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vout, m.dmm_vbat,
