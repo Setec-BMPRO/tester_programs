@@ -141,16 +141,16 @@ class Initial(tester.TestSequence):
         for dat in ('', '12500', '1100', ''):
             d.j35_puts(dat)
 
-        d.dcs_vbat.output(0.0)
         d.dcs_vaux.output(12.8, True)
+        d.dcs_vbat.output(0.0)
         d.dcl_bat.output(0.5)
         d.j35['AUX_RELAY'] = True
         tester.MeasureGroup((m.dmm_vaux, m.dmm_vair, m.arm_auxv,
                                 m.arm_auxi), timeout=5)
         d.j35['AUX_RELAY'] = False
-        d.dcs_vaux.output(0.0, output=False)
-        d.dcl_bat.output(0.0)
         d.dcs_vbat.output(12.5)
+        d.dcs_vaux.output(0.0, False)
+        d.dcl_bat.output(0.0)
 
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac.
@@ -179,7 +179,8 @@ class Initial(tester.TestSequence):
         m.arm_vout_ov.measure()
         tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vout, m.dmm_vbat,
                             m.dmm_fanOff, m.arm_acv, m.arm_acf, m.arm_secT,
-                            m.arm_vout, m.arm_fan), timeout=5)
+                            m.arm_vout,
+                            m.arm_fan), timeout=5)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 
