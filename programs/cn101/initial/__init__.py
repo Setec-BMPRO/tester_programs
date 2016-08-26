@@ -35,7 +35,7 @@ class Initial(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
-            ('Awning', self._step_awning, None, True),
+            ('Awning', self._step_awning, None, False),
             ('TankSense', self._step_tank_sense, None, True),
             ('Bluetooth', self._step_bluetooth, None, True),
             ('CanBus', self._step_canbus, None, True),
@@ -100,7 +100,7 @@ class Initial(tester.TestSequence):
 
         d.cn101.open()
         d.rla_reset.pulse(0.1)
-        d.cn101.action(None, delay=1.5, expected=2)   # Flush banner
+        d.cn101.action(None, delay=1.5, expected=0)   # Flush banner
         d.cn101['UNLOCK'] = True
         d.cn101['HW_VER'] = limit.HW_VER
         d.cn101['SER_ID'] = self._sernum
@@ -132,9 +132,9 @@ class Initial(tester.TestSequence):
         if self._fifo:
             reply = True
         else:
-            self._ble.open()
-            reply = self._ble.scan(_btmac)
-            self._ble.close()
+            d.ble.open()
+            reply = d.ble.scan(_btmac)
+            d.ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         s.oMirBT.store(reply)
         m.detectBT.measure()
