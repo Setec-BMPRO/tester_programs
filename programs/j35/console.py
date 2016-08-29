@@ -116,8 +116,8 @@ class Console(console.Variable, console.BadUartConsole):
         mode = 0
         while mode != 0x10000:      # Wait for the operating mode to change
             mode = self['OPERATING_MODE']
-        self['VOUT'] = 12.8
         self['IOUT'] = 35.0
+        self['VOUT'] = 12.8
         self['VOUT_OV'] = 2     # OVP Latch reset
 
     def power_on(self):
@@ -125,7 +125,7 @@ class Console(console.Variable, console.BadUartConsole):
         self['DCDC_EN'] = True
         time.sleep(0.5)
         self['VOUT_OV'] = 2     # OVP Latch reset
-        self['LOAD_DIS'] = False
+#        self['LOAD_DIS'] = False
 
     def load_set(self, set_on=True, loads=()):
         """Set the state of load outputs.

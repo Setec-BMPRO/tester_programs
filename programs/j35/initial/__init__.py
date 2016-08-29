@@ -3,6 +3,7 @@
 """J35 Initial Test Program."""
 
 import logging
+import time
 
 import tester
 from . import support
@@ -175,12 +176,15 @@ class Initial(tester.TestSequence):
         m.arm_vout_ov.measure()
         # Remove injected Battery voltage
         d.dcs_vbat.output(0.0, False)
+        d.dcl_bat.output(0.5, True)
+        time.sleep(0.5)
+        d.dcl_bat.output(0.0, False)
         # Is it now running on it's own?
         m.arm_vout_ov.measure()
         tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vout, m.dmm_vbat,
                             m.dmm_fanOff, m.arm_acv, m.arm_acf, m.arm_secT,
                             m.arm_vout,
-                            m.arm_fan), timeout=5)
+                            m.arm_fan), timeout=10)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 
