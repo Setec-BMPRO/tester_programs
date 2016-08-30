@@ -54,6 +54,7 @@ class Console(console.Variable, console.BadUartConsole):
                 'FAN_SPEED', writeable=True,
                 minimum=0, maximum=100, scale=10),
             'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
+            'SOLAR': ParameterBoolean('SOLAR_CHARGE_RELAY', writeable=True),
 #            'CAN_EN': ParameterBoolean('CAN_BUS_POWER_ENABLE', writeable=True),
 #            '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
 #            'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),

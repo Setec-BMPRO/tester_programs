@@ -35,6 +35,7 @@ class Initial(tester.TestSequence):
             ('ProgramARM', self._step_program_arm, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('Aux', self._step_aux, None, True),
+            ('Solar', self._step_solar, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
             ('Load', self._step_load, None, True),
@@ -83,13 +84,13 @@ class Initial(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.olock, 10.0), (s.ovbat, 12.0), (s.o3V3U, 3.3), (s.o3V3, 3.3),
+            ((s.olock, 10.0), (s.ovbat, 12.5), (s.o3V3U, 3.3), (s.o3V3, 3.3),
              (s.sernum, ('A1626010123', )), ))
 
         m.dmm_lock.measure(timeout=5)
         self._sernum = m.ui_sernum.measure().reading1
         # Apply DC Sources to Battery terminals
-        d.dcs_vbat.output(12.5, True)
+        d.dcs_vbat.output(13.0, True)
         tester.MeasureGroup(
             (m.dmm_vbatin, m.dmm_3v3u, m.dmm_3v3), timeout=5)
 
@@ -138,20 +139,30 @@ class Initial(tester.TestSequence):
 
     def _step_aux(self):
         """Test Auxiliary input."""
-        self.fifo_push(((s.oaux, 12.8), (s.oair, 12.8), ))
-        for dat in ('', '12500', '1100', ''):
+        self.fifo_push(((s.oaux, 13.5), (s.oair, 13.5), ))
+        for dat in ('', '13500', '1100', ''):
             d.j35_puts(dat)
 
-        d.dcs_vaux.output(12.8, True)
-        d.dcs_vbat.output(0.0)
+        d.dcs_vaux.output(13.5, True)
         d.dcl_bat.output(0.5)
         d.j35['AUX_RELAY'] = True
         tester.MeasureGroup((m.dmm_vaux, m.dmm_vair, m.arm_auxv,
                                 m.arm_auxi), timeout=5)
         d.j35['AUX_RELAY'] = False
-        d.dcs_vbat.output(12.5)
         d.dcs_vaux.output(0.0, False)
         d.dcl_bat.output(0.0)
+
+    def _step_solar(self):
+        """Test Solar input."""
+        self.fifo_push(((s.oair, 13.5), ))
+        for dat in ('', ''):
+            d.j35_puts(dat)
+
+        d.dcs_solar.output(13.5, True)
+        d.j35['SOLAR'] = True
+        tester.MeasureGroup((m.dmm_vair, ), timeout=5)
+        d.j35['SOLAR'] = False
+        d.dcs_solar.output(0.0, False)
 
     def _step_powerup(self):
         """Power-Up the Unit with 240Vac.
@@ -163,28 +174,22 @@ class Initial(tester.TestSequence):
             ((s.oacin, 240.0), (s.ovbus, 340.0), (s.o12Vpri, 12.5),
             (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.ovout, 12.8), (s.ovbat, 12.8),
             (s.ofan, (0, 12.0)), ))
-        for dat in ('', ) * 3 + ('0', ) * 2:
-            d.j35_puts(dat)
-        for dat in ('240', '50000', '350', '12800', '500', '', ):
+        for dat in ('', '', '0', '0', '240', '50000', '350', '12800', '500', ''):
             d.j35_puts(dat)
 
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
-        tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=10)
+        tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
         # Enable DCDC converters
         d.j35.power_on()
         m.arm_vout_ov.measure()
         # Remove injected Battery voltage
         d.dcs_vbat.output(0.0, False)
-        d.dcl_bat.output(0.5, True)
-        time.sleep(0.5)
-        d.dcl_bat.output(0.0, False)
         # Is it now running on it's own?
         m.arm_vout_ov.measure()
         tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vout, m.dmm_vbat,
                             m.dmm_fanOff, m.arm_acv, m.arm_acf, m.arm_secT,
-                            m.arm_vout,
-                            m.arm_fan), timeout=10)
+                            m.arm_vout, m.arm_fan), timeout=10)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 
