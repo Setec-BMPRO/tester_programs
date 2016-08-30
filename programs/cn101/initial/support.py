@@ -29,11 +29,8 @@ class LogicalDevices():
         self.dcs_vcom = tester.DCSource(devices['DCS1'])
         # Power unit under test.
         self.dcs_vin = tester.DCSource(devices['DCS2'])
-        # Power for Awning.
-        self.dcs_awn = tester.DCSource(devices['DCS3'])
         self.rla_reset = tester.Relay(devices['RLA1'])
         self.rla_boot = tester.Relay(devices['RLA2'])
-        self.rla_awn = tester.Relay(devices['RLA3'])
         self.rla_s1 = tester.Relay(devices['RLA4'])
         self.rla_s2 = tester.Relay(devices['RLA5'])
         self.rla_s3 = tester.Relay(devices['RLA6'])
@@ -71,10 +68,9 @@ class LogicalDevices():
     def reset(self):
         """Reset instruments."""
         self.cn101.close()
-        for dcs in (self.dcs_vin, self.dcs_awn):
-            dcs.output(0.0, False)
-        for rla in (self.rla_reset, self.rla_boot, self.rla_awn,
-                    self.rla_s1, self.rla_s2, self.rla_s3, self.rla_s4):
+        self.dcs_vin.output(0.0, False)
+        for rla in (self.rla_reset, self.rla_boot, self.rla_s1, self.rla_s2,
+                        self.rla_s3, self.rla_s4):
             rla.set_off()
 
 
@@ -102,8 +98,6 @@ class Sensors():
         self.sw2 = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self.oAwnA = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
-        self.oAwnB = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         self.oSnEntry = sensor.DataEntry(
             message=tester.translate('cn101_initial', 'msgSnEntry'),
             caption=tester.translate('cn101_initial', 'capSnEntry'))
@@ -140,10 +134,6 @@ class Measurements():
         self.detectBT = Measurement(limits['DetectBT'], sense.oMirBT)
         self.dmm_vin = Measurement(limits['Vin'], sense.oVin)
         self.dmm_3v3 = Measurement(limits['3V3'], sense.o3V3)
-        self.dmm_awnAOff = Measurement(limits['AwnOff'], sense.oAwnA)
-        self.dmm_awnBOff = Measurement(limits['AwnOff'], sense.oAwnB)
-        self.dmm_awnAOn = Measurement(limits['AwnOn'], sense.oAwnA)
-        self.dmm_awnBOn = Measurement(limits['AwnOn'], sense.oAwnB)
         self.ui_serialnum = Measurement(limits['SerNum'], sense.oSnEntry)
         self.cn101_swver = Measurement(limits['SwVer'], sense.oSwVer)
         self.cn101_btmac = Measurement(limits['BtMac'], sense.oBtMac)
@@ -172,15 +162,6 @@ class SubTests():
         self.reset = tester.SubStep((
             tester.DcSubStep(setting=((d.dcs_vin, 0.0), ), delay=1.0),
             tester.DcSubStep(setting=((d.dcs_vin, 12.0), ), delay=15.0),
-            ))
-        # Awning:
-        self.awning = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_awn, 13.0), ), output=True),
-            tester.MeasureSubStep((m.dmm_awnAOff, m.dmm_awnBOff), timeout=5),
-            tester.RelaySubStep(relays=((d.rla_awn, True), )),
-            tester.MeasureSubStep((m.dmm_awnAOn, m.dmm_awnBOn), timeout=5),
-            tester.RelaySubStep(relays=((d.rla_awn, False), )),
-            tester.DcSubStep(setting=((d.dcs_awn, 0.0), )),
             ))
         # TankSense:
         self.tank = tester.SubStep((

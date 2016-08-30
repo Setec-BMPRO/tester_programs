@@ -35,7 +35,6 @@ class Initial(tester.TestSequence):
             ('PowerUp', self._step_power_up, None, True),
             ('Program', self._step_program, None, not fifo),
             ('TestArm', self._step_test_arm, None, True),
-            ('Awning', self._step_awning, None, False),
             ('TankSense', self._step_tank_sense, None, True),
             ('Bluetooth', self._step_bluetooth, None, True),
             ('CanBus', self._step_canbus, None, True),
@@ -107,12 +106,6 @@ class Initial(tester.TestSequence):
         d.cn101['NVDEFAULT'] = True
         d.cn101['NVWRITE'] = True
         m.cn101_swver.measure()
-
-    def _step_awning(self):
-        """Test Awning relay operation."""
-        self.fifo_push(((s.oAwnA, (0.0, 11.0)), (s.oAwnB, (0.0, 11.0)), ))
-
-        t.awning.run()
 
     def _step_tank_sense(self):
         """Activate tank sensors and read."""

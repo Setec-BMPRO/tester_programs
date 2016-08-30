@@ -185,6 +185,9 @@ class Initial(tester.TestSequence):
         m.arm_vout_ov.measure()
         # Remove injected Battery voltage
         d.dcs_vbat.output(0.0, False)
+        d.dcl_bat.output(0.5)
+        time.sleep(0.5)
+        d.dcl_bat.output(0.0)
         # Is it now running on it's own?
         m.arm_vout_ov.measure()
         tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vout, m.dmm_vbat,
