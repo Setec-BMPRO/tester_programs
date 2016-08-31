@@ -32,15 +32,15 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramARM', self._step_program_arm, None, not fifo),
+            ('ProgramARM', self._step_program_arm, None, False),
             ('Initialise', self._step_initialise_arm, None, True),
-            ('Aux', self._step_aux, None, True),
-            ('Solar', self._step_solar, None, True),
+            ('Aux', self._step_aux, None, False),
+            ('Solar', self._step_solar, None, False),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
-            ('Load', self._step_load, None, True),
-            ('OCP', self._step_ocp, None, True),
-            ('CanBus', self._step_canbus, None, True),
+            ('Load', self._step_load, None, False),
+            ('OCP', self._step_ocp, None, False),
+            ('CanBus', self._step_canbus, None, False),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -59,7 +59,7 @@ class Initial(tester.TestSequence):
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
-        # Apply power to fixture (Comms & CN101) circuits.
+        # Apply power to fixture Comms circuits.
         d.dcs_vcom.output(9.0, True)
 
     def close(self):
@@ -135,7 +135,7 @@ class Initial(tester.TestSequence):
         d.j35.action(None, delay=1.5, expected=2)  # Flush banner
         d.j35['UNLOCK'] = True
         m.arm_swver.measure()
-        d.j35.manual_mode()
+#        d.j35.manual_mode()
 
     def _step_aux(self):
         """Test Auxiliary input."""
@@ -180,19 +180,18 @@ class Initial(tester.TestSequence):
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
-        # Enable DCDC converters
-        d.j35.power_on()
+#        # Enable DCDC converters
+#        d.j35.power_on()
         m.arm_vout_ov.measure()
-        # Remove injected Battery voltage
+        # Remove injected Battery voltage and wait for the unit to start up.
         d.dcs_vbat.output(0.0, False)
         d.dcl_bat.output(0.5)
-        time.sleep(0.5)
+        time.sleep(10)
         d.dcl_bat.output(0.0)
         # Is it now running on it's own?
-        m.arm_vout_ov.measure()
-        tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vout, m.dmm_vbat,
-                            m.dmm_fanOff, m.arm_acv, m.arm_acf, m.arm_secT,
-                            m.arm_vout, m.arm_fan), timeout=10)
+        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs, m.dmm_vout,
+                            m.dmm_vbat, m.dmm_fanOff, m.arm_acv, m.arm_acf,
+                            m.arm_secT, m.arm_vout, m.arm_fan), timeout=10)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 
@@ -243,7 +242,8 @@ class Initial(tester.TestSequence):
 
     def _step_ocp(self):
         """Test OCP."""
-        self.fifo_push(((s.ovbat, (12.8, ) * 7 + (11.0, ), ), ))
+        self.fifo_push(((s.ovbat, (12.8, ) * 8 + (11.0, ), ), ))
+        m.dmm_vbat.measure(timeout=5)
         m.ramp_ocp.measure(timeout=5)
         d.dcl_bat.output(0.0)
 
