@@ -8,10 +8,10 @@ from testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int, lim_hilo,
     lim_lo, lim_string, lim_boolean)
 
-BIN_VERSION = '1.3.13347.138'   # Software binary version
+BIN_VERSION = '1.4.13801.139'   # Software binary version
 
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-HW_VER = (2, 0, 'E')
+HW_VER = (4, 0, 'A')
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
 CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
