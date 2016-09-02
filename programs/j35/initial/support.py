@@ -106,6 +106,7 @@ class Sensors():
         self.o15Vs = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
         self.ovout = sensor.Vdc(dmm, high=11, low=3, rng=100, res=0.01)
         self.ofan = sensor.Vdc(dmm, high=12, low=5, rng=100, res=0.01)
+        self.ocanpwr = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
         self.sernum = sensor.DataEntry(
             message=tester.translate('j35_initial', 'msgSnEntry'),
             caption=tester.translate('j35_initial', 'capSnEntry'))
@@ -129,7 +130,7 @@ class Sensors():
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.ovbat,
             detect_limit=(limits['InOCP'], ),
-            start=4.0, stop=10.0, step=0.5, delay=0.1)
+            start=4.0, stop=10.0, step=0.5, delay=0.2)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -175,6 +176,7 @@ class Measurements():
         self.arm_vout = Measurement(limits['ARM-Vout'], sense.arm_vout)
         self.arm_fan = Measurement(limits['ARM-Fan'], sense.arm_fan)
         self.arm_battI = Measurement(limits['ARM-BattI'], sense.arm_bati)
+        self.dmm_canpwr = Measurement(limits['CanPwr'], sense.ocanpwr)
         self.rx_can = Measurement(limits['CAN_RX'], sense.mir_can)
         self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.arm_canbind)
         # Generate 14 load current measurements
@@ -193,6 +195,13 @@ class SubTests():
         """Create SubTest Step instances."""
         d = logical_devices
         m = measurements
+        # ExtVbatOff: Switch off VbatIn, measure.
+        self.ExtVbatOff = tester.SubStep((
+            tester.DcSubStep(setting=((d.dcs_vbat, 0.0), )),
+            tester.LoadSubStep(((d.dcl_bat, 0.5), ), output=True, delay=0.5),
+            tester.LoadSubStep(((d.dcl_bat, 0.0), )),
+            tester.MeasureSubStep((m.dmm_vout, ), timeout=10),
+            ))
         # RemoteSw: Activate switch, measure.
         self.rem_sw = tester.SubStep((
             tester.RelaySubStep(((d.rla_loadsw, True), )),

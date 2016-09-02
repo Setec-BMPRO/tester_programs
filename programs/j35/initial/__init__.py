@@ -32,14 +32,15 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramARM', self._step_program_arm, None, False),
+            ('ProgramARM', self._step_program_arm, None, True),
             ('Initialise', self._step_initialise_arm, None, True),
-            ('Aux', self._step_aux, None, False),
-            ('Solar', self._step_solar, None, False),
+            ('Aux', self._step_aux, None, True),
+            ('Solar', self._step_solar, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
-            ('Load', self._step_load, None, False),
-            ('OCP', self._step_ocp, None, False),
+            ('RemoteSw', self._step_remote_sw, None, True),
+            ('Load', self._step_load, None, True),
+            ('OCP', self._step_ocp, None, True),
             ('CanBus', self._step_canbus, None, False),
             )
         # Set the Test Sequence in my base instance
@@ -135,7 +136,6 @@ class Initial(tester.TestSequence):
         d.j35.action(None, delay=1.5, expected=2)  # Flush banner
         d.j35['UNLOCK'] = True
         m.arm_swver.measure()
-#        d.j35.manual_mode()
 
     def _step_aux(self):
         """Test Auxiliary input."""
@@ -174,24 +174,22 @@ class Initial(tester.TestSequence):
             ((s.oacin, 240.0), (s.ovbus, 340.0), (s.o12Vpri, 12.5),
             (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.ovout, 12.8), (s.ovbat, 12.8),
             (s.ofan, (0, 12.0)), ))
-        for dat in ('', '', '0', '0', '240', '50000', '350', '12800', '500', ''):
+        for dat in ('', '', '0', '0', '240', '50000',
+                    '350', '12800', '500', ''):
             d.j35_puts(dat)
 
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
-#        # Enable DCDC converters
-#        d.j35.power_on()
         m.arm_vout_ov.measure()
         # Remove injected Battery voltage and wait for the unit to start up.
-        d.dcs_vbat.output(0.0, False)
-        d.dcl_bat.output(0.5)
-        time.sleep(10)
-        d.dcl_bat.output(0.0)
-        # Is it now running on it's own?
-        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs, m.dmm_vout,
+        t.ExtVbatOff.run()
+        # Enter manual mode and enable DCDC convertors.
+        d.j35.manual_mode()
+        d.j35.power_on()
+        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs,
                             m.dmm_vbat, m.dmm_fanOff, m.arm_acv, m.arm_acf,
-                            m.arm_secT, m.arm_vout, m.arm_fan), timeout=10)
+                            m.arm_secT, m.arm_vout, m.arm_fan), timeout=5)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 
@@ -200,11 +198,9 @@ class Initial(tester.TestSequence):
 
         Each output is turned ON in turn.
         All outputs are then left ON.
-        Test Remote switch.
 
         """
-        self.fifo_push(((s.ovload, (0.0, ) + (12.8, ) * 14),
-                        (s.ovload, (0.25, 12.34)), ))
+        self.fifo_push(((s.ovload, (0.0, ) + (12.8, ) * 14), ))
         for dat in ('', ) * (1 + 14 + 1):
             d.j35_puts(dat)
 
@@ -221,6 +217,11 @@ class Initial(tester.TestSequence):
             tester.testsequence.path_pop()
         # All outputs ON
         d.j35.load_set(set_on=False, loads=())
+
+    def _step_remote_sw(self):
+        """Test Remote switch."""
+        self.fifo_push(((s.ovload, (0.0, 12.8)), ))
+
         # Test Remote switch
         t.rem_sw.run()
 
@@ -243,17 +244,23 @@ class Initial(tester.TestSequence):
     def _step_ocp(self):
         """Test OCP."""
         self.fifo_push(((s.ovbat, (12.8, ) * 8 + (11.0, ), ), ))
-        m.dmm_vbat.measure(timeout=5)
+
         m.ramp_ocp.measure(timeout=5)
+        d.dcl_out.output(0.0)
         d.dcl_bat.output(0.0)
 
     def _step_canbus(self):
         """Test the Can Bus."""
+        self.fifo_push(((s.ocanpwr, 12.5), ))
         for dat in ('0x10000000', '', '0x10000000', '', ''):
             d.j35_puts(dat)
         d.j35_puts('RRQ,36,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
-        m.arm_can_bind.measure(timeout=10)
+        # Apply 240Vac & check
+        d.acsource.output(voltage=240.0, output=True)
+        time.sleep(12)
+        tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
+        tester.MeasureGroup((m.dmm_canpwr, m.arm_can_bind, ), timeout=10)
         d.j35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
         self._logger.debug('CAN Echo Request --> %s', repr(limit.CAN_ECHO))
