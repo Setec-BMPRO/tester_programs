@@ -195,13 +195,6 @@ class SubTests():
         """Create SubTest Step instances."""
         d = logical_devices
         m = measurements
-        # ExtVbatOff: Switch off VbatIn, measure.
-        self.ExtVbatOff = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_vbat, 0.0), )),
-            tester.LoadSubStep(((d.dcl_bat, 0.5), ), output=True, delay=0.5),
-            tester.LoadSubStep(((d.dcl_bat, 0.0), )),
-            tester.MeasureSubStep((m.dmm_vout, ), timeout=10),
-            ))
         # RemoteSw: Activate switch, measure.
         self.rem_sw = tester.SubStep((
             tester.RelaySubStep(((d.rla_loadsw, True), )),

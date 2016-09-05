@@ -35,7 +35,7 @@ class Initial(tester.TestSequence):
             ('ProgramARM', self._step_program_arm, None, True),
             ('Initialise', self._step_initialise_arm, None, True),
             ('Aux', self._step_aux, None, True),
-            ('Solar', self._step_solar, None, True),
+            ('Solar', self._step_solar, None, False),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
             ('RemoteSw', self._step_remote_sw, None, True),
@@ -91,7 +91,7 @@ class Initial(tester.TestSequence):
         m.dmm_lock.measure(timeout=5)
         self._sernum = m.ui_sernum.measure().reading1
         # Apply DC Sources to Battery terminals
-        d.dcs_vbat.output(13.0, True)
+        d.dcs_vbat.output(12.5, True)
         tester.MeasureGroup(
             (m.dmm_vbatin, m.dmm_3v3u, m.dmm_3v3), timeout=5)
 
@@ -136,6 +136,9 @@ class Initial(tester.TestSequence):
         d.j35.action(None, delay=1.5, expected=2)  # Flush banner
         d.j35['UNLOCK'] = True
         m.arm_swver.measure()
+        # Enter manual mode after Vload turns on.
+        m.dmm_vload.measure(timeout=10)
+        d.j35.manual_mode()
 
     def _step_aux(self):
         """Test Auxiliary input."""
@@ -182,14 +185,17 @@ class Initial(tester.TestSequence):
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
         m.arm_vout_ov.measure()
-        # Remove injected Battery voltage and wait for the unit to start up.
-        t.ExtVbatOff.run()
-        # Enter manual mode and enable DCDC convertors.
-        d.j35.manual_mode()
+        # Enable DCDC convertors.
         d.j35.power_on()
+        m.dmm_vbat.measure(timeout=5)
+        # Remove injected Battery voltage.
+        d.dcs_vbat.output(0.0, False)
         tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs,
+#                               m.dmm_vout,
                             m.dmm_vbat, m.dmm_fanOff, m.arm_acv, m.arm_acf,
-                            m.arm_secT, m.arm_vout, m.arm_fan), timeout=5)
+                            m.arm_secT,
+#                               m.arm_vout,
+                            m.arm_fan), timeout=5)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 

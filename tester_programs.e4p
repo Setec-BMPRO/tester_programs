@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
+<!-- Saved: 2016-09-05, 18:47:53 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -266,7 +267,6 @@
     <Other>programs/sx750/initial/pic10f320_programmer/pic10f320_images.h</Other>
     <Other>programs/sx750/initial/pic10f320_programmer/pic10f320_programmer.ino</Other>
     <Other>programs/sx750/initial/sx750_arm_3.1.2118.bin</Other>
-    <Other>programs/trek2/initial/Trek2_1.3.13347.138.bin</Other>
   </Others>
   <MainScript>main.py</MainScript>
   <Vcs>
