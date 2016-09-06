@@ -3,6 +3,7 @@
 """J35 Initial Test Program."""
 
 import logging
+import threading
 import time
 
 import tester
@@ -32,16 +33,16 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramARM', self._step_program_arm, None, True),
+            ('ProgramARM', self._step_program_arm, None, False),
             ('Initialise', self._step_initialise_arm, None, True),
             ('Aux', self._step_aux, None, True),
-            ('Solar', self._step_solar, None, False),
+            ('Solar', self._step_solar, None, True),
             ('PowerUp', self._step_powerup, None, True),
             ('Output', self._step_output, None, True),
             ('RemoteSw', self._step_remote_sw, None, True),
             ('Load', self._step_load, None, True),
             ('OCP', self._step_ocp, None, True),
-            ('CanBus', self._step_canbus, None, False),
+            ('CanBus', self._step_canbus, None, True),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -51,6 +52,7 @@ class Initial(tester.TestSequence):
         self._limits = test_limits
         self._sernum = None
         self._hwver = None
+        self.myevent = threading.Event()
 
     def open(self):
         """Prepare for testing."""
@@ -118,8 +120,7 @@ class Initial(tester.TestSequence):
                 ('', ) + ('success', ) * 2 + ('', ) * 2 +
                 ('Banner1\r\nBanner2', ) +  # Banner lines
                 ('', ) +
-                (limit.ARM_VERSION, ) +
-                ('', ) + ('0x10000', ) + ('', ) * 3     # Manual mode
+                (limit.ARM_VERSION, )
             ):
             d.j35_puts(dat)
 
@@ -136,9 +137,12 @@ class Initial(tester.TestSequence):
         d.j35.action(None, delay=1.5, expected=2)  # Flush banner
         d.j35['UNLOCK'] = True
         m.arm_swver.measure()
-        # Enter manual mode after Vload turns on.
-        m.dmm_vload.measure(timeout=10)
-        d.j35.manual_mode()
+#        # Enter manual mode after Vload turns on.
+#        m.dmm_vload.measure(timeout=10)
+#        d.j35.manual_mode()
+        # Start Timer on another thread.
+        self.mytimer = threading.Timer(2.5, self.myevent.set)
+        self.mytimer.start()
 
     def _step_aux(self):
         """Test Auxiliary input."""
@@ -177,10 +181,15 @@ class Initial(tester.TestSequence):
             ((s.oacin, 240.0), (s.ovbus, 340.0), (s.o12Vpri, 12.5),
             (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.ovout, 12.8), (s.ovbat, 12.8),
             (s.ofan, (0, 12.0)), ))
-        for dat in ('', '', '0', '0', '240', '50000',
-                    '350', '12800', '500', ''):
+        for dat in (('', ) + ('0x10000', ) + ('', ) * 3     # Manual mode
+                   + ('', '', '0', '0', '240', '50000',
+                    '350', '12800', '500', '')
+                    ):
             d.j35_puts(dat)
 
+        # Enter manual mode after Timer stops.
+        self.myevent.wait()
+        d.j35.manual_mode()
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
@@ -262,10 +271,10 @@ class Initial(tester.TestSequence):
             d.j35_puts(dat)
         d.j35_puts('RRQ,36,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
-        # Apply 240Vac & check
-        d.acsource.output(voltage=240.0, output=True)
-        time.sleep(12)
-        tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
+#        # Apply 240Vac & check
+#        d.acsource.output(voltage=240.0, output=True)
+#        time.sleep(10)
+#        tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
         tester.MeasureGroup((m.dmm_canpwr, m.arm_can_bind, ), timeout=10)
         d.j35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
