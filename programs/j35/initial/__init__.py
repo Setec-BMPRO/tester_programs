@@ -33,7 +33,7 @@ class Initial(tester.TestSequence):
         #    (Name, Target, Args, Enabled)
         sequence = (
             ('Prepare', self._step_prepare, None, True),
-            ('ProgramARM', self._step_program_arm, None, False),
+            ('ProgramARM', self._step_program_arm, None, not fifo),
             ('Initialise', self._step_initialise_arm, None, True),
             ('Aux', self._step_aux, None, True),
             ('Solar', self._step_solar, None, True),
@@ -195,11 +195,15 @@ class Initial(tester.TestSequence):
         m.dmm_vbat.measure(timeout=5)
         # Remove injected Battery voltage.
         d.dcs_vbat.output(0.0, False)
-        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs, m.dmm_vbat,
+        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3u, m.dmm_15vs, m.dmm_vbat,
                             m.dmm_fanOff, m.arm_acv, m.arm_acf, m.arm_secT,
                             m.arm_vout, m.arm_fan), timeout=5)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
+        d.rla_reset.pulse(0.1)
+        time.sleep(2.5)
+        d.j35.manual_mode()
+        d.j35.power_on()
 
     def _step_output(self):
         """Test the output switches.
@@ -242,8 +246,6 @@ class Initial(tester.TestSequence):
                 sen.store(2.0)
 
         d.dcl_out.binary(1.0, 28.0, 5.0)
-        d.dcl_bat.output(4.0, output=True)
-        tester.MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
         for load in range(14):
             tester.testsequence.path_push('L{}'.format(load + 1))
             m.arm_loads[load].measure(timeout=5)
@@ -253,6 +255,8 @@ class Initial(tester.TestSequence):
         """Test OCP."""
         self.fifo_push(((s.ovbat, (12.8, ) * 8 + (11.0, ), ), ))
 
+        d.dcl_bat.output(4.0, output=True)
+        tester.MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
         m.ramp_ocp.measure(timeout=5)
         d.dcl_out.output(0.0)
         d.dcl_bat.output(0.0)
@@ -264,13 +268,6 @@ class Initial(tester.TestSequence):
             d.j35_puts(dat)
         d.j35_puts('RRQ,36,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
-#        # Apply 240Vac & check
-#        d.acsource.output(voltage=240.0, output=True)
-#        time.sleep(10)
-#        tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
-#        d.j35.open()
-#        d.rla_reset.pulse(0.1)
-#        d.j35.action(None, delay=1.5, expected=2)  # Flush banner
         tester.MeasureGroup((m.dmm_canpwr, m.arm_can_bind, ), timeout=10)
         d.j35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!

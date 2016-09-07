@@ -8,7 +8,7 @@ from testlimit import (
     lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string, lim_hilo_int)
 
 ARM_VERSION = '1.0.13788.904'      # ARM versions
-ARM_HW_VER = (1, 0, 'A')
+ARM_HW_VER = (4, 0, 'A')
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
@@ -50,7 +50,7 @@ DATA = (
     lim_hilo_delta('CanPwr', 12.0, 1.0),
     lim_string('CAN_RX', r'^RRQ,36,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
-    lim_hilo('OCP', 6.0, 9.0),
+    lim_hilo('OCP', 5.5, 8.5),
     lim_lo('InOCP', 11.6),
     lim_lo('FixtureLock', 20),
     lim_boolean('Notify', True),

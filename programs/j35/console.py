@@ -55,8 +55,6 @@ class Console(console.Variable, console.BadUartConsole):
                 minimum=0, maximum=100, scale=10),
             'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
             'SOLAR': ParameterBoolean('SOLAR_CHARGE_RELAY', writeable=True),
-#            'CAN_EN': ParameterBoolean('CAN_BUS_POWER_ENABLE', writeable=True),
-#            'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
             'LOAD_SET': ParameterFloat(
                 'LOAD_SWITCH_STATE_0', writeable=True,
                 minimum=0, maximum=0x0FFFFFFF, scale=1),
@@ -105,10 +103,7 @@ class Console(console.Variable, console.BadUartConsole):
     def manual_mode(self):
         """Enter manual control mode."""
         self['SET_MODE'] = 3
-        mode = 0
-        while mode != 0x10000:      # Wait for the operating mode to change
-            mode = self['OPERATING_MODE']
-        time.sleep(2)
+        time.sleep(2.5)
         self['IOUT'] = 35.0
         self['VOUT'] = 12.8
         self['VOUT_OV'] = 2     # OVP Latch reset
@@ -123,13 +118,13 @@ class Console(console.Variable, console.BadUartConsole):
         """Set the state of load outputs.
 
         @param set_on True to set loads ON, False to set OFF.
-             ON = 0x01 (Green LED ON, Load ON)
-            OFF = 0x10 (Red LED ON, Load OFF)
+             ON = 0x01
+            OFF = 0x00
         @param loads Tuple of loads to set ON or OFF (0-13).
 
         """
-        value = 0x0AAAAAAA if set_on else 0x05555555
-        code = 0x1 if set_on else 0x2
+        value = 0 if set_on else 0x05555555
+        code = 0x1 if set_on else 0
         for load in loads:
             if load not in range(14):
                 raise ValueError('Load must be 0-13')
