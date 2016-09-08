@@ -53,7 +53,7 @@ class LogicalDevices():
         self.j35 = console.Console(self.j35_ser)
 
     def j35_puts(self, string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
+                 addprompt=True):
         """Push string data into the J35 buffer if FIFOs are enabled."""
         if self._fifo:
             if addprompt:
@@ -183,20 +183,3 @@ class Measurements():
             m = Measurement(limits['ARM-LoadI'], sen)
             self.arm_loads += (m, )
         self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances."""
-        d = logical_devices
-        m = measurements
-        # RemoteSw: Activate switch, measure.
-        self.rem_sw = tester.SubStep((
-            tester.RelaySubStep(((d.rla_loadsw, True), )),
-            tester.MeasureSubStep((m.dmm_vloadoff, ), timeout=5),
-            tester.RelaySubStep(((d.rla_loadsw, False), )),
-            tester.MeasureSubStep((m.dmm_vload, ), timeout=5),
-            ))

@@ -3,7 +3,6 @@
 """J35 Initial Test Program."""
 
 import logging
-import threading
 
 import tester
 from . import support
@@ -12,7 +11,7 @@ from . import limit
 INI_LIMIT = limit.DATA
 
 # These module level variables are to avoid having to use 'self.' everywhere.
-d = s = m = t = None
+d = s = m = None
 
 
 class Initial(tester.TestSequence):
@@ -51,26 +50,24 @@ class Initial(tester.TestSequence):
         self._limits = test_limits
         self._sernum = None
         self._hwver = None
-        self.myevent = threading.Event()
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m, t
+        global d, s, m
         d = support.LogicalDevices(self._devices, self._fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
         # Apply power to fixture Comms circuits.
         d.dcs_vcom.output(9.0, True)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global d, s, m, t
+        global d, s, m
         # Remove power from fixture circuits.
         d.dcs_vcom.output(0, False)
-        m = d = s = t = None
+        m = d = s = None
         super().close()
 
     def safety(self):
@@ -108,7 +105,6 @@ class Initial(tester.TestSequence):
 
         Device is powered by injected Battery voltage.
         Reset the device, set HW & SW versions & Serial number.
-        Write Non-Volatile memory defaults.
         Put device into manual control mode.
 
         """
@@ -123,19 +119,8 @@ class Initial(tester.TestSequence):
             d.j35_puts(dat)
 
         d.j35.open()
-        d.rla_reset.pulse(0.1)
-        d.j35.action(None, delay=1.5, expected=2)  # Flush banner
-        d.j35['HW_VER'] = limit.ARM_HW_VER
-        d.j35['SER_ID'] = self._sernum
-        d.j35['NVDEFAULT'] = True
-        d.j35['NVWRITE'] = True
-        # Restart required because of HW_VER setting
-        d.rla_reset.pulse(0.1)
-        d.j35.action(None, delay=1.5, expected=2)  # Flush banner
-        d.j35['SLEEP_MODE'] = 3
-        # Wait for sleep mode to take effect
-        self.mytimer = threading.Timer(2.5, self.myevent.set)
-        self.mytimer.start()
+        d.j35.brand(limit.ARM_HW_VER, self._sernum, d.rla_reset)
+        d.j35.manual_mode(True)     # Start the change to manual mode
         m.arm_swver.measure()
 
     def _step_aux(self):
@@ -147,8 +132,8 @@ class Initial(tester.TestSequence):
         d.dcs_vaux.output(13.5, True)
         d.dcl_bat.output(0.5)
         d.j35['AUX_RELAY'] = True
-        tester.MeasureGroup((m.dmm_vaux, m.dmm_vair, m.arm_auxv,
-                                m.arm_auxi), timeout=5)
+        tester.MeasureGroup(
+            (m.dmm_vaux, m.dmm_vair, m.arm_auxv, m.arm_auxi), timeout=5)
         d.j35['AUX_RELAY'] = False
         d.dcs_vaux.output(0.0, False)
         d.dcl_bat.output(0.0)
@@ -181,24 +166,20 @@ class Initial(tester.TestSequence):
                     ):
             d.j35_puts(dat)
 
-        # Enter manual mode after Timer stops.
-        self.myevent.wait()
-        d.j35['TASK_STARTUP'] = 0
-        d.j35['IOUT'] = 35.0
-        d.j35['VOUT'] = 12.8
-        d.j35['VOUT_OV'] = 2     # OVP Latch reset
+        d.j35.manual_mode()     # Complete the change to manual mode
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
         m.arm_vout_ov.measure()
         # Enable DCDC convertors.
-        d.j35.power_on()
+        d.j35.dcdc_on()
         m.dmm_vbat.measure(timeout=5)
         # Remove injected Battery voltage.
         d.dcs_vbat.output(0.0, False)
-        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs, m.dmm_vbat,
-                            m.dmm_fanOff, m.arm_acv, m.arm_acf, m.arm_secT,
-                            m.arm_vout, m.arm_fan), timeout=5)
+        tester.MeasureGroup(
+            (m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs, m.dmm_vbat, m.dmm_fanOff,
+             m.arm_acv, m.arm_acf, m.arm_secT, m.arm_vout, m.arm_fan),
+            timeout=5)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
 
@@ -231,8 +212,10 @@ class Initial(tester.TestSequence):
         """Test Remote switch."""
         self.fifo_push(((s.ovload, (0.0, 12.8)), ))
 
-        # Test Remote switch
-        t.rem_sw.run()
+        d.rla_loadsw.set_on()
+        m.dmm_vloadoff.measure(timeout=5)
+        d.rla_loadsw.set_off()
+        m.dmm_vload.measure(timeout=5)
 
     def _step_load(self):
         """Test with load."""

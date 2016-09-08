@@ -3,6 +3,7 @@
 """J35 ARM processor console driver."""
 
 import time
+import threading
 import tester
 import testlimit
 import sensor
@@ -27,6 +28,9 @@ _CAN_BOUND = (1 << 28)
 # Result values to store into the mirror sensors
 _SUCCESS = 0
 _FAILURE = 1
+
+# Time it takes for Manual Mode command to take effect
+_MANUAL_MODE_WAIT = 2.1
 
 
 class Console(console.Variable, console.BadUartConsole):
@@ -96,9 +100,46 @@ class Console(console.Variable, console.BadUartConsole):
         for i in range(1, 15):
             self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
+        # Event timer for entry into Manual Mode
+        self._myevent = threading.Event()
+        self._mytimer = None
 
-    def power_on(self):
-        """Power ON the converter circuits."""
+    def brand(self, hw_ver, sernum, reset_relay):
+        """Brand the unit with Hardware ID & Serial Number."""
+        reset_relay.pulse(0.1)
+        self.action(None, delay=1.5, expected=2)  # Flush banner
+        self['HW_VER'] = hw_ver
+        self['SER_ID'] = sernum
+        self['NVDEFAULT'] = True
+        self['NVWRITE'] = True
+        # Restart required because of HW_VER setting
+        reset_relay.pulse(0.1)
+        self.action(None, delay=1.5, expected=2)  # Flush banner
+
+    def manual_mode(self, start=False):
+        """Set the unit to Manual Mode.
+
+        The unit takes some time for the command to take effect. We use a
+        timer to run this delay in the background.
+
+        @param start True to start the entry to Manual Mode
+                     False to finish the transition to Manual Mode
+
+        """
+        if start:  # Trigger manual mode, and start a timer
+            self['SLEEP_MODE'] = 3
+            self._mytimer = threading.Timer(
+                _MANUAL_MODE_WAIT, self._myevent.set)
+            self._mytimer.start()
+        else:   # Complete manual mode setup once the timer is done.
+            self._myevent.wait()
+            self['TASK_STARTUP'] = 0
+            self['IOUT'] = 35.0
+            self['VOUT'] = 12.8
+            self['VOUT_OV'] = 2     # OVP Latch reset
+
+    def dcdc_on(self):
+        """Power ON the DC-DC converter circuits."""
         self['DCDC_EN'] = True
         time.sleep(0.5)
         self['VOUT_OV'] = 2     # OVP Latch reset
@@ -107,8 +148,7 @@ class Console(console.Variable, console.BadUartConsole):
         """Set the state of load outputs.
 
         @param set_on True to set loads ON, False to set OFF.
-             ON = 0x01
-            OFF = 0x00
+                      ON = 0x01, OFF = 0x00
         @param loads Tuple of loads to set ON or OFF (0-13).
 
         """
