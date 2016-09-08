@@ -35,7 +35,7 @@ class Sensors():
            @param limits Product test limits
 
         """
-        self.vbat = sensor.Vdc(
+        self.vload = sensor.Vdc(
             logical_devices.dmm, high=1, low=1, rng=100, res=0.001)
 
 
@@ -50,4 +50,20 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.dmm_vbat = tester.Measurement(limits['Vbat'], sense.vbat)
+        self.dmm_vload = tester.Measurement(limits['Vload'], sense.vload)
+
+
+class SubTests():
+
+    """SubTest Steps."""
+
+    def __init__(self, logical_devices, measurements):
+        """Create SubTest Step instances."""
+        d = logical_devices
+        m = measurements
+        # PowerUp: Input AC, measure.
+        self.pwrup = tester.SubStep((
+            tester.AcSubStep(
+                acs=d.acsource, voltage=240.0, output=True, delay=1.0),
+            tester.MeasureSubStep((m.dmm_vload, ), timeout=10),
+            ))

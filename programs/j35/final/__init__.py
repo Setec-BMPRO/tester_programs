@@ -11,7 +11,7 @@ from . import limit
 FIN_LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = None
+d = s = m = t = None
 
 
 class Final(tester.TestSequence):
@@ -41,16 +41,17 @@ class Final(tester.TestSequence):
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m
+        global d, s, m, t
         d = support.LogicalDevices(self._devices)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
+        t = support.SubTests(d, m)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s
-        m = d = s = None
+        global d, s, m, t
+        m = d = s = t = None
         super().close()
 
     def safety(self):
@@ -59,8 +60,7 @@ class Final(tester.TestSequence):
         d.reset()
 
     def _step_powerup(self):
-        """Power-Up the Unit with 240Vac and measure output voltages."""
-        self.fifo_push(((s.vbat, 12.8), ))
+        """Power-Up the Unit with 240Vac and measure output voltage."""
+        self.fifo_push(((s.vload, 12.8), ))
 
-        d.acsource.output(voltage=240.0, output=True)
-        m.dmm_vbat.measure(timeout=10)
+        t.pwrup.run()
