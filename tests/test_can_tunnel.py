@@ -10,6 +10,7 @@ console = None      # Console module
 mycon = None        # ConsoleCanTunnel instance
 
 
+@unittest.skip('TunnelTestCase')
 class TunnelTestCase(unittest.TestCase):
 
     """CAN Tunnel Console test suite."""

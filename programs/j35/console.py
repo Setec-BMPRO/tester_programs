@@ -37,8 +37,9 @@ class Console(console.Variable, console.BadUartConsole):
 
     """Communications to J35 console."""
 
-    def __init__(self, port):
+    def __init__(self, port, fifo):
         """Create console instance."""
+        self.fifo = fifo
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
         console.Variable.__init__(self)
@@ -128,11 +129,13 @@ class Console(console.Variable, console.BadUartConsole):
         """
         if start:  # Trigger manual mode, and start a timer
             self['SLEEP_MODE'] = 3
-            self._mytimer = threading.Timer(
-                _MANUAL_MODE_WAIT, self._myevent.set)
-            self._mytimer.start()
+            if not self.fifo:
+                self._mytimer = threading.Timer(
+                    _MANUAL_MODE_WAIT, self._myevent.set)
+                self._mytimer.start()
         else:   # Complete manual mode setup once the timer is done.
-            self._myevent.wait()
+            if not self.fifo:
+                self._myevent.wait()
             self['TASK_STARTUP'] = 0
             self['IOUT'] = 35.0
             self['VOUT'] = 12.8

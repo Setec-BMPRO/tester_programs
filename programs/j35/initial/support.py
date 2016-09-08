@@ -50,7 +50,7 @@ class LogicalDevices():
         # Set port separately, as we don't want it opened yet
         self.j35_ser.port = limit.ARM_PORT
         # J35 Console driver
-        self.j35 = console.Console(self.j35_ser)
+        self.j35 = console.Console(self.j35_ser, fifo)
 
     def j35_puts(self, string_data, preflush=0, postflush=0, priority=False,
                  addprompt=True):

@@ -10,6 +10,7 @@ console = None      # Console module
 mycon = None        # Console instance
 
 
+@unittest.skip('BaseConsoleTestCase')
 class BaseConsoleTestCase(unittest.TestCase):
 
     """BaseConsole test suite."""
@@ -50,6 +51,7 @@ class BaseConsoleTestCase(unittest.TestCase):
             mycon.action('NR')
 
 
+@unittest.skip('BadUartConsoleTestCase')
 class BadUartConsoleTestCase(unittest.TestCase):
 
     """BadUartConsole test suite."""

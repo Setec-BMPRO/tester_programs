@@ -111,7 +111,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(((s.sernum, ('A1526040123', )), ))
         for dat in (
                 ('Banner1\r\nBanner2', ) +  # Banner lines
-                ('', ) + ('success', ) * 2 + ('', ) * 2 +
+                ('', ) + ('success', ) * 2 + ('', ) +
                 ('Banner1\r\nBanner2', ) +  # Banner lines
                 ('', ) +
                 (limit.ARM_VERSION, )
@@ -158,11 +158,11 @@ class Initial(tester.TestSequence):
         """
         self.fifo_push(
             ((s.oacin, 240.0), (s.ovbus, 340.0), (s.o12Vpri, 12.5),
-            (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.ovbat, 12.8),
+            (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.ovbat, (12.8, 12.8, )),
             (s.ofan, (0, 12.0)), ))
-        for dat in (('', ) + ('0x10000', ) + ('', ) * 3     # Manual mode
-                   + ('', '', '0', '0', '240', '50000',
-                    '350', '12800', '500', '')
+        for dat in (('', ) * 4     # Manual mode
+                   + ('0', '', '0', '0', '240', '50000',
+                      '350', '12800', '500', '')
                     ):
             d.j35_puts(dat)
 
