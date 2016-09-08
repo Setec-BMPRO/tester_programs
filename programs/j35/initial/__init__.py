@@ -4,7 +4,6 @@
 
 import logging
 import threading
-import time
 
 import tester
 from . import support
@@ -93,7 +92,7 @@ class Initial(tester.TestSequence):
         m.dmm_lock.measure(timeout=5)
         self._sernum = m.ui_sernum.measure().reading1
         # Apply DC Sources to Battery terminals
-        d.dcs_vbat.output(12.5, True)
+        d.dcs_vbat.output(12.6, True)
         tester.MeasureGroup((m.dmm_vbatin, m.dmm_3v3u), timeout=5)
 
     def _step_program_arm(self):
@@ -126,7 +125,6 @@ class Initial(tester.TestSequence):
         d.j35.open()
         d.rla_reset.pulse(0.1)
         d.j35.action(None, delay=1.5, expected=2)  # Flush banner
-        d.j35['UNLOCK'] = True
         d.j35['HW_VER'] = limit.ARM_HW_VER
         d.j35['SER_ID'] = self._sernum
         d.j35['NVDEFAULT'] = True
@@ -134,11 +132,11 @@ class Initial(tester.TestSequence):
         # Restart required because of HW_VER setting
         d.rla_reset.pulse(0.1)
         d.j35.action(None, delay=1.5, expected=2)  # Flush banner
-        d.j35['UNLOCK'] = True
-        m.arm_swver.measure()
-        # Start Timer on another thread.
+        d.j35['SLEEP_MODE'] = 3
+        # Wait for sleep mode to take effect
         self.mytimer = threading.Timer(2.5, self.myevent.set)
         self.mytimer.start()
+        m.arm_swver.measure()
 
     def _step_aux(self):
         """Test Auxiliary input."""
@@ -175,7 +173,7 @@ class Initial(tester.TestSequence):
         """
         self.fifo_push(
             ((s.oacin, 240.0), (s.ovbus, 340.0), (s.o12Vpri, 12.5),
-            (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.ovout, 12.8), (s.ovbat, 12.8),
+            (s.o3V3, 3.3), (s.o15Vs, 12.5), (s.ovbat, 12.8),
             (s.ofan, (0, 12.0)), ))
         for dat in (('', ) + ('0x10000', ) + ('', ) * 3     # Manual mode
                    + ('', '', '0', '0', '240', '50000',
@@ -185,7 +183,10 @@ class Initial(tester.TestSequence):
 
         # Enter manual mode after Timer stops.
         self.myevent.wait()
-        d.j35.manual_mode()
+        d.j35['TASK_STARTUP'] = 0
+        d.j35['IOUT'] = 35.0
+        d.j35['VOUT'] = 12.8
+        d.j35['VOUT_OV'] = 2     # OVP Latch reset
         # Apply 240Vac & check
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((m.dmm_acin, m.dmm_vbus, m.dmm_12vpri), timeout=5)
@@ -195,15 +196,11 @@ class Initial(tester.TestSequence):
         m.dmm_vbat.measure(timeout=5)
         # Remove injected Battery voltage.
         d.dcs_vbat.output(0.0, False)
-        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3u, m.dmm_15vs, m.dmm_vbat,
+        tester.MeasureGroup((m.arm_vout_ov, m.dmm_3v3, m.dmm_15vs, m.dmm_vbat,
                             m.dmm_fanOff, m.arm_acv, m.arm_acf, m.arm_secT,
                             m.arm_vout, m.arm_fan), timeout=5)
         d.j35['FAN'] = 100
         m.dmm_fanOn.measure(timeout=5)
-        d.rla_reset.pulse(0.1)
-        time.sleep(2.5)
-        d.j35.manual_mode()
-        d.j35.power_on()
 
     def _step_output(self):
         """Test the output switches.

@@ -104,7 +104,6 @@ class Sensors():
         self.o3V3U = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
         self.o3V3 = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
         self.o15Vs = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
-        self.ovout = sensor.Vdc(dmm, high=11, low=3, rng=100, res=0.01)
         self.ofan = sensor.Vdc(dmm, high=12, low=5, rng=100, res=0.01)
         self.ocanpwr = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
         self.sernum = sensor.DataEntry(
@@ -162,7 +161,6 @@ class Measurements():
         self.dmm_3v3u = Measurement(limits['3V3U'], sense.o3V3U)
         self.dmm_3v3 = Measurement(limits['3V3'], sense.o3V3)
         self.dmm_15vs = Measurement(limits['15Vs'], sense.o15Vs)
-        self.dmm_vout = Measurement(limits['Vout'], sense.ovout)
         self.dmm_fanOn = Measurement(limits['FanOn'], sense.ofan)
         self.dmm_fanOff = Measurement(limits['FanOff'], sense.ofan)
         self.ui_sernum = Measurement(limits['SerNum'], sense.sernum)

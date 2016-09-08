@@ -29,7 +29,6 @@ DATA = (
     lim_hilo_delta('Vair', 13.5, 0.5),
     lim_hilo_delta('VbatIn', 12.0, 0.5),
     lim_hilo_delta('Vbat', 12.8, 0.2),
-    lim_hilo_delta('Vout', 12.8, 0.2),
     lim_hilo_delta('3V3U', 3.30, 0.05),
     lim_hilo_delta('3V3', 3.30, 0.05),
     lim_hilo('15Vs', 11.5, 13.0),

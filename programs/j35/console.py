@@ -47,9 +47,6 @@ class Console(console.Variable, console.BadUartConsole):
             'IOUT': ParameterFloat(
                 'CONVERTER_CURRENT_SETPOINT', writeable=True,
                 minimum=15.0, maximum=35.0, scale=1000),
-            'LOAD_DIS': ParameterFloat(
-                'LOAD_SWITCHES_INHIBITED', writeable=True,
-                minimum=0, maximum=1, scale=1),
             'FAN': ParameterFloat(
                 'FAN_SPEED', writeable=True,
                 minimum=0, maximum=100, scale=10),
@@ -61,8 +58,11 @@ class Console(console.Variable, console.BadUartConsole):
             'VOUT_OV': ParameterFloat(
                 'CONVERTER_OVERVOLT', writeable=True,
                 minimum=0, maximum=2, scale=1),
-            'SET_MODE': ParameterFloat(
+            'SLEEP_MODE': ParameterFloat(
                 'SLEEPMODE', writeable=True,
+                minimum=0, maximum=3, scale=1),
+            'TASK_STARTUP': ParameterFloat(
+                'TASK_STARTUP', writeable=True,
                 minimum=0, maximum=3, scale=1),
             'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
             'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
@@ -73,7 +73,6 @@ class Console(console.Variable, console.BadUartConsole):
             'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
             'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
             'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
-            'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
             'SER_ID': ParameterString(
                 'SET-SERIAL-ID', writeable=True, readable=False,
                 write_format='"{} {}'),
@@ -88,8 +87,6 @@ class Console(console.Variable, console.BadUartConsole):
             'CAN': ParameterString('CAN',
                 writeable=True, write_format='"{} {}'),
             'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
-            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
-                writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
                 writeable=True, readable=False, write_format='{1}'),
             'NVWRITE': ParameterBoolean('NV-WRITE',
@@ -99,14 +96,6 @@ class Console(console.Variable, console.BadUartConsole):
         for i in range(1, 15):
             self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
-
-    def manual_mode(self):
-        """Enter manual control mode."""
-        self['SET_MODE'] = 3
-        time.sleep(2.5)
-        self['IOUT'] = 35.0
-        self['VOUT'] = 12.8
-        self['VOUT_OV'] = 2     # OVP Latch reset
 
     def power_on(self):
         """Power ON the converter circuits."""
