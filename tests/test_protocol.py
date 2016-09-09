@@ -3,6 +3,7 @@
 """UnitTest for protocol."""
 
 import unittest
+from unittest.mock import patch
 import tester
 from . import logging_setup
 
@@ -10,7 +11,6 @@ console = None      # Console module
 mycon = None        # Console instance
 
 
-@unittest.skip('BaseConsoleTestCase')
 class BaseConsoleTestCase(unittest.TestCase):
 
     """BaseConsole test suite."""
@@ -19,16 +19,20 @@ class BaseConsoleTestCase(unittest.TestCase):
     def setUpClass(cls):
         """Hack import to get complete code coverage measurement."""
         logging_setup()
+        # Patch time.sleep to remove delays
+        cls.patcher = patch('time.sleep')
+        cls.patcher.start()
         import share.console as console_module
         global console
         console = console_module
         sim_ser = tester.SimSerial(simulation=True)
         global mycon
-        mycon = console.BaseConsole(sim_ser, verbose=True)
+        mycon = console.BaseConsole(sim_ser, verbose=False)
 
     @classmethod
     def tearDownClass(cls):
         mycon.close()
+        cls.patcher.stop()
 
     def test_1_open(self):
         mycon.puts('\7Banner1\rBanner2\r> ')
@@ -51,7 +55,6 @@ class BaseConsoleTestCase(unittest.TestCase):
             mycon.action('NR')
 
 
-@unittest.skip('BadUartConsoleTestCase')
 class BadUartConsoleTestCase(unittest.TestCase):
 
     """BadUartConsole test suite."""
@@ -60,16 +63,20 @@ class BadUartConsoleTestCase(unittest.TestCase):
     def setUpClass(cls):
         """Hack import to get complete code coverage measurement."""
         logging_setup()
+        # Patch time.sleep to remove delays
+        cls.patcher = patch('time.sleep')
+        cls._sleep = cls.patcher.start()
         import share.console as console_module
         global console
         console = console_module
         sim_ser = tester.SimSerial(simulation=True)
         global mycon
-        mycon = console.BadUartConsole(sim_ser, verbose=True)
+        mycon = console.BadUartConsole(sim_ser, verbose=False)
 
     @classmethod
     def tearDownClass(cls):
         mycon.close()
+        cls.patcher.stop()
 
     def test_1_open(self):
         mycon.puts('\7Banner1\r\nBanner2\r\n> ')

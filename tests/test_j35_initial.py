@@ -4,6 +4,7 @@
 
 import unittest
 from unittest.mock import patch
+import logging
 from pydispatch import dispatcher
 
 import tester
@@ -23,6 +24,12 @@ class J35_Initial_TestCase(unittest.TestCase):
     def setUpClass(cls):
         """Per-Class setup. Startup logging."""
         logging_setup()
+        # Set lower level logging
+        log = logging.getLogger('tester')
+        log.setLevel(logging.INFO)
+        # Patch time.sleep to remove delays
+        cls.patcher = patch('time.sleep')
+        cls.patcher.start()
         cls._tester = tester.Tester(
             'MockATE', ((_PROG_NAME, _PROG_CLASS, _PROG_LIMIT), ),
             fifo=True, prog_limits=False)
@@ -47,10 +54,6 @@ class J35_Initial_TestCase(unittest.TestCase):
             self._signal_result,
             sender=tester._SIGNAL_SENDER,
             signal=tester.testsequence.SigResult)
-        # Patch time.sleep to remove delays
-        patcher = patch('time.sleep')
-        self._sleep = patcher.start()
-        self.addCleanup(patcher.stop)
 
     def tearDown(self):
         """Per-Test tear down."""
@@ -67,6 +70,7 @@ class J35_Initial_TestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Per-Class tear down."""
+        cls.patcher.stop()
 
     def _signal_step(self, **kwargs):
         """Signal receiver for TestStep signals."""
@@ -86,7 +90,6 @@ class J35_Initial_TestCase(unittest.TestCase):
         try:    # Console strings
             data = self._console_data[stepname]
             for msg in data:
-                print('Message', msg)
                 dev.j35_puts(msg)
         except KeyError:
             pass

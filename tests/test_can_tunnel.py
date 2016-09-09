@@ -3,6 +3,7 @@
 """UnitTest for CAN Tunneled console."""
 
 import unittest
+from unittest.mock import patch
 import tester
 from . import logging_setup
 
@@ -10,7 +11,6 @@ console = None      # Console module
 mycon = None        # ConsoleCanTunnel instance
 
 
-@unittest.skip('TunnelTestCase')
 class TunnelTestCase(unittest.TestCase):
 
     """CAN Tunnel Console test suite."""
@@ -19,6 +19,9 @@ class TunnelTestCase(unittest.TestCase):
     def setUpClass(cls):
         """Hack import to get complete code coverage measurement."""
         logging_setup()
+        # Patch time.sleep to remove delays
+        cls.patcher = patch('time.sleep')
+        cls.patcher.start()
         import share.can_tunnel as console_module
         global console
         console = console_module
@@ -29,6 +32,7 @@ class TunnelTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         mycon.close()
+        cls.patcher.stop()
 
     def test_1_open_fail(self):
         """No echo from the CAN interface."""
