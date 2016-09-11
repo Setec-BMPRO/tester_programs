@@ -23,12 +23,11 @@ class Initial(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('FixtureLock', self._step_fixture_lock, None, True),
-            ('PowerUp', self._step_power_up, None, True),
-            ('FullLoad', self._step_full_load, None, True),
-            ('OCP', self._step_ocp, None, True),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('FullLoad', self._step_full_load),
+            tester.TestStep('OCP', self._step_ocp),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

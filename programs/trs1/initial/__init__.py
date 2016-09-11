@@ -29,11 +29,10 @@ class Initial(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('BreakAway', self._step_breakaway, None, True),
-            ('BattLow', self._step_batt_low, None, True),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('BreakAway', self._step_breakaway),
+            tester.TestStep('BattLow', self._step_batt_low),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

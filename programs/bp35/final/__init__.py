@@ -27,9 +27,8 @@ class Final(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_powerup, None, True),
+            tester.TestStep('PowerUp', self._step_powerup),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

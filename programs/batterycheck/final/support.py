@@ -16,12 +16,12 @@ class LogicalDevices(object):
 
     def __init__(self, devices, fifo):
         """Create all Logical Instruments."""
-        self._fifo = fifo
+        self.fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.dcs_input = tester.DCSource(devices['DCS1'])
         # Serial connection to the BT device
         self.btport = tester.SimSerial(
-            simulation=self._fifo, baudrate=115200, timeout=2)
+            simulation=self.fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         self.btport.port = limit.BT_PORT
         # BT Radio driver
@@ -30,7 +30,7 @@ class LogicalDevices(object):
     def bt_puts(self,
                  string_data, preflush=0, postflush=0, priority=False):
         """Push string data into the BT buffer only if FIFOs are enabled."""
-        if self._fifo:
+        if self.fifo:
             self.btport.puts(string_data, preflush, postflush, priority)
 
     def reset(self):

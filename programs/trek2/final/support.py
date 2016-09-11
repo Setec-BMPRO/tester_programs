@@ -19,7 +19,7 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._fifo = fifo
+        self.fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         # Power USB devices + Fixture Trek2.
         self.dcs_Vcom = tester.DCSource(devices['DCS1'])
@@ -47,7 +47,7 @@ class LogicalDevices():
                    string_data, preflush=0, postflush=0, priority=False,
                    addprompt=True):
         """Push string data into the buffer if FIFOs are enabled."""
-        if self._fifo:
+        if self.fifo:
             if addprompt:
                 string_data = string_data + '\r\n> '
             self.trek2.puts(string_data, preflush, postflush, priority)

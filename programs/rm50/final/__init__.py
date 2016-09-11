@@ -24,17 +24,16 @@ class Final(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('FixtureLock', self._step_fixture_lock, None, True),
-            ('DCInputLeakage', self._step_dcinput_leakage, None, True),
-            ('DCInputTrack', self._step_dcinput_track, None, True),
-            ('ACInput240V', self._step_acinput240v, None, True),
-            ('ACInput110V', self._step_acinput110v, None, True),
-            ('ACInput90V', self._step_acinput90v, None, True),
-            ('OCP', self._step_ocp, None, True),
-            ('PowerNoLoad', self._step_power_noload, None, True),
-            ('Efficiency', self._step_efficiency, None, True),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('DCInputLeakage', self._step_dcinput_leakage),
+            tester.TestStep('DCInputTrack', self._step_dcinput_track),
+            tester.TestStep('ACInput240V', self._step_acinput240v),
+            tester.TestStep('ACInput110V', self._step_acinput110v),
+            tester.TestStep('ACInput90V', self._step_acinput90v),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('PowerNoLoad', self._step_power_noload),
+            tester.TestStep('Efficiency', self._step_efficiency),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -107,12 +106,11 @@ class Final(tester.TestSequence):
         t.acinput_90V.run()
         d.dcl_out.linear(2.7, 2.95, step=0.05, delay=0.05)
         for curr in (3.0, 3.05):
-            tester.testsequence.path_push(str(curr))
-            time.sleep(0.5)
-            d.dcl_out.output(curr)
-            d.dcl_out.opc()
-            m.dmm_24Vpl.measure(timeout=5)
-            tester.testsequence.path_pop()
+            with tester.PathName(str(curr)):
+                time.sleep(0.5)
+                d.dcl_out.output(curr)
+                d.dcl_out.opc()
+                m.dmm_24Vpl.measure(timeout=5)
 
     def _step_ocp(self):
         """Measure OCP point, turn off and recover."""

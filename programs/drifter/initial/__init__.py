@@ -29,12 +29,11 @@ class Initial(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, not fifo),
-            ('CalPre', self._step_cal_pre, None, True),
-            ('Calibrate', self._step_calibrate, None, True),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self._step_program, not fifo),
+            tester.TestStep('CalPre', self._step_cal_pre),
+            tester.TestStep('Calibrate', self._step_calibrate),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -47,7 +46,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._limits, self._fifo)
+        d = support.LogicalDevices(self._devices, self._limits, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
 

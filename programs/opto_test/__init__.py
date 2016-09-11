@@ -39,14 +39,13 @@ class Main(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('BoardNum', self._step_boardnum, None, True),
-            ('InputAdj', self._step_in_adj1, None, True),
-            ('OutputAdj', self._step_out_adj1, None, True),
-            ('InputAdj', self._step_in_adj10, None, True),
-            ('OutputAdj', self._step_out_adj10, None, True),
-            ('Email', self._step_email, None, not fifo),
+            tester.TestStep('BoardNum', self._step_boardnum),
+            tester.TestStep('InputAdj', self._step_in_adj1),
+            tester.TestStep('OutputAdj', self._step_out_adj1),
+            tester.TestStep('InputAdj', self._step_in_adj10),
+            tester.TestStep('OutputAdj', self._step_out_adj10),
+            tester.TestStep('Email', self._step_email, not fifo),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -121,16 +120,15 @@ class Main(tester.TestSequence):
                 ((s.Vce[i], (-5.3, -4.9, -5.02, -5.02)),
                  (s.Iout[i], 0.6), (s.oIsen, 1.003), ))
             d.dcs_vout.output(4.7, True)
-            tester.testsequence.path_push('Opto{}'.format(i + 1))
-            m.ramp_VoutAdj1[i].measure(timeout=2)
-            m.dmm_Vce[i].measure(timeout=2)
-            i_out = m.dmm_Iout[i].measure(timeout=2).reading1
-            i_in = m.dmm_Iin1.measure(timeout=2).reading1
-            ctr = (i_out / i_in) * 100
-            self._ctr_data1.append(int(ctr))
-            s.oMirCtr.store(ctr)
-            m.dmm_ctr.measure()
-            tester.testsequence.path_pop()
+            with tester.PathName('Opto{}'.format(i + 1)):
+                m.ramp_VoutAdj1[i].measure(timeout=2)
+                m.dmm_Vce[i].measure(timeout=2)
+                i_out = m.dmm_Iout[i].measure(timeout=2).reading1
+                i_in = m.dmm_Iin1.measure(timeout=2).reading1
+                ctr = (i_out / i_in) * 100
+                self._ctr_data1.append(int(ctr))
+                s.oMirCtr.store(ctr)
+                m.dmm_ctr.measure()
 
     def _step_out_adj10(self):
         """Output adjust and measure.
@@ -147,16 +145,15 @@ class Main(tester.TestSequence):
                 ((s.Vce[i], (-5.5, -4.8, -5.2, -4.94, -5.02, -5.02)),
                  (s.Iout[i], 15.0), (s.oIsen, 10.03), ))
             d.dcs_vout.output(16.0, True)
-            tester.testsequence.path_push('Opto{}'.format(i + 1))
-            m.ramp_VoutAdj10[i].measure(timeout=2)
-            m.dmm_Vce[i].measure(timeout=2)
-            i_out = m.dmm_Iout[i].measure(timeout=2).reading1
-            i_in = m.dmm_Iin10.measure(timeout=2).reading1
-            ctr = (i_out / i_in) * 100
-            self._ctr_data10.append(int(ctr))
-            s.oMirCtr.store(ctr)
-            m.dmm_ctr.measure()
-            tester.testsequence.path_pop()
+            with tester.PathName('Opto{}'.format(i + 1)):
+                m.ramp_VoutAdj10[i].measure(timeout=2)
+                m.dmm_Vce[i].measure(timeout=2)
+                i_out = m.dmm_Iout[i].measure(timeout=2).reading1
+                i_in = m.dmm_Iin10.measure(timeout=2).reading1
+                ctr = (i_out / i_in) * 100
+                self._ctr_data10.append(int(ctr))
+                s.oMirCtr.store(ctr)
+                m.dmm_ctr.measure()
 
     def _step_email(self):
         """Email test result data."""

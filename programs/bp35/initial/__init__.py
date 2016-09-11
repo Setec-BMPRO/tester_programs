@@ -29,19 +29,18 @@ class Initial(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('Prepare', self._step_prepare, None, True),
-            ('ProgramPIC', self._step_program_pic, None, not fifo),
-            ('ProgramARM', self._step_program_arm, None, not fifo),
-            ('Initialise', self._step_initialise_arm, None, True),
-            ('SolarReg', self._step_solar_reg, None, True),
-            ('Aux', self._step_aux, None, True),
-            ('PowerUp', self._step_powerup, None, True),
-            ('Output', self._step_output, None, True),
-            ('RemoteSw', self._step_remote_sw, None, True),
-            ('OCP', self._step_ocp, None, True),
-            ('CanBus', self._step_canbus, None, True),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('ProgramPIC', self._step_program_pic, not fifo),
+            tester.TestStep('ProgramARM', self._step_program_arm, not fifo),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('SolarReg', self._step_solar_reg),
+            tester.TestStep('Aux', self._step_aux),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('Output', self._step_output),
+            tester.TestStep('RemoteSw', self._step_remote_sw),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -56,7 +55,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         # Apply power to fixture (Comms & Trek2) circuits.
@@ -241,10 +240,9 @@ class Initial(tester.TestSequence):
         m.dmm_vloadOff.measure(timeout=2)
         # One at a time ON
         for load in range(14):
-            tester.testsequence.path_push('L{}'.format(load + 1))
-            d.bp35.load_set(set_on=True, loads=(load, ))
-            m.dmm_vload.measure(timeout=2)
-            tester.testsequence.path_pop()
+            with tester.PathName('L{}'.format(load + 1)):
+                d.bp35.load_set(set_on=True, loads=(load, ))
+                m.dmm_vload.measure(timeout=2)
         # All outputs ON
         d.bp35.load_set(set_on=False, loads=())
 
@@ -262,7 +260,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.fan, (0, 12.0)),
              (s.vbat, 12.8), (s.vbat, (12.8, ) * 6 + (11.0, ), ), ))
-        if self._fifo:
+        if self.fifo:
             for sen in s.arm_loads:
                 sen.store(2.0)
         for dat in ('240', '50000', '350', '12800', '500', '', '4000'):
@@ -277,9 +275,8 @@ class Initial(tester.TestSequence):
         d.dcl_bat.output(4.0, output=True)
         tester.MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
         for load in range(14):
-            tester.testsequence.path_push('L{}'.format(load + 1))
-            m.arm_loads[load].measure(timeout=5)
-            tester.testsequence.path_pop()
+            with tester.PathName('L{}'.format(load + 1)):
+                m.arm_loads[load].measure(timeout=5)
         m.ramp_ocp.measure(timeout=5)
         d.dcl_bat.output(0.0)
 

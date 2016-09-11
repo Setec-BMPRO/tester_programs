@@ -22,16 +22,15 @@ class Initial(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('FixtureLock', self._step_fixture_lock, None, True),
-            ('Program', self._step_program_micros, None, not fifo),
-            ('Initialise', self._step_initialise_arm, None, True),
-            ('PowerUp', self._step_powerup, None, True),
-            ('5Vsb', self._step_reg_5v, None, True),
-            ('12V', self._step_reg_12v, None, True),
-            ('24V', self._step_reg_24v, None, True),
-            ('PeakPower', self._step_peak_power, None, True),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('Program', self._step_program_micros, not fifo),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('5Vsb', self._step_reg_5v),
+            tester.TestStep('12V', self._step_reg_12v),
+            tester.TestStep('24V', self._step_reg_24v),
+            tester.TestStep('PeakPower', self._step_peak_power),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -44,7 +43,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m, t
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
@@ -249,12 +248,11 @@ class Initial(tester.TestSequence):
         _ocp_set(
             target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
             enable=m.ocp12_unlock, limit=self._limits['12V_ocp'])
-        tester.testsequence.path_push('OCPcheck')
-        d.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
-        m.rampOcp12V.measure()
-        d.dcl_12V.output(1.0)
-        d.dcl_12V.output(0.0)
-        tester.testsequence.path_pop()
+        with tester.PathName('OCPcheck'):
+            d.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
+            m.rampOcp12V.measure()
+            d.dcl_12V.output(1.0)
+            d.dcl_12V.output(0.0)
 
     def _step_reg_24v(self):
         """Check regulation and OCP of the 24V.
@@ -285,12 +283,11 @@ class Initial(tester.TestSequence):
         _ocp_set(
             target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
             enable=m.ocp24_unlock, limit=self._limits['24V_ocp'])
-        tester.testsequence.path_push('OCPcheck')
-        d.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
-        m.rampOcp24V.measure()
-        d.dcl_24V.output(1.0)
-        d.dcl_24V.output(0.0)
-        tester.testsequence.path_pop()
+        with tester.PathName('OCPcheck'):
+            d.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
+            m.rampOcp24V.measure()
+            d.dcl_24V.output(1.0)
+            d.dcl_24V.output(0.0)
 
     def _step_peak_power(self):
         """Check operation at Peak load.
@@ -325,27 +322,23 @@ def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
     """
     dmm_out.configure()
     dmm_out.opc()
-    tester.testsequence.path_push('NoLoad')
-    dcl_out.output(0.0)
-    dcl_out.opc()
-    volt00 = dmm_out.measure().reading1
-    tester.testsequence.path_pop()
-    tester.testsequence.path_push('MaxLoad')
-    dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
-    dmm_out.measure()
-    tester.testsequence.path_pop()
-    tester.testsequence.path_push('LoadReg')
-    dcl_out.output(peak_load * 0.95)
-    dcl_out.opc()
-    volt = dmm_out.measure().reading1
-    load_reg = 100.0 * (volt00 - volt) / volt00
-    reg_limit.check(load_reg, 1)
-    tester.testsequence.path_pop()
-    tester.testsequence.path_push('PeakLoad')
-    dcl_out.output(peak_load)
-    dcl_out.opc()
-    dmm_out.measure()
-    tester.testsequence.path_pop()
+    with tester.PathName('NoLoad'):
+        dcl_out.output(0.0)
+        dcl_out.opc()
+        volt00 = dmm_out.measure().reading1
+    with tester.PathName('MaxLoad'):
+        dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
+        dmm_out.measure()
+    with tester.PathName('LoadReg'):
+        dcl_out.output(peak_load * 0.95)
+        dcl_out.opc()
+        volt = dmm_out.measure().reading1
+        load_reg = 100.0 * (volt00 - volt) / volt00
+        reg_limit.check(load_reg, 1)
+    with tester.PathName('PeakLoad'):
+        dcl_out.output(peak_load)
+        dcl_out.opc()
+        dmm_out.measure()
 
 def _ocp_set(target, load, dmm, detect, enable, limit):
     """Set OCP of an output.
@@ -362,18 +355,17 @@ def _ocp_set(target, load, dmm, detect, enable, limit):
     The unit is left running at no load.
 
     """
-    tester.testsequence.path_push('OCPset')
-    load.output(target)
-    dmm.measure()
-    detect.configure()
-    detect.opc()
-    enable.measure()
-    setting = 0
-    for setting in range(63, 0, -1):
-        m.ocp_step_dn.measure()
-        if detect.measure().result:
-            break
-    m.ocp_lock.measure()
-    load.output(0.0)
-    limit.check(setting, 1)
-    tester.testsequence.path_pop()
+    with tester.PathName('OCPset'):
+        load.output(target)
+        dmm.measure()
+        detect.configure()
+        detect.opc()
+        enable.measure()
+        setting = 0
+        for setting in range(63, 0, -1):
+            m.ocp_step_dn.measure()
+            if detect.measure().result:
+                break
+        m.ocp_lock.measure()
+        load.output(0.0)
+        limit.check(setting, 1)

@@ -27,8 +27,6 @@ TRI_LIMIT = limit.DATA_TRI
 # These are module level variables to avoid having to use 'self.' everywhere.
 d = s = m = None
 
-# Set to True to program uC
-_DO_PROGRAM = True
 # UCFG1 register value as 2 hex digits
 _UCFG1 = '23'
 
@@ -87,18 +85,17 @@ class InitialMulti(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerOn', self._step_poweron, None, True),
-            ('Program', self._step_program, None, _DO_PROGRAM),
-            ('Blue', self._step_blue, None, True),
-            ('Red', self._step_red, None, True),
-            ('Green12', self._step_green12, None, True),
-            ('Green24', self._step_green24, None, True),
-            ('Green32', self._step_green32, None, True),
-            ('Green35', self._step_green35, None, True),
-            ('Green10', self._step_green10, None, True),
-            ('Reset', self._step_firmware_reset, None, True),
+            tester.TestStep('PowerOn', self._step_poweron),
+            tester.TestStep('Program', self._step_program, not fifo),
+            tester.TestStep('Blue', self._step_blue),
+            tester.TestStep('Red', self._step_red),
+            tester.TestStep('Green12', self._step_green12),
+            tester.TestStep('Green24', self._step_green24),
+            tester.TestStep('Green32', self._step_green32),
+            tester.TestStep('Green35', self._step_green35),
+            tester.TestStep('Green10', self._step_green10),
+            tester.TestStep('Reset', self._step_firmware_reset),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -168,7 +165,7 @@ class InitialMulti(tester.TestSequence):
             ((s.oVcc1, 3.31), (s.oVcc2, 3.32),
             (s.oVcc3, 3.33), (s.oVcc4, 3.34), ))
         self._ac_in(0.0, output=True)
-        if _DO_PROGRAM:
+        if not self.fifo:
             d.rla_isp.pulse(duration=0.1)
         self._ac_in(12.0, ramp=False, correct=False)
         # Measure AC input and all Vcc.

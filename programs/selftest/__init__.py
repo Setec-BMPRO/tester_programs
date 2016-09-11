@@ -23,15 +23,14 @@ class Main(tester.testsequence.TestSequence):
         # True if running on ATE2 tester
         self._is_ate2 = (physical_devices.tester_type == 'ATE2')
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('ACSource', self._step_acsource, None, True),
-            ('Checker', self._step_checker, None, True),
-            ('DSO', self._step_dso, None, not self._is_ate2),
-            ('DCSource', self._step_dcsource, None, True),
-            ('DCLoad', self._step_dcload, None, True),
-            ('RelayDriver', self._step_relaydriver, None, True),
-            ('Discharge', self._step_discharge, None, True),
+            tester.TestStep('ACSource', self._step_acsource),
+            tester.TestStep('Checker', self._step_checker),
+            tester.TestStep('DSO', self._step_dso, not self._is_ate2),
+            tester.TestStep('DCSource', self._step_dcsource),
+            tester.TestStep('DCLoad', self._step_dcload),
+            tester.TestStep('RelayDriver', self._step_relaydriver),
+            tester.TestStep('Discharge', self._step_discharge),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -85,7 +84,7 @@ class Main(tester.testsequence.TestSequence):
         """
         self.fifo_push(((s.oShield1, 6.0), (s.oShield2, 6.0),
                 (s.oShield3, 6.0), (s.oShield4, 6.0), ))
-        if self._fifo:
+        if self.fifo:
             for subch in s.subchan:
                 subch.store(((8.0, 6.0, 4.0, 2.0),))
                 self.fifo_push(((s.oShield1, 0.0), (s.oShield2, 0.0),
@@ -102,7 +101,7 @@ class Main(tester.testsequence.TestSequence):
         After each step measure voltages on all DC Sources.
 
         """
-        if self._fifo:
+        if self.fifo:
             for src in s.dcs:
                 src.store((5.0, 10.0, 20.0, 35.0))
         for step, group in m.dmm_dcs:

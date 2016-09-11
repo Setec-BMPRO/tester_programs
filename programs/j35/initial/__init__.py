@@ -22,19 +22,19 @@ class Initial(tester.TestSequence):
            @param fifo True if FIFOs are enabled
 
         """
-        # Define the (linear) Test Sequence (Name, Target, Args, Enabled)
+        # Define the (linear) Test Sequence
         sequence = (
-            ('Prepare', self._step_prepare, None, True),
-            ('ProgramARM', self._step_program_arm, None, not fifo),
-            ('Initialise', self._step_initialise_arm, None, True),
-            ('Aux', self._step_aux, None, True),
-            ('Solar', self._step_solar, None, True),
-            ('PowerUp', self._step_powerup, None, True),
-            ('Output', self._step_output, None, True),
-            ('RemoteSw', self._step_remote_sw, None, True),
-            ('Load', self._step_load, None, True),
-            ('OCP', self._step_ocp, None, True),
-            ('CanBus', self._step_canbus, None, True),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('ProgramARM', self._step_program_arm, not fifo),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('Aux', self._step_aux),
+            tester.TestStep('Solar', self._step_solar),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('Output', self._step_output),
+            tester.TestStep('RemoteSw', self._step_remote_sw),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -48,7 +48,7 @@ class Initial(tester.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        self.logdev = support.LogicalDevices(self.phydev, self._fifo)
+        self.logdev = support.LogicalDevices(self.phydev, self.fifo)
         self.j35 = self.logdev.j35
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
@@ -156,10 +156,9 @@ class Initial(tester.TestSequence):
         dev.dcl_out.output(1.0, True) # A little load on the output
         mes.dmm_vloadoff.measure(timeout=2)
         for load in range(14):  # One at a time ON
-            tester.PathPush('L{}'.format(load + 1))
-            self.j35.load_set(set_on=True, loads=(load, ))
-            mes.dmm_vload.measure(timeout=2)
-            tester.PathPop()
+            with tester.PathName('L{}'.format(load + 1)):
+                self.j35.load_set(set_on=True, loads=(load, ))
+                mes.dmm_vload.measure(timeout=2)
         self.j35.load_set(set_on=False, loads=())  # All outputs ON
 
     def _step_remote_sw(self):
@@ -175,9 +174,8 @@ class Initial(tester.TestSequence):
         dev, mes = self.logdev, self.meas
         dev.dcl_out.binary(1.0, 28.0, 5.0)
         for load in range(14):
-            tester.PathPush('L{}'.format(load + 1))
-            mes.arm_loads[load].measure(timeout=5)
-            tester.PathPop()
+            with tester.PathName('L{}'.format(load + 1)):
+                mes.arm_loads[load].measure(timeout=5)
 
     def _step_ocp(self):
         """Test OCP."""

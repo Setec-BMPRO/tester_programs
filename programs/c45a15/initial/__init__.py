@@ -27,15 +27,14 @@ class Initial(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('FixtureLock', self._step_fixture_lock, None, True),
-            ('SecCheck', self._step_sec_check, None, True),
-            ('Program', self._step_program, None, not fifo),
-            ('OVP', self._step_ovp, None, True),
-            ('PowerUp', self._step_power_up, None, True),
-            ('Load', self._step_load, None, True),
-            ('OCP', self._step_ocp, None, True),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('SecCheck', self._step_sec_check),
+            tester.TestStep('Program', self._step_program, not fifo),
+            tester.TestStep('OVP', self._step_ovp),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

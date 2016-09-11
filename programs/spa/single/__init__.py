@@ -47,14 +47,13 @@ class InitialSingle(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerOn', self._step_poweron, None, True),
-            ('Led12', self._step_led12, None, True),
-            ('Led10', self._step_led10, None, True),
-            ('Led24', self._step_led24, None, True),
-            ('Led32', self._step_led32, None, True),
-            ('Led35', self._step_led35, None, True),
+            tester.TestStep('PowerOn', self._step_poweron),
+            tester.TestStep('Led12', self._step_led12),
+            tester.TestStep('Led10', self._step_led10),
+            tester.TestStep('Led24', self._step_led24),
+            tester.TestStep('Led32', self._step_led32),
+            tester.TestStep('Led35', self._step_led35),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

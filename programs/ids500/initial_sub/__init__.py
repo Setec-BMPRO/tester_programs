@@ -69,8 +69,8 @@ class InitialMicro(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('Program', self._step_program, None, True),
-            ('Comms', self._step_comms, None, True),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Comms', self._step_comms),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -80,7 +80,7 @@ class InitialMicro(_Main):
         super().open()
         self._logger.info('Open')
         global d, m, s
-        d = support.LogicalDevMicro(self._devices, self._fifo)
+        d = support.LogicalDevMicro(self._devices, self.fifo)
         s = support.SensorMicro(d, self._limits)
         m = support.MeasureMicro(s, self._limits)
         d.rla_comm.set_on()
@@ -95,7 +95,7 @@ class InitialMicro(_Main):
         self.fifo_push(((s.oVsec5VuP, 5.0), ))
         d.dcs_vcc.output(5.0, True)
         m.dmm_vsec5VuP.measure(timeout=5)
-        if not self._fifo:
+        if not self.fifo:
             d.program_picMic.program()
 
     def _step_comms(self):
@@ -130,10 +130,10 @@ class InitialAux(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('PowerUp', self._step_pwrup, None, True),
-            ('KeySwitch', self._step_key_switches12, None, True),
-            ('ACurrent', self._step_acurrent, None, True),
-            ('OCP', self._step_ocp, None, True),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('KeySwitch', self._step_key_switches12),
+            tester.TestStep('ACurrent', self._step_acurrent),
+            tester.TestStep('OCP', self._step_ocp),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -143,7 +143,7 @@ class InitialAux(_Main):
         super().open()
         self._logger.info('Open')
         global d, m, s, t
-        d = support.LogicalDevAux(self._devices, self._fifo)
+        d = support.LogicalDevAux(self._devices, self.fifo)
         s = support.SensorAux(d, self._limits)
         m = support.MeasureAux(s, self._limits)
         t = support.SubTestAux(d, m)
@@ -198,8 +198,8 @@ class InitialBias(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('PowerUp', self._step_pwrup, None, True),
-            ('OCP', self._step_ocp, None, True),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('OCP', self._step_ocp),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -209,7 +209,7 @@ class InitialBias(_Main):
         super().open()
         self._logger.info('Open')
         global d, m, s
-        d = support.LogicalDevBias(self._devices, self._fifo)
+        d = support.LogicalDevBias(self._devices, self.fifo)
         s = support.SensorBias(d, self._limits)
         m = support.MeasureBias(s, self._limits)
 
@@ -249,8 +249,8 @@ class InitialBus(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('PowerUp', self._step_pwrup, None, True),
-            ('TecLddStartup', self._step_tec_ldd, None, True),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('TecLddStartup', self._step_tec_ldd),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -260,7 +260,7 @@ class InitialBus(_Main):
         super().open()
         self._logger.info('Open')
         global d, m, s, t
-        d = support.LogicalDevBus(self._devices, self._fifo)
+        d = support.LogicalDevBus(self._devices, self.fifo)
         s = support.SensorBus(d, self._limits)
         m = support.MeasureBus(s, self._limits)
         t = support.SubTestBus(d, m)
@@ -300,12 +300,12 @@ class InitialSyn(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('Program', self._step_program, None, True),
-            ('PowerUp', self._step_pwrup, None, True),
-            ('TecEnable', self._step_tec_enable, None, True),
-            ('TecReverse', self._step_tec_rev, None, True),
-            ('LddEnable', self._step_ldd_enable, None, True),
-            ('ISSetAdj', self._step_ISset_adj, None, True),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('TecEnable', self._step_tec_enable),
+            tester.TestStep('TecReverse', self._step_tec_rev),
+            tester.TestStep('LddEnable', self._step_ldd_enable),
+            tester.TestStep('ISSetAdj', self._step_ISset_adj),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -315,7 +315,7 @@ class InitialSyn(_Main):
         super().open()
         self._logger.info('Open')
         global d, m, s, t
-        d = support.LogicalDevSyn(self._devices, self._fifo)
+        d = support.LogicalDevSyn(self._devices, self.fifo)
         s = support.SensorSyn(d, self._limits)
         m = support.MeasureSyn(s, self._limits)
         t = support.SubTestSyn(d, m)
@@ -330,7 +330,7 @@ class InitialSyn(_Main):
         self.fifo_push(((s.olock, 0.0), ))
         m.dmm_lock.measure(timeout=5)
         d.dcs_vsec5Vlddtec.output(5.0, True)
-        if not self._fifo:
+        if not self.fifo:
             d.program_picSyn.program()
 
     def _step_pwrup(self):

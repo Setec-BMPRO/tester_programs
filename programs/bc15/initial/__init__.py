@@ -28,14 +28,13 @@ class Initial(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PartDetect', self._step_part_detect, None, True),
-            ('ProgramARM', self._step_program_arm, None, not fifo),
-            ('Initialise', self._step_initialise_arm, None, True),
-            ('PowerUp', self._step_powerup, None, True),
-            ('Output', self._step_output, None, True),
-            ('Loaded', self._step_loaded, None, True),
+            tester.TestStep('PartDetect', self._step_part_detect),
+            tester.TestStep('ProgramARM', self._step_program_arm, not fifo),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('Output', self._step_output),
+            tester.TestStep('Loaded', self._step_loaded),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -48,7 +47,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         # Apply power to fixture Comms circuit.

@@ -35,13 +35,12 @@ class Initial(tester.testsequence.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('FixtureLock', self._step_fixture_lock, None, True),
-            ('ProgramMicro', self._step_program_micro, None, not fifo),
-            ('PowerUp', self._step_power_up, None, False),
-            ('Calibration', self._step_cal, None, False),
-            ('OCP', self._step_ocp, None, False),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('ProgramMicro', self._step_program_micro, not fifo),
+            tester.TestStep('PowerUp', self._step_power_up, False),
+            tester.TestStep('Calibration', self._step_cal, False),
+            tester.TestStep('OCP', self._step_ocp, False),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -90,7 +89,7 @@ class Initial(tester.testsequence.TestSequence):
         """
         self.fifo_push(((s.oVccBias, 15.0), ))
         t.prog_setup.run()
-        if not self._fifo:
+        if not self.fifo:
             self._msp.open()
         passwd = self._msp.bsl_passwd()
         self._logger.debug('Dump password: %s', passwd)

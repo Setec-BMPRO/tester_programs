@@ -22,15 +22,14 @@ class Initial(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PartDetect', self._step_part_detect, None, True),
-            ('Program', self._step_program, None, True),
-            ('Initialise', self._step_initialise_arm, None, True),
-            ('PowerUp', self._step_powerup, None, True),
-            ('5V', self._step_reg_5v, None, True),
-            ('12V', self._step_reg_12v, None, True),
-            ('24V', self._step_reg_24v, None, True),
+            tester.TestStep('PartDetect', self._step_part_detect),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('5V', self._step_reg_5v),
+            tester.TestStep('12V', self._step_reg_12v),
+            tester.TestStep('24V', self._step_reg_24v),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -43,7 +42,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         # Switch on fixture power
@@ -83,7 +82,7 @@ class Initial(tester.TestSequence):
         # Apply and check injected rails
         d.dcs_5v.output(5.15, True)
         tester.MeasureGroup((m.dmm_5v, m.dmm_3v3, ), timeout=2)
-        if self._fifo:
+        if self.fifo:
             self._logger.info(
                 '**** Programming skipped due to active FIFOs ****')
         else:
@@ -275,23 +274,18 @@ def _reg_check(dmm_out, dcl_out, max_load, peak_load, fet=False):
     Unit is left running at peak load.
 
     """
-    path_push = tester.testsequence.path_push
-    path_pop = tester.testsequence.path_pop
     dmm_out.configure()
     dmm_out.opc()
-    path_push('NoLoad')
-    dcl_out.output(0.0)
-    dcl_out.opc()
-    dmm_out.measure()
-    path_pop()
-    path_push('MaxLoad')
-    dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
-    dmm_out.measure()
-    if fet:
-        m.dmm_vdsfet.measure(timeout=5)
-    path_pop()
-    path_push('PeakLoad')
-    dcl_out.output(peak_load)
-    dcl_out.opc()
-    dmm_out.measure()
-    path_pop()
+    with tester.PathName('NoLoad'):
+        dcl_out.output(0.0)
+        dcl_out.opc()
+        dmm_out.measure()
+    with tester.PathName('MaxLoad'):
+        dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
+        dmm_out.measure()
+        if fet:
+            m.dmm_vdsfet.measure(timeout=5)
+    with tester.PathName('PeakLoad'):
+        dcl_out.output(peak_load)
+        dcl_out.opc()
+        dmm_out.measure()

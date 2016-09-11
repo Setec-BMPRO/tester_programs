@@ -21,13 +21,12 @@ class Final(tester.testsequence.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('ConnectCMR', self._step_connect_cmr, None, True),
-            ('Load', self._step_load, None, True),
-            ('Restart', self._step_restart, None, True),
-            ('Poweroff', self._step_power_off, None, True),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('ConnectCMR', self._step_connect_cmr),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('Restart', self._step_restart),
+            tester.TestStep('Poweroff', self._step_power_off),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

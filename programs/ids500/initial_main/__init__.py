@@ -27,10 +27,9 @@ class InitialMain(tester.testsequence.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('FixtureLock', self._step_fixture_lock, None, True),
-            ('PowerUp', self._step_power_up, None, True),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('PowerUp', self._step_power_up),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -62,13 +61,13 @@ class InitialMain(tester.testsequence.TestSequence):
 
     def _step_fixture_lock(self):
         """Check that Fixture Lock is closed."""
-        self._fifo_push(((s.Lock, 10.0), ))
+        self.fifo_push(((s.Lock, 10.0), ))
 
         m.dmm_Lock.measure(timeout=5)
 
     def _step_power_up(self):
         """Set min load, apply input AC and measure voltages."""
-        self._fifo_push(
+        self.fifo_push(
             ((s.oVbus, 340.0), (s.oTec, 0.0), (s.oTecVmon, 0.0),
              (s.oLdd, 0.0), (s.oIsVmon, 0.0), (s.o15V, 0.0), (s.om15V, 0.0),
              (s.o15Vp, 0.0), (s.o15VpSw, 0.0), (s.o5V, 0.0), ))

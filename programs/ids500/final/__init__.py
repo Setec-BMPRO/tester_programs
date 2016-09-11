@@ -27,16 +27,15 @@ class Final(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('KeySw1', self._step_key_switch1, None, True),
-            ('KeySw12', self._step_key_switch12, None, True),
-            ('TEC', self._step_tec, None, True),
-            ('LDD', self._step_ldd, None, True),
-            ('OCP', self._step_ocp, None, True),
-            ('Comms', self._step_comms, None, True),
-            ('EmergStop', self._step_emerg_stop, None, True),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('KeySw1', self._step_key_switch1),
+            tester.TestStep('KeySw12', self._step_key_switch12),
+            tester.TestStep('TEC', self._step_tec),
+            tester.TestStep('LDD', self._step_ldd),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('Comms', self._step_comms),
+            tester.TestStep('EmergStop', self._step_emerg_stop),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -166,7 +165,7 @@ class Final(tester.TestSequence):
     def _step_comms(self):
         """Write HW version, enter serial number."""
         self.fifo_push(((s.oSerEntry, ('A1504010034',)), ))
-        if self._fifo:
+        if self.fifo:
             d.pic_ser.put(b'Software Test Mode Entered\r\n' +
                           b'\r\nSetting Change Done\r\n\n')
             d.pic_ser.put(b'I,  2, 06A,Hardware Revision\r\n')

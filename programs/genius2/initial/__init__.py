@@ -25,14 +25,14 @@ class Initial(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('Program', self._step_program, None, True),
-            ('Aux', self._step_aux, None, True),
-            ('PowerUp', self._step_powerup, None, True),
-            ('VoutAdj', self._step_vout_adj, None, True),
-            ('ShutDown', self._step_shutdown, None, True),
-            ('OCP', self._step_ocp, None, False),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Aux', self._step_aux),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('VoutAdj', self._step_vout_adj),
+            tester.TestStep('ShutDown', self._step_shutdown),
+# FIXME: Why is this step disabled?
+            tester.TestStep('OCP', self._step_ocp, False),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -70,7 +70,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(((s.olock, 0.0), (s.ovbatctl, 13.0), (s.ovdd, 5.0), ))
         d.dcs_vbatctl.output(13.0, True)
         tester.MeasureGroup((m.dmm_lock, m.dmm_vbatctl, m.dmm_vdd), timeout=5)
-        if not self._fifo:
+        if not self.fifo:
             d.program_pic.program()
         d.dcs_vbatctl.output(0.0, False)
 

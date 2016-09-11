@@ -28,12 +28,11 @@ class Final(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('TunnelOpen', self._step_tunnel_open, None, True),
-            ('Display', self._step_display, None, True),
-            ('TestTanks', self._step_test_tanks, None, True),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('TunnelOpen', self._step_tunnel_open),
+            tester.TestStep('Display', self._step_display),
+            tester.TestStep('TestTanks', self._step_test_tanks),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -46,7 +45,7 @@ class Final(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
 
@@ -71,7 +70,7 @@ class Final(tester.TestSequence):
 
     def _step_tunnel_open(self):
         """Open console tunnel."""
-        if self._fifo:
+        if self.fifo:
             d.tunnel.port.puts('0 ECHO -> \r\n> ', preflush=1)
             d.tunnel.port.puts('\r\n')
             d.tunnel.port.puts('0x10000000\r\n')

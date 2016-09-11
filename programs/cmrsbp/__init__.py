@@ -57,7 +57,7 @@ class _Main(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('BaseOpen')
         global d, s
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
 
     def close(self):
@@ -78,7 +78,7 @@ class _Main(tester.TestSequence):
         @return Dictionary of CMR data.
 
         """
-        if self._fifo:
+        if self.fifo:
             _str = """
 #BATTERY MODE,24576
 #TEMPERATURE,297.0
@@ -138,12 +138,12 @@ class Initial(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, not fifo),
-            ('CheckPicValues', self._step_check_pic_vals, None, True),
-            ('CheckVcharge', self._step_check_vchge, None, True),
-            ('CalBQvolts', self._step_calv, None, True),
-            ('CalBQcurrent', self._step_cali, None, True),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self._step_program, not fifo),
+            tester.TestStep('CheckPicValues', self._step_check_pic_vals),
+            tester.TestStep('CheckVcharge', self._step_check_vchge),
+            tester.TestStep('CalBQvolts', self._step_calv),
+            tester.TestStep('CalBQcurrent', self._step_cali),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -153,7 +153,7 @@ class Initial(_Main):
         super().open()
         self._logger.info('Open')
         self._ev_ser = tester.SimSerial(
-            simulation=self._fifo,
+            simulation=self.fifo,
             port=limit.EV_PORT, baudrate=9600, timeout=4.0)
         self._ev = ev2200.EV2200(self._ev_ser)
         global m, t
@@ -260,7 +260,7 @@ class SerialDate(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('SerialDate', self._step_sn_date, None, True),
+            tester.TestStep('SerialDate', self._step_sn_date),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -270,7 +270,7 @@ class SerialDate(_Main):
         super().open()
         self._logger.info('Open')
         self._ev_ser = tester.SimSerial(
-            simulation=self._fifo,
+            simulation=self.fifo,
             port=limit.EV_PORT, baudrate=9600, timeout=4.0)
         self._ev = ev2200.EV2200(self._ev_ser)
         global m
@@ -313,8 +313,8 @@ class Final(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            ('Startup', self._step_startup, None, True),
-            ('Verify', self._step_verify, None, True),
+            tester.TestStep('Startup', self._step_startup),
+            tester.TestStep('Verify', self._step_verify),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

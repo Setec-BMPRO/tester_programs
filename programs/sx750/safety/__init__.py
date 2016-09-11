@@ -26,12 +26,11 @@ class Safety(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('Gnd1', self._step_gnd1, None, True),
-            ('Gnd2', self._step_gnd2, None, True),
-            ('Gnd3', self._step_gnd3, None, True),
-            ('HiPot', self._step_hipot, None, True),
+            tester.TestStep('Gnd1', self._step_gnd1),
+            tester.TestStep('Gnd2', self._step_gnd2),
+            tester.TestStep('Gnd3', self._step_gnd3),
+            tester.TestStep('HiPot', self._step_hipot),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)

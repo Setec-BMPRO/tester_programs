@@ -29,15 +29,14 @@ class Initial(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PartCheck', self._step_part_check, None, True),
-            ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, not fifo),
-            ('TestArm', self._step_test_arm, None, True),
-            ('TankSense', self._step_tank_sense, None, True),
-            ('Bluetooth', self._step_bluetooth, None, True),
-            ('CanBus', self._step_canbus, None, True),
+            tester.TestStep('PartCheck', self._step_part_check),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self._step_program, not fifo),
+            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('TankSense', self._step_tank_sense),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -51,7 +50,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m, t
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         t = support.SubTests(d, m)
@@ -122,7 +121,7 @@ class Initial(tester.TestSequence):
         t.reset.run()
         _btmac = m.cn101_btmac.measure().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', _btmac)
-        if self._fifo:
+        if self.fifo:
             reply = True
         else:
             d.ble.open()

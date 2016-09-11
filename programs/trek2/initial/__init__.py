@@ -29,12 +29,11 @@ class Initial(tester.TestSequence):
 
         """
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PowerUp', self._step_power_up, None, True),
-            ('Program', self._step_program, None, not fifo),
-            ('TestArm', self._step_test_arm, None, True),
-            ('CanBus', self._step_canbus, None, True),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self._step_program, not fifo),
+            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -48,7 +47,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d, self._limits)
         m = support.Measurements(s, self._limits)
         d.dcs_Vcom.output(12.0, output=True)

@@ -26,14 +26,13 @@ class Initial(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
-        #    (Name, Target, Args, Enabled)
         sequence = (
-            ('PreProgram', self._step_pre_program, None, True),
-            ('ProgramAVR', self._step_program_avr, None, not fifo),
-            ('ProgramARM', self._step_program_arm, None, not fifo),
-            ('InitialiseARM', self._step_initialise_arm, None, True),
-            ('TestARM', self._step_test_arm, None, True),
-            ('TestBlueTooth', self._step_test_bluetooth, None, True),
+            tester.TestStep('PreProgram', self._step_pre_program),
+            tester.TestStep('ProgramAVR', self._step_program_avr, not fifo),
+            tester.TestStep('ProgramARM', self._step_program_arm, not fifo),
+            tester.TestStep('InitialiseARM', self._step_initialise_arm),
+            tester.TestStep('TestARM', self._step_test_arm),
+            tester.TestStep('TestBlueTooth', self._step_test_bluetooth),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -47,7 +46,7 @@ class Initial(tester.TestSequence):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m
-        d = support.LogicalDevices(self._devices, self._fifo)
+        d = support.LogicalDevices(self._devices, self.fifo)
         s = support.Sensors(d)
         m = support.Measurements(s, self._limits)
 
