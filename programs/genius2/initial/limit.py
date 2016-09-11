@@ -32,6 +32,7 @@ DATA_H = (
     ('VbatCtl', 1, 12.7, 13.1, None, None),
     ('Vdd', 1, 4.90, 5.10, None, None),
     ('Vout', 1, 13.60, 13.70, None, None),
+    ('VoutOff', 1, 1.0, None, None, None),
     ('Vbat', 1, 13.60, 13.70, None, None),
     ('Vaux', 1, 13.60, 13.80, None, None),
     ('FlyLead', 1, 20.0, 40.0, None, None),

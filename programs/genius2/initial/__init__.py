@@ -10,7 +10,7 @@ from . import limit
 
 MeasureGroup = tester.measure.group
 
-INI_LIMIT = limit.DATA         # GENIUS-II limits
+INI_LIMIT = limit.DATA          # GENIUS-II limits
 INI_LIMIT_H = limit.DATA_H      # GENIUS-II-H limits
 
 
@@ -68,6 +68,7 @@ class Initial(tester.TestSequence):
     def _step_program(self):
         """Apply external dc, measure and program the board."""
         self.fifo_push(((s.olock, 0.0), (s.ovbatctl, 13.0), (s.ovdd, 5.0), ))
+
         d.dcs_vbatctl.output(13.0, True)
         tester.MeasureGroup((m.dmm_lock, m.dmm_vbatctl, m.dmm_vdd), timeout=5)
         if not self.fifo:
@@ -77,13 +78,16 @@ class Initial(tester.TestSequence):
     def _step_aux(self):
         """Apply external dc and measure."""
         self.fifo_push(((s.ovout, 13.65), (s.ovaux, 13.70), ))
+
         t.aux.run()
 
     def _step_powerup(self):
         """Check flying leads, apply 240Vac and measure voltages."""
-        self.fifo_push(((s.oflyld, 30.0), (s.oacin, 240.0), (s.ovbus, 330.0),
-                       (s.ovcc, 16.0), (s.ovbat, 13.0), (s.ovout, 13.0),
-                       (s.ovdd, 5.0), (s.ovctl, 12.0), ))
+        self.fifo_push(
+            ((s.oflyld, 30.0), (s.oacin, 240.0), (s.ovbus, 330.0),
+             (s.ovcc, 16.0), (s.ovbat, 13.0), (s.ovout, 13.0), (s.ovdd, 5.0),
+             (s.ovctl, 12.0), ))
+
         t.pwrup.run()
 
     def _step_vout_adj(self):
@@ -94,16 +98,21 @@ class Initial(tester.TestSequence):
 
          """
 
-        self.fifo_push(((s.oAdjVout, True), (s.ovout, (13.65, 13.65, )),
-                    (s.ovbatctl, 13.0), (s.ovbat, 13.65), (s.ovdd, 5.0), ))
-        tester.MeasureGroup((m.ui_AdjVout, m.dmm_vout, m.dmm_vbatctl,
-                            m.dmm_vbat, m.dmm_vdd, ),timeout=2)
+        self.fifo_push(
+            ((s.oAdjVout, True), (s.ovout, (13.65, 13.65, )),
+             (s.ovbatctl, 13.0), (s.ovbat, 13.65), (s.ovdd, 5.0), ))
+
+        tester.MeasureGroup(
+            (m.ui_AdjVout, m.dmm_vout, m.dmm_vbatctl, m.dmm_vbat,
+             m.dmm_vdd, ),timeout=2)
 
     def _step_shutdown(self):
         """Test fan on/off and shutdown."""
 
-        self.fifo_push(((s.ofan, (0.0, 12.5)), (s.ovout, (13.65, 0.0, 13.65)),
-                            (s.ovcc, 0.0), ))
+        self.fifo_push(
+            ((s.ofan, (0.0, 12.5)), (s.ovout, (13.65, 0.0, 13.65)),
+             (s.ovcc, 0.0), ))
+
         t.Shdn.run()
 
     def _step_ocp(self):
@@ -113,9 +122,11 @@ class Initial(tester.TestSequence):
         Shutdown and recover.
 
         """
-        self.fifo_push(((s.ovout, (13.5, ) * 11 + (13.0, ), ),
+        self.fifo_push(
+            ((s.ovout, (13.5, ) * 11 + (13.0, ), ),
 #                        (s.ovout, (0.1, 13.6, 13.6)),
-                        (s.ovbat, 13.6)))
+             (s.ovbat, 13.6)))
+
         d.dcl.output(0.0, output=True)
         d.dcl.binary(0.0, 32.0, 5.0)
         if self._isH:

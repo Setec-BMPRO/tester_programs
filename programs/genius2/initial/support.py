@@ -146,9 +146,9 @@ class SubTests():
             tester.MeasureSubStep((m.dmm_flyld, ), timeout=5),
             tester.LoadSubStep(((d.dcl, 0.5), )),
             tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5),
-            tester.MeasureSubStep((m.dmm_acin, m.dmm_vbus, m.dmm_vcc,
-                                m.dmm_vbatpre, m.dmm_voutpre, m.dmm_vdd,
-                                m.dmm_vctl), timeout=5),
+            tester.MeasureSubStep(
+                (m.dmm_acin, m.dmm_vbus, m.dmm_vcc, m.dmm_vbatpre,
+                 m.dmm_voutpre, m.dmm_vdd, m.dmm_vctl), timeout=5),
             ))
         # Shutdown:
         self.Shdn = tester.SubStep((

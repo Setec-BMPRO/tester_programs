@@ -132,6 +132,8 @@ ALL_SKIP = (
     'CMR-INI', 'CMR-SD',
     # Unfinished programs
     'IDS500 Initial Micro', 'IDS500 Initial Main', 'IDS500 Final',
+    # Done with unittest
+    'J35 Initial'
     # Obsolete and unused programs
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',
