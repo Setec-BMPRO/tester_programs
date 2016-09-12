@@ -48,23 +48,23 @@ class J35_Initial_TestCase(unittest.TestCase):
         self._steps = []
         dispatcher.connect(     # Subscribe to the TestStep signals
             self._signal_step,
-            sender=tester._SIGNAL_SENDER,
-            signal=tester.testsequence.SigStep)
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.step)
         dispatcher.connect(     # Subscribe to the TestResult signals
             self._signal_result,
-            sender=tester._SIGNAL_SENDER,
-            signal=tester.testsequence.SigResult)
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.result)
 
     def tearDown(self):
         """Per-Test tear down."""
         dispatcher.disconnect(
             self._signal_step,
-            sender=tester._SIGNAL_SENDER,
-            signal=tester.testsequence.SigStep)
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.step)
         dispatcher.disconnect(
             self._signal_result,
-            sender=tester._SIGNAL_SENDER,
-            signal=tester.testsequence.SigResult)
+            sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.result)
         self._tester.close()
 
     @classmethod
