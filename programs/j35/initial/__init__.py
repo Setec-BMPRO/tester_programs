@@ -116,7 +116,7 @@ class Initial(tester.TestSequence):
         dev.dcs_vaux.output(0.0, False)
         dev.dcl_bat.output(0.0)
 
-    def _step_solar(self):14
+    def _step_solar(self):
         """Test Solar input."""
         dev, mes = self.logdev, self.meas
         dev.dcs_solar.output(13.5, True)

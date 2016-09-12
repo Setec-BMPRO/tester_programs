@@ -121,10 +121,10 @@ class Sensors():
         self.arm_fan = console.Sensor(j35, 'FAN')
         self.arm_bati = console.Sensor(j35, 'BATT_I')
         self.arm_canbind = console.Sensor(j35, 'CAN_BIND')
-        # Generate 14 load current sensors
+        # Generate load current sensors
         self.arm_loads = []
-        for i in range(1, 15):
-            s = console.Sensor(j35, 'LOAD_{}'.format(i))
+        for i in range(limits.LOAD_COUNT):
+            s = console.Sensor(j35, 'LOAD_{}'.format(i + 1))
             self.arm_loads.append(s)
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.ovbat,
@@ -177,7 +177,7 @@ class Measurements():
         self.dmm_canpwr = Measurement(limits['CanPwr'], sense.ocanpwr)
         self.rx_can = Measurement(limits['CAN_RX'], sense.mir_can)
         self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.arm_canbind)
-        # Generate 14 load current measurements
+        # Generate load current measurements
         self.arm_loads = ()
         for sen in sense.arm_loads:
             m = Measurement(limits['ARM-LoadI'], sen)

@@ -51,7 +51,7 @@ DATA = (
     lim_hilo_delta('CanPwr', 12.0, 1.0),
     lim_string('CAN_RX', r'^RRQ,36,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
-    lim_hilo('OCP', 35.0 - LOAD_CURRENT, 42 - LOAD_CURRENT),
+    lim_hilo('OCP', 35.0 - LOAD_CURRENT, 42.0 - LOAD_CURRENT),
     lim_lo('InOCP', 11.6),
     lim_lo('FixtureLock', 20),
     lim_boolean('Notify', True),
