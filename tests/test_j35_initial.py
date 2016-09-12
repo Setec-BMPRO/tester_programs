@@ -31,8 +31,7 @@ class J35_Initial_TestCase(unittest.TestCase):
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
         cls._tester = tester.Tester(
-            'MockATE', ((_PROG_NAME, _PROG_CLASS, _PROG_LIMIT), ),
-            fifo=True, prog_limits=False)
+            'MockATE', ((_PROG_NAME, _PROG_CLASS, _PROG_LIMIT), ), fifo=True)
         cls._program = tester.TestProgram(
             _PROG_NAME, per_panel=1, parameter=None, test_limits=[])
 
