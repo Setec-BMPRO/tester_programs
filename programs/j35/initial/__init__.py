@@ -116,7 +116,7 @@ class Initial(tester.TestSequence):
         dev.dcs_vaux.output(0.0, False)
         dev.dcl_bat.output(0.0)
 
-    def _step_solar(self):
+    def _step_solar(self):14
         """Test Solar input."""
         dev, mes = self.logdev, self.meas
         dev.dcs_solar.output(13.5, True)
@@ -155,7 +155,7 @@ class Initial(tester.TestSequence):
         self.j35.load_set(set_on=True, loads=())   # All outputs OFF
         dev.dcl_out.output(1.0, True) # A little load on the output
         mes.dmm_vloadoff.measure(timeout=2)
-        for load in range(14):  # One at a time ON
+        for load in range(limit.LOAD_COUNT):  # One at a time ON
             with tester.PathName('L{}'.format(load + 1)):
                 self.j35.load_set(set_on=True, loads=(load, ))
                 mes.dmm_vload.measure(timeout=2)
@@ -172,8 +172,8 @@ class Initial(tester.TestSequence):
     def _step_load(self):
         """Test with load."""
         dev, mes = self.logdev, self.meas
-        dev.dcl_out.binary(1.0, 28.0, 5.0)
-        for load in range(14):
+        dev.dcl_out.binary(1.0, limit.LOAD_CURRENT, 5.0)
+        for load in range(limit.LOAD_COUNT):
             with tester.PathName('L{}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
 
