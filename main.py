@@ -6,33 +6,16 @@ import os
 import inspect
 import configparser
 import logging.handlers
+from unittest.mock import patch
 from pydispatch import dispatcher
 import time
 import gpib
 import tester
-from programs import PROGRAMS, ALL_SKIP
+import programs
 
 # Configuration of logger.
 _CONSOLE_LOG_LEVEL = logging.DEBUG
 _LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
-
-
-def _logging_setup():
-    """
-    Setup the logging system.
-
-    Messages are sent to the stderr console.
-
-    """
-    # create console handler and set level
-    hdlr = logging.StreamHandler()
-    hdlr.setLevel(_CONSOLE_LOG_LEVEL)
-    # Log record formatter
-    fmtr = logging.Formatter(_LOG_FORMAT)
-    # Connect it all together
-    hdlr.setFormatter(fmtr)
-    logging.root.addHandler(hdlr)
-    logging.root.setLevel(logging.DEBUG)
 
 
 def _main():
@@ -66,20 +49,16 @@ def _main():
         fifo = True
     else:
         run_all = False
-    use_progdata_limits = config['DEFAULT'].getboolean('UseProgDataLimits')
-    if use_progdata_limits is None:
-        use_progdata_limits = False
     tester_type = config['DEFAULT'].get('TesterType')
     if tester_type is None:
         tester_type = 'ATE3'
     no_delays = config['DEFAULT'].getboolean('NoDelays')
     if no_delays is None:
         no_delays = False
-    # "Monkey Patch" time, so all delays are zero
     if no_delays:
-        def no_sleep(secs=0):
-            pass
-        time.sleep = no_sleep
+        # Patch time.sleep to remove delays
+        patcher = patch('time.sleep')
+        patcher.start()
     # Receive Test Result signals here
     def test_result(result):
         logger.info('Test Result: %s', result)
@@ -89,17 +68,17 @@ def _main():
         signal=tester.signals.Status.result)
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
-    tst = tester.Tester(tester_type, PROGRAMS, fifo, use_progdata_limits)
+    tst = tester.Tester(tester_type, programs.PROGRAMS, fifo)
     tst.start()
     if run_all:
-        prog_list = PROGRAMS
+        prog_list = programs.PROGRAMS
     else:
         prog_list = ((test_program, ), )    # a single program group
     for prog in prog_list:
         test_program = prog[0]
         logger.info('#' * 40)
         logger.info('Create Program "%s"', test_program)
-        if run_all and test_program in ALL_SKIP:
+        if run_all and test_program in programs.ALL_SKIP:
             logger.info('Skip Program "%s"', test_program)
             continue
         # Make a TEST PROGRAM descriptor
@@ -121,6 +100,27 @@ def _main():
     tst.stop()
     tst.join()
     logger.info('Finished')
+    if no_delays:
+        patcher.stop()
+
+
+def _logging_setup():
+    """
+    Setup the logging system.
+
+    Messages are sent to the stderr console.
+
+    """
+    # create console handler and set level
+    hdlr = logging.StreamHandler()
+    hdlr.setLevel(_CONSOLE_LOG_LEVEL)
+    # Log record formatter
+    fmtr = logging.Formatter(_LOG_FORMAT)
+    # Connect it all together
+    hdlr.setFormatter(fmtr)
+    logging.root.addHandler(hdlr)
+    logging.root.setLevel(logging.DEBUG)
+
 
 if __name__ == '__main__':
     _logging_setup()
