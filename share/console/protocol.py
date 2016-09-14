@@ -61,6 +61,9 @@ Protocol 4: BC15 [ LPC111x CPU, No RTOS ]
 
 import time
 import logging
+import tester
+import testlimit
+import sensor
 
 # Console command prompt. Signals the end of output data.
 _CMD_PROMPT = b'\r> '
@@ -138,14 +141,22 @@ class BaseConsole():
         @raises ConsoleError.
 
         """
-        if command:
-            if self._port.simulation:   # Auto simulate the command echo
-                self._port.puts(command, preflush=1, priority=True)
-            self._port.flushInput()
-            self._write_command(command)
-        if delay:
-            time.sleep(delay)
-        return self._read_response(expected)
+        try:
+            if command:
+                if self._port.simulation:   # Auto simulate the command echo
+                    self._port.puts(command, preflush=1, priority=True)
+                self._port.flushInput()
+                self._write_command(command)
+            if delay:
+                time.sleep(delay)
+            reply = self._read_response(expected)
+        except ConsoleError as err:
+            self._logger.debug('Caught ConsoleError %s', err)
+            comms = tester.Measurement(
+                testlimit.LimitHiLoInt('Action', 0), sensor.Mirror())
+            comms.sensor.store(1)
+            comms.measure()   # Generates a test FAIL result
+        return reply
 
     def _write_command(self, command):
         """Write a command and verify the echo.

@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """BC15 ARM processor console driver."""
 
-import tester
-import testlimit
-import sensor
 from share import console
 
 Sensor = console.Sensor
@@ -13,10 +10,6 @@ Sensor = console.Sensor
 ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
-
-# Result values to store into the mirror sensors
-_SUCCESS = 0
-_FAILURE = 1
 
 
 class Console(console.Variable, console.BaseConsole):
@@ -111,22 +104,3 @@ class Console(console.Variable, console.BaseConsole):
         self.action('{} "SET_VOLTS_MV_NUM CAL'.format(mv_num_new))
         self['NVWRITE'] = True
         self.action('{} SETMV'.format(mv_set))
-
-    def action(self, command=None, delay=0, expected=0):
-        """Send a command, and read the response.
-
-        @param command Command string.
-        @param delay Delay between sending command and reading response.
-        @param expected Expected number of responses.
-        @return Response (None / String / ListOfStrings).
-        """
-        comms = tester.Measurement(
-            testlimit.LimitHiLo('Action', 0, (_SUCCESS - 0.5, _SUCCESS + 0.5)),
-            sensor.Mirror())
-        try:
-            reply = super().action(command, delay, expected)
-        except console.ConsoleError as err:
-            self._logger.debug('Caught ConsoleError %s', err)
-            comms.sensor.store(_FAILURE)
-            comms.measure()   # Generates a test FAIL result
-        return reply

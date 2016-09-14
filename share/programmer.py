@@ -50,8 +50,7 @@ class ProgramPIC():
             ]
         self._working_dir = working_dir
         self._relay = relay
-        limit = testlimit.LimitHiLo(
-            limitname, 0, (_SUCCESS - 0.5, _SUCCESS + 0.5))
+        limit = testlimit.LimitHiLoInt(limitname, _SUCCESS)
         self._pic = tester.Measurement(limit, sensor.Mirror())
 
     def program(self):
@@ -99,8 +98,7 @@ class ProgramARM():
         self._reset_relay = reset_relay
         with open(filename, 'rb') as infile:
             self._bindata = bytearray(infile.read())
-        limit = testlimit.LimitHiLo(
-            limitname, 0, (_SUCCESS - 0.5, _SUCCESS + 0.5))
+        limit = testlimit.LimitHiLoInt(limitname, _SUCCESS)
         self._arm = tester.Measurement(limit, sensor.Mirror())
 
     def program(self):

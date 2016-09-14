@@ -23,8 +23,7 @@ class Variable():
             '.'.join((__name__, self.__class__.__name__)))
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
-        limit = testlimit.LimitHiLo(
-            'Comms', 0, (_SUCCESS - 0.5, _SUCCESS + 0.5))
+        limit = testlimit.LimitHiLoInt('Comms', _SUCCESS)
         self._comms = tester.Measurement(limit, sensor.Mirror())
 
     def configure(self, key):
