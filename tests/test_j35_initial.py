@@ -117,10 +117,10 @@ class J35_Initial_TestCase(unittest.TestCase):
         self._sensor_data = {
             'Prepare':
                 ((sen.olock, 10.0), (sen.sernum, ('A1626010123', )),
-                 (sen.ovbat, 12.5), (sen.o3V3U, 3.3), ),
+                 (sen.ovbat, 12.5), (sen.oair, 12.5), (sen.o3V3U, 3.3), ),
             'Initialise': ((sen.sernum, ('A1526040123', )), ),
-            'Aux': ((sen.oaux, 13.5), (sen.oair, 13.5), ),
-            'Solar': ((sen.oair, 13.5), ),
+            'Aux': ((sen.oaux, 13.5), (sen.ovbat, 13.5), ),
+            'Solar': ((sen.ovbat, 13.5), ),
             'PowerUp':
                 ((sen.oacin, 240.0), (sen.ovbus, 340.0), (sen.o12Vpri, 12.5),
                  (sen.o3V3, 3.3), (sen.o15Vs, 12.5),
@@ -128,7 +128,7 @@ class J35_Initial_TestCase(unittest.TestCase):
             'Output': ((sen.ovload, (0.0, ) + (12.8, ) * 14), ),
             'RemoteSw': ((sen.ovload, (0.0, 12.8)), ),
             'Load': ((sen.ovbat, 12.8), ),
-            'OCP': ((sen.ovbat, (12.8, ) * 8 + (11.0, ), ), ),
+            'OCP': ((sen.ovbat, (12.8, ) * 7 + (11.0, ), ), ),
             'CanBus': ((sen.ocanpwr, 12.5), ),
             }
         # Callables
@@ -158,7 +158,7 @@ class J35_Initial_TestCase(unittest.TestCase):
             }
         self._tester.test(('UUT1', ))
         self.assertEqual('P', self._result.code)        # Test Result
-        self.assertEqual(63, len(self._result.readings)) # Reading count
+        self.assertEqual(64, len(self._result.readings)) # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp',

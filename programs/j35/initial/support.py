@@ -154,9 +154,10 @@ class Measurements():
         self.dmm_12vpri = Measurement(limits['12Vpri'], sense.o12Vpri)
         self.dmm_vload = Measurement(limits['Vload'], sense.ovload)
         self.dmm_vloadoff = Measurement(limits['VloadOff'], sense.ovload)
-        self.dmm_vaux = Measurement(limits['Vaux'], sense.oaux)
-        self.dmm_vair = Measurement(limits['Vair'], sense.oair)
         self.dmm_vbatin = Measurement(limits['VbatIn'], sense.ovbat)
+        self.dmm_vbatout = Measurement(limits['VbatOut'], sense.ovbat)
+        self.dmm_vair = Measurement(limits['Vair'], sense.oair)
+        self.dmm_vaux = Measurement(limits['Vaux'], sense.oaux)
         self.dmm_vbat = Measurement(limits['Vbat'], sense.ovbat)
         self.dmm_3v3u = Measurement(limits['3V3U'], sense.o3V3U)
         self.dmm_3v3 = Measurement(limits['3V3'], sense.o3V3)
@@ -183,3 +184,23 @@ class Measurements():
             m = Measurement(limits['ARM-LoadI'], sen)
             self.arm_loads += (m, )
         self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
+
+
+class SubTests():
+
+    """SubTest Steps."""
+
+    def __init__(self, dev, mes):
+        """Create SubTest Step instances."""
+        # RemoteSw: Activate sw, measure.
+        self.remote_sw = tester.SubStep((
+            tester.RelaySubStep(((dev.rla_loadsw, True), )),
+            tester.MeasureSubStep((mes.dmm_vloadoff, ), timeout=5),
+            tester.RelaySubStep(((dev.rla_loadsw, False), )),
+            tester.MeasureSubStep((mes.dmm_vload, ), timeout=5),
+            ))
+        # OCP:
+        self.ocp = tester.SubStep((
+            tester.MeasureSubStep((mes.ramp_ocp, ), timeout=5),
+            tester.LoadSubStep(((dev.dcl_out, 0.0), (dev.dcl_bat, 0.0), )),
+            ))

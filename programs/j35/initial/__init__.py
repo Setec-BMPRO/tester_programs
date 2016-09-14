@@ -43,6 +43,7 @@ class Initial(tester.TestSequence):
         self.logdev = None
         self.sensors = None
         self.meas = None
+        self.teststep = None
         self.sernum = None
         self.j35 = None
 
@@ -52,15 +53,17 @@ class Initial(tester.TestSequence):
         self.j35 = self.logdev.j35
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
+        self.teststep = support.SubTests(self.logdev, self.meas)
         # Power to fixture Comms circuits.
         self.logdev.dcs_vcom.output(9.0, True)
 
     def close(self):
         """Finished testing."""
         self.logdev.dcs_vcom.output(0, False)
-        self.meas = None
-        self.sensors = None
         self.logdev = None
+        self.sensors = None
+        self.meas = None
+        self.teststep = None
         self.j35 = None
         super().close()
 
@@ -80,7 +83,8 @@ class Initial(tester.TestSequence):
         self.sernum = mes.ui_sernum.measure().reading1
         # Apply DC Source to Battery terminals
         dev.dcs_vbat.output(12.6, True)
-        tester.MeasureGroup((mes.dmm_vbatin, mes.dmm_3v3u), timeout=5)
+        tester.MeasureGroup((mes.dmm_vbatin, mes.dmm_vair,
+                                    mes.dmm_3v3u), timeout=5)
 
     def _step_program_arm(self):
         """Program the ARM device.
@@ -107,11 +111,11 @@ class Initial(tester.TestSequence):
         """Test Auxiliary input."""
         dev, mes = self.logdev, self.meas
         dev.dcs_vaux.output(13.5, True)
-        dev.dcl_bat.output(0.5)
+        mes.dmm_vaux.measure(timeout=5)
+        dev.dcl_bat.output(0.5, True)
         self.j35['AUX_RELAY'] = True
-        tester.MeasureGroup(
-            (mes.dmm_vaux, mes.dmm_vair, mes.arm_auxv, mes.arm_auxi),
-            timeout=5)
+        tester.MeasureGroup((mes.dmm_vbatout, mes.arm_auxv,
+                                mes.arm_auxi), timeout=5)
         self.j35['AUX_RELAY'] = False
         dev.dcs_vaux.output(0.0, False)
         dev.dcl_bat.output(0.0)
@@ -121,7 +125,7 @@ class Initial(tester.TestSequence):
         dev, mes = self.logdev, self.meas
         dev.dcs_solar.output(13.5, True)
         self.j35['SOLAR'] = True
-        tester.MeasureGroup((mes.dmm_vair, ), timeout=5)
+        tester.MeasureGroup((mes.dmm_vbatout, ), timeout=5)
         self.j35['SOLAR'] = False
         dev.dcs_solar.output(0.0, False)
 
@@ -131,8 +135,8 @@ class Initial(tester.TestSequence):
         self.j35.manual_mode()     # Complete the change to manual mode
         dev.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup(
-            (mes.dmm_acin, mes.dmm_vbus, mes.dmm_12vpri), timeout=5)
-        mes.arm_vout_ov.measure()
+            (mes.dmm_acin, mes.dmm_vbus, mes.dmm_12vpri,
+            mes.arm_vout_ov), timeout=5)
         self.j35.dcdc_on()
         mes.dmm_vbat.measure(timeout=5)
         dev.dcs_vbat.output(0.0, False)
@@ -163,11 +167,7 @@ class Initial(tester.TestSequence):
 
     def _step_remote_sw(self):
         """Test Remote switch."""
-        dev, mes = self.logdev, self.meas
-        dev.rla_loadsw.set_on()
-        mes.dmm_vloadoff.measure(timeout=5)
-        dev.rla_loadsw.set_off()
-        mes.dmm_vload.measure(timeout=5)
+        self.teststep.remote_sw.run()
 
     def _step_load(self):
         """Test with load."""
@@ -176,20 +176,19 @@ class Initial(tester.TestSequence):
         for load in range(limit.LOAD_COUNT):
             with tester.PathName('L{}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
+        dev.dcl_bat.output(4.0, True)
+        tester.MeasureGroup(
+            (mes.dmm_vbat, mes.arm_battI, ), timeout=5)
 
     def _step_ocp(self):
         """Test OCP."""
-        dev, mes = self.logdev, self.meas
-        dev.dcl_bat.output(4.0, output=True)
-        tester.MeasureGroup((mes.dmm_vbat, mes.arm_battI, ), timeout=5)
-        mes.ramp_ocp.measure(timeout=5)
-        dev.dcl_out.output(0.0)
-        dev.dcl_bat.output(0.0)
+        self.teststep.ocp.run()
 
     def _step_canbus(self):
         """Test the Can Bus."""
         dev, mes = self.logdev, self.meas
-        tester.MeasureGroup((mes.dmm_canpwr, mes.arm_can_bind, ), timeout=10)
+        tester.MeasureGroup(
+            (mes.dmm_canpwr, mes.arm_can_bind, ), timeout=10)
         self.j35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
         self.j35['CAN'] = limit.CAN_ECHO
