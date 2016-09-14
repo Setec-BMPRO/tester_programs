@@ -47,7 +47,7 @@ from . import wtsi200
 #           The ATE4 storage system (No size limit)
 #           The ATE2 database (maximum of 50 characters)
 #   2) The class to use to create a program instance,
-#   3) Test limit data structure for testlimit.LimitSet()
+#   3) Test limit data structure for testlimit.limitset()
 #
 #   Names listed in ALL_SKIP will not be run by the ALL PROGRAMS
 #   option in main.py
