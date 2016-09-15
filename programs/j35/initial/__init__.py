@@ -9,7 +9,7 @@ from . import limit
 INI_LIMIT = limit.DATA
 
 
-class Initial(tester.TestSequence):
+class Initial(tester.TestSequence):     # pylint:disable=R0902
 
     """J35 Initial Test Program."""
 
@@ -83,8 +83,8 @@ class Initial(tester.TestSequence):
         self.sernum = mes.ui_sernum.measure().reading1
         # Apply DC Source to Battery terminals
         dev.dcs_vbat.output(12.6, True)
-        tester.MeasureGroup((mes.dmm_vbatin, mes.dmm_vair,
-                                    mes.dmm_3v3u), timeout=5)
+        tester.MeasureGroup(
+            (mes.dmm_vbatin, mes.dmm_vair, mes.dmm_3v3u), timeout=5)
 
     def _step_program_arm(self):
         """Program the ARM device.
@@ -114,8 +114,8 @@ class Initial(tester.TestSequence):
         mes.dmm_vaux.measure(timeout=5)
         dev.dcl_bat.output(0.5, True)
         self.j35['AUX_RELAY'] = True
-        tester.MeasureGroup((mes.dmm_vbatout, mes.arm_auxv,
-                                mes.arm_auxi), timeout=5)
+        tester.MeasureGroup(
+            (mes.dmm_vbatout, mes.arm_auxv, mes.arm_auxi), timeout=5)
         self.j35['AUX_RELAY'] = False
         dev.dcs_vaux.output(0.0, False)
         dev.dcl_bat.output(0.0)
@@ -135,8 +135,8 @@ class Initial(tester.TestSequence):
         self.j35.manual_mode()     # Complete the change to manual mode
         dev.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup(
-            (mes.dmm_acin, mes.dmm_vbus, mes.dmm_12vpri,
-            mes.arm_vout_ov), timeout=5)
+            (mes.dmm_acin, mes.dmm_vbus, mes.dmm_12vpri, mes.arm_vout_ov),
+            timeout=5)
         self.j35.dcdc_on()
         mes.dmm_vbat.measure(timeout=5)
         dev.dcs_vbat.output(0.0, False)
@@ -157,10 +157,10 @@ class Initial(tester.TestSequence):
         """
         dev, mes = self.logdev, self.meas
         self.j35.load_set(set_on=True, loads=())   # All outputs OFF
-        dev.dcl_out.output(1.0, True) # A little load on the output
+        dev.dcl_out.output(1.0, True)  # A little load on the output
         mes.dmm_vloadoff.measure(timeout=2)
         for load in range(limit.LOAD_COUNT):  # One at a time ON
-            with tester.PathName('L{}'.format(load + 1)):
+            with tester.PathName('L{0}'.format(load + 1)):
                 self.j35.load_set(set_on=True, loads=(load, ))
                 mes.dmm_vload.measure(timeout=2)
         self.j35.load_set(set_on=False, loads=())  # All outputs ON
@@ -174,7 +174,7 @@ class Initial(tester.TestSequence):
         dev, mes = self.logdev, self.meas
         dev.dcl_out.binary(1.0, limit.LOAD_CURRENT, 5.0)
         for load in range(limit.LOAD_COUNT):
-            with tester.PathName('L{}'.format(load + 1)):
+            with tester.PathName('L{0}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
         dev.dcl_bat.output(4.0, True)
         tester.MeasureGroup(
