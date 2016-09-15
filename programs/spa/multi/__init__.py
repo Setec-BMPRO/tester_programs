@@ -118,7 +118,7 @@ class InitialMulti(tester.TestSequence):
         # This is a multi-unit parallel program so we can't stop on errors.
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
-        tester.measure.exception_upon_fail(False)
+        tester.MEASUREMENT_FAILURE_EXCEPTION = False
         # Last AC Source set voltage
         self._last_vac = 0.0
         # Suppress lower level logging
