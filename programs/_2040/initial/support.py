@@ -3,9 +3,7 @@
 """2040 Initial Test Program."""
 
 import time
-
 import tester
-import sensor
 
 
 class LogicalDevices():
@@ -53,6 +51,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oLock = sensor.Res(dmm, high=12, low=6, rng=10000, res=1)
         self.oVccAC = sensor.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
         self.oVccDC = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)

@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Opto Test Program.
+"""Opto Test Program."""
 
-        Logical Devices
-        Sensors
-        Measurements
-
-"""
 from pydispatch import dispatcher
-import sensor
 import tester
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -21,7 +13,7 @@ class LogicalDevices():
     def __init__(self, devices):
         """Create all Logical Instruments.
 
-           @param devices Physical instruments of the Tester
+        @param devices Physical instruments of the Tester
 
         """
         self.dmm = tester.DMM(devices['DMM'])
@@ -41,15 +33,17 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances.
 
-           @param logical_devices Logical instruments used
-           @param limits Product test limits
+        @param logical_devices Logical instruments used
+        @param limits Product test limits
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
+        translate = tester.translate
         self.oMirCtr = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
-
+        dispatcher.connect(
+            self._reset, sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.oIsen = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oVinAdj1 = sensor.Ramp(
             stimulus=logical_devices.dcs_vin, sensor=self.oIsen,
@@ -103,8 +97,8 @@ class Measurements():
     def __init__(self, sense, limits):
         """Create all Measurement instances.
 
-           @param sense Sensors used
-           @param limits Product test limits
+        @param sense Sensors used
+        @param limits Product test limits
 
         """
         Measurement = tester.Measurement

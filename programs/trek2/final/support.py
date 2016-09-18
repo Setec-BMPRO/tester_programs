@@ -3,7 +3,6 @@
 """Trek2 Final Test Program."""
 
 import tester
-import sensor
 import share
 from . import limit
 from .. import console
@@ -74,6 +73,7 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         trek2 = logical_devices.trek2
+        sensor = tester.sensor
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.oYesNoSeg = sensor.YesNo(
             message=tester.translate('trek2_final', 'AreSegmentsOn?'),

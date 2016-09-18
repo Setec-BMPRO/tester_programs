@@ -6,9 +6,7 @@ import os
 import inspect
 import time
 from pydispatch import dispatcher
-
 import tester
-import sensor
 import share
 from . import limit
 
@@ -65,9 +63,11 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oMirReg = sensor.Mirror()
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset, sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         self.oLock = sensor.Res(dmm, high=14, low=6, rng=10000, res=1)
         self.oVac = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self.oVbus = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)

@@ -6,7 +6,6 @@
 
 import os
 import logging
-
 import tester
 from . import msp
 from . import support

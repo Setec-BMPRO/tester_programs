@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """2040 Final Test Program."""
 
-import sensor
 import tester
 
 
@@ -30,6 +29,7 @@ class Sensors():
 
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
+        sensor = tester.sensor
         self.o20V = sensor.Vdc(
             logical_devices.dmm, high=3, low=3, rng=100, res=0.001)
         translate = tester.translate

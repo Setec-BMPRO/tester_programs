@@ -3,10 +3,7 @@
 """BCE282-12/24 Final Program."""
 
 import time
-import sensor
 import tester
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -36,6 +33,8 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
+        translate = tester.translate
         self.oVout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.oVbat = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.oAlarm = sensor.Res(dmm, high=5, low=3, rng=100000, res=1)

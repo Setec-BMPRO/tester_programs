@@ -2,11 +2,8 @@
 # -*- coding: utf-8 -*-
 """TRS1 Initial Test Program."""
 
-import sensor
 import tester
 from . import limit
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -43,6 +40,8 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         dso = logical_devices.dso
+        sensor = tester.sensor
+        translate = tester.translate
         self.oVin = sensor.Vdc(dmm, high=10, low=4, rng=100, res=0.01)
         self.o5V = sensor.Vdc(dmm, high=11, low=4, rng=10, res=0.01)
         self.oBrake = sensor.Vdc(dmm, high=12, low=4, rng=100, res=0.01)

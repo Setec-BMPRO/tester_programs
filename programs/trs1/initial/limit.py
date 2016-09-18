@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """TRS1 Initial Program Limits."""
 
-from testlimit import lim_hilo_delta, lim_boolean, lim_lo, lim_hi, lim_hilo
+from tester.testlimit import lim_hilo_delta, lim_boolean, lim_lo, lim_hi, lim_hilo
 
 LOW_BATT_L = 10.85
 LOW_BATT_U = 11.55

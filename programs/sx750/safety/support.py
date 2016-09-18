@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """SX-750 Safety Test Program."""
 
-import sensor
 import tester
 
 
@@ -26,6 +25,7 @@ class Sensors():
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         st = logical_devices.st
+        sensor = tester.sensor
         # Safety Tester sequence and test steps
         self.gnd1 = sensor.STGND(st, step=1, ch=1)
         self.gnd2 = sensor.STGND(st, step=2, ch=2, curr=11)

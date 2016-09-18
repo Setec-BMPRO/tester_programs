@@ -5,7 +5,6 @@ import sys
 from PySide import QtGui
 from pydispatch import dispatcher
 import logging
-
 import gui
 import worker
 import signals

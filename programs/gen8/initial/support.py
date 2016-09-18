@@ -5,9 +5,7 @@
 import os
 import inspect
 import time
-
 import tester
-import sensor
 import share
 from . import limit
 from .. import console
@@ -114,6 +112,7 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.o5v = sensor.Vdc(dmm, high=7, low=4, rng=10, res=0.001)
         self.o12v = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.001)
         self.o12v2 = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)

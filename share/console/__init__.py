@@ -6,7 +6,6 @@
 from ._base import *
 from .protocol import *
 import tester
-import testlimit
 
 # Result values to store into the mirror sensors
 _SUCCESS = 0
@@ -23,8 +22,8 @@ class Variable():
             '.'.join((__name__, self.__class__.__name__)))
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
-        limit = testlimit.LimitHiLoInt('Comms', _SUCCESS)
-        self._comms = tester.Measurement(limit, sensor.Mirror())
+        limit = tester.LimitHiLoInt('Comms', _SUCCESS)
+        self._comms = tester.Measurement(limit, tester.sensor.Mirror())
 
     def configure(self, key):
         """Sensor: Configure for next reading."""

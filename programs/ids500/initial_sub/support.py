@@ -5,10 +5,8 @@
 import os
 import inspect
 import time
-
 import share
 import tester
-import sensor
 from . import limit
 from .. import console
 
@@ -214,6 +212,7 @@ class SensorMicro():
         """
         dmm = logical_devices.dmm
         pic = logical_devices.pic
+        sensor = tester.sensor
         self.oVsec5VuP = sensor.Vdc(dmm, high=19, low=1, rng=10, res=0.001)
         self.oSwRev = console.Sensor(
                 pic, 'PIC-SwRev', rdgtype=sensor.ReadingString)
@@ -233,6 +232,7 @@ class SensorAux():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.olock = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
         self.o5V = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
         self.o15V = sensor.Vdc(dmm, high=23, low=1, rng=100, res=0.001)
@@ -267,6 +267,7 @@ class SensorBias():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.olock = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
         self.o400V = sensor.Vdc(dmm, high=9, low=2, rng=1000, res=0.001)
         self.oPVcc = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.001)
@@ -289,6 +290,7 @@ class SensorBus():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.olock = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
         self.o400V = sensor.Vdc(dmm, high=9, low=2, rng=1000, res=0.001)
         self.o20VT = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
@@ -309,6 +311,7 @@ class SensorSyn():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.olock = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
         self.oTec = sensor.Vdc(dmm, high=15, low=3, rng=100, res=0.001)
         self.oTecVmon = sensor.Vdc(dmm, high=24, low=1, rng=10, res=0.001)
@@ -316,8 +319,8 @@ class SensorSyn():
         self.oLdd = sensor.Vdc(dmm, high=21, low=1, rng=10, res=0.001)
         self.oLddVmon = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
         self.oLddImon = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
-        self.oLddShunt = sensor.Vdc(dmm, high=8, low=4, rng=0.1, res=0.0001,
-                                               scale=1000, nplc=10)
+        self.oLddShunt = sensor.Vdc(
+            dmm, high=8, low=4, rng=0.1, res=0.0001, scale=1000, nplc=10)
         self.o20VT = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
         self.o9V = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.001)
         self.o_20V = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.001)

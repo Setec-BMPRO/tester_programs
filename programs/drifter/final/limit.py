@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Drifter(BM) Final Program Limits."""
 
-from testlimit import lim_hilo_delta, lim_lo, lim_hi, lim_boolean
+from tester.testlimit import lim_hilo_delta, lim_lo, lim_hi, lim_boolean
 
 # Tuple ( Tuple (name, identity, low, high, string, boolean))
 _COMMON = (

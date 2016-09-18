@@ -4,11 +4,7 @@
 
 import time
 from pydispatch import dispatcher
-
-import sensor
 import tester
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -41,6 +37,8 @@ class Sensors():
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
+        translate = tester.translate
         self.oMir12v = sensor.Mirror()
         self.oMir24v = sensor.Mirror()
         dispatcher.connect(

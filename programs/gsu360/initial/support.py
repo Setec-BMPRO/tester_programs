@@ -3,8 +3,6 @@
 """GSU360-1TA Initial Test Program."""
 
 import time
-
-import sensor
 import tester
 
 
@@ -35,6 +33,7 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.ACin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self.PFC = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.1)
         self.PriCtl = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.001)

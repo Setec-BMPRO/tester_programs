@@ -3,7 +3,6 @@
 """BP35 Final Test Program."""
 
 import tester
-import sensor
 
 
 class LogicalDevices():
@@ -35,7 +34,7 @@ class Sensors():
            @param limits Product test limits
 
         """
-        self.vbat = sensor.Vdc(
+        self.vbat = tester.sensor.Vdc(
             logical_devices.dmm, high=1, low=1, rng=100, res=0.001)
 
 

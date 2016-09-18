@@ -4,10 +4,8 @@
 
 import os
 import inspect
-
 import tester
 import share
-import sensor
 from . import limit
 from .. import console
 
@@ -74,6 +72,7 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         trek2 = logical_devices.trek2
+        sensor = tester.sensor
         self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)

@@ -4,8 +4,6 @@
 
 import os
 import inspect
-
-import sensor
 import tester
 import share
 from . import limit
@@ -51,6 +49,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oVin2 = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.001)
         self.o5V = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)

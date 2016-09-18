@@ -5,10 +5,8 @@
 import os
 import inspect
 from pydispatch import dispatcher
-
 import share
 import tester
-import sensor
 from . import limit
 from . import cmrsbp
 
@@ -75,6 +73,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oMirvbatIn = sensor.Mirror()
         self.oMirCycleCnt = sensor.Mirror()
         self.oMirRelrnFlg = sensor.Mirror()

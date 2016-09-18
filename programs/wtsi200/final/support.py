@@ -4,8 +4,6 @@
 
 from pydispatch import dispatcher
 import time
-
-import sensor
 import tester
 
 
@@ -49,6 +47,7 @@ class Sensors():
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         dso = logical_devices.dso
+        sensor = tester.sensor
         tbase = sensor.Timebase(
             range=0.20, main_mode=True, delay=0, centre_ref=False)
         trg = sensor.Trigger(

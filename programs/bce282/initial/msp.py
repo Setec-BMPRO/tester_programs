@@ -9,9 +9,7 @@ Communication via Serial port to the MSP430F2272 processor.
 import serial
 import time
 import logging
-import sensor
-from testlimit import LimitBoolean
-
+import tester
 
 # Line terminator
 _EOL = b'\r'
@@ -28,11 +26,11 @@ class TimeoutError(Exception):
     """Read line Timeout."""
 
 
-class Sensor(sensor.Sensor):
+class Sensor(tester.sensor.Sensor):
 
     """MSP430 console data exposed as a Sensor."""
 
-    def __init__(self, msp, key, rdgtype=sensor.Reading, position=1):
+    def __init__(self, msp, key, rdgtype=tester.sensor.Reading, position=1):
         super().__init__(msp, position)
         self._msp = msp
         self._key = key
@@ -63,7 +61,7 @@ class Console():
         self._baud = baud
         self._ser = None
         self._buf = b''
-        self._limit = LimitBoolean('SerialTimeout', False)
+        self._limit = tester.LimitBoolean('SerialTimeout', False)
         self._read_cmd = None
         # Data readings:
         #   Name -> (function, ( Command, ScaleFactor ))

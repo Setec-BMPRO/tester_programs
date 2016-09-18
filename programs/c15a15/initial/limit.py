@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """C15A-15 Initial Program Limits."""
 
-from testlimit import lim_hilo, lim_hilo_percent, lim_hi, lim_lo
+from tester.testlimit import lim_hilo, lim_hilo_percent, lim_hi, lim_lo
 
 DATA = (
     lim_hilo('AcMin', 85, 95),

@@ -39,7 +39,6 @@ import sys
 import threading
 import queue
 import logging
-
 import share
 
 

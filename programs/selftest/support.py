@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Selfchecker Test Program."""
 
-import sensor
 import tester
 
 
@@ -65,6 +64,7 @@ class Sensors(object):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         dso = logical_devices.dso
+        sensor = tester.sensor
         # Self Checker Voltages
         self.o12V = sensor.Vdc(dmm, high=1, low=3, rng=100, res=0.1)
         self.o5Va = sensor.Vdc(dmm, high=2, low=3, rng=10, res=0.1)

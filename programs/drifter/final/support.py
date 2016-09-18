@@ -3,7 +3,6 @@
 """Drifter Final Test Program."""
 
 import tester
-import sensor
 
 
 class LogicalDevices():
@@ -30,6 +29,7 @@ class Sensors():
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oWaterPump = sensor.Vdc(dmm, high=1, low=2, rng=100, res=0.1)
         self.oBattSw = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.1)
         self.oUSB5V = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)

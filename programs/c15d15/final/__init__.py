@@ -3,7 +3,6 @@
 """C15D-15 Final Test Program."""
 
 import logging
-
 import tester
 from . import support
 from . import limit

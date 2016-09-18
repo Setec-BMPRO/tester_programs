@@ -62,8 +62,6 @@ Protocol 4: BC15 [ LPC111x CPU, No RTOS ]
 import time
 import logging
 import tester
-import testlimit
-import sensor
 
 # Console command prompt. Signals the end of output data.
 _CMD_PROMPT = b'\r> '
@@ -153,7 +151,7 @@ class BaseConsole():
         except ConsoleError as err:
             self._logger.debug('Caught ConsoleError %s', err)
             comms = tester.Measurement(
-                testlimit.LimitHiLoInt('Action', 0), sensor.Mirror())
+                tester.LimitHiLoInt('Action', 0), tester.sensor.Mirror())
             comms.sensor.store(1)
             comms.measure()   # Generates a test FAIL result
         return reply

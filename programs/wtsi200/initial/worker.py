@@ -4,7 +4,6 @@
 from pydispatch import dispatcher
 import shlex
 import logging
-
 import signals
 
 

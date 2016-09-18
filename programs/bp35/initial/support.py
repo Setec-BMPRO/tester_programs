@@ -6,10 +6,8 @@ import os
 import inspect
 import time
 from pydispatch import dispatcher
-
 import tester
 import share
-import sensor
 from . import limit
 from .. import console
 
@@ -94,10 +92,12 @@ class Sensors():
            @param limits Product test limits
 
         """
-        dispatcher.connect(self._reset, sender=tester.signals.Thread.tester,
-                           signal=tester.signals.TestRun.stop)
+        dispatcher.connect(
+            self._reset, sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
         bp35 = logical_devices.bp35
+        sensor = tester.sensor
         self.mir_can = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.acin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.vpfc = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)

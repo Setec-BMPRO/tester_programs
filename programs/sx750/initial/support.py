@@ -5,9 +5,7 @@
 import os
 import inspect
 import time
-
 import share
-import sensor
 import tester
 from . import limit
 from . import arduino
@@ -105,6 +103,7 @@ class Sensors():
         """Create all Sensor instances."""
         d = logical_devices
         dmm = d.dmm
+        sensor = tester.sensor
         self.o5Vsb = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
         self.o5Vsbunsw = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
         self.o8V5Ard = sensor.Vdc(dmm, high=19, low=3, rng=100, res=0.001)

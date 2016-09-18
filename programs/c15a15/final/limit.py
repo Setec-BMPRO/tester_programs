@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """C15A-15 Final Program Limits."""
 
-from testlimit import lim_hilo, lim_lo, lim_boolean
+from tester.testlimit import lim_hilo, lim_lo, lim_boolean
 
 DATA = (
     lim_hilo('Vout', 15.2, 15.8),

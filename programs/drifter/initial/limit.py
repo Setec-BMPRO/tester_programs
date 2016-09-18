@@ -3,8 +3,7 @@
 """Drifter(BM) Initial Program Limits."""
 
 import os
-
-from testlimit import lim_hilo, lim_hilo_delta, lim_hilo_int, lim_string
+from tester.testlimit import lim_hilo, lim_hilo_delta, lim_hilo_int, lim_string
 
 # Serial port for the PIC.
 PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]

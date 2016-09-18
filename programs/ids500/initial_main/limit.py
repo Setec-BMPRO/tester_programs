@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Initial Main Program Limits."""
 
-from testlimit import lim_lo, lim_hilo_delta
+from tester.testlimit import lim_lo, lim_hilo_delta
 
 DATA = (
     lim_hilo_delta('Vbus', 340.0, 10.0),

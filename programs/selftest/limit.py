@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Selfchecker Test Program Limits."""
 
-from testlimit import lim_hilo_delta, lim_hilo, lim_lo
+from tester.testlimit import lim_hilo_delta, lim_hilo, lim_lo
 
 DATA = (
     lim_hilo_delta('12V', 12.0, 0.5),

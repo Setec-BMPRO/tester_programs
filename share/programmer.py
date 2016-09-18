@@ -5,10 +5,7 @@
 import os
 import subprocess
 import logging
-
 import tester
-import testlimit
-import sensor
 import isplpc
 
 
@@ -50,8 +47,8 @@ class ProgramPIC():
             ]
         self._working_dir = working_dir
         self._relay = relay
-        limit = testlimit.LimitHiLoInt(limitname, _SUCCESS)
-        self._pic = tester.Measurement(limit, sensor.Mirror())
+        limit = tester.LimitHiLoInt(limitname, _SUCCESS)
+        self._pic = tester.Measurement(limit, tester.sensor.Mirror())
 
     def program(self):
         """Program a device."""
@@ -98,8 +95,8 @@ class ProgramARM():
         self._reset_relay = reset_relay
         with open(filename, 'rb') as infile:
             self._bindata = bytearray(infile.read())
-        limit = testlimit.LimitHiLoInt(limitname, _SUCCESS)
-        self._arm = tester.Measurement(limit, sensor.Mirror())
+        limit = tester.LimitHiLoInt(limitname, _SUCCESS)
+        self._arm = tester.Measurement(limit, tester.sensor.Mirror())
 
     def program(self):
         """Program a device.

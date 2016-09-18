@@ -3,7 +3,6 @@
 """TS3020H Initial Test Program."""
 
 import logging
-
 import tester
 from . import support
 from . import limit

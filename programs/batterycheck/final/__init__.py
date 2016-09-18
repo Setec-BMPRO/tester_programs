@@ -3,7 +3,6 @@
 """BatteryCheck Final Test Program."""
 
 import logging
-
 import share
 import tester
 from . import support

@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 """TS3020H Final Test Program."""
 
-import sensor
 import tester
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -34,6 +31,8 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
+        translate = tester.translate
         self.o12V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.oNotifyStart = sensor.Notify(
             message=translate('ts3020h_final', 'RemoveFuseSwitchOn'),

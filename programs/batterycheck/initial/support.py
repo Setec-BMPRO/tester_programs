@@ -4,10 +4,8 @@
 
 import os
 import inspect
-
 import share
 import tester
-import sensor
 from . import limit
 from .. import console
 
@@ -82,6 +80,7 @@ class Sensors(object):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         arm = logical_devices.arm
+        sensor = tester.sensor
         self.ARMvolt = console.Sensor(arm, 'VOLTAGE')
         self.ARMcurr = console.Sensor(arm, 'CURRENT')
         self.ARMsoft = console.Sensor(

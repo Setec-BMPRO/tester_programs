@@ -3,10 +3,8 @@
 """BatteryCheck Final Test Program."""
 
 from pydispatch import dispatcher
-
 import share
 import tester
-import sensor
 from . import limit
 
 
@@ -46,6 +44,7 @@ class Sensors(object):
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oMirBT = sensor.Mirror()
         self.oMirSwVer = sensor.Mirror(rdgtype=sensor.ReadingString)
         dispatcher.connect(

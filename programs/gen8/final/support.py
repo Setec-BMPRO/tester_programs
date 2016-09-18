@@ -3,7 +3,6 @@
 """GEN8 Final Test Program."""
 
 import tester
-import sensor
 
 
 class LogicalDevices():
@@ -37,6 +36,7 @@ class Sensors():
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oIec = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.o5V = sensor.Vdc(dmm, high=3, low=3, rng=10, res=0.0001)
         self.o24V = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
@@ -58,20 +58,21 @@ class Measurements():
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
         self._limits = limits
-        self.dmm_Iecon = self._maker('Iecon', sense.oIec)
-        self.dmm_Iecoff = self._maker('Iecoff', sense.oIec)
-        self.dmm_5V = self._maker('5V', sense.o5V)
-        self.dmm_24Voff = self._maker('24Voff', sense.o24V)
-        self.dmm_12Voff = self._maker('12Voff', sense.o12V)
-        self.dmm_12V2off = self._maker('12V2off', sense.o12V2)
-        self.dmm_24Von = self._maker('24Von', sense.o24V)
-        self.dmm_12Von = self._maker('12Von', sense.o12V)
-        self.dmm_12V2on = self._maker('12V2on', sense.o12V2)
-        self.dmm_PwrFailOff = self._maker('PwrFailOff', sense.oPwrFail)
-        self.ui_YesNoMains = self._maker('Notify', sense.oYesNoMains)
-        self.ui_NotifyPwrOff = self._maker('Notify', sense.oNotifyPwrOff)
+        maker = self._maker
+        self.dmm_Iecon = maker('Iecon', sense.oIec)
+        self.dmm_Iecoff = maker('Iecoff', sense.oIec)
+        self.dmm_5V = maker('5V', sense.o5V)
+        self.dmm_24Voff = maker('24Voff', sense.o24V)
+        self.dmm_12Voff = maker('12Voff', sense.o12V)
+        self.dmm_12V2off = maker('12V2off', sense.o12V2)
+        self.dmm_24Von = maker('24Von', sense.o24V)
+        self.dmm_12Von = maker('12Von', sense.o12V)
+        self.dmm_12V2on = maker('12V2on', sense.o12V2)
+        self.dmm_PwrFailOff = maker('PwrFailOff', sense.oPwrFail)
+        self.ui_YesNoMains = maker('Notify', sense.oYesNoMains)
+        self.ui_NotifyPwrOff = maker('Notify', sense.oNotifyPwrOff)
 
-    def _maker(self, limitname, sensor, position_fail=True):
+    def _maker(self, limitname, sensor):
         """Create a Measurement.
 
         @param limitname Test Limit name
@@ -79,8 +80,6 @@ class Measurements():
         @return tester.Measurement instance
 
         """
-        if not position_fail:
-            self._limits[limitname].position_fail = False
         return tester.Measurement(self._limits[limitname], sensor)
 
 

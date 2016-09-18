@@ -6,7 +6,6 @@ import unittest
 from unittest.mock import patch
 import logging
 from pydispatch import dispatcher
-
 import tester
 from . import logging_setup
 from programs import j35

@@ -31,7 +31,6 @@ The required process to run a tunnel...
 
 import logging
 import time
-
 import tester
 
 # "CAN Print Packets" mode controlled by STATUS bit 29

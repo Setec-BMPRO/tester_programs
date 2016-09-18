@@ -3,8 +3,7 @@
 """Trek2 Final Program Limits."""
 
 import os
-
-from testlimit import lim_hilo_delta, lim_hilo_int, lim_boolean
+from tester.testlimit import lim_hilo_delta, lim_hilo_int, lim_boolean
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
 CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]

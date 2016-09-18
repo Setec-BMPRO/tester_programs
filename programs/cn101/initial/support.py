@@ -5,10 +5,8 @@
 import os
 import inspect
 from pydispatch import dispatcher
-
 import share
 import tester
-import sensor
 from . import limit
 from .. import console
 
@@ -91,6 +89,7 @@ class Sensors():
             signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
         cn101 = logical_devices.cn101
+        sensor = tester.sensor
         self.oMirBT = sensor.Mirror()
         self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
         self.microsw = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)

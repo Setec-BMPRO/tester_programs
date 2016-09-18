@@ -47,11 +47,11 @@ class BaseConsoleTestCase(unittest.TestCase):
 
     def test_3_noprompt(self):
         mycon.puts(' -> \r')
-        with self.assertRaises(console.ConsoleResponseError):
+        with self.assertRaises(tester.MeasurementFailedError):
             mycon.action('NP')
 
     def test_4_noresponse(self):
-        with self.assertRaises(console.ConsoleResponseError):
+        with self.assertRaises(tester.MeasurementFailedError):
             mycon.action('NR')
 
 
@@ -91,9 +91,9 @@ class BadUartConsoleTestCase(unittest.TestCase):
 
     def test_3_noprompt(self):
         mycon.puts(' -> \r\n')
-        with self.assertRaises(console.ConsoleResponseError):
+        with self.assertRaises(tester.MeasurementFailedError):
             mycon.action('NP')
 
     def test_4_noresponse(self):
-        with self.assertRaises(console.ConsoleResponseError):
+        with self.assertRaises(tester.MeasurementFailedError):
             mycon.action('NR')

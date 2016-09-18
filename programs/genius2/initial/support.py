@@ -3,13 +3,9 @@
 """GENIUS-II and GENIUS-II-H Initial Test Program."""
 import os
 import inspect
-
 import share
 import tester
-import sensor
 from . import limit
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -62,6 +58,7 @@ class Sensors():
         dmm = logical_devices.dmm
         dcl = logical_devices.dcl
         dclh = logical_devices.dclh
+        sensor = tester.sensor
         self.olock = sensor.Res(dmm, high=16, low=8, rng=10000, res=1)
         self.oacin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.oflyld = sensor.Vac(dmm, high=15, low=7, rng=1000, res=0.01)

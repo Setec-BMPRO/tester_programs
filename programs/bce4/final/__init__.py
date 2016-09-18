@@ -3,7 +3,6 @@
 """BCE4/5 Final Test Program."""
 
 import logging
-
 import tester
 from . import support
 from . import limit

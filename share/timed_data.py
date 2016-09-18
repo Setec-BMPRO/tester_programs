@@ -10,7 +10,6 @@ after the last data write, the dictionary is cleared.
 import threading
 import copy
 import logging
-
 from .ticker import RepeatTimer
 
 

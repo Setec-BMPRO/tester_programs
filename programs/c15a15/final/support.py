@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 """C15A-15 Final Test Program."""
 
-import sensor
 import tester
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -33,6 +30,8 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
+        translate = tester.translate
         self.oVout = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.001)
         self.oYesNoGreen = sensor.YesNo(
             message=translate('c15a15_final', 'IsPowerLedGreen?'),

@@ -9,10 +9,10 @@
 # based on the application note slas96b.pdf from Texas Instruments, Inc.,
 # Volker Rzehak
 # additional infos from slaa089a.pdf
-# 
+#
 
 from __future__ import print_function
-import sys, time, string, io, struct, os
+import sys, time, io, struct
 import serial
 
 #
@@ -310,7 +310,7 @@ class LowLevel:
         self.telosI2C = 0
         self.amAddr    = None
         self.z1 = 0
-        
+
         self.protocolMode = self.MODE_BSL
         self.BSLMemAccessWarning = 0                #Default: no warning.
         self.slowmode = 0
@@ -408,7 +408,7 @@ class LowLevel:
                 sys.stderr.write("  comRxFrame() crc check\n")
             #rxLength+4: Length with header but w/o CRC:
             checksum = self.calcChecksum(rxFrame, ord(rxFrame[2]) + 4)
-            if (rxFrame[ord(rxFrame[2])+4] == chr(0xff & checksum) and 
+            if (rxFrame[ord(rxFrame[2])+4] == chr(0xff & checksum) and
                rxFrame[ord(rxFrame[2])+5] == chr(0xff & (checksum >> 8))): #Checksum correct?
                 #Frame received correctly (=> send next frame)
                 if DEBUG > 2:
@@ -565,7 +565,7 @@ class LowLevel:
         self.picROMclock(0, True)
         #k = 1
         #while not self.serial.getCTS():
-        #    pass 
+        #    pass
         #time.sleep(0.1)
         return recbuf
 
@@ -582,7 +582,7 @@ class LowLevel:
         self.picROMclock(r)
         #time.sleep(0.1)
         return recbuf
-        
+
     def picROMclock(self, masterout, slow = False):
         #print "setting masterout to "+str(masterout)
         self.serialport.setRTS(masterout)
@@ -607,10 +607,10 @@ class LowLevel:
         Parameters:
             invokeBSL = 1: complete sequence
             invokeBSL = 0: only RST/NMI pin accessed
-            
+
         By now only BSL mode is accessed
         '''
-        
+
         if DEBUG > 1:
             sys.stderr.write("* bslReset(invokeBSL=%s)\n" % invokeBSL)
         if invokeBSL:
@@ -763,7 +763,7 @@ class LowLevel:
                             sys.stderr.write("  bslSync() timeout, retry ...\n")
                     elif loopcnt == 4:
                         #nmi may have caused the first reset to be ignored, try again
-                        self.bslReset(0) 
+                        self.bslReset(0)
                         self.bslReset(1)
                     elif loopcnt > 0:
                         if DEBUG > 1:
@@ -1084,10 +1084,10 @@ class BootStrapLoader(LowLevel):
                     sys.stderr.write("  Program starting at 0x%05x, %i bytes ...\n" % (addr, len(blkout)))
             self.preparePatch()
             # handle TOS address
-            if (self.amAddr and 
-               (self.amAddr >= addr) and 
+            if (self.amAddr and
+               (self.amAddr >= addr) and
                (self.amAddr  < addr + len(blkout))):
-                if ((self.amAddr == addr + len(blkout) - 1) or 
+                if ((self.amAddr == addr + len(blkout) - 1) or
                    (addr & 1) or (len(blkout) & 1)):
                     sys.stderr.write("ERROR amAddr straddles (goofy) block!")
                     raise SystemExit
@@ -1242,7 +1242,7 @@ class BootStrapLoader(LowLevel):
         if self.bslVer <= 0x0130 and adjsp:
             #only do this on BSL where it's needed to prevent
             #malfunction with F4xx devices/ newer ROM-BSLs
-            
+
             #Execute function within bootstrap loader
             #to prepare stack pointer for the following patch.
             #This function will lock the protected functions again.
@@ -1267,7 +1267,7 @@ class BootStrapLoader(LowLevel):
                     sys.stderr.write("Using built in BSL replacement for F1x devices\n")
                     sys.stderr.flush()
                 replacementBSL.loadTIText(io.StringIO(F1X_BSL))  #parse embedded BSL
-    
+
         #now download the new BSL, if allowed and needed (version lower than the
         #the replacement) or forced
         if replacementBSL is not None:
@@ -1329,7 +1329,7 @@ class BootStrapLoader(LowLevel):
         self.txPasswd(self.passwd)
 
         #update version info
-        #verison only valid for the internal ones, but it also makes sure 
+        #verison only valid for the internal ones, but it also makes sure
         #that the patches are not applied if the user d/ls one
         self.bslVer = 0x0150
 
@@ -1406,7 +1406,7 @@ class BootStrapLoader(LowLevel):
             a,l = baudconfigs[baudrate]
         except KeyError:
             raise ValueError("baudrate not valid. valid values are %r" % list(baudconfigs.keys()))
-        
+
         sys.stderr.write("Changing baudrate to %d ...\n" % baudrate)
         sys.stderr.flush()
         self.bslTxRx(self.BSL_CHANGEBAUD,   #Command: change baudrate
@@ -1480,7 +1480,7 @@ General options:
   --swap-reset-test     Swap the RST and TEST pins (used for some BSL hardware)
   --telos-latch         Special twiddle in BSL reset for Telos hardware
   --telos-i2c           DTR/RTS map via an I2C switch to TCK/RST in Telos Rev.B
-  --telos               Implies options --invert-reset, --invert-test, 
+  --telos               Implies options --invert-reset, --invert-test,
                         --swap-reset-test, and --telos-latch
   --telosb              Implies options --swap-reset-test, --telos-i2c,
                         --no-BSL-download, and --speed=38400
@@ -1807,7 +1807,7 @@ def main():
      forceBSL,
      dumpivt,
      dumpinfo) = parseCommandLine()
- 
+
     if DEBUG:   #debug infos
         sys.stderr.write("Debug level set to %d\n" % DEBUG)
         sys.stderr.write("Python version: %s\n" % sys.version)
@@ -1830,7 +1830,7 @@ def main():
         reset = 0
 
     sys.stderr.flush()
-    
+
     #prepare data to download
     bsl.data = Memory()                             #prepare downloaded data
     if filetype is not None:                        #if the filetype is given...

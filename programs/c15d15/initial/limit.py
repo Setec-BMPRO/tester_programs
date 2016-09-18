@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """C15D-15 Initial Program Limits."""
 
-from testlimit import (
+from tester.testlimit import (
     lim_hilo, lim_hilo_delta, lim_hilo_percent, lim_lo)
 
 VIN_SET = 30.0      # Input voltage setting

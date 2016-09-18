@@ -3,8 +3,7 @@
 """CN101 Initial Program Limits."""
 
 import os
-
-from testlimit import (
+from tester.testlimit import (
     lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_lo, lim_string, lim_boolean)
 

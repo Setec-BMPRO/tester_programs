@@ -4,7 +4,6 @@
 from PySide import QtGui
 from pydispatch import dispatcher
 import logging
-
 import Ui_start
 import signals
 

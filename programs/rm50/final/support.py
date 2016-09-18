@@ -4,8 +4,6 @@
 
 import time
 from pydispatch import dispatcher
-
-import sensor
 import tester
 
 
@@ -45,6 +43,7 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         pwr = logical_devices.pwr
+        sensor = tester.sensor
         self.oMirVdcDrop = sensor.Mirror()
         self.oMirPowNL = sensor.Mirror()
         self.oMirEff = sensor.Mirror()

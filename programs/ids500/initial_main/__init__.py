@@ -3,7 +3,6 @@
 """IDS-500 Initial Main Test Program."""
 
 import logging
-
 import tester
 from . import support
 from . import limit

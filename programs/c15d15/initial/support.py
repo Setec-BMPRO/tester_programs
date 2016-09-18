@@ -2,11 +2,8 @@
 # -*- coding: utf-8 -*-
 """C15D-15 Initial Test Program."""
 
-import sensor
 import tester
 from . import limit
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -35,6 +32,7 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.vin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self.vcc = sensor.Vdc(dmm, high=2, low=1, rng=100, res=0.01)
         self.led_green = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)

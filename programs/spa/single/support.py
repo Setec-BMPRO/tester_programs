@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Spa SINGLE Initial Test Program."""
 
-import sensor
 import tester
 
 # Scale factor for AC Input Current sensors.
@@ -43,6 +42,7 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         dso = logical_devices.dso
+        sensor = tester.sensor
         # AC input voltage of all UUTs
         self.oAcVin = sensor.Vac(
             dmm, high=1, low=1, rng=100, res=0.0001, position=(1, 2, 3, 4))

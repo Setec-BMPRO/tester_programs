@@ -4,7 +4,7 @@
 
 import os
 
-from testlimit import lim_hilo_delta, lim_string, lim_boolean
+from tester.testlimit import lim_hilo_delta, lim_string, lim_boolean
 
 ARM_VERSION = '1.7.4080'        # Software binary version
 

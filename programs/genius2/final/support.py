@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 """GENIUS-II and GENIUS-II-H Final Test Program."""
 
-import sensor
 import tester
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -41,6 +38,8 @@ class Sensors():
         dmm = logical_devices.dmm
         dcl = logical_devices.dcl
         dclh = logical_devices.dclh
+        sensor = tester.sensor
+        translate = tester.translate
         self.oInpRes = sensor.Res(dmm, high=1, low=1, rng=1000000, res=1)
         self.oVout = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.oVbat = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)

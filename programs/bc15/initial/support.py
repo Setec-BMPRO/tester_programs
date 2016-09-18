@@ -5,10 +5,8 @@
 import os
 import inspect
 import time
-
 import share
 import tester
-import sensor
 from . import limit
 from .. import console
 
@@ -85,6 +83,7 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         bc15 = logical_devices.bc15
+        sensor = tester.sensor
         self.olock = sensor.Res(dmm, high=12, low=5, rng=10000, res=1)
         self.ofanshort = sensor.Res(dmm, high=13, low=6, rng=10000, res=1)
         self.oACin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)

@@ -4,8 +4,6 @@
 
 import time
 from pydispatch import dispatcher
-
-import sensor
 import tester
 
 
@@ -53,6 +51,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oMirReg = sensor.Mirror()
         dispatcher.connect(
             self._reset,

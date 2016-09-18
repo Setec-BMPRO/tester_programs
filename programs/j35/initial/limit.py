@@ -3,8 +3,7 @@
 """J35 Initial Program Limits."""
 
 import os
-
-from testlimit import (
+from tester.testlimit import (
     lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string, lim_hilo_int)
 
 ARM_VERSION = '1.0.13788.904'      # ARM versions

@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 """Spa RGB/TRI Initial Test Program."""
 
-import sensor
 import tester
-
 
 # Scale factor for AC Input Current sensors.
 #   0R1 current sense resistor
@@ -49,6 +47,7 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         dso = logical_devices.dso
+        sensor = tester.sensor
         # Mirror sensors for Programming result logging (1 per UUT)
         self.oMir1 = sensor.Mirror(1)
         self.oMir2 = sensor.Mirror(2)

@@ -3,10 +3,7 @@
 """BCE282-12/24 Initial Test Program."""
 
 import time
-
-import sensor
 import tester
-
 from . import msp
 
 
@@ -55,7 +52,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
-
+        sensor = tester.sensor
         self.Lock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
         self.oVac = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.oVbus = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
@@ -66,24 +63,18 @@ class Sensors():
         self.oVout = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
 #        self.oRed = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
 #        self.oGreen = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
-
         self.oMsp_Status = msp.Sensor(mspdev, 'MSP-NvStatus')
         self.oMsp_Vout = msp.Sensor(mspdev, 'MSP-Vout')
-
-
         ocp_start, ocp_stop = limits['BattOCPramp'].limit
-        self.oBattOCP = sensor.Ramp(stimulus=logical_devices.dcl_Vbat,
-                                    sensor=self.oVbat,
-                                    detect_limit=(limits['inOCP'], ),
-                                    start=ocp_start, stop=ocp_stop, step=0.05,
-                                    delay=0.05)
-
+        self.oBattOCP = sensor.Ramp(
+            stimulus=logical_devices.dcl_Vbat,sensor=self.oVbat,
+            detect_limit=(limits['inOCP'], ),
+            start=ocp_start, stop=ocp_stop, step=0.05, delay=0.05)
         ocp_start, ocp_stop = limits['OutOCPramp'].limit
-        self.oOutOCP = sensor.Ramp(stimulus=logical_devices.dcl_Vout,
-                                    sensor=self.oVout,
-                                    detect_limit=(limits['inOCP'], ),
-                                    start=ocp_start, stop=ocp_stop, step=0.05,
-                                    delay=0.05, reset=False)
+        self.oOutOCP = sensor.Ramp(
+            stimulus=logical_devices.dcl_Vout, sensor=self.oVout,
+            detect_limit=(limits['inOCP'], ),
+            start=ocp_start, stop=ocp_stop, step=0.05, delay=0.05, reset=False)
 
 
 class Measurements():
@@ -100,7 +91,6 @@ class Measurements():
         Measurement = tester.Measurement
         lim = limits
         sen = sense
-
         self.dmm_Lock = Measurement(lim['FixtureLock'], sen.Lock)
         self.dmm_VccBiasExt = Measurement(lim['VccBiasExt'], sen.oVccBias)
         self.dmm_Vac = Measurement(lim['Vac'], sen.oVac)

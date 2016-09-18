@@ -1,17 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Test suite definition for Eric6 Unittest plugin."""
+# Copyright 2016 SETEC Pty Ltd.
+"""Test suite definition for Eric Unittest plugin."""
 
 import unittest
 
 
 def suite():
-    """Define the test suite by discovering all test files."""
-    testsuite = unittest.defaultTestLoader.discover(
-        start_dir='.', pattern='test_*.py')
-    return testsuite
+    """Define the test suite for Eric unittest tool.
 
-if __name__ == '__main__':
+    @return unittest.testsuite
+
+    """
+    return unittest.defaultTestLoader.discover(
+        start_dir='.', pattern='test_*.py')
+
+
+def _main():
+    """Run the testsuite."""
     runner = unittest.TextTestRunner()
     testsuite = suite()
     runner.run(testsuite)
+
+
+if __name__ == '__main__':
+    _main()

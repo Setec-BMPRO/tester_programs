@@ -3,7 +3,6 @@
 """BC15 Final Test Program."""
 
 import tester
-import sensor
 
 
 class LogicalDevices():
@@ -38,6 +37,7 @@ class Sensors():
 
         """
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.vout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.ps_mode = sensor.Notify(
             message=tester.translate('bc15_final', 'GoToPsMode'),

@@ -3,7 +3,6 @@
 """Product Test Programs."""
 
 from . import selftest
-
 from . import _2040
 from . import atxg450
 from . import batterycheck

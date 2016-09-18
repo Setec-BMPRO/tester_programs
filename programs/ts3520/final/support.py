@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """TS3520 Final Test Program."""
 
-import sensor
 import tester
 
 
@@ -32,6 +31,7 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.o12V_1 = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.o12V_2 = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.o12V_3 = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)

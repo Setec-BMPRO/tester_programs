@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """IDS-500 PIC processor console driver."""
-import time
 
+import time
 from share import console
 
 Sensor = console.Sensor

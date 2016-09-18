@@ -3,9 +3,7 @@
 """IDS-500 Final Test Program."""
 
 from pydispatch import dispatcher
-
 import tester
-import sensor
 from . import limit
 from .. import console
 
@@ -69,6 +67,7 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         picdev = logical_devices.picdev
+        sensor = tester.sensor
         self.oMirTecErr = sensor.Mirror()
         self.oMirTecVmonErr = sensor.Mirror()
         self.oMirIsErr = sensor.Mirror()

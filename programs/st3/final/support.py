@@ -3,11 +3,7 @@
 """STxx-III Final Test Program."""
 
 import time
-
-import sensor
 import tester
-
-translate = tester.translate
 
 
 class LogicalDevices():
@@ -38,6 +34,8 @@ class Sensors():
     def __init__(self, logical_devices, limits):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
+        translate = tester.translate
         self.oLoad = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oFuse1 = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oFuse2 = sensor.Vdc(dmm, high=2, low=1, rng=100, res=0.001)

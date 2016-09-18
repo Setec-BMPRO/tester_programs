@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """UNI-750 Final Test Program."""
 
-import sensor
 import tester
 
 
@@ -38,6 +37,7 @@ class Sensors():
     def __init__(self, logical_devices):
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
+        sensor = tester.sensor
         self.oAcUnsw = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self.oAcSw = sensor.Vac(dmm, high=2, low=2, rng=1000, res=0.1)
         self.o24V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)

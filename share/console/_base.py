@@ -3,20 +3,20 @@
 """Base classes for Serial Consoles."""
 
 import logging
-import sensor
+import tester
 
 # Default read/write format strings (For the X-Register based consoles)
 _DEF_WRITE = '{} "{} XN!'
 _DEF_READ = '"{} XN?'
 
 
-class Sensor(sensor.Sensor):
+class Sensor(tester.sensor.Sensor):
 
     """Console data exposed as a Sensor."""
 
     def __init__(self,
             arm, key,
-            rdgtype=sensor.Reading, position=1,
+            rdgtype=tester.sensor.Reading, position=1,
             scale=1.0):
         """Create a sensor."""
         super().__init__(arm, position)
@@ -39,7 +39,7 @@ class Sensor(sensor.Sensor):
 
         """
         value = super().read()
-        if self._rdgtype is sensor.Reading:
+        if self._rdgtype is tester.sensor.Reading:
             value = float(value) * self._scale
         rdg = self._rdgtype(value, position=self.position)
         return (rdg, )

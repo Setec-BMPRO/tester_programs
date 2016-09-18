@@ -3,12 +3,12 @@
 """Tester program loader."""
 
 import os
+import time
 import inspect
 import configparser
 import logging.handlers
 from unittest.mock import patch
 from pydispatch import dispatcher
-import time
 import gpib
 import tester
 import programs
