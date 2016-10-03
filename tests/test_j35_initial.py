@@ -157,7 +157,7 @@ class J35_Initial_TestCase(unittest.TestCase):
             }
         self._tester.test(('UUT1', ))
         self.assertEqual('P', self._result.code)        # Test Result
-        self.assertEqual(64, len(self._result.readings)) # Reading count
+        self.assertEqual(75, len(self._result.readings)) # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp',

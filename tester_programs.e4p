@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-09-09, 13:28:45 -->
+<!-- Saved: 2016-10-03, 17:14:04 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -240,6 +240,7 @@
     <Source>share/timed_data.py</Source>
     <Source>tests/__init__.py</Source>
     <Source>tests/test_can_tunnel.py</Source>
+    <Source>tests/test_j35_final.py</Source>
     <Source>tests/test_j35_initial.py</Source>
     <Source>tests/test_protocol.py</Source>
     <Source>testsuite.py</Source>

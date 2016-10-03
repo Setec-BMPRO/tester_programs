@@ -3,6 +3,7 @@
 """J35 Final Test Program."""
 
 import tester
+from . import limit
 
 
 class LogicalDevices():
@@ -17,11 +18,14 @@ class LogicalDevices():
         """
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
+        self.dcs_photo = tester.DCSource(devices['DCS1'])
+        self.dcl_out = tester.DCLoad(devices['DCL1'])
 
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
-
+        self.dcs_photo.output(0.0, False)
+        self.dcl_out.output(0.0, False)
 
 class Sensors():
 
@@ -34,8 +38,19 @@ class Sensors():
            @param limits Product test limits
 
         """
-        self.vload = tester.sensor.Vdc(
-            logical_devices.dmm, high=1, low=1, rng=100, res=0.001)
+        dmm = logical_devices.dmm
+        sensor = tester.sensor
+        self.photo = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
+        self.vload1 = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
+        # Generate load voltage sensors
+        self.vloads = []
+        for i in range(limit.LOAD_COUNT):
+            s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
+            self.vloads.append(s)
+        self.ocp = sensor.Ramp(
+            stimulus=logical_devices.dcl_out, sensor=self.vload1,
+            detect_limit=(limits['InOCP'], ),
+            start=32.0, stop=38.0, step=0.5, delay=0.2)
 
 
 class Measurements():
@@ -49,20 +64,16 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.dmm_vload = tester.Measurement(limits['Vload'], sense.vload)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances."""
-        d = logical_devices
-        m = measurements
-        # PowerUp: Input AC, measure.
-        self.pwrup = tester.SubStep((
-            tester.AcSubStep(
-                acs=d.acsource, voltage=240.0, output=True, delay=1.0),
-            tester.MeasureSubStep((m.dmm_vload, ), timeout=10),
-            ))
+        Measurement = tester.Measurement
+        self.dmm_fanoff = Measurement(limits['FanOff'], sense.photo)
+        self.dmm_fanon = Measurement(limits['FanOn'], sense.photo)
+        # Generate load voltage measurements
+        self.dmm_vouts = ()
+        for sen in sense.vloads:
+            m = Measurement(limits['Vout'], sen)
+            self.dmm_vouts += (m, )
+        self.dmm_vloads = ()
+        for sen in sense.vloads:
+            m = Measurement(limits['Vload'], sen)
+            self.dmm_vloads += (m, )
+        self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
