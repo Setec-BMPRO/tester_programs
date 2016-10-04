@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for J35 Final Test program."""
+"""UnitTest for J35C Final Test program."""
 
 import unittest
 from unittest.mock import patch
@@ -12,7 +12,7 @@ from programs import j35
 
 _PROG_NAME = 'J35 Final'
 _PROG_CLASS = j35.Final
-_PROG_LIMIT = j35.FIN_LIMIT
+_PROG_LIMIT = j35.FIN_LIMIT_C
 
 
 class J35_Final_TestCase(unittest.TestCase):

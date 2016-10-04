@@ -101,7 +101,7 @@ PROGRAMS = (
     ('IDS500 Initial Main', ids500.InitialMain, ids500.INI_MAIN_LIMIT),
     ('IDS500 Final', ids500.Final, ids500.FIN_LIMIT),
     ('J35 Initial', j35.Initial, j35.INI_LIMIT),
-    ('J35 Final', j35.Final, j35.FIN_LIMIT),
+    ('J35C Final', j35.Final, j35.FIN_LIMIT_C),
     ('MK7-400-1 Final', mk7400.Final, mk7400.FIN_LIMIT),
     ('Opto Test', opto_test.Main, opto_test.LIMIT),
     ('RM-50-24 Final', rm50.Final, rm50.FIN_LIMIT),

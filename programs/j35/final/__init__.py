@@ -7,7 +7,7 @@ import tester
 from . import support
 from . import limit
 
-FIN_LIMIT = limit.DATA
+FIN_LIMIT_C = limit.DATA_C
 
 
 class Final(tester.TestSequence):
@@ -38,6 +38,8 @@ class Final(tester.TestSequence):
         self.logdev = None
         self.sensors = None
         self.meas = None
+        self._LOAD_COUNT = self.limits['LOAD_COUNT'].limit
+        self._LOAD_CURRENT = self.limits['LOAD_CURRENT'].limit
 
     def open(self):
         """Prepare for testing."""
@@ -63,15 +65,15 @@ class Final(tester.TestSequence):
         mes.dmm_fanoff.measure(timeout=5)
         dev.acsource.output(240.0, True)
         mes.dmm_fanon.measure(timeout=12)
-        for load in range(limit.LOAD_COUNT):
+        for load in range(self._LOAD_COUNT):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vouts[load].measure(timeout=5)
 
     def _step_load(self):
         """Test outputs with load."""
         dev, mes = self.logdev, self.meas
-        dev.dcl_out.binary(1.0, limit.LOAD_CURRENT, 5.0)
-        for load in range(limit.LOAD_COUNT):
+        dev.dcl_out.binary(1.0, self._LOAD_CURRENT, 5.0)
+        for load in range(self._LOAD_COUNT):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vloads[load].measure(timeout=5)
 

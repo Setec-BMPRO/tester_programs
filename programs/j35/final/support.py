@@ -3,7 +3,6 @@
 """J35 Final Test Program."""
 
 import tester
-from . import limit
 
 
 class LogicalDevices():
@@ -44,7 +43,7 @@ class Sensors():
         self.vload1 = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         # Generate load voltage sensors
         self.vloads = []
-        for i in range(limit.LOAD_COUNT):
+        for i in range(limits['LOAD_COUNT'].limit):
             s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
             self.vloads.append(s)
         self.ocp = sensor.Ramp(
