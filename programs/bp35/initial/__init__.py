@@ -119,6 +119,12 @@ class Initial(tester.TestSequence):
 
         """
         d.program_arm.program()
+        # Reset microprocessor for boards that need reprogramming by Service
+        d.dcs_vbat.output(0.0)
+        d.dcl_bat.output(1.0)
+        time.sleep(1)
+        d.dcl_bat.output(0.0)
+        d.dcs_vbat.output(limit.VBAT_IN)
 
     def _step_initialise_arm(self):
         """Initialise the ARM device.
