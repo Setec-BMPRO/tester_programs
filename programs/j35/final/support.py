@@ -46,10 +46,11 @@ class Sensors():
         for i in range(limits['LOAD_COUNT'].limit):
             s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
             self.vloads.append(s)
+        low, high = limits['OCP'].limit
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl_out, sensor=self.vload1,
             detect_limit=(limits['InOCP'], ),
-            start=32.0, stop=38.0, step=0.5, delay=0.2)
+            start=low - 1, stop=high + 1, step=0.5, delay=0.2)
 
 
 class Measurements():

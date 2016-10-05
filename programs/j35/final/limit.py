@@ -8,7 +8,7 @@ DATA_C = (
     lim_lo('FanOff', 1.0),
     lim_hi('FanOn', 10.0),
     lim_hilo_delta('Vout', 12.8, 0.2),
-    lim_hilo_delta('Vload', 12.8, 0.2),
+    lim_hilo('Vload', 12.5, 13.0),
     lim_hilo('OCP', 35.0, 42.0),
     lim_lo('InOCP', 11.6),
     lim_lo('LOAD_COUNT', 14),

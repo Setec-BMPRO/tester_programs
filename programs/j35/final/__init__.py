@@ -26,8 +26,8 @@ class Final(tester.TestSequence):
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('Load', self._step_load, True),
-            tester.TestStep('OCP', self._step_ocp, True),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
             )
         # Set the Test Sequence in my base instance
         super().__init__(selection, sequence, fifo)
@@ -63,8 +63,8 @@ class Final(tester.TestSequence):
         dev, mes = self.logdev, self.meas
         dev.dcs_photo.output(12.0, True)
         mes.dmm_fanoff.measure(timeout=5)
-        dev.acsource.output(240.0, True)
-        mes.dmm_fanon.measure(timeout=12)
+        dev.acsource.output(240.0, output=True)
+        mes.dmm_fanon.measure(timeout=15)
         for load in range(self._LOAD_COUNT):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vouts[load].measure(timeout=5)
@@ -72,6 +72,7 @@ class Final(tester.TestSequence):
     def _step_load(self):
         """Test outputs with load."""
         dev, mes = self.logdev, self.meas
+        dev.dcl_out.output(0.0,  output=True)
         dev.dcl_out.binary(1.0, self._LOAD_CURRENT, 5.0)
         for load in range(self._LOAD_COUNT):
             with tester.PathName('L{0}'.format(load + 1)):
