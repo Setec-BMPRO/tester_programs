@@ -135,7 +135,7 @@ ALL_SKIP = (
     'IDS500 Initial Bus', 'IDS500 Initial Syn',
     'IDS500 Initial Main', 'IDS500 Final',
     # Done with unittest
-    'J35 Initial',
+    'J35 Initial', 'J35C Final',
     # Obsolete and unused programs
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',

@@ -3,7 +3,7 @@
 """UnitTest for J35 Initial Test program."""
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import logging
 from pydispatch import dispatcher
 import tester
@@ -157,7 +157,7 @@ class J35_Initial_TestCase(unittest.TestCase):
             }
         self._tester.test(('UUT1', ))
         self.assertEqual('P', self._result.code)        # Test Result
-        self.assertEqual(75, len(self._result.readings)) # Reading count
+        self.assertEqual(64, len(self._result.readings)) # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp',
@@ -166,6 +166,16 @@ class J35_Initial_TestCase(unittest.TestCase):
 
     def test_fail_run(self):
         """FAIL 1st Vbat reading."""
+        # Patch threading.Event & threading.Timer to remove delays
+        mymock = MagicMock()
+        # sen.olock: False          sen.ovbat: False, True
+        mymock.is_set.side_effect = (False,  False, True)
+        patcher = patch('threading.Event', return_value=mymock)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('threading.Timer', return_value=mymock)
+        self.addCleanup(patcher.stop)
+        patcher.start()
         sen = self._test_program.sensors
         self._sensor_data = {
             'Prepare':
