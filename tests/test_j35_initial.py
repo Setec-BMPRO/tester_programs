@@ -168,8 +168,7 @@ class J35_Initial_TestCase(unittest.TestCase):
         """FAIL 1st Vbat reading."""
         # Patch threading.Event & threading.Timer to remove delays
         mymock = MagicMock()
-        # sen.olock: False          sen.ovbat: False, True
-        mymock.is_set.side_effect = (False,  False, True)
+        mymock.is_set.return_value = True   # threading.Event.is_set()
         patcher = patch('threading.Event', return_value=mymock)
         self.addCleanup(patcher.stop)
         patcher.start()

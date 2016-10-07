@@ -171,37 +171,37 @@ class Initial(tester.TestSequence):
         d.loads(i12=1.0, i24=1.0)
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
-        result, pfc = m.dmm_pfcpre.stable(limit.PFC_STABLE)
+        result, _, pfc = m.dmm_pfcpre.stable(limit.PFC_STABLE)
         d.arm_calpfc(pfc)
-        result, pfc = m.dmm_pfcpost1.stable(limit.PFC_STABLE)
+        result, _, pfc = m.dmm_pfcpost1.stable(limit.PFC_STABLE)
         if not result:      # 1st retry
             self._logger.info('Retry1 PFC calibration')
             d.arm_calpfc(pfc)
-            result, pfc = m.dmm_pfcpost2.stable(limit.PFC_STABLE)
+            result, _, pfc = m.dmm_pfcpost2.stable(limit.PFC_STABLE)
         if not result:      # 2nd retry
             self._logger.info('Retry2 PFC calibration')
             d.arm_calpfc(pfc)
-            result, pfc = m.dmm_pfcpost3.stable(limit.PFC_STABLE)
+            result, _, pfc = m.dmm_pfcpost3.stable(limit.PFC_STABLE)
         if not result:      # 3rd retry
             self._logger.info('Retry3 PFC calibration')
             d.arm_calpfc(pfc)
-            result, pfc = m.dmm_pfcpost4.stable(limit.PFC_STABLE)
+            result, _, pfc = m.dmm_pfcpost4.stable(limit.PFC_STABLE)
         # A final PFC setup check
         m.dmm_pfcpost.stable(limit.PFC_STABLE)
         # no load for 12V calibration
         d.loads(i12=0, i24=0)
         # Calibrate the 12V set voltage
         self._logger.info('Start 12V calibration')
-        result, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
+        result, _, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
         d.arm_cal12v(v12)
         # Prevent a limit fail from failing the unit
         m.dmm_12vset.testlimit[0].position_fail = False
-        result, v12 = m.dmm_12vset.stable(limit.V12_STABLE)
+        result, _, v12 = m.dmm_12vset.stable(limit.V12_STABLE)
         # Allow a limit fail to fail the unit
         m.dmm_12vset.testlimit[0].position_fail = True
         if not result:
             self._logger.info('Retry 12V calibration')
-            result, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
+            result, _, v12 = m.dmm_12vpre.stable(limit.V12_STABLE)
             d.arm_cal12v(v12)
             m.dmm_12vset.stable(limit.V12_STABLE)
         tester.MeasureGroup(
