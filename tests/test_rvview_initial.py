@@ -122,7 +122,7 @@ class RVVIEW_Initial_TestCase(unittest.TestCase):
                 ('Banner1\r\nBanner2', ) +
                  ('', ) + ('success', ) * 2 + ('', ) +
                  ('Banner1\r\nBanner2', ) +
-                 ('1.0.13893.979', ),
+                 (rvview.initial.limit.BIN_VERSION, ),
             'Display':
                 ('0x10000000', ) + ('', ) +
                 ('0x10000000', ) + ('', ),

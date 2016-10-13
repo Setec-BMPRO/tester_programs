@@ -7,7 +7,7 @@ from tester.testlimit import (
     lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string, lim_hilo_int)
 
 ARM_VERSION = '1.1.13913.918'      # ARM versions
-ARM_HW_VER = (5, 0, 'A')
+ARM_HW_VER = (4, 0, 'A')
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
