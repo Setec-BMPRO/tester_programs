@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-10-07, 11:17:45 -->
+<!-- Saved: 2016-10-13, 17:00:13 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -159,6 +159,11 @@
     <Source>programs/rm50/final/__init__.py</Source>
     <Source>programs/rm50/final/limit.py</Source>
     <Source>programs/rm50/final/support.py</Source>
+    <Source>programs/rvview/__init__.py</Source>
+    <Source>programs/rvview/console.py</Source>
+    <Source>programs/rvview/initial/__init__.py</Source>
+    <Source>programs/rvview/initial/limit.py</Source>
+    <Source>programs/rvview/initial/support.py</Source>
     <Source>programs/selftest/__init__.py</Source>
     <Source>programs/selftest/limit.py</Source>
     <Source>programs/selftest/support.py</Source>
@@ -243,6 +248,7 @@
     <Source>tests/test_j35_final.py</Source>
     <Source>tests/test_j35_initial.py</Source>
     <Source>tests/test_protocol.py</Source>
+    <Source>tests/test_rvview_initial.py</Source>
     <Source>testsuite.py</Source>
   </Sources>
   <Forms>

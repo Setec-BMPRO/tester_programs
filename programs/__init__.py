@@ -24,6 +24,7 @@ from . import ids500
 from . import j35
 from . import mk7400
 from . import opto_test
+from . import rvview
 from . import rm50
 from . import smu75070
 from . import spa
@@ -104,6 +105,7 @@ PROGRAMS = (
     ('J35C Final', j35.Final, j35.FIN_LIMIT_C),
     ('MK7-400-1 Final', mk7400.Final, mk7400.FIN_LIMIT),
     ('Opto Test', opto_test.Main, opto_test.LIMIT),
+    ('RVVIEW Initial', rvview.Initial, rvview.INI_LIMIT),
     ('RM-50-24 Final', rm50.Final, rm50.FIN_LIMIT),
     ('SMU750-70 Final', smu75070.Final, smu75070.FIN_LIMIT),
     ('Spa Multi RGB', spa.InitialMulti, spa.RGB_LIMIT),
