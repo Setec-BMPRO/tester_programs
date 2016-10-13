@@ -9,7 +9,7 @@ from tester.testlimit import (
 
 BIN_VERSION = '1.0.13893.979'   # Software binary version
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-ARM_HW_VER = (4, 0, 'A')
+ARM_HW_VER = (2, 0, 'A')
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
@@ -27,7 +27,7 @@ DATA = (
     lim_hilo('Vin', 7.0, 8.0),
     lim_hilo_percent('3V3', 3.3, 3.0),
     lim_lo('BkLghtOff', 0.5),
-    lim_hilo('BkLghtOn', 3.465, 4.545),     # 40mA = 4V with 100R (1%)
+    lim_hilo('BkLghtOn', 2.5, 3.5),
     lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     lim_string('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
     lim_string('CAN_RX', r'^RRQ,32,0'),

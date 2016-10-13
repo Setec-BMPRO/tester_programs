@@ -39,7 +39,7 @@ class LogicalDevices():
         # Set port separately, as we don't want it opened yet
         self.rvview_ser.port = limit.ARM_PORT
         # rvview Console driver
-        self.rvview = console.DirectConsole(self.rvview_ser)
+        self.rvview = console.DirectConsole(self.rvview_ser, verbose=False)
 
     def rvview_puts(self,
                    string_data, preflush=0, postflush=0, priority=False,
