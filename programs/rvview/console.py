@@ -53,14 +53,14 @@ class _Console():
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
         reset_relay.pulse(0.1)
-        self.action(None, delay=2.0, expected=0)  # Flush banner
+        self.action(None, delay=2.0, expected=2)  # Flush banner
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
         # Restart required because of HW_VER setting
         reset_relay.pulse(0.1)
-        self.action(None, delay=2.0, expected=0)  # Flush banner
+        self.action(None, delay=2.0, expected=2)  # Flush banner
 
     def testmode(self, state):
         """Enable or disable Test Mode.
