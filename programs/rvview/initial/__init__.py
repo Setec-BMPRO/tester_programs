@@ -69,7 +69,7 @@ class Initial(tester.TestSequence):
         """Apply input voltage and measure voltages."""
         dev, mes = self.logdev, self.meas
         self._sernum = share.get_sernum(
-            self.uuts, self._limits['SerNum'], mes.ui_SnEntry)
+            self.uuts, self.limits['SerNum'], mes.ui_SnEntry)
         dev.dcs_vin.output(limit.VIN_SET, True)
         tester.MeasureGroup((mes.dmm_vin, mes.dmm_3V3), timeout=5)
 
