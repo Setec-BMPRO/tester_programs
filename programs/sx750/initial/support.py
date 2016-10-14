@@ -87,8 +87,7 @@ class LogicalDevices():
         self.discharge.pulse()
         for ld in (self.dcl_5Vsb, self.dcl_12V, self.dcl_24V):
             ld.output(0.0)
-        for dcs in (self.dcs_PriCtl, self.dcs_Arduino, self.dcs_5Vsb,
-              self.dcs_Vcom):
+        for dcs in (self.dcs_PriCtl, self.dcs_5Vsb):
             dcs.output(0.0, False)
         for rla in (
                 self.rla_pic1, self.rla_pic2, self.rla_boot, self.rla_pson):
@@ -242,8 +241,8 @@ class SubTests():
         # ExtPowerOn: Apply and check injected rails.
         self.ext_pwron = tester.SubStep((
             tester.DcSubStep(
-                setting=((d.dcs_5Vsb, 9.0), (d.dcs_PriCtl, 12.0),
-                         (d.dcs_Arduino, 12.0), ), output=True),
+                setting=((d.dcs_5Vsb, 9.0), (d.dcs_PriCtl, 12.0), ),
+                output=True),
             tester.MeasureSubStep(
                 (m.dmm_5Vext, m.dmm_5Vunsw, m.dmm_3V3, m.dmm_PriCtl,
                  m.dmm_8V5Ard,), timeout=5),
