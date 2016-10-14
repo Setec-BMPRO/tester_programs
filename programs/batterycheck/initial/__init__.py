@@ -9,6 +9,7 @@ import time
 import subprocess
 import logging
 import tester
+import share
 from . import support
 from . import limit
 
@@ -77,7 +78,8 @@ class Initial(tester.TestSequence):
         d.rla_reset.set_on()
         # Apply and check supply rails
         d.dcs_input.output(15.0, output=True)
-        self._sernum = m.ui_SnEntry.measure().reading1
+        self._sernum = share.get_sernum(
+            self.uuts, self._limits['SerNum'], m.ui_SnEntry)
         tester.MeasureGroup((m.dmm_reg5V, m.dmm_reg12V, m.dmm_3V3), 2)
 
     def _step_program_avr(self):

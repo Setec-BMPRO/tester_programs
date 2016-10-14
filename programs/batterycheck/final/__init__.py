@@ -57,13 +57,8 @@ class Final(tester.TestSequence):
         """Power the battery check."""
         self.fifo_push(((s.oSnEntry, ('A1509020010', )), (s.o12V, 12.0), ))
 
-        self._sernum = str(self.uuts[0])
-        sn_lim = self._limits['SerNum']
-        sn_lim.position_fail = False
-        match = (sn_lim == self._sernum)
-        sn_lim.position_fail = True
-        if not match:   # Display pop-up box to enter serial number.
-            self._sernum = m.ui_SnEntry.measure().reading1
+        self._sernum = share.get_sernum(
+            self.uuts, self._limits['SerNum'], m.ui_SnEntry)
         d.dcs_input.output(12.0, output=True)
         m.dmm_12V.measure(timeout=5)
 

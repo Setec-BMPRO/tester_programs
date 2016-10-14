@@ -3,6 +3,7 @@
 """J35 Initial Test Program."""
 
 import tester
+import share
 from . import support
 from . import limit
 
@@ -80,7 +81,8 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         """
         dev, mes = self.logdev, self.meas
         mes.dmm_lock.measure(timeout=5)
-        self.sernum = mes.ui_sernum.measure().reading1
+        self._sernum = share.get_sernum(
+            self.uuts, self._limits['SerNum'], mes.ui_sernum)
         # Apply DC Source to Battery terminals
         dev.dcs_vbat.output(12.6, True)
         tester.MeasureGroup(

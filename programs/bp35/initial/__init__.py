@@ -5,6 +5,7 @@
 import logging
 import time
 import tester
+import share
 from . import support
 from . import limit
 
@@ -87,7 +88,8 @@ class Initial(tester.TestSequence):
              (s.vbat, 12.0), (s.o3v3, 3.3), (s.o3v3prog, 3.3),
              (s.sernum, ('A1626010123', )), ))
 
-        self._sernum = m.ui_sernum.measure().reading1
+        self._sernum = share.get_sernum(
+            self.uuts, self._limits['SerNum'], m.ui_sernum)
         m.dmm_lock.measure(timeout=5)
         # Detect the hardware version & choose correct HW_VER values
         if m.hardware5.measure().result:

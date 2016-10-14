@@ -5,6 +5,7 @@
 import logging
 import time
 import tester
+import share
 from . import support
 from . import limit
 
@@ -69,7 +70,8 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.oSnEntry, ('A1526040123', )), (s.oVin, 12.0), (s.o3V3, 3.3), ))
 
-        self.sernum = m.ui_SnEntry.measure().reading1
+        self._sernum = share.get_sernum(
+            self.uuts, self._limits['SerNum'], m.ui_SnEntry)
         d.dcs_Vin.output(limit.VIN_SET, output=True)
         tester.MeasureGroup((m.dmm_Vin, m.dmm_3V3), timeout=5)
 
