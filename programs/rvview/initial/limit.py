@@ -7,7 +7,7 @@ from tester.testlimit import (
     lim_hilo_percent, lim_hilo_int, lim_hilo,
     lim_lo, lim_string, lim_boolean)
 
-BIN_VERSION = '1.0.13893.979'   # Software binary version
+BIN_VERSION = '1.0.13938.981'   # Software binary version
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 ARM_HW_VER = (2, 0, 'A')
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
+<!-- Saved: 2016-10-14, 16:18:48 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -268,6 +269,7 @@
     <Other>programs/etrac/initial/etracII-2A.hex</Other>
     <Other>programs/gen8/initial/gen8_1.4.645.bin</Other>
     <Other>programs/j35/initial/j35_1.1.13913.918.bin</Other>
+    <Other>programs/rvview/initial/RvView_1.0.13938.981.bin</Other>
     <Other>programs/spa/multi/MFDrgb_V103.hex</Other>
     <Other>programs/spa/multi/MFDtri_V103.hex</Other>
     <Other>programs/spa/multi/spa_reset/spa_reset.ino</Other>
