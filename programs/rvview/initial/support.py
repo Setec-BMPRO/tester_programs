@@ -81,11 +81,11 @@ class Sensors():
             caption=tester.translate('rvview_initial', 'capSnEntry'),
             timeout=300)
         self.oYesNoOn = sensor.YesNo(
-            message=tester.translate('rvview_initial', 'IsDisplayOn?'),
-            caption=tester.translate('rvview_initial', 'capDisplay'))
+            message=tester.translate('rvview_initial', 'PushButtonOn?'),
+            caption=tester.translate('rvview_initial', 'capButtonOn'))
         self.oYesNoOff = sensor.YesNo(
-            message=tester.translate('rvview_initial', 'IsDisplayOff?'),
-            caption=tester.translate('rvview_initial', 'capDisplay'))
+            message=tester.translate('rvview_initial', 'PushButtonOff?'),
+            caption=tester.translate('rvview_initial', 'capButtonOff'))
         self.arm_canbind = console.Sensor(rvview, 'CAN_BIND')
         self.oSwVer = console.Sensor(
             rvview, 'SW_VER', rdgtype=sensor.ReadingString)
