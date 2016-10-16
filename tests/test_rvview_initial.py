@@ -112,7 +112,7 @@ class RVVIEW_Initial_TestCase(unittest.TestCase):
                 ((sen.oSnEntry, ('A1626010123', )), (sen.oVin, 7.5),
                 (sen.o3V3, 3.3), ),
             'Display': ((sen.oYesNoOn, True), (sen.oYesNoOff, True),
-                (sen.oBkLght, (4.0, 0.0)), ),
+                (sen.oBkLght, (3.0, 0.0)), ),
             }
         # Callables
         self._callables = {}
