@@ -110,9 +110,10 @@ class RVVIEW_Initial_TestCase(unittest.TestCase):
         self._sensor_data = {
             'PowerUp':
                 ((sen.oSnEntry, ('A1626010123', )), (sen.oVin, 7.5),
-                (sen.o3V3, 3.3), ),
-            'Display': ((sen.oYesNoOn, True), (sen.oYesNoOff, True),
-                (sen.oBkLght, (4.0, 0.0)), ),
+                 (sen.o3V3, 3.3), ),
+            'Display':
+                ((sen.oYesNoOn, True), (sen.oYesNoOff, True),
+                 (sen.oBkLght, (3.0, 0.0)), ),
             }
         # Callables
         self._callables = {}
@@ -120,12 +121,10 @@ class RVVIEW_Initial_TestCase(unittest.TestCase):
         self._console_data = {
             'Initialise':
                 ('Banner1\r\nBanner2', ) +
-                 ('', ) + ('success', ) * 2 + ('', ) +
-                 ('Banner1\r\nBanner2', ) +
-                 (rvview.initial.limit.BIN_VERSION, ),
-            'Display':
-                ('0x10000000', ) + ('', ) +
-                ('0x10000000', ) + ('', ),
+                ('', ) + ('success', ) * 2 + ('', ) +
+                ('Banner1\r\nBanner2', ) +
+                (rvview.initial.limit.BIN_VERSION, ),
+            'Display': ('0x10000000', '', '0x10000000', '', ),
             'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
             }
         # Tuples of strings with addprompt=False
@@ -133,8 +132,8 @@ class RVVIEW_Initial_TestCase(unittest.TestCase):
             'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
             }
         self._tester.test(('UUT1', ))
-        self.assertEqual('P', self._result.code)        # Test Result
-        self.assertEqual(10, len(self._result.readings)) # Reading count
+        self.assertEqual('P', self._result.code)            # Test Result
+        self.assertEqual(10, len(self._result.readings))    # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerUp', 'Initialise', 'Display', 'CanBus'],
