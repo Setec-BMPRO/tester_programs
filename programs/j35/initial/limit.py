@@ -6,7 +6,7 @@ import os
 from tester.testlimit import (
     lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string, lim_hilo_int)
 
-ARM_VERSION = '1.1.13913.918'      # ARM versions
+ARM_VERSION = '1.1.13949.919'      # ARM versions
 ARM_HW_VER = (4, 0, 'A')
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
