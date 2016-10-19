@@ -133,6 +133,7 @@ class Console(console.Variable, console.BadUartConsole):
             self['IOUT'] = 35.0
             self['VOUT'] = 12.8
             self['VOUT_OV'] = 2     # OVP Latch reset
+            self['FAN'] = 0
 
     def dcdc_on(self):
         """Power ON the DC-DC converter circuits."""

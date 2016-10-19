@@ -81,7 +81,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         """
         dev, mes = self.logdev, self.meas
         mes.dmm_lock.measure(timeout=5)
-        self._sernum = share.get_sernum(
+        self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes.ui_sernum)
         # Apply DC Source to Battery terminals
         dev.dcs_vbat.output(12.6, True)

@@ -66,8 +66,7 @@ class LogicalDevices():
         self.dcl_out.output(2.0)
         time.sleep(1)
         self.discharge.pulse()
-        for dcs in (self.dcs_vcom, self.dcs_vbat, self.dcs_vaux,
-                        self.dcs_solar):
+        for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_solar):
             dcs.output(0.0, False)
         for ld in (self.dcl_out, self.dcl_bat):
             ld.output(0.0, False)
