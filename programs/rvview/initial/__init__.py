@@ -68,7 +68,7 @@ class Initial(tester.TestSequence):
     def _step_power_up(self):
         """Apply input voltage and measure voltages."""
         dev, mes = self.logdev, self.meas
-        self._sernum = share.get_sernum(
+        self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes.ui_SnEntry)
         dev.dcs_vin.output(limit.VIN_SET, True)
         tester.MeasureGroup((mes.dmm_vin, mes.dmm_3V3), timeout=5)
@@ -100,7 +100,7 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup(
             (mes.ui_YesNoOn, mes.dmm_BkLghtOn, mes.ui_YesNoOff,
              mes.dmm_BkLghtOff),
-                timeout=5)
+            timeout=5)
         self.rvview.testmode(False)
 
     def _step_canbus(self):
