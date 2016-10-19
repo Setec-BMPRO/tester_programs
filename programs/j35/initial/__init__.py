@@ -144,9 +144,10 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.dcs_vbat.output(0.0, False)
         tester.MeasureGroup(
             (mes.arm_vout_ov, mes.dmm_3v3, mes.dmm_15vs, mes.dmm_vbat,
-             mes.dmm_fanOff, mes.arm_acv, mes.arm_acf, mes.arm_secT,
+             mes.dmm_fanOn, mes.arm_acv, mes.arm_acf, mes.arm_secT,
              mes.arm_vout, mes.arm_fan),
             timeout=5)
+        mes.dmm_fanOff.measure(timeout=10)
         self.j35['FAN'] = 100
         mes.dmm_fanOn.measure(timeout=5)
 

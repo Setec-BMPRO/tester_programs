@@ -123,7 +123,7 @@ class J35_Initial_TestCase(unittest.TestCase):
             'PowerUp':
                 ((sen.oacin, 240.0), (sen.ovbus, 340.0), (sen.o12Vpri, 12.5),
                  (sen.o3V3, 3.3), (sen.o15Vs, 12.5),
-                 (sen.ovbat, (12.8, 12.8, )), (sen.ofan, (0, 12.0)), ),
+                 (sen.ovbat, (12.8, 12.8, )), (sen.ofan, (12, 0, 12)), ),
             'Output': ((sen.ovload, (0.0, ) + (12.8, ) * 14), ),
             'RemoteSw': ((sen.ovload, (0.0, 12.8)), ),
             'Load': ((sen.ovbat, 12.8), ),
@@ -157,7 +157,7 @@ class J35_Initial_TestCase(unittest.TestCase):
             }
         self._tester.test(('UUT1', ))
         self.assertEqual('P', self._result.code)        # Test Result
-        self.assertEqual(64, len(self._result.readings)) # Reading count
+        self.assertEqual(65, len(self._result.readings)) # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp',
