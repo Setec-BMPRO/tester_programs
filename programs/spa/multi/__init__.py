@@ -183,25 +183,25 @@ class InitialMulti(tester.TestSequence):
         uc1_name = 0
         uc1_port = '/dev/ttyUSB0'
         uc1 = threading.Thread(
-            target=_programmer, name='Isp1Thread',
+            target=self.programmer, name='Isp1Thread',
             args=(uc1_name, uc1_port, self._hexfile, pgm_q))
         uc1.start()
         uc2_name = 1
         uc2_port = '/dev/ttyUSB1'
         uc2 = threading.Thread(
-            target=_programmer, name='Isp2Thread',
+            target=self.programmer, name='Isp2Thread',
             args=(uc2_name, uc2_port, self._hexfile, pgm_q))
         uc2.start()
         uc3_name = 2
         uc3_port = '/dev/ttyUSB2'
         uc3 = threading.Thread(
-            target=_programmer, name='Isp3Thread',
+            target=self.programmer, name='Isp3Thread',
             args=(uc3_name, uc3_port, self._hexfile, pgm_q))
         uc3.start()
         uc4_name = 3
         uc4_port = '/dev/ttyUSB3'
         uc4 = threading.Thread(
-            target=_programmer, name='Isp4Thread',
+            target=self.programmer, name='Isp4Thread',
             args=(uc4_name, uc4_port, self._hexfile, pgm_q))
         uc4.start()
         # Wait for programming completion
@@ -385,62 +385,61 @@ class InitialMulti(tester.TestSequence):
                 d.acsource.output(voltage=vsrc, output=output)
             time.sleep(_AC_SETTLE_TIME)
 
+    @staticmethod
+    def _programmer(myname, port, hexfile, result_q):
+        """Thread worker to program a uC.
 
-def _programmer(myname, port, hexfile, result_q):
-    """Thread worker to program a uC.
+        myname: My thread name.
+        port: List of command arguments.
+        hexfile: HEX file contents as Tuple of lines.
+        result_q: Queue for result tuple: (myname, error).
 
-    myname: My thread name.
-    port: List of command arguments.
-    hexfile: HEX file contents as Tuple of lines.
-    result_q: Queue for result tuple: (myname, error).
-
-    """
-    logger = logging.getLogger(__name__)
-    error = False
-    dev = None
-    try:
-        dev = p89lpc924.P89LPC924(port=port, baud=9600, timeout=1.0)
-        dev.read_device_id()
-        status_byte = dev.read_status_byte()
-        # status_byte b'00' means device is already programmed. Erase it.
-        if status_byte == b'00':
-            logger.debug('Erasing Device')
-            # erase 3 x 1k sectors (0000 to 08FF)
-            for adr in ('0000', '0400', '0800'):
-                dev.erase_sector(adr)
-            # erase 8 x 64b pages (0C00 to 0DFF)
-            for adr in ('0C00', '0C40', '0C80', '0CC0',
-                        '0D00', '0D40', '0D80', '0DC0'):
-                dev.erase_page(adr)
-            # Leave the ISP code alone (0E00 to 0FFF)
-        dev.read_boot_vector()
-        dev.read_UCFG1_register()
-        # Write all hex lines into device
-        logger.debug('Programming Device')
-        for rec in hexfile:
-            dev.write_hex_record(rec)
-        # Set status bit to zero to run user code at reset
-        dev.write_status_bit_zero()
-        # Set UCFG1 register
-        dev.write_UCFG1_register(_UCFG1)
-        # Read back some settings
-        dev.read_status_byte()
-        dev.read_boot_vector()
-        dev.read_UCFG1_register()
-
-    except serial.SerialException as e:
-        # Usually if the port cannot be opened
-        logger.debug('Serial Error: %s', e)
-        error = True
-    except p89lpc924.ISPError as e:
-        # Device is not programming
-        logger.debug('ISP%s Error: %s', myname, e)
-        error = True
-    except Exception:
-        # Log more info on any other exception
-        exc_str = traceback.format_exc()
-        logger.error('%s', exc_str)
-        error = True
-    if dev:
-        dev.close()
-    result_q.put((myname, error))
+        """
+        logger = logging.getLogger(__name__)
+        error = False
+        dev = None
+        try:
+            dev = p89lpc924.P89LPC924(port=port, baud=9600, timeout=1.0)
+            dev.read_device_id()
+            status_byte = dev.read_status_byte()
+            # status_byte b'00' means device is already programmed. Erase it.
+            if status_byte == b'00':
+                logger.debug('Erasing Device')
+                # erase 3 x 1k sectors (0000 to 08FF)
+                for adr in ('0000', '0400', '0800'):
+                    dev.erase_sector(adr)
+                # erase 8 x 64b pages (0C00 to 0DFF)
+                for adr in ('0C00', '0C40', '0C80', '0CC0',
+                            '0D00', '0D40', '0D80', '0DC0'):
+                    dev.erase_page(adr)
+                # Leave the ISP code alone (0E00 to 0FFF)
+            dev.read_boot_vector()
+            dev.read_UCFG1_register()
+            # Write all hex lines into device
+            logger.debug('Programming Device')
+            for rec in hexfile:
+                dev.write_hex_record(rec)
+            # Set status bit to zero to run user code at reset
+            dev.write_status_bit_zero()
+            # Set UCFG1 register
+            dev.write_UCFG1_register(_UCFG1)
+            # Read back some settings
+            dev.read_status_byte()
+            dev.read_boot_vector()
+            dev.read_UCFG1_register()
+        except serial.SerialException as e:
+            # Usually if the port cannot be opened
+            logger.debug('Serial Error: %s', e)
+            error = True
+        except p89lpc924.ISPError as e:
+            # Device is not programming
+            logger.debug('ISP%s Error: %s', myname, e)
+            error = True
+        except Exception:
+            # Log more info on any other exception
+            exc_str = traceback.format_exc()
+            logger.error('%s', exc_str)
+            error = True
+        if dev:
+            dev.close()
+        result_q.put((myname, error))

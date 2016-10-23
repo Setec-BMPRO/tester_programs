@@ -20,21 +20,6 @@ LIMIT_DATA_17L = limit.DATA_17L     # CMR-SBP-17-LiFePO4 Final limits
 d = s = m = t = None
 
 
-def _bit_status(num, check_bit):
-    """Check if a binary bit in an integer is 1 or 0.
-
-    num - Integer.
-    check_bit - Binary bit number to check.
-    Return true if bit is set otherwise false.
-
-    """
-    mask = 1 << check_bit
-    result = True if num & mask else False
-#    print('Bit %s of integer %s (binary %s) = %s',
-#        check_bit, num, bin(65536 + num), result)
-    return result
-
-
 class _Main(tester.TestSequence):
 
     """CMR-SBP Base Test Program."""
@@ -352,17 +337,29 @@ class Final(_Main):
         s.oMirvbatIn.store(cmr_data['VOLTAGE'])
         s.oMirErrV.store(dmm_vbatIn - cmr_data['VOLTAGE'])
         s.oMirCycleCnt.store(cmr_data['CYCLE COUNT'])
-        status = _bit_status(cmr_data['BATTERY MODE'], 7)
+        status = self.bit_status(cmr_data['BATTERY MODE'], 7)
         s.oMirRelrnFlg.store(status)
         s.oMirSw.store(cmr_data['ROTARY SWITCH READING'])
         s.oMirSenseRes.store(cmr_data['SENSE RESISTOR READING'])
         s.oMirCapacity.store(cmr_data['FULL CHARGE CAPACITY'])
         s.oMirRelStateCharge.store(cmr_data['REL STATE OF CHARGE'])
         s.oMirHalfCell.store(cmr_data['HALF CELL READING'])
-        status = _bit_status(cmr_data['PACK STATUS AND CONFIG'], 7)
+        status = self.bit_status(cmr_data['PACK STATUS AND CONFIG'], 7)
         s.oMirVFCcalStatus.store(status)
         s.oMirSerNum.store(str(cmr_data['SERIAL NUMBER']))
         tester.MeasureGroup(
             (m.cmr_vbatIn, m.cmr_ErrV, m.cmr_CycleCnt, m.cmr_RelrnFlg,
              m.cmr_Sw, m.cmr_SenseRes, m.cmr_Capacity, m.cmr_RelStateCharge,
              m.cmr_Halfcell, m.cmr_VFCcalStatus, m.cmr_SerNum), )
+
+    @staticmethod
+    def bit_status(num, check_bit):
+        """Check if a binary bit in an integer is 1 or 0.
+
+        num - Integer.
+        check_bit - Binary bit number to check.
+        Return true if bit is set otherwise false.
+
+        """
+        mask = 1 << check_bit
+        return True if num & mask else False

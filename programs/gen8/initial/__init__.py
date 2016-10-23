@@ -221,7 +221,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(((s.o5v, (5.15, 5.14, 5.10)), ))
 
         d.loads(i12=4.0, i24=0.1)
-        _reg_check(
+        self.reg_check(
             dmm_out=m.dmm_5v, dcl_out=d.dcl_5v, max_load=2.0, peak_load=2.5)
         d.loads(i5=0, i12=0, i24=0)
 
@@ -239,7 +239,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(((s.o12v, (12.34, 12.25, 12.00)), (s.vdsfet, 0.05), ))
 
         d.loads(i24=0.1)
-        _reg_check(
+        self.reg_check(
             dmm_out=m.dmm_12v, dcl_out=d.dcl_12v, max_load=22, peak_load=24)
         d.loads(i12=0, i24=0)
 
@@ -256,35 +256,35 @@ class Initial(tester.TestSequence):
         self.fifo_push(((s.o24v, (24.33, 24.22, 24.11)), (s.vdsfet, 0.05), ))
 
         d.loads(i12=4.0)
-        _reg_check(
+        self.reg_check(
             dmm_out=m.dmm_24v, dcl_out=d.dcl_24v, max_load=5.0, peak_load=6.0,
             fet=True)
         d.loads(i12=0, i24=0)
 
+    @staticmethod
+    def reg_check(dmm_out, dcl_out, max_load, peak_load, fet=False):
+        """Check regulation of an output.
 
-def _reg_check(dmm_out, dcl_out, max_load, peak_load, fet=False):
-    """Check regulation of an output.
+        dmm_out: Measurement instance for output voltage.
+        dcl_out: DC Load instance.
+        max_load: Maximum output load.
+        peak_load: Peak output load.
 
-    dmm_out: Measurement instance for output voltage.
-    dcl_out: DC Load instance.
-    max_load: Maximum output load.
-    peak_load: Peak output load.
+        Unit is left running at peak load.
 
-    Unit is left running at peak load.
-
-    """
-    dmm_out.configure()
-    dmm_out.opc()
-    with tester.PathName('NoLoad'):
-        dcl_out.output(0.0)
-        dcl_out.opc()
-        dmm_out.measure()
-    with tester.PathName('MaxLoad'):
-        dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
-        dmm_out.measure()
-        if fet:
-            m.dmm_vdsfet.measure(timeout=5)
-    with tester.PathName('PeakLoad'):
-        dcl_out.output(peak_load)
-        dcl_out.opc()
-        dmm_out.measure()
+        """
+        dmm_out.configure()
+        dmm_out.opc()
+        with tester.PathName('NoLoad'):
+            dcl_out.output(0.0)
+            dcl_out.opc()
+            dmm_out.measure()
+        with tester.PathName('MaxLoad'):
+            dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
+            dmm_out.measure()
+            if fet:
+                m.dmm_vdsfet.measure(timeout=5)
+        with tester.PathName('PeakLoad'):
+            dcl_out.output(peak_load)
+            dcl_out.opc()
+            dmm_out.measure()
