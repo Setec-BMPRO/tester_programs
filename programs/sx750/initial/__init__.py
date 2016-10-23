@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """SX-750 Initial Test Program."""
 
 import time
@@ -38,7 +39,7 @@ class Initial(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
 
-    def open(self):
+    def open(self, sequence=None):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m, t
@@ -82,16 +83,16 @@ class Initial(tester.TestSequence):
     def _step_program_micros(self):
         """Program the ARM and PIC devices.
 
-         5Vsb is injected to power the ARM and 5Vsb PIC. PriCtl is injected
-         to power the PwrSw PIC and digital pots.
-         The ARM is programmed.
-         The PIC's are programmed and the digital pots are set for maximum OCP.
-         Unit is left unpowered.
+        5Vsb is injected to power the ARM and 5Vsb PIC. PriCtl is injected
+        to power the PwrSw PIC and digital pots.
+        The ARM is programmed.
+        The PIC's are programmed and the digital pots are set for maximum OCP.
+        Unit is left unpowered.
 
-         """
+        """
         self.fifo_push(
             ((s.o5Vsb, 5.75), (s.o5Vsbunsw, (5.0,) * 2), (s.o3V3, 3.21),
-            (s.o8V5Ard, 8.5), (s.PriCtl, 12.34),))
+             (s.o8V5Ard, 8.5), (s.PriCtl, 12.34),))
         for _ in range(2):      # Push response prompts
             d.ard_puts('OK')
 
@@ -157,14 +158,14 @@ class Initial(tester.TestSequence):
                433.0, 433.0,     # After 1st cal
                433.0, 433.0,     # 2nd reading
                435.0, 435.0,     # Final value
-               )), ))
+              )), ))
         d.arm_puts('')
-        for str in (('50Hz ', ) +       # ARM_AcFreq
-                    ('240Vrms ', ) +    # ARM_AcVolt
-                    ('12180mV ', ) +    # ARM_12V
-                    ('24000mV ', )      # ARM_24V
+        for dstr in (('50Hz ', ) +       # ARM_AcFreq
+                     ('240Vrms ', ) +    # ARM_AcVolt
+                     ('12180mV ', ) +    # ARM_12V
+                     ('24000mV ', )      # ARM_24V
                     ):
-            d.arm_puts(str)
+            d.arm_puts(dstr)
         d.arm_puts(limit.BIN_VERSION[:3])    # ARM SwVer
         d.arm_puts(limit.BIN_VERSION[4:])    # ARM BuildNo
         for _ in range(4):      # Push response prompts
@@ -214,7 +215,7 @@ class Initial(tester.TestSequence):
         """
         self.fifo_push(((s.o5Vsb, (5.20, 5.15, 5.14, 5.10, )), ))
 
-        _reg_check(
+        self.reg_check(
             dmm_out=m.dmm_5Vsb, dcl_out=d.dcl_5Vsb,
             reg_limit=self._limits['5Vsb_reg'], max_load=2.0, peak_load=2.5)
         d.dcl_5Vsb.output(0)
@@ -236,19 +237,20 @@ class Initial(tester.TestSequence):
             ((s.o12V, (12.34, 12.25, 12.10, 12.00, 12.34, )),
              # OPC SET: Push 32 reads before OCP detected
              # OCP CHECK: Push 37 reads before OCP detected
-             (s.o12VinOCP, ((0.123, ) * 32 + (4.444, )) +
-                           ((0.123, ) * 37 + (4.444, ))),
-             ))
+             (s.o12VinOCP,
+              ((0.123, ) * 32 + (4.444, )) +
+              ((0.123, ) * 37 + (4.444, ))),
+            ))
         # Push response prompts
         for _ in range(35):      # Push response prompts
             d.ard_puts('OK')
 
-        _reg_check(
+        self.reg_check(
             dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
             reg_limit=self._limits['12V_reg'], max_load=32.0, peak_load=36.0)
-        _ocp_set(
+        self.ocp_set(
             target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
-            enable=m.ocp12_unlock, limit=self._limits['12V_ocp'])
+            enable=m.ocp12_unlock, olimit=self._limits['12V_ocp'])
         with tester.PathName('OCPcheck'):
             d.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
             m.rampOcp12V.measure()
@@ -272,18 +274,19 @@ class Initial(tester.TestSequence):
             ((s.o24V, (24.44, 24.33, 24.22, 24.11, 24.24)),
              # OPC SET: Push 32 reads before OCP detected
              # OCP CHECK: Push 18 reads before OCP detected
-             (s.o24VinOCP, ((0.123, ) * 32 + (4.444, )) +
-                           ((0.123, ) * 18 + (4.444, ))),
-             ))
+             (s.o24VinOCP,
+              ((0.123, ) * 32 + (4.444, )) +
+              ((0.123, ) * 18 + (4.444, ))),
+            ))
         for _ in range(35):      # Push response prompts
             d.ard_puts('OK')
 
-        _reg_check(
+        self.reg_check(
             dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
             reg_limit=self._limits['24V_reg'], max_load=15.0, peak_load=18.0)
-        _ocp_set(
+        self.ocp_set(
             target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
-            enable=m.ocp24_unlock, limit=self._limits['24V_ocp'])
+            enable=m.ocp24_unlock, olimit=self._limits['24V_ocp'])
         with tester.PathName('OCPcheck'):
             d.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
             m.rampOcp24V.measure()
@@ -309,64 +312,65 @@ class Initial(tester.TestSequence):
         d.dcl_12V.output(0)
         d.dcl_5Vsb.output(0)
 
+    @staticmethod
+    def reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
+        """Check regulation of an output.
 
-def _reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
-    """Check regulation of an output.
+        dmm_out: Measurement instance for output voltage.
+        dcl_out: DC Load instance.
+        reg_limit: TestLimit for Load Regulation.
+        max_load: Maximum output load.
+        peak_load: Peak output load.
+        Unit is left running at peak load.
 
-    dmm_out: Measurement instance for output voltage.
-    dcl_out: DC Load instance.
-    reg_limit: TestLimit for Load Regulation.
-    max_load: Maximum output load.
-    peak_load: Peak output load.
-    Unit is left running at peak load.
+        """
+        dmm_out.configure()
+        dmm_out.opc()
+        with tester.PathName('NoLoad'):
+            dcl_out.output(0.0)
+            dcl_out.opc()
+            volt00 = dmm_out.measure().reading1
+        with tester.PathName('MaxLoad'):
+            dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
+            dmm_out.measure()
+        with tester.PathName('LoadReg'):
+            dcl_out.output(peak_load * 0.95)
+            dcl_out.opc()
+            volt = dmm_out.measure().reading1
+            load_reg = 100.0 * (volt00 - volt) / volt00
+            reg_limit.check(load_reg, 1)
+        with tester.PathName('PeakLoad'):
+            dcl_out.output(peak_load)
+            dcl_out.opc()
+            dmm_out.measure()
 
-    """
-    dmm_out.configure()
-    dmm_out.opc()
-    with tester.PathName('NoLoad'):
-        dcl_out.output(0.0)
-        dcl_out.opc()
-        volt00 = dmm_out.measure().reading1
-    with tester.PathName('MaxLoad'):
-        dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
-        dmm_out.measure()
-    with tester.PathName('LoadReg'):
-        dcl_out.output(peak_load * 0.95)
-        dcl_out.opc()
-        volt = dmm_out.measure().reading1
-        load_reg = 100.0 * (volt00 - volt) / volt00
-        reg_limit.check(load_reg, 1)
-    with tester.PathName('PeakLoad'):
-        dcl_out.output(peak_load)
-        dcl_out.opc()
-        dmm_out.measure()
+    @staticmethod
+    def ocp_set(target, load, dmm, detect, enable, olimit):
+        """Set OCP of an output.
 
-def _ocp_set(target, load, dmm, detect, enable, limit):
-    """Set OCP of an output.
+        target: Target setpoint in Amp.
+        load: Load instrument.
+        dmm: Measurement of output voltage.
+        detect: Measurement of 'In OCP'.
+        enable: Measurement to call to enable digital pot.
+        olimit: Limit to check OCP pot setting.
 
-    target: Target setpoint in Amp.
-    load: Load instrument.
-    dmm: Measurement of output voltage.
-    detect: Measurement of 'In OCP'.
-    enable: Measurement to call to enable digital pot.
-    limit: Limit to check OCP pot setting.
+        OCP has been set to maximum in the programming step.
+        Apply the desired load current, then lower the OCP setting until
+        OCP triggers. The unit is left running at no load.
 
-    OCP has been set to maximum in the programming step. Apply the desired load
-    current, then lower the OCP setting until OCP triggers.
-    The unit is left running at no load.
-
-    """
-    with tester.PathName('OCPset'):
-        load.output(target)
-        dmm.measure()
-        detect.configure()
-        detect.opc()
-        enable.measure()
-        setting = 0
-        for setting in range(63, 0, -1):
-            m.ocp_step_dn.measure()
-            if detect.measure().result:
-                break
-        m.ocp_lock.measure()
-        load.output(0.0)
-        limit.check(setting, 1)
+        """
+        with tester.PathName('OCPset'):
+            load.output(target)
+            dmm.measure()
+            detect.configure()
+            detect.opc()
+            enable.measure()
+            setting = 0
+            for setting in range(63, 0, -1):
+                m.ocp_step_dn.measure()
+                if detect.measure().result:
+                    break
+            m.ocp_lock.measure()
+            load.output(0.0)
+            olimit.check(setting, 1)
