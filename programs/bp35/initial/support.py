@@ -157,6 +157,7 @@ class Measurements():
         """
         self._limits = limits
         self.hardware5 = self._maker('HwVer5', sense.hardware, False)
+        self.hardware8 = self._maker('HwVer8', sense.hardware, False)
         self.rx_can = self._maker('CAN_RX', sense.mir_can)
         self.dmm_lock = self._maker('FixtureLock', sense.lock)
         self.dmm_acin = self._maker('ACin', sense.acin)

@@ -10,6 +10,7 @@ from tester.testlimit import (
 ARM_VERSION = '1.2.13351.3801'      # ARM versions
 ARM_HW_VER = (3, 0, 'A')
 ARM_HW_VER5 = (7, 0, 'A')
+ARM_HW_VER8 = (8, 0, 'A')
 PIC_VERSION = '1.1.13543.181'       # Solar Regulator versions
 PIC_HW_VER = 1
 
@@ -37,7 +38,8 @@ PFC_STABLE = 0.05
 DATA = (
     lim_lo('FixtureLock', 1200),
     lim_boolean('Notify', True),
-    lim_hilo_delta('HwVer5', 3200.0, 250.0),
+    lim_hilo_delta('HwVer5', 3200.0, 250.0),    # Rev 5-7
+    lim_hilo_delta('HwVer8', 4400.0, 250.0),    # Rev 8+
     lim_hilo_delta('ACin', 240.0, 5.0),
     lim_hilo('Vpfc', 401.0, 424.0),
     lim_hilo('12Vpri', 11.5, 13.0),

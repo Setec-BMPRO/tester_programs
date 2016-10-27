@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """BP35 Initial Test Program."""
 
+from functools import wraps
 import logging
 import time
 import tester
@@ -11,8 +12,13 @@ from . import limit
 
 INI_LIMIT = limit.DATA
 
-# These module level variables are to avoid having to use 'self.' everywhere.
-d = s = m = None
+
+def teststep(func):
+    """Decorator to add arguments to the test step calls."""
+    @wraps(func)
+    def new_func(self):
+        return func(self, self.logdev, self.sensor, self.meas)
+    return new_func
 
 
 class Initial(tester.TestSequence):
@@ -46,36 +52,37 @@ class Initial(tester.TestSequence):
         super().__init__(selection, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._devices = physical_devices
-        self._limits = test_limits
-        self._sernum = None
-        self._hwver = None
+        self.phydev = physical_devices
+        self.limits = test_limits
+        self.sernum = None
+        self.hwver = None
+        self.logdev = None
+        self.sensor = None
+        self.meas = None
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m
-        d = support.LogicalDevices(self._devices, self.fifo)
-        s = support.Sensors(d, self._limits)
-        m = support.Measurements(s, self._limits)
+        self.logdev = support.LogicalDevices(self.phydev, self.fifo)
+        self.sensor = support.Sensors(self.logdev, self.limits)
+        self.meas = support.Measurements(self.sensor, self.limits)
         # Apply power to fixture (Comms & Trek2) circuits.
-        d.dcs_vcom.output(12.0, True)
+        self.logdev.dcs_vcom.output(12.0, True)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s
         # Remove power from fixture circuits.
-        d.dcs_vcom.output(0, False)
-        m = d = s = None
+        self.logdev.dcs_vcom.output(0, False)
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.reset()
+        self.logdev.reset()
 
-    def _step_prepare(self):
+    @teststep
+    def _step_prepare(self, dev, sen, mes):
         """Prepare to run a test.
 
         Measure fixture lock and part detection micro-switches.
@@ -84,51 +91,57 @@ class Initial(tester.TestSequence):
 
         """
         self.fifo_push(
-            ((s.lock, 10.0), (s.hardware, 1000),
-             (s.vbat, 12.0), (s.o3v3, 3.3), (s.o3v3prog, 3.3),
-             (s.sernum, ('A1626010123', )), ))
+            ((sen.lock, 10.0), (sen.hardware, 1000),
+             (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.o3v3prog, 3.3),
+             (sen.sernum, ('A1626010123', )), ))
 
-        self._sernum = share.get_sernum(
-            self.uuts, self._limits['SerNum'], m.ui_sernum)
-        m.dmm_lock.measure(timeout=5)
+        self.sernum = share.get_sernum(
+            self.uuts, self.limits['SerNum'], mes.ui_sernum)
+        mes.dmm_lock.measure(timeout=5)
         # Detect the hardware version & choose correct HW_VER values
-        if m.hardware5.measure().result:
-            self._logger.info(repr('Hardware Version 5+'))
-            self._hwver = limit.ARM_HW_VER5
+        if mes.hardware8.measure().result:
+            self._logger.info(repr('Hardware Version 8+'))
+            self.hwver = limit.ARM_HW_VER8
+        elif mes.hardware5.measure().result:
+            self._logger.info(repr('Hardware Version 5-7'))
+            self.hwver = limit.ARM_HW_VER5
         else:
             self._logger.info(repr('Hardware Version 1-4'))
-            self._hwver = limit.ARM_HW_VER
+            self.hwver = limit.ARM_HW_VER
         # Apply DC Sources to Battery terminals and Solar Reg input
-        d.dcs_vbat.output(limit.VBAT_IN, True)
-        d.rla_vbat.set_on()
-        d.dcs_sreg.output(limit.SOLAR_VIN, True)
+        dev.dcs_vbat.output(limit.VBAT_IN, True)
+        dev.rla_vbat.set_on()
+        dev.dcs_sreg.output(limit.SOLAR_VIN, True)
         tester.MeasureGroup(
-            (m.dmm_vbatin, m.dmm_3v3, m.dmm_3v3prog), timeout=5)
+            (mes.dmm_vbatin, mes.dmm_3v3, mes.dmm_3v3prog), timeout=5)
 
-    def _step_program_pic(self):
+    @teststep
+    def _step_program_pic(self, dev, sen, mes):
         """Program the dsPIC device.
 
         Device is powered by Solar Reg input voltage.
 
         """
-        d.program_pic.program()
-        d.dcs_sreg.output(0.0)  # Switch off the Solar
+        dev.program_pic.program()
+        dev.dcs_sreg.output(0.0)  # Switch off the Solar
 
-    def _step_program_arm(self):
+    @teststep
+    def _step_program_arm(self, dev, sen, mes):
         """Program the ARM device.
 
         Device is powered by injected Battery voltage.
 
         """
-        d.program_arm.program()
+        dev.program_arm.program()
         # Reset microprocessor for boards that need reprogramming by Service
-        d.dcs_vbat.output(0.0)
-        d.dcl_bat.output(1.0)
+        dev.dcs_vbat.output(0.0)
+        dev.dcl_bat.output(1.0)
         time.sleep(1)
-        d.dcl_bat.output(0.0)
-        d.dcs_vbat.output(limit.VBAT_IN)
+        dev.dcl_bat.output(0.0)
+        dev.dcs_vbat.output(limit.VBAT_IN)
 
-    def _step_initialise_arm(self):
+    @teststep
+    def _step_initialise_arm(self, dev, sen, mes):
         """Initialise the ARM device.
 
         Device is powered by injected Battery voltage.
@@ -137,7 +150,7 @@ class Initial(tester.TestSequence):
         Put device into manual control mode.
 
         """
-        self.fifo_push(((s.sernum, ('A1526040123', )), ))
+        self.fifo_push(((sen.sernum, ('A1526040123', )), ))
         for dat in (
                 ('Banner1\r\nBanner2', ) +  # Banner lines
                 ('', ) + ('success', ) * 2 + ('', ) * 4 +
@@ -146,160 +159,170 @@ class Initial(tester.TestSequence):
                 (limit.ARM_VERSION, ) +
                 ('', ) + ('0x10000', ) + ('', ) * 3     # Manual mode
             ):
-            d.bp35_puts(dat)
+            dev.bp35_puts(dat)
 
-        d.bp35.open()
-        d.rla_reset.pulse(0.1)
-        d.dcs_sreg.output(limit.SOLAR_VIN)
-        d.bp35.action(None, delay=1.5, expected=2)  # Flush banner
-        d.bp35['UNLOCK'] = True
-        d.bp35['HW_VER'] = self._hwver
-        d.bp35['SER_ID'] = self._sernum
-        d.bp35['NVDEFAULT'] = True
-        d.bp35['NVWRITE'] = True
-        d.bp35['SR_DEL_CAL'] = True
-        d.bp35['SR_HW_VER'] = limit.PIC_HW_VER
+        dev.bp35.open()
+        dev.rla_reset.pulse(0.1)
+        dev.dcs_sreg.output(limit.SOLAR_VIN)
+        dev.bp35.action(None, delay=1.5, expected=2)  # Flush banner
+        dev.bp35['UNLOCK'] = True
+        dev.bp35['HW_VER'] = self.hwver
+        dev.bp35['SER_ID'] = self.sernum
+        dev.bp35['NVDEFAULT'] = True
+        dev.bp35['NVWRITE'] = True
+        dev.bp35['SR_DEL_CAL'] = True
+        dev.bp35['SR_HW_VER'] = limit.PIC_HW_VER
         # Restart required because of HW_VER setting
-        d.rla_reset.pulse(0.1)
-        d.bp35.action(None, delay=1.5, expected=2)  # Flush banner
-        d.bp35['UNLOCK'] = True
-        m.arm_swver.measure()
-        d.bp35.manual_mode()
+        dev.rla_reset.pulse(0.1)
+        dev.bp35.action(None, delay=1.5, expected=2)  # Flush banner
+        dev.bp35['UNLOCK'] = True
+        mes.arm_swver.measure()
+        dev.bp35.manual_mode()
 
-    def _step_solar_reg(self):
+    @teststep
+    def _step_solar_reg(self, dev, sen, mes):
         """Test & Calibrate the Solar Regulator board."""
-        self.fifo_push(((s.vsreg, (13.0, 13.5)), ))
+        self.fifo_push(((sen.vsreg, (13.0, 13.5)), ))
         for dat in (
                 ('1.0', '0') +      # Solar alive, Vout OV
                 ('0', ) * 3 +       # 2 x Solar VI, Vout OV
                 ('0', '1') +        # Errorcode, Relay
                 ('0', )             # SR Cal
             ):
-            d.bp35_puts(dat)
+            dev.bp35_puts(dat)
 
-        tester.MeasureGroup((m.arm_solar_alive, m.arm_vout_ov, ))
+        tester.MeasureGroup((mes.arm_solar_alive, mes.arm_vout_ov, ))
         # The SR needs V & I set to zero after power up or it won't start.
-        d.bp35.solar_set(0, 0)
+        dev.bp35.solar_set(0, 0)
         # Now set the actual output settings
-        d.bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
+        dev.bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(2)           # Wait for the Solar to start & overshoot
-        d.bp35['VOUT_OV'] = 2   # Reset OVP Latch because the Solar overshot
+        dev.bp35['VOUT_OV'] = 2   # Reset OVP Latch because the Solar overshot
         # Check that Solar Reg is error-free & the relay is ON
-        tester.MeasureGroup((m.arm_solar_error, m.arm_solar_relay, ))
-        vmeasured = m.dmm_vsregpre.measure(timeout=5).reading1
-        d.bp35['SR_VCAL'] = vmeasured   # Calibrate voltage setpoint
+        tester.MeasureGroup((mes.arm_solar_error, mes.arm_solar_relay, ))
+        vmeasured = mes.dmm_vsregpre.measure(timeout=5).reading1
+        dev.bp35['SR_VCAL'] = vmeasured   # Calibrate voltage setpoint
         time.sleep(1)
-        m.dmm_vsregpost.measure(timeout=5)
-        d.dcs_sreg.output(0.0, output=False)
+        mes.dmm_vsregpost.measure(timeout=5)
+        dev.dcs_sreg.output(0.0, output=False)
 
-    def _step_aux(self):
+    @teststep
+    def _step_aux(self, dev, sen, mes):
         """Apply Auxiliary input."""
-        self.fifo_push(((s.vbat, 13.5), ))
+        self.fifo_push(((sen.vbat, 13.5), ))
         for dat in ('', '13500', '350', ''):
-            d.bp35_puts(dat)
+            dev.bp35_puts(dat)
 
-        d.dcs_vaux.output(limit.VAUX_IN, output=True)
-        d.dcl_bat.output(0.5)
-        d.bp35['AUX_RELAY'] = True
-        tester.MeasureGroup((m.dmm_vaux, m.arm_auxv, m.arm_auxi), timeout=5)
-        d.bp35['AUX_RELAY'] = False
-        d.dcs_vaux.output(0.0, output=False)
-        d.dcl_bat.output(0.0)
+        dev.dcs_vaux.output(limit.VAUX_IN, output=True)
+        dev.dcl_bat.output(0.5)
+        dev.bp35['AUX_RELAY'] = True
+        tester.MeasureGroup(
+            (mes.dmm_vaux, mes.arm_auxv, mes.arm_auxi), timeout=5)
+        dev.bp35['AUX_RELAY'] = False
+        dev.dcs_vaux.output(0.0, output=False)
+        dev.dcl_bat.output(0.0)
 
-    def _step_powerup(self):
+    @teststep
+    def _step_powerup(self, dev, sen, mes):
         """Power-Up the Unit with 240Vac."""
         self.fifo_push(
-            ((s.acin, 240.0), (s.pri12v, 12.5), (s.o3v3, 3.3),
-             (s.o15Vs, 12.5), (s.vbat, 12.8), (s.vpfc, (415.0, 415.0), )))
+            ((sen.acin, 240.0), (sen.pri12v, 12.5), (sen.o3v3, 3.3),
+             (sen.o15Vs, 12.5), (sen.vbat, 12.8),
+             (sen.vpfc, (415.0, 415.0), )))
         for dat in ('', ) * 4 + ('0', ) * 2:
-            d.bp35_puts(dat)
+            dev.bp35_puts(dat)
 
         # Apply 240Vac & check
-        d.acsource.output(voltage=240.0, output=True)
-        tester.MeasureGroup((m.dmm_acin, m.dmm_pri12v), timeout=10)
+        dev.acsource.output(voltage=240.0, output=True)
+        tester.MeasureGroup((mes.dmm_acin, mes.dmm_pri12v), timeout=10)
         # Enable PFC & DCDC converters
-        d.bp35.power_on()
+        dev.bp35.power_on()
         # Wait for PFC overshoot to settle
-        m.dmm_vpfc.stable(limit.PFC_STABLE)
-        m.arm_vout_ov.measure()
+        mes.dmm_vpfc.stable(limit.PFC_STABLE)
+        mes.arm_vout_ov.measure()
         # Remove injected Battery voltage
-        d.rla_vbat.set_off()
-        d.dcs_vbat.output(0.0, output=False)
+        dev.rla_vbat.set_off()
+        dev.dcs_vbat.output(0.0, output=False)
         # Is it now running on it's own?
-        m.arm_vout_ov.measure()
-        tester.MeasureGroup((m.dmm_3v3, m.dmm_15vs, m.dmm_vbat), timeout=10)
+        mes.arm_vout_ov.measure()
+        tester.MeasureGroup(
+            (mes.dmm_3v3, mes.dmm_15vs, mes.dmm_vbat), timeout=10)
 
-    def _step_output(self):
+    @teststep
+    def _step_output(self, dev, sen, mes):
         """Test the output switches.
 
         Each output is turned ON in turn.
         All outputs are then left ON.
 
         """
-        self.fifo_push(((s.vload, (0.0, ) + (12.8, ) * 14), ))
+        self.fifo_push(((sen.vload, (0.0, ) + (12.8, ) * 14), ))
         for dat in ('', ) * (1 + 14 + 1):
-            d.bp35_puts(dat)
+            dev.bp35_puts(dat)
 
         # All outputs OFF
-        d.bp35.load_set(set_on=True, loads=())
+        dev.bp35.load_set(set_on=True, loads=())
         # A little load on the output.
-        d.dcl_out.output(1.0, True)
-        m.dmm_vloadOff.measure(timeout=2)
+        dev.dcl_out.output(1.0, True)
+        mes.dmm_vloadOff.measure(timeout=2)
         # One at a time ON
         for load in range(14):
             with tester.PathName('L{}'.format(load + 1)):
-                d.bp35.load_set(set_on=True, loads=(load, ))
-                m.dmm_vload.measure(timeout=2)
+                dev.bp35.load_set(set_on=True, loads=(load, ))
+                mes.dmm_vload.measure(timeout=2)
         # All outputs ON
-        d.bp35.load_set(set_on=False, loads=())
+        dev.bp35.load_set(set_on=False, loads=())
 
-    def _step_remote_sw(self):
+    @teststep
+    def _step_remote_sw(self, dev, sen, mes):
         """Test Remote Load Isolator Switch."""
-        self.fifo_push(((s.vload, (0.25, 12.34)), ))
+        self.fifo_push(((sen.vload, (0.25, 12.34)), ))
 
-        d.rla_loadsw.set_on()
-        m.dmm_vloadOff.measure(timeout=5)
-        d.rla_loadsw.set_off()
-        m.dmm_vload.measure(timeout=5)
+        dev.rla_loadsw.set_on()
+        mes.dmm_vloadOff.measure(timeout=5)
+        dev.rla_loadsw.set_off()
+        mes.dmm_vload.measure(timeout=5)
 
-    def _step_ocp(self):
+    @teststep
+    def _step_ocp(self, dev, sen, mes):
         """Test functions of the unit."""
         self.fifo_push(
-            ((s.fan, (0, 12.0)),
-             (s.vbat, 12.8), (s.vbat, (12.8, ) * 6 + (11.0, ), ), ))
+            ((sen.fan, (0, 12.0)),
+             (sen.vbat, 12.8), (sen.vbat, (12.8, ) * 6 + (11.0, ), ), ))
         if self.fifo:
-            for sen in s.arm_loads:
+            for sen in sen.arm_loads:
                 sen.store(2.0)
         for dat in ('240', '50000', '350', '12800', '500', '', '4000'):
-            d.bp35_puts(dat)
+            dev.bp35_puts(dat)
 
         tester.MeasureGroup(
-            (m.arm_acv, m.arm_acf, m.arm_secT, m.arm_vout, m.arm_fan,
-             m.dmm_fanOff), timeout=5)
-        d.bp35['FAN'] = 100
-        m.dmm_fanOn.measure(timeout=5)
-        d.dcl_out.binary(1.0, 28.0, 5.0)
-        d.dcl_bat.output(4.0, output=True)
-        tester.MeasureGroup((m.dmm_vbat, m.arm_battI, ), timeout=5)
+            (mes.arm_acv, mes.arm_acf, mes.arm_secT, mes.arm_vout,
+             mes.arm_fan, mes.dmm_fanOff), timeout=5)
+        dev.bp35['FAN'] = 100
+        mes.dmm_fanOn.measure(timeout=5)
+        dev.dcl_out.binary(1.0, 28.0, 5.0)
+        dev.dcl_bat.output(4.0, output=True)
+        tester.MeasureGroup((mes.dmm_vbat, mes.arm_battI, ), timeout=5)
         for load in range(14):
             with tester.PathName('L{}'.format(load + 1)):
-                m.arm_loads[load].measure(timeout=5)
-        m.ramp_ocp.measure(timeout=5)
-        d.dcl_bat.output(0.0)
+                mes.arm_loads[load].measure(timeout=5)
+        mes.ramp_ocp.measure(timeout=5)
+        dev.dcl_bat.output(0.0)
 
-    def _step_canbus(self):
+    @teststep
+    def _step_canbus(self, dev, sen, mes):
         """Test the Can Bus."""
         for dat in ('0x10000000', '', '0x10000000', '', ''):
-            d.bp35_puts(dat)
-        d.bp35_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
+            dev.bp35_puts(dat)
+        dev.bp35_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
-        m.arm_can_bind.measure(timeout=10)
-        d.bp35.can_testmode(True)
+        mes.arm_can_bind.measure(timeout=10)
+        dev.bp35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
         self._logger.debug('CAN Echo Request --> %s', repr(limit.CAN_ECHO))
-        d.bp35['CAN'] = limit.CAN_ECHO
-        echo_reply = d.bp35_ser.readline().decode(errors='ignore')
+        dev.bp35['CAN'] = limit.CAN_ECHO
+        echo_reply = dev.bp35_ser.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
-        s.mir_can.store(echo_reply)
-        m.rx_can.measure()
+        sen.mir_can.store(echo_reply)
+        mes.rx_can.measure()
