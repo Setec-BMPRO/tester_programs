@@ -22,7 +22,7 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self._fifo = fifo
+        self.fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
         self.discharge = tester.Discharge(devices['DIS'])
@@ -46,7 +46,7 @@ class LogicalDevices():
             boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # PIC device programmer
         self.program_pic = share.ProgramPIC(
-            limit.PIC_HEX, folder, '33FJ16GS402', self.rla_pic)
+            'dummy', folder, '33FJ16GS402', self.rla_pic)
         # Serial connection to the BP35 console
         self.bp35_ser = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=5.0)
@@ -59,7 +59,7 @@ class LogicalDevices():
                   string_data, preflush=0, postflush=0, priority=False,
                   addprompt=True):
         """Push string data into the BP35 buffer if FIFOs are enabled."""
-        if self._fifo:
+        if self.fifo:
             if addprompt:
                 string_data = string_data + '\r\n> '
             self.bp35.puts(string_data, preflush, postflush, priority)

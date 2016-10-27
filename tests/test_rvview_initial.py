@@ -86,6 +86,7 @@ class RVVIEW_Initial_TestCase(unittest.TestCase):
         except KeyError:
             pass
         try:    # Console strings
+            dev.rvview_ser.flushInput()
             data = self._console_data[stepname]
             for msg in data:
                 dev.rvview_puts(msg)

@@ -13,13 +13,13 @@ import isplpc
 _SUCCESS = 0
 _FAILURE = 1
 
-# Programmer binaries.
-_PIC_BINARY = {'posix': 'pickit3',
-               'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
-               }[os.name]
-
 
 class ProgramPIC():
+
+    pic_binary = {
+        'posix': 'pickit3',
+        'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
+        }[os.name]
 
     """Microchip PIC programmer using a PicKit3."""
 
@@ -37,29 +37,31 @@ class ProgramPIC():
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._command = [
-            _PIC_BINARY,
-            '/P{}'.format(device_type),
-            '/F{}'.format(hexfile),
-            '/E',
-            '/M',
-            '/Y'
-            ]
-        self._working_dir = working_dir
-        self._relay = relay
+        self.hexfile = hexfile
+        self.working_dir = working_dir
+        self.device_type = device_type
+        self.relay = relay
         limit = tester.LimitHiLoInt(limitname, _SUCCESS)
         self._pic = tester.Measurement(limit, tester.sensor.Mirror())
 
     def program(self):
         """Program a device."""
         try:
-            self._relay.set_on()
-            subprocess.check_output(self._command, cwd=self._working_dir)
+            command = [
+                self.pic_binary,
+                '/P{}'.format(self.device_type),
+                '/F{}'.format(self.hexfile),
+                '/E',
+                '/M',
+                '/Y'
+                ]
+            self.relay.set_on()
+            subprocess.check_output(command, cwd=self.working_dir)
             self._pic.sensor.store(_SUCCESS)
         except subprocess.CalledProcessError as err:
             self._logger.debug('Error: %s', err.output)
             self._pic.sensor.store(_FAILURE)
-        self._relay.set_off()
+        self.relay.set_off()
         self._pic.measure()
 
 

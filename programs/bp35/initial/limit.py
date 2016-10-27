@@ -8,18 +8,21 @@ from tester.testlimit import (
     lim_lo, lim_string, lim_boolean)
 
 ARM_VERSION = '1.2.13351.3801'      # ARM versions
-ARM_HW_VER = (3, 0, 'A')
+ARM_HW_VER1 = (3, 0, 'A')
 ARM_HW_VER5 = (7, 0, 'A')
 ARM_HW_VER8 = (8, 0, 'A')
-PIC_VERSION = '1.1.13543.181'       # Solar Regulator versions
-PIC_HW_VER = 1
+PIC_VERSION1 = '1.1.13543.181'      # Solar Regulator for Rev 1-7
+PIC_HW_VER1 = 1
+PIC_VERSION8 = '1.1.13802.182'      # Solar Regulator for Rev 8
+PIC_HW_VER8 = 3
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # ARM software image file
 ARM_BIN = 'bp35_{}.bin'.format(ARM_VERSION)
 # dsPIC software image file
-PIC_HEX = 'bp35sr_{}.hex'.format(PIC_VERSION)
+PIC_HEX1 = 'bp35sr_{}.hex'.format(PIC_VERSION1)
+PIC_HEX8 = 'bp35sr_{}.hex'.format(PIC_VERSION8)
 # CAN echo request messages
 CAN_ECHO = 'TQQ,32,0'
 

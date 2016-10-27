@@ -8,16 +8,16 @@ import logging
 from pydispatch import dispatcher
 import tester
 from . import logging_setup
-from programs import j35
+from programs import bp35
 
-_PROG_NAME = 'J35 Initial'
-_PROG_CLASS = j35.Initial
-_PROG_LIMIT = j35.INI_LIMIT
+_PROG_NAME = 'BP35 Initial'
+_PROG_CLASS = bp35.Initial
+_PROG_LIMIT = bp35.INI_LIMIT
 
 
-class J35_Initial_TestCase(unittest.TestCase):
+class BP35Initial(unittest.TestCase):
 
-    """J35 Initial program test suite."""
+    """BP35 Initial program test suite."""
 
     @classmethod
     def setUpClass(cls):
@@ -86,16 +86,16 @@ class J35_Initial_TestCase(unittest.TestCase):
         except KeyError:
             pass
         try:    # Console strings
-            dev.j35_ser.flushInput()
+            dev.bp35_ser.flushInput()
             data = self._console_data[stepname]
             for msg in data:
-                dev.j35_puts(msg)
+                dev.bp35_puts(msg)
         except KeyError:
             pass
         try:    # Console strings with addprompt=False
             data = self._console_np_data[stepname]
             for msg in data:
-                dev.j35_puts(msg, addprompt=False)
+                dev.bp35_puts(msg, addprompt=False)
         except KeyError:
             pass
 
@@ -106,63 +106,69 @@ class J35_Initial_TestCase(unittest.TestCase):
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
-        sen = self._test_program.sensors
+        sen = self._test_program.sensor
         for sensor in sen.arm_loads:
             sensor.store(value)
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self._test_program.sensors
+        sen = self._test_program.sensor
         # Tuples of sensor data
         self._sensor_data = {
             'Prepare':
-                ((sen.olock, 10.0), (sen.sernum, ('A1626010123', )),
-                 (sen.ovbat, 12.5), (sen.oair, 12.5), (sen.o3V3U, 3.3), ),
+                ((sen.lock, 10.0), (sen.hardware, 1000),
+                 (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.o3v3prog, 3.3),
+                 (sen.sernum, ('A1626010123', )), ),
             'Initialise': ((sen.sernum, ('A1526040123', )), ),
-            'Aux': ((sen.oaux, 13.5), (sen.ovbat, 13.5), ),
-            'Solar': ((sen.ovbat, 13.5), ),
+            'SolarReg': ((sen.vsreg, (13.0, 13.5)), ),
+            'Aux': ((sen.vbat, 13.5), ),
             'PowerUp':
-                ((sen.oacin, 240.0), (sen.ovbus, 340.0), (sen.o12Vpri, 12.5),
-                 (sen.o3V3, 3.3), (sen.o15Vs, 12.5),
-                 (sen.ovbat, (12.8, 12.8, )), (sen.ofan, (12, 0, 12)), ),
-            'Output': ((sen.ovload, (0.0, ) + (12.8, ) * 14), ),
-            'RemoteSw': ((sen.ovload, (0.0, 12.8)), ),
-            'Load': ((sen.ovbat, 12.8), ),
-            'OCP': ((sen.ovbat, (12.8, ) * 7 + (11.0, ), ), ),
-            'CanBus': ((sen.ocanpwr, 12.5), ),
+                ((sen.acin, 240.0), (sen.pri12v, 12.5), (sen.o3v3, 3.3),
+                 (sen.o15Vs, 12.5), (sen.vbat, 12.8),
+                 (sen.vpfc, (415.0, 415.0), )),
+            'Output': ((sen.vload, (0.0, ) + (12.8, ) * 14), ),
+            'RemoteSw': ((sen.vload, (0.25, 12.34)), ),
+            'OCP':
+                ((sen.fan, (0, 12.0)), (sen.vbat, 12.8),
+                 (sen.vbat, (12.8, ) * 6 + (11.0, ), ), ),
             }
         # Callables
         self._callables = {
-            'Load': (self._arm_loads, 2.0),
+            'OCP': (self._arm_loads, 2.0),
             }
         # Tuples of console strings
         self._console_data = {
             'Initialise':
                 ('Banner1\r\nBanner2', ) +
-                 ('', ) + ('success', ) * 2 + ('', ) +
-                 ('Banner1\r\nBanner2', ) +
-                 ('', ) + (j35.initial.limit.ARM_VERSION, ),
+                ('', ) + ('success', ) * 2 + ('', ) * 4 +
+                ('Banner1\r\nBanner2', ) +
+                ('', ) +
+                (bp35.initial.limit.ARM_VERSION, ) +
+                ('', ) + ('0x10000', ) + ('', ) * 3,      # Manual mode
+            'SolarReg':
+                ('1.0', '0') +      # Solar alive, Vout OV
+                ('0', ) * 3 +       # 2 x Solar VI, Vout OV
+                ('0', '1') +        # Errorcode, Relay
+                ('0', ),
             'Aux': ('', '13500', '1100', ''),
-            'Solar': ('', ''),
             'PowerUp':
-                ('', ) * 5 +     # Manual mode
-                ('0', '', '0', '0', '240', '50000',
-                 '350', '12800', '500', '', ),
+                ('', ) * 4 +     # Manual mode
+                ('0', ) * 2,
             'Output': ('', ) * (1 + 14 + 1),
-            'Load': ('4000', ),
+            'OCP': ('240', '50000', '350', '12800', '500', '', '4000'),
             'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
             }
         # Tuples of strings with addprompt=False
         self._console_np_data = {
-            'CanBus': ('RRQ,36,0,7,0,0,0,0,0,0,0\r\n', ),
+            'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
             }
         self._tester.test(('UUT1', ))
         self.assertEqual('P', self._result.code)        # Test Result
-        self.assertEqual(64, len(self._result.readings)) # Reading count
+        self.assertEqual(68, len(self._result.readings)) # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp',
-             'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus'],
+            ['Prepare', 'Initialise', 'SolarReg', 'Aux', 'PowerUp',
+             'Output', 'RemoteSw', 'OCP', 'CanBus'],
             self._steps)
 
     def test_fail_run(self):
@@ -176,13 +182,13 @@ class J35_Initial_TestCase(unittest.TestCase):
         patcher = patch('threading.Timer', return_value=mymock)
         self.addCleanup(patcher.stop)
         patcher.start()
-        sen = self._test_program.sensors
+        sen = self._test_program.sensor
         self._sensor_data = {
             'Prepare':
-                ((sen.olock, 10.0), (sen.sernum, ('A1626010123', )),
-                 (sen.ovbat, 2.5), ),   # Vbat will fail
+                ((sen.lock, 10.0), (sen.sernum, ('A1626010123', )),
+                 (sen.vbat, 2.5), ),   # Vbat will fail
             }
         self._tester.test(('UUT1', ))
         self.assertEqual(self._result.code, 'F')        # Must have failed
-        self.assertEqual(3, len(self._result.readings))
+        self.assertEqual(5, len(self._result.readings))
         self.assertEqual(['Prepare'], self._steps)

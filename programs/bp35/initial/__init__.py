@@ -56,6 +56,7 @@ class Initial(tester.TestSequence):
         self.limits = test_limits
         self.sernum = None
         self.hwver = None
+        self.hwver_pic = None
         self.logdev = None
         self.sensor = None
         self.meas = None
@@ -90,11 +91,6 @@ class Initial(tester.TestSequence):
         to power up the micros.
 
         """
-        self.fifo_push(
-            ((sen.lock, 10.0), (sen.hardware, 1000),
-             (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.o3v3prog, 3.3),
-             (sen.sernum, ('A1626010123', )), ))
-
         self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes.ui_sernum)
         mes.dmm_lock.measure(timeout=5)
@@ -102,12 +98,18 @@ class Initial(tester.TestSequence):
         if mes.hardware8.measure().result:
             self._logger.info(repr('Hardware Version 8+'))
             self.hwver = limit.ARM_HW_VER8
+            dev.program_pic.hexfile = limit.PIC_HEX8
+            self.hwver_pic = limit.PIC_HW_VER8
         elif mes.hardware5.measure().result:
             self._logger.info(repr('Hardware Version 5-7'))
             self.hwver = limit.ARM_HW_VER5
+            dev.program_pic.hexfile = limit.PIC_HEX1
+            self.hwver_pic = limit.PIC_HW_VER1
         else:
             self._logger.info(repr('Hardware Version 1-4'))
-            self.hwver = limit.ARM_HW_VER
+            self.hwver = limit.ARM_HW_VER1
+            dev.program_pic.hexfile = limit.PIC_HEX1
+            self.hwver_pic = limit.PIC_HW_VER1
         # Apply DC Sources to Battery terminals and Solar Reg input
         dev.dcs_vbat.output(limit.VBAT_IN, True)
         dev.rla_vbat.set_on()
@@ -150,17 +152,6 @@ class Initial(tester.TestSequence):
         Put device into manual control mode.
 
         """
-        self.fifo_push(((sen.sernum, ('A1526040123', )), ))
-        for dat in (
-                ('Banner1\r\nBanner2', ) +  # Banner lines
-                ('', ) + ('success', ) * 2 + ('', ) * 4 +
-                ('Banner1\r\nBanner2', ) +  # Banner lines
-                ('', ) +
-                (limit.ARM_VERSION, ) +
-                ('', ) + ('0x10000', ) + ('', ) * 3     # Manual mode
-            ):
-            dev.bp35_puts(dat)
-
         dev.bp35.open()
         dev.rla_reset.pulse(0.1)
         dev.dcs_sreg.output(limit.SOLAR_VIN)
@@ -171,7 +162,7 @@ class Initial(tester.TestSequence):
         dev.bp35['NVDEFAULT'] = True
         dev.bp35['NVWRITE'] = True
         dev.bp35['SR_DEL_CAL'] = True
-        dev.bp35['SR_HW_VER'] = limit.PIC_HW_VER
+        dev.bp35['SR_HW_VER'] = self.hwver_pic
         # Restart required because of HW_VER setting
         dev.rla_reset.pulse(0.1)
         dev.bp35.action(None, delay=1.5, expected=2)  # Flush banner
@@ -182,15 +173,6 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_solar_reg(self, dev, sen, mes):
         """Test & Calibrate the Solar Regulator board."""
-        self.fifo_push(((sen.vsreg, (13.0, 13.5)), ))
-        for dat in (
-                ('1.0', '0') +      # Solar alive, Vout OV
-                ('0', ) * 3 +       # 2 x Solar VI, Vout OV
-                ('0', '1') +        # Errorcode, Relay
-                ('0', )             # SR Cal
-            ):
-            dev.bp35_puts(dat)
-
         tester.MeasureGroup((mes.arm_solar_alive, mes.arm_vout_ov, ))
         # The SR needs V & I set to zero after power up or it won't start.
         dev.bp35.solar_set(0, 0)
@@ -209,10 +191,6 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_aux(self, dev, sen, mes):
         """Apply Auxiliary input."""
-        self.fifo_push(((sen.vbat, 13.5), ))
-        for dat in ('', '13500', '350', ''):
-            dev.bp35_puts(dat)
-
         dev.dcs_vaux.output(limit.VAUX_IN, output=True)
         dev.dcl_bat.output(0.5)
         dev.bp35['AUX_RELAY'] = True
@@ -225,13 +203,6 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_powerup(self, dev, sen, mes):
         """Power-Up the Unit with 240Vac."""
-        self.fifo_push(
-            ((sen.acin, 240.0), (sen.pri12v, 12.5), (sen.o3v3, 3.3),
-             (sen.o15Vs, 12.5), (sen.vbat, 12.8),
-             (sen.vpfc, (415.0, 415.0), )))
-        for dat in ('', ) * 4 + ('0', ) * 2:
-            dev.bp35_puts(dat)
-
         # Apply 240Vac & check
         dev.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((mes.dmm_acin, mes.dmm_pri12v), timeout=10)
@@ -256,10 +227,6 @@ class Initial(tester.TestSequence):
         All outputs are then left ON.
 
         """
-        self.fifo_push(((sen.vload, (0.0, ) + (12.8, ) * 14), ))
-        for dat in ('', ) * (1 + 14 + 1):
-            dev.bp35_puts(dat)
-
         # All outputs OFF
         dev.bp35.load_set(set_on=True, loads=())
         # A little load on the output.
@@ -276,8 +243,6 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_remote_sw(self, dev, sen, mes):
         """Test Remote Load Isolator Switch."""
-        self.fifo_push(((sen.vload, (0.25, 12.34)), ))
-
         dev.rla_loadsw.set_on()
         mes.dmm_vloadOff.measure(timeout=5)
         dev.rla_loadsw.set_off()
@@ -286,15 +251,6 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_ocp(self, dev, sen, mes):
         """Test functions of the unit."""
-        self.fifo_push(
-            ((sen.fan, (0, 12.0)),
-             (sen.vbat, 12.8), (sen.vbat, (12.8, ) * 6 + (11.0, ), ), ))
-        if self.fifo:
-            for sen in sen.arm_loads:
-                sen.store(2.0)
-        for dat in ('240', '50000', '350', '12800', '500', '', '4000'):
-            dev.bp35_puts(dat)
-
         tester.MeasureGroup(
             (mes.arm_acv, mes.arm_acf, mes.arm_secT, mes.arm_vout,
              mes.arm_fan, mes.dmm_fanOff), timeout=5)
@@ -312,10 +268,6 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_canbus(self, dev, sen, mes):
         """Test the Can Bus."""
-        for dat in ('0x10000000', '', '0x10000000', '', ''):
-            dev.bp35_puts(dat)
-        dev.bp35_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
-
         mes.arm_can_bind.measure(timeout=10)
         dev.bp35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!

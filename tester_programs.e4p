@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-10-19, 13:26:20 -->
+<!-- Saved: 2016-10-27, 18:24:31 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -244,6 +244,7 @@
     <Source>share/ticker.py</Source>
     <Source>share/timed_data.py</Source>
     <Source>tests/__init__.py</Source>
+    <Source>tests/test_bp35_initial.py</Source>
     <Source>tests/test_can_tunnel.py</Source>
     <Source>tests/test_j35_final.py</Source>
     <Source>tests/test_j35_initial.py</Source>
@@ -261,6 +262,8 @@
     <Other>programs/batterycheck/initial/BatteryCheckControl_1.7.4080.bin</Other>
     <Other>programs/batterycheck/initial/BatteryCheckSupervisor-2.hex</Other>
     <Other>programs/bp35/initial/bp35_1.2.13351.3801.bin</Other>
+    <Other>programs/bp35/initial/bp35sr_1.1.13543.181.hex</Other>
+    <Other>programs/bp35/initial/bp35sr_1.1.13802.182.hex</Other>
     <Other>programs/c45a15/initial/c45a-15.hex</Other>
     <Other>programs/cmrsbp/CMR-SBP-9.hex</Other>
     <Other>programs/cn101/initial/cn101_1.1.13665.176.bin</Other>
