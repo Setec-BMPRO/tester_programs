@@ -16,7 +16,7 @@ def teststep(func):
     """Decorator to add arguments to the test step calls."""
     @wraps(func)
     def new_func(self):
-        return func(self, self.logdev, self.meas)
+        return func(self, self.logdev, self.logdev.rvview, self.meas)
     return new_func
 
 
@@ -41,16 +41,12 @@ class Initial(tester.TestSequence):
         self.sensors = None
         self.meas = None
         self.sernum = None
-        self.rvview = None
 
     def open(self):
         """Prepare for testing."""
         self.logdev = support.LogicalDevices(self.phydev, self.fifo)
-        self.rvview = self.logdev.rvview
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
-        # Power to fixture Comms circuits.
-        self.logdev.dcs_vcom.output(9.0, True)
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -61,6 +57,8 @@ class Initial(tester.TestSequence):
             tester.TestStep('CanBus', self._step_canbus),
             )
         super().open(sequence)
+        # Power to fixture Comms circuits.
+        self.logdev.dcs_vcom.output(9.0, True)
 
     def close(self):
         """Finished testing."""
@@ -68,7 +66,6 @@ class Initial(tester.TestSequence):
         self.logdev = None
         self.sensors = None
         self.meas = None
-        self.rvview = None
         super().close()
 
     def safety(self):
@@ -76,7 +73,7 @@ class Initial(tester.TestSequence):
         self.logdev.reset()
 
     @teststep
-    def _step_power_up(self, dev, mes):
+    def _step_power_up(self, dev, rvview, mes):
         """Apply input voltage and measure voltages."""
         self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes.ui_SnEntry)
@@ -84,38 +81,38 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup((mes.dmm_vin, mes.dmm_3V3), timeout=5)
 
     @teststep
-    def _step_initialise_arm(self, dev, mes):
+    def _step_initialise_arm(self, dev, rvview, mes):
         """Initialise the ARM device.
 
         Reset the device, set HW version & Serial number.
 
         """
-        self.rvview.open()
-        self.rvview.brand(limit.ARM_HW_VER, self.sernum, dev.rla_reset)
+        rvview.open()
+        rvview.brand(limit.ARM_HW_VER, self.sernum, dev.rla_reset)
         mes.arm_swver.measure()
 
     @teststep
-    def _step_display(self, dev, mes):
+    def _step_display(self, dev, rvview, mes):
         """Test the LCD.
 
         Put device into test mode.
         Check all segments and backlight.
 
         """
-        self.rvview.testmode(True)
+        rvview.testmode(True)
         tester.MeasureGroup(
             (mes.ui_YesNoOn, mes.dmm_BkLghtOn, mes.ui_YesNoOff,
              mes.dmm_BkLghtOff),
             timeout=5)
-        self.rvview.testmode(False)
+        rvview.testmode(False)
 
     @teststep
-    def _step_canbus(self, dev, mes):
+    def _step_canbus(self, dev, rvview, mes):
         """Test the Can Bus."""
         mes.arm_can_bind.measure(timeout=10)
-        self.rvview.can_testmode(True)
+        rvview.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
-        self.rvview['CAN'] = limit.CAN_ECHO
+        rvview['CAN'] = limit.CAN_ECHO
         echo_reply = dev.rvview_ser.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         self.sensors.mir_can.store(echo_reply)
