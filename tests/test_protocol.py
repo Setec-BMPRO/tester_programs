@@ -11,7 +11,7 @@ console = None      # Console module
 mycon = None        # Console instance
 
 
-class BaseConsoleTestCase(unittest.TestCase):
+class BaseConsole(unittest.TestCase):
 
     """BaseConsole test suite."""
 
@@ -28,11 +28,14 @@ class BaseConsoleTestCase(unittest.TestCase):
         sim_ser = tester.SimSerial(simulation=True)
         global mycon
         mycon = console.BaseConsole(sim_ser, verbose=False)
+        # We need a tester to get MeasurementFailedError
+        cls.tester = tester.Tester('MockATE', (), fifo=True)
 
     @classmethod
     def tearDownClass(cls):
         mycon.close()
         cls.patcher.stop()
+        cls.tester.stop()
 
     def test_1_open(self):
         mycon.puts('\7Banner1\rBanner2\r> ')
@@ -55,7 +58,7 @@ class BaseConsoleTestCase(unittest.TestCase):
             mycon.action('NR')
 
 
-class BadUartConsoleTestCase(unittest.TestCase):
+class BadUartConsole(unittest.TestCase):
 
     """BadUartConsole test suite."""
 
@@ -72,11 +75,14 @@ class BadUartConsoleTestCase(unittest.TestCase):
         sim_ser = tester.SimSerial(simulation=True)
         global mycon
         mycon = console.BadUartConsole(sim_ser, verbose=False)
+        # We need a tester to get MeasurementFailedError
+        cls.tester = tester.Tester('MockATE', (), fifo=True)
 
     @classmethod
     def tearDownClass(cls):
         mycon.close()
         cls.patcher.stop()
+        cls.tester.stop()
 
     def test_1_open(self):
         mycon.puts('\7Banner1\r\nBanner2\r\n> ')

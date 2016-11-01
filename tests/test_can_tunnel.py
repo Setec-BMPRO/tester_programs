@@ -11,7 +11,7 @@ console = None      # Console module
 mycon = None        # ConsoleCanTunnel instance
 
 
-class TunnelTestCase(unittest.TestCase):
+class Tunnel(unittest.TestCase):
 
     """CAN Tunnel Console test suite."""
 

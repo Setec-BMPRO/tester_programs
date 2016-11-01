@@ -121,5 +121,5 @@ class Initial(tester.testsequence.TestSequence):
             self.fifo_push(((s.oAlarm, 12000),
                             (s.oVbat, (27.3, ) * 15 + (25.9, ), ),
                             (s.oVout, (27.3, ) * 15 + (25.9, ), ), ))
-        tester.measure.group((m.dmm_AlarmOpen, m.ramp_BattOCP,
-                              m.ramp_OutOCP, ), timeout=5)
+        tester.MeasureGroup((m.dmm_AlarmOpen, m.ramp_BattOCP,
+                             m.ramp_OutOCP, ), timeout=5)

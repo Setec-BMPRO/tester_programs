@@ -7,8 +7,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 INI_LIMIT = limit.DATA          # GENIUS-II limits
 INI_LIMIT_H = limit.DATA_H      # GENIUS-II-H limits
 

@@ -7,8 +7,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 FIN_LIMIT = limit.DATA         # GENIUS-II limits
 FIN_LIMIT_H = limit.DATA_H     # GENIUS-II-H limits
 
@@ -78,7 +76,7 @@ class Final(tester.TestSequence):
         """Remove and insert battery fuse, check red LED."""
         self.fifo_push(((s.oYesNoFuseOut, True), (s.oVbat, 0.0),
                         (s.oYesNoFuseIn, True), (s.oVout, 13.6)))
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.ui_YesNoFuseOut, m.dmm_VbatOff, m.ui_YesNoFuseIn, m.dmm_Vout),
             timeout=5)
 

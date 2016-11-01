@@ -187,7 +187,7 @@ class Initial(_Main):
         s.oMirSenseRes.store(cmr_data['SENSE RESISTOR READING'])
         s.oMirHalfCell.store(cmr_data['HALF CELL READING'])
         s.oMirVChge.store(cmr_data['CHARGE INPUT READING'])
-        tester.measure.group((m.cmr_SenseRes, m.cmr_Halfcell, m.cmr_VChgeOn),)
+        tester.MeasureGroup((m.cmr_SenseRes, m.cmr_Halfcell, m.cmr_VChgeOn),)
 
     def _step_check_vchge(self):
         """Check Vcharge."""

@@ -59,6 +59,7 @@ class Initial(tester.TestSequence):
         global m, d, s
         d.dcs_Vcom.output(0.0, output=False)
         m = d = s = None
+        super().close()
 
     def safety(self):
         """Make the unit safe after a test."""

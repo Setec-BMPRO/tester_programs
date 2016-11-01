@@ -13,8 +13,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 SGL_LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -63,7 +61,7 @@ class InitialSingle(tester.TestSequence):
         # This is a multi-unit parallel program so we can't stop on errors.
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
-        tester.MEASUREMENT_FAILURE_EXCEPTION = False
+        tester.Tester.measurement_failure_exception = False
         # Last AC Source set voltage
         self._last_vac = 0.0
 
@@ -109,8 +107,9 @@ class InitialSingle(tester.TestSequence):
             ((s.oAcVin, 12.01), (s.oAcIin1, 0.28 / 5), (s.oAcIin2, 0.28 / 5),
              (s.oAcIin3, 0.28 / 5), (s.oAcIin4, 0.28 / 5),
              (s.dso_led, ((7.51, 7.52, 7.53, 7.54), )), ))
-        MeasureGroup((m.dmm_AcVin12, m.dso_led, m.dmm_AcIin1_12,
-                      m.dmm_AcIin2_12, m.dmm_AcIin3_12, m.dmm_AcIin4_12))
+        tester.MeasureGroup(
+            (m.dmm_AcVin12, m.dso_led, m.dmm_AcIin1_12,
+             m.dmm_AcIin2_12, m.dmm_AcIin3_12, m.dmm_AcIin4_12))
 
     def _step_led10(self):
         """LED current regulation 10.5Vac.
@@ -123,8 +122,9 @@ class InitialSingle(tester.TestSequence):
              (s.oAcIin3, 0.24 / 5), (s.oAcIin4, 0.24 / 5),
              (s.dso_led, ((7.1, 7.2, 7.3, 7.4), )), ))
         self._ac_in(10.5)
-        MeasureGroup((m.dmm_AcVin10, m.dso_led10, m.dmm_AcIin1_10,
-                      m.dmm_AcIin2_10, m.dmm_AcIin3_10, m.dmm_AcIin4_10))
+        tester.MeasureGroup(
+            (m.dmm_AcVin10, m.dso_led10, m.dmm_AcIin1_10,
+             m.dmm_AcIin2_10, m.dmm_AcIin3_10, m.dmm_AcIin4_10))
 
     def _step_led24(self):
         """LED current regulation 24Vac.
@@ -137,8 +137,9 @@ class InitialSingle(tester.TestSequence):
              (s.oAcIin3, 0.2 / 5), (s.oAcIin4, 0.2 / 5),
              (s.dso_led, ((7.61, 7.62, 7.63, 7.64), )), ))
         self._ac_in(24.0)
-        MeasureGroup((m.dmm_AcVin24, m.dso_led, m.dmm_AcIin1_24,
-                      m.dmm_AcIin2_24, m.dmm_AcIin3_24, m.dmm_AcIin4_24))
+        tester.MeasureGroup(
+            (m.dmm_AcVin24, m.dso_led, m.dmm_AcIin1_24,
+             m.dmm_AcIin2_24, m.dmm_AcIin3_24, m.dmm_AcIin4_24))
 
     def _step_led32(self):
         """LED current regulation 32Vac.
@@ -151,8 +152,9 @@ class InitialSingle(tester.TestSequence):
              (s.oAcIin3, 0.16 / 5), (s.oAcIin4, 0.16 / 5),
              (s.dso_led, ((7.71, 7.72, 7.73, 7.74), )), ))
         self._ac_in(32.0)
-        MeasureGroup((m.dmm_AcVin32, m.dso_led, m.dmm_AcIin1_32,
-                      m.dmm_AcIin2_32, m.dmm_AcIin3_32, m.dmm_AcIin4_32))
+        tester.MeasureGroup(
+            (m.dmm_AcVin32, m.dso_led, m.dmm_AcIin1_32,
+             m.dmm_AcIin2_32, m.dmm_AcIin3_32, m.dmm_AcIin4_32))
 
     def _step_led35(self):
         """LED current regulation 35Vac.
@@ -165,8 +167,9 @@ class InitialSingle(tester.TestSequence):
              (s.oAcIin3, 0.1 / 5), (s.oAcIin4, 0.1 / 5),
              (s.dso_led, ((7.81, 7.82, 7.83, 7.84), )), ))
         self._ac_in(35.0)
-        MeasureGroup((m.dmm_AcVin35, m.dso_led, m.dmm_AcIin1_35,
-                      m.dmm_AcIin2_35, m.dmm_AcIin3_35, m.dmm_AcIin4_35))
+        tester.MeasureGroup(
+            (m.dmm_AcVin35, m.dso_led, m.dmm_AcIin1_35,
+             m.dmm_AcIin2_35, m.dmm_AcIin3_35, m.dmm_AcIin4_35))
 
     def _ac_in(self, vset, output=True, ramp=True, correct=True):
         """Set the AC Source for the target input voltage."""

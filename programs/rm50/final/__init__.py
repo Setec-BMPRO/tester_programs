@@ -8,8 +8,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 FIN_LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -82,7 +80,7 @@ class Final(tester.TestSequence):
         val = m.dmm_24Vdcin.measure(timeout=5).reading1
         # Slightly higher dc input to compensate for drop in fixture cabling
         d.dcs_24V.output(24.0 + (24.0 - val))
-        vals = MeasureGroup(
+        vals = tester.MeasureGroup(
             (m.dmm_24Vdcin, m.dmm_24Vdcout), timeout=5).readings
         s.oMirVdcDrop.store(vals[0] - vals[1])
         m.dmm_vdcDrop.measure()

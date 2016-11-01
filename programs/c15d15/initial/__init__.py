@@ -9,8 +9,6 @@ from . import limit
 
 INI_LIMIT = limit.DATA
 
-MeasureGroup = tester.measure.group
-
 # These are module level variables to avoid having to use 'self.' everywhere.
 d = s = m = None
 
@@ -62,7 +60,7 @@ class Initial(tester.TestSequence):
 
         d.dcl.output(0.0, output=True)
         d.dcs_input.output(limit.VIN_SET, output=True)
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_vin, m.dmm_vcc, m.dmm_vout_nl, m.dmm_green_on,
              m.dmm_yellow_off, ), timeout=5)
 
@@ -80,8 +78,8 @@ class Initial(tester.TestSequence):
              (s.led_green, 10.0), (s.led_yellow, 10.0), ))
 
         d.rla_load.set_on()
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_vout_ocp, m.dmm_green_on, m.dmm_yellow_on, ),
             timeout=5)
         d.rla_load.set_off()
-        MeasureGroup((m.dmm_vout_nl, ), timeout=5)
+        tester.MeasureGroup((m.dmm_vout_nl, ), timeout=5)

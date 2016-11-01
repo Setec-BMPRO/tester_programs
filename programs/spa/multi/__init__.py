@@ -18,8 +18,6 @@ from . import support
 from . import limit
 from . import p89lpc924
 
-MeasureGroup = tester.measure.group
-
 RGB_LIMIT = limit.DATA_RGB
 TRI_LIMIT = limit.DATA_TRI
 
@@ -117,7 +115,7 @@ class InitialMulti(tester.TestSequence):
         # This is a multi-unit parallel program so we can't stop on errors.
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
-        tester.MEASUREMENT_FAILURE_EXCEPTION = False
+        tester.Tester.measurement_failure_exception = False
         # Last AC Source set voltage
         self._last_vac = 0.0
         # Suppress lower level logging
@@ -168,7 +166,7 @@ class InitialMulti(tester.TestSequence):
             d.rla_isp.pulse(duration=0.1)
         self._ac_in(12.0, ramp=False, correct=False)
         # Measure AC input and all Vcc.
-        MeasureGroup((m.dmm_Vcc1, m.dmm_Vcc2, m.dmm_Vcc3, m.dmm_Vcc4))
+        tester.MeasureGroup((m.dmm_Vcc1, m.dmm_Vcc2, m.dmm_Vcc3, m.dmm_Vcc4))
 
     def _step_program(self):
         """Program uC.
@@ -224,7 +222,7 @@ class InitialMulti(tester.TestSequence):
             val = results[i]
             sensors[i].store(val)
         # 'Measure' the mirror sensors to check and log data
-        MeasureGroup((m.pgm1, m.pgm2, m.pgm3, m.pgm4))
+        tester.MeasureGroup((m.pgm1, m.pgm2, m.pgm3, m.pgm4))
         # Power cycle to start the software
         self._ac_in(0.0)
         time.sleep(3)
@@ -276,7 +274,7 @@ class InitialMulti(tester.TestSequence):
             ((s.oAcVin, 12.01), (s.oAcIin1, 0.35 / 5), (s.oAcIin2, 0.35 / 5),
              (s.oAcIin3, 0.35 / 5), (s.oAcIin4, 0.35 / 5),
              (s.dso_green, ((7.51, 7.52, 7.53, 7.54), )), ))
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_AcVin12, m.dso_green, m.dmm_AcIin1_12, m.dmm_AcIin2_12,
              m.dmm_AcIin3_12, m.dmm_AcIin4_12))
 
@@ -287,7 +285,7 @@ class InitialMulti(tester.TestSequence):
             ((s.oAcVin, 24.01), (s.oAcIin1, 0.22 / 5), (s.oAcIin2, 0.22 / 5),
              (s.oAcIin3, 0.22 / 5), (s.oAcIin4, 0.22 / 5),
              (s.dso_green, ((7.1, 7.2, 7.3, 7.4), )), ))
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_AcVin24, m.dso_green, m.dmm_AcIin1_24, m.dmm_AcIin2_24,
              m.dmm_AcIin3_24, m.dmm_AcIin4_24))
 
@@ -298,7 +296,7 @@ class InitialMulti(tester.TestSequence):
             ((s.oAcVin, 32.01), (s.oAcIin1, 0.20 / 5), (s.oAcIin2, 0.20 / 5),
              (s.oAcIin3, 0.20 / 5), (s.oAcIin4, 0.20 / 5),
              (s.dso_green, ((7.61, 7.62, 7.63, 7.64), )), ))
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_AcVin32, m.dso_green, m.dmm_AcIin1_32, m.dmm_AcIin2_32,
              m.dmm_AcIin3_32, m.dmm_AcIin4_32))
 
@@ -309,7 +307,7 @@ class InitialMulti(tester.TestSequence):
             ((s.oAcVin, 35.01), (s.oAcIin1, 0.18 / 5), (s.oAcIin2, 0.18 / 5),
              (s.oAcIin3, 0.18 / 5), (s.oAcIin4, 0.18 / 5),
              (s.dso_green, ((7.71, 7.72, 7.73, 7.74), )), ))
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_AcVin35, m.dso_green, m.dmm_AcIin1_35, m.dmm_AcIin2_35,
              m.dmm_AcIin3_35, m.dmm_AcIin4_35))
 
@@ -320,7 +318,7 @@ class InitialMulti(tester.TestSequence):
             ((s.oAcVin, 10.5), (s.oAcIin1, 0.25 / 5), (s.oAcIin2, 0.25 / 5),
              (s.oAcIin3, 0.25 / 5), (s.oAcIin4, 0.25 / 5),
              (s.dso_green, ((7.81, 7.82, 7.83, 7.84), )), ))
-        MeasureGroup(
+        tester.MeasureGroup(
             (m.dmm_AcVin10, m.dso_green10, m.dmm_AcIin1_10, m.dmm_AcIin2_10,
              m.dmm_AcIin3_10, m.dmm_AcIin4_10))
         self._logger.info('Restore 12Vac')

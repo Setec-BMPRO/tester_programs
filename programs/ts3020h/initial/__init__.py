@@ -7,8 +7,6 @@ import tester
 from . import support
 from . import limit
 
-MeasureGroup = tester.measure.group
-
 INI_LIMIT = limit.DATA
 
 # These are module level variables to avoid having to use 'self.' everywhere.
@@ -71,7 +69,8 @@ class Initial(tester.TestSequence):
         """Check that Fixture Lock is closed."""
         self.fifo_push(
             ((s.oLock, 10.0), (s.oFanConn, 150.0), (s.oInrush, 160.0), ))
-        MeasureGroup((m.dmm_Lock, m.dmm_FanConn, m.dmm_InrushOff), timeout=5)
+        tester.MeasureGroup(
+            (m.dmm_Lock, m.dmm_FanConn, m.dmm_InrushOff), timeout=5)
 
     def _step_fuse_check(self):
         """Check for output fuse in/out.
