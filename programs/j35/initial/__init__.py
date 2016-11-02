@@ -176,7 +176,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
                 mes.arm_loads[load].measure(timeout=5)
         dev.dcl_bat.output(4.0, True)
         tester.MeasureGroup(
-            (mes.dmm_vbat, mes.arm_battI, ), timeout=5)
+            (mes.dmm_vbatload, mes.arm_battI, ), timeout=5)
 
     @teststep
     def _step_canbus(self, dev, j35, mes):

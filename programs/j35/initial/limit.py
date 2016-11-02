@@ -4,7 +4,8 @@
 
 import os
 from tester.testlimit import (
-    lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string, lim_hilo_int)
+    lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string,
+    lim_hilo_int, lim_hilo_percent)
 
 ARM_VERSION = '1.1.13949.919'      # ARM versions
 ARM_HW_VER = (4, 0, 'A')
@@ -27,10 +28,11 @@ DATA = (
     lim_hilo('Vload', 12.0, 12.9),
     lim_lo('VloadOff', 0.5),
     lim_hilo_delta('VbatIn', 12.0, 0.5),
-    lim_hilo_delta('Vair', 12.5, 0.5),
     lim_hilo_delta('VbatOut', 13.0, 0.5),
-    lim_hilo_delta('Vaux', 13.5, 0.5),
     lim_hilo_delta('Vbat', 12.8, 0.2),
+    lim_hilo_percent('VbatLoad', 12.8, 5),
+    lim_hilo_delta('Vair', 12.5, 0.5),
+    lim_hilo_delta('Vaux', 13.5, 0.5),
     lim_hilo_delta('3V3U', 3.30, 0.05),
     lim_hilo_delta('3V3', 3.30, 0.05),
     lim_hilo('15Vs', 11.5, 13.0),
