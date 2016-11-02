@@ -69,7 +69,7 @@ class LogicalDevices():
         self.bp35.close()
         # Switch off AC Source & discharge the unit
         self.acsource.output(voltage=0.0, output=False)
-        self.dcl_out.output(2.0)
+        self.dcl_bat.output(2.0)
         time.sleep(1)
         self.discharge.pulse()
         for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):

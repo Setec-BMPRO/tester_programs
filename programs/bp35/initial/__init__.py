@@ -186,6 +186,10 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup((mes.arm_solar_error, mes.arm_solar_relay, ))
         vmeasured = mes.dmm_vsregpre.measure(timeout=5).reading1
         bp35['SR_VCAL'] = vmeasured   # Calibrate voltage setpoint
+        # New solar sw ver 182 is too dumb to change the setpoint until a
+        # DIFFERENT voltage setpoint is given...
+        bp35.solar_set(limit.SOLAR_VSET - 0.05, limit.SOLAR_ISET)
+        bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(1)
         mes.dmm_vsregpost.measure(timeout=5)
         dev.dcs_sreg.output(0.0, output=False)

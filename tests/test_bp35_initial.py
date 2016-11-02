@@ -95,7 +95,8 @@ class BP35Initial(unittest.TestCase):
                     ('1.0', '0') +      # Solar alive, Vout OV
                     ('0', ) * 3 +       # 2 x Solar VI, Vout OV
                     ('0', '1') +        # Errorcode, Relay
-                    ('0', ),
+                    ('0', ) +          # Vcal
+                    ('0', ) * 2,
                 'Aux': ('', '13500', '1100', ''),
                 'PowerUp':
                     ('', ) * 4 +     # Manual mode
