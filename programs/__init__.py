@@ -133,8 +133,6 @@ ALL_SKIP = (
     'CMR-INI', 'CMR-SD',
     # Unfinished programs
     'GENIUS-II Initial', 'GENIUS-II-H Initial',
-    'IDS500 Initial Micro', 'IDS500 Initial Aux', 'IDS500 Initial Bias',
-    'IDS500 Initial Bus', 'IDS500 Initial Syn',
     'IDS500 Initial Main', 'IDS500 Final',
     # Done with unittest
     'BP35 Initial', 'J35 Initial', 'J35C Final', 'RVVIEW Initial',

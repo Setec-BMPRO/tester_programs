@@ -68,7 +68,7 @@ class InitialMicro(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Program', self._step_program, not fifo),
             tester.TestStep('Comms', self._step_comms),
             )
         # Set the Test Sequence in my base instance
@@ -92,10 +92,10 @@ class InitialMicro(_Main):
     def _step_program(self):
         """Apply Vcc and program the board."""
         self.fifo_push(((s.oVsec5VuP, 5.0), ))
+
         d.dcs_vcc.output(5.0, True)
         m.dmm_vsec5VuP.measure(timeout=5)
-        if not self.fifo:
-            d.program_picMic.program()
+        d.program_picMic.program()
 
     def _step_comms(self):
         """Communicate with the PIC console."""
@@ -107,6 +107,7 @@ class InitialMicro(_Main):
                 ('D, 16, 24,MICRO Temp.(C)', )
                 ):
             d.pic_puts(str)
+
         d.pic.open()
         d.pic.clear_port()
         tester.MeasureGroup((m.swrev, m.microtemp, ), timeout=2)
@@ -158,6 +159,7 @@ class InitialAux(_Main):
             ((s.olock, 0.0), (s.o20VL, 21.0), (s.o_20V, -21.0), (s.o5V, 0.0),
              (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 0.0),
              (s.o15VpSw, 0.0), (s.oPwrGood, 0.0), ))
+
         t.pwrup.run()
 
     def _step_key_switches12(self):
@@ -165,18 +167,22 @@ class InitialAux(_Main):
         self.fifo_push(
             ((s.o5V, 5.0), (s.o15V, 15.0), (s.o_15V, -15.0), (s.o15Vp, 15.0),
              (s.o15VpSw, (0.0, 15.0)), (s.oPwrGood, 5.0), ))
+
         t.key_sws.run()
 
     def _step_acurrent(self):
         """Test ACurrent: No load, 5V load, 5V load + 15Vp load """
         self.fifo_push(
             ((s.oACurr5V, (0.0, 2.0, 2.0)), (s.oACurr15V, (0.1, 0.1, 1.3)), ))
+
         t.acurr.run()
 
     def _step_ocp(self):
         """Measure OCP and voltage a/c R657 with 5V applied via a 100k."""
-        self.fifo_push(((s.o5V, (5.0, ) * 20 + (4.7, ), ),
-                (s.o15Vp, (15.0, ) * 30 + (14.1, ), ), (s.oAuxTemp, 3.5)))
+        self.fifo_push(
+            ((s.o5V, (5.0, ) * 20 + (4.7, ), ),
+             (s.o15Vp, (15.0, ) * 30 + (14.1, ), ), (s.oAuxTemp, 3.5)))
+
         t.ocp.run()
 
 
@@ -220,6 +226,7 @@ class InitialBias(_Main):
     def _step_pwrup(self):
         """Check Fixture Lock, power up internal IDS-500 for 400V rail."""
         self.fifo_push(((s.olock, 0.0), (s.o400V, 400.0), (s.oPVcc, 14.0), ))
+
         m.dmm_lock.measure(timeout=5)
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((m.dmm_400V, m.dmm_pvcc, ),timeout=5)
@@ -227,6 +234,7 @@ class InitialBias(_Main):
     def _step_ocp(self):
         """Measure OCP."""
         self.fifo_push(((s.o12Vsbraw, (13.0, ) * 4 + (12.5, 0.0), ), ))
+
         tester.MeasureGroup(
                 (m.dmm_12Vsbraw, m.ramp_OCP, m.dmm_12Vsbraw2,),timeout=1)
 
@@ -272,13 +280,15 @@ class InitialBus(_Main):
     def _step_pwrup(self):
         """Check Fixture Lock, power up internal IDS-500 for 400V rail."""
         self.fifo_push(((s.olock, 0.0), (s.o400V, 400.0), ))
+
         t.pwrup.run()
 
     def _step_tec_ldd(self):
         """ """
         self.fifo_push(
-                ((s.o20VT, (23, 23, 22, 19)), (s.o9V, (11, 10, 10, 11 )),
-                (s.o20VL, (23, 23, 21, 23)), (s.o_20V, (-23, -23, -21, -23)),))
+            ((s.o20VT, (23, 23, 22, 19)), (s.o9V, (11, 10, 10, 11 )),
+             (s.o20VL, (23, 23, 21, 23)), (s.o_20V, (-23, -23, -21, -23)),))
+
         t.tl_startup.run()
 
 
@@ -299,7 +309,7 @@ class InitialSyn(_Main):
         self._devices = physical_devices
         self._limits = test_limits
         sequence = (
-            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Program', self._step_program, not fifo),
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('TecEnable', self._step_tec_enable),
             tester.TestStep('TecReverse', self._step_tec_rev),
@@ -327,28 +337,31 @@ class InitialSyn(_Main):
     def _step_program(self):
         """Check Fixture Lock, apply Vcc and program the board."""
         self.fifo_push(((s.olock, 0.0), ))
+
         m.dmm_lock.measure(timeout=5)
         d.dcs_vsec5Vlddtec.output(5.0, True)
-        if not self.fifo:
-            d.program_picSyn.program()
+        d.program_picSyn.program()
 
     def _step_pwrup(self):
         """Power up internal IDS-500 for 20VT,-20V, 9V rails and measure."""
         self.fifo_push(
-            ((s.o20VT, 23.0), (s.o_20V, -23.0), (s.o9V, 11.0), (s.oTec, 0.0),
+            ((s.o20VT, 20.0), (s.o_20V, -20.0), (s.o9V, 11.0), (s.oTec, 0.0),
             (s.oLdd, 0.0), (s.oLddVmon, 0.0), (s.oLddImon, 0.0),
             (s.oTecVmon, 0.0), (s.oTecVset, 0.0), ))
+
         t.pwrup.run()
 
     def _step_tec_enable(self):
         """Enable TEC, set dc input and measure voltages."""
         self.fifo_push(
             ((s.oTecVmon, (0.5, 2.5, 5.0)), (s.oTec, (0.5, 7.5, 15.0)), ))
+
         t.tec_en.run()
 
     def _step_tec_rev(self):
         """Reverse TEC and measure voltages."""
         self.fifo_push(((s.oTecVmon, (5.0,) * 2), (s.oTec, (-15.0, 15.0)), ))
+
         t.tec_rv.run()
 
     def _step_ldd_enable(self):
@@ -356,6 +369,7 @@ class InitialSyn(_Main):
         self.fifo_push(
             ((s.oLdd, (0.0, 0.65, 1.3)), (s.oLddShunt, (0.0, 0.006, 0.05)),
             (s.oLddImon, (0.0, 0.6, 5.0)), ))
+
         t.ldd_en.run()
 
     def _step_ISset_adj(self):
@@ -369,14 +383,14 @@ class InitialSyn(_Main):
 
          """
 
-        self.fifo_push(((s.oLddIset, 5.01),
-                    (s.oAdjLdd, True),
-                    (s.oLddShunt, (0.0495, 0.0495, 0.05005)), ))
+        self.fifo_push(
+            ((s.oLddIset, 5.01), (s.oAdjLdd, True),
+             (s.oLddShunt, (0.0495, 0.0495, 0.05005)), ))
+
         d.dcs_lddiset.output(5.0, True)
         setI = m.dmm_ISIset5V.measure(timeout=5).reading1 * 10
         lo_lim = setI - (setI * 0.2/100)
         hi_lim = setI + (setI * 0.2/100)
-        self._limits['AdjLimits'].limit = (lo_lim, hi_lim)
-        s.oAdjLdd.low = lo_lim
-        s.oAdjLdd.high = hi_lim
-        tester.MeasureGroup((m.ui_AdjLdd, m.dmm_ISIoutPost, ),timeout=2)
+        self._limits['AdjLimits'].limit = lo_lim, hi_lim
+        s.oAdjLdd.low, s.oAdjLdd.high = lo_lim, hi_lim
+        tester.MeasureGroup((m.ui_AdjLdd, m.dmm_ISIoutPost, ), timeout=2)
