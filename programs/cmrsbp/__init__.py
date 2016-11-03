@@ -68,7 +68,7 @@ class _Main(tester.TestSequence):
 #TEMPERATURE,297.0
 #VOLTAGE,13.710
 #CURRENT,0.0
-#REL STATE OF CHARGE,100
+#REL STATE OF CHARGE,{}
 #ABS STATE OF CHARGE,0
 #REMAINING CAPACITY,0
 #FULL CHARGE CAPACITY,{}
@@ -82,8 +82,9 @@ class _Main(tester.TestSequence):
 #SENSE RESISTOR READING,{}
 #CHARGE INPUT READING,0
 #ROTARY SWITCH READING,256
-#SERIAL NUMBER,0778
+#SERIAL NUMBER,1234
 """
+            soc = 100
             sense_res = 250
             full_charge = 13000
             half_cell = 110
@@ -94,9 +95,10 @@ class _Main(tester.TestSequence):
                     sense_res = 50
                     full_charge = 8000
                 if low > 300:
+                    soc = 25
                     sense_res = 450
                     full_charge = 17000
-            data_str = _str.format(full_charge, half_cell, sense_res)
+            data_str = _str.format(soc, full_charge, half_cell, sense_res)
             def myputs():   # This will push the data when timer is done
                 d.cmr_ser.puts(data_str)
             tmr = threading.Timer(0.5, myputs)
