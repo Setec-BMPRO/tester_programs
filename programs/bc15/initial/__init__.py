@@ -118,9 +118,9 @@ class Initial(tester.TestSequence):
         self._bc15_putstartup(True)
 
         d.dcs_3v3.output(9.0, True)
+        d.bc15.open()
         d.rla_reset.pulse(0.1)
         time.sleep(0.5)
-        d.bc15.open()
         d.bc15.action(None, delay=1.5, expected=10)  # Flush banner
         d.bc15['UNLOCK'] = True
         d.bc15['NVDEFAULT'] = True

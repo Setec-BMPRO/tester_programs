@@ -11,7 +11,7 @@ from tester.testlimit import (
 BIN_VERSION = '1.0.13136.1528'      # Software binary version
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM12'}[os.name]
+ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # ARM software image file
 ARM_BIN = 'bc15_{}.bin'.format(BIN_VERSION)
 
