@@ -39,7 +39,7 @@ VAUX_IN = 13.5
 PFC_STABLE = 0.05
 
 DATA = (
-    lim_lo('FixtureLock', 1200),
+    lim_lo('FixtureLock', 50),
     lim_boolean('Notify', True),
     lim_hilo_delta('HwVer5', 3200.0, 250.0),    # Rev 5-7
     lim_hilo_delta('HwVer8', 4400.0, 250.0),    # Rev 8+
@@ -56,7 +56,7 @@ DATA = (
     lim_hilo_delta('3V3', 3.30, 0.05),
     lim_hilo_delta('FanOn', 12.5, 0.5),
     lim_lo('FanOff', 0.5),
-    lim_hilo_delta('3V3prog', 3.3, 0.1),
+    lim_hilo_delta('SolarVcc', 3.3, 0.1),
     lim_hilo_percent('VsetPre', SOLAR_VSET, 6.0),
     lim_hilo_percent('VsetPost', SOLAR_VSET, 3.0),
     lim_hilo('OCP', 6.0, 9.0),

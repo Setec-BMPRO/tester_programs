@@ -110,7 +110,7 @@ class Sensors():
         self.hardware = sensor.Res(dmm, high=8, low=4, rng=1000000, res=1)
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.lock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
-        self.o3v3prog = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self.solarvcc = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.vbat,
             detect_limit=(limits['InOCP'], ),
@@ -174,7 +174,7 @@ class Measurements():
         self.dmm_3v3 = self._maker('3V3', sense.o3v3)
         self.dmm_fanOn = self._maker('FanOn', sense.fan)
         self.dmm_fanOff = self._maker('FanOff', sense.fan)
-        self.dmm_3v3prog = self._maker('3V3prog', sense.o3v3prog)
+        self.dmm_solarvcc = self._maker('SolarVcc', sense.solarvcc)
         self.ramp_ocp = self._maker('OCP', sense.ocp)
         self.ui_sernum = self._maker('SerNum', sense.sernum)
         self.arm_swver = self._maker('ARM-SwVer', sense.arm_swver)

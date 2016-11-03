@@ -117,7 +117,7 @@ class Initial(tester.TestSequence):
         dev.rla_vbat.set_on()
         dev.dcs_sreg.output(limit.SOLAR_VIN, True)
         tester.MeasureGroup(
-            (mes.dmm_vbatin, mes.dmm_3v3, mes.dmm_3v3prog), timeout=5)
+            (mes.dmm_vbatin, mes.dmm_3v3, mes.dmm_solarvcc), timeout=5)
 
     @teststep
     def _step_program_pic(self, dev, bp35, mes):

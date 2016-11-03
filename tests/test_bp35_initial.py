@@ -65,7 +65,7 @@ class BP35Initial(unittest.TestCase):
             DataFeeder.key_sen: {       # Tuples of sensor data
                 'Prepare':
                     ((sen.lock, 10.0), (sen.hardware, 1000),
-                     (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.o3v3prog, 3.3),
+                     (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.solarvcc, 3.3),
                      (sen.sernum, ('A1626010123', )), ),
                 'Initialise': ((sen.sernum, ('A1526040123', )), ),
                 'SolarReg': ((sen.vsreg, (13.0, 13.5)), ),
