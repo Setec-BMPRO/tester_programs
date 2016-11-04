@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Initial Test Program for GENIUS-II and GENIUS-II-H."""
 
+from functools import wraps
 import logging
 import tester
 from . import support
@@ -11,8 +12,12 @@ INI_LIMIT = limit.DATA          # GENIUS-II limits
 INI_LIMIT_H = limit.DATA_H      # GENIUS-II-H limits
 
 
-# These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = t = None
+def teststep(func):
+    """Decorator to add arguments to the test step calls."""
+    @wraps(func)
+    def new_func(self):
+        return func(self, self.logdev, self.meas)
+    return new_func
 
 
 class Initial(tester.TestSequence):
@@ -21,114 +26,82 @@ class Initial(tester.TestSequence):
 
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
-        # Define the (linear) Test Sequence
-        sequence = (
-            tester.TestStep('Program', self._step_program),
-            tester.TestStep('Aux', self._step_aux),
-            tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('VoutAdj', self._step_vout_adj),
-            tester.TestStep('ShutDown', self._step_shutdown),
-# FIXME: Why is this step disabled?
-            tester.TestStep('OCP', self._step_ocp, False),
-            )
-        # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(selection, None, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._devices = physical_devices
-        self._limits = test_limits
+        self.phydev = physical_devices
+        self.limits = test_limits
         # It is a GENIUS-II-H if BattLoad current > 20A
         self._fullload = test_limits['MaxBattLoad'].limit
         self._isH = (self._fullload > 20)
+        self.logdev = None
+        self.sensor = None
+        self.meas = None
+        self.subtest = None
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global m, d, s, t
-        d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits)
-        m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
+        self.logdev = support.LogicalDevices(self.phydev)
+        self.sensor = support.Sensors(self.logdev, self.limits)
+        self.meas = support.Measurements(self.sensor, self.limits)
+        self.subtest = support.SubTests(self.logdev, self.meas)
+        # Define the (linear) Test Sequence
+        sequence = (
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('Program', self._step_program, not self.fifo),
+            tester.TestStep('Aux', self.subtest.aux.run),
+            tester.TestStep('PowerUp', self.subtest.pwrup.run),
+            tester.TestStep('VoutAdj', self._step_vout_adj),
+            tester.TestStep('ShutDown', self.subtest.shdn.run),
+            tester.TestStep('OCP', self._step_ocp),
+            )
+        super().open(sequence)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s, t
-        m = d = s = t = None
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.reset()
+        self.logdev.reset()
 
-    def _step_program(self):
-        """Apply external dc, measure and program the board."""
-        self.fifo_push(((s.olock, 0.0), (s.ovbatctl, 13.0), (s.ovdd, 5.0), ))
-
-        d.dcs_vbatctl.output(13.0, True)
-        tester.MeasureGroup((m.dmm_lock, m.dmm_vbatctl, m.dmm_vdd), timeout=5)
-        if not self.fifo:
-            d.program_pic.program()
-        d.dcs_vbatctl.output(0.0, False)
-
-    def _step_aux(self):
-        """Apply external dc and measure."""
-        self.fifo_push(((s.ovout, 13.65), (s.ovaux, 13.70), ))
-
-        t.aux.run()
-
-    def _step_powerup(self):
-        """Check flying leads, apply 240Vac and measure voltages."""
-        self.fifo_push(
-            ((s.oflyld, 30.0), (s.oacin, 240.0), (s.ovbus, 330.0),
-             (s.ovcc, 16.0), (s.ovbat, 13.0), (s.ovout, 13.0), (s.ovdd, 5.0),
-             (s.ovctl, 12.0), ))
-
-        t.pwrup.run()
-
-    def _step_vout_adj(self):
-        """Vout adjustment.
-
-         Adjust pot R39.
-         Measure voltages.
-
-         """
-
-        self.fifo_push(
-            ((s.oAdjVout, True), (s.ovout, (13.65, 13.65, )),
-             (s.ovbatctl, 13.0), (s.ovbat, 13.65), (s.ovdd, 5.0), ))
-
+    @teststep
+    def _step_prepare(self, dev, mes):
+        """Apply external power."""
+        dev.dcs_vbatctl.output(13.0, True)
         tester.MeasureGroup(
-            (m.ui_AdjVout, m.dmm_vout, m.dmm_vbatctl, m.dmm_vbat,
-             m.dmm_vdd, ),timeout=2)
+            (mes.dmm_lock, mes.dmm_vbatctl, mes.dmm_vdd), timeout=5)
 
-    def _step_shutdown(self):
-        """Test fan on/off and shutdown."""
+    @teststep
+    def _step_program(self, dev, mes):
+        """Program the board."""
+        dev.program_pic.program()
+        dev.dcs_vbatctl.output(0.0, False)
 
-        self.fifo_push(
-            ((s.ofan, (0.0, 12.5)), (s.ovout, (13.65, 0.0, 13.65)),
-             (s.ovcc, 0.0), ))
+    @teststep
+    def _step_vout_adj(self, dev, mes):
+        """Vout adjustment."""
+        tester.MeasureGroup(
+            (mes.ui_AdjVout, mes.dmm_vout, mes.dmm_vbatctl, mes.dmm_vbat,
+             mes.dmm_vdd, ),
+            timeout=2)
 
-        t.Shdn.run()
-
-    def _step_ocp(self):
+    @teststep
+    def _step_ocp(self, dev, mes):
         """
         Ramp up load until OCP.
 
         Shutdown and recover.
 
         """
-        self.fifo_push(
-            ((s.ovout, (13.5, ) * 11 + (13.0, ), ),
-#                        (s.ovout, (0.1, 13.6, 13.6)),
-             (s.ovbat, 13.6)))
-
-        d.dcl.output(0.0, output=True)
-        d.dcl.binary(0.0, 32.0, 5.0)
+        dev.dcl.output(0.0, output=True)
+        dev.dcl.binary(0.0, 32.0, 5.0)
         if self._isH:
-            m.ramp_OCP_H.measure()
+            mes.ramp_OCP_H.measure()
 #            t.shdnH.run()
         else:
-            m.ramp_OCP.measure()
+            mes.ramp_OCP.measure()
 #            t.shdn.run()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-11-01, 17:50:05 -->
+<!-- Saved: 2016-11-04, 14:03:26 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -247,6 +247,7 @@
     <Source>tests/data_feed.py</Source>
     <Source>tests/test_bp35_initial.py</Source>
     <Source>tests/test_can_tunnel.py</Source>
+    <Source>tests/test_g2_initial.py</Source>
     <Source>tests/test_j35_final.py</Source>
     <Source>tests/test_j35_initial.py</Source>
     <Source>tests/test_protocol.py</Source>

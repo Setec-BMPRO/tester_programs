@@ -39,13 +39,14 @@ class LogicalDevices():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
-        for dcs in (self.dcs_vout, self.dcs_vbat, self.dcs_vaux,
-                        self.dcs_vbatctl):
+        for dcs in (
+                self.dcs_vout, self.dcs_vbat, self.dcs_vaux, self.dcs_vbatctl):
             dcs.output(0.0, False)
         for dcl in (self.dcl, self.dclh, ):
             dcl.output(0.0, False)
-        for rla in (self.rla_prog, self.rla_vbus, self.rla_batfuse,
-                        self.rla_fan, self.rla_shdwn1, self.rla_shdwn2):
+        for rla in (
+                self.rla_prog, self.rla_vbus, self.rla_batfuse,
+                self.rla_fan, self.rla_shdwn1, self.rla_shdwn2):
             rla.set_off()
 
 
@@ -65,8 +66,8 @@ class Sensors():
         self.ovcap = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
         self.ovbus = sensor.Vdc(dmm, high=3, low=2, rng=1000, res=0.01)
         self.ovcc = sensor.Vdc(dmm, high=4, low=2, rng=100, res=0.001)
-        self.ovout = sensor.Vdc(dmm, high=5, low=4, rng=100, res=0.001,
-                                                        nplc=10)
+        self.ovout = sensor.Vdc(
+            dmm, high=5, low=4, rng=100, res=0.001, nplc=10)
         self.ovbat = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
         self.ovaux = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
         self.ovbatfuse = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
@@ -148,7 +149,7 @@ class SubTests():
                  m.dmm_voutpre, m.dmm_vdd, m.dmm_vctl), timeout=5),
             ))
         # Shutdown:
-        self.Shdn = tester.SubStep((
+        self.shdn = tester.SubStep((
             tester.MeasureSubStep((m.dmm_fanoff, ), timeout=5),
             tester.RelaySubStep(((d.rla_fan, True), )),
             tester.MeasureSubStep((m.dmm_fanon, ), timeout=5),

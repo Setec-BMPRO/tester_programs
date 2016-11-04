@@ -132,10 +132,11 @@ ALL_SKIP = (
     # Due to use of the EV2200
     'CMR-INI', 'CMR-SD',
     # Unfinished programs
-    'GENIUS-II Initial', 'GENIUS-II-H Initial',
     'IDS500 Initial Main', 'IDS500 Final',
     # Done with unittest
-    'BP35 Initial', 'J35 Initial', 'J35C Final', 'RVVIEW Initial',
+    'BP35 Initial',
+    'GENIUS-II Initial', 'GENIUS-II-H Initial',
+    'J35 Initial', 'J35C Final', 'RVVIEW Initial',
     # Obsolete and unused programs
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',

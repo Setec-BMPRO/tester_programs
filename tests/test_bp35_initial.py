@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for J35 Initial Test program."""
+"""UnitTest for BP35 Initial Test program."""
 
 import unittest
 from unittest.mock import MagicMock, patch

@@ -2,51 +2,36 @@
 # -*- coding: utf-8 -*-
 """GENIUS-II and GENIUS-II-H Initial Test Program Limits."""
 
+from tester.testlimit import lim_hilo, lim_hilo_delta, lim_lo, lim_boolean
+
 PIC_HEX = 'genius2_2.hex'
 
-# Tuple ( Tuple (name, identity, low, high, string, boolean))
-DATA = (
-    ('VbatCtl', 1, 12.7, 13.1, None, None),
-    ('Vdd', 1, 4.90, 5.10, None, None),
-    ('Vout', 1, 13.60, 13.70, None, None),
-    ('VoutOff', 1, 1.0, None, None, None),
-    ('Vbat', 1, 13.60, 13.70, None, None),
-    ('Vaux', 1, 13.60, 13.80, None, None),
-    ('FlyLead', 1, 20.0, 40.0, None, None),
-    ('AcIn', 1, 235.0, 245.0, None, None),
-    ('Vbus', 1, 310.0, 350.0, None, None),
-    ('Vcc', 1, 13.8, 22.5, None, None),
-    ('VccOff', 1, 5.0, None, None, None),
-    ('VoutPre', 1, 12.5, 15.0, None, None),
-    ('Vctl', 1, 11.5, 12.5, None, None),
-    ('FanOff', 1, 0.5, None, None, None),
-    ('FanOn', 1, 12.0, 14.1, None, None),
-    ('MaxBattLoad', 1, 15.0, None, None, None),
-    ('InOCP', 1, 13.24, None, None, None),
-    ('OCP', 1, 34.0, 43.0, None, None),
-    ('Notify', 2, None, None, None, True),
-    ('FixtureLock', 0, 20, None, None, None),
+_BASE_DATA = (
+    lim_hilo('VbatCtl', 12.7, 13.1),
+    lim_hilo_delta('Vdd', 5.00, 0.1),
+    lim_hilo_delta('Vout', 13.65, 0.05),
+    lim_lo('VoutOff', 1.0),
+    lim_hilo_delta('Vbat', 13.65, 0.05),
+    lim_hilo_delta('Vaux', 13.70, 0.1),
+    lim_hilo_delta('FlyLead', 30.0, 10.0),
+    lim_hilo_delta('AcIn', 240.0, 5.0),
+    lim_hilo_delta('Vbus', 330.0, 20.0),
+    lim_hilo('Vcc', 13.8, 22.5),
+    lim_lo('VccOff', 5.0),
+    lim_hilo('VoutPre', 12.5, 15.0),
+    lim_hilo_delta('Vctl', 12.0, 0.5),
+    lim_lo('FanOff', 0.5),
+    lim_hilo('FanOn', 12.0, 14.1),
+    lim_lo('InOCP', 13.24),
+    lim_hilo('OCP', 34.0, 43.0),
+    lim_boolean('Notify', True),
+    lim_lo('FixtureLock', 20),
     )
 
-DATA_H = (
-    ('VbatCtl', 1, 12.7, 13.1, None, None),
-    ('Vdd', 1, 4.90, 5.10, None, None),
-    ('Vout', 1, 13.60, 13.70, None, None),
-    ('VoutOff', 1, 1.0, None, None, None),
-    ('Vbat', 1, 13.60, 13.70, None, None),
-    ('Vaux', 1, 13.60, 13.80, None, None),
-    ('FlyLead', 1, 20.0, 40.0, None, None),
-    ('AcIn', 1, 235.0, 245.0, None, None),
-    ('Vbus', 1, 310.0, 350.0, None, None),
-    ('Vcc', 1, 13.8, 22.5, None, None),
-    ('VccOff', 1, 5.0, None, None, None),
-    ('VoutPre', 1, 12.5, 15.0, None, None),
-    ('Vctl', 1, 11.5, 12.5, None, None),
-    ('FanOff', 1, 0.5, None, None, None),
-    ('FanOn', 1, 12.0, 14.1, None, None),
-    ('MaxBattLoad', 1, 30.0, None, None, None),
-    ('InOCP', 1, 13.24, None, None, None),
-    ('OCP', 1, 34.0, 43.0, None, None),
-    ('Notify', 2, None, None, None, True),
-    ('FixtureLock', 0, 20, None, None, None),
+DATA = _BASE_DATA + (
+    lim_lo('MaxBattLoad', 15.0),
+    )
+
+DATA_H = _BASE_DATA + (
+    lim_lo('MaxBattLoad', 30.0),
     )
