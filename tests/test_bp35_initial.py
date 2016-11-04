@@ -5,9 +5,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import logging
-import tester
 from . import logging_setup
-from .data_feed import DataFeeder
+from .data_feed import UnitTester
 from programs import bp35
 
 _PROG_CLASS = bp35.Initial
@@ -28,15 +27,11 @@ class BP35Initial(unittest.TestCase):
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
-        cls.tester = tester.Tester(
-            'MockATE', (('ProgName', _PROG_CLASS, _PROG_LIMIT), ), fifo=True)
-        cls.program = tester.TestProgram(
-            'ProgName', per_panel=1, parameter=None, test_limits=[])
-        cls.feeder = DataFeeder()
+        cls.tester = UnitTester(_PROG_CLASS, _PROG_LIMIT)
 
     def setUp(self):
         """Per-Test setup."""
-        self.tester.open(self.program)
+        self.tester.open()
         self.test_program = self.tester.runner.program
 
     def tearDown(self):
@@ -47,7 +42,6 @@ class BP35Initial(unittest.TestCase):
     def tearDownClass(cls):
         """Per-Class tear down."""
         cls.patcher.stop()
-        cls.feeder.stop()
         cls.tester.stop()
 
     def _arm_loads(self, value):
@@ -62,7 +56,7 @@ class BP35Initial(unittest.TestCase):
         dev = self.test_program.logdev
         dev.bp35_ser.flushInput()       # Flush console input buffer
         data = {
-            DataFeeder.key_sen: {       # Tuples of sensor data
+            UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
                     ((sen.lock, 10.0), (sen.hardware, 1000),
                      (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.solarvcc, 3.3),
@@ -80,10 +74,10 @@ class BP35Initial(unittest.TestCase):
                     ((sen.fan, (0, 12.0)), (sen.vbat, 12.8),
                      (sen.vbat, (12.8, ) * 6 + (11.0, ), ), ),
                 },
-            DataFeeder.key_call: {      # Callables
+            UnitTester.key_call: {      # Callables
                 'OCP': (self._arm_loads, 2.0),
                 },
-            DataFeeder.key_con: {       # Tuples of console strings
+            UnitTester.key_con: {       # Tuples of console strings
                 'Initialise':
                     ('Banner1\r\nBanner2', ) +
                     ('', ) + ('success', ) * 2 + ('', ) * 4 +
@@ -105,20 +99,20 @@ class BP35Initial(unittest.TestCase):
                 'OCP': ('240', '50000', '350', '12800', '500', '', '4000'),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
-            DataFeeder.key_con_np: {    # Tuples of strings, addprompt=False
+            UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
                 'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
                 },
             }
-        self.feeder.load(data, self.test_program.fifo_push, dev.bp35_puts)
+        self.tester.ut_load(data, self.test_program.fifo_push, dev.bp35_puts)
         self.tester.test(('UUT1', ))
-        result = self.feeder.result
+        result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
         self.assertEqual(68, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'SolarReg', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'OCP', 'CanBus'],
-            self.feeder.steps)
+            self.tester.ut_steps)
 
     def test_fail_run(self):
         """FAIL 1st Vbat reading."""
@@ -133,15 +127,15 @@ class BP35Initial(unittest.TestCase):
         patcher.start()
         sen = self.test_program.sensor
         data = {
-            DataFeeder.key_sen: {       # Tuples of sensor data
+            UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
                     ((sen.lock, 10.0), (sen.sernum, ('A1626010123', )),
                      (sen.vbat, 2.5), ),   # Vbat will fail
                 },
             }
-        self.feeder.load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
-        result = self.feeder.result
+        result = self.tester.ut_result
         self.assertEqual('F', result.code)      # Must have failed
         self.assertEqual(5, len(result.readings))
-        self.assertEqual(['Prepare'], self.feeder.steps)
+        self.assertEqual(['Prepare'], self.tester.ut_steps)

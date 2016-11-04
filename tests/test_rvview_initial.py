@@ -5,9 +5,8 @@
 import unittest
 from unittest.mock import patch
 import logging
-import tester
 from . import logging_setup
-from .data_feed import DataFeeder
+from .data_feed import UnitTester
 from programs import rvview
 
 _PROG_CLASS = rvview.Initial
@@ -28,15 +27,11 @@ class RvViewInitial(unittest.TestCase):
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
-        cls.tester = tester.Tester(
-            'MockATE', (('ProgName', _PROG_CLASS, _PROG_LIMIT), ), fifo=True)
-        cls.program = tester.TestProgram(
-            'ProgName', per_panel=1, parameter=None, test_limits=[])
-        cls.feeder = DataFeeder()
+        cls.tester = UnitTester(_PROG_CLASS, _PROG_LIMIT)
 
     def setUp(self):
         """Per-Test setup."""
-        self.tester.open(self.program)
+        self.tester.open()
         self.test_program = self.tester.runner.program
 
     def tearDown(self):
@@ -47,7 +42,6 @@ class RvViewInitial(unittest.TestCase):
     def tearDownClass(cls):
         """Per-Class tear down."""
         cls.patcher.stop()
-        cls.feeder.stop()
         cls.tester.stop()
 
     def test_pass_run(self):
@@ -56,7 +50,7 @@ class RvViewInitial(unittest.TestCase):
         dev = self.test_program.logdev
         dev.rvview_ser.flushInput()     # Flush console input buffer
         data = {
-            DataFeeder.key_sen: {       # Tuples of sensor data
+            UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp':
                     ((sen.oSnEntry, ('A1626010123', )), (sen.oVin, 7.5),
                      (sen.o3V3, 3.3), ),
@@ -64,9 +58,9 @@ class RvViewInitial(unittest.TestCase):
                     ((sen.oYesNoOn, True), (sen.oYesNoOff, True),
                      (sen.oBkLght, (3.0, 0.0)), ),
                 },
-            DataFeeder.key_call: {      # Callables
+            UnitTester.key_call: {      # Callables
                 },
-            DataFeeder.key_con: {       # Tuples of console strings
+            UnitTester.key_con: {       # Tuples of console strings
                 'Initialise':
                     ('Banner1\r\nBanner2', ) +
                     ('', ) + ('success', ) * 2 + ('', ) +
@@ -75,16 +69,16 @@ class RvViewInitial(unittest.TestCase):
                 'Display': ('0x10000000', '', '0x10000000', '', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
-            DataFeeder.key_con_np: {    # Tuples of strings, addprompt=False
+            UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
                 'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
                 },
             }
-        self.feeder.load(data, self.test_program.fifo_push, dev.rvview_puts)
+        self.tester.ut_load(data, self.test_program.fifo_push, dev.rvview_puts)
         self.tester.test(('UUT1', ))
-        result = self.feeder.result
+        result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
         self.assertEqual(10, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerUp', 'Initialise', 'Display', 'CanBus'],
-            self.feeder.steps)
+            self.tester.ut_steps)

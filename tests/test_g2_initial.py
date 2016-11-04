@@ -5,9 +5,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import logging
-import tester
 from . import logging_setup
-from .data_feed import DataFeeder
+from .data_feed import UnitTester
 from programs import genius2
 
 _PROG_CLASS = genius2.Initial
@@ -28,15 +27,11 @@ class Genius2Initial(unittest.TestCase):
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
-        cls.tester = tester.Tester(
-            'MockATE', (('ProgName', _PROG_CLASS, _PROG_LIMIT), ), fifo=True)
-        cls.program = tester.TestProgram(
-            'ProgName', per_panel=1, parameter=None, test_limits=[])
-        cls.feeder = DataFeeder()
+        cls.tester = UnitTester(_PROG_CLASS, _PROG_LIMIT)
 
     def setUp(self):
         """Per-Test setup."""
-        self.tester.open(self.program)
+        self.tester.open()
         self.test_program = self.tester.runner.program
 
     def tearDown(self):
@@ -47,14 +42,13 @@ class Genius2Initial(unittest.TestCase):
     def tearDownClass(cls):
         """Per-Class tear down."""
         cls.patcher.stop()
-        cls.feeder.stop()
         cls.tester.stop()
 
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensor
         data = {
-            DataFeeder.key_sen: {       # Tuples of sensor data
+            UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
                     ((sen.olock, 0.0), (sen.ovbatctl, 13.0),
                      (sen.ovdd, 5.0), ),
@@ -76,15 +70,15 @@ class Genius2Initial(unittest.TestCase):
                      (sen.ovbat, 13.6), ),
                 },
             }
-        self.feeder.load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
-        result = self.feeder.result
+        result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
         self.assertEqual(25, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Aux', 'PowerUp', 'VoutAdj', 'ShutDown', 'OCP'],
-            self.feeder.steps)
+            self.tester.ut_steps)
 
     def test_fail_run(self):
         """FAIL 1st Vout reading."""
@@ -99,14 +93,14 @@ class Genius2Initial(unittest.TestCase):
         patcher.start()
         sen = self.test_program.sensor
         data = {
-            DataFeeder.key_sen: {       # Tuples of sensor data
+            UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
                     ((sen.olock, 1000), ),
                 },
             }
-        self.feeder.load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
-        result = self.feeder.result
+        result = self.tester.ut_result
         self.assertEqual('F', result.code)      # Must have failed
         self.assertEqual(1, len(result.readings))
-        self.assertEqual(['Prepare'], self.feeder.steps)
+        self.assertEqual(['Prepare'], self.tester.ut_steps)
