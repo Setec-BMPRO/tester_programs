@@ -325,7 +325,7 @@ class Final(_Main):
         self.fifo_push(((s.oSnEntry, (sernum_push, )), ))
 
         sernum = m.ui_SnEntry.measure().reading1
-        self._limits['SerNum'].limit = str(int(sernum[-4:]))
+        self._limits['SerNumChk'].limit = str(int(sernum[-4:]))
         d.dcs_Vcom.output(12.0, output=True)
         time.sleep(1)
         d.rla_Pic.set_on()
@@ -356,10 +356,10 @@ class Final(_Main):
 
     @staticmethod
     def bit_status(num, check_bit):
-        """Check if a binary bit in an integer is 1 or 0.
+        """Check if a bit in an integer is 1 or 0.
 
         num - Integer.
-        check_bit - Binary bit number to check.
+        check_bit - Bit number to check.
         Return true if bit is set otherwise false.
 
         """

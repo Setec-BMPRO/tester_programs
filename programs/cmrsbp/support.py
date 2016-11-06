@@ -130,24 +130,24 @@ class MeasureInit():
            @param limits Product test limits
 
         """
-        Measurement = tester.Measurement
-        self.cmr_SenseRes = Measurement(limits['SenseRes'], sense.oMirSenseRes)
-        self.cmr_Halfcell = Measurement(limits['Halfcell'], sense.oMirHalfCell)
-        self.cmr_VChgeOn = Measurement(limits['VChgeOn'], sense.oMirVChge)
-        self.bq_ErrVUncal = Measurement(limits['ErrVUncal'], sense.oMirErrV)
-        self.bq_ErrIUncal = Measurement(limits['ErrIUncal'], sense.oMirErrI)
-        self.bq_Temp = Measurement(limits['BQ-Temp'], sense.oMirTemp)
-        self.bq_ErrVCal = Measurement(limits['ErrVCal'], sense.oMirErrV)
-        self.bq_ErrICal = Measurement(limits['ErrICal'], sense.oMirErrI)
-        self.dmm_NoFinal = Measurement(
+        mes = tester.Measurement
+        self.cmr_SenseRes = mes(limits['SenseRes'], sense.oMirSenseRes)
+        self.cmr_Halfcell = mes(limits['Halfcell'], sense.oMirHalfCell)
+        self.cmr_VChgeOn = mes(limits['VChgeOn'], sense.oMirVChge)
+        self.bq_ErrVUncal = mes(limits['ErrVUncal'], sense.oMirErrV)
+        self.bq_ErrIUncal = mes(limits['ErrIUncal'], sense.oMirErrI)
+        self.bq_Temp = mes(limits['BQ-Temp'], sense.oMirTemp)
+        self.bq_ErrVCal = mes(limits['ErrVCal'], sense.oMirErrV)
+        self.bq_ErrICal = mes(limits['ErrICal'], sense.oMirErrI)
+        self.dmm_NoFinal = mes(
             limits['Final Not Connected'], sense.ovbatIn)
-        self.dmm_vbat = Measurement(limits['Vbat'], sense.ovbat)
-        self.dmm_vbatChge = Measurement(limits['VbatCharge'], sense.ovbat)
-        self.dmm_Vcc = Measurement(limits['Vcc'], sense.oVcc)
-        self.dmm_VErase = Measurement(limits['VErase'], sense.oVcc)
-        self.dmm_Vchge = Measurement(limits['Vchge'], sense.oVchge)
-        self.dmm_ibat = Measurement(limits['Ibat'], sense.oibat)
-        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
+        self.dmm_vbat = mes(limits['Vbat'], sense.ovbat)
+        self.dmm_vbatChge = mes(limits['VbatCharge'], sense.ovbat)
+        self.dmm_Vcc = mes(limits['Vcc'], sense.oVcc)
+        self.dmm_VErase = mes(limits['VErase'], sense.oVcc)
+        self.dmm_Vchge = mes(limits['Vchge'], sense.oVchge)
+        self.dmm_ibat = mes(limits['Ibat'], sense.oibat)
+        self.ui_SnEntry = mes(limits['SerNum'], sense.oSnEntry)
 
 
 class MeasureFin():
@@ -161,22 +161,22 @@ class MeasureFin():
            @param limits Product test limits
 
         """
-        Measurement = tester.Measurement
-        self.dmm_vbatIn = Measurement(limits['VbatIn'], sense.ovbatIn)
-        self.cmr_vbatIn = Measurement(limits['VbatIn'], sense.oMirvbatIn)
-        self.cmr_ErrV = Measurement(limits['ErrV'], sense.oMirErrV)
-        self.cmr_CycleCnt = Measurement(limits['CycleCnt'], sense.oMirCycleCnt)
-        self.cmr_RelrnFlg = Measurement(limits['RelrnFlg'], sense.oMirRelrnFlg)
-        self.cmr_Sw = Measurement(limits['RotarySw'], sense.oMirSw)
-        self.cmr_SenseRes = Measurement(limits['SenseRes'], sense.oMirSenseRes)
-        self.cmr_Capacity = Measurement(limits['Capacity'], sense.oMirCapacity)
-        self.cmr_RelStateCharge = Measurement(
+        mes = tester.Measurement
+        self.ui_SnEntry = mes(limits['SerNum'], sense.oSnEntry)
+        self.dmm_vbatIn = mes(limits['VbatIn'], sense.ovbatIn)
+        self.cmr_vbatIn = mes(limits['VbatIn'], sense.oMirvbatIn)
+        self.cmr_ErrV = mes(limits['ErrV'], sense.oMirErrV)
+        self.cmr_CycleCnt = mes(limits['CycleCnt'], sense.oMirCycleCnt)
+        self.cmr_RelrnFlg = mes(limits['RelrnFlg'], sense.oMirRelrnFlg)
+        self.cmr_Sw = mes(limits['RotarySw'], sense.oMirSw)
+        self.cmr_SenseRes = mes(limits['SenseRes'], sense.oMirSenseRes)
+        self.cmr_Capacity = mes(limits['Capacity'], sense.oMirCapacity)
+        self.cmr_RelStateCharge = mes(
             limits['StateOfCharge'], sense.oMirRelStateCharge)
-        self.cmr_Halfcell = Measurement(limits['Halfcell'], sense.oMirHalfCell)
-        self.cmr_VFCcalStatus = Measurement(
+        self.cmr_Halfcell = mes(limits['Halfcell'], sense.oMirHalfCell)
+        self.cmr_VFCcalStatus = mes(
             limits['VFCcalStatus'], sense.oMirVFCcalStatus)
-        self.cmr_SerNum = Measurement(limits['SerNum'], sense.oMirSerNum)
-        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
+        self.cmr_SerNum = mes(limits['SerNumChk'], sense.oMirSerNum)
 
 
 class SubTestInit():
