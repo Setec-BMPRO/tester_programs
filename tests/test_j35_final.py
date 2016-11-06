@@ -2,47 +2,19 @@
 # -*- coding: utf-8 -*-
 """UnitTest for J35C Final Test program."""
 
-import unittest
-from unittest.mock import patch
-import logging
-from . import logging_setup
-from .data_feed import UnitTester
+from .data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
 _PROG_CLASS = j35.Final
 _PROG_LIMIT = j35.FIN_LIMIT_C
 
 
-class J35Final(unittest.TestCase):
+class J35Final(ProgramTestCase):
 
     """J35 Final program test suite."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Per-Class setup. Startup logging."""
-        logging_setup()
-        # Set lower level logging
-        log = logging.getLogger('tester')
-        log.setLevel(logging.INFO)
-        # Patch time.sleep to remove delays
-        cls.patcher = patch('time.sleep')
-        cls.patcher.start()
-        cls.tester = UnitTester(_PROG_CLASS, _PROG_LIMIT)
-
-    def setUp(self):
-        """Per-Test setup."""
-        self.tester.open()
-        self.test_program = self.tester.runner.program
-
-    def tearDown(self):
-        """Per-Test tear down."""
-        self.tester.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        """Per-Class tear down."""
-        cls.patcher.stop()
-        cls.tester.stop()
+    prog_class = _PROG_CLASS
+    prog_limit = _PROG_LIMIT
 
     def _dmm_loads(self, value):
         """Fill all DMM Load sensors with a value."""

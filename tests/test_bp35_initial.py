@@ -2,47 +2,20 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BP35 Initial Test program."""
 
-import unittest
 from unittest.mock import MagicMock, patch
-import logging
-from . import logging_setup
-from .data_feed import UnitTester
+from .data_feed import UnitTester, ProgramTestCase
 from programs import bp35
 
 _PROG_CLASS = bp35.Initial
 _PROG_LIMIT = bp35.INI_LIMIT
 
 
-class BP35Initial(unittest.TestCase):
+class BP35Initial(ProgramTestCase):
 
     """BP35 Initial program test suite."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Per-Class setup. Startup logging."""
-        logging_setup()
-        # Set lower level logging
-        log = logging.getLogger('tester')
-        log.setLevel(logging.INFO)
-        # Patch time.sleep to remove delays
-        cls.patcher = patch('time.sleep')
-        cls.patcher.start()
-        cls.tester = UnitTester(_PROG_CLASS, _PROG_LIMIT)
-
-    def setUp(self):
-        """Per-Test setup."""
-        self.tester.open()
-        self.test_program = self.tester.runner.program
-
-    def tearDown(self):
-        """Per-Test tear down."""
-        self.tester.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        """Per-Class tear down."""
-        cls.patcher.stop()
-        cls.tester.stop()
+    prog_class = _PROG_CLASS
+    prog_limit = _PROG_LIMIT
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""

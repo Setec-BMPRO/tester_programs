@@ -2,47 +2,20 @@
 # -*- coding: utf-8 -*-
 """UnitTest for GENIUS-II Initial Test program."""
 
-import unittest
 from unittest.mock import MagicMock, patch
-import logging
-from . import logging_setup
-from .data_feed import UnitTester
+from .data_feed import UnitTester, ProgramTestCase
 from programs import genius2
 
 _PROG_CLASS = genius2.Initial
 _PROG_LIMIT = genius2.INI_LIMIT
 
 
-class Genius2Initial(unittest.TestCase):
+class Genius2Initial(ProgramTestCase):
 
     """GENIUS-II Initial program test suite."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Per-Class setup. Startup logging."""
-        logging_setup()
-        # Set lower level logging
-        log = logging.getLogger('tester')
-        log.setLevel(logging.DEBUG)  # INFO)
-        # Patch time.sleep to remove delays
-        cls.patcher = patch('time.sleep')
-        cls.patcher.start()
-        cls.tester = UnitTester(_PROG_CLASS, _PROG_LIMIT)
-
-    def setUp(self):
-        """Per-Test setup."""
-        self.tester.open()
-        self.test_program = self.tester.runner.program
-
-    def tearDown(self):
-        """Per-Test tear down."""
-        self.tester.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        """Per-Class tear down."""
-        cls.patcher.stop()
-        cls.tester.stop()
+    prog_class = _PROG_CLASS
+    prog_limit = _PROG_LIMIT
 
     def test_pass_run(self):
         """PASS run of the program."""

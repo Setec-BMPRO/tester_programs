@@ -9,6 +9,10 @@ Record the test result.
 
 """
 
+import unittest
+from unittest.mock import patch
+import logging
+from . import logging_setup
 from pydispatch import dispatcher
 import tester
 
@@ -121,3 +125,35 @@ class UnitTester(tester.Tester):
         """Signal receiver for TestResult signals."""
         result = kwargs['result']
         self.ut_result = result
+
+
+class ProgramTestCase(unittest.TestCase):
+
+    """Product test program wrapper."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Per-Class setup. Startup logging."""
+        logging_setup()
+        # Set lower level logging
+        log = logging.getLogger('tester')
+        log.setLevel(logging.INFO)
+        # Patch time.sleep to remove delays
+        cls.patcher = patch('time.sleep')
+        cls.patcher.start()
+        cls.tester = UnitTester(cls.prog_class, cls.prog_limit)
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.tester.open()
+        self.test_program = self.tester.runner.program
+
+    def tearDown(self):
+        """Per-Test tear down."""
+        self.tester.close()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Per-Class tear down."""
+        cls.patcher.stop()
+        cls.tester.stop()
