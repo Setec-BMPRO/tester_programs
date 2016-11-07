@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""GENIUS-II and GENIUS-II-H Initial Test Program."""
+"""GENIUS-II and GENIUS-II-H Initial Test Programes."""
 import os
 import inspect
 import share
@@ -40,7 +40,7 @@ class LogicalDevices():
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
         for dcs in (
-                self.dcs_vout, self.dcs_vbat, self.dcs_vaux, self.dcs_vbatctl):
+            self.dcs_vout, self.dcs_vbat, self.dcs_vaux, self.dcs_vbatctl):
             dcs.output(0.0, False)
         for dcl in (self.dcl, self.dclh, ):
             dcl.output(0.0, False)
@@ -100,21 +100,20 @@ class Measurements():
         """Create all Measurement instances."""
         Measurement = tester.Measurement
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.olock)
-        self.dmm_vbatctl = Measurement(limits['VbatCtl'], sense.ovbatctl)
-        self.dmm_vdd = Measurement(limits['Vdd'], sense.ovdd)
-        self.dmm_vout = Measurement(limits['Vout'], sense.ovout)
-        self.dmm_voutoff = Measurement(limits['VoutOff'], sense.ovout)
-        self.dmm_vaux = Measurement(limits['Vaux'], sense.ovaux)
         self.dmm_flyld = Measurement(limits['FlyLead'], sense.oflyld)
         self.dmm_acin = Measurement(limits['AcIn'], sense.oacin)
         self.dmm_vbus = Measurement(limits['Vbus'], sense.ovbus)
         self.dmm_vcc = Measurement(limits['Vcc'], sense.ovcc)
         self.dmm_vccoff = Measurement(limits['VccOff'], sense.ovcc)
-        self.dmm_vbatpre = Measurement(limits['VoutPre'], sense.ovbat)
-        self.dmm_vbat = Measurement(limits['Vbat'], sense.ovbat)
+        self.dmm_vdd = Measurement(limits['Vdd'], sense.ovdd)
+        self.dmm_vbatctl = Measurement(limits['VbatCtl'], sense.ovbatctl)
+        self.dmm_vctl = Measurement(limits['Vctl'], sense.ovctl)
         self.dmm_voutpre = Measurement(limits['VoutPre'], sense.ovout)
         self.dmm_vout = Measurement(limits['Vout'], sense.ovout)
-        self.dmm_vctl = Measurement(limits['Vctl'], sense.ovctl)
+        self.dmm_voutoff = Measurement(limits['VoutOff'], sense.ovout)
+        self.dmm_vbatpre = Measurement(limits['VbatPre'], sense.ovbat)
+        self.dmm_vbat = Measurement(limits['Vbat'], sense.ovbat)
+        self.dmm_vaux = Measurement(limits['Vaux'], sense.ovaux)
         self.dmm_fanoff = Measurement(limits['FanOff'], sense.ofan)
         self.dmm_fanon = Measurement(limits['FanOn'], sense.ofan)
         self.ui_AdjVout = Measurement(limits['Notify'], sense.oAdjVout)
@@ -126,37 +125,36 @@ class SubTests():
 
     """SubTest Steps."""
 
-    def __init__(self, logical_devices, measurements):
+    def __init__(self, dev, mes):
         """Create SubTest Step instances."""
-        d = logical_devices
-        m = measurements
         # Aux:  Dc input, measure.
         self.aux = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_vaux, 13.8), ), output=True),
-            tester.LoadSubStep(((d.dcl, 0.5), )),
-            tester.MeasureSubStep((m.dmm_vout, m.dmm_vaux, ), timeout=5),
-            tester.DcSubStep(setting=((d.dcs_vaux, 0.0), ), output=False),
-            tester.LoadSubStep(((d.dcl, 0.0), )),
+            tester.DcSubStep(setting=((dev.dcs_vaux, 13.8), ), output=True),
+            tester.LoadSubStep(((dev.dcl, 0.5), ), output=True),
+            tester.MeasureSubStep((mes.dmm_vout, mes.dmm_vaux, ), timeout=5),
+            tester.DcSubStep(setting=((dev.dcs_vaux, 0.0), ), output=False),
+            tester.LoadSubStep(((dev.dcl, 10.0), ), delay=2),
+            tester.LoadSubStep(((dev.dcl, 0.0), )),
             ))
         # PowerUp:  Check flying leads, AC input, measure.
         self.pwrup = tester.SubStep((
-            tester.AcSubStep(acs=d.acsource, voltage=30.0, output=True),
-            tester.MeasureSubStep((m.dmm_flyld, ), timeout=5),
-            tester.LoadSubStep(((d.dcl, 0.5), )),
-            tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5),
+            tester.AcSubStep(acs=dev.acsource, voltage=30.0, output=True),
+            tester.MeasureSubStep((mes.dmm_flyld, ), timeout=5),
+            tester.LoadSubStep(((dev.dcl, 0.5), )),
+            tester.AcSubStep(acs=dev.acsource, voltage=240.0, delay=0.5),
             tester.MeasureSubStep(
-                (m.dmm_acin, m.dmm_vbus, m.dmm_vcc, m.dmm_vbatpre,
-                 m.dmm_voutpre, m.dmm_vdd, m.dmm_vctl), timeout=5),
+                (mes.dmm_acin, mes.dmm_vbus, mes.dmm_vcc, mes.dmm_vbatpre,
+                 mes.dmm_voutpre, mes.dmm_vdd, mes.dmm_vctl), timeout=5),
             ))
         # Shutdown:
         self.shdn = tester.SubStep((
-            tester.MeasureSubStep((m.dmm_fanoff, ), timeout=5),
-            tester.RelaySubStep(((d.rla_fan, True), )),
-            tester.MeasureSubStep((m.dmm_fanon, ), timeout=5),
-            tester.RelaySubStep(((d.rla_fan, False), )),
-            tester.MeasureSubStep((m.dmm_vout, ), timeout=5),
-            tester.RelaySubStep(((d.rla_shdwn2, True), )),
-            tester.MeasureSubStep((m.dmm_vccoff, m.dmm_voutoff, ), timeout=5),
-            tester.RelaySubStep(((d.rla_shdwn2, False), )),
-            tester.MeasureSubStep((m.dmm_vout, ), timeout=5),
+            tester.MeasureSubStep((mes.dmm_fanoff, ), timeout=5),
+            tester.RelaySubStep(((dev.rla_fan, True), )),
+            tester.MeasureSubStep((mes.dmm_fanon, ), timeout=5),
+            tester.RelaySubStep(((dev.rla_fan, False), )),
+            tester.MeasureSubStep((mes.dmm_vout, ), timeout=5),
+            tester.RelaySubStep(((dev.rla_shdwn2, True), )),
+            tester.MeasureSubStep((mes.dmm_vccoff, mes.dmm_voutoff, ), timeout=5),
+            tester.RelaySubStep(((dev.rla_shdwn2, False), )),
+            tester.MeasureSubStep((mes.dmm_vout, ), timeout=5),
             ))

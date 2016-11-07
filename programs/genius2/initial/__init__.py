@@ -70,7 +70,7 @@ class Initial(tester.TestSequence):
 
     @teststep
     def _step_prepare(self, dev, mes):
-        """Apply external power."""
+        """Apply external dc voltage to power the micro."""
         dev.dcs_vbatctl.output(13.0, True)
         tester.MeasureGroup(
             (mes.dmm_lock, mes.dmm_vbatctl, mes.dmm_vdd), timeout=5)
@@ -84,10 +84,11 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_vout_adj(self, dev, mes):
         """Vout adjustment."""
+        mes.ui_AdjVout.measure(timeout=5)
+        dev.dcl.output(2.0)
         tester.MeasureGroup(
-            (mes.ui_AdjVout, mes.dmm_vout, mes.dmm_vbatctl, mes.dmm_vbat,
-             mes.dmm_vdd, ),
-            timeout=2)
+            (mes.dmm_vout, mes.dmm_vbatctl, mes.dmm_vbat, mes.dmm_vdd),
+            timeout=5)
 
     @teststep
     def _step_ocp(self, dev, mes):
@@ -97,11 +98,9 @@ class Initial(tester.TestSequence):
         Shutdown and recover.
 
         """
-        dev.dcl.output(0.0, output=True)
-        dev.dcl.binary(0.0, 32.0, 5.0)
         if self._isH:
+            dev.dclh.binary(0.0, 32.0, 5.0)
             mes.ramp_OCP_H.measure()
-#            t.shdnH.run()
         else:
+            dev.dcl.binary(0.0, 32.0, 5.0)
             mes.ramp_OCP.measure()
-#            t.shdn.run()
