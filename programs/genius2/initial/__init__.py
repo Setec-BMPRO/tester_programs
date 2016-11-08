@@ -72,6 +72,7 @@ class Initial(tester.TestSequence):
     def _step_prepare(self, dev, mes):
         """Apply external dc voltage to power the micro."""
         dev.dcs_vbatctl.output(13.0, True)
+        dev.rla_prog.set_on()
         tester.MeasureGroup(
             (mes.dmm_lock, mes.dmm_vbatctl, mes.dmm_vdd), timeout=5)
 
@@ -92,12 +93,10 @@ class Initial(tester.TestSequence):
 
     @teststep
     def _step_ocp(self, dev, mes):
-        """
-        Ramp up load until OCP.
-
-        Shutdown and recover.
-
-        """
+        """Ramp up load until OCP."""
+        dev.dcl_vbat.binary(0.0, 18.0, 5.0)
+        mes.dmm_vbatocp.measure(timeout=2)
+        dev.dcl_vbat.output(0.0)
         if self._isH:
             dev.dclh.binary(0.0, 32.0, 5.0)
             mes.ramp_OCP_H.measure()

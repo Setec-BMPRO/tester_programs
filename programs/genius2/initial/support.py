@@ -3,6 +3,7 @@
 """GENIUS-II and GENIUS-II-H Initial Test Programes."""
 import os
 import inspect
+import time
 import share
 import tester
 from . import limit
@@ -16,14 +17,17 @@ class LogicalDevices():
         """Create all Logical Instruments."""
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
+        self.discharge = tester.Discharge(devices['DIS'])
         self.dcs_vout = tester.DCSource(devices['DCS1'])
         self.dcs_vbat = tester.DCSource(devices['DCS2'])
         self.dcs_vaux = tester.DCSource(devices['DCS4'])
         self.dcs_vbatctl = tester.DCSource(devices['DCS5'])
-        dcl_vout = tester.DCLoad(devices['DCL1'])
-        dcl_vbat = tester.DCLoad(devices['DCL5'])
-        self.dcl = tester.DCLoadParallel(((dcl_vout, 29), (dcl_vbat, 14)))
-        self.dclh = tester.DCLoadParallel(((dcl_vout, 5), (dcl_vbat, 30)))
+        self.dcl_vout = tester.DCLoad(devices['DCL1'])
+        self.dcl_vbat = tester.DCLoad(devices['DCL5'])
+        self.dcl = tester.DCLoadParallel(
+            ((self.dcl_vout, 29), (self.dcl_vbat, 14)))
+        self.dclh = tester.DCLoadParallel(
+            ((self.dcl_vout, 5), (self.dcl_vbat, 30)))
         self.rla_prog = tester.Relay(devices['RLA1'])
         self.rla_vbus = tester.Relay(devices['RLA2'])
         self.rla_batfuse = tester.Relay(devices['RLA3'])
@@ -38,7 +42,11 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
+        # Switch off AC Source & discharge the unit
         self.acsource.output(voltage=0.0, output=False)
+        self.dcl.output(10.0)
+        time.sleep(1)
+        self.discharge.pulse()
         for dcs in (
             self.dcs_vout, self.dcs_vbat, self.dcs_vaux, self.dcs_vbatctl):
             dcs.output(0.0, False)
@@ -66,16 +74,15 @@ class Sensors():
         self.ovcap = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
         self.ovbus = sensor.Vdc(dmm, high=3, low=2, rng=1000, res=0.01)
         self.ovcc = sensor.Vdc(dmm, high=4, low=2, rng=100, res=0.001)
-        self.ovout = sensor.Vdc(
-            dmm, high=5, low=4, rng=100, res=0.001, nplc=10)
+        self.ovout = sensor.Vdc(dmm, high=5, low=4, rng=100, res=0.001)
         self.ovbat = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
         self.ovaux = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
         self.ovbatfuse = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
         self.ovctl = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.001)
         self.ovbatctl = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.001)
         self.ovdd = sensor.Vdc(dmm, high=11, low=3, rng=100, res=0.001)
-        self.ofan = sensor.Vdc(dmm, high=13, low=5, rng=100, res=0.001)
-        self.oshdwn = sensor.Vdc(dmm, high=14, low=6, rng=100, res=0.001)
+        self.ofan = sensor.Vdc(dmm, high=13, low=5, rng=100, res=0.01)
+        self.oshdwn = sensor.Vdc(dmm, high=14, low=6, rng=100, res=0.01)
         lo_lim, hi_lim = limits['Vout'].limit
         self.oAdjVout = sensor.AdjustAnalog(
             sensor=self.ovout,
@@ -85,11 +92,11 @@ class Sensors():
         self.oOCP = sensor.Ramp(
             stimulus=dcl, sensor=self.ovout,
             detect_limit=(limits['InOCP'], ),
-            start=32.0, stop=48.0, step=0.2, delay=0.1)
+            start=33.6, stop=44.0, step=0.2)
         self.oOCP_H = sensor.Ramp(
             stimulus=dclh, sensor=self.ovout,
             detect_limit=(limits['InOCP'], ),
-            start=32.0, stop=48.0, step=0.2, delay=0.1)
+            start=33.6, stop=44.0, step=0.2)
 
 
 class Measurements():
@@ -113,6 +120,7 @@ class Measurements():
         self.dmm_voutoff = Measurement(limits['VoutOff'], sense.ovout)
         self.dmm_vbatpre = Measurement(limits['VbatPre'], sense.ovbat)
         self.dmm_vbat = Measurement(limits['Vbat'], sense.ovbat)
+        self.dmm_vbatocp = Measurement(limits['VbatOCP'], sense.ovbat)
         self.dmm_vaux = Measurement(limits['Vaux'], sense.ovaux)
         self.dmm_fanoff = Measurement(limits['FanOff'], sense.ofan)
         self.dmm_fanon = Measurement(limits['FanOn'], sense.ofan)
@@ -130,8 +138,9 @@ class SubTests():
         # Aux:  Dc input, measure.
         self.aux = tester.SubStep((
             tester.DcSubStep(setting=((dev.dcs_vaux, 13.8), ), output=True),
-            tester.LoadSubStep(((dev.dcl, 0.5), ), output=True),
-            tester.MeasureSubStep((mes.dmm_vout, mes.dmm_vaux, ), timeout=5),
+            tester.LoadSubStep(((dev.dcl, 0.1), ), output=True),
+#            tester.MeasureSubStep((mes.dmm_vout, mes.dmm_vaux, ), timeout=5),
+            tester.MeasureSubStep((mes.dmm_voutpre, mes.dmm_vaux, ), timeout=5),
             tester.DcSubStep(setting=((dev.dcs_vaux, 0.0), ), output=False),
             tester.LoadSubStep(((dev.dcl, 10.0), ), delay=2),
             tester.LoadSubStep(((dev.dcl, 0.0), )),
@@ -140,7 +149,7 @@ class SubTests():
         self.pwrup = tester.SubStep((
             tester.AcSubStep(acs=dev.acsource, voltage=30.0, output=True),
             tester.MeasureSubStep((mes.dmm_flyld, ), timeout=5),
-            tester.LoadSubStep(((dev.dcl, 0.5), )),
+            tester.LoadSubStep(((dev.dcl, 0.1), )),
             tester.AcSubStep(acs=dev.acsource, voltage=240.0, delay=0.5),
             tester.MeasureSubStep(
                 (mes.dmm_acin, mes.dmm_vbus, mes.dmm_vcc, mes.dmm_vbatpre,
