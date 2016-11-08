@@ -149,7 +149,7 @@ class CmrSbp():
         #                   1 = data ready
         timeup = threading.Event()
         while run:
-            rawdata = serport.read(512).decode()
+            rawdata = serport.read(512).decode(errors='ignore')
             buf += rawdata.replace('\r', '')
             pos = buf.find('\n')
             while pos >= 0:

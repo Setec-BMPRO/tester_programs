@@ -47,6 +47,8 @@ class _Main(tester.TestSequence):
     def close(self):
         """Finished testing."""
         self._logger.info('BaseClose')
+        d.cmr.close()
+        d.cmr_ser.close()
         global m, d, s, t
         m = d = s = t = None
         super().close()
