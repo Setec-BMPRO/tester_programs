@@ -40,10 +40,10 @@ class LogicalDevices():
             limit.ARM_PORT, file,
             boot_relay=self.rla_boot, reset_relay=self.rla_reset)
         # Serial connection to the ARM console
-        arm_ser = tester.SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
+        self.arm_ser = tester.SimSerial(simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
-        arm_ser.port = limit.ARM_PORT
-        self.arm = console.Console(arm_ser, verbose=False)
+        self.arm_ser.port = limit.ARM_PORT
+        self.arm = console.Console(self.arm_ser, verbose=False)
 
     def arm_puts(self,
                  string_data, preflush=0, postflush=0, priority=False,

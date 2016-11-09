@@ -47,14 +47,14 @@ class Genius2Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(25, len(result.readings))  # Reading count
+        self.assertEqual(26, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Aux', 'PowerUp', 'VoutAdj', 'ShutDown', 'OCP'],
             self.tester.ut_steps)
 
     def test_fail_run(self):
-        """FAIL 1st Vout reading."""
+        """FAIL 1st reading."""
         # Patch threading.Event & threading.Timer to remove delays
         mymock = MagicMock()
         mymock.is_set.return_value = True   # threading.Event.is_set()
