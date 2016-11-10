@@ -40,17 +40,17 @@ class LogicalDevices():
         self.programmer = share.ProgramARM(
             limit.ARM_PORT, file, boot_relay=self.rla_boot)
         # Serial connection to the ARM console
-        arm_ser = tester.SimSerial(
+        self.arm_ser = tester.SimSerial(
             simulation=fifo, baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = limit.ARM_PORT
-        self.arm = console.Console(arm_ser, verbose=False)
+        self.arm_ser.port = limit.ARM_PORT
+        self.arm = console.Console(self.arm_ser, verbose=False)
         # Serial connection to the Arduino console
-        ard_ser = tester.SimSerial(
+        self.ard_ser = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = limit.ARDUINO_PORT
-        self.ard = arduino.Arduino(ard_ser, verbose=False)
+        self.ard_ser.port = limit.ARDUINO_PORT
+        self.ard = arduino.Arduino(self.ard_ser, verbose=False)
 
     def arm_puts(self,
                  string_data, preflush=0, postflush=0, priority=False,
