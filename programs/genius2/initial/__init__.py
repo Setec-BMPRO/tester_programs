@@ -94,9 +94,9 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_ocp(self, dev, mes):
         """Ramp up load until OCP."""
-        dev.dcl_vbat.binary(0.0, 18.0, 5.0)
-        mes.dmm_vbatocp.measure(timeout=2)
-        dev.dcl_vbat.output(0.0)
+#        dev.dcl_vbat.binary(0.0, 18.0, 5.0)
+#        mes.dmm_vbatocp.measure(timeout=2)
+#        dev.dcl_vbat.output(0.0)
         if self._isH:
             dev.dclh.binary(0.0, 32.0, 5.0)
             mes.ramp_OCP_H.measure()
