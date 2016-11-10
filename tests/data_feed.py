@@ -26,6 +26,7 @@ class UnitTester(tester.Tester):
     key_call = 'Call'
     key_con = 'Con'
     key_con_np = 'ConNP'
+    key_ext = 'Ext'
 
     def __init__(self, prog_class, prog_limit):
         """Initalise the data feeder."""
@@ -39,6 +40,7 @@ class UnitTester(tester.Tester):
         self.ut_data = None
         self.ut_fifo_pusher = None
         self.ut_console_puts = None
+        self.extra_puts = None
         dispatcher.connect(     # Subscribe to the TestStep signals
             self._signal_step,
             sender=tester.signals.Thread.tester,
@@ -64,7 +66,7 @@ class UnitTester(tester.Tester):
             signal=tester.signals.TestRun.result)
         super().stop()
 
-    def ut_load(self, data, fifo_pusher, console_puts=None):
+    def ut_load(self, data, fifo_pusher, console_puts=None, extra_puts=None):
         """Per-Test data load.
 
         @param data Dictionary of FIFO data
@@ -75,6 +77,7 @@ class UnitTester(tester.Tester):
         self.ut_data = data
         self.ut_fifo_pusher = fifo_pusher
         self.ut_console_puts = console_puts
+        self.ut_extra_puts = extra_puts
         self.ut_steps.clear()
         self.ut_result = None
 
@@ -86,6 +89,7 @@ class UnitTester(tester.Tester):
         self._load_callables(stepname)
         self._load_console(stepname)
         self._load_console_np(stepname)
+        self._load_extra(stepname)
 
     def _load_sensors(self, stepname):
         """Sensor FIFOs."""
@@ -118,6 +122,15 @@ class UnitTester(tester.Tester):
             dat = self.ut_data[self.key_con_np][stepname]
             for msg in dat:
                 self.ut_console_puts(msg, addprompt=False)
+        except KeyError:
+            pass
+
+    def _load_extra(self, stepname):
+        """Extra strings."""
+        try:
+            dat = self.ut_data[self.key_ext][stepname]
+            for msg in dat:
+                self.ut_extra_puts(msg)
         except KeyError:
             pass
 

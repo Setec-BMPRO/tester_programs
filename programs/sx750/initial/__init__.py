@@ -3,6 +3,7 @@
 # Copyright 2016 SETEC Pty Ltd
 """SX-750 Initial Test Program."""
 
+from functools import wraps
 import time
 import logging
 import tester
@@ -11,8 +12,14 @@ from . import limit
 
 INI_LIMIT = limit.DATA
 
-# These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = t = None
+
+def teststep(func):
+    """Decorator to add arguments to the test step calls."""
+    @wraps(func)
+    def new_func(self):
+        """Add logical device & measurement arguments."""
+        return func(self, self.logdev, self.meas)
+    return new_func
 
 
 class Initial(tester.TestSequence):
@@ -21,10 +28,27 @@ class Initial(tester.TestSequence):
 
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
+        super().__init__(selection, None, fifo)
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
+        self.devices = physical_devices
+        self.limits = test_limits
+        self.logdev = None
+        self.sensor = None
+        self.meas = None
+        self.subt = None
+
+    def open(self, sequence=None):
+        """Prepare for testing."""
+        self._logger.info('Open')
+        self.logdev = support.LogicalDevices(self.devices, self.fifo)
+        self.sensor = support.Sensors(self.logdev, self.limits)
+        self.meas = support.Measurements(self.sensor, self.limits)
+        self.subt = support.SubTests(self.logdev, self.meas)
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
-            tester.TestStep('Program', self._step_program_micros, not fifo),
+            tester.TestStep('Program', self._step_program_micros),
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('5Vsb', self._step_reg_5v),
@@ -32,55 +56,38 @@ class Initial(tester.TestSequence):
             tester.TestStep('24V', self._step_reg_24v),
             tester.TestStep('PeakPower', self._step_peak_power),
             )
-        # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._devices = physical_devices
-        self._limits = test_limits
-
-    def open(self, sequence=None):
-        """Prepare for testing."""
-        self._logger.info('Open')
-        global d, s, m, t
-        d = support.LogicalDevices(self._devices, self.fifo)
-        s = support.Sensors(d, self._limits)
-        m = support.Measurements(s, self._limits)
-        t = support.SubTests(d, m)
-        d.dcs_Vcom.output(9.0, output=True)
-        d.dcs_Arduino.output(12.0, output=True)
+        super().open(sequence)
+        self.logdev.dcs_Vcom.output(9.0, output=True)
+        self.logdev.dcs_Arduino.output(12.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global d, s, m, t
-        d.dcs_Arduino.output(0.0, output=False)
-        d.dcs_Vcom.output(0.0, output=False)
-        d = s = m = t = None
+        self.logdev.dcs_Arduino.output(0.0, output=False)
+        self.logdev.dcs_Vcom.output(0.0, output=False)
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.reset()
+        self.logdev.reset()
 
-    def _step_fixture_lock(self):
+    @teststep
+    def _step_fixture_lock(self, dev, mes):
         """Check that Fixture Lock is closed.
 
         Measure Part detection microswitches.
         Check for presence of Snubber resistors.
 
         """
-        self.fifo_push(
-            ((s.Lock, 10.1), (s.Part, 10.2), (s.R601, 2001.0),
-             (s.R602, 2002.0), (s.R609, 2003.0), (s.R608, 2004.0), ))
-
         tester.MeasureGroup(
-            (m.dmm_Lock, m.dmm_Part, m.dmm_R601, m.dmm_R602, m.dmm_R609,
-             m.dmm_R608), 2)
+            (mes.dmm_Lock, mes.dmm_Part, mes.dmm_R601, mes.dmm_R602,
+             mes.dmm_R609, mes.dmm_R608),
+            timeout=2)
 
-    def _step_program_micros(self):
+    @teststep
+    def _step_program_micros(self, dev, mes):
         """Program the ARM and PIC devices.
 
         5Vsb is injected to power the ARM and 5Vsb PIC. PriCtl is injected
@@ -90,33 +97,32 @@ class Initial(tester.TestSequence):
         Unit is left unpowered.
 
         """
-        self.fifo_push(
-            ((s.o5Vsb, 5.75), (s.o5Vsbunsw, (5.0,) * 2), (s.o3V3, 3.21),
-             (s.o8V5Ard, 8.5), (s.PriCtl, 12.34),))
-        for _ in range(2):      # Push response prompts
-            d.ard_puts('OK')
-
         # Set BOOT active before power-on so the ARM boot-loader runs
-        d.rla_boot.set_on()
+        dev.rla_boot.set_on()
         # Apply and check injected rails
-        t.ext_pwron.run()
-        d.programmer.program()  # Program the ARM device
-        d.ard.open()
+        self.subt.ext_pwron.run()
+        if self.fifo:
+            self._logger.info(
+                '**** Programming skipped due to active FIFOs ****')
+        else:
+            dev.programmer.program()  # Program the ARM device
+        dev.ard.open()
         time.sleep(2)        # Wait for Arduino to start
-        d.rla_pic1.set_on()
-        d.rla_pic1.opc()
-        m.dmm_5Vunsw.measure(timeout=2)
-        m.pgm_5vsb.measure()
-        d.rla_pic1.set_off()
-        d.rla_pic2.set_on()
-        d.rla_pic2.opc()
-        m.pgm_pwrsw.measure()
-        d.rla_pic2.set_off()
-        m.ocp_max.measure()
+        dev.rla_pic1.set_on()
+        dev.rla_pic1.opc()
+        mes.dmm_5Vunsw.measure(timeout=2)
+        mes.pgm_5vsb.measure()
+        dev.rla_pic1.set_off()
+        dev.rla_pic2.set_on()
+        dev.rla_pic2.opc()
+        mes.pgm_pwrsw.measure()
+        dev.rla_pic2.set_off()
+        mes.ocp_max.measure()
         # Switch off rails and discharge the 5Vsb to stop the ARM
-        t.ext_pwroff.run()
+        self.subt.ext_pwroff.run()
 
-    def _step_initialise_arm(self):
+    @teststep
+    def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
         5Vsb is injected to power the ARM.
@@ -124,23 +130,20 @@ class Initial(tester.TestSequence):
         Unit is left unpowered.
 
         """
-        self.fifo_push(((s.o5Vsb, 5.75), (s.o5Vsbunsw, 5.01), ))
-        for _ in range(2):      # Push response prompts
-            d.arm_puts('')
-
-        d.dcs_5Vsb.output(9.0, True)
-        tester.MeasureGroup((m.dmm_5Vext, m.dmm_5Vunsw), 2)
+        dev.dcs_5Vsb.output(9.0, True)
+        tester.MeasureGroup((mes.dmm_5Vext, mes.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
-        d.arm.open()
-        d.arm['UNLOCK'] = True
-        d.arm['NVWRITE'] = True
+        dev.arm.open()
+        dev.arm['UNLOCK'] = True
+        dev.arm['NVWRITE'] = True
         # Switch everything off
-        d.dcs_5Vsb.output(0, False)
-        d.dcl_5Vsb.output(0.1)
+        dev.dcs_5Vsb.output(0, False)
+        dev.dcl_5Vsb.output(0.1)
         time.sleep(0.5)
-        d.dcl_5Vsb.output(0)
+        dev.dcl_5Vsb.output(0)
 
-    def _step_powerup(self):
+    @teststep
+    def _step_powerup(self, dev, mes):
         """Power-Up the Unit.
 
         240Vac is applied.
@@ -149,62 +152,42 @@ class Initial(tester.TestSequence):
         Unit is left running at 240Vac, no load.
 
         """
-        self.fifo_push(
-            ((s.ACin, 240.0), (s.PriCtl, 12.34), (s.o5Vsb, 5.05),
-             (s.o12V, (0.12, 12.34)), (s.o24V, (0.24, 24.34)),
-             (s.ACFAIL, 5.0), (s.PGOOD, 0.123),
-             (s.PFC,
-              (432.0, 432.0,     # Initial reading
-               433.0, 433.0,     # After 1st cal
-               433.0, 433.0,     # 2nd reading
-               435.0, 435.0,     # Final value
-              )), ))
-        d.arm_puts('')
-        for dstr in (('50Hz ', ) +       # ARM_AcFreq
-                     ('240Vrms ', ) +    # ARM_AcVolt
-                     ('12180mV ', ) +    # ARM_12V
-                     ('24000mV ', )      # ARM_24V
-                    ):
-            d.arm_puts(dstr)
-        d.arm_puts(limit.BIN_VERSION[:3])    # ARM SwVer
-        d.arm_puts(limit.BIN_VERSION[4:])    # ARM BuildNo
-        for _ in range(4):      # Push response prompts
-            d.arm_puts('')
-
-        d.acsource.output(voltage=240.0, output=True)
+        dev.acsource.output(voltage=240.0, output=True)
         # A little load so PFC voltage falls faster
-        d.dcl_12V.output(1.0)
-        d.dcl_24V.output(1.0)
+        dev.dcl_12V.output(1.0)
+        dev.dcl_24V.output(1.0)
         tester.MeasureGroup(
-            (m.dmm_ACin, m.dmm_PriCtl, m.dmm_5Vsb_set, m.dmm_12Voff,
-             m.dmm_24Voff, m.dmm_ACFAIL), 2)
+            (mes.dmm_ACin, mes.dmm_PriCtl, mes.dmm_5Vsb_set, mes.dmm_12Voff,
+             mes.dmm_24Voff, mes.dmm_ACFAIL), 2)
         # Switch all outputs ON
-        d.rla_pson.set_on()
-        tester.MeasureGroup((m.dmm_12V_set, m.dmm_24V_set, m.dmm_PGOOD), 2)
-        # ARM data readings
-        d.arm['UNLOCK'] = True
+        dev.rla_pson.set_on()
         tester.MeasureGroup(
-            (m.arm_AcFreq, m.arm_AcVolt, m.arm_12V, m.arm_24V,
-             m.arm_SwVer, m.arm_SwBld), )
+            (mes.dmm_12V_set, mes.dmm_24V_set, mes.dmm_PGOOD), 2)
+        # ARM data readings
+        dev.arm['UNLOCK'] = True
+        tester.MeasureGroup(
+            (mes.arm_AcFreq, mes.arm_AcVolt, mes.arm_12V, mes.arm_24V,
+             mes.arm_SwVer, mes.arm_SwBld), )
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
-        result, _, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
-        d.arm_calpfc(pfc)
+        result, _, pfc = mes.dmm_PFCpre.stable(limit.PFC_STABLE)
+        dev.arm_calpfc(pfc)
         # Prevent a limit fail from failing the unit
-        m.dmm_PFCpost.testlimit[0].position_fail = False
-        result, _, pfc = m.dmm_PFCpost.stable(limit.PFC_STABLE)
+        mes.dmm_PFCpost.testlimit[0].position_fail = False
+        result, _, pfc = mes.dmm_PFCpost.stable(limit.PFC_STABLE)
         # Allow a limit fail to fail the unit
-        m.dmm_PFCpost.testlimit[0].position_fail = True
+        mes.dmm_PFCpost.testlimit[0].position_fail = True
         if not result:
             self._logger.info('Retry PFC calibration')
-            result, _, pfc = m.dmm_PFCpre.stable(limit.PFC_STABLE)
-            d.arm_calpfc(pfc)
-            m.dmm_PFCpost.stable(limit.PFC_STABLE)
+            result, _, pfc = mes.dmm_PFCpre.stable(limit.PFC_STABLE)
+            dev.arm_calpfc(pfc)
+            mes.dmm_PFCpost.stable(limit.PFC_STABLE)
         # Leave the loads at zero
-        d.dcl_12V.output(0)
-        d.dcl_24V.output(0)
+        dev.dcl_12V.output(0)
+        dev.dcl_24V.output(0)
 
-    def _step_reg_5v(self):
+    @teststep
+    def _step_reg_5v(self, dev, mes):
         """Check regulation of the 5Vsb.
 
         Min = 0, Max = 2.0A, Peak = 2.5A
@@ -213,14 +196,13 @@ class Initial(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(((s.o5Vsb, (5.20, 5.15, 5.14, 5.10, )), ))
-
         self.reg_check(
-            dmm_out=m.dmm_5Vsb, dcl_out=d.dcl_5Vsb,
-            reg_limit=self._limits['5Vsb_reg'], max_load=2.0, peak_load=2.5)
-        d.dcl_5Vsb.output(0)
+            dmm_out=mes.dmm_5Vsb, dcl_out=dev.dcl_5Vsb,
+            reg_limit=self.limits['5Vsb_reg'], max_load=2.0, peak_load=2.5)
+        dev.dcl_5Vsb.output(0)
 
-    def _step_reg_12v(self):
+    @teststep
+    def _step_reg_12v(self, dev, mes):
         """Check regulation and OCP of the 12V.
 
         Min = 0, Max = 32A, Peak = 36A
@@ -233,31 +215,21 @@ class Initial(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(
-            ((s.o12V, (12.34, 12.25, 12.10, 12.00, 12.34, )),
-             # OPC SET: Push 32 reads before OCP detected
-             # OCP CHECK: Push 37 reads before OCP detected
-             (s.o12VinOCP,
-              ((0.123, ) * 32 + (4.444, )) +
-              ((0.123, ) * 37 + (4.444, ))),
-            ))
-        # Push response prompts
-        for _ in range(35):      # Push response prompts
-            d.ard_puts('OK')
-
         self.reg_check(
-            dmm_out=m.dmm_12V, dcl_out=d.dcl_12V,
-            reg_limit=self._limits['12V_reg'], max_load=32.0, peak_load=36.0)
+            dmm_out=mes.dmm_12V, dcl_out=dev.dcl_12V,
+            reg_limit=self.limits['12V_reg'], max_load=32.0, peak_load=36.0)
         self.ocp_set(
-            target=36.6, load=d.dcl_12V, dmm=m.dmm_12V, detect=m.dmm_12V_inOCP,
-            enable=m.ocp12_unlock, olimit=self._limits['12V_ocp'])
+            target=36.6, load=dev.dcl_12V,
+            dmm=mes.dmm_12V, detect=mes.dmm_12V_inOCP,
+            enable=mes.ocp12_unlock, olimit=self.limits['12V_ocp'])
         with tester.PathName('OCPcheck'):
-            d.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
-            m.rampOcp12V.measure()
-            d.dcl_12V.output(1.0)
-            d.dcl_12V.output(0.0)
+            dev.dcl_12V.binary(0.0, 36.6 * 0.9, 2.0)
+            mes.rampOcp12V.measure()
+            dev.dcl_12V.output(1.0)
+            dev.dcl_12V.output(0.0)
 
-    def _step_reg_24v(self):
+    @teststep
+    def _step_reg_24v(self, dev, mes):
         """Check regulation and OCP of the 24V.
 
         Min = 0, Max = 15A, Peak = 18A
@@ -270,47 +242,65 @@ class Initial(tester.TestSequence):
         Unit is left running at no load.
 
         """
-        self.fifo_push(
-            ((s.o24V, (24.44, 24.33, 24.22, 24.11, 24.24)),
-             # OPC SET: Push 32 reads before OCP detected
-             # OCP CHECK: Push 18 reads before OCP detected
-             (s.o24VinOCP,
-              ((0.123, ) * 32 + (4.444, )) +
-              ((0.123, ) * 18 + (4.444, ))),
-            ))
-        for _ in range(35):      # Push response prompts
-            d.ard_puts('OK')
-
         self.reg_check(
-            dmm_out=m.dmm_24V, dcl_out=d.dcl_24V,
-            reg_limit=self._limits['24V_reg'], max_load=15.0, peak_load=18.0)
+            dmm_out=mes.dmm_24V, dcl_out=dev.dcl_24V,
+            reg_limit=self.limits['24V_reg'], max_load=15.0, peak_load=18.0)
         self.ocp_set(
-            target=18.3, load=d.dcl_24V, dmm=m.dmm_24V, detect=m.dmm_24V_inOCP,
-            enable=m.ocp24_unlock, olimit=self._limits['24V_ocp'])
+            target=18.3, load=dev.dcl_24V,
+            dmm=mes.dmm_24V, detect=mes.dmm_24V_inOCP,
+            enable=mes.ocp24_unlock, olimit=self.limits['24V_ocp'])
         with tester.PathName('OCPcheck'):
-            d.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
-            m.rampOcp24V.measure()
-            d.dcl_24V.output(1.0)
-            d.dcl_24V.output(0.0)
+            dev.dcl_24V.binary(0.0, 18.3 * 0.9, 2.0)
+            mes.rampOcp24V.measure()
+            dev.dcl_24V.output(1.0)
+            dev.dcl_24V.output(0.0)
 
-    def _step_peak_power(self):
+    @teststep
+    def _step_peak_power(self, dev, mes):
         """Check operation at Peak load.
 
         5Vsb @ 2.5A, 12V @ 36.0A, 24V @ 18.0A
         Unit is left running at no load.
 
         """
-        self.fifo_push(
-            ((s.o5Vsb, 5.15), (s.o12V, 12.22), (s.o24V, 24.44),
-             (s.PGOOD, 0.15)))
+        dev.dcl_5Vsb.binary(start=0.0, end=2.5, step=1.0)
+        dev.dcl_12V.binary(start=0.0, end=36.0, step=2.0)
+        dev.dcl_24V.binary(start=0.0, end=18.0, step=2.0)
+        tester.MeasureGroup(
+            (mes.dmm_5Vsb, mes.dmm_12V, mes.dmm_24V, mes.dmm_PGOOD), 2)
+        dev.dcl_24V.output(0)
+        dev.dcl_12V.output(0)
+        dev.dcl_5Vsb.output(0)
 
-        d.dcl_5Vsb.binary(start=0.0, end=2.5, step=1.0)
-        d.dcl_12V.binary(start=0.0, end=36.0, step=2.0)
-        d.dcl_24V.binary(start=0.0, end=18.0, step=2.0)
-        tester.MeasureGroup((m.dmm_5Vsb, m.dmm_12V, m.dmm_24V, m.dmm_PGOOD), 2)
-        d.dcl_24V.output(0)
-        d.dcl_12V.output(0)
-        d.dcl_5Vsb.output(0)
+    def ocp_set(self, target, load, dmm, detect, enable, olimit):
+        """Set OCP of an output.
+
+        target: Target setpoint in Amp.
+        load: Load instrument.
+        dmm: Measurement of output voltage.
+        detect: Measurement of 'In OCP'.
+        enable: Measurement to call to enable digital pot.
+        olimit: Limit to check OCP pot setting.
+
+        OCP has been set to maximum in the programming step.
+        Apply the desired load current, then lower the OCP setting until
+        OCP triggers. The unit is left running at no load.
+
+        """
+        with tester.PathName('OCPset'):
+            load.output(target)
+            dmm.measure()
+            detect.configure()
+            detect.opc()
+            enable.measure()
+            setting = 0
+            for setting in range(63, 0, -1):
+                self.meas.ocp_step_dn.measure()
+                if detect.measure().result:
+                    break
+            self.meas.ocp_lock.measure()
+            load.output(0.0)
+            olimit.check(setting, 1)
 
     @staticmethod
     def reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
@@ -343,34 +333,3 @@ class Initial(tester.TestSequence):
             dcl_out.output(peak_load)
             dcl_out.opc()
             dmm_out.measure()
-
-    @staticmethod
-    def ocp_set(target, load, dmm, detect, enable, olimit):
-        """Set OCP of an output.
-
-        target: Target setpoint in Amp.
-        load: Load instrument.
-        dmm: Measurement of output voltage.
-        detect: Measurement of 'In OCP'.
-        enable: Measurement to call to enable digital pot.
-        olimit: Limit to check OCP pot setting.
-
-        OCP has been set to maximum in the programming step.
-        Apply the desired load current, then lower the OCP setting until
-        OCP triggers. The unit is left running at no load.
-
-        """
-        with tester.PathName('OCPset'):
-            load.output(target)
-            dmm.measure()
-            detect.configure()
-            detect.opc()
-            enable.measure()
-            setting = 0
-            for setting in range(63, 0, -1):
-                m.ocp_step_dn.measure()
-                if detect.measure().result:
-                    break
-            m.ocp_lock.measure()
-            load.output(0.0)
-            olimit.check(setting, 1)

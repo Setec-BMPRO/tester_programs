@@ -29,7 +29,7 @@ class LogicalDevices():
         self.dcs_vcom = tester.DCSource(devices['DCS1'])
         self.dcs_vbat = tester.DCSource(devices['DCS2'])
         self.dcs_vaux = tester.DCSource(devices['DCS3'])
-        self.dcs_sreg = tester.DCSource(devices['DCS4'])
+#        self.dcs_sreg = tester.DCSource(devices['DCS4'])
         self.dcl_out = tester.DCLoad(devices['DCL1'])
         self.dcl_bat = tester.DCLoad(devices['DCL5'])
         self.rla_reset = tester.Relay(devices['RLA1'])
@@ -37,6 +37,7 @@ class LogicalDevices():
         self.rla_pic = tester.Relay(devices['RLA3'])
         self.rla_loadsw = tester.Relay(devices['RLA4'])
         self.rla_vbat = tester.Relay(devices['RLA5'])
+        self.rla_acsw = tester.Relay(devices['RLA6'])
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -72,12 +73,13 @@ class LogicalDevices():
         self.dcl_bat.output(2.0)
         time.sleep(1)
         self.discharge.pulse()
-        for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
+#        for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
+        for dcs in (self.dcs_vbat, self.dcs_vaux):
             dcs.output(0.0, False)
         for ld in (self.dcl_out, self.dcl_bat):
             ld.output(0.0, False)
         for rla in (self.rla_reset, self.rla_boot, self.rla_pic,
-                    self.rla_loadsw, self.rla_vbat):
+                    self.rla_loadsw, self.rla_vbat, self.rla_acsw):
             rla.set_off()
 
 
@@ -138,6 +140,7 @@ class Sensors():
         self.arm_solar_relay = console.Sensor(bp35, 'SR_RELAY')
         self.arm_solar_error = console.Sensor(bp35, 'SR_ERROR')
         self.arm_vout_ov = console.Sensor(bp35, 'VOUT_OV')
+        self.arm_isreg = console.Sensor(bp35, 'SR_IOUT', scale=1000)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -170,6 +173,8 @@ class Measurements():
         self.dmm_vbat = self._maker('Vbat', sense.vbat)
         self.dmm_vsregpre = self._maker('VsetPre', sense.vsreg)
         self.dmm_vsregpost = self._maker('VsetPost', sense.vsreg)
+        self.arm_isregpre = self._maker('ARM-IoutPre', sense.arm_isreg)
+        self.arm_isregpost = self._maker('ARM-IoutPost', sense.arm_isreg)
         self.dmm_vaux = self._maker('Vaux', sense.vbat)
         self.dmm_3v3 = self._maker('3V3', sense.o3v3)
         self.dmm_fanOn = self._maker('FanOn', sense.fan)

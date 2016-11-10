@@ -59,6 +59,8 @@ DATA = (
     lim_hilo_delta('SolarVcc', 3.3, 0.1),
     lim_hilo_percent('VsetPre', SOLAR_VSET, 6.0),
     lim_hilo_percent('VsetPost', SOLAR_VSET, 3.0),
+    lim_hilo_percent('ARM-IoutPre', 10.0, 9.0),
+    lim_hilo_percent('ARM-IoutPost', 10.0, 4.0),
     lim_hilo('OCP', 6.0, 9.0),
     lim_lo('InOCP', 11.6),
     lim_string('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
