@@ -112,10 +112,12 @@ class Initial(tester.TestSequence):
             self.hwver = limit.ARM_HW_VER1
             dev.program_pic.hexfile = limit.PIC_HEX1
             self.hwver_pic = limit.PIC_HW_VER1
-        # Apply DC Sources to Battery terminals and Solar Reg input
+        # Apply DC Sources to Battery terminals and Solar Reg input (BC282 o/p)
         dev.dcs_vbat.output(limit.VBAT_IN, True)
         dev.rla_vbat.set_on()
-        dev.dcs_sreg.output(limit.SOLAR_VIN, True)
+#        dev.dcs_sreg.output(limit.SOLAR_VIN, True)
+        dev.rla_acsw.set_on()
+        dev.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup(
             (mes.dmm_vbatin, mes.dmm_3v3, mes.dmm_solarvcc), timeout=5)
 
@@ -127,7 +129,7 @@ class Initial(tester.TestSequence):
 
         """
         dev.program_pic.program()
-        dev.dcs_sreg.output(0.0)  # Switch off the Solar
+#        dev.dcs_sreg.output(0.0)  # Switch off the Solar
 
     @teststep
     def _step_program_arm(self, dev, bp35, mes):
@@ -156,7 +158,7 @@ class Initial(tester.TestSequence):
         """
         bp35.open()
         dev.rla_reset.pulse(0.1)
-        dev.dcs_sreg.output(limit.SOLAR_VIN)
+#        dev.dcs_sreg.output(limit.SOLAR_VIN)
         bp35.action(None, delay=1.5, expected=2)  # Flush banner
         bp35['UNLOCK'] = True
         bp35['HW_VER'] = self.hwver
@@ -192,7 +194,18 @@ class Initial(tester.TestSequence):
         bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(1)
         mes.dmm_vsregpost.measure(timeout=5)
-        dev.dcs_sreg.output(0.0, output=False)
+        dev.dcl_bat.output(10.0, True)
+        mes.arm_isregpre.measure()
+        imeasured = 10.0
+        bp35['SR_ICAL'] = imeasured   # Calibrate current setpoint
+        bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET - 1.0)
+        bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
+        time.sleep(1)
+        mes.arm_isregpost.measure()
+#        dev.dcs_sreg.output(0.0, output=False)
+        # Turn fixture BC282 off.
+        dev.acsource.output(voltage=0.0)
+        dev.rla_acsw.set_off()
 
     @teststep
     def _step_aux(self, dev, bp35, mes):

@@ -72,6 +72,11 @@ class Console(console.Variable, console.BadUartConsole):
             'SR_VCAL': ParameterFloat(
                 'SOLAR_REG_CAL_V_OUT', writeable=True,
                 scale=1000),
+            'SR_ICAL': ParameterFloat(
+                'SOLAR_REG_CAL_I_OUT', writeable=True,
+                scale=1000),
+            'SR_IOUT': ParameterFloat(
+                'SOLAR_REG_IOUT', scale=1000),
             'SR_DEL_CAL': ParameterBoolean(
                 'SOLAR_REG_DEL_CAL', writeable=True),
             'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),

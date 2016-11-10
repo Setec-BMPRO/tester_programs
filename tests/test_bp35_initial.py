@@ -63,7 +63,11 @@ class BP35Initial(ProgramTestCase):
                     ('0', ) * 3 +       # 2 x Solar VI, Vout OV
                     ('0', '1') +        # Errorcode, Relay
                     ('0', ) +          # Vcal
-                    ('0', ) * 2,
+                    ('0', ) * 2 +
+                    ('10.5', ) +       # IoutPre
+                    ('0', ) +          # Ical
+                    ('0', ) * 2 +
+                    ('10.3', ),        # IoutPost
                 'Aux': ('', '13500', '1100', ''),
                 'PowerUp':
                     ('', ) * 4 +     # Manual mode
@@ -80,7 +84,7 @@ class BP35Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(68, len(result.readings))  # Reading count
+        self.assertEqual(70, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'SolarReg', 'Aux', 'PowerUp',
