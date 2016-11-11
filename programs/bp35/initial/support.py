@@ -29,7 +29,7 @@ class LogicalDevices():
         self.dcs_vcom = tester.DCSource(devices['DCS1'])
         self.dcs_vbat = tester.DCSource(devices['DCS2'])
         self.dcs_vaux = tester.DCSource(devices['DCS3'])
-#        self.dcs_sreg = tester.DCSource(devices['DCS4'])
+        self.dcs_sreg = tester.DCSource(devices['DCS4'])
         self.dcl_out = tester.DCLoad(devices['DCL1'])
         self.dcl_bat = tester.DCLoad(devices['DCL5'])
         self.rla_reset = tester.Relay(devices['RLA1'])
@@ -73,8 +73,7 @@ class LogicalDevices():
         self.dcl_bat.output(2.0)
         time.sleep(1)
         self.discharge.pulse()
-#        for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
-        for dcs in (self.dcs_vbat, self.dcs_vaux):
+        for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_sreg):
             dcs.output(0.0, False)
         for ld in (self.dcl_out, self.dcl_bat):
             ld.output(0.0, False)
@@ -140,7 +139,7 @@ class Sensors():
         self.arm_solar_relay = console.Sensor(bp35, 'SR_RELAY')
         self.arm_solar_error = console.Sensor(bp35, 'SR_ERROR')
         self.arm_vout_ov = console.Sensor(bp35, 'VOUT_OV')
-        self.arm_isreg = console.Sensor(bp35, 'SR_IOUT', scale=1000)
+        self.arm_isreg = console.Sensor(bp35, 'SR_IOUT')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
