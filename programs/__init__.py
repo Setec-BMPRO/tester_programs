@@ -134,7 +134,7 @@ ALL_SKIP = (
     # Unfinished programs
     'IDS500 Initial Main', 'IDS500 Final',
     # Done with unittest
-    'BP35 Initial', 'GEN8 Initial',
+    'BP35 Initial', 'GEN8 Initial', 'GEN8 Final',
     'GENIUS-II Initial', 'GENIUS-II-H Initial',
     'J35 Initial', 'J35C Final', 'RVVIEW Initial',
     # Obsolete and unused programs

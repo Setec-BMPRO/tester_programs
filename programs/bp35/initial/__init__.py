@@ -46,7 +46,7 @@ class Initial(tester.TestSequence):
         self.sensor = None
         self.meas = None
 
-    def open(self):
+    def open(self, sequence=None):
         """Prepare for testing."""
         self._logger.info('Open')
         self.logdev = support.LogicalDevices(self.phydev, self.fifo)
@@ -196,10 +196,9 @@ class Initial(tester.TestSequence):
         bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(1)
         mes.dmm_vsregpost.measure(timeout=5)
-        dev.dcl_bat.output(10.0, True)
+        dev.dcl_bat.output(limit.SOLAR_ICAL, True)
         mes.arm_isregpre.measure()
-        imeasured = 10.0
-        bp35['SR_ICAL'] = imeasured   # Calibrate current setpoint
+        bp35['SR_ICAL'] = limit.SOLAR_ICAL  # Calibrate current setpoint
         time.sleep(1)
         mes.arm_isregpost.measure()
         dev.dcl_bat.output(0.0)

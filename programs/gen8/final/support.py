@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """GEN8 Final Test Program."""
 
 import tester
@@ -23,8 +24,8 @@ class LogicalDevices():
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
-        for ld in (self.dcl_12V, self.dcl_24V, self.dcl_5V, self.dcl_12V2):
-            ld.output(0.0, False)
+        for load in (self.dcl_12V, self.dcl_24V, self.dcl_5V, self.dcl_12V2):
+            load.output(0.0, False)
         for rla in (self.rla_12V2off, self.rla_pson):
             rla.set_off()
 
@@ -81,56 +82,3 @@ class Measurements():
 
         """
         return tester.Measurement(self._limits[limitname], sensor)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances."""
-        d = logical_devices
-        m = measurements
-        # PowerUp: Apply 240Vac, set min load, measure.
-        self.pwr_up = tester.SubStep((
-            tester.LoadSubStep(
-                ((d.dcl_5V, 0.0), (d.dcl_24V, 0.1), (d.dcl_12V, 3.5),
-                 (d.dcl_12V2, 0.5)), output=True),
-            tester.AcSubStep(
-                acs=d.acsource, voltage=240.0, output=True, delay=1.0),
-            tester.MeasureSubStep(
-                (m.dmm_5V, m.dmm_24Voff, m.dmm_12Voff, ), timeout=5),
-            tester.RelaySubStep(((d.rla_12V2off, True), )),
-            tester.MeasureSubStep((m.dmm_12V2off, ), timeout=5),
-            ))
-        # PowerOn: Turn on, measure at min load.
-        self.pwr_on = tester.SubStep((
-            tester.RelaySubStep(((d.rla_pson, True), )),
-            tester.MeasureSubStep(
-                (m.dmm_24Von, m.dmm_12Von, m.dmm_12V2off,
-                 m.dmm_PwrFailOff, ), timeout=5),
-            tester.RelaySubStep(((d.rla_12V2off, False), )),
-            tester.MeasureSubStep((m.dmm_12V2on, m.dmm_Iecon, ), timeout=5),
-            tester.MeasureSubStep((m.ui_YesNoMains, )),
-            ))
-        # Full Load: Apply full load, measure.
-        # 115Vac Full Load: 115Vac, measure.
-        mss = tester.MeasureSubStep(
-            (m.dmm_5V, m.dmm_24Von, m.dmm_12Von, m.dmm_12V2on,), timeout=5)
-        self.full_load = tester.SubStep((
-            tester.LoadSubStep(
-                ((d.dcl_5V, 2.5), (d.dcl_24V, 5.0),
-                 (d.dcl_12V, 15.0), (d.dcl_12V2, 7.0)), delay=0.5),
-            mss,
-            ))
-        self.full_load_115 = tester.SubStep((
-            tester.AcSubStep(acs=d.acsource, voltage=115.0, delay=0.5),
-            mss,
-            ))
-        # PowerOff: Set min load, switch off, measure.
-        self.pwr_off = tester.SubStep((
-            tester.LoadSubStep(
-                ((d.dcl_5V, 0.5), (d.dcl_24V, 0.5), (d.dcl_12V, 4.0))),
-            tester.MeasureSubStep(
-                (m.ui_NotifyPwrOff, m.dmm_Iecoff, m.dmm_24Voff,)),
-            ))

@@ -60,14 +60,13 @@ class BP35Initial(ProgramTestCase):
                     ('', ) + ('0x10000', ) + ('', ) * 3,      # Manual mode
                 'SolarReg':
                     ('1.0', '0') +      # Solar alive, Vout OV
-                    ('0', ) * 3 +       # 2 x Solar VI, Vout OV
+                    ('', ) * 3 +        # 2 x Solar VI, Vout OV
                     ('0', '1') +        # Errorcode, Relay
-                    ('0', ) +          # Vcal
-                    ('0', ) * 2 +
-                    ('10.5', ) +       # IoutPre
-                    ('0', ) +          # Ical
-                    ('0', ) * 2 +
-                    ('10.3', ),        # IoutPost
+                    ('', ) +            # Vcal
+                    ('', ) * 2 +        # 2 x Solar VI
+                    ('10500', ) +       # IoutPre
+                    ('', ) +            # Ical
+                    ('10100', ),        # IoutPost
                 'Aux': ('', '13500', '1100', ''),
                 'PowerUp':
                     ('', ) * 4 +     # Manual mode

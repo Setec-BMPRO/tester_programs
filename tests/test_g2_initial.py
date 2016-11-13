@@ -47,7 +47,7 @@ class Genius2Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(26, len(result.readings))  # Reading count
+        self.assertEqual(25, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Aux', 'PowerUp', 'VoutAdj', 'ShutDown', 'OCP'],

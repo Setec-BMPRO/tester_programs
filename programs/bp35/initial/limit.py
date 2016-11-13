@@ -31,6 +31,7 @@ _CAN_BIND = 1 << 28
 # Solar Reg settings
 SOLAR_VSET = 13.650
 SOLAR_ISET = 30.0
+SOLAR_ICAL = 10.0
 SOLAR_VIN = 20.0
 # Injected Vbat & Vaux
 VBAT_IN = 12.4
@@ -59,8 +60,8 @@ DATA = (
     lim_hilo_delta('SolarVcc', 3.3, 0.1),
     lim_hilo_percent('VsetPre', SOLAR_VSET, 6.0),
     lim_hilo_percent('VsetPost', SOLAR_VSET, 3.0),
-    lim_hilo_percent('ARM-IoutPre', 10.0, 9.0),
-    lim_hilo_percent('ARM-IoutPost', 10.0, 4.0),
+    lim_hilo_percent('ARM-IoutPre', SOLAR_ICAL, 9.0),
+    lim_hilo_percent('ARM-IoutPost', SOLAR_ICAL, 4.0),
     lim_hilo('OCP', 6.0, 9.0),
     lim_lo('InOCP', 11.6),
     lim_string('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
