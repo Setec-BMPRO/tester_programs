@@ -4,6 +4,7 @@
 
 from functools import wraps
 import logging
+import time
 import tester
 from . import support
 from . import limit
@@ -71,6 +72,11 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_prepare(self, dev, mes):
         """Apply external dc voltage to power the micro."""
+#        dev.dcs_vaux.output(13.0, True)
+#        dev.dcl_vbat.output(0.2, True)
+#        mes.dmm_diode.measure(timeout=5)
+#        dev.dcs_vaux.output(0.0)
+#        dev.dcl_vbat.output(0.0)
         dev.dcs_vbatctl.output(13.0, True)
         dev.rla_prog.set_on()
         tester.MeasureGroup(
@@ -94,9 +100,11 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_ocp(self, dev, mes):
         """Ramp up load until OCP."""
-#        dev.dcl_vbat.binary(0.0, 18.0, 5.0)
-#        mes.dmm_vbatocp.measure(timeout=2)
-#        dev.dcl_vbat.output(0.0)
+        # Check for correct model (GENIUS-II/GENIUS-II-H)
+        dev.dcl_vbat.binary(0.0, 18.0, 5.0)
+        mes.dmm_vbatocp.measure(timeout=2)
+        dev.dcl_vbat.output(0.0)
+        mes.dmm_vbat.measure(timeout=10)
         if self._isH:
             dev.dclh.binary(0.0, 32.0, 5.0)
             mes.ramp_OCP_H.measure()

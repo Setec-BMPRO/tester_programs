@@ -68,7 +68,8 @@ class Sensors():
         dcl = logical_devices.dcl
         dclh = logical_devices.dclh
         sensor = tester.sensor
-        self.olock = sensor.Res(dmm, high=16, low=8, rng=10000, res=1)
+        self.diode = sensor.Vdc(dmm, high=7, low=8, rng=10, res=0.001)
+        self.olock = sensor.Res(dmm, high=16, low=4, rng=10000, res=1)
         self.oacin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.oflyld = sensor.Vac(dmm, high=15, low=7, rng=1000, res=0.01)
         self.ovcap = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
@@ -106,6 +107,7 @@ class Measurements():
     def __init__(self, sense, limits):
         """Create all Measurement instances."""
         Measurement = tester.Measurement
+        self.dmm_diode = Measurement(limits['DetectDiode'], sense.diode)
         self.dmm_lock = Measurement(limits['FixtureLock'], sense.olock)
         self.dmm_flyld = Measurement(limits['FlyLead'], sense.oflyld)
         self.dmm_acin = Measurement(limits['AcIn'], sense.oacin)
@@ -139,7 +141,6 @@ class SubTests():
         self.aux = tester.SubStep((
             tester.DcSubStep(setting=((dev.dcs_vaux, 13.8), ), output=True),
             tester.LoadSubStep(((dev.dcl, 0.1), ), output=True),
-#            tester.MeasureSubStep((mes.dmm_vout, mes.dmm_vaux, ), timeout=5),
             tester.MeasureSubStep((mes.dmm_voutpre, mes.dmm_vaux, ), timeout=5),
             tester.DcSubStep(setting=((dev.dcs_vaux, 0.0), ), output=False),
             tester.LoadSubStep(((dev.dcl, 10.0), ), delay=2),
