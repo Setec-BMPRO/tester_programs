@@ -140,7 +140,7 @@ class SubTests():
         # Prepare:  Dc input, measure.
         self.prepare = tester.SubStep((
             tester.DcSubStep(setting=((dev.dcs_vaux, 12.0), ), output=True),
-            tester.LoadSubStep(((dev.dcl_vbat, 0.4), ), output=True),
+            tester.LoadSubStep(((dev.dcl_vbat, 0.4), ), output=True, delay=1.0),
             tester.MeasureSubStep((mes.dmm_diode, ), timeout=5),
             tester.LoadSubStep(((dev.dcl_vbat, 0.0), )),
             tester.DcSubStep(setting=(

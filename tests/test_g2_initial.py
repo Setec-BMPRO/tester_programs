@@ -24,7 +24,7 @@ class Genius2Initial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
                     ((sen.olock, 0.0), (sen.ovbatctl, 13.0),
-                     (sen.ovdd, 5.0), ),
+                     (sen.ovdd, 5.0), (sen.diode, 0.25), ),
                 'Aux': ((sen.ovout, 13.65), (sen.ovaux, 13.70), ),
                 'PowerUp':
                     ((sen.oflyld, 30.0), (sen.oacin, 240.0),
@@ -39,15 +39,14 @@ class Genius2Initial(ProgramTestCase):
                      (sen.ovcc, 0.0), ),
                 'OCP':
                     ((sen.ovout, (13.5, ) * 11 + (13.0, ), ),
-                     (sen.ovout, (0.1, 13.6, 13.6)),
-                     (sen.ovbat, 13.6), ),
+                     (sen.ovbat, (3.6, 13.6)), ),
                 },
             }
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(25, len(result.readings))  # Reading count
+        self.assertEqual(28, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Aux', 'PowerUp', 'VoutAdj', 'ShutDown', 'OCP'],

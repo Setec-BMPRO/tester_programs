@@ -4,6 +4,7 @@
 
 from functools import wraps
 import logging
+import time
 import tester
 from . import support
 from . import limit
@@ -68,19 +69,6 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-#    @teststep
-#    def _step_prepare(self, dev, mes):
-#        """Apply external dc voltage to power the micro."""
-#        dev.dcs_vaux.output(12.0, True)
-#        dev.dcl_vbat.output(0.4, True)
-#        mes.dmm_diode.measure(timeout=5)
-#        dev.dcs_vaux.output(0.0)
-#        dev.dcl_vbat.output(0.0)
-#        dev.dcs_vbatctl.output(13.0, True)
-#        dev.rla_prog.set_on()
-#        tester.MeasureGroup(
-#            (mes.dmm_lock, mes.dmm_vbatctl, mes.dmm_vdd), timeout=5)
-
     @teststep
     def _step_program(self, dev, mes):
         """Program the board."""
@@ -104,6 +92,7 @@ class Initial(tester.TestSequence):
         mes.dmm_vbatocp.measure(timeout=2)
         dev.dcl_vbat.output(0.0)
         mes.dmm_vbat.measure(timeout=10)
+        time.sleep(2)
         if self._isH:
             dev.dclh.binary(0.0, 32.0, 5.0)
             mes.ramp_OCP_H.measure()

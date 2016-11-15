@@ -8,7 +8,7 @@ from tester.testlimit import (
 PIC_HEX = 'genius2_2.hex'
 
 _BASE_DATA = (
-    lim_lo('DetectDiode', 0.4),
+    lim_lo('DetectDiode', 0.3),
     lim_hilo_delta('FlyLead', 30.0, 10.0),
     lim_hilo_delta('AcIn', 240.0, 5.0),
     lim_hilo_delta('Vbus', 330.0, 20.0),
