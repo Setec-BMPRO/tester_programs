@@ -6,7 +6,7 @@ from .data_feed import UnitTester, ProgramTestCase
 from programs import gen8
 
 _PROG_CLASS = gen8.Final
-_PROG_LIMIT = gen8.FIN_LIMIT
+_PROG_LIMIT = ()
 
 
 class GEN8Final(ProgramTestCase):
@@ -18,29 +18,29 @@ class GEN8Final(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_program.support.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen.o5V, 5.1), (sen.o24V, 0.0), (sen.o12V, 0.0),
-                    (sen.o12V2, 0.0),
+                    (sen.o5v, 5.1), (sen.o24v, 0.0), (sen.o12v, 0.0),
+                    (sen.o12v2, 0.0),
                     ),
                 'PowerOn': (
-                    (sen.o24V, 24.0), (sen.o12V, 12.0), (sen.o12V2, 0.0),
-                    (sen.oPwrFail, 24.1), (sen.o12V2, 12.0),
-                    (sen.oYesNoMains, True), (sen.oIec, 240.0),
+                    (sen.o24v, 24.0), (sen.o12v, 12.0), (sen.o12v2, 0.0),
+                    (sen.pwrfail, 24.1), (sen.o12v2, 12.0),
+                    (sen.yn_mains, True), (sen.iec, 240.0),
                     ),
                 'FullLoad': (
-                    (sen.o5V, 5.1), (sen.o24V, 24.1), (sen.o12V, 12.1),
-                    (sen.o12V2, 12.2),
+                    (sen.o5v, 5.1), (sen.o24v, 24.1), (sen.o12v, 12.1),
+                    (sen.o12v2, 12.2),
                     ),
                 '115V': (
-                    (sen.o5V, 5.1), (sen.o24V, 24.1), (sen.o12V, 12.1),
-                    (sen.o12V2, 12.2),
+                    (sen.o5v, 5.1), (sen.o24v, 24.1), (sen.o12v, 12.1),
+                    (sen.o12v2, 12.2),
                     ),
                 'Poweroff': (
-                    (sen.oNotifyPwrOff, True), (sen.oIec, 0.0),
-                    (sen.o24V, 0.0),
+                    (sen.not_pwroff, True), (sen.iec, 0.0),
+                    (sen.o24v, 0.0),
                     ),
                 },
             }
