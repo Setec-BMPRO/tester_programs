@@ -4,7 +4,6 @@
 
 from functools import wraps
 import logging
-import time
 import tester
 from . import support
 from . import limit
@@ -49,7 +48,7 @@ class Initial(tester.TestSequence):
         self.subtest = support.SubTests(self.logdev, self.meas)
         # Define the (linear) Test Sequence
         sequence = (
-            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('Prepare', self.subtest.prepare.run),
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('Aux', self.subtest.aux.run),
             tester.TestStep('PowerUp', self.subtest.pwrup.run),
@@ -69,18 +68,18 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @teststep
-    def _step_prepare(self, dev, mes):
-        """Apply external dc voltage to power the micro."""
-#        dev.dcs_vaux.output(13.0, True)
-#        dev.dcl_vbat.output(0.2, True)
+#    @teststep
+#    def _step_prepare(self, dev, mes):
+#        """Apply external dc voltage to power the micro."""
+#        dev.dcs_vaux.output(12.0, True)
+#        dev.dcl_vbat.output(0.4, True)
 #        mes.dmm_diode.measure(timeout=5)
 #        dev.dcs_vaux.output(0.0)
 #        dev.dcl_vbat.output(0.0)
-        dev.dcs_vbatctl.output(13.0, True)
-        dev.rla_prog.set_on()
-        tester.MeasureGroup(
-            (mes.dmm_lock, mes.dmm_vbatctl, mes.dmm_vdd), timeout=5)
+#        dev.dcs_vbatctl.output(13.0, True)
+#        dev.rla_prog.set_on()
+#        tester.MeasureGroup(
+#            (mes.dmm_lock, mes.dmm_vbatctl, mes.dmm_vdd), timeout=5)
 
     @teststep
     def _step_program(self, dev, mes):

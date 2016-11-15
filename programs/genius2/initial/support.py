@@ -137,6 +137,18 @@ class SubTests():
 
     def __init__(self, dev, mes):
         """Create SubTest Step instances."""
+        # Prepare:  Dc input, measure.
+        self.prepare = tester.SubStep((
+            tester.DcSubStep(setting=((dev.dcs_vaux, 12.0), ), output=True),
+            tester.LoadSubStep(((dev.dcl_vbat, 0.4), ), output=True),
+            tester.MeasureSubStep((mes.dmm_diode, ), timeout=5),
+            tester.LoadSubStep(((dev.dcl_vbat, 0.0), )),
+            tester.DcSubStep(setting=(
+                (dev.dcs_vaux, 0.0), (dev.dcs_vbatctl, 13.0), ), output=True),
+            tester.RelaySubStep(((dev.rla_prog, True), )),
+            tester.MeasureSubStep(
+                (mes.dmm_lock, mes.dmm_vbatctl, mes.dmm_vdd, ), timeout=5),
+            ))
         # Aux:  Dc input, measure.
         self.aux = tester.SubStep((
             tester.DcSubStep(setting=((dev.dcs_vaux, 13.8), ), output=True),
