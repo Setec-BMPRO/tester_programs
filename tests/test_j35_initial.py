@@ -7,7 +7,7 @@ from .data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
 _PROG_CLASS = j35.Initial
-_PROG_LIMIT = j35.INI_LIMIT
+_PROG_LIMIT = j35.INI_LIMIT_C
 
 
 class J35Initial(ProgramTestCase):
@@ -32,10 +32,10 @@ class J35Initial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
                     ((sen.olock, 10.0), (sen.sernum, ('A1626010123', )),
-                     (sen.ovbat, 12.5), (sen.oair, 12.5), (sen.o3V3U, 3.3), ),
+                     (sen.ovbat, 12.0), (sen.o3V3U, 3.3), ),
                 'Initialise': ((sen.sernum, ('A1526040123', )), ),
                 'Aux': ((sen.oaux, 13.5), (sen.ovbat, 13.5), ),
-                'Solar': ((sen.ovbat, 13.5), ),
+                'Solar': ((sen.ovbat, 13.0), (sen.oair, 13.0), ),
                 'PowerUp':
                     ((sen.oacin, 240.0), (sen.ovbus, 340.0),
                      (sen.o12Vpri, 12.5), (sen.o3V3, 3.3), (sen.o15Vs, 12.5),
@@ -61,7 +61,7 @@ class J35Initial(ProgramTestCase):
                     ('', ) * 5 +     # Manual mode
                     ('0', '', '0', '0', '240', '50000',
                      '350', '12800', '500', '', ),
-                'Output': ('', ) * (1 + 14 + 1),
+                'Output': ('', ) * (1 + sen.load_count + 1),
                 'Load': ('4000', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },

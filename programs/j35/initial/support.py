@@ -121,8 +121,9 @@ class Sensors():
         self.arm_bati = console.Sensor(j35, 'BATT_I')
         self.arm_canbind = console.Sensor(j35, 'CAN_BIND')
         # Generate load current sensors
+        self.load_count = limits['LOAD_COUNT'].limit
         self.arm_loads = []
-        for i in range(limit.LOAD_COUNT):
+        for i in range(self.load_count):
             s = console.Sensor(j35, 'LOAD_{}'.format(i + 1))
             self.arm_loads.append(s)
         self.ocp = sensor.Ramp(

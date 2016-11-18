@@ -18,10 +18,12 @@ ARM_BIN = 'j35_{}.bin'.format(ARM_VERSION)
 CAN_ECHO = 'TQQ,36,0'
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
-LOAD_CURRENT = 28.0
-LOAD_COUNT = 14
+COUNT_A = 7
+CURRENT_A = 14.0
+COUNT_BC = 14
+CURRENT_BC = 28.0
 
-DATA = (
+_BASE_DATA = (
     lim_hilo_delta('ACin', 240.0, 5.0),
     lim_hilo('Vbus', 335.0, 345.0),
     lim_hilo('12Vpri', 11.5, 13.0),
@@ -29,9 +31,9 @@ DATA = (
     lim_lo('VloadOff', 0.5),
     lim_hilo_delta('VbatIn', 12.0, 0.5),
     lim_hilo_delta('VbatOut', 13.0, 0.5),
+    lim_hilo_delta('Vair', 13.0, 0.5),
     lim_hilo_delta('Vbat', 12.8, 0.2),
     lim_hilo_percent('VbatLoad', 12.8, 5),
-    lim_hilo_delta('Vair', 12.5, 0.5),
     lim_hilo_delta('Vaux', 13.5, 0.5),
     lim_hilo_delta('3V3U', 3.30, 0.05),
     lim_hilo_delta('3V3', 3.30, 0.05),
@@ -53,8 +55,27 @@ DATA = (
     lim_hilo_delta('CanPwr', 12.0, 1.0),
     lim_string('CAN_RX', r'^RRQ,36,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
-    lim_hilo('OCP', 35.0 - LOAD_CURRENT, 42.0 - LOAD_CURRENT),
     lim_lo('InOCP', 11.6),
     lim_lo('FixtureLock', 20),
     lim_boolean('Notify', True),
+    )
+
+DATA_A = _BASE_DATA + (
+    lim_lo('LOAD_COUNT', COUNT_A),
+    lim_lo('LOAD_CURRENT', CURRENT_A),
+    lim_hilo('OCP', 20.0 - CURRENT_A, 25.0 - CURRENT_A),
+    )
+
+DATA_B = _BASE_DATA + (
+    lim_lo('LOAD_COUNT', COUNT_BC),
+    lim_lo('LOAD_CURRENT', CURRENT_BC),
+    lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
+    lim_boolean('J35C', False),
+    )
+
+DATA_C = _BASE_DATA + (
+    lim_lo('LOAD_COUNT', COUNT_BC),
+    lim_lo('LOAD_CURRENT', CURRENT_BC),
+    lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
+    lim_boolean('J35C', True),
     )

@@ -8,7 +8,9 @@ import share
 from . import support
 from . import limit
 
-INI_LIMIT = limit.DATA
+INI_LIMIT_A = limit.DATA_A
+INI_LIMIT_B = limit.DATA_B
+INI_LIMIT_C = limit.DATA_C
 
 
 def teststep(func):
@@ -40,6 +42,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.meas = None
         self.teststep = None
         self.sernum = None
+        self.isC = False
 
     def open(self):
         """Prepare for testing."""
@@ -47,6 +50,8 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
         self.teststep = support.SubTests(self.logdev, self.meas)
+        if self.limits['LOAD_COUNT'].limit > 7:
+            self.isC = self.limits['J35C'].limit
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('Prepare', self._step_prepare),
@@ -54,13 +59,13 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
                 'ProgramARM', self.logdev.program_arm.program, not self.fifo),
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('Aux', self._step_aux),
-            tester.TestStep('Solar', self._step_solar),
+            tester.TestStep('Solar', self._step_solar, self.isC),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('Output', self._step_output),
             tester.TestStep('RemoteSw', self.teststep.remote_sw.run),
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self.teststep.ocp.run),
-            tester.TestStep('CanBus', self._step_canbus),
+            tester.TestStep('CanBus', self._step_canbus, self.isC),
             )
         super().open(sequence)
         # Power to fixture Comms circuits.
@@ -93,7 +98,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         # Apply DC Source to Battery terminals
         dev.dcs_vbat.output(12.6, True)
         tester.MeasureGroup(
-            (mes.dmm_vbatin, mes.dmm_vair, mes.dmm_3v3u), timeout=5)
+            (mes.dmm_vbatin, mes.dmm_3v3u), timeout=5)
 
     @teststep
     def _step_initialise_arm(self, dev, j35, mes):
@@ -127,7 +132,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         """Test Solar input."""
         dev.dcs_solar.output(13.5, True)
         j35['SOLAR'] = True
-        tester.MeasureGroup((mes.dmm_vbatout, ), timeout=5)
+        tester.MeasureGroup((mes.dmm_vbatout, mes.dmm_vair), timeout=5)
         j35['SOLAR'] = False
         dev.dcs_solar.output(0.0, False)
 
@@ -161,7 +166,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         j35.load_set(set_on=True, loads=())   # All outputs OFF
         dev.dcl_out.output(1.0, True)  # A little load on the output
         mes.dmm_vloadoff.measure(timeout=2)
-        for load in range(limit.LOAD_COUNT):  # One at a time ON
+        for load in range(self.limits['LOAD_COUNT'].limit):  # One at a time ON
             with tester.PathName('L{0}'.format(load + 1)):
                 j35.load_set(set_on=True, loads=(load, ))
                 mes.dmm_vload.measure(timeout=2)
@@ -170,8 +175,8 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
     @teststep
     def _step_load(self, dev, j35, mes):
         """Test with load."""
-        dev.dcl_out.binary(1.0, limit.LOAD_CURRENT, 5.0)
-        for load in range(limit.LOAD_COUNT):
+        dev.dcl_out.binary(1.0, self.limits['LOAD_CURRENT'].limit, 5.0)
+        for load in range(self.limits['LOAD_COUNT'].limit):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
         dev.dcl_bat.output(4.0, True)
