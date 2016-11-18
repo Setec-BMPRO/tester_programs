@@ -7,6 +7,8 @@ import tester
 from . import support
 from . import limit
 
+FIN_LIMIT_A = limit.DATA_A
+FIN_LIMIT_B = limit.DATA_B
 FIN_LIMIT_C = limit.DATA_C
 
 
