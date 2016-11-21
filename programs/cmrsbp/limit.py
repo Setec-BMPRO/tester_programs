@@ -34,7 +34,7 @@ DATA = (
     # 298K nominal +/- 2.5K in Kelvin (25C +/- 2.5C in Celsius).
     lim_hilo_delta('BQ-Temp', 300, 4.5),
     # SerialDate
-    lim_string('SerNum', '.'),
+    lim_string('SerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
     )
 
 _FIN_DATA = (   # Shared Final Test limits

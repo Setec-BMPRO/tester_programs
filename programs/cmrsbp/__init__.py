@@ -272,7 +272,7 @@ class SerialDate(_Main):
 
     def _step_sn_date(self):
         """Write SerialNo & Manufacturing Datecode into EEPROM of BQ2060A."""
-        self.fifo_push(((s.ovbatIn, 0.5), (s.oSnEntry, ('11', )), ))
+        self.fifo_push(((s.ovbatIn, 0.5), (s.oSnEntry, ('9136861F1234', )), ))
 
         m.dmm_NoFinal.measure(timeout=5)
         d.rla_vbat.set_on()
@@ -281,6 +281,7 @@ class SerialDate(_Main):
         time.sleep(2)
         d.rla_EVM.set_on()
         sernum = m.ui_SnEntry.measure().reading1
+        sernum = sernum[-4:]    # Last 4 digits only
         current_date = datetime.date.today().isoformat()
         self._ev.sn_date(datecode=current_date, serialno=sernum)
 
