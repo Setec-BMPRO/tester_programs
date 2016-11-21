@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """J35 Final Test Program."""
 
-import logging
+from functools import wraps
 import tester
 from . import support
 from . import limit
@@ -10,6 +10,13 @@ from . import limit
 FIN_LIMIT_A = limit.DATA_A
 FIN_LIMIT_B = limit.DATA_B
 FIN_LIMIT_C = limit.DATA_C
+
+def teststep(func):
+    """Decorator to add arguments to the test step calls."""
+    @wraps(func)
+    def new_func(self):
+        return func(self, self.logdev, self.meas)
+    return new_func
 
 
 class Final(tester.TestSequence):
@@ -25,29 +32,25 @@ class Final(tester.TestSequence):
            @param fifo True if FIFOs are enabled
 
         """
-        # Define the (linear) Test Sequence
-        sequence = (
-            tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('Load', self._step_load),
-            tester.TestStep('OCP', self._step_ocp),
-            )
-        # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
+        super().__init__(selection, None, fifo)
         self.phydev = physical_devices
         self.limits = test_limits
         self.logdev = None
         self.sensors = None
         self.meas = None
-        self._LOAD_COUNT = self.limits['LOAD_COUNT'].limit
-        self._LOAD_CURRENT = self.limits['LOAD_CURRENT'].limit
 
     def open(self):
         """Prepare for testing."""
         self.logdev = support.LogicalDevices(self.phydev)
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
+        # Define the (linear) Test Sequence
+        sequence = (
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
+            )
+        super().open(sequence)
 
     def close(self):
         """Finished testing."""
@@ -60,27 +63,27 @@ class Final(tester.TestSequence):
         """Make the unit safe after a test."""
         self.logdev.reset()
 
-    def _step_powerup(self):
+    @teststep
+    def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac and measure output voltage."""
-        dev, mes = self.logdev, self.meas
         dev.dcs_photo.output(12.0, True)
         mes.dmm_fanoff.measure(timeout=5)
         dev.acsource.output(240.0, output=True)
         mes.dmm_fanon.measure(timeout=15)
-        for load in range(self._LOAD_COUNT):
+        for load in range(self.limits['LOAD_COUNT'].limit):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vouts[load].measure(timeout=5)
 
-    def _step_load(self):
+    @teststep
+    def _step_load(self, dev, mes):
         """Test outputs with load."""
-        dev, mes = self.logdev, self.meas
         dev.dcl_out.output(0.0,  output=True)
-        dev.dcl_out.binary(1.0, self._LOAD_CURRENT, 5.0)
-        for load in range(self._LOAD_COUNT):
+        dev.dcl_out.binary(1.0, self.limits['LOAD_CURRENT'].limit, 5.0)
+        for load in range(self.limits['LOAD_COUNT'].limit):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vloads[load].measure(timeout=5)
 
-    def _step_ocp(self):
+    @teststep
+    def _step_ocp(self, dev, mes):
         """Test OCP."""
-        mes = self.meas
         mes.ramp_ocp.measure(timeout=5)

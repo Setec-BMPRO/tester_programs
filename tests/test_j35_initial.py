@@ -35,7 +35,7 @@ class J35Initial(ProgramTestCase):
                      (sen.ovbat, 12.0), (sen.o3V3U, 3.3), ),
                 'Initialise': ((sen.sernum, ('A1526040123', )), ),
                 'Aux': ((sen.oaux, 13.5), (sen.ovbat, 13.5), ),
-                'Solar': ((sen.ovbat, 13.0), (sen.oair, 13.0), ),
+                'Solar': ((sen.ovbat, 13.5), (sen.oair, 13.5), ),
                 'PowerUp':
                     ((sen.oacin, 240.0), (sen.ovbus, 340.0),
                      (sen.o12Vpri, 12.5), (sen.o3V3, 3.3), (sen.o15Vs, 12.5),
