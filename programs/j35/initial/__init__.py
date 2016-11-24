@@ -42,6 +42,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.meas = None
         self.teststep = None
         self.sernum = None
+        self.variant = None
 
     def open(self):
         """Prepare for testing."""
@@ -49,9 +50,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
         self.teststep = support.SubTests(self.logdev, self.meas)
-        _isJ35C = False
-        if self.limits['LOAD_COUNT'].limit > 7:
-            _isJ35C = self.limits['J35C'].limit
+        self.variant = limit.VARIANT[self.limits['Variant'].limit]
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('Prepare', self._step_prepare),
@@ -59,13 +58,15 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
                 'ProgramARM', self.logdev.program_arm.program, not self.fifo),
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('Aux', self._step_aux),
-            tester.TestStep('Solar', self._step_solar, _isJ35C),
+            tester.TestStep(
+                'Solar', self._step_solar, self.variant['SolarCan']),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('Output', self._step_output),
             tester.TestStep('RemoteSw', self.teststep.remote_sw.run),
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self.teststep.ocp.run),
-            tester.TestStep('CanBus', self._step_canbus, _isJ35C),
+            tester.TestStep(
+                'CanBus', self._step_canbus, self.variant['SolarCan']),
             )
         super().open(sequence)
         # Power to fixture Comms circuits.
@@ -110,8 +111,10 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
 
         """
         j35.open()
-        j35.brand(limit.ARM_HW_VER, self.sernum, dev.rla_reset)
-        j35.manual_mode(True)     # Start the change to manual mode
+        j35.brand(self.variant['HwVer'], self.sernum, dev.rla_reset)
+        j35.manual_mode(True)   # Start the change to manual mode
+        if self.variant['Derate']:
+            j35.derate()        # Derate for lower output current
         mes.arm_swver.measure()
 
     @teststep

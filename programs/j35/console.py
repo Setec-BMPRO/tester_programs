@@ -69,6 +69,16 @@ class Console(console.Variable, console.BadUartConsole):
             'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
             'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
             'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
+            'CONV_MAX': ParameterFloat(
+                'MLC_MAX_CONVERTER_MW', writeable=True, scale=1000),
+            'CONV_RATED': ParameterFloat(
+                'MLC_CONVERTER_RATED_MA', writeable=True, scale=1000),
+            'CONV_DERATED': ParameterFloat(
+                'MLC_CONVERTER_DERATED_MA', writeable=True, scale=1000),
+            'CONV_FAULT': ParameterFloat(
+                'MLC_CONVERTER_FAULT_MA', writeable=True, scale=1000),
+            'INHIBIT_BY_AUX': ParameterBoolean(
+                'LOAD_SWITCH_INHIBITED_BY_AUX', writeable=True,),
             'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
             'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
             'SER_ID': ParameterString(
@@ -134,6 +144,14 @@ class Console(console.Variable, console.BadUartConsole):
             self['VOUT'] = 12.8
             self['VOUT_OV'] = 2     # OVP Latch reset
             self['FAN'] = 0
+
+    def derate(self):
+        """Derate for the 20A version (J35-A)."""
+        self['CONV_MAX'] = 28.8
+        self['CONV_RATED'] = 20.0
+        self['CONV_DERATED'] = 10.0
+        self['CONV_FAULT'] = 25.0
+        self['INHIBIT_BY_AUX'] = False
 
     def dcdc_on(self):
         """Power ON the DC-DC converter circuits."""

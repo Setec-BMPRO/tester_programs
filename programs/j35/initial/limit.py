@@ -8,7 +8,26 @@ from tester.testlimit import (
     lim_hilo_int, lim_hilo_percent)
 
 ARM_VERSION = '1.1.13949.919'      # ARM versions
-ARM_HW_VER = (4, 0, 'A')
+# Variant specific data. Indexed by limit "Variant" value.
+#   'HwVer': Hardware version data.
+#   'SolarCan': Enable Solar input & CAN bus tests.
+VARIANT = {
+    'J35A': {
+        'HwVer': (1, 1, 'A'),
+        'SolarCan': False,
+        'Derate': True,
+        },
+    'J35B': {
+        'HwVer': (2, 2, 'A'),
+        'SolarCan': False,
+        'Derate': False,
+        },
+    'J35C': {
+        'HwVer': (6, 3, 'A'),
+        'SolarCan': True,
+        'Derate': False,
+        },
+    }
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
@@ -61,21 +80,22 @@ _BASE_DATA = (
     )
 
 DATA_A = _BASE_DATA + (
+    lim_string('Variant', 'J35A'),
     lim_lo('LOAD_COUNT', COUNT_A),
     lim_lo('LOAD_CURRENT', CURRENT_A),
     lim_hilo('OCP', 20.0 - CURRENT_A, 25.0 - CURRENT_A),
     )
 
 DATA_B = _BASE_DATA + (
+    lim_string('Variant', 'J35B'),
     lim_lo('LOAD_COUNT', COUNT_BC),
     lim_lo('LOAD_CURRENT', CURRENT_BC),
     lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
-    lim_boolean('J35C', False),
     )
 
 DATA_C = _BASE_DATA + (
+    lim_string('Variant', 'J35C'),
     lim_lo('LOAD_COUNT', COUNT_BC),
     lim_lo('LOAD_CURRENT', CURRENT_BC),
     lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
-    lim_boolean('J35C', True),
     )
