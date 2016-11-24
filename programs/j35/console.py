@@ -147,7 +147,7 @@ class Console(console.Variable, console.BadUartConsole):
 
     def derate(self):
         """Derate for the 20A version (J35-A)."""
-        self['CONV_MAX'] = 28.8
+        self['CONV_MAX'] = 288
         self['CONV_RATED'] = 20.0
         self['CONV_DERATED'] = 10.0
         self['CONV_FAULT'] = 25.0
