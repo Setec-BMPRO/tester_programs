@@ -140,7 +140,9 @@ ALL_SKIP = (
     # Done with unittest
     'BP35 Initial', 'GEN8 Initial', 'GEN8 Final',
     'GENIUS-II Initial', 'GENIUS-II-H Initial',
-    'J35 Initial', 'J35C Final', 'RVVIEW Initial',
+    'J35A Initial', 'J35B Initial', 'J35C Initial'
+    'J35A Final', 'J35B Final', 'J35C Final',
+    'RVVIEW Initial',
     # Obsolete and unused programs
     'Spa Multi RGB', 'Spa Multi TRI', 'Spa Single',
     'SX-750 Safety',
