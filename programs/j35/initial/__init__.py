@@ -113,8 +113,6 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         j35.open()
         j35.brand(self.variant['HwVer'], self.sernum, dev.rla_reset)
         j35.manual_mode(True)   # Start the change to manual mode
-        if self.variant['Derate']:
-            j35.derate()        # Derate for lower output current
         mes.arm_swver.measure()
 
     @teststep
@@ -143,6 +141,8 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
     def _step_powerup(self, dev, j35, mes):
         """Power-Up the Unit with 240Vac."""
         j35.manual_mode()     # Complete the change to manual mode
+        if self.variant['Derate']:
+            j35.derate()        # Derate for lower output current
         dev.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup(
             (mes.dmm_acin, mes.dmm_vbus, mes.dmm_12vpri, mes.arm_vout_ov),

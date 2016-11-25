@@ -126,10 +126,11 @@ class Sensors():
         for i in range(self.load_count):
             s = console.Sensor(j35, 'LOAD_{}'.format(i + 1))
             self.arm_loads.append(s)
+        low, high = limits['OCP'].limit
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.ovbat,
             detect_limit=(limits['InOCP'], ),
-            start=4.0, stop=10.0, step=0.5, delay=0.2)
+            start=low - 1, stop=high + 1, step=0.5, delay=0.2)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

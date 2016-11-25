@@ -152,6 +152,7 @@ class Console(console.Variable, console.BadUartConsole):
         self['CONV_DERATED'] = 10.0
         self['CONV_FAULT'] = 25.0
         self['INHIBIT_BY_AUX'] = False
+        self['IOUT'] = 20.0
 
     def dcdc_on(self):
         """Power ON the DC-DC converter circuits."""
