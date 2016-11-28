@@ -46,11 +46,11 @@ class Final(tester.TestSequence):
             tester.TestStep('PowerUp', self.subtest.pwr_up.run),
             tester.TestStep('KeySw1', self.subtest.key_sw1.run),
             tester.TestStep('KeySw12', self.subtest.key_sw12.run),
-            tester.TestStep('TEC', self._step_tec),
-            tester.TestStep('LDD', self._step_ldd),
-            tester.TestStep('OCP', self.subtest.ocp.run),
+#            tester.TestStep('TEC', self._step_tec),
+#            tester.TestStep('LDD', self._step_ldd),
+#            tester.TestStep('OCP', self.subtest.ocp.run),
             tester.TestStep('Comms', self._step_comms),
-            tester.TestStep('EmergStop', self.subtest.emg_stop.run),
+#            tester.TestStep('EmergStop', self.subtest.emg_stop.run),
             )
         super().open(sequence)
 
@@ -141,22 +141,16 @@ class Final(tester.TestSequence):
     @teststep
     def _step_comms(self, dev, mes, sen):
         """Write HW version and serial number. Read back values."""
-#        self.fifo_push(((s.oSerEntry, ('A1504010034',)), ))
-#        if self.fifo:
-#            dev.pic_ser.put(b'Software Test Mode Entered\r\n' +
-#                          b'\r\nSetting Change Done\r\n\n')
-#            dev.pic_ser.put(b'I,  2, 06A,Hardware Revision\r\n')
-#            if limit.NEW_PSU:
-#                dev.pic_ser.put(b'\r\nSetting Change Done\r\n\n')
-#            else:
-#                dev.pic_ser.put(b'M, 6,Setting is Protected\r\n')
-#            dev.pic_ser.put(b'I,  3, A1504010034,Serial Number\r\n')
+        dev.pic.open()
+        dev.pic.clear_port()
         dev.pic.sw_test_mode()
-        mes.pic_SwTstMode.measure()
+#        mes.pic_SwTstMode.measure()
         dev.pic['HwRev'] = limit.HW_REV
+        dev.pic.clear_port()
         self.limits['HwRev'].limit = limit.HW_REV
         mes.pic_hwrev.measure()
         sernum = mes.ui_SerEntry.measure().reading1
         dev.pic['SerNum'] = sernum
+        dev.pic.clear_port()
         self.limits['SerChk'].limit = sernum
         mes.pic_serchk.measure()
