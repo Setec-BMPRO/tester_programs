@@ -53,9 +53,9 @@ DATA = (
     ('inOCP15VpSw', 1, 12.0, None, None, None),
     ('OCPTec', 1, 18.0, 25.0, None, None),
     ('inOCPTec', 1, 12.0, None, None, None),
-    ('SwTstMode', 0, None, None, r'Software Test Mode Entered', None),
-    ('HwVerCheck', 0, None, None, 'dummy', None),
+    ('SwTstMode', 0, None, None, r'SoftwareTestModeEntered', None),
     ('SerEntry', 0, None, None, r'^[AS][0-9]{4}[0-9,A-Z]{2}[0-9]{4}$', None),
-    ('SerCheck', 0, None, None, 'dummy', None),
+    ('HwRev', 0, None, None, '.', None),
+    ('SerChk', 0, None, None, '.', None),
     ('Notify', 2, None, None, None, True),
     )

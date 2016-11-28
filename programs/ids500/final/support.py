@@ -12,12 +12,13 @@ class LogicalDevices():
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def __init__(self, devices, fifo):
         """Create all Logical Instruments.
 
            @param devices Physical instruments of the Tester
 
         """
+        self.fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
         self.dcs_TecVset = tester.DCSource(devices['DCS1'])
@@ -35,9 +36,20 @@ class LogicalDevices():
         self.rla_Interlock = tester.Relay(devices['RLA6'])
         self.rla_Enable = tester.Relay(devices['RLA7'])
         self.rla_TecPhase = tester.Relay(devices['RLA8'])
+        # Serial connection to the console to communicate with the PIC
         self.pic_ser = tester.SimSerial(
-            port=limit.PIC_PORT, baudrate=19200, timeout=0.1)
-        self.picdev = console.Console(self.pic_ser)
+            simulation=self.fifo, baudrate=19200, timeout=2.0)
+        # Set port separately, as we don't want it opened yet
+        self.pic_ser.port = limit.PIC_PORT
+        self.pic = console.Console(self.pic_ser)
+
+    def ids_puts(self, string_data, preflush=0, postflush=0, priority=False,
+                 addprompt=False):
+        """Push string data into the IDS buffer if FIFOs are enabled."""
+        if self.fifo:
+            if addprompt:
+                string_data = string_data + '\r\n>'
+            self.pic.puts(string_data, preflush, postflush, priority)
 
     def reset(self):
         """Reset instruments."""
@@ -65,16 +77,15 @@ class Sensors():
            @param limits Product test limits
 
         """
+        dispatcher.connect(
+            self._reset, sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
-        picdev = logical_devices.picdev
+        pic = logical_devices.pic
         sensor = tester.sensor
         self.oMirTecErr = sensor.Mirror()
         self.oMirTecVmonErr = sensor.Mirror()
         self.oMirIsErr = sensor.Mirror()
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
         self.Tec = sensor.Vdc(dmm, high=1, low=3, rng=100, res=0.001)
         self.TecVset = sensor.Vdc(dmm, high=3, low=6, rng=10, res=0.001)
         self.TecVmon = sensor.Vdc(dmm, high=4, low=6, rng=10, res=0.001)
@@ -89,12 +100,12 @@ class Sensors():
         self.o15VpSw = sensor.Vdc(dmm, high=11, low=1, rng=100, res=0.001)
         self.o5V = sensor.Vdc(dmm, high=12, low=1, rng=10, res=0.001)
         self.PwrOk = sensor.Vdc(dmm, high=13, low=2, rng=10, res=0.001)
-        self.oPic_SwTstMode = console.Sensor(
-            picdev, 'PIC-SwTstMode', rdgtype=sensor.ReadingString)
-        self.oPic_HwVerChk = console.Sensor(
-            picdev, 'PIC-HwVerCheck', rdgtype=sensor.ReadingString)
-        self.oPic_SerChk = console.Sensor(
-            picdev, 'PIC-SerCheck', rdgtype=sensor.ReadingString)
+        self.oSwTstMode = console.Sensor(
+            pic, 'PIC-SwTstMode', rdgtype=sensor.ReadingString)
+        self.oHwRev = console.Sensor(
+            pic, 'PIC-HwRev', rdgtype=sensor.ReadingString)
+        self.oSerChk = console.Sensor(
+            pic, 'PIC-SerChk', rdgtype=sensor.ReadingString)
         self.oYesNoPsu = sensor.YesNo(
             message=tester.translate('ids500_final', 'IsPSULedGreen?'),
             caption=tester.translate('ids500_final', 'capPsuLed'))
@@ -184,10 +195,10 @@ class Measurements():
         self.dmm_5VOff = Measurement(limits['5VOff'], sense.o5V)
         self.dmm_5V = Measurement(limits['5V'], sense.o5V)
         self.pic_SwTstMode = Measurement(
-            limits['SwTstMode'], sense.oPic_SwTstMode)
-        self.pic_HwVerChk = Measurement(
-            limits['HwVerCheck'], sense.oPic_HwVerChk)
-        self.pic_SerChk = Measurement(limits['SerCheck'], sense.oPic_SerChk)
+            limits['SwTstMode'], sense.oSwTstMode)
+        self.pic_hwrev = Measurement(
+            limits['HwRev'], sense.oHwRev)
+        self.pic_serchk = Measurement(limits['SerChk'], sense.oSerChk)
         self.ui_YesNoPsu = Measurement(limits['Notify'], sense.oYesNoPsu)
         self.ui_YesNoTecGreen = Measurement(
             limits['Notify'], sense.oYesNoTecGreen)
@@ -207,101 +218,75 @@ class SubTests():
 
     """SubTest Steps."""
 
-    def __init__(self, logical_devices, measurements):
+    def __init__(self, dev, mes):
         """Create SubTest Step instances.
 
            @param measurements Measurements used
            @param logical_devices Logical instruments used
 
         """
-        d = logical_devices
-        m = measurements
-        # PowerUp: Set min loads, Input AC, measure.
-        ld1 = tester.LoadSubStep(
-            ((d.dcl_Tec, 0.0), (d.dcl_15Vp, 1.0), (d.dcl_15VpSw, 0.0),
-             (d.dcl_5V, 5.0)), output=True)
-        acs1 = tester.AcSubStep(acs=d.acsource, voltage=240.0, output=True, delay=2.0)
-        msr1 = tester.MeasureSubStep(
-            (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
-             m.dmm_15VOff, m.dmm__15VOff, m.dmm_15VpOff, m.dmm_15VpSwOff,
-             m.dmm_5VOff, ),
-             timeout=5)
-        self.pwr_up = tester.SubStep((ld1, acs1, msr1))
-        # KeySw: Turn on KeySwitches, measure.
-        rly1 = tester.RelaySubStep(((d.rla_MainsEnable, True), ))
-        msr1 = tester.MeasureSubStep(
-            (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
-             m.dmm_15V, m.dmm__15V, m.dmm_15Vp, m.dmm_15VpSwOff, m.dmm_5V, ),
-             timeout=5)
-        rly2 = tester.RelaySubStep(((d.rla_15VpEnable, True), ))
-        msr2 = tester.MeasureSubStep(
-            (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
-             m.dmm_15V, m.dmm__15V, m.dmm_15Vp, m.dmm_15VpSw, m.dmm_5V, ),
-             timeout=5)
-        self.key_sw1 = tester.SubStep((rly1, msr1, ))
-        self.key_sw12 = tester.SubStep((rly2, msr2, ))
-        # TEC:  Enable, measure.
-        dcs1 = tester.DcSubStep(setting=((d.dcs_5V, 5.0), ), output=True)
-        rly1 = tester.RelaySubStep(((d.rla_Enable, True), ))
-        dcs2 = tester.DcSubStep(setting=((d.dcs_TecVset, 0.0), ), output=True)
-        msr1 = tester.MeasureSubStep((m.dmm_TecOff, m.dmm_TecVmon0V, ), timeout=5)
-        ld1 = tester.LoadSubStep(((d.dcl_Tec, 0.3), ))
-        dcs3 = tester.DcSubStep(setting=((d.dcs_TecVset, 5.0), ), delay=0.1)
-        msr2 = tester.MeasureSubStep(
-            (m.ui_YesNoPsu, m.ui_YesNoTecGreen, ), timeout=5)
-        rly2 = tester.RelaySubStep(((d.rla_TecPhase, True), ))
-        msr3 = tester.MeasureSubStep(
-            (m.dmm_TecPhase, m.ui_YesNoTecRed, ), timeout=5)
-        rly3 = tester.RelaySubStep(((d.rla_TecPhase, False), ))
-        self.tec_pre = tester.SubStep((dcs1, rly1, dcs2, msr1, ld1, dcs3))
-        self.tec_post = tester.SubStep((msr2, rly2, msr3, rly3))
-        # LDD:  Enable, measure.
-        dcs1 = tester.DcSubStep(setting=((d.dcs_IsSet, 0.0), ), output=True)
-        rly1 = tester.RelaySubStep(
-            ((d.rla_Crowbar, True), (d.rla_Interlock, True),
-             (d.rla_EnableIs, True), ))
-        msr1 = tester.MeasureSubStep(
-            (m.dmm_IsVmon, m.dmm_IsOut0V, m.dmm_IsIout0V, ), timeout=5)
-        dcs2 = tester.DcSubStep(setting=((d.dcs_IsSet, 0.6), ), delay=1)
-        msr2 = tester.MeasureSubStep((m.dmm_IsVmon, ), timeout=5)
-        msr3 = tester.MeasureSubStep((m.ui_YesNoLddGreen, ), timeout=5)
-        dcs3 = tester.DcSubStep(setting=((d.dcs_IsSet, 5.0), ), delay=1)
-        msr4 = tester.MeasureSubStep((m.dmm_IsVmon, ), timeout=5)
-        msr5 = tester.MeasureSubStep((m.ui_YesNoLddRed, ), timeout=5)
-        dcs4 = tester.DcSubStep(setting=((d.dcs_IsSet, 0.0), ), output=False)
-        rly2 = tester.RelaySubStep(
-            ((d.rla_Crowbar, False), (d.rla_Interlock, False),
-             (d.rla_EnableIs, False),))
-        self.ldd_06V = tester.SubStep((dcs1, rly1, msr1, dcs2, msr2))
-        self.ldd_5V = tester.SubStep((msr3, dcs3, msr4))
-        self.ldd_off = tester.SubStep((msr5, dcs4, rly2))
+        # PowerUp: Min loads, input AC, measure.
+        self.pwr_up = tester.SubStep((
+            tester.LoadSubStep(
+                ((dev.dcl_Tec, 0.4), (dev.dcl_15Vp, 0.4),
+                 (dev.dcl_15VpSw, 0.4), (dev.dcl_5V, 0.4), ), output=True),
+            tester.AcSubStep(acs=dev.acsource, voltage=240.0, output=True,
+                                delay=2.0),
+            tester.MeasureSubStep(
+                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
+                 mes.dmm_IsVmonOff, mes.dmm_15VOff, mes.dmm__15VOff,
+                 mes.dmm_15VpOff, mes.dmm_15VpSwOff, mes.dmm_5VOff),
+                 timeout=5),
+            ))
+
+        # KeySw1: KeySwitch 1, measure.
+        self.key_sw1 = tester.SubStep((
+            tester.RelaySubStep(((dev.rla_MainsEnable, True), )),
+            tester.MeasureSubStep(
+                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
+                 mes.dmm_IsVmonOff, mes.dmm_15V, mes.dmm__15V, mes.dmm_15Vp,
+                 mes.dmm_15VpSwOff, mes.dmm_5V),
+                 timeout=5),
+            ))
+
+        # KeySw12: KeySwitch 1 & 2, measure.
+        self.key_sw12 = tester.SubStep((
+            tester.RelaySubStep(((dev.rla_15VpEnable, True), )),
+            tester.MeasureSubStep(
+                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
+                 mes.dmm_IsVmonOff, mes.dmm_15V, mes.dmm__15V, mes.dmm_15Vp,
+                 mes.dmm_15VpSw, mes.dmm_5V),
+                 timeout=5),
+            ))
+
         # OCP:
-        ld1 = tester.LoadSubStep(
-            ((d.dcl_Tec, 0.0), (d.dcl_15Vp, 1.0), (d.dcl_15VpSw, 0.0),
-             (d.dcl_5V, 5.0)))
-        msr1 = tester.MeasureSubStep((m.ramp_OCP5V, ), timeout=5)
-        msr2 = tester.MeasureSubStep((m.ramp_OCP15Vp, ), timeout=5)
-        msr3 = tester.MeasureSubStep((m.ramp_OCP15VpSw, ), timeout=5)
-        dcs1 = tester.DcSubStep(setting=((d.dcs_TecVset, 5.0), ), delay=1)
-        ld2 = tester.LoadSubStep(((d.dcl_Tec, 0.5), ), delay=1)
-        msr4 = tester.MeasureSubStep((m.ramp_OCPTec, ), timeout=5)
-        dcs2 = tester.DcSubStep(setting=((d.dcs_5V, 0.0), ))
-        acs1 = tester.AcSubStep(acs=d.acsource, voltage=0.0, delay=3.5)
-        acs2 = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=1.0)
-        dcs3 = tester.DcSubStep(setting=((d.dcs_5V, 5.0), ))
-        msr5 = tester.MeasureSubStep((m.dmm_15Vp, ), timeout=5)
-        self.ocp_5V = tester.SubStep((ld1, msr1))
-        self.ocp_15Vp = tester.SubStep((msr2, ))
-        self.ocp_15VpSw = tester.SubStep((msr3, ))
-        self.ocp_tec = tester.SubStep((dcs1, ld2, msr4))
-        self.restart = tester.SubStep((ld1, dcs2, acs1, acs2, dcs3, msr5))
-        # EmergStop:
-        ld1 = tester.LoadSubStep(
-            ((d.dcl_Tec, 0.0), (d.dcl_15Vp, 1.0), (d.dcl_15VpSw, 0.0),
-             (d.dcl_5V, 5.0)))
-        rly1 = tester.RelaySubStep(((d.rla_Emergency, True), ), delay=1)
-        msr1 = tester.MeasureSubStep(
-            (m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff, m.dmm_IsVmonOff,
-             m.dmm_15VOff, m.dmm__15VOff, m.dmm_15VpOff, m.dmm_15VpSwOff,
-             m.dmm_5VOff, ), timeout=5)
-        self.emg_stop = tester.SubStep((ld1, rly1, msr1))
+        self.ocp = tester.SubStep((
+            tester.LoadSubStep(
+                ((dev.dcl_Tec, 0.0), (dev.dcl_15Vp, 1.0),
+                 (dev.dcl_15VpSw, 0.0), (dev.dcl_5V, 5.0), )),
+            tester.MeasureSubStep(
+                (mes.ramp_OCP5V, mes.ramp_OCP15Vp, mes.ramp_OCP15VpSw),
+                timeout=5),
+            tester.DcSubStep(setting=((dev.dcs_TecVset, 5.0), ), delay=1),
+            tester.LoadSubStep(((dev.dcl_Tec, 0.5), ), delay=1),
+            tester.MeasureSubStep((mes.ramp_OCPTec, ), timeout=5),
+            tester.LoadSubStep(((dev.dcl_Tec, 0.0), )),
+            tester.DcSubStep(setting=((dev.dcs_5V, 0.0), )),
+            tester.AcSubStep(acs=dev.acsource, voltage=0.0, delay=3.5),
+            tester.AcSubStep(acs=dev.acsource, voltage=240.0, delay=1.0),
+            tester.DcSubStep(setting=((dev.dcs_5V, 5.0), )),
+            tester.MeasureSubStep((mes.dmm_15Vp, ), timeout=5),
+            ))
+
+        # EmergStop: Emergency stop, measure.
+        self.emg_stop = tester.SubStep((
+            tester.LoadSubStep(
+                ((dev.dcl_Tec, 0.0), (dev.dcl_15Vp, 1.0),
+                 (dev.dcl_15VpSw, 0.0), (dev.dcl_5V, 5.0))),
+            tester.RelaySubStep(((dev.rla_Emergency, True), ), delay=1),
+            tester.MeasureSubStep(
+                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
+                 mes.dmm_IsVmonOff, mes.dmm_15VOff, mes.dmm__15VOff,
+                 mes.dmm_15VpOff, mes.dmm_15VpSwOff, mes.dmm_5VOff),
+                 timeout=5)
+            ))

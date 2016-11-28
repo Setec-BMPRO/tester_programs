@@ -34,6 +34,26 @@ class Console(console.Variable, console.BaseConsole):
                 '?,D,16', read_format='{}'),
             'PIC-Clear': ParameterString(
                 '', read_format='{}'),
+            'AccessSwTstMode1': ParameterString(
+                'S,:,0', read_format='{}'),
+            'AccessSwTstMode2': ParameterString(
+                'S,:,2230', read_format='{}'),
+            'AccessSwTstMode3': ParameterString(
+                'S,:,42', read_format='{}'),
+            'PIC-SwTstMode': ParameterString(
+                '?,D,16', read_format='{}'),
+            'HwRev': ParameterString(
+#                'S,@,', writeable=True, readable=False,
+                'S,@,', writeable=True,
+                write_format='{1}{0}'),
+            'PIC-HwRev': ParameterString(
+                '?,I,2', read_format='{}'),
+            'SerNum': ParameterString(
+#                'S,#,', writeable=True, readable=False,
+                'S,#,', writeable=True,
+                write_format='{1}{0}'),
+            'PIC-SerChk': ParameterString(
+                '?,I,3', read_format='{}'),
             }
 
     def clear_port(self):
@@ -42,6 +62,12 @@ class Console(console.Variable, console.BaseConsole):
         self['PIC-Clear']
         self['PIC-Clear']
         self['PIC-Clear']
+
+    def sw_test_mode(self):
+        """Acess Software Test Mode"""
+        self['AccessSwTstMode1']
+        self['AccessSwTstMode2']
+        self['AccessSwTstMode3']
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
@@ -78,11 +104,12 @@ class Console(console.Variable, console.BaseConsole):
         @return Response (None / String).
 
         """
+        print('Expect:', expected)
         data = self._port.readline()
         data = data.replace(b'\r\n', b'')   # Remove '\r\n'
         data = data.replace(b' ', b'')      # Remove whitespaces
         response = data.decode(errors='ignore')
-        self._logger.debug('Response <-- %s', repr(response))
         if len(response) == 0:
             response = None
+        self._logger.debug('Response <-- %s', repr(response))
         return response
