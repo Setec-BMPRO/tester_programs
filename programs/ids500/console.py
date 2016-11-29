@@ -56,15 +56,18 @@ class Console(console.Variable, console.BaseConsole):
         self['PIC-Clear']
         self['PIC-Clear']
 
+    def flush_port(self):
+        """Flush the com port."""
+        self._logger.debug('Flushing port')
+        self._port.flushInput()
+
     def sw_test_mode(self):
         """Access Software Test Mode"""
+        self.action('\r\n\r\n', expected=3)
         self['SwTstMode'] = 0
-        self.clear_port()
         self['SwTstMode'] = 2230
-        self.clear_port()
         self['SwTstMode'] = 42
-        self['PIC-Clear']
-        self.clear_port()
+        self.action(expected=1)
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
@@ -76,10 +79,11 @@ class Console(console.Variable, console.BaseConsole):
         @return Response (None / String).
 
         """
-        self._write_command(command)
+        if command is not None:
+            self._write_command(command)
         if delay:
             time.sleep(delay)
-        return self._read_response(expected=1)
+        return self._read_response(expected=3)
 
     def _write_command(self, command):
         """Write a command.
@@ -101,11 +105,14 @@ class Console(console.Variable, console.BaseConsole):
         @return Response (None / String).
 
         """
-        data = self._port.readline()
-        data = data.replace(b'\r\n', b'')   # Remove '\r\n'
-        data = data.replace(b' ', b'')      # Remove whitespaces
-        response = data.decode(errors='ignore')
-        if len(response) == 0:
-            response = None
-        self._logger.debug('Response <-- %s', repr(response))
-        return response
+        all_response = []
+        for _ in range(expected):
+            data = self._port.readline()
+            data = data.replace(b'\r', b'')   # Remove '\r'
+            data = data.replace(b'\n', b'')   # Remove '\n'
+            response = data.decode(errors='ignore')
+            if len(response) == 0:
+                response = None
+            self._logger.debug('Response <-- %s', repr(response))
+            all_response.append(response)
+        return all_response

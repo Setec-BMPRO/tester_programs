@@ -41,7 +41,7 @@ class LogicalDevices():
             simulation=self.fifo, baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         self.pic_ser.port = limit.PIC_PORT
-        self.pic = console.Console(self.pic_ser)
+        self.pic = console.Console(self.pic_ser, verbose=True)
 
     def ids_puts(self, string_data, preflush=0, postflush=0, priority=False,
                  addprompt=False):
