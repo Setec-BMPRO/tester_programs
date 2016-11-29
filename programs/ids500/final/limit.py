@@ -53,7 +53,6 @@ DATA = (
     ('inOCP15VpSw', 1, 12.0, None, None, None),
     ('OCPTec', 1, 18.0, 25.0, None, None),
     ('inOCPTec', 1, 12.0, None, None, None),
-    ('SwTstMode', 0, None, None, r'SoftwareTestModeEntered', None),
     ('SerEntry', 0, None, None, r'^[AS][0-9]{4}[0-9,A-Z]{2}[0-9]{4}$', None),
     ('HwRev', 0, None, None, '.', None),
     ('SerChk', 0, None, None, '.', None),

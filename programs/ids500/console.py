@@ -34,21 +34,19 @@ class Console(console.Variable, console.BaseConsole):
                 '?,D,16', read_format='{}'),
             'PIC-Clear': ParameterString(
                 '', read_format='{}'),
-            'AccessSwTstMode': ParameterString(
+            'PIC-HwRev': ParameterString(
+                '?,I,2', read_format='{}'),
+            'PIC-SerChk': ParameterString(
+                '?,I,3', read_format='{}'),
+            'SwTstMode': ParameterString(
                 '', writeable=True,
                 write_format='S,:,{}'),
-            'PIC-SwTstMode': ParameterString(
-                '?,D,16', read_format='{}'),
             'HwRev': ParameterString(
                 'S,@,', writeable=True,
                 write_format='{1}{0}'),
-            'PIC-HwRev': ParameterString(
-                '?,I,2', read_format='{}'),
             'SerNum': ParameterString(
                 'S,#,', writeable=True,
                 write_format='{1}{0}'),
-            'PIC-SerChk': ParameterString(
-                '?,I,3', read_format='{}'),
             }
 
     def clear_port(self):
@@ -60,11 +58,11 @@ class Console(console.Variable, console.BaseConsole):
 
     def sw_test_mode(self):
         """Access Software Test Mode"""
-        self['AccessSwTstMode'] = 0
+        self['SwTstMode'] = 0
         self.clear_port()
-        self['AccessSwTstMode'] = 2230
+        self['SwTstMode'] = 2230
         self.clear_port()
-        self['AccessSwTstMode'] = 42
+        self['SwTstMode'] = 42
         self['PIC-Clear']
         self.clear_port()
 
@@ -81,7 +79,7 @@ class Console(console.Variable, console.BaseConsole):
         self._write_command(command)
         if delay:
             time.sleep(delay)
-        return self._read_response(expected)
+        return self._read_response(expected=1)
 
     def _write_command(self, command):
         """Write a command.

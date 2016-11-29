@@ -46,11 +46,11 @@ class Final(tester.TestSequence):
             tester.TestStep('PowerUp', self.subtest.pwr_up.run),
             tester.TestStep('KeySw1', self.subtest.key_sw1.run),
             tester.TestStep('KeySw12', self.subtest.key_sw12.run),
-#            tester.TestStep('TEC', self._step_tec),
-#            tester.TestStep('LDD', self._step_ldd),
-#            tester.TestStep('OCP', self.subtest.ocp.run),
+            tester.TestStep('TEC', self._step_tec),
+            tester.TestStep('LDD', self._step_ldd),
+            tester.TestStep('OCP', self.subtest.ocp.run),
             tester.TestStep('Comms', self._step_comms),
-#            tester.TestStep('EmergStop', self.subtest.emg_stop.run),
+            tester.TestStep('EmergStop', self.subtest.emg_stop.run),
             )
         super().open(sequence)
 
@@ -144,7 +144,6 @@ class Final(tester.TestSequence):
         dev.pic.open()
         dev.pic.clear_port()
         dev.pic.sw_test_mode()
-#        mes.pic_SwTstMode.measure()
         dev.pic['HwRev'] = limit.HW_REV
         dev.pic.clear_port()
         self.limits['HwRev'].limit = limit.HW_REV

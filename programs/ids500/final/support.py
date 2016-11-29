@@ -100,8 +100,6 @@ class Sensors():
         self.o15VpSw = sensor.Vdc(dmm, high=11, low=1, rng=100, res=0.001)
         self.o5V = sensor.Vdc(dmm, high=12, low=1, rng=10, res=0.001)
         self.PwrOk = sensor.Vdc(dmm, high=13, low=2, rng=10, res=0.001)
-        self.oSwTstMode = console.Sensor(
-            pic, 'PIC-SwTstMode', rdgtype=sensor.ReadingString)
         self.oHwRev = console.Sensor(
             pic, 'PIC-HwRev', rdgtype=sensor.ReadingString)
         self.oSerChk = console.Sensor(
@@ -194,8 +192,6 @@ class Measurements():
         self.dmm_15VpSw = Measurement(limits['15Vp'], sense.o15VpSw)
         self.dmm_5VOff = Measurement(limits['5VOff'], sense.o5V)
         self.dmm_5V = Measurement(limits['5V'], sense.o5V)
-        self.pic_SwTstMode = Measurement(
-            limits['SwTstMode'], sense.oSwTstMode)
         self.pic_hwrev = Measurement(
             limits['HwRev'], sense.oHwRev)
         self.pic_serchk = Measurement(limits['SerChk'], sense.oSerChk)

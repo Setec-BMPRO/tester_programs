@@ -65,13 +65,22 @@ class Ids500Final(ProgramTestCase):
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Comms':
-                    ('\r\n', ) * 3 +
-                    ('Software Test Mode Entered\r\n', ) +
-#                    ('\r\nSetting Change Done\r\n\n', ) +
-                    ('Setting Change Done\r\n', ) +
+                    ('\r\n', 'M,1,Incorrectformat!Type?.?forhelp\r\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
+                    ('\r\nSetting Change Done\r\n\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
+                    '\r\nSetting Change Done\r\n\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
+                    'Software Test Mode Entered\r\n',
+                    '\r\nSetting Change Done\r\n\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
+                    ('\r\nSetting Change Done\r\n\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
                     ('I, 2, 06A,Hardware Revision\r\n', ) +
-#                    ('\r\nSetting Change Done\r\n\n', ) +
-                    ('Setting Change Done\r\n', ) +
+                    ('M,6,SettingisProtected\r\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
+                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
                     ('I, 3, A1504010034,Serial Number\r\n', ),
                 },
             }
@@ -79,7 +88,7 @@ class Ids500Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(75, len(result.readings))  # Reading count
+        self.assertEqual(74, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD', 'OCP',
