@@ -197,10 +197,10 @@ class Initial(tester.TestSequence):
         time.sleep(1)
         mes.dmm_vsregpost.measure(timeout=5)
         dev.dcl_bat.output(limit.SOLAR_ICAL, True)
-        mes.arm_isregpre.measure()
+        mes.arm_isregpre.measure(timeout=5)
         bp35['SR_ICAL'] = limit.SOLAR_ICAL  # Calibrate current setpoint
         time.sleep(1)
-        mes.arm_isregpost.measure()
+        mes.arm_isregpost.measure(timeout=5)
         dev.dcl_bat.output(0.0)
         # Switch off fixture BC282
         dev.acsource.output(voltage=0.0)
