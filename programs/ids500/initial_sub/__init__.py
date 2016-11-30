@@ -103,14 +103,15 @@ class InitialMicro(_Main):
                 ('', ) +
                 ('M,1,Incorrectformat!Type?.?forhelp', ) +
                 ('M,3,UnknownCommand!Type?.?forhelp', ) +
-                ('I, 1, 2,Software Revision', ) +
-                ('D, 16, 24,MICRO Temp.(C)', )
+                ('2', ) +
+                ('MICRO Temp', )
                 ):
             d.pic_puts(str)
 
         d.pic.open()
         d.pic.clear_port()
-        tester.MeasureGroup((m.swrev, m.microtemp, ), timeout=2)
+        d.pic.exp_cnt = 1
+        tester.MeasureGroup((m.swrev, m.microtemp, ))
 
 
 class InitialAux(_Main):
