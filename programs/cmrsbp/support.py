@@ -96,8 +96,11 @@ class Sensors():
         self.oVchge = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.001)
         self.oibat = sensor.Vdc(
             dmm, high=4, low=2, rng=0.1, res=0.000001, scale=100.0)
-        self.oSnEntry = sensor.DataEntry(
-            message=tester.translate('cmrsbp_sn', 'msgSnEntry'),
+        self.sn_entry_ini = sensor.DataEntry(
+            message=tester.translate('cmrsbp_sn', 'msgSnEntryIni'),
+            caption=tester.translate('cmrsbp_sn', 'capSnEntry'))
+        self.sn_entry_fin = sensor.DataEntry(
+            message=tester.translate('cmrsbp_sn', 'msgSnEntryFin'),
             caption=tester.translate('cmrsbp_sn', 'capSnEntry'))
 
     def _reset(self):
@@ -145,7 +148,7 @@ class MeasureInit():
         self.dmm_VErase = mes(limits['VErase'], sense.oVcc)
         self.dmm_Vchge = mes(limits['Vchge'], sense.oVchge)
         self.dmm_ibat = mes(limits['Ibat'], sense.oibat)
-        self.ui_SnEntry = mes(limits['SerNum'], sense.oSnEntry)
+        self.ui_SnEntry = mes(limits['SerNum'], sense.sn_entry_ini)
 
 
 class MeasureFin():
@@ -160,7 +163,7 @@ class MeasureFin():
 
         """
         mes = tester.Measurement
-        self.ui_SnEntry = mes(limits['SerNum'], sense.oSnEntry)
+        self.ui_SnEntry = mes(limits['SerNum'], sense.sn_entry_fin)
         self.dmm_vbatIn = mes(limits['VbatIn'], sense.ovbatIn)
         self.cmr_vbatIn = mes(limits['VbatIn'], sense.oMirvbatIn)
         self.cmr_ErrV = mes(limits['ErrV'], sense.oMirErrV)

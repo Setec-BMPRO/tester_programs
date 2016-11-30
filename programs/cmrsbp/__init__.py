@@ -272,7 +272,8 @@ class SerialDate(_Main):
 
     def _step_sn_date(self):
         """Write SerialNo & Manufacturing Datecode into EEPROM of BQ2060A."""
-        self.fifo_push(((s.ovbatIn, 0.5), (s.oSnEntry, ('9136861F1234', )), ))
+        self.fifo_push(
+            ((s.ovbatIn, 0.5), (s.sn_entry_ini, ('9136861F1234', )), ))
 
         m.dmm_NoFinal.measure(timeout=5)
         d.rla_vbat.set_on()
@@ -325,7 +326,7 @@ class Final(_Main):
             sernum_push = 'G240166F1234'
         if '403' in sernum_limit:
             sernum_push = 'G240323F1234'
-        self.fifo_push(((s.oSnEntry, (sernum_push, )), ))
+        self.fifo_push(((s.sn_entry_fin, (sernum_push, )), ))
 
         sernum = m.ui_SnEntry.measure().reading1
         self._limits['SerNumChk'].limit = str(int(sernum[-4:]))
