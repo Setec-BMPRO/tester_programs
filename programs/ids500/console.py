@@ -48,26 +48,25 @@ class Console(console.Variable, console.BaseConsole):
                 'S,#,', writeable=True,
                 write_format='{1}{0}'),
             }
+        self.exp_cnt = 0
 
     def clear_port(self):
         """Discard unwanted strings when the port is opened"""
         self._logger.debug('Discard unwanted strings')
+        self.exp_cnt = 1
         self['PIC-Clear']
         self['PIC-Clear']
         self['PIC-Clear']
-
-    def flush_port(self):
-        """Flush the com port."""
-        self._logger.debug('Flushing port')
-        self._port.flushInput()
+        self.exp_cnt = 0
 
     def sw_test_mode(self):
         """Access Software Test Mode"""
-        self.action('\r\n\r\n', expected=3)
+        self.exp_cnt = 3
         self['SwTstMode'] = 0
         self['SwTstMode'] = 2230
+        self.exp_cnt = 4
         self['SwTstMode'] = 42
-        self.action(expected=1)
+        self.exp_cnt = 0
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
@@ -83,7 +82,7 @@ class Console(console.Variable, console.BaseConsole):
             self._write_command(command)
         if delay:
             time.sleep(delay)
-        return self._read_response(expected=3)
+        return self._read_response(expected=self.exp_cnt)
 
     def _write_command(self, command):
         """Write a command.

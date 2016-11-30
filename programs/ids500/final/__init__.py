@@ -46,11 +46,11 @@ class Final(tester.TestSequence):
             tester.TestStep('PowerUp', self.subtest.pwr_up.run),
             tester.TestStep('KeySw1', self.subtest.key_sw1.run),
             tester.TestStep('KeySw12', self.subtest.key_sw12.run),
-#            tester.TestStep('TEC', self._step_tec),
-#            tester.TestStep('LDD', self._step_ldd),
-#            tester.TestStep('OCP', self.subtest.ocp.run),
+            tester.TestStep('TEC', self._step_tec),
+            tester.TestStep('LDD', self._step_ldd),
+            tester.TestStep('OCP', self.subtest.ocp.run),
             tester.TestStep('Comms', self._step_comms),
-#            tester.TestStep('EmergStop', self.subtest.emg_stop.run),
+            tester.TestStep('EmergStop', self.subtest.emg_stop.run),
             )
         super().open(sequence)
 
@@ -142,12 +142,16 @@ class Final(tester.TestSequence):
     def _step_comms(self, dev, mes, sen):
         """Write HW version and serial number. Read back values."""
         dev.pic.open()
-        dev.pic.flush_port()
+        dev.pic.clear_port()
         dev.pic.sw_test_mode()
+        dev.pic.exp_cnt = 3
         dev.pic['HwRev'] = limit.HW_REV
         self.limits['HwRev'].limit = limit.HW_REV
+        dev.pic.exp_cnt = 1
         mes.pic_hwrev.measure()
         sernum = mes.ui_SerEntry.measure().reading1
+        dev.pic.exp_cnt = 3
         dev.pic['SerNum'] = sernum
         self.limits['SerChk'].limit = sernum
+        dev.pic.exp_cnt = 1
         mes.pic_serchk.measure()

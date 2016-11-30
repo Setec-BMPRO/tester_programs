@@ -9,7 +9,7 @@ PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
 NEW_PSU  =  False
 
-HW_REV = '06A'
+HW_REV = '06B'
 
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
@@ -54,7 +54,7 @@ DATA = (
     ('OCPTec', 1, 18.0, 25.0, None, None),
     ('inOCPTec', 1, 12.0, None, None, None),
     ('SerEntry', 0, None, None, r'^[AS][0-9]{4}[0-9,A-Z]{2}[0-9]{4}$', None),
-    ('HwRev', 0, None, None, '.', None),
-    ('SerChk', 0, None, None, '.', None),
+    ('HwRev', 0, None, None, r'.', None),
+    ('SerChk', 0, None, None, r'.', None),
     ('Notify', 2, None, None, None, True),
     )
