@@ -48,7 +48,6 @@ class Final(tester.TestSequence):
             tester.TestStep('KeySw12', self.subtest.key_sw12.run),
             tester.TestStep('TEC', self._step_tec),
             tester.TestStep('LDD', self._step_ldd),
-            tester.TestStep('OCP', self.subtest.ocp.run),
             tester.TestStep('Comms', self._step_comms),
             tester.TestStep('EmergStop', self.subtest.emg_stop.run),
             )

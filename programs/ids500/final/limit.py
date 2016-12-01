@@ -9,7 +9,7 @@ PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
 NEW_PSU  =  False
 
-HW_REV = '06B'
+HW_REV = '06A'
 
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
@@ -25,6 +25,7 @@ DATA = (
     ('15V', 1, 14.25, 15.75, None, None),
     ('-15V', 1, -15.75, -14.25, None, None),
     ('15Vp', 1, 14.25, 15.75, None, None),
+    ('15VpSw', 1, 14.25, 15.75, None, None),
     ('5V', 1, 4.85, 5.10, None, None),
     ('Tec', 1, 14.70, 15.30, None, None),
     ('TecPhase', 1, -15.30, -14.70, None, None),
@@ -45,14 +46,6 @@ DATA = (
     ('SetMonErr', 1, -0.07, 0.07, None, None),
     ('SetOutErr', 1, -0.07, 0.07, None, None),
     ('MonOutErr', 1, -0.07, 0.07, None, None),
-    ('OCP5V', 1, 7.0, 10.0, None, None),
-    ('inOCP5V', 1, 4.0, None, None, None),
-    ('OCP15Vp', 1, 7.0, 10.0, None, None),
-    ('inOCP15Vp', 1, 12.0, None, None, None),
-    ('OCP15VpSw', 1, 6.0, 9.0, None, None),
-    ('inOCP15VpSw', 1, 12.0, None, None, None),
-    ('OCPTec', 1, 18.0, 25.0, None, None),
-    ('inOCPTec', 1, 12.0, None, None, None),
     ('SerEntry', 0, None, None, r'^[AS][0-9]{4}[0-9,A-Z]{2}[0-9]{4}$', None),
     ('HwRev', 0, None, None, r'.', None),
     ('SerChk', 0, None, None, r'.', None),

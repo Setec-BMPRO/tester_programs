@@ -50,12 +50,6 @@ class Ids500Final(ProgramTestCase):
                      (sen.IsIout, (0.0, 0.601, 5.01)),
                      (sen.IsOut, (0.0, 0.00602, 0.0502)),
                      (sen.oYesNoLddGreen, True), (sen.oYesNoLddRed, True)),
-                'OCP':
-                    ((sen.o5V, (5.0, ) * 21 + (3.9,), ),
-                     (sen.o15Vp, (15.0, ) * 21 + (11.9,), ),
-                     (sen.o15VpSw, (15.0, ) * 21 + (11.9,), ),
-                     (sen.Tec, (15.0,) * 21 + (11.9,), ),
-                     (sen.o15Vp, (15.0,) * 3), ),
                 'Comms':
                     ((sen.oSerEntry, ('A1504010034',)), ),
                 'EmergStop':
@@ -67,20 +61,13 @@ class Ids500Final(ProgramTestCase):
                 'Comms':
                     ('\r\n', 'M,1,Incorrectformat!Type?.?forhelp\r\n',
                     'M,3,UnknownCommand!Type?.?forhelp\r\n') +
-                    ('\r\nSetting Change Done\r\n\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
-                    '\r\nSetting Change Done\r\n\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
+                    ('\r\n', 'Setting Change Done\r\n', '\r\n',
+                    '\r\n', 'Setting Change Done\r\n', '\r\n',
                     'Software Test Mode Entered\r\n',
-                    '\r\nSetting Change Done\r\n\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
-                    ('\r\nSetting Change Done\r\n\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
+                    '\r\n', 'Setting Change Done\r\n', '\r\n') +
+                    ('\r\n', 'Setting Change Done\r\n', '\r\n') +
                     ('I, 2, 06A,Hardware Revision\r\n', ) +
-                    ('M,6,SettingisProtected\r\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
+                    ('M,6,SettingisProtected\r\n', '\r\n', '\r\n') +
                     ('I, 3, A1504010034,Serial Number\r\n', ),
                 },
             }
@@ -88,9 +75,9 @@ class Ids500Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(74, len(result.readings))  # Reading count
+        self.assertEqual(69, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD', 'OCP',
+            ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD',
               'Comms', 'EmergStop'],
             self.tester.ut_steps)

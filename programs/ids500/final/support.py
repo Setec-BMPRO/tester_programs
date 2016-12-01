@@ -122,22 +122,6 @@ class Sensors():
         self.oSerEntry = sensor.DataEntry(
             message=tester.translate('ids500_final', 'msgSerEntry'),
             caption=tester.translate('ids500_final', 'capSerEntry'))
-        self.oOCP5V = sensor.Ramp(
-            stimulus=logical_devices.dcl_5V, sensor=self.o5V,
-            detect_limit=(limits['inOCP5V'], ),
-            start=5.0, stop=12.0, step=0.1, delay=0.2)
-        self.oOCP15Vp = sensor.Ramp(
-            stimulus=logical_devices.dcl_15Vp, sensor=self.o15Vp,
-            detect_limit=(limits['inOCP15Vp'], ),
-            start=5.0, stop=12.0, step=0.1, delay=0.2)
-        self.oOCP15VpSw = sensor.Ramp(
-            stimulus=logical_devices.dcl_15VpSw, sensor=self.o15VpSw,
-            detect_limit=(limits['inOCP15VpSw'], ),
-            start=4.0, stop=11.0, step=0.1, delay=0.2)
-        self.oOCPTec = sensor.Ramp(
-            stimulus=logical_devices.dcl_Tec, sensor=self.Tec,
-            detect_limit=(limits['inOCPTec'], ),
-            start=20.0, stop=23.0, step=0.1, delay=0.2)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -189,7 +173,7 @@ class Measurements():
         self.dmm_15VpOff = Measurement(limits['15VpOff'], sense.o15Vp)
         self.dmm_15Vp = Measurement(limits['15Vp'], sense.o15Vp)
         self.dmm_15VpSwOff = Measurement(limits['15VpSwOff'], sense.o15VpSw)
-        self.dmm_15VpSw = Measurement(limits['15Vp'], sense.o15VpSw)
+        self.dmm_15VpSw = Measurement(limits['15VpSw'], sense.o15VpSw)
         self.dmm_5VOff = Measurement(limits['5VOff'], sense.o5V)
         self.dmm_5V = Measurement(limits['5V'], sense.o5V)
         self.pic_hwrev = Measurement(
@@ -203,11 +187,6 @@ class Measurements():
             limits['Notify'], sense.oYesNoLddGreen)
         self.ui_YesNoLddRed = Measurement(limits['Notify'], sense.oYesNoLddRed)
         self.ui_SerEntry = Measurement(limits['SerEntry'], sense.oSerEntry)
-        self.ramp_OCP5V = Measurement(limits['OCP5V'], sense.oOCP5V)
-        self.ramp_OCP15Vp = Measurement(limits['OCP15Vp'], sense.oOCP15Vp)
-        self.ramp_OCP15VpSw = Measurement(
-            limits['OCP15VpSw'], sense.oOCP15VpSw)
-        self.ramp_OCPTec = Measurement(limits['OCPTec'], sense.oOCPTec)
 
 
 class SubTests():
@@ -253,25 +232,6 @@ class SubTests():
                  mes.dmm_IsVmonOff, mes.dmm_15V, mes.dmm__15V, mes.dmm_15Vp,
                  mes.dmm_15VpSw, mes.dmm_5V),
                  timeout=5),
-            ))
-
-        # OCP:
-        self.ocp = tester.SubStep((
-            tester.LoadSubStep(
-                ((dev.dcl_Tec, 0.0), (dev.dcl_15Vp, 1.0),
-                 (dev.dcl_15VpSw, 0.0), (dev.dcl_5V, 5.0), )),
-            tester.MeasureSubStep(
-                (mes.ramp_OCP5V, mes.ramp_OCP15Vp, mes.ramp_OCP15VpSw),
-                timeout=5),
-            tester.DcSubStep(setting=((dev.dcs_TecVset, 5.0), ), delay=1),
-            tester.LoadSubStep(((dev.dcl_Tec, 0.5), ), delay=1),
-            tester.MeasureSubStep((mes.ramp_OCPTec, ), timeout=5),
-            tester.LoadSubStep(((dev.dcl_Tec, 0.0), )),
-            tester.DcSubStep(setting=((dev.dcs_5V, 0.0), )),
-            tester.AcSubStep(acs=dev.acsource, voltage=0.0, delay=3.5),
-            tester.AcSubStep(acs=dev.acsource, voltage=240.0, delay=1.0),
-            tester.DcSubStep(setting=((dev.dcs_5V, 5.0), )),
-            tester.MeasureSubStep((mes.dmm_15Vp, ), timeout=5),
             ))
 
         # EmergStop: Emergency stop, measure.
