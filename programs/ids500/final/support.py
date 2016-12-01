@@ -122,6 +122,9 @@ class Sensors():
         self.oSerEntry = sensor.DataEntry(
             message=tester.translate('ids500_final', 'msgSerEntry'),
             caption=tester.translate('ids500_final', 'capSerEntry'))
+        self.oHwRevEntry = sensor.DataEntry(
+            message=tester.translate('ids500_final', 'msgHwRev'),
+            caption=tester.translate('ids500_final', 'capHwRev'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -187,6 +190,7 @@ class Measurements():
             limits['Notify'], sense.oYesNoLddGreen)
         self.ui_YesNoLddRed = Measurement(limits['Notify'], sense.oYesNoLddRed)
         self.ui_SerEntry = Measurement(limits['SerEntry'], sense.oSerEntry)
+        self.ui_HwRev = Measurement(limits['HwRevEntry'], sense.oHwRevEntry)
 
 
 class SubTests():

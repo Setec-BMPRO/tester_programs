@@ -143,9 +143,10 @@ class Final(tester.TestSequence):
         dev.pic.open()
         dev.pic.clear_port()
         dev.pic.sw_test_mode()
+        hwrev = mes.ui_HwRev.measure().reading1
         dev.pic.exp_cnt = 3
-        dev.pic['HwRev'] = limit.HW_REV
-        self.limits['HwRev'].limit = limit.HW_REV
+        dev.pic['HwRev'] = hwrev
+        self.limits['HwRev'].limit = hwrev
         dev.pic.exp_cnt = 1
         mes.pic_hwrev.measure()
         sernum = mes.ui_SerEntry.measure().reading1

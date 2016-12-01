@@ -51,7 +51,8 @@ class Ids500Final(ProgramTestCase):
                      (sen.IsOut, (0.0, 0.00602, 0.0502)),
                      (sen.oYesNoLddGreen, True), (sen.oYesNoLddRed, True)),
                 'Comms':
-                    ((sen.oSerEntry, ('A1504010034',)), ),
+                    ((sen.oSerEntry, ('A1504010034',)),
+                    (sen.oHwRevEntry, ('06A',)), ),
                 'EmergStop':
                     ((sen.Tec, 0.0), (sen.TecVmon, 0.0), (sen.Ldd, 0.0),
                      (sen.IsVmon, 0.0), (sen.o15V, 0.0), (sen.o_15V, 0.0),

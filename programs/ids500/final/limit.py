@@ -7,10 +7,6 @@ import os
 # Serial port for the PIC.
 PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 
-NEW_PSU  =  False
-
-HW_REV = '06A'
-
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 DATA = (
     ('TecOff', 1, -1.5, 1.5, None, None),
@@ -46,6 +42,7 @@ DATA = (
     ('SetMonErr', 1, -0.07, 0.07, None, None),
     ('SetOutErr', 1, -0.07, 0.07, None, None),
     ('MonOutErr', 1, -0.07, 0.07, None, None),
+    ('HwRevEntry', 0, None, None, r'^[0-9]{2}[AB]$', None),
     ('SerEntry', 0, None, None, r'^[AS][0-9]{4}[0-9,A-Z]{2}[0-9]{4}$', None),
     ('HwRev', 0, None, None, r'.', None),
     ('SerChk', 0, None, None, r'.', None),
