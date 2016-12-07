@@ -147,13 +147,13 @@ class Final(tester.TestSequence):
         hwrev = mes.ui_hwrev.measure().reading1
         dev.pic.exp_cnt = 3
         dev.pic['WriteHwRev'] = hwrev
-        self.limits['Dummy'].limit = hwrev
         dev.pic.exp_cnt = 1
+        mes.pic_hwrev.testlimit[0].limit = hwrev
         mes.pic_hwrev.measure()
         sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes.ui_sernum)
         dev.pic.exp_cnt = 3
         dev.pic['WriteSerNum'] = sernum
-        self.limits['Dummy'].limit = sernum
         dev.pic.exp_cnt = 1
+        mes.pic_sernum.testlimit[0].limit = sernum
         mes.pic_sernum.measure()

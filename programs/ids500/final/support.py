@@ -141,7 +141,8 @@ class Measurements():
         """Create all Measurement instances.
 
            @param sense Sensors used
-           @param limits Product test limits
+           @param limits Product test limits        self.dmm_tecphase = Measurement(limits['TecPhase'], sense.tec)
+
 
         """
         Measurement = tester.Measurement
@@ -182,14 +183,19 @@ class Measurements():
         self.ui_YesNoPsu = Measurement(limits['Notify'], sense.oYesNoPsu)
         self.ui_YesNoTecGreen = Measurement(
             limits['Notify'], sense.oYesNoTecGreen)
-        self.ui_YesNoTecRed = Measurement(limits['Notify'], sense.oYesNoTecRed)
+        self.ui_YesNoTecRed = Measurement(
+            limits['Notify'], sense.oYesNoTecRed)
         self.ui_YesNoLddGreen = Measurement(
             limits['Notify'], sense.oYesNoLddGreen)
-        self.ui_YesNoLddRed = Measurement(limits['Notify'], sense.oYesNoLddRed)
+        self.ui_YesNoLddRed = Measurement(
+            limits['Notify'], sense.oYesNoLddRed)
         self.ui_sernum = Measurement(limits['SerNum'], sense.oSerNumEntry)
         self.ui_hwrev = Measurement(limits['HwRev'], sense.oHwRevEntry)
-        self.pic_hwrev = Measurement(limits['Dummy'], sense.hwrev)
-        self.pic_sernum = Measurement(limits['Dummy'], sense.sernum)
+        # Create limits locally for these measurements.
+        self.pic_hwrev = Measurement(
+            tester.LimitString('HwRev-PIC', ''), sense.hwrev)
+        self.pic_sernum = Measurement(
+            tester.LimitString('SerNum-PIC', ''), sense.sernum)
 
 
 class SubTests():

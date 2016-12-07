@@ -45,6 +45,5 @@ DATA = (
     lim_hilo('MonOutErr', -0.07, 0.07),
     lim_string('HwRev', r'^[0-9]{2}[AB]$'),
     lim_string('SerNum', r'^[AS][0-9]{4}[0-9,A-Z]{2}[0-9]{4}$'),
-    lim_string('Dummy', r'.'),
     lim_boolean('Notify', True),
     )
