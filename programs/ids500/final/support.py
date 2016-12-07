@@ -21,21 +21,21 @@ class LogicalDevices():
         self.fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
-        self.dcs_TecVset = tester.DCSource(devices['DCS1'])
-        self.dcs_IsSet = tester.DCSource(devices['DCS2'])
-        self.dcs_5V = tester.DCSource(devices['DCS3'])
-        self.dcl_Tec = tester.DCLoad(devices['DCL2'])
-        self.dcl_15Vp = tester.DCLoad(devices['DCL3'])
-        self.dcl_15VpSw = tester.DCLoad(devices['DCL4'])
-        self.dcl_5V = tester.DCLoad(devices['DCL5'])
-        self.rla_MainsEnable = tester.Relay(devices['RLA1'])
-        self.rla_15VpEnable = tester.Relay(devices['RLA2'])
-        self.rla_Emergency = tester.Relay(devices['RLA3'])
-        self.rla_Crowbar = tester.Relay(devices['RLA4'])
-        self.rla_EnableIs = tester.Relay(devices['RLA5'])
-        self.rla_Interlock = tester.Relay(devices['RLA6'])
-        self.rla_Enable = tester.Relay(devices['RLA7'])
-        self.rla_TecPhase = tester.Relay(devices['RLA8'])
+        self.dcs_tecvset = tester.DCSource(devices['DCS1'])
+        self.dcs_isset = tester.DCSource(devices['DCS2'])
+        self.dcs_5v = tester.DCSource(devices['DCS3'])
+        self.dcl_tec = tester.DCLoad(devices['DCL2'])
+        self.dcl_15vp = tester.DCLoad(devices['DCL3'])
+        self.dcl_15vpsw = tester.DCLoad(devices['DCL4'])
+        self.dcl_5v = tester.DCLoad(devices['DCL5'])
+        self.rla_mainsenable = tester.Relay(devices['RLA1'])
+        self.rla_15vpenable = tester.Relay(devices['RLA2'])
+        self.rla_emergency = tester.Relay(devices['RLA3'])
+        self.rla_crowbar = tester.Relay(devices['RLA4'])
+        self.rla_enableis = tester.Relay(devices['RLA5'])
+        self.rla_interlock = tester.Relay(devices['RLA6'])
+        self.rla_enable = tester.Relay(devices['RLA7'])
+        self.rla_tecphase = tester.Relay(devices['RLA8'])
         # Serial connection to the console to communicate with the PIC
         self.pic_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=19200, timeout=2.0)
@@ -55,14 +55,14 @@ class LogicalDevices():
         """Reset instruments."""
         self.pic_ser.close()
         self.acsource.output(voltage=0.0, output=False)
-        for dcs in (self.dcs_TecVset, self.dcs_IsSet, self.dcs_5V):
+        for dcs in (self.dcs_tecvset, self.dcs_isset, self.dcs_5v):
             dcs.output(0.0, False)
-        for ld in (self.dcl_Tec, self.dcl_15Vp, self.dcl_15VpSw, self.dcl_5V):
+        for ld in (self.dcl_tec, self.dcl_15vp, self.dcl_15vpsw, self.dcl_5v):
             ld.output(0.0, False)
         for rla in (
-                self.rla_MainsEnable, self.rla_15VpEnable, self.rla_Crowbar,
-                self.rla_Emergency, self.rla_EnableIs, self.rla_Interlock,
-                self.rla_Enable, self.rla_TecPhase):
+                self.rla_mainsenable, self.rla_15vpenable, self.rla_crowbar,
+                self.rla_emergency, self.rla_enableis, self.rla_interlock,
+                self.rla_enable, self.rla_tecphase):
             rla.set_off()
 
 
@@ -86,24 +86,20 @@ class Sensors():
         self.oMirTecErr = sensor.Mirror()
         self.oMirTecVmonErr = sensor.Mirror()
         self.oMirIsErr = sensor.Mirror()
-        self.Tec = sensor.Vdc(dmm, high=1, low=3, rng=100, res=0.001)
-        self.TecVset = sensor.Vdc(dmm, high=3, low=6, rng=10, res=0.001)
-        self.TecVmon = sensor.Vdc(dmm, high=4, low=6, rng=10, res=0.001)
-        self.Ldd = sensor.Vdc(dmm, high=2, low=4, rng=10, res=0.001)
-        self.IsSet = sensor.Vdc(dmm, high=5, low=6, rng=10, res=0.0001)
-        self.IsOut = sensor.Vdc(dmm, high=14, low=5, rng=10, res=0.00001)
-        self.IsIout = sensor.Vdc(dmm, high=6, low=6, rng=10, res=0.0001)
-        self.IsVmon = sensor.Vdc(dmm, high=7, low=6, rng=10, res=0.001)
-        self.o15V = sensor.Vdc(dmm, high=8, low=1, rng=100, res=0.001)
-        self.o_15V = sensor.Vdc(dmm, high=9, low=1, rng=100, res=0.001)
-        self.o15Vp = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
-        self.o15VpSw = sensor.Vdc(dmm, high=11, low=1, rng=100, res=0.001)
-        self.o5V = sensor.Vdc(dmm, high=12, low=1, rng=10, res=0.001)
-        self.PwrOk = sensor.Vdc(dmm, high=13, low=2, rng=10, res=0.001)
-        self.oHwRev = console.Sensor(
-            pic, 'PIC-HwRev', rdgtype=sensor.ReadingString)
-        self.oSerChk = console.Sensor(
-            pic, 'PIC-SerChk', rdgtype=sensor.ReadingString)
+        self.tec = sensor.Vdc(dmm, high=1, low=3, rng=100, res=0.001)
+        self.tecvset = sensor.Vdc(dmm, high=3, low=6, rng=10, res=0.001)
+        self.tecvmon = sensor.Vdc(dmm, high=4, low=6, rng=10, res=0.001)
+        self.ldd = sensor.Vdc(dmm, high=2, low=4, rng=10, res=0.001)
+        self.isset = sensor.Vdc(dmm, high=5, low=6, rng=10, res=0.0001)
+        self.isout = sensor.Vdc(dmm, high=14, low=5, rng=10, res=0.00001)
+        self.isiout = sensor.Vdc(dmm, high=6, low=6, rng=10, res=0.0001)
+        self.isvmon = sensor.Vdc(dmm, high=7, low=6, rng=10, res=0.001)
+        self.o15v = sensor.Vdc(dmm, high=8, low=1, rng=100, res=0.001)
+        self.o_15v = sensor.Vdc(dmm, high=9, low=1, rng=100, res=0.001)
+        self.o15vp = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
+        self.o15vpsw = sensor.Vdc(dmm, high=11, low=1, rng=100, res=0.001)
+        self.o5v = sensor.Vdc(dmm, high=12, low=1, rng=10, res=0.001)
+        self.pwrok = sensor.Vdc(dmm, high=13, low=2, rng=10, res=0.001)
         self.oYesNoPsu = sensor.YesNo(
             message=tester.translate('ids500_final', 'IsPSULedGreen?'),
             caption=tester.translate('ids500_final', 'capPsuLed'))
@@ -119,12 +115,16 @@ class Sensors():
         self.oYesNoLddRed = sensor.YesNo(
             message=tester.translate('ids500_final', 'IsLDDLedRed?'),
             caption=tester.translate('ids500_final', 'capLddRedLed'))
-        self.oSerEntry = sensor.DataEntry(
+        self.oSerNumEntry = sensor.DataEntry(
             message=tester.translate('ids500_final', 'msgSerEntry'),
             caption=tester.translate('ids500_final', 'capSerEntry'))
         self.oHwRevEntry = sensor.DataEntry(
             message=tester.translate('ids500_final', 'msgHwRev'),
             caption=tester.translate('ids500_final', 'capHwRev'))
+        self.hwrev = console.Sensor(
+            pic, 'PIC-HwRev', rdgtype=sensor.ReadingString)
+        self.sernum = console.Sensor(
+            pic, 'PIC-SerNum', rdgtype=sensor.ReadingString)
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -145,43 +145,40 @@ class Measurements():
 
         """
         Measurement = tester.Measurement
-        self.TecErr = Measurement(limits['TecErr'], sense.oMirTecErr)
-        self.TecVmonErr = Measurement(
+        self.tecerr = Measurement(limits['TecErr'], sense.oMirTecErr)
+        self.tecvmonerr = Measurement(
             limits['TecVmonErr'], sense.oMirTecVmonErr)
-        self.SetMonErr = Measurement(limits['SetMonErr'], sense.oMirIsErr)
-        self.SetOutErr = Measurement(limits['SetOutErr'], sense.oMirIsErr)
-        self.MonOutErr = Measurement(limits['MonOutErr'], sense.oMirIsErr)
-        self.dmm_TecOff = Measurement(limits['TecOff'], sense.Tec)
-        self.dmm_Tec = Measurement(limits['Tec'], sense.Tec)
-        self.dmm_TecPhase = Measurement(limits['TecPhase'], sense.Tec)
-        self.dmm_TecVset = Measurement(limits['TecVset'], sense.TecVset)
-        self.dmm_TecVmonOff = Measurement(limits['TecVmonOff'], sense.TecVmon)
-        self.dmm_TecVmon0V = Measurement(limits['TecVmon0V'], sense.TecVmon)
-        self.dmm_TecVmon = Measurement(limits['TecVmon'], sense.TecVmon)
-        self.dmm_LddOff = Measurement(limits['LddOff'], sense.Ldd)
-        self.dmm_IsVmonOff = Measurement(limits['IsVmonOff'], sense.IsVmon)
-        self.dmm_IsVmon = Measurement(limits['IsVmon'], sense.IsVmon)
-        self.dmm_IsOut0V = Measurement(limits['IsOut0V'], sense.IsOut)
-        self.dmm_IsOut06V = Measurement(limits['IsOut06V'], sense.IsOut)
-        self.dmm_IsOut5V = Measurement(limits['IsOut5V'], sense.IsOut)
-        self.dmm_IsIout0V = Measurement(limits['IsIout0V'], sense.IsIout)
-        self.dmm_IsIout06V = Measurement(limits['IsIout06V'], sense.IsIout)
-        self.dmm_IsIout5V = Measurement(limits['IsIout5V'], sense.IsIout)
-        self.dmm_IsSet06V = Measurement(limits['IsSet06V'], sense.IsSet)
-        self.dmm_IsSet5V = Measurement(limits['IsSet5V'], sense.IsSet)
-        self.dmm_15VOff = Measurement(limits['15VOff'], sense.o15V)
-        self.dmm_15V = Measurement(limits['15V'], sense.o15V)
-        self.dmm__15VOff = Measurement(limits['-15VOff'], sense.o_15V)
-        self.dmm__15V = Measurement(limits['-15V'], sense.o_15V)
-        self.dmm_15VpOff = Measurement(limits['15VpOff'], sense.o15Vp)
-        self.dmm_15Vp = Measurement(limits['15Vp'], sense.o15Vp)
-        self.dmm_15VpSwOff = Measurement(limits['15VpSwOff'], sense.o15VpSw)
-        self.dmm_15VpSw = Measurement(limits['15VpSw'], sense.o15VpSw)
-        self.dmm_5VOff = Measurement(limits['5VOff'], sense.o5V)
-        self.dmm_5V = Measurement(limits['5V'], sense.o5V)
-        self.pic_hwrev = Measurement(
-            limits['HwRev'], sense.oHwRev)
-        self.pic_serchk = Measurement(limits['SerChk'], sense.oSerChk)
+        self.setmonerr = Measurement(limits['SetMonErr'], sense.oMirIsErr)
+        self.setouterr = Measurement(limits['SetOutErr'], sense.oMirIsErr)
+        self.monouterr = Measurement(limits['MonOutErr'], sense.oMirIsErr)
+        self.dmm_tecoff = Measurement(limits['TecOff'], sense.tec)
+        self.dmm_tec = Measurement(limits['Tec'], sense.tec)
+        self.dmm_tecphase = Measurement(limits['TecPhase'], sense.tec)
+        self.dmm_tecvset = Measurement(limits['TecVset'], sense.tecvset)
+        self.dmm_tecvmonoff = Measurement(limits['TecVmonOff'], sense.tecvmon)
+        self.dmm_tecvmon0v = Measurement(limits['TecVmon0V'], sense.tecvmon)
+        self.dmm_tecvmon = Measurement(limits['TecVmon'], sense.tecvmon)
+        self.dmm_lddoff = Measurement(limits['LddOff'], sense.ldd)
+        self.dmm_isvmonoff = Measurement(limits['IsVmonOff'], sense.isvmon)
+        self.dmm_isvmon = Measurement(limits['IsVmon'], sense.isvmon)
+        self.dmm_isout0v = Measurement(limits['IsOut0V'], sense.isout)
+        self.dmm_isout06v = Measurement(limits['IsOut06V'], sense.isout)
+        self.dmm_isout5v = Measurement(limits['IsOut5V'], sense.isout)
+        self.dmm_isiout0v = Measurement(limits['IsIout0V'], sense.isiout)
+        self.dmm_isiout06v = Measurement(limits['IsIout06V'], sense.isiout)
+        self.dmm_isiout5v = Measurement(limits['IsIout5V'], sense.isiout)
+        self.dmm_isset06v = Measurement(limits['IsSet06V'], sense.isset)
+        self.dmm_isset5v = Measurement(limits['IsSet5V'], sense.isset)
+        self.dmm_15voff = Measurement(limits['15VOff'], sense.o15v)
+        self.dmm_15v = Measurement(limits['15V'], sense.o15v)
+        self.dmm__15voff = Measurement(limits['-15VOff'], sense.o_15v)
+        self.dmm__15v = Measurement(limits['-15V'], sense.o_15v)
+        self.dmm_15vpoff = Measurement(limits['15VpOff'], sense.o15vp)
+        self.dmm_15vp = Measurement(limits['15Vp'], sense.o15vp)
+        self.dmm_15vpswoff = Measurement(limits['15VpSwOff'], sense.o15vpsw)
+        self.dmm_15vpsw = Measurement(limits['15VpSw'], sense.o15vpsw)
+        self.dmm_5voff = Measurement(limits['5VOff'], sense.o5v)
+        self.dmm_5v = Measurement(limits['5V'], sense.o5v)
         self.ui_YesNoPsu = Measurement(limits['Notify'], sense.oYesNoPsu)
         self.ui_YesNoTecGreen = Measurement(
             limits['Notify'], sense.oYesNoTecGreen)
@@ -189,8 +186,10 @@ class Measurements():
         self.ui_YesNoLddGreen = Measurement(
             limits['Notify'], sense.oYesNoLddGreen)
         self.ui_YesNoLddRed = Measurement(limits['Notify'], sense.oYesNoLddRed)
-        self.ui_SerEntry = Measurement(limits['SerEntry'], sense.oSerEntry)
-        self.ui_HwRev = Measurement(limits['HwRevEntry'], sense.oHwRevEntry)
+        self.ui_sernum = Measurement(limits['SerNum'], sense.oSerNumEntry)
+        self.ui_hwrev = Measurement(limits['HwRev'], sense.oHwRevEntry)
+        self.pic_hwrev = Measurement(limits['Dummy'], sense.hwrev)
+        self.pic_sernum = Measurement(limits['Dummy'], sense.sernum)
 
 
 class SubTests():
@@ -207,46 +206,46 @@ class SubTests():
         # PowerUp: Min loads, input AC, measure.
         self.pwr_up = tester.SubStep((
             tester.LoadSubStep(
-                ((dev.dcl_Tec, 0.4), (dev.dcl_15Vp, 0.4),
-                 (dev.dcl_15VpSw, 0.4), (dev.dcl_5V, 0.4), ), output=True),
+                ((dev.dcl_tec, 0.4), (dev.dcl_15vp, 0.4),
+                 (dev.dcl_15vpsw, 0.4), (dev.dcl_5v, 0.4), ), output=True),
             tester.AcSubStep(acs=dev.acsource, voltage=240.0, output=True,
                                 delay=2.0),
             tester.MeasureSubStep(
-                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
-                 mes.dmm_IsVmonOff, mes.dmm_15VOff, mes.dmm__15VOff,
-                 mes.dmm_15VpOff, mes.dmm_15VpSwOff, mes.dmm_5VOff),
+                (mes.dmm_tecoff, mes.dmm_tecvmonoff, mes.dmm_lddoff,
+                 mes.dmm_isvmonoff, mes.dmm_15voff, mes.dmm__15voff,
+                 mes.dmm_15vpoff, mes.dmm_15vpswoff, mes.dmm_5voff),
                  timeout=5),
             ))
 
         # KeySw1: KeySwitch 1, measure.
         self.key_sw1 = tester.SubStep((
-            tester.RelaySubStep(((dev.rla_MainsEnable, True), )),
+            tester.RelaySubStep(((dev.rla_mainsenable, True), )),
             tester.MeasureSubStep(
-                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
-                 mes.dmm_IsVmonOff, mes.dmm_15V, mes.dmm__15V, mes.dmm_15Vp,
-                 mes.dmm_15VpSwOff, mes.dmm_5V),
+                (mes.dmm_tecoff, mes.dmm_tecvmonoff, mes.dmm_lddoff,
+                 mes.dmm_isvmonoff, mes.dmm_15v, mes.dmm__15v, mes.dmm_15vp,
+                 mes.dmm_15vpswoff, mes.dmm_5v),
                  timeout=5),
             ))
 
         # KeySw12: KeySwitch 1 & 2, measure.
         self.key_sw12 = tester.SubStep((
-            tester.RelaySubStep(((dev.rla_15VpEnable, True), )),
+            tester.RelaySubStep(((dev.rla_15vpenable, True), )),
             tester.MeasureSubStep(
-                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
-                 mes.dmm_IsVmonOff, mes.dmm_15V, mes.dmm__15V, mes.dmm_15Vp,
-                 mes.dmm_15VpSw, mes.dmm_5V),
+                (mes.dmm_tecoff, mes.dmm_tecvmonoff, mes.dmm_lddoff,
+                 mes.dmm_isvmonoff, mes.dmm_15v, mes.dmm__15v, mes.dmm_15vp,
+                 mes.dmm_15vpsw, mes.dmm_5v),
                  timeout=5),
             ))
 
         # EmergStop: Emergency stop, measure.
         self.emg_stop = tester.SubStep((
             tester.LoadSubStep(
-                ((dev.dcl_Tec, 0.0), (dev.dcl_15Vp, 1.0),
-                 (dev.dcl_15VpSw, 0.0), (dev.dcl_5V, 5.0))),
-            tester.RelaySubStep(((dev.rla_Emergency, True), ), delay=1),
+                ((dev.dcl_tec, 0.0), (dev.dcl_15vp, 1.0),
+                 (dev.dcl_15vpsw, 0.0), (dev.dcl_5v, 5.0))),
+            tester.RelaySubStep(((dev.rla_emergency, True), ), delay=1),
             tester.MeasureSubStep(
-                (mes.dmm_TecOff, mes.dmm_TecVmonOff, mes.dmm_LddOff,
-                 mes.dmm_IsVmonOff, mes.dmm_15VOff, mes.dmm__15VOff,
-                 mes.dmm_15VpOff, mes.dmm_15VpSwOff, mes.dmm_5VOff),
+                (mes.dmm_tecoff, mes.dmm_tecvmonoff, mes.dmm_lddoff,
+                 mes.dmm_isvmonoff, mes.dmm_15voff, mes.dmm__15voff,
+                 mes.dmm_15vpoff, mes.dmm_15vpswoff, mes.dmm_5voff),
                  timeout=5)
             ))

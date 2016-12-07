@@ -5,6 +5,7 @@
 from functools import wraps
 import logging
 import tester
+import share
 from . import support
 from . import limit
 
@@ -66,23 +67,23 @@ class Final(tester.TestSequence):
     @teststep
     def _step_tec(self, dev, mes, sen):
         """Check TEC."""
-        dev.dcs_5V.output(5.0, True)
-        dev.rla_Enable.set_on()
-        dev.dcs_TecVset.output(0.0, True)
-        tester.MeasureGroup((mes.dmm_TecOff, mes.dmm_TecVmon0V), timeout=5)
-        dev.dcl_Tec.output(0.3)
-        dev.dcs_TecVset.output(voltage=5.0, delay=0.1)
+        dev.dcs_5v.output(5.0, True)
+        dev.rla_enable.set_on()
+        dev.dcs_tecvset.output(0.0, True)
+        tester.MeasureGroup((mes.dmm_tecoff, mes.dmm_tecvmon0v), timeout=5)
+        dev.dcl_tec.output(0.3)
+        dev.dcs_tecvset.output(voltage=5.0, delay=0.1)
         Vset, Vmon, Vtec = tester.MeasureGroup(
-            (mes.dmm_TecVset, mes.dmm_TecVmon, mes.dmm_Tec), timeout=5).readings
+            (mes.dmm_tecvset, mes.dmm_tecvmon, mes.dmm_tec), timeout=5).readings
         self._logger.debug('Vset:%s, Vmon:%s, Vtec:%s', Vset, Vmon, Vtec)
         sen.oMirTecErr.store(Vtec - (Vset * 3))
-        mes.TecErr.measure(timeout=5)
+        mes.tecerr.measure(timeout=5)
         sen.oMirTecVmonErr.store(Vmon - (Vtec / 3))
-        mes.TecVmonErr.measure(timeout=5)
+        mes.tecvmonerr.measure(timeout=5)
         tester.MeasureGroup((mes.ui_YesNoPsu, mes.ui_YesNoTecGreen), timeout=5)
-        dev.rla_TecPhase.set_on()
-        tester.MeasureGroup((mes.dmm_TecPhase, mes.ui_YesNoTecRed), timeout=5)
-        dev.rla_TecPhase.set_off()
+        dev.rla_tecphase.set_on()
+        tester.MeasureGroup((mes.dmm_tecphase, mes.ui_YesNoTecRed), timeout=5)
+        dev.rla_tecphase.set_off()
 
     @teststep
     def _step_ldd(self, dev, mes, sen):
@@ -93,35 +94,35 @@ class Final(tester.TestSequence):
 
         """
         # Run LDD at 0A
-        dev.dcs_IsSet.output(0.0, True)
-        dev.rla_Crowbar.set_on()
-        dev.rla_Interlock.set_on()
-        dev.rla_EnableIs.set_on()
+        dev.dcs_isset.output(0.0, True)
+        dev.rla_crowbar.set_on()
+        dev.rla_interlock.set_on()
+        dev.rla_enableis.set_on()
         tester.MeasureGroup(
-            (mes.dmm_IsVmon, mes.dmm_IsOut0V, mes.dmm_IsIout0V), timeout=5)
+            (mes.dmm_isvmon, mes.dmm_isout0v, mes.dmm_isiout0v), timeout=5)
         # Run LDD at 6A
-        dev.dcs_IsSet.output(voltage=0.6, delay=1)
-        mes.dmm_IsVmon.measure(timeout=5)
+        dev.dcs_isset.output(voltage=0.6, delay=1)
+        mes.dmm_isvmon.measure(timeout=5)
         Iset, Iout, Imon = tester.MeasureGroup(
-            (mes.dmm_IsSet06V, mes.dmm_IsOut06V, mes.dmm_IsIout06V),
+            (mes.dmm_isset06v, mes.dmm_isout06v, mes.dmm_isiout06v),
             timeout=5).readings
         self._ldd_err(Iset, Iout, Imon)
         # Run LDD at 50A
         mes.ui_YesNoLddGreen.measure(timeout=5)
-        dev.dcs_IsSet.output(voltage=5.0, delay=1)
-        mes.dmm_IsVmon.measure(timeout=5)
+        dev.dcs_isset.output(voltage=5.0, delay=1)
+        mes.dmm_isvmon.measure(timeout=5)
         Iset, Iout, Imon = tester.MeasureGroup(
-            (mes.dmm_IsSet5V, mes.dmm_IsOut5V, mes.dmm_IsIout5V),
+            (mes.dmm_isset5v, mes.dmm_isout5v, mes.dmm_isiout5v),
             timeout=5).readings
         for name in ('SetMonErr', 'SetOutErr', 'MonOutErr'):
             self.limits[name].limit = (-0.7, 0.7)
         self._ldd_err(Iset, Iout, Imon)
         # LDD off
         mes.ui_YesNoLddRed.measure(timeout=5)
-        dev.dcs_IsSet.output(0.0, False)
-        dev.rla_Crowbar.set_off()
-        dev.rla_Interlock.set_off()
-        dev.rla_EnableIs.set_off()
+        dev.dcs_isset.output(0.0, False)
+        dev.rla_crowbar.set_off()
+        dev.rla_interlock.set_off()
+        dev.rla_enableis.set_off()
 
     def _ldd_err(self, Iset, Iout, Imon):
         """Check the accuracy between set and measured values for LDdev."""
@@ -129,13 +130,13 @@ class Final(tester.TestSequence):
         self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
         # Compare Set value to Mon
         sen.oMirIsErr.store((Iset * 10) - (Imon * 10))
-        mes.SetMonErr.measure()
+        mes.setmonerr.measure()
         # Compare Set value to Out
         sen.oMirIsErr.store((Iset * 10) - (Iout * 1000))
-        mes.SetOutErr.measure()
+        mes.setouterr.measure()
         # Compare Mon to Out
         sen.oMirIsErr.store((Imon * 10) - (Iout * 1000))
-        mes.MonOutErr.measure()
+        mes.monouterr.measure()
 
     @teststep
     def _step_comms(self, dev, mes, sen):
@@ -143,15 +144,16 @@ class Final(tester.TestSequence):
         dev.pic.open()
         dev.pic.clear_port()
         dev.pic.sw_test_mode()
-        hwrev = mes.ui_HwRev.measure().reading1
+        hwrev = mes.ui_hwrev.measure().reading1
         dev.pic.exp_cnt = 3
-        dev.pic['HwRev'] = hwrev
-        self.limits['HwRev'].limit = hwrev
+        dev.pic['WriteHwRev'] = hwrev
+        self.limits['Dummy'].limit = hwrev
         dev.pic.exp_cnt = 1
         mes.pic_hwrev.measure()
-        sernum = mes.ui_SerEntry.measure().reading1
+        sernum = share.get_sernum(
+            self.uuts, self.limits['SerNum'], mes.ui_sernum)
         dev.pic.exp_cnt = 3
-        dev.pic['SerNum'] = sernum
-        self.limits['SerChk'].limit = sernum
+        dev.pic['WriteSerNum'] = sernum
+        self.limits['Dummy'].limit = sernum
         dev.pic.exp_cnt = 1
-        mes.pic_serchk.measure()
+        mes.pic_sernum.measure()

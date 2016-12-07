@@ -30,33 +30,33 @@ class Ids500Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp':
-                    ((sen.Tec, 0.0), (sen.TecVmon, 0.0), (sen.Ldd, 0.0),
-                     (sen.IsVmon, 0.0), (sen.o15V, 0.0), (sen.o_15V, 0.0),
-                     (sen.o15Vp, 0.0), (sen.o15VpSw, 0.0), (sen.o5V, 0.0)),
+                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
+                     (sen.isvmon, 0.0), (sen.o15v, 0.0), (sen.o_15v, 0.0),
+                     (sen.o15vp, 0.0), (sen.o15vpsw, 0.0), (sen.o5v, 0.0)),
                 'KeySw1':
-                    ((sen.Tec, 0.0), (sen.TecVmon, 0.0), (sen.Ldd, 0.0),
-                     (sen.IsVmon, 0.0), (sen.o15V, 15.0), (sen.o_15V, -15.0),
-                     (sen.o15Vp, 15.0), (sen.o15VpSw, 0.0), (sen.o5V, 5.0)),
+                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
+                     (sen.isvmon, 0.0), (sen.o15v, 15.0), (sen.o_15v, -15.0),
+                     (sen.o15vp, 15.0), (sen.o15vpsw, 0.0), (sen.o5v, 5.0)),
                 'KeySw12':
-                    ((sen.Tec, 0.0), (sen.TecVmon, 240.0), (sen.Ldd, 0.0),
-                     (sen.IsVmon, 0.0), (sen.o15V, 15.0), (sen.o_15V, -15.0),
-                     (sen.o15Vp, 15.0), (sen.o15VpSw, 15.0), (sen.o5V, 5.0)),
+                    ((sen.tec, 0.0), (sen.tecvmon, 240.0), (sen.ldd, 0.0),
+                     (sen.isvmon, 0.0), (sen.o15v, 15.0), (sen.o_15v, -15.0),
+                     (sen.o15vp, 15.0), (sen.o15vpsw, 15.0), (sen.o5v, 5.0)),
                 'TEC':
-                    ((sen.TecVset, 5.05), (sen.TecVmon, (0.0, 4.99)),
-                     (sen.Tec, (0.0, 15.0, -15.0)), (sen.oYesNoPsu, True),
+                    ((sen.tecvset, 5.05), (sen.tecvmon, (0.0, 4.99)),
+                     (sen.tec, (0.0, 15.0, -15.0)), (sen.oYesNoPsu, True),
                      (sen.oYesNoTecGreen, True), (sen.oYesNoTecRed, True)),
                 'LDD':
-                    ((sen.IsVmon, (2.0,) * 3), (sen.IsSet, (0.6, 5.0)),
-                     (sen.IsIout, (0.0, 0.601, 5.01)),
-                     (sen.IsOut, (0.0, 0.00602, 0.0502)),
+                    ((sen.isvmon, (2.0,) * 3), (sen.isset, (0.6, 5.0)),
+                     (sen.isiout, (0.0, 0.601, 5.01)),
+                     (sen.isout, (0.0, 0.00602, 0.0502)),
                      (sen.oYesNoLddGreen, True), (sen.oYesNoLddRed, True)),
                 'Comms':
-                    ((sen.oSerEntry, ('A1504010034',)),
+                    ((sen.oSerNumEntry, ('A1504010034',)),
                     (sen.oHwRevEntry, ('06A',)), ),
                 'EmergStop':
-                    ((sen.Tec, 0.0), (sen.TecVmon, 0.0), (sen.Ldd, 0.0),
-                     (sen.IsVmon, 0.0), (sen.o15V, 0.0), (sen.o_15V, 0.0),
-                     (sen.o15Vp, 0.0), (sen.o15VpSw, 0.0), (sen.o5V, 0.0)),
+                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
+                     (sen.isvmon, 0.0), (sen.o15v, 0.0), (sen.o_15v, 0.0),
+                     (sen.o15vp, 0.0), (sen.o15vpsw, 0.0), (sen.o5v, 0.0)),
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Comms':
@@ -76,7 +76,7 @@ class Ids500Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(69, len(result.readings))  # Reading count
+        self.assertEqual(70, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD',

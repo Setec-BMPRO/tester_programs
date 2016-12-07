@@ -36,15 +36,15 @@ class Console(console.Variable, console.BaseConsole):
                 '', read_format='{}'),
             'PIC-HwRev': ParameterString(
                 '?,I,2', read_format='{}'),
-            'PIC-SerChk': ParameterString(
+            'PIC-SerNum': ParameterString(
                 '?,I,3', read_format='{}'),
             'SwTstMode': ParameterString(
                 '', writeable=True,
                 write_format='S,:,{}'),
-            'HwRev': ParameterString(
+            'WriteHwRev': ParameterString(
                 'S,@,', writeable=True,
                 write_format='{1}{0}'),
-            'SerNum': ParameterString(
+            'WriteSerNum': ParameterString(
                 'S,#,', writeable=True,
                 write_format='{1}{0}'),
             }
