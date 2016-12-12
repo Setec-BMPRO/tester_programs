@@ -212,8 +212,8 @@ class SubTests():
         # PowerUp: Min loads, input AC, measure.
         self.pwr_up = tester.SubStep((
             tester.LoadSubStep(
-                ((dev.dcl_tec, 0.4), (dev.dcl_15vp, 0.4),
-                 (dev.dcl_15vpsw, 0.4), (dev.dcl_5v, 0.4), ), output=True),
+                ((dev.dcl_tec, 0.0), (dev.dcl_15vp, 1.0),
+                 (dev.dcl_15vpsw, 0.0), (dev.dcl_5v, 5.0), ), output=True),
             tester.AcSubStep(acs=dev.acsource, voltage=240.0, output=True,
                                 delay=2.0),
             tester.MeasureSubStep(
