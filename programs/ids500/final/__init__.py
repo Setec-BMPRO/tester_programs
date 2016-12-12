@@ -66,7 +66,13 @@ class Final(tester.TestSequence):
 
     @teststep
     def _step_tec(self, dev, mes, sen):
-        """Check TEC."""
+        """Check the TEC circuit.
+
+           Enable, measure voltages.
+           Error calculations.
+           Check LED status.
+
+         """
         dev.dcs_5v.output(5.0, True)
         dev.rla_enable.set_on()
         dev.dcs_tecvset.output(0.0, True)
@@ -87,10 +93,11 @@ class Final(tester.TestSequence):
 
     @teststep
     def _step_ldd(self, dev, mes, sen):
-        """Check LDdev.
+        """Check the Laser diode circuit.
 
-           Check led status.
-           Check voltages at 0A, 6A & 50A.
+           Enable, measure voltages.
+           Error calculations at 0A, 6A & 50A loading.
+           Check LED status.
 
         """
         # Run LDD at 0A
@@ -125,7 +132,7 @@ class Final(tester.TestSequence):
         dev.rla_enableis.set_off()
 
     def _ldd_err(self, Iset, Iout, Imon):
-        """Check the accuracy between set and measured values for LDdev."""
+        """Check the accuracy between set and measured values for LD."""
         mes, sen = self.meas, self.sensor
         self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
         # Compare Set value to Mon
