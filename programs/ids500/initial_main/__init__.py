@@ -81,7 +81,6 @@ class InitialMain(tester.testsequence.TestSequence):
         Vset, Vmon, Vtec = tester.MeasureGroup(
             (mes.dmm_tecvset, mes.dmm_tecvmon, mes.dmm_tec),
             timeout=5).readings
-        Vtec = -Vtec
         self._logger.debug('Vset:%s, Vmon:%s, Vtec:%s', Vset, Vmon, Vtec)
         sen.oMirTecErr.store(Vtec - (Vset * 3))
         mes.tecerr.measure(timeout=5)

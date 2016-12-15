@@ -80,7 +80,7 @@ class Sensors():
         self.oMirTecVmonErr = sensor.Mirror()
         self.oMirIsErr = sensor.Mirror()
         self.lock = sensor.Res(dmm, high=18, low=3, rng=10000, res=1)
-        self.tec = sensor.Vdc(dmm, high=1, low=4, rng=100, res=0.001)
+        self.tec = sensor.Vdc(dmm, high=1, low=4, rng=100, res=0.001, scale=-1)
         self.ldd = sensor.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
         self.tecvset = sensor.Vdc(dmm, high=3, low=7, rng=10, res=0.001)
         self.tecvmon = sensor.Vdc(dmm, high=4, low=7, rng=10, res=0.001)
@@ -104,18 +104,21 @@ class Sensors():
         self.o5vlddtec = sensor.Vdc(dmm, high=22, low=7, rng=10, res=0.001)
         self.o5vupaux = sensor.Vdc(dmm, high=23, low=7, rng=10, res=0.001)
         self.o5vup = sensor.Vdc(dmm, high=24, low=7, rng=10, res=0.001)
+        low, high = limits['OCP5V'].limit
         self.ocp5v = sensor.Ramp(
             stimulus=logical_devices.dcl_5v, sensor=self.o5v,
             detect_limit=(limits['inOCP5V'], ),
-            start=5.0, stop=12.0, step=0.1, delay=0.2)
+            start=low - 1, stop=high + 1, step=0.1, delay=0.2)
+        low, high = limits['OCP15Vp'].limit
         self.ocp15vp = sensor.Ramp(
             stimulus=logical_devices.dcl_15vp, sensor=self.o15vp,
             detect_limit=(limits['inOCP15Vp'], ),
-            start=5.0, stop=12.0, step=0.1, delay=0.2)
+            start=low - 1, stop=high + 1, step=0.1, delay=0.2)
+        low, high = limits['OCPTec'].limit
         self.ocptec = sensor.Ramp(
             stimulus=logical_devices.dcl_tec, sensor=self.tec,
             detect_limit=(limits['inOCPTec'], ),
-            start=20.0, stop=23.0, step=0.1, delay=0.2)
+            start=low - 1, stop=high + 1, step=0.1, delay=0.2)
         self.oYesNoPsu = sensor.YesNo(
             message=tester.translate('ids500_final', 'IsPSULedGreen?'),
             caption=tester.translate('ids500_final', 'capPsuLed'))
