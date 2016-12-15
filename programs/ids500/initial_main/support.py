@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """IDS-500 Initial Main Test Program."""
 
-import time
 from pydispatch import dispatcher
+import time
 import tester
 
 
@@ -20,43 +20,43 @@ class LogicalDevices():
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
         self.discharge = tester.Discharge(devices['DIS'])
-        self.dcs_TecVset = tester.DCSource(devices['DCS1'])
-        self.dcs_IsSet = tester.DCSource(devices['DCS2'])
-        self.dcs_5V = tester.DCSource(devices['DCS3'])
-        self.dcl_Tec = tester.DCLoad(devices['DCL1'])
-        self.dcl_15Vp = tester.DCLoad(devices['DCL2'])
-        self.dcl_15Vpsw = tester.DCLoad(devices['DCL5'])
-        self.dcl_5V = tester.DCLoad(devices['DCL6'])
-        self.rla_KeySw1 = tester.Relay(devices['RLA1'])
-        self.rla_KeySw2 = tester.Relay(devices['RLA2'])
-        self.rla_Emergency = tester.Relay(devices['RLA3'])
-        self.rla_Crowbar = tester.Relay(devices['RLA4'])
-        self.rla_EnableIS = tester.Relay(devices['RLA5'])
-        self.rla_Interlock = tester.Relay(devices['RLA6'])
-        self.rla_Enable = tester.Relay(devices['RLA7'])
-        self.rla_TecPhase = tester.Relay(devices['RLA8'])
-        self.rla_LedSel0 = tester.Relay(devices['RLA9'])
-        self.rla_LedSel1 = tester.Relay(devices['RLA10'])
-        self.rla_LedSel2 = tester.Relay(devices['RLA11'])
+        self.dcs_tecvset = tester.DCSource(devices['DCS1'])
+        self.dcs_isset = tester.DCSource(devices['DCS2'])
+        self.dcs_5v = tester.DCSource(devices['DCS3'])
+        self.dcl_tec = tester.DCLoad(devices['DCL1'])
+        self.dcl_15vp = tester.DCLoad(devices['DCL2'])
+        self.dcl_15vpsw = tester.DCLoad(devices['DCL5'])
+        self.dcl_5v = tester.DCLoad(devices['DCL6'])
+        self.rla_keysw1 = tester.Relay(devices['RLA1'])
+        self.rla_keysw2 = tester.Relay(devices['RLA2'])
+        self.rla_emergency = tester.Relay(devices['RLA3'])
+        self.rla_crowbar = tester.Relay(devices['RLA4'])
+        self.rla_enableis = tester.Relay(devices['RLA5'])
+        self.rla_interlock = tester.Relay(devices['RLA6'])
+        self.rla_enable = tester.Relay(devices['RLA7'])
+        self.rla_tecphase = tester.Relay(devices['RLA8'])
+        self.rla_ledsel0 = tester.Relay(devices['RLA9'])
+        self.rla_ledsel1 = tester.Relay(devices['RLA10'])
+        self.rla_ledsel2 = tester.Relay(devices['RLA11'])
 
     def reset(self):
         """Reset instruments."""
         self.acsource.output(voltage=0.0, output=False)
-        self.dcl_Tec.output(0.1)
-        self.dcl_15Vp.output(1.0)
-        self.dcl_15Vpsw.output(0.0)
-        self.dcl_5V.output(5.0)
+        self.dcl_tec.output(0.1)
+        self.dcl_15vp.output(2.0)
+        self.dcl_15vpsw.output(0.0)
+        self.dcl_5v.output(5.0)
         time.sleep(1)
         self.discharge.pulse()
-        for dcs in (self.dcs_TecVset, self.dcs_IsSet, self.dcs_5V):
+        for dcs in (self.dcs_tecvset, self.dcs_isset, self.dcs_5v):
             dcs.output(0.0, False)
-        for ld in (self.dcl_Tec, self.dcl_15Vp, self.dcl_15Vpsw, self.dcl_5V):
+        for ld in (self.dcl_tec, self.dcl_15vp, self.dcl_15vpsw, self.dcl_5v):
             ld.output(0.0, False)
         for rla in (
-                self.rla_KeySw1, self.rla_KeySw2, self.rla_Emergency,
-                self.rla_Crowbar, self.rla_EnableIS, self.rla_Interlock,
-                self.rla_Enable, self.rla_TecPhase, self.rla_LedSel0,
-                self.rla_LedSel1, self.rla_LedSel2):
+                self.rla_keysw1, self.rla_keysw2, self.rla_emergency,
+                self.rla_crowbar, self.rla_enableis, self.rla_interlock,
+                self.rla_enable, self.rla_tecphase, self.rla_ledsel0,
+                self.rla_ledsel1, self.rla_ledsel2):
             rla.set_off()
 
 
@@ -71,42 +71,72 @@ class Sensors():
            @param limits Product test limits
 
         """
+        dispatcher.connect(
+            self._reset, sender=tester.signals.Thread.tester,
+            signal=tester.signals.TestRun.stop)
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        self.oMirPIC = sensor.Mirror()
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
-        self.Lock = sensor.Res(dmm, high=18, low=3, rng=10000, res=1)
-        self.oTec = sensor.Vdc(dmm, high=1, low=4, rng=100, res=0.001)
-        self.oLdd = sensor.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
-        self.oTecVset = sensor.Vdc(dmm, high=3, low=7, rng=10, res=0.001)
-        self.oTecVmon = sensor.Vdc(dmm, high=4, low=7, rng=10, res=0.001)
-        self.oIsSet = sensor.Vdc(dmm, high=5, low=7, rng=10, res=0.001)
-        self.oIsIout = sensor.Vdc(dmm, high=6, low=7, rng=10, res=0.001)
-        self.oIsVmon = sensor.Vdc(dmm, high=7, low=7, rng=10, res=0.001)
-        self.oIsOut = sensor.Vdc(dmm, high=14, low=6, rng=10, res=0.001)
-        self.o15V = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
-        self.om15V = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.001)
-        self.o15Vp = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.001)
-        self.o15VpSw = sensor.Vdc(dmm, high=11, low=3, rng=100, res=0.001)
-        self.o5V = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
-        self.oPwrOk = sensor.Vdc(dmm, high=13, low=8, rng=100, res=0.01)
-        self.oActive = sensor.Vac(dmm, high=20, low=1, rng=1000, res=0.01)
-        self.oVbus = sensor.Vdc(dmm, high=15, low=2, rng=1000, res=0.01)
-        self.oRed = sensor.Vdc(dmm, high=16, low=7, rng=10, res=0.01)
-        self.oGreen = sensor.Vdc(dmm, high=17, low=7, rng=10, res=0.01)
-        self.oFan1 = sensor.Vdc(dmm, high=18, low=7, rng=100, res=0.001)
-        self.oFan2 = sensor.Vdc(dmm, high=19, low=7, rng=100, res=0.001)
-        self.oVsec13V = sensor.Vdc(dmm, high=21, low=7, rng=100, res=0.01)
-        self.o5VLddTec = sensor.Vdc(dmm, high=22, low=7, rng=10, res=0.01)
-        self.o5VuPAux = sensor.Vdc(dmm, high=23, low=7, rng=10, res=0.01)
-        self.o5VuP = sensor.Vdc(dmm, high=24, low=7, rng=10, res=0.01)
+        self.oMirTecErr = sensor.Mirror()
+        self.oMirTecVmonErr = sensor.Mirror()
+        self.oMirIsErr = sensor.Mirror()
+        self.lock = sensor.Res(dmm, high=18, low=3, rng=10000, res=1)
+        self.tec = sensor.Vdc(dmm, high=1, low=4, rng=100, res=0.001)
+        self.ldd = sensor.Vdc(dmm, high=2, low=5, rng=100, res=0.001)
+        self.tecvset = sensor.Vdc(dmm, high=3, low=7, rng=10, res=0.001)
+        self.tecvmon = sensor.Vdc(dmm, high=4, low=7, rng=10, res=0.001)
+        self.isset = sensor.Vdc(dmm, high=5, low=7, rng=10, res=0.001)
+        self.isiout = sensor.Vdc(dmm, high=6, low=7, rng=10, res=0.001)
+        self.isvmon = sensor.Vdc(dmm, high=7, low=7, rng=10, res=0.001)
+        self.isout = sensor.Vdc(dmm, high=14, low=6, rng=10, res=0.001)
+        self.o15v = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
+        self.o_15v = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.001)
+        self.o15vp = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.001)
+        self.o15vpsw = sensor.Vdc(dmm, high=11, low=3, rng=100, res=0.001)
+        self.o5v = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
+        self.pwrok = sensor.Vdc(dmm, high=13, low=8, rng=100, res=0.01)
+        self.active = sensor.Vac(dmm, high=20, low=1, rng=1000, res=0.1)
+        self.vbus = sensor.Vdc(dmm, high=15, low=2, rng=1000, res=0.1)
+        self.red = sensor.Vdc(dmm, high=16, low=7, rng=10, res=0.01)
+        self.green = sensor.Vdc(dmm, high=17, low=7, rng=10, res=0.01)
+        self.fan1 = sensor.Vdc(dmm, high=18, low=7, rng=100, res=0.01)
+        self.fan2 = sensor.Vdc(dmm, high=19, low=7, rng=100, res=0.01)
+        self.vsec13v = sensor.Vdc(dmm, high=21, low=7, rng=100, res=0.001)
+        self.o5vlddtec = sensor.Vdc(dmm, high=22, low=7, rng=10, res=0.001)
+        self.o5vupaux = sensor.Vdc(dmm, high=23, low=7, rng=10, res=0.001)
+        self.o5vup = sensor.Vdc(dmm, high=24, low=7, rng=10, res=0.001)
+        self.ocp5v = sensor.Ramp(
+            stimulus=logical_devices.dcl_5v, sensor=self.o5v,
+            detect_limit=(limits['inOCP5V'], ),
+            start=5.0, stop=12.0, step=0.1, delay=0.2)
+        self.ocp15vp = sensor.Ramp(
+            stimulus=logical_devices.dcl_15vp, sensor=self.o15vp,
+            detect_limit=(limits['inOCP15Vp'], ),
+            start=5.0, stop=12.0, step=0.1, delay=0.2)
+        self.ocptec = sensor.Ramp(
+            stimulus=logical_devices.dcl_tec, sensor=self.tec,
+            detect_limit=(limits['inOCPTec'], ),
+            start=20.0, stop=23.0, step=0.1, delay=0.2)
+        self.oYesNoPsu = sensor.YesNo(
+            message=tester.translate('ids500_final', 'IsPSULedGreen?'),
+            caption=tester.translate('ids500_final', 'capPsuLed'))
+        self.oYesNoTecGreen = sensor.YesNo(
+            message=tester.translate('ids500_final', 'IsTECLedGreen?'),
+            caption=tester.translate('ids500_final', 'capTecGreenLed'))
+        self.oYesNoTecRed = sensor.YesNo(
+            message=tester.translate('ids500_final', 'IsTECLedRed?'),
+            caption=tester.translate('ids500_final', 'capTecRedLed'))
+        self.oYesNoLddGreen = sensor.YesNo(
+            message=tester.translate('ids500_final', 'IsLDDLedGreen?'),
+            caption=tester.translate('ids500_final', 'capLddGreenLed'))
+        self.oYesNoLddRed = sensor.YesNo(
+            message=tester.translate('ids500_final', 'IsLDDLedRed?'),
+            caption=tester.translate('ids500_final', 'capLddRedLed'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
-        self.oMirPIC.flush()
+        self.oMirTecErr.flush()
+        self.oMirTecVmonErr.flush()
+        self.oMirIsErr.flush()
 
 
 class Measurements():
@@ -121,42 +151,122 @@ class Measurements():
 
         """
         Measurement = tester.Measurement
-        self.dmm_Lock = Measurement(limits['FixtureLock'], sense.Lock)
-        self.dmm_TecOff = Measurement(limits['Off'], sense.oTec)
-        self.dmm_TecVmonOff = Measurement(limits['Off'], sense.oTecVmon)
-        self.dmm_LddOff = Measurement(limits['Off'], sense.oLdd)
-        self.dmm_IsVmonOff = Measurement(limits['Off'], sense.oIsVmon)
-        self.dmm_15VOff = Measurement(limits['Off'], sense.o15V)
-        self.dmm_m15VOff = Measurement(limits['Off'], sense.om15V)
-        self.dmm_15VpOff = Measurement(limits['Off'], sense.o15Vp)
-        self.dmm_15VpSwOff = Measurement(limits['Off'], sense.o15VpSw)
-        self.dmm_5VOff = Measurement(limits['Off'], sense.o5V)
-        self.dmm_Vbus = Measurement(limits['Vbus'], sense.oVbus)
+        self.tecerr = Measurement(limits['TecErr'], sense.oMirTecErr)
+        self.tecvmonerr = Measurement(
+            limits['TecVmonErr'], sense.oMirTecVmonErr)
+        self.setmonerr = Measurement(limits['SetMonErr'], sense.oMirIsErr)
+        self.setouterr = Measurement(limits['SetOutErr'], sense.oMirIsErr)
+        self.monouterr = Measurement(limits['MonOutErr'], sense.oMirIsErr)
+        self.dmm_lock = Measurement(limits['FixtureLock'], sense.lock)
+        self.dmm_vbus = Measurement(limits['Vbus'], sense.vbus)
+        self.dmm_tecoff = Measurement(limits['TecOff'], sense.tec)
+        self.dmm_tec = Measurement(limits['Tec'], sense.tec)
+        self.dmm_tecphase = Measurement(limits['TecPhase'], sense.tec)
+        self.dmm_tecvset = Measurement(limits['TecVset'], sense.tecvset)
+        self.dmm_tecvmonoff = Measurement(limits['TecVmonOff'], sense.tecvmon)
+        self.dmm_tecvmon0v = Measurement(limits['TecVmon0V'], sense.tecvmon)
+        self.dmm_tecvmon = Measurement(limits['TecVmon'], sense.tecvmon)
+        self.dmm_lddoff = Measurement(limits['LddOff'], sense.ldd)
+        self.dmm_isldd = Measurement(limits['Ldd'], sense.ldd)
+        self.dmm_isvmonoff = Measurement(limits['IsVmonOff'], sense.isvmon)
+        self.dmm_isvmon = Measurement(limits['IsVmon'], sense.isvmon)
+        self.dmm_isout0v = Measurement(limits['IsOut0V'], sense.isout)
+        self.dmm_isout06v = Measurement(limits['IsOut06V'], sense.isout)
+        self.dmm_isout5v = Measurement(limits['IsOut5V'], sense.isout)
+        self.dmm_isiout0v = Measurement(limits['IsIout0V'], sense.isiout)
+        self.dmm_isiout06v = Measurement(limits['IsIout06V'], sense.isiout)
+        self.dmm_isiout5v = Measurement(limits['IsIout5V'], sense.isiout)
+        self.dmm_isset06v = Measurement(limits['IsSet06V'], sense.isset)
+        self.dmm_isset5v = Measurement(limits['IsSet5V'], sense.isset)
+        self.dmm_15voff = Measurement(limits['15VOff'], sense.o15v)
+        self.dmm_15v = Measurement(limits['15V'], sense.o15v)
+        self.dmm__15voff = Measurement(limits['-15VOff'], sense.o_15v)
+        self.dmm__15v = Measurement(limits['-15V'], sense.o_15v)
+        self.dmm_15vpoff = Measurement(limits['15VpOff'], sense.o15vp)
+        self.dmm_15vp = Measurement(limits['15Vp'], sense.o15vp)
+        self.dmm_15vpswoff = Measurement(limits['15VpSwOff'], sense.o15vpsw)
+        self.dmm_15vpsw = Measurement(limits['15VpSw'], sense.o15vpsw)
+        self.dmm_5voff = Measurement(limits['5VOff'], sense.o5v)
+        self.dmm_5v = Measurement(limits['5V'], sense.o5v)
+        self.ramp_ocp5v = Measurement(limits['OCP5V'], sense.ocp5v)
+        self.ramp_ocp15vp = Measurement(limits['OCP15Vp'], sense.ocp15vp)
+        self.ramp_ocptec = Measurement(limits['OCPTec'], sense.ocptec)
+        self.ui_YesNoPsu = Measurement(limits['Notify'], sense.oYesNoPsu)
+        self.ui_YesNoTecGreen = Measurement(
+            limits['Notify'], sense.oYesNoTecGreen)
+        self.ui_YesNoTecRed = Measurement(
+            limits['Notify'], sense.oYesNoTecRed)
+        self.ui_YesNoLddGreen = Measurement(
+            limits['Notify'], sense.oYesNoLddGreen)
+        self.ui_YesNoLddRed = Measurement(
+            limits['Notify'], sense.oYesNoLddRed)
 
 
 class SubTests():
 
     """SubTest Steps."""
 
-    def __init__(self, logical_devices, measurements):
+    def __init__(self, dev, mes):
         """Create SubTest Step instances.
 
            @param measurements Measurements used
            @param logical_devices Logical instruments used
 
         """
-        d = logical_devices
-        m = measurements
-        # PowerUp: Min load, input AC, measure.
+        # PowerUp: Fixture lock, Min load, input AC, measure.
         self.pwr_up = tester.SubStep((
+            tester.MeasureSubStep((mes.dmm_lock, ), timeout=5),
             tester.LoadSubStep(
-                ((d.dcl_Tec, 0.1), (d.dcl_15Vp, 1.0),
-                 (d.dcl_15Vpsw, 0.0), (d.dcl_5V, 5.0)),
-                output=True),
+                ((dev.dcl_tec, 0.1), (dev.dcl_15vp, 1.0),
+                (dev.dcl_15vpsw, 0.0), (dev.dcl_5v, 5.0)), output=True),
             tester.AcSubStep(
-                acs=d.acsource, voltage=240.0, output=True, delay=1.0),
+                acs=dev.acsource, voltage=240.0, output=True, delay=1.0),
             tester.MeasureSubStep(
-                (m.dmm_Vbus, m.dmm_TecOff, m.dmm_TecVmonOff, m.dmm_LddOff,
-                 m.dmm_IsVmonOff, m.dmm_15VOff, m.dmm_m15VOff, m.dmm_15VpOff,
-                 m.dmm_5VOff, m.dmm_15VpSwOff,  ), timeout=5),
+                (mes.dmm_vbus, mes.dmm_tecoff, mes.dmm_tecvmonoff,
+                mes.dmm_lddoff, mes.dmm_isvmonoff, mes.dmm_15voff,
+                mes.dmm__15voff, mes.dmm_15vpoff, mes.dmm_15vpswoff,
+                mes.dmm_5voff), timeout=5),
+            ))
+
+        # KeySw1: KeySwitch 1, measure.
+        self.key_sw1 = tester.SubStep((
+            tester.RelaySubStep(((dev.rla_keysw1, True), )),
+            tester.MeasureSubStep(
+                (mes.dmm_tecoff, mes.dmm_tecvmonoff, mes.dmm_lddoff,
+                mes.dmm_isvmonoff, mes.dmm_15v, mes.dmm__15v,
+                mes.dmm_15vp, mes.dmm_15vpswoff, mes.dmm_5v), timeout=5),
+            ))
+
+        # KeySw12: KeySwitch 1 & 2, measure.
+        self.key_sw12 = tester.SubStep((
+            tester.RelaySubStep(((dev.rla_keysw2, True), )),
+            tester.MeasureSubStep(
+                (mes.dmm_tecoff, mes.dmm_tecvmonoff, mes.dmm_lddoff,
+                mes.dmm_isvmonoff, mes.dmm_15v, mes.dmm__15v,
+                mes.dmm_15vp, mes.dmm_15vpsw, mes.dmm_5v), timeout=5),
+            ))
+
+        # Reset: Power off and on.
+        self.reset = tester.SubStep((
+            tester.LoadSubStep(
+                ((dev.dcl_tec, 0.1), (dev.dcl_15vp, 1.0),
+                 (dev.dcl_15vpsw, 0.0), (dev.dcl_5v, 5.0), )),
+            tester.DcSubStep(setting=((dev.dcs_5v, 0.0), )),
+            tester.AcSubStep(acs=dev.acsource, voltage=0.0, delay=4.5),
+            tester.AcSubStep(acs=dev.acsource, voltage=240.0, delay=0.5),
+            tester.DcSubStep(setting=((dev.dcs_5v, 5.0), )),
+            tester.MeasureSubStep((mes.dmm_15vp, ), timeout=10),
+            ))
+
+        # EmergStop: Emergency stop, measure.
+        self.emg_stop = tester.SubStep((
+            tester.LoadSubStep(
+                ((dev.dcl_tec, 0.1), (dev.dcl_15vp, 1.0),
+                 (dev.dcl_15vpsw, 0.0), (dev.dcl_5v, 5.0), )),
+            tester.RelaySubStep(((dev.rla_emergency, True), ), delay=1),
+            tester.MeasureSubStep(
+                (mes.dmm_tecoff, mes.dmm_tecvmonoff, mes.dmm_lddoff,
+                 mes.dmm_isvmonoff, mes.dmm_15voff, mes.dmm__15voff,
+                 mes.dmm_15vpoff, mes.dmm_15vpswoff, mes.dmm_5voff),
+                 timeout=5)
             ))

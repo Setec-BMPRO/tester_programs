@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""UnitTest for IDS500 Initial Main Test program."""
+
+from .data_feed import UnitTester, ProgramTestCase
+from programs import ids500
+
+_PROG_CLASS = ids500.InitialMain
+_PROG_LIMIT = ids500.INI_MAIN_LIMIT
+
+
+class Ids500IniMain(ProgramTestCase):
+
+    """IDS500 Initial Main program test suite."""
+
+    prog_class = _PROG_CLASS
+    prog_limit = _PROG_LIMIT
+
+    def test_pass_run(self):
+        """PASS run of the program."""
+        sen = self.test_program.sensor
+        data = {
+            UnitTester.key_sen: {       # Tuples of sensor data
+                'PowerUp':
+                    ((sen.lock, 10.0), (sen.vbus, 340.0), (sen.tec, 0.0),
+                     (sen.tecvmon, 0.0), (sen.ldd, 0.0), (sen.isvmon, 0.0),
+                     (sen.o15v, 0.0), (sen.o_15v, 0.0), (sen.o15vp, 0.0),
+                     (sen.o15vpsw, 0.0), (sen.o5v, 0.0)),
+                'KeySw1':
+                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
+                     (sen.isvmon, 0.0), (sen.o15v, 15.0), (sen.o_15v, -15.0),
+                     (sen.o15vp, 15.0), (sen.o15vpsw, 0.0), (sen.o5v, 5.0)),
+                'KeySw12':
+                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
+                     (sen.isvmon, 0.0), (sen.o15v, 15.0), (sen.o_15v, -15.0),
+                     (sen.o15vp, 15.0), (sen.o15vpsw, 15.0), (sen.o5v, 5.0)),
+                'TEC':
+                    ((sen.tecvset, 5.05), (sen.tecvmon, (0.0, 4.99)),
+                     (sen.tec, (0.0, -15.0, 15.0)), (sen.oYesNoPsu, True),
+                     (sen.oYesNoTecGreen, True), (sen.oYesNoTecRed, True)),
+                'LDD':
+                    ((sen.ldd, (2.0,) * 3), (sen.isiout, (0.0, 0.601, 5.01)),
+                     (sen.isvmon, (2.0,) * 3), (sen.isset, (0.6, 5.0)),
+                       (sen.isout, (0.0, 0.00602, 0.0502)),
+                     (sen.oYesNoLddGreen, True), (sen.oYesNoLddRed, True)),
+                'OCP':
+                    ((sen.o5v, (5.0, ) * 23 + (3.9,), ),
+                     (sen.o15vp, (15.0, ) * 23 + (11.9,), ),
+                     (sen.tec, (-15.0,) * 23 + (-11.9,), ),
+                     (sen.o15vp, (15.0, ) * 3), ),
+                'EmergStop':
+                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
+                     (sen.isvmon, 0.0), (sen.o15v, 0.0), (sen.o_15v, 0.0),
+                     (sen.o15vp, 0.0), (sen.o15vpsw, 0.0), (sen.o5v, 0.0)),
+                },
+            }
+        self.tester.ut_load(data, self.test_program.fifo_push)
+        self.tester.test(('UUT1', ))
+        result = self.tester.ut_result
+        self.assertEqual('P', result.code)          # Test Result
+        self.assertEqual(80, len(result.readings))  # Reading count
+        # And did all steps run in turn?
+        self.assertEqual(
+            ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD', 'OCP', 'EmergStop'],
+            self.tester.ut_steps)
