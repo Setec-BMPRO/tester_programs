@@ -113,20 +113,24 @@ class InitialMain(tester.testsequence.TestSequence):
         # Run LDD at 6A
         dev.dcs_isset.output(voltage=0.6, delay=1)
         mes.dmm_isvmon.measure(timeout=5)
-        Iset, Iout, Imon, Ldd = tester.MeasureGroup(
-            (mes.dmm_isset06v, mes.dmm_isout06v, mes.dmm_isiout06v,
-            mes.dmm_isldd), timeout=5).readings
-        self._ldd_err(Iset, Iout, Imon)
+        Iset, Iout, Imon = tester.MeasureGroup(
+            (mes.dmm_isset06v, mes.dmm_isout06v, mes.dmm_isiout06v),
+            timeout=5).readings
+        mes.dmm_isldd.measure(timeout=5)
+        with tester.PathName('6A'):
+            self._ldd_err(Iset, Iout, Imon)
         # Run LDD at 50A
         mes.ui_YesNoLddGreen.measure(timeout=5)
         dev.dcs_isset.output(voltage=5.0, delay=1)
         mes.dmm_isvmon.measure(timeout=5)
-        Iset, Iout, Imon, Ldd = tester.MeasureGroup(
-            (mes.dmm_isset5v, mes.dmm_isout5v, mes.dmm_isiout5v,
-            mes.dmm_isldd), timeout=5).readings
+        Iset, Iout, Imon = tester.MeasureGroup(
+            (mes.dmm_isset5v, mes.dmm_isout5v, mes.dmm_isiout5v),
+            timeout=5).readings
+        mes.dmm_isldd.measure(timeout=5)
         for name in ('SetMonErr', 'SetOutErr', 'MonOutErr'):
             self.limits[name].limit = (-0.7, 0.7)
-        self._ldd_err(Iset, Iout, Imon)
+        with tester.PathName('50A'):
+            self._ldd_err(Iset, Iout, Imon)
         # LDD off
         mes.ui_YesNoLddRed.measure(timeout=5)
         dev.dcs_isset.output(0.0, False)
