@@ -120,20 +120,20 @@ class Sensors():
             detect_limit=(limits['inOCPTec'], ),
             start=low - 1, stop=high + 1, step=0.1, delay=0.2)
         self.oYesNoPsu = sensor.YesNo(
-            message=tester.translate('ids500_final', 'IsPSULedGreen?'),
-            caption=tester.translate('ids500_final', 'capPsuLed'))
+            message=tester.translate('ids500_ini_main', 'IsPSULedGreen?'),
+            caption=tester.translate('ids500_ini_main', 'capPsuLed'))
         self.oYesNoTecGreen = sensor.YesNo(
-            message=tester.translate('ids500_final', 'IsTECLedGreen?'),
-            caption=tester.translate('ids500_final', 'capTecGreenLed'))
+            message=tester.translate('ids500_ini_main', 'IsTECLedGreen?'),
+            caption=tester.translate('ids500_ini_main', 'capTecGreenLed'))
         self.oYesNoTecRed = sensor.YesNo(
-            message=tester.translate('ids500_final', 'IsTECLedRed?'),
-            caption=tester.translate('ids500_final', 'capTecRedLed'))
+            message=tester.translate('ids500_ini_main', 'IsTECLedRed?'),
+            caption=tester.translate('ids500_ini_main', 'capTecRedLed'))
         self.oYesNoLddGreen = sensor.YesNo(
-            message=tester.translate('ids500_final', 'IsLDDLedGreen?'),
-            caption=tester.translate('ids500_final', 'capLddGreenLed'))
+            message=tester.translate('ids500_ini_main', 'IsLDDLedGreen?'),
+            caption=tester.translate('ids500_ini_main', 'capLddGreenLed'))
         self.oYesNoLddRed = sensor.YesNo(
-            message=tester.translate('ids500_final', 'IsLDDLedRed?'),
-            caption=tester.translate('ids500_final', 'capLddRedLed'))
+            message=tester.translate('ids500_ini_main', 'IsLDDLedRed?'),
+            caption=tester.translate('ids500_ini_main', 'capLddRedLed'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

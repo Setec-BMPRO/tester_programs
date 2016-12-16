@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2016-12-05, 17:33:12 -->
+<!-- Saved: 2016-12-16, 11:15:23 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
   <ProgLanguage mixed="0">Python3</ProgLanguage>
   <ProjectType>PySide</ProjectType>
-  <Description></Description>
   <Version>0.1</Version>
   <Author></Author>
   <Email></Email>
