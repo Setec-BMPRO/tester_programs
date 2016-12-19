@@ -53,7 +53,10 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        self.trek2.close()
+        try:
+            self.trek2.close()
+        except Exception:   # Ignore serial port close errors
+            pass
         self.dcs_Vin.output(0.0, output=False)
         self.dcs_Vcom.output(0.0, output=False)
         for rla in (self.rla_s1, self.rla_s2, self.rla_s3):
