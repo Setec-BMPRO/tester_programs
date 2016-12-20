@@ -28,7 +28,7 @@ class LogicalDevices():
         self.dcs_Vcom = tester.DCSource(devices['DCS4'])
         self.dcl_5Vsb = tester.DCLoad(devices['DCL2'])
         self.dcl_12V = tester.DCLoad(devices['DCL1'])
-        self.dcl_24V = tester.DCLoad(devices['DCL5'])
+        self.dcl_24V = tester.DCLoad(devices['DCL3'])
         self.rla_pic1 = tester.Relay(devices['RLA1'])
         self.rla_pic2 = tester.Relay(devices['RLA2'])
         self.rla_pson = tester.Relay(devices['RLA3'])
@@ -254,5 +254,8 @@ class SubTests():
                 setting=((d.dcs_5Vsb, 0.0), (d.dcs_PriCtl, 0.0), ),
                 output=False),
             tester.LoadSubStep(((d.dcl_5Vsb, 0.1), ), output=True, delay=0.5),
-            tester.LoadSubStep(((d.dcl_5Vsb, 0.0), ), output=False),
+            # This will also enable all loads on an ATE3/4 tester.
+            tester.LoadSubStep(
+                ((d.dcl_5Vsb, 0.0), (d.dcl_12V, 0.0), (d.dcl_24V, 0.0), ),
+                output=True),
         ))

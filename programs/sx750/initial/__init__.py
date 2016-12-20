@@ -130,10 +130,10 @@ class Initial(tester.TestSequence):
         Unit is left unpowered.
 
         """
+        dev.arm.open()
         dev.dcs_5Vsb.output(9.0, True)
         tester.MeasureGroup((mes.dmm_5Vext, mes.dmm_5Vunsw), 2)
         time.sleep(1)           # ARM startup delay
-        dev.arm.open()
         dev.arm['UNLOCK'] = True
         dev.arm['NVWRITE'] = True
         # Switch everything off
