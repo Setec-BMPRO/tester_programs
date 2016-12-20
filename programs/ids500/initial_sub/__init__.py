@@ -87,6 +87,7 @@ class InitialMicro(_Main):
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
+        d.rla_comm.set_off()
         super().close()
 
     def _step_program(self):

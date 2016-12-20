@@ -50,8 +50,7 @@ class LogicalDevMicro():
         """Reset instruments."""
         self.pic.close()
         self.dcs_vcc.output(0.0, False)
-        for rla in (self.rla_mic, self.rla_comm, ):
-            rla.set_off()
+        self.rla_mic.set_off()
 
 
 class LogicalDevAux():
