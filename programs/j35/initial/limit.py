@@ -7,13 +7,13 @@ from tester.testlimit import (
     lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string,
     lim_hilo_int, lim_hilo_percent)
 
-ARM_VERSION = '1.1.13949.919'      # ARM versions
+ARM_VERSION = '1.1.14080.920'      # ARM versions
 # Variant specific data. Indexed by limit "Variant" value.
 #   'HwVer': Hardware version data.
 #   'SolarCan': Enable Solar input & CAN bus tests.
 VARIANT = {
     'J35A': {
-        'HwVer': (1, 1, 'A'),
+        'HwVer': (2, 1, 'A'),
         'SolarCan': False,
         'Derate': True,
         },
