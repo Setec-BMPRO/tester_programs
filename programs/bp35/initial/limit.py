@@ -70,7 +70,7 @@ DATA = (
     lim_hilo('ARM-SecT', 8.0, 70.0),
     lim_hilo_delta('ARM-Vout', 12.45, 0.45),
     lim_hilo('ARM-Fan', 0, 100),
-    lim_hilo('ARM-LoadI', 0.1, 12.1),
+    lim_hilo_delta('ARM-LoadI', 2.1, 0.9),
     lim_hilo_delta('ARM-BattI', 4.0, 1.0),
     lim_hilo_delta('ARM-AuxV', 13.4, 0.4),
     lim_hilo('ARM-AuxI', 0.0, 1.5),

@@ -70,7 +70,7 @@ _BASE_DATA = (
     lim_hilo_delta('ARM-Vout', 12.8, 0.356),
     lim_hilo('ARM-Fan', 0, 100),
     lim_hilo_delta('ARM-BattI', 4.0, 1.0),
-    lim_hilo('ARM-LoadI', 0.1, 12.0),
+    lim_hilo_delta('ARM-LoadI', 2.1, 0.9),
     lim_hilo_delta('CanPwr', 12.0, 1.0),
     lim_string('CAN_RX', r'^RRQ,36,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
