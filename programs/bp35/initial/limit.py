@@ -7,13 +7,13 @@ from tester.testlimit import (
     lim_hilo, lim_hilo_delta, lim_hilo_percent, lim_hilo_int,
     lim_lo, lim_string, lim_boolean)
 
-ARM_VERSION = '1.2.13351.3801'      # ARM versions
+ARM_VERSION = '1.2.14256.3912'      # ARM versions
 ARM_HW_VER1 = (3, 0, 'A')
 ARM_HW_VER5 = (7, 0, 'A')
-ARM_HW_VER8 = (8, 0, 'A')
+ARM_HW_VER8 = (9, 0, 'A')
 PIC_VERSION1 = '1.1.13543.181'      # Solar Regulator for Rev 1-7
 PIC_HW_VER1 = 1
-PIC_VERSION8 = '1.1.13802.182'      # Solar Regulator for Rev 8
+PIC_VERSION8 = '1.1.13802.182'      # Solar Regulator for Rev 8+
 PIC_HW_VER8 = 3
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
@@ -33,6 +33,8 @@ SOLAR_VSET = 13.650
 SOLAR_ISET = 30.0
 SOLAR_ICAL = 10.0
 SOLAR_VIN = 20.0
+SOLAR_VIN_PRE_PERCENT = 6.0
+SOLAR_VIN_POST_PERCENT = 1.5
 # Injected Vbat & Vaux
 VBAT_IN = 12.4
 VAUX_IN = 13.5
@@ -58,10 +60,11 @@ DATA = (
     lim_hilo_delta('FanOn', 12.5, 0.5),
     lim_lo('FanOff', 0.5),
     lim_hilo_delta('SolarVcc', 3.3, 0.1),
+    lim_hilo_delta('SolarVin', SOLAR_VIN, 0.5),
     lim_hilo_percent('VsetPre', SOLAR_VSET, 6.0),
-    lim_hilo_percent('VsetPost', SOLAR_VSET, 3.0),
+    lim_hilo_percent('VsetPost', SOLAR_VSET, 1.5),
     lim_hilo_percent('ARM-IoutPre', SOLAR_ICAL, 9.0),
-    lim_hilo_percent('ARM-IoutPost', SOLAR_ICAL, 4.0),
+    lim_hilo_percent('ARM-IoutPost', SOLAR_ICAL, 3.0),
     lim_hilo('OCP', 6.0, 9.0),
     lim_lo('InOCP', 11.6),
     lim_string('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
@@ -69,6 +72,8 @@ DATA = (
     lim_hilo_delta('ARM-AcF', 50.0, 1.0),
     lim_hilo('ARM-SecT', 8.0, 70.0),
     lim_hilo_delta('ARM-Vout', 12.45, 0.45),
+    lim_hilo_percent('ARM-SolarVin-Pre', SOLAR_VIN, SOLAR_VIN_PRE_PERCENT),
+    lim_hilo_percent('ARM-SolarVin-Post', SOLAR_VIN, SOLAR_VIN_POST_PERCENT),
     lim_hilo('ARM-Fan', 0, 100),
     lim_hilo_delta('ARM-LoadI', 2.1, 0.9),
     lim_hilo_delta('ARM-BattI', 4.0, 1.0),

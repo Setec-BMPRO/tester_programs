@@ -185,17 +185,31 @@ class Initial(tester.TestSequence):
         # Now set the actual output settings
         bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(2)           # Wait for the Solar to start & overshoot
-        bp35['VOUT_OV'] = 2   # Reset OVP Latch because the Solar overshot
-        # Check that Solar Reg is error-free & the relay is ON
-        tester.MeasureGroup((mes.arm_solar_error, mes.arm_solar_relay, ))
+        bp35['VOUT_OV'] = 2     # Reset OVP Latch because the Solar overshot
+        # Read solar input voltage and setup ARM measurement limits
+        solar_vin = mes.dmm_solarvin.measure(timeout=5).reading1
+        mes.arm_solar_vin_pre.testlimit = (
+            tester.testlimit.LimitHiLoPercent(
+                'ARM-SolarVin-Pre',
+                (solar_vin, limit.SOLAR_VIN_PRE_PERCENT)), )
+        mes.arm_solar_vin_post.testlimit = (
+            tester.testlimit.LimitHiLoPercent(
+                'ARM-SolarVin-Post',
+                (solar_vin, limit.SOLAR_VIN_POST_PERCENT)), )
+        # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
+        tester.MeasureGroup(
+            (mes.arm_solar_error, mes.arm_solar_relay,
+             mes.arm_solar_vin_pre, ))
         vmeasured = mes.dmm_vsregpre.measure(timeout=5).reading1
-        bp35['SR_VCAL'] = vmeasured   # Calibrate voltage setpoint
+        bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
+        bp35['SR_VIN_CAL'] = solar_vin  # Calibrate input voltage reading
         # New solar sw ver 182 is too dumb to change the setpoint until a
         # DIFFERENT voltage setpoint is given...
         bp35.solar_set(limit.SOLAR_VSET - 0.05, limit.SOLAR_ISET)
         bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(1)
-        mes.dmm_vsregpost.measure(timeout=5)
+        tester.MeasureGroup(
+            (mes.arm_solar_vin_post, mes.dmm_vsregpost, ))
         dev.dcl_bat.output(limit.SOLAR_ICAL, True)
         mes.arm_isregpre.measure(timeout=5)
         bp35['SR_ICAL'] = limit.SOLAR_ICAL  # Calibrate current setpoint

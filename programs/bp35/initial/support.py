@@ -112,6 +112,7 @@ class Sensors():
         self.o15Vs = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.lock = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
         self.solarvcc = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self.solarvin = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
         self.ocp = sensor.Ramp(
             stimulus=logical_devices.dcl_bat, sensor=self.vbat,
             detect_limit=(limits['InOCP'], ),
@@ -140,6 +141,7 @@ class Sensors():
         self.arm_solar_error = console.Sensor(bp35, 'SR_ERROR')
         self.arm_vout_ov = console.Sensor(bp35, 'VOUT_OV')
         self.arm_isreg = console.Sensor(bp35, 'SR_IOUT')
+        self.arm_solar_vin = console.Sensor(bp35, 'SR_VIN')
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
@@ -179,6 +181,7 @@ class Measurements():
         self.dmm_fanOn = self._maker('FanOn', sense.fan)
         self.dmm_fanOff = self._maker('FanOff', sense.fan)
         self.dmm_solarvcc = self._maker('SolarVcc', sense.solarvcc)
+        self.dmm_solarvin = self._maker('SolarVin', sense.solarvin)
         self.ramp_ocp = self._maker('OCP', sense.ocp)
         self.ui_sernum = self._maker('SerNum', sense.sernum)
         self.arm_swver = self._maker('ARM-SwVer', sense.arm_swver)
@@ -203,6 +206,10 @@ class Measurements():
         self.arm_solar_error = self._maker(
             'SOLAR_ERROR', sense.arm_solar_error)
         self.arm_vout_ov = self._maker('Vout_OV', sense.arm_vout_ov)
+        self.arm_solar_vin_pre = self._maker(
+            'ARM-SolarVin-Pre', sense.arm_solar_vin)
+        self.arm_solar_vin_post = self._maker(
+            'ARM-SolarVin-Post', sense.arm_solar_vin)
 
     def _maker(self, limitname, sensor, position_fail=True):
         """Create a Measurement.

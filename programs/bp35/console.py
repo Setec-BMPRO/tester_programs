@@ -48,7 +48,8 @@ class Console(console.Variable, console.BadUartConsole):
                 'FAN_SPEED', writeable=True,
                 minimum=0, maximum=100, scale=10),
             'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
-            'CAN_EN': ParameterBoolean('CAN_BUS_POWER_ENABLE', writeable=True),
+            'CAN_PWR_EN': ParameterBoolean(
+                'CAN_BUS_POWER_ENABLE', writeable=True),
             '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
             'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
             'LOAD_SET': ParameterFloat(
@@ -75,10 +76,13 @@ class Console(console.Variable, console.BadUartConsole):
             'SR_ICAL': ParameterFloat(
                 'SOLAR_REG_CAL_I_OUT', writeable=True,
                 scale=1000),
-            'SR_IOUT': ParameterFloat(
-                'SOLAR_REG_IOUT', scale=1000),
+            'SR_IOUT': ParameterFloat('SOLAR_REG_IOUT', scale=1000),
             'SR_DEL_CAL': ParameterBoolean(
                 'SOLAR_REG_DEL_CAL', writeable=True),
+            'SR_VIN': ParameterFloat('SOLAR_REG_VIN', scale=1000),
+            'SR_VIN_CAL': ParameterFloat(
+                'SOLAR_REG_CAL_V_IN', writeable=True,
+                scale=1000),
             'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
             'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
             'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),

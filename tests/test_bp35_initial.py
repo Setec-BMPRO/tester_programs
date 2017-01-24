@@ -35,7 +35,8 @@ class BP35Initial(ProgramTestCase):
                      (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.solarvcc, 3.3),
                      (sen.sernum, ('A1626010123', )), ),
                 'Initialise': ((sen.sernum, ('A1526040123', )), ),
-                'SolarReg': ((sen.vsreg, (13.0, 13.5)), ),
+                'SolarReg':
+                    ((sen.vsreg, (13.0, 13.5)), (sen.solarvin, 19.55), ),
                 'Aux': ((sen.vbat, 13.5), ),
                 'PowerUp':
                     ((sen.acin, 240.0), (sen.pri12v, 12.5), (sen.o3v3, 3.3),
@@ -62,8 +63,10 @@ class BP35Initial(ProgramTestCase):
                     ('1.0', '0') +      # Solar alive, Vout OV
                     ('', ) * 3 +        # 2 x Solar VI, Vout OV
                     ('0', '1') +        # Errorcode, Relay
-                    ('', ) +            # Vcal
+                    ('19900', ) +       # Vin pre
+                    ('', ) * 2 +        # 2 x Vcal
                     ('', ) * 2 +        # 2 x Solar VI
+                    ('19501', ) +       # Vin post
                     ('10500', ) +       # IoutPre
                     ('', ) +            # Ical
                     ('10100', ),        # IoutPost
@@ -83,7 +86,7 @@ class BP35Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(70, len(result.readings))  # Reading count
+        self.assertEqual(73, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'SolarReg', 'Aux', 'PowerUp',
