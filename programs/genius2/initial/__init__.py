@@ -1,24 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """Initial Test Program for GENIUS-II and GENIUS-II-H."""
 
-from functools import wraps
 import logging
 import time
 import tester
+import share
 from . import support
 from . import limit
 
 INI_LIMIT = limit.DATA          # GENIUS-II limits
 INI_LIMIT_H = limit.DATA_H      # GENIUS-II-H limits
-
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls."""
-    @wraps(func)
-    def new_func(self):
-        return func(self, self.logdev, self.meas)
-    return new_func
 
 
 class Initial(tester.TestSequence):
@@ -69,13 +62,13 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @teststep
+    @share.oldteststep
     def _step_program(self, dev, mes):
         """Program the board."""
         dev.program_pic.program()
         dev.dcs_vbatctl.output(0.0, False)
 
-    @teststep
+    @share.oldteststep
     def _step_vout_adj(self, dev, mes):
         """Vout adjustment."""
         mes.ui_AdjVout.measure(timeout=5)
@@ -84,7 +77,7 @@ class Initial(tester.TestSequence):
             (mes.dmm_vout, mes.dmm_vbatctl, mes.dmm_vbat, mes.dmm_vdd),
             timeout=5)
 
-    @teststep
+    @share.oldteststep
     def _step_ocp(self, dev, mes):
         """Ramp up load until OCP."""
         # Check for correct model (GENIUS-II/GENIUS-II-H)

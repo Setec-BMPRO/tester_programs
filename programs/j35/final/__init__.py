@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """J35 Final Test Program."""
 
-from functools import wraps
 import tester
+import share
 from . import support
 from . import limit
 
 FIN_LIMIT_A = limit.DATA_A
 FIN_LIMIT_B = limit.DATA_B
 FIN_LIMIT_C = limit.DATA_C
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls."""
-    @wraps(func)
-    def new_func(self):
-        return func(self, self.logdev, self.meas)
-    return new_func
 
 
 class Final(tester.TestSequence):
@@ -63,7 +57,7 @@ class Final(tester.TestSequence):
         """Make the unit safe after a test."""
         self.logdev.reset()
 
-    @teststep
+    @share.oldteststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac and measure output voltage."""
         dev.dcs_photo.output(12.0, True)
@@ -74,7 +68,7 @@ class Final(tester.TestSequence):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vouts[load].measure(timeout=5)
 
-    @teststep
+    @share.oldteststep
     def _step_load(self, dev, mes):
         """Test outputs with load."""
         dev.dcl_out.output(0.0,  output=True)
@@ -83,7 +77,7 @@ class Final(tester.TestSequence):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vloads[load].measure(timeout=5)
 
-    @teststep
+    @share.oldteststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         mes.ramp_ocp.measure(timeout=5)

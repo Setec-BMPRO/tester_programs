@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """Shared modules for Tester programs."""
 
+from functools import wraps
 # Easy access to utility methods and classes
 from .bluetooth import *
 from .console import *
@@ -9,6 +11,32 @@ from .can_tunnel import *
 from .programmer import *
 from .ticker import *
 from .timed_data import *
+
+
+def teststep(func):
+    """Decorator to add arguments to the test step calls.
+
+    @return Decorated function
+
+    """
+    @wraps(func)
+    def new_func(self):
+        """Decorate the function."""
+        return func(self, self.support.devices, self.support.measurements)
+    return new_func
+
+
+def oldteststep(func):
+    """Deprecated decorator to add arguments to the test step calls.
+
+    @return Decorated function
+
+    """
+    @wraps(func)
+    def new_func(self):
+        """Decorate the function."""
+        return func(self, self.logdev, self.meas)
+    return new_func
 
 
 def get_sernum(uuts, lim, measurement):

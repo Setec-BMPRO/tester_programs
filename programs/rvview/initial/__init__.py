@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """RVVIEW Initial Test Program."""
 
-from functools import wraps
 import logging
 import tester
 import share
@@ -10,14 +10,6 @@ from . import support
 from . import limit
 
 INI_LIMIT = limit.DATA
-
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls."""
-    @wraps(func)
-    def new_func(self):
-        return func(self, self.logdev, self.logdev.rvview, self.meas)
-    return new_func
 
 
 class Initial(tester.TestSequence):
@@ -72,47 +64,47 @@ class Initial(tester.TestSequence):
         """Make the unit safe after a test."""
         self.logdev.reset()
 
-    @teststep
-    def _step_power_up(self, dev, rvview, mes):
+    @share.oldteststep
+    def _step_power_up(self, dev, mes):
         """Apply input voltage and measure voltages."""
         self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes.ui_SnEntry)
         dev.dcs_vin.output(limit.VIN_SET, True)
         tester.MeasureGroup((mes.dmm_vin, mes.dmm_3V3), timeout=5)
 
-    @teststep
-    def _step_initialise_arm(self, dev, rvview, mes):
+    @share.oldteststep
+    def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
         Reset the device, set HW version & Serial number.
 
         """
-        rvview.open()
-        rvview.brand(limit.ARM_HW_VER, self.sernum, dev.rla_reset)
+        dev.rvview.open()
+        dev.rvview.brand(limit.ARM_HW_VER, self.sernum, dev.rla_reset)
         mes.arm_swver.measure()
 
-    @teststep
-    def _step_display(self, dev, rvview, mes):
+    @share.oldteststep
+    def _step_display(self, dev, mes):
         """Test the LCD.
 
         Put device into test mode.
         Check all segments and backlight.
 
         """
-        rvview.testmode(True)
+        dev.rvview.testmode(True)
         tester.MeasureGroup(
             (mes.ui_YesNoOn, mes.dmm_BkLghtOn, mes.ui_YesNoOff,
              mes.dmm_BkLghtOff),
             timeout=5)
-        rvview.testmode(False)
+        dev.rvview.testmode(False)
 
-    @teststep
-    def _step_canbus(self, dev, rvview, mes):
+    @share.oldteststep
+    def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes.arm_can_bind.measure(timeout=10)
-        rvview.can_testmode(True)
+        dev.rvview.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
-        rvview['CAN'] = limit.CAN_ECHO
+        dev.rvview['CAN'] = limit.CAN_ECHO
         echo_reply = dev.rvview_ser.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         self.sensors.mir_can.store(echo_reply)

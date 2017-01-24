@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """BP35 Initial Test Program."""
 
-from functools import wraps
 import logging
 import time
 import tester
@@ -11,14 +11,6 @@ from . import support
 from . import limit
 
 INI_LIMIT = limit.DATA
-
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls."""
-    @wraps(func)
-    def new_func(self):
-        return func(self, self.logdev, self.logdev.bp35, self.meas)
-    return new_func
 
 
 class Initial(tester.TestSequence):
@@ -84,8 +76,8 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @teststep
-    def _step_prepare(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
         Measure fixture lock and part detection micro-switches.
@@ -119,8 +111,8 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup(
             (mes.dmm_vbatin, mes.dmm_3v3, mes.dmm_solarvcc), timeout=5)
 
-    @teststep
-    def _step_program_pic(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_program_pic(self, dev, mes):
         """Program the dsPIC device.
 
         Device is powered by Solar Reg input voltage.
@@ -129,8 +121,8 @@ class Initial(tester.TestSequence):
         dev.program_pic.program()
         dev.dcs_sreg.output(0.0)  # Switch off the Solar
 
-    @teststep
-    def _step_program_arm(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_program_arm(self, dev, mes):
         """Program the ARM device.
 
         Device is powered by injected Battery voltage.
@@ -144,8 +136,8 @@ class Initial(tester.TestSequence):
         dev.dcl_bat.output(0.0)
         dev.dcs_vbat.output(limit.VBAT_IN)
 
-    @teststep
-    def _step_initialise_arm(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
         Device is powered by injected Battery voltage.
@@ -154,26 +146,26 @@ class Initial(tester.TestSequence):
         Put device into manual control mode.
 
         """
-        bp35.open()
+        dev.bp35.open()
         dev.rla_reset.pulse(0.1)
         dev.dcs_sreg.output(limit.SOLAR_VIN)
-        bp35.action(None, delay=1.5, expected=2)  # Flush banner
-        bp35['UNLOCK'] = True
-        bp35['HW_VER'] = self.hwver
-        bp35['SER_ID'] = self.sernum
-        bp35['NVDEFAULT'] = True
-        bp35['NVWRITE'] = True
-        bp35['SR_DEL_CAL'] = True
-        bp35['SR_HW_VER'] = self.hwver_pic
+        dev.bp35.action(None, delay=1.5, expected=2)  # Flush banner
+        dev.bp35['UNLOCK'] = True
+        dev.bp35['HW_VER'] = self.hwver
+        dev.bp35['SER_ID'] = self.sernum
+        dev.bp35['NVDEFAULT'] = True
+        dev.bp35['NVWRITE'] = True
+        dev.bp35['SR_DEL_CAL'] = True
+        dev.bp35['SR_HW_VER'] = self.hwver_pic
         # Restart required because of HW_VER setting
         dev.rla_reset.pulse(0.1)
-        bp35.action(None, delay=1.5, expected=2)  # Flush banner
-        bp35['UNLOCK'] = True
+        dev.bp35.action(None, delay=1.5, expected=2)  # Flush banner
+        dev.bp35['UNLOCK'] = True
         mes.arm_swver.measure()
-        bp35.manual_mode()
+        dev.bp35.manual_mode()
 
-    @teststep
-    def _step_solar_reg(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_solar_reg(self, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         # Switch on fixture BC282 to power Solar Reg input
         dev.rla_acsw.set_on()
@@ -181,11 +173,11 @@ class Initial(tester.TestSequence):
         dev.dcs_sreg.output(0.0, output=False)
         tester.MeasureGroup((mes.arm_solar_alive, mes.arm_vout_ov, ))
         # The SR needs V & I set to zero after power up or it won't start.
-        bp35.solar_set(0, 0)
+        dev.bp35.solar_set(0, 0)
         # Now set the actual output settings
-        bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
+        dev.bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(2)           # Wait for the Solar to start & overshoot
-        bp35['VOUT_OV'] = 2     # Reset OVP Latch because the Solar overshot
+        dev.bp35['VOUT_OV'] = 2     # Reset OVP Latch because the Solar overshot
         # Read solar input voltage and setup ARM measurement limits
         solar_vin = mes.dmm_solarvin.measure(timeout=5).reading1
         mes.arm_solar_vin_pre.testlimit = (
@@ -201,18 +193,18 @@ class Initial(tester.TestSequence):
             (mes.arm_solar_error, mes.arm_solar_relay,
              mes.arm_solar_vin_pre, ))
         vmeasured = mes.dmm_vsregpre.measure(timeout=5).reading1
-        bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
-        bp35['SR_VIN_CAL'] = solar_vin  # Calibrate input voltage reading
+        dev.bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
+        dev.bp35['SR_VIN_CAL'] = solar_vin  # Calibrate input voltage reading
         # New solar sw ver 182 is too dumb to change the setpoint until a
         # DIFFERENT voltage setpoint is given...
-        bp35.solar_set(limit.SOLAR_VSET - 0.05, limit.SOLAR_ISET)
-        bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
+        dev.bp35.solar_set(limit.SOLAR_VSET - 0.05, limit.SOLAR_ISET)
+        dev.bp35.solar_set(limit.SOLAR_VSET, limit.SOLAR_ISET)
         time.sleep(1)
         tester.MeasureGroup(
             (mes.arm_solar_vin_post, mes.dmm_vsregpost, ))
         dev.dcl_bat.output(limit.SOLAR_ICAL, True)
         mes.arm_isregpre.measure(timeout=5)
-        bp35['SR_ICAL'] = limit.SOLAR_ICAL  # Calibrate current setpoint
+        dev.bp35['SR_ICAL'] = limit.SOLAR_ICAL  # Calibrate current setpoint
         time.sleep(1)
         mes.arm_isregpost.measure(timeout=5)
         dev.dcl_bat.output(0.0)
@@ -220,26 +212,26 @@ class Initial(tester.TestSequence):
         dev.acsource.output(voltage=0.0)
         dev.rla_acsw.set_off()
 
-    @teststep
-    def _step_aux(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_aux(self, dev, mes):
         """Apply Auxiliary input."""
         dev.dcs_vaux.output(limit.VAUX_IN, output=True)
         dev.dcl_bat.output(0.5)
-        bp35['AUX_RELAY'] = True
+        dev.bp35['AUX_RELAY'] = True
         tester.MeasureGroup(
             (mes.dmm_vaux, mes.arm_auxv, mes.arm_auxi), timeout=5)
-        bp35['AUX_RELAY'] = False
+        dev.bp35['AUX_RELAY'] = False
         dev.dcs_vaux.output(0.0, output=False)
         dev.dcl_bat.output(0.0)
 
-    @teststep
-    def _step_powerup(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
         # Apply 240Vac & check
         dev.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup((mes.dmm_acin, mes.dmm_pri12v), timeout=10)
         # Enable PFC & DCDC converters
-        bp35.power_on()
+        dev.bp35.power_on()
         # Wait for PFC overshoot to settle
         mes.dmm_vpfc.stable(limit.PFC_STABLE)
         mes.arm_vout_ov.measure()
@@ -251,8 +243,8 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup(
             (mes.dmm_3v3, mes.dmm_15vs, mes.dmm_vbat), timeout=10)
 
-    @teststep
-    def _step_output(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_output(self, dev, mes):
         """Test the output switches.
 
         Each output is turned ON in turn.
@@ -260,33 +252,33 @@ class Initial(tester.TestSequence):
 
         """
         # All outputs OFF
-        bp35.load_set(set_on=True, loads=())
+        dev.bp35.load_set(set_on=True, loads=())
         # A little load on the output.
         dev.dcl_out.output(1.0, True)
         mes.dmm_vloadOff.measure(timeout=2)
         # One at a time ON
         for load in range(14):
             with tester.PathName('L{}'.format(load + 1)):
-                bp35.load_set(set_on=True, loads=(load, ))
+                dev.bp35.load_set(set_on=True, loads=(load, ))
                 mes.dmm_vload.measure(timeout=2)
         # All outputs ON
-        bp35.load_set(set_on=False, loads=())
+        dev.bp35.load_set(set_on=False, loads=())
 
-    @teststep
-    def _step_remote_sw(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_remote_sw(self, dev, mes):
         """Test Remote Load Isolator Switch."""
         dev.rla_loadsw.set_on()
         mes.dmm_vloadOff.measure(timeout=5)
         dev.rla_loadsw.set_off()
         mes.dmm_vload.measure(timeout=5)
 
-    @teststep
-    def _step_ocp(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_ocp(self, dev, mes):
         """Test functions of the unit."""
         tester.MeasureGroup(
             (mes.arm_acv, mes.arm_acf, mes.arm_secT, mes.arm_vout,
              mes.arm_fan, mes.dmm_fanOff), timeout=5)
-        bp35['FAN'] = 100
+        dev.bp35['FAN'] = 100
         mes.dmm_fanOn.measure(timeout=5)
         dev.dcl_out.binary(1.0, 28.0, 5.0)
         dev.dcl_bat.output(4.0, output=True)
@@ -297,14 +289,14 @@ class Initial(tester.TestSequence):
         mes.ramp_ocp.measure(timeout=5)
         dev.dcl_bat.output(0.0)
 
-    @teststep
-    def _step_canbus(self, dev, bp35, mes):
+    @share.oldteststep
+    def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes.arm_can_bind.measure(timeout=10)
-        bp35.can_testmode(True)
+        dev.bp35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
         self._logger.debug('CAN Echo Request --> %s', repr(limit.CAN_ECHO))
-        bp35['CAN'] = limit.CAN_ECHO
+        dev.bp35['CAN'] = limit.CAN_ECHO
         echo_reply = dev.bp35_ser.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         self._logger.debug('CAN Reply <-- %s', repr(echo_reply))

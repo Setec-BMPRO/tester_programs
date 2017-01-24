@@ -3,26 +3,9 @@
 # Copyright 2016 SETEC Pty Ltd
 """GEN8 Final Test Program."""
 
-from functools import wraps
 import logging
 import tester
-
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls.
-
-    @return Decorated function
-
-    """
-    @wraps(func)
-    def new_func(self):
-        """Add Logical Devices and Measurement parameters.
-
-        @return Decorated function
-
-        """
-        return func(self, self.support.devices, self.support.measurements)
-    return new_func
+import share
 
 
 class Final(tester.TestSequence):
@@ -58,9 +41,9 @@ class Final(tester.TestSequence):
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        self.support.devices.reset()
+        self.support.reset()
 
-    @teststep
+    @share.teststep
     def _step_pwrup(self, dev, mes):
         """Power Up step."""
         tester.dcl_substep(
@@ -73,21 +56,21 @@ class Final(tester.TestSequence):
         tester.relay_substep(((dev.rla_12v2off, True), ))
         tester.MeasureGroup((mes.dmm_12v2off, ), timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_pwron(self, dev, mes):
         """Power On step."""
         tester.relay_substep(((dev.rla_pson, True), ))
         tester.MeasureGroup(
             (mes.dmm_24von, mes.dmm_12von, mes.dmm_12v2off,
-             mes.dmm_PwrFailOff, ),
+             mes.dmm_pwrfailoff, ),
             timeout=5)
         tester.relay_substep(((dev.rla_12v2off, False), ))
         tester.MeasureGroup(
-            (mes.dmm_12v2on, mes.dmm_Iecon, ),
+            (mes.dmm_12v2on, mes.dmm_iec_on, ),
             timeout=5)
-        tester.MeasureGroup((mes.ui_YesNoMains, ))
+        tester.MeasureGroup((mes.ui_yesno_mains, ))
 
-    @teststep
+    @share.teststep
     def _step_fullload(self, dev, mes):
         """Full Load step."""
         tester.dcl_substep(
@@ -98,7 +81,7 @@ class Final(tester.TestSequence):
             (mes.dmm_5v, mes.dmm_24von, mes.dmm_12von, mes.dmm_12v2on, ),
             timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_fullload115(self, dev, mes):
         """115Vac step."""
         dev.acsource.output(voltage=115.0, delay=0.5)
@@ -106,13 +89,13 @@ class Final(tester.TestSequence):
             (mes.dmm_5v, mes.dmm_24von, mes.dmm_12von, mes.dmm_12v2on, ),
             timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_pwroff(self, dev, mes):
         """Power Off step."""
         tester.dcl_substep(
             ((dev.dcl_5v, 0.5), (dev.dcl_24v, 0.5), (dev.dcl_12v, 4.0), ))
         tester.MeasureGroup(
-            (mes.ui_NotifyPwrOff, mes.dmm_Iecoff, mes.dmm_24voff, ))
+            (mes.ui_notify_pwroff, mes.dmm_iec_off, mes.dmm_24voff, ))
 
 
 class Support():
@@ -137,6 +120,10 @@ class Support():
             tester.LimitBoolean('Notify', True),
             ))
         self.measurements = Measurements(self.sensors, self.limits)
+
+    def reset(self):
+        """Reset instruments."""
+        self.devices.reset()
 
 
 class LogicalDevices():
@@ -193,8 +180,8 @@ class Measurements():
         """Create all Measurement instances."""
         self.limits = limits
         maker = self._maker
-        self.dmm_Iecon = maker('Iecon', sense.iec)
-        self.dmm_Iecoff = maker('Iecoff', sense.iec)
+        self.dmm_iec_on = maker('Iecon', sense.iec)
+        self.dmm_iec_off = maker('Iecoff', sense.iec)
         self.dmm_5v = maker('5V', sense.o5v)
         self.dmm_24voff = maker('24Voff', sense.o24v)
         self.dmm_12voff = maker('12Voff', sense.o12v)
@@ -202,9 +189,9 @@ class Measurements():
         self.dmm_24von = maker('24Von', sense.o24v)
         self.dmm_12von = maker('12Von', sense.o12v)
         self.dmm_12v2on = maker('12V2on', sense.o12v2)
-        self.dmm_PwrFailOff = maker('PwrFailOff', sense.pwrfail)
-        self.ui_YesNoMains = maker('Notify', sense.yn_mains)
-        self.ui_NotifyPwrOff = maker('Notify', sense.not_pwroff)
+        self.dmm_pwrfailoff = maker('PwrFailOff', sense.pwrfail)
+        self.ui_yesno_mains = maker('Notify', sense.yn_mains)
+        self.ui_notify_pwroff = maker('Notify', sense.not_pwroff)
 
     def _maker(self, limitname, sensor):
         """Create a Measurement.

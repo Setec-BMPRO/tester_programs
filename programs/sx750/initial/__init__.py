@@ -3,23 +3,14 @@
 # Copyright 2016 SETEC Pty Ltd
 """SX-750 Initial Test Program."""
 
-from functools import wraps
 import time
 import logging
 import tester
+import share
 from . import support
 from . import limit
 
 INI_LIMIT = limit.DATA
-
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls."""
-    @wraps(func)
-    def new_func(self):
-        """Add logical device & measurement arguments."""
-        return func(self, self.logdev, self.meas)
-    return new_func
 
 
 class Initial(tester.TestSequence):
@@ -73,7 +64,7 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @teststep
+    @share.oldteststep
     def _step_fixture_lock(self, dev, mes):
         """Check that Fixture Lock is closed.
 
@@ -86,7 +77,7 @@ class Initial(tester.TestSequence):
              mes.dmm_R609, mes.dmm_R608),
             timeout=2)
 
-    @teststep
+    @share.oldteststep
     def _step_program_micros(self, dev, mes):
         """Program the ARM and PIC devices.
 
@@ -121,7 +112,7 @@ class Initial(tester.TestSequence):
         # Switch off rails and discharge the 5Vsb to stop the ARM
         self.subt.ext_pwroff.run()
 
-    @teststep
+    @share.oldteststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -142,7 +133,7 @@ class Initial(tester.TestSequence):
         time.sleep(0.5)
         dev.dcl_5Vsb.output(0)
 
-    @teststep
+    @share.oldteststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit.
 
@@ -186,7 +177,7 @@ class Initial(tester.TestSequence):
         dev.dcl_12V.output(0)
         dev.dcl_24V.output(0)
 
-    @teststep
+    @share.oldteststep
     def _step_reg_5v(self, dev, mes):
         """Check regulation of the 5Vsb.
 
@@ -201,7 +192,7 @@ class Initial(tester.TestSequence):
             reg_limit=self.limits['5Vsb_reg'], max_load=2.0, peak_load=2.5)
         dev.dcl_5Vsb.output(0)
 
-    @teststep
+    @share.oldteststep
     def _step_reg_12v(self, dev, mes):
         """Check regulation and OCP of the 12V.
 
@@ -228,7 +219,7 @@ class Initial(tester.TestSequence):
             dev.dcl_12V.output(1.0)
             dev.dcl_12V.output(0.0)
 
-    @teststep
+    @share.oldteststep
     def _step_reg_24v(self, dev, mes):
         """Check regulation and OCP of the 24V.
 
@@ -255,7 +246,7 @@ class Initial(tester.TestSequence):
             dev.dcl_24V.output(1.0)
             dev.dcl_24V.output(0.0)
 
-    @teststep
+    @share.oldteststep
     def _step_peak_power(self, dev, mes):
         """Check operation at Peak load.
 

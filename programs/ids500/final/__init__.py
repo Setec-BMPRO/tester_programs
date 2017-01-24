@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd
 """IDS-500 Final Test Program."""
 
-from functools import wraps
 import logging
 import tester
 import share
@@ -10,13 +10,6 @@ from . import support
 from . import limit
 
 FIN_LIMIT = limit.DATA
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls."""
-    @wraps(func)
-    def new_func(self):
-        return func(self, self.logdev, self.meas, self.sensor)
-    return new_func
 
 
 class Final(tester.TestSequence):
@@ -64,8 +57,8 @@ class Final(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @teststep
-    def _step_tec(self, dev, mes, sen):
+    @share.oldteststep
+    def _step_tec(self, dev, mes):
         """Check the TEC circuit.
 
            Enable, measure voltages.
@@ -82,17 +75,17 @@ class Final(tester.TestSequence):
         Vset, Vmon, Vtec = tester.MeasureGroup(
             (mes.dmm_tecvset, mes.dmm_tecvmon, mes.dmm_tec), timeout=5).readings
         self._logger.debug('Vset:%s, Vmon:%s, Vtec:%s', Vset, Vmon, Vtec)
-        sen.oMirTecErr.store(Vtec - (Vset * 3))
+        self.sensor.oMirTecErr.store(Vtec - (Vset * 3))
         mes.tecerr.measure(timeout=5)
-        sen.oMirTecVmonErr.store(Vmon - (Vtec / 3))
+        self.sensor.oMirTecVmonErr.store(Vmon - (Vtec / 3))
         mes.tecvmonerr.measure(timeout=5)
         tester.MeasureGroup((mes.ui_YesNoPsu, mes.ui_YesNoTecGreen), timeout=5)
         dev.rla_tecphase.set_on()
         tester.MeasureGroup((mes.dmm_tecphase, mes.ui_YesNoTecRed), timeout=5)
         dev.rla_tecphase.set_off()
 
-    @teststep
-    def _step_ldd(self, dev, mes, sen):
+    @share.oldteststep
+    def _step_ldd(self, dev, mes):
         """Check the Laser diode circuit.
 
            Enable, measure voltages.
@@ -145,8 +138,8 @@ class Final(tester.TestSequence):
         sen.oMirIsErr.store((Imon * 10) - (Iout * 1000))
         mes.monouterr.measure()
 
-    @teststep
-    def _step_comms(self, dev, mes, sen):
+    @share.oldteststep
+    def _step_comms(self, dev, mes):
         """Write HW version and serial number. Read back values."""
         dev.pic.open()
         dev.pic.clear_port()
