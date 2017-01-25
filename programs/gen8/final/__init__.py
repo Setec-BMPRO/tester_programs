@@ -5,7 +5,7 @@
 
 import logging
 import tester
-import share
+from share import teststep
 
 
 class Final(tester.TestSequence):
@@ -43,7 +43,7 @@ class Final(tester.TestSequence):
         self._logger.info('Safety')
         self.support.reset()
 
-    @share.teststep
+    @teststep
     def _step_pwrup(self, dev, mes):
         """Power Up step."""
         tester.dcl_substep(
@@ -56,7 +56,7 @@ class Final(tester.TestSequence):
         tester.relay_substep(((dev.rla_12v2off, True), ))
         tester.MeasureGroup((mes.dmm_12v2off, ), timeout=5)
 
-    @share.teststep
+    @teststep
     def _step_pwron(self, dev, mes):
         """Power On step."""
         tester.relay_substep(((dev.rla_pson, True), ))
@@ -70,7 +70,7 @@ class Final(tester.TestSequence):
             timeout=5)
         tester.MeasureGroup((mes.ui_yesno_mains, ))
 
-    @share.teststep
+    @teststep
     def _step_fullload(self, dev, mes):
         """Full Load step."""
         tester.dcl_substep(
@@ -81,7 +81,7 @@ class Final(tester.TestSequence):
             (mes.dmm_5v, mes.dmm_24von, mes.dmm_12von, mes.dmm_12v2on, ),
             timeout=5)
 
-    @share.teststep
+    @teststep
     def _step_fullload115(self, dev, mes):
         """115Vac step."""
         dev.acsource.output(voltage=115.0, delay=0.5)
@@ -89,7 +89,7 @@ class Final(tester.TestSequence):
             (mes.dmm_5v, mes.dmm_24von, mes.dmm_12von, mes.dmm_12v2on, ),
             timeout=5)
 
-    @share.teststep
+    @teststep
     def _step_pwroff(self, dev, mes):
         """Power Off step."""
         tester.dcl_substep(

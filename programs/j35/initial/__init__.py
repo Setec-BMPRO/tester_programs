@@ -5,6 +5,7 @@
 
 import tester
 import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -77,7 +78,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         """Make the unit safe after a test."""
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
@@ -93,7 +94,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         tester.MeasureGroup(
             (mes.dmm_vbatin, mes.dmm_3v3u), timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -107,7 +108,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.j35.manual_mode(True)   # Start the change to manual mode
         mes.arm_swver.measure()
 
-    @share.oldteststep
+    @oldteststep
     def _step_aux(self, dev, mes):
         """Test Auxiliary input."""
         dev.dcs_vaux.output(13.5, True)
@@ -120,7 +121,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.dcs_vaux.output(0.0, False)
         dev.dcl_bat.output(0.0)
 
-    @share.oldteststep
+    @oldteststep
     def _step_solar(self, dev, mes):
         """Test Solar input."""
         dev.dcs_solar.output(13.5, True)
@@ -129,7 +130,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.j35['SOLAR'] = False
         dev.dcs_solar.output(0.0, False)
 
-    @share.oldteststep
+    @oldteststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
         dev.j35.manual_mode()     # Complete the change to manual mode
@@ -150,7 +151,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.j35['FAN'] = 100
         mes.dmm_fanOn.measure(timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_output(self, dev, mes):
         """Test the output switches.
 
@@ -167,7 +168,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
                 mes.dmm_vload.measure(timeout=2)
         dev.j35.load_set(set_on=False, loads=())  # All outputs ON
 
-    @share.oldteststep
+    @oldteststep
     def _step_load(self, dev, mes):
         """Test with load."""
         dev.dcl_out.binary(1.0, self.limits['LOAD_CURRENT'].limit, 5.0)
@@ -178,7 +179,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         tester.MeasureGroup(
             (mes.dmm_vbatload, mes.arm_battI, ), timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         tester.MeasureGroup(

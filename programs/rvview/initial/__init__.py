@@ -6,6 +6,7 @@
 import logging
 import tester
 import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -64,7 +65,7 @@ class Initial(tester.TestSequence):
         """Make the unit safe after a test."""
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_power_up(self, dev, mes):
         """Apply input voltage and measure voltages."""
         self.sernum = share.get_sernum(
@@ -72,7 +73,7 @@ class Initial(tester.TestSequence):
         dev.dcs_vin.output(limit.VIN_SET, True)
         tester.MeasureGroup((mes.dmm_vin, mes.dmm_3V3), timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -83,7 +84,7 @@ class Initial(tester.TestSequence):
         dev.rvview.brand(limit.ARM_HW_VER, self.sernum, dev.rla_reset)
         mes.arm_swver.measure()
 
-    @share.oldteststep
+    @oldteststep
     def _step_display(self, dev, mes):
         """Test the LCD.
 
@@ -98,7 +99,7 @@ class Initial(tester.TestSequence):
             timeout=5)
         dev.rvview.testmode(False)
 
-    @share.oldteststep
+    @oldteststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes.arm_can_bind.measure(timeout=10)

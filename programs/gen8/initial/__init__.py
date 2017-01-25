@@ -6,7 +6,7 @@
 import time
 import logging
 import tester
-import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -60,13 +60,13 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_part_detect(self, dev, mes):
         """Measure Part detection microswitches."""
         tester.MeasureGroup(
             (mes.dmm_lock, mes.dmm_part, mes.dmm_fanshort, ), timeout=2)
 
-    @share.oldteststep
+    @oldteststep
     def _step_program(self, dev, mes):
         """Program the ARM device.
 
@@ -85,7 +85,7 @@ class Initial(tester.TestSequence):
         dev.rla_reset.pulse(0.1)
         time.sleep(1)
 
-    @share.oldteststep
+    @oldteststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -103,7 +103,7 @@ class Initial(tester.TestSequence):
         time.sleep(0.5)
         dev.loads(i5=0)
 
-    @share.oldteststep
+    @oldteststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit.
 
@@ -171,7 +171,7 @@ class Initial(tester.TestSequence):
             (mes.arm_acfreq, mes.arm_acvolt,
              mes.arm_5v, mes.arm_12v, mes.arm_24v, mes.arm_swver, mes.arm_swbld), )
 
-    @share.oldteststep
+    @oldteststep
     def _step_reg_5v(self, dev, mes):
         """Check regulation of the 5V.
 
@@ -187,7 +187,7 @@ class Initial(tester.TestSequence):
             dmm_out=mes.dmm_5v, dcl_out=dev.dcl_5v, max_load=2.0, peak_load=2.5)
         dev.loads(i5=0, i12=0, i24=0)
 
-    @share.oldteststep
+    @oldteststep
     def _step_reg_12v(self, dev, mes):
         """Check regulation and OCP of the 12V.
 
@@ -204,7 +204,7 @@ class Initial(tester.TestSequence):
             dmm_out=mes.dmm_12v, dcl_out=dev.dcl_12v, max_load=22, peak_load=24)
         dev.loads(i12=0, i24=0)
 
-    @share.oldteststep
+    @oldteststep
     def _step_reg_24v(self, dev, mes):
         """Check regulation and OCP of the 24V.
 

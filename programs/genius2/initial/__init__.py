@@ -6,7 +6,7 @@
 import logging
 import time
 import tester
-import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -62,13 +62,13 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_program(self, dev, mes):
         """Program the board."""
         dev.program_pic.program()
         dev.dcs_vbatctl.output(0.0, False)
 
-    @share.oldteststep
+    @oldteststep
     def _step_vout_adj(self, dev, mes):
         """Vout adjustment."""
         mes.ui_AdjVout.measure(timeout=5)
@@ -77,7 +77,7 @@ class Initial(tester.TestSequence):
             (mes.dmm_vout, mes.dmm_vbatctl, mes.dmm_vbat, mes.dmm_vdd),
             timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_ocp(self, dev, mes):
         """Ramp up load until OCP."""
         # Check for correct model (GENIUS-II/GENIUS-II-H)

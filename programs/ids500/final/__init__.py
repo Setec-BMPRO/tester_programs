@@ -6,6 +6,7 @@
 import logging
 import tester
 import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -57,7 +58,7 @@ class Final(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_tec(self, dev, mes):
         """Check the TEC circuit.
 
@@ -84,7 +85,7 @@ class Final(tester.TestSequence):
         tester.MeasureGroup((mes.dmm_tecphase, mes.ui_YesNoTecRed), timeout=5)
         dev.rla_tecphase.set_off()
 
-    @share.oldteststep
+    @oldteststep
     def _step_ldd(self, dev, mes):
         """Check the Laser diode circuit.
 
@@ -138,7 +139,7 @@ class Final(tester.TestSequence):
         sen.oMirIsErr.store((Imon * 10) - (Iout * 1000))
         mes.monouterr.measure()
 
-    @share.oldteststep
+    @oldteststep
     def _step_comms(self, dev, mes):
         """Write HW version and serial number. Read back values."""
         dev.pic.open()

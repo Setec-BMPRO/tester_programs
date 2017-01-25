@@ -7,6 +7,7 @@ import logging
 import time
 import tester
 import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -76,7 +77,7 @@ class Initial(tester.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
@@ -111,7 +112,7 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup(
             (mes.dmm_vbatin, mes.dmm_3v3, mes.dmm_solarvcc), timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_program_pic(self, dev, mes):
         """Program the dsPIC device.
 
@@ -121,7 +122,7 @@ class Initial(tester.TestSequence):
         dev.program_pic.program()
         dev.dcs_sreg.output(0.0)  # Switch off the Solar
 
-    @share.oldteststep
+    @oldteststep
     def _step_program_arm(self, dev, mes):
         """Program the ARM device.
 
@@ -136,7 +137,7 @@ class Initial(tester.TestSequence):
         dev.dcl_bat.output(0.0)
         dev.dcs_vbat.output(limit.VBAT_IN)
 
-    @share.oldteststep
+    @oldteststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -164,7 +165,7 @@ class Initial(tester.TestSequence):
         mes.arm_swver.measure()
         dev.bp35.manual_mode()
 
-    @share.oldteststep
+    @oldteststep
     def _step_solar_reg(self, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         # Switch on fixture BC282 to power Solar Reg input
@@ -212,7 +213,7 @@ class Initial(tester.TestSequence):
         dev.acsource.output(voltage=0.0)
         dev.rla_acsw.set_off()
 
-    @share.oldteststep
+    @oldteststep
     def _step_aux(self, dev, mes):
         """Apply Auxiliary input."""
         dev.dcs_vaux.output(limit.VAUX_IN, output=True)
@@ -224,7 +225,7 @@ class Initial(tester.TestSequence):
         dev.dcs_vaux.output(0.0, output=False)
         dev.dcl_bat.output(0.0)
 
-    @share.oldteststep
+    @oldteststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
         # Apply 240Vac & check
@@ -243,7 +244,7 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup(
             (mes.dmm_3v3, mes.dmm_15vs, mes.dmm_vbat), timeout=10)
 
-    @share.oldteststep
+    @oldteststep
     def _step_output(self, dev, mes):
         """Test the output switches.
 
@@ -264,7 +265,7 @@ class Initial(tester.TestSequence):
         # All outputs ON
         dev.bp35.load_set(set_on=False, loads=())
 
-    @share.oldteststep
+    @oldteststep
     def _step_remote_sw(self, dev, mes):
         """Test Remote Load Isolator Switch."""
         dev.rla_loadsw.set_on()
@@ -272,7 +273,7 @@ class Initial(tester.TestSequence):
         dev.rla_loadsw.set_off()
         mes.dmm_vload.measure(timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_ocp(self, dev, mes):
         """Test functions of the unit."""
         tester.MeasureGroup(
@@ -289,7 +290,7 @@ class Initial(tester.TestSequence):
         mes.ramp_ocp.measure(timeout=5)
         dev.dcl_bat.output(0.0)
 
-    @share.oldteststep
+    @oldteststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes.arm_can_bind.measure(timeout=10)

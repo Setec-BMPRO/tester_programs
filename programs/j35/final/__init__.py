@@ -4,7 +4,7 @@
 """J35 Final Test Program."""
 
 import tester
-import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -57,7 +57,7 @@ class Final(tester.TestSequence):
         """Make the unit safe after a test."""
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac and measure output voltage."""
         dev.dcs_photo.output(12.0, True)
@@ -68,7 +68,7 @@ class Final(tester.TestSequence):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vouts[load].measure(timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_load(self, dev, mes):
         """Test outputs with load."""
         dev.dcl_out.output(0.0,  output=True)
@@ -77,7 +77,7 @@ class Final(tester.TestSequence):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.dmm_vloads[load].measure(timeout=5)
 
-    @share.oldteststep
+    @oldteststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         mes.ramp_ocp.measure(timeout=5)

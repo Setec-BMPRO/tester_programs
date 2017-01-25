@@ -5,7 +5,7 @@
 
 import logging
 import tester
-import share
+from share import oldteststep
 from . import support
 from . import limit
 
@@ -57,7 +57,7 @@ class InitialMain(tester.testsequence.TestSequence):
         self._logger.info('Safety')
         self.logdev.reset()
 
-    @share.oldteststep
+    @oldteststep
     def _step_tec(self, dev, mes):
         """Check the TEC circuit.
 
@@ -86,7 +86,7 @@ class InitialMain(tester.testsequence.TestSequence):
             (mes.dmm_tecphase, mes.ui_YesNoTecGreen), timeout=5)
         dev.rla_tecphase.set_off()
 
-    @share.oldteststep
+    @oldteststep
     def _step_ldd(self, dev, mes):
         """Check the Laser diode circuit.
 
@@ -145,7 +145,7 @@ class InitialMain(tester.testsequence.TestSequence):
         sen.oMirIsErr.store((Imon * 10) - (Iout * 1000))
         mes.monouterr.measure()
 
-    @share.oldteststep
+    @oldteststep
     def _step_ocp(self, dev, mes):
         """OCP."""
         tst = self.subtest
