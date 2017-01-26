@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2017 SETEC Pty Ltd
 """BP35 Final Test Program."""
 
 import logging
 import tester
-from . import support
-from . import limit
-
-FIN_LIMIT = limit.DATA
-
-# These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = None
+from share import teststep
 
 
 class Final(tester.TestSequence):
@@ -25,40 +20,98 @@ class Final(tester.TestSequence):
            @param test_limits Product test limits
 
         """
-        # Define the (linear) Test Sequence
-        sequence = (
-            tester.TestStep('PowerUp', self._step_powerup),
-            )
-        # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(selection, None, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._devices = physical_devices
-        self._limits = test_limits
+        self.devices = physical_devices
+        self.support = None
 
     def open(self):
         """Prepare for testing."""
         self._logger.info('Open')
-        global d, s, m
-        d = support.LogicalDevices(self._devices)
-        s = support.Sensors(d, self._limits)
-        m = support.Measurements(s, self._limits)
+        self.support = Support(self.devices)
+        sequence = (
+            tester.TestStep('PowerUp', self._step_powerup),
+            )
+        super().open(sequence)
 
     def close(self):
         """Finished testing."""
         self._logger.info('Close')
-        global m, d, s
-        m = d = s = None
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
         self._logger.info('Safety')
-        d.reset()
+        self.support.reset()
 
-    def _step_powerup(self):
+    @teststep
+    def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac and measure output voltages."""
-        self.fifo_push(((s.vbat, 12.8), ))
+        dev.acsource.output(voltage=240.0, output=True)
+        mes.dmm_vbat.measure(timeout=10)
 
-        d.acsource.output(voltage=240.0, output=True)
-        m.dmm_vbat.measure(timeout=10)
+
+class Support():
+
+    """Supporting data."""
+
+    def __init__(self, physical_devices):
+        """Create all supporting classes."""
+        self.devices = LogicalDevices(physical_devices)
+        self.limits = tester.limitdict((
+            tester.LimitHiLoDelta('Vbat', (12.8, 0.2)),
+            ))
+        self.sensors = Sensors(self.devices, self.limits)
+        self.measurements = Measurements(self.sensors, self.limits)
+
+    def reset(self):
+        """Reset instruments."""
+        self.devices.reset()
+
+
+class LogicalDevices():
+
+    """Logical Devices."""
+
+    def __init__(self, devices):
+        """Create all Logical Instruments.
+
+           @param devices Physical instruments of the Tester
+
+        """
+        self.dmm = tester.DMM(devices['DMM'])
+        self.acsource = tester.ACSource(devices['ACS'])
+
+    def reset(self):
+        """Reset instruments."""
+        self.acsource.output(voltage=0.0, output=False)
+
+
+class Sensors():
+
+    """Sensors."""
+
+    def __init__(self, logical_devices, limits):
+        """Create all Sensor instances.
+
+           @param logical_devices Logical instruments used
+           @param limits Product test limits
+
+        """
+        self.vbat = tester.sensor.Vdc(
+            logical_devices.dmm, high=1, low=1, rng=100, res=0.001)
+
+
+class Measurements():
+
+    """Measurements."""
+
+    def __init__(self, sense, limits):
+        """Create all Measurement instances.
+
+           @param sense Sensors used
+           @param limits Product test limits
+
+        """
+        self.dmm_vbat = tester.Measurement(limits['Vbat'], sense.vbat)
