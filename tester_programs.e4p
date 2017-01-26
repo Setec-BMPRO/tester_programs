@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-01-26, 19:02:44 -->
+<!-- Saved: 2017-01-26, 19:18:02 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -57,10 +57,8 @@
     <Source>programs/bce4/final/support.py</Source>
     <Source>programs/bp35/__init__.py</Source>
     <Source>programs/bp35/console.py</Source>
-    <Source>programs/bp35/final/__init__.py</Source>
-    <Source>programs/bp35/final/limit.py</Source>
-    <Source>programs/bp35/final/support.py</Source>
-    <Source>programs/bp35/initial/__init__.py</Source>
+    <Source>programs/bp35/final.py</Source>
+    <Source>programs/bp35/initial.py</Source>
     <Source>programs/c15a15/__init__.py</Source>
     <Source>programs/c15a15/final/__init__.py</Source>
     <Source>programs/c15a15/final/limit.py</Source>
@@ -264,8 +262,8 @@
   <Others>
     <Other>programs/batterycheck/initial/BatteryCheckControl_1.7.4080.bin</Other>
     <Other>programs/batterycheck/initial/BatteryCheckSupervisor-2.hex</Other>
-    <Other>programs/bp35/initial/bp35_1.2.14256.3912.bin</Other>
-    <Other>programs/bp35/initial/bp35sr_1.1.13802.182.hex</Other>
+    <Other>programs/bp35/bp35_1.2.14256.3912.bin</Other>
+    <Other>programs/bp35/bp35sr_1.1.13802.182.hex</Other>
     <Other>programs/c45a15/initial/c45a-15.hex</Other>
     <Other>programs/cmrsbp/CMR-SBP-9.hex</Other>
     <Other>programs/cn101/initial/cn101_1.1.13665.176.bin</Other>

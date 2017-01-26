@@ -11,7 +11,7 @@ from pydispatch import dispatcher
 import tester
 import share
 from share import teststep
-from .. import console
+from . import console
 
 ARM_VERSION = '1.2.14256.3912'
 ARM_HW_VER = (9, 0, 'A')
