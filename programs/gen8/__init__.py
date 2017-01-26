@@ -4,4 +4,4 @@
 
 # Easy access to utility methods and classes
 from .initial import *
-from .final import *
+from .final import Final
