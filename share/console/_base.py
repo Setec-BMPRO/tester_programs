@@ -6,8 +6,8 @@ import logging
 import tester
 
 # Default read/write format strings (For the X-Register based consoles)
-_DEF_WRITE = '{} "{} XN!'
-_DEF_READ = '"{} XN?'
+_DEF_WRITE = '{0} "{1} XN!'
+_DEF_READ = '"{0} XN?'
 
 
 class Sensor(tester.sensor.Sensor):
@@ -131,7 +131,7 @@ class ParameterBoolean(_Parameter):
 
         """
         if not isinstance(value, bool):
-            raise ParameterError('value "{}" must be boolean'.format(value))
+            raise ParameterError('value "{0}" must be boolean'.format(value))
         super().write(int(value), func)
 
     def read(self, func):
@@ -168,7 +168,7 @@ class ParameterFloat(_Parameter):
         """
         if value < self._min or value > self._max:
             raise ParameterError(
-                'Value out of range {} - {}'.format(self._min, self._max))
+                'Value out of range {0} - {1}'.format(self._min, self._max))
         super().write(int(value * self._scale), func)
 
     def read(self, func):
@@ -190,8 +190,8 @@ class ParameterHex(_Parameter):
 
     def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, mask=0xFFFFFFFF,
-                       write_format='${:08X} "{} XN!',
-                       read_format='"{} XN?'):
+                       write_format='${0:08X} "{1} XN!',
+                       read_format='"{0} XN?'):
         """Remember the data limits."""
         super().__init__(
             command, writeable, readable, write_format, read_format)
@@ -208,7 +208,7 @@ class ParameterHex(_Parameter):
         """
         if value < self._min or value > self._max:
             raise ParameterError(
-                'Value out of range {} - {}'.format(self._min, self._max))
+                'Value out of range {0} - {1}'.format(self._min, self._max))
         super().write(int(value), func)
 
     def read(self, func):
@@ -233,7 +233,7 @@ class ParameterHex0x(ParameterHex):
         """Remember the data limits."""
         super().__init__(
             command, writeable, readable,
-            minimum, maximum, mask, write_format='0x{:08X} "{} XN!')
+            minimum, maximum, mask, write_format='0x{0:08X} "{1} XN!')
 
 
 class ParameterCAN(_Parameter):
@@ -242,7 +242,7 @@ class ParameterCAN(_Parameter):
 
     def __init__(self, command, writeable=False):
         """Set a new read_format."""
-        super().__init__(command, writeable, read_format='"{} CAN')
+        super().__init__(command, writeable, read_format='"{0} CAN')
 
     def write(self, value):
         """Write parameter value.

@@ -16,6 +16,7 @@ class BP35Initial(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    debug = False
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
@@ -75,7 +76,9 @@ class BP35Initial(ProgramTestCase):
                     ('', ) * 4 +     # Manual mode
                     ('0', ) * 2,
                 'Output': ('', ) * (1 + 14 + 1),
-                'OCP': ('240', '50000', '350', '12800', '500', '', '4000'),
+                'OCP':
+                    ('240', '50000', '350', '12800', '500', ) +
+                    ('', '4000', '32000', '', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
@@ -86,7 +89,7 @@ class BP35Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(72, len(result.readings))  # Reading count
+        self.assertEqual(73, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'SolarReg', 'Aux', 'PowerUp',

@@ -83,7 +83,7 @@ class Console(console.Variable, console.BadUartConsole):
             'SR_VIN_CAL': ParameterFloat(
                 'SOLAR_REG_CAL_V_IN', writeable=True,
                 scale=1000),
-            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+            'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
             'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
             'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
             'PRI_T': ParameterFloat('PRIMARY_TEMPERATURE', scale=10),
@@ -91,6 +91,10 @@ class Console(console.Variable, console.BadUartConsole):
             'BATT_T': ParameterFloat('BATTERY_TEMPERATURE', scale=10),
             'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
             'BUS_I': ParameterFloat('CONVERTER_CURRENT', scale=1000),
+            'BUS_ICAL': ParameterFloat(
+                'ICONV', writeable=True,    # an undocumented command...
+                write_format='{0} "{1} CAL',
+                scale=1000),
             'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
             'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
             'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
@@ -107,7 +111,7 @@ class Console(console.Variable, console.BadUartConsole):
             'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
             'SER_ID': ParameterString(
                 'SET-SERIAL-ID', writeable=True, readable=False,
-                write_format='"{} {}'),
+                write_format='"{0} {1}'),
             'HW_VER': ParameterString(
                 'SET-HW-VER', writeable=True, readable=False,
                 write_format='{0[0]} {0[1]} "{0[2]} {1}'),
@@ -117,8 +121,8 @@ class Console(console.Variable, console.BadUartConsole):
                 'STATUS', writeable=True,
                 minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
             'CAN': ParameterString('CAN',
-                writeable=True, write_format='"{} {}'),
-            'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
+                writeable=True, write_format='"{0} {1}'),
+            'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
             'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
                 writeable=True, readable=False, write_format='{1}'),
             'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
@@ -128,8 +132,8 @@ class Console(console.Variable, console.BadUartConsole):
             }
         # Add in the 14 load switch current readings
         for i in range(1, 15):
-            self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
-                'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
+            self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
+                'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
 
     def manual_mode(self):
         """Enter manual control mode."""
@@ -178,7 +182,7 @@ class Console(console.Variable, console.BadUartConsole):
 
         """
         self.action(
-            '{} {} SOLAR-SETP-V-I'.format(
+            '{0} {1} SOLAR-SETP-V-I'.format(
                 int(voltage * 1000), int(current * 1000)))
 
     def can_testmode(self, state):

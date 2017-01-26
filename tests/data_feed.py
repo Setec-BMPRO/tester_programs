@@ -146,14 +146,17 @@ class ProgramTestCase(unittest.TestCase):
 
     """Product test program wrapper."""
 
+    debug = False
+    _logger_names = ('tester', 'share', 'programs')
+
     @classmethod
     def setUpClass(cls):
         """Per-Class setup. Startup logging."""
         logging_setup()
         # Set lower level logging level
-        for name in ('tester', 'share', 'programs'):
+        for name in cls._logger_names:
             log = logging.getLogger(name)
-            log.setLevel(logging.INFO)
+            log.setLevel(logging.DEBUG if cls.debug else logging.INFO)
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
@@ -171,5 +174,9 @@ class ProgramTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Per-Class tear down."""
+        # Reset lower level logging level
+        for name in cls._logger_names:
+            log = logging.getLogger(name)
+            log.setLevel(logging.INFO)
         cls.patcher.stop()
         cls.tester.stop()

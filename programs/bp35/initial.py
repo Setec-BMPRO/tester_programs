@@ -41,6 +41,12 @@ VBAT_IN = 12.4
 VAUX_IN = 13.5
 # PFC settling level
 PFC_STABLE = 0.05
+# Converter loading
+ILOAD = 28.0
+IBATT = 4.0
+# Other settings
+VAC = 240.0
+OUTPUTS = 14
 
 
 class Initial(tester.TestSequence):
@@ -111,8 +117,7 @@ class Initial(tester.TestSequence):
         self.sernum = share.get_sernum(
             self.uuts, self.support.limits['SerNum'], mes.ui_sernum)
         tester.MeasureGroup(
-            (mes.dmm_lock, mes.hardware8, ),
-            timeout=5)
+            (mes.dmm_lock, mes.hardware8, ), timeout=5)
         # Apply DC Sources to Battery terminals and Solar Reg input
         dev.dcs_vbat.output(VBAT_IN, True)
         dev.rla_vbat.set_on()
@@ -178,9 +183,9 @@ class Initial(tester.TestSequence):
     def _step_solar_reg(self, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         bp35 = dev.bp35
-        # Switch on fixture BC282 to power Solar Reg input
+        # Switch on fixture BCE282 to power Solar Reg input
         dev.rla_acsw.set_on()
-        dev.acsource.output(voltage=240.0, output=True)
+        dev.acsource.output(voltage=VAC, output=True)
         dev.dcs_sreg.output(0.0, output=False)
         tester.MeasureGroup((mes.arm_solar_alive, mes.arm_vout_ov, ))
         # The SR needs V & I set to zero after power up or it won't start.
@@ -219,7 +224,7 @@ class Initial(tester.TestSequence):
         time.sleep(1)
         mes.arm_ioutpost.measure(timeout=5)
         dev.dcl_bat.output(0.0)
-        # Switch off fixture BC282
+        # Switch off fixture BCE282
         dev.acsource.output(voltage=0.0)
         dev.rla_acsw.set_off()
 
@@ -239,10 +244,8 @@ class Initial(tester.TestSequence):
     @teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
-        # Apply 240Vac & check
-        dev.acsource.output(voltage=240.0, output=True)
+        dev.acsource.output(voltage=VAC, output=True)
         tester.MeasureGroup((mes.dmm_acin, mes.dmm_pri12v), timeout=10)
-        # Enable PFC & DCDC converters
         dev.bp35.power_on()
         # Wait for PFC overshoot to settle
         mes.dmm_vpfc.stable(PFC_STABLE)
@@ -270,7 +273,7 @@ class Initial(tester.TestSequence):
         dev.dcl_out.output(1.0, True)
         mes.dmm_vloadoff.measure(timeout=2)
         # One at a time ON
-        for load in range(14):
+        for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
                 bp35.load_set(set_on=True, loads=(load, ))
                 mes.dmm_vload.measure(timeout=2)
@@ -293,10 +296,12 @@ class Initial(tester.TestSequence):
              mes.arm_fan, mes.dmm_fanoff), timeout=5)
         dev.bp35['FAN'] = 100
         mes.dmm_fanon.measure(timeout=5)
-        dev.dcl_out.binary(1.0, 28.0, 5.0)
-        dev.dcl_bat.output(4.0, output=True)
-        tester.MeasureGroup((mes.dmm_vbat, mes.arm_ibat, ), timeout=5)
-        for load in range(14):
+        dev.dcl_out.binary(1.0, ILOAD, 5.0)
+        dev.dcl_bat.output(IBATT, output=True)
+        tester.MeasureGroup(
+            (mes.dmm_vbat, mes.arm_ibat, mes.arm_ibus, ), timeout=5)
+        dev.bp35['BUS_ICAL'] = ILOAD + IBATT    # Calibrate converter current
+        for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
         mes.ramp_ocp.measure(timeout=5)
@@ -326,9 +331,8 @@ class Support():
         self.devices = LogicalDevices(physical_devices, fifo)
         self.limits = tester.limitdict((
             tester.LimitLo('FixtureLock', 50),
-            tester.LimitBoolean('Notify', True),
             tester.LimitHiLoDelta('HwVer8', (4400.0, 250.0)),  # Rev 8+
-            tester.LimitHiLoDelta('ACin', (240.0, 5.0)),
+            tester.LimitHiLoDelta('ACin', (VAC, 5.0)),
             tester.LimitHiLo('Vpfc', (401.0, 424.0)),
             tester.LimitHiLo('12Vpri', (11.5, 13.0)),
             tester.LimitHiLo('15Vs', (11.5, 13.0)),
@@ -336,7 +340,6 @@ class Support():
             tester.LimitLo('VloadOff', 0.5),
             tester.LimitHiLoDelta('VbatIn', (12.0, 0.5)),
             tester.LimitHiLo('Vbat', (12.2, 13.0)),
-            tester.LimitHiLo('Vsreg', (0, 9999)),
             tester.LimitHiLoDelta('Vaux', (13.4, 0.4)),
             tester.LimitHiLoDelta('3V3', (3.30, 0.05)),
             tester.LimitHiLoDelta('FanOn', (12.5, 0.5)),
@@ -347,11 +350,11 @@ class Support():
             tester.LimitHiLoPercent('VsetPost', (SOLAR_VSET, 1.5)),
             tester.LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
             tester.LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
-            tester.LimitHiLo('OCP', (6.0, 9.0)),
+            tester.LimitHiLo('OCP', (34.0 - ILOAD, 37.0 - ILOAD)),
             tester.LimitLo('InOCP', 11.6),
             tester.LimitString(
                 'ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
-            tester.LimitHiLoDelta('ARM-AcV', (240.0, 10.0)),
+            tester.LimitHiLoDelta('ARM-AcV', (VAC, 10.0)),
             tester.LimitHiLoDelta('ARM-AcF', (50.0, 1.0)),
             tester.LimitHiLo('ARM-SecT', (8.0, 70.0)),
             tester.LimitHiLoDelta('ARM-Vout', (12.45, 0.45)),
@@ -361,7 +364,8 @@ class Support():
                 'ARM-SolarVin-Post', (SOLAR_VIN, SOLAR_VIN_POST_PERCENT)),
             tester.LimitHiLo('ARM-Fan', (0, 100)),
             tester.LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
-            tester.LimitHiLoDelta('ARM-BattI', (4.0, 1.0)),
+            tester.LimitHiLoDelta('ARM-BattI', (IBATT, 1.0)),
+            tester.LimitHiLoDelta('ARM-BusI', (ILOAD + IBATT, 3.0)),
             tester.LimitHiLoDelta('ARM-AuxV', (13.4, 0.4)),
             tester.LimitHiLo('ARM-AuxI', (0.0, 1.5)),
             tester.LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
@@ -496,11 +500,12 @@ class Sensors():
         self.arm_vout = console.Sensor(bp35, 'BUS_V')
         self.arm_fan = console.Sensor(bp35, 'FAN')
         self.arm_canbind = console.Sensor(bp35, 'CAN_BIND')
-        # Generate 14 load current sensors
+        # Generate load current sensors
         self.arm_loads = []
-        for i in range(1, 15):
+        for i in range(1, OUTPUTS + 1):
             self.arm_loads.append(console.Sensor(bp35, 'LOAD_{0}'.format(i)))
         self.arm_ibat = console.Sensor(bp35, 'BATT_I')
+        self.arm_ibus = console.Sensor(bp35, 'BUS_I')
         self.arm_vaux = console.Sensor(bp35, 'AUX_V')
         self.arm_iaux = console.Sensor(bp35, 'AUX_I')
         self.arm_solar_alive = console.Sensor(bp35, 'SR_ALIVE')
@@ -557,11 +562,12 @@ class Measurements():
         self.arm_vout = self._maker('ARM-Vout', sense.arm_vout)
         self.arm_fan = self._maker('ARM-Fan', sense.arm_fan)
         self.arm_can_bind = self._maker('CAN_BIND', sense.arm_canbind)
-        # Generate 14 load current measurements
+        # Generate load current measurements
         self.arm_loads = []
         for sen in sense.arm_loads:
             self.arm_loads.append(self._maker('ARM-LoadI', sen))
         self.arm_ibat = self._maker('ARM-BattI', sense.arm_ibat)
+        self.arm_ibus = self._maker('ARM-BusI', sense.arm_ibus)
         self.arm_vaux = self._maker('ARM-AuxV', sense.arm_vaux)
         self.arm_iaux = self._maker('ARM-AuxI', sense.arm_iaux)
         self.arm_solar_alive = self._maker(
