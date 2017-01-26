@@ -13,6 +13,32 @@ from .ticker import *
 from .timed_data import *
 
 
+class AttrDict():
+
+    """Store dictionary data and expose as instance attributes."""
+
+    def __init__(self, classname):
+        self.name = classname
+        self.attr = {}
+
+    def __getattr__(self, name):
+        """Access dictionary entries as instance attributes."""
+        if name in self.attr:
+            return self.attr[name]
+        else:
+            raise AttributeError(
+                "'{0}' object has no attribute '{1}'".format(self.name, name))
+
+    def save(self, name, value):
+        """Save a value into the attribute dictionary.
+
+        @param name Attribute name
+        @param value Attribute value
+
+        """
+        self.attr[name] = value
+
+
 def teststep(func):
     """Decorator to add arguments to the test step calls.
 
