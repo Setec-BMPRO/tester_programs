@@ -32,9 +32,11 @@ class UnitTester(tester.Tester):
         """Initalise the data feeder."""
         # Create a 'real' Tester instance
         super().__init__(
-            'MockATE', (('ProgName', prog_class, prog_limit), ), fifo=True)
+            'MockATE',
+            ((repr(prog_class), prog_class, prog_limit), ),
+            fifo=True)
         self.ut_program = tester.TestProgram(
-            'ProgName', per_panel=1, parameter=None, test_limits=[])
+            repr(prog_class), per_panel=1, parameter=None, test_limits=[])
         self.ut_result = None
         self.ut_steps = []
         self.ut_data = None
@@ -148,9 +150,10 @@ class ProgramTestCase(unittest.TestCase):
     def setUpClass(cls):
         """Per-Class setup. Startup logging."""
         logging_setup()
-        # Set lower level logging
-        log = logging.getLogger('tester')
-        log.setLevel(logging.INFO)
+        # Set lower level logging level
+        for name in ('tester', 'share', 'programs'):
+            log = logging.getLogger(name)
+            log.setLevel(logging.INFO)
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()

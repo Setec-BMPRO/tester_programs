@@ -85,9 +85,9 @@ class ConsoleCanTunnel():
 
     def open(self):
         """Open the CAN tunnel."""
-        self._logger.info('Open CAN tunnel buffer port')
+        self._logger.debug('Open CAN tunnel buffer port')
         self._buf_port.open()
-        self._logger.info('Open CAN tunnel serial port')
+        self._logger.debug('Open CAN tunnel serial port')
         self.port.open()
         # Switch console echo OFF
         self.port.flushInput()
@@ -121,9 +121,9 @@ class ConsoleCanTunnel():
         """Close the CAN tunnel."""
         self.action(
             '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id))
-        self._logger.info('Close CAN tunnel serial port')
+        self._logger.debug('Close CAN tunnel serial port')
         self.port.close()
-        self._logger.info('Close CAN tunnel buffer port')
+        self._logger.debug('Close CAN tunnel buffer port')
         self._buf_port.close()
         self._logger.debug('CAN Tunnel closed')
 

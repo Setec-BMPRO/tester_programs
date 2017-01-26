@@ -7,7 +7,7 @@ from .data_feed import UnitTester, ProgramTestCase
 from programs import bp35
 
 _PROG_CLASS = bp35.Initial
-_PROG_LIMIT = bp35.INI_LIMIT
+_PROG_LIMIT = ()
 
 
 class BP35Initial(ProgramTestCase):
@@ -19,28 +19,28 @@ class BP35Initial(ProgramTestCase):
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
-        sen = self.test_program.sensor
+        sen = self.test_program.support.sensors
         for sensor in sen.arm_loads:
             sensor.store(value)
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensor
-        dev = self.test_program.logdev
+        sen = self.test_program.support.sensors
+        dev = self.test_program.support.devices
         dev.bp35_ser.flushInput()       # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
-                    ((sen.lock, 10.0), (sen.hardware, 1000),
+                    ((sen.lock, 10.0), (sen.hardware, 4400),
                      (sen.vbat, 12.0), (sen.o3v3, 3.3), (sen.solarvcc, 3.3),
                      (sen.sernum, ('A1626010123', )), ),
                 'Initialise': ((sen.sernum, ('A1526040123', )), ),
                 'SolarReg':
-                    ((sen.vsreg, (13.0, 13.5)), (sen.solarvin, 19.55), ),
+                    ((sen.vset, (13.0, 13.5)), (sen.solarvin, 19.55), ),
                 'Aux': ((sen.vbat, 13.5), ),
                 'PowerUp':
                     ((sen.acin, 240.0), (sen.pri12v, 12.5), (sen.o3v3, 3.3),
-                     (sen.o15Vs, 12.5), (sen.vbat, 12.8),
+                     (sen.o15vs, 12.5), (sen.vbat, 12.8),
                      (sen.vpfc, (415.0, 415.0), )),
                 'Output': ((sen.vload, (0.0, ) + (12.8, ) * 14), ),
                 'RemoteSw': ((sen.vload, (0.25, 12.34)), ),
@@ -57,7 +57,7 @@ class BP35Initial(ProgramTestCase):
                     ('', ) + ('success', ) * 2 + ('', ) * 4 +
                     ('Banner1\r\nBanner2', ) +
                     ('', ) +
-                    (bp35.initial.limit.ARM_VERSION, ) +
+                    (bp35.initial.ARM_VERSION, ) +
                     ('', ) + ('0x10000', ) + ('', ) * 3,      # Manual mode
                 'SolarReg':
                     ('1.0', '0') +      # Solar alive, Vout OV
@@ -86,7 +86,7 @@ class BP35Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(73, len(result.readings))  # Reading count
+        self.assertEqual(72, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'SolarReg', 'Aux', 'PowerUp',
@@ -104,11 +104,12 @@ class BP35Initial(ProgramTestCase):
         patcher = patch('threading.Timer', return_value=mymock)
         self.addCleanup(patcher.stop)
         patcher.start()
-        sen = self.test_program.sensor
+        sen = self.test_program.support.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
-                    ((sen.lock, 10.0), (sen.sernum, ('A1626010123', )),
+                    ((sen.lock, 10.0), (sen.hardware, 4400),
+                     (sen.sernum, ('A1626010123', )),
                      (sen.vbat, 2.5), ),   # Vbat will fail
                 },
             }
@@ -116,5 +117,5 @@ class BP35Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('F', result.code)      # Must have failed
-        self.assertEqual(5, len(result.readings))
+        self.assertEqual(4, len(result.readings))
         self.assertEqual(['Prepare'], self.tester.ut_steps)
