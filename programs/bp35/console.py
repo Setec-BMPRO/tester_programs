@@ -135,14 +135,19 @@ class Console(console.Variable, console.BadUartConsole):
             self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
 
-    def manual_mode(self):
-        """Enter manual control mode."""
+    def manual_mode(self, voltage, current):
+        """Enter manual control mode.
+
+        @param voltage Output voltage setting
+        @param current Output OCP setting
+
+        """
         self['SET_MODE'] = 3
         mode = 0
         while mode != 0x10000:      # Wait for the operating mode to change
             mode = self['OPERATING_MODE']
-        self['VOUT'] = 12.8
-        self['IOUT'] = 35.0
+        self['VOUT'] = voltage
+        self['IOUT'] = current
         self['VOUT_OV'] = 2     # OVP Latch reset
 
     def power_on(self):

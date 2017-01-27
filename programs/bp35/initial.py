@@ -46,6 +46,8 @@ IBATT = 4.0
 # Other settings
 VAC = 240.0
 OUTPUTS = 14
+VOUT_SET = 12.8
+OCP_NOMINAL = 36.5
 
 
 class Initial(tester.TestSequence):
@@ -169,7 +171,7 @@ class Initial(tester.TestSequence):
         bp35.action(None, delay=1.5, expected=2)  # Flush banner
         bp35['UNLOCK'] = True
         mes['arm_swver']()
-        bp35.manual_mode()
+        bp35.manual_mode(VOUT_SET, OCP_NOMINAL)
 
     @teststep
     def _step_solar_reg(self, dev, mes):
@@ -338,7 +340,7 @@ class Support(SupportBase):
             tester.LimitHiLoPercent('VsetPost', (SOLAR_VSET, 1.5)),
             tester.LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
             tester.LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
-            tester.LimitHiLo('OCP', (34.0 - ILOAD, 37.0 - ILOAD)),
+            tester.LimitHiLoPercent('OCP', (OCP_NOMINAL - ILOAD, 4.0)),
             tester.LimitLo('InOCP', 11.6),
             tester.LimitString(
                 'ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
