@@ -5,7 +5,7 @@
 
 import logging
 import tester
-from share import teststep
+from share import teststep, SupportBase, AttributeDict
 
 
 class Final(tester.TestSequence):
@@ -47,17 +47,18 @@ class Final(tester.TestSequence):
 
     @teststep
     def _step_powerup(self, dev, mes):
-        """Power-Up the Unit with 240Vac and measure output voltages."""
-        dev.acsource.output(voltage=240.0, output=True)
-        mes.dmm_vbat.measure(timeout=10)
+        """Power-Up the Unit and measure output voltages."""
+        dev['acsource'].output(voltage=240.0, output=True)
+        mes['dmm_vbat'].measure(timeout=10)
 
 
-class Support():
+class Support(SupportBase):
 
     """Supporting data."""
 
     def __init__(self, physical_devices):
         """Create all supporting classes."""
+        super().__init__()
         self.devices = LogicalDevices(physical_devices)
         self.limits = tester.limitdict((
             tester.LimitHiLoDelta('Vbat', (12.8, 0.2)),
@@ -65,12 +66,8 @@ class Support():
         self.sensors = Sensors(self.devices, self.limits)
         self.measurements = Measurements(self.sensors, self.limits)
 
-    def reset(self):
-        """Reset instruments."""
-        self.devices.reset()
 
-
-class LogicalDevices():
+class LogicalDevices(AttributeDict):
 
     """Logical Devices."""
 
@@ -80,15 +77,16 @@ class LogicalDevices():
            @param devices Physical instruments of the Tester
 
         """
-        self.dmm = tester.DMM(devices['DMM'])
-        self.acsource = tester.ACSource(devices['ACS'])
+        super().__init__()
+        self['dmm'] = tester.DMM(devices['DMM'])
+        self['acsource'] = tester.ACSource(devices['ACS'])
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.output(voltage=0.0, output=False)
+        self['acsource'].output(voltage=0.0, output=False)
 
 
-class Sensors():
+class Sensors(AttributeDict):
 
     """Sensors."""
 
@@ -99,11 +97,12 @@ class Sensors():
            @param limits Product test limits
 
         """
-        self.vbat = tester.sensor.Vdc(
-            logical_devices.dmm, high=1, low=1, rng=100, res=0.001)
+        super().__init__()
+        self['vbat'] = tester.sensor.Vdc(
+            logical_devices['dmm'], high=1, low=1, rng=100, res=0.001)
 
 
-class Measurements():
+class Measurements(AttributeDict):
 
     """Measurements."""
 
@@ -114,4 +113,5 @@ class Measurements():
            @param limits Product test limits
 
         """
-        self.dmm_vbat = tester.Measurement(limits['Vbat'], sense.vbat)
+        super().__init__()
+        self['dmm_vbat'] = tester.Measurement(limits['Vbat'], sense['vbat'])

@@ -4,6 +4,7 @@
 """Shared modules for Tester programs."""
 
 from functools import wraps
+from abc import ABC, abstractmethod
 # Easy access to utility methods and classes
 from .bluetooth import *
 from .console import *
@@ -13,34 +14,62 @@ from .ticker import *
 from .timed_data import *
 
 
-class AttrDict():
+class AttributeDict(dict):
 
-    """Store dictionary data and expose as instance attributes."""
-
-    def __init__(self, classname):
-        self.name = classname
-        self.attr = {}
+    """A dictionary that exposes the keys as instance attributes."""
 
     def __getattr__(self, name):
-        """Access dictionary entries as instance attributes."""
-        if name in self.attr:
-            return self.attr[name]
-        else:
-            raise AttributeError(
-                "'{0}' object has no attribute '{1}'".format(self.name, name))
-
-    def save(self, name, value):
-        """Save a value into the attribute dictionary.
+        """Access dictionary entries as instance attributes.
 
         @param name Attribute name
-        @param value Attribute value
+        @return Entry value
 
         """
-        self.attr[name] = value
+        try:
+            return self[name]
+        except KeyError as exc:
+            raise AttributeError(
+                "'{0}' object has no attribute '{1}'".format(
+                self.__class__.__name__, name)) from exc
+
+
+class SupportBase(ABC):
+
+    """Supporting data base class."""
+
+    @abstractmethod
+    def __init__(self):
+        """Create all supporting classes."""
+        self.devices = None
+        self.limits = None
+        self.sensors = None
+        self.measurements = None
+
+    def measure_group(self, names, timeout=0):
+        """Measure a group of measurements given the measurement names.
+
+        @param names Measurement names
+        @param timeout Measurement timeout
+
+        """
+        measurements = []
+        for name in names:
+            measurements.append(self.measurements[name])
+        tester.MeasureGroup(measurements, timeout)
+
+    def reset(self):
+        """Reset logical devices."""
+        self.devices.reset()
+
+    def close(self):
+        """Close logical devices."""
+        self.devices.close()
 
 
 def teststep(func):
     """Decorator to add arguments to the test step calls.
+
+    Requires self.support.devices and self.support.measurements
 
     @return Decorated function
 
@@ -54,6 +83,8 @@ def teststep(func):
 
 def oldteststep(func):
     """Deprecated decorator to add arguments to the test step calls.
+
+    Requires self.logdev and self.meas
 
     @return Decorated function
 
