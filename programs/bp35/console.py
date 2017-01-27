@@ -40,7 +40,7 @@ class Console(console.Variable, console.BadUartConsole):
                 minimum=0.0, maximum=14.0, scale=1000),
             'IOUT': ParameterFloat(
                 'CONVERTER_CURRENT_SETPOINT', writeable=True,
-                minimum=15.0, maximum=35.0, scale=1000),
+                minimum=15.0, maximum=40.0, scale=1000),
             'LOAD_DIS': ParameterFloat(
                 'LOAD_SWITCHES_INHIBITED', writeable=True,
                 minimum=0, maximum=1, scale=1),
@@ -91,10 +91,6 @@ class Console(console.Variable, console.BadUartConsole):
             'BATT_T': ParameterFloat('BATTERY_TEMPERATURE', scale=10),
             'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
             'BUS_I': ParameterFloat('CONVERTER_CURRENT', scale=1000),
-            'BUS_ICAL': ParameterFloat(
-                'ICONV', writeable=True,    # an undocumented command...
-                write_format='{0} "{1} CAL',
-                scale=1000),
             'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
             'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
             'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),

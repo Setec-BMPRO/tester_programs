@@ -78,7 +78,7 @@ class BP35Initial(ProgramTestCase):
                 'Output': ('', ) * (1 + 14 + 1),
                 'OCP':
                     ('240', '50000', '350', '12800', '500', ) +
-                    ('', '4000', '32000', '', ),
+                    ('', '4000', '32000', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
