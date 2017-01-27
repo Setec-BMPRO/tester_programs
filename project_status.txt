@@ -1,0 +1,42 @@
+Tester Programs project status as of 2017-01-27
+===============================================
+
+1st generation test programs used these constructional elements:
+
+    Typically 3 files for each program in a 'test-type' sub-directory:
+        __init__.py     The test program
+        support.py      Supporting data (LogicalDevice, Sensor, Measurement)
+        limit.py        Test limits
+
+    A collection of global variables, which can be identified by the lines at
+    the top of the program:
+    >   # These are module level variables...
+    >   d = s = m = t = None
+
+====
+
+2nd generation test programs used these constructional elements:
+
+    Typically 3 files for each program in a 'test-type' sub-directory:
+        __init__.py     The test program
+        support.py      Supporting data (Log.Devices, Sensor, Measurements)
+        limit.py        Test limits
+
+    Global variables are replaced by "@oldteststep" decorators on test steps
+    to provide the (LogicalDevice, Measurement) arguments to the test steps.
+
+====
+
+3rd generation test programs used these constructional elements:
+
+    Typically 1 file for each program, and NO sub-directory:
+        initial.py      The test program and all related items
+
+    "@oldteststep" decorators are replaced by "@teststep" decorators on test
+    steps to provide the (LogicalDevice, Measurement) arguments to the test steps.
+
+    A "Support" class to manage the LogicalDevice/Sensor/Measurement data.
+    Inherits from a base class that provides common methods.
+
+    LogicalDevice/Sensor/Measurement all inherit from "AttributeDict", which
+    stores data in a dictionary and allows access to keys as instance attributes.
