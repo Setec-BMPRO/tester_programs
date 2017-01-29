@@ -106,13 +106,13 @@ class BaseConsole():
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._port = port
+        self.port = port
         self.ignore = ()    # Tuple of strings to remove from responses
         self._verbose = verbose
 
     def open(self):
         """Open port."""
-        self._port.open()
+        self.port.open()
 
     def puts(self, string_data, preflush=0, postflush=0, priority=False):
         """Put a string into the read-back buffer.
@@ -123,11 +123,11 @@ class BaseConsole():
         @param priority True to put in front of the buffer.
 
         """
-        self._port.puts(string_data, preflush, postflush, priority)
+        self.port.puts(string_data, preflush, postflush, priority)
 
     def close(self):
         """Close serial communications."""
-        self._port.close()
+        self.port.close()
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
@@ -141,9 +141,9 @@ class BaseConsole():
         """
         try:
             if command:
-                if self._port.simulation:   # Auto simulate the command echo
-                    self._port.puts(command, preflush=1, priority=True)
-                self._port.flushInput()
+                if self.port.simulation:   # Auto simulate the command echo
+                    self.port.puts(command, preflush=1, priority=True)
+                self.port.flushInput()
                 self._write_command(command)
             if delay:
                 time.sleep(delay)
@@ -166,9 +166,9 @@ class BaseConsole():
         # Send the command with a '\r'
         cmd_data = command.encode()
         self._logger.debug('Cmd --> %s', repr(cmd_data))
-        self._port.write(cmd_data + b'\r')
+        self.port.write(cmd_data + b'\r')
         # Read back the echo of the command
-        cmd_echo = self._port.read(len(cmd_data))
+        cmd_echo = self.port.read(len(cmd_data))
         if self._verbose:
             self._logger.debug('Echo <-- %s', repr(cmd_echo))
         # The echo must match what we sent
@@ -189,7 +189,7 @@ class BaseConsole():
         # Read bytes until the command prompt is seen.
         buf = bytearray()           # Buffer for the response bytes
         while _CMD_PROMPT not in buf:
-            data = self._port.read(1)
+            data = self.port.read(1)
             if self._verbose:
                 self._logger.debug('Read <-- %s', repr(data))
             if len(data) == 0:              # No data means a timeout
@@ -238,8 +238,8 @@ class BadUartConsole(BaseConsole):
         # Send each byte with echo verification
         for a_byte in cmd_data:
             a_byte = bytes([a_byte])    # We need a byte, not an integer
-            self._port.write(a_byte)
-            echo = self._port.read(1)
+            self.port.write(a_byte)
+            echo = self.port.read(1)
             if self._verbose:
                 self._logger.debug(' Tx -> %s Rx <- %s', a_byte, echo)
             if echo != a_byte:
@@ -247,4 +247,4 @@ class BadUartConsole(BaseConsole):
                     'Command echo error. Tx: {}, Rx: {}'.format(
                         a_byte, echo))
         # And the '\r' without echo
-        self._port.write(b'\r')
+        self.port.write(b'\r')

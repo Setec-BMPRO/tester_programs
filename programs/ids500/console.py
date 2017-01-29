@@ -94,7 +94,7 @@ class Console(console.Variable, console.BaseConsole):
         # Send the command with a '\r\n'
         cmd_data = command.encode()
         self._logger.debug('Cmd --> %s', repr(cmd_data))
-        self._port.write(cmd_data + b'\r\n')
+        self.port.write(cmd_data + b'\r\n')
 
     def _read_response(self, expected):
         """Read the response to a command.
@@ -106,7 +106,7 @@ class Console(console.Variable, console.BaseConsole):
         """
         all_response = []
         for _ in range(expected):
-            data = self._port.readline()
+            data = self.port.readline()
             data = data.replace(b'\r', b'')   # Remove '\r'
             data = data.replace(b'\n', b'')   # Remove '\n'
             response = data.decode(errors='ignore')

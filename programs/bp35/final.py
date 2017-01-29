@@ -3,7 +3,6 @@
 # Copyright 2017 SETEC Pty Ltd
 """BP35 Final Test Program."""
 
-import logging
 import tester
 from share import teststep, SupportBase, AttributeDict
 
@@ -21,14 +20,11 @@ class Final(tester.TestSequence):
 
         """
         super().__init__(selection, None, fifo)
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
         self.devices = physical_devices
         self.support = None
 
     def open(self):
         """Prepare for testing."""
-        self._logger.info('Open')
         self.support = Support(self.devices)
         sequence = (
             tester.TestStep('PowerUp', self._step_powerup),
@@ -37,16 +33,14 @@ class Final(tester.TestSequence):
 
     def close(self):
         """Finished testing."""
-        self._logger.info('Close')
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety')
         self.support.reset()
 
     @teststep
-    def _step_powerup(self, dev, mes):
+    def _step_powerup(self, sup, dev, mes):
         """Power-Up the Unit and measure output voltages."""
         dev['acsource'].output(voltage=240.0, output=True)
         mes['dmm_vbat'].measure(timeout=10)

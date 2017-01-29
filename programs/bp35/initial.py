@@ -67,12 +67,10 @@ class Initial(tester.TestSequence):
         self.devices = physical_devices
         self.sernum = None
         self.support = None
-        self.measure_group = None
 
     def open(self, sequence=None):
         """Prepare for testing."""
         self.support = Support(self.devices, self.fifo)
-        self.measure_group = self.support.measure_group
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('Prepare', self._step_prepare),
@@ -101,7 +99,7 @@ class Initial(tester.TestSequence):
         self.support.reset()
 
     @teststep
-    def _step_prepare(self, dev, mes):
+    def _step_prepare(self, sup, dev, mes):
         """Prepare to run a test.
 
         Measure fixture lock and part detection micro-switches.
@@ -110,17 +108,16 @@ class Initial(tester.TestSequence):
 
         """
         self.sernum = share.get_sernum(
-            self.uuts, self.support.limits['SerNum'], mes['ui_sernum'])
-        self.measure_group(('dmm_lock', 'hardware8', ), timeout=5)
+            self.uuts, sup.limits['SerNum'], mes['ui_sernum'])
+        sup.measure(('dmm_lock', 'hardware8', ), timeout=5)
         # Apply DC Sources to Battery terminals and Solar Reg input
         dev['dcs_vbat'].output(VBAT_IN, True)
         dev['rla_vbat'].set_on()
         dev['dcs_sreg'].output(SOLAR_VIN, True)
-        self.measure_group(
-            ('dmm_vbatin', 'dmm_3v3', 'dmm_solarvcc'), timeout=5)
+        sup.measure(('dmm_vbatin', 'dmm_3v3', 'dmm_solarvcc'), timeout=5)
 
     @teststep
-    def _step_program_pic(self, dev, mes):
+    def _step_program_pic(self, sup, dev, mes):
         """Program the dsPIC device.
 
         Device is powered by Solar Reg input voltage.
@@ -130,7 +127,7 @@ class Initial(tester.TestSequence):
         dev['dcs_sreg'].output(0.0)     # Switch off the Solar
 
     @teststep
-    def _step_program_arm(self, dev, mes):
+    def _step_program_arm(self, sup, dev, mes):
         """Program the ARM device.
 
         Device is powered by injected Battery voltage.
@@ -146,7 +143,7 @@ class Initial(tester.TestSequence):
         dcsource.output(VBAT_IN)
 
     @teststep
-    def _step_initialise_arm(self, dev, mes):
+    def _step_initialise_arm(self, sup, dev, mes):
         """Initialise the ARM device.
 
         Device is powered by injected Battery voltage.
@@ -174,14 +171,14 @@ class Initial(tester.TestSequence):
         bp35.manual_mode(VOUT_SET, OCP_NOMINAL)
 
     @teststep
-    def _step_solar_reg(self, dev, mes):
+    def _step_solar_reg(self, sup, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         bp35 = dev['bp35']
         # Switch on fixture BCE282 to power Solar Reg input
         dev['rla_acsw'].set_on()
         dev['acsource'].output(voltage=VAC, output=True)
         dev['dcs_sreg'].output(0.0, output=False)
-        self.measure_group(('arm_solar_alive', 'arm_vout_ov', ))
+        sup.measure(('arm_solar_alive', 'arm_vout_ov', ))
         # The SR needs V & I set to zero after power up or it won't start.
         bp35.solar_set(0, 0)
         # Now set the actual output settings
@@ -197,7 +194,7 @@ class Initial(tester.TestSequence):
             tester.testlimit.LimitHiLoPercent(
                 'ARM-SolarVin-Post', (solar_vin, SOLAR_VIN_POST_PERCENT)), )
         # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
-        self.measure_group(
+        sup.measure(
             ('arm_solar_error', 'arm_solar_relay', 'arm_solar_vin_pre', ))
         vmeasured = mes['dmm_vsetpre'](timeout=5).reading1
         bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
@@ -207,7 +204,7 @@ class Initial(tester.TestSequence):
         bp35.solar_set(SOLAR_VSET - 0.05, SOLAR_ISET)
         bp35.solar_set(SOLAR_VSET, SOLAR_ISET)
         time.sleep(1)
-        self.measure_group(('arm_solar_vin_post', 'dmm_vsetpost', ))
+        sup.measure(('arm_solar_vin_post', 'dmm_vsetpost', ))
         dev['dcl_bat'].output(SOLAR_ICAL, True)
         mes['arm_ioutpre'](timeout=5)
         bp35['SR_ICAL'] = SOLAR_ICAL  # Calibrate current setpoint
@@ -219,22 +216,22 @@ class Initial(tester.TestSequence):
         dev['rla_acsw'].set_off()
 
     @teststep
-    def _step_aux(self, dev, mes):
+    def _step_aux(self, sup, dev, mes):
         """Apply Auxiliary input."""
         bp35, source, load = dev['bp35'], dev['dcs_vaux'], dev['dcl_bat']
         source.output(VAUX_IN, output=True)
         load.output(0.5)
         bp35['AUX_RELAY'] = True
-        self.measure_group(('dmm_vaux', 'arm_vaux', 'arm_iaux'), timeout=5)
+        sup.measure(('dmm_vaux', 'arm_vaux', 'arm_iaux'), timeout=5)
         bp35['AUX_RELAY'] = False
         source.output(0.0, output=False)
         load.output(0.0)
 
     @teststep
-    def _step_powerup(self, dev, mes):
+    def _step_powerup(self, sup, dev, mes):
         """Power-Up the Unit with AC."""
         dev['acsource'].output(voltage=VAC, output=True)
-        self.measure_group(('dmm_acin', 'dmm_pri12v'), timeout=10)
+        sup.measure(('dmm_acin', 'dmm_pri12v'), timeout=10)
         dev['bp35'].power_on()
         # Wait for PFC overshoot to settle
         mes['dmm_vpfc'].stable(PFC_STABLE)
@@ -244,10 +241,10 @@ class Initial(tester.TestSequence):
         dev['dcs_vbat'].output(0.0, output=False)
         # Is it now running on it's own?
         mes['arm_vout_ov']()
-        self.measure_group(('dmm_3v3', 'dmm_15vs', 'dmm_vbat'), timeout=10)
+        sup.measure(('dmm_3v3', 'dmm_15vs', 'dmm_vbat'), timeout=10)
 
     @teststep
-    def _step_output(self, dev, mes):
+    def _step_output(self, sup, dev, mes):
         """Test the output switches.
 
         Each output is turned ON in turn.
@@ -269,7 +266,7 @@ class Initial(tester.TestSequence):
         bp35.load_set(set_on=False, loads=())
 
     @teststep
-    def _step_remote_sw(self, dev, mes):
+    def _step_remote_sw(self, sup, dev, mes):
         """Test Remote Load Isolator Switch."""
         relay = dev['rla_loadsw']
         relay.set_on()
@@ -278,17 +275,17 @@ class Initial(tester.TestSequence):
         mes['dmm_vload'](timeout=5)
 
     @teststep
-    def _step_ocp(self, dev, mes):
+    def _step_ocp(self, sup, dev, mes):
         """Test functions of the unit."""
         bp35 = dev['bp35']
-        self.measure_group(
-            ('arm_acv', 'arm_acf', 'arm_sect', 'arm_vout',
-             'arm_fan', 'dmm_fanoff'), timeout=5)
+        sup.measure(
+            ('arm_acv', 'arm_acf', 'arm_sect', 'arm_vout', 'arm_fan',
+             'dmm_fanoff'), timeout=5)
         bp35['FAN'] = 100
         mes['dmm_fanon'](timeout=5)
         dev['dcl_out'].binary(1.0, ILOAD, 5.0)
         dev['dcl_bat'].output(IBATT, output=True)
-        self.measure_group(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
+        sup.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
         for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
@@ -296,7 +293,7 @@ class Initial(tester.TestSequence):
         dev['dcl_bat'].output(0.0)
 
     @teststep
-    def _step_canbus(self, dev, mes):
+    def _step_canbus(self, sup, dev, mes):
         """Test the Can Bus."""
         bp35 = dev['bp35']
         mes['arm_can_bind'](timeout=10)
@@ -419,15 +416,6 @@ class LogicalDevices(AttributeDict):
         self['bp35'] = console.Console(self['bp35_ser'])
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
-
-    def bp35_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
-        """Push string data into the BP35 buffer if FIFOs are enabled."""
-        if self.fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self['bp35'].puts(string_data, preflush, postflush, priority)
 
     def reset(self):
         """Reset instruments."""

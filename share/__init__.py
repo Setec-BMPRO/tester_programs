@@ -5,6 +5,7 @@
 
 from functools import wraps
 from abc import ABC, abstractmethod
+import time
 # Easy access to utility methods and classes
 from .bluetooth import *
 from .console import *
@@ -45,7 +46,15 @@ class SupportBase(ABC):
         self.sensors = None
         self.measurements = None
 
-    def measure_group(self, names, timeout=0):
+    def reset(self):
+        """Reset logical devices."""
+        self.devices.reset()
+
+    def close(self):
+        """Close logical devices."""
+        self.devices.close()
+
+    def measure(self, names, timeout=0):
         """Measure a group of measurements given the measurement names.
 
         @param names Measurement names
@@ -57,13 +66,73 @@ class SupportBase(ABC):
             measurements.append(self.measurements[name])
         tester.MeasureGroup(measurements, timeout)
 
-    def reset(self):
-        """Reset logical devices."""
-        self.devices.reset()
+    def dcload(self, setting, output=True, delay=0):
+        """DC Load setter.
 
-    def close(self):
-        """Close logical devices."""
-        self.devices.close()
+        @param setting Iterable of Tuple of (DcLoad name, Current)
+        @param output Boolean to control output enable
+        @param delay Time delay after all setting are made
+
+        """
+        for dcl, current in setting:
+            self.devices[dcl].output(current, output)
+        time.sleep(delay)
+
+    def dcsource(self, setting, output=True, delay=0):
+        """DC Source setter.
+
+        @param setting Iterable of Tuple of (DcSource name, Voltage)
+        @param output Boolean to control output enable
+        @param delay Time delay after all setting are made
+
+        """
+        for dcs, voltage in setting:
+            self.devices[dcs].output(voltage, output)
+        time.sleep(delay)
+
+    def relay(self, relays, delay=0):
+        """Relay setter.
+
+        @param relays Iterable of Tuple of (Relay name, State)
+                        (True=on | False=Off)
+        @param delay Time delay after all setting are made
+
+        """
+        for rla, state in relays:
+            rla = self.devices[rla]
+            if state:
+                rla.set_on()
+            else:
+                rla.set_off()
+        time.sleep(delay)
+
+    def ramp_linear(self, setting, output=True, delay=0):
+        """Linear ramping.
+
+        @param setting Iterable of Tuple of (Instrument name, Start, End, Step)
+        @param output Boolean to control output enable
+        @param delay Time delay after all setting are made
+
+        """
+        for instr, start, end, step in setting:
+            instr = self.devices[instr]
+            instr.output(start, output)
+            instr.linear(start, end, step)
+        time.sleep(delay)
+
+    def ramp_binary(self, setting, output=True, delay=0):
+        """Binary ramping.
+
+        @param setting Iterable of Tuple of (Instrument name, Start, End, Step)
+        @param output Boolean to control output enable
+        @param delay Time delay after all setting are made
+
+        """
+        for instr, start, end, step in setting:
+            instr = self.devices[instr]
+            instr.output(start, output)
+            instr.binary(start, end, step)
+        time.sleep(delay)
 
 
 def teststep(func):
@@ -77,7 +146,9 @@ def teststep(func):
     @wraps(func)
     def new_func(self):
         """Decorate the function."""
-        return func(self, self.support.devices, self.support.measurements)
+        return func(
+            self, self.support,
+            self.support.devices, self.support.measurements)
     return new_func
 
 

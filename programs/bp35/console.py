@@ -131,6 +131,15 @@ class Console(console.Variable, console.BadUartConsole):
             self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
 
+    def puts(self,
+             string_data, preflush=0, postflush=0, priority=False,
+             addprompt=True):
+        """Push string data into the buffer if simulating."""
+        if self.port.simulation:
+            if addprompt:
+                string_data = string_data + '\r\n> '
+            super().puts(string_data, preflush, postflush, priority)
+
     def manual_mode(self, voltage, current):
         """Enter manual control mode.
 
