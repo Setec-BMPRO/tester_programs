@@ -49,3 +49,30 @@ class Console(console.Variable, console.BaseConsole):
             }
         # Strings to ignore in responses
         self.ignore = (' ', 'Hz', 'Vrms', 'mV')
+
+    def puts(self,
+             string_data, preflush=0, postflush=0, priority=False,
+             addprompt=True):
+        """Push string data into the buffer, if FIFOs are enabled."""
+        if self.port.simulation:
+            if addprompt:
+                string_data = string_data + '\r> '
+            super().puts(string_data, preflush, postflush, priority)
+
+    def calpfc(self, voltage):
+        """Issue PFC calibration commands.
+
+        @param voltage Measured PFC bus voltage
+
+        """
+        self['CAL_PFC'] = voltage
+        self['NVWRITE'] = True
+
+    def cal12v(self, voltage):
+        """Issue 12V calibration commands.
+
+        @param voltage Measured 12V rail voltage
+
+        """
+        self['CAL_12V'] = voltage
+        self['NVWRITE'] = True

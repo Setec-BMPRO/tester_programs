@@ -4,7 +4,6 @@
 """GEN8 Initial Test Program."""
 
 import time
-import logging
 import tester
 from share import oldteststep
 from . import support
@@ -20,8 +19,6 @@ class Initial(tester.TestSequence):
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         super().__init__(selection, None, fifo)
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
         self.devices = physical_devices
         self.limits = test_limits
         self.logdev = None
@@ -30,14 +27,13 @@ class Initial(tester.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        self._logger.info('Open')
         self.logdev = support.LogicalDevices(self.devices, self.fifo)
         self.sensor = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensor, self.limits)
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('PartDetect', self._step_part_detect),
-            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('5V', self._step_reg_5v),
@@ -45,19 +41,15 @@ class Initial(tester.TestSequence):
             tester.TestStep('24V', self._step_reg_24v),
             )
         super().open(sequence)
-        # Switch on fixture power
-        self.logdev.dcs_fixture.output(10.0, output=True)
 
     def close(self):
         """Finished testing."""
-        self._logger.info('Close')
         # Switch off fixture power
         self.logdev.dcs_fixture.output(0.0, output=False)
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety')
         self.logdev.reset()
 
     @oldteststep
@@ -76,11 +68,7 @@ class Initial(tester.TestSequence):
         """
         dev.dcs_5v.output(5.15, True)
         tester.MeasureGroup((mes.dmm_5v, mes.dmm_3v3, ), timeout=2)
-        if self.fifo:
-            self._logger.info(
-                '**** Programming skipped due to active FIFOs ****')
-        else:
-            dev.programmer.program()
+        dev.programmer.program()
         # Reset micro, wait for ARM startup
         dev.rla_reset.pulse(0.1)
         time.sleep(1)
@@ -133,39 +121,33 @@ class Initial(tester.TestSequence):
         # A little load so PFC voltage falls faster
         dev.loads(i12=1.0, i24=1.0)
         # Calibrate the PFC set voltage
-        self._logger.info('Start PFC calibration')
         result, _, pfc = mes.dmm_pfcpre.stable(limit.PFC_STABLE)
-        dev.arm_calpfc(pfc)
+        dev.arm.calpfc(pfc)
         result, _, pfc = mes.dmm_pfcpost1.stable(limit.PFC_STABLE)
         if not result:      # 1st retry
-            self._logger.info('Retry1 PFC calibration')
-            dev.arm_calpfc(pfc)
+            dev.arm.calpfc(pfc)
             result, _, pfc = mes.dmm_pfcpost2.stable(limit.PFC_STABLE)
         if not result:      # 2nd retry
-            self._logger.info('Retry2 PFC calibration')
-            dev.arm_calpfc(pfc)
+            dev.arm.calpfc(pfc)
             result, _, pfc = mes.dmm_pfcpost3.stable(limit.PFC_STABLE)
         if not result:      # 3rd retry
-            self._logger.info('Retry3 PFC calibration')
-            dev.arm_calpfc(pfc)
+            dev.arm.calpfc(pfc)
             result, _, pfc = mes.dmm_pfcpost4.stable(limit.PFC_STABLE)
         # A final PFC setup check
         mes.dmm_pfcpost.stable(limit.PFC_STABLE)
         # no load for 12V calibration
         dev.loads(i12=0, i24=0)
         # Calibrate the 12V set voltage
-        self._logger.info('Start 12V calibration')
         result, _, v12 = mes.dmm_12vpre.stable(limit.V12_STABLE)
-        dev.arm_cal12v(v12)
+        dev.arm.cal12v(v12)
         # Prevent a limit fail from failing the unit
         mes.dmm_12vset.testlimit[0].position_fail = False
         result, _, v12 = mes.dmm_12vset.stable(limit.V12_STABLE)
         # Allow a limit fail to fail the unit
         mes.dmm_12vset.testlimit[0].position_fail = True
         if not result:
-            self._logger.info('Retry 12V calibration')
             result, _, v12 = mes.dmm_12vpre.stable(limit.V12_STABLE)
-            dev.arm_cal12v(v12)
+            dev.arm.cal12v(v12)
             mes.dmm_12vset.stable(limit.V12_STABLE)
         tester.MeasureGroup(
             (mes.arm_acfreq, mes.arm_acvolt,

@@ -44,33 +44,8 @@ class LogicalDevices():
         # Set port separately - don't open until after programming
         self.arm_ser.port = limit.ARM_PORT
         self.arm = console.Console(self.arm_ser, verbose=False)
-
-    def arm_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False,
-                 addprompt=True):
-        """Push string data into the buffer, if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r> '
-            self.arm.puts(string_data, preflush, postflush, priority)
-
-    def arm_calpfc(self, voltage):
-        """Issue PFC calibration commands.
-
-        @param voltage Measured PFC bus voltage
-
-        """
-        self.arm['CAL_PFC'] = voltage
-        self.arm['NVWRITE'] = True
-
-    def arm_cal12v(self, voltage):
-        """Issue 12V calibration commands.
-
-        @param voltage Measured 12V rail voltage
-
-        """
-        self.arm['CAL_12V'] = voltage
-        self.arm['NVWRITE'] = True
+        # Switch on fixture power
+        self.dcs_fixture.output(10.0, output=True)
 
     def reset(self):
         """Reset instruments."""

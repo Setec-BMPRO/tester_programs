@@ -15,6 +15,7 @@ class Gen8Initial(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -26,7 +27,6 @@ class Gen8Initial(ProgramTestCase):
                 'PartDetect': (
                     (sen.lock, 10.0), (sen.part, 10.0), (sen.fanshort, 200.0),
                     ),
-                'Program': ((sen.o5v, 5.10), (sen.o3v3, 3.30), ),
                 'PowerUp': (
                     (sen.acin, 240.0), (sen.o5v, (5.05, 5.11, )),
                     (sen.o12vpri, 12.12), (sen.o12v, 0.12),
@@ -65,13 +65,12 @@ class Gen8Initial(ProgramTestCase):
                     (gen8.initial.limit.BIN_VERSION[4:], ),     # ARM BuildNo
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev.arm_puts)
+        self.tester.ut_load(data, self.test_program.fifo_push, dev.arm.puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(41, len(result.readings))  # Reading count
+        self.assertEqual(39, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['PartDetect', 'Program', 'Initialise',
-             'PowerUp', '5V', '12V', '24V'],
+            ['PartDetect', 'Initialise', 'PowerUp', '5V', '12V', '24V'],
             self.tester.ut_steps)
