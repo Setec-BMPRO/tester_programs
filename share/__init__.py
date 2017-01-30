@@ -47,8 +47,12 @@ class SupportBase(ABC):
         self.measurements = None
 
     def reset(self):
-        """Reset logical devices."""
+        """Reset logical devices and sensors."""
         self.devices.reset()
+        try:
+            self.sensors.reset()
+        except AttributeError:
+            pass
 
     def close(self):
         """Close logical devices."""

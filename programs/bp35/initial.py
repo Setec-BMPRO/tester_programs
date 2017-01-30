@@ -6,7 +6,6 @@
 import os
 import inspect
 import time
-from pydispatch import dispatcher
 import tester
 import share
 from share import teststep, SupportBase, AttributeDict
@@ -337,7 +336,7 @@ class Support(SupportBase):
             tester.LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
             tester.LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
             tester.LimitHiLoDelta(
-                'OCP', (OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04)), # 4%
+                'OCP', (OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04)),  # 4%
             tester.LimitLo('InOCP', 11.6),
             tester.LimitString(
                 'ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
@@ -448,10 +447,6 @@ class Sensors(AttributeDict):
 
         """
         super().__init__()
-        dispatcher.connect(
-            self._reset,
-            sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
         dmm = logical_devices['dmm']
         sensor = tester.sensor
         self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
@@ -505,8 +500,8 @@ class Sensors(AttributeDict):
             loads.append(console.Sensor(bp35, 'LOAD_{0}'.format(i)))
         self['arm_loads'] = loads
 
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensors."""
+    def reset(self):
+        """Empty the Mirror Sensor."""
         self['mir_can'].flush()
 
 
