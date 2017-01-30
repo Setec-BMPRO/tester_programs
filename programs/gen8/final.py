@@ -6,6 +6,20 @@
 import tester
 from share import teststep, SupportBase, AttributeDict
 
+LIMITS = tester.limitdict((
+    tester.LimitHiLoDelta('Iecon', (240, 10)),
+    tester.LimitLo('Iecoff', 10),
+    tester.LimitHiLo('5V', (4.998, 5.202)),
+    tester.LimitLo('24Voff', 0.5),
+    tester.LimitLo('12Voff', 0.5),
+    tester.LimitLo('12V2off', 0.5),
+    tester.LimitHiLo('24Von', (22.80, 25.44)),
+    tester.LimitHiLo('12Von', (11.8755, 12.4845)),
+    tester.LimitHiLo('12V2on', (11.8146, 12.4845)),
+    tester.LimitHi('PwrFailOff', 11.0),
+    tester.LimitBoolean('Notify', True),
+    ))
+
 
 class Final(tester.TestSequence):
 
@@ -89,21 +103,9 @@ class Support(SupportBase):
     def __init__(self, physical_devices):
         """Create all supporting classes."""
         self.devices = LogicalDevices(physical_devices)
-        self.limits = tester.limitdict((
-            tester.LimitHiLoDelta('Iecon', (240, 10)),
-            tester.LimitLo('Iecoff', 10),
-            tester.LimitHiLo('5V', (4.998, 5.202)),
-            tester.LimitLo('24Voff', 0.5),
-            tester.LimitLo('12Voff', 0.5),
-            tester.LimitLo('12V2off', 0.5),
-            tester.LimitHiLo('24Von', (22.80, 25.44)),
-            tester.LimitHiLo('12Von', (11.8755, 12.4845)),
-            tester.LimitHiLo('12V2on', (11.8146, 12.4845)),
-            tester.LimitHi('PwrFailOff', 11.0),
-            tester.LimitBoolean('Notify', True),
-            ))
+        self.limits = LIMITS
         self.sensors = Sensors(self.devices)
-        self.measurements = Measurements(self.sensors, self.limits)
+        self.measurements = Measurements(self.sensors)
 
 
 class LogicalDevices(AttributeDict):
@@ -162,7 +164,7 @@ class Measurements(AttributeDict):
 
     """Measurements."""
 
-    def __init__(self, sense, limits):
+    def __init__(self, sense):
         """Create all Measurement instances."""
         super().__init__()
         for measurement_name, limit_name, sensor_name in (
@@ -180,4 +182,4 @@ class Measurements(AttributeDict):
             ('ui_notify_pwroff', 'Notify', 'not_pwroff'),
             ):
             self[measurement_name] = tester.Measurement(
-                limits[limit_name], sense[sensor_name])
+                LIMITS[limit_name], sense[sensor_name])

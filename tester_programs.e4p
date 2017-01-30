@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-01-26, 19:18:02 -->
+<!-- Saved: 2017-01-30, 17:51:32 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -105,9 +105,7 @@
     <Source>programs/gen8/__init__.py</Source>
     <Source>programs/gen8/console.py</Source>
     <Source>programs/gen8/final.py</Source>
-    <Source>programs/gen8/initial/__init__.py</Source>
-    <Source>programs/gen8/initial/limit.py</Source>
-    <Source>programs/gen8/initial/support.py</Source>
+    <Source>programs/gen8/initial.py</Source>
     <Source>programs/genius2/__init__.py</Source>
     <Source>programs/genius2/final/__init__.py</Source>
     <Source>programs/genius2/final/limit.py</Source>
@@ -270,7 +268,7 @@
     <Other>programs/drifter/initial/Drifter-5.hex</Other>
     <Other>programs/drifter/initial/DrifterBM-2.hex</Other>
     <Other>programs/etrac/initial/etracII-2A.hex</Other>
-    <Other>programs/gen8/initial/gen8_1.4.645.bin</Other>
+    <Other>programs/gen8/gen8_1.4.645.bin</Other>
     <Other>programs/rvview/initial/RvView_1.0.14022.985.bin</Other>
     <Other>programs/spa/multi/MFDrgb_V103.hex</Other>
     <Other>programs/spa/multi/MFDtri_V103.hex</Other>

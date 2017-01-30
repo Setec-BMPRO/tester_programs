@@ -6,7 +6,7 @@ from .data_feed import UnitTester, ProgramTestCase
 from programs import gen8
 
 _PROG_CLASS = gen8.Initial
-_PROG_LIMIT = gen8.INI_LIMIT
+_PROG_LIMIT = ()
 
 
 class Gen8Initial(ProgramTestCase):
@@ -19,8 +19,8 @@ class Gen8Initial(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensor
-        dev = self.test_program.logdev
+        sen = self.test_program.support.sensors
+        dev = self.test_program.support.devices
         dev.arm_ser.flushInput()        # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
@@ -61,8 +61,8 @@ class Gen8Initial(ProgramTestCase):
                     ('5050mV ', ) +     # ARM_5V
                     ('12180mV ', ) +    # ARM_12V
                     ('24000mV ', ) +    # ARM_24V
-                    (gen8.initial.limit.BIN_VERSION[:3], ) +    # ARM SwVer
-                    (gen8.initial.limit.BIN_VERSION[4:], ),     # ARM BuildNo
+                    (gen8.initial.BIN_VERSION[:3], ) +    # ARM SwVer
+                    (gen8.initial.BIN_VERSION[4:], ),     # ARM BuildNo
                 },
             }
         self.tester.ut_load(data, self.test_program.fifo_push, dev.arm.puts)

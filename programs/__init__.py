@@ -87,7 +87,7 @@ PROGRAMS = (
     ('Drifter BM Final', drifter.Final, drifter.FIN_LIMIT_BM),
     ('Etrac-II Initial', etrac.Initial, etrac.INI_LIMIT),
     ('GEN8 Final', gen8.Final, ()),
-    ('GEN8 Initial', gen8.Initial, gen8.INI_LIMIT),
+    ('GEN8 Initial', gen8.Initial, ()),
     ('GENIUS-II Final', genius2.Final, genius2.FIN_LIMIT),
     ('GENIUS-II-H Final', genius2.Final, genius2.FIN_LIMIT_H),
     ('GENIUS-II Initial', genius2.Initial, genius2.INI_LIMIT),

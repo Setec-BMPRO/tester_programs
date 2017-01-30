@@ -6,6 +6,10 @@
 import tester
 from share import teststep, SupportBase, AttributeDict
 
+LIMITS = tester.limitdict((
+    tester.LimitHiLoDelta('Vbat', (12.8, 0.2)),
+    ))
+
 
 class Final(tester.TestSequence):
 
@@ -54,11 +58,9 @@ class Support(SupportBase):
         """Create all supporting classes."""
         super().__init__()
         self.devices = LogicalDevices(physical_devices)
-        self.limits = tester.limitdict((
-            tester.LimitHiLoDelta('Vbat', (12.8, 0.2)),
-            ))
-        self.sensors = Sensors(self.devices, self.limits)
-        self.measurements = Measurements(self.sensors, self.limits)
+        self.limits = LIMITS
+        self.sensors = Sensors(self.devices)
+        self.measurements = Measurements(self.sensors)
 
 
 class LogicalDevices(AttributeDict):
@@ -84,11 +86,10 @@ class Sensors(AttributeDict):
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
+    def __init__(self, logical_devices):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
-           @param limits Product test limits
 
         """
         super().__init__()
@@ -100,12 +101,11 @@ class Measurements(AttributeDict):
 
     """Measurements."""
 
-    def __init__(self, sense, limits):
+    def __init__(self, sense):
         """Create all Measurement instances.
 
            @param sense Sensors used
-           @param limits Product test limits
 
         """
         super().__init__()
-        self['dmm_vbat'] = tester.Measurement(limits['Vbat'], sense['vbat'])
+        self['dmm_vbat'] = tester.Measurement(LIMITS['Vbat'], sense['vbat'])

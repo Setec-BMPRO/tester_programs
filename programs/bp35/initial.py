@@ -48,6 +48,55 @@ OUTPUTS = 14
 VOUT_SET = 12.8
 OCP_NOMINAL = 35.0
 
+LIMITS = tester.limitdict((
+    tester.LimitLo('FixtureLock', 50),
+    tester.LimitHiLoDelta('HwVer8', (4400.0, 250.0)),  # Rev 8+
+    tester.LimitHiLoDelta('ACin', (VAC, 5.0)),
+    tester.LimitHiLo('Vpfc', (401.0, 424.0)),
+    tester.LimitHiLo('12Vpri', (11.5, 13.0)),
+    tester.LimitHiLo('15Vs', (11.5, 13.0)),
+    tester.LimitHiLo('Vload', (12.0, 12.9)),
+    tester.LimitLo('VloadOff', 0.5),
+    tester.LimitHiLoDelta('VbatIn', (12.0, 0.5)),
+    tester.LimitHiLo('Vbat', (12.2, 13.0)),
+    tester.LimitHiLoDelta('Vaux', (13.4, 0.4)),
+    tester.LimitHiLoDelta('3V3', (3.30, 0.05)),
+    tester.LimitHiLoDelta('FanOn', (12.5, 0.5)),
+    tester.LimitLo('FanOff', 0.5),
+    tester.LimitHiLoDelta('SolarVcc', (3.3, 0.1)),
+    tester.LimitHiLoDelta('SolarVin', (SOLAR_VIN, 0.5)),
+    tester.LimitHiLoPercent('VsetPre', (SOLAR_VSET, 6.0)),
+    tester.LimitHiLoPercent('VsetPost', (SOLAR_VSET, 1.5)),
+    tester.LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
+    tester.LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
+    tester.LimitHiLoDelta(
+        'OCP', (OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04)),  # 4%
+    tester.LimitLo('InOCP', 11.6),
+    tester.LimitString(
+        'ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
+    tester.LimitHiLoDelta('ARM-AcV', (VAC, 10.0)),
+    tester.LimitHiLoDelta('ARM-AcF', (50.0, 1.0)),
+    tester.LimitHiLo('ARM-SecT', (8.0, 70.0)),
+    tester.LimitHiLoDelta('ARM-Vout', (12.45, 0.45)),
+    tester.LimitHiLoPercent(
+        'ARM-SolarVin-Pre', (SOLAR_VIN, SOLAR_VIN_PRE_PERCENT)),
+    tester.LimitHiLoPercent(
+        'ARM-SolarVin-Post', (SOLAR_VIN, SOLAR_VIN_POST_PERCENT)),
+    tester.LimitHiLo('ARM-Fan', (0, 100)),
+    tester.LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
+    tester.LimitHiLoDelta('ARM-BattI', (IBATT, 1.0)),
+    tester.LimitHiLoDelta('ARM-BusI', (ILOAD + IBATT, 3.0)),
+    tester.LimitHiLoDelta('ARM-AuxV', (13.4, 0.4)),
+    tester.LimitHiLo('ARM-AuxI', (0.0, 1.5)),
+    tester.LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    tester.LimitString('CAN_RX', r'^RRQ,32,0'),
+    tester.LimitHiLoInt('CAN_BIND', _CAN_BIND),
+    tester.LimitHiLoInt('SOLAR_ALIVE', 1),
+    tester.LimitHiLoInt('SOLAR_RELAY', 1),
+    tester.LimitHiLoInt('SOLAR_ERROR', 0),
+    tester.LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
+    ))
+
 
 class Initial(tester.TestSequence):
 
@@ -314,56 +363,9 @@ class Support(SupportBase):
         """Create all supporting classes."""
         super().__init__()
         self.devices = LogicalDevices(physical_devices, fifo)
-        self.limits = tester.limitdict((
-            tester.LimitLo('FixtureLock', 50),
-            tester.LimitHiLoDelta('HwVer8', (4400.0, 250.0)),  # Rev 8+
-            tester.LimitHiLoDelta('ACin', (VAC, 5.0)),
-            tester.LimitHiLo('Vpfc', (401.0, 424.0)),
-            tester.LimitHiLo('12Vpri', (11.5, 13.0)),
-            tester.LimitHiLo('15Vs', (11.5, 13.0)),
-            tester.LimitHiLo('Vload', (12.0, 12.9)),
-            tester.LimitLo('VloadOff', 0.5),
-            tester.LimitHiLoDelta('VbatIn', (12.0, 0.5)),
-            tester.LimitHiLo('Vbat', (12.2, 13.0)),
-            tester.LimitHiLoDelta('Vaux', (13.4, 0.4)),
-            tester.LimitHiLoDelta('3V3', (3.30, 0.05)),
-            tester.LimitHiLoDelta('FanOn', (12.5, 0.5)),
-            tester.LimitLo('FanOff', 0.5),
-            tester.LimitHiLoDelta('SolarVcc', (3.3, 0.1)),
-            tester.LimitHiLoDelta('SolarVin', (SOLAR_VIN, 0.5)),
-            tester.LimitHiLoPercent('VsetPre', (SOLAR_VSET, 6.0)),
-            tester.LimitHiLoPercent('VsetPost', (SOLAR_VSET, 1.5)),
-            tester.LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
-            tester.LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
-            tester.LimitHiLoDelta(
-                'OCP', (OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04)),  # 4%
-            tester.LimitLo('InOCP', 11.6),
-            tester.LimitString(
-                'ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
-            tester.LimitHiLoDelta('ARM-AcV', (VAC, 10.0)),
-            tester.LimitHiLoDelta('ARM-AcF', (50.0, 1.0)),
-            tester.LimitHiLo('ARM-SecT', (8.0, 70.0)),
-            tester.LimitHiLoDelta('ARM-Vout', (12.45, 0.45)),
-            tester.LimitHiLoPercent(
-                'ARM-SolarVin-Pre', (SOLAR_VIN, SOLAR_VIN_PRE_PERCENT)),
-            tester.LimitHiLoPercent(
-                'ARM-SolarVin-Post', (SOLAR_VIN, SOLAR_VIN_POST_PERCENT)),
-            tester.LimitHiLo('ARM-Fan', (0, 100)),
-            tester.LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
-            tester.LimitHiLoDelta('ARM-BattI', (IBATT, 1.0)),
-            tester.LimitHiLoDelta('ARM-BusI', (ILOAD + IBATT, 3.0)),
-            tester.LimitHiLoDelta('ARM-AuxV', (13.4, 0.4)),
-            tester.LimitHiLo('ARM-AuxI', (0.0, 1.5)),
-            tester.LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-            tester.LimitString('CAN_RX', r'^RRQ,32,0'),
-            tester.LimitHiLoInt('CAN_BIND', _CAN_BIND),
-            tester.LimitHiLoInt('SOLAR_ALIVE', 1),
-            tester.LimitHiLoInt('SOLAR_RELAY', 1),
-            tester.LimitHiLoInt('SOLAR_ERROR', 0),
-            tester.LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
-            ))
-        self.sensors = Sensors(self.devices, self.limits)
-        self.measurements = Measurements(self.sensors, self.limits)
+        self.limits = LIMITS
+        self.sensors = Sensors(self.devices)
+        self.measurements = Measurements(self.sensors)
 
 
 class LogicalDevices(AttributeDict):
@@ -377,7 +379,6 @@ class LogicalDevices(AttributeDict):
 
         """
         super().__init__()
-        self.fifo = fifo
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -439,11 +440,10 @@ class Sensors(AttributeDict):
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
+    def __init__(self, logical_devices):
         """Create all Sensor instances.
 
            @param logical_devices Logical instruments used
-           @param limits Product test limits
 
         """
         super().__init__()
@@ -466,7 +466,7 @@ class Sensors(AttributeDict):
         self['ocp'] = sensor.Ramp(
             stimulus=logical_devices['dcl_bat'],
             sensor=self['vbat'],
-            detect_limit=(limits['InOCP'], ),
+            detect_limit=(LIMITS['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bp35_initial', 'msgSnEntry'),
@@ -509,11 +509,10 @@ class Measurements(AttributeDict):
 
     """Measurements."""
 
-    def __init__(self, sense, limits):
+    def __init__(self, sense):
         """Create all Measurement instances.
 
            @param sense Sensors used
-           @param limits Product test limits
 
         """
         super().__init__()
@@ -560,9 +559,9 @@ class Measurements(AttributeDict):
                 ('arm_solar_vin_post', 'ARM-SolarVin-Post', 'arm_solar_vin'),
             ):
             self[measurement_name] = tester.Measurement(
-                limits[limit_name], sense[sensor_name])
+                LIMITS[limit_name], sense[sensor_name])
         # Generate load current measurements
         loads = []
         for sen in sense['arm_loads']:
-            loads.append(tester.Measurement(limits['ARM-LoadI'], sen))
+            loads.append(tester.Measurement(LIMITS['ARM-LoadI'], sen))
         self['arm_loads'] = loads
