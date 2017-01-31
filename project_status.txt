@@ -46,3 +46,14 @@ Tester Programs project status as of 2017-01-27
 
     LogicalDevice/Sensor/Measurement all inherit from "AttributeDict", which
     stores data in a dictionary and allows access to keys as instance attributes.
+
+
+
+
+Programs using super().open(sequence)
+- SubSteps, or reference to a Logical Device
+    GENIUS-II Initial       SubStep
+    IDS500 Final            SubStep
+    IDS500 Main Initial     SubStep
+    J35 Initial             LogDev, SubStep
+    RvView Initial          LogDev

@@ -16,10 +16,11 @@ class BP35Final(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.support.sensors
+        sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (

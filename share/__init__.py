@@ -3,8 +3,9 @@
 # Copyright 2016 SETEC Pty Ltd
 """Shared modules for Tester programs."""
 
-from functools import wraps
+import functools
 from abc import ABC, abstractmethod
+import logging
 import time
 # Easy access to utility methods and classes
 from .bluetooth import *
@@ -15,36 +16,23 @@ from .ticker import *
 from .timed_data import *
 
 
-class AttributeDict(dict):
+class Support(ABC):
 
-    """A dictionary that exposes the keys as instance attributes."""
-
-    def __getattr__(self, name):
-        """Access dictionary entries as instance attributes.
-
-        @param name Attribute name
-        @return Entry value
-
-        """
-        try:
-            return self[name]
-        except KeyError as exc:
-            raise AttributeError(
-                "'{0}' object has no attribute '{1}'".format(
-                self.__class__.__name__, name)) from exc
-
-
-class SupportBase(ABC):
-
-    """Supporting data base class."""
+    """Supporting utility class for Test Programs."""
 
     @abstractmethod
-    def __init__(self):
+    def __init__(self, devices, limits, sensors, measurements):
         """Create all supporting classes."""
-        self.devices = None
-        self.limits = None
-        self.sensors = None
-        self.measurements = None
+        self.devices = devices
+        self.limits = limits
+        self.sensors = sensors
+        self.measurements = measurements
+
+    def open(self):
+        """Prepare for testing."""
+        self.devices.open()
+        self.sensors.open()
+        self.measurements.open()
 
     def reset(self):
         """Reset logical devices and sensors."""
@@ -53,6 +41,8 @@ class SupportBase(ABC):
             self.sensors.reset()
         except AttributeError:
             pass
+
+    safety = reset
 
     def close(self):
         """Close logical devices."""
@@ -138,21 +128,78 @@ class SupportBase(ABC):
             instr.binary(start, end, step)
         time.sleep(delay)
 
+    def get_serial(self, uuts, limit_name, measurement_name):
+        """Find the unit's Serial number.
 
-def teststep(func):
-    """Decorator to add arguments to the test step calls.
+        @param uuts Tuple of UUT instances
+        @param limit_name TestLimit to validate a serial number
+        @param measurement_name Measurement to ask the operator for the number
+        @return Serial Number
 
-    Requires self.support.devices and self.support.measurements
+        Inspect uuts[0] first, and if it is not a serial number, use the
+        measurement to get the number from the tester operator.
+
+        """
+        sernum = str(uuts[0])
+        limit = self.limits[limit_name]
+        measurement = self.measurements[measurement_name]
+        if not limit.check(sernum, position=1, send_signal=False):
+            sernum = measurement.measure().reading1
+        return sernum
+
+
+class AttributeDict(dict):
+
+    """A dictionary that exposes the keys as instance attributes."""
+
+    def __getattr__(self, name):
+        """Access dictionary entries as instance attributes.
+
+        @param name Attribute name
+        @return Entry value
+
+        """
+        try:
+            return self[name]
+        except KeyError as exc:
+            raise AttributeError(
+                "'{0}' object has no attribute '{1}'".format(
+                self.__class__.__name__, name)) from exc
+
+
+def deprecated(func):
+    """Decorator to mark functions as deprecated.
+
+    It will result in a warning when the function is used.
 
     @return Decorated function
 
     """
-    @wraps(func)
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            'Call to deprecated function "{0}" in "{1}" at line {2}.'.format(
+                func.__name__,
+                func.__code__.co_filename,
+                func.__code__.co_firstlineno + 1)
+        )
+        return func(*args, **kwargs)
+    return new_func
+
+
+def teststep(func):
+    """Decorator to add arguments to the test step calls.
+
+    Requires self.devices and self.measurements
+
+    @return Decorated function
+
+    """
+    @functools.wraps(func)
     def new_func(self):
         """Decorate the function."""
-        return func(
-            self, self.support,
-            self.support.devices, self.support.measurements)
+        return func(self, self.devices, self.measurements)
     return new_func
 
 
@@ -164,13 +211,14 @@ def oldteststep(func):
     @return Decorated function
 
     """
-    @wraps(func)
+    @functools.wraps(func)
     def new_func(self):
         """Decorate the function."""
         return func(self, self.logdev, self.meas)
     return new_func
 
 
+@deprecated
 def get_sernum(uuts, lim, measurement):
     """Find the unit's Serial number.
 

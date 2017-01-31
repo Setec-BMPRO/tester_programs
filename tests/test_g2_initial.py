@@ -16,6 +16,7 @@ class Genius2Initial(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""

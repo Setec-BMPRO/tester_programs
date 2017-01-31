@@ -15,6 +15,7 @@ class Ids500Final(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    debug = False
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""

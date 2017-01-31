@@ -7,15 +7,19 @@ import os
 import inspect
 import time
 import tester
+from tester import TestSequence, TestStep
+from tester import (
+    LimitLo, LimitString,
+    LimitHiLo, LimitHiLoDelta, LimitHiLoPercent, LimitHiLoInt
+    )
 import share
-from share import teststep, SupportBase, AttributeDict
+from share import teststep, Support, AttributeDict
 from . import console
 
 ARM_VERSION = '1.2.14256.3912'
 ARM_HW_VER = (9, 0, 'A')
 PIC_VERSION = '1.1.13802.182'
 PIC_HW_VER = 3
-
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # ARM software image file
@@ -24,7 +28,6 @@ ARM_FILE = 'bp35_{0}.bin'.format(ARM_VERSION)
 PIC_FILE = 'bp35sr_{0}.hex'.format(PIC_VERSION)
 # CAN echo request messages
 CAN_ECHO = 'TQQ,32,0'
-
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
 # Solar Reg settings
@@ -49,56 +52,52 @@ VOUT_SET = 12.8
 OCP_NOMINAL = 35.0
 
 LIMITS = tester.limitdict((
-    tester.LimitLo('FixtureLock', 50),
-    tester.LimitHiLoDelta('HwVer8', (4400.0, 250.0)),  # Rev 8+
-    tester.LimitHiLoDelta('ACin', (VAC, 5.0)),
-    tester.LimitHiLo('Vpfc', (401.0, 424.0)),
-    tester.LimitHiLo('12Vpri', (11.5, 13.0)),
-    tester.LimitHiLo('15Vs', (11.5, 13.0)),
-    tester.LimitHiLo('Vload', (12.0, 12.9)),
-    tester.LimitLo('VloadOff', 0.5),
-    tester.LimitHiLoDelta('VbatIn', (12.0, 0.5)),
-    tester.LimitHiLo('Vbat', (12.2, 13.0)),
-    tester.LimitHiLoDelta('Vaux', (13.4, 0.4)),
-    tester.LimitHiLoDelta('3V3', (3.30, 0.05)),
-    tester.LimitHiLoDelta('FanOn', (12.5, 0.5)),
-    tester.LimitLo('FanOff', 0.5),
-    tester.LimitHiLoDelta('SolarVcc', (3.3, 0.1)),
-    tester.LimitHiLoDelta('SolarVin', (SOLAR_VIN, 0.5)),
-    tester.LimitHiLoPercent('VsetPre', (SOLAR_VSET, 6.0)),
-    tester.LimitHiLoPercent('VsetPost', (SOLAR_VSET, 1.5)),
-    tester.LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
-    tester.LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
-    tester.LimitHiLoDelta(
-        'OCP', (OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04)),  # 4%
-    tester.LimitLo('InOCP', 11.6),
-    tester.LimitString(
-        'ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    tester.LimitHiLoDelta('ARM-AcV', (VAC, 10.0)),
-    tester.LimitHiLoDelta('ARM-AcF', (50.0, 1.0)),
-    tester.LimitHiLo('ARM-SecT', (8.0, 70.0)),
-    tester.LimitHiLoDelta('ARM-Vout', (12.45, 0.45)),
-    tester.LimitHiLoPercent(
-        'ARM-SolarVin-Pre', (SOLAR_VIN, SOLAR_VIN_PRE_PERCENT)),
-    tester.LimitHiLoPercent(
-        'ARM-SolarVin-Post', (SOLAR_VIN, SOLAR_VIN_POST_PERCENT)),
-    tester.LimitHiLo('ARM-Fan', (0, 100)),
-    tester.LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
-    tester.LimitHiLoDelta('ARM-BattI', (IBATT, 1.0)),
-    tester.LimitHiLoDelta('ARM-BusI', (ILOAD + IBATT, 3.0)),
-    tester.LimitHiLoDelta('ARM-AuxV', (13.4, 0.4)),
-    tester.LimitHiLo('ARM-AuxI', (0.0, 1.5)),
-    tester.LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    tester.LimitString('CAN_RX', r'^RRQ,32,0'),
-    tester.LimitHiLoInt('CAN_BIND', _CAN_BIND),
-    tester.LimitHiLoInt('SOLAR_ALIVE', 1),
-    tester.LimitHiLoInt('SOLAR_RELAY', 1),
-    tester.LimitHiLoInt('SOLAR_ERROR', 0),
-    tester.LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
+    LimitLo('FixtureLock', 50),
+    LimitHiLoDelta('HwVer8', (4400.0, 250.0)),  # Rev 8+
+    LimitHiLoDelta('ACin', (VAC, 5.0)),
+    LimitHiLo('Vpfc', (401.0, 424.0)),
+    LimitHiLo('12Vpri', (11.5, 13.0)),
+    LimitHiLo('15Vs', (11.5, 13.0)),
+    LimitHiLo('Vload', (12.0, 12.9)),
+    LimitLo('VloadOff', 0.5),
+    LimitHiLoDelta('VbatIn', (12.0, 0.5)),
+    LimitHiLo('Vbat', (12.2, 13.0)),
+    LimitHiLoDelta('Vaux', (13.4, 0.4)),
+    LimitHiLoDelta('3V3', (3.30, 0.05)),
+    LimitHiLoDelta('FanOn', (12.5, 0.5)),
+    LimitLo('FanOff', 0.5),
+    LimitHiLoDelta('SolarVcc', (3.3, 0.1)),
+    LimitHiLoDelta('SolarVin', (SOLAR_VIN, 0.5)),
+    LimitHiLoPercent('VsetPre', (SOLAR_VSET, 6.0)),
+    LimitHiLoPercent('VsetPost', (SOLAR_VSET, 1.5)),
+    LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
+    LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
+    LimitHiLoDelta('OCP', (OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04)),  # 4%
+    LimitLo('InOCP', 11.6),
+    LimitString('ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
+    LimitHiLoDelta('ARM-AcV', (VAC, 10.0)),
+    LimitHiLoDelta('ARM-AcF', (50.0, 1.0)),
+    LimitHiLo('ARM-SecT', (8.0, 70.0)),
+    LimitHiLoDelta('ARM-Vout', (12.45, 0.45)),
+    LimitHiLoPercent('ARM-SolarVin-Pre', (SOLAR_VIN, SOLAR_VIN_PRE_PERCENT)),
+    LimitHiLoPercent('ARM-SolarVin-Post', (SOLAR_VIN, SOLAR_VIN_POST_PERCENT)),
+    LimitHiLo('ARM-Fan', (0, 100)),
+    LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
+    LimitHiLoDelta('ARM-BattI', (IBATT, 1.0)),
+    LimitHiLoDelta('ARM-BusI', (ILOAD + IBATT, 3.0)),
+    LimitHiLoDelta('ARM-AuxV', (13.4, 0.4)),
+    LimitHiLo('ARM-AuxI', (0.0, 1.5)),
+    LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    LimitString('CAN_RX', r'^RRQ,32,0'),
+    LimitHiLoInt('CAN_BIND', _CAN_BIND),
+    LimitHiLoInt('SOLAR_ALIVE', 1),
+    LimitHiLoInt('SOLAR_RELAY', 1),
+    LimitHiLoInt('SOLAR_ERROR', 0),
+    LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
     ))
 
 
-class Initial(tester.TestSequence):
+class Initial(Support, TestSequence):
 
     """BP35 Initial Test Program."""
 
@@ -111,43 +110,29 @@ class Initial(tester.TestSequence):
            @param fifo True if FIFOs are enabled
 
         """
-        super().__init__(selection, None, fifo)
-        self.devices = physical_devices
-        self.sernum = None
-        self.support = None
-
-    def open(self, sequence=None):
-        """Prepare for testing."""
-        self.support = Support(self.devices, self.fifo)
-        # Define the (linear) Test Sequence
+        devices = LogicalDevices(physical_devices, fifo)
+        limits = LIMITS
+        sensors = Sensors(devices, limits)
+        measurements = Measurements(sensors, limits)
         sequence = (
-            tester.TestStep('Prepare', self._step_prepare),
-            tester.TestStep(
-                'ProgramPIC', self._step_program_pic, not self.fifo),
-            tester.TestStep(
-                'ProgramARM', self._step_program_arm, not self.fifo),
-            tester.TestStep('Initialise', self._step_initialise_arm),
-            tester.TestStep('SolarReg', self._step_solar_reg),
-            tester.TestStep('Aux', self._step_aux),
-            tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('Output', self._step_output),
-            tester.TestStep('RemoteSw', self._step_remote_sw),
-            tester.TestStep('OCP', self._step_ocp),
-            tester.TestStep('CanBus', self._step_canbus),
+            TestStep('Prepare', self._step_prepare),
+            TestStep('ProgramPIC', self._step_program_pic, not fifo),
+            TestStep('ProgramARM', self._step_program_arm, not fifo),
+            TestStep('Initialise', self._step_initialise_arm),
+            TestStep('SolarReg', self._step_solar_reg),
+            TestStep('Aux', self._step_aux),
+            TestStep('PowerUp', self._step_powerup),
+            TestStep('Output', self._step_output),
+            TestStep('RemoteSw', self._step_remote_sw),
+            TestStep('OCP', self._step_ocp),
+            TestStep('CanBus', self._step_canbus),
             )
-        super().open(sequence)
-
-    def close(self):
-        """Finished testing."""
-        self.support.close()
-        super().close()
-
-    def safety(self):
-        """Make the unit safe after a test."""
-        self.support.reset()
+        TestSequence.__init__(self, selection, sequence, fifo)
+        Support.__init__(self, devices, limits, sensors, measurements)
+        self.sernum = None
 
     @teststep
-    def _step_prepare(self, sup, dev, mes):
+    def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
         Measure fixture lock and part detection micro-switches.
@@ -155,17 +140,16 @@ class Initial(tester.TestSequence):
         to power up the micros.
 
         """
-        self.sernum = share.get_sernum(
-            self.uuts, sup.limits['SerNum'], mes['ui_sernum'])
-        sup.measure(('dmm_lock', 'hardware8', ), timeout=5)
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        self.measure(('dmm_lock', 'hardware8', ), timeout=5)
         # Apply DC Sources to Battery terminals and Solar Reg input
         dev['dcs_vbat'].output(VBAT_IN, True)
         dev['rla_vbat'].set_on()
         dev['dcs_sreg'].output(SOLAR_VIN, True)
-        sup.measure(('dmm_vbatin', 'dmm_3v3', 'dmm_solarvcc'), timeout=5)
+        self.measure(('dmm_vbatin', 'dmm_3v3', 'dmm_solarvcc'), timeout=5)
 
     @teststep
-    def _step_program_pic(self, sup, dev, mes):
+    def _step_program_pic(self, dev, mes):
         """Program the dsPIC device.
 
         Device is powered by Solar Reg input voltage.
@@ -175,7 +159,7 @@ class Initial(tester.TestSequence):
         dev['dcs_sreg'].output(0.0)     # Switch off the Solar
 
     @teststep
-    def _step_program_arm(self, sup, dev, mes):
+    def _step_program_arm(self, dev, mes):
         """Program the ARM device.
 
         Device is powered by injected Battery voltage.
@@ -191,7 +175,7 @@ class Initial(tester.TestSequence):
         dcsource.output(VBAT_IN)
 
     @teststep
-    def _step_initialise_arm(self, sup, dev, mes):
+    def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
         Device is powered by injected Battery voltage.
@@ -219,14 +203,14 @@ class Initial(tester.TestSequence):
         bp35.manual_mode(VOUT_SET, OCP_NOMINAL)
 
     @teststep
-    def _step_solar_reg(self, sup, dev, mes):
+    def _step_solar_reg(self, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         bp35 = dev['bp35']
         # Switch on fixture BCE282 to power Solar Reg input
         dev['rla_acsw'].set_on()
         dev['acsource'].output(voltage=VAC, output=True)
         dev['dcs_sreg'].output(0.0, output=False)
-        sup.measure(('arm_solar_alive', 'arm_vout_ov', ))
+        self.measure(('arm_solar_alive', 'arm_vout_ov', ))
         # The SR needs V & I set to zero after power up or it won't start.
         bp35.solar_set(0, 0)
         # Now set the actual output settings
@@ -236,13 +220,13 @@ class Initial(tester.TestSequence):
         # Read solar input voltage and patch ARM measurement limits
         solar_vin = mes['dmm_solarvin'](timeout=5).reading1
         mes['arm_solar_vin_pre'].testlimit = (
-            tester.testlimit.LimitHiLoPercent(
+            LimitHiLoPercent(
                 'ARM-SolarVin-Pre', (solar_vin, SOLAR_VIN_PRE_PERCENT)), )
         mes['arm_solar_vin_post'].testlimit = (
-            tester.testlimit.LimitHiLoPercent(
+            LimitHiLoPercent(
                 'ARM-SolarVin-Post', (solar_vin, SOLAR_VIN_POST_PERCENT)), )
         # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
-        sup.measure(
+        self.measure(
             ('arm_solar_error', 'arm_solar_relay', 'arm_solar_vin_pre', ))
         vmeasured = mes['dmm_vsetpre'](timeout=5).reading1
         bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
@@ -252,7 +236,7 @@ class Initial(tester.TestSequence):
         bp35.solar_set(SOLAR_VSET - 0.05, SOLAR_ISET)
         bp35.solar_set(SOLAR_VSET, SOLAR_ISET)
         time.sleep(1)
-        sup.measure(('arm_solar_vin_post', 'dmm_vsetpost', ))
+        self.measure(('arm_solar_vin_post', 'dmm_vsetpost', ))
         dev['dcl_bat'].output(SOLAR_ICAL, True)
         mes['arm_ioutpre'](timeout=5)
         bp35['SR_ICAL'] = SOLAR_ICAL  # Calibrate current setpoint
@@ -264,22 +248,22 @@ class Initial(tester.TestSequence):
         dev['rla_acsw'].set_off()
 
     @teststep
-    def _step_aux(self, sup, dev, mes):
+    def _step_aux(self, dev, mes):
         """Apply Auxiliary input."""
         bp35, source, load = dev['bp35'], dev['dcs_vaux'], dev['dcl_bat']
         source.output(VAUX_IN, output=True)
         load.output(0.5)
         bp35['AUX_RELAY'] = True
-        sup.measure(('dmm_vaux', 'arm_vaux', 'arm_iaux'), timeout=5)
+        self.measure(('dmm_vaux', 'arm_vaux', 'arm_iaux'), timeout=5)
         bp35['AUX_RELAY'] = False
         source.output(0.0, output=False)
         load.output(0.0)
 
     @teststep
-    def _step_powerup(self, sup, dev, mes):
+    def _step_powerup(self, dev, mes):
         """Power-Up the Unit with AC."""
         dev['acsource'].output(voltage=VAC, output=True)
-        sup.measure(('dmm_acin', 'dmm_pri12v'), timeout=10)
+        self.measure(('dmm_acin', 'dmm_pri12v'), timeout=10)
         dev['bp35'].power_on()
         # Wait for PFC overshoot to settle
         mes['dmm_vpfc'].stable(PFC_STABLE)
@@ -289,10 +273,10 @@ class Initial(tester.TestSequence):
         dev['dcs_vbat'].output(0.0, output=False)
         # Is it now running on it's own?
         mes['arm_vout_ov']()
-        sup.measure(('dmm_3v3', 'dmm_15vs', 'dmm_vbat'), timeout=10)
+        self.measure(('dmm_3v3', 'dmm_15vs', 'dmm_vbat'), timeout=10)
 
     @teststep
-    def _step_output(self, sup, dev, mes):
+    def _step_output(self, dev, mes):
         """Test the output switches.
 
         Each output is turned ON in turn.
@@ -314,7 +298,7 @@ class Initial(tester.TestSequence):
         bp35.load_set(set_on=False, loads=())
 
     @teststep
-    def _step_remote_sw(self, sup, dev, mes):
+    def _step_remote_sw(self, dev, mes):
         """Test Remote Load Isolator Switch."""
         relay = dev['rla_loadsw']
         relay.set_on()
@@ -323,17 +307,17 @@ class Initial(tester.TestSequence):
         mes['dmm_vload'](timeout=5)
 
     @teststep
-    def _step_ocp(self, sup, dev, mes):
+    def _step_ocp(self, dev, mes):
         """Test functions of the unit."""
         bp35 = dev['bp35']
-        sup.measure(
+        self.measure(
             ('arm_acv', 'arm_acf', 'arm_sect', 'arm_vout', 'arm_fan',
              'dmm_fanoff'), timeout=5)
         bp35['FAN'] = 100
         mes['dmm_fanon'](timeout=5)
         dev['dcl_out'].binary(1.0, ILOAD, 5.0)
         dev['dcl_bat'].output(IBATT, output=True)
-        sup.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
+        self.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
         for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
@@ -341,7 +325,7 @@ class Initial(tester.TestSequence):
         dev['dcl_bat'].output(0.0)
 
     @teststep
-    def _step_canbus(self, sup, dev, mes):
+    def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         bp35 = dev['bp35']
         mes['arm_can_bind'](timeout=10)
@@ -355,30 +339,23 @@ class Initial(tester.TestSequence):
         rx_can.measure()
 
 
-class Support(SupportBase):
-
-    """Supporting data."""
-
-    def __init__(self, physical_devices, fifo):
-        """Create all supporting classes."""
-        super().__init__()
-        self.devices = LogicalDevices(physical_devices, fifo)
-        self.limits = LIMITS
-        self.sensors = Sensors(self.devices)
-        self.measurements = Measurements(self.sensors)
-
-
 class LogicalDevices(AttributeDict):
 
     """Logical Devices."""
 
-    def __init__(self, devices, fifo):
+    def __init__(self, physical_devices, fifo):
         """Create all Logical Instruments.
 
-           @param devices Physical instruments of the Tester
+        @param physical_devices Physical instruments
+        @param fifo True if FIFOs are active
 
         """
         super().__init__()
+        self.physical_devices = physical_devices
+        self.fifo = fifo
+
+    def open(self):
+        """Create all Logical Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -397,7 +374,7 @@ class LogicalDevices(AttributeDict):
                 ('rla_vbat', tester.Relay, 'RLA5'),
                 ('rla_acsw', tester.Relay, 'RLA6'),
             ):
-            self[name] = devtype(devices[phydevname])
+            self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -409,7 +386,7 @@ class LogicalDevices(AttributeDict):
             PIC_FILE, folder, '33FJ16GS402', self['rla_pic'])
         # Serial connection to the BP35 console
         self['bp35_ser'] = tester.SimSerial(
-            simulation=fifo, baudrate=115200, timeout=5.0)
+            simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         self['bp35_ser'].port = ARM_PORT
         # BP35 Console driver
@@ -440,14 +417,20 @@ class Sensors(AttributeDict):
 
     """Sensors."""
 
-    def __init__(self, logical_devices):
-        """Create all Sensor instances.
+    def __init__(self, devices, limits):
+        """Create all Sensors.
 
-           @param logical_devices Logical instruments used
+        @param devices Logical instruments
+        @param limits Test limits
 
         """
         super().__init__()
-        dmm = logical_devices['dmm']
+        self.devices = devices
+        self.limits = limits
+
+    def open(self):
+        """Create all Sensors."""
+        dmm = self.devices['dmm']
         sensor = tester.sensor
         self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['acin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
@@ -464,15 +447,15 @@ class Sensors(AttributeDict):
         self['solarvcc'] = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
         self['solarvin'] = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
         self['ocp'] = sensor.Ramp(
-            stimulus=logical_devices['dcl_bat'],
+            stimulus=self.devices['dcl_bat'],
             sensor=self['vbat'],
-            detect_limit=(LIMITS['InOCP'], ),
+            detect_limit=(self.limits['InOCP'], ),
             start=4.0, stop=10.0, step=0.5, delay=0.1)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bp35_initial', 'msgSnEntry'),
             caption=tester.translate('bp35_initial', 'capSnEntry'))
         # Console sensors
-        bp35 = logical_devices['bp35']
+        bp35 = self.devices['bp35']
         for name, cmdkey in (
                 ('arm_acv', 'AC_V'),
                 ('arm_acf', 'AC_F'),
@@ -509,13 +492,19 @@ class Measurements(AttributeDict):
 
     """Measurements."""
 
-    def __init__(self, sense):
-        """Create all Measurement instances.
+    def __init__(self, sense, limits):
+        """Create all Measurements.
 
-           @param sense Sensors used
+        @param sense Sensors
+        @param limits Test limits
 
         """
         super().__init__()
+        self.sense = sense
+        self.limits = limits
+
+    def open(self):
+        """Create all Measurements."""
         for measurement_name, limit_name, sensor_name in (
                 ('hardware8', 'HwVer8', 'hardware'),
                 ('rx_can', 'CAN_RX', 'mir_can'),
@@ -559,9 +548,9 @@ class Measurements(AttributeDict):
                 ('arm_solar_vin_post', 'ARM-SolarVin-Post', 'arm_solar_vin'),
             ):
             self[measurement_name] = tester.Measurement(
-                LIMITS[limit_name], sense[sensor_name])
+                self.limits[limit_name], self.sense[sensor_name])
         # Generate load current measurements
         loads = []
-        for sen in sense['arm_loads']:
-            loads.append(tester.Measurement(LIMITS['ARM-LoadI'], sen))
+        for sen in self.sense['arm_loads']:
+            loads.append(tester.Measurement(self.limits['ARM-LoadI'], sen))
         self['arm_loads'] = loads

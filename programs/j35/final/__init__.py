@@ -26,7 +26,12 @@ class Final(tester.TestSequence):
            @param fifo True if FIFOs are enabled
 
         """
-        super().__init__(selection, None, fifo)
+        sequence = (
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
+            )
+        super().__init__(selection, sequence, fifo)
         self.phydev = physical_devices
         self.limits = test_limits
         self.logdev = None
@@ -38,13 +43,7 @@ class Final(tester.TestSequence):
         self.logdev = support.LogicalDevices(self.phydev)
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
-        # Define the (linear) Test Sequence
-        sequence = (
-            tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('Load', self._step_load),
-            tester.TestStep('OCP', self._step_ocp),
-            )
-        super().open(sequence)
+        super().open()
 
     def close(self):
         """Finished testing."""

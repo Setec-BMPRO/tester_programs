@@ -19,7 +19,17 @@ class Initial(tester.TestSequence):
 
     def __init__(self, selection, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
-        super().__init__(selection, None, fifo)
+        sequence = (
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('Program', self._step_program_micros),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('5Vsb', self._step_reg_5v),
+            tester.TestStep('12V', self._step_reg_12v),
+            tester.TestStep('24V', self._step_reg_24v),
+            tester.TestStep('PeakPower', self._step_peak_power),
+            )
+        super().__init__(selection, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.devices = physical_devices
@@ -32,22 +42,11 @@ class Initial(tester.TestSequence):
     def open(self, sequence=None):
         """Prepare for testing."""
         self._logger.info('Open')
+        super().open()
         self.logdev = support.LogicalDevices(self.devices, self.fifo)
         self.sensor = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensor, self.limits)
         self.subt = support.SubTests(self.logdev, self.meas)
-        # Define the (linear) Test Sequence
-        sequence = (
-            tester.TestStep('FixtureLock', self._step_fixture_lock),
-            tester.TestStep('Program', self._step_program_micros),
-            tester.TestStep('Initialise', self._step_initialise_arm),
-            tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('5Vsb', self._step_reg_5v),
-            tester.TestStep('12V', self._step_reg_12v),
-            tester.TestStep('24V', self._step_reg_24v),
-            tester.TestStep('PeakPower', self._step_peak_power),
-            )
-        super().open(sequence)
         self.logdev.dcs_Vcom.output(9.0, output=True)
         self.logdev.dcs_Arduino.output(12.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports

@@ -19,8 +19,8 @@ class Gen8Initial(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.support.sensors
-        dev = self.test_program.support.devices
+        sen = self.test_program.sensors
+        dev = self.test_program.devices
         dev.arm_ser.flushInput()        # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data

@@ -20,14 +20,14 @@ class BP35Initial(ProgramTestCase):
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
-        sen = self.test_program.support.sensors
+        sen = self.test_program.sensors
         for sensor in sen.arm_loads:
             sensor.store(value)
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.support.sensors
-        dev = self.test_program.support.devices
+        sen = self.test_program.sensors
+        dev = self.test_program.devices
         dev.bp35_ser.flushInput()       # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
@@ -107,7 +107,7 @@ class BP35Initial(ProgramTestCase):
         patcher = patch('threading.Timer', return_value=mymock)
         self.addCleanup(patcher.stop)
         patcher.start()
-        sen = self.test_program.support.sensors
+        sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare':
