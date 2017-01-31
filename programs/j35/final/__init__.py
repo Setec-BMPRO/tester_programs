@@ -17,10 +17,10 @@ class Final(tester.TestSequence):
 
     """J35 Final Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param physical_devices Physical instruments of the Tester
            @param test_limits Product test limits
            @param fifo True if FIFOs are enabled
@@ -31,7 +31,7 @@ class Final(tester.TestSequence):
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
             )
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
         self.phydev = physical_devices
         self.limits = test_limits
         self.logdev = None

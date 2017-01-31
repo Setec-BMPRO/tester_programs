@@ -41,7 +41,7 @@ class InitialSingle(tester.TestSequence):
 
     """Spa SINGLE Initial Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
         sequence = (
@@ -53,7 +53,7 @@ class InitialSingle(tester.TestSequence):
             tester.TestStep('Led35', self._step_led35),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices

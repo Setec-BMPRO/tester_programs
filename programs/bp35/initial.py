@@ -96,14 +96,14 @@ LIMITS = tester.limitdict((
     ))
 
 
-class Initial(share.Support, tester.TestSequence):
+class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param physical_devices Physical instruments of the Tester
            @param test_limits Product test limits
            @param fifo True if FIFOs are enabled
@@ -126,8 +126,9 @@ class Initial(share.Support, tester.TestSequence):
             TestStep('OCP', self._step_ocp),
             TestStep('CanBus', self._step_canbus),
             )
-        tester.TestSequence.__init__(self, selection, sequence, fifo)
-        share.Support.__init__(self, devices, limits, sensors, measurements)
+        sequence_data = share.TestSequenceData(
+            fifo, per_panel, devices, limits, sensors, measurements, sequence)
+        super().__init__(sequence_data)
         self.sernum = None
 
     @share.teststep
@@ -460,25 +461,10 @@ class Sensors(share.Sensors):
             loads.append(console.Sensor(bp35, 'LOAD_{0}'.format(i)))
         self['arm_loads'] = loads
 
-    def reset(self):
-        """Empty the Mirror Sensor."""
-        self['mir_can'].flush()
 
-
-class Measurements(share.AttributeDict):
+class Measurements(share.Measurements):
 
     """Measurements."""
-
-    def __init__(self, sense, limits):
-        """Create all Measurements.
-
-        @param sense Sensors
-        @param limits Test limits
-
-        """
-        super().__init__()
-        self.sense = sense
-        self.limits = limits
 
     def open(self):
         """Create all Measurements."""

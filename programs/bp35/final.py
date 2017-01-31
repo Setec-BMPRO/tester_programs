@@ -4,22 +4,21 @@
 """BP35 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitHiLoDelta
 import share
 
 LIMITS = tester.limitdict((
-    LimitHiLoDelta('Vbat', (12.8, 0.2)),
+    tester.LimitHiLoDelta('Vbat', (12.8, 0.2)),
     ))
 
 
-class Final(share.Support, tester.TestSequence):
+class Final(share.TestSequence):
 
     """BP35 Final Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param physical_devices Physical instruments of the Tester
            @param test_limits Product test limits
 
@@ -29,10 +28,11 @@ class Final(share.Support, tester.TestSequence):
         sensors = Sensors(devices)
         measurements = Measurements(sensors, limits)
         sequence = (
-            TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('PowerUp', self._step_powerup),
             )
-        tester.TestSequence.__init__(self, selection, sequence, fifo)
-        share.Support.__init__(self, devices, limits, sensors, measurements)
+        sequence_data = share.TestSequenceData(
+            fifo, per_panel, devices, limits, sensors, measurements, sequence)
+        super().__init__(sequence_data)
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -65,20 +65,9 @@ class Sensors(share.Sensors):
             self.devices['dmm'], high=1, low=1, rng=100, res=0.001)
 
 
-class Measurements(share.AttributeDict):
+class Measurements(share.Measurements):
 
     """Measurements."""
-
-    def __init__(self, sense, limits):
-        """Create all Measurements.
-
-        @param sense Sensors
-        @param limits Test limits
-
-        """
-        super().__init__()
-        self.sense = sense
-        self.limits = limits
 
     def open(self):
         """Create all Measurements."""

@@ -79,7 +79,7 @@ class InitialMulti(tester.TestSequence):
 
     """Spa RGB/TRI Initial Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # Define the (linear) Test Sequence
         sequence = (
@@ -95,7 +95,7 @@ class InitialMulti(tester.TestSequence):
             tester.TestStep('Reset', self._step_firmware_reset),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices

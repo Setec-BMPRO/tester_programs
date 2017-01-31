@@ -4,9 +4,11 @@
 """Shared modules for Tester programs."""
 
 import functools
-from abc import ABC, abstractmethod
+import abc
+import collections
 import logging
 import time
+import tester
 # Easy access to utility methods and classes
 from .bluetooth import *
 from .console import *
@@ -15,38 +17,48 @@ from .programmer import *
 from .ticker import *
 from .timed_data import *
 
+# Data tuple of Test Sequence helper instances
+TestSequenceData = collections.namedtuple(
+    'TestSequenceData',
+    'fifo, per_panel, devices, limits, sensors, measurements, sequence')
 
-class Support(ABC):
 
-    """Supporting utility class for Test Programs."""
+class TestSequence(tester.TestSequence):
 
-    @abstractmethod
-    def __init__(self, devices, limits, sensors, measurements):
+    """Base class for Test Programs.
+
+    Manages the common instances
+
+    """
+
+    @abc.abstractmethod
+    def __init__(self, sequence_data):
         """Create all supporting classes."""
-        self.devices = devices
-        self.limits = limits
-        self.sensors = sensors
-        self.measurements = measurements
+        self.devices = sequence_data.devices
+        self.limits = sequence_data.limits
+        self.sensors = sequence_data.sensors
+        self.measurements = sequence_data.measurements
+        super().__init__(
+            sequence_data.per_panel,
+            sequence_data.sequence,
+            sequence_data.fifo)
 
     def open(self):
         """Prepare for testing."""
+        super().open()
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
 
-    def reset(self):
+    def safety(self):
         """Reset logical devices and sensors."""
         self.devices.reset()
-        try:
-            self.sensors.reset()
-        except AttributeError:
-            pass
-
-    safety = reset
+        self.sensors.reset()
 
     def close(self):
         """Close logical devices."""
         self.devices.close()
+        super().close()
 
     def measure(self, names, timeout=0):
         """Measure a group of measurements given the measurement names.
@@ -167,7 +179,7 @@ class AttributeDict(dict):
                 self.__class__.__name__, name)) from exc
 
 
-class LogicalDevices(ABC, AttributeDict):
+class LogicalDevices(abc.ABC, dict):
 
     """Logical Devices abstract base class."""
 
@@ -182,11 +194,11 @@ class LogicalDevices(ABC, AttributeDict):
         self.physical_devices = physical_devices
         self.fifo = fifo
 
-    @abstractmethod
+    @abc.abstractmethod
     def open(self):
         """Create all Logical Instruments."""
 
-    @abstractmethod
+    @abc.abstractmethod
     def reset(self):
         """Reset instruments."""
 
@@ -194,12 +206,12 @@ class LogicalDevices(ABC, AttributeDict):
         """Close logical devices."""
 
 
-class Sensors(ABC, AttributeDict):
+class Sensors(abc.ABC, dict):
 
     """Sensors."""
 
     def __init__(self, devices, limits=None):
-        """Create all Sensors.
+        """Create Sensors instance.
 
         @param devices Logical instruments
         @param limits Test limits
@@ -209,12 +221,34 @@ class Sensors(ABC, AttributeDict):
         self.devices = devices
         self.limits = limits
 
-    @abstractmethod
+    @abc.abstractmethod
     def open(self):
-        """Open sensors."""
+        """Create all sensors."""
 
     def reset(self):
-        """Reset sensors."""
+        """Reset sensors by flushing any stored data."""
+        for sensor in self:
+            self[sensor].flush()
+
+
+class Measurements(abc.ABC, dict):
+
+    """Measurements."""
+
+    def __init__(self, sense, limits):
+        """Create Measurements instance.
+
+        @param sense Sensors
+        @param limits Test limits
+
+        """
+        super().__init__()
+        self.sense = sense
+        self.limits = limits
+
+    @abc.abstractmethod
+    def open(self):
+        """Create all Measurements."""
 
 
 def deprecated(func):

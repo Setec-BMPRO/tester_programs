@@ -20,10 +20,10 @@ class Initial(tester.TestSequence):
 
     """CN101 Initial Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param physical_devices Physical instruments of the Tester
            @param test_limits Product test limits
 
@@ -39,7 +39,7 @@ class Initial(tester.TestSequence):
             tester.TestStep('CanBus', self._step_canbus),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices

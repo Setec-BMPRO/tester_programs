@@ -17,9 +17,9 @@ class Final(tester.TestSequence):
 
     """IDS-500 Final Test Programes."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
-        super().__init__(selection, None, fifo)
+        super().__init__(per_panel, None, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.phydev = physical_devices

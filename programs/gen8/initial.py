@@ -63,11 +63,11 @@ LIMITS = tester.limitdict((
     LimitString('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
     ))
 
-class Initial(share.Support, tester.TestSequence):
+class Initial(share.TestSequence):
 
     """GEN8 Initial Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         devices = LogicalDevices(physical_devices, fifo)
         limits = LIMITS
@@ -82,8 +82,9 @@ class Initial(share.Support, tester.TestSequence):
             TestStep('12V', self._step_reg_12v),
             TestStep('24V', self._step_reg_24v),
             )
-        tester.TestSequence.__init__(self, selection, sequence, fifo)
-        share.Support.__init__(self, devices, limits, sensors, measurements)
+        sequence_data = share.TestSequenceData(
+            fifo, per_panel, devices, limits, sensors, measurements, sequence)
+        super().__init__(sequence_data)
 
     @share.teststep
     def _step_part_detect(self, dev, mes):
@@ -381,20 +382,9 @@ class Sensors(share.Sensors):
                 arm, cmdkey, rdgtype=sensor.ReadingString)
 
 
-class Measurements(share.AttributeDict):
+class Measurements(share.Measurements):
 
     """Measurements."""
-
-    def __init__(self, sense, limits):
-        """Create all Measurements.
-
-        @param sense Sensors
-        @param limits Test limits
-
-        """
-        super().__init__()
-        self.sense = sense
-        self.limits = limits
 
     def open(self):
         """Create all Measurements."""

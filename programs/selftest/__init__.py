@@ -17,7 +17,7 @@ class Main(tester.testsequence.TestSequence):
 
     """Selfchecker Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         # True if running on ATE2 tester
         self._is_ate2 = (physical_devices.tester_type == 'ATE2')
@@ -32,7 +32,7 @@ class Main(tester.testsequence.TestSequence):
             tester.TestStep('Discharge', self._step_discharge),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices

@@ -24,10 +24,10 @@ class _Main(tester.TestSequence):
 
     """CMR-SBP Base Test Program."""
 
-    def __init__(self, selection, sequence, fifo):
+    def __init__(self, per_panel, sequence, fifo):
         """Common test program segments.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param sequence Test sequence
            @param fifo True to enable FIFOs
 
@@ -35,7 +35,7 @@ class _Main(tester.TestSequence):
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._isFin = False
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -114,10 +114,10 @@ class Initial(_Main):
 
     """CMR-SBP Initial Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param physical_devices Physical instruments of the Tester
            @param test_limits Product test limits
            @param fifo True to enable FIFOs
@@ -134,7 +134,7 @@ class Initial(_Main):
             tester.TestStep('CalBQcurrent', self._step_cali),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -236,10 +236,10 @@ class SerialDate(_Main):
 
     """CMR-SBP SerialDate Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param physical_devices Physical instruments of the Tester
            @param test_limits Product test limits
            @param fifo True to enable FIFOs
@@ -251,7 +251,7 @@ class SerialDate(_Main):
             tester.TestStep('SerialDate', self._step_sn_date),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -291,10 +291,10 @@ class Final(_Main):
 
     """CMR-SBP Final Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
-           @param selection Product test program
+           @param per_panel Number of units tested together
            @param physical_devices Physical instruments of the Tester
            @param test_limits Product test limits
            @param fifo True to enable FIFOs
@@ -307,7 +307,7 @@ class Final(_Main):
             tester.TestStep('Verify', self._step_verify),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(selection, sequence, fifo)
+        super().__init__(per_panel, sequence, fifo)
         self._isFin = True
 
     def open(self):

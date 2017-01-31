@@ -25,11 +25,11 @@ LIMITS = tester.limitdict((
     ))
 
 
-class Final(share.Support, tester.TestSequence):
+class Final(share.TestSequence):
 
     """GEN8 Final Test Program."""
 
-    def __init__(self, selection, physical_devices, test_limits, fifo):
+    def __init__(self, per_panel, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         devices = LogicalDevices(physical_devices)
         limits = LIMITS
@@ -42,8 +42,9 @@ class Final(share.Support, tester.TestSequence):
             TestStep('115V', self._step_fullload115),
             TestStep('Poweroff', self._step_pwroff),
             )
-        tester.TestSequence.__init__(self, selection, sequence, fifo)
-        share.Support.__init__(self, devices, limits, sensors, measurements)
+        sequence_data = share.TestSequenceData(
+            fifo, per_panel, devices, limits, sensors, measurements, sequence)
+        super().__init__(sequence_data)
 
     @share.teststep
     def _step_pwrup(self, dev, mes):
@@ -140,20 +141,9 @@ class Sensors(share.Sensors):
             caption=tester.translate('gen8_final', 'capSwitchOff'))
 
 
-class Measurements(share.AttributeDict):
+class Measurements(share.Measurements):
 
     """Measurements."""
-
-    def __init__(self, sense, limits):
-        """Create all Measurements.
-
-        @param sense Sensors
-        @param limits Test limits
-
-        """
-        super().__init__()
-        self.sense = sense
-        self.limits = limits
 
     def open(self):
         """Create all Measurements."""
