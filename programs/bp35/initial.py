@@ -15,7 +15,7 @@ from tester import (
 import share
 from . import console
 
-ARM_VERSION = '1.2.14256.3912'
+ARM_VERSION = '1.2.14284.3921'
 ARM_HW_VER = (9, 0, 'A')
 PIC_VERSION = '1.1.13802.182'
 PIC_HW_VER = 3
