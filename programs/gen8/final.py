@@ -4,9 +4,11 @@
 """GEN8 Final Test Program."""
 
 import tester
-from tester import TestSequence, TestStep
-from tester import LimitLo, LimitHi, LimitBoolean, LimitHiLo, LimitHiLoDelta
-from share import teststep, Support, AttributeDict
+from tester import (
+    TestStep,
+    LimitLo, LimitHi, LimitBoolean, LimitHiLo, LimitHiLoDelta
+    )
+import share
 
 LIMITS = tester.limitdict((
     LimitHiLoDelta('Iecon', (240, 10)),
@@ -23,7 +25,7 @@ LIMITS = tester.limitdict((
     ))
 
 
-class Final(Support, TestSequence):
+class Final(share.Support, tester.TestSequence):
 
     """GEN8 Final Test Program."""
 
@@ -40,10 +42,10 @@ class Final(Support, TestSequence):
             TestStep('115V', self._step_fullload115),
             TestStep('Poweroff', self._step_pwroff),
             )
-        TestSequence.__init__(self, selection, sequence, fifo)
-        Support.__init__(self, devices, limits, sensors, measurements)
+        tester.TestSequence.__init__(self, selection, sequence, fifo)
+        share.Support.__init__(self, devices, limits, sensors, measurements)
 
-    @teststep
+    @share.teststep
     def _step_pwrup(self, dev, mes):
         """Power Up step."""
         self.dcload(
@@ -54,7 +56,7 @@ class Final(Support, TestSequence):
         dev['rla_12v2off'].set_on()
         mes['dmm_12v2off'](timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_pwron(self, dev, mes):
         """Power On step."""
         dev['rla_pson'].set_on()
@@ -65,7 +67,7 @@ class Final(Support, TestSequence):
         self.measure(('dmm_12v2on', 'dmm_iec_on', ), timeout=5)
         mes['ui_yesno_mains']()
 
-    @teststep
+    @share.teststep
     def _step_fullload(self, dev, mes):
         """Full Load step."""
         self.dcload(
@@ -74,32 +76,23 @@ class Final(Support, TestSequence):
         self.measure(
             ('dmm_5v', 'dmm_24von', 'dmm_12von', 'dmm_12v2on', ), timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_fullload115(self, dev, mes):
         """115Vac step."""
         dev['acsource'].output(voltage=115.0, delay=0.5)
         self.measure(
             ('dmm_5v', 'dmm_24von', 'dmm_12von', 'dmm_12v2on', ), timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_pwroff(self, dev, mes):
         """Power Off step."""
         self.dcload((('dcl_5v', 0.5), ('dcl_24v', 0.5), ('dcl_12v', 4.0), ))
         self.measure(('ui_notify_pwroff', 'dmm_iec_off', 'dmm_24voff', ))
 
 
-class LogicalDevices(AttributeDict):
+class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
-
-    def __init__(self, physical_devices):
-        """Create instance.
-
-        @param physical_devices Physical instruments
-
-        """
-        super().__init__()
-        self.physical_devices = physical_devices
 
     def open(self):
         """Create all Logical Instruments."""
@@ -124,22 +117,10 @@ class LogicalDevices(AttributeDict):
         for rla in ('rla_12v2off', 'rla_pson'):
             self[rla].set_off()
 
-    def close(self):
-        """Close logical devices."""
 
-
-class Sensors(AttributeDict):
+class Sensors(share.Sensors):
 
     """Sensors."""
-
-    def __init__(self, devices):
-        """Create all Sensors.
-
-        @param devices Logical instruments
-
-        """
-        super().__init__()
-        self.devices = devices
 
     def open(self):
         """Create all Sensors."""
@@ -159,7 +140,7 @@ class Sensors(AttributeDict):
             caption=tester.translate('gen8_final', 'capSwitchOff'))
 
 
-class Measurements(AttributeDict):
+class Measurements(share.AttributeDict):
 
     """Measurements."""
 

@@ -7,12 +7,12 @@ import os
 import inspect
 import time
 import tester
-from tester import TestSequence, TestStep
 from tester import (
-    LimitLo, LimitHi, LimitString, LimitHiLo, LimitHiLoDelta, LimitHiLoPercent
+    TestStep,
+    LimitLo, LimitHi, LimitString,
+    LimitHiLo, LimitHiLoDelta, LimitHiLoPercent
     )
 import share
-from share import teststep, Support, AttributeDict
 from . import console
 
 BIN_VERSION = '1.4.645'     # Software binary version
@@ -63,7 +63,7 @@ LIMITS = tester.limitdict((
     LimitString('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
     ))
 
-class Initial(Support, TestSequence):
+class Initial(share.Support, tester.TestSequence):
 
     """GEN8 Initial Test Program."""
 
@@ -82,15 +82,15 @@ class Initial(Support, TestSequence):
             TestStep('12V', self._step_reg_12v),
             TestStep('24V', self._step_reg_24v),
             )
-        TestSequence.__init__(self, selection, sequence, fifo)
-        Support.__init__(self, devices, limits, sensors, measurements)
+        tester.TestSequence.__init__(self, selection, sequence, fifo)
+        share.Support.__init__(self, devices, limits, sensors, measurements)
 
-    @teststep
+    @share.teststep
     def _step_part_detect(self, dev, mes):
         """Measure Part detection microswitches."""
         self.measure(('dmm_lock', 'dmm_part', 'dmm_fanshort', ), timeout=2)
 
-    @teststep
+    @share.teststep
     def _step_program(self, dev, mes):
         """Program the ARM device.
 
@@ -105,7 +105,7 @@ class Initial(Support, TestSequence):
         dev['rla_reset'].pulse(0.1)
         time.sleep(1)
 
-    @teststep
+    @share.teststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -124,7 +124,7 @@ class Initial(Support, TestSequence):
         time.sleep(0.5)
         dev.loads(i5=0)
 
-    @teststep
+    @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit.
 
@@ -187,7 +187,7 @@ class Initial(Support, TestSequence):
             ('arm_acfreq', 'arm_acvolt', 'arm_5v', 'arm_12v', 'arm_24v',
              'arm_swver', 'arm_swbld'), )
 
-    @teststep
+    @share.teststep
     def _step_reg_5v(self, dev, mes):
         """Check regulation of the 5V.
 
@@ -204,7 +204,7 @@ class Initial(Support, TestSequence):
             max_load=2.0, peak_load=2.5)
         dev.loads(i5=0, i12=0, i24=0)
 
-    @teststep
+    @share.teststep
     def _step_reg_12v(self, dev, mes):
         """Check regulation and OCP of the 12V.
 
@@ -222,7 +222,7 @@ class Initial(Support, TestSequence):
             max_load=22, peak_load=24)
         dev.loads(i12=0, i24=0)
 
-    @teststep
+    @share.teststep
     def _step_reg_24v(self, dev, mes):
         """Check regulation and OCP of the 24V.
 
@@ -269,20 +269,9 @@ class Initial(Support, TestSequence):
             dmm_out.measure()
 
 
-class LogicalDevices(AttributeDict):
+class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
-
-    def __init__(self, physical_devices, fifo):
-        """Logical Instruments.
-
-        @param physical_devices Physical instruments
-        @param fifo True for FIFOs
-
-        """
-        super().__init__()
-        self.physical_devices = physical_devices
-        self.fifo = fifo
 
     def open(self):
         """Create all Logical Instruments."""
@@ -353,18 +342,9 @@ class LogicalDevices(AttributeDict):
             self['dcl_24v'].output(i24, output)
 
 
-class Sensors(AttributeDict):
+class Sensors(share.Sensors):
 
     """Sensors."""
-
-    def __init__(self, devices):
-        """Create all Sensors.
-
-        @param devices Logical instruments
-
-        """
-        super().__init__()
-        self.devices = devices
 
     def open(self):
         """Create all Sensors."""
@@ -401,7 +381,7 @@ class Sensors(AttributeDict):
                 arm, cmdkey, rdgtype=sensor.ReadingString)
 
 
-class Measurements(AttributeDict):
+class Measurements(share.AttributeDict):
 
     """Measurements."""
 

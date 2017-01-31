@@ -7,13 +7,12 @@ import os
 import inspect
 import time
 import tester
-from tester import TestSequence, TestStep
 from tester import (
+    TestStep,
     LimitLo, LimitString,
     LimitHiLo, LimitHiLoDelta, LimitHiLoPercent, LimitHiLoInt
     )
 import share
-from share import teststep, Support, AttributeDict
 from . import console
 
 ARM_VERSION = '1.2.14256.3912'
@@ -97,7 +96,7 @@ LIMITS = tester.limitdict((
     ))
 
 
-class Initial(Support, TestSequence):
+class Initial(share.Support, tester.TestSequence):
 
     """BP35 Initial Test Program."""
 
@@ -127,11 +126,11 @@ class Initial(Support, TestSequence):
             TestStep('OCP', self._step_ocp),
             TestStep('CanBus', self._step_canbus),
             )
-        TestSequence.__init__(self, selection, sequence, fifo)
-        Support.__init__(self, devices, limits, sensors, measurements)
+        tester.TestSequence.__init__(self, selection, sequence, fifo)
+        share.Support.__init__(self, devices, limits, sensors, measurements)
         self.sernum = None
 
-    @teststep
+    @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
@@ -148,7 +147,7 @@ class Initial(Support, TestSequence):
         dev['dcs_sreg'].output(SOLAR_VIN, True)
         self.measure(('dmm_vbatin', 'dmm_3v3', 'dmm_solarvcc'), timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_program_pic(self, dev, mes):
         """Program the dsPIC device.
 
@@ -158,7 +157,7 @@ class Initial(Support, TestSequence):
         dev['program_pic'].program()
         dev['dcs_sreg'].output(0.0)     # Switch off the Solar
 
-    @teststep
+    @share.teststep
     def _step_program_arm(self, dev, mes):
         """Program the ARM device.
 
@@ -174,7 +173,7 @@ class Initial(Support, TestSequence):
         load.output(0.0)
         dcsource.output(VBAT_IN)
 
-    @teststep
+    @share.teststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -202,7 +201,7 @@ class Initial(Support, TestSequence):
         mes['arm_swver']()
         bp35.manual_mode(VOUT_SET, OCP_NOMINAL)
 
-    @teststep
+    @share.teststep
     def _step_solar_reg(self, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         bp35 = dev['bp35']
@@ -247,7 +246,7 @@ class Initial(Support, TestSequence):
         dev['acsource'].output(voltage=0.0)
         dev['rla_acsw'].set_off()
 
-    @teststep
+    @share.teststep
     def _step_aux(self, dev, mes):
         """Apply Auxiliary input."""
         bp35, source, load = dev['bp35'], dev['dcs_vaux'], dev['dcl_bat']
@@ -259,7 +258,7 @@ class Initial(Support, TestSequence):
         source.output(0.0, output=False)
         load.output(0.0)
 
-    @teststep
+    @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with AC."""
         dev['acsource'].output(voltage=VAC, output=True)
@@ -275,7 +274,7 @@ class Initial(Support, TestSequence):
         mes['arm_vout_ov']()
         self.measure(('dmm_3v3', 'dmm_15vs', 'dmm_vbat'), timeout=10)
 
-    @teststep
+    @share.teststep
     def _step_output(self, dev, mes):
         """Test the output switches.
 
@@ -297,7 +296,7 @@ class Initial(Support, TestSequence):
         # All outputs ON
         bp35.load_set(set_on=False, loads=())
 
-    @teststep
+    @share.teststep
     def _step_remote_sw(self, dev, mes):
         """Test Remote Load Isolator Switch."""
         relay = dev['rla_loadsw']
@@ -306,7 +305,7 @@ class Initial(Support, TestSequence):
         relay.set_off()
         mes['dmm_vload'](timeout=5)
 
-    @teststep
+    @share.teststep
     def _step_ocp(self, dev, mes):
         """Test functions of the unit."""
         bp35 = dev['bp35']
@@ -324,7 +323,7 @@ class Initial(Support, TestSequence):
         mes['ramp_ocp'](timeout=5)
         dev['dcl_bat'].output(0.0)
 
-    @teststep
+    @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         bp35 = dev['bp35']
@@ -339,20 +338,9 @@ class Initial(Support, TestSequence):
         rx_can.measure()
 
 
-class LogicalDevices(AttributeDict):
+class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
-
-    def __init__(self, physical_devices, fifo):
-        """Create all Logical Instruments.
-
-        @param physical_devices Physical instruments
-        @param fifo True if FIFOs are active
-
-        """
-        super().__init__()
-        self.physical_devices = physical_devices
-        self.fifo = fifo
 
     def open(self):
         """Create all Logical Instruments."""
@@ -413,20 +401,9 @@ class LogicalDevices(AttributeDict):
         self['dcs_vcom'].output(0, False)   # Remove power from fixture.
 
 
-class Sensors(AttributeDict):
+class Sensors(share.Sensors):
 
     """Sensors."""
-
-    def __init__(self, devices, limits):
-        """Create all Sensors.
-
-        @param devices Logical instruments
-        @param limits Test limits
-
-        """
-        super().__init__()
-        self.devices = devices
-        self.limits = limits
 
     def open(self):
         """Create all Sensors."""
@@ -488,7 +465,7 @@ class Sensors(AttributeDict):
         self['mir_can'].flush()
 
 
-class Measurements(AttributeDict):
+class Measurements(share.AttributeDict):
 
     """Measurements."""
 

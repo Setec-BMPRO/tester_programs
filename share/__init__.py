@@ -167,6 +167,56 @@ class AttributeDict(dict):
                 self.__class__.__name__, name)) from exc
 
 
+class LogicalDevices(ABC, AttributeDict):
+
+    """Logical Devices abstract base class."""
+
+    def __init__(self, physical_devices, fifo=False):
+        """Create instance.
+
+        @param physical_devices Physical instruments
+        @param fifo True if FIFOs are active
+
+        """
+        super().__init__()
+        self.physical_devices = physical_devices
+        self.fifo = fifo
+
+    @abstractmethod
+    def open(self):
+        """Create all Logical Instruments."""
+
+    @abstractmethod
+    def reset(self):
+        """Reset instruments."""
+
+    def close(self):
+        """Close logical devices."""
+
+
+class Sensors(ABC, AttributeDict):
+
+    """Sensors."""
+
+    def __init__(self, devices, limits=None):
+        """Create all Sensors.
+
+        @param devices Logical instruments
+        @param limits Test limits
+
+        """
+        super().__init__()
+        self.devices = devices
+        self.limits = limits
+
+    @abstractmethod
+    def open(self):
+        """Open sensors."""
+
+    def reset(self):
+        """Reset sensors."""
+
+
 def deprecated(func):
     """Decorator to mark functions as deprecated.
 
