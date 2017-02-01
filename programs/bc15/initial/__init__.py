@@ -150,7 +150,7 @@ class Initial(tester.TestSequence):
         d.bc15.open()
         d.bc15.action(None, delay=1.5, expected=10)  # Flush banner
         d.bc15.ps_mode()
-# FIXME: Save the "Power Supply" mode state in the unit (new command required)
+# TODO: Save the "Power Supply" mode state in the unit (new command required)
 
     def _step_output(self):
         """Tests of the output.

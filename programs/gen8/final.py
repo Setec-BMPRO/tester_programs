@@ -31,10 +31,6 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        devices = LogicalDevices(self.physical_devices)
-        limits = LIMITS
-        sensors = Sensors(devices, limits)
-        measurements = Measurements(sensors, limits)
         sequence = (
             TestStep('PowerUp', self._step_pwrup),
             TestStep('PowerOn', self._step_pwron),
@@ -42,9 +38,10 @@ class Final(share.TestSequence):
             TestStep('115V', self._step_fullload115),
             TestStep('Poweroff', self._step_pwroff),
             )
-        sequence_data = share.TestSequenceData(
-            devices, limits, sensors, measurements, sequence)
-        super().open(sequence_data)
+        super().open(
+            share.TestSequenceData(
+                LogicalDevices, LIMITS, Sensors, Measurements, sequence)
+            )
 
     @share.teststep
     def _step_pwrup(self, dev, mes):
@@ -162,4 +159,4 @@ class Measurements(share.Measurements):
             ('ui_notify_pwroff', 'Notify', 'not_pwroff'),
             ):
             self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sense[sensor_name])
+                self.limits[limit_name], self.sensors[sensor_name])

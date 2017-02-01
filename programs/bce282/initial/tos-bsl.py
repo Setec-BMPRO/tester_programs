@@ -466,7 +466,7 @@ class LowLevel:
 
         accessAddr = (0x0212 + (checksum^0xffff)) & 0xfffe  #0x0212: Address of wCHKSUM
         if self.BSLMemAccessWarning and accessAddr < self.BSL_CRITICAL_ADDR:
-            sys.stderr.write("WARNING: This command might change data at address %04x or %04x!\n" % (accessAddr, accessAddr + 1))
+            sys.stderr.write("Warning: This command might change data at address %04x or %04x!\n" % (accessAddr, accessAddr + 1))
 
         self.serialport.flushInput()                #clear receiving queue
         #TODO: Check after each transmitted character,

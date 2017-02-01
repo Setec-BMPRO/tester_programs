@@ -17,16 +17,13 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        devices = LogicalDevices(self.physical_devices)
-        limits = LIMITS
-        sensors = Sensors(devices, limits)
-        measurements = Measurements(sensors, limits)
         sequence = (
             tester.TestStep('PowerUp', self._step_powerup),
             )
-        sequence_data = share.TestSequenceData(
-            devices, limits, sensors, measurements, sequence)
-        super().open(sequence_data)
+        super().open(
+            share.TestSequenceData(
+                LogicalDevices, LIMITS, Sensors, Measurements, sequence)
+            )
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -66,4 +63,4 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self['dmm_vbat'] = tester.Measurement(
-            self.limits['Vbat'], self.sense['vbat'])
+            self.limits['Vbat'], self.sensors['vbat'])

@@ -69,10 +69,6 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        devices = LogicalDevices(self.physical_devices, self.fifo)
-        limits = LIMITS
-        sensors = Sensors(devices, limits)
-        measurements = Measurements(sensors, limits)
         sequence = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program, not self.fifo),
@@ -82,9 +78,10 @@ class Initial(share.TestSequence):
             TestStep('12V', self._step_reg_12v),
             TestStep('24V', self._step_reg_24v),
             )
-        sequence_data = share.TestSequenceData(
-            devices, limits, sensors, measurements, sequence)
-        super().open(sequence_data)
+        super().open(
+            share.TestSequenceData(
+                LogicalDevices, LIMITS, Sensors, Measurements, sequence)
+            )
 
     @share.teststep
     def _step_part_detect(self, dev, mes):
@@ -424,7 +421,7 @@ class Measurements(share.Measurements):
                 ('arm_swbld', 'SwBld', 'arm_swbld'),
             ):
             self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sense[sensor_name])
+                self.limits[limit_name], self.sensors[sensor_name])
         # Prevent test failures on these limits.
         for limitname in ('PFCpost1', 'PFCpost2', 'PFCpost3', 'PFCpost4'):
             self.limits[limitname].position_fail = False

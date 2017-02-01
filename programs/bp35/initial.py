@@ -102,10 +102,6 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        devices = LogicalDevices(self.physical_devices, self.fifo)
-        limits = LIMITS
-        sensors = Sensors(devices, limits)
-        measurements = Measurements(sensors, limits)
         sequence = (
             TestStep('Prepare', self._step_prepare),
             TestStep('ProgramPIC', self._step_program_pic, not self.fifo),
@@ -119,9 +115,10 @@ class Initial(share.TestSequence):
             TestStep('OCP', self._step_ocp),
             TestStep('CanBus', self._step_canbus),
             )
-        sequence_data = share.TestSequenceData(
-            devices, limits, sensors, measurements, sequence)
-        super().open(sequence_data)
+        super().open(
+            share.TestSequenceData(
+                LogicalDevices, LIMITS, Sensors, Measurements, sequence)
+            )
         self.sernum = None
 
     @share.teststep
@@ -504,9 +501,9 @@ class Measurements(share.Measurements):
                 ('arm_solar_vin_post', 'ARM-SolarVin-Post', 'arm_solar_vin'),
             ):
             self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sense[sensor_name])
+                self.limits[limit_name], self.sensors[sensor_name])
         # Generate load current measurements
         loads = []
-        for sen in self.sense['arm_loads']:
+        for sen in self.sensors['arm_loads']:
             loads.append(tester.Measurement(self.limits['ARM-LoadI'], sen))
         self['arm_loads'] = loads

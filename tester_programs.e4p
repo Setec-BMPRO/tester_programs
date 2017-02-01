@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-02-01, 13:58:07 -->
+<!-- Saved: 2017-02-01, 21:53:11 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -232,6 +232,7 @@
     <Source>share/console/_base.py</Source>
     <Source>share/console/protocol.py</Source>
     <Source>share/programmer.py</Source>
+    <Source>share/testsequence.py</Source>
     <Source>share/ticker.py</Source>
     <Source>share/timed_data.py</Source>
     <Source>tests/__init__.py</Source>

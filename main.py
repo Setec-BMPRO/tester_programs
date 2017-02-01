@@ -14,7 +14,7 @@ import tester
 import programs
 
 # Configuration of logger.
-_CONSOLE_LOG_LEVEL = logging.DEBUG
+_CONSOLE_LOG_LEVEL = logging.INFO   #  DEBUG
 _LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
 
 
@@ -77,10 +77,11 @@ def _main():
     for prog in prog_list:
         test_program = prog[0]
         logger.info('#' * 40)
-        logger.info('Create Program "%s"', test_program)
         if run_all and test_program in programs.ALL_SKIP:
             logger.info('Skip Program "%s"', test_program)
+            logger.info('#' * 40)
             continue
+        logger.info('Create Program "%s"', test_program)
         # Make a TEST PROGRAM descriptor
         pgm = tester.TestProgram(
             test_program, per_panel=1, parameter=None, test_limits=[])
@@ -95,7 +96,6 @@ def _main():
         logger.info('Close Program')
         time.sleep(2)
         tst.close()
-        logger.info('#' * 40)
     logger.info('Stop Tester')
     tst.stop()
     tst.join()
