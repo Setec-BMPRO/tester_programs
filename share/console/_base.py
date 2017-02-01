@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Base classes for Serial Consoles."""
 
-import logging
 import tester
 
 # Default read/write format strings (For the X-Register based consoles)
@@ -24,9 +23,6 @@ class Sensor(tester.sensor.Sensor):
         self._key = key
         self._rdgtype = rdgtype
         self._scale = scale
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._logger.debug('Created')
 
     def configure(self):
         """Configure measurement."""

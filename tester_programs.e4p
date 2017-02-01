@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-01-30, 17:51:32 -->
+<!-- Saved: 2017-02-01, 13:58:07 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -260,7 +260,7 @@
   <Others>
     <Other>programs/batterycheck/initial/BatteryCheckControl_1.7.4080.bin</Other>
     <Other>programs/batterycheck/initial/BatteryCheckSupervisor-2.hex</Other>
-    <Other>programs/bp35/bp35_1.2.14256.3912.bin</Other>
+    <Other>programs/bp35/bp35_1.2.14284.3921.bin</Other>
     <Other>programs/bp35/bp35sr_1.1.13802.182.hex</Other>
     <Other>programs/c45a15/initial/c45a-15.hex</Other>
     <Other>programs/cmrsbp/CMR-SBP-9.hex</Other>

@@ -228,7 +228,10 @@ class Sensors(abc.ABC, dict):
     def reset(self):
         """Reset sensors by flushing any stored data."""
         for sensor in self:
-            self[sensor].flush()
+            try:
+                self[sensor].flush()
+            except AttributeError:  # Sometime it's a List of Sensors
+                pass
 
 
 class Measurements(abc.ABC, dict):
