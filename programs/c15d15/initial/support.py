@@ -16,7 +16,6 @@ class LogicalDevices():
         self.dcs_input = tester.DCSource(devices['DCS1'])
         self.dcl = tester.DCLoad(devices['DCL1'])
         self.rla_load = tester.Relay(devices['RLA1'])
-# FIXME: Remove RLA1,3 from fixture. Move RLA2 to RLA1
 
     def reset(self):
         """Reset instruments."""

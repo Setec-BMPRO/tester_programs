@@ -33,10 +33,9 @@ class Sensors():
         dmm = logical_devices.dmm
         sensor = tester.sensor
         self.o24V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-# FIXME: Use translations here.
         self.oYesNoGreen = sensor.YesNo(
-            message='Is the <b>GREEN POWER SWITCH</b> light <b>ON</b> ?',
-            caption='Switch light')
+            message=tester.translate('gsu360_final', 'IsSwitchGreen?'),
+            caption=tester.translate('gsu360_final', 'capSwitchGreen'))
         self.o24Vocp = sensor.Ramp(
             stimulus=logical_devices.dcl_24V, sensor=self.o24V,
             detect_limit=(limits['24Vinocp'], ),

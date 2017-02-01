@@ -34,13 +34,12 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        translate = tester.translate
         self.oVout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.oVbat = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.oAlarm = sensor.Res(dmm, high=5, low=3, rng=100000, res=1)
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('bce282_final', 'IsGreenFlash?'),
-            caption=translate('bce282_final', 'capLedGreen'))
+            message=tester.translate('bce282_final', 'IsGreenFlash?'),
+            caption=tester.translate('bce282_final', 'capLedGreen'))
         ocp_start, ocp_stop = limits['OCPrampLoad'].limit
         self.oOCPLoad = sensor.Ramp(
             stimulus=logical_devices.dcl_Vout, sensor=self.oVout,

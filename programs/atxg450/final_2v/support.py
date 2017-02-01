@@ -37,7 +37,6 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        translate = tester.translate
         self.oIec = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.o24V = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self.o12V = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
@@ -48,11 +47,11 @@ class Sensors():
         self.oPwrGood = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
         self.oPwrFail = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('atxg450_2v_final', 'IsSwitchGreen?'),
-            caption=translate('atxg450_2v_final', 'capSwitchGreen'))
+            message=tester.translate('atxg450_2v_final', 'IsSwitchGreen?'),
+            caption=tester.translate('atxg450_2v_final', 'capSwitchGreen'))
         self.oYesNoFan = sensor.YesNo(
-            message=translate('atxg450_2v_final', 'IsFanRunning?'),
-            caption=translate('atxg450_2v_final', 'capFan'))
+            message=tester.translate('atxg450_2v_final', 'IsFanRunning?'),
+            caption=tester.translate('atxg450_2v_final', 'capFan'))
         self.o24Vocp = sensor.Ramp(
             stimulus=logical_devices.dcl_24V, sensor=self.o24V,
             detect_limit=(limits['24Vinocp'], ),

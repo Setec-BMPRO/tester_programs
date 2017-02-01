@@ -39,7 +39,6 @@ class Sensors():
         """
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        translate = tester.translate
         self.oMirCtr = sensor.Mirror()
         dispatcher.connect(
             self._reset, sender=tester.signals.Thread.tester,
@@ -82,8 +81,8 @@ class Sensors():
             s = sensor.Vdc(dmm, high=(i + 5), low=1, rng=100, res=0.001)
             self.Iout.append(s)
         self.oSnEntry = sensor.DataEntry(
-            message=translate('opto_test', 'msgSnEntry'),
-            caption=translate('opto_test', 'capSnEntry'))
+            message=tester.translate('opto_test', 'msgSnEntry'),
+            caption=tester.translate('opto_test', 'capSnEntry'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

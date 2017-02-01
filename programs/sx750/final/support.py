@@ -38,7 +38,6 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        translate = tester.translate
         self.oMir12v = sensor.Mirror()
         self.oMir24v = sensor.Mirror()
         dispatcher.connect(
@@ -53,11 +52,11 @@ class Sensors():
         self.oPwrGood = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
         self.oAcFail = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.01)
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('sx750_final', 'IsLedGreen?'),
-            caption=translate('sx750_final', 'capLedGreen'))
+            message=tester.translate('sx750_final', 'IsLedGreen?'),
+            caption=tester.translate('sx750_final', 'capLedGreen'))
         self.oYesNoBlue = sensor.YesNo(
-            message=translate('sx750_final', 'IsLedBlue?'),
-            caption=translate('sx750_final', 'capLedBlue'))
+            message=tester.translate('sx750_final', 'IsLedBlue?'),
+            caption=tester.translate('sx750_final', 'capLedBlue'))
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

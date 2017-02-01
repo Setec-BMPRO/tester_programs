@@ -41,7 +41,6 @@ class Sensors():
         dmm = logical_devices.dmm
         dso = logical_devices.dso
         sensor = tester.sensor
-        translate = tester.translate
         self.oVin = sensor.Vdc(dmm, high=10, low=4, rng=100, res=0.01)
         self.o5V = sensor.Vdc(dmm, high=11, low=4, rng=10, res=0.01)
         self.oBrake = sensor.Vdc(dmm, high=12, low=4, rng=100, res=0.01)
@@ -49,8 +48,8 @@ class Sensors():
         self.oRemote = sensor.Vdc(dmm, high=14, low=4, rng=100, res=0.01)
         self.oRed = sensor.Vdc(dmm, high=15, low=4, rng=100, res=0.01)
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('trs1_initial', 'IsGreenLedOn?'),
-            caption=translate('trs1_initial', 'capGreenLed'))
+            message=tester.translate('trs1_initial', 'IsGreenLedOn?'),
+            caption=tester.translate('trs1_initial', 'capGreenLed'))
         tbase = sensor.Timebase(
             range=3.0, main_mode=True, delay=0, centre_ref=False)
         trg = sensor.Trigger(

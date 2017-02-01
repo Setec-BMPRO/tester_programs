@@ -35,7 +35,6 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        translate = tester.translate
         self.oLoad = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oFuse1 = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oFuse2 = sensor.Vdc(dmm, high=2, low=1, rng=100, res=0.001)
@@ -48,17 +47,17 @@ class Sensors():
         self.oBatt = sensor.Vdc(dmm, high=9, low=2, rng=100, res=0.001)
         self.oAlarm = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.01)
         self.oBarcode = sensor.DataEntry(
-            message=translate('st3_final', 'ScanBarcode'),
-            caption=translate('st3_final', 'capBarcode'))
+            message=tester.translate('st3_final', 'ScanBarcode'),
+            caption=tester.translate('st3_final', 'capBarcode'))
         self.oYesNoOrGr = sensor.YesNo(
-            message=translate('st3_final', 'AreOrangeGreen?'),
-            caption=translate('st3_final', 'capOrangeGreen'))
+            message=tester.translate('st3_final', 'AreOrangeGreen?'),
+            caption=tester.translate('st3_final', 'capOrangeGreen'))
         self.oYesNoRedOn = sensor.YesNo(
-            message=translate('st3_final', 'RemoveBattFuseIsRedBlink?'),
-            caption=translate('st3_final', 'capRed'))
+            message=tester.translate('st3_final', 'RemoveBattFuseIsRedBlink?'),
+            caption=tester.translate('st3_final', 'capRed'))
         self.oYesNoRedOff = sensor.YesNo(
-            message=translate('st3_final', 'ReplaceBattFuseIsRedOff?'),
-            caption=translate('st3_final', 'capRed'))
+            message=tester.translate('st3_final', 'ReplaceBattFuseIsRedOff?'),
+            caption=tester.translate('st3_final', 'capRed'))
         ocp_start, ocp_stop = limits['LoadOCPramp'].limit
         self.oLoadOCP = sensor.Ramp(
             stimulus=logical_devices.dcl_Load, sensor=self.oLoad,

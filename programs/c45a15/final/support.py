@@ -31,20 +31,19 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        translate = tester.translate
         self.oVout = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('c45a15_final', 'IsPowerLedGreen?'),
-            caption=translate('c45a15_final', 'capPowerLed'))
+            message=tester.translate('c45a15_final', 'IsPowerLedGreen?'),
+            caption=tester.translate('c45a15_final', 'capPowerLed'))
         self.oYesNoYellow = sensor.YesNo(
-            message=translate('c45a15_final', 'WaitYellowLedOn?'),
-            caption=translate('c45a15_final', 'capOutputLed'))
+            message=tester.translate('c45a15_final', 'WaitYellowLedOn?'),
+            caption=tester.translate('c45a15_final', 'capOutputLed'))
         self.oYesNoRed = sensor.YesNo(
-            message=translate('c45a15_final', 'WaitRedLedFlash?'),
-            caption=translate('c45a15_final', 'capOutputLed'))
+            message=tester.translate('c45a15_final', 'WaitRedLedFlash?'),
+            caption=tester.translate('c45a15_final', 'capOutputLed'))
         self.oNotifyOff = sensor.Notify(
-            message=translate('c45a15_final', 'WaitAllLedsOff'),
-            caption=translate('c45a15_final', 'capAllOff'))
+            message=tester.translate('c45a15_final', 'WaitAllLedsOff'),
+            caption=tester.translate('c45a15_final', 'capAllOff'))
 
 
 class Measurements():

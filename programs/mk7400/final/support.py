@@ -37,7 +37,6 @@ class Sensors():
         """Create all Sensor instances."""
         dmm = logical_devices.dmm
         sensor = tester.sensor
-        translate = tester.translate
         self.oAux = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self.oAuxSw = sensor.Vac(dmm, high=2, low=2, rng=1000, res=0.01)
         self.o5V = sensor.Vdc(dmm, high=3, low=3, rng=10, res=0.0001)
@@ -46,11 +45,11 @@ class Sensors():
         self.o24V2 = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self.oPwrFail = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
         self.oYesNoMains = sensor.YesNo(
-            message=translate('mk7_final', 'IsSwitchLightOn?'),
-            caption=translate('mk7_final', 'capSwitchLight'))
+            message=tester.translate('mk7_final', 'IsSwitchLightOn?'),
+            caption=tester.translate('mk7_final', 'capSwitchLight'))
         self.oNotifyPwrOff = sensor.Notify(
-            message=translate('mk7_final', 'msgSwitchOff'),
-            caption=translate('mk7_final', 'capSwitchOff'))
+            message=tester.translate('mk7_final', 'msgSwitchOff'),
+            caption=tester.translate('mk7_final', 'capSwitchOff'))
 
 
 class Measurements():

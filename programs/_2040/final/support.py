@@ -32,22 +32,21 @@ class Sensors():
         sensor = tester.sensor
         self.o20V = sensor.Vdc(
             logical_devices.dmm, high=3, low=3, rng=100, res=0.001)
-        translate = tester.translate
         self.oYesNoGreen = sensor.YesNo(
-            message=translate('_2040_final', 'IsPowerLedGreen?'),
-            caption=translate('_2040_final', 'capPowerLed'))
+            message=tester.translate('_2040_final', 'IsPowerLedGreen?'),
+            caption=tester.translate('_2040_final', 'capPowerLed'))
         self.oYesNoDCOff = sensor.YesNo(
-            message=translate('_2040_final', 'IsDcRedLedOff?'),
-            caption=translate('_2040_final', 'capDcLed'))
+            message=tester.translate('_2040_final', 'IsDcRedLedOff?'),
+            caption=tester.translate('_2040_final', 'capDcLed'))
         self.oYesNoDCOn = sensor.YesNo(
-            message=translate('_2040_final', 'IsDcRedLedOn?'),
-            caption=translate('_2040_final', 'capDcLed'))
+            message=tester.translate('_2040_final', 'IsDcRedLedOn?'),
+            caption=tester.translate('_2040_final', 'capDcLed'))
         self.oYesNoACOff = sensor.YesNo(
-            message=translate('_2040_final', 'IsAcRedLedOff?'),
-            caption=translate('_2040_final', 'capAcLed'))
+            message=tester.translate('_2040_final', 'IsAcRedLedOff?'),
+            caption=tester.translate('_2040_final', 'capAcLed'))
         self.oYesNoACOn = sensor.YesNo(
-            message=translate('_2040_final', 'IsAcRedLedOn?'),
-            caption=translate('_2040_final', 'capAcLed'))
+            message=tester.translate('_2040_final', 'IsAcRedLedOn?'),
+            caption=tester.translate('_2040_final', 'capAcLed'))
 
 
 class Measurements():

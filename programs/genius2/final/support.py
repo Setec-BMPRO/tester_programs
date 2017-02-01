@@ -39,7 +39,6 @@ class Sensors():
         dcl = logical_devices.dcl
         dclh = logical_devices.dclh
         sensor = tester.sensor
-        translate = tester.translate
         self.oInpRes = sensor.Res(dmm, high=1, low=1, rng=1000000, res=1)
         self.oVout = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self.oVbat = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
@@ -52,13 +51,13 @@ class Sensors():
             detect_limit=(limits['InOCP'], ),
             start=32.0, stop=48.0, step=0.2, delay=0.1)
         self.oYesNoFuseOut = sensor.YesNo(
-            message=translate(
+            message=tester.translate(
                 'geniusII_final', 'RemoveBattFuseIsLedRedFlashing?'),
-            caption=translate('geniusII_final', 'capLedRed'))
+            caption=tester.translate('geniusII_final', 'capLedRed'))
         self.oYesNoFuseIn = sensor.YesNo(
-            message=translate(
+            message=tester.translate(
                 'geniusII_final', 'ReplaceBattFuseIsLedGreen?'),
-            caption=translate('geniusII_final', 'capLedRed'))
+            caption=tester.translate('geniusII_final', 'capLedRed'))
 
 
 class Measurements():
