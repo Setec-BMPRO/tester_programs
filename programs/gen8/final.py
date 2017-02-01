@@ -29,11 +29,11 @@ class Final(share.TestSequence):
 
     """GEN8 Final Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def open(self):
         """Create the test program as a linear sequence."""
-        devices = LogicalDevices(physical_devices)
+        devices = LogicalDevices(self.physical_devices)
         limits = LIMITS
-        sensors = Sensors(devices)
+        sensors = Sensors(devices, limits)
         measurements = Measurements(sensors, limits)
         sequence = (
             TestStep('PowerUp', self._step_pwrup),
@@ -43,8 +43,8 @@ class Final(share.TestSequence):
             TestStep('Poweroff', self._step_pwroff),
             )
         sequence_data = share.TestSequenceData(
-            fifo, per_panel, devices, limits, sensors, measurements, sequence)
-        super().__init__(sequence_data)
+            devices, limits, sensors, measurements, sequence)
+        super().open(sequence_data)
 
     @share.teststep
     def _step_pwrup(self, dev, mes):

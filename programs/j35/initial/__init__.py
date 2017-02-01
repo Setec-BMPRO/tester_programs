@@ -18,7 +18,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
 
     """J35 Initial Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param per_panel Number of units tested together
@@ -27,7 +27,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
            @param fifo True if FIFOs are enabled
 
         """
-        super().__init__(per_panel, None, fifo)
+        super().__init__(None, fifo)
         self.phydev = physical_devices
         self.limits = test_limits
         self.logdev = None

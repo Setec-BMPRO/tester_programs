@@ -67,15 +67,15 @@ class Initial(share.TestSequence):
 
     """GEN8 Initial Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def open(self):
         """Create the test program as a linear sequence."""
-        devices = LogicalDevices(physical_devices, fifo)
+        devices = LogicalDevices(self.physical_devices, self.fifo)
         limits = LIMITS
-        sensors = Sensors(devices)
+        sensors = Sensors(devices, limits)
         measurements = Measurements(sensors, limits)
         sequence = (
             TestStep('PartDetect', self._step_part_detect),
-            TestStep('Program', self._step_program, not fifo),
+            TestStep('Program', self._step_program, not self.fifo),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('PowerUp', self._step_powerup),
             TestStep('5V', self._step_reg_5v),
@@ -83,8 +83,8 @@ class Initial(share.TestSequence):
             TestStep('24V', self._step_reg_24v),
             )
         sequence_data = share.TestSequenceData(
-            fifo, per_panel, devices, limits, sensors, measurements, sequence)
-        super().__init__(sequence_data)
+            devices, limits, sensors, measurements, sequence)
+        super().open(sequence_data)
 
     @share.teststep
     def _step_part_detect(self, dev, mes):

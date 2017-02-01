@@ -15,24 +15,18 @@ class Final(share.TestSequence):
 
     """BP35 Final Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-
-        """
-        devices = LogicalDevices(physical_devices)
+    def open(self):
+        """Create the test program as a linear sequence."""
+        devices = LogicalDevices(self.physical_devices)
         limits = LIMITS
-        sensors = Sensors(devices)
+        sensors = Sensors(devices, limits)
         measurements = Measurements(sensors, limits)
         sequence = (
             tester.TestStep('PowerUp', self._step_powerup),
             )
         sequence_data = share.TestSequenceData(
-            fifo, per_panel, devices, limits, sensors, measurements, sequence)
-        super().__init__(sequence_data)
+            devices, limits, sensors, measurements, sequence)
+        super().open(sequence_data)
 
     @share.teststep
     def _step_powerup(self, dev, mes):

@@ -100,23 +100,16 @@ class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-           @param fifo True if FIFOs are enabled
-
-        """
-        devices = LogicalDevices(physical_devices, fifo)
+    def open(self):
+        """Create the test program as a linear sequence."""
+        devices = LogicalDevices(self.physical_devices, self.fifo)
         limits = LIMITS
         sensors = Sensors(devices, limits)
         measurements = Measurements(sensors, limits)
         sequence = (
             TestStep('Prepare', self._step_prepare),
-            TestStep('ProgramPIC', self._step_program_pic, not fifo),
-            TestStep('ProgramARM', self._step_program_arm, not fifo),
+            TestStep('ProgramPIC', self._step_program_pic, not self.fifo),
+            TestStep('ProgramARM', self._step_program_arm, not self.fifo),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('SolarReg', self._step_solar_reg),
             TestStep('Aux', self._step_aux),
@@ -127,8 +120,8 @@ class Initial(share.TestSequence):
             TestStep('CanBus', self._step_canbus),
             )
         sequence_data = share.TestSequenceData(
-            fifo, per_panel, devices, limits, sensors, measurements, sequence)
-        super().__init__(sequence_data)
+            devices, limits, sensors, measurements, sequence)
+        super().open(sequence_data)
         self.sernum = None
 
     @share.teststep

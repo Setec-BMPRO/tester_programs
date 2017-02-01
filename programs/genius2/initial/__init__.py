@@ -18,9 +18,9 @@ class Initial(tester.TestSequence):
 
     """GENIUS-II Initial Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
-        super().__init__(per_panel, None, fifo)
+        super().__init__(None, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.phydev = physical_devices

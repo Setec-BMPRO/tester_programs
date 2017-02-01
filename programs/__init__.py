@@ -131,16 +131,16 @@ PROGRAMS = (
     )
 
 # Skip these programs when running 'ALL PROGRAMS' in main.py
-#   because they will not pass in simulation mode.
 ALL_SKIP = (
     # Due to use of the EV2200
     'CMR-INI', 'CMR-SD',
     # Unfinished programs
-    'IDS500 Initial Main', 'IDS500 Final',
+
     # Done with unittest
     'BP35 Initial', 'GEN8 Initial', 'GEN8 Final',
     'GENIUS-II Initial', 'GENIUS-II-H Initial',
-    'J35A Initial', 'J35B Initial', 'J35C Initial'
+    'IDS500 Initial Main', 'IDS500 Final',
+    'J35A Initial', 'J35B Initial', 'J35C Initial',
     'J35A Final', 'J35B Final', 'J35C Final',
     'RVVIEW Initial',
     # Obsolete and unused programs

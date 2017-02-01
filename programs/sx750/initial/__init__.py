@@ -17,7 +17,7 @@ class Initial(tester.TestSequence):
 
     """SX-750 Initial Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence."""
         sequence = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
@@ -29,7 +29,7 @@ class Initial(tester.TestSequence):
             tester.TestStep('24V', self._step_reg_24v),
             tester.TestStep('PeakPower', self._step_peak_power),
             )
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.devices = physical_devices

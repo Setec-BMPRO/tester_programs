@@ -22,17 +22,16 @@ class _Main(tester.TestSequence):
 
     """IDS-500 Base Subboard Test Program."""
 
-    def __init__(self, per_panel, sequence, fifo):
+    def __init__(self, sequence, fifo):
         """Common test program segments.
 
-           @param per_panel Number of units tested together
            @param sequence Test sequence
            @param fifo True to enable FIFOs
 
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -55,7 +54,7 @@ class InitialMicro(_Main):
 
     """IDS-500 Initial Micro Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param per_panel Number of units tested together
@@ -72,7 +71,7 @@ class InitialMicro(_Main):
             tester.TestStep('Comms', self._step_comms),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -119,7 +118,7 @@ class InitialAux(_Main):
 
     """IDS-500 Initial Aux Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param per_panel Number of units tested together
@@ -138,7 +137,7 @@ class InitialAux(_Main):
             tester.TestStep('OCP', self._step_ocp),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -192,7 +191,7 @@ class InitialBias(_Main):
 
     """IDS-500 Initial Bias Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param per_panel Number of units tested together
@@ -209,7 +208,7 @@ class InitialBias(_Main):
             tester.TestStep('OCP', self._step_ocp),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -245,7 +244,7 @@ class InitialBus(_Main):
 
     """IDS-500 Initial Bus Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param per_panel Number of units tested together
@@ -262,7 +261,7 @@ class InitialBus(_Main):
             tester.TestStep('TecLddStartup', self._step_tec_ldd),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
 
     def open(self):
         """Prepare for testing."""
@@ -298,7 +297,7 @@ class InitialSyn(_Main):
 
     """IDS-500 Initial SynBuck Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param per_panel Number of units tested together
@@ -319,7 +318,7 @@ class InitialSyn(_Main):
             tester.TestStep('ISSetAdj', self._step_ISset_adj),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
 
     def open(self):
         """Prepare for testing."""

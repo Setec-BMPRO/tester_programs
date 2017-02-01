@@ -17,7 +17,7 @@ class Initial(tester.TestSequence):
 
     """TS3020H Initial Test Program."""
 
-    def __init__(self, per_panel, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices, test_limits, fifo):
         """Create the test program as a linear sequence.
 
            @param per_panel Number of units tested together
@@ -38,7 +38,7 @@ class Initial(tester.TestSequence):
             tester.TestStep('InputOV', self._step_input_ov),
             )
         # Set the Test Sequence in my base instance
-        super().__init__(per_panel, sequence, fifo)
+        super().__init__(sequence, fifo)
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._devices = physical_devices

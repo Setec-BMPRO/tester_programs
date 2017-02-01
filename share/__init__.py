@@ -20,7 +20,7 @@ from .timed_data import *
 # Data tuple of Test Sequence helper instances
 TestSequenceData = collections.namedtuple(
     'TestSequenceData',
-    'fifo, per_panel, devices, limits, sensors, measurements, sequence')
+    'devices, limits, sensors, measurements, sequence')
 
 
 class TestSequence(tester.TestSequence):
@@ -31,21 +31,29 @@ class TestSequence(tester.TestSequence):
 
     """
 
+    def __init__(self, physical_devices, test_limits, fifo):
+        """Create the test program instance.
+
+           @param physical_devices Physical instruments of the Tester
+           @param test_limits Product test limits (ignored & to be deprecated)
+           @param fifo True if FIFOs are enabled (to be deprecated)
+
+        """
+        self.physical_devices = physical_devices
+        super().__init__(None, fifo)
+
     @abc.abstractmethod
-    def __init__(self, sequence_data):
-        """Create all supporting classes."""
+    def open(self, sequence_data):
+        """Open test program by opening supporting instances.
+
+        @param sequence_data TestSequenceData instance
+
+        """
+        super().open(sequence_data.sequence)
         self.devices = sequence_data.devices
         self.limits = sequence_data.limits
         self.sensors = sequence_data.sensors
         self.measurements = sequence_data.measurements
-        super().__init__(
-            sequence_data.per_panel,
-            sequence_data.sequence,
-            sequence_data.fifo)
-
-    def open(self):
-        """Prepare for testing."""
-        super().open()
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
@@ -210,7 +218,7 @@ class Sensors(abc.ABC, dict):
 
     """Sensors."""
 
-    def __init__(self, devices, limits=None):
+    def __init__(self, devices, limits):
         """Create Sensors instance.
 
         @param devices Logical instruments
