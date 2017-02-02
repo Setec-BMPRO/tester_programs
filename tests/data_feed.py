@@ -28,7 +28,7 @@ class UnitTester(tester.Tester):
     key_con_np = 'ConNP'
     key_ext = 'Ext'
 
-    def __init__(self, prog_class, prog_limit):
+    def __init__(self, prog_class, prog_limit, parameter):
         """Initalise the data feeder."""
         # Create a 'real' Tester instance
         super().__init__(
@@ -36,7 +36,7 @@ class UnitTester(tester.Tester):
             {repr(prog_class): (prog_class, prog_limit)},
             fifo=True)
         self.ut_program = tester.TestProgram(
-            repr(prog_class), per_panel=1, parameter=None, test_limits=[])
+            repr(prog_class), per_panel=1, parameter=parameter, test_limits=[])
         self.ut_result = None
         self.ut_steps = []
         self.ut_data = None
@@ -147,6 +147,7 @@ class ProgramTestCase(unittest.TestCase):
     """Product test program wrapper."""
 
     debug = False
+    parameter = None
     _logger_names = ('tester', 'share', 'programs')
 
     @classmethod
@@ -160,7 +161,7 @@ class ProgramTestCase(unittest.TestCase):
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
-        cls.tester = UnitTester(cls.prog_class, cls.prog_limit)
+        cls.tester = UnitTester(cls.prog_class, cls.prog_limit, cls.parameter)
 
     def setUp(self):
         """Per-Test setup."""

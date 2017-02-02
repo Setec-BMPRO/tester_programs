@@ -15,6 +15,7 @@ class SX750Initial(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    parameter = None
     debug = False
 
     def test_pass_run(self):

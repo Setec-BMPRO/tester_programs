@@ -15,6 +15,7 @@ class J35Final(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    parameter = None
     debug = False
 
     def _dmm_loads(self, value):

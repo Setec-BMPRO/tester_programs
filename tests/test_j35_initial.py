@@ -16,6 +16,7 @@ class J35Initial(ProgramTestCase):
 
     prog_class = _PROG_CLASS
     prog_limit = _PROG_LIMIT
+    parameter = None
     debug = False
 
     def _arm_loads(self, value):
