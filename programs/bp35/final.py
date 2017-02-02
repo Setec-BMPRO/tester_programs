@@ -6,9 +6,9 @@
 import tester
 import share
 
-LIMITS = tester.limitdict((
+LIMITS = (
     tester.LimitHiLoDelta('Vbat', (12.8, 0.2)),
-    ))
+    )
 
 
 class Final(share.TestSequence):

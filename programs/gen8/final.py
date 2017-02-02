@@ -10,7 +10,7 @@ from tester import (
     )
 import share
 
-LIMITS = tester.limitdict((
+LIMITS = (
     LimitHiLoDelta('Iecon', (240, 10)),
     LimitLo('Iecoff', 10),
     LimitHiLo('5V', (4.998, 5.202)),
@@ -22,7 +22,7 @@ LIMITS = tester.limitdict((
     LimitHiLo('12V2on', (11.8146, 12.4845)),
     LimitHi('PwrFailOff', 11.0),
     LimitBoolean('Notify', True),
-    ))
+    )
 
 
 class Final(share.TestSequence):

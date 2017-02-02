@@ -50,7 +50,7 @@ OUTPUTS = 14
 VOUT_SET = 12.8
 OCP_NOMINAL = 35.0
 
-LIMITS = tester.limitdict((
+LIMITS = (
     LimitLo('FixtureLock', 50),
     LimitHiLoDelta('HwVer8', (4400.0, 250.0)),  # Rev 8+
     LimitHiLoDelta('ACin', (VAC, 5.0)),
@@ -93,7 +93,7 @@ LIMITS = tester.limitdict((
     LimitHiLoInt('SOLAR_RELAY', 1),
     LimitHiLoInt('SOLAR_ERROR', 0),
     LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
-    ))
+    )
 
 
 class Initial(share.TestSequence):

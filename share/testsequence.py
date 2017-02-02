@@ -50,7 +50,7 @@ class TestSequence(tester.TestSequence):
         super().open(sequence_data.sequence)
         self.devices = sequence_data.cls_devices(
             self.physical_devices, self.fifo)
-        self.limits = sequence_data.limits
+        self.limits = tester.limitdict(sequence_data.limits)
         self.sensors = sequence_data.cls_sensors(
             self.devices, self.limits)
         self.measurements = sequence_data.cls_measurements(
@@ -77,12 +77,13 @@ class TestSequence(tester.TestSequence):
 
         @param names Measurement names
         @param timeout Measurement timeout
+        @return Measurement result
 
         """
         measurements = []
         for name in names:
             measurements.append(self.measurements[name])
-        tester.MeasureGroup(measurements, timeout)
+        return tester.MeasureGroup(measurements, timeout)
 
     def dcload(self, setting, output=True, delay=0):
         """DC Load setter.

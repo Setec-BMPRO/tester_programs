@@ -26,7 +26,7 @@ ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM6'}[os.name]
 # Software image filename
 ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
 
-LIMITS = tester.limitdict((
+LIMITS = (
     LimitLo('PartCheck', 100),   # uSwitches on C106, C107, D2
     LimitHi('FanShort', 20),     # Short on fan connector
     LimitLo('FixtureLock', 20),
@@ -61,7 +61,7 @@ LIMITS = tester.limitdict((
     LimitHiLoDelta('ARM-24V', (24.0, 2.0)),
     LimitString('SwVer', '^{0}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
     LimitString('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
-    ))
+    )
 
 class Initial(share.TestSequence):
 
