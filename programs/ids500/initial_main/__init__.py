@@ -28,7 +28,7 @@ class InitialMain(tester.testsequence.TestSequence):
         self.meas = None
         self.subtest = None
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         self.logdev = support.LogicalDevices(self.phydev)

@@ -36,7 +36,7 @@ class Final(tester.TestSequence):
         # It is BCE4 is FullLoad current > 7.5A
         self._isbce4 = test_limits['FullLoad'].limit > 7.5
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         global m, d, s, t

@@ -65,7 +65,7 @@ class InitialSingle(tester.TestSequence):
         # Last AC Source set voltage
         self._last_vac = 0.0
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m

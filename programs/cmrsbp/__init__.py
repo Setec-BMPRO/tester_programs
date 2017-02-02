@@ -36,7 +36,7 @@ class _Main(tester.TestSequence):
         self._isFin = False
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('BaseOpen')
         global d, s
@@ -135,9 +135,9 @@ class Initial(_Main):
         # Set the Test Sequence in my base instance
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         self._ev_ser = tester.SimSerial(
             simulation=self.fifo,
@@ -252,9 +252,9 @@ class SerialDate(_Main):
         # Set the Test Sequence in my base instance
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         self._ev_ser = tester.SimSerial(
             simulation=self.fifo,
@@ -309,9 +309,9 @@ class Final(_Main):
         super().__init__(sequence, fifo)
         self._isFin = True
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         global m
         m = support.MeasureFin(s, self._limits)

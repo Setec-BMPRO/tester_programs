@@ -67,7 +67,7 @@ class Initial(share.TestSequence):
 
     """GEN8 Initial Test Program."""
 
-    def open(self):
+    def open(self, parameter):
         """Create the test program as a linear sequence."""
         sequence = (
             TestStep('PartDetect', self._step_part_detect),
@@ -79,6 +79,7 @@ class Initial(share.TestSequence):
             TestStep('24V', self._step_reg_24v),
             )
         super().open(
+            parameter,
             share.TestSequenceData(
                 LogicalDevices, Sensors, Measurements, LIMITS, sequence)
             )

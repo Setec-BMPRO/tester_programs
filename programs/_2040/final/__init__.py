@@ -34,7 +34,7 @@ class Final(tester.TestSequence):
         self._devices = physical_devices
         self._limits = test_limits
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m, t

@@ -33,7 +33,7 @@ class _Main(tester.TestSequence):
             '.'.join((__name__, self.__class__.__name__)))
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('BaseOpen')
 
@@ -73,9 +73,9 @@ class InitialMicro(_Main):
         # Set the Test Sequence in my base instance
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         global d, m, s
         d = support.LogicalDevMicro(self._devices, self.fifo)
@@ -139,9 +139,9 @@ class InitialAux(_Main):
         # Set the Test Sequence in my base instance
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         global d, m, s, t
         d = support.LogicalDevAux(self._devices, self.fifo)
@@ -210,9 +210,9 @@ class InitialBias(_Main):
         # Set the Test Sequence in my base instance
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         global d, m, s
         d = support.LogicalDevBias(self._devices, self.fifo)
@@ -263,9 +263,9 @@ class InitialBus(_Main):
         # Set the Test Sequence in my base instance
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         global d, m, s, t
         d = support.LogicalDevBus(self._devices, self.fifo)
@@ -320,9 +320,9 @@ class InitialSyn(_Main):
         # Set the Test Sequence in my base instance
         super().__init__(sequence, fifo)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
-        super().open()
+        super().open(parameter)
         self._logger.info('Open')
         global d, m, s, t
         d = support.LogicalDevSyn(self._devices, self.fifo)

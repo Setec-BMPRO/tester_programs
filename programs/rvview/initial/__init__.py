@@ -35,7 +35,7 @@ class Initial(tester.TestSequence):
         self.meas = None
         self.sernum = None
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self.logdev = support.LogicalDevices(self.phydev, self.fifo)
         self.sensors = support.Sensors(self.logdev, self.limits)

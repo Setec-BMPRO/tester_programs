@@ -42,7 +42,7 @@ class Initial(tester.TestSequence):
         self._limits = test_limits
         self._sernum = None
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m

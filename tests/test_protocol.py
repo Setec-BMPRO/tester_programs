@@ -29,7 +29,7 @@ class BaseConsole(unittest.TestCase):
         global mycon
         mycon = console.BaseConsole(sim_ser, verbose=False)
         # We need a tester to get MeasurementFailedError
-        cls.tester = tester.Tester('MockATE', (), fifo=True)
+        cls.tester = tester.Tester('MockATE', {}, fifo=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -76,7 +76,7 @@ class BadUartConsole(unittest.TestCase):
         global mycon
         mycon = console.BadUartConsole(sim_ser, verbose=False)
         # We need a tester to get MeasurementFailedError
-        cls.tester = tester.Tester('MockATE', (), fifo=True)
+        cls.tester = tester.Tester('MockATE', {}, fifo=True)
 
     @classmethod
     def tearDownClass(cls):

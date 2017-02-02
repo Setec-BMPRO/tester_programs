@@ -50,7 +50,7 @@ class Initial(tester.testsequence.TestSequence):
         # It is a BCE282-12 if FullLoad current > 15.0A
         self._isbce12 = test_limits['FullLoad'].limit > 15.0
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         self._msp = msp.Console(port=_MSP430_PORT)

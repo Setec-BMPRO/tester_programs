@@ -29,7 +29,7 @@ class Final(share.TestSequence):
 
     """GEN8 Final Test Program."""
 
-    def open(self):
+    def open(self, parameter):
         """Create the test program as a linear sequence."""
         sequence = (
             TestStep('PowerUp', self._step_pwrup),
@@ -39,6 +39,7 @@ class Final(share.TestSequence):
             TestStep('Poweroff', self._step_pwroff),
             )
         super().open(
+            parameter,
             share.TestSequenceData(
                 LogicalDevices, Sensors, Measurements, LIMITS, sequence)
             )

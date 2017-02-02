@@ -56,7 +56,7 @@ class Main(tester.TestSequence):
         self._ctr_data1 = []
         self._ctr_data10 = []
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m

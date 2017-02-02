@@ -122,7 +122,7 @@ class InitialMulti(tester.TestSequence):
         log = logging.getLogger('tester.spa_multi.p89lpc924')
         log.setLevel(logging.INFO)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         global d, s, m

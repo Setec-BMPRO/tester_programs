@@ -33,7 +33,7 @@ class UnitTester(tester.Tester):
         # Create a 'real' Tester instance
         super().__init__(
             'MockATE',
-            ((repr(prog_class), prog_class, prog_limit), ),
+            {repr(prog_class): (prog_class, prog_limit)},
             fifo=True)
         self.ut_program = tester.TestProgram(
             repr(prog_class), per_panel=1, parameter=None, test_limits=[])

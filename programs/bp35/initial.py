@@ -100,7 +100,7 @@ class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
-    def open(self):
+    def open(self, parameter):
         """Create the test program as a linear sequence."""
         sequence = (
             TestStep('Prepare', self._step_prepare),
@@ -116,6 +116,7 @@ class Initial(share.TestSequence):
             TestStep('CanBus', self._step_canbus),
             )
         super().open(
+            parameter,
             share.TestSequenceData(
                 LogicalDevices, Sensors, Measurements, LIMITS, sequence)
             )

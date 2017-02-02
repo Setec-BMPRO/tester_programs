@@ -72,21 +72,20 @@ def _main():
     tst.start()
     if run_all:
         prog_list = programs.PROGRAMS
-    else:
-        prog_list = ((test_program, ), )    # a single program group
+    else:    # a single program group
+        prog_list = {test_program: programs.PROGRAMS[test_program]}
     for prog in prog_list:
-        test_program = prog[0]
         logger.info('#' * 40)
-        if run_all and test_program in programs.ALL_SKIP:
-            logger.info('Skip Program "%s"', test_program)
+        if run_all and prog in programs.ALL_SKIP:
+            logger.info('Skip Program "%s"', prog)
             logger.info('#' * 40)
             continue
-        logger.info('Create Program "%s"', test_program)
+        logger.info('Create Program "%s"', prog)
         # Make a TEST PROGRAM descriptor
         pgm = tester.TestProgram(
-            test_program, per_panel=1, parameter=None, test_limits=[])
+            prog, per_panel=1, parameter=None, test_limits=[])
         logger.info('#' * 40)
-        logger.info('Open Program "%s"', test_program)
+        logger.info('Open Program "%s"', prog)
         tst.open(pgm)
         logger.info('#' * 40)
         logger.info('Running Test')

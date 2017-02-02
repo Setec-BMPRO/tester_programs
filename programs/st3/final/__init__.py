@@ -39,7 +39,7 @@ class Final(tester.TestSequence):
         self._fullload = test_limits['FullLoad'].limit
         self._is35 = (self._fullload > 25)
 
-    def open(self):
+    def open(self, parameter):
         """Prepare for testing."""
         self._logger.info('Open')
         global m, d, s, t
