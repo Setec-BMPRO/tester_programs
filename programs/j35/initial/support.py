@@ -49,8 +49,6 @@ class LogicalDevices():
         self.j35_ser.port = limit.ARM_PORT
         # J35 Console driver
         self.j35 = console.Console(self.j35_ser, fifo)
-        # Auto add prompt to puts strings
-        self.j35.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

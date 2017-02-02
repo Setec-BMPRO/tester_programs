@@ -42,8 +42,6 @@ class LogicalDevices():
         # Set port separately, as we don't want it opened yet
         self.pic_ser.port = limit.PIC_PORT
         self.pic = console.Console(self.pic_ser)
-        # Auto add prompt to puts strings
-        self.pic.puts_prompt = '\r\n'
 
     def reset(self):
         """Reset instruments."""

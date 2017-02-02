@@ -110,6 +110,8 @@ class DirectConsole(console.Variable, _Console, console.BadUartConsole):
         console.Variable.__init__(self)
         _Console.__init__(self)
         console.BadUartConsole.__init__(self, port, verbose)
+        # Auto add prompt to puts strings
+        self.puts_prompt = '\r\n> '
 
 
 class TunnelConsole(console.Variable, _Console, console.BaseConsole):
@@ -127,3 +129,5 @@ class TunnelConsole(console.Variable, _Console, console.BaseConsole):
         console.Variable.__init__(self)
         _Console.__init__(self)
         console.BaseConsole.__init__(self, port, verbose)
+        # Auto add prompt to puts strings
+        self.puts_prompt = '\r\n> '

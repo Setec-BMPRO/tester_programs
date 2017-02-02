@@ -370,8 +370,6 @@ class LogicalDevices(share.LogicalDevices):
         self['bp35_ser'].port = ARM_PORT
         # BP35 Console driver
         self['bp35'] = console.Console(self['bp35_ser'])
-        # Auto add prompt to puts strings
-        self['bp35'].puts_prompt = '\r\n> '
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
 

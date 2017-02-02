@@ -46,8 +46,6 @@ class LogicalDevices():
         bc15_ser.port = limit.ARM_PORT
         # BC15 Console driver
         self.bc15 = console.Console(bc15_ser)
-        # Auto add prompt to puts strings
-        self.bc15.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

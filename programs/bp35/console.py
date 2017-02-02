@@ -32,6 +32,8 @@ class Console(console.Variable, console.BadUartConsole):
         # the arguments don't match
         console.Variable.__init__(self)
         console.BadUartConsole.__init__(self, port)
+        # Auto add prompt to puts strings
+        self.puts_prompt = '\r\n> '
         self.cmd_data = {
             'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
             'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),

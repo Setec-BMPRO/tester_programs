@@ -41,8 +41,6 @@ class LogicalDevices():
         self.trek2_ser.port = limit.ARM_PORT
         # Trek2 Console driver
         self.trek2 = console.DirectConsole(self.trek2_ser)
-        # Auto add prompt to puts strings
-        self.trek2.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

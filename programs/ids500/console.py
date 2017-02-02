@@ -27,6 +27,8 @@ class Console(console.Variable, console.BaseConsole):
         # the arguments don't match
         console.Variable.__init__(self)
         console.BaseConsole.__init__(self, port, verbose)
+        # Auto add prompt to puts strings
+        self.puts_prompt = '\r\n'
         self.cmd_data = {
             'PIC-SwRev': ParameterString(
                 '?,I,1', read_format='{}'),

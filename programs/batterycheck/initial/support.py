@@ -35,8 +35,6 @@ class LogicalDevices():
         # Set port separately, as we don't want it opened yet
         arm_ser.port = limit.ARM_CON
         self.arm = console.Console(arm_ser)
-        # Auto add prompt to puts strings
-        self.arm.puts_prompt = '\r\n> '
         # Serial connection to the BT device
         self.btport = tester.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=2)

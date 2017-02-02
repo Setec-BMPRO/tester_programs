@@ -40,8 +40,6 @@ class LogicalDevices():
         self.rvview_ser.port = limit.ARM_PORT
         # rvview Console driver
         self.rvview = console.DirectConsole(self.rvview_ser, verbose=False)
-        # Auto add prompt to puts strings
-        self.rvview.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

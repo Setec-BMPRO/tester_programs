@@ -41,8 +41,6 @@ class LogicalDevices():
             port=ser_can, simulation=fifo, verbose=False)
         # Trek2 Console driver (using the CAN Tunnel)
         self.trek2 = console.TunnelConsole(port=self.tunnel, verbose=False)
-        # Auto add prompt to puts strings
-        self.trek2.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

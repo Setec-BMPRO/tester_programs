@@ -47,8 +47,6 @@ class LogicalDevices():
         self.cn101_ser.port = limit.ARM_PORT
         # CN101 Console driver
         self.cn101 = console.Console(self.cn101_ser)
-        # Auto add prompt to puts strings
-        self.cn101.puts_prompt = '\r\n> '
         # Serial connection to the BLE module
         ble_ser = tester.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=0.1, rtscts=True)

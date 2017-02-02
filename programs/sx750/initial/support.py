@@ -45,16 +45,12 @@ class LogicalDevices():
         # Set port separately, as we don't want it opened yet
         self.arm_ser.port = limit.ARM_PORT
         self.arm = console.Console(self.arm_ser, verbose=False)
-        # Auto add prompt to puts strings
-        self.arm.puts_prompt = '\r> '
         # Serial connection to the Arduino console
         self.ard_ser = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         self.ard_ser.port = limit.ARDUINO_PORT
         self.ard = arduino.Arduino(self.ard_ser, verbose=True)
-        # Auto add prompt to puts strings
-        self.ard.puts_prompt = '\r> '
 
     def reset(self):
         """Reset instruments."""

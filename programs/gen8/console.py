@@ -22,6 +22,8 @@ class Console(console.Variable, console.BaseConsole):
         # the arguments don't match
         console.Variable.__init__(self)
         console.BaseConsole.__init__(self, port, verbose)
+        # Auto add prompt to puts strings
+        self.puts_prompt = '\r> '
         rfmt = '{} X?'      # 1st generation console read format string
         self.cmd_data = {
             'AcFreq': ParameterFloat(

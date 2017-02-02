@@ -22,6 +22,8 @@ class Arduino(console.Variable, console.BaseConsole):
         # the arguments don't match
         console.Variable.__init__(self)
         console.BaseConsole.__init__(self, port, verbose)
+        # Auto add prompt to puts strings
+        self.puts_prompt = '\r> '
         self.cmd_data = {
             'VERSION': ParameterString(
                 'VERSION?', read_format='{}'),
