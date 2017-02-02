@@ -10,7 +10,7 @@ import worker
 import signals
 
 
-class Controller(object):
+class Controller():
     """
     Controller class keeps track of all dispatcher broadcasts
     """

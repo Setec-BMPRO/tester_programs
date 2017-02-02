@@ -40,15 +40,8 @@ class LogicalDevices():
         self.rvview_ser.port = limit.ARM_PORT
         # rvview Console driver
         self.rvview = console.DirectConsole(self.rvview_ser, verbose=False)
-
-    def rvview_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False,
-                   addprompt=True):
-        """Push string data into the buffer if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self.rvview.puts(string_data, preflush, postflush, priority)
+        # Auto add prompt to puts strings
+        self.rvview.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

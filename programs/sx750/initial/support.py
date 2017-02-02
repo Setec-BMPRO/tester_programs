@@ -45,35 +45,16 @@ class LogicalDevices():
         # Set port separately, as we don't want it opened yet
         self.arm_ser.port = limit.ARM_PORT
         self.arm = console.Console(self.arm_ser, verbose=False)
+        # Auto add prompt to puts strings
+        self.arm.puts_prompt = '\r> '
         # Serial connection to the Arduino console
         self.ard_ser = tester.SimSerial(
             simulation=fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         self.ard_ser.port = limit.ARDUINO_PORT
-        self.ard = arduino.Arduino(self.ard_ser, verbose=False)
-
-    def arm_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False,
-                 addprompt=True):
-        """Push string data into the buffer, if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r> '
-            self.arm.puts(string_data, preflush, postflush, priority)
-
-    def ard_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False,
-                 addprompt=True):
-        """Push string data into the buffer, if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r> '
-            self.ard.puts(string_data, preflush, postflush, priority)
-
-    def arm_calpfc(self, voltage):
-        """Issue PFC calibration commands."""
-        self.arm['CAL_PFC'] = voltage
-        self.arm['NVWRITE'] = True
+        self.ard = arduino.Arduino(self.ard_ser, verbose=True)
+        # Auto add prompt to puts strings
+        self.ard.puts_prompt = '\r> '
 
     def reset(self):
         """Reset instruments."""

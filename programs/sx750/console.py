@@ -44,3 +44,8 @@ class Console(console.Variable, console.BaseConsole):
             }
         # Strings to ignore in responses
         self.ignore = (' ', 'Hz', 'Vrms', 'mV')
+
+    def calpfc(self, voltage):
+        """Issue PFC calibration commands."""
+        self['CAL_PFC'] = voltage
+        self['NVWRITE'] = True

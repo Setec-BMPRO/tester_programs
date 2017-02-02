@@ -49,14 +49,8 @@ class LogicalDevices():
         self.j35_ser.port = limit.ARM_PORT
         # J35 Console driver
         self.j35 = console.Console(self.j35_ser, fifo)
-
-    def j35_puts(self, string_data, preflush=0, postflush=0, priority=False,
-                 addprompt=True):
-        """Push string data into the J35 buffer if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self.j35.puts(string_data, preflush, postflush, priority)
+        # Auto add prompt to puts strings
+        self.j35.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

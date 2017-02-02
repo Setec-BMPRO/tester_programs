@@ -5,7 +5,7 @@
 import tester
 
 
-class LogicalDevices(object):
+class LogicalDevices():
 
     """Logical Devices."""
 
@@ -56,7 +56,7 @@ class LogicalDevices(object):
             rla.set_off()
 
 
-class Sensors(object):
+class Sensors():
 
     """Sensors."""
 
@@ -139,7 +139,7 @@ class Sensors(object):
         self.oDisch3 = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.1)
 
 
-class Measurements(object):
+class Measurements():
 
     """Measurements."""
 

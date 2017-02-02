@@ -46,15 +46,8 @@ class LogicalDevices():
         bc15_ser.port = limit.ARM_PORT
         # BC15 Console driver
         self.bc15 = console.Console(bc15_ser)
-
-    def bc15_puts(self,
-                  string_data, preflush=0, postflush=0, priority=False,
-                  addprompt=True):
-        """Push string data into the buffer if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self.bc15.puts(string_data, preflush, postflush, priority)
+        # Auto add prompt to puts strings
+        self.bc15.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

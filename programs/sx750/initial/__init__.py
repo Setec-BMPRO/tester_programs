@@ -161,7 +161,7 @@ class Initial(tester.TestSequence):
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         result, _, pfc = mes.dmm_PFCpre.stable(limit.PFC_STABLE)
-        dev.arm_calpfc(pfc)
+        dev.arm.calpfc(pfc)
         # Prevent a limit fail from failing the unit
         mes.dmm_PFCpost.testlimit[0].position_fail = False
         result, _, pfc = mes.dmm_PFCpost.stable(limit.PFC_STABLE)
@@ -170,7 +170,7 @@ class Initial(tester.TestSequence):
         if not result:
             self._logger.info('Retry PFC calibration')
             result, _, pfc = mes.dmm_PFCpre.stable(limit.PFC_STABLE)
-            dev.arm_calpfc(pfc)
+            dev.arm.calpfc(pfc)
             mes.dmm_PFCpost.stable(limit.PFC_STABLE)
         # Leave the loads at zero
         dev.dcl_12V.output(0)

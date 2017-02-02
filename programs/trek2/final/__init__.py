@@ -76,8 +76,8 @@ class Final(tester.TestSequence):
             d.tunnel.port.puts('\r\n')
             d.tunnel.port.puts('\r\n')
             d.tunnel.port.puts('RRC,32,3,3,0,16,1\r\n')
-        d.trek2_puts('0x10000000')
-        d.trek2_puts('')
+        d.trek2.puts('0x10000000')
+        d.trek2.puts('')
 
         d.trek2.open()
         d.trek2.testmode(True)
@@ -86,8 +86,8 @@ class Final(tester.TestSequence):
         """Display tests."""
         for sens in (s.oYesNoSeg, s.oYesNoBklight, ):
             self.fifo_push(((sens, True), ))
-        d.trek2_puts('0x10000000')
-        d.trek2_puts('')
+        d.trek2.puts('0x10000000')
+        d.trek2.puts('')
 
         tester.MeasureGroup((m.ui_YesNoSeg, m.ui_YesNoBklight, ))
         d.trek2.testmode(False)
@@ -96,8 +96,8 @@ class Final(tester.TestSequence):
         """Test all tanks one level at a time."""
         for sens in s.otanks:
             self.fifo_push(((sens, (1, 2, 3, 4)), ))
-        d.trek2_puts('')
-        d.trek2_puts('')
+        d.trek2.puts('')
+        d.trek2.puts('')
 
         d.trek2['CONFIG'] = 0x7E00      # Enable all 4 tanks
         d.trek2['TANK_SPEED'] = 0.1     # Change update interval

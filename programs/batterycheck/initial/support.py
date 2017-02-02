@@ -10,7 +10,7 @@ from . import limit
 from .. import console
 
 
-class LogicalDevices(object):
+class LogicalDevices():
 
     """BatteryCheck Logical Devices."""
 
@@ -35,6 +35,8 @@ class LogicalDevices(object):
         # Set port separately, as we don't want it opened yet
         arm_ser.port = limit.ARM_CON
         self.arm = console.Console(arm_ser)
+        # Auto add prompt to puts strings
+        self.arm.puts_prompt = '\r\n> '
         # Serial connection to the BT device
         self.btport = tester.SimSerial(
             simulation=self._fifo, baudrate=115200, timeout=2)
@@ -42,24 +44,6 @@ class LogicalDevices(object):
         self.btport.port = limit.BT_PORT
         # BT Radio driver
         self.bt = share.BtRadio(self.btport)
-
-    def arm_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False,
-                 addprompt=True):
-        """Push string data into the buffer if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self.arm.puts(string_data, preflush, postflush, priority)
-
-    def bt_puts(self,
-                string_data, preflush=0, postflush=0, priority=False,
-                addcrlf=True):
-        """Push string data into the buffer only if FIFOs are enabled."""
-        if self._fifo:
-            if addcrlf:
-                string_data = string_data + '\r\n'
-            self.btport.puts(string_data, preflush, postflush, priority)
 
     def reset(self):
         """Reset instruments."""
@@ -72,7 +56,7 @@ class LogicalDevices(object):
             rla.set_off()
 
 
-class Sensors(object):
+class Sensors():
 
     """BatteryCheck Sensors."""
 
@@ -99,7 +83,7 @@ class Sensors(object):
             caption=tester.translate('batterycheck_initial', 'capSnEntry'))
 
 
-class Measurements(object):
+class Measurements():
 
     """BatteryCheck Measurements."""
 

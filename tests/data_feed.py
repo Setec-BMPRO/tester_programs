@@ -114,7 +114,7 @@ class UnitTester(tester.Tester):
         try:
             dat = self.ut_data[self.key_con][stepname]
             for msg in dat:
-                self.ut_console_puts(msg)
+                self.ut_console_puts(msg, addprompt=True)
         except KeyError:
             pass
 
@@ -132,7 +132,7 @@ class UnitTester(tester.Tester):
         try:
             dat = self.ut_data[self.key_ext][stepname]
             for msg in dat:
-                self.ut_extra_puts(msg)
+                self.ut_extra_puts(msg, addprompt=True)
         except KeyError:
             pass
 

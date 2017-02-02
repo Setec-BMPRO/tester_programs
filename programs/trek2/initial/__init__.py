@@ -87,7 +87,7 @@ class Initial(tester.TestSequence):
                 ('', ) + ('success', ) * 2 + ('', ) * 2 +
                 (limit.BIN_VERSION, )
                 ):
-            d.trek2_puts(str)
+            d.trek2.puts(str)
 
         d.trek2.open()
         d.rla_reset.pulse(0.1)
@@ -102,8 +102,8 @@ class Initial(tester.TestSequence):
     def _step_canbus(self):
         """Test the Can Bus."""
         for str in ('0x10000000', '', '0x10000000', '', ''):
-            d.trek2_puts(str)
-        d.trek2_puts('RRQ,16,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
+            d.trek2.puts(str)
+        d.trek2.puts('RRQ,16,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
         m.trek2_can_bind.measure(timeout=10)
         d.trek2.can_testmode(True)

@@ -50,15 +50,6 @@ class Console(console.Variable, console.BaseConsole):
         # Strings to ignore in responses
         self.ignore = (' ', 'Hz', 'Vrms', 'mV')
 
-    def puts(self,
-             string_data, preflush=0, postflush=0, priority=False,
-             addprompt=True):
-        """Push string data into the buffer, if FIFOs are enabled."""
-        if self.port.simulation:
-            if addprompt:
-                string_data = string_data + '\r> '
-            super().puts(string_data, preflush, postflush, priority)
-
     def calpfc(self, voltage):
         """Issue PFC calibration commands.
 

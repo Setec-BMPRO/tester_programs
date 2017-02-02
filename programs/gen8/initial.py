@@ -303,6 +303,8 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately - don't open until after programming
         self['arm_ser'].port = ARM_PORT
         self['arm'] = console.Console(self['arm_ser'], verbose=False)
+        # Auto add prompt to puts strings
+        self['arm'].puts_prompt = '\r> '
         # Switch on fixture power
         self['dcs_fixture'].output(10.0, output=True)
 

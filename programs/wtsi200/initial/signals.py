@@ -6,7 +6,7 @@ Use class singletons to ensure unique signals.
 
 """
 
-class _Signal(object):
+class _Signal():
 
     """Used to represent signal values."""
 
@@ -18,14 +18,14 @@ class _Signal(object):
 
 
 # SENDERS = Which thread the message comes from.
-class Thread(object):
+class Thread():
 
     """Pseudo enumerated type for available senders."""
 
     gui = _Signal('Thread.gui')
 
 # SIGNALS = What signal it is.
-class _MySignal(_Signal):
+class _MySignal():
 
     """User Interaction request signals"""
 

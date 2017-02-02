@@ -39,15 +39,8 @@ class LogicalDevices():
         # Set port separately, as we don't want it opened yet
         pic_ser.port = limit.PIC_PORT
         self.pic = console.Console(pic_ser)
-
-    def pic_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False,
-                 addprompt=True):
-        """Push string data into the buffer if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self.pic.puts(string_data, preflush, postflush, priority)
+        # Auto add prompt to puts strings
+        self.pic.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

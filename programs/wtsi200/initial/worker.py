@@ -7,7 +7,7 @@ import logging
 import signals
 
 
-class Worker(object):
+class Worker():
     """Converts a hex file into a header file."""
     def __init__(self):
         self._logger = logging.getLogger(

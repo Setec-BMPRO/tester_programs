@@ -106,7 +106,7 @@ class InitialMicro(_Main):
                 ('2', ) +
                 ('MICRO Temp', )
                 ):
-            d.pic_puts(str)
+            d.pic.puts(str)
 
         d.pic.open()
         d.pic.clear_port()

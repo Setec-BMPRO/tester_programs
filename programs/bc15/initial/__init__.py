@@ -69,7 +69,7 @@ class Initial(tester.TestSequence):
 
     def _bc15_putstartup(self, put_defaults):
         """Push startup banner strings into fake serial port."""
-        d.bc15_puts(
+        d.bc15.puts(
             'BC15\r\n'                          # BEGIN Startup messages
             'Build date:       06/11/2015\r\n'
             'Build time:       15:31:40\r\n'
@@ -86,7 +86,7 @@ class Initial(tester.TestSequence):
                 ('OK', ) * 3 +
                 ('{}'.format(limit.BIN_VERSION), )
                 ):
-                d.bc15_puts(str)
+                d.bc15.puts(str)
 
     def _step_part_detect(self):
         """Measure fixture lock and part detection microswitches."""
@@ -141,7 +141,7 @@ class Initial(tester.TestSequence):
              (s.o3V3, 3.3), (s.o15Vs, 15.0), (s.oVout, 0.2), ))
         self._bc15_putstartup(False)
         for str in (('', ) * 10):
-            d.bc15_puts(str)
+            d.bc15.puts(str)
 
         d.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup(
@@ -159,15 +159,15 @@ class Initial(tester.TestSequence):
 
         """
         self.fifo_push(((s.oVout, 14.40), ))
-        d.bc15_puts(
+        d.bc15.puts(
             'not-pulsing-volts=14432 ;mV \r\nnot-pulsing-current=1987 ;mA ')
-        d.bc15_puts('3')
-        d.bc15_puts('mv-set=14400 ;mV \r\nnot-pulsing-volts=14432 ;mV ')
-        d.bc15_puts(
+        d.bc15.puts('3')
+        d.bc15.puts('mv-set=14400 ;mV \r\nnot-pulsing-volts=14432 ;mV ')
+        d.bc15.puts(
             'set_volts_mv_num                        902 \r\n'
             'set_volts_mv_den                      14400 ')
         for str in (('', ) * 3):
-            d.bc15_puts(str)
+            d.bc15.puts(str)
 
         d.dcl.output(2.0, True)
         time.sleep(0.5)
@@ -183,7 +183,7 @@ class Initial(tester.TestSequence):
     def _step_loaded(self):
         """Tests of the output."""
         self.fifo_push(((s.oVout, (14.4, ) * 5 + (11.0, ), ), ))
-        d.bc15_puts(
+        d.bc15.puts(
             'not-pulsing-volts=14432 ;mV \r\nnot-pulsing-current=14000 ;mA ')
 
         d.dcl.output(14.0, True)

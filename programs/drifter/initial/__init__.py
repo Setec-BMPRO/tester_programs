@@ -86,7 +86,7 @@ class Initial(tester.TestSequence):
                 ('Banner1\r\nBanner2', ) +
                 ('', '0', '')
                 ):
-            d.pic_puts(str)
+            d.pic.puts(str)
 
         d.dcs_RS232.output(10.0, output=True)
         time.sleep(4)
@@ -111,7 +111,7 @@ class Initial(tester.TestSequence):
                 ('', ) +
                 ('20000', '15000', '-8', '160', )
                 ):
-            d.pic_puts(str)
+            d.pic.puts(str)
 
         # Simulate zero current
         d.rla_ZeroCal.set_on()
@@ -170,7 +170,7 @@ class Initial(tester.TestSequence):
 
     def _cal_reload(self):
         """Re-Load data readings."""
-        d.pic_puts('', priority=True)
+        d.pic.puts('', priority=True)
 
         d.pic['CAL_RELOAD'] = True
         time.sleep(10)

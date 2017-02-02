@@ -8,7 +8,7 @@ import tester
 from . import limit
 
 
-class LogicalDevices(object):
+class LogicalDevices():
 
     """BatteryCheck Logical Devices."""
 
@@ -25,19 +25,13 @@ class LogicalDevices(object):
         # BT Radio driver
         self.bt = share.BtRadio(self.btport)
 
-    def bt_puts(self,
-                 string_data, preflush=0, postflush=0, priority=False):
-        """Push string data into the BT buffer only if FIFOs are enabled."""
-        if self.fifo:
-            self.btport.puts(string_data, preflush, postflush, priority)
-
     def reset(self):
         """Reset instruments."""
         self.bt.close()
         self.dcs_input.output(0.0, output=False)
 
 
-class Sensors(object):
+class Sensors():
 
     """BatteryCheck Sensors."""
 
@@ -62,7 +56,7 @@ class Sensors(object):
         self.oMirSwVer.flush()
 
 
-class Measurements(object):
+class Measurements():
 
     """BatteryCheck Measurements."""
 

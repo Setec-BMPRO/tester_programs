@@ -46,7 +46,7 @@ class RvViewInitial(ProgramTestCase):
                 'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev.rvview_puts)
+        self.tester.ut_load(data, self.test_program.fifo_push, dev.rvview.puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result

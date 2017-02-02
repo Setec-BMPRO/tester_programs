@@ -61,19 +61,19 @@ class Ids500Final(ProgramTestCase):
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Comms':
-                    ('\r\n', 'M,1,Incorrectformat!Type?.?forhelp\r\n',
-                    'M,3,UnknownCommand!Type?.?forhelp\r\n') +
-                    ('\r\n', 'Setting Change Done\r\n', '\r\n',
-                    '\r\n', 'Setting Change Done\r\n', '\r\n',
-                    'Software Test Mode Entered\r\n',
-                    '\r\n', 'Setting Change Done\r\n', '\r\n') +
-                    ('\r\n', 'Setting Change Done\r\n', '\r\n') +
-                    ('I, 2, 06A,Hardware Revision\r\n', ) +
-                    ('M,6,SettingisProtected\r\n', '\r\n', '\r\n') +
-                    ('I, 3, A1504010034,Serial Number\r\n', ),
+                    ('', 'M,1,Incorrectformat!Type?.?forhelp',
+                    'M,3,UnknownCommand!Type?.?forhelp') +
+                    ('', 'Setting Change Done', '',
+                    '', 'Setting Change Done', '',
+                    'Software Test Mode Entered',
+                    '', 'Setting Change Done', '') +
+                    ('', 'Setting Change Done', '') +
+                    ('I, 2, 06A,Hardware Revision', ) +
+                    ('M,6,SettingisProtected', '', '') +
+                    ('I, 3, A1504010034,Serial Number', ),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev.ids_puts)
+        self.tester.ut_load(data, self.test_program.fifo_push, dev.pic.puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result

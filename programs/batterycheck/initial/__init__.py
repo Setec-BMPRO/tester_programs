@@ -134,7 +134,7 @@ class Initial(tester.TestSequence):
                 ('Banner1\r\nBanner2', ) +  # Banner lines
                 ('', ) * 3
                 ):
-            d.arm_puts(str)
+            d.arm.puts(str)
 
         d.arm.open()
         d.rla_reset.pulse_on(0.1)
@@ -161,7 +161,7 @@ class Initial(tester.TestSequence):
                     ('12120', ) +
                     ('', )
                     ):
-            d.arm_puts(str)
+            d.arm.puts(str)
 
         d.dcs_shunt.output(62.5 * limit.SHUNT_SCALE, True)
         time.sleep(1.5)  # ARM rdgs settle
@@ -183,11 +183,11 @@ class Initial(tester.TestSequence):
         Scan for BT device and match against serial number.
 
         """
-        d.bt_puts('OK', preflush=2)
-        d.bt_puts('OK', preflush=1)
-        d.bt_puts('OK', preflush=1)
-        d.bt_puts('+RDDSRES=112233445566,BCheck A1509020010,2,3')
-        d.bt_puts('+RDDSCNF=0')
+        d.bt.puts('OK', preflush=2)
+        d.bt.puts('OK', preflush=1)
+        d.bt.puts('OK', preflush=1)
+        d.bt.puts('+RDDSRES=112233445566,BCheck A1509020010,2,3')
+        d.bt.puts('+RDDSCNF=0')
 
         d.rla_reset.pulse_on(0.1)
         time.sleep(2.0)  # ARM startup delay

@@ -68,26 +68,26 @@ class Final(tester.TestSequence):
         Scan for BT devices and match against serial number.
 
         """
-        d.bt_puts('OK\r\n', preflush=2)
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts('+RDDSRES=112233445566,BCheck A1509020010,2,3\r\n')
-        d.bt_puts('+RDDSCNF=0\r\n')
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts('+RPCI=\r\n') # Ask for PIN
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts('+RUCE=\r\n') # Ask for 6-digit verify
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts('+RCCRCNF=500,0000,0\r\n') # Pair response
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts(
+        d.bt.puts('OK\r\n', preflush=2)
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts('+RDDSRES=112233445566,BCheck A1509020010,2,3\r\n')
+        d.bt.puts('+RDDSCNF=0\r\n')
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts('+RPCI=\r\n') # Ask for PIN
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts('+RUCE=\r\n') # Ask for 6-digit verify
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts('+RCCRCNF=500,0000,0\r\n') # Pair response
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts(
             '{"jsonrpc": "2.0","id": 8256,'
             '"result": {"HardwareVersion": "2.0",'
             '"SoftwareVersion": "' + limit.ARM_VERSION + '",'
             '"SerialID": "A1509020010"}}\r\n', preflush=1)
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts('OK\r\n', preflush=1)
-        d.bt_puts('+RDII\r\n')
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts('OK\r\n', preflush=1)
+        d.bt.puts('+RDII\r\n')
 
         self._logger.debug('Testing Bluetooth Serial: "%s"', self._sernum)
         d.bt.open()

@@ -41,15 +41,8 @@ class LogicalDevices():
         self.trek2_ser.port = limit.ARM_PORT
         # Trek2 Console driver
         self.trek2 = console.DirectConsole(self.trek2_ser)
-
-    def trek2_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False,
-                   addprompt=True):
-        """Push string data into the buffer if FIFOs are enabled."""
-        if self._fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self.trek2.puts(string_data, preflush, postflush, priority)
+        # Auto add prompt to puts strings
+        self.trek2.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

@@ -41,15 +41,8 @@ class LogicalDevices():
             port=ser_can, simulation=fifo, verbose=False)
         # Trek2 Console driver (using the CAN Tunnel)
         self.trek2 = console.TunnelConsole(port=self.tunnel, verbose=False)
-
-    def trek2_puts(self,
-                   string_data, preflush=0, postflush=0, priority=False,
-                   addprompt=True):
-        """Push string data into the buffer if FIFOs are enabled."""
-        if self.fifo:
-            if addprompt:
-                string_data = string_data + '\r\n> '
-            self.trek2.puts(string_data, preflush, postflush, priority)
+        # Auto add prompt to puts strings
+        self.trek2.puts_prompt = '\r\n> '
 
     def reset(self):
         """Reset instruments."""

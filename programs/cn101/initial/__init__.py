@@ -94,8 +94,8 @@ class Initial(tester.TestSequence):
         """Test the ARM device."""
         for str in (('Banner1\r\nBanner2', ) +
                     ('', ) * 5 ):
-            d.cn101_puts(str)
-        d.cn101_puts(limit.BIN_VERSION, postflush=0)
+            d.cn101.puts(str)
+        d.cn101.puts(limit.BIN_VERSION, postflush=0)
 
         d.cn101.open()
         d.rla_reset.pulse(0.1)
@@ -110,14 +110,14 @@ class Initial(tester.TestSequence):
     def _step_tank_sense(self):
         """Activate tank sensors and read."""
         for str in (('', ) + ('5', ) * 4):
-            d.cn101_puts(str)
+            d.cn101.puts(str)
 
         d.cn101['ADC_SCAN'] = 100
         t.tank.run()
 
     def _step_bluetooth(self):
         """Test the Bluetooth interface."""
-        d.cn101_puts('001EC030BC15', )
+        d.cn101.puts('001EC030BC15')
 
         t.reset.run()
         _btmac = m.cn101_btmac.measure().reading1
@@ -135,8 +135,8 @@ class Initial(tester.TestSequence):
     def _step_canbus(self):
         """Test the CAN interface."""
         for str in ('0x10000000', '', '0x10000000', '', ''):
-            d.cn101_puts(str)
-        d.cn101_puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
+            d.cn101.puts(str)
+        d.cn101.puts('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
 
         m.cn101_can_bind.measure(timeout=10)
         d.cn101.can_testmode(True)
