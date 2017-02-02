@@ -39,19 +39,16 @@ Tester Programs project status as of 2017-01-27
     "@oldteststep" decorators are replaced by "@teststep" decorators on test
     steps to provide the (LogicalDevice, Measurement) arguments to the test steps.
 
-    A "Support" class to manage the LogicalDevice/Sensor/Measurement data.
-    Inherits from a base class that provides common methods.
+    A "share.TestSequence" class to manage the LogicalDevice/Sensor/Measurement
+    instances.
 
-    SubStep classes are deprecated and replaced by methods on SupportBase.
-
-    LogicalDevice/Sensor/Measurement all inherit from "AttributeDict", which
-    stores data in a dictionary and allows access to keys as instance attributes.
+    SubStep classes are deprecated and replaced by methods on share.TestSequence.
 
 
 
 
 Programs using super().open(sequence)
-- SubSteps, or reference to a Logical Device
+Due to either SubSteps, or reference to a Logical Device
     GENIUS-II Initial       SubStep
     IDS500 Final            SubStep
     IDS500 Main Initial     SubStep

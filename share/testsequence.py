@@ -13,7 +13,7 @@ import tester
 # Data tuple of Test Sequence helper instances
 TestSequenceData = collections.namedtuple(
     'TestSequenceData',
-    'cls_devices, limits, cls_sensors, cls_measurements, sequence')
+    'cls_devices, cls_sensors, cls_measurements, limits, sequence')
 
 
 class TestSequence(tester.TestSequence):
@@ -63,9 +63,12 @@ class TestSequence(tester.TestSequence):
         """Reset logical devices and sensors."""
         self.devices.reset()
         self.sensors.reset()
+        self.measurements.reset()
 
     def close(self):
         """Close logical devices."""
+        self.measurements.close()
+        self.sensors.close()
         self.devices.close()
         super().close()
 
@@ -213,6 +216,7 @@ class LogicalDevices(abc.ABC, dict):
 
     def close(self):
         """Close logical devices."""
+        self.clear()
 
 
 class Sensors(abc.ABC, dict):
@@ -243,13 +247,17 @@ class Sensors(abc.ABC, dict):
                 for subsensor in self[sensor]:
                     subsensor.flush()
 
+    def close(self):
+        """Close sensors."""
+        self.clear()
+
 
 class Measurements(abc.ABC, dict):
 
     """Measurements."""
 
     def __init__(self, sensors, limits):
-        """Create Measurements instance.
+        """Create measurement instance.
 
         @param sensors Sensors
         @param limits Test limits
@@ -261,7 +269,14 @@ class Measurements(abc.ABC, dict):
 
     @abc.abstractmethod
     def open(self):
-        """Create all Measurements."""
+        """Create all measurements."""
+
+    def reset(self):
+        """Reset measurements."""
+
+    def close(self):
+        """Close measurements."""
+        self.clear()
 
 
 def teststep(func):

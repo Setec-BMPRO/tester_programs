@@ -22,7 +22,7 @@ class Final(share.TestSequence):
             )
         super().open(
             share.TestSequenceData(
-                LogicalDevices, LIMITS, Sensors, Measurements, sequence)
+                LogicalDevices, Sensors, Measurements, LIMITS, sequence)
             )
 
     @share.teststep
