@@ -43,9 +43,8 @@ class Initial(tester.TestSequence):
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep(
-                'Program', self.logdev.programmer.program, not self.fifo),
-            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('Program', self._step_program, not self.fifo),
+            tester.TestStep('Initialise', self._step_initialise),
             tester.TestStep('Display', self._step_display),
             tester.TestStep('CanBus', self._step_canbus),
             )
@@ -74,7 +73,12 @@ class Initial(tester.TestSequence):
         tester.MeasureGroup((mes.dmm_vin, mes.dmm_3V3), timeout=5)
 
     @oldteststep
-    def _step_initialise_arm(self, dev, mes):
+    def _step_program(self, dev, mes):
+        """Program the ARM device."""
+        dev.programmer.program()
+
+    @oldteststep
+    def _step_initialise(self, dev, mes):
         """Initialise the ARM device.
 
         Reset the device, set HW version & Serial number.

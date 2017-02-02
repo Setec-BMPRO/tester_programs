@@ -33,7 +33,6 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.logdev = None
         self.sensors = None
         self.meas = None
-        self.teststep = None
         self.sernum = None
         self.variant = None
 
@@ -42,22 +41,21 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.logdev = support.LogicalDevices(self.phydev, self.fifo)
         self.sensors = support.Sensors(self.logdev, self.limits)
         self.meas = support.Measurements(self.sensors, self.limits)
-        self.teststep = support.SubTests(self.logdev, self.meas)
         self.variant = limit.VARIANT[self.limits['Variant'].limit]
         # Define the (linear) Test Sequence
         sequence = (
             tester.TestStep('Prepare', self._step_prepare),
             tester.TestStep(
-                'ProgramARM', self.logdev.program_arm.program, not self.fifo),
+                'ProgramARM', self._step_program_arm, not self.fifo),
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('Aux', self._step_aux),
             tester.TestStep(
                 'Solar', self._step_solar, self.variant['SolarCan']),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('Output', self._step_output),
-            tester.TestStep('RemoteSw', self.teststep.remote_sw.run),
+            tester.TestStep('RemoteSw', self._step_remote_sw),
             tester.TestStep('Load', self._step_load),
-            tester.TestStep('OCP', self.teststep.ocp.run),
+            tester.TestStep('OCP', self._step_ocp),
             tester.TestStep(
                 'CanBus', self._step_canbus, self.variant['SolarCan']),
             )
@@ -71,7 +69,6 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.logdev = None
         self.sensors = None
         self.meas = None
-        self.teststep = None
         super().close()
 
     def safety(self):
@@ -93,6 +90,15 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.dcs_vbat.output(12.6, True)
         tester.MeasureGroup(
             (mes.dmm_vbatin, mes.dmm_3v3u), timeout=5)
+
+    @oldteststep
+    def _step_program_arm(self, dev, mes):
+        """Program the ARM device.
+
+        Device is powered by injected Battery voltage.
+
+        """
+        dev.program_arm.program()
 
     @oldteststep
     def _step_initialise_arm(self, dev, mes):
@@ -168,6 +174,15 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
                 mes.dmm_vload.measure(timeout=2)
         dev.j35.load_set(set_on=False, loads=())  # All outputs ON
 
+
+    @oldteststep
+    def _step_remote_sw(self, dev, mes):
+        """Test the remote switch."""
+        dev.rla_loadsw.set_on()
+        mes.dmm_vloadoff(timeout=5),
+        dev.rla_loadsw.set_off()
+        mes.dmm_vload(timeout=5),
+
     @oldteststep
     def _step_load(self, dev, mes):
         """Test with load."""
@@ -178,6 +193,13 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.dcl_bat.output(4.0, True)
         tester.MeasureGroup(
             (mes.dmm_vbatload, mes.arm_battI, ), timeout=5)
+
+    @oldteststep
+    def _step_ocp(self, dev, mes):
+        """Test OCP."""
+        mes.ramp_ocp(timeout=5)
+        dev.dcl_out.output(0.0)
+        dev.dcl_bat.output(0.0)
 
     @oldteststep
     def _step_canbus(self, dev, mes):

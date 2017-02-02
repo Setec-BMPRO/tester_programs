@@ -47,10 +47,7 @@ Tester Programs project status as of 2017-01-27
 
 
 
-Programs using super().open(sequence)
-Due to either SubSteps, or reference to a Logical Device
-    GENIUS-II Initial       SubStep
-    IDS500 Final            SubStep
-    IDS500 Main Initial     SubStep
-    J35 Initial             LogDev, SubStep
-    RvView Initial          LogDev
+Programs using super().open(sequence) due to SubSteps.
+    GENIUS-II Initial
+    IDS500 Final
+    IDS500 Main Initial

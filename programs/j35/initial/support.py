@@ -178,23 +178,3 @@ class Measurements():
             m = Measurement(limits['ARM-LoadI'], sen)
             self.arm_loads += (m, )
         self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, dev, mes):
-        """Create SubTest Step instances."""
-        # RemoteSw: Activate sw, measure.
-        self.remote_sw = tester.SubStep((
-            tester.RelaySubStep(((dev.rla_loadsw, True), )),
-            tester.MeasureSubStep((mes.dmm_vloadoff, ), timeout=5),
-            tester.RelaySubStep(((dev.rla_loadsw, False), )),
-            tester.MeasureSubStep((mes.dmm_vload, ), timeout=5),
-            ))
-        # OCP:
-        self.ocp = tester.SubStep((
-            tester.MeasureSubStep((mes.ramp_ocp, ), timeout=5),
-            tester.LoadSubStep(((dev.dcl_out, 0.0), (dev.dcl_bat, 0.0), )),
-            ))
