@@ -50,7 +50,7 @@ class LogicalDevices():
             simulation=fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         self.ard_ser.port = limit.ARDUINO_PORT
-        self.ard = arduino.Arduino(self.ard_ser, verbose=True)
+        self.ard = arduino.Arduino(self.ard_ser, verbose=False)
 
     def reset(self):
         """Reset instruments."""
