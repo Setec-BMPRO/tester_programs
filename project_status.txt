@@ -1,12 +1,7 @@
-Tester Programs project status as of 2017-01-27
+Tester Programs project status as of 2017-02-03
 ===============================================
 
 1st generation test programs used these constructional elements:
-
-    Typically 3 files for each program in a 'test-type' sub-directory:
-        __init__.py     The test program
-        support.py      Supporting data (LogicalDevice, Sensor, Measurement)
-        limit.py        Test limits
 
     SubStep classes may be used in test programs.
 
@@ -19,11 +14,6 @@ Tester Programs project status as of 2017-01-27
 
 2nd generation test programs used these constructional elements:
 
-    Typically 3 files for each program in a 'test-type' sub-directory:
-        __init__.py     The test program
-        support.py      Supporting data (Log.Devices, Sensor, Measurements)
-        limit.py        Test limits
-
     SubStep classes may be used in test programs.
 
     Global variables are replaced by "@oldteststep" decorators on test steps
@@ -33,9 +23,6 @@ Tester Programs project status as of 2017-01-27
 
 3rd generation test programs used these constructional elements:
 
-    Typically 1 file for each program, and NO sub-directory:
-        initial.py      The test program and all related items
-
     "@oldteststep" decorators are replaced by "@teststep" decorators on test
     steps to provide the (LogicalDevice, Measurement) arguments to the test steps.
 
@@ -43,11 +30,3 @@ Tester Programs project status as of 2017-01-27
     instances.
 
     SubStep classes are deprecated and replaced by methods on share.TestSequence.
-
-
-
-
-Programs using super().open(sequence) due to SubSteps.
-    GENIUS-II Initial
-    IDS500 Final
-    IDS500 Main Initial
