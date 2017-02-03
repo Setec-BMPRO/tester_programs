@@ -5,16 +5,12 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import gen8
 
-_PROG_CLASS = gen8.Final
-_PROG_LIMIT = ()
-
 
 class GEN8Final(ProgramTestCase):
 
     """GEN8 Final program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = gen8.Final
     parameter = None
     debug = False
 

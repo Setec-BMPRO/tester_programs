@@ -6,16 +6,12 @@ from unittest.mock import MagicMock, patch
 from .data_feed import UnitTester, ProgramTestCase
 from programs import bp35
 
-_PROG_CLASS = bp35.Initial
-_PROG_LIMIT = ()
-
 
 class BP35Initial(ProgramTestCase):
 
     """BP35 Initial program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = bp35.Initial
     parameter = None
     debug = False
 

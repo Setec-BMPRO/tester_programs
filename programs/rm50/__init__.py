@@ -3,4 +3,4 @@
 """RM50-24 Test Programs."""
 
 # Easy access to utility methods and classes
-from .final import *
+from .final import Final

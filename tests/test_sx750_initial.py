@@ -5,16 +5,12 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import sx750
 
-_PROG_CLASS = sx750.Initial
-_PROG_LIMIT = sx750.INI_LIMIT
-
 
 class SX750Initial(ProgramTestCase):
 
     """SX750 Initial program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = sx750.Initial
     parameter = None
     debug = False
 
@@ -75,8 +71,8 @@ class SX750Initial(ProgramTestCase):
                     ('240Vrms ', ) +    # ARM_AcVolt
                     ('12180mV ', ) +    # ARM_12V
                     ('24000mV ', ) +    # ARM_24V
-                    (sx750.initial.limit.BIN_VERSION[:3], ) +   # ARM SwVer
-                    (sx750.initial.limit.BIN_VERSION[4:], ) +   # ARM BuildNo
+                    (sx750.initial.BIN_VERSION[:3], ) +   # ARM SwVer
+                    (sx750.initial.BIN_VERSION[4:], ) +   # ARM BuildNo
                     ('', ) * 4,
                 },
             UnitTester.key_ext: {       # Tuples of extra strings

@@ -6,16 +6,12 @@ from unittest.mock import MagicMock, patch
 from .data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
-_PROG_CLASS = j35.Initial
-_PROG_LIMIT = j35.INI_LIMIT_C
-
 
 class J35Initial(ProgramTestCase):
 
     """J35 Initial program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = j35.Initial
     parameter = None
     debug = False
 
@@ -56,7 +52,7 @@ class J35Initial(ProgramTestCase):
                     ('Banner1\r\nBanner2', ) +
                      ('', ) + ('success', ) * 2 + ('', ) +
                      ('Banner1\r\nBanner2', ) +
-                     ('', ) + (j35.initial.limit.ARM_VERSION, ),
+                     ('', ) + (j35.initial.ARM_VERSION, ),
                 'Aux': ('', '13500', '1100', ''),
                 'Solar': ('', ''),
                 'PowerUp':

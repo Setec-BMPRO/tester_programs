@@ -5,16 +5,12 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import rvview
 
-_PROG_CLASS = rvview.Initial
-_PROG_LIMIT = rvview.INI_LIMIT
-
 
 class RvViewInitial(ProgramTestCase):
 
     """RVVIEW Initial program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = rvview.Initial
     parameter = None
     debug = False
 
@@ -39,7 +35,7 @@ class RvViewInitial(ProgramTestCase):
                     ('Banner1\r\nBanner2', ) +
                     ('', ) + ('success', ) * 2 + ('', ) +
                     ('Banner1\r\nBanner2', ) +
-                    (rvview.initial.limit.BIN_VERSION, ),
+                    (rvview.initial.BIN_VERSION, ),
                 'Display': ('0x10000000', '', '0x10000000', '', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },

@@ -3,5 +3,5 @@
 """C15A-15 Test Programs."""
 
 # Easy access to utility methods and classes
-from .initial import *
-from .final import *
+from .initial import Initial
+from .final import Final

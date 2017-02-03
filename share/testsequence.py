@@ -24,13 +24,10 @@ class TestSequence(tester.TestSequence):
 
     """
 
-# FIXME: Deprecate test_limits and fifo arguments
-    def __init__(self, physical_devices, test_limits, fifo):
+    def __init__(self, physical_devices):
         """Create the test program instance.
 
            @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits (ignored & to be deprecated)
-           @param fifo True if FIFOs are enabled (to be deprecated)
 
         """
         self.physical_devices = physical_devices
@@ -39,7 +36,7 @@ class TestSequence(tester.TestSequence):
         self.limits = None
         self.sensors = None
         self.measurements = None
-        super().__init__(None, fifo)
+        super().__init__()
 
     @abc.abstractmethod
     def open(self, parameter, sequence_data):

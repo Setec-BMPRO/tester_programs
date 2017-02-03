@@ -6,16 +6,12 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import bp35
 
-_PROG_CLASS = bp35.Final
-_PROG_LIMIT = ()
-
 
 class BP35Final(ProgramTestCase):
 
     """BP35 Final program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = bp35.Final
     parameter = None
     debug = False
 

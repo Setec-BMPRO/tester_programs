@@ -6,16 +6,12 @@ from unittest.mock import MagicMock, patch
 from .data_feed import UnitTester, ProgramTestCase
 from programs import genius2
 
-_PROG_CLASS = genius2.Initial
-_PROG_LIMIT = genius2.INI_LIMIT
-
 
 class Genius2Initial(ProgramTestCase):
 
     """GENIUS-II Initial program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = genius2.Initial
     parameter = None
     debug = False
 

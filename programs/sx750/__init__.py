@@ -3,6 +3,6 @@
 """SX-750 Test Programs."""
 
 # Easy access to utility methods and classes
-from .initial import *
-from .final import *
-from .safety import *
+from .initial import Initial
+from .final import Final
+from .safety import Safety

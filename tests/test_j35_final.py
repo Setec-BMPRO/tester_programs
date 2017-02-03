@@ -5,16 +5,12 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
-_PROG_CLASS = j35.Final
-_PROG_LIMIT = j35.FIN_LIMIT_C
-
 
 class J35Final(ProgramTestCase):
 
     """J35 Final program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = j35.Final
     parameter = None
     debug = False
 

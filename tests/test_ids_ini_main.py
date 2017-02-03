@@ -5,16 +5,12 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import ids500
 
-_PROG_CLASS = ids500.InitialMain
-_PROG_LIMIT = ids500.INI_MAIN_LIMIT
-
 
 class Ids500IniMain(ProgramTestCase):
 
     """IDS500 Initial Main program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = ids500.InitialMain
     parameter = None
     debug = False
 

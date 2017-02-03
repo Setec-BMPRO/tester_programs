@@ -3,5 +3,5 @@
 """GENIUS-II Test Programs."""
 
 # Easy access to utility methods and classes
-from .final import *
-from .initial import *
+from .initial import Initial
+from .final import Final

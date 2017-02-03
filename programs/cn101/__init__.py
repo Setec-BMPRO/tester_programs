@@ -3,4 +3,4 @@
 """CN101 Test Programs."""
 
 # Easy access to utility methods and classes
-from .initial import *
+from .initial import Initial

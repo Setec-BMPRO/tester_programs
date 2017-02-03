@@ -5,16 +5,12 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import ids500
 
-_PROG_CLASS = ids500.Final
-_PROG_LIMIT = ids500.FIN_LIMIT
-
 
 class Ids500Final(ProgramTestCase):
 
     """IDS500 Final program test suite."""
 
-    prog_class = _PROG_CLASS
-    prog_limit = _PROG_LIMIT
+    prog_class = ids500.Final
     parameter = None
     debug = False
 
