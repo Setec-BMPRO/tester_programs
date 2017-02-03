@@ -65,12 +65,8 @@ class Initial(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        global m, d, s, t
-        d = LogicalDevices(self._devices)
-        s = Sensors(d, self._limits)
-        m = Measurements(s, self._limits)
-        t = SubTests(d, m)
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
             tester.TestStep('SecCheck', self._step_sec_check),
             tester.TestStep('Program', self._step_program, not self.fifo),
@@ -79,7 +75,11 @@ class Initial(tester.TestSequence):
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
             )
-        super().open(sequence)
+        global m, d, s, t
+        d = LogicalDevices(self._devices)
+        s = Sensors(d, self._limits)
+        m = Measurements(s, self._limits)
+        t = SubTests(d, m)
 
     def close(self):
         """Finished testing."""

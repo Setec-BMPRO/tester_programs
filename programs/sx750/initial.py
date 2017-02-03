@@ -98,7 +98,8 @@ class Initial(tester.TestSequence):
 
     def open(self, sequence=None):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
             tester.TestStep('Program', self._step_program_micros),
             tester.TestStep('Initialise', self._step_initialise_arm),
@@ -108,7 +109,6 @@ class Initial(tester.TestSequence):
             tester.TestStep('24V', self._step_reg_24v),
             tester.TestStep('PeakPower', self._step_peak_power),
             )
-        super().open(sequence)
         self.logdev = LogicalDevices(self.devices, self.fifo)
         self.sensor = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensor, self.limits)

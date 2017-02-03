@@ -77,13 +77,13 @@ class Initial(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('CalPre', self._step_cal_pre),
             tester.TestStep('Calibrate', self._step_calibrate),
             )
-        super().open(sequence)
         self._limits = LIMITS[parameter]
         global d, s, m
         d = LogicalDevices(self._devices, self._limits, self.fifo)

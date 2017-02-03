@@ -42,7 +42,8 @@ class Final(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
             tester.TestStep('DCInputLeakage', self._step_dcinput_leakage),
             tester.TestStep('DCInputTrack', self._step_dcinput_track),
@@ -53,7 +54,6 @@ class Final(tester.TestSequence):
             tester.TestStep('PowerNoLoad', self._step_power_noload),
             tester.TestStep('Efficiency', self._step_efficiency),
             )
-        super().open(sequence)
         global m, d, s, t
         d = LogicalDevices(self._devices)
         s = Sensors(d, self._limits)

@@ -12,8 +12,7 @@ import tester
 
 # Data tuple of Test Sequence helper instances
 TestSequenceData = collections.namedtuple(
-    'TestSequenceData',
-    'cls_devices, cls_sensors, cls_measurements, limits, sequence')
+    'TestSequenceData', 'cls_devices, cls_sensors, cls_measurements, limits')
 
 
 class TestSequence(tester.TestSequence):
@@ -46,8 +45,8 @@ class TestSequence(tester.TestSequence):
         @param sequence_data TestSequenceData instance
 
         """
+        super().open()
         self.parameter = parameter
-        super().open(sequence_data.sequence)
         self.devices = sequence_data.cls_devices(
             self.physical_devices, self.fifo)
         self.limits = tester.limitdict(sequence_data.limits)

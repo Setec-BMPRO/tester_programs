@@ -48,7 +48,8 @@ class Main(tester.testsequence.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('ACSource', self._step_acsource),
             tester.TestStep('Checker', self._step_checker),
             tester.TestStep('DSO', self._step_dso, not self._is_ate2),
@@ -57,7 +58,6 @@ class Main(tester.testsequence.TestSequence):
             tester.TestStep('RelayDriver', self._step_relaydriver),
             tester.TestStep('Discharge', self._step_discharge),
             )
-        super().open(sequence)
         global d, s, m, t
         d = LogicalDevices(self._devices, self._is_ate2)
         s = Sensors(d, self._is_ate2)

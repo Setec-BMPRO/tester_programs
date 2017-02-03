@@ -35,12 +35,12 @@ class Final(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PowerOn', self._step_power_on),
             tester.TestStep('FullLoad', self._step_full_load),
             )
-        super().open(sequence)
         global m, d, s, t
         d = LogicalDevices(self._devices)
         s = Sensors(d)

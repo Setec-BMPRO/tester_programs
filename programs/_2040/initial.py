@@ -49,13 +49,13 @@ class Initial(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
             tester.TestStep('SecCheck', self._step_sec_check),
             tester.TestStep('DCPowerOn', self._step_dcpower_on),
             tester.TestStep('ACPowerOn', self._step_acpower_on),
             )
-        super().open(sequence)
         global d, s, m, t
         d = LogicalDevices(self._devices)
         s = Sensors(d, self._limits)

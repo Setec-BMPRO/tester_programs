@@ -59,14 +59,14 @@ class Final(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('FuseLabel', self._step_label),
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Battery', self._step_battery),
             tester.TestStep('LoadOCP', self._step_load_ocp),
             tester.TestStep('BattOCP', self._step_batt_ocp),
             )
-        super().open(sequence)
         self._limits = LIMITS[parameter]
         self._is35 = (parameter != '20')
         self._fullload = self._limits['FullLoad'].limit

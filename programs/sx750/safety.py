@@ -31,13 +31,13 @@ class Safety(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('Gnd1', self._step_gnd1),
             tester.TestStep('Gnd2', self._step_gnd2),
             tester.TestStep('Gnd3', self._step_gnd3),
             tester.TestStep('HiPot', self._step_hipot),
             )
-        super().open(sequence)
         global m, d, s
         d = LogicalDevices(self._devices)
         s = Sensors(d)

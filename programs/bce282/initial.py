@@ -88,6 +88,15 @@ class Initial(tester.testsequence.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
+        super().open()
+        self.steps = (
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep(
+                'ProgramMicro', self._step_program_micro, not self.fifo),
+            tester.TestStep('PowerUp', self._step_power_up, False),
+            tester.TestStep('Calibration', self._step_cal, False),
+            tester.TestStep('OCP', self._step_ocp, False),
+            )
         self._limits = LIMITS[parameter]
         self._isbce12 = (parameter != '24')
         self._msp = msp.Console(port=_MSP430_PORT)
@@ -96,15 +105,6 @@ class Initial(tester.testsequence.TestSequence):
         s = Sensors(d, self._limits, self._msp)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)
-        sequence = (
-            tester.TestStep('FixtureLock', self._step_fixture_lock),
-            tester.TestStep(
-                'ProgramMicro', self._step_program_micro, not self.fifo),
-            tester.TestStep('PowerUp', self._step_power_up, False),
-            tester.TestStep('Calibration', self._step_cal, False),
-            tester.TestStep('OCP', self._step_ocp, False),
-            )
-        super().open(sequence)
 
     def close(self):
         """Finished testing."""

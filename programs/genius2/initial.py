@@ -72,14 +72,14 @@ class Initial(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
+        super().open()
         self._isH = (parameter == 'H')
         self.limits = LIMITS[parameter]
         self.logdev = LogicalDevices(self.phydev)
         self.sensor = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensor, self.limits)
         self.subtest = SubTests(self.logdev, self.meas)
-        # Define the (linear) Test Sequence
-        sequence = (
+        self.steps = (
             tester.TestStep('Prepare', self.subtest.prepare.run),
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('Aux', self.subtest.aux.run),
@@ -88,7 +88,6 @@ class Initial(tester.TestSequence):
             tester.TestStep('ShutDown', self.subtest.shdn.run),
             tester.TestStep('OCP', self._step_ocp),
             )
-        super().open(sequence)
 
     def close(self):
         """Finished testing."""

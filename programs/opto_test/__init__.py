@@ -34,8 +34,7 @@ LIMITS = tester.testlimit.limitset((
 d = s = m = None
 
 _FROM = '"GEN8 Opto Tester" <noreply@setec.com.au>'
-_RECIPIENT = '"Michael Burrell" <michael.burrell@setec.com.au>'
-# _RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
+_RECIPIENT = '"Stephen Bell" <stephen.bell@setec.com.au>'
 # _RECIPIENT = '"Rajiv Fonn" <rajiv.fonn@setec.com.au>'
 _SUBJECT = 'GEN8 Opto Test Data'
 _EMAIL_SERVER = 'smtp.core.setec.com.au'
@@ -62,7 +61,8 @@ class Main(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('BoardNum', self._step_boardnum),
             tester.TestStep('InputAdj', self._step_in_adj1),
             tester.TestStep('OutputAdj', self._step_out_adj1),
@@ -70,7 +70,6 @@ class Main(tester.TestSequence):
             tester.TestStep('OutputAdj', self._step_out_adj10),
             tester.TestStep('Email', self._step_email, not self.fifo),
             )
-        super().open(sequence)
         global d, s, m
         d = LogicalDevices(self._devices)
         s = Sensors(d, self._limits)

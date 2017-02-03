@@ -69,7 +69,12 @@ class Initial(share.TestSequence):
 
     def open(self, parameter):
         """Create the test program as a linear sequence."""
-        sequence = (
+        super().open(
+            parameter,
+            share.TestSequenceData(
+                LogicalDevices, Sensors, Measurements, LIMITS)
+            )
+        self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program, not self.fifo),
             TestStep('Initialise', self._step_initialise_arm),
@@ -77,11 +82,6 @@ class Initial(share.TestSequence):
             TestStep('5V', self._step_reg_5v),
             TestStep('12V', self._step_reg_12v),
             TestStep('24V', self._step_reg_24v),
-            )
-        super().open(
-            parameter,
-            share.TestSequenceData(
-                LogicalDevices, Sensors, Measurements, LIMITS, sequence)
             )
 
     @share.teststep

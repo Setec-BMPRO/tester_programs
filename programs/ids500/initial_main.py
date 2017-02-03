@@ -75,12 +75,12 @@ class InitialMain(tester.testsequence.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
+        super().open()
         self.logdev = LogicalDevices(self.phydev)
         self.sensor = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensor, self.limits)
         self.subtest = SubTests(self.logdev, self.meas)
-        # Define the (linear) Test Sequence
-        sequence = (
+        self.steps = (
             tester.TestStep('PowerUp', self.subtest.pwr_up.run),
             tester.TestStep('KeySw1', self.subtest.key_sw1.run),
             tester.TestStep('KeySw12', self.subtest.key_sw12.run),
@@ -89,7 +89,6 @@ class InitialMain(tester.testsequence.TestSequence):
             tester.TestStep('OCP', self._step_ocp),
             tester.TestStep('EmergStop', self.subtest.emg_stop.run),
             )
-        super().open(sequence)
 
     def close(self):
         """Finished testing."""

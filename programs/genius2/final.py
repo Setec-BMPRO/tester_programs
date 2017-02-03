@@ -55,14 +55,14 @@ class Final(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('InputRes', self._step_inres),
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('BattFuse', self._step_battfuse),
             tester.TestStep('OCP', self._step_ocp),
             tester.TestStep('RemoteSw', self._step_remote_sw),
             )
-        super().open(sequence)
         self._limits = LIMITS[parameter]
         self._isH = (parameter == 'H')
         global m, d, s, t

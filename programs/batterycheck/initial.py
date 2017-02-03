@@ -69,12 +69,8 @@ class Initial(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        self._logger.info('Open')
-        global d, s, m
-        d = LogicalDevices(self._devices, self.fifo)
-        s = Sensors(d)
-        m = Measurements(s, self._limits)
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PreProgram', self._step_pre_program),
             tester.TestStep(
             'ProgramAVR', self._step_program_avr, not self.fifo),
@@ -84,18 +80,19 @@ class Initial(tester.TestSequence):
             tester.TestStep('TestARM', self._step_test_arm),
             tester.TestStep('TestBlueTooth', self._step_test_bluetooth),
             )
-        super().open(sequence)
+        global d, s, m
+        d = LogicalDevices(self._devices, self.fifo)
+        s = Sensors(d)
+        m = Measurements(s, self._limits)
 
     def close(self):
         """Finished testing."""
-        self._logger.info('Close')
         global m, d, s
         m = d = s = None
         super().close()
 
     def safety(self):
         """Make the unit safe after a test."""
-        self._logger.info('Safety')
         d.reset()
 
     def _step_pre_program(self):

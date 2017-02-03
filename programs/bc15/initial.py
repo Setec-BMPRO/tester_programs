@@ -69,11 +69,8 @@ class Initial(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        global d, s, m
-        d = LogicalDevices(self._devices, self.fifo)
-        s = Sensors(d, self._limits)
-        m = Measurements(s, self._limits)
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
             tester.TestStep(
                 'ProgramARM', self._step_program_arm, not self.fifo),
@@ -82,7 +79,10 @@ class Initial(tester.TestSequence):
             tester.TestStep('Output', self._step_output),
             tester.TestStep('Loaded', self._step_loaded),
             )
-        super().open(sequence)
+        global d, s, m
+        d = LogicalDevices(self._devices, self.fifo)
+        s = Sensors(d, self._limits)
+        m = Measurements(s, self._limits)
         # Apply power to fixture Comms circuit.
         d.dcs_vcom.output(12.0, True)
         time.sleep(2)       # Allow OS to detect USB serial port

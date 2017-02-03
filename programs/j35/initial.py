@@ -141,6 +141,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
 
     def open(self, parameter):
         """Prepare for testing."""
+        super().open()
         if parameter is None:
             parameter = 'C'
         self.limits = LIMITS[parameter]
@@ -148,8 +149,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         self.logdev = LogicalDevices(self.phydev, self.fifo)
         self.sensors = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensors, self.limits)
-        # Define the (linear) Test Sequence
-        sequence = (
+        self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
             tester.TestStep(
                 'ProgramARM', self._step_program_arm, not self.fifo),
@@ -165,7 +165,6 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
             tester.TestStep(
                 'CanBus', self._step_canbus, self.variant['SolarCan']),
             )
-        super().open(sequence)
         # Power to fixture Comms circuits.
         self.logdev.dcs_vcom.output(9.0, True)
 

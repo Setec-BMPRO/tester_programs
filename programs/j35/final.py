@@ -71,7 +71,8 @@ class Final(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
@@ -80,7 +81,6 @@ class Final(tester.TestSequence):
         self.logdev = LogicalDevices(self.phydev)
         self.sensors = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensors, self.limits)
-        super().open(sequence)
 
     def close(self):
         """Finished testing."""

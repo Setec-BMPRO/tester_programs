@@ -64,18 +64,17 @@ class Initial(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        self.logdev = LogicalDevices(self.phydev, self.fifo)
-        self.sensors = Sensors(self.logdev, self.limits)
-        self.meas = Measurements(self.sensors, self.limits)
-        # Define the (linear) Test Sequence
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('Initialise', self._step_initialise),
             tester.TestStep('Display', self._step_display),
             tester.TestStep('CanBus', self._step_canbus),
             )
-        super().open(sequence)
+        self.logdev = LogicalDevices(self.phydev, self.fifo)
+        self.sensors = Sensors(self.logdev, self.limits)
+        self.meas = Measurements(self.sensors, self.limits)
         # Power to fixture Comms circuits.
         self.logdev.dcs_vcom.output(9.0, True)
 

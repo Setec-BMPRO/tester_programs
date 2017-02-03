@@ -55,13 +55,13 @@ class Final(tester.TestSequence):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('FullLoad', self._step_full_load),
             tester.TestStep('OCP', self._step_ocp),
             tester.TestStep('LowMains', self._step_low_mains),
             )
-        super().open(sequence)
         self._limits = LIMITS[parameter]
         self._isbce4 = (parameter != '5')
         global m, d, s, t

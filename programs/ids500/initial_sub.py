@@ -143,11 +143,11 @@ class InitialMicro(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('Comms', self._step_comms),
             )
-        super().open(sequence)
         global d, m, s
         d = LogicalDevMicro(self._devices, self.fifo)
         s = SensorMicro(d, self._limits)
@@ -200,13 +200,13 @@ class InitialAux(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('KeySwitch', self._step_key_switches12),
             tester.TestStep('ACurrent', self._step_acurrent),
             tester.TestStep('OCP', self._step_ocp),
             )
-        super().open(sequence)
         global d, m, s, t
         d = LogicalDevAux(self._devices, self.fifo)
         s = SensorAux(d, self._limits)
@@ -266,11 +266,11 @@ class InitialBias(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('OCP', self._step_ocp),
             )
-        super().open(sequence)
         global d, m, s
         d = LogicalDevBias(self._devices, self.fifo)
         s = SensorBias(d, self._limits)
@@ -312,11 +312,11 @@ class InitialBus(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('TecLddStartup', self._step_tec_ldd),
             )
-        super().open(sequence)
         global d, m, s, t
         d = LogicalDevBus(self._devices, self.fifo)
         s = SensorBus(d, self._limits)
@@ -358,7 +358,8 @@ class InitialSyn(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('TecEnable', self._step_tec_enable),
@@ -366,7 +367,6 @@ class InitialSyn(_Main):
             tester.TestStep('LddEnable', self._step_ldd_enable),
             tester.TestStep('ISSetAdj', self._step_ISset_adj),
             )
-        super().open(sequence)
         global d, m, s, t
         d = LogicalDevSyn(self._devices, self.fifo)
         s = SensorSyn(d, self._limits)

@@ -98,12 +98,12 @@ class _Main(tester.TestSequence):
         self._isFin = False
         super().__init__()
 
-    def open(self, sequence=None):
+    def open(self):
         """Prepare for testing."""
+        super().open()
         global d, s
         d = LogicalDevices(self._devices, self.fifo)
         s = Sensors(d, self._limits)
-        super().open(sequence)
 
     def close(self):
         """Finished testing."""
@@ -185,7 +185,8 @@ class Initial(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('CheckPicValues', self._step_check_pic_vals),
@@ -193,7 +194,6 @@ class Initial(_Main):
             tester.TestStep('CalBQvolts', self._step_calv),
             tester.TestStep('CalBQcurrent', self._step_cali),
             )
-        super().open(sequence)
         self._ev_ser = tester.SimSerial(
             simulation=self.fifo,
             port=EV_PORT, baudrate=9600, timeout=4.0)
@@ -302,10 +302,10 @@ class SerialDate(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('SerialDate', self._step_sn_date),
             )
-        super().open(sequence)
         self._ev_ser = tester.SimSerial(
             simulation=self.fifo,
             port=EV_PORT, baudrate=9600, timeout=4.0)
@@ -353,11 +353,11 @@ class Final(_Main):
 
     def open(self, parameter):
         """Prepare for testing."""
-        sequence = (
+        super().open()
+        self.steps = (
             tester.TestStep('Startup', self._step_startup),
             tester.TestStep('Verify', self._step_verify),
             )
-        super().open(sequence)
         self._limits = LIMITS[parameter]
         global m
         m = MeasureFin(s, self._limits)
