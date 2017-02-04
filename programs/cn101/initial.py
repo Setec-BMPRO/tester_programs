@@ -4,7 +4,6 @@
 
 import os
 import inspect
-import logging
 import time
 from pydispatch import dispatcher
 import tester
@@ -51,22 +50,7 @@ class Initial(tester.TestSequence):
 
     """CN101 Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-
-        """
-        super().__init__()
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._devices = physical_devices
-        self._limits = LIMITS
-        self._sernum = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -78,8 +62,10 @@ class Initial(tester.TestSequence):
             tester.TestStep('Bluetooth', self._step_bluetooth),
             tester.TestStep('CanBus', self._step_canbus),
             )
+        self._limits = LIMITS
+        self._sernum = None
         global d, s, m, t
-        d = LogicalDevices(self._devices, self.fifo)
+        d = LogicalDevices(self.physical_devices, self.fifo)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

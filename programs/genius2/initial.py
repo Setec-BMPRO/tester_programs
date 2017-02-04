@@ -48,7 +48,7 @@ LIMITS_H = tester.testlimit.limitset(_BASE_DATA + (
     lim_hi('VbatOCP', 13.0),
     ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     None: LIMITS_STD,
     'STD': LIMITS_STD,
     'H': LIMITS_H,
@@ -59,23 +59,12 @@ class Initial(tester.TestSequence):
 
     """GENIUS-II Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self.phydev = physical_devices
-        self.limits = None
-        self._isH = None
-        self.logdev = None
-        self.sensor = None
-        self.meas = None
-        self.subtest = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
-        self._isH = (parameter == 'H')
-        self.limits = LIMITS[parameter]
-        self.logdev = LogicalDevices(self.phydev)
+        self._isH = (self.parameter == 'H')
+        self.limits = LIMITS[self.parameter]
+        self.logdev = LogicalDevices(self.physical_devices)
         self.sensor = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensor, self.limits)
         self.subtest = SubTests(self.logdev, self.meas)

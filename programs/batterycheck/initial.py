@@ -7,7 +7,6 @@ import os
 import inspect
 import time
 import subprocess
-import logging
 import tester
 import share
 from tester.testlimit import (
@@ -58,16 +57,7 @@ class Initial(tester.TestSequence):
 
     """BatteryCheck Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._devices = physical_devices
-        self._limits = LIMITS
-        self._sernum = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -81,7 +71,9 @@ class Initial(tester.TestSequence):
             tester.TestStep('TestBlueTooth', self._step_test_bluetooth),
             )
         global d, s, m
-        d = LogicalDevices(self._devices, self.fifo)
+        self._limits = LIMITS
+        self._sernum = None
+        d = LogicalDevices(self.physical_devices, self.fifo)
         s = Sensors(d)
         m = Measurements(s, self._limits)
 

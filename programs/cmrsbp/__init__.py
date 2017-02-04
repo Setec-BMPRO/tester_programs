@@ -78,7 +78,7 @@ LIMITS_17 = tester.testlimit.limitset(_FIN_DATA + (
     lim_string('SerNum', r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$'),
     ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     None: LIMITS_13,
     '8': LIMITS_8,
     '13': LIMITS_13,
@@ -93,16 +93,11 @@ class _Main(tester.TestSequence):
 
     """CMR-SBP Base Test Program."""
 
-    def __init__(self):
-        """Common test program segments."""
-        self._isFin = False
-        super().__init__()
-
     def open(self):
         """Prepare for testing."""
         super().open()
         global d, s
-        d = LogicalDevices(self._devices, self.fifo)
+        d = LogicalDevices(self.physical_devices, self.fifo)
         s = Sensors(d, self._limits)
 
     def close(self):
@@ -172,20 +167,11 @@ class Initial(_Main):
 
     """CMR-SBP Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-           @param fifo True to enable FIFOs
-
-        """
-        self._devices = physical_devices
-        self._limits = LIMITS_INI
-        super().__init__()
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
+        self._limits = LIMITS_INI
         super().open()
+        self._isFin = False
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program, not self.fifo),
@@ -289,20 +275,11 @@ class SerialDate(_Main):
 
     """CMR-SBP SerialDate Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-           @param fifo True to enable FIFOs
-
-        """
-        self._devices = physical_devices
-        self._limits = LIMITS_INI
-        super().__init__()
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
+        self._limits = LIMITS_INI
         super().open()
+        self._isFin = False
         self.steps = (
             tester.TestStep('SerialDate', self._step_sn_date),
             )
@@ -339,26 +316,15 @@ class Final(_Main):
 
     """CMR-SBP Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-           @param fifo True to enable FIFOs
-
-        """
-        self._devices = physical_devices
-        self._limits = None
-        super().__init__()
-        self._isFin = True
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
+        self._limits = LIMITS[self.parameter]
         super().open()
+        self._isFin = True
         self.steps = (
             tester.TestStep('Startup', self._step_startup),
             tester.TestStep('Verify', self._step_verify),
             )
-        self._limits = LIMITS[parameter]
         global m
         m = MeasureFin(s, self._limits)
 

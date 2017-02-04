@@ -22,13 +22,7 @@ class Final(tester.TestSequence):
 
     """SMU750-70 Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -37,8 +31,9 @@ class Final(tester.TestSequence):
             tester.TestStep('OCP', self._step_ocp),
             tester.TestStep('Shutdown', self._step_shutdown),
             )
+        self._limits = LIMITS
         global d, s, m, t
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

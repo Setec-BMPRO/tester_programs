@@ -21,13 +21,7 @@ class Final(tester.TestSequence):
 
     """C15D-15 Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -37,8 +31,9 @@ class Final(tester.TestSequence):
             tester.TestStep('Recover', self._step_recover),
             tester.TestStep('PowerOff', self._step_power_off),
             )
+        self._limits = LIMITS
         global d, s, m, t
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

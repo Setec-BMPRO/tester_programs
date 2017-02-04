@@ -35,7 +35,7 @@ LIMITS_35 = tester.testlimit.limitset(_COMMON + (
     ('FuseLabel', 1, None, None, '^ST35\-III$', None),
     ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     None: LIMITS_35,
     '20': LIMITS_20,
     '35': LIMITS_35,
@@ -49,15 +49,7 @@ class Final(tester.TestSequence):
 
     """STxx-III Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = None
-        self._is35 = None
-        self._fullload = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -67,11 +59,11 @@ class Final(tester.TestSequence):
             tester.TestStep('LoadOCP', self._step_load_ocp),
             tester.TestStep('BattOCP', self._step_batt_ocp),
             )
-        self._limits = LIMITS[parameter]
-        self._is35 = (parameter != '20')
+        self._limits = LIMITS[self.parameter]
+        self._is35 = (self.parameter != '20')
         self._fullload = self._limits['FullLoad'].limit
         global m, d, s, t
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

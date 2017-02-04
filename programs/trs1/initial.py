@@ -33,17 +33,7 @@ class Initial(tester.TestSequence):
 
     """Trs1 Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -51,8 +41,9 @@ class Initial(tester.TestSequence):
             tester.TestStep('BreakAway', self._step_breakaway),
             tester.TestStep('BattLow', self._step_batt_low),
             )
+        self._limits = LIMITS
         global d, s, m, t
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

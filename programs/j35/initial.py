@@ -88,7 +88,7 @@ LIMITS_C = tester.testlimit.limitset(_COMMON + (
     lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
     ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     'A': LIMITS_A,
     'B': LIMITS_B,
     'C': LIMITS_C,
@@ -121,32 +121,14 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
 
     """J35 Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-           @param fifo True if FIFOs are enabled
-
-        """
-        super().__init__()
-        self.phydev = physical_devices
-        self.limits = None
-        self.logdev = None
-        self.sensors = None
-        self.meas = None
-        self.sernum = None
-        self.variant = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
-        if parameter is None:
-            parameter = 'C'
-        self.limits = LIMITS[parameter]
-        self.variant = VARIANT[parameter]
-        self.logdev = LogicalDevices(self.phydev, self.fifo)
+        if self.parameter is None:
+            self.parameter = 'C'
+        self.limits = LIMITS[self.parameter]
+        self.variant = VARIANT[self.parameter]
+        self.logdev = LogicalDevices(self.physical_devices, self.fifo)
         self.sensors = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensors, self.limits)
         self.steps = (

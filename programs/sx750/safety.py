@@ -23,13 +23,7 @@ class Safety(tester.TestSequence):
 
     """SX-750 Safety Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -38,8 +32,9 @@ class Safety(tester.TestSequence):
             tester.TestStep('Gnd3', self._step_gnd3),
             tester.TestStep('HiPot', self._step_hipot),
             )
+        self._limits = LIMITS
         global m, d, s
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d)
         m = Measurements(s, self._limits)
 

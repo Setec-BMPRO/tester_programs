@@ -59,7 +59,7 @@ LIMITS_24 = tester.testlimit.limitset((
         ('MspVout', 0, 13.0, 14.6, None, None),
         ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     None: LIMITS_12,
     '12': LIMITS_12,
     '24': LIMITS_24
@@ -76,17 +76,7 @@ class Initial(tester.testsequence.TestSequence):
 
     """BCE282-12/24 Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -97,11 +87,11 @@ class Initial(tester.testsequence.TestSequence):
             tester.TestStep('Calibration', self._step_cal, False),
             tester.TestStep('OCP', self._step_ocp, False),
             )
-        self._limits = LIMITS[parameter]
-        self._isbce12 = (parameter != '24')
+        self._limits = LIMITS[self.parameter]
+        self._isbce12 = (self.parameter != '24')
         self._msp = msp.Console(port=_MSP430_PORT)
         global d, s, m, t
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits, self._msp)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

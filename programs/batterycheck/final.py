@@ -29,24 +29,19 @@ class Final(tester.TestSequence):
 
     """BatteryCheck Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-        self._sernum = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('TestBlueTooth', self._step_test_bluetooth),
             )
+        self._limits = LIMITS
         global d, s, m
-        d = LogicalDevices(self._devices, self.fifo)
+        d = LogicalDevices(self.physical_devices, self.fifo)
         s = Sensors(d)
         m = Measurements(s, self._limits)
+        self._sernum = None
 
     def close(self):
         """Finished testing."""

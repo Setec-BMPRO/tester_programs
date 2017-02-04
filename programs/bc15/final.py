@@ -23,17 +23,7 @@ class Final(tester.TestSequence):
 
     """BC15 Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -41,7 +31,8 @@ class Final(tester.TestSequence):
             tester.TestStep('Load', self._step_loaded),
             )
         global d, s, m
-        d = LogicalDevices(self._devices)
+        self._limits = LIMITS
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
 

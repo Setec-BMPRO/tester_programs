@@ -28,13 +28,7 @@ class Initial(tester.TestSequence):
 
     """GSU360-1TA Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -43,8 +37,9 @@ class Initial(tester.TestSequence):
             tester.TestStep('FullLoad', self._step_full_load),
             tester.TestStep('OCP', self._step_ocp),
             )
+        self._limits = LIMITS
         global m, d, s, t
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

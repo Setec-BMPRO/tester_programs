@@ -46,23 +46,7 @@ class Initial(tester.TestSequence):
 
     """RVVIEW Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-
-        """
-        super().__init__()
-        self.phydev = physical_devices
-        self.limits = LIMITS
-        self.logdev = None
-        self.sensors = None
-        self.meas = None
-        self.sernum = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -72,7 +56,8 @@ class Initial(tester.TestSequence):
             tester.TestStep('Display', self._step_display),
             tester.TestStep('CanBus', self._step_canbus),
             )
-        self.logdev = LogicalDevices(self.phydev, self.fifo)
+        self.limits = LIMITS
+        self.logdev = LogicalDevices(self.physical_devices, self.fifo)
         self.sensors = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensors, self.limits)
         # Power to fixture Comms circuits.

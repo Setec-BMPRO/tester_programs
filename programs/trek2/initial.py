@@ -51,18 +51,7 @@ class Initial(tester.TestSequence):
 
     """Trek2 Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-        self.sernum = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -71,12 +60,14 @@ class Initial(tester.TestSequence):
             tester.TestStep('TestArm', self._step_test_arm),
             tester.TestStep('CanBus', self._step_canbus),
             )
+        self._limits = LIMITS
         global d, s, m
-        d = LogicalDevices(self._devices, self.fifo)
+        d = LogicalDevices(self.physical_devices, self.fifo)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
         d.dcs_Vcom.output(12.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports
+        self.sernum = None
 
     def close(self):
         """Finished testing."""
@@ -94,7 +85,7 @@ class Initial(tester.TestSequence):
         self.fifo_push(
             ((s.oSnEntry, ('A1526040123', )), (s.oVin, 12.0), (s.o3V3, 3.3), ))
 
-        self._sernum = share.get_sernum(
+        self.sernum = share.get_sernum(
             self.uuts, self._limits['SerNum'], m.ui_SnEntry)
         d.dcs_Vin.output(VIN_SET, output=True)
         tester.MeasureGroup((m.dmm_Vin, m.dmm_3V3), timeout=5)

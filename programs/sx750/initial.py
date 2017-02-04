@@ -86,16 +86,6 @@ class Initial(tester.TestSequence):
 
     """SX-750 Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self.devices = physical_devices
-        self.limits = LIMITS
-        self.logdev = None
-        self.sensor = None
-        self.meas = None
-        self.subt = None
-
     def open(self, sequence=None):
         """Prepare for testing."""
         super().open()
@@ -109,7 +99,8 @@ class Initial(tester.TestSequence):
             tester.TestStep('24V', self._step_reg_24v),
             tester.TestStep('PeakPower', self._step_peak_power),
             )
-        self.logdev = LogicalDevices(self.devices, self.fifo)
+        self.limits = LIMITS
+        self.logdev = LogicalDevices(self.physical_devices, self.fifo)
         self.sensor = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensor, self.limits)
         self.subt = SubTests(self.logdev, self.meas)

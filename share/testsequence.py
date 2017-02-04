@@ -23,14 +23,9 @@ class TestSequence(tester.TestSequence):
 
     """
 
-    def __init__(self, physical_devices):
-        """Create the test program instance.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        self.physical_devices = physical_devices
-        self.parameter = None
+    def __init__(self):
+        """Create the test program instance."""
+        self.physical_devices = None
         self.devices = None
         self.limits = None
         self.sensors = None
@@ -38,15 +33,13 @@ class TestSequence(tester.TestSequence):
         super().__init__()
 
     @abc.abstractmethod
-    def open(self, parameter, sequence_data):
+    def open(self, sequence_data):
         """Open test program by creating supporting instances.
 
-        @param parameter Program configuration parameter
         @param sequence_data TestSequenceData instance
 
         """
         super().open()
-        self.parameter = parameter
         self.devices = sequence_data.cls_devices(
             self.physical_devices, self.fifo)
         self.limits = tester.limitdict(sequence_data.limits)

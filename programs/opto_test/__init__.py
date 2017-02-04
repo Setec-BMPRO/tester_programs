@@ -44,22 +44,7 @@ class Main(tester.TestSequence):
 
     """Opto Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-
-        """
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-        self._brdnum = None
-        self._ctr_data1 = []
-        self._ctr_data10 = []
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -70,10 +55,14 @@ class Main(tester.TestSequence):
             tester.TestStep('OutputAdj', self._step_out_adj10),
             tester.TestStep('Email', self._step_email, not self.fifo),
             )
+        self._limits = LIMITS
         global d, s, m
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
+        self._brdnum = None
+        self._ctr_data1 = []
+        self._ctr_data10 = []
 
     def close(self):
         """Finished testing."""
@@ -174,8 +163,10 @@ class Main(tester.TestSequence):
         data = '"{}","{}"'.format(self._brdnum, now)
         for ctr in self._ctr_data1:
             data += ',{}'.format(ctr)
+        self._ctr_data1.clear()
         for ctr in self._ctr_data10:
             data += ',{}'.format(ctr)
+        self._ctr_data10.clear()
         csv = header + '\r\n' + data + '\r\n'
         outer = MIMEMultipart()
         outer['To'] = _RECIPIENT

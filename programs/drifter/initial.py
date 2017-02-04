@@ -49,7 +49,7 @@ LIMITS_BM = tester.testlimit.limitset(_COMMON + (
     lim_hilo('0V8', -1.4, -0.6),
     ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     None: LIMITS_STD,
     'STD': LIMITS_STD,
     'BM': LIMITS_BM,
@@ -63,19 +63,7 @@ class Initial(tester.TestSequence):
 
     """Drifter Initial Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-
-        """
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -84,9 +72,9 @@ class Initial(tester.TestSequence):
             tester.TestStep('CalPre', self._step_cal_pre),
             tester.TestStep('Calibrate', self._step_calibrate),
             )
-        self._limits = LIMITS[parameter]
+        self._limits = LIMITS[self.parameter]
         global d, s, m
-        d = LogicalDevices(self._devices, self._limits, self.fifo)
+        d = LogicalDevices(self.physical_devices, self._limits, self.fifo)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
 

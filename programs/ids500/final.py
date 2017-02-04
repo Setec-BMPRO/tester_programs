@@ -4,7 +4,6 @@
 """IDS-500 Final Test Program."""
 
 import os
-import logging
 from pydispatch import dispatcher
 import tester
 from tester.testlimit import lim_lo, lim_hilo, lim_string, lim_boolean
@@ -59,22 +58,11 @@ class Final(tester.TestSequence):
 
     """IDS-500 Final Test Programes."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self.phydev = physical_devices
-        self.limits = LIMITS
-        self.logdev = None
-        self.sensor = None
-        self.meas = None
-        self.subtest = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
-        self.logdev = LogicalDevices(self.phydev, self.fifo)
+        self.limits = LIMITS
+        self.logdev = LogicalDevices(self.physical_devices, self.fifo)
         self.sensor = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensor, self.limits)
         self.subtest = SubTests(self.logdev, self.meas)

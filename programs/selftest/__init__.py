@@ -38,17 +38,11 @@ class Main(tester.testsequence.TestSequence):
 
     """Selfchecker Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        # True if running on ATE2 tester
-        self._is_ate2 = (physical_devices.tester_type == 'ATE2')
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = LIMITS
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
+        # True if running on ATE2 tester
+        self._is_ate2 = (self.physical_devices.tester_type == 'ATE2')
         self.steps = (
             tester.TestStep('ACSource', self._step_acsource),
             tester.TestStep('Checker', self._step_checker),
@@ -58,8 +52,9 @@ class Main(tester.testsequence.TestSequence):
             tester.TestStep('RelayDriver', self._step_relaydriver),
             tester.TestStep('Discharge', self._step_discharge),
             )
+        self._limits = LIMITS
         global d, s, m, t
-        d = LogicalDevices(self._devices, self._is_ate2)
+        d = LogicalDevices(self.physical_devices, self._is_ate2)
         s = Sensors(d, self._is_ate2)
         m = Measurements(s, self._limits)
         t = SubTests(d, m)

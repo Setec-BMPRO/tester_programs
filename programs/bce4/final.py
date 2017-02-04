@@ -33,7 +33,7 @@ LIMITS_5 = tester.testlimit.limitset((
     ('Dropout', 1, 150.0, 180.0, None, None),
     ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     None: LIMITS_4,
     '4': LIMITS_4,
     '5': LIMITS_5,
@@ -47,13 +47,7 @@ class Final(tester.TestSequence):
 
     """BCE4/5 Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence."""
-        super().__init__()
-        self._devices = physical_devices
-        self._limits = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -62,10 +56,10 @@ class Final(tester.TestSequence):
             tester.TestStep('OCP', self._step_ocp),
             tester.TestStep('LowMains', self._step_low_mains),
             )
-        self._limits = LIMITS[parameter]
-        self._isbce4 = (parameter != '5')
+        self._limits = LIMITS[self.parameter]
+        self._isbce4 = (self.parameter != '5')
         global m, d, s, t
-        d = LogicalDevices(self._devices)
+        d = LogicalDevices(self.physical_devices)
         s = Sensors(d, self._limits)
         m = Measurements(s, self._limits)
         t = SubTests(d, m, self._limits)

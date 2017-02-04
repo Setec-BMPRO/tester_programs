@@ -41,7 +41,7 @@ LIMITS_C = tester.testlimit.limitset(_BASE_DATA + (
     lim_boolean('J35C', True),
     ))
 
-LIMITS = {      # Test limit selection keyed by open() parameter
+LIMITS = {      # Test limit selection keyed by program parameter
     None: LIMITS_C,
     'A': LIMITS_A,
     'B': LIMITS_B,
@@ -53,23 +53,7 @@ class Final(tester.TestSequence):
 
     """J35 Final Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param per_panel Number of units tested together
-           @param physical_devices Physical instruments of the Tester
-           @param test_limits Product test limits
-           @param fifo True if FIFOs are enabled
-
-        """
-        super().__init__()
-        self.phydev = physical_devices
-        self.limits = None
-        self.logdev = None
-        self.sensors = None
-        self.meas = None
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -77,8 +61,8 @@ class Final(tester.TestSequence):
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
             )
-        self.limits = LIMITS[parameter]
-        self.logdev = LogicalDevices(self.phydev)
+        self.limits = LIMITS[self.parameter]
+        self.logdev = LogicalDevices(self.physical_devices)
         self.sensors = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensors, self.limits)
 

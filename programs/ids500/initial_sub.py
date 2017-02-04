@@ -131,25 +131,16 @@ class InitialMicro(_Main):
 
     """IDS-500 Initial Micro Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        self._devices = physical_devices
-        self._limits = LIMITS_MIC
-        super().__init__()
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
             tester.TestStep('Program', self._step_program, not self.fifo),
             tester.TestStep('Comms', self._step_comms),
             )
+        self._limits = LIMITS_MIC
         global d, m, s
-        d = LogicalDevMicro(self._devices, self.fifo)
+        d = LogicalDevMicro(self.physical_devices, self.fifo)
         s = SensorMicro(d, self._limits)
         m = MeasureMicro(s, self._limits)
         d.rla_comm.set_on()
@@ -188,17 +179,7 @@ class InitialAux(_Main):
 
     """IDS-500 Initial Aux Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        self._devices = physical_devices
-        self._limits = LIMITS_AUX
-        super().__init__()
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -207,8 +188,9 @@ class InitialAux(_Main):
             tester.TestStep('ACurrent', self._step_acurrent),
             tester.TestStep('OCP', self._step_ocp),
             )
+        self._limits = LIMITS_AUX
         global d, m, s, t
-        d = LogicalDevAux(self._devices, self.fifo)
+        d = LogicalDevAux(self.physical_devices, self.fifo)
         s = SensorAux(d, self._limits)
         m = MeasureAux(s, self._limits)
         t = SubTestAux(d, m)
@@ -254,25 +236,16 @@ class InitialBias(_Main):
 
     """IDS-500 Initial Bias Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        self._devices = physical_devices
-        self._limits = LIMITS_BIAS
-        super().__init__()
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('OCP', self._step_ocp),
             )
+        self._limits = LIMITS_BIAS
         global d, m, s
-        d = LogicalDevBias(self._devices, self.fifo)
+        d = LogicalDevBias(self.physical_devices, self.fifo)
         s = SensorBias(d, self._limits)
         m = MeasureBias(s, self._limits)
 
@@ -300,25 +273,16 @@ class InitialBus(_Main):
 
     """IDS-500 Initial Bus Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        self._devices = physical_devices
-        self._limits = LIMITS_BUS
-        super().__init__()
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('TecLddStartup', self._step_tec_ldd),
             )
+        self._limits = LIMITS_BUS
         global d, m, s, t
-        d = LogicalDevBus(self._devices, self.fifo)
+        d = LogicalDevBus(self.physical_devices, self.fifo)
         s = SensorBus(d, self._limits)
         m = MeasureBus(s, self._limits)
         t = SubTestBus(d, m)
@@ -346,17 +310,7 @@ class InitialSyn(_Main):
 
     """IDS-500 Initial SynBuck Test Program."""
 
-    def __init__(self, physical_devices):
-        """Create the test program as a linear sequence.
-
-           @param physical_devices Physical instruments of the Tester
-
-        """
-        self._devices = physical_devices
-        self._limits = LIMITS_SYN
-        super().__init__()
-
-    def open(self, parameter):
+    def open(self):
         """Prepare for testing."""
         super().open()
         self.steps = (
@@ -367,8 +321,9 @@ class InitialSyn(_Main):
             tester.TestStep('LddEnable', self._step_ldd_enable),
             tester.TestStep('ISSetAdj', self._step_ISset_adj),
             )
+        self._limits = LIMITS_SYN
         global d, m, s, t
-        d = LogicalDevSyn(self._devices, self.fifo)
+        d = LogicalDevSyn(self.physical_devices, self.fifo)
         s = SensorSyn(d, self._limits)
         m = MeasureSyn(s, self._limits)
         t = SubTestSyn(d, m)
