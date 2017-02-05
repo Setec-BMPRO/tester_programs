@@ -102,10 +102,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(
-            share.TestSequenceData(
-                LogicalDevices, Sensors, Measurements, LIMITS)
-            )
+        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('ProgramPIC', self._step_program_pic, not self.fifo),

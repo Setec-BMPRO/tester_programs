@@ -63,16 +63,14 @@ LIMITS = (
     LimitString('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
     )
 
+
 class Initial(share.TestSequence):
 
     """GEN8 Initial Test Program."""
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(
-            share.TestSequenceData(
-                LogicalDevices, Sensors, Measurements, LIMITS)
-            )
+        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program, not self.fifo),

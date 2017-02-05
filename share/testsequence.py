@@ -5,14 +5,8 @@
 
 import functools
 import abc
-import collections
 import time
 import tester
-
-
-# Data tuple of Test Sequence helper instances
-TestSequenceData = collections.namedtuple(
-    'TestSequenceData', 'cls_devices, cls_sensors, cls_measurements, limits')
 
 
 class TestSequence(tester.TestSequence):
@@ -33,20 +27,20 @@ class TestSequence(tester.TestSequence):
         super().__init__()
 
     @abc.abstractmethod
-    def open(self, sequence_data):
+    def open(self, limits, cls_devices, cls_sensors, cls_measurements):
         """Open test program by creating supporting instances.
 
-        @param sequence_data TestSequenceData instance
+        @param limits Tuple of test limits
+        @param cls_devices Logical Devices class
+        @param cls_sensors Sensors class
+        @param cls_measurements Measurements class
 
         """
         super().open()
-        self.devices = sequence_data.cls_devices(
-            self.physical_devices, self.fifo)
-        self.limits = tester.limitdict(sequence_data.limits)
-        self.sensors = sequence_data.cls_sensors(
-            self.devices, self.limits)
-        self.measurements = sequence_data.cls_measurements(
-            self.sensors, self.limits)
+        self.limits = tester.limitdict(limits)
+        self.devices = cls_devices(self.physical_devices, self.fifo)
+        self.sensors = cls_sensors(self.devices, self.limits)
+        self.measurements = cls_measurements(self.sensors, self.limits)
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
@@ -62,6 +56,10 @@ class TestSequence(tester.TestSequence):
         self.measurements.close()
         self.sensors.close()
         self.devices.close()
+        self.measurements = None
+        self.sensors = None
+        self.limits = None
+        self.devices = None
         super().close()
 
     def measure(self, names, timeout=0):

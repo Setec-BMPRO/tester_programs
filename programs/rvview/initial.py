@@ -62,6 +62,7 @@ class Initial(tester.TestSequence):
         self.meas = Measurements(self.sensors, self.limits)
         # Power to fixture Comms circuits.
         self.logdev.dcs_vcom.output(9.0, True)
+        self.sernum = None
 
     def close(self):
         """Finished testing."""

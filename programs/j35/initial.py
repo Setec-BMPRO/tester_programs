@@ -149,6 +149,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
             )
         # Power to fixture Comms circuits.
         self.logdev.dcs_vcom.output(9.0, True)
+        self.sernum = None
 
     def close(self):
         """Finished testing."""
