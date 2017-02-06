@@ -5,10 +5,13 @@
 from .data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
+COUNT_A = 7
+COUNT_BC = 14
 
-class J35Final(ProgramTestCase):
 
-    """J35 Final program test suite."""
+class _J35Final(ProgramTestCase):
+
+    """J35 Final program base test suite."""
 
     prog_class = j35.Final
     parameter = None
@@ -17,16 +20,16 @@ class J35Final(ProgramTestCase):
     def _dmm_loads(self, value):
         """Fill all DMM Load sensors with a value."""
         sen = self.test_program.sensors
-        for sensor in sen.vloads:
+        for sensor in sen['vloads']:
             sensor.store(value)
 
-    def test_pass_run(self):
+    def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': ((sen.photo, (0.0, 12.0)), ),
-                'OCP': ((sen.vload1, (12.7, ) * 10 + (11.0, ), ), ),
+                'PowerUp': ((sen['photo'], (0.0, 12.0)), ),
+                'OCP': ((sen['vload1'], (12.7, ) * 10 + (11.0, ), ), ),
                 },
             UnitTester.key_call: {      # Callables
                 'PowerUp': (self._dmm_loads, 12.7),
@@ -37,6 +40,41 @@ class J35Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(31, len(result.readings))  # Reading count
+        self.assertEqual(
+            # 2 reading/output + 3 other readings
+            3 + 2 * self.load_count, len(result.readings))
         # And did all steps run in turn?
         self.assertEqual(['PowerUp', 'Load', 'OCP'], self.tester.ut_steps)
+
+
+class J35_A_Final(_J35Final):
+
+    """J35-A Final program test suite."""
+
+    parameter = 'A'
+    load_count = COUNT_A
+
+    def test_pass_run(self):
+        super()._pass_run()
+
+
+class J35_B_Final(_J35Final):
+
+    """J35-B Final program test suite."""
+
+    parameter = 'B'
+    load_count = COUNT_BC
+
+    def test_pass_run(self):
+        super()._pass_run()
+
+
+class J35_C_Final(_J35Final):
+
+    """J35-C Final program test suite."""
+
+    parameter = 'C'
+    load_count = COUNT_BC
+
+    def test_pass_run(self):
+        super()._pass_run()
