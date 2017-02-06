@@ -19,7 +19,6 @@ class TestSequence(tester.TestSequence):
 
     def __init__(self):
         """Create the test program instance."""
-        self.physical_devices = None
         self.devices = None
         self.limits = None
         self.sensors = None
@@ -39,8 +38,11 @@ class TestSequence(tester.TestSequence):
         super().open()
         self.limits = tester.limitdict(limits)
         self.devices = cls_devices(self.physical_devices, self.fifo)
+        self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
+        self.sensors.parameter = self.parameter
         self.measurements = cls_measurements(self.sensors, self.limits)
+        self.measurements.parameter = self.parameter
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
@@ -196,6 +198,7 @@ class LogicalDevices(abc.ABC, dict):
         super().__init__()
         self.physical_devices = physical_devices
         self.fifo = fifo
+        self.parameter = None
 
     @abc.abstractmethod
     def open(self):
@@ -224,6 +227,7 @@ class Sensors(abc.ABC, dict):
         super().__init__()
         self.devices = devices
         self.limits = limits
+        self.parameter = None
 
     @abc.abstractmethod
     def open(self):
@@ -257,6 +261,7 @@ class Measurements(abc.ABC, dict):
         super().__init__()
         self.sensors = sensors
         self.limits = limits
+        self.parameter = None
 
     @abc.abstractmethod
     def open(self):

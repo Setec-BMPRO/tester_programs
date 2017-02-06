@@ -19,19 +19,26 @@ _COMMON = (
     )
 
 LIMITS_A = _COMMON + (
-    LimitLo('LOAD_COUNT', 7),
     LimitHiLo('OCP', (20.0, 25.0)),
     )
 
 LIMITS_BC = _COMMON + (
-    LimitLo('LOAD_COUNT', 14),
     LimitHiLo('OCP', (35.0, 42.0)),
     )
 
-LIMITS = {      # Test limit selection keyed by program parameter
-    'A': LIMITS_A,
-    'B': LIMITS_BC,
-    'C': LIMITS_BC,
+CONFIG = {      # Test configuration keyed by program parameter
+    'A': {
+        'Limits': LIMITS_A,
+        'LoadCount': 7,
+        },
+    'B': {
+        'Limits': LIMITS_BC,
+        'LoadCount': 14,
+        },
+    'C': {
+        'Limits': LIMITS_BC,
+        'LoadCount': 14,
+        },
     }
 
 
@@ -42,12 +49,14 @@ class Final(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter], LogicalDevices, Sensors, Measurements)
+            CONFIG[self.parameter]['Limits'],
+            LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_powerup),
             TestStep('Load', self._step_load),
             TestStep('OCP', self._step_ocp),
             )
+        self.load_count = CONFIG[self.parameter]['LoadCount']
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -56,7 +65,7 @@ class Final(share.TestSequence):
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
         mes['dmm_fanon'](timeout=15)
-        for load in range(self.limits['LOAD_COUNT'].limit):
+        for load in range(self.load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vouts'][load](timeout=5)
 
@@ -64,8 +73,8 @@ class Final(share.TestSequence):
     def _step_load(self, dev, mes):
         """Test outputs with load."""
         dev['dcl_out'].output(0.0,  output=True)
-        dev['dcl_out'].binary(1.0, self.limits['LOAD_COUNT'].limit * 2.0, 5.0)
-        for load in range(self.limits['LOAD_COUNT'].limit):
+        dev['dcl_out'].binary(1.0, self.load_count * 2.0, 5.0)
+        for load in range(self.load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vloads'][load](timeout=5)
 
@@ -112,7 +121,7 @@ class Sensors(share.Sensors):
             start=low - 1, stop=high + 1, step=0.5, delay=0.2)
         # Generate load voltage sensors
         vloads = []
-        for i in range(self.limits['LOAD_COUNT'].limit):
+        for i in range(CONFIG[self.parameter]['LoadCount']):
             s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
             vloads.append(s)
         self['vloads'] = vloads
