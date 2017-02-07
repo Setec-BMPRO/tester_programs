@@ -165,7 +165,7 @@ class ParameterFloat(_Parameter):
         if value < self._min or value > self._max:
             raise ParameterError(
                 'Value out of range {0} - {1}'.format(self._min, self._max))
-        super().write(int(value * self._scale), func)
+        super().write(round(value * self._scale), func)
 
     def read(self, func):
         """Read parameter value.
@@ -205,7 +205,7 @@ class ParameterHex(_Parameter):
         if value < self._min or value > self._max:
             raise ParameterError(
                 'Value out of range {0} - {1}'.format(self._min, self._max))
-        super().write(int(value), func)
+        super().write(round(value), func)
 
     def read(self, func):
         """Read parameter value.

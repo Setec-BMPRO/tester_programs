@@ -60,7 +60,7 @@ class J35Initial(ProgramTestCase):
                     ('0', '', '0', '0', '240', '50000',
                      '350', '12800', '500', '', ),
                 'Output': ('', ) * (1 + sen.load_count + 1),
-                'Load': ('4000', ),
+                'Load': (str(0x5555555), '4000', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
@@ -71,7 +71,7 @@ class J35Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(64, len(result.readings))  # Reading count
+        self.assertEqual(65, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp',

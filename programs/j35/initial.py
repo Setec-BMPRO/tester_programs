@@ -71,6 +71,7 @@ LIMITS_A = tester.testlimit.limitset(_COMMON + (
     lim_string('Variant', 'J35A'),
     lim_lo('LOAD_COUNT', COUNT_A),
     lim_lo('LOAD_CURRENT', CURRENT_A),
+    lim_hilo_int('LOAD_SET', 0x1555),
     lim_hilo('OCP', 20.0 - CURRENT_A, 25.0 - CURRENT_A),
     ))
 
@@ -78,6 +79,7 @@ LIMITS_B = tester.testlimit.limitset(_COMMON + (
     lim_string('Variant', 'J35B'),
     lim_lo('LOAD_COUNT', COUNT_BC),
     lim_lo('LOAD_CURRENT', CURRENT_BC),
+    lim_hilo_int('LOAD_SET', 0x5555555),
     lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
     ))
 
@@ -85,6 +87,7 @@ LIMITS_C = tester.testlimit.limitset(_COMMON + (
     lim_string('Variant', 'J35C'),
     lim_lo('LOAD_COUNT', COUNT_BC),
     lim_lo('LOAD_CURRENT', CURRENT_BC),
+    lim_hilo_int('LOAD_SET', 0x5555555),
     lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
     ))
 
@@ -275,6 +278,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
     def _step_load(self, dev, mes):
         """Test with load."""
         dev.dcl_out.linear(1.0, self.limits['LOAD_CURRENT'].limit, 5.0, 0.2)
+        mes.arm_loadset()
         for load in range(self.limits['LOAD_COUNT'].limit):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
@@ -403,11 +407,12 @@ class Sensors():
         self.arm_fan = console.Sensor(j35, 'FAN')
         self.arm_bati = console.Sensor(j35, 'BATT_I')
         self.arm_canbind = console.Sensor(j35, 'CAN_BIND')
+        self.arm_loadset = console.Sensor(j35, 'LOAD_SET')
         # Generate load current sensors
         self.load_count = limits['LOAD_COUNT'].limit
         self.arm_loads = []
         for i in range(self.load_count):
-            s = console.Sensor(j35, 'LOAD_{}'.format(i + 1))
+            s = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
             self.arm_loads.append(s)
         low, high = limits['OCP'].limit
         self.ocp = sensor.Ramp(
@@ -463,9 +468,9 @@ class Measurements():
         self.dmm_canpwr = Measurement(limits['CanPwr'], sense.ocanpwr)
         self.rx_can = Measurement(limits['CAN_RX'], sense.mir_can)
         self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.arm_canbind)
+        self.arm_loadset = Measurement(limits['LOAD_SET'], sense.arm_loadset)
         # Generate load current measurements
-        self.arm_loads = ()
+        self.arm_loads = []
         for sen in sense.arm_loads:
-            m = Measurement(limits['ARM-LoadI'], sen)
-            self.arm_loads += (m, )
+            self.arm_loads.append(Measurement(limits['ARM-LoadI'], sen))
         self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
