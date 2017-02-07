@@ -52,9 +52,9 @@ class Console(console.Variable, console.BadUartConsole):
                 minimum=0, maximum=100, scale=10),
             'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
             'SOLAR': ParameterBoolean('SOLAR_CHARGE_RELAY', writeable=True),
-            'LOAD_SET': ParameterFloat(
+            'LOAD_SET': ParameterHex(
                 'LOAD_SWITCH_STATE_0', writeable=True,
-                minimum=0, maximum=0x0FFFFFFF, scale=1),
+                minimum=0, maximum=0x0FFFFFFF),
             'VOUT_OV': ParameterFloat(
                 'CONVERTER_OVERVOLT', writeable=True,
                 minimum=0, maximum=2, scale=1),
