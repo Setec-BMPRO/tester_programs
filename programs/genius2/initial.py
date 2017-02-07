@@ -12,7 +12,7 @@ from tester.testlimit import (
 import share
 from share import oldteststep
 
-PIC_HEX = 'genius2_2.hex'
+PIC_HEX = 'genius2_3a.hex'
 
 _BASE_DATA = (
     lim_lo('DetectDiode', 0.3),
