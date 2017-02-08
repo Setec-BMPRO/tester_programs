@@ -420,16 +420,7 @@ class Sensors():
             start=low - self.load_current - 1,
             stop=high - self.load_current + 1,
             step=0.5, delay=0.2)
-        self.ocp.callback = self.correct_ocp
-
-    def correct_ocp(self, value):
-        """Callback for the OCP ramp sensor.
-
-        @param value Raw sensor reading
-        @return Corrected reading that allows for extra load current
-
-        """
-        return value + self.load_current
+        self.ocp.on_read = lambda value: value + self.load_current
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

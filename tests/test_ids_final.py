@@ -50,7 +50,7 @@ class Ids500Final(ProgramTestCase):
                      (sen.oYesNoLddGreen, True), (sen.oYesNoLddRed, True)),
                 'Comms':
                     ((sen.oSerNumEntry, ('A1504010034',)),
-                    (sen.oHwRevEntry, ('06A',)), ),
+                    (sen.oHwRevEntry, ('07a ',)), ),
                 'EmergStop':
                     ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
                      (sen.isvmon, 0.0), (sen.o15v, 0.0), (sen.o_15v, 0.0),
@@ -65,7 +65,7 @@ class Ids500Final(ProgramTestCase):
                     'Software Test Mode Entered',
                     '', 'Setting Change Done', '') +
                     ('', 'Setting Change Done', '') +
-                    ('I, 2, 06A,Hardware Revision', ) +
+                    ('I, 2, 07A,Hardware Revision', ) +
                     ('M,6,SettingisProtected', '', '') +
                     ('I, 3, A1504010034,Serial Number', ),
                 },

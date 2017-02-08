@@ -291,20 +291,11 @@ class Sensors():
         self.oHwRevEntry = sensor.DataEntry(
             message=tester.translate('ids500_final', 'msgHwRev'),
             caption=tester.translate('ids500_final', 'capHwRev'))
-        self.oHwRevEntry.callback = self.clean_hwrev
+        self.oHwRevEntry.on_read = lambda value: value.upper().strip()
         self.hwrev = console.Sensor(
             pic, 'PIC-HwRev', rdgtype=sensor.ReadingString)
         self.sernum = console.Sensor(
             pic, 'PIC-SerNum', rdgtype=sensor.ReadingString)
-
-    def clean_hwrev(self, value):
-        """Callback for the HwRev user entry sensor.
-
-        @param value Raw sensor reading string
-        @return Uppercase, trimmed reading string
-
-        """
-        return value.upper().strip()
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""
