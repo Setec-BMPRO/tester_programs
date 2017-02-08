@@ -277,8 +277,9 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
     @oldteststep
     def _step_load(self, dev, mes):
         """Test with load."""
+        val = mes.arm_loadset().reading1
+        print('0x{:08X}'.format(int(val)))
         dev.dcl_out.linear(1.0, self.limits['LOAD_CURRENT'].limit, 5.0, 0.2)
-        mes.arm_loadset()
         for load in range(self.limits['LOAD_COUNT'].limit):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
