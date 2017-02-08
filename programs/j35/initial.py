@@ -68,51 +68,46 @@ _COMMON = (
     )
 
 LIMITS_A = tester.testlimit.limitset(_COMMON + (
-    lim_string('Variant', 'J35A'),
     lim_lo('LOAD_COUNT', COUNT_A),
-    lim_lo('LOAD_CURRENT', CURRENT_A),
     lim_hilo_int('LOAD_SET', 0x1555),
-    lim_hilo('OCP', 20.0 - CURRENT_A, 25.0 - CURRENT_A),
+    lim_hilo('OCP', 20.0, 25.0),
     ))
 
 LIMITS_B = tester.testlimit.limitset(_COMMON + (
-    lim_string('Variant', 'J35B'),
     lim_lo('LOAD_COUNT', COUNT_BC),
-    lim_lo('LOAD_CURRENT', CURRENT_BC),
     lim_hilo_int('LOAD_SET', 0x5555555),
-    lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
+    lim_hilo('OCP', 35.0, 42.0),
     ))
 
 LIMITS_C = tester.testlimit.limitset(_COMMON + (
-    lim_string('Variant', 'J35C'),
     lim_lo('LOAD_COUNT', COUNT_BC),
-    lim_lo('LOAD_CURRENT', CURRENT_BC),
     lim_hilo_int('LOAD_SET', 0x5555555),
-    lim_hilo('OCP', 35.0 - CURRENT_BC, 42.0 - CURRENT_BC),
+    lim_hilo('OCP', 35.0, 42.0),
     ))
 
-LIMITS = {      # Test limit selection keyed by program parameter
-    'A': LIMITS_A,
-    'B': LIMITS_B,
-    'C': LIMITS_C,
-    }
-
-# Variant specific data. Indexed by open() parameter.
+# Variant specific configuration data. Indexed by test program parameter.
+#   'Limits': Test limits.
 #   'HwVer': Hardware version data.
 #   'SolarCan': Enable Solar input & CAN bus tests.
 #   'Derate': Derate output current.
-VARIANT = {
+CONFIG = {
     'A': {
+        'Limits': LIMITS_A,
+        'LoadCount': 7,
         'HwVer': (2, 1, 'A'),
         'SolarCan': False,
         'Derate': True,
         },
     'B': {
+        'Limits': LIMITS_B,
+        'LoadCount': 14,
         'HwVer': (2, 2, 'A'),
         'SolarCan': False,
         'Derate': False,
         },
     'C': {
+        'Limits': LIMITS_C,
+        'LoadCount': 14,
         'HwVer': (6, 3, 'A'),
         'SolarCan': True,
         'Derate': False,
@@ -129,8 +124,8 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         super().open()
         if self.parameter is None:
             self.parameter = 'C'
-        self.limits = LIMITS[self.parameter]
-        self.variant = VARIANT[self.parameter]
+        self.config = CONFIG[self.parameter]
+        self.limits = self.config['Limits']
         self.logdev = LogicalDevices(self.physical_devices, self.fifo)
         self.sensors = Sensors(self.logdev, self.limits)
         self.meas = Measurements(self.sensors, self.limits)
@@ -141,14 +136,14 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('Aux', self._step_aux),
             tester.TestStep(
-                'Solar', self._step_solar, self.variant['SolarCan']),
+                'Solar', self._step_solar, self.config['SolarCan']),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('Output', self._step_output),
             tester.TestStep('RemoteSw', self._step_remote_sw),
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
             tester.TestStep(
-                'CanBus', self._step_canbus, self.variant['SolarCan']),
+                'CanBus', self._step_canbus, self.config['SolarCan']),
             )
         # Power to fixture Comms circuits.
         self.logdev.dcs_vcom.output(9.0, True)
@@ -201,7 +196,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
 
         """
         dev.j35.open()
-        dev.j35.brand(self.variant['HwVer'], self.sernum, dev.rla_reset)
+        dev.j35.brand(self.config['HwVer'], self.sernum, dev.rla_reset)
         dev.j35.manual_mode(True)   # Start the change to manual mode
         mes.arm_swver.measure()
 
@@ -231,7 +226,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
         dev.j35.manual_mode()     # Complete the change to manual mode
-        if self.variant['Derate']:
+        if self.config['Derate']:
             dev.j35.derate()      # Derate for lower output current
         dev.acsource.output(voltage=240.0, output=True)
         tester.MeasureGroup(
@@ -259,7 +254,7 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         dev.j35.load_set(set_on=True, loads=())   # All outputs OFF
         dev.dcl_out.output(1.0, True)  # A little load on the output
         mes.dmm_vloadoff.measure(timeout=2)
-        for load in range(self.limits['LOAD_COUNT'].limit):  # One at a time ON
+        for load in range(self.config['LoadCount']):  # One at a time ON
             with tester.PathName('L{0}'.format(load + 1)):
                 dev.j35.load_set(set_on=True, loads=(load, ))
                 mes.dmm_vload.measure(timeout=2)
@@ -278,9 +273,10 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
     def _step_load(self, dev, mes):
         """Test with load."""
         val = mes.arm_loadset().reading1
-        print('0x{:08X}'.format(int(val)))
-        dev.dcl_out.linear(1.0, self.limits['LOAD_CURRENT'].limit, 5.0, 0.2)
-        for load in range(self.limits['LOAD_COUNT'].limit):
+        self._logger.debug('0x{:08X}'.format(int(val)))
+        load_count = self.config['LoadCount']
+        dev.dcl_out.binary(1.0, load_count * 2.0, 5.0)
+        for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes.arm_loads[load].measure(timeout=5)
         dev.dcl_bat.output(4.0, True)
@@ -415,11 +411,25 @@ class Sensors():
         for i in range(self.load_count):
             s = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
             self.arm_loads.append(s)
+        self.load_current = self.load_count * 2.0
         low, high = limits['OCP'].limit
         self.ocp = sensor.Ramp(
-            stimulus=logical_devices.dcl_bat, sensor=self.ovbat,
+            stimulus=logical_devices.dcl_bat,
+            sensor=self.ovbat,
             detect_limit=(limits['InOCP'], ),
-            start=low - 1, stop=high + 1, step=0.5, delay=0.2)
+            start=low - self.load_current - 1,
+            stop=high - self.load_current + 1,
+            step=0.5, delay=0.2)
+        self.ocp.callback = self.correct_ocp
+
+    def correct_ocp(self, value):
+        """Callback for the OCP ramp sensor.
+
+        @param value Raw sensor reading
+        @return Corrected reading that allows for extra load current
+
+        """
+        return value + self.load_current
 
     def _reset(self):
         """TestRun.stop: Empty the Mirror Sensors."""

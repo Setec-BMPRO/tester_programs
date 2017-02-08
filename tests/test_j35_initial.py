@@ -60,7 +60,7 @@ class J35Initial(ProgramTestCase):
                     ('0', '', '0', '0', '240', '50000',
                      '350', '12800', '500', '', ),
                 'Output': ('', ) * (1 + sen.load_count + 1),
-                'Load': (str(0x5555555), '4000', ),
+                'Load': ('0x5555555', '4000', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
