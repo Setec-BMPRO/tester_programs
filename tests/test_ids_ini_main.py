@@ -16,40 +16,54 @@ class Ids500IniMain(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensor
+        sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp':
-                    ((sen.lock, 10.0), (sen.vbus, 340.0), (sen.tec, 0.0),
-                     (sen.tecvmon, 0.0), (sen.ldd, 0.0), (sen.isvmon, 0.0),
-                     (sen.o15v, 0.0), (sen.o_15v, 0.0), (sen.o15vp, 0.0),
-                     (sen.o15vpsw, 0.0), (sen.o5v, 0.0)),
+                    ((sen['lock'], 10.0), (sen['vbus'], 340.0),
+                     (sen['tec'], 0.0), (sen['tecvmon'], 0.0),
+                     (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                     (sen['o15v'], 0.0), (sen['o_15v'], 0.0),
+                     (sen['o15vp'], 0.0), (sen['o15vpsw'], 0.0),
+                     (sen['o5v'], 0.0)),
                 'KeySw1':
-                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
-                     (sen.isvmon, 0.0), (sen.o15v, 15.0), (sen.o_15v, -15.0),
-                     (sen.o15vp, 15.0), (sen.o15vpsw, 0.0), (sen.o5v, 5.0)),
+                    ((sen['tec'], 0.0), (sen['tecvmon'], 0.0),
+                     (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                     (sen['o15v'], 15.0), (sen['o_15v'], -15.0),
+                     (sen['o15vp'], 15.0), (sen['o15vpsw'], 0.0),
+                     (sen['o5v'], 5.0)),
                 'KeySw12':
-                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
-                     (sen.isvmon, 0.0), (sen.o15v, 15.0), (sen.o_15v, -15.0),
-                     (sen.o15vp, 15.0), (sen.o15vpsw, 15.0), (sen.o5v, 5.0)),
+                    ((sen['tec'], 0.0), (sen['tecvmon'], 0.0),
+                     (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                     (sen['o15v'], 15.0), (sen['o_15v'], -15.0),
+                     (sen['o15vp'], 15.0), (sen['o15vpsw'], 15.0),
+                     (sen['o5v'], 5.0)),
                 'TEC':
-                    ((sen.tecvset, 5.05), (sen.tecvmon, (0.0, 4.99)),
-                     (sen.tec, (0.0, -15.0, 15.0)), (sen.oYesNoPsu, True),
-                     (sen.oYesNoTecGreen, True), (sen.oYesNoTecRed, True)),
+                    ((sen['tecvset'], 5.05),
+                     (sen['tecvmon'], (0.0, 4.99)),
+                     (sen['tec'], (0.0, -15.0, 15.0)),
+                     (sen['oYesNoPsu'], True),
+                     (sen['oYesNoTecGreen'], True),
+                     (sen['oYesNoTecRed'], True)),
                 'LDD':
-                    ((sen.ldd, (2.0,) * 3), (sen.isiout, (0.0, 0.601, 5.01)),
-                     (sen.isvmon, (2.0,) * 3), (sen.isset, (0.6, 5.0)),
-                       (sen.isout, (0.0, 0.00602, 0.0502)),
-                     (sen.oYesNoLddGreen, True), (sen.oYesNoLddRed, True)),
+                    ((sen['ldd'], (2.0,) * 3),
+                     (sen['isiout'], (0.0, 0.601, 5.01)),
+                     (sen['isvmon'], (2.0,) * 3),
+                     (sen['isset'], (0.6, 5.0)),
+                     (sen['isout'], (0.0, 0.00602, 0.0502)),
+                     (sen['oYesNoLddGreen'], True),
+                     (sen['oYesNoLddRed'], True)),
                 'OCP':
-                    ((sen.o5v, (5.0, ) * 23 + (3.9,), ),
-                     (sen.o15vp, (15.0, ) * 23 + (11.9,), ),
-                     (sen.tec, (-15.0,) * 23 + (-11.9,), ),
-                     (sen.o15vp, (15.0, ) * 3), ),
+                    ((sen['o5v'], (5.0, ) * 23 + (3.9,), ),
+                     (sen['o15vp'], (15.0, ) * 23 + (11.9,), ),
+                     (sen['tec'], (-15.0,) * 23 + (-11.9,), ),
+                     (sen['o15vp'], (15.0, ) * 3), ),
                 'EmergStop':
-                    ((sen.tec, 0.0), (sen.tecvmon, 0.0), (sen.ldd, 0.0),
-                     (sen.isvmon, 0.0), (sen.o15v, 0.0), (sen.o_15v, 0.0),
-                     (sen.o15vp, 0.0), (sen.o15vpsw, 0.0), (sen.o5v, 0.0)),
+                    ((sen['tec'], 0.0), (sen['tecvmon'], 0.0),
+                     (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                     (sen['o15v'], 0.0), (sen['o_15v'], 0.0),
+                     (sen['o15vp'], 0.0), (sen['o15vpsw'], 0.0),
+                     (sen['o5v'], 0.0)),
                 },
             }
         self.tester.ut_load(data, self.test_program.fifo_push)
