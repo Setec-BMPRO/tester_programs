@@ -387,6 +387,7 @@ class LogicalDevices(share.LogicalDevices):
     def close(self):
         """Close logical devices."""
         self['dcs_vcom'].output(0, False)   # Remove power from fixture.
+        super().close()
 
 
 class Sensors(share.Sensors):

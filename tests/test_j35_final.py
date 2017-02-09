@@ -23,7 +23,7 @@ class _J35Final(ProgramTestCase):
         for sensor in sen['vloads']:
             sensor.store(value)
 
-    def _pass_run(self):
+    def _pass_run(self, rdg_count):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
@@ -40,9 +40,7 @@ class _J35Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(
-            # 2 reading/output + 3 other readings
-            3 + 2 * self.load_count, len(result.readings))
+        self.assertEqual(rdg_count, len(result.readings))
         # And did all steps run in turn?
         self.assertEqual(['PowerUp', 'Load', 'OCP'], self.tester.ut_steps)
 
@@ -52,10 +50,9 @@ class J35_A_Final(_J35Final):
     """J35-A Final program test suite."""
 
     parameter = 'A'
-    load_count = COUNT_A
 
     def test_pass_run(self):
-        super()._pass_run()
+        super()._pass_run(17)
 
 
 class J35_B_Final(_J35Final):
@@ -63,10 +60,9 @@ class J35_B_Final(_J35Final):
     """J35-B Final program test suite."""
 
     parameter = 'B'
-    load_count = COUNT_BC
 
     def test_pass_run(self):
-        super()._pass_run()
+        super()._pass_run(31)
 
 
 class J35_C_Final(_J35Final):
@@ -74,7 +70,6 @@ class J35_C_Final(_J35Final):
     """J35-C Final program test suite."""
 
     parameter = 'C'
-    load_count = COUNT_BC
 
     def test_pass_run(self):
-        super()._pass_run()
+        super()._pass_run(31)

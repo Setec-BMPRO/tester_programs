@@ -6,82 +6,79 @@
 import os
 import inspect
 import time
-from pydispatch import dispatcher
 import tester
-from tester.testlimit import (
-    lim_hilo, lim_hilo_delta, lim_lo, lim_boolean, lim_string,
-    lim_hilo_int, lim_hilo_percent
+from tester import (
+    TestStep,
+    LimitLo, LimitBoolean, LimitString,
+    LimitHiLo, LimitHiLoDelta, LimitHiLoPercent, LimitHiLoInt
     )
 import share
-from share import oldteststep
 from . import console
 
 ARM_VERSION = '1.1.14080.920'      # ARM versions
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # ARM software image file
-ARM_BIN = 'j35_{}.bin'.format(ARM_VERSION)
+ARM_FILE = 'j35_{}.bin'.format(ARM_VERSION)
 # CAN echo request messages
 CAN_ECHO = 'TQQ,36,0'
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
 COUNT_A = 7
-CURRENT_A = 14.0
 COUNT_BC = 14
-CURRENT_BC = 28.0
 
 _COMMON = (
-    lim_hilo_delta('ACin', 240.0, 5.0),
-    lim_hilo('Vbus', 335.0, 345.0),
-    lim_hilo('12Vpri', 11.5, 13.0),
-    lim_hilo('Vload', 12.0, 12.9),
-    lim_lo('VloadOff', 0.5),
-    lim_hilo_delta('VbatIn', 12.0, 0.5),
-    lim_hilo_delta('VbatOut', 13.5, 0.5),
-    lim_hilo_delta('Vbat', 12.8, 0.2),
-    lim_hilo_percent('VbatLoad', 12.8, 5),
-    lim_hilo_delta('Vaux', 13.5, 0.5),
-    lim_hilo_delta('Vair', 13.5, 0.5),
-    lim_hilo_delta('3V3U', 3.30, 0.05),
-    lim_hilo_delta('3V3', 3.30, 0.05),
-    lim_hilo('15Vs', 11.5, 13.0),
-    lim_hilo_delta('FanOn', 12.5, 0.5),
-    lim_lo('FanOff', 0.5),
-    lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    lim_string('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    lim_hilo_delta('ARM-AuxV', 13.5, 0.37),
-    lim_hilo('ARM-AuxI', 0.0, 1.5),
-    lim_hilo_int('Vout_OV', 0),     # Over-voltage not triggered
-    lim_hilo_delta('ARM-AcV', 240.0, 10.0),
-    lim_hilo_delta('ARM-AcF', 50.0, 3.0),
-    lim_hilo('ARM-SecT', 8.0, 70.0),
-    lim_hilo_delta('ARM-Vout', 12.8, 0.356),
-    lim_hilo('ARM-Fan', 0, 100),
-    lim_hilo_delta('ARM-BattI', 4.0, 1.0),
-    lim_hilo_delta('ARM-LoadI', 2.1, 0.9),
-    lim_hilo_delta('CanPwr', 12.0, 1.0),
-    lim_hilo_int('LOAD_SET', 0x5555555),
-    lim_string('CAN_RX', r'^RRQ,36,0'),
-    lim_hilo_int('CAN_BIND', _CAN_BIND),
-    lim_lo('InOCP', 11.6),
-    lim_lo('FixtureLock', 20),
-    lim_boolean('Notify', True),
+    LimitHiLoDelta('ACin', (240.0, 5.0)),
+    LimitHiLoDelta('Vbus', (340.0, 5.0)),
+    LimitHiLo('12Vpri', (11.5, 13.0)),
+    LimitHiLo('Vload', (12.0, 12.9)),
+    LimitLo('VloadOff', 0.5),
+    LimitHiLoDelta('VbatIn', (12.0, 0.5)),
+    LimitHiLoDelta('VbatOut', (13.5, 0.5)),
+    LimitHiLoDelta('Vbat', (12.8, 0.2)),
+    LimitHiLoPercent('VbatLoad', (12.8, 5)),
+    LimitHiLoDelta('Vaux', (13.5, 0.5)),
+    LimitHiLoDelta('Vair', (13.5, 0.5)),
+    LimitHiLoDelta('3V3U', (3.30, 0.05)),
+    LimitHiLoDelta('3V3', (3.30, 0.05)),
+    LimitHiLo('15Vs', (11.5, 13.0)),
+    LimitHiLoDelta('FanOn', (12.5, 0.5)),
+    LimitLo('FanOff', 0.5),
+    LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    LimitString('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
+    LimitHiLoDelta('ARM-AuxV', (13.5, 0.37)),
+    LimitHiLo('ARM-AuxI', (0.0, 1.5)),
+    LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
+    LimitHiLoDelta('ARM-AcV', (240.0, 10.0)),
+    LimitHiLoDelta('ARM-AcF', (50.0, 3.0)),
+    LimitHiLo('ARM-SecT', (8.0, 70.0)),
+    LimitHiLoDelta('ARM-Vout', (12.8, 0.356)),
+    LimitHiLo('ARM-Fan', (0, 100)),
+    LimitHiLoDelta('ARM-BattI', (4.0, 1.0)),
+    LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
+    LimitHiLoDelta('CanPwr', (12.0, 1.0)),
+    LimitHiLoInt('LOAD_SET', 0x5555555),
+    LimitString('CAN_RX', r'^RRQ,36,0'),
+    LimitHiLoInt('CAN_BIND', _CAN_BIND),
+    LimitLo('InOCP', 11.6),
+    LimitLo('FixtureLock', 20),
+    LimitBoolean('Notify', True),
     )
 
-LIMITS_A = tester.testlimit.limitset(_COMMON + (
-    lim_lo('LOAD_COUNT', COUNT_A),
-    lim_hilo('OCP', 20.0, 25.0),
-    ))
+LIMITS_A = _COMMON + (
+    LimitLo('LOAD_COUNT', COUNT_A),
+    LimitHiLo('OCP', (20.0, 25.0)),
+    )
 
-LIMITS_B = tester.testlimit.limitset(_COMMON + (
-    lim_lo('LOAD_COUNT', COUNT_BC),
-    lim_hilo('OCP', 35.0, 42.0),
-    ))
+LIMITS_B = _COMMON + (
+    LimitLo('LOAD_COUNT', COUNT_BC),
+    LimitHiLo('OCP', (35.0, 42.0)),
+    )
 
-LIMITS_C = tester.testlimit.limitset(_COMMON + (
-    lim_lo('LOAD_COUNT', COUNT_BC),
-    lim_hilo('OCP', 35.0, 42.0),
-    ))
+LIMITS_C = _COMMON + (
+    LimitLo('LOAD_COUNT', COUNT_BC),
+    LimitHiLo('OCP', (35.0, 42.0)),
+    )
 
 # Variant specific configuration data. Indexed by test program parameter.
 #   'Limits': Test limits.
@@ -113,53 +110,33 @@ CONFIG = {
     }
 
 
-class Initial(tester.TestSequence):     # pylint:disable=R0902
+class Initial(share.TestSequence):
 
     """J35 Initial Test Program."""
 
     def open(self):
         """Prepare for testing."""
-        super().open()
-        if self.parameter is None:
-            self.parameter = 'C'
         self.config = CONFIG[self.parameter]
-        self.limits = self.config['Limits']
-        self.logdev = LogicalDevices(self.physical_devices, self.fifo)
-        self.sensors = Sensors(self.logdev, self.limits)
-        self.meas = Measurements(self.sensors, self.limits)
+        super().open(
+            self.config['Limits'], LogicalDevices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('Prepare', self._step_prepare),
-            tester.TestStep(
-                'ProgramARM', self._step_program_arm, not self.fifo),
-            tester.TestStep('Initialise', self._step_initialise_arm),
-            tester.TestStep('Aux', self._step_aux),
-            tester.TestStep(
-                'Solar', self._step_solar, self.config['SolarCan']),
-            tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('Output', self._step_output),
-            tester.TestStep('RemoteSw', self._step_remote_sw),
-            tester.TestStep('Load', self._step_load),
-            tester.TestStep('OCP', self._step_ocp),
-            tester.TestStep(
-                'CanBus', self._step_canbus, self.config['SolarCan']),
+            TestStep('Prepare', self._step_prepare),
+            TestStep(
+                'ProgramARM',
+                self.devices['program_arm'].program, not self.fifo),
+            TestStep('Initialise', self._step_initialise_arm),
+            TestStep('Aux', self._step_aux),
+            TestStep('Solar', self._step_solar, self.config['SolarCan']),
+            TestStep('PowerUp', self._step_powerup),
+            TestStep('Output', self._step_output),
+            TestStep('RemoteSw', self._step_remote_sw),
+            TestStep('Load', self._step_load),
+            TestStep('OCP', self._step_ocp),
+            TestStep('CanBus', self._step_canbus, self.config['SolarCan']),
             )
-        # Power to fixture Comms circuits.
-        self.logdev.dcs_vcom.output(9.0, True)
         self.sernum = None
 
-    def close(self):
-        """Finished testing."""
-        self.logdev.dcs_vcom.output(0, False)
-        self.logdev = None
-        self.sensors = None
-        self.meas = None
-        super().close()
-
-    def safety(self):
-        """Make the unit safe after a test."""
-        self.logdev.reset()
-
-    @oldteststep
+    @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
@@ -167,24 +144,13 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         Apply power to the unit's Battery terminals to power up the micro.
 
         """
-        mes.dmm_lock.measure(timeout=5)
-        self.sernum = share.get_sernum(
-            self.uuts, self.limits['SerNum'], mes.ui_sernum)
+        mes['dmm_lock'](timeout=5)
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Apply DC Source to Battery terminals
-        dev.dcs_vbat.output(12.6, True)
-        tester.MeasureGroup(
-            (mes.dmm_vbatin, mes.dmm_3v3u), timeout=5)
+        dev['dcs_vbat'].output(12.6, True)
+        self.measure(('dmm_vbatin', 'dmm_3v3u'), timeout=5)
 
-    @oldteststep
-    def _step_program_arm(self, dev, mes):
-        """Program the ARM device.
-
-        Device is powered by injected Battery voltage.
-
-        """
-        dev.program_arm.program()
-
-    @oldteststep
+    @share.teststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
@@ -193,55 +159,57 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         Put device into manual control mode.
 
         """
-        dev.j35.open()
-        dev.j35.brand(self.config['HwVer'], self.sernum, dev.rla_reset)
-        dev.j35.manual_mode(True)   # Start the change to manual mode
-        mes.arm_swver.measure()
+        j35 = dev['j35']
+        j35.open()
+        j35.brand(self.config['HwVer'], self.sernum, dev['rla_reset'])
+        j35.manual_mode(True)   # Start the change to manual mode
+        mes['arm_swver']()
 
-    @oldteststep
+    @share.teststep
     def _step_aux(self, dev, mes):
         """Test Auxiliary input."""
-        dev.dcs_vaux.output(13.5, True)
-        mes.dmm_vaux.measure(timeout=5)
-        dev.dcl_bat.output(0.5, True)
-        dev.j35['AUX_RELAY'] = True
-        tester.MeasureGroup(
-            (mes.dmm_vbatout, mes.arm_auxv, mes.arm_auxi), timeout=5)
-        dev.j35['AUX_RELAY'] = False
-        dev.dcs_vaux.output(0.0, False)
-        dev.dcl_bat.output(0.0)
+        dev['dcs_vaux'].output(13.5, True)
+        mes['dmm_vaux'](timeout=5)
+        dev['dcl_bat'].output(0.5, True)
+        j35 = dev['j35']
+        j35['AUX_RELAY'] = True
+        self.measure(('dmm_vbatout', 'arm_auxv', 'arm_auxi'), timeout=5)
+        j35['AUX_RELAY'] = False
+        dev['dcs_vaux'].output(0.0, False)
+        dev['dcl_bat'].output(0.0)
 
-    @oldteststep
+    @share.teststep
     def _step_solar(self, dev, mes):
         """Test Solar input."""
-        dev.dcs_solar.output(13.5, True)
-        dev.j35['SOLAR'] = True
-        tester.MeasureGroup((mes.dmm_vbatout, mes.dmm_vair), timeout=5)
-        dev.j35['SOLAR'] = False
-        dev.dcs_solar.output(0.0, False)
+        dev['dcs_solar'].output(13.5, True)
+        j35 = dev['j35']
+        j35['SOLAR'] = True
+        self.measure(('dmm_vbatout', 'dmm_vair'), timeout=5)
+        j35['SOLAR'] = False
+        dev['dcs_solar'].output(0.0, False)
 
-    @oldteststep
+    @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
-        dev.j35.manual_mode()     # Complete the change to manual mode
+        j35 = dev['j35']
+        j35.manual_mode()     # Complete the change to manual mode
         if self.config['Derate']:
-            dev.j35.derate()      # Derate for lower output current
-        dev.acsource.output(voltage=240.0, output=True)
-        tester.MeasureGroup(
-            (mes.dmm_acin, mes.dmm_vbus, mes.dmm_12vpri, mes.arm_vout_ov),
+            j35.derate()      # Derate for lower output current
+        dev['acsource'].output(voltage=240.0, output=True)
+        self.measure(
+            ('dmm_acin', 'dmm_vbus', 'dmm_12vpri', 'arm_vout_ov'),
             timeout=5)
-        dev.j35.dcdc_on()
-        mes.dmm_vbat.measure(timeout=5)
-        dev.dcs_vbat.output(0.0, False)
-        tester.MeasureGroup(
-            (mes.arm_vout_ov, mes.dmm_3v3, mes.dmm_15vs, mes.dmm_vbat,
-             mes.dmm_fanOff, mes.arm_acv, mes.arm_acf, mes.arm_secT,
-             mes.arm_vout, mes.arm_fan),
+        j35.dcdc_on()
+        mes['dmm_vbat'](timeout=5)
+        dev['dcs_vbat'].output(0.0, False)
+        self.measure(
+            ('arm_vout_ov', 'dmm_3v3', 'dmm_15vs', 'dmm_vbat', 'dmm_fanOff',
+             'arm_acv', 'arm_acf', 'arm_secT', 'arm_vout', 'arm_fan'),
             timeout=5)
-        dev.j35['FAN'] = 100
-        mes.dmm_fanOn.measure(timeout=5)
+        j35['FAN'] = 100
+        mes['dmm_fanOn'](timeout=5)
 
-    @oldteststep
+    @share.teststep
     def _step_output(self, dev, mes):
         """Test the output switches.
 
@@ -249,228 +217,223 @@ class Initial(tester.TestSequence):     # pylint:disable=R0902
         All outputs are then left ON.
 
         """
-        dev.j35.load_set(set_on=True, loads=())   # All outputs OFF
-        dev.dcl_out.output(1.0, True)  # A little load on the output
-        mes.dmm_vloadoff.measure(timeout=2)
+        j35 = dev['j35']
+        j35.load_set(set_on=True, loads=())   # All outputs OFF
+        dev['dcl_out'].output(1.0, True)  # A little load on the output
+        mes['dmm_vloadoff'](timeout=2)
         for load in range(self.config['LoadCount']):  # One at a time ON
             with tester.PathName('L{0}'.format(load + 1)):
-                dev.j35.load_set(set_on=True, loads=(load, ))
-                mes.dmm_vload.measure(timeout=2)
-        dev.j35.load_set(set_on=False, loads=())  # All outputs ON
+                j35.load_set(set_on=True, loads=(load, ))
+                mes['dmm_vload'](timeout=2)
+        j35.load_set(set_on=False, loads=())  # All outputs ON
 
-
-    @oldteststep
+    @share.teststep
     def _step_remote_sw(self, dev, mes):
         """Test the remote switch."""
-        dev.rla_loadsw.set_on()
-        mes.dmm_vloadoff(timeout=5),
-        dev.rla_loadsw.set_off()
-        mes.dmm_vload(timeout=5),
+        dev['rla_loadsw'].set_on()
+        mes['dmm_vloadoff'](timeout=5)
+        dev['rla_loadsw'].set_off()
+        mes['dmm_vload'](timeout=5)
 
-    @oldteststep
+    @share.teststep
     def _step_load(self, dev, mes):
         """Test with load."""
-        val = mes.arm_loadset().reading1
+        val = mes['arm_loadset']().reading1
         self._logger.debug('0x{:08X}'.format(int(val)))
         load_count = self.config['LoadCount']
-        dev.dcl_out.binary(1.0, load_count * 2.0, 5.0)
+        dev['dcl_out'].binary(1.0, load_count * 2.0, 5.0)
         for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
-                mes.arm_loads[load].measure(timeout=5)
-        dev.dcl_bat.output(4.0, True)
-        tester.MeasureGroup(
-            (mes.dmm_vbatload, mes.arm_battI, ), timeout=5)
+                mes['arm_loads'][load](timeout=5)
+        dev['dcl_bat'].output(4.0, True)
+        self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 
-    @oldteststep
+    @share.teststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
-        mes.ramp_ocp(timeout=5)
-        dev.dcl_out.output(0.0)
-        dev.dcl_bat.output(0.0)
+        mes['ramp_ocp'](timeout=5)
+        dev['dcl_out'].output(0.0)
+        dev['dcl_bat'].output(0.0)
 
-    @oldteststep
+    @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        tester.MeasureGroup(
-            (mes.dmm_canpwr, mes.arm_can_bind, ), timeout=10)
-        dev.j35.can_testmode(True)
+        self.measure(('dmm_canpwr', 'arm_can_bind', ), timeout=10)
+        j35 = dev['j35']
+        j35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
-        dev.j35['CAN'] = CAN_ECHO
-        echo_reply = dev.j35_ser.readline().decode(errors='ignore')
+        j35['CAN'] = CAN_ECHO
+        echo_reply = dev['j35_ser'].readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
-        self.sensors.mir_can.store(echo_reply)
-        mes.rx_can.measure()
+        rx_can = mes['rx_can']
+        rx_can.sensor.store(echo_reply)
+        rx_can.measure()
 
 
-class LogicalDevices():
+class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
 
-    def __init__(self, devices, fifo):
-        """Create all Logical Instruments.
-
-           @param devices Physical instruments of the Tester
-
-        """
-        self._fifo = fifo
-        self.dmm = tester.DMM(devices['DMM'])
-        self.acsource = tester.ACSource(devices['ACS'])
-        self.discharge = tester.Discharge(devices['DIS'])
-        self.dcs_vcom = tester.DCSource(devices['DCS1'])
-        self.dcs_vbat = tester.DCSource(devices['DCS2'])
-        self.dcs_vaux = tester.DCSource(devices['DCS3'])
-        self.dcs_solar = tester.DCSource(devices['DCS4'])
-        self.dcl_out = tester.DCLoad(devices['DCL1'])
-        self.dcl_bat = tester.DCLoad(devices['DCL5'])
-        self.rla_reset = tester.Relay(devices['RLA1'])
-        self.rla_boot = tester.Relay(devices['RLA2'])
-        self.rla_loadsw = tester.Relay(devices['RLA3'])
+    def open(self):
+        """Create all Logical Instruments."""
+        # Physical Instrument based devices
+        for name, devtype, phydevname in (
+                ('dmm', tester.DMM, 'DMM'),
+                ('acsource', tester.ACSource, 'ACS'),
+                ('discharge', tester.Discharge, 'DIS'),
+                ('dcs_vcom', tester.DCSource, 'DCS1'),
+                ('dcs_vbat', tester.DCSource, 'DCS2'),
+                ('dcs_vaux', tester.DCSource, 'DCS3'),
+                ('dcs_solar', tester.DCSource, 'DCS4'),
+                ('dcl_out', tester.DCLoad, 'DCL1'),
+                ('dcl_bat', tester.DCLoad, 'DCL5'),
+                ('rla_reset', tester.Relay, 'RLA1'),
+                ('rla_boot', tester.Relay, 'RLA2'),
+                ('rla_loadsw', tester.Relay, 'RLA3'),
+            ):
+            self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        file = os.path.join(folder, ARM_BIN)
-        self.program_arm = share.ProgramARM(
-            ARM_PORT, file, crpmode=False,
-            boot_relay=self.rla_boot, reset_relay=self.rla_reset)
-        # Serial connection to the J35 console
-        self.j35_ser = tester.SimSerial(
-            simulation=fifo, baudrate=115200, timeout=5.0)
+        self['program_arm'] = share.ProgramARM(
+            ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
+            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+        # Serial connection to the console
+        self['j35_ser'] = tester.SimSerial(
+            simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self.j35_ser.port = ARM_PORT
+        self['j35_ser'].port = ARM_PORT
         # J35 Console driver
-        self.j35 = console.Console(self.j35_ser, fifo)
+        self['j35'] = console.Console(self['j35_ser'], self.fifo)
+        # Apply power to fixture circuits.
+        self['dcs_vcom'].output(9.0, True)
 
     def reset(self):
         """Reset instruments."""
-        self.j35.close()
+        self['j35'].close()
         # Switch off AC Source & discharge the unit
-        self.acsource.output(voltage=0.0, output=False)
-        self.dcl_out.output(2.0)
+        self['acsource'].output(voltage=0.0, output=False)
+        self['dcl_out'].output(2.0)
         time.sleep(1)
-        self.discharge.pulse()
-        for dcs in (self.dcs_vbat, self.dcs_vaux, self.dcs_solar):
-            dcs.output(0.0, False)
-        for ld in (self.dcl_out, self.dcl_bat):
-            ld.output(0.0, False)
-        for rla in (self.rla_reset, self.rla_boot, ):
-            rla.set_off()
+        self['discharge'].pulse()
+        for dev in ('dcs_vbat', 'dcs_vaux', 'dcs_solar', 'dcl_out', 'dcl_bat'):
+            self[dev].output(0.0, False)
+        for rla in ('rla_reset', 'rla_boot', 'rla_loadsw'):
+            self[rla].set_off()
+
+    def close(self):
+        """Finished testing."""
+        self['dcs_vcom'].output(0, False)
+        super().close()
 
 
-class Sensors():
+class Sensors(share.Sensors):
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
-        """Create all Sensor instances.
-
-           @param logical_devices Logical instruments used
-           @param limits Product test limits
-
-        """
-        dispatcher.connect(
-            self._reset, sender=tester.signals.Thread.tester,
-            signal=tester.signals.TestRun.stop)
-        dmm = logical_devices.dmm
-        j35 = logical_devices.j35
+    def open(self):
+        """Create all Sensor instances."""
+        dmm = self.devices['dmm']
+        j35 = self.devices['j35']
         sensor = tester.sensor
-        self.mir_can = sensor.Mirror(rdgtype=sensor.ReadingString)
-        self.olock = sensor.Res(dmm, high=17, low=8, rng=10000, res=0.1)
-        self.oacin = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
-        self.ovbus = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.1)
-        self.o12Vpri = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)
-        self.ovbat = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
-        self.ovload = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
-        self.oaux = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.001)
-        self.oair = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
-        self.o3V3U = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
-        self.o3V3 = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
-        self.o15Vs = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
-        self.ofan = sensor.Vdc(dmm, high=12, low=5, rng=100, res=0.01)
-        self.ocanpwr = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
-        self.sernum = sensor.DataEntry(
+        self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
+        self['olock'] = sensor.Res(dmm, high=17, low=8, rng=10000, res=0.1)
+        self['oacin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
+        self['ovbus'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.1)
+        self['o12Vpri'] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)
+        self['ovbat'] = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
+        self['ovload'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
+        self['oaux'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.001)
+        self['oair'] = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
+        self['o3V3U'] = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
+        self['o3V3'] = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
+        self['o15Vs'] = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
+        self['ofan'] = sensor.Vdc(dmm, high=12, low=5, rng=100, res=0.01)
+        self['ocanpwr'] = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
+        self['sernum'] = sensor.DataEntry(
             message=tester.translate('j35_initial', 'msgSnEntry'),
             caption=tester.translate('j35_initial', 'capSnEntry'))
-        self.arm_swver = console.Sensor(
+        # Console sensors
+        j35 = self.devices['j35']
+        for name, cmdkey in (
+                ('arm_auxv', 'AUX_V'),
+                ('arm_auxi', 'AUX_I'),
+                ('arm_vout_ov', 'VOUT_OV'),
+                ('arm_acv', 'AC_V'),
+                ('arm_acf', 'AC_F'),
+                ('arm_sect', 'SEC_T'),
+                ('arm_vout', 'BUS_V'),
+                ('arm_fan', 'FAN'),
+                ('arm_bati', 'BATT_I'),
+                ('arm_canbind', 'CAN_BIND'),
+                ('arm_loadset', 'LOAD_SET'),
+            ):
+            self[name] = console.Sensor(j35, cmdkey)
+        self['arm_swver'] = console.Sensor(
             j35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self.arm_auxv = console.Sensor(j35, 'AUX_V')
-        self.arm_auxi = console.Sensor(j35, 'AUX_I')
-        self.arm_vout_ov = console.Sensor(j35, 'VOUT_OV')
-        self.arm_acv = console.Sensor(j35, 'AC_V')
-        self.arm_acf = console.Sensor(j35, 'AC_F')
-        self.arm_sect = console.Sensor(j35, 'SEC_T')
-        self.arm_vout = console.Sensor(j35, 'BUS_V')
-        self.arm_fan = console.Sensor(j35, 'FAN')
-        self.arm_bati = console.Sensor(j35, 'BATT_I')
-        self.arm_canbind = console.Sensor(j35, 'CAN_BIND')
-        self.arm_loadset = console.Sensor(j35, 'LOAD_SET')
         # Generate load current sensors
-        self.load_count = limits['LOAD_COUNT'].limit
-        self.arm_loads = []
-        for i in range(self.load_count):
-            s = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
-            self.arm_loads.append(s)
-        self.load_current = self.load_count * 2.0
-        low, high = limits['OCP'].limit
-        self.ocp = sensor.Ramp(
-            stimulus=logical_devices.dcl_bat,
-            sensor=self.ovbat,
-            detect_limit=(limits['InOCP'], ),
-            start=low - self.load_current - 1,
-            stop=high - self.load_current + 1,
+        load_count = self.limits['LOAD_COUNT'].limit
+        self['arm_loads'] = []
+        for i in range(load_count):
+            sen = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
+            self['arm_loads'].append(sen)
+        load_current = load_count * 2.0
+        low, high = self.limits['OCP'].limit
+        self['ocp'] = sensor.Ramp(
+            stimulus=self.devices['dcl_bat'],
+            sensor=self['ovbat'],
+            detect_limit=(self.limits['InOCP'], ),
+            start=low - load_current - 1,
+            stop=high - load_current + 1,
             step=0.5, delay=0.2)
-        self.ocp.on_read = lambda value: value + self.load_current
-
-    def _reset(self):
-        """TestRun.stop: Empty the Mirror Sensors."""
-        self.mir_can.flush()
+        self['ocp'].on_read = lambda value: value + load_current
 
 
-class Measurements():
+class Measurements(share.Measurements):
 
     """Measurements."""
 
-    def __init__(self, sense, limits):
-        """Create all Measurement instances.
-
-           @param sense Sensors used
-           @param limits Product test limits
-
-        """
-        Measurement = tester.Measurement
-        self.dmm_lock = Measurement(limits['FixtureLock'], sense.olock)
-        self.dmm_acin = Measurement(limits['ACin'], sense.oacin)
-        self.dmm_vbus = Measurement(limits['Vbus'], sense.ovbus)
-        self.dmm_12vpri = Measurement(limits['12Vpri'], sense.o12Vpri)
-        self.dmm_vload = Measurement(limits['Vload'], sense.ovload)
-        self.dmm_vloadoff = Measurement(limits['VloadOff'], sense.ovload)
-        self.dmm_vbatin = Measurement(limits['VbatIn'], sense.ovbat)
-        self.dmm_vbatout = Measurement(limits['VbatOut'], sense.ovbat)
-        self.dmm_vbat = Measurement(limits['Vbat'], sense.ovbat)
-        self.dmm_vbatload = Measurement(limits['VbatLoad'], sense.ovbat)
-        self.dmm_vair = Measurement(limits['Vair'], sense.oair)
-        self.dmm_vaux = Measurement(limits['Vaux'], sense.oaux)
-        self.dmm_3v3u = Measurement(limits['3V3U'], sense.o3V3U)
-        self.dmm_3v3 = Measurement(limits['3V3'], sense.o3V3)
-        self.dmm_15vs = Measurement(limits['15Vs'], sense.o15Vs)
-        self.dmm_fanOn = Measurement(limits['FanOn'], sense.ofan)
-        self.dmm_fanOff = Measurement(limits['FanOff'], sense.ofan)
-        self.ui_sernum = Measurement(limits['SerNum'], sense.sernum)
-        self.arm_swver = Measurement(limits['ARM-SwVer'], sense.arm_swver)
-        self.arm_auxv = Measurement(limits['ARM-AuxV'], sense.arm_auxv)
-        self.arm_auxi = Measurement(limits['ARM-AuxI'], sense.arm_auxi)
-        self.arm_vout_ov = Measurement(limits['Vout_OV'], sense.arm_vout_ov)
-        self.arm_acv = Measurement(limits['ARM-AcV'], sense.arm_acv)
-        self.arm_acf = Measurement(limits['ARM-AcF'], sense.arm_acf)
-        self.arm_secT = Measurement(limits['ARM-SecT'], sense.arm_sect)
-        self.arm_vout = Measurement(limits['ARM-Vout'], sense.arm_vout)
-        self.arm_fan = Measurement(limits['ARM-Fan'], sense.arm_fan)
-        self.arm_battI = Measurement(limits['ARM-BattI'], sense.arm_bati)
-        self.dmm_canpwr = Measurement(limits['CanPwr'], sense.ocanpwr)
-        self.rx_can = Measurement(limits['CAN_RX'], sense.mir_can)
-        self.arm_can_bind = Measurement(limits['CAN_BIND'], sense.arm_canbind)
-        self.arm_loadset = Measurement(limits['LOAD_SET'], sense.arm_loadset)
+    def open(self):
+        """Create all Measurement instances."""
+        for measurement_name, limit_name, sensor_name in (
+                ('dmm_lock', 'FixtureLock', 'olock'),
+                ('dmm_acin', 'ACin', 'oacin'),
+                ('dmm_vbus', 'Vbus', 'ovbus'),
+                ('dmm_12vpri', '12Vpri', 'o12Vpri'),
+                ('dmm_vload', 'Vload', 'ovload'),
+                ('dmm_vloadoff', 'VloadOff', 'ovload'),
+                ('dmm_vbatin', 'VbatIn', 'ovbat'),
+                ('dmm_vbatout', 'VbatOut', 'ovbat'),
+                ('dmm_vbat', 'Vbat', 'ovbat'),
+                ('dmm_vbatload', 'VbatLoad', 'ovbat'),
+                ('dmm_vair', 'Vair', 'oair'),
+                ('dmm_vaux', 'Vaux', 'oaux'),
+                ('dmm_3v3u', '3V3U', 'o3V3U'),
+                ('dmm_3v3', '3V3', 'o3V3'),
+                ('dmm_15vs', '15Vs', 'o15Vs'),
+                ('dmm_fanOn', 'FanOn', 'ofan'),
+                ('dmm_fanOff', 'FanOff', 'ofan'),
+                ('ramp_ocp', 'OCP', 'ocp'),
+                ('ui_sernum', 'SerNum', 'sernum'),
+                ('arm_swver', 'ARM-SwVer', 'arm_swver'),
+                ('arm_auxv', 'ARM-AuxV', 'arm_auxv'),
+                ('arm_auxi', 'ARM-AuxI', 'arm_auxi'),
+                ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov'),
+                ('arm_acv', 'ARM-AcV', 'arm_acv'),
+                ('arm_acf', 'ARM-AcF', 'arm_acf'),
+                ('arm_secT', 'ARM-SecT', 'arm_sect'),
+                ('arm_vout', 'ARM-Vout', 'arm_vout'),
+                ('arm_fan', 'ARM-Fan', 'arm_fan'),
+                ('arm_battI', 'ARM-BattI', 'arm_bati'),
+                ('dmm_canpwr', 'CanPwr', 'ocanpwr'),
+                ('rx_can', 'CAN_RX', 'mir_can'),
+                ('arm_can_bind', 'CAN_BIND', 'arm_canbind'),
+                ('arm_loadset', 'LOAD_SET', 'arm_loadset'),
+            ):
+            self[measurement_name] = tester.Measurement(
+                self.limits[limit_name], self.sensors[sensor_name])
         # Generate load current measurements
-        self.arm_loads = []
-        for sen in sense.arm_loads:
-            self.arm_loads.append(Measurement(limits['ARM-LoadI'], sen))
-        self.ramp_ocp = Measurement(limits['OCP'], sense.ocp)
+        loads = []
+        for sen in self.sensors['arm_loads']:
+            loads.append(tester.Measurement(self.limits['ARM-LoadI'], sen))
+        self['arm_loads'] = loads

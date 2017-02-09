@@ -320,6 +320,7 @@ class LogicalDevices(share.LogicalDevices):
     def close(self):
         """Switch on fixture power."""
         self['dcs_fixture'].output(0.0, output=False)
+        super().close()
 
     def loads(self, i5=None, i12=None, i24=None, output=True):
         """Set output loads.

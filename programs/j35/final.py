@@ -134,9 +134,9 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurement instances."""
         for measurement_name, limit_name, sensor_name in (
-            ('dmm_fanoff', 'FanOff', 'photo'),
-            ('dmm_fanon', 'FanOn', 'photo'),
-            ('ramp_ocp', 'OCP', 'ocp'),
+                ('dmm_fanoff', 'FanOff', 'photo'),
+                ('dmm_fanon', 'FanOn', 'photo'),
+                ('ramp_ocp', 'OCP', 'ocp'),
             ):
             self[measurement_name] = tester.Measurement(
                 self.limits[limit_name], self.sensors[sensor_name])
