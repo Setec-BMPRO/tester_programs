@@ -60,6 +60,7 @@ _COMMON = (
     lim_hilo_delta('ARM-BattI', 4.0, 1.0),
     lim_hilo_delta('ARM-LoadI', 2.1, 0.9),
     lim_hilo_delta('CanPwr', 12.0, 1.0),
+    lim_hilo_int('LOAD_SET', 0x5555555),
     lim_string('CAN_RX', r'^RRQ,36,0'),
     lim_hilo_int('CAN_BIND', _CAN_BIND),
     lim_lo('InOCP', 11.6),
@@ -69,19 +70,16 @@ _COMMON = (
 
 LIMITS_A = tester.testlimit.limitset(_COMMON + (
     lim_lo('LOAD_COUNT', COUNT_A),
-    lim_hilo_int('LOAD_SET', 0x1555),
     lim_hilo('OCP', 20.0, 25.0),
     ))
 
 LIMITS_B = tester.testlimit.limitset(_COMMON + (
     lim_lo('LOAD_COUNT', COUNT_BC),
-    lim_hilo_int('LOAD_SET', 0x5555555),
     lim_hilo('OCP', 35.0, 42.0),
     ))
 
 LIMITS_C = tester.testlimit.limitset(_COMMON + (
     lim_lo('LOAD_COUNT', COUNT_BC),
-    lim_hilo_int('LOAD_SET', 0x5555555),
     lim_hilo('OCP', 35.0, 42.0),
     ))
 
