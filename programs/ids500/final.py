@@ -4,6 +4,7 @@
 """IDS-500 Final Test Program."""
 
 import os
+import time
 import tester
 from tester import (
     TestStep,
@@ -212,6 +213,10 @@ class Final(share.TestSequence):
         hwrev = mes['ui_hwrev']().reading1
         pic.expected = 3
         pic['WriteHwRev'] = hwrev
+        # Only the very 1st time a HwRev is written, the unit outputs 4 lines
+        # Here we flush the 1 extra line...
+        time.sleep(0.5)
+        dev['pic_ser'].flushInput()
         pic.expected = 1
         mes['pic_hwrev'].testlimit[0].limit = hwrev
         mes['pic_hwrev']()
