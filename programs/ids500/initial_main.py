@@ -14,7 +14,8 @@ _LDD_6_ERROR_LIMITS = (-0.07, 0.07)
 _LDD_50_ERROR_LIMITS = (-0.7, 0.7)
 
 LIMITS = (
-    LimitHiLoDelta('Vbus', (340.0, 10.0)),
+    LimitHiLoDelta('PfcOff', (340.0, 10.0)),
+    LimitHiLo('PfcOn', (395.0, 410.0)),
     LimitLo('TecOff', 1.5),
     LimitLo('TecVmonOff', 1.5),
     LimitLo('LddOff', 1.5),
@@ -79,7 +80,7 @@ class InitialMain(share.TestSequence):
 
     @share.teststep
     def _step_pwr_up(self, dev, mes):
-        """PowerUp: Fixture lock, Min load, input AC, measure."""
+        """Power Up the unit. Outputs should be off."""
         mes['dmm_lock'](timeout=5)
         self.dcload(
             (('dcl_tec', 0.1), ('dcl_15vp', 1.0), ('dcl_15vpsw', 0.0),
@@ -87,23 +88,24 @@ class InitialMain(share.TestSequence):
              output=True)
         dev['acsource'].output(240.0, output=True, delay=1)
         self.measure(
-            ('dmm_vbus', 'dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff',
+            ('dmm_PFC_off', 'dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff',
              'dmm_isvmonoff', 'dmm_15voff', 'dmm__15voff', 'dmm_15vpoff',
              'dmm_15vpswoff', 'dmm_5voff', ),
             timeout=5)
 
     @share.teststep
     def _step_key_sw1(self, dev, mes):
-        """KeySw1: KeySwitch 1, measure."""
+        """KeySwitch 1. Outputs must switch on."""
         dev['rla_keysw1'].set_on()
         self.measure(
-            ('dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff', 'dmm_isvmonoff',
-             'dmm_15v', 'dmm__15v', 'dmm_15vp', 'dmm_15vpswoff', 'dmm_5v', ),
+            ('dmm_PFC_on', 'dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff',
+             'dmm_isvmonoff', 'dmm_15v', 'dmm__15v', 'dmm_15vp',
+             'dmm_15vpswoff', 'dmm_5v', ),
             timeout=5)
 
     @share.teststep
     def _step_key_sw12(self, dev, mes):
-        """KeySw12: KeySwitch 1 & 2, measure."""
+        """KeySwitch 1 & 2. 15Vp must also switch on."""
         dev['rla_keysw2'].set_on()
         self.measure(
             ('dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff', 'dmm_isvmonoff',
@@ -112,11 +114,11 @@ class InitialMain(share.TestSequence):
 
     @share.teststep
     def _step_tec(self, dev, mes):
-        """Check the TEC circuit.
+        """TEC output accuracy and polarity tests.
 
            Enable, measure voltages.
-           Error calculations.
-           Check LED status.
+           Error calculations of actual & monitor vs set point.
+           Check LED status as TEC polarity reverses.
 
          """
         dev['dcs_5v'].output(5.0, True)
@@ -132,18 +134,18 @@ class InitialMain(share.TestSequence):
         mes['tecerr']()
         mes['tecvmonerr'].sensor.store(Vmon - (Vtec / 3))
         mes['tecvmonerr']()
-        self.measure(('ui_YesNoPsu', 'ui_YesNoTecRed'), timeout=5)
+        self.measure(('ui_YesNoPsu', 'ui_YesNoTecRed'))
         dev['rla_tecphase'].set_on()
-        self.measure(('dmm_tecphase', 'ui_YesNoTecGreen', ), timeout=5)
+        self.measure(('dmm_tecphase', 'ui_YesNoTecGreen', ))
         dev['rla_tecphase'].set_off()
 
     @share.teststep
     def _step_ldd(self, dev, mes):
-        """Check the Laser diode circuit.
+        """Laser diode output setting and accuracy tests.
 
-           Enable, measure voltages.
+           Enable, measure set vs actual and monitor.
            Error calculations at 0A, 6A & 50A loading.
-           Check LED status.
+           Check LED status at 6A (green) and 50A (red).
 
         """
         # Run LDD at 0A
@@ -161,35 +163,43 @@ class InitialMain(share.TestSequence):
             timeout=5).readings
         mes['dmm_isldd'](timeout=5)
         with tester.PathName('6A'):
-            self._ldd_err(Iset, Iout, Imon)
+            self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
+            self._ldd_err(mes, Iset, Iout, Imon)
         # Run LDD at 50A
-        mes['ui_YesNoLddGreen'](timeout=5)
+        mes['ui_YesNoLddGreen']()
         dev['dcs_isset'].output(5.0, delay=1)
         mes['dmm_isvmon'](timeout=5)
         Iset, Iout, Imon = self.measure(
             ('dmm_isset5v', 'dmm_isout5v', 'dmm_isiout5v', ),
             timeout=5).readings
         mes['dmm_isldd'](timeout=5)
-        try:
-            # Patch limits for 50A checks
-            patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
-            for name in patch_limits:
-                self.limits[name].limit = _LDD_50_ERROR_LIMITS
-            with tester.PathName('50A'):
-                self._ldd_err(Iset, Iout, Imon)
-        finally:    # Restore the limits for 6A checks
-            for name in patch_limits:
-                self.limits[name].limit = _LDD_6_ERROR_LIMITS
+        with tester.PathName('50A'):
+            self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
+            try:
+                # Patch limits for 50A checks
+                patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
+                for name in patch_limits:
+                    self.limits[name].limit = _LDD_50_ERROR_LIMITS
+                self._ldd_err(mes, Iset, Iout, Imon)
+            finally:    # Restore the limits for 6A checks
+                for name in patch_limits:
+                    self.limits[name].limit = _LDD_6_ERROR_LIMITS
         # LDD off
-        mes['ui_YesNoLddRed'](timeout=5)
+        mes['ui_YesNoLddRed']()
         dev['dcs_isset'].output(0.0, False)
         for rla in ('rla_crowbar', 'rla_interlock', 'rla_enableis'):
             dev[rla].set_off()
 
-    def _ldd_err(self, Iset, Iout, Imon):
-        """Check the accuracy between set and measured values for LD."""
-        mes = self.measurements
-        self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
+    @staticmethod
+    def _ldd_err(mes, Iset, Iout, Imon):
+        """Accuracy check between set and measured values for LDD.
+
+        @param mes Measurements instance
+        @param Iset LDD Set value of control voltage
+        @param Iout LDD Output current
+        @param Imon LDD Monitor output voltage
+
+        """
         # Compare Set value to Mon
         mes['setmonerr'].sensor.store((Iset * 10) - (Imon * 10))
         mes['setmonerr']()
@@ -202,7 +212,7 @@ class InitialMain(share.TestSequence):
 
     @share.teststep
     def _step_ocp(self, dev, mes):
-        """OCP."""
+        """OCP of the 5V, 15Vp and TEC outputs."""
         dev['dcl_tec'].output(0.1)
         dev['dcl_15vp'].output(1.0)
         dev['dcl_15vpsw'].output(0.0)
@@ -218,7 +228,7 @@ class InitialMain(share.TestSequence):
 
     @share.teststep
     def _step_emg_stop(self, dev, mes):
-        """EmergStop: Emergency stop, measure."""
+        """Emergency stop. All outputs must switch off."""
         self.dcload(
             (('dcl_tec', 0.1), ('dcl_15vp', 1.0), ('dcl_15vpsw', 0.0),
              ('dcl_5v', 5.0), ))
@@ -229,9 +239,9 @@ class InitialMain(share.TestSequence):
              'dmm_5voff', ),
              timeout=5)
 
-    def _restart(self):
-        """Restart: Power off and on."""
-        dev = self.devices
+    @share.teststep     # Not a real teststep - used to get dev and mes
+    def _restart(self, dev, mes):
+        """Restart: By cycling AC off and on."""
         self.dcload(
             (('dcl_tec', 0.1), ('dcl_15vp', 1.0), ('dcl_15vpsw', 0.0),
              ('dcl_5v', 5.0), ))
@@ -239,7 +249,7 @@ class InitialMain(share.TestSequence):
         dev['acsource'].output(0.0, delay=4.5)
         dev['acsource'].output(240.0, delay=0.5)
         dev['dcs_5v'].output(5.0)
-        self.measurements['dmm_15vp'](timeout=10)
+        mes['dmm_15vp'](timeout=10)
 
 
 class LogicalDevices(share.LogicalDevices):
@@ -378,7 +388,8 @@ class Measurements(share.Measurements):
                 ('setouterr', 'SetOutErr', 'oMirIsErr'),
                 ('monouterr', 'MonOutErr', 'oMirIsErr'),
                 ('dmm_lock', 'FixtureLock', 'lock'),
-                ('dmm_vbus', 'Vbus', 'vbus'),
+                ('dmm_PFC_off', 'PfcOff', 'vbus'),
+                ('dmm_PFC_on', 'PfcOn', 'vbus'),
                 ('dmm_tecoff', 'TecOff', 'tec'),
                 ('dmm_tec', 'Tec', 'tec'),
                 ('dmm_tecphase', 'TecPhase', 'tec'),

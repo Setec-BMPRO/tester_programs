@@ -27,11 +27,11 @@ class Ids500IniMain(ProgramTestCase):
                      (sen['o15vp'], 0.0), (sen['o15vpsw'], 0.0),
                      (sen['o5v'], 0.0)),
                 'KeySw1':
-                    ((sen['tec'], 0.0), (sen['tecvmon'], 0.0),
-                     (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
-                     (sen['o15v'], 15.0), (sen['o_15v'], -15.0),
-                     (sen['o15vp'], 15.0), (sen['o15vpsw'], 0.0),
-                     (sen['o5v'], 5.0)),
+                    ((sen['vbus'], 405.0), (sen['tec'], 0.0),
+                     (sen['tecvmon'], 0.0), (sen['ldd'], 0.0),
+                     (sen['isvmon'], 0.0), (sen['o15v'], 15.0),
+                     (sen['o_15v'], -15.0), (sen['o15vp'], 15.0),
+                     (sen['o15vpsw'], 0.0), (sen['o5v'], 5.0)),
                 'KeySw12':
                     ((sen['tec'], 0.0), (sen['tecvmon'], 0.0),
                      (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
@@ -70,7 +70,7 @@ class Ids500IniMain(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(80, len(result.readings))  # Reading count
+        self.assertEqual(81, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD', 'OCP', 'EmergStop'],
