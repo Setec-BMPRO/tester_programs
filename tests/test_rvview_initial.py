@@ -17,18 +17,18 @@ class RvViewInitial(ProgramTestCase):
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.logdev
-        dev.rvview_ser.flushInput()     # Flush console input buffer
+        dev = self.test_program.devices
+        dev['rvview_ser'].flushInput()  # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp':
-                    ((sen.oSnEntry, ('A1626010123', )), (sen.oVin, 7.5),
-                     (sen.o3V3, 3.3), ),
+                    ((sen['oSnEntry'], ('A1626010123', )),
+                     (sen['oVin'], 7.5),
+                     (sen['o3V3'], 3.3), ),
                 'Display':
-                    ((sen.oYesNoOn, True), (sen.oYesNoOff, True),
-                     (sen.oBkLght, (3.0, 0.0)), ),
-                },
-            UnitTester.key_call: {      # Callables
+                    ((sen['oYesNoOn'], True),
+                     (sen['oYesNoOff'], True),
+                     (sen['oBkLght'], (3.0, 0.0)), ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise':
@@ -43,7 +43,8 @@ class RvViewInitial(ProgramTestCase):
                 'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev.rvview.puts)
+        self.tester.ut_load(
+            data, self.test_program.fifo_push, dev['rvview'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result

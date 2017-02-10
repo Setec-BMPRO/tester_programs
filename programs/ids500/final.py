@@ -65,7 +65,6 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        self.limits = LIMITS
         super().open(LIMITS, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_pwr_up),
