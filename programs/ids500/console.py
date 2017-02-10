@@ -6,11 +6,15 @@ import time
 from share import console
 
 Sensor = console.Sensor
-
 # Some easier to use short names
 ParameterString = console.ParameterString
 ParameterFloat = console.ParameterFloat
 ParameterBoolean = console.ParameterBoolean
+# Magic number to unlock test mode
+_TESTMODE_MAGIC_1 = 0
+_TESTMODE_MAGIC_2 = 2230
+_TESTMODE_MAGIC_3 = 42
+
 
 class ConsoleResponseError():
 
@@ -30,45 +34,37 @@ class Console(console.Variable, console.BaseConsole):
         # Auto add prompt to puts strings
         self.puts_prompt = '\r\n'
         self.cmd_data = {
-            'PIC-SwRev': ParameterString(
-                '?,I,1', read_format='{}'),
-            'PIC-MicroTemp': ParameterString(
-                '?,D,16', read_format='{}'),
-            'PIC-Clear': ParameterString(
-                '', read_format='{}'),
-            'PIC-HwRev': ParameterString(
-                '?,I,2', read_format='{}'),
-            'PIC-SerNum': ParameterString(
-                '?,I,3', read_format='{}'),
+            'PIC-SwRev': ParameterString('?,I,1', read_format='{0}'),
+            'PIC-MicroTemp': ParameterString('?,D,16', read_format='{0}'),
+            'PIC-Clear': ParameterString('', read_format='{0}'),
+            'PIC-HwRev': ParameterString('?,I,2', read_format='{0}'),
+            'PIC-SerNum': ParameterString('?,I,3', read_format='{0}'),
             'SwTstMode': ParameterString(
-                '', writeable=True,
-                write_format='S,:,{}'),
+                'S,:,', writeable=True, write_format='{1}{0}'),
             'WriteHwRev': ParameterString(
-                'S,@,', writeable=True,
-                write_format='{1}{0}'),
+                'S,@,', writeable=True, write_format='{1}{0}'),
             'WriteSerNum': ParameterString(
-                'S,#,', writeable=True,
-                write_format='{1}{0}'),
+                'S,#,', writeable=True, write_format='{1}{0}'),
             }
-        self.exp_cnt = 0
+        self.expected = 0
 
     def clear_port(self):
         """Discard unwanted strings when the port is opened"""
         self._logger.debug('Discard unwanted strings')
-        self.exp_cnt = 1
+        self.expected = 1
         self['PIC-Clear']
         self['PIC-Clear']
         self['PIC-Clear']
-        self.exp_cnt = 0
+        self.expected = 0
 
     def sw_test_mode(self):
         """Access Software Test Mode"""
-        self.exp_cnt = 3
-        self['SwTstMode'] = 0
-        self['SwTstMode'] = 2230
-        self.exp_cnt = 4
-        self['SwTstMode'] = 42
-        self.exp_cnt = 0
+        self.expected = 3
+        self['SwTstMode'] = _TESTMODE_MAGIC_1
+        self['SwTstMode'] = _TESTMODE_MAGIC_2
+        self.expected = 4
+        self['SwTstMode'] = _TESTMODE_MAGIC_3
+        self.expected = 0
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
@@ -77,14 +73,14 @@ class Console(console.Variable, console.BaseConsole):
         @param command Command string.
         @param delay Delay between sending command and reading response.
         @param expected Expected number of responses.
-        @return Response (None / String).
+        @return Response (None / List of String).
 
         """
         if command is not None:
             self._write_command(command)
         if delay:
             time.sleep(delay)
-        return self._read_response(expected=self.exp_cnt)
+        return self._read_response(expected=self.expected)
 
     def _write_command(self, command):
         """Write a command.
@@ -103,7 +99,7 @@ class Console(console.Variable, console.BaseConsole):
 
         Overrides BaseConsole().
         @param expected Expected number of responses.
-        @return Response (None / String).
+        @return Response (None / List of String).
 
         """
         all_response = []

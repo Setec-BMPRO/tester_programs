@@ -148,32 +148,30 @@ class InitialMain(share.TestSequence):
            Check LED status at 6A (green) and 50A (red).
 
         """
-        # Run LDD at 0A
         dev['dcs_isset'].output(0.0, True)
         for rla in ('rla_crowbar', 'rla_interlock', 'rla_enableis'):
             dev[rla].set_on()
-        self.measure(
-            ('dmm_isvmon', 'dmm_isout0v', 'dmm_isiout0v', 'dmm_isldd', ),
-            timeout=5)
-        # Run LDD at 6A
-        dev['dcs_isset'].output(0.6, delay=1)
-        mes['dmm_isvmon'](timeout=5)
-        Iset, Iout, Imon = self.measure(
-            ('dmm_isset06v', 'dmm_isout06v', 'dmm_isiout06v', ),
-            timeout=5).readings
-        mes['dmm_isldd'](timeout=5)
+        with tester.PathName('0A'):
+            self.measure(
+                ('dmm_isvmon', 'dmm_isout0v', 'dmm_isiout0v', 'dmm_isldd', ),
+                timeout=5)
         with tester.PathName('6A'):
+            dev['dcs_isset'].output(0.6, delay=1)
+            mes['dmm_isvmon'](timeout=5)
+            Iset, Iout, Imon = self.measure(
+                ('dmm_isset06v', 'dmm_isout06v', 'dmm_isiout06v', ),
+                timeout=5).readings
+            mes['dmm_isldd'](timeout=5)
             self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
             self._ldd_err(mes, Iset, Iout, Imon)
-        # Run LDD at 50A
-        mes['ui_YesNoLddGreen']()
-        dev['dcs_isset'].output(5.0, delay=1)
-        mes['dmm_isvmon'](timeout=5)
-        Iset, Iout, Imon = self.measure(
-            ('dmm_isset5v', 'dmm_isout5v', 'dmm_isiout5v', ),
-            timeout=5).readings
-        mes['dmm_isldd'](timeout=5)
+            mes['ui_YesNoLddGreen']()
         with tester.PathName('50A'):
+            dev['dcs_isset'].output(5.0, delay=1)
+            mes['dmm_isvmon'](timeout=5)
+            Iset, Iout, Imon = self.measure(
+                ('dmm_isset5v', 'dmm_isout5v', 'dmm_isiout5v', ),
+                timeout=5).readings
+            mes['dmm_isldd'](timeout=5)
             self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
             try:
                 # Patch limits for 50A checks
@@ -184,8 +182,8 @@ class InitialMain(share.TestSequence):
             finally:    # Restore the limits for 6A checks
                 for name in patch_limits:
                     self.limits[name].limit = _LDD_6_ERROR_LIMITS
+            mes['ui_YesNoLddRed']()
         # LDD off
-        mes['ui_YesNoLddRed']()
         dev['dcs_isset'].output(0.0, False)
         for rla in ('rla_crowbar', 'rla_interlock', 'rla_enableis'):
             dev[rla].set_off()
