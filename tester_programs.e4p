@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-02-10, 16:36:39 -->
+<!-- Saved: 2017-02-10, 19:53:14 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -145,6 +145,7 @@
     <Source>tests/test_j35_initial.py</Source>
     <Source>tests/test_protocol.py</Source>
     <Source>tests/test_rvview_initial.py</Source>
+    <Source>tests/test_sx750_final.py</Source>
     <Source>tests/test_sx750_initial.py</Source>
     <Source>testsuite.py</Source>
   </Sources>
