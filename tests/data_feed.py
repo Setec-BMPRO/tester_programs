@@ -107,11 +107,14 @@ class UnitTester(tester.Tester):
             pass
 
     def _load_console(self, stepname):
-        """Console strings."""
+        """Console strings, or None to add a flush stopper."""
         try:
             dat = self.ut_data[self.key_con][stepname]
             for msg in dat:
-                self.ut_console_puts(msg, addprompt=True)
+                if msg is None:
+                    self.ut_console_puts('', postflush=1)
+                else:
+                    self.ut_console_puts(msg, addprompt=True)
         except KeyError:
             pass
 
