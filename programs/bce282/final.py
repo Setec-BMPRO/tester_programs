@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """BCE282-12/24 Final Program."""
 
-# FIXME: This program is not finished yet!
-
 import time
 import tester
 
