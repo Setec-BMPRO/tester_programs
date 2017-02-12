@@ -187,17 +187,15 @@ class Measurements(share.Measurements):
 
     def open(self):
         """Create all Measurement instances."""
-        for measurement_name, limit_name, sensor_name in (
-                ('dmm_vin', 'Vin', 'oVin'),
-                ('dmm_3V3', '3V3', 'o3V3'),
-                ('dmm_BkLghtOff', 'BkLghtOff', 'oBkLght'),
-                ('dmm_BkLghtOn', 'BkLghtOn', 'oBkLght'),
-                ('ui_SnEntry', 'SerNum', 'oSnEntry'),
-                ('arm_swver', 'SwVer', 'oSwVer'),
-                ('rx_can', 'CAN_RX', 'mir_can'),
-                ('arm_can_bind', 'CAN_BIND', 'arm_canbind'),
-                ('ui_YesNoOn', 'Notify', 'oYesNoOn'),
-                ('ui_YesNoOff', 'Notify', 'oYesNoOff'),
-            ):
-            self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sensors[sensor_name])
+        self.create_from_names((
+            ('dmm_vin', 'Vin', 'oVin'),
+            ('dmm_3V3', '3V3', 'o3V3'),
+            ('dmm_BkLghtOff', 'BkLghtOff', 'oBkLght'),
+            ('dmm_BkLghtOn', 'BkLghtOn', 'oBkLght'),
+            ('ui_SnEntry', 'SerNum', 'oSnEntry'),
+            ('arm_swver', 'SwVer', 'oSwVer'),
+            ('rx_can', 'CAN_RX', 'mir_can'),
+            ('arm_can_bind', 'CAN_BIND', 'arm_canbind'),
+            ('ui_YesNoOn', 'Notify', 'oYesNoOn'),
+            ('ui_YesNoOff', 'Notify', 'oYesNoOff'),
+            ))

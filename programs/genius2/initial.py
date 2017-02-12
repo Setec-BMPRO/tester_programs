@@ -247,28 +247,26 @@ class Measurements(share.Measurements):
 
     def open(self):
         """Create all Measurement instances."""
-        for measurement_name, limit_name, sensor_name in (
-                ('dmm_diode', 'DetectDiode', 'diode'),
-                ('dmm_lock', 'FixtureLock', 'olock'),
-                ('dmm_flyld', 'FlyLead', 'oflyld'),
-                ('dmm_acin', 'AcIn', 'oacin'),
-                ('dmm_vbus', 'Vbus', 'ovbus'),
-                ('dmm_vcc', 'Vcc', 'ovcc'),
-                ('dmm_vccoff', 'VccOff', 'ovcc'),
-                ('dmm_vdd', 'Vdd', 'ovdd'),
-                ('dmm_vbatctl', 'VbatCtl', 'ovbatctl'),
-                ('dmm_vctl', 'Vctl', 'ovctl'),
-                ('dmm_voutpre', 'VoutPre', 'ovout'),
-                ('dmm_vout', 'Vout', 'ovout'),
-                ('dmm_voutoff', 'VoutOff', 'ovout'),
-                ('dmm_vbatpre', 'VbatPre', 'ovbat'),
-                ('dmm_vbat', 'Vbat', 'ovbat'),
-                ('dmm_vbatocp', 'VbatOCP', 'ovbat'),
-                ('dmm_vaux', 'Vaux', 'ovaux'),
-                ('dmm_fanoff', 'FanOff', 'ofan'),
-                ('dmm_fanon', 'FanOn', 'ofan'),
-                ('ui_AdjVout', 'Notify', 'oAdjVout'),
-                ('ramp_OCP', 'OCP', 'oOCP'),
-            ):
-            self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sensors[sensor_name])
+        self.create_from_names((
+            ('dmm_diode', 'DetectDiode', 'diode'),
+            ('dmm_lock', 'FixtureLock', 'olock'),
+            ('dmm_flyld', 'FlyLead', 'oflyld'),
+            ('dmm_acin', 'AcIn', 'oacin'),
+            ('dmm_vbus', 'Vbus', 'ovbus'),
+            ('dmm_vcc', 'Vcc', 'ovcc'),
+            ('dmm_vccoff', 'VccOff', 'ovcc'),
+            ('dmm_vdd', 'Vdd', 'ovdd'),
+            ('dmm_vbatctl', 'VbatCtl', 'ovbatctl'),
+            ('dmm_vctl', 'Vctl', 'ovctl'),
+            ('dmm_voutpre', 'VoutPre', 'ovout'),
+            ('dmm_vout', 'Vout', 'ovout'),
+            ('dmm_voutoff', 'VoutOff', 'ovout'),
+            ('dmm_vbatpre', 'VbatPre', 'ovbat'),
+            ('dmm_vbat', 'Vbat', 'ovbat'),
+            ('dmm_vbatocp', 'VbatOCP', 'ovbat'),
+            ('dmm_vaux', 'Vaux', 'ovaux'),
+            ('dmm_fanoff', 'FanOff', 'ofan'),
+            ('dmm_fanon', 'FanOn', 'ofan'),
+            ('ui_AdjVout', 'Notify', 'oAdjVout'),
+            ('ramp_OCP', 'OCP', 'oOCP'),
+            ))

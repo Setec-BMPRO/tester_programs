@@ -139,23 +139,21 @@ class Measurements(share.Measurements):
 
     def open(self):
         """Create all Measurement instances."""
-        for measurement_name, limit_name, sensor_name in (
-                ('reg12v', 'Reg12V', 'oMir12v'),
-                ('reg24v', 'Reg24V', 'oMir24v'),
-                ('dmm_InpRes', 'InRes', 'oInpRes'),
-                ('dmm_Iecoff', 'IECoff', 'oIec'),
-                ('dmm_Iec', 'IEC', 'oIec'),
-                ('dmm_5v', '5V', 'o5v'),
-                ('dmm_12voff', '12Voff', 'o12v'),
-                ('dmm_12von', '12Von', 'o12v'),
-                ('dmm_24von', '24Von', 'o24v'),
-                ('dmm_PwrGood', 'PwrGood', 'oPwrGood'),
-                ('dmm_AcFail', 'AcFail', 'oAcFail'),
-                ('dmm_5vfl', '5Vfl', 'o5v'),
-                ('dmm_12vfl', '12Vfl', 'o12v'),
-                ('dmm_24vfl', '24Vfl', 'o24v'),
-                ('ui_YesNoGreen', 'Notify', 'oYesNoGreen'),
-                ('ui_YesNoBlue', 'Notify', 'oYesNoBlue'),
-            ):
-            self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sensors[sensor_name])
+        self.create_from_names((
+            ('reg12v', 'Reg12V', 'oMir12v'),
+            ('reg24v', 'Reg24V', 'oMir24v'),
+            ('dmm_InpRes', 'InRes', 'oInpRes'),
+            ('dmm_Iecoff', 'IECoff', 'oIec'),
+            ('dmm_Iec', 'IEC', 'oIec'),
+            ('dmm_5v', '5V', 'o5v'),
+            ('dmm_12voff', '12Voff', 'o12v'),
+            ('dmm_12von', '12Von', 'o12v'),
+            ('dmm_24von', '24Von', 'o24v'),
+            ('dmm_PwrGood', 'PwrGood', 'oPwrGood'),
+            ('dmm_AcFail', 'AcFail', 'oAcFail'),
+            ('dmm_5vfl', '5Vfl', 'o5v'),
+            ('dmm_12vfl', '12Vfl', 'o12v'),
+            ('dmm_24vfl', '24Vfl', 'o24v'),
+            ('ui_YesNoGreen', 'Notify', 'oYesNoGreen'),
+            ('ui_YesNoBlue', 'Notify', 'oYesNoBlue'),
+            ))

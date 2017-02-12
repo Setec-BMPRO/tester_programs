@@ -274,6 +274,17 @@ class Measurements(abc.ABC, dict):
         """Close measurements."""
         self.clear()
 
+    def create_from_names(self, namedata):
+        """Create measurements from name data.
+
+        @param namedata Iterable of Tuple of
+                (measurement_name, limit_name, sensor_name)
+
+        """
+        for measurement_name, limit_name, sensor_name in namedata:
+            self[measurement_name] = tester.Measurement(
+                self.limits[limit_name], self.sensors[sensor_name])
+
 
 def teststep(func):
     """Decorator to add arguments to the test step calls.
