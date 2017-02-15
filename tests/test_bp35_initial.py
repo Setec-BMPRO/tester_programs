@@ -35,7 +35,7 @@ class BP35Initial(ProgramTestCase):
                      (sen['sernum'], ('A1626010123', )), ),
                 'Initialise': ((sen['sernum'], ('A1526040123', )), ),
                 'SolarReg':
-                    ((sen['vset'], (13.0, 13.5)), (sen['solarvin'], 19.55), ),
+                    ((sen['vset'], (13.0, 13.0, 13.5)), (sen['solarvin'], 19.55), ),
                 'Aux': ((sen['vbat'], 13.5), ),
                 'PowerUp':
                     ((sen['acin'], 240.0), (sen['pri12v'], 12.5),

@@ -31,6 +31,7 @@ CAN_ECHO = 'TQQ,32,0'
 _CAN_BIND = 1 << 28
 # Solar Reg settings
 SOLAR_VSET = 13.650
+SOLAR_VSET_SETTLE = 0.05
 SOLAR_ISET = 30.0
 SOLAR_ICAL = 10.0
 SOLAR_VIN = 20.0
@@ -215,12 +216,14 @@ class Initial(share.TestSequence):
         # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
         self.measure(
             ('arm_solar_error', 'arm_solar_relay', 'arm_solar_vin_pre', ))
-        vmeasured = mes['dmm_vsetpre'](timeout=5).reading1
+        # Wait for the voltage to settle
+        vmeasured = mes['dmm_vsetpre'].stable(SOLAR_VSET_SETTLE).reading1
         bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
         bp35['SR_VIN_CAL'] = solar_vin  # Calibrate input voltage reading
         # New solar sw ver 182 is too dumb to change the setpoint until a
         # DIFFERENT voltage setpoint is given...
         bp35.solar_set(SOLAR_VSET - 0.05, SOLAR_ISET)
+        time.sleep(0.2)
         bp35.solar_set(SOLAR_VSET, SOLAR_ISET)
         time.sleep(1)
         self.measure(('arm_solar_vin_post', 'dmm_vsetpost', ))
