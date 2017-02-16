@@ -49,6 +49,7 @@ def _main():
         fifo = True
     else:
         run_all = False
+    parameter = config['DEFAULT'].get('Parameter')
     tester_type = config['DEFAULT'].get('TesterType')
     if tester_type is None:
         tester_type = 'ATE3'
@@ -83,7 +84,7 @@ def _main():
         logger.info('Create Program "%s"', prog)
         # Make a TEST PROGRAM descriptor
         pgm = tester.TestProgram(
-            prog, per_panel=1, parameter=None, test_limits=[])
+            prog, per_panel=1, parameter=parameter, test_limits=[])
         logger.info('#' * 40)
         logger.info('Open Program "%s"', prog)
         tst.open(pgm)
