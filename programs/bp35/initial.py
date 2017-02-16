@@ -16,8 +16,8 @@ import share
 from . import console
 
 ARM_VERSION = '1.2.14284.3921'
-ARM_HW_VER = (9, 0, 'A')
-PIC_VERSION = '1.1.13802.182'
+ARM_HW_VER = (8, 0, 'C')
+PIC_VERSION = '1.4.14454.271'
 PIC_HW_VER = 3
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
