@@ -137,7 +137,7 @@ class ParameterBoolean(_Parameter):
         @return Boolean data value.
 
         """
-        return bool(super().read(func))
+        return bool(int(super().read(func).strip()))
 
 
 class ParameterFloat(_Parameter):

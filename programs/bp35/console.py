@@ -26,12 +26,12 @@ class Console(console.Variable, console.BadUartConsole):
 
     """Communications to BP35 console."""
 
-    def __init__(self, port):
+    def __init__(self, port, verbose=False):
         """Create console instance."""
         # Call __init__() methods directly, since we cannot use super() as
         # the arguments don't match
         console.Variable.__init__(self)
-        console.BadUartConsole.__init__(self, port)
+        console.BadUartConsole.__init__(self, port, verbose)
         # Auto add prompt to puts strings
         self.puts_prompt = '\r\n> '
         self.cmd_data = {

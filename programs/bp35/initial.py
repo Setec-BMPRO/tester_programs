@@ -198,7 +198,7 @@ class Initial(share.TestSequence):
         dev['rla_acsw'].set_on()
         dev['acsource'].output(voltage=VAC, output=True)
         dev['dcs_sreg'].output(0.0, output=False)
-        self.measure(('arm_solar_alive', 'arm_vout_ov', ))
+        self.measure(('arm_solar_alive', 'arm_vout_ov', ), timeout=5)
         # The SR needs V & I set to zero after power up or it won't start.
         bp35.solar_set(0, 0)
         # Now set the actual output settings
@@ -215,7 +215,7 @@ class Initial(share.TestSequence):
                 'ARM-SolarVin-Post', (solar_vin, SOLAR_VIN_POST_PERCENT)), )
         # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
         self.measure(
-            ('arm_solar_error', 'arm_solar_relay', 'arm_solar_vin_pre', ))
+            ('arm_solar_error', 'arm_solar_relay', 'arm_solar_vin_pre', ), timeout=5)
         # Wait for the voltage to settle
         vmeasured = mes['dmm_vsetpre'].stable(SOLAR_VSET_SETTLE).reading1
         bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
@@ -369,7 +369,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         self['bp35_ser'].port = ARM_PORT
         # BP35 Console driver
-        self['bp35'] = console.Console(self['bp35_ser'])
+        self['bp35'] = console.Console(self['bp35_ser'], verbose=False)
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
 
