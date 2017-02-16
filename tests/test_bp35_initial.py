@@ -59,9 +59,9 @@ class BP35Initial(ProgramTestCase):
                     (bp35.initial.ARM_VERSION, ) +
                     ('', ) + ('0x10000', ) + ('', ) * 3,      # Manual mode
                 'SolarReg':
-                    ('1.0', '0') +      # Solar alive, Vout OV
+                    ('1 ', '0') +      # Solar alive, Vout OV
                     ('', ) * 3 +        # 2 x Solar VI, Vout OV
-                    ('0', '1') +        # Errorcode, Relay
+                    ('0 ', '1') +        # Errorcode, Relay
                     ('19900', ) +       # Vin pre
                     ('', ) * 2 +        # 2 x Vcal
                     ('', ) * 2 +        # 2 x Solar VI
