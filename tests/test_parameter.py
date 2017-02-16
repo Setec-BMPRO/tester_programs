@@ -16,7 +16,7 @@ class ParameterBoolean(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.param = share.ParameterBoolean(_CMD, writeable=True)
-        self.func = MagicMock(name='ParBool')
+        self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
         """Read command."""
@@ -56,3 +56,27 @@ class ParameterBoolean(unittest.TestCase):
         for val in (1, 'x', '1', ''):
             with self.assertRaises(share.console.ParameterError):
                 self.param.write(val, self.func)
+
+
+class ParameterString(unittest.TestCase):
+
+    """ParameterString test suite."""
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.param = share.ParameterString(_CMD, writeable=True)
+        self.func = MagicMock(name='Parameter')
+
+    def test_1_rd_cmd(self):
+        """Read command."""
+        response = 'abc '
+        self.func.return_value = response
+        value = self.param.read(self.func)
+        self.assertEqual(response, value)
+        self.func.assert_called_with('"{0} XN?'.format(_CMD), expected=1)
+
+    def test_2_wr_cmd(self):
+        """Write command."""
+        value = 'def'
+        self.param.write(value, self.func)
+        self.func.assert_called_with('{0} "{1} XN!'.format(value, _CMD))
