@@ -4,6 +4,7 @@
 """J35 Initial Test Program."""
 
 import os
+import math
 import inspect
 import time
 import tester
@@ -24,60 +25,76 @@ ARM_FILE = 'j35_{}.bin'.format(ARM_VERSION)
 CAN_ECHO = 'TQQ,36,0'
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
-COUNT_A = 7
-COUNT_BC = 14
+# Number of outputs of each product version
+OUTPUT_COUNT_A = 7
+OUTPUT_COUNT_BC = 14
+# Injected voltages
+VBAT_INJECT = 12.6          # Battery bus
+AUX_SOLAR_INJECT = 13.5     # Aux or Solar inputs
+# AC voltage powering the unit
+AC_VOLT = 240.0
+AC_FREQ = 50.0
+# Output set points when running in manual mode
+VOUT_SET = 12.8
+OCP_SET = 35.0
+# Battery load current
+BATT_CURRENT = 4.0
+# Load on each output channel
+LOAD_PER_OUTPUT = 2.0
+
 
 _COMMON = (
-    LimitHiLoDelta('ACin', (240.0, 5.0)),
-    LimitHiLoDelta('Vbus', (340.0, 5.0)),
+    LimitHiLoDelta('ACin', (AC_VOLT, 5.0)),
+    LimitHiLoDelta('Vbus', (AC_VOLT * math.sqrt(2), 10.0)),  # Peak of ACin
     LimitHiLo('12Vpri', (11.5, 13.0)),
-    LimitHiLoPercent('Vload', (12.8, 3.0)), # AC-DC Convertor voltage setpoint
+    LimitHiLoPercent('Vload', (VOUT_SET, 3.0)), # AC-DC voltage setpoint
     LimitLo('VloadOff', 0.5),
-    LimitHiLoDelta('VbatIn', (12.0, 0.5)),
-    LimitHiLoDelta('VbatOut', (13.5, 0.5)),
-    LimitHiLoDelta('Vbat', (12.8, 0.2)),
-    LimitHiLoPercent('VbatLoad', (12.8, 5)),
-    LimitHiLoDelta('Vaux', (13.5, 0.5)),
-    LimitHiLoDelta('Vair', (13.5, 0.5)),
-    LimitHiLoDelta('3V3U', (3.30, 0.05)),
-    LimitHiLoDelta('3V3', (3.30, 0.05)),
+    LimitHiLoDelta('VbatIn', (VBAT_INJECT, 1.0)),
+    LimitHiLoDelta('VbatOut', (AUX_SOLAR_INJECT, 0.5)),
+    LimitHiLoDelta('Vbat', (VOUT_SET, 0.2)),
+    LimitHiLoPercent('VbatLoad', (VOUT_SET, 5.0)),
+    LimitHiLoDelta('Vaux', (AUX_SOLAR_INJECT, 0.5)),
+    LimitHiLoDelta('Vair', (AUX_SOLAR_INJECT, 0.5)),
+    LimitHiLoPercent('3V3U', (3.30, 1.5)),
+    LimitHiLoPercent('3V3', (3.30, 1.5)),
     LimitHiLo('15Vs', (11.5, 13.0)),
-    LimitHiLoDelta('FanOn', (12.5, 0.5)),
+    LimitHiLoDelta('FanOn', (VOUT_SET, 1.0)),
     LimitLo('FanOff', 0.5),
     LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     LimitString('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    LimitHiLoDelta('ARM-AuxV', (13.5, 0.37)),
+    LimitHiLoDelta(
+        'ARM-AuxV', (AUX_SOLAR_INJECT, AUX_SOLAR_INJECT * 0.02 + 0.1)),
     LimitHiLo('ARM-AuxI', (0.0, 1.5)),
     LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
-    LimitHiLoDelta('ARM-AcV', (240.0, 10.0)),
-    LimitHiLoDelta('ARM-AcF', (50.0, 3.0)),
+    LimitHiLoDelta('ARM-AcV', (AC_VOLT, AC_VOLT * 0.04 + 1.0)),
+    LimitHiLoDelta('ARM-AcF', (AC_FREQ, AC_FREQ * 0.04 + 1.0)),
     LimitHiLo('ARM-SecT', (8.0, 70.0)),
-    LimitHiLoDelta('ARM-Vout', (12.8, 0.356)),
+    LimitHiLoDelta('ARM-Vout', (VOUT_SET, VOUT_SET * 0.02 + 0.1)),
     LimitHiLo('ARM-Fan', (0, 100)),
-    LimitHiLoDelta('ARM-BattI', (4.0, 1.0)),
-    LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
-    LimitHiLoDelta('CanPwr', (12.0, 1.0)),
+    LimitHiLoDelta('ARM-BattI', (BATT_CURRENT, BATT_CURRENT * 0.017 + 1.0)),
+    LimitHiLoDelta('ARM-LoadI', (LOAD_PER_OUTPUT, 0.9)),
+    LimitHiLoDelta('CanPwr', (VOUT_SET, 1.8)),
     LimitHiLoInt('LOAD_SET', 0x5555555),
     LimitString('CAN_RX', r'^RRQ,36,0'),
     LimitHiLoInt('CAN_BIND', _CAN_BIND),
-    LimitLo('InOCP', 11.6),
+    LimitLo('InOCP', VOUT_SET - 1.2),
     LimitLo('FixtureLock', 20),
     LimitBoolean('Notify', True),
     )
 
 LIMITS_A = _COMMON + (
-    LimitLo('LOAD_COUNT', COUNT_A),
+    LimitLo('LOAD_COUNT', OUTPUT_COUNT_A),
     LimitHiLo('OCP', (20.0, 25.0)),
     )
 
 LIMITS_B = _COMMON + (
-    LimitLo('LOAD_COUNT', COUNT_BC),
-    LimitHiLo('OCP', (35.0, 42.0)),
+    LimitLo('LOAD_COUNT', OUTPUT_COUNT_BC),
+    LimitHiLo('OCP', (OCP_SET, OCP_SET + 7.0)),
     )
 
 LIMITS_C = _COMMON + (
-    LimitLo('LOAD_COUNT', COUNT_BC),
-    LimitHiLo('OCP', (35.0, 42.0)),
+    LimitLo('LOAD_COUNT', OUTPUT_COUNT_BC),
+    LimitHiLo('OCP', (OCP_SET, OCP_SET + 7.0)),
     )
 
 # Variant specific configuration data. Indexed by test program parameter.
@@ -147,7 +164,7 @@ class Initial(share.TestSequence):
         mes['dmm_lock'](timeout=5)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Apply DC Source to Battery terminals
-        dev['dcs_vbat'].output(12.6, True)
+        dev['dcs_vbat'].output(VBAT_INJECT, True)
         self.measure(('dmm_vbatin', 'dmm_3v3u'), timeout=5)
 
     @share.teststep
@@ -162,13 +179,13 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         j35.open()
         j35.brand(self.config['HwVer'], self.sernum, dev['rla_reset'])
-        j35.manual_mode(True)   # Start the change to manual mode
+        j35.manual_mode(start=True) # Start the change to manual mode
         mes['arm_swver']()
 
     @share.teststep
     def _step_aux(self, dev, mes):
         """Test Auxiliary input."""
-        dev['dcs_vaux'].output(13.5, True)
+        dev['dcs_vaux'].output(AUX_SOLAR_INJECT, True)
         mes['dmm_vaux'](timeout=5)
         dev['dcl_bat'].output(0.5, True)
         j35 = dev['j35']
@@ -181,7 +198,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_solar(self, dev, mes):
         """Test Solar input."""
-        dev['dcs_solar'].output(13.5, True)
+        dev['dcs_solar'].output(AUX_SOLAR_INJECT, True)
         j35 = dev['j35']
         j35['SOLAR'] = True
         self.measure(('dmm_vbatout', 'dmm_vair'), timeout=5)
@@ -192,10 +209,11 @@ class Initial(share.TestSequence):
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
         j35 = dev['j35']
-        j35.manual_mode()     # Complete the change to manual mode
+        # Complete the change to manual mode
+        j35.manual_mode(vout=VOUT_SET, iout=OCP_SET)
         if self.config['Derate']:
             j35.derate()      # Derate for lower output current
-        dev['acsource'].output(voltage=240.0, output=True)
+        dev['acsource'].output(voltage=AC_VOLT, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12vpri', 'arm_vout_ov'),
             timeout=5)
@@ -241,11 +259,11 @@ class Initial(share.TestSequence):
         val = mes['arm_loadset']().reading1
         self._logger.debug('0x{:08X}'.format(int(val)))
         load_count = self.config['LoadCount']
-        dev['dcl_out'].binary(1.0, load_count * 2.0, 5.0)
+        dev['dcl_out'].binary(1.0, load_count * LOAD_PER_OUTPUT, 5.0)
         for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
-        dev['dcl_bat'].output(4.0, True)
+        dev['dcl_bat'].output(BATT_CURRENT, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 
     @share.teststep
@@ -377,7 +395,7 @@ class Sensors(share.Sensors):
         for i in range(load_count):
             sen = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
             self['arm_loads'].append(sen)
-        load_current = load_count * 2.0
+        load_current = load_count * LOAD_PER_OUTPUT
         low, high = self.limits['OCP'].limit
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_bat'],

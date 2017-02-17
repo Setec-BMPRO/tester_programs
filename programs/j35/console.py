@@ -122,7 +122,7 @@ class Console(console.Variable, console.BadUartConsole):
         reset_relay.pulse(0.1)
         self.action(None, delay=1.5, expected=2)  # Flush banner
 
-    def manual_mode(self, start=False):
+    def manual_mode(self, start=False, vout=None, iout=None):
         """Set the unit to Manual Mode.
 
         The unit takes some time for the command to take effect. We use a
@@ -130,6 +130,8 @@ class Console(console.Variable, console.BadUartConsole):
 
         @param start True to start the entry to Manual Mode
                      False to finish the transition to Manual Mode
+        @param vout Output voltage setpoint in Volts
+        @param iout Output OCP setpoint in Amps
 
         """
         if start:  # Trigger manual mode, and start a timer
@@ -142,8 +144,8 @@ class Console(console.Variable, console.BadUartConsole):
             if not self.fifo:
                 self._myevent.wait()
             self['TASK_STARTUP'] = 0
-            self['IOUT'] = 35.0
-            self['VOUT'] = 12.8
+            self['IOUT'] = iout
+            self['VOUT'] = vout
             self['VOUT_OV'] = 2     # OVP Latch reset
             self['FAN'] = 0
 
