@@ -40,7 +40,7 @@ class ParameterBoolean(unittest.TestCase):
 
     def test_4_rd_invalid(self):
         """Invalid response values."""
-        for resp in ('x', 'True', 'False', ''):
+        for resp in ('x', 'True', 'False', 'yes', ''):
             self.func.return_value = resp
             with self.assertRaises(ValueError):
                 self.param.read(self.func)
@@ -80,3 +80,123 @@ class ParameterString(unittest.TestCase):
         value = 'def'
         self.param.write(value, self.func)
         self.func.assert_called_with('{0} "{1} XN!'.format(value, _CMD))
+
+
+class ParameterFloat(unittest.TestCase):
+
+    """ParameterFloat test suite."""
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.param = share.ParameterFloat(_CMD, writeable=True)
+        self.func = MagicMock(name='Parameter')
+
+    def test_1_rd_cmd(self):
+        """Read command."""
+        response = '1.234 '
+        self.func.return_value = response
+        value = self.param.read(self.func)
+        self.assertEqual(float(response), value)
+        self.func.assert_called_with('"{0} XN?'.format(_CMD), expected=1)
+
+    def test_2_wr_cmd(self):
+        """Write command."""
+        value = 2.678
+        self.param.write(value, self.func)
+        self.func.assert_called_with('{0} "{1} XN!'.format(round(value), _CMD))
+
+
+class ParameterHex(unittest.TestCase):
+
+    """ParameterHex test suite."""
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.param = share.ParameterHex(_CMD, writeable=True)
+        self.func = MagicMock(name='Parameter')
+
+    def test_1_rd_cmd(self):
+        """Read command."""
+        response = '0x1234 '
+        self.func.return_value = response
+        value = self.param.read(self.func)
+        self.assertEqual(int(response, 16), value)
+        self.func.assert_called_with('"{0} XN?'.format(_CMD), expected=1)
+
+    def test_2_wr_cmd(self):
+        """Write command."""
+        value = 234
+        self.param.write(value, self.func)
+        self.func.assert_called_with(
+            '${0:08X} "{1} XN!'.format(round(value), _CMD))
+
+
+class ParameterHex0x(unittest.TestCase):
+
+    """ParameterHex0x test suite."""
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.param = share.ParameterHex0x(_CMD, writeable=True)
+        self.func = MagicMock(name='Parameter')
+
+    def test_1_rd_cmd(self):
+        """Read command."""
+        response = '0x1234 '
+        self.func.return_value = response
+        value = self.param.read(self.func)
+        self.assertEqual(int(response, 16), value)
+        self.func.assert_called_with('"{0} XN?'.format(_CMD), expected=1)
+
+    def test_2_wr_cmd(self):
+        """Write command."""
+        value = 234
+        self.param.write(value, self.func)
+        self.func.assert_called_with(
+            '0x{0:08X} "{1} XN!'.format(round(value), _CMD))
+
+
+class ParameterCAN(unittest.TestCase):
+
+    """ParameterCAN test suite."""
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.param = share.ParameterCAN(_CMD, writeable=True)
+        self.func = MagicMock(name='Parameter')
+
+    def test_1_rd_cmd(self):
+        """Read command."""
+        response = 'abc '
+        self.func.return_value = response
+        value = self.param.read(self.func)
+        self.assertEqual(response, value)
+        self.func.assert_called_with('"{0} CAN'.format(_CMD), expected=1)
+
+    def test_2_wr_cmd(self):
+        """Write command."""
+        with self.assertRaises(share.console.ParameterError):
+            self.param.write('x', self.func)
+
+
+class ParameterRaw(unittest.TestCase):
+
+    """ParameterRaw test suite."""
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.func = MagicMock(name='Parameter')
+        self.param = share.ParameterRaw(_CMD, writeable=True, func=self.func)
+
+    def test_1_rd_cmd(self):
+        """Read command."""
+        response = 'abc '
+        self.func.return_value = response
+        value = self.param.read(None)
+        self.assertEqual(response, value)
+        self.func.assert_called_with()
+
+    def test_2_wr_cmd(self):
+        """Write command."""
+        with self.assertRaises(share.console.ParameterError):
+            self.param.write('x', self.func)

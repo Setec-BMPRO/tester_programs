@@ -240,7 +240,7 @@ class ParameterCAN(_Parameter):
         """Set a new read_format."""
         super().__init__(command, writeable, read_format='"{0} CAN')
 
-    def write(self, value):
+    def write(self, value, func):
         """Write parameter value.
 
         @param value Data value.
@@ -276,7 +276,7 @@ class ParameterRaw(_Parameter):
         super().__init__(command, writeable)
         self._func = func
 
-    def write(self, value):
+    def write(self, value, func):
         """Write parameter value.
 
         @param value Data value.
