@@ -31,7 +31,7 @@ _COMMON = (
     LimitHiLoDelta('ACin', (240.0, 5.0)),
     LimitHiLoDelta('Vbus', (340.0, 5.0)),
     LimitHiLo('12Vpri', (11.5, 13.0)),
-    LimitHiLo('Vload', (12.0, 12.9)),
+    LimitHiLoPercent('Vload', (12.8, 3.0)), # AC-DC Convertor voltage setpoint
     LimitLo('VloadOff', 0.5),
     LimitHiLoDelta('VbatIn', (12.0, 0.5)),
     LimitHiLoDelta('VbatOut', (13.5, 0.5)),
