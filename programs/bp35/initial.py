@@ -9,8 +9,8 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitString,
-    LimitHiLo, LimitHiLoDelta, LimitHiLoPercent, LimitHiLoInt
+    LimitLow, LimitRegExp,
+    LimitBetween, LimitDelta, LimitPercent, LimitInteger
     )
 import share
 from . import console
@@ -52,48 +52,48 @@ VOUT_SET = 12.8
 OCP_NOMINAL = 35.0
 
 LIMITS = (
-    LimitLo('FixtureLock', 50),
-    LimitHiLoDelta('HwVer8', (4400.0, 250.0)),  # Rev 8+
-    LimitHiLoDelta('ACin', (VAC, 5.0)),
-    LimitHiLo('Vpfc', (401.0, 424.0)),
-    LimitHiLo('12Vpri', (11.5, 13.0)),
-    LimitHiLo('15Vs', (11.5, 13.0)),
-    LimitHiLo('Vload', (12.0, 12.9)),
-    LimitLo('VloadOff', 0.5),
-    LimitHiLoDelta('VbatIn', (12.0, 0.5)),
-    LimitHiLo('Vbat', (12.2, 13.0)),
-    LimitHiLoDelta('Vaux', (13.4, 0.4)),
-    LimitHiLoDelta('3V3', (3.30, 0.05)),
-    LimitHiLoDelta('FanOn', (12.5, 0.5)),
-    LimitLo('FanOff', 0.5),
-    LimitHiLoDelta('SolarVcc', (3.3, 0.1)),
-    LimitHiLoDelta('SolarVin', (SOLAR_VIN, 0.5)),
-    LimitHiLoPercent('VsetPre', (SOLAR_VSET, 6.0)),
-    LimitHiLoPercent('VsetPost', (SOLAR_VSET, 1.5)),
-    LimitHiLoPercent('ARM-IoutPre', (SOLAR_ICAL, 9.0)),
-    LimitHiLoPercent('ARM-IoutPost', (SOLAR_ICAL, 3.0)),
-    LimitHiLoDelta('OCP', (OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04)),  # 4%
-    LimitLo('InOCP', 11.6),
-    LimitString('ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    LimitHiLoDelta('ARM-AcV', (VAC, 10.0)),
-    LimitHiLoDelta('ARM-AcF', (50.0, 1.0)),
-    LimitHiLo('ARM-SecT', (8.0, 70.0)),
-    LimitHiLoDelta('ARM-Vout', (12.45, 0.45)),
-    LimitHiLoPercent('ARM-SolarVin-Pre', (SOLAR_VIN, SOLAR_VIN_PRE_PERCENT)),
-    LimitHiLoPercent('ARM-SolarVin-Post', (SOLAR_VIN, SOLAR_VIN_POST_PERCENT)),
-    LimitHiLo('ARM-Fan', (0, 100)),
-    LimitHiLoDelta('ARM-LoadI', (2.1, 0.9)),
-    LimitHiLoDelta('ARM-BattI', (IBATT, 1.0)),
-    LimitHiLoDelta('ARM-BusI', (ILOAD + IBATT, 3.0)),
-    LimitHiLoDelta('ARM-AuxV', (13.4, 0.4)),
-    LimitHiLo('ARM-AuxI', (0.0, 1.5)),
-    LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    LimitString('CAN_RX', r'^RRQ,32,0'),
-    LimitHiLoInt('CAN_BIND', _CAN_BIND),
-    LimitHiLoInt('SOLAR_ALIVE', 1),
-    LimitHiLoInt('SOLAR_RELAY', 1),
-    LimitHiLoInt('SOLAR_ERROR', 0),
-    LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
+    LimitLow('FixtureLock', 50),
+    LimitDelta('HwVer8', 4400.0, 250.0),  # Rev 8+
+    LimitDelta('ACin', VAC, 5.0),
+    LimitBetween('Vpfc', 401.0, 424.0),
+    LimitBetween('12Vpri', 11.5, 13.0),
+    LimitBetween('15Vs', 11.5, 13.0),
+    LimitBetween('Vload', 12.0, 12.9),
+    LimitLow('VloadOff', 0.5),
+    LimitDelta('VbatIn', 12.0, 0.5),
+    LimitBetween('Vbat', 12.2, 13.0),
+    LimitDelta('Vaux', 13.4, 0.4),
+    LimitDelta('3V3', 3.30, 0.05),
+    LimitDelta('FanOn', 12.5, 0.5),
+    LimitLow('FanOff', 0.5),
+    LimitDelta('SolarVcc', 3.3, 0.1),
+    LimitDelta('SolarVin', SOLAR_VIN, 0.5),
+    LimitPercent('VsetPre', SOLAR_VSET, 6.0),
+    LimitPercent('VsetPost', SOLAR_VSET, 1.5),
+    LimitPercent('ARM-IoutPre', SOLAR_ICAL, 9.0),
+    LimitPercent('ARM-IoutPost', SOLAR_ICAL, 3.0),
+    LimitDelta('OCP', OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04),  # 4%
+    LimitLow('InOCP', 11.6),
+    LimitRegExp('ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
+    LimitDelta('ARM-AcV', VAC, 10.0),
+    LimitDelta('ARM-AcF', 50.0, 1.0),
+    LimitBetween('ARM-SecT', 8.0, 70.0),
+    LimitDelta('ARM-Vout', 12.45, 0.45),
+    LimitPercent('ARM-SolarVin-Pre', SOLAR_VIN, SOLAR_VIN_PRE_PERCENT),
+    LimitPercent('ARM-SolarVin-Post', SOLAR_VIN, SOLAR_VIN_POST_PERCENT),
+    LimitBetween('ARM-Fan', 0, 100),
+    LimitDelta('ARM-LoadI', 2.1, 0.9),
+    LimitDelta('ARM-BattI', IBATT, 1.0),
+    LimitDelta('ARM-BusI', ILOAD + IBATT, 3.0),
+    LimitDelta('ARM-AuxV', 13.4, 0.4),
+    LimitBetween('ARM-AuxI', 0.0, 1.5),
+    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    LimitRegExp('CAN_RX', r'^RRQ,32,0'),
+    LimitInteger('CAN_BIND', _CAN_BIND),
+    LimitInteger('SOLAR_ALIVE', 1),
+    LimitInteger('SOLAR_RELAY', 1),
+    LimitInteger('SOLAR_ERROR', 0),
+    LimitInteger('Vout_OV', 0),     # Over-voltage not triggered
     )
 
 
@@ -208,11 +208,11 @@ class Initial(share.TestSequence):
         # Read solar input voltage and patch ARM measurement limits
         solar_vin = mes['dmm_solarvin'](timeout=5).reading1
         mes['arm_solar_vin_pre'].testlimit = (
-            LimitHiLoPercent(
-                'ARM-SolarVin-Pre', (solar_vin, SOLAR_VIN_PRE_PERCENT)), )
+            LimitPercent(
+                'ARM-SolarVin-Pre', solar_vin, SOLAR_VIN_PRE_PERCENT), )
         mes['arm_solar_vin_post'].testlimit = (
-            LimitHiLoPercent(
-                'ARM-SolarVin-Post', (solar_vin, SOLAR_VIN_POST_PERCENT)), )
+            LimitPercent(
+                'ARM-SolarVin-Post', solar_vin, SOLAR_VIN_POST_PERCENT), )
         # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
         self.measure(
             ('arm_solar_error', 'arm_solar_relay', 'arm_solar_vin_pre', ), timeout=5)

@@ -17,8 +17,8 @@ PIC_HEX_SYN = 'ids_picSyn_2.hex'
 
 LIMITS_MIC = tester.testlimit.limitset((
     ('5V', 1, 4.95, 5.05, None, None),
-    ('SwRev', 1, None, None, r'2', None),
-    ('MicroTemp', 1, None, None, r'MICRO Temp', None),
+    ('SwRev', 1, None, None, '2', None),
+    ('MicroTemp', 1, None, None, 'MICRO Temp', None),
     ))
 
 LIMITS_AUX = tester.testlimit.limitset((
@@ -171,7 +171,7 @@ class InitialMicro(_Main):
 
         d.pic.open()
         d.pic.clear_port()
-        d.pic.exp_cnt = 1
+        d.pic.expected = 1
         tester.MeasureGroup((m.swrev, m.microtemp, ))
 
 

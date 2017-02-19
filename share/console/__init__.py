@@ -22,7 +22,8 @@ class Variable():
             '.'.join((__name__, self.__class__.__name__)))
         self._read_key = None
         self.cmd_data = {}  # Data readings: Key=Name, Value=Parameter
-        limit = tester.LimitHiLoInt('Comms', _SUCCESS)
+        limit = tester.LimitInteger(
+            'Comms', _SUCCESS, doc='Communication succeeded')
         self._comms = tester.Measurement(limit, tester.sensor.Mirror())
 
     def configure(self, key):

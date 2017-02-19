@@ -41,7 +41,8 @@ class ProgramPIC():
         self.working_dir = working_dir
         self.device_type = device_type
         self.relay = relay
-        limit = tester.LimitHiLoInt(limitname, _SUCCESS)
+        limit = tester.LimitInteger(
+            limitname, _SUCCESS, doc='Programming succeeded')
         self._pic = tester.Measurement(limit, tester.sensor.Mirror())
 
     def program(self):
@@ -97,7 +98,8 @@ class ProgramARM():
         self._reset_relay = reset_relay
         with open(filename, 'rb') as infile:
             self._bindata = bytearray(infile.read())
-        limit = tester.LimitHiLoInt(limitname, _SUCCESS)
+        limit = tester.LimitInteger(
+            limitname, _SUCCESS, doc='Programming succeeded')
         self._arm = tester.Measurement(limit, tester.sensor.Mirror())
 
     def program(self):

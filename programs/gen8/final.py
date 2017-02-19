@@ -6,21 +6,21 @@
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitHi, LimitBoolean, LimitHiLo, LimitHiLoDelta
+    LimitLow, LimitHigh, LimitBoolean, LimitBetween, LimitDelta
     )
 import share
 
 LIMITS = (
-    LimitHiLoDelta('Iecon', (240, 10)),
-    LimitLo('Iecoff', 10),
-    LimitHiLo('5V', (4.998, 5.202)),
-    LimitLo('24Voff', 0.5),
-    LimitLo('12Voff', 0.5),
-    LimitLo('12V2off', 0.5),
-    LimitHiLo('24Von', (22.80, 25.44)),
-    LimitHiLo('12Von', (11.8755, 12.4845)),
-    LimitHiLo('12V2on', (11.8146, 12.4845)),
-    LimitHi('PwrFailOff', 11.0),
+    LimitDelta('Iecon', 240, 10),
+    LimitLow('Iecoff', 10),
+    LimitBetween('5V', 4.998, 5.202),
+    LimitLow('24Voff', 0.5),
+    LimitLow('12Voff', 0.5),
+    LimitLow('12V2off', 0.5),
+    LimitBetween('24Von', 22.80, 25.44),
+    LimitBetween('12Von', 11.8755, 12.4845),
+    LimitBetween('12V2on', 11.8146, 12.4845),
+    LimitHigh('PwrFailOff', 11.0),
     LimitBoolean('Notify', True),
     )
 

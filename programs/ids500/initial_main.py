@@ -6,57 +6,57 @@
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitHi, LimitHiLo, LimitHiLoDelta, LimitBoolean,
+    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitBoolean,
     )
 import share
 
-_LDD_6_ERROR_LIMITS = (-0.07, 0.07)
-_LDD_50_ERROR_LIMITS = (-0.7, 0.7)
+_LDD_6_ERROR_LIMITS = 0.07
+_LDD_50_ERROR_LIMITS = 0.7
 
 LIMITS = (
-    LimitHiLoDelta('PfcOff', (340.0, 10.0)),
-    LimitHiLo('PfcOn', (395.0, 410.0)),
-    LimitLo('TecOff', 1.5),
-    LimitLo('TecVmonOff', 1.5),
-    LimitLo('LddOff', 1.5),
-    LimitLo('IsVmonOff', 0.5),
-    LimitLo('15VOff', 1.5),
-    LimitHi('-15VOff', -1.5),
-    LimitLo('15VpOff', 1.5),
-    LimitLo('15VpSwOff', 1.5),
-    LimitLo('5VOff', 1.5),
-    LimitHiLoDelta('15V', (15.00, 0.75)),
-    LimitHiLoDelta('-15V', (-15.00, 0.75)),
-    LimitHiLoDelta('15Vp', (15.00, 0.75)),
-    LimitHiLoDelta('15VpSw', (15.00, 0.75)),
-    LimitHiLoDelta('5V', (4.95, 0.15)),
-    LimitHiLoDelta('Tec', (15.00, 0.30)),
-    LimitHiLoDelta('TecPhase', (-15.00, 0.30)),
-    LimitHiLo('TecVset', (4.95, 5.18)),
-    LimitLo('TecVmon0V', 0.5),
-    LimitHiLoDelta('TecVmon', (5.00, 0.10)),
-    LimitHiLoDelta('TecErr', (0.000, 0.275)),
-    LimitHiLoDelta('TecVmonErr', (0.000, 0.030)),
-    LimitHiLo('Ldd', (-0.4, 2.5)),
-    LimitHiLo('IsVmon', (-0.4, 2.5)),
-    LimitHiLoDelta('IsOut0V', (0.000, 0.001)),
-    LimitHiLoDelta('IsOut06V', (0.006, 0.001)),
-    LimitHiLoDelta('IsOut5V', (0.050, 0.002)),
-    LimitHiLoDelta('IsIout0V', (0.00, 0.05)),
-    LimitHiLoDelta('IsIout06V', (0.60, 0.02)),
-    LimitHiLoDelta('IsIout5V', (5.00, 0.10)),
-    LimitHiLoDelta('IsSet06V', (0.60, 0.05)),
-    LimitHiLoDelta('IsSet5V', (5.00, 0.05)),
-    LimitHiLo('SetMonErr', _LDD_6_ERROR_LIMITS),    # these 3 are patched and
-    LimitHiLo('SetOutErr', _LDD_6_ERROR_LIMITS),    # then restored during
-    LimitHiLo('MonOutErr', _LDD_6_ERROR_LIMITS),    # the LDD accuracy test
-    LimitHiLo('OCP5V', (7.0, 10.0)),
-    LimitLo('inOCP5V', 4.0),
-    LimitHiLo('OCP15Vp', (7.0, 10.0)),
-    LimitLo('inOCP15Vp', 12.0),
-    LimitHiLo('OCPTec', (20.0, 23.0)),
-    LimitLo('inOCPTec', 12.0),
-    LimitLo('FixtureLock', 20),
+    LimitDelta('PfcOff', 340.0, 10.0),
+    LimitBetween('PfcOn', 395.0, 410.0),
+    LimitLow('TecOff', 1.5),
+    LimitLow('TecVmonOff', 1.5),
+    LimitLow('LddOff', 1.5),
+    LimitLow('IsVmonOff', 0.5),
+    LimitLow('15VOff', 1.5),
+    LimitHigh('-15VOff', -1.5),
+    LimitLow('15VpOff', 1.5),
+    LimitLow('15VpSwOff', 1.5),
+    LimitLow('5VOff', 1.5),
+    LimitDelta('15V', 15.00, 0.75),
+    LimitDelta('-15V', -15.00, 0.75),
+    LimitDelta('15Vp', 15.00, 0.75),
+    LimitDelta('15VpSw', 15.00, 0.75),
+    LimitDelta('5V', 4.95, 0.15),
+    LimitDelta('Tec', 15.00, 0.30),
+    LimitDelta('TecPhase', -15.00, 0.30),
+    LimitBetween('TecVset', 4.95, 5.18),
+    LimitLow('TecVmon0V', 0.5),
+    LimitDelta('TecVmon', 5.00, 0.10),
+    LimitDelta('TecErr', 0.000, 0.275),
+    LimitDelta('TecVmonErr', 0.000, 0.030),
+    LimitBetween('Ldd', -0.4, 2.5),
+    LimitBetween('IsVmon', -0.4, 2.5),
+    LimitDelta('IsOut0V', 0.000, 0.001),
+    LimitDelta('IsOut06V', 0.006, 0.001),
+    LimitDelta('IsOut5V', 0.050, 0.002),
+    LimitDelta('IsIout0V', 0.00, 0.05),
+    LimitDelta('IsIout06V', 0.60, 0.02),
+    LimitDelta('IsIout5V', 5.00, 0.10),
+    LimitDelta('IsSet06V', 0.60, 0.05),
+    LimitDelta('IsSet5V', 5.00, 0.05),
+    LimitDelta('SetMonErr', 0, _LDD_6_ERROR_LIMITS),    # these 3 are patched and
+    LimitDelta('SetOutErr', 0, _LDD_6_ERROR_LIMITS),    # then restored during
+    LimitDelta('MonOutErr', 0, _LDD_6_ERROR_LIMITS),    # the LDD accuracy test
+    LimitBetween('OCP5V', 7.0, 10.0),
+    LimitLow('inOCP5V', 4.0),
+    LimitBetween('OCP15Vp', 7.0, 10.0),
+    LimitLow('inOCP15Vp', 12.0),
+    LimitBetween('OCPTec', 20.0, 23.0),
+    LimitLow('inOCPTec', 12.0),
+    LimitLow('FixtureLock', 20),
     LimitBoolean('Notify', True),
     )
 
@@ -177,11 +177,13 @@ class InitialMain(share.TestSequence):
                 # Patch limits for 50A checks
                 patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
                 for name in patch_limits:
-                    self.limits[name].limit = _LDD_50_ERROR_LIMITS
+                    self.limits[name].limit = (
+                    -_LDD_50_ERROR_LIMITS, _LDD_50_ERROR_LIMITS)
                 self._ldd_err(mes, Iset, Iout, Imon)
             finally:    # Restore the limits for 6A checks
                 for name in patch_limits:
-                    self.limits[name].limit = _LDD_6_ERROR_LIMITS
+                    self.limits[name].limit = (
+                    -_LDD_6_ERROR_LIMITS, _LDD_6_ERROR_LIMITS)
             mes['ui_YesNoLddRed']()
         # LDD off
         dev['dcs_isset'].output(0.0, False)

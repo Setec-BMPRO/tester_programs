@@ -9,7 +9,7 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitHi, LimitHiLo, LimitHiLoDelta, LimitBoolean
+    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitBoolean
     )
 import share
 
@@ -19,35 +19,35 @@ _OCP_LOW = 34.0
 _OCP_HIGH = 43.0
 
 _BASE_DATA = (
-    LimitLo('DetectDiode', 0.3),
-    LimitHiLoDelta('FlyLead', (30.0, 10.0)),
-    LimitHiLoDelta('AcIn', (240.0, 5.0)),
-    LimitHiLoDelta('Vbus', (330.0, 20.0)),
-    LimitHiLo('Vcc', (13.8, 22.5)),
-    LimitLo('VccOff', 5.0),
-    LimitHiLoDelta('Vdd', (5.00, 0.1)),
-    LimitHiLo('VbatCtl', (12.7, 13.5)),
-    LimitHiLoDelta('Vctl', (12.0, 0.5)),
-    LimitHiLo('VoutPre', (12.5, 15.0)),
-    LimitHiLoDelta('Vout', (13.65, 0.05)),
-    LimitLo('VoutOff', 1.0),
-    LimitHiLo('VbatPre', (12.5, 15.0)),
-    LimitHiLoDelta('Vbat', (13.65, 0.05)),
-    LimitHiLoDelta('Vaux', (13.70, 0.5)),
-    LimitLo('FanOff', 0.5),
-    LimitHiLo('FanOn', (12.0, 14.1)),
-    LimitLo('InOCP', 13.24),
-    LimitHiLo('OCP', (_OCP_LOW, _OCP_HIGH)),
+    LimitLow('DetectDiode', 0.3),
+    LimitDelta('FlyLead', 30.0, 10.0),
+    LimitDelta('AcIn', 240.0, 5.0),
+    LimitDelta('Vbus', 330.0, 20.0),
+    LimitBetween('Vcc', 13.8, 22.5),
+    LimitLow('VccOff', 5.0),
+    LimitDelta('Vdd', 5.00, 0.1),
+    LimitBetween('VbatCtl', 12.7, 13.5),
+    LimitDelta('Vctl', 12.0, 0.5),
+    LimitBetween('VoutPre', 12.5, 15.0),
+    LimitDelta('Vout', 13.65, 0.05),
+    LimitLow('VoutOff', 1.0),
+    LimitBetween('VbatPre', 12.5, 15.0),
+    LimitDelta('Vbat', 13.65, 0.05),
+    LimitDelta('Vaux', 13.70, 0.5),
+    LimitLow('FanOff', 0.5),
+    LimitBetween('FanOn', 12.0, 14.1),
+    LimitLow('InOCP', 13.24),
+    LimitBetween('OCP', _OCP_LOW, _OCP_HIGH),
     LimitBoolean('Notify', True),
-    LimitLo('FixtureLock', 20),
+    LimitLow('FixtureLock', 20),
     )
 
 LIMITS_STD = _BASE_DATA + (
-    LimitLo('VbatOCP', 10.0),
+    LimitLow('VbatOCP', 10.0),
     )
 
 LIMITS_H = _BASE_DATA + (
-    LimitHi('VbatOCP', 13.0),
+    LimitHigh('VbatOCP', 13.0),
     )
 
 LIMITS = {      # Test limit selection keyed by program parameter

@@ -122,7 +122,7 @@ ALL_SKIP = (
     'GENIUS-II Initial',
     'IDS500 Initial Main', 'IDS500 Final',
     'J35 Initial', 'J35 Final',
-    'RVVIEW Initial', 'SX-750 Initial',
+    'RVVIEW Initial', 'SX-750 Initial', 'SX-750 Final',
     # Obsolete and unused programs
     'SX-750 Safety',
     # The voltage adjuster will not simulate

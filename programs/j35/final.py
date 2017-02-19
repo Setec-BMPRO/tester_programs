@@ -7,23 +7,26 @@ import tester
 import share
 from tester import (
     TestStep,
-    LimitLo, LimitHi, LimitHiLo, LimitHiLoDelta, LimitHiLoPercent
+    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitPercent
     )
 
+# Load on each output channel
+LOAD_PER_OUTPUT = 2.0
+
 _COMMON = (
-    LimitLo('FanOff', 1.0),
-    LimitHi('FanOn', 10.0),
-    LimitHiLoDelta('Vout', (12.8, 0.2)),
-    LimitHiLoPercent('Vload', (12.8, 5)),
-    LimitLo('InOCP', 11.6),
+    LimitLow('FanOff', 1.0, doc='No airflow seen'),
+    LimitHigh('FanOn', 10.0, doc='Airflow seen'),
+    LimitDelta('Vout', 12.8, delta=0.2, doc='No load output voltage'),
+    LimitPercent('Vload', 12.8, percent=5, doc='Loaded output voltage'),
+    LimitLow('InOCP', 11.6, doc='Output voltage in OCP'),
     )
 
 LIMITS_A = _COMMON + (
-    LimitHiLo('OCP', (20.0, 25.0)),
+    LimitBetween('OCP', 20.0, 25.0, doc='OCP trip current'),
     )
 
 LIMITS_BC = _COMMON + (
-    LimitHiLo('OCP', (35.0, 42.0)),
+    LimitBetween('OCP', 35.0, 42.0, doc='OCP trip current'),
     )
 
 CONFIG = {      # Test configuration keyed by program parameter
@@ -61,7 +64,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac and measure output voltage."""
-        dev['dcs_photo'].output(12.0, True)
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
         mes['dmm_fanon'](timeout=15)
@@ -72,8 +74,8 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_load(self, dev, mes):
         """Test outputs with load."""
-        dev['dcl_out'].output(0.0,  output=True)
-        dev['dcl_out'].binary(1.0, self.load_count * 2.0, 5.0)
+        dev['dcl_out'].output(1.0,  output=True)
+        dev['dcl_out'].binary(1.0, self.load_count * LOAD_PER_OUTPUT, 5.0)
         for load in range(self.load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vloads'][load](timeout=5)
@@ -97,12 +99,17 @@ class LogicalDevices(share.LogicalDevices):
                 ('dcl_out', tester.DCLoad, 'DCL1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        self['dcs_photo'].output(12.0, True)
 
     def reset(self):
         """Reset instruments."""
         self['acsource'].output(voltage=0.0, output=False)
-        self['dcs_photo'].output(0.0, False)
         self['dcl_out'].output(0.0, False)
+
+    def close(self):
+        """Finished testing."""
+        self['dcs_photo'].output(0.0, False)
+        super().close()
 
 class Sensors(share.Sensors):
 

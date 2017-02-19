@@ -5,25 +5,25 @@
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitBoolean, LimitHiLo, LimitHiLoDelta
+    LimitLow, LimitBoolean, LimitBetween, LimitDelta
     )
 import share
 
 LIMITS = (
-    LimitHiLoDelta('InRes', (70000, 10000)),
-    LimitLo('IECoff', 0.5),
-    LimitHiLoDelta('IEC', (240, 5)),
-    LimitHiLo('5V', (5.034, 5.177)),
-    LimitLo('12Voff', 0.5),
-    LimitHiLo('12Von', (12.005, 12.495)),
-    LimitHiLo('24Von', (23.647, 24.613)),
-    LimitHiLo('5Vfl', (4.820, 5.380)),
-    LimitHiLo('12Vfl', (11.270, 13.230)),
-    LimitHiLo('24Vfl', (21.596, 26.663)),
-    LimitLo('PwrGood', 0.5),
-    LimitHiLoDelta('AcFail', (5.0, 0.5)),
-    LimitHiLo('Reg12V', (0.5, 5.0)),
-    LimitHiLo('Reg24V', (0.2, 5.0)),
+    LimitDelta('InRes', 70000, 10000),
+    LimitLow('IECoff', 0.5),
+    LimitDelta('IEC', 240, 5),
+    LimitBetween('5V', 5.034, 5.177),
+    LimitLow('12Voff', 0.5),
+    LimitBetween('12Von', 12.005, 12.495),
+    LimitBetween('24Von', 23.647, 24.613),
+    LimitBetween('5Vfl', 4.820, 5.380),
+    LimitBetween('12Vfl', 11.270, 13.230),
+    LimitBetween('24Vfl', 21.596, 26.663),
+    LimitLow('PwrGood', 0.5),
+    LimitDelta('AcFail', 5.0, 0.5),
+    LimitBetween('Reg12V', 0.5, 5.0),
+    LimitBetween('Reg24V', 0.2, 5.0),
     LimitBoolean('Notify', True),
     )
 

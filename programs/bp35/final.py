@@ -7,7 +7,7 @@ import tester
 import share
 
 LIMITS = (
-    tester.LimitHiLoDelta('Vbat', (12.8, 0.2)),
+    tester.LimitDelta('Vbat', 12.8, 0.2),
     )
 
 

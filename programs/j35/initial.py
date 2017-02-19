@@ -10,8 +10,7 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitBoolean, LimitString,
-    LimitHiLo, LimitHiLoDelta, LimitHiLoPercent, LimitHiLoInt
+    LimitLow, LimitRegExp, LimitBetween, LimitDelta, LimitPercent, LimitInteger
     )
 import share
 from . import console
@@ -44,57 +43,70 @@ LOAD_PER_OUTPUT = 2.0
 
 
 _COMMON = (
-    LimitHiLoDelta('ACin', (AC_VOLT, 5.0)),
-    LimitHiLoDelta('Vbus', (AC_VOLT * math.sqrt(2), 10.0)),  # Peak of ACin
-    LimitHiLo('12Vpri', (11.5, 13.0)),
-    LimitHiLoPercent('Vload', (VOUT_SET, 3.0)), # AC-DC voltage setpoint
-    LimitLo('VloadOff', 0.5),
-    LimitHiLoDelta('VbatIn', (VBAT_INJECT, 1.0)),
-    LimitHiLoDelta('VbatOut', (AUX_SOLAR_INJECT, 0.5)),
-    LimitHiLoDelta('Vbat', (VOUT_SET, 0.2)),
-    LimitHiLoPercent('VbatLoad', (VOUT_SET, 5.0)),
-    LimitHiLoDelta('Vaux', (AUX_SOLAR_INJECT, 0.5)),
-    LimitHiLoDelta('Vair', (AUX_SOLAR_INJECT, 0.5)),
-    LimitHiLoPercent('3V3U', (3.30, 1.5)),
-    LimitHiLoPercent('3V3', (3.30, 1.5)),
-    LimitHiLo('15Vs', (11.5, 13.0)),
-    LimitHiLoDelta('FanOn', (VOUT_SET, 1.0)),
-    LimitLo('FanOff', 0.5),
-    LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    LimitString('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    LimitHiLoDelta(
-        'ARM-AuxV', (AUX_SOLAR_INJECT, AUX_SOLAR_INJECT * 0.02 + 0.1)),
-    LimitHiLo('ARM-AuxI', (0.0, 1.5)),
-    LimitHiLoInt('Vout_OV', 0),     # Over-voltage not triggered
-    LimitHiLoDelta('ARM-AcV', (AC_VOLT, AC_VOLT * 0.04 + 1.0)),
-    LimitHiLoDelta('ARM-AcF', (AC_FREQ, AC_FREQ * 0.04 + 1.0)),
-    LimitHiLo('ARM-SecT', (8.0, 70.0)),
-    LimitHiLoDelta('ARM-Vout', (VOUT_SET, VOUT_SET * 0.02 + 0.1)),
-    LimitHiLo('ARM-Fan', (0, 100)),
-    LimitHiLoDelta('ARM-BattI', (BATT_CURRENT, BATT_CURRENT * 0.017 + 1.0)),
-    LimitHiLoDelta('ARM-LoadI', (LOAD_PER_OUTPUT, 0.9)),
-    LimitHiLoDelta('CanPwr', (VOUT_SET, 1.8)),
-    LimitHiLoInt('LOAD_SET', 0x5555555),
-    LimitString('CAN_RX', r'^RRQ,36,0'),
-    LimitHiLoInt('CAN_BIND', _CAN_BIND),
-    LimitLo('InOCP', VOUT_SET - 1.2),
-    LimitLo('FixtureLock', 20),
-    LimitBoolean('Notify', True),
+    LimitDelta('ACin', AC_VOLT, delta=5.0, doc='AC input voltage'),
+    LimitDelta('Vbus', AC_VOLT * math.sqrt(2), delta=10.0,
+        doc='Peak of AC input'),
+    LimitBetween('12Vpri', 11.5, 13.0, doc='12Vpri rail'),
+    LimitPercent('Vload', VOUT_SET, percent=3.0,
+        doc='AC-DC convertor voltage setpoint'),
+    LimitLow('VloadOff', 0.5, doc='When output is OFF'),
+    LimitDelta('VbatIn', VBAT_INJECT, delta=1.0,
+        doc='Vbat with injected voltage'),
+    LimitDelta('VbatOut', AUX_SOLAR_INJECT, delta=0.5,
+        doc='Vbat when Aux/Solar is injected'),
+    LimitDelta('Vbat', VOUT_SET, delta=0.2, doc='Vbat when unit is running'),
+    LimitPercent('VbatLoad', VOUT_SET, percent=5.0),
+    LimitDelta('Vaux', AUX_SOLAR_INJECT, delta=0.5,
+        doc='Vaux when voltage is injected'),
+    LimitDelta('Vair', AUX_SOLAR_INJECT, delta=0.5,
+            doc='Vair when voltage is injected to Solar'),
+    LimitPercent('3V3U', 3.30, percent=1.5, doc='3V3 unswitched'),
+    LimitPercent('3V3', 3.30, percent=1.5, doc='3V3 internal rail'),
+    LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
+    LimitDelta('FanOn', VOUT_SET, delta=1.0, doc='Fan running'),
+    LimitLow('FanOff', 0.5, doc='Fan not running'),
+    LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$',
+        doc='Valid serial number'),
+    LimitRegExp('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.')),
+        doc='Arm Software version'),
+    LimitPercent('ARM-AuxV', AUX_SOLAR_INJECT, percent=2.0, delta=0.1,
+        doc='ARM Aux voltage reading'),
+    LimitBetween('ARM-AuxI', 0.0, 1.5, doc='ARM Aux current reading'),
+    LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
+    LimitPercent('ARM-AcV', AC_VOLT, percent=4.0, delta=1.0,
+        doc='ARM AC voltage reading'),
+    LimitPercent('ARM-AcF', AC_FREQ, percent=4.0, delta=1.0,
+        doc='ARM AC frequency reading'),
+    LimitBetween('ARM-SecT', 8.0, 70.0,
+        doc='ARM secondary temperature sensor'),
+    LimitPercent('ARM-Vout', VOUT_SET, percent=2.0, delta=0.1,
+        doc='ARM measured Vout'),
+    LimitBetween('ARM-Fan', 0, 100, doc='ARM fan speed'),
+    LimitPercent('ARM-BattI', BATT_CURRENT, percent=1.7, delta=1.0,
+        doc='ARM battery current reading'),
+    LimitDelta('ARM-LoadI', LOAD_PER_OUTPUT, delta=0.9,
+        doc='ARM output current reading'),
+    LimitDelta('CanPwr', VOUT_SET, delta=1.8, doc='CAN bus power supply'),
+    LimitInteger('LOAD_SET', 0x5555555, doc='ARM output load enable setting'),
+    LimitInteger('CAN_BIND', _CAN_BIND, doc='ARM reports CAN bus operational'),
+    LimitRegExp('CAN_RX', '^RRQ,36,0', doc='Response to CAN echo message'),
+    LimitLow('InOCP', VOUT_SET - 1.2, doc='Output is in OCP'),
+    LimitLow('FixtureLock', 20, doc='Test fixture lid microswitch'),
     )
 
 LIMITS_A = _COMMON + (
-    LimitLo('LOAD_COUNT', OUTPUT_COUNT_A),
-    LimitHiLo('OCP', (20.0, 25.0)),
+    LimitLow('LOAD_COUNT', OUTPUT_COUNT_A),
+    LimitBetween('OCP', 20.0, 25.0, doc='OCP trip range'),
     )
 
 LIMITS_B = _COMMON + (
-    LimitLo('LOAD_COUNT', OUTPUT_COUNT_BC),
-    LimitHiLo('OCP', (OCP_SET, OCP_SET + 7.0)),
+    LimitLow('LOAD_COUNT', OUTPUT_COUNT_BC),
+    LimitBetween('OCP', OCP_SET, OCP_SET + 7.0, doc='OCP trip range'),
     )
 
 LIMITS_C = _COMMON + (
-    LimitLo('LOAD_COUNT', OUTPUT_COUNT_BC),
-    LimitHiLo('OCP', (OCP_SET, OCP_SET + 7.0)),
+    LimitLow('LOAD_COUNT', OUTPUT_COUNT_BC),
+    LimitBetween('OCP', OCP_SET, OCP_SET + 7.0, doc='OCP trip range'),
     )
 
 # Variant specific configuration data. Indexed by test program parameter.

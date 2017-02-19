@@ -9,8 +9,8 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitHi, LimitString,
-    LimitHiLo, LimitHiLoDelta, LimitHiLoPercent
+    LimitLow, LimitHigh, LimitRegExp,
+    LimitBetween, LimitDelta, LimitPercent
     )
 import share
 from . import console
@@ -27,40 +27,40 @@ ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM6'}[os.name]
 ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
 
 LIMITS = (
-    LimitLo('PartCheck', 100),   # uSwitches on C106, C107, D2
-    LimitHi('FanShort', 20),     # Short on fan connector
-    LimitLo('FixtureLock', 20),
-    LimitLo('5Voff', 0.5),
-    LimitHiLoPercent('5Vset', (5.10, 1.0)),
-    LimitHiLoPercent('5V', (5.10, 2.0)),
-    LimitLo('12Voff', 0.5),
-    LimitHiLoDelta('12Vpre', (12.1, 1.0)),
-    LimitHiLoDelta('12Vset', (12.18, 0.01)),
-    LimitHiLoPercent('12V', (12.18, 2.5)),
-    LimitLo('12V2off', 0.5),
-    LimitHiLoDelta('12V2pre', (12.0, 1.0)),
-    LimitHiLo('12V2', (11.8146, 12.4845)),   # 12.18 +2.5% -3.0%
-    LimitLo('24Voff', 0.5),
-    LimitHiLoDelta('24Vpre', (24.0, 2.0)),   # TestEng estimate
-    LimitHiLo('24V', (22.80, 25.68)),        # 24.0 +7% -5%
-    LimitLo('VdsQ103', 0.30),
-    LimitHiLoPercent('3V3', (3.30, 10.0)),   # TestEng estimate
-    LimitLo('PwrFail', 0.5),
-    LimitHiLoDelta('InputFuse', (240, 10)),
-    LimitHiLo('12Vpri', (11.4, 17.0)),
-    LimitHiLoDelta('PFCpre', (435, 15)),
-    LimitHiLoDelta('PFCpost1', (440.0, 0.8)),
-    LimitHiLoDelta('PFCpost2', (440.0, 0.8)),
-    LimitHiLoDelta('PFCpost3', (440.0, 0.8)),
-    LimitHiLoDelta('PFCpost4', (440.0, 0.8)),
-    LimitHiLoDelta('PFCpost', (440.0, 0.9)),
-    LimitHiLoDelta('ARM-AcFreq', (50, 10)),
-    LimitLo('ARM-AcVolt', 300),
-    LimitHiLoDelta('ARM-5V', (5.0, 1.0)),
-    LimitHiLoDelta('ARM-12V', (12.0, 1.0)),
-    LimitHiLoDelta('ARM-24V', (24.0, 2.0)),
-    LimitString('SwVer', '^{0}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
-    LimitString('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
+    LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
+    LimitHigh('FanShort', 20),     # Short on fan connector
+    LimitLow('FixtureLock', 20),
+    LimitLow('5Voff', 0.5),
+    LimitPercent('5Vset', 5.10, 1.0),
+    LimitPercent('5V', 5.10, 2.0),
+    LimitLow('12Voff', 0.5),
+    LimitDelta('12Vpre', 12.1, 1.0),
+    LimitDelta('12Vset', 12.18, 0.01),
+    LimitPercent('12V', 12.18, 2.5),
+    LimitLow('12V2off', 0.5),
+    LimitDelta('12V2pre', 12.0, 1.0),
+    LimitBetween('12V2', 11.8146, 12.4845),   # 12.18 +2.5% -3.0%
+    LimitLow('24Voff', 0.5),
+    LimitDelta('24Vpre', 24.0, 2.0),   # TestEng estimate
+    LimitBetween('24V', 22.80, 25.68),        # 24.0 +7% -5%
+    LimitLow('VdsQ103', 0.30),
+    LimitPercent('3V3', 3.30, 10.0),   # TestEng estimate
+    LimitLow('PwrFail', 0.5),
+    LimitDelta('InputFuse', 240, 10),
+    LimitBetween('12Vpri', 11.4, 17.0),
+    LimitDelta('PFCpre', 435, 15),
+    LimitDelta('PFCpost1', 440.0, 0.8),
+    LimitDelta('PFCpost2', 440.0, 0.8),
+    LimitDelta('PFCpost3', 440.0, 0.8),
+    LimitDelta('PFCpost4', 440.0, 0.8),
+    LimitDelta('PFCpost', 440.0, 0.9),
+    LimitDelta('ARM-AcFreq', 50, 10),
+    LimitLow('ARM-AcVolt', 300),
+    LimitDelta('ARM-5V', 5.0, 1.0),
+    LimitDelta('ARM-12V', 12.0, 1.0),
+    LimitDelta('ARM-24V', 24.0, 2.0),
+    LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
+    LimitRegExp('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
     )
 
 

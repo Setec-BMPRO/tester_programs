@@ -8,8 +8,8 @@ import inspect
 import tester
 from tester import (
     TestStep,
-    LimitLo, LimitBoolean, LimitString,
-    LimitHiLo, LimitHiLoPercent, LimitHiLoInt
+    LimitLow, LimitBoolean, LimitRegExp,
+    LimitBetween, LimitPercent, LimitInteger
     )
 import share
 from . import console
@@ -29,14 +29,14 @@ VIN_SET = 8.1
 _CAN_BIND = 1 << 28
 
 LIMITS = (
-    LimitHiLo('Vin', (7.0, 8.0)),
-    LimitHiLoPercent('3V3', (3.3, 3.0)),
-    LimitLo('BkLghtOff', 0.5),
-    LimitHiLo('BkLghtOn', (2.5, 3.5)),
-    LimitString('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    LimitString('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
-    LimitString('CAN_RX', r'^RRQ,32,0'),
-    LimitHiLoInt('CAN_BIND', _CAN_BIND),
+    LimitBetween('Vin', 7.0, 8.0),
+    LimitPercent('3V3', 3.3, 3.0),
+    LimitLow('BkLghtOff', 0.5),
+    LimitBetween('BkLghtOn', 2.5, 3.5),
+    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    LimitRegExp('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
+    LimitRegExp('CAN_RX', r'^RRQ,32,0'),
+    LimitInteger('CAN_BIND', _CAN_BIND),
     LimitBoolean('Notify', True),
     )
 

@@ -161,7 +161,8 @@ class BaseConsole():
         except ConsoleError as err:
             self._logger.debug('Caught ConsoleError %s', err)
             comms = tester.Measurement(
-                tester.LimitHiLoInt('Action', 0), tester.sensor.Mirror())
+                tester.LimitInteger('Action', 0, doc='Command succeeded'),
+                tester.sensor.Mirror())
             comms.sensor.store(1)
             comms.measure()   # Generates a test FAIL result
         return reply
