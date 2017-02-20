@@ -29,7 +29,7 @@ class _J35Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': ((sen['photo'], (0.0, 12.0)), ),
-                'OCP': ((sen['vload1'], (12.7, ) * 10 + (11.0, ), ), ),
+                'OCP': ((sen['vloads'][0], (12.7, ) * 10 + (11.0, ), ), ),
                 },
             UnitTester.key_call: {      # Callables
                 'PowerUp': (self._dmm_loads, 12.7),

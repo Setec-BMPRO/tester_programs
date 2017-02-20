@@ -18,7 +18,7 @@ _COMMON = (
     LimitHigh('FanOn', 10.0, doc='Airflow seen'),
     LimitDelta('Vout', 12.8, delta=0.2, doc='No load output voltage'),
     LimitPercent('Vload', 12.8, percent=5, doc='Loaded output voltage'),
-    LimitLow('InOCP', 11.6, doc='Output voltage in OCP'),
+    LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
     )
 
 LIMITS_A = _COMMON + (
@@ -92,13 +92,17 @@ class LogicalDevices(share.LogicalDevices):
 
     def open(self):
         """Create all Logical Instruments."""
-        for name, devtype, phydevname in (
-                ('dmm', tester.DMM, 'DMM'),
-                ('acsource', tester.ACSource, 'ACS'),
-                ('dcs_photo', tester.DCSource, 'DCS1'),
-                ('dcl_out', tester.DCLoad, 'DCL1'),
+        for name, devtype, phydevname, doc in (
+                ('dmm', tester.DMM, 'DMM',
+                 ''),
+                ('acsource', tester.ACSource, 'ACS',
+                 'AC input power'),
+                ('dcs_photo', tester.DCSource, 'DCS1',
+                 'Power to airflow detector'),
+                ('dcl_out', tester.DCLoad, 'DCL1',
+                 'Load shared by all outputs'),
             ):
-            self[name] = devtype(self.physical_devices[phydevname])
+            self[name] = devtype(self.physical_devices[phydevname], doc)
         self['dcs_photo'].output(12.0, True)
 
     def reset(self):
@@ -120,18 +124,21 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['photo'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
-        self['vload1'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
-        low, high = self.limits['OCP'].limit
-        self['ocp'] = sensor.Ramp(
-            stimulus=self.devices['dcl_out'], sensor=self['vload1'],
-            detect_limit=(self.limits['InOCP'], ),
-            start=low - 1, stop=high + 1, step=0.5, delay=0.2)
+        self['photo'].doc = 'Airflow detector'
         # Generate load voltage sensors
         vloads = []
         for i in range(CONFIG[self.parameter]['LoadCount']):
             s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
+            s.doc = 'Output #{0}'.format(i + 1)
             vloads.append(s)
         self['vloads'] = vloads
+        low, high = self.limits['OCP'].limit
+        self['ocp'] = sensor.Ramp(
+            stimulus=self.devices['dcl_out'], sensor=self['vloads'][0],
+            detect_limit=(self.limits['InOCP'], ),
+            start=low - 1, stop=high + 1, step=0.5, delay=0.2)
+        self['ocp'].doc = 'OCP trip value'
+        self['ocp'].units = 'Adc'
 
 
 class Measurements(share.Measurements):
