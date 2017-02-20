@@ -278,12 +278,12 @@ class Measurements(abc.ABC, dict):
         """Create measurements from name data.
 
         @param namedata Iterable of Tuple of
-                (measurement_name, limit_name, sensor_name)
+                (measurement_name, limit_name, sensor_name, doc)
 
         """
-        for measurement_name, limit_name, sensor_name in namedata:
+        for measurement_name, limit_name, sensor_name, doc in namedata:
             self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sensors[sensor_name])
+                self.limits[limit_name], self.sensors[sensor_name], doc=doc)
 
 
 def teststep(func):

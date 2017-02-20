@@ -142,16 +142,16 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_iec_on', 'Iecon', 'iec'),
-            ('dmm_iec_off', 'Iecoff', 'iec'),
-            ('dmm_5v', '5V', 'o5v'),
-            ('dmm_24voff', '24Voff', 'o24v'),
-            ('dmm_12voff', '12Voff', 'o12v'),
-            ('dmm_12v2off', '12V2off', 'o12v2'),
-            ('dmm_24von', '24Von', 'o24v'),
-            ('dmm_12von', '12Von', 'o12v'),
-            ('dmm_12v2on', '12V2on', 'o12v2'),
-            ('dmm_pwrfailoff', 'PwrFailOff', 'pwrfail'),
-            ('ui_yesno_mains', 'Notify', 'yn_mains'),
-            ('ui_notify_pwroff', 'Notify', 'not_pwroff'),
+            ('dmm_iec_on', 'Iecon', 'iec', ''),
+            ('dmm_iec_off', 'Iecoff', 'iec', ''),
+            ('dmm_5v', '5V', 'o5v', ''),
+            ('dmm_24voff', '24Voff', 'o24v', ''),
+            ('dmm_12voff', '12Voff', 'o12v', ''),
+            ('dmm_12v2off', '12V2off', 'o12v2', ''),
+            ('dmm_24von', '24Von', 'o24v', ''),
+            ('dmm_12von', '12Von', 'o12v', ''),
+            ('dmm_12v2on', '12V2on', 'o12v2', ''),
+            ('dmm_pwrfailoff', 'PwrFailOff', 'pwrfail', ''),
+            ('ui_yesno_mains', 'Notify', 'yn_mains', ''),
+            ('ui_notify_pwroff', 'Notify', 'not_pwroff', ''),
             ))

@@ -148,15 +148,17 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurement instances."""
         self.create_from_names((
-            ('dmm_fanoff', 'FanOff', 'photo'),
-            ('dmm_fanon', 'FanOn', 'photo'),
-            ('ramp_ocp', 'OCP', 'ocp'),
+            ('dmm_fanoff', 'FanOff', 'photo', 'Fan not running'),
+            ('dmm_fanon', 'FanOn', 'photo', 'Fan running'),
+            ('ramp_ocp', 'OCP', 'ocp', 'Output OCP'),
             ))
         # Generate load measurements
         vouts = []
         vloads = []
         for sen in self.sensors['vloads']:
-            vouts.append(tester.Measurement(self.limits['Vout'], sen))
-            vloads.append(tester.Measurement(self.limits['Vload'], sen))
+            vouts.append(tester.Measurement(
+                self.limits['Vout'], sen, doc='No load output voltage'))
+            vloads.append(tester.Measurement(
+                self.limits['Vload'], sen, doc='Loaded output voltage'))
         self['dmm_vouts'] = vouts
         self['dmm_vloads'] = vloads
