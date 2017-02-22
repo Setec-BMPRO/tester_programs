@@ -151,7 +151,7 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         dev.loads(i12=1.0, i24=1.0)
         # Calibrate the PFC set voltage
-        result, _, pfc = mes['dmm_pfcpre'].stable(PFC_STABLE)
+        pfc = mes['dmm_pfcpre'].stable(PFC_STABLE).reading1
         arm.calpfc(pfc)
         result, _, pfc = mes['dmm_pfcpost1'].stable(PFC_STABLE)
         if not result:      # 1st retry
@@ -162,21 +162,21 @@ class Initial(share.TestSequence):
             result, _, pfc = mes['dmm_pfcpost3'].stable(PFC_STABLE)
         if not result:      # 3rd retry
             arm.calpfc(pfc)
-            result, _, pfc = mes['dmm_pfcpost4'].stable(PFC_STABLE)
+            mes['dmm_pfcpost4'].stable(PFC_STABLE)
         # A final PFC setup check
         mes['dmm_pfcpost'].stable(PFC_STABLE)
         # no load for 12V calibration
         dev.loads(i12=0, i24=0)
         # Calibrate the 12V set voltage
-        result, _, v12 = mes['dmm_12vpre'].stable(V12_STABLE)
+        v12 = mes['dmm_12vpre'].stable(V12_STABLE).reading1
         arm.cal12v(v12)
         # Prevent a limit fail from failing the unit
         mes['dmm_12vset'].testlimit[0].position_fail = False
-        result, _, v12 = mes['dmm_12vset'].stable(V12_STABLE)
+        result = mes['dmm_12vset'].stable(V12_STABLE).result
         # Allow a limit fail to fail the unit
         mes['dmm_12vset'].testlimit[0].position_fail = True
         if not result:
-            result, _, v12 = mes['dmm_12vpre'].stable(V12_STABLE)
+            v12 = mes['dmm_12vpre'].stable(V12_STABLE).reading1
             arm.cal12v(v12)
             mes['dmm_12vset'].stable(V12_STABLE)
         self.measure(
