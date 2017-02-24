@@ -217,11 +217,11 @@ class Initial(tester.TestSequence):
         self._logger.info('Start PFC calibration')
         pfc = mes.dmm_PFCpre.stable(PFC_STABLE).reading1
         dev.arm.calpfc(pfc)
-        # Prevent a limit fail from failing the unit
-        mes.dmm_PFCpost.testlimit[0].position_fail = False
+        # Prevent a fail from failing the unit
+        mes.dmm_PFCpost.position_fail = False
         result = mes.dmm_PFCpost.stable(PFC_STABLE).result
-        # Allow a limit fail to fail the unit
-        mes.dmm_PFCpost.testlimit[0].position_fail = True
+        # Allow a fail to fail the unit
+        mes.dmm_PFCpost.position_fail = True
         if not result:
             self._logger.info('Retry PFC calibration')
             pfc = mes.dmm_PFCpre.stable(PFC_STABLE).reading1
@@ -540,13 +540,15 @@ class Measurements():
         self.rampOcp12V = self._maker('12V_OCPchk', sense.OCP12V)
         self.rampOcp24V = self._maker('24V_OCPchk', sense.OCP24V)
         self.dmm_8V5Ard = self._maker('8.5V Arduino', sense.o8V5Ard)
-        self.pgm_5vsb = self._maker('Reply', sense.pgm5Vsb)
-        self.pgm_pwrsw = self._maker('Reply', sense.pgmPwrSw)
-        self.ocp_max = self._maker('Reply', sense.ocpMax)
-        self.ocp12_unlock = self._maker('Reply', sense.ocp12Unlock)
-        self.ocp24_unlock = self._maker('Reply', sense.ocp24Unlock)
+        self.pgm_5vsb = self._maker('Reply', sense.pgm5Vsb, silent=True)
+        self.pgm_pwrsw = self._maker('Reply', sense.pgmPwrSw, silent=True)
+        self.ocp_max = self._maker('Reply', sense.ocpMax, silent=True)
+        self.ocp12_unlock = self._maker(
+            'Reply', sense.ocp12Unlock, silent=True)
+        self.ocp24_unlock = self._maker(
+            'Reply', sense.ocp24Unlock, silent=True)
         self.ocp_step_dn = self._maker('Reply', sense.ocpStepDn, silent=True)
-        self.ocp_lock = self._maker('Reply', sense.ocpLock)
+        self.ocp_lock = self._maker('Reply', sense.ocpLock, silent=True)
         self.arm_AcFreq = self._maker('ARM-AcFreq', sense.ARM_AcFreq)
         self.arm_AcVolt = self._maker('ARM-AcVolt', sense.ARM_AcVolt)
         self.arm_12V = self._maker('ARM-12V', sense.ARM_12V)
@@ -559,15 +561,15 @@ class Measurements():
 
         @param limitname Test Limit name
         @param sensor Sensor to use
-        @param silent True to suppress position_fail & send_signal
+        @param silent True to suppress reading signal sending
         @return tester.Measurement instance
 
         """
         lim = self._limits[limitname]
+        mes = tester.Measurement(lim, sensor)
         if silent:
-            lim.position_fail = False
-            lim.send_signal = False
-        return tester.Measurement(lim, sensor)
+            mes.send_signal = False
+        return mes
 
 
 class SubTests():

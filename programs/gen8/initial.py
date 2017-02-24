@@ -170,11 +170,11 @@ class Initial(share.TestSequence):
         # Calibrate the 12V set voltage
         v12 = mes['dmm_12vpre'].stable(V12_STABLE).reading1
         arm.cal12v(v12)
-        # Prevent a limit fail from failing the unit
-        mes['dmm_12vset'].testlimit[0].position_fail = False
+        # Prevent a fail from failing the unit
+        mes['dmm_12vset'].position_fail = False
         result = mes['dmm_12vset'].stable(V12_STABLE).result
-        # Allow a limit fail to fail the unit
-        mes['dmm_12vset'].testlimit[0].position_fail = True
+        # Allow a fail to fail the unit
+        mes['dmm_12vset'].position_fail = True
         if not result:
             v12 = mes['dmm_12vpre'].stable(V12_STABLE).reading1
             arm.cal12v(v12)
@@ -420,5 +420,8 @@ class Measurements(share.Measurements):
             ('arm_swbld', 'SwBld', 'arm_swbld', ''),
             ))
         # Prevent test failures on these limits.
-        for limitname in ('PFCpost1', 'PFCpost2', 'PFCpost3', 'PFCpost4'):
-            self.limits[limitname].position_fail = False
+        for name in (
+                'dmm_pfcpost1', 'dmm_pfcpost2', 'dmm_pfcpost3',
+                'dmm_pfcpost4',
+                ):
+            self[name].position_fail = False
