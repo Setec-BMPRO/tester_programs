@@ -42,7 +42,7 @@ class Main(tester.testsequence.TestSequence):
         """Prepare for testing."""
         super().open()
         # True if running on ATE2 tester
-        self._is_ate2 = (self.physical_devices.tester_type == 'ATE2')
+        self._is_ate2 = (self.physical_devices.tester_type[:4] == 'ATE2')
         self.steps = (
             tester.TestStep('ACSource', self._step_acsource),
             tester.TestStep('Checker', self._step_checker),
