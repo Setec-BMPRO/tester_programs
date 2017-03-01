@@ -29,7 +29,7 @@ ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
 LIMITS = (
     LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
     LimitHigh('FanShort', 20),     # Short on fan connector
-    LimitLow('FixtureLock', 20),
+    LimitLow('FixtureLock', 200),
     LimitLow('5Voff', 0.5),
     LimitPercent('5Vset', 5.10, 1.0),
     LimitPercent('5V', 5.10, 2.0),
