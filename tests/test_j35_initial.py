@@ -53,7 +53,7 @@ class _J35Initial(ProgramTestCase):
                 'Output': ((sen['ovload'], (0.0, ) + (12.8, ) * 14), ),
                 'RemoteSw': ((sen['ovload'], (0.0, 12.8)), ),
                 'Load': ((sen['ovbat'], 12.8), ),
-                'OCP': ((sen['ovbat'], (12.8, ) * 7 + (11.0, ), ), ),
+                'OCP': ((sen['ovbat'], (12.8, ) * 5 + (11.0, ), ), ),
                 'CanBus': ((sen['ocanpwr'], 12.5), ),
                 },
             UnitTester.key_call: {      # Callables

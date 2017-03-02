@@ -96,17 +96,17 @@ _COMMON = (
 
 LIMITS_A = _COMMON + (
     LimitLow('LOAD_COUNT', OUTPUT_COUNT_A),
-    LimitBetween('OCP', 20.0, 25.0, doc='OCP trip range'),
+    LimitPercent('OCP', 20.0, 4.0, doc='OCP trip range'),
     )
 
 LIMITS_B = _COMMON + (
     LimitLow('LOAD_COUNT', OUTPUT_COUNT_BC),
-    LimitBetween('OCP', OCP_SET, OCP_SET + 7.0, doc='OCP trip range'),
+    LimitPercent('OCP', OCP_SET, 4.0, doc='OCP trip range'),
     )
 
 LIMITS_C = _COMMON + (
     LimitLow('LOAD_COUNT', OUTPUT_COUNT_BC),
-    LimitBetween('OCP', OCP_SET, OCP_SET + 7.0, doc='OCP trip range'),
+    LimitPercent('OCP', OCP_SET, 4.0, doc='OCP trip range'),
     )
 
 # Variant specific configuration data. Indexed by test program parameter.

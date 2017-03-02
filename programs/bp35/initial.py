@@ -72,7 +72,7 @@ LIMITS = (
     LimitPercent('VsetPost', SOLAR_VSET, 1.5),
     LimitPercent('ARM-IoutPre', SOLAR_ICAL, 9.0),
     LimitPercent('ARM-IoutPost', SOLAR_ICAL, 3.0),
-    LimitDelta('OCP', OCP_NOMINAL - ILOAD, OCP_NOMINAL * 0.04),  # 4%
+    LimitPercent('OCP', OCP_NOMINAL, 4.0),
     LimitLow('InOCP', 11.6),
     LimitRegExp('ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
     LimitDelta('ARM-AcV', VAC, 10.0),
@@ -415,11 +415,6 @@ class Sensors(share.Sensors):
         self['lock'] = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
         self['solarvcc'] = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
         self['solarvin'] = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
-        self['ocp'] = sensor.Ramp(
-            stimulus=self.devices['dcl_bat'],
-            sensor=self['vbat'],
-            detect_limit=(self.limits['InOCP'], ),
-            start=4.0, stop=10.0, step=0.5, delay=0.1)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bp35_initial', 'msgSnEntry'),
             caption=tester.translate('bp35_initial', 'capSnEntry'))
@@ -451,6 +446,15 @@ class Sensors(share.Sensors):
         for i in range(1, OUTPUTS + 1):
             loads.append(console.Sensor(bp35, 'LOAD_{0}'.format(i)))
         self['arm_loads'] = loads
+        low, high = self.limits['OCP'].limit
+        self['ocp'] = sensor.Ramp(
+            stimulus=self.devices['dcl_bat'],
+            sensor=self['vbat'],
+            detect_limit=(self.limits['InOCP'], ),
+            start=low - ILOAD - 1,
+            stop=high - ILOAD + 1,
+            step=0.5, delay=0.1)
+        self['ocp'].on_read = lambda value: value + ILOAD
 
 
 class Measurements(share.Measurements):
