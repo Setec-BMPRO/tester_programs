@@ -7,7 +7,7 @@ import tester
 import share
 from tester import (
     TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitPercent
+    LimitLow, LimitHigh, LimitDelta, LimitPercent
     )
 
 # Load on each output channel
@@ -22,11 +22,11 @@ _COMMON = (
     )
 
 LIMITS_A = _COMMON + (
-    LimitBetween('OCP', 20.0, 25.0, doc='OCP trip current'),
+    LimitPercent('OCP', 20.0, 4.0, doc='OCP trip current'),
     )
 
 LIMITS_BC = _COMMON + (
-    LimitBetween('OCP', 35.0, 42.0, doc='OCP trip current'),
+    LimitPercent('OCP', 35.0, 4.0, doc='OCP trip current'),
     )
 
 CONFIG = {      # Test configuration keyed by program parameter

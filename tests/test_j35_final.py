@@ -15,7 +15,6 @@ class _J35Final(ProgramTestCase):
 
     prog_class = j35.Final
     parameter = None
-    debug = False
 
     def _dmm_loads(self, value):
         """Fill all DMM Load sensors with a value."""
@@ -29,7 +28,7 @@ class _J35Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': ((sen['photo'], (0.0, 12.0)), ),
-                'OCP': ((sen['vloads'][0], (12.7, ) * 10 + (11.0, ), ), ),
+                'OCP': ((sen['vloads'][0], (12.7, ) * 4 + (11.0, ), ), ),
                 },
             UnitTester.key_call: {      # Callables
                 'PowerUp': (self._dmm_loads, 12.7),
@@ -50,6 +49,7 @@ class J35_A_Final(_J35Final):
     """J35-A Final program test suite."""
 
     parameter = 'A'
+    debug = False
 
     def test_pass_run(self):
         super()._pass_run(17)
@@ -60,6 +60,7 @@ class J35_B_Final(_J35Final):
     """J35-B Final program test suite."""
 
     parameter = 'B'
+    debug = False
 
     def test_pass_run(self):
         super()._pass_run(31)
@@ -70,6 +71,7 @@ class J35_C_Final(_J35Final):
     """J35-C Final program test suite."""
 
     parameter = 'C'
+    debug = False
 
     def test_pass_run(self):
         super()._pass_run(31)
