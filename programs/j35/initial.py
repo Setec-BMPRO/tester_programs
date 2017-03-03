@@ -415,7 +415,7 @@ class Sensors(share.Sensors):
             detect_limit=(self.limits['InOCP'], ),
             start=low - load_current - 1,
             stop=high - load_current + 1,
-            step=0.5, delay=0.2)
+            step=0.1, delay=0.1)
         self['ocp'].on_read = lambda value: value + load_current
 
 

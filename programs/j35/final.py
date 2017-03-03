@@ -136,7 +136,7 @@ class Sensors(share.Sensors):
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_out'], sensor=self['vloads'][0],
             detect_limit=(self.limits['InOCP'], ),
-            start=low - 1, stop=high + 1, step=0.5, delay=0.2)
+            start=low - 1, stop=high + 1, step=0.1, delay=0.1)
         self['ocp'].doc = 'OCP trip value'
         self['ocp'].units = 'Adc'
 
