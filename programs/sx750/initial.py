@@ -74,8 +74,8 @@ LIMITS = tester.testlimit.limitset((
         'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
     lim_string('ARM-SwBld', '^{}$'.format(BIN_VERSION[4:])),
     #
-    lim_lo('FixtureLock', 20),
-    lim_lo('PartCheck', 20),            # Microswitches on C612, C613, D404
+    lim_lo('FixtureLock', 200),
+    lim_lo('PartCheck', 100),            # Microswitches on C612, C613, D404
     lim_hilo('Snubber', 1000, 3000),    # Snubbing resistors
     lim_string('Reply', '^OK$'),
     lim_hilo_int('Program', 0)

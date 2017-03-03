@@ -39,7 +39,7 @@ _BASE_DATA = (
     LimitLow('InOCP', 13.24),
     LimitBetween('OCP', _OCP_LOW, _OCP_HIGH),
     LimitBoolean('Notify', True),
-    LimitLow('FixtureLock', 20),
+    LimitLow('FixtureLock', 200),
     )
 
 LIMITS_STD = _BASE_DATA + (

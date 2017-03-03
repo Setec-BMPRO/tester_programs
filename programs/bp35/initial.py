@@ -52,7 +52,7 @@ VOUT_SET = 12.8
 OCP_NOMINAL = 35.0
 
 LIMITS = (
-    LimitLow('FixtureLock', 50),
+    LimitLow('FixtureLock', 200),
     LimitDelta('HwVer8', 4400.0, 250.0),  # Rev 8+
     LimitDelta('ACin', VAC, 5.0),
     LimitBetween('Vpfc', 401.0, 424.0),
