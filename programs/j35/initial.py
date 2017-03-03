@@ -91,7 +91,7 @@ _COMMON = (
     LimitInteger('CAN_BIND', _CAN_BIND, doc='ARM reports CAN bus operational'),
     LimitRegExp('CAN_RX', '^RRQ,36,0', doc='Response to CAN echo message'),
     LimitLow('InOCP', VOUT_SET - 1.2, doc='Output is in OCP'),
-    LimitLow('FixtureLock', 20, doc='Test fixture lid microswitch'),
+    LimitLow('FixtureLock', 200, doc='Test fixture lid microswitch'),
     )
 
 LIMITS_A = _COMMON + (
