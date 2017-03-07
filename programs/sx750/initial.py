@@ -425,6 +425,7 @@ class LogicalDevices():
         self.arm.close()
         self.ard.close()
         self.acsource.output(voltage=0.0, output=False)
+        self.acsource.reset()
         self.dcl_5Vsb.output(1.0)
         self.dcl_12V.output(5.0)
         self.dcl_24V.output(5.0)
