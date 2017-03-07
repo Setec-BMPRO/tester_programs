@@ -156,7 +156,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.output(voltage=0.0, output=False)
+        self.acsource.reset()
         self.dcl_out.output(2.1)
         time.sleep(1)
         self.discharge.pulse()

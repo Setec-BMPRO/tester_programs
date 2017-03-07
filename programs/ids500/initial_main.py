@@ -285,7 +285,7 @@ class LogicalDevices(share.LogicalDevices):
 
     def reset(self):
         """Reset instruments."""
-        self['acsource'].output(voltage=0.0, output=False)
+        self['acsource'].reset()
         self['dcl_tec'].output(0.1)
         self['dcl_15vp'].output(2.0)
         self['dcl_15vpsw'].output(0.0)

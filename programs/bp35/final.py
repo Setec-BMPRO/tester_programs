@@ -40,7 +40,7 @@ class LogicalDevices(share.LogicalDevices):
 
     def reset(self):
         """Reset instruments."""
-        self['acsource'].output(voltage=0.0, output=False)
+        self['acsource'].reset()
 
 
 class Sensors(share.Sensors):

@@ -177,7 +177,7 @@ class LogicalDevices():
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.output(voltage=0.0, output=False)
+        self.acsource.reset()
         self.dcl_Vout.output(2.0)
         self.dcl_Vbat.output(2.0)
         time.sleep(1)

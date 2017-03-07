@@ -451,7 +451,7 @@ class LogicalDevAux():
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.output(voltage=0.0, output=False)
+        self.acsource.reset()
         time.sleep(2)
         self.discharge.pulse()
         for dcs in (self.dcs_5Vfix, self.dcs_fan, ):
@@ -481,7 +481,7 @@ class LogicalDevBias():
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.output(voltage=0.0, output=False)
+        self.acsource.reset()
         time.sleep(2)
         self.discharge.pulse()
         self.dcs_fan.output(0.0, False)
@@ -515,7 +515,7 @@ class LogicalDevBus():
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.output(voltage=0.0, output=False)
+        self.acsource.reset()
         time.sleep(2)
         self.discharge.pulse()
         for dcs in (self.dcs_prictl, self.dcs_fan, ):
@@ -561,7 +561,7 @@ class LogicalDevSyn():
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.output(voltage=0.0, output=False)
+        self.acsource.reset()
         time.sleep(2)
         self.discharge.pulse()
         for dcs in (self.dcs_vsec5Vlddtec, self.dcs_lddiset, self.dcs_tecvset,

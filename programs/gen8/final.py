@@ -106,7 +106,7 @@ class LogicalDevices(share.LogicalDevices):
 
     def reset(self):
         """Reset instruments."""
-        self['acsource'].output(voltage=0.0, output=False)
+        self['acsource'].reset()
         for load in ('dcl_12v', 'dcl_24v', 'dcl_5v', 'dcl_12v2'):
             self[load].output(0.0, False)
         for rla in ('rla_12v2off', 'rla_pson'):

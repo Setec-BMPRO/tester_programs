@@ -342,7 +342,7 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         self['j35'].close()
         # Switch off AC Source & discharge the unit
-        self['acsource'].output(voltage=0.0, output=False)
+        self['acsource'].reset()
         self['dcl_out'].output(2.0)
         time.sleep(1)
         self['discharge'].pulse()
