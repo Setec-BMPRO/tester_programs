@@ -15,7 +15,7 @@ from tester import (
 import share
 from . import console
 
-ARM_VERSION = '1.1.14080.920'      # ARM versions
+ARM_VERSION = '1.2.14549.989'      # ARM versions
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # ARM software image file
@@ -275,6 +275,8 @@ class Initial(share.TestSequence):
         for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
+        # Calibrate converter current
+        dev['j35']['BUS_ICAL'] = load_count * LOAD_PER_OUTPUT
         dev['dcl_bat'].output(BATT_CURRENT, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 

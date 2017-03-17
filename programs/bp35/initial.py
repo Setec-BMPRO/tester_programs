@@ -308,6 +308,7 @@ class Initial(share.TestSequence):
         dev['dcl_out'].binary(1.0, ILOAD, 5.0)
         dev['dcl_bat'].output(IBATT, output=True)
         self.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
+        bp35['BUS_ICAL'] = ILOAD + IBATT    # Calibrate converter current
         for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
