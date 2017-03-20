@@ -97,6 +97,7 @@ PROGRAMS = {
     'RVVIEW Initial': rvview.Initial,
     'RM-50-24 Final': rm50.Final,
     'SMU750-70 Final': smu75070.Final,
+    'SMU750-70 Initial': smu75070.Initial,
     'STxx-III Final': st3.Final,
     'SX-750 Initial': sx750.Initial,
     'SX-750 Final': sx750.Final,
@@ -123,6 +124,7 @@ ALL_SKIP = (
     'IDS500 Initial Main', 'IDS500 Final',
     'J35 Initial', 'J35 Final',
     'RVVIEW Initial', 'SX-750 Initial', 'SX-750 Final',
+    'SMU750-70 Initial',
     # Obsolete and unused programs
     'SX-750 Safety',
     # The voltage adjuster will not simulate
