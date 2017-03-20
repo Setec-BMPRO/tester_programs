@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-02-16, 22:08:36 -->
+<!-- Saved: 2017-03-06, 17:45:18 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -91,6 +91,7 @@
     <Source>programs/selftest/__init__.py</Source>
     <Source>programs/smu75070/__init__.py</Source>
     <Source>programs/smu75070/final.py</Source>
+    <Source>programs/smu75070/initial.py</Source>
     <Source>programs/st3/__init__.py</Source>
     <Source>programs/st3/final.py</Source>
     <Source>programs/sx750/__init__.py</Source>
@@ -146,6 +147,7 @@
     <Source>tests/test_j35_initial.py</Source>
     <Source>tests/test_parameter.py</Source>
     <Source>tests/test_rvview_initial.py</Source>
+    <Source>tests/test_smu75070_initial.py</Source>
     <Source>tests/test_sx750_final.py</Source>
     <Source>tests/test_sx750_initial.py</Source>
     <Source>testsuite.py</Source>
