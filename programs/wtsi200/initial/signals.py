@@ -30,7 +30,6 @@ class _MySignal():
     """User Interaction request signals"""
 
     def __init__(self, name):
-        super(_MySignal, self).__init__(name)
         self.start_load_program = name + '.start_load_program'
         self.controller_load_program = name + '.controller_load_program'
         self.worker_message = name + '.worker_message'

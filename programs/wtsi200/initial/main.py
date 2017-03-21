@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PySide import QtGui
+from PyQt4 import QtGui
 from pydispatch import dispatcher
 import logging
 import gui

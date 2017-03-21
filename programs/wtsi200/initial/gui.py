@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PySide import QtGui
+from PyQt4 import QtGui
 from pydispatch import dispatcher
 import logging
 import Ui_start
