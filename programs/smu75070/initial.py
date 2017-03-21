@@ -14,7 +14,7 @@ import share
 VOUT_LOAD_REG = 0.4
 
 LIMITS = (
-    LimitLow('FixtureLock', 200, doc='Resistance of closed micro switch'),
+    LimitLow('FixtureLock', 200, doc='Closed micro switch'),
     LimitBetween('InrushOff', 120, 180,
         doc='Inrush resistors with K1 off'),
     LimitBetween('VacMin', 95.0, 105.0, doc='Min AC input voltage'),
@@ -122,7 +122,7 @@ class LogicalDevices(share.LogicalDevices):
 
     def reset(self):
         """Reset instruments."""
-        self['acsource'].output(voltage=0.0, output=False)
+        self['acsource'].reset()
         self['dcl'].output(5.0)
         time.sleep(1)
         self['discharge'].pulse()
