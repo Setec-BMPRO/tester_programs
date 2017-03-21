@@ -45,7 +45,7 @@ class BP35Initial(ProgramTestCase):
                 'RemoteSw': ((sen['vload'], (0.25, 12.34)), ),
                 'OCP':
                     ((sen['fan'], (0, 12.0)), (sen['vbat'], 12.8),
-                     (sen['vbat'], (12.8, ) * 6 + (11.0, ), ), ),
+                     (sen['vbat'], (12.8, ) * 20 + (11.0, ), ), ),
                 },
             UnitTester.key_call: {      # Callables
                 'OCP': (self._arm_loads, 2.0),
@@ -76,7 +76,7 @@ class BP35Initial(ProgramTestCase):
                 'Output': ('', ) * (1 + 14 + 1),
                 'OCP':
                     ('240', '50000', '350', '12800', '500', ) +
-                    ('', '4000', '32000', ),
+                    ('', '4000', '32000', ''),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False

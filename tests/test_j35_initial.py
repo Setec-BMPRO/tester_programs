@@ -53,7 +53,7 @@ class _J35Initial(ProgramTestCase):
                 'Output': ((sen['ovload'], (0.0, ) + (12.8, ) * 14), ),
                 'RemoteSw': ((sen['ovload'], (0.0, 12.8)), ),
                 'Load': ((sen['ovbat'], 12.8), ),
-                'OCP': ((sen['ovbat'], (12.8, ) * 5 + (11.0, ), ), ),
+                'OCP': ((sen['ovbat'], (12.8, ) * 20 + (11.0, ), ), ),
                 'CanBus': ((sen['ocanpwr'], 12.5), ),
                 },
             UnitTester.key_call: {      # Callables
@@ -69,7 +69,7 @@ class _J35Initial(ProgramTestCase):
                 'Solar': ('', ''),
                 'PowerUp': pwr_con,
                 'Output': ('', ) * (1 + len(sen['arm_loads']) + 1),
-                'Load': ('0x5555555', '4000', ),
+                'Load': ('0x5555555', '', '4000', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
@@ -119,6 +119,7 @@ class J35_A_Initial(_J35Initial):
     debug = False
 
     def test_pass_run(self):
+        """PASS run of the A program."""
         super()._pass_run(
             _POWERUP_CON_A,
             46,
@@ -135,6 +136,7 @@ class J35_B_Initial(_J35Initial):
     debug = False
 
     def test_pass_run(self):
+        """PASS run of the B program."""
         super()._pass_run(
             _POWERUP_CON_BC,
             60,
@@ -148,9 +150,10 @@ class J35_C_Initial(_J35Initial):
     """J35-C Initial program test suite."""
 
     parameter = 'C'
-    debug = False
+    debug = True # False
 
     def test_pass_run(self):
+        """PASS run of the C program."""
         super()._pass_run(
             _POWERUP_CON_BC,
             65,
