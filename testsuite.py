@@ -1,10 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2016 SETEC Pty Ltd.
-"""Test suite definition for Eric Unittest plugin."""
+"""Test suite loader for Eric Unittest.
+
+In Eric, this module is imported by unittest using a call to:
+  loadTestsFromName(name, module=None)
+    with parameters of  name="suite", module="testsuite"
+
+From the Python unittest help...
+  Return a suite of all tests cases given a string specifier.
+  The specifier name is a "dotted name" that may resolve either to
+    a module,
+    a test case class,
+    a test method within a test case class,
+    a TestSuite instance,
+    a callable object which returns a TestCase or TestSuite instance.
+  These checks are applied in the order listed here.
+
+For "Rerun Failed" unittest, loadTestsFromName is called with parameters:
+    name="test_XXXX", module="testsuite"
+
+"""
 
 import unittest
 import logging
+from tests import *
 
 # Configuration of console logger when this script is run stand-alone.
 #   Log Levels are: CRITICAL,ERROR,WARNING,INFO,DEBUG
@@ -12,16 +32,6 @@ _LOG_LEVEL = logging.CRITICAL
 _LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
 # Set these logger names to INFO level
 _LOGGER_NAMES = ('gpib', )
-
-
-def suite():
-    """Define the test suite for Eric unittest tool.
-
-    @return unittest.testsuite
-
-    """
-    return unittest.defaultTestLoader.discover(
-        start_dir='.', pattern='test_*.py')
 
 
 def logging_setup():

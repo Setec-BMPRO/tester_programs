@@ -1,8 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for Share."""
+# Copyright 2017 SETEC Pty Ltd.
+"""Unittests."""
 
+import unittest
 import logging
+
+_test_modules = [
+    'test_bp35_final',
+    'test_bp35_initial',
+    'test_can_tunnel',
+    'test_console',
+    'test_gen8_final',
+    'test_gen8_initial',
+    'test_genius2_initial',
+    'test_ids_final',
+    'test_ids_ini_main',
+    'test_j35_final',
+    'test_j35_initial',
+    'test_parameter',
+    'test_rvview_initial',
+    'test_smu75070_initial',
+    'test_sx750_final',
+    'test_sx750_initial',
+    ]
+
+__all__ = ['suite'] + _test_modules
+
+
+def suite():
+    """Define the TestSuite for Eric unittest."""
+    testsuite = unittest.defaultTestLoader.loadTestsFromNames(
+        ('tests.' + name for name in _test_modules)
+        )
+    return testsuite
 
 # Configuration of logger.
 _CONSOLE_LOG_LEVEL = logging.DEBUG

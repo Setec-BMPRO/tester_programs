@@ -28,7 +28,7 @@ class _J35Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': ((sen['photo'], (0.0, 12.0)), ),
-                'OCP': ((sen['vloads'][0], (12.7, ) * 4 + (11.0, ), ), ),
+                'OCP': ((sen['vloads'][0], (12.7, ) * 20 + (11.0, ), ), ),
                 },
             UnitTester.key_call: {      # Callables
                 'PowerUp': (self._dmm_loads, 12.7),
@@ -52,6 +52,7 @@ class J35_A_Final(_J35Final):
     debug = False
 
     def test_pass_run(self):
+        """PASS run of the A program."""
         super()._pass_run(17)
 
 
@@ -63,6 +64,7 @@ class J35_B_Final(_J35Final):
     debug = False
 
     def test_pass_run(self):
+        """PASS run of the B program."""
         super()._pass_run(31)
 
 
@@ -74,4 +76,5 @@ class J35_C_Final(_J35Final):
     debug = False
 
     def test_pass_run(self):
+        """PASS run of the C program."""
         super()._pass_run(31)
