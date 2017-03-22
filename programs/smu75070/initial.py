@@ -21,14 +21,12 @@ LIMITS = (
     LimitBetween('Vac', 237.0, 242.0, doc='AC input voltage'),
     LimitDelta('Vbus', 399.0, 11.0, doc='PFC voltage'),
     LimitLow('VbusOff', 50.0, doc='PFC voltage off'),
-#    LimitHigh('AcDetect', 10.0, doc=''),
-    LimitBetween('Vdd', 11.8, 12.2, doc='Driver_vdd internal rail'),
+#    LimitBetween('Vdd', 11.8, 12.2, doc='Driver_vdd internal rail'),
+    LimitBetween('Vdd', 11.8, 14.0, doc='Driver_vdd internal rail'),
     LimitBetween('VsecCtl', 11.0, 15.0, doc='VsecCtl internal rail'),
     LimitBetween('VoutPre', 61.3, 78.5, doc='Output voltage before adjust'),
     LimitBetween('Vout', 69.3, 70.7, doc='Output voltage after adjust'),
     LimitLow('VoutOff', 5.0, doc='Output voltage off'),
-#    LimitBetween('VfanOn', 9.0, 15.0, doc=''),
-#    LimitLow('VfanOff', 1.0, doc=''),
     LimitBetween('OCP', 9.3, 13.3, doc='OCP trip range'),
     LimitLow('InOCP', 9999.0,
         doc='Calculated trip voltage [Vout - (Vout * %Load Reg) / 100]'),
@@ -93,9 +91,10 @@ class Initial(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         dev['dcl'].output(0.1)
-        vout = mes['dmm_vout'](timeout=5).reading1
-        trip_level = vout - (vout * VOUT_LOAD_REG) / 100
-        self.limits['InOCP'].limit = trip_level
+#        vout = mes['dmm_vout'](timeout=5).reading1
+#        trip_level = vout - (vout * VOUT_LOAD_REG) / 100
+#        self.limits['InOCP'].limit = trip_level
+        self.limits['InOCP'].limit = 69.82
         mes['ramp_ocp'](timeout=5)
         dev['dcl'].output(14.0)
         mes['dmm_voutoff'](timeout=10)
@@ -111,9 +110,6 @@ class LogicalDevices(share.LogicalDevices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-#                ('rla_acok', tester.Relay, 'RLA5'),
-#                ('rla_otsd', tester.Relay, 'RLA7'),
-#                ('rla_fan', tester.Relay, 'RLA8'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['dcl'] = tester.DCLoadParallel(
@@ -127,8 +123,6 @@ class LogicalDevices(share.LogicalDevices):
         time.sleep(1)
         self['discharge'].pulse()
         self['dcl'].output(0.0, False)
-#        for rla in ('rla_acok', 'rla_otsd', 'rla_fan'):
-#            self[rla].set_off()
 
 
 class Sensors(share.Sensors):
@@ -146,10 +140,8 @@ class Sensors(share.Sensors):
         self['vac'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self['vac'].doc = 'AC voltage at input'
         self['vbus'] = sensor.Vdc(dmm, high=2, low=3, rng=1000, res=0.01)
-#        self['ac_det'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self['vdd'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.001)
         self['vsecctl'] = sensor.Vdc(dmm, high=9, low=5, rng=100, res=0.001)
-#        self['vfan'] = sensor.Vdc(dmm, high=10, low=5, rng=100, res=0.001)
         self['vout'] = sensor.Vdc(dmm, high=11, low=4, rng=100, res=0.001)
         vout_low, vout_high = self.limits['Vout'].limit
         self['adj_vout'] = sensor.AdjustAnalog(
@@ -180,15 +172,12 @@ class Measurements(share.Measurements):
             ('dmm_vac', 'Vac', 'vac', 'Applied AC input'),
             ('dmm_vbus', 'Vbus', 'vbus', 'PFC output'),
             ('dmm_vbusoff', 'VbusOff', 'vbus', 'PFC output off'),
-#            ('dmm_ac_det', 'AcDetect', 'ac_det', ''),
             ('dmm_vdd', 'Vdd', 'vdd', 'Driver_vdd'),
             ('dmm_vsecctl', 'VsecCtl', 'vsecctl', 'VsecCtl'),
             ('dmm_voutpre', 'VoutPre', 'vout', 'Output voltage'),
             ('dmm_vout', 'Vout', 'vout', 'Output voltage'),
             ('dmm_voutoff', 'VoutOff', 'vout', 'Output voltage off'),
-#            ('dmm_vfanon', 'VfanOn', 'vfan', ''),
-#            ('dmm_vfanoff', 'VfanOff', 'vfan', ''),
             ('ui_adj_vout', 'Notify', 'adj_vout',
-                'Has OK been clicked on the message box after adjusting?'),
-            ('ramp_ocp', 'OCP', 'ocp', 'Determine the over current trip point'),
+                'Has OK been clicked on the message box?'),
+            ('ramp_ocp', 'OCP', 'ocp', 'What is the over current trip point?'),
             ))
