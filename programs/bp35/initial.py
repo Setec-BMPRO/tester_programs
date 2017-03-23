@@ -50,6 +50,9 @@ VAC = 240.0
 OUTPUTS = 14
 VOUT_SET = 12.8
 OCP_NOMINAL = 35.0
+# This magic number is the OCP setpoint.
+# 41786 is the inbuilt default, which we reduce, to increase OCP.
+_OCP_MAGIC = round(41786 / 1.05)    # +5% adjustment
 
 LIMITS = (
     LimitLow('FixtureLock', 200),
@@ -308,7 +311,8 @@ class Initial(share.TestSequence):
         dev['dcl_out'].binary(1.0, ILOAD, 5.0)
         dev['dcl_bat'].output(IBATT, output=True)
         self.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
-        bp35['BUS_ICAL'] = ILOAD + IBATT    # Calibrate converter current
+        bp35['BUS_ICAL'] = ILOAD + IBATT    # Calibrate current reading
+        bp35['OCP_CAL'] = _OCP_MAGIC        # Calibrate current setpoint
         for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
