@@ -22,8 +22,7 @@ LIMITS = (
     LimitDelta('Vbus', 399.0, 11.0, doc='PFC voltage'),
     LimitLow('VbusOff', 50.0, doc='PFC voltage off'),
     LimitBetween('Vdd', 12.0, 14.0, doc='Driver_vdd internal rail'),
-#    LimitBetween('VsecCtl', 11.0, 15.0, doc='VsecCtl internal rail'),
-    LimitBetween('VsecCtl', 9.0, 12.0, doc='VsecCtl internal rail'),
+    LimitBetween('VsecCtl', 11.0, 15.0, doc='VsecCtl internal rail'),
     LimitBetween('VoutPre', 61.3, 78.5, doc='Output voltage before adjust'),
     LimitPercent('Vout', 70.0, 1.0, doc='Output voltage after adjust'),
     LimitLow('VoutOff', 5.0, doc='Output voltage off'),
@@ -63,8 +62,8 @@ class Initial(share.TestSequence):
             'dmm_voutpre'),
               timeout=5)
         dev['acsource'].output(voltage=0.0)
-        dev['dcl'].output(5.0)
-        time.sleep(1)
+        dev['dcl'].output(10.0)
+        time.sleep(2)
         dev['discharge'].pulse()
         mes['dmm_vbusoff'](timeout=5)
         dev['dcl'].output(0.0)

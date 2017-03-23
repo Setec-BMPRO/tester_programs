@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-03-21, 15:57:11 -->
+<!-- Saved: 2017-03-23, 17:04:24 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -115,7 +115,6 @@
     <Source>programs/uni750/final.py</Source>
     <Source>programs/wtsi200/__init__.py</Source>
     <Source>programs/wtsi200/final.py</Source>
-    <Source>programs/wtsi200/initial/Ui_start.py</Source>
     <Source>programs/wtsi200/initial/__init__.py</Source>
     <Source>programs/wtsi200/initial/gui.py</Source>
     <Source>programs/wtsi200/initial/main.py</Source>
