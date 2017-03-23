@@ -23,18 +23,18 @@ class SMU75070Initial(ProgramTestCase):
                     (sen['lock'], 10.0), (sen['inrush'], 150.0),
                     ),
                 'PowerOn': (
-                    (sen['vac'], 100.0), (sen['vdd'], (12.0,) * 2),
-                    (sen['vsecctl'], (13.0,) * 2), (sen['vbus'], (400.0, 0)),
+                    (sen['vac'], 100.0), (sen['vdd'], 13.5),
+                    (sen['vsecctl'], 11.9), (sen['vbus'], (400.0, 0)),
                     (sen['vout'], 69.0),
                     ),
                 'AdjOutput': (
-                    (sen['vac'], 240.0), (sen['vdd'], 12.0),
-                    (sen['vsecctl'], 13.0), (sen['adj_vout'], True),
+                    (sen['vac'], 240.0), (sen['vdd'], 13.5),
+                    (sen['vsecctl'], 11.9), (sen['adj_vout'], True),
                     (sen['vout'], (69.0, 69.1, 69.2, 70.0)),
                     ),
                 'FullLoad': (
-                    (sen['vbus'], 400.0), (sen['vdd'], 12.0),
-                    (sen['vsecctl'], 13.0), (sen['vout'], 70.0),
+                    (sen['vbus'], 400.0), (sen['vdd'], 13.5),
+                    (sen['vsecctl'], 11.9), (sen['vout'], 70.0),
                     ),
                 'OCP': (
                     (sen['vout'], 70.0),

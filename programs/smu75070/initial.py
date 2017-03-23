@@ -6,7 +6,7 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitBoolean, LimitBetween, LimitDelta
+    LimitLow, LimitBoolean, LimitBetween, LimitPercent, LimitDelta
     )
 import share
 
@@ -21,13 +21,13 @@ LIMITS = (
     LimitBetween('Vac', 237.0, 242.0, doc='AC input voltage'),
     LimitDelta('Vbus', 399.0, 11.0, doc='PFC voltage'),
     LimitLow('VbusOff', 50.0, doc='PFC voltage off'),
-#    LimitBetween('Vdd', 11.8, 12.2, doc='Driver_vdd internal rail'),
-    LimitBetween('Vdd', 11.8, 14.0, doc='Driver_vdd internal rail'),
-    LimitBetween('VsecCtl', 11.0, 15.0, doc='VsecCtl internal rail'),
+    LimitBetween('Vdd', 12.0, 14.0, doc='Driver_vdd internal rail'),
+#    LimitBetween('VsecCtl', 11.0, 15.0, doc='VsecCtl internal rail'),
+    LimitBetween('VsecCtl', 9.0, 12.0, doc='VsecCtl internal rail'),
     LimitBetween('VoutPre', 61.3, 78.5, doc='Output voltage before adjust'),
-    LimitBetween('Vout', 69.3, 70.7, doc='Output voltage after adjust'),
+    LimitPercent('Vout', 70.0, 1.0, doc='Output voltage after adjust'),
     LimitLow('VoutOff', 5.0, doc='Output voltage off'),
-    LimitBetween('OCP', 9.3, 13.3, doc='OCP trip range'),
+    LimitBetween('OCP', 9.3, 13.3, doc='OCP trip limits before fine tuning'),
     LimitLow('InOCP', 9999.0,
         doc='Calculated trip voltage [Vout - (Vout * %Load Reg) / 100]'),
     LimitBoolean('Notify', True, doc='OK clicked'),
@@ -91,12 +91,12 @@ class Initial(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         dev['dcl'].output(0.1)
-#        vout = mes['dmm_vout'](timeout=5).reading1
-#        trip_level = vout - (vout * VOUT_LOAD_REG) / 100
-#        self.limits['InOCP'].limit = trip_level
-        self.limits['InOCP'].limit = 69.82
+        vout = mes['dmm_vout'](timeout=5).reading1
+        trip_level = vout - (vout * VOUT_LOAD_REG) / 100
+        self.limits['InOCP'].limit = trip_level
         mes['ramp_ocp'](timeout=5)
-        dev['dcl'].output(14.0)
+        low, high = self.limits['OCP'].limit
+        dev['dcl'].output(high + 0.7)
         mes['dmm_voutoff'](timeout=10)
 
 class LogicalDevices(share.LogicalDevices):
@@ -138,7 +138,7 @@ class Sensors(share.Sensors):
         self['inrush'] = sensor.Res(dmm, high=3, low=2, rng=1000, res=0.1)
         self['inrush'].doc = 'Inrush resistors, thermal fuse, K2'
         self['vac'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
-        self['vac'].doc = 'AC voltage at input'
+        self['vac'].doc = 'AC input'
         self['vbus'] = sensor.Vdc(dmm, high=2, low=3, rng=1000, res=0.01)
         self['vdd'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.001)
         self['vsecctl'] = sensor.Vdc(dmm, high=9, low=5, rng=100, res=0.001)
@@ -168,8 +168,8 @@ class Measurements(share.Measurements):
             ('dmm_lock', 'FixtureLock', 'lock', 'Is the fixture locked?'),
             ('dmm_inrushoff', 'InrushOff', 'inrush',
                 'Inrush resistors, thermal fuse and K2 in place?'),
-            ('dmm_vacmin', 'VacMin', 'vac', 'Applied AC input'),
-            ('dmm_vac', 'Vac', 'vac', 'Applied AC input'),
+            ('dmm_vacmin', 'VacMin', 'vac', 'AC input'),
+            ('dmm_vac', 'Vac', 'vac', 'AC input'),
             ('dmm_vbus', 'Vbus', 'vbus', 'PFC output'),
             ('dmm_vbusoff', 'VbusOff', 'vbus', 'PFC output off'),
             ('dmm_vdd', 'Vdd', 'vdd', 'Driver_vdd'),
@@ -179,5 +179,6 @@ class Measurements(share.Measurements):
             ('dmm_voutoff', 'VoutOff', 'vout', 'Output voltage off'),
             ('ui_adj_vout', 'Notify', 'adj_vout',
                 'Has OK been clicked on the message box?'),
-            ('ramp_ocp', 'OCP', 'ocp', 'What is the over current trip point?'),
+            ('ramp_ocp', 'OCP', 'ocp',
+                'OCP before mounting main board in case and fine tuning CL'),
             ))
