@@ -12,7 +12,7 @@ class SMU75070Initial(ProgramTestCase):
 
     prog_class = smu75070.Initial
     parameter = None
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""

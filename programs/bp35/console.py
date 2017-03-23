@@ -93,10 +93,12 @@ class Console(console.Variable, console.BadUartConsole):
             'BATT_T': ParameterFloat('BATTERY_TEMPERATURE', scale=10),
             'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
             'BUS_I': ParameterFloat('CONVERTER_CURRENT', scale=1000),
-            'BUS_ICAL': ParameterFloat(
-                'ICONV', writeable=True,    # an undocumented command...
+            'BUS_ICAL': ParameterFloat( # an undocumented command...
+                'ICONV', writeable=True,
                 write_format='{0} "{1} CAL',
                 scale=1000),
+            'OCP_CAL': ParameterFloat(  # an undocumented command...
+                'CAL_I_CONVSET', writeable=True, maximum=65535),
             'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
             'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
             'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
