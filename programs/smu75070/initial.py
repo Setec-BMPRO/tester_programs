@@ -81,6 +81,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_fullload(self, dev, mes):
         """Full Load step."""
+        dev['dcs_fixfan'].output(12.0, True)
         dev['dcl'].output(10.0)
         self.measure(
             ('dmm_vbus', 'dmm_vdd', 'dmm_vsecctl', 'dmm_vout'), timeout=5)
@@ -109,6 +110,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
+                ('dcs_fixfan', tester.DCSource, 'DCS3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['dcl'] = tester.DCLoadParallel(
@@ -122,6 +124,7 @@ class LogicalDevices(share.LogicalDevices):
         time.sleep(1)
         self['discharge'].pulse()
         self['dcl'].output(0.0, False)
+        self['dcs_fixfan'].output(0.0, False)
 
 
 class Sensors(share.Sensors):
