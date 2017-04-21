@@ -63,10 +63,6 @@ import time
 import logging
 import tester
 
-# Console command prompt. Signals the end of output data.
-_CMD_PROMPT = b'\r> '
-# Command suffix between echo of a command and the response.
-_RES_SUFFIX = b' -> '
 
 
 class ConsoleError(Exception):
@@ -98,6 +94,13 @@ class BaseConsole():
 
     """
 
+    # Console command prompt. Signals the end of output data.
+    cmd_prompt = b'\r> '
+    # Command suffix between echo of a command and the response.
+    res_suffix = b' -> '
+    puts_prompt = ''
+    ignore = ()    # Tuple of strings to remove from responses
+
     def __init__(self, port, verbose=False):
         """Initialise communications.
 
@@ -107,9 +110,7 @@ class BaseConsole():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
-        self.ignore = ()    # Tuple of strings to remove from responses
         self._verbose = verbose
-        self.puts_prompt = ''
 
     def open(self):
         """Open port."""
@@ -175,15 +176,15 @@ class BaseConsole():
 
         """
         # Send the command with a '\r'
-        cmd_data = command.encode()
-        self._logger.debug('Cmd --> %s', repr(cmd_data))
-        self.port.write(cmd_data + b'\r')
+        cmd_bytes = command.encode()
+        self._logger.debug('Cmd --> %s', repr(cmd_bytes))
+        self.port.write(cmd_bytes + b'\r')
         # Read back the echo of the command
-        cmd_echo = self.port.read(len(cmd_data))
+        cmd_echo = self.port.read(len(cmd_bytes))
         if self._verbose:
             self._logger.debug('Echo <-- %s', repr(cmd_echo))
         # The echo must match what we sent
-        if cmd_echo != cmd_data:
+        if cmd_echo != cmd_bytes:
             raise ConsoleCommandError('Command echo error')
 
     def _read_response(self, expected):
@@ -199,7 +200,7 @@ class BaseConsole():
         """
         # Read bytes until the command prompt is seen.
         buf = bytearray()           # Buffer for the response bytes
-        while _CMD_PROMPT not in buf:
+        while self.cmd_prompt not in buf:
             data = self.port.read(1)
             if self._verbose:
                 self._logger.debug('Read <-- %s', repr(data))
@@ -207,8 +208,8 @@ class BaseConsole():
                 raise ConsoleResponseError('Response timeout')
             buf += data
             buf = buf.replace(b'\n', b'')   # Remove all '\n'
-        buf = buf.replace(_CMD_PROMPT, b'') # Remove the command prompt
-        buf = buf.replace(_RES_SUFFIX, b'') # Remove any ' -> '
+        buf = buf.replace(self.cmd_prompt, b'') # Remove the command prompt
+        buf = buf.replace(self.res_suffix, b'') # Remove any ' -> '
         for pattern in self.ignore:         # Remove ignored strings
             buf = buf.replace(pattern.encode(), b'')
         # Decode and split response lines from the byte buffer
@@ -244,10 +245,10 @@ class BadUartConsole(BaseConsole):
         @raises ConsoleCommandError.
 
         """
-        cmd_data = command.encode()
-        self._logger.debug('Cmd --> %s', repr(cmd_data))
+        cmd_bytes = command.encode()
+        self._logger.debug('Cmd --> %s', repr(cmd_bytes))
         # Send each byte with echo verification
-        for a_byte in cmd_data:
+        for a_byte in cmd_bytes:
             a_byte = bytes([a_byte])    # We need a byte, not an integer
             self.port.write(a_byte)
             echo = self.port.read(1)
