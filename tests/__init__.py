@@ -9,6 +9,7 @@ import logging
 _test_modules = [
     'test_bp35_final',
     'test_bp35_initial',
+    'test_bce282_initial',
     'test_can_tunnel',
     'test_console',
     'test_gen8_final',

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-03-23, 17:04:24 -->
+<!-- Saved: 2017-04-20, 18:11:34 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -30,6 +30,7 @@
     <Source>programs/bc15/final.py</Source>
     <Source>programs/bc15/initial.py</Source>
     <Source>programs/bce282/__init__.py</Source>
+    <Source>programs/bce282/console.py</Source>
     <Source>programs/bce282/final.py</Source>
     <Source>programs/bce282/initial.py</Source>
     <Source>programs/bce282/msp.py</Source>
@@ -134,6 +135,7 @@
     <Source>share/timed_data.py</Source>
     <Source>tests/__init__.py</Source>
     <Source>tests/data_feed.py</Source>
+    <Source>tests/test_bce282_initial.py</Source>
     <Source>tests/test_bp35_final.py</Source>
     <Source>tests/test_bp35_initial.py</Source>
     <Source>tests/test_can_tunnel.py</Source>
