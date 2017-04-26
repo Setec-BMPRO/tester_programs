@@ -41,15 +41,17 @@ class Console(console.Variable, console.BaseConsole):
             'test-mode-enable', read_format='{0}'),
         'FL-RELOAD': ParameterString(
             'adc-filter-reload', read_format='{0}'),
-        'MSP-STATUS': ParameterFloat(
-            'nv-status PRINT'),
+#        'MSP-STATUS': ParameterFloat(
+#            'nv-status PRINT', read_format='{0}'),
+        'MSP-STATUS': ParameterString(
+            'nv-status PRINT', read_format='{0}'),
         'MSP-VOUT': ParameterFloat(
-            'x-supply-voltage x@ print', scale=1000),
-        'MSP-IOUT': ParameterString(
-            'x-supply-current x@ print', read_format='{0}'),
+            'x-supply-voltage x@ print', read_format='{0}', scale=1000),
         'CAL-V': ParameterFloat(
-            ' cal-vset print', writeable=True, write_format='{0}{1}',
-            minimum=0, maximum=15000, scale=1000),
+            ' cal-vset PRINT', writeable=True, write_format='{0}{1}',
+            read_format='{0}', minimum=0, maximum=15000, scale=1000),
+        'VER': ParameterString(
+            'x-software-version x@ PRINT', read_format='{0}'),
         }
 
     def __init__(self, port, verbose=False):
@@ -61,11 +63,11 @@ class Console(console.Variable, console.BaseConsole):
 
     def setup(self):
         """Setup console for calibration."""
-        self['0 ECHO']
+#        self['0 ECHO']
         self['UNLOCK']
-        self['NV-WRITE-RES']
-        self['0 ECHO']
-        self['UNLOCK']
+#        self['NV-WRITE-RES']
+#        self['0 ECHO']
+#        self['UNLOCK']
 
     def test_mode(self):
         """Enable Manual Mode"""
@@ -89,3 +91,23 @@ class Console(console.Variable, console.BaseConsole):
         cmd_bytes = command.encode()
         self._logger.debug('Cmd --> %s', repr(cmd_bytes))
         self.port.write(cmd_bytes + b'\r')
+
+#    def _read_response(self, expected):
+#        """Read the response to a command.
+#
+#        Overrides BaseConsole().
+#        @param expected Expected number of responses.
+#        @return Response (None / List of String).
+#
+#        """
+#        all_response = []
+#        for _ in range(expected):
+#            data = self.port.readline()
+#            data = data.replace(b'\r', b'')   # Remove '\r'
+#            data = data.replace(b'\n', b'')   # Remove '\n'
+#            response = data.decode(errors='ignore')
+#            if len(response) == 0:
+#                response = None
+#            self._logger.debug('Response <-- %s', repr(response))
+#            all_response.append(response)
+#        return all_response

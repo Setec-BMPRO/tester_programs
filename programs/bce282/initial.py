@@ -25,6 +25,7 @@ _COMMON = (
     LimitPercent('VccPri', 15.6, 5.0),
     LimitPercent('VccBias', 15.0, 13.0),
     LimitLow('VbatOff', 0.5),
+    LimitBetween('Vbat', 10.0, 30.0),
     LimitBetween('AlarmClosed', 1000, 3000),
     LimitBetween('AlarmOpen', 11000, 13000),
     LimitBetween('Status 0', -0.1, 0.1),
@@ -106,7 +107,8 @@ class Initial(share.TestSequence):
         dev['dcl_vbat'].output(0.1, True)
         self.measure(
             ('dmm_vac', 'dmm_vbus', 'dmm_vccpri', 'dmm_vccbias',
-             'dmm_vbatoff', 'dmm_alarmclose'), timeout=5)
+#             'dmm_vbatoff', 'dmm_alarmclose'), timeout=5)
+             'dmm_vbatoff', 'dmm_alarmopen'), timeout=5)
         dev['dcl_vbat'].output(0.0)
 
     @share.teststep
@@ -114,22 +116,27 @@ class Initial(share.TestSequence):
         """Calibration."""
         msp = dev['msp']
         msp.open()
+        time.sleep(1)
         msp.setup()
-        mes['msp_status']()
+#        mes['msp_status']()
+        msp['MSP-STATUS']
         msp.test_mode()
         msp.filter_reload()
-        mes['msp_vout']()
+#        mes['msp_vout']()
         dmm_V = mes['dmm_voutpre'](timeout=5).reading1
         msp['CAL-V'] = dmm_V
         mes['dmm_voutpost'](timeout=5)
         msp['NV-WRITE']
-        mes['msp_status']()
+#        mes['msp_status']()
+        msp['MSP-STATUS']
 
     @share.teststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
+        mes['dmm_vbat'](timeout=5)
         self.measure(
-            ('dmm_alarmopen', 'ramp_outocp', 'ramp_battocp'), timeout=5)
+#            ('dmm_alarmopen', 'ramp_battocp', 'ramp_outocp'), timeout=5)
+            ('dmm_alarmclose', 'ramp_battocp', 'ramp_outocp'), timeout=5)
 
 
 class LogicalDevices(share.LogicalDevices):
@@ -194,7 +201,7 @@ class Sensors(share.Sensors):
         self['vcc_bias'] = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
         self['vout'] = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
         self['vbat'] = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
-        self['alarm'] = sensor.Res(dmm, high=9, low=5, rng=100, res=0.001)
+        self['alarm'] = sensor.Res(dmm, high=9, low=5, rng=100000, res=1)
         self['msp_stat'] = console.Sensor(
                 msp, 'MSP-STATUS')
         self['msp_vo'] = console.Sensor(
@@ -228,6 +235,7 @@ class Measurements(share.Measurements):
             ('dmm_vccpri', 'VccPri', 'vcc_pri', ''),
             ('dmm_vccbiasext', 'VccBiasExt', 'vcc_bias', ''),
             ('dmm_vccbias', 'VccBias', 'vcc_bias', ''),
+            ('dmm_vbat', 'Vbat', 'vbat', ''),
             ('dmm_vbatoff', 'VbatOff', 'vbat', ''),
             ('dmm_alarmclose', 'AlarmClosed', 'alarm', ''),
             ('dmm_alarmopen', 'AlarmOpen', 'alarm', ''),
