@@ -22,7 +22,7 @@ _COMMON = (
     )
 
 LIMITS_A = _COMMON + (
-    LimitPercent('OCP', 20.0, (4.0, 7.0), doc='OCP trip current'),
+    LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip current'),
     )
 
 LIMITS_BC = _COMMON + (
