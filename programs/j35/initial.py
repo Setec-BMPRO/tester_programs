@@ -96,7 +96,7 @@ _COMMON = (
 
 LIMITS_A = _COMMON + (
     LimitLow('LOAD_COUNT', OUTPUT_COUNT_A),
-    LimitPercent('OCP', 20.0, (4.0, 7.0), doc='OCP trip range'),
+    LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip range'),
     )
 
 LIMITS_B = _COMMON + (
