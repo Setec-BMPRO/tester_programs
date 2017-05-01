@@ -14,7 +14,7 @@ from tester import (
 import share
 from . import console
 
-# Serial port for MSP430. Used by programmer and MSP comms module.
+# Serial port for MSP430. Used by MSP comms module.
 _MSP_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
 
 _COMMON = (
@@ -75,7 +75,7 @@ class Initial(share.TestSequence):
             TestStep('Program', self._step_program, not self.fifo),
             TestStep('PowerUp', self._step_power_up),
             TestStep('Calibration', self._step_cal),
-            TestStep('OCP', self._step_ocp),
+            TestStep('OCP', self._step_ocp, False),
             )
         self._limits = LIMITS[self.parameter]['Limits']
 
@@ -107,8 +107,9 @@ class Initial(share.TestSequence):
         dev['dcl_vbat'].output(0.1, True)
         self.measure(
             ('dmm_vac', 'dmm_vbus', 'dmm_vccpri', 'dmm_vccbias',
-#             'dmm_vbatoff', 'dmm_alarmclose'), timeout=5)
-             'dmm_vbatoff', 'dmm_alarmopen'), timeout=5)
+             'dmm_vbatoff',
+#             'dmm_alarmclose'
+             ), timeout=5)
         dev['dcl_vbat'].output(0.0)
 
     @share.teststep
@@ -118,25 +119,26 @@ class Initial(share.TestSequence):
         msp.open()
         time.sleep(1)
         msp.setup()
-#        mes['msp_status']()
-        msp['MSP-STATUS']
+        mes['msp_status']()
         msp.test_mode()
+        time.sleep(0.1)
         msp.filter_reload()
-#        mes['msp_vout']()
+        time.sleep(1)
+        mes['msp_vout']()
         dmm_V = mes['dmm_voutpre'](timeout=5).reading1
         msp['CAL-V'] = dmm_V
         mes['dmm_voutpost'](timeout=5)
         msp['NV-WRITE']
-#        mes['msp_status']()
-        msp['MSP-STATUS']
+        mes['msp_status']()
 
     @share.teststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         mes['dmm_vbat'](timeout=5)
         self.measure(
-#            ('dmm_alarmopen', 'ramp_battocp', 'ramp_outocp'), timeout=5)
-            ('dmm_alarmclose', 'ramp_battocp', 'ramp_outocp'), timeout=5)
+            (
+#            'dmm_alarmopen',
+            'ramp_battocp', 'ramp_outocp'), timeout=5)
 
 
 class LogicalDevices(share.LogicalDevices):
