@@ -42,10 +42,10 @@ class Console(console.Variable, console.BadUartConsole):
         'MSP-STATUS': ParameterFloat(
             'nv-status PRINT', read_format='{0}'),
         'MSP-VOUT': ParameterFloat(
-            'x-supply-voltage x@ print', read_format='{0}', scale=1),
+            'x-supply-voltage x@ print', read_format='{0}'),
         'CAL-V': ParameterFloat(
             'cal-vset PRINT', writeable=True, write_format='{0} {1}',
-            read_format='{0}', minimum=0, maximum=15000, scale=1),
+            read_format='{0}', minimum=0, maximum=15000),
         }
 
     def __init__(self, port, verbose=False):
@@ -64,6 +64,7 @@ class Console(console.Variable, console.BadUartConsole):
         """Setup console for calibration."""
         self['ECHO'] = True
         self['UNLOCK'] = True
+# FIXME: The next command causes a restart... why?
         self['NV-WRITE']
         self['ECHO'] = True
         self['UNLOCK'] = True

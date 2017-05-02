@@ -49,14 +49,18 @@ LIMITS_24 = _COMMON + (
     LimitBetween('MspVout', 26.0, 29.2),
     )
 
+# ScaleFactor: 24V model responds with 12V output to measurement "msp_vout"
+# and is designed to be calibrated with half its measured output voltage.
 LIMITS = {      # Test limit selection keyed by program parameter
     '12': {
         'Limits': LIMITS_12,
         'LoadRatio': (20, 14),      # Iout:Ibat
+        'ScaleFactor': 1000,
         },
     '24': {
         'Limits': LIMITS_24,
         'LoadRatio': (10, 6),       # Iout:Ibat
+        'ScaleFactor': 500,
         },
     }
 
@@ -77,7 +81,7 @@ class Initial(share.TestSequence):
             TestStep('Calibration', self._step_cal),
             TestStep('OCP', self._step_ocp),
             )
-        self._limits = LIMITS[self.parameter]['Limits']
+        self.devices['msp'].config(LIMITS[self.parameter]['ScaleFactor'])
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -97,6 +101,7 @@ class Initial(share.TestSequence):
 #        msp = dev['msp']
 #        msp.open()
         dev['rla_prog'].set_on()
+# TODO: Add programming here
         dev['rla_prog'].set_off()
         dev['dcs_vccbias'].output(0.0)
 
@@ -166,12 +171,6 @@ class LogicalDevices(share.LogicalDevices):
         self['msp'] = console.Console(self['msp_ser'], verbose=False)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(9.0, True)
-        # 24V model responds with 12V output to measurement "msp_vout" and
-        # is designed to be calibrated with half its measured output voltage.
-        if self.parameter == '24':
-            self['msp'].config(500)
-        else:
-            self['msp'].config(1000)
 
     def reset(self):
         """Reset instruments."""
@@ -208,11 +207,9 @@ class Sensors(share.Sensors):
         self['vout'] = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
         self['vbat'] = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
         self['alarm'] = sensor.Res(dmm, high=9, low=5, rng=100000, res=1)
-        self['msp_stat'] = console.Sensor(
-                msp, 'MSP-STATUS')
+        self['msp_stat'] = console.Sensor(msp, 'MSP-STATUS')
         self['msp_stat'].doc = 'MSP430 console'
-        self['msp_vo'] = console.Sensor(
-                msp, 'MSP-VOUT')
+        self['msp_vo'] = console.Sensor(msp, 'MSP-VOUT')
         self['msp_vo'].doc = 'MSP430 console'
         low, high = self.limits['OutOCP'].limit
         self['ocp_out'] = sensor.Ramp(

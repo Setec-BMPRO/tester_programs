@@ -80,6 +80,11 @@ class Console(console.Variable, console.BaseConsole):
         self.action('1 SETDCDCOUT')
         self.action('0 SETPSON', delay=0.5)
 
+    def powersupply(self):
+        """Set the unit to default to Power Supply mode at switch-on."""
+        self.action('"POWERSUPPLY SETCHARGEMODE')
+        self['NVWRITE'] = True
+
     def cal_vout(self, voltage):
         """Calibrate the output voltage setpoint.
 

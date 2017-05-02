@@ -7,6 +7,8 @@ import unittest
 import logging
 
 _test_modules = [
+    'test_bc15_initial',
+    'test_bc15_final',
     'test_bp35_final',
     'test_bp35_initial',
     'test_bce282_initial',
