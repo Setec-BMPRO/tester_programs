@@ -75,7 +75,7 @@ class Initial(share.TestSequence):
             TestStep('Program', self._step_program, not self.fifo),
             TestStep('PowerUp', self._step_power_up),
             TestStep('Calibration', self._step_cal),
-            TestStep('OCP', self._step_ocp, False),
+            TestStep('OCP', self._step_ocp),
             )
         self._limits = LIMITS[self.parameter]['Limits']
 
@@ -121,9 +121,7 @@ class Initial(share.TestSequence):
         msp.setup()
         mes['msp_status']()
         msp.test_mode()
-        time.sleep(0.1)
         msp.filter_reload()
-        time.sleep(1)
         mes['msp_vout']()
         dmm_V = mes['dmm_voutpre'](timeout=5).reading1
         msp['CAL-V'] = dmm_V
@@ -168,6 +166,12 @@ class LogicalDevices(share.LogicalDevices):
         self['msp'] = console.Console(self['msp_ser'], verbose=False)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(9.0, True)
+        # 24V model responds with 12V output to measurement "msp_vout" and
+        # is designed to be calibrated with half its measured output voltage.
+        if self.parameter == '24':
+            self['msp'].config(500)
+        else:
+            self['msp'].config(1000)
 
     def reset(self):
         """Reset instruments."""
@@ -206,8 +210,10 @@ class Sensors(share.Sensors):
         self['alarm'] = sensor.Res(dmm, high=9, low=5, rng=100000, res=1)
         self['msp_stat'] = console.Sensor(
                 msp, 'MSP-STATUS')
+        self['msp_stat'].doc = 'MSP430 console'
         self['msp_vo'] = console.Sensor(
                 msp, 'MSP-VOUT')
+        self['msp_vo'].doc = 'MSP430 console'
         low, high = self.limits['OutOCP'].limit
         self['ocp_out'] = sensor.Ramp(
             stimulus=self.devices['dcl_vout'],
@@ -241,10 +247,14 @@ class Measurements(share.Measurements):
             ('dmm_vbatoff', 'VbatOff', 'vbat', ''),
             ('dmm_alarmclose', 'AlarmClosed', 'alarm', ''),
             ('dmm_alarmopen', 'AlarmOpen', 'alarm', ''),
-            ('dmm_voutpre', 'VoutPreCal', 'vout', ''),
-            ('dmm_voutpost', 'VoutPostCal', 'vout', ''),
+            ('dmm_voutpre', 'VoutPreCal', 'vout',
+                'Output before Calibration'),
+            ('dmm_voutpost', 'VoutPostCal', 'vout',
+                'Output after Calibration'),
             ('ramp_outocp', 'OutOCP', 'ocp_out', ''),
             ('ramp_battocp', 'BattOCP', 'ocp_batt', ''),
-            ('msp_status', 'Status 0', 'msp_stat', ''),
-            ('msp_vout', 'MspVout', 'msp_vo', ''),
+            ('msp_status', 'Status 0', 'msp_stat',
+                'Ask the MSP430 to report Status'),
+            ('msp_vout', 'MspVout', 'msp_vo',
+                'Ask the MSP430 to report output voltage'),
             ))

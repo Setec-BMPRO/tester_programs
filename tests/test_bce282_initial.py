@@ -38,20 +38,26 @@ class _BCE282Initial(ProgramTestCase):
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Calibration':
-                    ('->', ) * 5 +
-                    ('->0', ) +
-                    ('->', ) * 2 +
-                    (self.msp_vout, ) +
-#   TODO:   Check for return value of "CAL-V" ?
-                    ('->1', ) +
-                    ('->', '->0'),
+                    (' -> ', ) +
+                    (' -> ', ) +
+                    (' -> \r\x07BCE282 V3.0, build 2759.\r Built 11:57:54 on 8/8/2012.\r Error code: 1(p8=0, p16=0).\r Restart code: 4.', ) +
+                    (' -> ', ) +
+                    (' -> ', ) +
+                    (' -> 0 ', ) +
+                    (' -> ', ) +
+                    (' -> ', ) +
+                    # Both models respond with 12V output.
+                    (' -> 13800 ', ) +
+                    (' -> 1 ', ) +
+                    (' -> \r\x07BCE282 V3.0, build 2759.\r Built 11:57:54 on 8/8/2012.\r Error code: 1(p8=0, p16=0).\r Restart code: 4.', ) +
+                    (' -> 0 ', ),
                 },
             }
         self.tester.ut_load(data, self.test_program.fifo_push, dev['msp'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(16, len(result.readings))  # Reading count
+        self.assertEqual(15, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'PowerUp', 'Calibration', 'OCP'],
@@ -65,7 +71,6 @@ class BCE282_12_Initial(_BCE282Initial):
     parameter = '12'
     vout = 13.8
     inocp = 12.9
-    msp_vout = '->13800'
     debug = True
 
     def test_pass_run(self):
@@ -78,10 +83,9 @@ class BCE282_24_Initial(_BCE282Initial):
     """BCE282-12 Initial program test suite."""
 
     parameter = '24'
-    vout = 27.6
+    vout = 27.7
     inocp = 25.9
-    msp_vout = '->27500'
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the 24 program."""

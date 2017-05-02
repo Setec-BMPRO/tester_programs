@@ -151,9 +151,9 @@ class ParameterFloat(_Parameter):
         """Remember the scaling and data limits."""
         super().__init__(
             command, writeable, readable, write_format, read_format)
-        self._min = minimum
-        self._max = maximum
-        self._scale = scale
+        self.min = minimum
+        self.max = maximum
+        self.scale = scale
 
     def write(self, value, func):
         """Write parameter value.
@@ -162,10 +162,10 @@ class ParameterFloat(_Parameter):
         @param func Function to use to write the value.
 
         """
-        if value < self._min or value > self._max:
+        if value < self.min or value > self.max:
             raise ParameterError(
-                'Value out of range {0} - {1}'.format(self._min, self._max))
-        super().write(round(value * self._scale), func)
+                'Value out of range {0} - {1}'.format(self.min, self.max))
+        super().write(round(value * self.scale), func)
 
     def read(self, func):
         """Read parameter value.
@@ -177,7 +177,7 @@ class ParameterFloat(_Parameter):
         value = super().read(func)
         if value is None:
             value = '0'
-        return float(value) / self._scale
+        return float(value) / self.scale
 
 
 class ParameterHex(_Parameter):
