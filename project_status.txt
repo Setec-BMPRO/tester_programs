@@ -1,5 +1,5 @@
-Tester Programs project status as of 2017-02-03
-===============================================
+Tester Programs project status
+==============================
 
 1st generation test programs used these constructional elements:
 
@@ -30,3 +30,69 @@ Tester Programs project status as of 2017-02-03
     instances.
 
     SubStep classes are deprecated and replaced by methods on share.TestSequence.
+
+
+Not at 3rd generation:  37
+==========================
+    Self-Test
+    2040 Final
+    2040 Initial
+    ATXG-450-2V Final
+    BatteryCheck Initial
+    BatteryCheck Final
+    BCE4/5 Final
+    C15A-15 Initial
+    C15A-15 Final
+    C15D-15(M) Initial
+    C15D-15(M) Final
+    C45A-15(M) Initial
+    C45A-15(M) Final
+    CMR-INI
+    CMR-SD
+    CMR-FIN
+    CN101 Initial
+    Drifter Initial
+    Drifter Final
+    Etrac-II Initial
+    GENIUS-II Final
+    GSU360-1TA Initial
+    GSU360-1TA Final
+    MK7-400-1 Final
+    Opto Test
+    RM-50-24 Final
+    SMU750-70 Final
+    STxx-III Final
+    SX-750 Safety
+    Trek2 Initial
+    Trek2 Final
+    TRS1 Initial
+    TS3020-H Initial
+    TS3020-H Final
+    TS3520 Final
+    UNI-750 Final
+    WTSI200 Final
+
+3rd generation:    22
+=====================
+    BC15 Initial
+    BC15 Final
+    BCE282 Initial
+    BCE282 Final
+    BP35 Initial
+    BP35 Final
+    GEN8 Final
+    GEN8 Initial
+    GENIUS-II Initial
+    IDS500 Initial Micro
+    IDS500 Initial Aux
+    IDS500 Initial Bias
+    IDS500 Initial Bus
+    IDS500 Initial Syn
+    IDS500 Initial Main
+    IDS500 Final
+    J35 Initial
+    J35 Final
+    RVVIEW Initial
+    SMU750-70 Initial
+    SX-750 Initial
+    SX-750 Final

@@ -40,7 +40,10 @@ class _BCE282Initial(ProgramTestCase):
                 'Calibration':
                     (' -> ', ) +
                     (' -> ', ) +
-                    (' -> \r\x07BCE282 V3.0, build 2759.\r Built 11:57:54 on 8/8/2012.\r Error code: 1(p8=0, p16=0).\r Restart code: 4.', ) +
+                    (' -> \r\x07BCE282 V3.0, build 2759.\r'
+                        ' Built 11:57:54 on 8/8/2012.\r'
+                        ' Error code: 1(p8=0, p16=0).\r'
+                        ' Restart code: 4.', ) +
                     (' -> ', ) +
                     (' -> ', ) +
                     (' -> 0 ', ) +
@@ -49,7 +52,10 @@ class _BCE282Initial(ProgramTestCase):
                     # Both models respond with 12V output.
                     (' -> 13800 ', ) +
                     (' -> 1 ', ) +
-                    (' -> \r\x07BCE282 V3.0, build 2759.\r Built 11:57:54 on 8/8/2012.\r Error code: 1(p8=0, p16=0).\r Restart code: 4.', ) +
+                    (' -> \r\x07BCE282 V3.0, build 2759.\r'
+                        ' Built 11:57:54 on 8/8/2012.\r'
+                        ' Error code: 1(p8=0, p16=0).\r'
+                        ' Restart code: 4.', ) +
                     (' -> 0 ', ),
                 },
             }

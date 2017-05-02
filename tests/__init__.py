@@ -11,6 +11,7 @@ _test_modules = [
     'test_bc15_final',
     'test_bp35_final',
     'test_bp35_initial',
+    'test_bce282_final',
     'test_bce282_initial',
     'test_can_tunnel',
     'test_console',

@@ -187,6 +187,8 @@ class LogicalDevices(share.LogicalDevices):
 
     def close(self):
         """Finished testing."""
+        # Remove power to fixture circuits.
+        self['dcs_vcom'].output(0.0, False)
         super().close()
 
 
