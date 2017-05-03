@@ -32,8 +32,8 @@ Tester Programs project status
     SubStep classes are deprecated and replaced by methods on share.TestSequence.
 
 
-Not at 3rd generation:  37
-==========================
+1st generation:  37
+===================
     Self-Test
     2040 Final
     2040 Initial
@@ -71,6 +71,9 @@ Not at 3rd generation:  37
     TS3520 Final
     UNI-750 Final
     WTSI200 Final
+
+2nd generation:     0
+=====================
 
 3rd generation:    22
 =====================
