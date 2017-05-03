@@ -33,8 +33,10 @@ class Console(console.Variable, console.BadUartConsole):
             'echo', writeable=True, write_format='{0} {1}', read_format='{0}'),
         'UNLOCK': ParameterBoolean(
             '$deadbea7 unlock', writeable=True, write_format='{1}'),
-        'NV-WRITE': ParameterString(
-            'nv-factory-write', read_format='{0}'),
+        'NV-WRITE': ParameterBoolean(
+            'nv-factory-write', writeable=True, write_format='{1}'),
+        'RESTART': ParameterBoolean(
+            'restart', writeable=True, write_format='{1}'),
         'TEST-MODE': ParameterBoolean(
             'test-mode-enable', writeable=True, write_format='{1}'),
         'FL-RELOAD': ParameterBoolean(
@@ -46,6 +48,8 @@ class Console(console.Variable, console.BadUartConsole):
         'CAL-V': ParameterFloat(
             'cal-vset PRINT', writeable=True, write_format='{0} {1}',
             read_format='{0}', minimum=0, maximum=15000),
+        'PASSWD': ParameterString(
+            'bsl-password', read_format='{0}'),
         }
 
     def __init__(self, port, verbose=False):
@@ -64,8 +68,8 @@ class Console(console.Variable, console.BadUartConsole):
         """Setup console for calibration."""
         self['ECHO'] = True
         self['UNLOCK'] = True
-# FIXME: The next command causes a restart... why?
-        self['NV-WRITE']
+        self['NV-WRITE'] = True
+        self['RESTART'] = True
         self['ECHO'] = True
         self['UNLOCK'] = True
 

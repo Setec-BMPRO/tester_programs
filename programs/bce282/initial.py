@@ -14,8 +14,10 @@ from tester import (
 import share
 from . import console
 
-# Serial port for MSP430. Used by MSP comms module.
-_MSP_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM2'}[os.name]
+# Serial port for programming MSP430.
+_MSP_PORT1 = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+# Serial port used by MSP430 comms module.
+_MSP_PORT2 = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
 
 _COMMON = (
     LimitLow('FixtureLock', 200),
@@ -79,7 +81,7 @@ class Initial(share.TestSequence):
             TestStep('Program', self._step_program, not self.fifo),
             TestStep('PowerUp', self._step_power_up),
             TestStep('Calibration', self._step_cal),
-            TestStep('OCP', self._step_ocp),
+            TestStep('OCP', self._step_ocp, False),
             )
         self.devices['msp'].config(LIMITS[self.parameter]['ScaleFactor'])
 
@@ -104,6 +106,7 @@ class Initial(share.TestSequence):
 # TODO: Add programming here
         dev['rla_prog'].set_off()
         dev['dcs_vccbias'].output(0.0)
+        time.sleep(1)
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -131,17 +134,17 @@ class Initial(share.TestSequence):
         dmm_V = mes['dmm_voutpre'](timeout=5).reading1
         msp['CAL-V'] = dmm_V
         mes['dmm_voutpost'](timeout=5)
-        msp['NV-WRITE']
+        msp['NV-WRITE'] = True
         mes['msp_status']()
 
     @share.teststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         mes['dmm_vbat'](timeout=5)
-        self.measure(
-            (
-#            'dmm_alarmopen',
-            'ramp_battocp', 'ramp_outocp'), timeout=5)
+        self.measure(('dmm_alarmopen', 'ramp_battocp'), timeout=5)
+        dev['dcl_vbat'].output(0.0)
+        mes['ramp_outocp'](timeout=5)
+        dev['dcl_vout'].output(0.0)
 
 
 class LogicalDevices(share.LogicalDevices):
@@ -155,8 +158,8 @@ class LogicalDevices(share.LogicalDevices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-                ('dcs_vccbias', tester.DCSource, 'DCS1'), # Powers MSP430
-                ('dcs_vcom', tester.DCSource, 'DCS2'), # Powers bootloader interface
+                ('dcs_vccbias', tester.DCSource, 'DCS1'),
+                ('dcs_vcom', tester.DCSource, 'DCS2'),
                 ('dcl_vout', tester.DCLoad, 'DCL1'),
                 ('dcl_vbat', tester.DCLoad, 'DCL2'),
                 ('rla_prog', tester.Relay, 'RLA1'),
@@ -166,7 +169,7 @@ class LogicalDevices(share.LogicalDevices):
         self['msp_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['msp_ser'].port = _MSP_PORT
+        self['msp_ser'].port = _MSP_PORT2
         # MSP430 Console driver
         self['msp'] = console.Console(self['msp_ser'], verbose=False)
         # Apply power to fixture circuits.
