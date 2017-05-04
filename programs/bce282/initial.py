@@ -96,13 +96,23 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the board.
+        """Program the board."""
+# BCE282 Programming from the LabVIEW program:
+#
+# STEP 1 - SAVE
+#  tos-bsl.py --comport=0 [-P "bsl-password.txt"] --upload=0x10c0 --size=64 --ti > "bsl-savedata.txt"
+#
+# "bsl-password.txt" format:
+#   @ffe0
+#   <32 bytes of data>
+#   q
+#
+# STEP 2 - RESTORE
+#  tos-bsl.py --comport=0 --masserase --program "bsl-savedata.txt"
+#
+# STEP 3 - PROGRAM
+#  tos-bsl.py --comport=0 --program "myfile.hex"
 
-           Powers bootloader interface and MSP430.
-           Dumps existing password if any.
-           Programs.
-
-        """
 #        msp = dev['msp']
 #        msp.open()
         dev['rla_prog'].set_on()
