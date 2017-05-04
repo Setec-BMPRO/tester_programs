@@ -121,9 +121,9 @@ class LogicalDevices():
         self.fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         # Power USB devices + Fixture Trek2.
-        self.dcs_Vcom = tester.DCSource(devices['DCS1'])
+        self.dcs_Vcom = tester.DCSource(devices['DCS2'])
         # Power unit under test.
-        self.dcs_Vin = tester.DCSource(devices['DCS2'])
+        self.dcs_Vin = tester.DCSource(devices['DCS3'])
         # As the water level rises the "switches" close. The order of switch
         # closure does not matter, just the number closed.
         # The lowest bar always flashes. Closing these relays makes the other
