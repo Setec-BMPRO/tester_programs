@@ -95,7 +95,7 @@ class LogicalDevices():
         """Create all Logical Instruments."""
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
-        self.dcs_Input = tester.DCSource(devices['DCS1'])
+        self.dcs_Input = tester.DCSource(devices['DCS2'])
         self.dcl_Output = tester.DCLoad(devices['DCL1'])
 
     def reset(self):

@@ -152,7 +152,7 @@ class LogicalDevices():
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
         # This DC Source controls the PS_ON signal (12V == Unit OFF)
-        self.dcs_PsOn = tester.DCSource(devices['DCS1'])
+        self.dcs_PsOn = tester.DCSource(devices['DCS2'])
         self.dcl_24V = tester.DCLoad(devices['DCL1'])
         self.dcl_12V = tester.DCLoad(devices['DCL2'])
         self.dcl_5V = tester.DCLoad(devices['DCL3'])

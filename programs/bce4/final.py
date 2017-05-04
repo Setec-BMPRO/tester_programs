@@ -120,7 +120,7 @@ class LogicalDevices():
         """Create all Logical Instruments."""
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
-        self.dcs_10Vfixture = tester.DCSource(devices['DCS1'])
+        self.dcs_10Vfixture = tester.DCSource(devices['DCS2'])
         self.dcl_Vout = tester.DCLoad(devices['DCL1'])
         self.dcl_Vbat = tester.DCLoad(devices['DCL2'])
 

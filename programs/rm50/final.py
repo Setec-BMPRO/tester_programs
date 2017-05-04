@@ -148,7 +148,7 @@ class LogicalDevices():
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
         self.pwr = tester.Power(devices['PWR'])
-        self.dcs_24V = tester.DCSource(devices['DCS1'])
+        self.dcs_24V = tester.DCSource(devices['DCS2'])
         self.dcl_out = tester.DCLoad(devices['DCL1'])
         self.dcl_dcout = tester.DCLoad(devices['DCL5'])
         self.rla_rsense = tester.Relay(devices['RLA1'])

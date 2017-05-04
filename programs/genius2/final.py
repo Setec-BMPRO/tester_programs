@@ -132,7 +132,7 @@ class LogicalDevices():
         self.dmm = tester.DMM(devices['DMM'])
         self.acsource = tester.ACSource(devices['ACS'])
         # This DC Source simulates the battery voltage
-        self.dcs_Vbat = tester.DCSource(devices['DCS1'])
+        self.dcs_Vbat = tester.DCSource(devices['DCS2'])
         dcl_vout = tester.DCLoad(devices['DCL1'])
         dcl_vbat = tester.DCLoad(devices['DCL3'])
         self.dcl = tester.DCLoadParallel(((dcl_vout, 29), (dcl_vbat, 14)))

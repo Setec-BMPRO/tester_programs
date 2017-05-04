@@ -119,7 +119,7 @@ class LogicalDevices():
         """Create all Logical Instruments."""
         self.fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
-        self.dcs_input = tester.DCSource(devices['DCS1'])
+        self.dcs_input = tester.DCSource(devices['DCS2'])
         # Serial connection to the BT device
         self.btport = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=2)
