@@ -143,8 +143,8 @@ class LogicalDevices():
         self._fifo = fifo
         self.dmm = tester.DMM(devices['DMM'])
         # Power RS232 + Fixture Trek2.
-        self.dcs_Vcom = tester.DCSource(devices['DCS1'])
-        self.dcs_Vin = tester.DCSource(devices['DCS2'])
+        self.dcs_Vcom = tester.DCSource(devices['DCS2'])
+        self.dcs_Vin = tester.DCSource(devices['DCS3'])
         self.rla_reset = tester.Relay(devices['RLA1'])
         self.rla_boot = tester.Relay(devices['RLA2'])
         # ARM device programmer
