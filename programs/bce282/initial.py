@@ -19,6 +19,9 @@ _MSP_PORT1 = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Serial port used by MSP430 comms module.
 _MSP_PORT2 = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
 
+# Software image file (TI Text format)
+_MSP_FILE = 'bce282_3a.txt'
+
 _COMMON = (
     LimitLow('FixtureLock', 200),
     LimitDelta('VccBiasExt', 15.0, 1.0),
