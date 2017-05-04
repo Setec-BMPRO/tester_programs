@@ -97,7 +97,7 @@ class LogicalDevices(share.LogicalDevices):
                  ''),
                 ('acsource', tester.ACSource, 'ACS',
                  'AC input power'),
-                ('dcs_photo', tester.DCSource, 'DCS1',
+                ('dcs_photo', tester.DCSource, 'DCS2',
                  'Power to airflow detector'),
                 ('dcl_out', tester.DCLoad, 'DCL1',
                  'Load shared by all outputs'),
