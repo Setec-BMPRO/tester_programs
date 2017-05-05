@@ -12,7 +12,7 @@ from tester import (
 import share
 from . import console
 
-BIN_VERSION = '2.0.14782.1943'      # Software binary version
+BIN_VERSION = '2.0.14884.1979'      # Software binary version
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
@@ -81,17 +81,16 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device."""
-        dev['dcs_3v3'].output(9.0, True)
         bc15 = dev['bc15']
         bc15.open()
+        bc15.port.flushInput()
+        dev['dcs_3v3'].output(9.0, True)
         dev['rla_reset'].pulse(0.1)
-        time.sleep(0.5)
-        bc15.action(None, delay=1.5, expected=10)  # Flush banner
+        bc15.action(None, delay=2, expected=3)  # Flush banner
         bc15['UNLOCK'] = True
         bc15['NVDEFAULT'] = True
         bc15['NVWRITE'] = True
         mes['arm_SwVer'].measure()
-        bc15.close()
         dev['dcs_3v3'].output(0.0, False)
 
     @share.teststep
@@ -102,8 +101,7 @@ class Initial(share.TestSequence):
             ('dmm_acin', 'dmm_vbus', 'dmm_12Vs', 'dmm_3V3',
              'dmm_15Vs', 'dmm_voutoff', ), timeout=5)
         bc15 = dev['bc15']
-        bc15.open()
-        bc15.action(None, delay=1.5, expected=10)  # Flush banner
+        bc15.action(None, delay=1.5, expected=3)  # Flush banner
         bc15.ps_mode()
 
     @share.teststep
@@ -166,7 +164,7 @@ class LogicalDevices(share.LogicalDevices):
         self['bc15'] = console.Console(self['bc15_ser'], verbose=False)
         # Apply power to fixture Comms circuit.
         self['dcs_vcom'].output(12.0, True)
-        time.sleep(2)       # Allow OS to detect USB serial port
+        time.sleep(4)       # Allow OS to detect USB serial port
 
     def reset(self):
         """Reset instruments."""

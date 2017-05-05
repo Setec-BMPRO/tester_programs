@@ -104,10 +104,10 @@ class Console(console.Variable, console.BaseConsole):
         mv_set = float(self['mv-set'])
         # Calculate the PWM value (0-1023) given the numerator, denominator,
         # and millivolt setpoint.
-        pwm = int(((mv_set * mv_num) / mv_den) + 0.5)
+        pwm = round(((mv_set * mv_num) / mv_den) + 0.5)
         # Calculate new numerator using measured voltage.
-        mv_num_new = int(((pwm * mv_den) / (voltage * 1000)) + 0.5)
+        mv_num_new = round(((pwm * mv_den) / (voltage * 1000)) + 0.5)
         # Write new numerator and save it.
         self.action('{} "SET_VOLTS_MV_NUM CAL'.format(mv_num_new))
         self['NVWRITE'] = True
-        self.action('{} SETMV'.format(mv_set))
+        self.action('{} SETMV'.format(round(mv_set)))
