@@ -72,7 +72,7 @@ class LogicalDevices():
     def __init__(self, devices):
         """Create all Logical Instruments."""
         self.dmm = tester.DMM(devices['DMM'])
-        self.dcs_Isense = tester.DCSource(devices['DCS1'])
+        self.dcs_Isense = tester.DCSource(devices['DCS4'])
         self.dcs_12V = tester.DCSource(devices['DCS2'])
         self.dcs_Level = tester.DCSource(devices['DCS3'])
 
