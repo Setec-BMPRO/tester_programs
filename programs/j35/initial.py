@@ -69,7 +69,7 @@ _COMMON = (
         doc='Valid serial number'),
     LimitRegExp('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.')),
         doc='Arm Software version'),
-    LimitPercent('ARM-AuxV', AUX_SOLAR_INJECT, percent=2.0, delta=0.1,
+    LimitPercent('ARM-AuxV', AUX_SOLAR_INJECT, percent=2.0, delta=0.3,
         doc='ARM Aux voltage reading'),
     LimitBetween('ARM-AuxI', 0.0, 1.5, doc='ARM Aux current reading'),
     LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
@@ -132,7 +132,7 @@ CONFIG = {
     'C': {
         'Limits': LIMITS_C,
         'LoadCount': 14,
-        'HwVer': (6, 3, 'A'),
+        'HwVer': (7, 3, 'A'),
         'SolarCan': True,
         'Derate': False,
         },
