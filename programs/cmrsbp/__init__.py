@@ -86,7 +86,7 @@ LIMITS = {      # Test limit selection keyed by program parameter
     }
 
 # These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = t = None
+d = s = m = None
 
 
 class _Main(tester.TestSequence):
@@ -102,10 +102,10 @@ class _Main(tester.TestSequence):
 
     def close(self):
         """Finished testing."""
-        global m, d, s, t
+        global m, d, s
         d.cmr.close()
         d.cmr_ser.close()
-        m = d = s = t = None
+        m = d = s = None
         super().close()
 
     def safety(self):
@@ -184,9 +184,8 @@ class Initial(_Main):
             simulation=self.fifo,
             port=EV_PORT, baudrate=9600, timeout=4.0)
         self._ev = ev2200.EV2200(self._ev_ser)
-        global m, t
+        global m
         m = MeasureInit(s, self._limits)
-        t = SubTestInit(d, m)
 
     def close(self):
         """Finished testing."""
@@ -202,7 +201,10 @@ class Initial(_Main):
         """
         self.fifo_push(((s.ovbatIn, 0.5), (s.ovbat, 12.0), (s.oVcc, 3.3), ))
 
-        t.pwrup.run()
+        m.dmm_NoFinal.measure(timeout=5)
+        d.rla_vbat.set_on()
+        d.dcs_vbat.output(12.20, output=True)
+        tester.MeasureGroup((m.dmm_vbat, m.dmm_Vcc, ), timeout=5)
 
     def _step_program(self):
         """Program the PIC micro.
@@ -225,7 +227,9 @@ class Initial(_Main):
            Read PIC and check values.
 
         """
-        t.pwr_comms.run()
+        d.dcs_Vcom.output(12.0, output=True)
+        d.dcs_Vchg.output(12.6, output=True, delay=15)
+        d.rla_Pic.set_on(delay=2)
         cmr_data = self._read_data()
         s.oMirSenseRes.store(cmr_data['SENSE RESISTOR READING'])
         s.oMirHalfCell.store(cmr_data['HALF CELL READING'])
@@ -236,13 +240,20 @@ class Initial(_Main):
         """Check Vcharge."""
         self.fifo_push(((s.ovbat, 12.0), (s.oVcc, 3.3), ))
 
-        t.chk_vch.run()
+        d.dcs_vbat.output(0.0)
+        d.rla_vbat.set_off()
+        tester.MeasureGroup((m.dmm_vbatChge, m.dmm_Vcc), timeout=5)
+        d.rla_vbat.set_on()
 
     def _step_calv(self):
         """Calibrate vbat for BQ2060A."""
         self.fifo_push(((s.ovbat, 12.0), ))
 
-        t.cal_setup.run()
+        d.dcs_vbat.output(12.20)
+        d.dcs_Vchg.output(0.0)
+        d.rla_Pic.set_off()
+        d.rla_PicReset.set_on(delay=2)
+        d.rla_EVM.set_on()
         dmm_vbat = m.dmm_vbat.measure(timeout=5).reading1
         ev_data = self._ev.read_vit()
         s.oMirErrV.store(dmm_vbat - ev_data['Voltage'])
@@ -420,13 +431,14 @@ class LogicalDevices():
         self.program_pic = share.ProgramPIC(
             PIC_HEX, folder, '18F252', self.rla_Prog)
 
-
     def reset(self):
         """Reset instruments."""
         for dcs in (self.dcs_vbat, self.dcs_Vchg, self.dcs_Vcom):
             dcs.output(0.0, False)
         self.dcl_ibat.output(0.0)
-        for rla in (self.rla_Pic, self.rla_Erase):
+        for rla in (
+                self.rla_vbat, self.rla_PicReset, self.rla_Prog,
+                self.rla_EVM, self.rla_Pic, self.rla_Erase):
             rla.set_off()
 
 
@@ -549,47 +561,3 @@ class MeasureFin():
         self.cmr_VFCcalStatus = mes(
             limits['VFCcalStatus'], sense.oMirVFCcalStatus)
         self.cmr_SerNum = mes(limits['SerNumChk'], sense.oMirSerNum)
-
-
-class SubTestInit():
-
-    """Initial and SerDate SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements):
-        """Create SubTest Step instances.
-
-           @param measurements Measurements used
-           @param logical_devices Logical instruments used
-
-        """
-        d = logical_devices
-        m = measurements
-        # PowerUp: Check, Apply Batt In, measure.
-        self.pwrup = tester.SubStep((
-            tester.MeasureSubStep((m.dmm_NoFinal, ), timeout=5),
-            tester.RelaySubStep(((d.rla_vbat, True), )),
-            tester.DcSubStep(setting=((d.dcs_vbat, 12.20), ), output=True),
-            tester.MeasureSubStep((m.dmm_vbat, m.dmm_Vcc, ), timeout=5),
-            ))
-        # PowerComms: Power Comms, connect.
-        self.pwr_comms = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_Vcom, 12.0), ), output=True),
-            tester.DcSubStep(
-                setting=((d.dcs_Vchg, 12.6), ), output=True, delay=15),
-            tester.RelaySubStep(((d.rla_Pic, True), ), delay=2),
-            ))
-        # CheckVcharge: Switch off vbat, measure
-        self.chk_vch = tester.SubStep((
-            tester.DcSubStep(setting=((d.dcs_vbat, 0.0), )),
-            tester.RelaySubStep(((d.rla_vbat, False), )),
-            tester.MeasureSubStep((m.dmm_vbatChge, m.dmm_Vcc), timeout=5),
-            tester.RelaySubStep(((d.rla_vbat, True), )),
-            ))
-        # CalSetup:
-        self.cal_setup = tester.SubStep((
-            tester.DcSubStep(
-                setting=((d.dcs_vbat, 12.20), (d.dcs_Vchg, 0.0))),
-            tester.RelaySubStep(
-                ((d.rla_Pic, False), (d.rla_PicReset, True), ), delay=2),
-            tester.RelaySubStep(((d.rla_EVM, True), )),
-            ))
