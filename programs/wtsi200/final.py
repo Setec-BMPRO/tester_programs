@@ -88,8 +88,8 @@ class LogicalDevices():
     def __init__(self, devices):
         """Create all Logical Instruments."""
         self.dso = tester.DSO(devices['DSO'])
-        self.dcs_12V = tester.DCSource(devices['DCS1'])
         self.dcs_3V3 = tester.DCSource(devices['DCS2'])
+        self.dcs_12V = tester.DCSource(devices['DCS3'])
         self.rla_tank1S3 = tester.Relay(devices['RLA1'])
         self.rla_tank1S2 = tester.Relay(devices['RLA2'])
         self.rla_tank1S1 = tester.Relay(devices['RLA3'])
