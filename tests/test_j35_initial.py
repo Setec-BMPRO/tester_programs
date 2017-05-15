@@ -43,8 +43,8 @@ class _J35Initial(ProgramTestCase):
                     ((sen['olock'], 10.0), (sen['sernum'], ('A1626010123', )),
                      (sen['ovbat'], 12.0), (sen['o3V3U'], 3.3), ),
                 'Initialise': ((sen['sernum'], ('A1526040123', )), ),
-                'Aux': ((sen['oaux'], 13.5), (sen['ovbat'], 13.5), ),
-                'Solar': ((sen['ovbat'], 13.5), (sen['oair'], 13.5), ),
+                'Aux': ((sen['ovbat'], 13.5), ),
+                'Solar': ((sen['oair'], 13.5), ),
                 'PowerUp':
                     ((sen['oacin'], 240.0), (sen['ovbus'], 340.0),
                      (sen['o12Vpri'], 12.5), (sen['o3V3'], 3.3),
@@ -122,7 +122,7 @@ class J35_A_Initial(_J35Initial):
         """PASS run of the A program."""
         super()._pass_run(
             _POWERUP_CON_A,
-            46,
+            45,
             ['Prepare', 'Initialise', 'Aux', 'PowerUp', 'Output',
              'RemoteSw', 'Load', 'OCP']
             )
@@ -139,7 +139,7 @@ class J35_B_Initial(_J35Initial):
         """PASS run of the B program."""
         super()._pass_run(
             _POWERUP_CON_BC,
-            60,
+            59,
             ['Prepare', 'Initialise', 'Aux', 'PowerUp', 'Output',
              'RemoteSw', 'Load', 'OCP']
             )
@@ -150,13 +150,13 @@ class J35_C_Initial(_J35Initial):
     """J35-C Initial program test suite."""
 
     parameter = 'C'
-    debug = True # False
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the C program."""
         super()._pass_run(
             _POWERUP_CON_BC,
-            65,
+            63,
             ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp', 'Output',
              'RemoteSw', 'Load', 'OCP', 'CanBus']
             )

@@ -29,7 +29,7 @@ OUTPUT_COUNT_A = 7
 OUTPUT_COUNT_BC = 14
 # Injected voltages
 VBAT_INJECT = 12.6          # Battery bus
-AUX_SOLAR_INJECT = 13.5     # Aux or Solar inputs
+AUX_SOLAR_INJECT = 13.5      # Aux or Solar inputs
 # AC voltage powering the unit
 AC_VOLT = 240.0
 AC_FREQ = 50.0
@@ -51,16 +51,17 @@ _COMMON = (
         doc='AC-DC convertor voltage setpoint'),
     LimitLow('VloadOff', 0.5, doc='When output is OFF'),
     LimitDelta('VbatIn', VBAT_INJECT, delta=1.0,
-        doc='Vbat with injected voltage'),
+        doc='Voltage at Batt when 12.6V is injected into Batt'),
     LimitDelta('VbatOut', AUX_SOLAR_INJECT, delta=0.5,
-        doc='Vbat when Aux/Solar is injected'),
-    LimitDelta('Vbat', VOUT_SET, delta=0.2, doc='Vbat when unit is running'),
-    LimitPercent('VbatLoad', VOUT_SET, percent=5.0),
-    LimitDelta('Vaux', AUX_SOLAR_INJECT, delta=0.5,
-        doc='Vaux when voltage is injected'),
+        doc='Voltage at Batt when 13.5V is injected into Aux'),
+    LimitDelta('Vbat', VOUT_SET, delta=0.2,
+        doc='Voltage at Batt when unit is running'),
+    LimitPercent('VbatLoad', VOUT_SET, percent=5.0,
+        doc='Voltage at Batt when unit is running under load'),
     LimitDelta('Vair', AUX_SOLAR_INJECT, delta=0.5,
-            doc='Vair when voltage is injected to Solar'),
-    LimitPercent('3V3U', 3.30, percent=1.5, doc='3V3 unswitched'),
+        doc='Voltage at Air when 13.5V is injected into Solar'),
+    LimitPercent('3V3U', 3.30, percent=1.5,
+        doc='3V3 unswitched when 12.6V is injected into Batt'),
     LimitPercent('3V3', 3.30, percent=1.5, doc='3V3 internal rail'),
     LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
     LimitDelta('FanOn', VOUT_SET, delta=1.0, doc='Fan running'),
@@ -71,7 +72,8 @@ _COMMON = (
         doc='Arm Software version'),
     LimitPercent('ARM-AuxV', AUX_SOLAR_INJECT, percent=2.0, delta=0.3,
         doc='ARM Aux voltage reading'),
-    LimitBetween('ARM-AuxI', 0.0, 1.5, doc='ARM Aux current reading'),
+    LimitBetween('ARM-AuxI', 0.0, 1.5,
+        doc='ARM Aux current reading'),
     LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
     LimitPercent('ARM-AcV', AC_VOLT, percent=4.0, delta=1.0,
         doc='ARM AC voltage reading'),
@@ -198,7 +200,6 @@ class Initial(share.TestSequence):
     def _step_aux(self, dev, mes):
         """Test Auxiliary input."""
         dev['dcs_vaux'].output(AUX_SOLAR_INJECT, True)
-        mes['dmm_vaux'](timeout=5)
         dev['dcl_bat'].output(0.5, True)
         j35 = dev['j35']
         j35['AUX_RELAY'] = True
@@ -213,7 +214,7 @@ class Initial(share.TestSequence):
         dev['dcs_solar'].output(AUX_SOLAR_INJECT, True)
         j35 = dev['j35']
         j35['SOLAR'] = True
-        self.measure(('dmm_vbatout', 'dmm_vair'), timeout=5)
+        mes['dmm_vair'](timeout=5)
         j35['SOLAR'] = False
         dev['dcs_solar'].output(0.0, False)
 
@@ -375,7 +376,6 @@ class Sensors(share.Sensors):
         self['o12Vpri'] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)
         self['ovbat'] = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
         self['ovload'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
-        self['oaux'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.001)
         self['oair'] = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self['o3V3U'] = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
         self['o3V3'] = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
@@ -439,7 +439,6 @@ class Measurements(share.Measurements):
             ('dmm_vbat', 'Vbat', 'ovbat', ''),
             ('dmm_vbatload', 'VbatLoad', 'ovbat', ''),
             ('dmm_vair', 'Vair', 'oair', ''),
-            ('dmm_vaux', 'Vaux', 'oaux', ''),
             ('dmm_3v3u', '3V3U', 'o3V3U', ''),
             ('dmm_3v3', '3V3', 'o3V3', ''),
             ('dmm_15vs', '15Vs', 'o15Vs', ''),
