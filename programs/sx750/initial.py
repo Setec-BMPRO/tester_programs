@@ -73,9 +73,8 @@ LIMITS = (
     LimitRegExp(
         'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
     LimitRegExp('ARM-SwBld', '^{}$'.format(BIN_VERSION[4:])),
-    #
     LimitLow('FixtureLock', 200),
-    LimitLow('PartCheck', 100),            # Microswitches on C612, C613, D404
+    LimitLow('PartCheck', 1.0),           # Photo sensor on D404
     LimitBetween('Snubber', 1000, 3000),    # Snubbing resistors
     LimitRegExp('Reply', '^OK$'),
     LimitInteger('Program', 0)
@@ -90,7 +89,7 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         super().open(LIMITS, LogicalDevices, Sensors, Measurements)
         self.steps = (
-            TestStep('FixtureLock', self._step_fixture_lock),
+            TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program_micros),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('PowerUp', self._step_powerup),
@@ -101,7 +100,7 @@ class Initial(share.TestSequence):
             )
 
     @share.teststep
-    def _step_fixture_lock(self, dev, mes):
+    def _step_part_detect(self, dev, mes):
         """Check that Fixture Lock is closed."""
         self.measure(
             ('dmm_Lock', 'dmm_Part', 'dmm_R601', 'dmm_R602',
@@ -465,7 +464,7 @@ class Sensors(share.Sensors):
         self['o3V3'] = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
         self['ACin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self['Lock'] = sensor.Res(dmm, high=12, low=4, rng=1000, res=1)
-        self['Part'] = sensor.Res(dmm, high=13, low=4, rng=1000, res=1)
+        self['Part'] = sensor.Vdc(dmm, high=13, low=7, rng=100, res=0.01)
         self['R601'] = sensor.Res(dmm, high=14, low=5, rng=10000, res=1)
         self['R602'] = sensor.Res(dmm, high=15, low=5, rng=10000, res=1)
         self['R609'] = sensor.Res(dmm, high=16, low=6, rng=10000, res=1)
