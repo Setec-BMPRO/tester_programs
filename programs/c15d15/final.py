@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """C15D-15 Final Test Program."""
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import tester
 from tester.testlimit import lim_hilo, lim_hilo_percent, lim_lo, lim_boolean

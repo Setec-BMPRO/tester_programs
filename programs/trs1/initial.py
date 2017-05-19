@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """TRS1 Initial Test Program."""
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import tester
 from tester.testlimit import lim_hilo_delta, lim_boolean, lim_lo, lim_hi, lim_hilo

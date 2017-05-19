@@ -165,25 +165,6 @@ class TestSequence(tester.TestSequence):
         return sernum
 
 
-class AttributeDict(dict):
-
-    """A dictionary that exposes the keys as instance attributes."""
-
-    def __getattr__(self, name):
-        """Access dictionary entries as instance attributes.
-
-        @param name Attribute name
-        @return Entry value
-
-        """
-        try:
-            return self[name]
-        except KeyError as exc:
-            raise AttributeError(
-                "'{0}' object has no attribute '{1}'".format(
-                    self.__class__.__name__, name)) from exc
-
-
 class LogicalDevices(abc.ABC, dict):
 
     """Logical Devices abstract base class."""
@@ -298,19 +279,4 @@ def teststep(func):
     def new_func(self):
         """Decorate the function."""
         return func(self, self.devices, self.measurements)
-    return new_func
-
-
-def oldteststep(func):
-    """Deprecated decorator to add arguments to the test step calls.
-
-    Requires self.logdev and self.meas
-
-    @return Decorated function
-
-    """
-    @functools.wraps(func)
-    def new_func(self):
-        """Decorate the function."""
-        return func(self, self.logdev, self.meas)
     return new_func
