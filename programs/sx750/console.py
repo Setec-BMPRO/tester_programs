@@ -24,7 +24,7 @@ class Console(console.Variable, console.BaseConsole):
         console.BaseConsole.__init__(self, port, verbose)
         # Auto add prompt to puts strings
         self.puts_prompt = '\r> '
-        rfmt = '{} X?'      # 1st generation console read format string
+        rfmt = '{0} X?'     # 1st generation console read format string
         self.cmd_data = {
             'ARM-AcFreq': ParameterFloat(
                 'X-AC-LINE-FREQUENCY', read_format=rfmt),
@@ -36,9 +36,16 @@ class Console(console.Variable, console.BaseConsole):
             'ARM_SwVer': ParameterString(
                 'X-SOFTWARE-VERSION', read_format=rfmt),
             'ARM_SwBld': ParameterString('X-BUILD-NUMBER', read_format=rfmt),
+            'FAN_SET': ParameterFloat(
+                'X-TEMPERATURE-CONTROLLER-SETPOINT',
+                writeable=True,
+                write_format='{0} {1} XN!'),
             'CAL_PFC': ParameterFloat(
-                'CAL-PFC-BUS-VOLTS', writeable=True, readable=False,
-                scale=1000, write_format='{0} {1}'),
+                'CAL-PFC-BUS-VOLTS',
+                writeable=True,
+                readable=False,
+                scale=1000,
+                write_format='{0} {1}'),
             'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
                 writeable=True, readable=False, write_format='{1}'),
             'NVWRITE': ParameterBoolean('NV-WRITE',

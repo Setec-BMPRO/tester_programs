@@ -13,18 +13,11 @@ class BC15Initial(ProgramTestCase):
 
     prog_class = bc15.Initial
     parameter = None
-    debug = False
+    debug = True # False
     startup_banner = (
-        'BC15\r\n'                          # BEGIN Startup messages
-        'Build date:       06/11/2015\r\n'
-        'Build time:       15:31:40\r\n'
-        'SystemCoreClock:  48000000\r\n'
-        'Software version: 1.2.3.456\r\n'
-        'nonvol: reading crc invalid at sector 14 offset 0\r\n'
-        'nonvol: reading nonvol2 OK at sector 15 offset 2304\r\n'
-        'Hardware version: 0.0.[00]\r\n'
-        'Serial number:    A9999999999\r\n'
-        'Please type help command.'         # END Startup messages
+        'Banner line 1\r\n'
+        'Banner line 2\r\n'
+        'Banner line 3\r\n'
         )
 
     def test_pass_run(self):
@@ -45,6 +38,7 @@ class BC15Initial(ProgramTestCase):
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise': (
+# FIXME: The bc15.port.flushInput() at Line 86 breaks this test!
                     (self.startup_banner, ) +
                     ('OK', ) * 3 +
                     ('{}'.format(bc15.initial.BIN_VERSION), )

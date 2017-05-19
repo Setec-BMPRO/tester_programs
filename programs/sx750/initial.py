@@ -30,6 +30,9 @@ ARM_BIN = 'sx750_arm_{}.bin'.format(BIN_VERSION)
 # Reading to reading difference for PFC voltage stability
 PFC_STABLE = 0.05
 
+# Fan ON threshold temperature (C)
+FAN_THRESHOLD = 65.0
+
 LIMITS = (
     LimitBetween('8.5V Arduino', 8.1, 8.9),
     LimitLow('5Voff', 0.5),
@@ -171,7 +174,9 @@ class Initial(share.TestSequence):
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
         time.sleep(1)           # ARM startup delay
         arm['UNLOCK'] = True
+        arm['FAN_SET'] = FAN_THRESHOLD
         arm['NVWRITE'] = True
+        time.sleep(1.0)
         # Switch everything off
         dev['dcs_5Vsb'].output(0, False)
         dev['dcl_5Vsb'].output(0.1)

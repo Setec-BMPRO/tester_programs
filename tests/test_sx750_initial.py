@@ -22,8 +22,8 @@ class SX750Initial(ProgramTestCase):
         dev['ard_ser'].flushInput()        # Flush Arduino input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'FixtureLock':(
-                    (sen['Lock'], 10.1), (sen['Part'], 10.2),
+                'PartDetect':(
+                    (sen['Lock'], 10.1), (sen['Part'], 0.5),
                     (sen['R601'], 2001.0), (sen['R602'], 2002.0),
                     (sen['R609'], 2003.0), (sen['R608'], 2004.0),
                     ),
@@ -68,7 +68,7 @@ class SX750Initial(ProgramTestCase):
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
-                'Initialise': ('', ) * 2,   # arm
+                'Initialise': ('', ) * 3,
                 'PowerUp': ('', ) +
                     ('50Hz ', ) +       # ARM_AcFreq
                     ('240Vrms ', ) +    # ARM_AcVolt
@@ -93,6 +93,6 @@ class SX750Initial(ProgramTestCase):
         self.assertEqual(53, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['FixtureLock', 'Program', 'Initialise', 'PowerUp',
+            ['PartDetect', 'Program', 'Initialise', 'PowerUp',
              '5Vsb', '12V', '24V', 'PeakPower'],
             self.tester.ut_steps)
