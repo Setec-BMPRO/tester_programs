@@ -39,7 +39,7 @@ class Console(console.Variable, console.BaseConsole):
             'FAN_SET': ParameterFloat(
                 'X-TEMPERATURE-CONTROLLER-SETPOINT',
                 writeable=True,
-                write_format='{0} {1} XN!'),
+                write_format='{0} {1} X!'),
             'CAL_PFC': ParameterFloat(
                 'CAL-PFC-BUS-VOLTS',
                 writeable=True,
