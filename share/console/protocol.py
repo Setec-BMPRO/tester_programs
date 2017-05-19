@@ -222,6 +222,7 @@ class BaseConsole():
         if response_count == 0:     # Reduce empty list to None
             response = None
         self._logger.debug('Response <-- %s', repr(response))
+# FIXME: Next line should be:   if response_count != expected:
         if response_count < expected:
             raise ConsoleResponseError(
                 'Expected {}, actual {}'.format(expected, response_count))

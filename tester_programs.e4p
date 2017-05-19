@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-05-04, 17:14:00 -->
+<!-- Saved: 2017-05-19, 15:30:03 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -13,7 +13,6 @@
   <Email></Email>
   <Eol index="1"/>
   <Sources>
-    <Source></Source>
     <Source>main.py</Source>
     <Source>programs/_2040/__init__.py</Source>
     <Source>programs/_2040/final.py</Source>
@@ -99,6 +98,7 @@
     <Source>programs/sx750/console.py</Source>
     <Source>programs/sx750/final.py</Source>
     <Source>programs/sx750/initial.py</Source>
+    <Source>programs/sx750/pic10f320_programmer/hex_reader.py</Source>
     <Source>programs/sx750/safety.py</Source>
     <Source>programs/trek2/__init__.py</Source>
     <Source>programs/trek2/console.py</Source>
@@ -164,6 +164,7 @@
   <Interfaces/>
   <Others>
     <Other>main.py.ini</Other>
+    <Other>programs/ids500/DcSourceUsage.txt</Other>
     <Other>project_status.txt</Other>
   </Others>
   <MainScript>main.py</MainScript>
