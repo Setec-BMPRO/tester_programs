@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for IDS500 Initial Main Test program."""
 
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import ids500
 
 

@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 import tester
 import share
-from . import logging_setup
+from .. import logging_setup
 
 
 class BaseConsole(unittest.TestCase):

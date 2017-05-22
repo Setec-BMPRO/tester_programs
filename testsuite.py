@@ -18,13 +18,13 @@ From the Python unittest help...
   These checks are applied in the order listed here.
 
 For "Rerun Failed" unittest, loadTestsFromName is called with parameters:
-    name="test_XXXX", module="testsuite"
+    name="programs.test_XXXX", module="testsuite"
 
 """
 
 import unittest
 import logging
-from tests import *
+from tests import suite, share, programs
 
 # Configuration of console logger when this script is run stand-alone.
 #   Log Levels are: CRITICAL,ERROR,WARNING,INFO,DEBUG
