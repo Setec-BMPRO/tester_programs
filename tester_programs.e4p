@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-05-19, 15:30:03 -->
+<!-- Saved: 2017-05-22, 12:54:12 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
   <ProgLanguage mixed="0">Python3</ProgLanguage>
   <ProjectType>Qt4</ProjectType>
-  <Version>0.1</Version>
+  <Version>1.0</Version>
   <Author></Author>
   <Email></Email>
   <Eol index="1"/>
@@ -167,7 +167,7 @@
     <Other>programs/ids500/DcSourceUsage.txt</Other>
     <Other>project_status.txt</Other>
   </Others>
-  <MainScript>main.py</MainScript>
+  <MainScript>testsuite.py</MainScript>
   <Vcs>
     <VcsType>Git</VcsType>
     <VcsOptions>
