@@ -3,7 +3,6 @@
 # Copyright 2017 SETEC Pty Ltd.
 """Unittests for Program."""
 
-# Used to run tests by name
 from . import test_bc15_initial
 from . import test_bc15_final
 from . import test_bp35_final
@@ -22,8 +21,7 @@ from . import test_smu75070_initial
 from . import test_sx750_final
 from . import test_sx750_initial
 
-# Used by unittest.defaultTestLoader.loadTestsFromNames
-test_modules = [
+__all__ = [
     'test_bc15_initial',
     'test_bc15_final',
     'test_bp35_final',

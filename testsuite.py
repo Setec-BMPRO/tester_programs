@@ -24,7 +24,23 @@ For "Rerun Failed" unittest, loadTestsFromName is called with parameters:
 
 import unittest
 import logging
-from tests import suite, share, programs
+from tests import programs, share # for running individual tests
+
+
+def suite():
+    """Define the TestSuite for Eric unittest.
+
+    @return TestSuite
+
+    """
+    testnames = []
+    for name in share.__all__:
+        testnames.append('tests.share.' + name)
+    for name in programs.__all__:
+        testnames.append('tests.programs.' + name)
+    testsuite = unittest.defaultTestLoader.loadTestsFromNames(testnames)
+    return testsuite
+
 
 # Configuration of console logger when this script is run stand-alone.
 #   Log Levels are: CRITICAL,ERROR,WARNING,INFO,DEBUG

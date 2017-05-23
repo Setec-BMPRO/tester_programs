@@ -3,13 +3,11 @@
 # Copyright 2017 SETEC Pty Ltd.
 """Unittests for Share."""
 
-# Used to run tests by name
 from . import test_can_tunnel
 from . import test_console
 from . import test_parameter
 
-# Used by unittest.defaultTestLoader.loadTestsFromNames
-test_modules = [
+__all__ = [
     'test_can_tunnel',
     'test_console',
     'test_parameter',

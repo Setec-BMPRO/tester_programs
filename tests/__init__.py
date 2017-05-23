@@ -3,7 +3,7 @@
 # Copyright 2017 SETEC Pty Ltd.
 """Unittests."""
 
-import unittest
+#import unittest
 import logging
 
 _LOG_LEVEL = logging.DEBUG
@@ -33,18 +33,3 @@ def logging_setup():
 # Imported here so that logging_setup already exists in the namespace
 from . import share
 from . import programs
-
-
-def suite():
-    """Define the TestSuite for Eric unittest.
-
-    @return TestSuite
-
-    """
-    testnames = []
-    for name in share.test_modules:
-        testnames.append('tests.share.' + name)
-    for name in programs.test_modules:
-        testnames.append('tests.programs.' + name)
-    testsuite = unittest.defaultTestLoader.loadTestsFromNames(testnames)
-    return testsuite
