@@ -245,7 +245,8 @@ class Initial(share.TestSequence):
         """Apply Auxiliary input."""
         bp35, source, load = dev['bp35'], dev['dcs_vaux'], dev['dcl_bat']
         source.output(VAUX_IN, output=True)
-        load.output(0.5)
+        load.output(0.5, delay=1.0)
+        mes['dmm_vbatin'](timeout=1)
         bp35['AUX_RELAY'] = True
         self.measure(('dmm_vaux', 'arm_vaux', 'arm_iaux'), timeout=5)
         bp35['AUX_RELAY'] = False
