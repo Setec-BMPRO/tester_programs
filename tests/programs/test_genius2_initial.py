@@ -3,7 +3,7 @@
 """UnitTest for GENIUS-II Initial Test program."""
 
 from unittest.mock import MagicMock, patch
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import genius2
 
 

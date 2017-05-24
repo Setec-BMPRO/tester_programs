@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """MK7-400-1 Final Test Program."""
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import tester
 

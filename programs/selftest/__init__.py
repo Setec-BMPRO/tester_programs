@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Selfchecker Test Program."""
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import tester
 from tester.testlimit import lim_hilo_delta, lim_hilo, lim_lo

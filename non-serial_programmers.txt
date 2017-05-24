@@ -1,0 +1,38 @@
+Non-Serial Device Programmers
+
+MicroChip PIC Series
+====================
+PIC10F320               Done by Arduino 2016-06
+    SX-750
+
+PIC16F684
+    C45A-15
+    ST20-III
+    ST35-III
+
+PIC16F1828
+    ETrac-II
+    GENIUS-II
+
+PIC18F4321
+    IDS-500 SynBuck
+
+PIC18F4520
+    IDS-500 Micro
+
+PIC18F87J93
+    DRIFTER
+
+PIC18LF252
+    CMR-SBP
+
+dsPIC33FJ16GS402
+    BP35SR
+
+ATMEL AtTiny
+============
+AtTiny10                Done by Arduino 2016-11
+    BatteryCheck
+
+AtTiny1634              Done by Arduino 2013-08
+    WTSI200

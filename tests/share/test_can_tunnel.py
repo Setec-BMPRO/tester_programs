@@ -5,7 +5,7 @@
 import unittest
 from unittest.mock import patch
 import tester
-from . import logging_setup
+from .. import logging_setup
 
 console = None      # Console module
 mycon = None        # ConsoleCanTunnel instance

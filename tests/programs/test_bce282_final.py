@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BCE282 Final Test program."""
 
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import bce282
 
 

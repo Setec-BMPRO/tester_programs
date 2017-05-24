@@ -1,5 +1,6 @@
 #!/usr/bin/e nv python3
 """WTSI200 Final Test Program."""
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import time
 from pydispatch import dispatcher

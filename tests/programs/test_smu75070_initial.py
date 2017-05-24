@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for SMU750-70 Initial Test program."""
 
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import smu75070
 
 

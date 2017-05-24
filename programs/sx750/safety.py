@@ -6,6 +6,7 @@ Call 'self.abort()' to stop program running at end of current step.
 'self._result_map' is a list of 'uut.Result' indexed by position.
 
 """
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import tester
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """GSU360-1TA Initial Test Program."""
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import time
 import tester

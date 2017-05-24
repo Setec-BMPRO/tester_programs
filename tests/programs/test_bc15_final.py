@@ -3,7 +3,7 @@
 """UnitTest for BC15 Final Test program."""
 
 from unittest.mock import MagicMock, patch
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc15
 
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """2040 Initial Test Program."""
+# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import time
 import tester

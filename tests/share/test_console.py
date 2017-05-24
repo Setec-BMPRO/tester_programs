@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 import tester
 import share
-from . import logging_setup
+from .. import logging_setup
 
 
 class BaseConsole(unittest.TestCase):
@@ -21,6 +21,7 @@ class BaseConsole(unittest.TestCase):
         cls.patcher.start()
         sim_ser = tester.SimSerial(simulation=True)
         cls.mycon = share.console.BaseConsole(sim_ser, verbose=False)
+        cls.mycon.open()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester('MockATE', {}, fifo=True)
 
@@ -30,23 +31,37 @@ class BaseConsole(unittest.TestCase):
         cls.patcher.stop()
         cls.tester.stop()
 
-    def test_1_open(self):
-        self.mycon.puts('\7Banner1\rBanner2\r> ')
-        self.mycon.open()
-        response = self.mycon.action()
-        self.assertEqual(response, ['\7Banner1','Banner2'])
+    def test_response2(self):
+        """Multiple responses."""
+        self.mycon.puts('R1\rR2\r> ')
+        response = self.mycon.action(expected=2)
+        self.assertEqual(response, ['R1','R2'])
 
-    def test_2_action(self):
+    def test_response1(self):
+        """A single response."""
         self.mycon.puts(' -> 1234\r> ')
-        response = self.mycon.action('D')
+        response = self.mycon.action('D', expected=1)
         self.assertEqual(response, '1234')
 
-    def test_3_noprompt(self):
+    def test_response_missing(self):
+        """Not enough responses."""
+        self.mycon.puts('R1\r> ')
+        with self.assertRaises(tester.MeasurementFailedError):
+            self.mycon.action(expected=2)
+
+    @unittest.skip('Feature not implemented yet')
+    def test_response_extra(self):
+        """Too many responses."""
+        self.mycon.puts('R1\rR2\r> ')
+        with self.assertRaises(tester.MeasurementFailedError):
+            self.mycon.action(expected=1)
+
+    def test_noprompt(self):
         self.mycon.puts(' -> \r')
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action('NP')
 
-    def test_4_noresponse(self):
+    def test_noresponse(self):
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action('NR')
 
@@ -63,6 +78,7 @@ class BadUartConsole(unittest.TestCase):
         cls._sleep = cls.patcher.start()
         sim_ser = tester.SimSerial(simulation=True)
         cls.mycon = share.console.BadUartConsole(sim_ser, verbose=False)
+        cls.mycon.open()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester('MockATE', {}, fifo=True)
 
@@ -72,22 +88,21 @@ class BadUartConsole(unittest.TestCase):
         cls.patcher.stop()
         cls.tester.stop()
 
-    def test_1_open(self):
-        self.mycon.puts('\7Banner1\r\nBanner2\r\n> ')
-        self.mycon.open()
-        response = self.mycon.action()
-        self.assertEqual(response, ['\7Banner1','Banner2'])
+    def test_action2(self):
+        self.mycon.puts('R1\r\nR2\r\n> ')
+        response = self.mycon.action(expected=2)
+        self.assertEqual(response, ['R1','R2'])
 
-    def test_2_action(self):
+    def test_action1(self):
         self.mycon.puts(' -> 1234\r\n> ')
-        response = self.mycon.action('D')
+        response = self.mycon.action('D', expected=1)
         self.assertEqual(response, '1234')
 
-    def test_3_noprompt(self):
+    def test_noprompt(self):
         self.mycon.puts(' -> \r\n')
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action('NP')
 
-    def test_4_noresponse(self):
+    def test_noresponse(self):
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action('NR')

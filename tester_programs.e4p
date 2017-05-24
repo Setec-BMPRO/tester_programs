@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-05-04, 17:14:00 -->
+<!-- Saved: 2017-05-22, 21:28:08 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
   <ProgLanguage mixed="0">Python3</ProgLanguage>
   <ProjectType>Qt4</ProjectType>
-  <Version>0.1</Version>
+  <Version>1.0</Version>
   <Author></Author>
   <Email></Email>
   <Eol index="1"/>
   <Sources>
-    <Source></Source>
     <Source>main.py</Source>
     <Source>programs/_2040/__init__.py</Source>
     <Source>programs/_2040/final.py</Source>
@@ -99,6 +98,7 @@
     <Source>programs/sx750/console.py</Source>
     <Source>programs/sx750/final.py</Source>
     <Source>programs/sx750/initial.py</Source>
+    <Source>programs/sx750/pic10f320_programmer/hex_reader.py</Source>
     <Source>programs/sx750/safety.py</Source>
     <Source>programs/trek2/__init__.py</Source>
     <Source>programs/trek2/console.py</Source>
@@ -134,26 +134,28 @@
     <Source>share/timed_data.py</Source>
     <Source>tests/__init__.py</Source>
     <Source>tests/data_feed.py</Source>
-    <Source>tests/test_bc15_final.py</Source>
-    <Source>tests/test_bc15_initial.py</Source>
-    <Source>tests/test_bce282_final.py</Source>
-    <Source>tests/test_bce282_initial.py</Source>
-    <Source>tests/test_bp35_final.py</Source>
-    <Source>tests/test_bp35_initial.py</Source>
-    <Source>tests/test_can_tunnel.py</Source>
-    <Source>tests/test_console.py</Source>
-    <Source>tests/test_gen8_final.py</Source>
-    <Source>tests/test_gen8_initial.py</Source>
-    <Source>tests/test_genius2_initial.py</Source>
-    <Source>tests/test_ids_final.py</Source>
-    <Source>tests/test_ids_ini_main.py</Source>
-    <Source>tests/test_j35_final.py</Source>
-    <Source>tests/test_j35_initial.py</Source>
-    <Source>tests/test_parameter.py</Source>
-    <Source>tests/test_rvview_initial.py</Source>
-    <Source>tests/test_smu75070_initial.py</Source>
-    <Source>tests/test_sx750_final.py</Source>
-    <Source>tests/test_sx750_initial.py</Source>
+    <Source>tests/programs/__init__.py</Source>
+    <Source>tests/programs/test_bc15_final.py</Source>
+    <Source>tests/programs/test_bc15_initial.py</Source>
+    <Source>tests/programs/test_bce282_final.py</Source>
+    <Source>tests/programs/test_bce282_initial.py</Source>
+    <Source>tests/programs/test_bp35_final.py</Source>
+    <Source>tests/programs/test_bp35_initial.py</Source>
+    <Source>tests/programs/test_gen8_final.py</Source>
+    <Source>tests/programs/test_gen8_initial.py</Source>
+    <Source>tests/programs/test_genius2_initial.py</Source>
+    <Source>tests/programs/test_ids_final.py</Source>
+    <Source>tests/programs/test_ids_ini_main.py</Source>
+    <Source>tests/programs/test_j35_final.py</Source>
+    <Source>tests/programs/test_j35_initial.py</Source>
+    <Source>tests/programs/test_rvview_initial.py</Source>
+    <Source>tests/programs/test_smu75070_initial.py</Source>
+    <Source>tests/programs/test_sx750_final.py</Source>
+    <Source>tests/programs/test_sx750_initial.py</Source>
+    <Source>tests/share/__init__.py</Source>
+    <Source>tests/share/test_can_tunnel.py</Source>
+    <Source>tests/share/test_console.py</Source>
+    <Source>tests/share/test_parameter.py</Source>
     <Source>testsuite.py</Source>
   </Sources>
   <Forms>
@@ -164,9 +166,10 @@
   <Interfaces/>
   <Others>
     <Other>main.py.ini</Other>
+    <Other>programs/ids500/DcSourceUsage.txt</Other>
     <Other>project_status.txt</Other>
   </Others>
-  <MainScript>main.py</MainScript>
+  <MainScript>testsuite.py</MainScript>
   <Vcs>
     <VcsType>Git</VcsType>
     <VcsOptions>

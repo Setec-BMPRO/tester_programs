@@ -3,7 +3,7 @@
 # Copyright 2017 SETEC Pty Ltd
 """UnitTest for BP35 Final Test program."""
 
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import bp35
 
 

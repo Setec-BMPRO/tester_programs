@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for J35C Final Test program."""
 
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
 COUNT_A = 7

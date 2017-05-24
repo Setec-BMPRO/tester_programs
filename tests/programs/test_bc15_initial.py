@@ -3,7 +3,7 @@
 """UnitTest for BC15 Initial Test program."""
 
 from unittest.mock import MagicMock, patch
-from .data_feed import UnitTester, ProgramTestCase
+from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc15
 
 
@@ -38,7 +38,7 @@ class BC15Initial(ProgramTestCase):
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise': (
-# FIXME: The bc15.port.flushInput() at Line 86 breaks this test!
+                    (None, ) +  # Terminate port.flushInput()
                     (self.startup_banner, ) +
                     ('OK', ) * 3 +
                     ('{}'.format(bc15.initial.BIN_VERSION), )
