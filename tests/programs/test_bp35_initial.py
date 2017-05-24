@@ -36,7 +36,7 @@ class BP35Initial(ProgramTestCase):
                 'Initialise': ((sen['sernum'], ('A1526040123', )), ),
                 'SolarReg':
                     ((sen['vset'], (13.0, 13.0, 13.5)), (sen['solarvin'], 19.55), ),
-                'Aux': ((sen['vbat'], 13.5), ),
+                'Aux': ((sen['vbat'], (12.0, 13.5)), ),
                 'PowerUp':
                     ((sen['acin'], 240.0), (sen['pri12v'], 12.5),
                      (sen['o3v3'], 3.3), (sen['o15vs'], 12.5),
@@ -87,7 +87,7 @@ class BP35Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(73, len(result.readings))  # Reading count
+        self.assertEqual(74, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Initialise', 'SolarReg', 'Aux', 'PowerUp',
