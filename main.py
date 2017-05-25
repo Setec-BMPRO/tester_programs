@@ -43,12 +43,6 @@ def _main():
     test_program = config['DEFAULT'].get('Program')
     if test_program is None:
         test_program = 'Dummy'
-    if test_program == 'ALL PROGRAMS':
-        run_all = True
-        debug_gpib = True
-        fifo = True
-    else:
-        run_all = False
     parameter = config['DEFAULT'].get('Parameter')
     tester_type = config['DEFAULT'].get('TesterType')
     if tester_type is None:
@@ -71,31 +65,18 @@ def _main():
     logger.info('Creating "%s" Tester', tester_type)
     tst = tester.Tester(tester_type, programs.PROGRAMS, fifo)
     tst.start()
-    if run_all:
-        prog_list = programs.PROGRAMS
-    else:    # a single program group
-        prog_list = {test_program: programs.PROGRAMS[test_program]}
-    for prog in prog_list:
-        logger.info('#' * 40)
-        if run_all and prog in programs.ALL_SKIP:
-            logger.info('Skip Program "%s"', prog)
-            logger.info('#' * 40)
-            continue
-        logger.info('Create Program "%s"', prog)
-        # Make a TEST PROGRAM descriptor
-        pgm = tester.TestProgram(
-            prog, per_panel=1, parameter=parameter, test_limits=[])
-        logger.info('#' * 40)
-        logger.info('Open Program "%s"', prog)
-        tst.open(pgm)
-        logger.info('#' * 40)
-        logger.info('Running Test')
-        tst.test(('UUT1', ))
-    #    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
-        logger.info('#' * 40)
-        logger.info('Close Program')
-        time.sleep(2)
-        tst.close()
+    logger.info('Create Program "%s"', test_program)
+    # Make a TEST PROGRAM descriptor
+    pgm = tester.TestProgram(
+        test_program, per_panel=1, parameter=parameter, test_limits=[])
+    logger.info('Open Program "%s"', test_program)
+    tst.open(pgm)
+    logger.info('Running Test')
+    tst.test(('UUT1', ))
+#    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
+    logger.info('Close Program')
+    time.sleep(2)
+    tst.close()
     logger.info('Stop Tester')
     tst.stop()
     tst.join()

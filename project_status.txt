@@ -32,11 +32,9 @@ Tester Programs project status
     SubStep classes are deprecated and replaced by methods on share.TestSequence.
 
 
-1st generation:  37
+1st generation:  35
 ===================
     Self-Test
-    2040 Final
-    2040 Initial
     ATXG-450-2V Final
     BatteryCheck Initial
     BatteryCheck Final
@@ -75,8 +73,10 @@ Tester Programs project status
 2nd generation:     0
 =====================
 
-3rd generation:    22
+3rd generation:    24
 =====================
+    2040 Final
+    2040 Initial
     BC15 Initial
     BC15 Final
     BCE282 Initial

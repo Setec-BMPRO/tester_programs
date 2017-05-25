@@ -46,9 +46,6 @@ from . import wtsi200
 #       Value: Tuple of 2 items:
 #           1) The class to use to create a program instance,
 #           2) Test limit data structure for testlimit.limitset()
-#
-#   Names listed in ALL_SKIP will not be run by the ALL PROGRAMS
-#   option in main.py
 
 PROGRAMS = {
     'Self-Test': selftest.Main,
@@ -111,22 +108,3 @@ PROGRAMS = {
     'UNI-750 Final': uni750.Final,
     'WTSI200 Final': wtsi200.Final,
     }
-
-# Skip these programs when running 'ALL PROGRAMS' in main.py
-ALL_SKIP = (
-    # Due to use of the EV2200
-    'CMR-INI', 'CMR-SD',
-    # Unfinished programs
-
-    # Done with unittest
-    'BP35 Initial', 'BP35 Final', 'GEN8 Initial', 'GEN8 Final',
-    'GENIUS-II Initial',
-    'IDS500 Initial Main', 'IDS500 Final',
-    'J35 Initial', 'J35 Final',
-    'RVVIEW Initial', 'SX-750 Initial', 'SX-750 Final',
-    'SMU750-70 Initial',
-    # Obsolete and unused programs
-    'SX-750 Safety',
-    # The voltage adjuster will not simulate
-    'TS3020-H Initial',
-    )
