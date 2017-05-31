@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-05-26, 11:35:55 -->
+<!-- Saved: 2017-05-30, 18:12:29 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -28,6 +28,8 @@
     <Source>programs/bc15/console.py</Source>
     <Source>programs/bc15/final.py</Source>
     <Source>programs/bc15/initial.py</Source>
+    <Source>programs/bc2/__init__.py</Source>
+    <Source>programs/bc2/initial.py</Source>
     <Source>programs/bce282/__init__.py</Source>
     <Source>programs/bce282/console.py</Source>
     <Source>programs/bce282/final.py</Source>
@@ -79,6 +81,8 @@
     <Source>programs/j35/console.py</Source>
     <Source>programs/j35/final.py</Source>
     <Source>programs/j35/initial.py</Source>
+    <Source>programs/mb2/__init__.py</Source>
+    <Source>programs/mb2/final.py</Source>
     <Source>programs/mk7400/__init__.py</Source>
     <Source>programs/mk7400/final.py</Source>
     <Source>programs/opto_test/__init__.py</Source>
@@ -151,6 +155,7 @@
     <Source>tests/programs/test_ids_ini_main.py</Source>
     <Source>tests/programs/test_j35_final.py</Source>
     <Source>tests/programs/test_j35_initial.py</Source>
+    <Source>tests/programs/test_mb2_final.py</Source>
     <Source>tests/programs/test_rvview_initial.py</Source>
     <Source>tests/programs/test_smu75070_initial.py</Source>
     <Source>tests/programs/test_sx750_final.py</Source>
