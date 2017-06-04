@@ -11,6 +11,7 @@ from . import test_bp35_final
 from . import test_bp35_initial
 from . import test_bce282_final
 from . import test_bce282_initial
+from . import test_c15a15_final
 from . import test_cn101_initial
 from . import test_gen8_final
 from . import test_gen8_initial
@@ -34,6 +35,7 @@ __all__ = [
     'test_bp35_initial',
     'test_bce282_final',
     'test_bce282_initial',
+    'test_c15a15_final',
     'test_cn101_initial',
     'test_gen8_final',
     'test_gen8_initial',
