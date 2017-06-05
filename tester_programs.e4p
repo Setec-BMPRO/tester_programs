@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-04, 19:15:08 -->
+<!-- Saved: 2017-06-05, 12:08:28 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -28,6 +28,8 @@
     <Source>programs/bc15/console.py</Source>
     <Source>programs/bc15/final.py</Source>
     <Source>programs/bc15/initial.py</Source>
+    <Source>programs/bc2/__init__.py</Source>
+    <Source>programs/bc2/initial.py</Source>
     <Source>programs/bce282/__init__.py</Source>
     <Source>programs/bce282/console.py</Source>
     <Source>programs/bce282/final.py</Source>
@@ -141,6 +143,7 @@
     <Source>tests/programs/test_2040_initial.py</Source>
     <Source>tests/programs/test_bc15_final.py</Source>
     <Source>tests/programs/test_bc15_initial.py</Source>
+    <Source>tests/programs/test_bc2_initial.py</Source>
     <Source>tests/programs/test_bce282_final.py</Source>
     <Source>tests/programs/test_bce282_initial.py</Source>
     <Source>tests/programs/test_bp35_final.py</Source>
