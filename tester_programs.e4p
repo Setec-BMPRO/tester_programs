@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-05, 12:08:28 -->
+<!-- Saved: 2017-06-06, 16:50:56 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -29,6 +29,7 @@
     <Source>programs/bc15/final.py</Source>
     <Source>programs/bc15/initial.py</Source>
     <Source>programs/bc2/__init__.py</Source>
+    <Source>programs/bc2/console.py</Source>
     <Source>programs/bc2/initial.py</Source>
     <Source>programs/bce282/__init__.py</Source>
     <Source>programs/bce282/console.py</Source>

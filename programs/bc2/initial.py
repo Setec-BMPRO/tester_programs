@@ -2,16 +2,25 @@
 # -*- coding: utf-8 -*-
 """BC2 Initial Program."""
 
+import os
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitBoolean
+    LimitDelta, LimitBoolean, LimitRegExp
     )
 import share
+from . import console
+
+# Serial port for the ARM. Used by programmer.
+ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM17'}[os.name]
+# Serial port for the Bluetooth module.
+BLE_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM18'}[os.name]
 
 LIMITS = (
     LimitDelta('Vin', 12.0, 0.5),
     LimitDelta('3V3', 3.3, 0.25),
+    LimitRegExp('BtMac', r'^[0-F]{12}$'),
+    LimitBoolean('DetectBT', True),
     LimitBoolean('Notify', True),
     )
 
@@ -25,6 +34,8 @@ class Initial(share.TestSequence):
         super().open(LIMITS, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
+            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Bluetooth', self._step_bluetooth),
             )
 
     @share.teststep
@@ -37,6 +48,29 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(12.0, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the ARM device."""
+#        dev['programmer'].program()
+
+    @share.teststep
+    def _step_bluetooth(self, dev, mes):
+        """Test the Bluetooth interface."""
+        dev['dcs_vin'].output(0.0, delay=1.0)
+        dev['dcs_vin'].output(12.0, delay=15.0)
+        btmac = mes['bc2_btmac']().reading1
+        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
+        if self.fifo:
+            reply = True
+        else:
+            ble = dev['ble']
+            ble.open()
+            reply = ble.scan(btmac)
+            ble.close()
+        self._logger.debug('Bluetooth MAC detected: %s', reply)
+        mes['detectBT'].sensor.store(reply)
+        mes['detectBT']()
+
 
 class LogicalDevices(share.LogicalDevices):
 
@@ -47,9 +81,25 @@ class LogicalDevices(share.LogicalDevices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vin', tester.DCSource, 'DCS1'),
+                ('dcs_vcom', tester.DCSource, 'DCS1'),
+                ('dcs_vin', tester.DCSource, 'DCS2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Serial connection to the console
+        self['bc2_ser'] = tester.SimSerial(
+            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        # Set port separately, as we don't want it opened yet
+        self['bc2_ser'].port = ARM_PORT
+        # Console driver
+        self['bc2'] = console.Console(self['bc2_ser'], verbose=False)
+        # Serial connection to the BLE module
+        self['ble_ser'] = tester.SimSerial(
+            simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
+        # Set port separately, as we don't want it opened yet
+        self['ble_ser'].port = BLE_PORT
+        self['ble'] = share.BleRadio(self['ble_ser'])
+        # Apply power to fixture circuits.
+        self['dcs_vcom'].output(9.0, output=True, delay=5)
 
     def reset(self):
         """Reset instruments."""
@@ -66,6 +116,14 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['mirbt'] = sensor.Mirror()
+        # Console sensors
+        bc2 = self.devices['bc2']
+        for name, cmdkey in (
+                ('btmac', 'BT_MAC'),
+            ):
+            self[name] = console.Sensor(
+                bc2, cmdkey, rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -77,4 +135,6 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
             ('dmm_3v3', '3V3', '3v3', ''),
+            ('detectBT', 'DetectBT', 'mirbt', ''),
+            ('bc2_btmac', 'BtMac', 'btmac', ''),
             ))
