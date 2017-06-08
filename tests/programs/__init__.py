@@ -5,6 +5,7 @@
 
 from . import test_2040_final
 from . import test_2040_initial
+from . import test_atxg4502v_final
 from . import test_bc2_initial
 from . import test_bc15_initial
 from . import test_bc15_final
@@ -33,6 +34,7 @@ from . import test_sx750_initial
 __all__ = [
     'test_2040_final',
     'test_2040_initial',
+    'test_atxg4502v_final',
     'test_bc2_initial',
     'test_bc15_initial',
     'test_bc15_final',

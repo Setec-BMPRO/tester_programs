@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-08, 16:22:14 -->
+<!-- Saved: 2017-06-09, 09:24:25 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -142,6 +142,7 @@
     <Source>tests/programs/__init__.py</Source>
     <Source>tests/programs/test_2040_final.py</Source>
     <Source>tests/programs/test_2040_initial.py</Source>
+    <Source>tests/programs/test_atxg4502v_final.py</Source>
     <Source>tests/programs/test_bc15_final.py</Source>
     <Source>tests/programs/test_bc15_initial.py</Source>
     <Source>tests/programs/test_bc2_initial.py</Source>
