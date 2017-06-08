@@ -1,205 +1,163 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """BCE4/5 Final Test Program."""
-# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
-import time
 import tester
+from tester import (
+    TestStep,
+    LimitLow, LimitBetween, LimitDelta
+    )
+import share
 
-LIMITS_4 = tester.testlimit.limitset((
-    ('VoutNL', 1, 13.50, 13.80, None, None),
-    ('Vout', 1, 13.28, 13.80, None, None),
-    ('Vbat', 1, 13.28, 13.92, None, None),
-    ('FullLoad', 1, 10.1, None, None, None),
-    ('OCPramp', 1, 10.0, 13.5, None, None),
-    ('inOCP', 1, 13.28, None, None, None),
-    ('OCP', 1, 10.2, 13.0, None, None),
-    ('AlarmOpen', 1, 9.0, 11.0, None, None),
-    ('AlarmClosed', 1, 1.0, None, None, None),
-    ('InDropout', 1, 13.28, None, None, None),
-    ('Dropout', 1, 150.0, 180.0, None, None),
-    ))
+_COMMON = (
+    LimitDelta('AlarmOpen', 10.0, 1.0, doc='Contacts open'),
+    LimitLow('AlarmClosed', 1.0, doc='Contacts closed'),
+    LimitBetween('Dropout', 150.0, 180.0, doc='AC dropout voltage'),
+    )
 
-LIMITS_5 = tester.testlimit.limitset((
-    ('VoutNL', 1, 27.00, 27.60, None, None),
-    ('Vout', 1, 26.56, 27.84, None, None),
-    ('Vbat', 1, 26.56, 27.84, None, None),
-    ('FullLoad', 1, 5.1, None, None, None),
-    ('OCPramp', 1, 5.0, 7.0, None, None),
-    ('inOCP', 1, 26.56, None, None, None),
-    ('OCP', 1, 5.1, 6.3, None, None),
-    ('AlarmOpen', 1, 9.0, 11.0, None, None),
-    ('AlarmClosed', 1, 1.0, None, None, None),
-    ('InDropout', 1, 26.56, None, None, None),
-    ('Dropout', 1, 150.0, 180.0, None, None),
-    ))
+LIMITS_4 = _COMMON + (
+    LimitBetween('VoutNL', 13.50, 13.80),
+    LimitBetween('Vout', 13.28, 13.80),
+    LimitBetween('Vbat', 13.28, 13.92),
+    LimitLow('inOCP', 13.28),
+    LimitBetween('OCP', 10.2, 13.0),
+    LimitLow('InDropout', 13.28),
+    )
+
+LIMITS_5 = _COMMON + (
+    LimitBetween('VoutNL', 27.00, 27.60),
+    LimitBetween('Vout', 26.56, 27.84),
+    LimitBetween('Vbat', 26.56, 27.84),
+    LimitLow('inOCP', 26.56),
+    LimitBetween('OCP', 5.1, 6.3),
+    LimitLow('InDropout', 26.56),
+    )
 
 LIMITS = {      # Test limit selection keyed by program parameter
-    None: LIMITS_4,
-    '4': LIMITS_4,
-    '5': LIMITS_5,
+    '4': {
+        'Limits': LIMITS_4,
+        'FullLoad': 10.1,
+        'OCPramp': (10.0, 13.5),
+        },
+    '5': {
+        'Limits': LIMITS_5,
+        'FullLoad': 5.1,
+        'OCPramp': (5.0, 7.0),
+        },
     }
 
-# These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = t = None
 
-
-class Final(tester.TestSequence):
+class Final(share.TestSequence):
 
     """BCE4/5 Final Test Program."""
 
     def open(self):
         """Prepare for testing."""
-        super().open()
+        super().open(
+            LIMITS[self.parameter]['Limits'],
+            LogicalDevices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('FullLoad', self._step_full_load),
-            tester.TestStep('OCP', self._step_ocp),
-            tester.TestStep('LowMains', self._step_low_mains),
+            TestStep('PowerUp', self._step_power_up),
+            TestStep('FullLoad', self._step_full_load),
+            TestStep('OCP', self._step_ocp),
+            TestStep('LowMains', self._step_low_mains),
             )
-        self._limits = LIMITS[self.parameter]
-        self._isbce4 = (self.parameter != '5')
-        global m, d, s, t
-        d = LogicalDevices(self.physical_devices)
-        s = Sensors(d, self._limits)
-        m = Measurements(s, self._limits)
-        t = SubTests(d, m, self._limits)
 
-    def close(self):
-        """Finished testing."""
-        global m, d, s, t
-        m = d = s = t = None
-        super().close()
-
-    def safety(self):
-        """Make the unit safe after a test."""
-        d.reset()
-
-    def _step_power_up(self):
+    @share.teststep
+    def _step_power_up(self, dev, mes):
         """Power up unit."""
-        if self._isbce4:
-            self.fifo_push(
-                ((s.oVout, (13.6, 13.55)), (s.oVbat, 13.3),
-                 (s.oAlarm, (0.1, 10.0)), ))
-        else:
-            self.fifo_push(
-                ((s.oVout, (27.3, 27.2)), (s.oVbat, 27.2),
-                 (s.oAlarm, (0.1, 10.0)), ))
-        t.power_up.run()
+        dev['dcs_10Vfixture'].output(10.0, output=True)
+        mes['dmm_AlarmClosed'](timeout=5)
+        self.dcload((('dcl_Vout', 0.1), ('dcl_Vbat', 0.0)), output=True)
+        dev['acsource'].output(185.0, output=True, delay=0.5)
+        mes['dmm_VoutNL'](timeout=5)
+        dev['acsource'].output(240.0, delay=0.5)
+        self.measure(
+            ('dmm_VoutNL', 'dmm_Vbat', 'dmm_AlarmOpen'),
+            timeout=5)
 
-    def _step_full_load(self):
+    @share.teststep
+    def _step_full_load(self, dev, mes):
         """Measure outputs at full-load."""
-        if self._isbce4:
-            self.fifo_push(((s.oVout, 13.4), (s.oVbat, 13.3), ))
-        else:
-            self.fifo_push(((s.oVout, 27.2), (s.oVbat, 27.1), ))
-        t.full_load.run()
+        self.dcload(
+            (('dcl_Vout', LIMITS[self.parameter]['FullLoad']),
+            ('dcl_Vbat', 0.1)), )
+        self.measure(('dmm_Vout', 'dmm_Vbat'), timeout=5)
 
-    def _step_ocp(self):
+    @share.teststep
+    def _step_ocp(self, dev, mes):
         """Measure OCP point."""
-        if self._isbce4:
-            self.fifo_push(((s.oVout, (13.4, ) * 15 + (13.0, ), ), ))
-        else:
-            self.fifo_push(((s.oVout, (27.3, ) * 8 + (26.0, ), ), ))
         # Load is already at FullLoad
-        m.ramp_OCP.measure()
+        mes['ramp_OCP']()
 
-    def _step_low_mains(self):
+    @share.teststep
+    def _step_low_mains(self, dev, mes):
         """Low input voltage."""
-        if self._isbce4:
-            self.fifo_push(((s.oVout, (13.4, ) * 17 + (13.0, ), ), ))
-        else:
-            self.fifo_push(((s.oVout, (27.3, ) * 17 + (26.0, ), ), ))
-        t.low_mains.run()
+        dev['acsource'].output(185.0, delay=0.5)
+        self.measure(('dmm_Vout', 'dropout', ))
 
 
-class LogicalDevices():
+class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def open(self):
         """Create all Logical Instruments."""
-        self.dmm = tester.DMM(devices['DMM'])
-        self.acsource = tester.ACSource(devices['ACS'])
-        self.dcs_10Vfixture = tester.DCSource(devices['DCS2'])
-        self.dcl_Vout = tester.DCLoad(devices['DCL1'])
-        self.dcl_Vbat = tester.DCLoad(devices['DCL2'])
+        # Physical Instrument based devices
+        for name, devtype, phydevname in (
+                ('dmm', tester.DMM, 'DMM'),
+                ('acsource', tester.ACSource, 'ACS'),
+                ('dcs_10Vfixture', tester.DCSource, 'DCS2'),
+                ('dcl_Vout', tester.DCLoad, 'DCL1'),
+                ('dcl_Vbat', tester.DCLoad, 'DCL2'),
+            ):
+            self[name] = devtype(self.physical_devices[phydevname])
 
     def reset(self):
         """Reset instruments."""
-        self.acsource.reset()
-        self.dcs_10Vfixture.output(0.0, output=False)
-        self.dcl_Vout.output(5.0, True)
-        time.sleep(0.5)
-        for dcl in (self.dcl_Vout, self.dcl_Vbat):
-            dcl.output(0.0, False)
+        self['acsource'].reset()
+        self['dcs_10Vfixture'].output(0.0, output=False)
+        self['dcl_Vout'].output(5.0, delay=0.5)
+        for dcl in ('dcl_Vout', 'dcl_Vbat'):
+            self[dcl].output(0.0, False)
 
 
-class Sensors():
+class Sensors(share.Sensors):
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
-        """Create all Sensor instances."""
-        dmm = logical_devices.dmm
+    def open(self):
+        """Create all Sensors."""
+        dmm = self.devices['dmm']
         sensor = tester.sensor
-        self.oVout = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        self.oVbat = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
-        self.oAlarm = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.01)
-        ocp_start, ocp_stop = limits['OCPramp'].limit
-        self.oOCP = sensor.Ramp(
-            stimulus=logical_devices.dcl_Vout, sensor=self.oVout,
-            detect_limit=(limits['inOCP'], ),
+        self['oVout'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
+        self['oVbat'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
+        self['oAlarm'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.01)
+        ocp_start, ocp_stop = LIMITS[self.parameter]['OCPramp']
+        self['oOCP'] = sensor.Ramp(
+            stimulus=self.devices['dcl_Vout'],
+            sensor=self['oVout'],
+            detect_limit=(self.limits['inOCP'], ),
             start=ocp_start, stop=ocp_stop, step=0.05, delay=0.1)
-        self.oDropout = sensor.Ramp(
-            stimulus=logical_devices.acsource, sensor=self.oVout,
-            detect_limit=(limits['InDropout'], ),
+        self['oDropout'] = sensor.Ramp(
+            stimulus=self.devices['acsource'],
+            sensor=self['oVout'],
+            detect_limit=(self.limits['InDropout'], ),
             start=185.0, stop=150.0, step=-0.5, delay=0.1, reset=False)
 
 
-class Measurements():
+class Measurements(share.Measurements):
 
     """Measurements."""
 
-    def __init__(self, sense, limits):
-        """Create all Measurement instances."""
-        Measurement = tester.Measurement
-        self.dmm_VoutNL = Measurement(limits['VoutNL'], sense.oVout)
-        self.dmm_Vout = Measurement(limits['Vout'], sense.oVout)
-        self.dmm_Vbat = Measurement(limits['Vbat'], sense.oVbat)
-        self.dmm_AlarmOpen = Measurement(limits['AlarmOpen'], sense.oAlarm)
-        self.dmm_AlarmClosed = Measurement(limits['AlarmClosed'], sense.oAlarm)
-        self.ramp_OCP = Measurement(limits['OCP'], sense.oOCP)
-        self.dropout = Measurement(limits['Dropout'], sense.oDropout)
-
-
-class SubTests():
-
-    """SubTest Steps."""
-
-    def __init__(self, logical_devices, measurements, limits):
-        """Create SubTest Step instances."""
-        d = logical_devices
-        m = measurements
-
-        # PowerUp: 185Vac, measure, 240Vac, measure.
-        dc = tester.DcSubStep(((d.dcs_10Vfixture, 10.0), ))
-        ld = tester.LoadSubStep(((d.dcl_Vout, 0.1), (d.dcl_Vbat, 0.0)), output=True)
-        msr1 = tester.MeasureSubStep((m.dmm_AlarmClosed, ), timeout=5)
-        acs1 = tester.AcSubStep(acs=d.acsource, voltage=185.0, output=True, delay=0.5)
-        msr2 = tester.MeasureSubStep((m.dmm_VoutNL, ), timeout=5)
-        acs2 = tester.AcSubStep(acs=d.acsource, voltage=240.0, delay=0.5)
-        msr3 = tester.MeasureSubStep(
-            (m.dmm_VoutNL, m.dmm_Vbat, m.dmm_AlarmOpen), timeout=5)
-        self.power_up = tester.SubStep((dc, msr1, ld, acs1, msr2, acs2, msr3))
-
-        # Full Load: load, measure.
-        ld = tester.LoadSubStep(
-            ((d.dcl_Vout, limits['FullLoad'].limit), (d.dcl_Vbat, 0.1)))
-        msr1 = tester.MeasureSubStep((m.dmm_Vout, m.dmm_Vbat), timeout=5)
-        self.full_load = tester.SubStep((ld, msr1))
-
-        # Low Mains: 180Vac, measure.
-        acs1 = tester.AcSubStep(acs=d.acsource, voltage=185.0, delay=0.5)
-        msr1 = tester.MeasureSubStep((m.dmm_Vout, m.dropout, ))
-        self.low_mains = tester.SubStep((acs1, msr1))
+    def open(self):
+        """Create all Measurements."""
+        self.create_from_names((
+            ('dmm_VoutNL', 'VoutNL', 'oVout', ''),
+            ('dmm_Vout', 'Vout', 'oVout', ''),
+            ('dmm_Vbat', 'Vbat', 'oVbat', ''),
+            ('dmm_AlarmOpen', 'AlarmOpen', 'oAlarm', ''),
+            ('dmm_AlarmClosed', 'AlarmClosed', 'oAlarm', ''),
+            ('ramp_OCP', 'OCP', 'oOCP', ''),
+            ('dropout', 'Dropout', 'oDropout', ''),
+            ))

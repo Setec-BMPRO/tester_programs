@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-06, 16:50:56 -->
+<!-- Saved: 2017-06-08, 09:57:20 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -147,6 +147,7 @@
     <Source>tests/programs/test_bc2_initial.py</Source>
     <Source>tests/programs/test_bce282_final.py</Source>
     <Source>tests/programs/test_bce282_initial.py</Source>
+    <Source>tests/programs/test_bce4_final.py</Source>
     <Source>tests/programs/test_bp35_final.py</Source>
     <Source>tests/programs/test_bp35_initial.py</Source>
     <Source>tests/programs/test_c15a15_final.py</Source>
