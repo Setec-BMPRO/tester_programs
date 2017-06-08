@@ -97,7 +97,7 @@ class LogicalDevices(share.LogicalDevices):
                  ''),
                 ('acsource', tester.ACSource, 'ACS',
                  'AC input power'),
-                ('dcs_photo', tester.DCSource, 'DCS2',
+                ('dcs_photo', tester.DCSource, 'DCS3',
                  'Power to airflow detector'),
                 ('dcl_out', tester.DCLoad, 'DCL1',
                  'Load shared by all outputs'),
@@ -108,6 +108,7 @@ class LogicalDevices(share.LogicalDevices):
     def reset(self):
         """Reset instruments."""
         self['acsource'].reset()
+        self['dcl_out'].output(15.0, delay=2)
         self['dcl_out'].output(0.0, False)
 
     def close(self):
@@ -123,7 +124,7 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['photo'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
+        self['photo'] = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.1)
         self['photo'].doc = 'Airflow detector'
         # Generate load voltage sensors
         vloads = []
