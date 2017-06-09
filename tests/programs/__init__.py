@@ -32,6 +32,7 @@ from . import test_rvview_initial
 from . import test_smu75070_initial
 from . import test_sx750_final
 from . import test_sx750_initial
+from . import test_sx750_safety
 from . import test_uni750_final
 
 __all__ = [
@@ -64,5 +65,6 @@ __all__ = [
     'test_smu75070_initial',
     'test_sx750_final',
     'test_sx750_initial',
+    'test_sx750_safety',
     'test_uni750_final',
     ]

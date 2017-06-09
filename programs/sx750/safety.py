@@ -1,111 +1,88 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""SX-750 Safety Test Program.
-
-Call 'self.abort()' to stop program running at end of current step.
-'self._result_map' is a list of 'uut.Result' indexed by position.
-
-"""
-# FIXME: Upgrade this program to 3rd Generation standards with unittest.
+"""SX-750 Safety Test Program."""
 
 import tester
+import share
+from tester import TestStep, LimitBetween
 
-LIMITS = tester.testlimit.limitset((
-    ('gnd', 0, 20, 100, None, None),
-    ('arc', 0, -0.001, 0, None, None),
-    ('acw', 0, 2.0, 4.0, None, None),
-    ))
-
-# These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = None
+LIMITS = (
+    LimitBetween('gnd', 20, 100),
+    LimitBetween('arc', -0.001, 0),
+    LimitBetween('acw', 2.0, 4.0),
+    )
 
 
-class Safety(tester.TestSequence):
+class Safety(share.TestSequence):
 
     """SX-750 Safety Test Program."""
 
     def open(self):
-        """Prepare for testing."""
-        super().open()
+        """Create the test program as a linear sequence."""
+        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('Gnd1', self._step_gnd1),
-            tester.TestStep('Gnd2', self._step_gnd2),
-            tester.TestStep('Gnd3', self._step_gnd3),
-            tester.TestStep('HiPot', self._step_hipot),
+            TestStep('Gnd1', self._step_gnd1),
+            TestStep('Gnd2', self._step_gnd2),
+            TestStep('Gnd3', self._step_gnd3),
+            TestStep('HiPot', self._step_hipot),
             )
-        self._limits = LIMITS
-        global m, d, s
-        d = LogicalDevices(self.physical_devices)
-        s = Sensors(d)
-        m = Measurements(s, self._limits)
 
-    def close(self):
-        """Finished testing."""
-        global m, d, s
-        m = d = s = None
-        super().close()
-
-    def safety(self):
-        """Make the unit safe after a test."""
-        d.reset()
-
-    def _step_gnd1(self):
+    @share.teststep
+    def _step_gnd1(self, dev, mes):
         """Ground Continuity 1."""
-        self.fifo_push(((s.gnd1, 40), ))
-        m.gnd1.measure()
+        mes['gnd1']()
 
-    def _step_gnd2(self):
+    @share.teststep
+    def _step_gnd2(self, dev, mes):
         """Ground Continuity 2."""
-        self.fifo_push(((s.gnd2, 50), ))
-        m.gnd2.measure()
+        mes['gnd2']()
 
-    def _step_gnd3(self):
+    @share.teststep
+    def _step_gnd3(self, dev, mes):
         """Ground Continuity 3."""
-        self.fifo_push(((s.gnd3, 60), ))
-        m.gnd3.measure()
+        mes['gnd3']()
 
-    def _step_hipot(self):
+    @share.teststep
+    def _step_hipot(self, dev, mes):
         """HiPot Test."""
-        self.fifo_push(((s.acw, 3.0), ))
-        m.acw.measure()
+        mes['acw']()
 
 
-class LogicalDevices():
+class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
 
-    def __init__(self, devices):
+    def open(self):
         """Create all Logical Instruments."""
-        self.st = tester.SafetyTester(devices['SAF'])
-
-    def reset(self):
-        """Reset instruments."""
-        pass
+        # Physical Instrument based devices
+        self['st'] = tester.SafetyTester(self.physical_devices['SAF'])
 
 
-class Sensors():
+class Sensors(share.Sensors):
 
     """Sensors."""
 
-    def __init__(self, logical_devices):
-        """Create all Sensor instances."""
-        st = logical_devices.st
+    def open(self):
+        """Create all Sensors."""
+        st = self.devices['st']
         sensor = tester.sensor
-        # Safety Tester sequence and test steps
-        self.gnd1 = sensor.STGND(st, step=1, ch=1)
-        self.gnd2 = sensor.STGND(st, step=2, ch=2, curr=11)
-        self.gnd3 = sensor.STGND(st, step=3, ch=3, curr=11)
-        self.acw = sensor.STACW(st, step=4)
+        self['gnd1'] = sensor.STGND(st, step=1, ch=1)
+        self['gnd2'] = sensor.STGND(st, step=2, ch=2, curr=11)
+        self['gnd3'] = sensor.STGND(st, step=3, ch=3, curr=11)
+        self['acw'] = sensor.STACW(st, step=4)
 
 
-class Measurements():
+class Measurements(share.Measurements):
 
     """Measurements."""
 
-    def __init__(self, sense, limits):
-        """Create all Measurement instances."""
-        Measurement = tester.Measurement
-        self.gnd1 = Measurement(limits['gnd'], sense.gnd1)
-        self.gnd2 = Measurement(limits['gnd'], sense.gnd2)
-        self.gnd3 = Measurement(limits['gnd'], sense.gnd3)
-        self.acw = Measurement((limits['arc'], limits['acw']), sense.acw)
+    def open(self):
+        """Create all Measurements."""
+        self.create_from_names((
+            ('gnd1', 'gnd', 'gnd1', ''),
+            ('gnd2', 'gnd', 'gnd2', ''),
+            ('gnd3', 'gnd', 'gnd3', ''),
+            ))
+        self['acw'] = tester.Measurement(
+            (self.limits['arc'], self.limits['acw'], ),
+            self.sensors['acw'], doc='')
