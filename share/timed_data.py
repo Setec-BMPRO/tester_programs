@@ -43,11 +43,8 @@ class TimedStore():
     def clear(self):
         """Clear the saved data state by copying from the template."""
         self._logger.debug('clear data')
-        self._lock.acquire()
-        try:
+        with self._lock:
             self.data = copy.deepcopy(self._template)
-        finally:
-            self._lock.release()
 
     def __getitem__(self, name):
         """Get an item's value.
@@ -55,11 +52,8 @@ class TimedStore():
         @return Item value.
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             value = self.data[name]
-        finally:
-            self._lock.release()
         return value
 
     def __setitem__(self, name, val):
@@ -68,11 +62,8 @@ class TimedStore():
         Reset the data lifetime timer
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             self.data[name] = val
-        finally:
-            self._lock.release()
         self._timer = self._timeout / self._tick
 
     def __delitem__(self, name):
@@ -81,20 +72,14 @@ class TimedStore():
         Reset the data lifetime timer
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             del self.data[name]
-        finally:
-            self._lock.release()
         self._timer = self._timeout / self._tick
 
     def __len__(self):
         """Return length of the data store."""
-        self._lock.acquire()
-        try:
+        with self._lock:
             length = len(self.data)
-        finally:
-            self._lock.release()
         return length
 
     def _tick_handler(self):
