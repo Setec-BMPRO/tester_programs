@@ -16,20 +16,22 @@ class BaseConsole(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         logging_setup()
-        # Patch time.sleep to remove delays
-        cls.patcher = patch('time.sleep')
-        cls.patcher.start()
-        sim_ser = tester.SimSerial(simulation=True)
-        cls.mycon = share.console.BaseConsole(sim_ser, verbose=False)
-        cls.mycon.open()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester('MockATE', {}, fifo=True)
 
     @classmethod
     def tearDownClass(cls):
-        cls.mycon.close()
-        cls.patcher.stop()
         cls.tester.stop()
+
+    def setUp(self):
+        logging_setup()
+        patcher = patch('time.sleep')   # Remove time delays
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        sim_ser = tester.SimSerial(simulation=True)
+        self.mycon = share.console.BaseConsole(sim_ser, verbose=False)
+        self.addCleanup(self.mycon.close)
+        self.mycon.open()
 
     def test_response2(self):
         """Multiple responses."""
@@ -73,20 +75,22 @@ class BadUartConsole(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         logging_setup()
-        # Patch time.sleep to remove delays
-        cls.patcher = patch('time.sleep')
-        cls._sleep = cls.patcher.start()
-        sim_ser = tester.SimSerial(simulation=True)
-        cls.mycon = share.console.BadUartConsole(sim_ser, verbose=False)
-        cls.mycon.open()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester('MockATE', {}, fifo=True)
 
     @classmethod
     def tearDownClass(cls):
-        cls.mycon.close()
-        cls.patcher.stop()
         cls.tester.stop()
+
+    def setUp(self):
+        logging_setup()
+        patcher = patch('time.sleep')   # Remove time delays
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        sim_ser = tester.SimSerial(simulation=True)
+        self.mycon = share.console.BadUartConsole(sim_ser, verbose=False)
+        self.addCleanup(self.mycon.close)
+        self.mycon.open()
 
     def test_action2(self):
         self.mycon.puts('R1\r\nR2\r\n> ')
