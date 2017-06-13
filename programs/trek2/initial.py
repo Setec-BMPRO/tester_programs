@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Trek2 Initial Test Program."""
-# FIXME: Upgrade this program to 3rd Generation standards with unittest.
 
 import os
 import inspect
 import time
 import tester
-from tester.testlimit import (
-    lim_hilo_delta, lim_hilo_percent, lim_hilo_int, lim_hilo,
-    lim_lo, lim_string, lim_boolean)
+from tester import (
+    TestStep,
+    LimitLow, LimitRegExp, LimitBetween, LimitDelta,
+    LimitPercent, LimitInteger, LimitBoolean
+    )
 import share
 from . import console
+
 
 BIN_VERSION = '1.4.13801.139'   # Software binary version
 
@@ -23,7 +25,7 @@ CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
 # Software image filename
-ARM_BIN = 'Trek2_{}.bin'.format(BIN_VERSION)
+ARM_FILE = 'Trek2_{}.bin'.format(BIN_VERSION)
 # CAN echo request messages
 CAN_ECHO = 'TQQ,16,0'
 # Input voltage to power the unit
@@ -32,189 +34,150 @@ VIN_SET = 12.75
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
 
-LIMITS = tester.testlimit.limitset((
-    lim_hilo_delta('Vin', 12.0, 0.5),
-    lim_hilo_percent('3V3', 3.3, 3.0),
-    lim_lo('BkLghtOff', 0.5),
-    lim_hilo('BkLghtOn', 3.465, 4.545),     # 40mA = 4V with 100R (1%)
-    lim_string('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    lim_string('CAN_RX', r'^RRQ,16,0'),
-    lim_hilo_int('CAN_BIND', _CAN_BIND),
-    lim_string('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
-    lim_boolean('Notify', True),
-    ))
-
-# These are module level variables to avoid having to use 'self.' everywhere.
-d = s = m = None
+LIMITS = (
+    LimitDelta('Vin', 12.0, 0.5),
+    LimitPercent('3V3', 3.3, 3.0),
+    LimitLow('BkLghtOff', 0.5),
+    LimitBetween('BkLghtOn', 3.465, 4.545),     # 40mA = 4V with 100R (1%)
+    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+    LimitRegExp('CAN_RX', r'^RRQ,16,0'),
+    LimitInteger('CAN_BIND', _CAN_BIND),
+    LimitRegExp('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
+    LimitBoolean('Notify', True),
+    )
 
 
-class Initial(tester.TestSequence):
+class Initial(share.TestSequence):
 
     """Trek2 Initial Test Program."""
 
     def open(self):
-        """Prepare for testing."""
-        super().open()
+        """Create the test program as a linear sequence."""
+        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self._step_program, not self.fifo),
-            tester.TestStep('TestArm', self._step_test_arm),
-            tester.TestStep('CanBus', self._step_canbus),
+            TestStep('PowerUp', self._step_power_up),
+            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('TestArm', self._step_test_arm),
+            TestStep('CanBus', self._step_canbus),
             )
-        self._limits = LIMITS
-        global d, s, m
-        d = LogicalDevices(self.physical_devices, self.fifo)
-        s = Sensors(d, self._limits)
-        m = Measurements(s, self._limits)
-        d.dcs_Vcom.output(12.0, output=True)
-        time.sleep(2)   # Allow OS to detect the new ports
         self.sernum = None
 
-    def close(self):
-        """Finished testing."""
-        global m, d, s
-        d.dcs_Vcom.output(0.0, output=False)
-        m = d = s = None
-        super().close()
-
-    def safety(self):
-        """Make the unit safe after a test."""
-        d.reset()
-
-    def _step_power_up(self):
+    @share.teststep
+    def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.fifo_push(
-            ((s.oSnEntry, ('A1526040123', )), (s.oVin, 12.0), (s.o3V3, 3.3), ))
-
         self.sernum = share.get_sernum(
-            self.uuts, self._limits['SerNum'], m.ui_SnEntry)
-        d.dcs_Vin.output(VIN_SET, output=True)
-        tester.MeasureGroup((m.dmm_Vin, m.dmm_3V3), timeout=5)
+            self.uuts, self.limits['SerNum'], mes['ui_SnEntry'])
+        dev['dcs_Vin'].output(VIN_SET, output=True)
+        self.measure(('dmm_Vin', 'dmm_3V3'), timeout=5)
 
-    def _step_program(self):
+    @share.teststep
+    def _step_program(self, dev, mes):
         """Program the ARM device."""
-        d.programmer.program()
+        dev['programmer'].program()
 
-    def _step_test_arm(self):
+    @share.teststep
+    def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
-        for str in (
-                ('Banner1\r\nBanner2', ) +  # Banner lines
-                ('', ) + ('success', ) * 2 + ('', ) * 2 +
-                (BIN_VERSION, )
-                ):
-            d.trek2.puts(str)
+        trek2 = dev['trek2']
+        trek2.open()
+        dev['rla_reset'].pulse(0.1)
+        trek2.action(None, delay=1.5, expected=2)  # Flush banner
+        trek2['UNLOCK'] = True
+        trek2['HW_VER'] = HW_VER
+        trek2['SER_ID'] = self.sernum
+        trek2['NVDEFAULT'] = True
+        trek2['NVWRITE'] = True
+        mes['trek2_SwVer']()
 
-        d.trek2.open()
-        d.rla_reset.pulse(0.1)
-        d.trek2.action(None, delay=1.5, expected=2)  # Flush banner
-        d.trek2['UNLOCK'] = True
-        d.trek2['HW_VER'] = HW_VER
-        d.trek2['SER_ID'] = self.sernum
-        d.trek2['NVDEFAULT'] = True
-        d.trek2['NVWRITE'] = True
-        m.trek2_SwVer.measure()
-
-    def _step_canbus(self):
+    @share.teststep
+    def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        for str in ('0x10000000', '', '0x10000000', '', ''):
-            d.trek2.puts(str)
-        d.trek2.puts('RRQ,16,0,7,0,0,0,0,0,0,0\r\n', addprompt=False)
-
-        m.trek2_can_bind.measure(timeout=10)
-        d.trek2.can_testmode(True)
+        mes['trek2_can_bind'](timeout=10)
+        dev['trek2'].can_testmode(True)
         time.sleep(2)   # Let other CAN messages come in...
         # From here, Command-Response mode is broken by the CAN debug messages!
-        d.trek2['CAN'] = CAN_ECHO
-        echo_reply = d.trek2_ser.readline().decode(errors='ignore')
+        dev['trek2']['CAN'] = CAN_ECHO
+        echo_reply = dev['trek2_ser'].readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
-        s.oMirCAN.store(echo_reply)
-        m.rx_can.measure()
+        mes['rx_can'].sensor.store(echo_reply)
+        mes['rx_can']()
 
 
-class LogicalDevices():
+class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
 
-    def __init__(self, devices, fifo):
-        """Create all Logical Instruments.
-
-           @param devices Physical instruments of the Tester
-
-        """
-        self._fifo = fifo
-        self.dmm = tester.DMM(devices['DMM'])
-        # Power RS232 + Fixture Trek2.
-        self.dcs_Vcom = tester.DCSource(devices['DCS2'])
-        self.dcs_Vin = tester.DCSource(devices['DCS3'])
-        self.rla_reset = tester.Relay(devices['RLA1'])
-        self.rla_boot = tester.Relay(devices['RLA2'])
+    def open(self):
+        """Create all Logical Instruments."""
+        # Physical Instrument based devices
+        for name, devtype, phydevname in (
+                ('dmm', tester.DMM, 'DMM'),
+                ('dcs_Vcom', tester.DCSource, 'DCS2'),
+                ('dcs_Vin', tester.DCSource, 'DCS3'),
+                ('rla_reset', tester.Relay, 'RLA1'),
+                ('rla_boot', tester.Relay, 'RLA2'),
+            ):
+            self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        file = os.path.join(os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe()))),
-            ARM_BIN)
-        self.programmer = share.ProgramARM(
-            ARM_PORT, file, crpmode=False,
-            boot_relay=self.rla_boot, reset_relay=self.rla_reset)
-        # Serial connection to the Trek2 console
-        self.trek2_ser = tester.SimSerial(
-            simulation=fifo, baudrate=115200, timeout=5.0)
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self['programmer'] = share.ProgramARM(
+            ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
+            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+        # Serial connection to the console
+        self['trek2_ser'] = tester.SimSerial(
+            simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self.trek2_ser.port = ARM_PORT
-        # Trek2 Console driver
-        self.trek2 = console.DirectConsole(self.trek2_ser)
+        self['trek2_ser'].port = ARM_PORT
+        # Console driver
+        self['trek2'] = console.DirectConsole(self['trek2_ser'], verbose=False)
+        # Apply power to fixture circuits.
+        self['dcs_Vcom'].output(12.0, output=True, delay=2)
 
     def reset(self):
         """Reset instruments."""
-        self.trek2.close()
-        self.dcs_Vin.output(0.0, False)
-        for rla in (self.rla_reset, self.rla_boot):
-            rla.set_off()
+        self['trek2'].close()
+        self['dcs_Vcom'].output(0.0, output=False)
+        for rla in ('rla_reset', 'rla_boot'):
+            self[rla].set_off()
 
 
-class Sensors():
+class Sensors(share.Sensors):
 
     """Sensors."""
 
-    def __init__(self, logical_devices, limits):
-        """Create all Sensor instances.
-
-           @param logical_devices Logical instruments used
-           @param limits Product test limits
-
-        """
-        dmm = logical_devices.dmm
-        trek2 = logical_devices.trek2
+    def open(self):
+        """Create all Sensors."""
+        dmm = self.devices['dmm']
+        trek2 = self.devices['trek2']
         sensor = tester.sensor
-        self.oMirCAN = sensor.Mirror(rdgtype=sensor.ReadingString)
-        self.oVin = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self.o3V3 = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self.oBkLght = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
-        self.oSnEntry = sensor.DataEntry(
+        self['oMirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingString)
+        self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['o3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['oBkLght'] = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
+        self['oSnEntry'] = sensor.DataEntry(
             message=tester.translate('trek2_initial', 'msgSnEntry'),
             caption=tester.translate('trek2_initial', 'capSnEntry'),
             timeout=300)
-        self.oCANBIND = console.Sensor(trek2, 'CAN_BIND')
-        self.oSwVer = console.Sensor(
+        # Console sensors
+        self['oCANBIND'] = console.Sensor(trek2, 'CAN_BIND')
+        self['oSwVer'] = console.Sensor(
             trek2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
-class Measurements():
+class Measurements(share.Measurements):
 
     """Measurements."""
 
-    def __init__(self, sense, limits):
-        """Create all Measurement instances.
-
-           @param sense Sensors used
-           @param limits Product test limits
-
-        """
-        Measurement = tester.Measurement
-        self.rx_can = Measurement(limits['CAN_RX'], sense.oMirCAN)
-        self.dmm_Vin = Measurement(limits['Vin'], sense.oVin)
-        self.dmm_3V3 = Measurement(limits['3V3'], sense.o3V3)
-        self.dmm_BkLghtOff = Measurement(limits['BkLghtOff'], sense.oBkLght)
-        self.dmm_BkLghtOn = Measurement(limits['BkLghtOn'], sense.oBkLght)
-        self.ui_SnEntry = Measurement(limits['SerNum'], sense.oSnEntry)
-        self.trek2_can_bind = Measurement(limits['CAN_BIND'], sense.oCANBIND)
-        self.trek2_SwVer = Measurement(limits['SwVer'], sense.oSwVer)
+    def open(self):
+        """Create all Measurements."""
+        self.create_from_names((
+            ('rx_can', 'CAN_RX', 'oMirCAN', ''),
+            ('dmm_Vin', 'Vin', 'oVin', ''),
+            ('dmm_3V3', '3V3', 'o3V3', ''),
+            ('dmm_BkLghtOff', 'BkLghtOff', 'oBkLght', ''),
+            ('dmm_BkLghtOn', 'BkLghtOn', 'oBkLght', ''),
+            ('ui_SnEntry', 'SerNum', 'oSnEntry', ''),
+            ('trek2_can_bind', 'CAN_BIND', 'oCANBIND', ''),
+            ('trek2_SwVer', 'SwVer', 'oSwVer', ''),
+            ))
