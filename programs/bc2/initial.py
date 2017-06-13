@@ -3,6 +3,7 @@
 """BC2 Initial Program."""
 
 import os
+import inspect
 import tester
 from tester import (
     TestStep,
@@ -11,10 +12,14 @@ from tester import (
 import share
 from . import console
 
-# Serial port for the ARM. Used by programmer.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM17'}[os.name]
+SAM_HEX = 'bc2_test.hex'
+
+# Serial port for the programmer.
+PROG_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM17'}[os.name]
+# Serial port for the ARM. Used by ARM comms module.
+ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM18'}[os.name]
 # Serial port for the Bluetooth module.
-BLE_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM18'}[os.name]
+BLE_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM19'}[os.name]
 
 LIMITS = (
     LimitDelta('Vin', 12.0, 0.5),
@@ -50,8 +55,8 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the ARM device."""
-#        dev['programmer'].program()
+        """Program the SAM device."""
+        dev['program_sam'].program()
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -83,8 +88,15 @@ class LogicalDevices(share.LogicalDevices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
+                ('dcs_shunt', tester.DCSource, 'DCS3'),
+                ('rla_prog', tester.Relay, 'RLA1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # SAM device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self['program_sam'] = share.ProgramSAM(
+            SAM_HEX, folder, 'SAM B11-MR210CA', self['rla_prog'])
         # Serial connection to the console
         self['bc2_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
@@ -103,7 +115,10 @@ class LogicalDevices(share.LogicalDevices):
 
     def reset(self):
         """Reset instruments."""
-        self['dcs_vin'].output(0.0, False)
+        for dev in ('dcs_vcom', 'dcs_vin', 'dcs_shunt'):
+            self[dev].output(0.0, False)
+        for rla in ('rla_prog', ):
+            self[rla].set_off()
 
 
 class Sensors(share.Sensors):
