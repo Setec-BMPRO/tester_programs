@@ -14,6 +14,58 @@ _SUCCESS = 0
 _FAILURE = 1
 
 
+class ProgramSAM():
+
+    pic_binary = {
+        'posix': 'pickit3',
+        'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
+        }[os.name]
+
+    """Atmel SAM device programmer using a Atmel-ICE Debugger."""
+
+    def __init__(self,
+                 hexfile, working_dir, device_type,
+                 relay, limitname='Program'):
+        """Create a programmer.
+
+        @param hexfile Full pathname of HEX file
+        @param working_dir Working directory
+        @param device_type SAM device type (eg: 'SAM B11-MR210CA')
+        @param relay Relay device to connect programmer to target
+        @param limitname Testlimit name
+
+        """
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
+        self.hexfile = hexfile
+        self.working_dir = working_dir
+        self.device_type = device_type
+        self.relay = relay
+        limit = tester.LimitInteger(
+            limitname, _SUCCESS, doc='Programming succeeded')
+        self._sam = tester.Measurement(limit, tester.sensor.Mirror())
+
+    def program(self):
+        """Program a device."""
+        try:
+            command = [
+                self.pic_binary,
+                '/P{}'.format(self.device_type),
+                '/F{}'.format(self.hexfile),
+                '/E',
+                '/M',
+                '/Y'
+                ]
+            self.relay.set_on()
+            subprocess.check_output(command, cwd=self.working_dir)
+            self._sam.sensor.store(_SUCCESS)
+        except subprocess.CalledProcessError as err:
+            self._logger.debug('Error: %s', err.output)
+            self._sam.sensor.store(_FAILURE)
+        self.relay.set_off()
+        self._sam.measure()
+
+
 class ProgramPIC():
 
     pic_binary = {
