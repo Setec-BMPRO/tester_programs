@@ -43,6 +43,7 @@ from . import test_sx750_initial
 from . import test_sx750_safety
 from . import test_trek2_initial
 from . import test_ts3020h_initial
+from . import test_ts3020h_final
 from . import test_ts3520_final
 from . import test_uni750_final
 
@@ -87,6 +88,7 @@ __all__ = [
     'test_sx750_safety',
     'test_trek2_initial',
     'test_ts3020h_initial',
+    'test_ts3020h_final',
     'test_ts3520_final',
     'test_uni750_final',
     ]

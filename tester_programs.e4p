@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-14, 13:26:43 -->
+<!-- Saved: 2017-06-14, 14:06:16 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -179,6 +179,7 @@
     <Source>tests/programs/test_sx750_initial.py</Source>
     <Source>tests/programs/test_sx750_safety.py</Source>
     <Source>tests/programs/test_trek2_initial.py</Source>
+    <Source>tests/programs/test_ts3020h_final.py</Source>
     <Source>tests/programs/test_ts3020h_initial.py</Source>
     <Source>tests/programs/test_ts3520_final.py</Source>
     <Source>tests/programs/test_uni750_final.py</Source>
