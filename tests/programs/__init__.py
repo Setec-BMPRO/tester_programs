@@ -18,6 +18,7 @@ from . import test_c15a15_initial
 from . import test_c15a15_final
 from . import test_c15d15_initial
 from . import test_c15d15_final
+from . import test_c45a15_final
 from . import test_cn101_initial
 from . import test_drifter_final
 from . import test_drifter_initial
@@ -59,6 +60,7 @@ __all__ = [
     'test_c15a15_final',
     'test_c15d15_initial',
     'test_c15d15_final',
+    'test_c45a15_final',
     'test_cn101_initial',
     'test_drifter_final',
     'test_drifter_initial',
