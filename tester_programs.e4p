@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-14, 11:25:22 -->
+<!-- Saved: 2017-06-14, 12:00:56 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -156,6 +156,7 @@
     <Source>tests/programs/test_c15d15_final.py</Source>
     <Source>tests/programs/test_c15d15_initial.py</Source>
     <Source>tests/programs/test_c45a15_final.py</Source>
+    <Source>tests/programs/test_c45a15_initial.py</Source>
     <Source>tests/programs/test_cn101_initial.py</Source>
     <Source>tests/programs/test_drifter_final.py</Source>
     <Source>tests/programs/test_drifter_initial.py</Source>
