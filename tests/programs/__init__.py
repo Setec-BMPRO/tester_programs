@@ -34,6 +34,7 @@ from . import test_j35_final
 from . import test_j35_initial
 from . import test_mb2_final
 from . import test_mk7400_final
+from . import test_rm50_final
 from . import test_rvview_initial
 from . import test_smu75070_final
 from . import test_smu75070_initial
@@ -79,6 +80,7 @@ __all__ = [
     'test_j35_initial',
     'test_mb2_final',
     'test_mk7400_final',
+    'test_rm50_final',
     'test_rvview_initial',
     'test_smu75070_final',
     'test_smu75070_initial',

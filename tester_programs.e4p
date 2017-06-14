@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-14, 14:06:16 -->
+<!-- Saved: 2017-06-14, 16:16:40 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -171,6 +171,7 @@
     <Source>tests/programs/test_j35_initial.py</Source>
     <Source>tests/programs/test_mb2_final.py</Source>
     <Source>tests/programs/test_mk7400_final.py</Source>
+    <Source>tests/programs/test_rm50_final.py</Source>
     <Source>tests/programs/test_rvview_initial.py</Source>
     <Source>tests/programs/test_smu75070_final.py</Source>
     <Source>tests/programs/test_smu75070_initial.py</Source>
