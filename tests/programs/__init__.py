@@ -28,6 +28,7 @@ from . import test_gen8_final
 from . import test_gen8_initial
 from . import test_genius2_final
 from . import test_genius2_initial
+from . import test_gsu360_final
 from . import test_gsu360_initial
 from . import test_ids_final
 from . import test_ids_ini_main
@@ -76,6 +77,7 @@ __all__ = [
     'test_gen8_initial',
     'test_genius2_final',
     'test_genius2_initial',
+    'test_gsu360_final',
     'test_gsu360_initial',
     'test_ids_final',
     'test_ids_ini_main',
