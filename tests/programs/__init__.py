@@ -50,6 +50,7 @@ from . import test_ts3020h_initial
 from . import test_ts3020h_final
 from . import test_ts3520_final
 from . import test_uni750_final
+from . import test_wtsi200_final
 
 __all__ = [
     'test_2040_final',
@@ -99,4 +100,5 @@ __all__ = [
     'test_ts3020h_final',
     'test_ts3520_final',
     'test_uni750_final',
+    'test_wtsi200_final',
     ]
