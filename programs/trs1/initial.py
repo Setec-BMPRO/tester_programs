@@ -79,7 +79,7 @@ class LogicalDevices(share.LogicalDevices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dso', tester.ACSource, 'DSO'),
+                ('dso', tester.DSO, 'DSO'),
                 ('dcs_Vin', tester.DCSource, 'DCS4'),
                 ('rla_pin', tester.Relay, 'RLA5'),
             ):
