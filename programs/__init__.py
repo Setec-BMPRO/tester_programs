@@ -23,7 +23,6 @@ from . import gsu360
 from . import ids500
 from . import j35
 from . import mk7400
-from . import opto_test
 from . import rvview
 from . import rm50
 from . import smu75070
@@ -90,7 +89,6 @@ PROGRAMS = {
     'J35 Initial': j35.Initial,
     'J35 Final': j35.Final,
     'MK7-400-1 Final': mk7400.Final,
-    'Opto Test': opto_test.Main,
     'RVVIEW Initial': rvview.Initial,
     'RM-50-24 Final': rm50.Final,
     'SMU750-70 Final': smu75070.Final,
