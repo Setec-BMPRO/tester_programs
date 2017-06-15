@@ -75,7 +75,7 @@ class BCE282_12_Initial(_BCE282Initial):
     parameter = '12'
     vout = 13.8
     inocp = 12.9
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the 12 program."""

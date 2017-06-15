@@ -12,7 +12,7 @@ class ATXG4502VFinal(ProgramTestCase):
 
     prog_class = atxg450.Final2V
     parameter = None
-    debug = True # False
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""

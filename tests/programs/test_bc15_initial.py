@@ -13,7 +13,7 @@ class BC15Initial(ProgramTestCase):
 
     prog_class = bc15.Initial
     parameter = None
-    debug = True # False
+    debug = False
     startup_banner = (
         'Banner line 1\r\n'
         'Banner line 2\r\n'

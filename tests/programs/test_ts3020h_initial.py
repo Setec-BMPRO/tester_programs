@@ -12,7 +12,7 @@ class TS3020HInitial(ProgramTestCase):
 
     prog_class = ts3020h.Initial
     parameter = None
-    debug = True #False
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""
