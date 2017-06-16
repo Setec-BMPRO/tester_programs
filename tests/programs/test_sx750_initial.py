@@ -18,8 +18,8 @@ class SX750Initial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         dev = self.test_program.devices
-        dev['arm_ser'].flushInput()        # Flush console input buffer
-        dev['ard_ser'].flushInput()        # Flush Arduino input buffer
+        dev['arm'].port.flushInput()    # Flush console input buffer
+        dev['ard'].port.flushInput()    # Flush Arduino input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PartDetect':(

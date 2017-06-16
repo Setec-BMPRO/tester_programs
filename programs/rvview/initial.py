@@ -100,7 +100,7 @@ class Initial(share.TestSequence):
         rvview.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
         rvview['CAN'] = CAN_ECHO
-        echo_reply = dev['rvview_ser'].readline().decode(errors='ignore')
+        echo_reply = rvview.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         rx_can = mes['rx_can']
         rx_can.sensor.store(echo_reply)
@@ -130,13 +130,12 @@ class LogicalDevices(share.LogicalDevices):
             ARM_PORT, file, crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the rvview console
-        self['rvview_ser'] = tester.SimSerial(
+        rvview_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['rvview_ser'].port = ARM_PORT
+        rvview_ser.port = ARM_PORT
         # rvview Console driver
-        self['rvview'] = console.DirectConsole(
-            self['rvview_ser'], verbose=False)
+        self['rvview'] = console.DirectConsole(rvview_ser, verbose=False)
         # Power to fixture Comms circuits.
         self['dcs_vcom'].output(9.0, True)
 

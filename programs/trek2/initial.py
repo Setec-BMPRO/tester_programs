@@ -93,11 +93,12 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes['trek2_can_bind'](timeout=10)
-        dev['trek2'].can_testmode(True)
+        trek2 = dev['trek2']
+        trek2.can_testmode(True)
         time.sleep(2)   # Let other CAN messages come in...
         # From here, Command-Response mode is broken by the CAN debug messages!
-        dev['trek2']['CAN'] = CAN_ECHO
-        echo_reply = dev['trek2_ser'].readline().decode(errors='ignore')
+        trek2['CAN'] = CAN_ECHO
+        echo_reply = trek2.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         mes['rx_can'].sensor.store(echo_reply)
         mes['rx_can']()
@@ -125,12 +126,12 @@ class LogicalDevices(share.LogicalDevices):
             ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the console
-        self['trek2_ser'] = tester.SimSerial(
+        trek2_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['trek2_ser'].port = ARM_PORT
+        trek2_ser.port = ARM_PORT
         # Console driver
-        self['trek2'] = console.DirectConsole(self['trek2_ser'], verbose=False)
+        self['trek2'] = console.DirectConsole(trek2_ser, verbose=False)
         # Apply power to fixture circuits.
         self['dcs_Vcom'].output(12.0, output=True, delay=2)
 

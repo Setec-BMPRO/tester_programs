@@ -407,17 +407,17 @@ class LogicalDevices(share.LogicalDevices):
         self['programmer'] = share.ProgramARM(
             ARM_PORT, file, boot_relay=self['rla_boot'])
         # Serial connection to the ARM console
-        self['arm_ser'] = tester.SimSerial(
+        arm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        self['arm_ser'].port = ARM_PORT
-        self['arm'] = console.Console(self['arm_ser'], verbose=False)
+        arm_ser.port = ARM_PORT
+        self['arm'] = console.Console(arm_ser, verbose=False)
         # Serial connection to the Arduino console
-        self['ard_ser'] = tester.SimSerial(
+        ard_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        self['ard_ser'].port = ARDUINO_PORT
-        self['ard'] = arduino.Arduino(self['ard_ser'], verbose=False)
+        ard_ser.port = ARDUINO_PORT
+        self['ard'] = arduino.Arduino(ard_ser, verbose=False)
         # Switch on power to fixture
         self['dcs_Vcom'].output(9.0, output=True)
         self['dcs_Arduino'].output(12.0, output=True)

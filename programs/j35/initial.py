@@ -296,7 +296,7 @@ class Initial(share.TestSequence):
         j35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
         j35['CAN'] = CAN_ECHO
-        echo_reply = dev['j35_ser'].readline().decode(errors='ignore')
+        echo_reply = j35.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         rx_can = mes['rx_can']
         rx_can.sensor.store(echo_reply)
@@ -332,12 +332,12 @@ class LogicalDevices(share.LogicalDevices):
             ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the console
-        self['j35_ser'] = tester.SimSerial(
+        j35_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['j35_ser'].port = ARM_PORT
+        j35_ser.port = ARM_PORT
         # J35 Console driver
-        self['j35'] = console.Console(self['j35_ser'], self.fifo)
+        self['j35'] = console.Console(j35_ser, self.fifo)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(9.0, True)
 

@@ -18,7 +18,7 @@ class Trek2Initial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         dev = self.test_program.devices
-        dev['trek2_ser'].flushInput()   # Flush console input buffer
+        dev['trek2'].port.flushInput()  # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp':

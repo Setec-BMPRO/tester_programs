@@ -24,7 +24,7 @@ class Ids500Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         dev = self.test_program.devices
-        dev['pic_ser'].flushInput()     # Flush console input buffer
+        dev['pic'].port.flushInput()    # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp':

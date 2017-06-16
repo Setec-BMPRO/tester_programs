@@ -296,11 +296,11 @@ class LogicalDevices(share.LogicalDevices):
             ARM_PORT, os.path.join(folder, ARM_BIN),
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the ARM console
-        self['arm_ser'] = tester.SimSerial(
+        arm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
-        self['arm_ser'].port = ARM_PORT
-        self['arm'] = console.Console(self['arm_ser'], verbose=False)
+        arm_ser.port = ARM_PORT
+        self['arm'] = console.Console(arm_ser, verbose=False)
         # Switch on fixture power
         self['dcs_fixture'].output(10.0, output=True)
 

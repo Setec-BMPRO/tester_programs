@@ -57,12 +57,12 @@ class BleRadio():
         """Create."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._port = port
+        self.port = port
 
     def open(self):
         """Open BLE Radio."""
         self._logger.debug('Open')
-        self._port.open()
+        self.port.open()
         # Remove 'CMD' response and other rubbish characters at power up.
         try:
             self._cmdresp('')
@@ -73,16 +73,16 @@ class BleRadio():
     def close(self):
         """Close BLE Radio."""
         self._logger.debug('Close')
-        self._port.close()
+        self.port.close()
 
     def puts(self,
              string_data, preflush=0, postflush=0, priority=False,
-             addcrlf=True):
+             addprompt=True):
         """Push string data into the buffer if simulating."""
-        if self._port.simulation:
-            if addcrlf:
+        if self.port.simulation:
+            if addprompt:
                 string_data = string_data + '\r\n'
-            self._port.puts(string_data, preflush, postflush, priority)
+            self.port.puts(string_data, preflush, postflush, priority)
 
     def scan(self, btmac):
         """Scan for bluetooth device with 'btmac' MAC address.
@@ -122,7 +122,7 @@ class BleRadio():
         @raises BleError upon error.
 
         """
-        self._port.flushInput()
+        self.port.flushInput()
         self._log('--> {!r}'.format(cmd))
         self._write(cmd + '\r')
         reply = self._readline()
@@ -138,7 +138,7 @@ class BleRadio():
 
     def _readline(self):
         """Read a line from the port and decode to a string."""
-        line = self._port.readline().decode(errors='ignore')
+        line = self.port.readline().decode(errors='ignore')
         if len(line) == 0:
             raise BleError('No response')
         else:
@@ -146,4 +146,4 @@ class BleRadio():
 
     def _write(self, data):
         """Encode data and write to the port."""
-        self._port.write(data.encode())
+        self.port.write(data.encode())

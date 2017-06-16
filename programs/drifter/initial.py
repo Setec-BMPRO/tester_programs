@@ -196,11 +196,11 @@ class LogicalDevices(share.LogicalDevices):
             LIMITS[self.parameter]['Software'],
             folder, '18F87J93', self['rla_Prog'])
         # Serial connection to the console
-        self['pic_ser'] = tester.SimSerial(
+        pic_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
-        self['pic_ser'].port = PIC_PORT
-        self['pic'] = console.Console(self['pic_ser'])
+        pic_ser.port = PIC_PORT
+        self['pic'] = console.Console(pic_ser)
 
     def reset(self):
         """Reset instruments."""

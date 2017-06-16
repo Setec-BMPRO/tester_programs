@@ -111,6 +111,7 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(12.0, delay=15.0)
         btmac = mes['cn101_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
+# FIXME: Make the Bluetooth simulatable
         if self.fifo:
             reply = True
         else:
@@ -131,7 +132,7 @@ class Initial(share.TestSequence):
         # From here Command-Response mode is broken by the CAN debug messages!
         self._logger.debug('CAN Echo Request --> %s', repr(CAN_ECHO))
         cn101['CAN'] = CAN_ECHO
-        echo_reply = dev['cn101_ser'].readline().decode(errors='ignore')
+        echo_reply = cn101.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
         mes['cn101_rx_can'].sensor.store(echo_reply)
@@ -164,18 +165,18 @@ class LogicalDevices(share.LogicalDevices):
             ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the console
-        self['cn101_ser'] = tester.SimSerial(
+        cn101_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['cn101_ser'].port = ARM_PORT
+        cn101_ser.port = ARM_PORT
         # Console driver
-        self['cn101'] = console.Console(self['cn101_ser'], verbose=False)
+        self['cn101'] = console.Console(cn101_ser, verbose=False)
         # Serial connection to the BLE module
-        self['ble_ser'] = tester.SimSerial(
+        ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        self['ble_ser'].port = BLE_PORT
-        self['ble'] = share.BleRadio(self['ble_ser'])
+        ble_ser.port = BLE_PORT
+        self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)
 

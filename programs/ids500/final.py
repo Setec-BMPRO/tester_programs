@@ -270,11 +270,11 @@ class LogicalDevices(share.LogicalDevices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console to communicate with the PIC
-        self['pic_ser'] = tester.SimSerial(
+        pic_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        self['pic_ser'].port = PIC_PORT
-        self['pic'] = console.Console(self['pic_ser'], verbose=False)
+        pic_ser.port = PIC_PORT
+        self['pic'] = console.Console(pic_ser, verbose=False)
 
     def reset(self):
         """Reset instruments."""

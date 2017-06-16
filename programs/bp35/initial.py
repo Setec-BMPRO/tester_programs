@@ -328,7 +328,7 @@ class Initial(share.TestSequence):
         bp35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
         bp35['CAN'] = CAN_ECHO
-        echo_reply = dev['bp35_ser'].readline().decode(errors='ignore')
+        echo_reply = bp35.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         rx_can = mes['rx_can']
         rx_can.sensor.store(echo_reply)
@@ -370,12 +370,12 @@ class LogicalDevices(share.LogicalDevices):
         self['program_pic'] = share.ProgramPIC(
             PIC_FILE, folder, '33FJ16GS402', self['rla_pic'])
         # Serial connection to the BP35 console
-        self['bp35_ser'] = tester.SimSerial(
+        bp35_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['bp35_ser'].port = ARM_PORT
+        bp35_ser.port = ARM_PORT
         # BP35 Console driver
-        self['bp35'] = console.Console(self['bp35_ser'], verbose=False)
+        self['bp35'] = console.Console(bp35_ser, verbose=False)
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
 
