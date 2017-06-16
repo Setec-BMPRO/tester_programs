@@ -132,7 +132,10 @@ class UnitTester(tester.Tester):
         try:
             dat = self.ut_data[self.key_ext][stepname]
             for msg in dat:
-                self.ut_extra_puts(msg, addprompt=True)
+                if msg is None:
+                    self.ut_extra_puts('', postflush=1)
+                else:
+                    self.ut_extra_puts(msg, addprompt=True)
         except KeyError:
             pass
 
