@@ -12,7 +12,7 @@ class WTSI200Final(ProgramTestCase):
 
     prog_class = wtsi200.Final
     parameter = None
-    debug = True # False
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -47,8 +47,6 @@ class WTSI200Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        for rdg in result.readings:
-            print(rdg)
         self.assertEqual(30, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
