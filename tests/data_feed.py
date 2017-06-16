@@ -27,6 +27,7 @@ class UnitTester(tester.Tester):
     key_con = 'Con'
     key_con_np = 'ConNP'
     key_ext = 'Ext'
+    key_ext_np = 'ExtNP'
 
     def __init__(self, prog_class, parameter):
         """Initalise the data feeder."""
@@ -89,6 +90,7 @@ class UnitTester(tester.Tester):
         self._load_console(stepname)
         self._load_console_np(stepname)
         self._load_extra(stepname)
+        self._load_extra_np(stepname)
 
     def _load_sensors(self, stepname):
         """Sensor FIFOs."""
@@ -112,7 +114,7 @@ class UnitTester(tester.Tester):
             dat = self.ut_data[self.key_con][stepname]
             for msg in dat:
                 if msg is None:
-                    self.ut_console_puts('', postflush=1)
+                    self.ut_console_puts('', postflush=1, addprompt=False)
                 else:
                     self.ut_console_puts(msg, addprompt=True)
         except KeyError:
@@ -123,7 +125,10 @@ class UnitTester(tester.Tester):
         try:
             dat = self.ut_data[self.key_con_np][stepname]
             for msg in dat:
-                self.ut_console_puts(msg, addprompt=False)
+                if msg is None:
+                    self.ut_console_puts('', postflush=1, addprompt=False)
+                else:
+                    self.ut_console_puts(msg, addprompt=False)
         except KeyError:
             pass
 
@@ -133,9 +138,21 @@ class UnitTester(tester.Tester):
             dat = self.ut_data[self.key_ext][stepname]
             for msg in dat:
                 if msg is None:
-                    self.ut_extra_puts('', postflush=1)
+                    self.ut_extra_puts('', postflush=1, addprompt=False)
                 else:
                     self.ut_extra_puts(msg, addprompt=True)
+        except KeyError:
+            pass
+
+    def _load_extra_np(self, stepname):
+        """Extra strings with addprompt=False."""
+        try:
+            dat = self.ut_data[self.key_ext_np][stepname]
+            for msg in dat:
+                if msg is None:
+                    self.ut_extra_puts('', postflush=1, addprompt=False)
+                else:
+                    self.ut_extra_puts(msg, addprompt=False)
         except KeyError:
             pass
 

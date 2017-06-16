@@ -13,7 +13,8 @@ class CN101Initial(ProgramTestCase):
 
     prog_class = cn101.Initial
     parameter = None
-    debug = False
+    debug = True # False
+    btmac = '001EC030BC15'
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -35,23 +36,33 @@ class CN101Initial(ProgramTestCase):
                     ('', ) * 5 +
                     (cn101.initial.ARM_VERSION, ),
                 'TankSense': (('', ) + ('5', ) * 4),
-                'Bluetooth': ('001EC030BC15', ),
+                'Bluetooth': (self.btmac, ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
                 'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
                 },
+            UnitTester.key_ext: {       # Tuples of extra strings
+                'Bluetooth': (
+                    (None, 'AOK', ) +
+                    (None, 'MCHP BTLE v1', ) +
+                    (None, 'AOK', ) +
+                    (self.btmac + ',0,,53....,-53', ) +
+                    (None, 'AOK', )
+                    ),
+                },
             }
         self.tester.ut_load(
-            data, self.test_program.fifo_push, dev['cn101'].puts)
+            data, self.test_program.fifo_push,
+            dev['cn101'].puts, dev['ble'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
         self.assertEqual(15, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['PartCheck', 'PowerUp', 'TestArm', 'TankSense',
-             'Bluetooth', 'CanBus'],
+            ['PartCheck', 'PowerUp', 'TestArm',
+             'TankSense', 'Bluetooth', 'CanBus'],
             self.tester.ut_steps)
 
     def test_fail_run(self):

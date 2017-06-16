@@ -217,7 +217,7 @@ class Final(share.TestSequence):
         # Only the very 1st time a HwRev is written, the unit outputs 4 lines
         # Here we flush the 1 extra line...
         time.sleep(0.5)
-        dev['pic_ser'].flushInput()
+        pic.port.flushInput()
         pic.expected = 1
         mes['pic_hwrev'].testlimit[0].limit = hwrev
         mes['pic_hwrev']()
