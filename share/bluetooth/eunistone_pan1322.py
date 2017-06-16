@@ -29,7 +29,7 @@ class BtRadio():
         """Create."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._port = port
+        self.port = port
         self._mac = None
         self._pin = None
         self._sernum = None
@@ -43,10 +43,10 @@ class BtRadio():
 
         """
         self._logger.debug('Open')
-        self._port.rtscts = True
-        self._port.open()
+        self.port.rtscts = True
+        self.port.open()
         time.sleep(1)
-        self._port.flushInput()
+        self.port.flushInput()
         for retry in range(0, 5):
             try:
                 self._cmdresp('AT+JRES')    # reset
@@ -60,17 +60,17 @@ class BtRadio():
     def close(self):
         """Close serial communications with BT Radio."""
         self._logger.debug('Close')
-        self._port.rtscts = False   # so close() does not hang
-        self._port.close()
+        self.port.rtscts = False   # so close() does not hang
+        self.port.close()
 
     def puts(self,
              string_data, preflush=0, postflush=0, priority=False,
-             addcrlf=True):
+             addprompt=True):
         """Push string data into the buffer if simulating."""
-        if self._port.simulation:
-            if addcrlf:
+        if self.port.simulation:
+            if addprompt:
                 string_data = string_data + '\r\n'
-            self._port.puts(string_data, preflush, postflush, priority)
+            self.port.puts(string_data, preflush, postflush, priority)
 
     def _log(self, message):
         """Helper method to Log messages."""
@@ -78,12 +78,12 @@ class BtRadio():
 
     def _readline(self):
         """Read a line from the port and decode to a string."""
-        line = self._port.readline().decode(errors='ignore')
+        line = self.port.readline().decode(errors='ignore')
         return line.replace('\r\n', '')
 
     def _write(self, data):
         """Encode data and write to the port."""
-        self._port.write(data.encode())
+        self.port.write(data.encode())
 
     def _cmdresp(self, cmd):
         """Send a command to the modem and process the response.
@@ -91,7 +91,7 @@ class BtRadio():
         @raises BtError upon error.
 
         """
-        self._port.flushInput()
+        self.port.flushInput()
         if cmd == _ESCAPE:
             time.sleep(1)       # need long guard time before first letter
             for _ in range(0, 3):
@@ -260,7 +260,7 @@ class BtRadio():
             'method': method, 'params': params}
         cmd = json.dumps(request)
         self._log('JSONRPC request: {!r}'.format(cmd))
-        self._port.flushInput()
+        self.port.flushInput()
         self._write(cmd + '\r')
         response = self._readline()
         self._log('<--- {!r}'.format(response))
