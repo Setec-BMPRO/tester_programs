@@ -12,7 +12,7 @@ class Trek2Final(ProgramTestCase):
 
     prog_class = trek2.Final
     parameter = None
-    debug = True # False
+    debug = False
     real_tunnel_puts = None
 
     def _tank_sensors(self, value):

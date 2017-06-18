@@ -42,46 +42,36 @@ import logging
 import share
 
 
-_DATAMAP = {
-    'BATTERY MODE':             (0, int),
-    'TEMPERATURE':              (0.0, float),
-    'VOLTAGE':                  (0.0, float),
-    'CURRENT':                  (0.0, float),
-    'REL STATE OF CHARGE':      (0, int),
-    'ABS STATE OF CHARGE':      (0, int),
-    'REMAINING CAPACITY':       (0, int),
-    'FULL CHARGE CAPACITY':     (0, int),
-    'CHARGING CURRENT':         (0.0, float),
-    'CHARGING VOLTAGE':         (0.0, float),
-    'BATTERY STATUS':           (0, int),
-    'CYCLE COUNT':              (0, int),
-    'PACK STATUS AND CONFIG':   (0, int),
-    'FULL PACK READING':        (0, int),
-    'HALF CELL READING':        (0, int),
-    'SENSE RESISTOR READING':   (0, int),
-    'CHARGE INPUT READING':     (0, int),
-    'ROTARY SWITCH READING':    (0, int),
-    'SERIAL NUMBER':            (0, int),
-    }
-
-
-class Error(Exception):
+class CmrError(Exception):
 
     """CMR Exception class."""
-
-    def __init__(self, message):
-        """Create error."""
-        super().__init__()
-        self.message = message
-
-    def __str__(self):
-        """Return error name."""
-        return repr(self.message)
 
 
 class CmrSbp():
 
     """CMR Monitor."""
+
+    _datamap = {
+        'BATTERY MODE':             (0, int),
+        'TEMPERATURE':              (0.0, float),
+        'VOLTAGE':                  (0.0, float),
+        'CURRENT':                  (0.0, float),
+        'REL STATE OF CHARGE':      (0, int),
+        'ABS STATE OF CHARGE':      (0, int),
+        'REMAINING CAPACITY':       (0, int),
+        'FULL CHARGE CAPACITY':     (0, int),
+        'CHARGING CURRENT':         (0.0, float),
+        'CHARGING VOLTAGE':         (0.0, float),
+        'BATTERY STATUS':           (0, int),
+        'CYCLE COUNT':              (0, int),
+        'PACK STATUS AND CONFIG':   (0, int),
+        'FULL PACK READING':        (0, int),
+        'HALF CELL READING':        (0, int),
+        'SENSE RESISTOR READING':   (0, int),
+        'CHARGE INPUT READING':     (0, int),
+        'ROTARY SWITCH READING':    (0, int),
+        'SERIAL NUMBER':            (0, int),
+        }
 
     def __init__(self, serport, data_timeout=1.0):
         """Define our data, and start the worker.
@@ -92,14 +82,15 @@ class CmrSbp():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         data_template = {}
-        for parameter in iter(_DATAMAP):
-            default, dtype = _DATAMAP[parameter]
+        for parameter in iter(self._datamap):
+            default, dtype = self._datamap[parameter]
             data_template[parameter] = default
-
-        self._serargs = {'data_template': data_template,
-                         'data_timeout': data_timeout,
-                         'serport': serport,
-                         }
+        self._serargs = {
+            'data_template': data_template,
+            'data_timeout': data_timeout,
+            'serport': serport,
+            }
+        self.port = serport     # used to puts() data
         self.ResultQ = queue.Queue()
         self._read = threading.Event()
         self._close = threading.Event()
@@ -118,7 +109,7 @@ class CmrSbp():
         if splat == 0 and comma > 0:
             d_key = line[1:comma]
             d_val = line[comma + 1:]
-            dtype = _DATAMAP[d_key][1]
+            dtype = self._datamap[d_key][1]
             tdata[d_key] = dtype(d_val)
         else:
             d_key = ''
@@ -143,10 +134,11 @@ class CmrSbp():
             self._logger.warning(err)
         buf = ''
         state = 0
-        # Data read state:  0 = idle
-        #                   3 = waiting for data start
-        #                   2 = waiting for data end
-        #                   1 = data ready
+        # Data reader states:
+        #  0 = idle
+        #  3 = waiting for data start
+        #  2 = waiting for data end
+        #  1 = data ready
         timeup = threading.Event()
         while run:
             rawdata = serport.read(512).decode(errors='ignore')
@@ -201,7 +193,7 @@ class CmrSbp():
         self._read.set()
         err, cdata = self.ResultQ.get()
         if err:
-            raise Error(err)
+            raise CmrError(err)
         return cdata
 
     def close(self):
@@ -213,3 +205,4 @@ class CmrSbp():
         self._logger.debug('Close')
         self._close.set()
         self._wrk.join()
+        self.port.close()

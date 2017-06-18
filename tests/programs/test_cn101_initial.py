@@ -13,7 +13,7 @@ class CN101Initial(ProgramTestCase):
 
     prog_class = cn101.Initial
     parameter = None
-    debug = True # False
+    debug = False
     btmac = '001EC030BC15'
 
     def test_pass_run(self):
