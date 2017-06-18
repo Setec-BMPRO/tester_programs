@@ -5,14 +5,7 @@
 Listens to serial traffic from a CMR-SBP.
 This is traffic from the PIC, via the SMBus to RS232 converter
 
-Data format of the CMR-SBP transmission can be described by the
-regular expression:
-    ^#([A-Z ]*),(.*)$
-where,
-    (1) is the parameter name
-    (2) is the parameter value
-
-This is a sample CMR transmission from CMR-SBP-8-D-NiMH:
+Here is a sample CMR transmission from CMR-SBP-8-D-NiMH:
 #BATTERY MODE,24576
 #TEMPERATURE,297.0
 #VOLTAGE,13.710
@@ -36,15 +29,11 @@ This is a sample CMR transmission from CMR-SBP-8-D-NiMH:
 """
 
 import sys
+import re
 import threading
 import queue
 import logging
 import share
-
-
-class CmrError(Exception):
-
-    """CMR Exception class."""
 
 
 class CmrSbp():
@@ -73,64 +62,59 @@ class CmrSbp():
         'SERIAL NUMBER':            (0, int),
         }
 
-    def __init__(self, serport, data_timeout=1.0):
+    # RegExp object to match the CMR data lines
+    _regexp = re.compile('^#([A-Z ]+),([0-9\.\-]+)$')
+
+    def __init__(self, port, data_timeout=1.0):
         """Define our data, and start the worker.
 
-        @param param The dictionary of CSV data given to the server
+        @param port The open serial port to read from
+        @param data_timeout Timeout for received CMR-SBP data
 
         """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        data_template = {}
-        for parameter in iter(self._datamap):
-            default, dtype = self._datamap[parameter]
-            data_template[parameter] = default
-        self._serargs = {
-            'data_template': data_template,
-            'data_timeout': data_timeout,
-            'serport': serport,
-            }
-        self.port = serport     # used to puts() data
+        self.port = port
         self.ResultQ = queue.Queue()
-        self._read = threading.Event()
-        self._close = threading.Event()
-        self._wrk = threading.Thread(target=self.worker, name='ListenerThread')
-        self._wrk.start()
+        self._evt_read = threading.Event()
+        self._evt_close = threading.Event()
+        self._worker = threading.Thread(
+            target=self.worker, name='ListenerThread', args=(data_timeout, ))
+        self._worker.start()
 
     def _scan_line(self, line, tdata):
         """Scan a line, looking for data.
 
-        @return Key
+        @return Key, if found, or None
 
         """
         self._logger.debug('Line %s', line)
-        splat = line.find('#')
-        comma = line.find(',')
-        if splat == 0 and comma > 0:
-            d_key = line[1:comma]
-            d_val = line[comma + 1:]
-            dtype = self._datamap[d_key][1]
-            tdata[d_key] = dtype(d_val)
+        match = self._regexp.match(line)
+        if match:
+            key, val = match.groups()
+            datatype = self._datamap[key][1]
+            tdata[key] = datatype(val)
         else:
-            d_key = ''
-        return d_key
+            key = None
+        return key
 
-    def worker(self):
+    def worker(self, data_timeout):
         """Worker to listen to a CMR."""
+        self._logger.info('Started')
         err = ''
         run = False
         try:
-            self._logger.info('Started')
-            data_template = self._serargs['data_template']
-            data_timeout = self._serargs['data_timeout']
-            serport = self._serargs['serport']
-            serport.flushInput()
+            self.port.flushInput()
+            data_template = {}
+            for parameter in iter(self._datamap):
+                data_template[parameter] = self._datamap[parameter][0]
             tdata = share.TimedStore(data_template, data_timeout)
             run = True
         except Exception:
             err = ' '.join(
                 ('_cmr Error:',
-                 str(sys.exc_info()[0]), str(sys.exc_info()[1])))
+                 str(sys.exc_info()[0]),
+                 str(sys.exc_info()[1])))
             self._logger.warning(err)
         buf = ''
         state = 0
@@ -141,7 +125,7 @@ class CmrSbp():
         #  1 = data ready
         timeup = threading.Event()
         while run:
-            rawdata = serport.read(512).decode(errors='ignore')
+            rawdata = self.port.read(512).decode(errors='ignore')
             buf += rawdata.replace('\r', '')
             pos = buf.find('\n')
             while pos >= 0:
@@ -155,14 +139,14 @@ class CmrSbp():
                         self._logger.debug('End data block')
                         state = 1
                 pos = buf.find('\n')
-            if self._read.is_set():
-                self._read.clear()
+            if self._evt_read.is_set():
+                self._evt_read.clear()
                 self._logger.debug('Starting data read')
                 state = 3
                 timeup.clear()
                 tmr = threading.Timer(20.0, timeup.set)
                 tmr.start()
-            if self._close.is_set():
+            if self._evt_close.is_set():
                 run = False
                 if state > 0:
                     tmr.cancel()
@@ -172,11 +156,11 @@ class CmrSbp():
                 tmr.cancel()
                 state = 0
                 self._logger.debug('Data read completed')
-                self.ResultQ.put((None, tdata.data))  # this will be valid data
+                self.ResultQ.put(tdata.data)    # this will be valid data
             if state > 0 and timeup.is_set():
                 state = 0
                 self._logger.debug('Data read timeout')
-                self.ResultQ.put((None, tdata.data))  # this will be empty data
+                self.ResultQ.put(tdata.data)    # this will be empty data
         try:
             tdata.cancel()
         except Exception:
@@ -190,11 +174,8 @@ class CmrSbp():
 
         """
         self._logger.debug('Read')
-        self._read.set()
-        err, cdata = self.ResultQ.get()
-        if err:
-            raise CmrError(err)
-        return cdata
+        self._evt_read.set()
+        return self.ResultQ.get()
 
     def close(self):
         """Signal the worker thread to shutdown.
@@ -203,6 +184,6 @@ class CmrSbp():
 
         """
         self._logger.debug('Close')
-        self._close.set()
-        self._wrk.join()
+        self._evt_close.set()
+        self._worker.join()
         self.port.close()

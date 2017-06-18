@@ -4,6 +4,7 @@
 
 import datetime
 import copy
+import unittest
 from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import cmrsbp
@@ -234,3 +235,49 @@ class CMR_17_Final(_CMRSBPFin):
         self.mycmrdata['FULL CHARGE CAPACITY'] = 17000
         self.mycmrdata['SENSE RESISTOR READING'] = 450
         super()._pass_run()
+
+
+class CMRDataMonitor(unittest.TestCase):
+
+    """CMR-SBP data monitor test suite."""
+
+    _data_template = (
+        ('BATTERY MODE', '24576'),
+        ('TEMPERATURE', '297.0'),
+        ('VOLTAGE', '13.710'),
+        ('CURRENT', '0.013'),
+        ('REL STATE OF CHARGE', '100'),
+        ('ABS STATE OF CHARGE', '104'),
+        ('REMAINING CAPACITY', '8283'),
+        ('FULL CHARGE CAPACITY', '8283'),
+        ('CHARGING CURRENT', '0.400'),
+        ('CHARGING VOLTAGE', '16.000'),
+        ('BATTERY STATUS', '224'),
+        ('CYCLE COUNT', '1'),
+        ('PACK STATUS AND CONFIG', '-24416'),
+        ('FULL PACK READING', '790'),
+        ('HALF CELL READING', '397'),
+        ('SENSE RESISTOR READING', '66'),
+        ('CHARGE INPUT READING', '1'),
+        ('ROTARY SWITCH READING', '256'),
+        ('SERIAL NUMBER', '949'),
+        )
+
+    def test_read(self):
+        """Read CMR data."""
+        myser = MagicMock(name='SerialPort')
+        # Generate the binary serial data
+        response = bytearray()
+        for entry in self._data_template:
+            response += '#{0[0]},{0[1]}\n'.format(entry).encode()
+        myser.read.return_value = response
+        # Generate expected result of a data read call
+        myresult = {}
+        for entry in self._data_template:
+            val = float(entry[1]) if '.' in entry[1] else int(entry[1])
+            myresult[entry[0]] = val
+        # Read data
+        cmr = cmrsbp.cmrsbp.CmrSbp(myser)
+        result = cmr.read()
+        cmr.close()
+        self.assertEqual(myresult, result)
