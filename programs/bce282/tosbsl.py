@@ -15,6 +15,10 @@ from __future__ import print_function
 import sys, time, io, struct
 import serial
 
+# SETEC addition: TI Text format to save the calibration data
+#   It is a list of lines of text
+SAVEDATA = []
+
 #
 # This is an universal version, tested with:
 #   * generic MSP430
@@ -28,7 +32,7 @@ import serial
 #
 VERSION = "1.39-universal-1"
 
-DEBUG = 0                                       #disable debug messages by default
+DEBUG = 0       #disable debug messages by default
 
 #copy of the patch file provided by TI
 #this part is (C) by Texas Instruments
@@ -792,7 +796,7 @@ class LowLevel:
             #Align to even start address
             if (addr % 2) != 0:
                 addr = addr - 1                     #Decrement address and
-                blkout = chr(0xFF) + blkOut         #fill first byte of blkout with 0xFF
+                blkout = chr(0xFF) + blkout         #fill first byte of blkout with 0xFF
                 length = length + 1
             #Make sure that len is even
             if (length % 2) != 0:
@@ -1070,8 +1074,6 @@ class BootStrapLoader(LowLevel):
         """program a memory block"""
         if DEBUG > 1:
             sys.stderr.write("* programBlk()\n")
-
-        data = []
 
         #Check, if specified range is erased
         self.verifyBlk(addr, blkout, action & self.ACTION_ERASE_CHECK)
@@ -1908,12 +1910,24 @@ def main():
                 print(hexify(startaddr + m, data[m:m + 16]))
                 m = m + 16
         elif hexoutput == 2:                        #TI Text
-            print('@%04x' % startaddr)
+# Start SETEC modification
+#            print('@%04x' % startaddr)
+#            m = 0
+#            while m < len(data):
+#                print(' '.join(['%02x' % d for d in data[m:m+16]]))
+#                m = m + 16
+#            print('q')
+# Replace the print() with a 'savedata' string representation
+            SAVEDATA.clear()
+            SAVEDATA.append('@%04x' % startaddr)
             m = 0
             while m < len(data):
-                print(' '.join(['%02x' % d for d in data[m:m+16]]))
+                SAVEDATA.append(' '.join(['%02x' % d for d in data[m:m+16]]))
                 m = m + 16
-            print('q')
+            SAVEDATA.append('q')
+            for aline in SAVEDATA:
+                print(aline)
+# End SETEC modification
         else:
             sys.stdout.write(data)                  #binary output w/o newline!
         wait = 0    # wait makes no sense as after the upload the device

@@ -4,7 +4,9 @@
 
 # FIXME: This program is not finished yet!
 
+import sys
 import os
+import inspect
 import time
 import tester
 from tester import (
@@ -13,14 +15,24 @@ from tester import (
     )
 import share
 from . import console
+from . import tosbsl
 
 # Serial port for programming MSP430.
-_MSP_PORT1 = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+MSP_PORT1 = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Serial port used by MSP430 comms module.
-_MSP_PORT2 = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
-
+MSP_PORT2 = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
 # Software image file (TI Text format)
-_MSP_FILE = 'bce282_3a.txt'
+MSP_FILE = 'bce282_3a.txt'
+# Calibration data save file (TI Text format)
+MSP_SAVEFILE = {    # Needs to be writable by the tester login
+    'posix': '/home/setec/testdata/bslsavedata.txt',
+    'nt': r'C:\TestGear\TestData\bslsavedata.txt',
+    }[os.name]
+# Password data save file
+MSP_PASSWORD = {    # Needs to be writable by the tester login
+    'posix': '/home/setec/testdata/bslpassword.txt',
+    'nt': r'C:\TestGear\TestData\bslpassword.txt',
+    }[os.name]
 
 _COMMON = (
     LimitLow('FixtureLock', 200),
@@ -97,29 +109,46 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the board."""
-# BCE282 Programming from the LabVIEW program:
-#
-# STEP 1 - SAVE
-#  tos-bsl.py --comport=0 [-P "bsl-password.txt"] --upload=0x10c0 --size=64 --ti > "bsl-savedata.txt"
-#
-# "bsl-password.txt" format:
-#   @ffe0
-#   <32 bytes of data>
-#   q
-#
-# STEP 2 - RESTORE
-#  tos-bsl.py --comport=0 --masserase --program "bsl-savedata.txt"
-#
-# STEP 3 - PROGRAM
-#  tos-bsl.py --comport=0 --program "myfile.hex"
-
-#        msp = dev['msp']
-#        msp.open()
+        # Get any existing password & write to MSP_PASSWORD file
+        msp = dev['msp']
+        msp.open()
+        password = None
+        try:
+            password = msp['PASSWD']    # Fails if device was never programmed
+            with open(MSP_PASSWORD, 'w') as fout:
+                fout.write(password)
+        except Exception:
+            pass
+        msp.close()
         dev['rla_prog'].set_on()
-# TODO: Add programming here
+        # STEP 1 - SAVE INTERNAL CALIBRATION
+        sys.argv = (['',
+            '--comport={0}'.format(MSP_PORT1), ] +
+            ['-P', MSP_PASSWORD, ] if password else [] +
+            ['--upload=0x10C0', '--size=64', '--ti', ]
+            )
+        tosbsl.main()
+        # Write TI Text format calibration data to a file for use later
+        with open(MSP_SAVEFILE, 'w') as fout:
+            for aline in tosbsl.SAVEDATA:
+                fout.write(aline)
+        # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
+        sys.argv = ['',
+            '--comport={0}'.format(MSP_PORT1),
+            '--masserase',
+            '--program', MSP_SAVEFILE,
+            ]
+        tosbsl.main()
+        # STEP 3 - PROGRAM
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        sys.argv = ['',
+            '--comport={0}'.format(MSP_PORT1),
+            '--program', os.path.join(folder, MSP_FILE),
+            ]
+        tosbsl.main()
         dev['rla_prog'].set_off()
-        dev['dcs_vccbias'].output(0.0)
-        time.sleep(1)
+        dev['dcs_vccbias'].output(0.0, delay=1)
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -128,8 +157,7 @@ class Initial(share.TestSequence):
         dev['dcl_vbat'].output(0.1, True)
         self.measure(
             ('dmm_vac', 'dmm_vbus', 'dmm_vccpri', 'dmm_vccbias',
-             'dmm_vbatoff',
-#             'dmm_alarmclose'
+             'dmm_vbatoff', #'dmm_alarmclose',
              ), timeout=5)
         dev['dcl_vbat'].output(0.0)
 
@@ -182,7 +210,7 @@ class LogicalDevices(share.LogicalDevices):
         self['msp_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['msp_ser'].port = _MSP_PORT2
+        self['msp_ser'].port = MSP_PORT2
         # MSP430 Console driver
         self['msp'] = console.Console(self['msp_ser'], verbose=False)
         # Apply power to fixture circuits.

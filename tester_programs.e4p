@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-19, 13:09:04 -->
+<!-- Saved: 2017-06-19, 22:09:58 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -35,7 +35,7 @@
     <Source>programs/bce282/console.py</Source>
     <Source>programs/bce282/final.py</Source>
     <Source>programs/bce282/initial.py</Source>
-    <Source>programs/bce282/tos-bsl.py</Source>
+    <Source>programs/bce282/tosbsl.py</Source>
     <Source>programs/bce4/__init__.py</Source>
     <Source>programs/bce4/final.py</Source>
     <Source>programs/bp35/__init__.py</Source>
