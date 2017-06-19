@@ -3,6 +3,7 @@
 # Copyright 2017 SETEC Pty Ltd.
 """Unittests for Program."""
 
+from . import test_selftest
 from . import test_2040_final
 from . import test_2040_initial
 from . import test_atxg4502v_final
@@ -57,6 +58,7 @@ from . import test_uni750_final
 from . import test_wtsi200_final
 
 __all__ = [
+    'test_selftest',
     'test_2040_final',
     'test_2040_initial',
     'test_atxg4502v_final',
