@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """BCE282-12/24 Initial Test Program."""
 
-# FIXME: This program is not finished yet!
-
 import sys
 import os
 import inspect
@@ -93,9 +91,10 @@ class Initial(share.TestSequence):
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self._step_program),
             TestStep('PowerUp', self._step_power_up),
             TestStep('Calibration', self._step_cal),
+# FIXME: Why is the OCP step disabled?
             TestStep('OCP', self._step_ocp, False),
             )
         self.devices['msp'].config(LIMITS[self.parameter]['ScaleFactor'])
@@ -111,17 +110,19 @@ class Initial(share.TestSequence):
         """Program the board."""
         # Get any existing password & write to MSP_PASSWORD file
         msp = dev['msp']
-        msp.open()
         password = None
-        try:
-            password = msp['PASSWD']    # Fails if device was never programmed
-            with open(MSP_PASSWORD, 'w') as fout:
-                fout.write('@ffe0\n')     # Write in password in TI Text format
-                fout.write(password)
-                fout.write('\nq\n')
-        except Exception:
+        try:    # Fails if device has never been programmed
+            msp.open()
+            msp.measurement_fail_on_error = False
+            password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
+            if not self.fifo:
+                with open(MSP_PASSWORD, 'w') as fout:
+                    fout.write(password)
+        except share.console.protocol.ConsoleError:
             pass
-        msp.close()
+        finally:
+            msp.measurement_fail_on_error = True
+            msp.close()
         dev['rla_prog'].set_on()
         # STEP 1 - SAVE INTERNAL CALIBRATION
         sys.argv = (['',
@@ -131,9 +132,11 @@ class Initial(share.TestSequence):
             )
         tosbsl.main()
         # Write TI Text format calibration data to a file for use later
-        with open(MSP_SAVEFILE, 'w') as fout:
-            for aline in tosbsl.SAVEDATA:
-                fout.write(aline + '\n')
+        if not self.fifo:
+            with open(MSP_SAVEFILE, 'w') as fout:
+                for aline in tosbsl.SAVEDATA:
+                    fout.write(aline)
+                    fout.write('\n')
         # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
         sys.argv = ['',
             '--comport={0}'.format(MSP_PORT1),
@@ -157,6 +160,7 @@ class Initial(share.TestSequence):
         """Power up the unit at 240Vac and measure voltages at min load."""
         dev['acsource'].output(voltage=240.0, output=True, delay=1.0)
         dev['dcl_vbat'].output(0.1, True)
+# FIXME: Why measurement 'dmm_alarmclose' disabled?
         self.measure(
             ('dmm_vac', 'dmm_vbus', 'dmm_vccpri', 'dmm_vccbias',
              'dmm_vbatoff', #'dmm_alarmclose',

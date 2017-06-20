@@ -94,12 +94,14 @@ class BaseConsole():
 
     """
 
-    # Console command prompt. Signals the end of output data.
+    # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\r> '
-    # Command suffix between echo of a command and the response.
+    # Command suffix between echo of a command and the start of the response.
     res_suffix = b' -> '
     puts_prompt = ''
     ignore = ()    # Tuple of strings to remove from responses
+    # Fail a measurement upon a ConsoleError
+    measurement_fail_on_error = True
 
     def __init__(self, port, verbose=False):
         """Initialise communications.
@@ -150,6 +152,7 @@ class BaseConsole():
         @raises ConsoleError.
 
         """
+        reply = None
         try:
             if command:
                 if self.port.simulation:   # Auto simulate the command echo
@@ -160,12 +163,15 @@ class BaseConsole():
                 time.sleep(delay)
             reply = self._read_response(expected)
         except ConsoleError as err:
-            self._logger.debug('Caught ConsoleError %s', err)
-            comms = tester.Measurement(
-                tester.LimitInteger('Action', 0, doc='Command succeeded'),
-                tester.sensor.Mirror())
-            comms.sensor.store(1)
-            comms.measure()   # Generates a test FAIL result
+            if self.measurement_fail_on_error:
+                self._logger.debug('Caught ConsoleError: "%s"', err)
+                comms = tester.Measurement(
+                    tester.LimitInteger('Action', 0, doc='Command succeeded'),
+                    tester.sensor.Mirror())
+                comms.sensor.store(1)
+                comms.measure()   # Generates a test FAIL result
+            else:
+                raise
         return reply
 
     def _write_command(self, command):

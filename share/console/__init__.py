@@ -7,10 +7,6 @@ from ._base import *
 from .protocol import *
 import tester
 
-# Result values to store into the mirror sensors
-_SUCCESS = 0
-_FAILURE = 1
-
 
 class Variable():
 
@@ -18,14 +14,6 @@ class Variable():
 
     _read_key = None
     cmd_data = {}  # Data readings: Key=Name, Value=Parameter
-    limit = tester.LimitInteger(
-        'Comms', _SUCCESS, doc='Communication succeeded')
-    _comms = tester.Measurement(limit, tester.sensor.Mirror())
-
-    def __init__(self):
-        """Initialise."""
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -50,14 +38,8 @@ class Variable():
         @return Reading
 
         """
-        try:
-            parameter = self.cmd_data[key]
-            reply = parameter.read(self.action)
-        except ConsoleError as err:
-            self._logger.debug('Caught ConsoleError %s', err)
-            self._comms.sensor.store(_FAILURE)
-            self._comms.measure()   # Generates a test FAIL result
-        return reply
+        parameter = self.cmd_data[key]
+        return parameter.read(self.action)
 
     def __setitem__(self, key, value):
         """Write a value to the console.
@@ -66,10 +48,5 @@ class Variable():
         @param value Data value
 
         """
-        try:
-            parameter = self.cmd_data[key]
-            parameter.write(value, self.action)
-        except ConsoleError as err:
-            self._logger.debug('Caught ConsoleError %s', err)
-            self._comms.sensor.store(_FAILURE)
-            self._comms.measure()   # Generates a test FAIL result
+        parameter = self.cmd_data[key]
+        parameter.write(value, self.action)

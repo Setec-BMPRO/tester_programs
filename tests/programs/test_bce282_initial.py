@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BCE282-12/24 Initial Test program."""
 
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bce282
 
@@ -11,6 +12,16 @@ class _BCE282Initial(ProgramTestCase):
     """BCE282 Initial program test suite."""
 
     prog_class = bce282.Initial
+
+    def setUp(self):
+        """Per-Test setup."""
+        # Patch tosbsl driver
+        self.mybsl = MagicMock(name='tosbsl')
+        patcher = patch(
+            'programs.bce282.tosbsl.main', new=self.mybsl)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def _pass_run(self):
         """PASS run of the program."""
@@ -37,6 +48,8 @@ class _BCE282Initial(ProgramTestCase):
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
+                'Program':
+                    ('55 AA ' * 16, ),
                 'Calibration':
                     (' -> ', ) +
                     (' -> ', ) +
@@ -64,8 +77,10 @@ class _BCE282Initial(ProgramTestCase):
         self.assertEqual(12, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['Prepare', 'PowerUp', 'Calibration'],  # , 'OCP'],
+            ['Prepare', 'Program', 'PowerUp', 'Calibration'],  # , 'OCP'],
             self.tester.ut_steps)
+        # Calls to tosbsl.main
+        self.assertEqual(3, self.mybsl.call_count)
 
 
 class BCE282_12_Initial(_BCE282Initial):
