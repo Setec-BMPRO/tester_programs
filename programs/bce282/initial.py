@@ -116,9 +116,9 @@ class Initial(share.TestSequence):
         try:
             password = msp['PASSWD']    # Fails if device was never programmed
             with open(MSP_PASSWORD, 'w') as fout:
-                fout.write('@ffe0')     # Write in password in TI Text format
+                fout.write('@ffe0\n')     # Write in password in TI Text format
                 fout.write(password)
-                fout.write('q')
+                fout.write('\nq\n')
         except Exception:
             pass
         msp.close()
@@ -126,30 +126,29 @@ class Initial(share.TestSequence):
         # STEP 1 - SAVE INTERNAL CALIBRATION
         sys.argv = (['',
             '--comport={0}'.format(MSP_PORT1), ] +
-            ['-P', MSP_PASSWORD, ] if password else [] +
+            (['-P', MSP_PASSWORD, ] if password else []) +
             ['--upload=0x10C0', '--size=64', '--ti', ]
             )
         tosbsl.main()
         # Write TI Text format calibration data to a file for use later
         with open(MSP_SAVEFILE, 'w') as fout:
             for aline in tosbsl.SAVEDATA:
-                fout.write(aline)
-# FIXME: Re-enable erase & program
-#        # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
-#        sys.argv = ['',
-#            '--comport={0}'.format(MSP_PORT1),
-#            '--masserase',
-#            '--program', MSP_SAVEFILE,
-#            ]
-#        tosbsl.main()
-#        # STEP 3 - PROGRAM
-#        folder = os.path.dirname(
-#            os.path.abspath(inspect.getfile(inspect.currentframe())))
-#        sys.argv = ['',
-#            '--comport={0}'.format(MSP_PORT1),
-#            '--program', os.path.join(folder, MSP_FILE),
-#            ]
-#        tosbsl.main()
+                fout.write(aline + '\n')
+        # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
+        sys.argv = ['',
+            '--comport={0}'.format(MSP_PORT1),
+            '--masserase',
+            '--program', MSP_SAVEFILE,
+            ]
+        tosbsl.main()
+        # STEP 3 - PROGRAM
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        sys.argv = ['',
+            '--comport={0}'.format(MSP_PORT1),
+            '--program', os.path.join(folder, MSP_FILE),
+            ]
+        tosbsl.main()
         dev['rla_prog'].set_off()
         dev['dcs_vccbias'].output(0.0, delay=1)
 
