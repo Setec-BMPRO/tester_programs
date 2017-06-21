@@ -45,7 +45,7 @@ class Console(console.BadUartConsole):
         'MSP-VOUT': ParameterFloat(
             'x-supply-voltage x@ print', read_format='{0}'),
         'CAL-V': ParameterFloat(
-            'cal-vset PRINT', writeable=True, write_format='{0} {1}',
+            'cal-vset', writeable=True, write_format='{0} {1}',
             read_format='{0}', minimum=0, maximum=15000),
         'PASSWD': ParameterString(
             'bsl-password', read_format='{0}'),
@@ -61,7 +61,10 @@ class Console(console.BadUartConsole):
         self['ECHO'] = True
         self['UNLOCK'] = True
         self['NV-WRITE'] = True
+        # RESTART acts without sending a prompt, so we add one
+        self.port.puts(self.puts_prompt, priority=True)
         self['RESTART'] = True
+        self.action('', expected=4)     # Consume the startup banner lines
         self['ECHO'] = True
         self['UNLOCK'] = True
 

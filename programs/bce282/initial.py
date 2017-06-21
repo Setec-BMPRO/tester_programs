@@ -162,7 +162,7 @@ class Initial(share.TestSequence):
         """Power up the unit at 240Vac and measure voltages at min load."""
         dev['acsource'].output(voltage=240.0, output=True, delay=1.0)
         dev['dcl_vbat'].output(0.1, True)
-# FIXME: Why measurement 'dmm_alarmclose' disabled?
+# FIXME: Why is measurement 'dmm_alarmclose' disabled?
         self.measure(
             ('dmm_vac', 'dmm_vbus', 'dmm_vccpri', 'dmm_vccbias',
              'dmm_vbatoff', #'dmm_alarmclose',
