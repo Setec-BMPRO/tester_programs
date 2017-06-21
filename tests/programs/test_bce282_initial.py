@@ -70,7 +70,7 @@ class _BCE282Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(17, len(result.readings))  # Reading count
+        self.assertEqual(16, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Program', 'PowerUp', 'Calibration', 'OCP'],
