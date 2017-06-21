@@ -61,7 +61,7 @@ class _BCE282Initial(ProgramTestCase):
                     (' -> ', ) * 2 +
                     # Both models respond with 12V output.
                     (' -> 13800 ', ) +
-                    (' -> 1 ', ) +
+                    (' -> ', ) +
                     (' -> ', ) +
                     (' -> 0 ', ),
                 },

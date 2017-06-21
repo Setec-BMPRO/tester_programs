@@ -12,30 +12,24 @@ ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 
 
-class Console(console.Variable, console.BaseConsole):
+class Console(console.BaseConsole):
 
     """Communications to BC15 console."""
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        console.BaseConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n> '
-        self.cmd_data = {
-            'UNLOCK': ParameterBoolean('0xDEADBEA7 UNLOCK',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVWRITE': ParameterBoolean('NV-WRITE',
-                writeable=True, readable=False, write_format='{1}'),
-            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-            'SWITCH': ParameterFloat('SW', read_format='{}?'),
-            }
-        self.stat_data = {}  # Data readings: Key=Name, Value=Reading
-        self.cal_data = {}  # Calibration readings: Key=Name, Value=Setting
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n> '
+    cmd_data = {
+        'UNLOCK': ParameterBoolean('0xDEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+        'SWITCH': ParameterFloat('SW', read_format='{}?'),
+        }
+    stat_data = {}  # Data readings: Key=Name, Value=Reading
+    cal_data = {}  # Calibration readings: Key=Name, Value=Setting
 
     def __getitem__(self, key):
         """Read a value."""

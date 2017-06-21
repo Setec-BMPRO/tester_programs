@@ -26,45 +26,47 @@ class _Console():
 
     """Base class for a Trek2 console."""
 
-    def __init__(self):
+    cmd_data = {
+        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        'SER_ID': ParameterString(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{} {}'),
+        'HW_VER': ParameterString(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+        'PROMPT': ParameterString(
+            'PROMPT', writeable=True, write_format='"{} {}'),
+        'STATUS': ParameterHex(
+            'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
+        'CAN_BIND': ParameterHex(
+            'STATUS', writeable=True,
+            minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
+        'CAN': ParameterString(
+            'CAN', writeable=True, write_format='"{} {}'),
+        'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
+        'BACKLIGHT': ParameterFloat(
+            'BACKLIGHT_INTENSITY', writeable=True,
+            minimum=0, maximum=100, scale=1),
+        'CONFIG': ParameterHex(
+            'CONFIG', writeable=True, minimum=0, maximum=0xFFFF),
+        'TANK_SPEED': ParameterFloat(
+            'ADC_SCAN_INTERVAL_MSEC', writeable=True,
+            minimum=0, maximum=10, scale=1000),
+        'TANK1': ParameterFloat('TANK_1_LEVEL'),
+        'TANK2': ParameterFloat('TANK_2_LEVEL'),
+        'TANK3': ParameterFloat('TANK_3_LEVEL'),
+        'TANK4': ParameterFloat('TANK_4_LEVEL'),
+        }
+
+    def __init__(self, port, verbose=False):
         """Create console instance."""
-        self.cmd_data = {
-            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVWRITE': ParameterBoolean('NV-WRITE',
-                writeable=True, readable=False, write_format='{1}'),
-            'SER_ID': ParameterString(
-                'SET-SERIAL-ID', writeable=True, readable=False,
-                write_format='"{} {}'),
-            'HW_VER': ParameterString(
-                'SET-HW-VER', writeable=True, readable=False,
-                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-            'PROMPT': ParameterString(
-                'PROMPT', writeable=True, write_format='"{} {}'),
-            'STATUS': ParameterHex(
-                'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
-            'CAN_BIND': ParameterHex(
-                'STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
-            'CAN': ParameterString(
-                'CAN', writeable=True, write_format='"{} {}'),
-            'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
-            'BACKLIGHT': ParameterFloat(
-                'BACKLIGHT_INTENSITY', writeable=True,
-                minimum=0, maximum=100, scale=1),
-            'CONFIG': ParameterHex(
-                'CONFIG', writeable=True, minimum=0, maximum=0xFFFF),
-            'TANK_SPEED': ParameterFloat(
-                'ADC_SCAN_INTERVAL_MSEC', writeable=True,
-                minimum=0, maximum=10, scale=1000),
-            'TANK1': ParameterFloat('TANK_1_LEVEL'),
-            'TANK2': ParameterFloat('TANK_2_LEVEL'),
-            'TANK3': ParameterFloat('TANK_3_LEVEL'),
-            'TANK4': ParameterFloat('TANK_4_LEVEL'),
-            }
+        super().__init__(port, verbose)
 
     def testmode(self, state):
         """Enable or disable Test Mode.
@@ -99,22 +101,15 @@ class _Console():
         self['STATUS'] = value
 
 
-class DirectConsole(console.Variable, _Console, console.BadUartConsole):
+class DirectConsole(_Console, console.BadUartConsole):
 
     """Console for a direct connection to a Trek2."""
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        _Console.__init__(self)
-        console.BadUartConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n> '
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n> '
 
 
-class TunnelConsole(console.Variable, _Console, console.BaseConsole):
+class TunnelConsole(_Console, console.BaseConsole):
 
     """Console for a CAN tunneled connection to a Trek2.
 
@@ -122,12 +117,5 @@ class TunnelConsole(console.Variable, _Console, console.BaseConsole):
 
     """
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        _Console.__init__(self)
-        console.BaseConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n> '
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n> '

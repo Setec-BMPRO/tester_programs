@@ -102,6 +102,10 @@ class BaseConsole():
     ignore = ()    # Tuple of strings to remove from responses
     # Fail a measurement upon a ConsoleError
     measurement_fail_on_error = True
+    # Operating as a sensor: key value
+    _read_key = None
+    # Data readings: Key=Name, Value=Parameter
+    cmd_data = {}
 
     def __init__(self, port, verbose=False):
         """Initialise communications.
@@ -113,6 +117,42 @@ class BaseConsole():
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
         self._verbose = verbose
+
+    def configure(self, key):
+        """Sensor: Configure for next reading."""
+        self._read_key = key
+
+    def opc(self):
+        """Sensor: Dummy OPC."""
+        pass
+
+    def read(self):
+        """Sensor: Read ARM data using the last defined key.
+
+        @return Value
+
+        """
+        return self[self._read_key]
+
+    def __getitem__(self, key):
+        """Read a value from the console.
+
+        @param key Value name
+        @return Reading
+
+        """
+        parameter = self.cmd_data[key]
+        return parameter.read(self.action)
+
+    def __setitem__(self, key, value):
+        """Write a value to the console.
+
+        @param key Value name
+        @param value Data value
+
+        """
+        parameter = self.cmd_data[key]
+        parameter.write(value, self.action)
 
     def open(self):
         """Open port."""
@@ -236,7 +276,7 @@ class BaseConsole():
         if response_count > expected:
             self._logger.error(
                 'Extra responses! Expected %s, actual %s',
-                response_count, expected)
+                expected, response_count)
         return response
 
 

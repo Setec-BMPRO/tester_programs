@@ -4,10 +4,6 @@
 
 import tester
 
-# Default read/write format strings (For the X-Register based consoles)
-_DEF_WRITE = '{0} "{1} XN!'
-_DEF_READ = '"{0} XN?'
-
 
 class Sensor(tester.sensor.Sensor):
 
@@ -50,9 +46,12 @@ class _Parameter():
 
     """Parameter base class."""
 
+    # Default read/write format strings (For the X-Register based consoles)
+    _wr_fmt = '{0} "{1} XN!'
+    _rd_fmt = '"{0} XN?'
+
     def __init__(self, command, writeable=False, readable=True,
-                       write_format=_DEF_WRITE,
-                       read_format=_DEF_READ):
+                       write_format=None, read_format=None):
         """Initialise the parameter.
 
         @param command Command verb of this parameter.
@@ -64,8 +63,10 @@ class _Parameter():
         self._cmd = command
         self._writeable = writeable
         self._readable = readable
-        self._wr_fmt = write_format
-        self._rd_fmt = read_format
+        if write_format:
+            self._wr_fmt = write_format
+        if read_format:
+            self._rd_fmt = read_format
 
     def write(self, value, func):
         """Write parameter value.
@@ -146,8 +147,8 @@ class ParameterFloat(_Parameter):
 
     def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, scale=1,
-                       write_format=_DEF_WRITE,
-                       read_format=_DEF_READ):
+                       write_format=None,
+                       read_format=None):
         """Remember the scaling and data limits."""
         super().__init__(
             command, writeable, readable, write_format, read_format)

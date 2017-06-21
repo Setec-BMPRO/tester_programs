@@ -17,7 +17,7 @@ class ConsoleResponseError():
     """Console Response Error."""
 
 
-class Console(console.Variable, console.BadUartConsole):
+class Console(console.BadUartConsole):
 
     """Communications to BCE282 console."""
 
@@ -27,7 +27,6 @@ class Console(console.Variable, console.BadUartConsole):
     res_suffix = b' -> '
     # Auto add prompt to puts strings
     puts_prompt = '\r> '
-    expected = 0
     cmd_data = {
         'ECHO': ParameterBoolean(
             'echo', writeable=True, write_format='{0} {1}', read_format='{0}'),
@@ -46,18 +45,11 @@ class Console(console.Variable, console.BadUartConsole):
         'MSP-VOUT': ParameterFloat(
             'x-supply-voltage x@ print', read_format='{0}'),
         'CAL-V': ParameterFloat(
-            'cal-vset PRINT', writeable=True, write_format='{0} {1}',
+            'cal-vset', writeable=True, write_format='{0} {1}',
             read_format='{0}', minimum=0, maximum=15000),
         'PASSWD': ParameterString(
             'bsl-password', read_format='{0}'),
         }
-
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        console.BadUartConsole.__init__(self, port, verbose)
 
     def config(self, value):
         """Configure scale values for each model."""
@@ -69,7 +61,10 @@ class Console(console.Variable, console.BadUartConsole):
         self['ECHO'] = True
         self['UNLOCK'] = True
         self['NV-WRITE'] = True
+        # RESTART acts without sending a prompt, so we add one
+        self.port.puts(self.puts_prompt, priority=True)
         self['RESTART'] = True
+        self.action('', expected=4)     # Consume the startup banner lines
         self['ECHO'] = True
         self['UNLOCK'] = True
 
