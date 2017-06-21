@@ -122,8 +122,6 @@ class EV2200():
             '.'.join((__name__, self.__class__.__name__)))
         self._logger.info('Started')
         self.port = serport
-        self.port.flushInput()
-        self._logger.info('Connected')
 
     def open(self):
         """Open my port."""
