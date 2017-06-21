@@ -21,32 +21,26 @@ class ConsoleResponseError():
     """Console Response Error."""
 
 
-class Console(console.Variable, console.BaseConsole):
+class Console(console.BaseConsole):
 
     """Communications to IDS-500 console."""
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        console.BaseConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n'
-        self.cmd_data = {
-            'PIC-SwRev': ParameterString('?,I,1', read_format='{0}'),
-            'PIC-MicroTemp': ParameterString('?,D,16', read_format='{0}'),
-            'PIC-Clear': ParameterString('', read_format='{0}'),
-            'PIC-HwRev': ParameterString('?,I,2', read_format='{0}'),
-            'PIC-SerNum': ParameterString('?,I,3', read_format='{0}'),
-            'SwTstMode': ParameterString(
-                'S,:,', writeable=True, write_format='{1}{0}'),
-            'WriteHwRev': ParameterString(
-                'S,@,', writeable=True, write_format='{1}{0}'),
-            'WriteSerNum': ParameterString(
-                'S,#,', writeable=True, write_format='{1}{0}'),
-            }
-        self.expected = 0
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n'
+    cmd_data = {
+        'PIC-SwRev': ParameterString('?,I,1', read_format='{0}'),
+        'PIC-MicroTemp': ParameterString('?,D,16', read_format='{0}'),
+        'PIC-Clear': ParameterString('', read_format='{0}'),
+        'PIC-HwRev': ParameterString('?,I,2', read_format='{0}'),
+        'PIC-SerNum': ParameterString('?,I,3', read_format='{0}'),
+        'SwTstMode': ParameterString(
+            'S,:,', writeable=True, write_format='{1}{0}'),
+        'WriteHwRev': ParameterString(
+            'S,@,', writeable=True, write_format='{1}{0}'),
+        'WriteSerNum': ParameterString(
+            'S,#,', writeable=True, write_format='{1}{0}'),
+        }
+    expected = 0
 
     def clear_port(self):
         """Discard unwanted strings when the port is opened"""

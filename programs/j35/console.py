@@ -26,86 +26,84 @@ _CAN_BOUND = (1 << 28)
 _MANUAL_MODE_WAIT = 2.1
 
 
-class Console(console.Variable, console.BadUartConsole):
+class Console(console.BadUartConsole):
 
     """Communications to J35 console."""
 
-    def __init__(self, port, fifo):
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n> '
+    cmd_data = {
+        'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
+        'VOUT': ParameterFloat(
+            'CONVERTER_VOLTS_SETPOINT', writeable=True,
+            minimum=0.0, maximum=14.0, scale=1000),
+        'IOUT': ParameterFloat(
+            'CONVERTER_CURRENT_SETPOINT', writeable=True,
+            minimum=15.0, maximum=35.0, scale=1000),
+        'FAN': ParameterFloat(
+            'FAN_SPEED', writeable=True,
+            minimum=0, maximum=100, scale=10),
+        'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
+        'SOLAR': ParameterBoolean('SOLAR_CHARGE_RELAY', writeable=True),
+        'LOAD_SET': ParameterHex(
+            'LOAD_SWITCH_STATE_0', writeable=True,
+            minimum=0, maximum=0x0FFFFFFF),
+        'VOUT_OV': ParameterFloat(
+            'CONVERTER_OVERVOLT', writeable=True,
+            minimum=0, maximum=2, scale=1),
+        'SLEEP_MODE': ParameterFloat(
+            'SLEEPMODE', writeable=True,
+            minimum=0, maximum=3, scale=1),
+        'TASK_STARTUP': ParameterFloat(
+            'TASK_STARTUP', writeable=True,
+            minimum=0, maximum=3, scale=1),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+        'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
+        'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
+        'BUS_ICAL': ParameterFloat(
+            'ICONV', writeable=True,    # an undocumented command...
+            write_format='{0} "{1} CAL',
+            scale=1000),
+        'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
+        'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
+        'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
+        'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
+        'CONV_MAX': ParameterFloat(
+            'MLC_MAX_CONVERTER_MW', writeable=True, scale=1000),
+        'CONV_RATED': ParameterFloat(
+            'MLC_CONVERTER_RATED_MA', writeable=True, scale=1000),
+        'CONV_DERATED': ParameterFloat(
+            'MLC_CONVERTER_DERATED_MA', writeable=True, scale=1000),
+        'CONV_FAULT': ParameterFloat(
+            'MLC_CONVERTER_FAULT_MA', writeable=True, scale=1000),
+        'INHIBIT_BY_AUX': ParameterBoolean(
+            'LOAD_SWITCH_INHIBITED_BY_AUX', writeable=True,),
+        'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
+        'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
+        'SER_ID': ParameterString(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{} {}'),
+        'HW_VER': ParameterString(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'STATUS': ParameterHex(
+            'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
+        'CAN_BIND': ParameterHex(
+            'STATUS', writeable=True,
+            minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
+        'CAN': ParameterString('CAN',
+            writeable=True, write_format='"{} {}'),
+        'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        }
+
+    def __init__(self, port, verbose=False, fifo=False):
         """Create console instance."""
         self.fifo = fifo
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        console.BadUartConsole.__init__(self, port)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n> '
-        self.cmd_data = {
-            'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
-            'VOUT': ParameterFloat(
-                'CONVERTER_VOLTS_SETPOINT', writeable=True,
-                minimum=0.0, maximum=14.0, scale=1000),
-            'IOUT': ParameterFloat(
-                'CONVERTER_CURRENT_SETPOINT', writeable=True,
-                minimum=15.0, maximum=35.0, scale=1000),
-            'FAN': ParameterFloat(
-                'FAN_SPEED', writeable=True,
-                minimum=0, maximum=100, scale=10),
-            'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
-            'SOLAR': ParameterBoolean('SOLAR_CHARGE_RELAY', writeable=True),
-            'LOAD_SET': ParameterHex(
-                'LOAD_SWITCH_STATE_0', writeable=True,
-                minimum=0, maximum=0x0FFFFFFF),
-            'VOUT_OV': ParameterFloat(
-                'CONVERTER_OVERVOLT', writeable=True,
-                minimum=0, maximum=2, scale=1),
-            'SLEEP_MODE': ParameterFloat(
-                'SLEEPMODE', writeable=True,
-                minimum=0, maximum=3, scale=1),
-            'TASK_STARTUP': ParameterFloat(
-                'TASK_STARTUP', writeable=True,
-                minimum=0, maximum=3, scale=1),
-            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-            'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
-            'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
-            'BUS_ICAL': ParameterFloat(
-                'ICONV', writeable=True,    # an undocumented command...
-                write_format='{0} "{1} CAL',
-                scale=1000),
-            'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
-            'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
-            'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
-            'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
-            'CONV_MAX': ParameterFloat(
-                'MLC_MAX_CONVERTER_MW', writeable=True, scale=1000),
-            'CONV_RATED': ParameterFloat(
-                'MLC_CONVERTER_RATED_MA', writeable=True, scale=1000),
-            'CONV_DERATED': ParameterFloat(
-                'MLC_CONVERTER_DERATED_MA', writeable=True, scale=1000),
-            'CONV_FAULT': ParameterFloat(
-                'MLC_CONVERTER_FAULT_MA', writeable=True, scale=1000),
-            'INHIBIT_BY_AUX': ParameterBoolean(
-                'LOAD_SWITCH_INHIBITED_BY_AUX', writeable=True,),
-            'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
-            'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
-            'SER_ID': ParameterString(
-                'SET-SERIAL-ID', writeable=True, readable=False,
-                write_format='"{} {}'),
-            'HW_VER': ParameterString(
-                'SET-HW-VER', writeable=True, readable=False,
-                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-            'STATUS': ParameterHex(
-                'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
-            'CAN_BIND': ParameterHex(
-                'STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
-            'CAN': ParameterString('CAN',
-                writeable=True, write_format='"{} {}'),
-            'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
-            'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVWRITE': ParameterBoolean('NV-WRITE',
-                writeable=True, readable=False, write_format='{1}'),
-            }
+        super().__init__(port, verbose)
         # Add in the 14 load switch current readings
         for i in range(1, 15):
             self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(

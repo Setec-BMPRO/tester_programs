@@ -26,29 +26,31 @@ class _Console():
 
     """Base class for a RVVIEW console."""
 
-    def __init__(self):
+    cmd_data = {
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        'SER_ID': ParameterString(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{} {}'),
+        'HW_VER': ParameterString(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+        'STATUS': ParameterHex(
+            'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
+        'CAN_BIND': ParameterHex(
+            'STATUS', writeable=True,
+            minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
+        'CAN': ParameterString(
+            'CAN', writeable=True, write_format='"{} {}'),
+        'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
+        }
+
+    def __init__(self, port, verbose=False):
         """Create console instance."""
-        self.cmd_data = {
-            'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVWRITE': ParameterBoolean('NV-WRITE',
-                writeable=True, readable=False, write_format='{1}'),
-            'SER_ID': ParameterString(
-                'SET-SERIAL-ID', writeable=True, readable=False,
-                write_format='"{} {}'),
-            'HW_VER': ParameterString(
-                'SET-HW-VER', writeable=True, readable=False,
-                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-            'STATUS': ParameterHex(
-                'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
-            'CAN_BIND': ParameterHex(
-                'STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
-            'CAN': ParameterString(
-                'CAN', writeable=True, write_format='"{} {}'),
-            'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
-            }
+        super().__init__(port, verbose)
 
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
@@ -95,33 +97,18 @@ class _Console():
         self['STATUS'] = value
 
 
-class DirectConsole(console.Variable, _Console, console.BadUartConsole):
+class DirectConsole(_Console, console.BadUartConsole):
 
     """Console for a direct connection to a RVVIEW."""
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        _Console.__init__(self)
-        console.BadUartConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n> '
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n> '
 
 
-class TunnelConsole(console.Variable, _Console, console.BaseConsole):
+class TunnelConsole(_Console, console.BaseConsole):
 
     """Console for a CAN tunneled connection to a RVVIEW.
 
     The CAN tunnel does not need the BadUartConsole stuff.
 
     """
-
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        _Console.__init__(self)
-        console.BaseConsole.__init__(self, port, verbose)

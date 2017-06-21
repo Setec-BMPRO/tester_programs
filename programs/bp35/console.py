@@ -22,118 +22,116 @@ _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 _CAN_BOUND = (1 << 28)
 
 
-class Console(console.Variable, console.BadUartConsole):
+class Console(console.BadUartConsole):
 
     """Communications to BP35 console."""
 
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n> '
+    cmd_data = {
+        'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
+        'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
+        'VOUT': ParameterFloat(
+            'CONVERTER_VOLTS_SETPOINT', writeable=True,
+            minimum=0.0, maximum=14.0, scale=1000),
+        'IOUT': ParameterFloat(
+            'CONVERTER_CURRENT_SETPOINT', writeable=True,
+            minimum=15.0, maximum=40.0, scale=1000),
+        'LOAD_DIS': ParameterFloat(
+            'LOAD_SWITCHES_INHIBITED', writeable=True,
+            minimum=0, maximum=1, scale=1),
+        'FAN': ParameterFloat(
+            'FAN_SPEED', writeable=True,
+            minimum=0, maximum=100, scale=10),
+        'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
+        'CAN_PWR_EN': ParameterBoolean(
+            'CAN_BUS_POWER_ENABLE', writeable=True),
+        '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
+        'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
+        'LOAD_SET': ParameterFloat(
+            'LOAD_SWITCH_STATE_0', writeable=True,
+            minimum=0, maximum=0x0FFFFFFF, scale=1),
+        'VOUT_OV': ParameterFloat(
+            'CONVERTER_OVERVOLT', writeable=True,
+            minimum=0, maximum=2, scale=1),
+        'SET_MODE': ParameterFloat(
+            'SLEEPMODE', writeable=True,
+            minimum=0, maximum=3, scale=1),
+        'SR_HW_VER': ParameterFloat(
+            'SOLAR_REG_HW_VERS', writeable=True,
+            scale=1),
+        'SR_VSET': ParameterFloat(
+            'SOLAR_REG_V', writeable=True,
+            scale=1000),
+        'SR_ISET': ParameterFloat(
+            'SOLAR_REG_I', writeable=True,
+            scale=1000),
+        'SR_VCAL': ParameterFloat(
+            'SOLAR_REG_CAL_V_OUT', writeable=True,
+            scale=1000),
+        'SR_ICAL': ParameterFloat(
+            'SOLAR_REG_CAL_I_OUT', writeable=True,
+            scale=1000),
+        'SR_IOUT': ParameterFloat('SOLAR_REG_IOUT', scale=1000),
+        'SR_DEL_CAL': ParameterBoolean(
+            'SOLAR_REG_DEL_CAL', writeable=True),
+        'SR_VIN': ParameterFloat('SOLAR_REG_VIN', scale=1000),
+        'SR_VIN_CAL': ParameterFloat(
+            'SOLAR_REG_CAL_V_IN', writeable=True,
+            scale=1000),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
+        'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
+        'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
+        'PRI_T': ParameterFloat('PRIMARY_TEMPERATURE', scale=10),
+        'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
+        'BATT_T': ParameterFloat('BATTERY_TEMPERATURE', scale=10),
+        'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
+        'BUS_I': ParameterFloat('CONVERTER_CURRENT', scale=1000),
+        'BUS_ICAL': ParameterFloat( # an undocumented command...
+            'ICONV', writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=1000),
+        'OCP_CAL': ParameterFloat(  # an undocumented command...
+            'CAL_I_CONVSET', writeable=True, maximum=65535),
+        'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
+        'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
+        'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
+        'BATT_V': ParameterFloat('BATTERY_VOLTS', scale=1000),
+        'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
+        'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
+        'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
+        'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
+        'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
+        'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
+        'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
+        'SR_ERROR': ParameterFloat('SOLAR_REG_ERRORCODE'),
+        'SR_RELAY': ParameterFloat('SOLAR_REG_RELAY'),
+        'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
+        'SER_ID': ParameterString(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{0} {1}'),
+        'HW_VER': ParameterString(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'STATUS': ParameterHex(
+            'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
+        'CAN_BIND': ParameterHex(
+            'STATUS', writeable=True,
+            minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
+        'CAN': ParameterString('CAN',
+            writeable=True, write_format='"{0} {1}'),
+        'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
+        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        }
+
     def __init__(self, port, verbose=False):
         """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        console.BadUartConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n> '
-        self.cmd_data = {
-            'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
-            'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
-            'VOUT': ParameterFloat(
-                'CONVERTER_VOLTS_SETPOINT', writeable=True,
-                minimum=0.0, maximum=14.0, scale=1000),
-            'IOUT': ParameterFloat(
-                'CONVERTER_CURRENT_SETPOINT', writeable=True,
-                minimum=15.0, maximum=40.0, scale=1000),
-            'LOAD_DIS': ParameterFloat(
-                'LOAD_SWITCHES_INHIBITED', writeable=True,
-                minimum=0, maximum=1, scale=1),
-            'FAN': ParameterFloat(
-                'FAN_SPEED', writeable=True,
-                minimum=0, maximum=100, scale=10),
-            'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
-            'CAN_PWR_EN': ParameterBoolean(
-                'CAN_BUS_POWER_ENABLE', writeable=True),
-            '3V3_EN': ParameterBoolean('3V3_ENABLE', writeable=True),
-            'CAN_EN': ParameterBoolean('CAN_ENABLE', writeable=True),
-            'LOAD_SET': ParameterFloat(
-                'LOAD_SWITCH_STATE_0', writeable=True,
-                minimum=0, maximum=0x0FFFFFFF, scale=1),
-            'VOUT_OV': ParameterFloat(
-                'CONVERTER_OVERVOLT', writeable=True,
-                minimum=0, maximum=2, scale=1),
-            'SET_MODE': ParameterFloat(
-                'SLEEPMODE', writeable=True,
-                minimum=0, maximum=3, scale=1),
-            'SR_HW_VER': ParameterFloat(
-                'SOLAR_REG_HW_VERS', writeable=True,
-                scale=1),
-            'SR_VSET': ParameterFloat(
-                'SOLAR_REG_V', writeable=True,
-                scale=1000),
-            'SR_ISET': ParameterFloat(
-                'SOLAR_REG_I', writeable=True,
-                scale=1000),
-            'SR_VCAL': ParameterFloat(
-                'SOLAR_REG_CAL_V_OUT', writeable=True,
-                scale=1000),
-            'SR_ICAL': ParameterFloat(
-                'SOLAR_REG_CAL_I_OUT', writeable=True,
-                scale=1000),
-            'SR_IOUT': ParameterFloat('SOLAR_REG_IOUT', scale=1000),
-            'SR_DEL_CAL': ParameterBoolean(
-                'SOLAR_REG_DEL_CAL', writeable=True),
-            'SR_VIN': ParameterFloat('SOLAR_REG_VIN', scale=1000),
-            'SR_VIN_CAL': ParameterFloat(
-                'SOLAR_REG_CAL_V_IN', writeable=True,
-                scale=1000),
-            'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-            'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
-            'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
-            'PRI_T': ParameterFloat('PRIMARY_TEMPERATURE', scale=10),
-            'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
-            'BATT_T': ParameterFloat('BATTERY_TEMPERATURE', scale=10),
-            'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
-            'BUS_I': ParameterFloat('CONVERTER_CURRENT', scale=1000),
-            'BUS_ICAL': ParameterFloat( # an undocumented command...
-                'ICONV', writeable=True,
-                write_format='{0} "{1} CAL',
-                scale=1000),
-            'OCP_CAL': ParameterFloat(  # an undocumented command...
-                'CAL_I_CONVSET', writeable=True, maximum=65535),
-            'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
-            'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
-            'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
-            'BATT_V': ParameterFloat('BATTERY_VOLTS', scale=1000),
-            'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
-            'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
-            'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
-            'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
-            'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
-            'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
-            'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
-            'SR_ERROR': ParameterFloat('SOLAR_REG_ERRORCODE'),
-            'SR_RELAY': ParameterFloat('SOLAR_REG_RELAY'),
-            'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
-            'SER_ID': ParameterString(
-                'SET-SERIAL-ID', writeable=True, readable=False,
-                write_format='"{0} {1}'),
-            'HW_VER': ParameterString(
-                'SET-HW-VER', writeable=True, readable=False,
-                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-            'STATUS': ParameterHex(
-                'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
-            'CAN_BIND': ParameterHex(
-                'STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
-            'CAN': ParameterString('CAN',
-                writeable=True, write_format='"{0} {1}'),
-            'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
-            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVWRITE': ParameterBoolean('NV-WRITE',
-                writeable=True, readable=False, write_format='{1}'),
-            }
+        super().__init__(port, verbose)
         # Add in the 14 load switch current readings
         for i in range(1, 15):
             self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(

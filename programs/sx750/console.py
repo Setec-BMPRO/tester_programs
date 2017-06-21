@@ -12,47 +12,40 @@ ParameterFloat = console.ParameterFloat
 ParameterBoolean = console.ParameterBoolean
 
 
-class Console(console.Variable, console.BaseConsole):
+class Console(console.BaseConsole):
 
     """Communications to SX-750 console."""
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        console.BaseConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r> '
-        rfmt = '{0} X?'     # 1st generation console read format string
-        self.cmd_data = {
-            'ARM-AcFreq': ParameterFloat(
-                'X-AC-LINE-FREQUENCY', read_format=rfmt),
-            'ARM-AcVolt': ParameterFloat('X-AC-LINE-VOLTS', read_format=rfmt),
-            'ARM-12V': ParameterFloat(
-                'X-RAIL-VOLTAGE-12V', scale=1000, read_format=rfmt),
-            'ARM-24V': ParameterFloat(
-                'X-RAIL-VOLTAGE-24V', scale=1000, read_format=rfmt),
-            'ARM_SwVer': ParameterString(
-                'X-SOFTWARE-VERSION', read_format=rfmt),
-            'ARM_SwBld': ParameterString('X-BUILD-NUMBER', read_format=rfmt),
-            'FAN_SET': ParameterFloat(
-                'X-TEMPERATURE-CONTROLLER-SETPOINT',
-                writeable=True,
-                write_format='{0} {1} X!'),
-            'CAL_PFC': ParameterFloat(
-                'CAL-PFC-BUS-VOLTS',
-                writeable=True,
-                readable=False,
-                scale=1000,
-                write_format='{0} {1}'),
-            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVWRITE': ParameterBoolean('NV-WRITE',
-                writeable=True, readable=False, write_format='{1}'),
-            }
-        # Strings to ignore in responses
-        self.ignore = (' ', 'Hz', 'Vrms', 'mV')
+    # Auto add prompt to puts strings
+    puts_prompt = '\r> '
+    cmd_data = {
+        'ARM-AcFreq': ParameterFloat(
+            'X-AC-LINE-FREQUENCY', read_format='{} X?'),
+        'ARM-AcVolt': ParameterFloat('X-AC-LINE-VOLTS', read_format='{} X?'),
+        'ARM-12V': ParameterFloat(
+            'X-RAIL-VOLTAGE-12V', scale=1000, read_format='{} X?'),
+        'ARM-24V': ParameterFloat(
+            'X-RAIL-VOLTAGE-24V', scale=1000, read_format='{} X?'),
+        'ARM_SwVer': ParameterString(
+            'X-SOFTWARE-VERSION', read_format='{} X?'),
+        'ARM_SwBld': ParameterString('X-BUILD-NUMBER', read_format='{} X?'),
+        'FAN_SET': ParameterFloat(
+            'X-TEMPERATURE-CONTROLLER-SETPOINT',
+            writeable=True,
+            write_format='{0} {1} X!'),
+        'CAL_PFC': ParameterFloat(
+            'CAL-PFC-BUS-VOLTS',
+            writeable=True,
+            readable=False,
+            scale=1000,
+            write_format='{0} {1}'),
+        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        }
+    # Strings to ignore in responses
+    ignore = (' ', 'Hz', 'Vrms', 'mV')
 
     def calpfc(self, voltage):
         """Issue PFC calibration commands."""

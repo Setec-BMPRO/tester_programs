@@ -25,46 +25,40 @@ _BLE_ON = (1 << 27)
 _BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
 
 
-class Console(console.Variable, console.BadUartConsole):
+class Console(console.BadUartConsole):
 
     """Communications to CN101 console."""
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        # Call __init__() methods directly, since we cannot use super() as
-        # the arguments don't match
-        console.Variable.__init__(self)
-        console.BadUartConsole.__init__(self, port, verbose)
-        # Auto add prompt to puts strings
-        self.puts_prompt = '\r\n> '
-        self.cmd_data = {
-            'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-                writeable=True, readable=False, write_format='{1}'),
-            'NVWRITE': ParameterBoolean('NV-WRITE',
-                writeable=True, readable=False, write_format='{1}'),
-            'SER_ID': ParameterString(
-                'SET-SERIAL-ID', writeable=True, readable=False,
-                write_format='"{} {}'),
-            'HW_VER': ParameterString(
-                'SET-HW-VER', writeable=True, readable=False,
-                write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-            'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-            'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
-            'STATUS': ParameterHex('STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000),
-            'CAN_BIND': ParameterHex('STATUS', writeable=True,
-                minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-            'CAN': ParameterString('CAN',
-                writeable=True, write_format='"{} {}'),
-            'TANK1': ParameterFloat('TANK_1_LEVEL'),
-            'TANK2': ParameterFloat('TANK_2_LEVEL'),
-            'TANK3': ParameterFloat('TANK_3_LEVEL'),
-            'TANK4': ParameterFloat('TANK_4_LEVEL'),
-            'ADC_SCAN': ParameterFloat(
-                'ADC_SCAN_INTERVAL_MSEC', writeable=True),
-            }
+    # Auto add prompt to puts strings
+    puts_prompt = '\r\n> '
+    cmd_data = {
+        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        'SER_ID': ParameterString(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{} {}'),
+        'HW_VER': ParameterString(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+        'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
+        'STATUS': ParameterHex('STATUS', writeable=True,
+            minimum=0, maximum=0xF0000000),
+        'CAN_BIND': ParameterHex('STATUS', writeable=True,
+            minimum=0, maximum=0xF0000000, mask=(1 << 28)),
+        'CAN': ParameterString('CAN',
+            writeable=True, write_format='"{} {}'),
+        'TANK1': ParameterFloat('TANK_1_LEVEL'),
+        'TANK2': ParameterFloat('TANK_2_LEVEL'),
+        'TANK3': ParameterFloat('TANK_3_LEVEL'),
+        'TANK4': ParameterFloat('TANK_4_LEVEL'),
+        'ADC_SCAN': ParameterFloat(
+            'ADC_SCAN_INTERVAL_MSEC', writeable=True),
+        }
 
     def testmode(self, state):
         """Enable or disable Test Mode."""
