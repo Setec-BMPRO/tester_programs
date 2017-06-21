@@ -19,8 +19,6 @@ from . import tosbsl
 MSP_PORT1 = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Serial port used by MSP430 comms module.
 MSP_PORT2 = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
-# Software image file (TI Text format)
-MSP_FILE = 'bce282_3a.txt'
 # Calibration data save file (TI Text format)
 MSP_SAVEFILE = {    # Needs to be writable by the tester login
     'posix': '/home/setec/testdata/bslsavedata.txt',
@@ -71,11 +69,14 @@ LIMITS = {      # Test limit selection keyed by program parameter
         'Limits': LIMITS_12,
         'LoadRatio': (20, 14),      # Iout:Ibat
         'ScaleFactor': 1000,
+        'HexFile': 'bce282_12_3a.txt' # TI Text format
+
         },
     '24': {
         'Limits': LIMITS_24,
         'LoadRatio': (10, 6),       # Iout:Ibat
         'ScaleFactor': 500,
+        'HexFile': 'bce282_3a.txt' # TI Text format
         },
     }
 
@@ -149,7 +150,8 @@ class Initial(share.TestSequence):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         sys.argv = ['',
             '--comport={0}'.format(MSP_PORT1),
-            '--program', os.path.join(folder, MSP_FILE),
+            '--program', os.path.join(folder,
+                LIMITS[self.parameter]['HexFile']),
             ]
         tosbsl.main()
         dev['rla_prog'].set_off()
