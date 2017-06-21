@@ -232,6 +232,11 @@ class BaseConsole():
         if response_count < expected:
             raise ConsoleResponseError(
                 'Expected {}, actual {}'.format(expected, response_count))
+# TODO: Remove this logger once we implement response_count != expected
+        if response_count > expected:
+            self._logger.error(
+                'Extra responses! Expected %s, actual %s',
+                response_count, expected)
         return response
 
 

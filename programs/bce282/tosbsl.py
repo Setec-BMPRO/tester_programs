@@ -473,8 +473,8 @@ class LowLevel:
             sys.stderr.write("Warning: This command might change data at address %04x or %04x!\n" % (accessAddr, accessAddr + 1))
 
         self.serialport.flushInput()                #clear receiving queue
-        #TODO: Check after each transmitted character,
-        #TODO: if microcontroller did send a character (probably a NAK!).
+        #TO DO: Check after each transmitted character,
+        #TO DO: if microcontroller did send a character (probably a NAK!).
         for c in txFrame:
             self.serialport.write(bytearray([ord(c)]))
             if DEBUG > 3:
@@ -923,7 +923,7 @@ class Memory:
 
     def loadFile(self, filename):
         """fill memory with the contents of a file. file type is determined from extension"""
-        #TODO: do a contents based detection
+        #TO DO: do a contents based detection
         if filename[-4:].lower() == '.txt':
             self.loadTIText(open(filename, "rb"))
         elif filename[-4:].lower() in ('.a43', '.hex', 'ihex'):
