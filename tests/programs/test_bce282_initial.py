@@ -51,18 +51,14 @@ class _BCE282Initial(ProgramTestCase):
                 'Program':
                     ('55 AA ' * 16, ),
                 'Calibration':
-                    (' -> ', ) +
-                    (' -> ', ) +
-                    (' -> ', ) +
+                    (' -> ', ) * 3 +
                     (' -> \r\x07BCE282 V3.0, build 2759.\r'
                         ' Built 11:57:54 on 8/8/2012.\r'
                         ' Error code: 1(p8=0, p16=0).\r'
                         ' Restart code: 4.', ) +
-                    (' -> ', ) +
-                    (' -> ', ) +
+                    (' -> ', ) * 2 +
                     (' -> 0 ', ) +
-                    (' -> ', ) +
-                    (' -> ', ) +
+                    (' -> ', ) * 2 +
                     # Both models respond with 12V output.
                     (' -> 13800 ', ) +
                     (' -> 1 ', ) +
@@ -74,10 +70,10 @@ class _BCE282Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(12, len(result.readings))  # Reading count
+        self.assertEqual(17, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['Prepare', 'Program', 'PowerUp', 'Calibration'],  # , 'OCP'],
+            ['Prepare', 'Program', 'PowerUp', 'Calibration', 'OCP'],
             self.tester.ut_steps)
         # Calls to tosbsl.main
         self.assertEqual(3, self.mybsl.call_count)

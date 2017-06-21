@@ -38,7 +38,6 @@ _COMMON = (
     LimitPercent('VccPri', 15.6, 5.0),
     LimitPercent('VccBias', 15.0, 13.0),
     LimitLow('VbatOff', 0.5),
-    LimitBetween('Vbat', 10.0, 30.0),
     LimitBetween('AlarmClosed', 1000, 3000),
     LimitBetween('AlarmOpen', 11000, 13000),
     LimitBetween('Status 0', -0.1, 0.1),
@@ -95,8 +94,7 @@ class Initial(share.TestSequence):
             TestStep('Program', self._step_program),
             TestStep('PowerUp', self._step_power_up),
             TestStep('Calibration', self._step_cal),
-# FIXME: Why is the OCP step disabled?
-            TestStep('OCP', self._step_ocp, False),
+            TestStep('OCP', self._step_ocp),
             )
         self.devices['msp'].config(LIMITS[self.parameter]['ScaleFactor'])
 
@@ -162,10 +160,9 @@ class Initial(share.TestSequence):
         """Power up the unit at 240Vac and measure voltages at min load."""
         dev['acsource'].output(voltage=240.0, output=True, delay=1.0)
         dev['dcl_vbat'].output(0.1, True)
-# FIXME: Why measurement 'dmm_alarmclose' disabled?
         self.measure(
             ('dmm_vac', 'dmm_vbus', 'dmm_vccpri', 'dmm_vccbias',
-             'dmm_vbatoff', #'dmm_alarmclose',
+             'dmm_vbatoff', 'dmm_alarmclose',
              ), timeout=5)
         dev['dcl_vbat'].output(0.0)
 
@@ -189,7 +186,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
-        mes['dmm_vbat'](timeout=5)
         self.measure(('dmm_alarmopen', 'ramp_battocp'), timeout=5)
         dev['dcl_vbat'].output(0.0)
         mes['ramp_outocp'](timeout=5)
@@ -294,7 +290,6 @@ class Measurements(share.Measurements):
             ('dmm_vccpri', 'VccPri', 'vcc_pri', ''),
             ('dmm_vccbiasext', 'VccBiasExt', 'vcc_bias', ''),
             ('dmm_vccbias', 'VccBias', 'vcc_bias', ''),
-            ('dmm_vbat', 'Vbat', 'vbat', ''),
             ('dmm_vbatoff', 'VbatOff', 'vbat', ''),
             ('dmm_alarmclose', 'AlarmClosed', 'alarm', ''),
             ('dmm_alarmopen', 'AlarmOpen', 'alarm', ''),
