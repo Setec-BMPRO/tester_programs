@@ -337,7 +337,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         j35_ser.port = ARM_PORT
         # J35 Console driver
-        self['j35'] = console.Console(j35_ser, self.fifo)
+        self['j35'] = console.Console(j35_ser, verbose=False)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(9.0, True)
 

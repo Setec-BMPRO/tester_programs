@@ -100,16 +100,15 @@ class Console(console.BadUartConsole):
             writeable=True, readable=False, write_format='{1}'),
         }
 
-    def __init__(self, port, verbose=False, fifo=False):
+    def __init__(self, port, verbose=False):
         """Create console instance."""
-        self.fifo = fifo
         super().__init__(port, verbose)
         # Add in the 14 load switch current readings
         for i in range(1, 15):
             self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
         # Event timer for entry into Manual Mode
-        self._myevent = threading.Event()
+        self._myevent = None
         self._mytimer = None
 
     def brand(self, hw_ver, sernum, reset_relay):
@@ -138,13 +137,12 @@ class Console(console.BadUartConsole):
         """
         if start:  # Trigger manual mode, and start a timer
             self['SLEEP_MODE'] = 3
-            if not self.fifo:
-                self._mytimer = threading.Timer(
-                    _MANUAL_MODE_WAIT, self._myevent.set)
-                self._mytimer.start()
+            self._myevent = threading.Event()
+            self._mytimer = threading.Timer(
+                _MANUAL_MODE_WAIT, self._myevent.set)
+            self._mytimer.start()
         else:   # Complete manual mode setup once the timer is done.
-            if not self.fifo:
-                self._myevent.wait()
+            self._myevent.wait()
             self['TASK_STARTUP'] = 0
             self['IOUT'] = iout
             self['VOUT'] = vout

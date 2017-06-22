@@ -26,6 +26,19 @@ class _J35Initial(ProgramTestCase):
 
     prog_class = j35.Initial
 
+    def setUp(self):
+        """Per-Test setup."""
+        super().setUp()
+        # Patch threading.Event & threading.Timer for console.manual_mode()
+        mymock = MagicMock()
+        mymock.is_set.return_value = True   # threading.Event.is_set()
+        patcher = patch('threading.Event', return_value=mymock)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('threading.Timer', return_value=mymock)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
         sen = self.test_program.sensors
@@ -39,22 +52,39 @@ class _J35Initial(ProgramTestCase):
         dev['j35'].port.flushInput()    # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare':
-                    ((sen['olock'], 10.0), (sen['sernum'], ('A1626010123', )),
-                     (sen['ovbat'], 12.0), (sen['o3V3U'], 3.3), ),
+                'Prepare': (
+                    (sen['olock'], 10.0), (sen['sernum'], ('A1626010123', )),
+                    (sen['ovbat'], 12.0), (sen['o3V3U'], 3.3),
+                    ),
                 'Initialise': ((sen['sernum'], ('A1526040123', )), ),
-                'Aux': ((sen['ovbat'], 13.5), ),
-                'Solar': ((sen['oair'], 13.5), ),
-                'PowerUp':
-                    ((sen['oacin'], 240.0), (sen['ovbus'], 340.0),
-                     (sen['o12Vpri'], 12.5), (sen['o3V3'], 3.3),
-                     (sen['o15Vs'], 12.5), (sen['ovbat'], (12.8, 12.8, )),
-                     (sen['ofan'], (12, 0, 12)), ),
-                'Output': ((sen['ovload'], (0.0, ) + (12.8, ) * 14), ),
-                'RemoteSw': ((sen['ovload'], (0.0, 12.8)), ),
-                'Load': ((sen['ovbat'], 12.8), ),
-                'OCP': ((sen['ovbat'], (12.8, ) * 20 + (11.0, ), ), ),
-                'CanBus': ((sen['ocanpwr'], 12.5), ),
+                'Aux': (
+                    (sen['ovbat'], 13.5),
+                    ),
+                'Solar': (
+                    (sen['oair'], 13.5),
+                    ),
+                'PowerUp': (
+                    (sen['oacin'], 240.0), (sen['ovbus'], 340.0),
+                    (sen['o12Vpri'], 12.5), (sen['o3V3'], 3.3),
+                    (sen['o15Vs'], 12.5), (sen['ovbat'], (12.8, 12.8, )),
+                    (sen['ofan'], (0, 12)),
+                    ),
+                'Output': (
+                    (sen['ovload'], (0.0, ) +
+                        (12.8, ) * len(sen['arm_loads'])),
+                    ),
+                'RemoteSw': (
+                    (sen['ovload'], (0.0, 12.8)),
+                    ),
+                'Load': (
+                    (sen['ovbat'], 12.8),
+                    ),
+                'OCP': (
+                    (sen['ovbat'], (12.8, ) * 20 + (11.0, ), ),
+                    ),
+                'CanBus': (
+                    (sen['ocanpwr'], 12.5),
+                    ),
                 },
             UnitTester.key_call: {      # Callables
                 'Load': (self._arm_loads, 2.0),
@@ -86,21 +116,13 @@ class _J35Initial(ProgramTestCase):
 
     def _fail_run(self):
         """FAIL 1st Vbat reading."""
-        # Patch threading.Event & threading.Timer to remove delays
-        mymock = MagicMock()
-        mymock.is_set.return_value = True   # threading.Event.is_set()
-        patcher = patch('threading.Event', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('threading.Timer', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare':
-                    ((sen['olock'], 10.0), (sen['sernum'], ('A1626010123', )),
-                     (sen['ovbat'], 2.5), ),   # Vbat will fail
+                'Prepare': (
+                    (sen['olock'], 10.0), (sen['sernum'], ('A1626010123', )),
+                    (sen['ovbat'], 2.5),    # Vbat will fail
+                    ),
                 },
             }
         self.tester.ut_load(data, self.test_program.fifo_push)

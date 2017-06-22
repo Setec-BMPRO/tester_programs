@@ -106,6 +106,9 @@ class BaseConsole():
     _read_key = None
     # Data readings: Key=Name, Value=Parameter
     cmd_data = {}
+# TODO: Remove this logger once we implement response_count != expected
+    # Last command sent (for debug message @ line 280)
+    last_cmd = None
 
     def __init__(self, port, verbose=False):
         """Initialise communications.
@@ -195,6 +198,7 @@ class BaseConsole():
         reply = None
         try:
             if command:
+                self.last_cmd = command
                 if self.port.simulation:   # Auto simulate the command echo
                     self.port.puts(command, preflush=1, priority=True)
                 self.port.flushInput()
@@ -275,8 +279,8 @@ class BaseConsole():
 # TODO: Remove this logger once we implement response_count != expected
         if response_count > expected:
             self._logger.error(
-                'Extra responses! Expected %s, actual %s',
-                expected, response_count)
+                'Extra response to %s: Expected %s, actual %s',
+                repr(self.last_cmd), expected, repr(response))
         return response
 
 
