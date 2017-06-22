@@ -86,9 +86,9 @@ class Final(share.TestSequence):
     def _step_remote_sw(self, dev, mes):
         """Switch off AC, apply external Vbat, remote switch."""
         dev['acsource'].output(0.0)
-        dev['dcl'].output(2.0, delay=1)
+        dev['dcl'].output(2.0, output=True, delay=1)
         dev['dcl'].output(0.1)
-        dev['dcs_vbat'].output(12.6, output=True)
+        dev['dcs_vbat'].output(12.6, output=True, delay=2)
         self.measure(('dmm_VbatExt', 'dmm_VoutExt', ), timeout=5)
         dev['rla_RemoteSw'].set_on()
         mes['dmm_VoutOff'](timeout=10)
