@@ -182,6 +182,13 @@ class Console(console.BadUartConsole):
             value = value & mask | bits
         self['LOAD_SET'] = value
 
+    def cal_conv_curr(self, load):
+        """Calibrate converter current."""
+        # BUS_ICAL acts without sending a prompt, so we add one
+        self.port.puts(self.puts_prompt, priority=True)
+        self['BUS_ICAL'] = load
+        self.action('', expected=1)     # Consume the return line
+
     def can_testmode(self, state):
         """Enable or disable CAN Test Mode.
 

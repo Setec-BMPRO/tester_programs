@@ -269,6 +269,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_load(self, dev, mes):
         """Test with load."""
+        j35 = dev['j35']
         val = mes['arm_loadset']().reading1
         self._logger.debug('0x{:08X}'.format(int(val)))
         load_count = self.config['LoadCount']
@@ -276,8 +277,7 @@ class Initial(share.TestSequence):
         for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
-        # Calibrate converter current
-        dev['j35']['BUS_ICAL'] = load_count * LOAD_PER_OUTPUT
+        j35.cal_conv_curr(load_count * LOAD_PER_OUTPUT)
         dev['dcl_bat'].output(BATT_CURRENT, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 

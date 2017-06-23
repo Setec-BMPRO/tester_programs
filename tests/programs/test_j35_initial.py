@@ -9,13 +9,13 @@ from programs import j35
 # Console response string for "PowerUp" step
 _POWERUP_CON_BC = (
     ('', ) * 5 +    # Manual mode
-    ('0', '', '0', '0', '240', '50000',
+    ('0', '', '', '0', '240', '50000',
      '350', '12800', '500', '', )
     )
 _POWERUP_CON_A = (
     ('', ) * 5 +    # Manual mode
     ('', ) * 6 +    # Derate
-    ('0', '', '0', '0', '240', '50000',
+    ('0', '', '', '0', '240', '50000',
      '350', '12800', '500', '', )
     )
 
@@ -92,14 +92,14 @@ class _J35Initial(ProgramTestCase):
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise':
                     ('Banner1\r\nBanner2', ) +
-                     ('', ) + ('success', ) * 2 + ('', ) +
+                     ('', ) * 4 +
                      ('Banner1\r\nBanner2', ) +
                      ('', ) + (j35.initial.ARM_VERSION, ),
                 'Aux': ('', '13500', '1100', ''),
                 'Solar': ('', ''),
                 'PowerUp': pwr_con,
                 'Output': ('', ) * (1 + len(sen['arm_loads']) + 1),
-                'Load': ('0x5555555', '', '4000', ),
+                'Load': ('0x5555555', '41731 -> 42241', '4000', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
