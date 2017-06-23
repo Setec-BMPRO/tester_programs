@@ -109,10 +109,10 @@ class Console(console.BadUartConsole):
         'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
         'SER_ID': ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{0} {1}'),
+            write_format='"{0} {1}', write_expected=1),
         'HW_VER': ParameterString(
             'SET-HW-VER', writeable=True, readable=False,
-            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+            write_format='{0[0]} {0[1]} "{0[2]} {1}', write_expected=1),
         'STATUS': ParameterHex(
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
         'CAN_BIND': ParameterHex(
