@@ -52,7 +52,7 @@ class _BCE282Initial(ProgramTestCase):
                     ('55 AA ' * 16, ),
                 'Calibration':
                     (' -> ', ) * 3 +
-                    (' -> \r\x07BCE282 V3.0, build 2759.\r'
+                    (' ->\r\x07BCE282 V3.0, build 2759.\r'
                         ' Built 11:57:54 on 8/8/2012.\r'
                         ' Error code: 1(p8=0, p16=0).\r'
                         ' Restart code: 4.', ) +
