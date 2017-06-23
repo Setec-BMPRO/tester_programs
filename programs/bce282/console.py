@@ -35,7 +35,8 @@ class Console(console.BadUartConsole):
         'NV-WRITE': ParameterBoolean(
             'nv-factory-write', writeable=True, write_format='{1}'),
         'RESTART': ParameterBoolean(
-            'restart', writeable=True, write_format='{1}'),
+            'restart', writeable=True, write_format='{1}',
+            write_expected=4),  # 4 lines of startup banner
         'TEST-MODE': ParameterBoolean(
             'test-mode-enable', writeable=True, write_format='{1}'),
         'FL-RELOAD': ParameterBoolean(
@@ -61,10 +62,7 @@ class Console(console.BadUartConsole):
         self['ECHO'] = True
         self['UNLOCK'] = True
         self['NV-WRITE'] = True
-        # RESTART acts without sending a prompt, so we add one
-        self.port.puts(self.puts_prompt, priority=True)
         self['RESTART'] = True
-        self.action('', expected=4)     # Consume the startup banner lines
         self['ECHO'] = True
         self['UNLOCK'] = True
 

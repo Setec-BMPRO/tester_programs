@@ -49,7 +49,9 @@ class ParameterBoolean(unittest.TestCase):
         """Write command."""
         for val, code in ((True, '1'), (False, '0')):
             self.param.write(val, self.func)
-            self.func.assert_called_with('{0} "{1} XN!'.format(code, _CMD))
+            self.func.assert_called_with(
+                '{0} "{1} XN!'.format(code, _CMD),
+                expected=0)
 
     def test_6_wr_invalid(self):
         """Invalid data values."""
@@ -79,7 +81,9 @@ class ParameterString(unittest.TestCase):
         """Write command."""
         value = 'def'
         self.param.write(value, self.func)
-        self.func.assert_called_with('{0} "{1} XN!'.format(value, _CMD))
+        self.func.assert_called_with(
+            '{0} "{1} XN!'.format(value, _CMD),
+            expected=0)
 
 
 class ParameterFloat(unittest.TestCase):
@@ -103,7 +107,9 @@ class ParameterFloat(unittest.TestCase):
         """Write command."""
         value = 2.678
         self.param.write(value, self.func)
-        self.func.assert_called_with('{0} "{1} XN!'.format(round(value), _CMD))
+        self.func.assert_called_with(
+            '{0} "{1} XN!'.format(round(value), _CMD),
+            expected=0)
 
 
 class ParameterHex(unittest.TestCase):
@@ -128,7 +134,8 @@ class ParameterHex(unittest.TestCase):
         value = 234
         self.param.write(value, self.func)
         self.func.assert_called_with(
-            '${0:08X} "{1} XN!'.format(round(value), _CMD))
+            '${0:08X} "{1} XN!'.format(round(value), _CMD),
+            expected=0)
 
 
 class ParameterHex0x(unittest.TestCase):
@@ -153,7 +160,8 @@ class ParameterHex0x(unittest.TestCase):
         value = 234
         self.param.write(value, self.func)
         self.func.assert_called_with(
-            '0x{0:08X} "{1} XN!'.format(round(value), _CMD))
+            '0x{0:08X} "{1} XN!'.format(round(value), _CMD),
+            expected=0)
 
 
 class ParameterCAN(unittest.TestCase):
