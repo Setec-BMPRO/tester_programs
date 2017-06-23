@@ -277,7 +277,7 @@ class Initial(share.TestSequence):
         for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
-        j35.cal_conv_curr(load_count * LOAD_PER_OUTPUT)
+        j35['BUS_ICAL'] = load_count * LOAD_PER_OUTPUT
         dev['dcl_bat'].output(BATT_CURRENT, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 
