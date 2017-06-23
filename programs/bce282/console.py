@@ -36,7 +36,7 @@ class Console(console.BadUartConsole):
             'nv-factory-write', writeable=True, write_format='{1}'),
         'RESTART': ParameterBoolean(
             'restart', writeable=True, write_format='{1}',
-            write_expected=4),  # 4 lines of startup banner
+            write_expected=5),  # 5 lines of startup banner
         'TEST-MODE': ParameterBoolean(
             'test-mode-enable', writeable=True, write_format='{1}'),
         'FL-RELOAD': ParameterBoolean(
