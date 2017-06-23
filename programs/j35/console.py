@@ -62,7 +62,7 @@ class Console(console.BadUartConsole):
         'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
         'BUS_ICAL': ParameterFloat(
             'ICONV', writeable=True,    # an undocumented command...
-            write_format='{0} "{1} CAL',
+            write_format='{0} "{1} CAL', write_expected=1, 
             scale=1000),
         'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
         'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
@@ -181,13 +181,6 @@ class Console(console.BadUartConsole):
             bits = code << (load * 2)
             value = value & mask | bits
         self['LOAD_SET'] = value
-
-    def cal_conv_curr(self, load):
-        """Calibrate converter current."""
-        # BUS_ICAL acts without sending a prompt, so we add one
-        self.port.puts(self.puts_prompt, priority=True)
-        self['BUS_ICAL'] = load
-        self.action('', expected=1)     # Consume the return line
 
     def can_testmode(self, state):
         """Enable or disable CAN Test Mode.

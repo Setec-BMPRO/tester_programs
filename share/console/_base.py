@@ -51,7 +51,8 @@ class _Parameter():
     _rd_fmt = '"{0} XN?'
 
     def __init__(self, command, writeable=False, readable=True,
-                       write_format=None, read_format=None):
+                       write_format=None, read_format=None, 
+                       read_expected=1,  write_expected=0):
         """Initialise the parameter.
 
         @param command Command verb of this parameter.
@@ -67,6 +68,8 @@ class _Parameter():
             self._wr_fmt = write_format
         if read_format:
             self._rd_fmt = read_format
+        self.read_expected = read_expected
+        self.write_expected = write_expected
 
     def write(self, value, func):
         """Write parameter value.
@@ -78,7 +81,7 @@ class _Parameter():
         if not self._writeable:
             raise ParameterError('Parameter is not writeable')
         write_cmd = self._wr_fmt.format(value, self._cmd)
-        func(write_cmd)
+        func(write_cmd, expected=self.write_expected)
 
     def read(self, func):
         """Read parameter value.
@@ -90,7 +93,7 @@ class _Parameter():
         if not self._readable:
             raise ParameterError('Parameter is not readable')
         read_cmd = self._rd_fmt.format(self._cmd)
-        return func(read_cmd, expected=1)
+        return func(read_cmd, expected=self.read_expected)
 
 
 class ParameterString(_Parameter):
@@ -147,11 +150,12 @@ class ParameterFloat(_Parameter):
 
     def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, scale=1,
-                       write_format=None,
-                       read_format=None):
+                       write_format=None, read_format=None, 
+                       read_expected=1,  write_expected=0):
         """Remember the scaling and data limits."""
         super().__init__(
-            command, writeable, readable, write_format, read_format)
+            command, writeable, readable, write_format, read_format,
+            read_expected,  write_expected)
         self.min = minimum
         self.max = maximum
         self.scale = scale
@@ -188,10 +192,12 @@ class ParameterHex(_Parameter):
     def __init__(self, command, writeable=False, readable=True,
                        minimum=0, maximum=1000, mask=0xFFFFFFFF,
                        write_format='${0:08X} "{1} XN!',
-                       read_format='"{0} XN?'):
+                       read_format='"{0} XN?', 
+                       read_expected=1,  write_expected=0):
         """Remember the data limits."""
         super().__init__(
-            command, writeable, readable, write_format, read_format)
+            command, writeable, readable, write_format, read_format,
+            read_expected,  write_expected)
         self._min = minimum
         self._max = maximum
         self._mask = mask
@@ -226,11 +232,13 @@ class ParameterHex0x(ParameterHex):
     """Hex parameter type with the newer '0x' prefix hex literal."""
 
     def __init__(self, command, writeable=False, readable=True,
-                       minimum=0, maximum=1000, mask=0xFFFFFFFF):
+                       minimum=0, maximum=1000, mask=0xFFFFFFFF, 
+                       read_expected=1,  write_expected=0):
         """Remember the data limits."""
         super().__init__(
             command, writeable, readable,
-            minimum, maximum, mask, write_format='0x{0:08X} "{1} XN!')
+            minimum, maximum, mask, write_format='0x{0:08X} "{1} XN!', 
+            read_expected=1,  write_expected=0)
 
 
 class ParameterCAN(_Parameter):
