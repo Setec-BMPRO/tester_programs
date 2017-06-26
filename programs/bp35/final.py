@@ -50,7 +50,7 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         self['vbat'] = tester.sensor.Vdc(
-            self.devices['dmm'], high=1, low=1, rng=100, res=0.001)
+            self.devices['dmm'], high=2, low=2, rng=100, res=0.001)
 
 
 class Measurements(share.Measurements):
