@@ -6,7 +6,7 @@ import os
 import tester
 from tester import (
     TestStep,
-    LimitInteger, LimitBoolean, LimitDelta
+    LimitInteger, LimitBoolean
     )
 import share
 from . import console
@@ -15,7 +15,6 @@ from . import console
 CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 
 LIMITS = (
-    LimitDelta('Vin', 12.0, 0.5),
     LimitBoolean('Notify', True),
     LimitInteger('ARM-level1', 1),
     LimitInteger('ARM-level2', 2),
@@ -126,10 +125,8 @@ class Sensors(share.Sensors):
 
     def open(self):
         """Create all Sensor instances."""
-        dmm = self.devices['dmm']
         trek2 = self.devices['trek2']
         sensor = tester.sensor
-        self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['oYesNoSeg'] = sensor.YesNo(
             message=tester.translate('trek2_final', 'AreSegmentsOn?'),
             caption=tester.translate('trek2_final', 'capSegments'))
