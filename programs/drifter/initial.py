@@ -184,7 +184,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_RS232', tester.DCSource, 'DCS1'),
                 ('dcs_SlopeCal', tester.DCSource, 'DCS2'),
-                ('dcs_Vin', tester.DCLoad, 'DCS3'),
+                ('dcs_Vin', tester.DCSource, 'DCS3'),
                 ('rla_Prog', tester.Relay, 'RLA1'),
                 ('rla_ZeroCal', tester.Relay, 'RLA1'),
             ):
