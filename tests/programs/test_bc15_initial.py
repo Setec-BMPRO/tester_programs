@@ -13,7 +13,7 @@ class BC15Initial(ProgramTestCase):
 
     prog_class = bc15.Initial
     parameter = None
-    debug = True # False
+    debug = False
     startup_banner = (
         'Banner line 1\r\n'
         'Banner line 2\r\n'
@@ -55,7 +55,7 @@ class BC15Initial(ProgramTestCase):
                     '#\r\n' * 44 +      # Dummy response lines
                         'mv-set=14400 ;mV \r\n'
                         'not-pulsing-volts=14432 ;mV ',
-                    'x 0\r\n' * 37 +    # Dummy response lines
+                    '#\r\n' * 37 +      # Dummy response lines
                         'set_volts_mv_num                        902 \r\n'
                         'set_volts_mv_den                      14400 ', ) +
                     ('', ) * 3,

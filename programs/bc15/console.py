@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """BC15 ARM processor console driver."""
 
+import re
 from share import console
 
 Sensor = console.Sensor
@@ -29,7 +30,9 @@ class Console(console.BaseConsole):
         'SWITCH': ParameterFloat('SW', read_format='{}?'),
         }
     stat_data = {}  # Data readings: Key=Name, Value=Reading
-    cal_data = {}  # Calibration readings: Key=Name, Value=Setting
+    stat_regexp = re.compile('^([a-z\-]+)=([0-9]+).*$')
+    cal_data = {}   # Calibration readings: Key=Name, Value=Setting
+    cal_regexp = re.compile('^([a-z_]+) +([0-9]+) $')
 
     def __getitem__(self, key):
         """Read a value."""
@@ -42,23 +45,25 @@ class Console(console.BaseConsole):
     def stat(self):
         """Use STAT command to read data values."""
         self._logger.debug('Stat')
+        self.stat_data.clear()
         response = self.action('STAT', expected=46)
         for line in response:
-            if line[0] == '#':              # ignore comment lines
-                continue
-            line = line.split()[0]          # stop at the 1st space
-            line = line.split(sep='=')      # break the "key=value" pairs up
-            self.stat_data[line[0]] = line[1]
+            match = self.stat_regexp.match(line)
+            if match:
+                key, val = match.groups()
+                self.stat_data[key] = val
         self._logger.debug('Stat read %s data values', len(self.stat_data))
 
     def cal_read(self):
         """Use CAL? command to read calibration values."""
         self._logger.debug('Cal')
-        self.cal_data = {}
+        self.cal_data.clear()
         response = self.action('CAL?', expected=39)
         for line in response:
-            line = line.split()
-            self.cal_data[line[0]] = line[1]
+            match = self.cal_regexp.match(line)
+            if match:
+                key, val = match.groups()
+                self.cal_data[key] = val
         self._logger.debug('Cal read %s values', len(self.cal_data))
 
     def ps_mode(self):
