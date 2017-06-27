@@ -124,8 +124,7 @@ class Initial(share.TestSequence):
         time.sleep(0.5)
         bc15 = dev['bc15']
         bc15.stat()
-        self.measure(
-            ('dmm_vout', 'arm_vout', 'arm_14amp', 'ramp_ocp', ))
+        self.measure(('dmm_vout', 'arm_vout', 'arm_14amp', 'ramp_ocp', ))
         bc15.powersupply()
 
 

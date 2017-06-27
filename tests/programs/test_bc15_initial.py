@@ -13,7 +13,7 @@ class BC15Initial(ProgramTestCase):
 
     prog_class = bc15.Initial
     parameter = None
-    debug = False
+    debug = True # False
     startup_banner = (
         'Banner line 1\r\n'
         'Banner line 2\r\n'
@@ -40,7 +40,7 @@ class BC15Initial(ProgramTestCase):
                 'Initialise': (
                     (None, ) +  # Terminate port.flushInput()
                     (self.startup_banner, ) +
-                    ('OK', ) * 3 +
+                    ('', ) * 3 +
                     ('{}'.format(bc15.initial.BIN_VERSION), )
                     ),
                 'PowerUp': (
@@ -48,16 +48,20 @@ class BC15Initial(ProgramTestCase):
                     ('', ) * 10
                     ),
                 'Output':
-                    ('not-pulsing-volts=14432 ;mV \r\n'
+                    ('#\r\n' * 44 +     # Dummy response lines
+                        'not-pulsing-volts=14432 ;mV \r\n'
                         'not-pulsing-current=1987 ;mA ',
                     '3',
-                    'mv-set=14400 ;mV \r\n'
+                    '#\r\n' * 44 +      # Dummy response lines
+                        'mv-set=14400 ;mV \r\n'
                         'not-pulsing-volts=14432 ;mV ',
-                    'set_volts_mv_num                        902 \r\n'
+                    'x 0\r\n' * 37 +    # Dummy response lines
+                        'set_volts_mv_num                        902 \r\n'
                         'set_volts_mv_den                      14400 ', ) +
                     ('', ) * 3,
                 'Loaded':
-                    ('not-pulsing-volts=14432 ;mV \r\n'
+                    ('#\r\n' * 44 +     # Dummy response lines
+                        'not-pulsing-volts=14432 ;mV \r\n'
                         'not-pulsing-current=14000 ;mA ', ) +
                     ('OK', ) * 2,
                 },
