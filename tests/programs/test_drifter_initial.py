@@ -34,7 +34,7 @@ class _DrifterInitial(ProgramTestCase):
             UnitTester.key_con: {       # Tuples of console strings
                 'CalPre':
                     ('', ) * 2 +
-                    ('Banner1\r\nBanner2', ) +
+                    ('Banner1\r\nBanner2\r\nBanner3', ) +
                     ('', '0', ''),
                 'Calibrate':
                     ('', '-35', '', '', '', ) +
