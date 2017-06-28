@@ -12,7 +12,7 @@ ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 
 
-class Console(console.BadUartConsole):
+class Console(console.BaseConsole):
 
     """Communications to Drifter console."""
 
@@ -27,7 +27,8 @@ class Console(console.BadUartConsole):
             writeable=True, readable=False, write_format='{1}'),
         'NVSTATUS': ParameterFloat('NV-STATUS PRINT', read_format='{}'),
         'RESTART': ParameterBoolean('RESTART',
-            writeable=True, readable=False, write_format='{1}'),
+            writeable=True, readable=False, write_format='{1}',
+            write_expected=3),
         'APS_DISABLE': ParameterFloat('APS-DISABLE',
             writeable=True, readable=False, write_format='{} {}'),
         'CAL_RELOAD': ParameterBoolean('CAL-RELOAD',
