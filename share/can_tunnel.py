@@ -89,11 +89,16 @@ class ConsoleCanTunnel():
         self._buf_port.open()
         self._logger.debug('Open CAN tunnel serial port')
         self.port.open()
+        self.port.write(b'\r')      # Need this 'sometimes' to wake the unit up...
+        time.sleep(0.1)
         # Switch console echo OFF
         self.port.flushInput()
         no_echo_cmd = '0 ECHO'
         reply = self.action(no_echo_cmd)
         if reply is None or reply[:6] != no_echo_cmd:
+            self._logger.debug(
+                'Echo error: expected %s, got %s',
+                repr(no_echo_cmd), repr(reply))
             raise TunnelError
         # Set filters to see all CAN traffic
         self.action('"RF,ALL CAN')
