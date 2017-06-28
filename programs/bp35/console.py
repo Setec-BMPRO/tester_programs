@@ -90,7 +90,7 @@ class Console(console.BadUartConsole):
         'BUS_ICAL': ParameterFloat( # an undocumented command...
             'ICONV', writeable=True,
             write_format='{0} "{1} CAL',
-            scale=1000),
+            scale=1000, write_expected=1),
         'OCP_CAL': ParameterFloat(  # an undocumented command...
             'CAL_I_CONVSET', writeable=True, maximum=65535),
         'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
