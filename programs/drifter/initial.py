@@ -186,7 +186,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('dcs_SlopeCal', tester.DCSource, 'DCS2'),
                 ('dcs_Vin', tester.DCSource, 'DCS3'),
                 ('rla_Prog', tester.Relay, 'RLA1'),
-                ('rla_ZeroCal', tester.Relay, 'RLA1'),
+                ('rla_ZeroCal', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # PIC device programmer
