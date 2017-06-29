@@ -36,7 +36,7 @@ FAN_THRESHOLD = 65.0
 LIMITS = (
     LimitBetween('8.5V Arduino', 8.1, 8.9),
     LimitLow('5Voff', 0.5),
-    LimitBetween('5Vext', 5.5, 5.9),
+    LimitBetween('5Vext', 5.0, 5.9),
     LimitPercent('5Vsb_set', 5.10, 1.5),
     LimitPercent('5Vsb', 5.10, 5.5),
     LimitLow('5Vsb_reg', 3.0),        # Load Reg < 3.0%
@@ -125,7 +125,7 @@ class Initial(share.TestSequence):
         dev['rla_boot'].set_on()
         # Apply and check injected rails
         self.dcsource(
-            (('dcs_5Vsb', 9.0), ('dcs_PriCtl', 12.0), ),
+            (('dcs_5Vsb', 5.7), ('dcs_PriCtl', 12.0), ),
             output=True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_PriCtl',
@@ -170,7 +170,7 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         arm.open()
-        dev['dcs_5Vsb'].output(9.0, True)
+        dev['dcs_5Vsb'].output(5.7, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
         time.sleep(1)           # ARM startup delay
         arm['UNLOCK'] = True
