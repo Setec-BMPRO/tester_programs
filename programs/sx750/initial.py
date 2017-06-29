@@ -33,10 +33,13 @@ PFC_STABLE = 0.05
 # Fan ON threshold temperature (C)
 FAN_THRESHOLD = 65.0
 
+_5VSB_EXT = 6.3
+
 LIMITS = (
-    LimitBetween('8.5V Arduino', 8.1, 8.9),
+    LimitDelta('8.5V Arduino', 8.5, 0.4),
     LimitLow('5Voff', 0.5),
-    LimitBetween('5Vext', 4.0, 6.0),
+    LimitDelta('5Vext', _5VSB_EXT - 0.8, 1.0),
+    LimitDelta('5Vunsw', _5VSB_EXT - 0.8 - 0.7, 1.0),
     LimitPercent('5Vsb_set', 5.10, 1.5),
     LimitPercent('5Vsb', 5.10, 5.5),
     LimitLow('5Vsb_reg', 3.0),        # Load Reg < 3.0%
@@ -125,7 +128,7 @@ class Initial(share.TestSequence):
         dev['rla_boot'].set_on()
         # Apply and check injected rails
         self.dcsource(
-            (('dcs_5Vsb', 5.9), ('dcs_PriCtl', 12.0), ),
+            (('dcs_5Vsb', _5VSB_EXT), ('dcs_PriCtl', 12.0), ),
             output=True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_PriCtl',
@@ -170,7 +173,7 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         arm.open()
-        dev['dcs_5Vsb'].output(5.9, True)
+        dev['dcs_5Vsb'].output(_5VSB_EXT, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
         time.sleep(2)           # ARM startup delay
         arm['UNLOCK'] = True
@@ -525,7 +528,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_5Voff', '5Voff', 'o5Vsb', ''),
             ('dmm_5Vext', '5Vext', 'o5Vsb', ''),
-            ('dmm_5Vunsw', '5Vext', 'o5Vsbunsw', ''),
+            ('dmm_5Vunsw', '5Vunsw', 'o5Vsbunsw', ''),
             ('dmm_5Vsb_set', '5Vsb_set', 'o5Vsb', ''),
             ('dmm_5Vsb', '5Vsb', 'o5Vsb', ''),
             ('dmm_12V_set', '12V_set', 'o12V', ''),
