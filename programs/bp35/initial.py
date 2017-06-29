@@ -52,7 +52,7 @@ VOUT_SET = 12.8
 OCP_NOMINAL = 35.0
 # This magic number is the OCP setpoint.
 # 44000 is the inbuilt default, which we reduce, to increase OCP.
-_OCP_MAGIC = round(44000 / 1.03)    # +3% adjustment
+_OCP_MAGIC = round(44000 / 1.05)    # +5% adjustment
 
 LIMITS = (
     LimitLow('FixtureLock', 200),
