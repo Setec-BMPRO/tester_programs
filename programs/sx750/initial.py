@@ -36,7 +36,7 @@ FAN_THRESHOLD = 65.0
 LIMITS = (
     LimitBetween('8.5V Arduino', 8.1, 8.9),
     LimitLow('5Voff', 0.5),
-    LimitBetween('5Vext', 5.0, 5.9),
+    LimitBetween('5Vext', 4.0, 6.0),
     LimitPercent('5Vsb_set', 5.10, 1.5),
     LimitPercent('5Vsb', 5.10, 5.5),
     LimitLow('5Vsb_reg', 3.0),        # Load Reg < 3.0%
@@ -125,7 +125,7 @@ class Initial(share.TestSequence):
         dev['rla_boot'].set_on()
         # Apply and check injected rails
         self.dcsource(
-            (('dcs_5Vsb', 5.7), ('dcs_PriCtl', 12.0), ),
+            (('dcs_5Vsb', 5.9), ('dcs_PriCtl', 12.0), ),
             output=True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_PriCtl',
@@ -170,9 +170,9 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         arm.open()
-        dev['dcs_5Vsb'].output(5.7, True)
+        dev['dcs_5Vsb'].output(5.9, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
-        time.sleep(1)           # ARM startup delay
+        time.sleep(2)           # ARM startup delay
         arm['UNLOCK'] = True
         arm['FAN_SET'] = FAN_THRESHOLD
         arm['NVWRITE'] = True
@@ -525,7 +525,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_5Voff', '5Voff', 'o5Vsb', ''),
             ('dmm_5Vext', '5Vext', 'o5Vsb', ''),
-            ('dmm_5Vunsw', '5Vsb', 'o5Vsbunsw', ''),
+            ('dmm_5Vunsw', '5Vext', 'o5Vsbunsw', ''),
             ('dmm_5Vsb_set', '5Vsb_set', 'o5Vsb', ''),
             ('dmm_5Vsb', '5Vsb', 'o5Vsb', ''),
             ('dmm_12V_set', '12V_set', 'o12V', ''),
