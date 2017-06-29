@@ -28,11 +28,11 @@ class SX750Initial(ProgramTestCase):
                     (sen['R609'], 2003.0), (sen['R608'], 2004.0),
                     ),
                 'Program': (
-                    (sen['o5Vsb'], 5.75), (sen['o5Vsbunsw'], (5.0,) * 2),
+                    (sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], (5.0,) * 2),
                     (sen['o3V3'], 3.21), (sen['o8V5Ard'], 8.5),
                     (sen['PriCtl'], 12.34),
                     ),
-                'Initialise': ((sen['o5Vsb'], 5.75), (sen['o5Vsbunsw'], 5.01), ),
+                'Initialise': ((sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], 5.0), ),
                 'PowerUp': (
                     (sen['ACin'], 240.0), (sen['PriCtl'], 12.34),
                     (sen['o5Vsb'], 5.05), (sen['o12V'], (0.12, 12.34)),
