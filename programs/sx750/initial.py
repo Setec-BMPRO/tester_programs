@@ -422,8 +422,8 @@ class LogicalDevices(share.LogicalDevices):
         ard_ser.port = ARDUINO_PORT
         self['ard'] = arduino.Arduino(ard_ser, verbose=False)
         # Switch on power to fixture
-        self['dcs_Vcom'].output(9.0, output=True)
         self['dcs_Arduino'].output(12.0, output=True)
+        self['dcs_Vcom'].output(9.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports
 
     def reset(self):
@@ -460,7 +460,7 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['o5Vsb'] = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
         self['o5Vsbunsw'] = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
-        self['o8V5Ard'] = sensor.Vdc(dmm, high=19, low=3, rng=100, res=0.001)
+        self['o8V5Ard'] = sensor.Vdc(dmm, high=19, low=8, rng=100, res=0.001)
         self['o12V'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self['o12VinOCP'] = sensor.Vdc(dmm, high=10, low=2, rng=100, res=0.01)
         self['o24V'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
