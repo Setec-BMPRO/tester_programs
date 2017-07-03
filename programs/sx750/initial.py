@@ -391,9 +391,10 @@ class LogicalDevices(share.LogicalDevices):
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
                 ('dcs_PriCtl', tester.DCSource, 'DCS1'),
-                ('dcs_Arduino', tester.DCSource, 'DCS2'),
-                ('dcs_5Vsb', tester.DCSource, 'DCS3'),
+                ('dcs_5Vsb', tester.DCSource, 'DCS2'),
+                ('dcs_Arduino', tester.DCSource, 'DCS3'),
                 ('dcs_Vcom', tester.DCSource, 'DCS4'),
+                ('dcs_DigPot', tester.DCSource, 'DCS5'),
                 ('dcl_12V', tester.DCLoad, 'DCL1'),
                 ('dcl_5Vsb', tester.DCLoad, 'DCL2'),
                 ('dcl_24V', tester.DCLoad, 'DCL3'),
@@ -421,9 +422,10 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         ard_ser.port = ARDUINO_PORT
         self['ard'] = arduino.Arduino(ard_ser, verbose=False)
-        # Switch on power to fixture
+        # Switch on power to fixture circuits
         self['dcs_Arduino'].output(12.0, output=True)
         self['dcs_Vcom'].output(9.0, output=True)
+        self['dcs_DigPot'].output(9.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports
 
     def reset(self):
@@ -447,6 +449,7 @@ class LogicalDevices(share.LogicalDevices):
         """Finished testing."""
         self['dcs_Arduino'].output(0.0, output=False)
         self['dcs_Vcom'].output(0.0, output=False)
+        self['dcs_DigPot'].output(0.0, output=False)
         super().close()
 
 

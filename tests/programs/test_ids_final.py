@@ -12,7 +12,7 @@ class Ids500Final(ProgramTestCase):
 
     prog_class = ids500.Final
     parameter = None
-    debug = False
+    debug = True
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
@@ -76,7 +76,7 @@ class Ids500Final(ProgramTestCase):
                     'Software Test Mode Entered',
                     '', 'Setting Change Done', '') +
                     ('', 'Setting Change Done', '') +
-                    (None, 'I, 2, 07A,Hardware Revision', ) +
+                    (None, 'I, 2, 07A,Hardware Revision') +
                     ('M,6,SettingisProtected', '', '') +
                     ('I, 3, A1504010034,Serial Number', ),
                 },
