@@ -212,15 +212,19 @@ class Final(share.TestSequence):
         pic.clear_port()
         pic.sw_test_mode()
         hwrev = mes['ui_hwrev']().reading1
+        pic.expected = 3
         pic['WriteHwRev'] = hwrev
         # Only the very 1st time a HwRev is written, the unit outputs 4 lines
         # Here we flush the 1 extra line...
         time.sleep(0.5)
         pic.port.flushInput()
+        pic.expected = 1
         mes['pic_hwrev'].testlimit[0].limit = hwrev
         mes['pic_hwrev']()
         sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        pic.expected = 3
         pic['WriteSerNum'] = sernum
+        pic.expected = 1
         mes['pic_sernum'].testlimit[0].limit = sernum
         mes['pic_sernum']()
 
