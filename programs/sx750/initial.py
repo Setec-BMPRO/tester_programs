@@ -34,6 +34,7 @@ PFC_STABLE = 0.05
 FAN_THRESHOLD = 65.0
 
 _5VSB_EXT = 6.3
+PRICTL_EXT = 13.0
 
 LIMITS = (
     LimitDelta('8.5V Arduino', 8.5, 0.4),
@@ -128,7 +129,7 @@ class Initial(share.TestSequence):
         dev['rla_boot'].set_on()
         # Apply and check injected rails
         self.dcsource(
-            (('dcs_5Vsb', _5VSB_EXT), ('dcs_PriCtl', 12.0), ),
+            (('dcs_5Vsb', _5VSB_EXT), ('dcs_PriCtl', PRICTL_EXT), ),
             output=True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_PriCtl',
@@ -150,6 +151,7 @@ class Initial(share.TestSequence):
         dev['rla_pic2'].opc()
         mes['pgm_pwrsw']()
         dev['rla_pic2'].set_off()
+        dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
         mes['ocp_max']()
         # Switch off rails and discharge the 5Vsb to stop the ARM
         self.dcsource(
@@ -402,6 +404,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('rla_pic2', tester.Relay, 'RLA2'),
                 ('rla_pson', tester.Relay, 'RLA3'),
                 ('rla_boot', tester.Relay, 'RLA4'),
+                ('rla_0Vp', tester.Relay, 'RLA5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
@@ -442,7 +445,8 @@ class LogicalDevices(share.LogicalDevices):
             self[ld].output(0.0)
         for dcs in ('dcs_PriCtl', 'dcs_5Vsb'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_pic1', 'rla_pic2', 'rla_boot', 'rla_pson'):
+        for rla in ('rla_pic1', 'rla_pic2', 'rla_boot',
+            'rla_pson', 'rla_0Vp'):
             self[rla].set_off()
 
     def close(self):
