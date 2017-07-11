@@ -15,17 +15,17 @@ import share
 from . import console
 
 
-BIN_VERSION = '1.4.13801.139'   # Software binary version
+BIN_VERSION = '1.5.15833.150'   # Software binary version
 
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-HW_VER = (4, 0, 'A')
+HW_VER = (5, 0, 'B')
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
 CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
 # Software image filename
-ARM_FILE = 'Trek2_{}.bin'.format(BIN_VERSION)
+ARM_FILE = 'Trek2_{0}.bin'.format(BIN_VERSION)
 # CAN echo request messages
 CAN_ECHO = 'TQQ,16,0'
 # Input voltage to power the unit
@@ -35,14 +35,14 @@ VIN_SET = 12.75
 _CAN_BIND = 1 << 28
 
 LIMITS = (
-    LimitDelta('Vin', 12.0, 0.5),
+    LimitDelta('Vin', VIN_SET - 0.75, 0.5),
     LimitPercent('3V3', 3.3, 3.0),
     LimitLow('BkLghtOff', 0.5),
-    LimitBetween('BkLghtOn', 3.465, 4.545),     # 40mA = 4V with 100R (1%)
+    LimitDelta('BkLghtOn', 4.0, 0.55),      # 40mA = 4V with 100R (1%)
     LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     LimitRegExp('CAN_RX', r'^RRQ,16,0'),
     LimitInteger('CAN_BIND', _CAN_BIND),
-    LimitRegExp('SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
+    LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION.replace('.', r'\.'))),
     LimitBoolean('Notify', True),
     )
 
