@@ -427,7 +427,7 @@ class LogicalDevices(share.LogicalDevices):
         self['ard'] = arduino.Arduino(ard_ser, verbose=False)
         # Switch on power to fixture circuits
         self['dcs_Arduino'].output(12.0, output=True)
-        self['dcs_Vcom'].output(9.0, output=True)
+        self['dcs_Vcom'].output(12.0, output=True)
         self['dcs_DigPot'].output(12.0, output=True)
         time.sleep(2)   # Allow OS to detect the new ports
 
