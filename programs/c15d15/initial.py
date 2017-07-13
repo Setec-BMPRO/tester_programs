@@ -11,22 +11,23 @@ import share
 
 VIN_SET = 30.0      # Input voltage setting
 VOUT = 15.5
+VOUT_MIN = VOUT * (1.0 - ((2.0 + 1.5) / 100))   # Vout - 2% - 1.5%
 IOUT_FL = 1.0       # Max output current
 OCP_START = 0.9     # OCP measurement parameters
-OCP_STOP = 1.3
-OCP_STEP = 0.01
-OCP_DELAY = 0.5
+OCP_STOP = 1.5
+OCP_STEP = 0.02
+OCP_DELAY = 0.05
 
 LIMITS = (
     LimitDelta('Vin', VIN_SET, 2.0),
     LimitBetween('Vcc', 11.0, 14.0),
     LimitPercent('VoutNL', VOUT, 2.0),
-    LimitPercent('VoutFL', VOUT, (3.5, 2.0)),
-    LimitBetween('VoutOCP', 12.5, VOUT * (1.0 - 0.035)),
+    LimitPercent('VoutFL', VOUT, (2.0 + 1.5, 2.0)),
+    LimitBetween('VoutOCP', 12.5, VOUT_MIN),
     LimitLow('LedOff', 0.5),
     LimitBetween('LedOn', 7.0, 13.5),
-    LimitLow('inOCP', 14.8),
-    LimitBetween('OCP', 1.03, 1.17),
+    LimitLow('inOCP', VOUT_MIN),
+    LimitBetween('OCP', 1.0, 1.4),
     )
 
 
