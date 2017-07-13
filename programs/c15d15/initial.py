@@ -21,11 +21,11 @@ LIMITS = (
     LimitDelta('Vin', VIN_SET, 2.0),
     LimitBetween('Vcc', 11.0, 14.0),
     LimitPercent('VoutNL', VOUT, 2.0),
-    LimitBetween('VoutFL', VOUT * (1.0 - 0.035), VOUT * (1.0 + 0.02)),
+    LimitPercent('VoutFL', VOUT, (3.5, 2.0)),
     LimitBetween('VoutOCP', 12.5, VOUT * (1.0 - 0.035)),
     LimitLow('LedOff', 0.5),
     LimitBetween('LedOn', 7.0, 13.5),
-    LimitLow('inOCP', 13.6),
+    LimitLow('inOCP', 14.8),
     LimitBetween('OCP', 1.03, 1.17),
     )
 
