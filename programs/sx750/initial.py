@@ -127,13 +127,10 @@ class Initial(share.TestSequence):
         """
         # Set BOOT active before power-on so the ARM boot-loader runs
         dev['rla_boot'].set_on()
-        # Apply and check injected rails
-        self.dcsource(
-            (('dcs_5Vsb', _5VSB_EXT), ('dcs_PriCtl', PRICTL_EXT), ),
-            output=True)
+        # Apply and check injected 5Vsb
+        dev['dcs_5Vsb'].output(_5VSB_EXT, True)
         self.measure(
-            ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_PriCtl',
-             'dmm_8V5Ard',),
+            ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
             timeout=5)
         if self.fifo:
             self._logger.info(
@@ -147,18 +144,20 @@ class Initial(share.TestSequence):
         mes['dmm_5Vunsw'](timeout=2)
         mes['pgm_5vsb']()
         dev['rla_pic1'].set_off()
+        # Switch off 5Vsb rail and discharge the 5Vsb to stop the ARM
+        dev['dcs_5Vsb'].output(0)
+        self.dcload(
+            (('dcl_5Vsb', 0.1), ), output=True, delay=0.5)
+        # Apply and check injected 12V PriCtl
+        dev['dcs_PriCtl'].output(PRICTL_EXT, True)
+        mes['dmm_PriCtl'](timeout=2)
         dev['rla_pic2'].set_on()
         dev['rla_pic2'].opc()
         mes['pgm_pwrsw']()
         dev['rla_pic2'].set_off()
         dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
         mes['ocp_max']()
-        # Switch off rails and discharge the 5Vsb to stop the ARM
-        self.dcsource(
-            (('dcs_5Vsb', 0.0), ('dcs_PriCtl', 0.0), ),
-            output=False)
-        self.dcload(
-            (('dcl_5Vsb', 0.1), ), output=True, delay=0.5)
+        dev['dcs_PriCtl'].output(0.0)
         # This will also enable all loads on an ATE3/4 tester.
         self.dcload(
             (('dcl_5Vsb', 0.0), ('dcl_12V', 0.0), ('dcl_24V', 0.0), ),
