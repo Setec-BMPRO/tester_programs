@@ -8,7 +8,7 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitRegExp, LimitBetween, LimitDelta,
+    LimitLow, LimitRegExp, LimitDelta,
     LimitPercent, LimitInteger, LimitBoolean
     )
 import share
@@ -138,9 +138,13 @@ class LogicalDevices(share.LogicalDevices):
     def reset(self):
         """Reset instruments."""
         self['trek2'].close()
-        self['dcs_Vcom'].output(0.0, output=False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
+
+    def close(self):
+        """Close logical devices."""
+        self['dcs_Vcom'].output(0.0, False)   # Remove power from fixture.
+        super().close()
 
 
 class Sensors(share.Sensors):
