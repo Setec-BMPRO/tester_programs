@@ -138,6 +138,7 @@ class LogicalDevices(share.LogicalDevices):
     def reset(self):
         """Reset instruments."""
         self['trek2'].close()
+        self['dcs_Vin'].output(0.0, output=False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
 
