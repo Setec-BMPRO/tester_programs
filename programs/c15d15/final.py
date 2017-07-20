@@ -10,8 +10,8 @@ from tester import (
 import share
 
 LIMITS = (
-    LimitPercent('Vout', 15.0, 2.0),
-    LimitLow('Voutfl', 5.0),
+    LimitPercent('Vout', 15.5, 2.0),
+    LimitLow('VoutOverLoad', 5.0),
     LimitBetween('OCP', 1.0, 1.4),
     LimitLow('inOCP', 13.6),
     LimitBoolean('Notify', True),
@@ -31,7 +31,7 @@ class Final(share.TestSequence):
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('OCP', self._step_ocp),
-            TestStep('FullLoad', self._step_full_load),
+            TestStep('OverLoad', self._step_over_load),
             TestStep('Recover', self._step_recover),
             TestStep('PowerOff', self._step_power_off),
             )
@@ -54,14 +54,14 @@ class Final(share.TestSequence):
         self.measure(('ui_YesNoYellowOn', 'dmm_Vout', ), timeout=5)
 
     @share.teststep
-    def _step_full_load(self, dev, mes):
-        """Measure output at full load."""
+    def _step_over_load(self, dev, mes):
+        """Measure output at over load condition."""
         dev['dcl'].output(1.18, output=True)
-        mes['dmm_Voutfl'](timeout=5)
+        mes['dmm_Voutol'](timeout=5)
 
     @share.teststep
     def _step_recover(self, dev, mes):
-        """Recover from full load."""
+        """Recover from over load."""
         dev['dcl'].output(0.0)
         dev['dcs_Input'].output(0.0, delay=1)
         dev['dcs_Input'].output(12.0)
@@ -133,7 +133,7 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_Vout', 'Vout', 'oVout', ''),
-            ('dmm_Voutfl', 'Voutfl', 'oVout', ''),
+            ('dmm_Voutol', 'VoutOverLoad', 'oVout', ''),
             ('ui_YesNoGreen', 'Notify', 'oYesNoGreen', ''),
             ('ui_YesNoYellowOff', 'Notify', 'oYesNoYellowOff', ''),
             ('ui_NotifyYellow', 'Notify', 'oNotifyYellow', ''),
