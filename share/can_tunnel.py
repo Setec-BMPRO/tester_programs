@@ -100,6 +100,8 @@ class ConsoleCanTunnel():
                 'Echo error: expected %s, got %s',
                 repr(no_echo_cmd), repr(reply))
             raise TunnelError
+        # Send the Preconditions packet (for Trek2)
+        self.action('"TAN,16,105,0,0 CAN')
         # Set filters to see all CAN traffic
         self.action('"RF,ALL CAN')
         # Switch CAN Print Packet mode ON
