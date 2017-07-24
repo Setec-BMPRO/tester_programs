@@ -66,12 +66,17 @@ class Console(console.BaseConsole):
                 self.cal_data[key] = val
         self._logger.debug('Cal read %s values', len(self.cal_data))
 
-    def ps_mode(self):
-        """Set the unit into Power Supply mode."""
+    def ps_mode(self, voltage, current):
+        """Set the unit into Power Supply mode.
+
+        @param voltage Output voltage setting
+        @param current Output OCP setting
+
+        """
         self.action('0 MAINLOOP')
         self.action('STOP')
-        self.action('15000 SETMA')
-        self.action('14400 SETMV')
+        self.action('{0} SETMA'.format(int(current * 1000)))
+        self.action('{0} SETMV'.format(int(voltage * 1000)))
         self.action('0 0 PULSE')
         self.action('RESETOVERVOLT')
         self.action('1 SETDCDCEN')
