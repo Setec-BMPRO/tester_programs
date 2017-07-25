@@ -49,10 +49,12 @@ IBATT = 4.0
 VAC = 240.0
 OUTPUTS = 14
 VOUT_SET = 12.8
-OCP_NOMINAL = 35.0
+OCP_SET = 35.0
 # This magic number is the OCP setpoint.
 # 44000 is the inbuilt default, which we reduce, to increase OCP.
 _OCP_MAGIC = round(44000 / 1.05)    # +5% adjustment
+# Number of lines in startup banner
+BANNER_LINES = 3
 
 LIMITS = (
     LimitLow('FixtureLock', 200),
@@ -75,7 +77,7 @@ LIMITS = (
     LimitPercent('VsetPost', SOLAR_VSET, 1.5),
     LimitPercent('ARM-IoutPre', SOLAR_ICAL, 9.0),
     LimitPercent('ARM-IoutPost', SOLAR_ICAL, 3.0),
-    LimitPercent('OCP', OCP_NOMINAL, 4.0),
+    LimitPercent('OCP', OCP_SET, 4.0),
     LimitLow('InOCP', 11.6),
     LimitRegExp('ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
     LimitDelta('ARM-AcV', VAC, 10.0),
@@ -91,6 +93,7 @@ LIMITS = (
     LimitPercent('ARM-AuxV', VAUX_IN, percent=2.0, delta=0.3,
         doc='ARM Aux voltage reading'),
     LimitBetween('ARM-AuxI', 0.0, 1.5),
+    LimitInteger('ARM-RemoteClosed', 1),
     LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
     LimitRegExp('CAN_RX', r'^RRQ,32,0'),
     LimitInteger('CAN_BIND', _CAN_BIND),
@@ -180,19 +183,19 @@ class Initial(share.TestSequence):
         bp35.open()
         reset.pulse(0.1)
         dev['dcs_sreg'].output(SOLAR_VIN)
-        bp35.action(None, delay=1.5, expected=2)  # Flush banner
-        bp35['UNLOCK'] = True
+        bp35.action(None, delay=1.5, expected=BANNER_LINES)  # Flush banner
+        bp35['NVWIPE'] = True
+        reset.pulse(0.1)
+        bp35.action(None, delay=1.5, expected=BANNER_LINES)  # Flush banner
         bp35['HW_VER'] = ARM_HW_VER
         bp35['SER_ID'] = self.sernum
-        bp35['NVDEFAULT'] = True
         bp35['NVWRITE'] = True
         bp35['SR_DEL_CAL'] = True
         bp35['SR_HW_VER'] = PIC_HW_VER
         reset.pulse(0.1)    # Reset is required because of HW_VER setting
-        bp35.action(None, delay=1.5, expected=2)  # Flush banner
-        bp35['UNLOCK'] = True
+        bp35.action(None, delay=1.5, expected=BANNER_LINES)  # Flush banner
         mes['arm_swver']()
-        bp35.manual_mode(VOUT_SET, OCP_NOMINAL)
+        bp35.manual_mode(start=True) # Start the change to manual mode
 
     @share.teststep
     def _step_solar_reg(self, dev, mes):
@@ -257,9 +260,12 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with AC."""
+        bp35 = dev['bp35']
+        # Complete the change to manual mode
+        bp35.manual_mode(vout=VOUT_SET, iout=OCP_SET)
         dev['acsource'].output(voltage=VAC, output=True)
         self.measure(('dmm_acin', 'dmm_pri12v'), timeout=10)
-        dev['bp35'].power_on()
+        bp35.power_on()
         # Wait for PFC overshoot to settle
         mes['dmm_vpfc'].stable(PFC_STABLE)
         mes['arm_vout_ov']()
@@ -268,7 +274,12 @@ class Initial(share.TestSequence):
         dev['dcs_vbat'].output(0.0, output=False)
         # Is it now running on it's own?
         mes['arm_vout_ov']()
-        self.measure(('dmm_3v3', 'dmm_15vs', 'dmm_vbat'), timeout=10)
+        self.measure(('dmm_3v3', 'dmm_15vs'), timeout=10)
+        # Calibrate Vout setting and reading
+        data = self.measure(('dmm_vbat', ), timeout=10)
+        bp35['VSET_CAL'] = data.reading1
+        bp35['VBUS_CAL'] = data.reading1
+        bp35['NVWRITE'] = True
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -297,7 +308,7 @@ class Initial(share.TestSequence):
         """Test Remote Load Isolator Switch."""
         relay = dev['rla_loadsw']
         relay.set_on()
-        mes['dmm_vloadoff'](timeout=5)
+        mes['arm_remote'](timeout=5)
         relay.set_off()
         mes['dmm_vload'](timeout=5)
 
@@ -315,6 +326,7 @@ class Initial(share.TestSequence):
         self.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
         bp35['BUS_ICAL'] = ILOAD + IBATT    # Calibrate current reading
         bp35['OCP_CAL'] = _OCP_MAGIC        # Calibrate current setpoint
+        bp35['NVWRITE'] = True
         for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
@@ -444,6 +456,7 @@ class Sensors(share.Sensors):
                 ('arm_vout_ov', 'VOUT_OV'),
                 ('arm_iout', 'SR_IOUT'),
                 ('arm_solar_vin', 'SR_VIN'),
+                ('arm_remote', 'BATT_SWITCH'),
             ):
             self[name] = console.Sensor(bp35, cmdkey)
         self['arm_swver'] = console.Sensor(
@@ -511,6 +524,7 @@ class Measurements(share.Measurements):
             ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov', ''),
             ('arm_solar_vin_pre', 'ARM-SolarVin-Pre', 'arm_solar_vin', ''),
             ('arm_solar_vin_post', 'ARM-SolarVin-Post', 'arm_solar_vin', ''),
+            ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', ''),
             ))
         # Generate load current measurements
         loads = []
