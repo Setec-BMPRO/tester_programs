@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-06-19, 22:09:58 -->
+<!-- Saved: 2017-07-18, 18:04:19 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -110,6 +110,9 @@
     <Source>programs/trek2/initial.py</Source>
     <Source>programs/trs1/__init__.py</Source>
     <Source>programs/trs1/initial.py</Source>
+    <Source>programs/trs2/__init__.py</Source>
+    <Source>programs/trs2/console.py</Source>
+    <Source>programs/trs2/initial.py</Source>
     <Source>programs/ts3020h/__init__.py</Source>
     <Source>programs/ts3020h/final.py</Source>
     <Source>programs/ts3020h/initial.py</Source>
