@@ -91,7 +91,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_cal_pre(self, dev, mes):
         """Calibrate the PIC."""
-        dev['dcs_RS232'].output(10.0, output=True, delay=4)
+        dev['dcs_RS232'].output(12.0, output=True, delay=4)
         pic = dev['pic']
         pic.open()
         pic['UNLOCK'] = True
