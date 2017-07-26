@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """BP35 ARM processor console driver."""
 
+import threading
 import time
 from share import console
 
@@ -21,6 +22,9 @@ _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 # "CAN Bound" is STATUS bit 28
 _CAN_BOUND = (1 << 28)
 
+# Time it takes for Manual Mode command to take effect
+_MANUAL_MODE_WAIT = 2.1
+
 
 class Console(console.BadUartConsole):
 
@@ -29,6 +33,41 @@ class Console(console.BadUartConsole):
     # Auto add prompt to puts strings
     puts_prompt = '\r\n> '
     cmd_data = {
+        # Common commands
+        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'RESTART': ParameterBoolean('RESTART',
+            writeable=True, readable=False, write_format='{1}'),
+        'SER_ID': ParameterString(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{0} {1}'),
+        'HW_VER': ParameterString(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWIPE': ParameterBoolean('NV-FACTORY-WIPE',
+            writeable=True, readable=False, write_format='{1}'),
+        # Product specific commands
+        'VSET_CAL': ParameterFloat(      # Voltage reading
+            'VSET', writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=1000, write_expected=1),
+        'VBUS_CAL': ParameterFloat(      # Voltage setpoint
+            'VBUS', writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=1000, write_expected=1),
+        'BUS_ICAL': ParameterFloat(     # Current reading
+            'ICONV', writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=1000, write_expected=1),
+        'CAN': ParameterString('CAN',
+            writeable=True, write_format='"{0} {1}'),
+        'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
+        # X-Register product specific parameters
         'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
         'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
         'VOUT': ParameterFloat(
@@ -37,9 +76,6 @@ class Console(console.BadUartConsole):
         'IOUT': ParameterFloat(
             'CONVERTER_CURRENT_SETPOINT', writeable=True,
             minimum=15.0, maximum=40.0, scale=1000),
-        'LOAD_DIS': ParameterFloat(
-            'LOAD_SWITCHES_INHIBITED', writeable=True,
-            minimum=0, maximum=1, scale=1),
         'FAN': ParameterFloat(
             'FAN_SPEED', writeable=True,
             minimum=0, maximum=100, scale=10),
@@ -54,8 +90,11 @@ class Console(console.BadUartConsole):
         'VOUT_OV': ParameterFloat(
             'CONVERTER_OVERVOLT', writeable=True,
             minimum=0, maximum=2, scale=1),
-        'SET_MODE': ParameterFloat(
+        'SLEEP_MODE': ParameterFloat(
             'SLEEPMODE', writeable=True,
+            minimum=0, maximum=3, scale=1),
+        'TASK_STARTUP': ParameterFloat(
+            'TASK_STARTUP', writeable=True,
             minimum=0, maximum=3, scale=1),
         'SR_HW_VER': ParameterFloat(
             'SOLAR_REG_HW_VERS', writeable=True,
@@ -79,7 +118,6 @@ class Console(console.BadUartConsole):
         'SR_VIN_CAL': ParameterFloat(
             'SOLAR_REG_CAL_V_IN', writeable=True,
             scale=1000),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
         'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
         'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
         'PRI_T': ParameterFloat('PRIMARY_TEMPERATURE', scale=10),
@@ -87,12 +125,6 @@ class Console(console.BadUartConsole):
         'BATT_T': ParameterFloat('BATTERY_TEMPERATURE', scale=10),
         'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
         'BUS_I': ParameterFloat('CONVERTER_CURRENT', scale=1000),
-        'BUS_ICAL': ParameterFloat( # an undocumented command...
-            'ICONV', writeable=True,
-            write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
-        'OCP_CAL': ParameterFloat(  # an undocumented command...
-            'CAL_I_CONVSET', writeable=True, maximum=65535),
         'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
         'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
         'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
@@ -107,26 +139,13 @@ class Console(console.BadUartConsole):
         'SR_ERROR': ParameterFloat('SOLAR_REG_ERRORCODE'),
         'SR_RELAY': ParameterFloat('SOLAR_REG_RELAY'),
         'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
-        'SER_ID': ParameterString(
-            'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{0} {1}', write_expected=1),
-        'HW_VER': ParameterString(
-            'SET-HW-VER', writeable=True, readable=False,
-            write_format='{0[0]} {0[1]} "{0[2]} {1}', write_expected=1),
+        'OCP_CAL': ParameterFloat(      # OCP setpoint
+            'CAL_I_CONVSET', writeable=True, maximum=65535),
         'STATUS': ParameterHex(
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
         'CAN_BIND': ParameterHex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
-        'CAN': ParameterString('CAN',
-            writeable=True, write_format='"{0} {1}'),
-        'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
-        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
-            writeable=True, readable=False, write_format='{1}'),
         }
 
     def __init__(self, port, verbose=False):
@@ -137,20 +156,31 @@ class Console(console.BadUartConsole):
             self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
 
-    def manual_mode(self, voltage, current):
-        """Enter manual control mode.
+    def manual_mode(self, start=False, vout=None, iout=None):
+        """Set the unit to Manual Mode.
 
-        @param voltage Output voltage setting
-        @param current Output OCP setting
+        The unit takes some time for the command to take effect. We use a
+        timer to run this delay in the background.
+
+        @param start True to start the entry to Manual Mode
+                     False to finish the transition to Manual Mode
+        @param vout Output voltage setpoint in Volts
+        @param iout Output OCP setpoint in Amps
 
         """
-        self['SET_MODE'] = 3
-        mode = 0
-        while mode != 0x10000:      # Wait for the operating mode to change
-            mode = self['OPERATING_MODE']
-        self['VOUT'] = voltage
-        self['IOUT'] = current
-        self['VOUT_OV'] = 2     # OVP Latch reset
+        if start:  # Trigger manual mode, and start a timer
+            self['SLEEP_MODE'] = 3
+            self._myevent = threading.Event()
+            self._mytimer = threading.Timer(
+                _MANUAL_MODE_WAIT, self._myevent.set)
+            self._mytimer.start()
+        else:   # Complete manual mode setup once the timer is done.
+            self._myevent.wait()
+            self['TASK_STARTUP'] = 0
+            self['IOUT'] = iout
+            self['VOUT'] = vout
+            self['VOUT_OV'] = 2     # OVP Latch reset
+            self['FAN'] = 0
 
     def power_on(self):
         """Power ON the converter circuits."""
@@ -159,7 +189,6 @@ class Console(console.BadUartConsole):
         self['DCDC_EN'] = True
         time.sleep(0.5)
         self['VOUT_OV'] = 2     # OVP Latch reset
-        self['LOAD_DIS'] = False
 
     def load_set(self, set_on=True, loads=()):
         """Set the state of load outputs.

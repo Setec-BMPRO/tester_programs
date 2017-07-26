@@ -5,6 +5,7 @@
 import os
 import inspect
 import time
+import math
 import tester
 from tester import (
     LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitPercent,
@@ -13,15 +14,20 @@ import share
 from . import console
 
 BIN_VERSION = '2.0.14884.1979'      # Software binary version
-
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # ARM software image file
 ARM_FILE = 'bc15_{}.bin'.format(BIN_VERSION)
+# Setpoints
+VAC = 240.0
+VOUT_SET = 14.40
+OCP_NOMINAL = 15.0
 
 LIMITS = (
-    LimitDelta('ACin', 240.0, 5.0),
-    LimitDelta('Vbus', 335.0, 10.0),
+    LimitLow('FixtureLock', 20),
+    LimitHigh('FanShort', 100),
+    LimitDelta('ACin', VAC, 5.0),
+    LimitDelta('Vbus', math.sqrt(2) * VAC, 10.0),
     LimitDelta('14Vpri', 14.0, 1.0),
     LimitBetween('12Vs', 11.7, 13.0),
     LimitDelta('5Vs', 5.0, 0.1),
@@ -29,22 +35,16 @@ LIMITS = (
     LimitLow('FanOn', 0.5),
     LimitHigh('FanOff', 11.0),
     LimitDelta('15Vs', 15.5, 1.0),
-    LimitPercent('Vout', 14.40, 5.0),
-    LimitPercent('VoutCal', 14.40, 1.0),
+    LimitPercent('Vout', VOUT_SET, 4.0),
+    LimitPercent('VoutCal', VOUT_SET, 1.0),
     LimitLow('VoutOff', 2.0),
-    LimitPercent('OCP', 15.0, 5.0),
-    LimitLow('InOCP', 12.0),
-    LimitLow('FixtureLock', 20),
-    LimitHigh('FanShort', 100),
+    LimitPercent('OCP', OCP_NOMINAL, (4.0, 7.0)),
+    LimitLow('InOCP', 13.5),
     # Data reported by the ARM
     LimitRegExp('ARM-SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
-    LimitPercent('ARM-Vout', 14.40, 5.0),
-    LimitBetween('ARM-2amp', 0.5, 3.5),
-    # Why 'Lucky'?
-    #   The circuit specs are +/- 1.5A, and we hope to be lucky
-    #   and get units within +/- 1.0A ...
-    LimitDelta('ARM-2amp-Lucky', 2.0, 1.0),
-    LimitDelta('ARM-14amp', 14.0, 2.0),
+    LimitPercent('ARM-Vout', VOUT_SET, 5.0),
+    LimitPercent('ARM-2amp', 2.0, percent=1.7, delta=1.0),
+    LimitPercent('ARM-14amp', 14.0, percent=1.7, delta=1.0),
     LimitInteger('ARM-switch', 3),
     )
 
@@ -96,13 +96,13 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Power up the Unit."""
-        dev['acsource'].output(voltage=240.0, output=True)
+        dev['acsource'].output(voltage=VAC, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12Vs', 'dmm_3V3',
              'dmm_15Vs', 'dmm_voutoff', ), timeout=5)
         bc15 = dev['bc15']
         bc15.action(None, delay=1.5, expected=3)  # Flush banner
-        bc15.ps_mode()
+        bc15.ps_mode(VOUT_SET, OCP_NOMINAL)
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -112,15 +112,14 @@ class Initial(share.TestSequence):
         time.sleep(0.5)
         bc15.stat()
         vout = self.measure(
-            ('dmm_vout', 'arm_vout', 'arm_2amp', 'arm_2amp_lucky',
-             'arm_switch', )).reading1
+            ('dmm_vout', 'arm_vout', 'arm_2amp', 'arm_switch', )).reading1
         bc15.cal_vout(vout)
         mes['dmm_vout_cal'].measure()
 
     @share.teststep
     def _step_loaded(self, dev, mes):
         """Tests of the output."""
-        dev['dcl'].output(14.0, True)
+        dev['dcl'].output(OCP_NOMINAL - 1.0, True)
         time.sleep(0.5)
         bc15 = dev['bc15']
         bc15.stat()
@@ -208,7 +207,10 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['oVout'],
             detect_limit=(self.limits['InOCP'], ),
-            start=14.0, stop=17.0, step=0.25, delay=0.1)
+            start=OCP_NOMINAL - 1.0,
+            stop=OCP_NOMINAL + 2.0,
+            step=0.1,
+            delay=0.2)
         # Console sensors
         bc15 = self.devices['bc15']
         self['arm_vout'] = console.Sensor(
@@ -245,7 +247,6 @@ class Measurements(share.Measurements):
             ('arm_SwVer', 'ARM-SwVer', 'arm_swver', ''),
             ('arm_vout', 'ARM-Vout', 'arm_vout', ''),
             ('arm_2amp', 'ARM-2amp', 'arm_iout', ''),
-            ('arm_2amp_lucky', 'ARM-2amp-Lucky', 'arm_iout', ''),
             ('arm_switch', 'ARM-switch', 'arm_switch', ''),
             ('arm_14amp', 'ARM-14amp', 'arm_iout', ''),
             ))
