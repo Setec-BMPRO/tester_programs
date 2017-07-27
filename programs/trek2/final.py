@@ -6,7 +6,7 @@ import os
 import tester
 from tester import (
     TestStep,
-    LimitInteger, LimitBoolean
+    LimitInteger, LimitBoolean, LimitRegExp
     )
 import share
 from . import console
@@ -14,7 +14,11 @@ from . import console
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
 CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 
+BIN_VERSION = '1.5.15833.150'   # Software binary version
+
+
 LIMITS = (
+    LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION.replace('.', r'\.'))),
     LimitBoolean('Notify', True),
     LimitInteger('ARM-level1', 1),
     LimitInteger('ARM-level2', 2),
@@ -53,7 +57,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Display tests."""
-        self.measure(('ui_YesNoSeg', 'ui_YesNoBklight', ))
+        self.measure(('trek2_SwVer', 'ui_YesNoSeg', 'ui_YesNoBklight', ))
         dev['trek2'].testmode(False)
 
     @share.teststep
@@ -139,6 +143,9 @@ class Sensors(share.Sensors):
             console.Sensor(trek2, 'TANK3'),
             console.Sensor(trek2, 'TANK4'),
             )
+        # Console sensors
+        self['oSwVer'] = console.Sensor(
+            trek2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -150,6 +157,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('ui_YesNoSeg', 'Notify', 'oYesNoSeg', ''),
             ('ui_YesNoBklight', 'Notify', 'oYesNoBklight', ''),
+            ('trek2_SwVer', 'SwVer', 'oSwVer', ''),
             ))
         self['arm_level1'] = []
         self['arm_level2'] = []
