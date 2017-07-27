@@ -13,7 +13,20 @@ class BP35Initial(ProgramTestCase):
 
     prog_class = bp35.Initial
     parameter = None
-    debug = False
+    debug = True
+
+    def setUp(self):
+        """Per-Test setup."""
+        super().setUp()
+        # Patch threading.Event & threading.Timer for console.manual_mode()
+        mymock = MagicMock()
+        mymock.is_set.return_value = True   # threading.Event.is_set()
+        patcher = patch('threading.Event', return_value=mymock)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('threading.Timer', return_value=mymock)
+        self.addCleanup(patcher.stop)
+        patcher.start()
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
@@ -42,7 +55,7 @@ class BP35Initial(ProgramTestCase):
                      (sen['o3v3'], 3.3), (sen['o15vs'], 12.5),
                      (sen['vbat'], 12.8), (sen['vpfc'], (415.0, 415.0), )),
                 'Output': ((sen['vload'], (0.0, ) + (12.8, ) * 14), ),
-                'RemoteSw': ((sen['vload'], (0.25, 12.34)), ),
+                'RemoteSw': ((sen['vload'], (12.34, )), ),
                 'OCP':
                     ((sen['fan'], (0, 12.0)), (sen['vbat'], 12.8),
                      (sen['vbat'], (12.8, ) * 20 + (11.0, ), ), ),
@@ -52,12 +65,13 @@ class BP35Initial(ProgramTestCase):
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise':
-                    ('Banner1\r\nBanner2', ) +
-                    ('', ) + ('success', ) * 2 + ('', ) * 4 +
-                    ('Banner1\r\nBanner2', ) +
+                    ('B1\r\nB2\r\nB3', ) +
                     ('', ) +
+                    ('B1\r\nB2\r\nB3', ) +
+                    ('', ) * 5 +
+                    ('B1\r\nB2\r\nB3', ) +
                     (bp35.initial.ARM_VERSION, ) +
-                    ('', ) + ('0x10000', ) + ('', ) * 3,      # Manual mode
+                    ('', ),
                 'SolarReg':
                     ('1 ', '0') +      # Solar alive, Vout OV
                     ('', ) * 3 +        # 2 x Solar VI, Vout OV
@@ -71,12 +85,17 @@ class BP35Initial(ProgramTestCase):
                     ('10100', ),        # IoutPost
                 'Aux': ('', '13500', '1100', ''),
                 'PowerUp':
-                    ('', ) * 4 +     # Manual mode
-                    ('0', ) * 2,
-                'Output': ('', ) * (1 + 14 + 1),
+                    ('', ) * 8 +       # Manual mode
+                    ('0', ) * 2 +
+                    ('12341234', ) * 2 + # Calibrations
+                    ('', ),
+                'Output':
+                    ('', ) * (1 + 14 + 1),
+                'RemoteSw':
+                    ('1', ),
                 'OCP':
                     ('240', '50000', '350', '12800', '500', ) +
-                    ('', '4000', '32000', '', ''),
+                    ('', '4000', '32000', '12341234', '', ''),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False

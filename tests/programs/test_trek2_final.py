@@ -35,7 +35,9 @@ class Trek2Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Display': (
-                    (sen['oYesNoSeg'], True), (sen['oYesNoBklight'], True),
+                    (sen['oSwVer'], (trek2.final.BIN_VERSION, )),
+                    (sen['oYesNoSeg'], True),
+                    (sen['oYesNoBklight'], True),
                     ),
                 },
             UnitTester.key_call: {      # Callables
@@ -58,6 +60,7 @@ class Trek2Final(ProgramTestCase):
                 'TunnelOpen':(
                     (None, '0 ECHO -> \r\n> ', ) +
                     ('\r\n', ) +
+                    ('\r\n', ) +
                     ('0x10000000\r\n', ) +
                     ('\r\n', ) +
                     ('\r\n', ) +
@@ -72,7 +75,7 @@ class Trek2Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(18, len(result.readings))  # Reading count
+        self.assertEqual(19, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerUp', 'TunnelOpen', 'Display', 'Tanks'],

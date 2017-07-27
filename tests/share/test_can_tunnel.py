@@ -31,6 +31,7 @@ class Tunnel(unittest.TestCase):
         puts = self.mycon.port.puts
         puts('0 ECHO -> \r\n', preflush=1)
         puts('\r\n')
+        puts('\r\n')
         puts('0x10000000\r\n\r\n')
         puts('\r\nRRC,32,3,3,0,16,1\r\n')
         self.mycon.open()

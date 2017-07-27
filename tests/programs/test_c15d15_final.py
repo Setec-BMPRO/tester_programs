@@ -20,21 +20,21 @@ class C15D15Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['oVout'], 15.0),
+                    (sen['oVout'], 15.5),
                     (sen['oYesNoGreen'], True),
                     (sen['oYesNoYellowOff'], True),
                     (sen['oNotifyYellow'], True),
                     ),
                 'OCP': (
-                    (sen['oVout'], (15.0, ) * 5 + (13.5, ), ),
+                    (sen['oVout'], (15.5, ) * 5 + (13.5, ), ),
                     (sen['oYesNoYellowOn'], True),
-                    (sen['oVout'], 15.0),
+                    (sen['oVout'], 15.5),
                     ),
-                'FullLoad': (
+                'OverLoad': (
                     (sen['oVout'], 4.0),
                     ),
                 'Recover': (
-                    (sen['oVout'], 15.0),
+                    (sen['oVout'], 15.5),
                     ),
                 },
             }
@@ -45,5 +45,5 @@ class C15D15Final(ProgramTestCase):
         self.assertEqual(9, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['PowerUp', 'OCP', 'FullLoad', 'Recover', 'PowerOff'],
+            ['PowerUp', 'OCP', 'OverLoad', 'Recover', 'PowerOff'],
             self.tester.ut_steps)
