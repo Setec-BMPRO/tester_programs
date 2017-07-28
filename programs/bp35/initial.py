@@ -16,7 +16,6 @@ import share
 from . import console
 
 ARM_VERSION = '2.0.16018.4543'
-ARM_HW_VER = (10, 1, 'A')       # Rev 10A, SR version
 PIC_VERSION = '1.4.14454.271'
 PIC_HW_VER = 3
 # Serial port for the ARM. Used by programmer and ARM comms module.
@@ -56,7 +55,7 @@ _OCP_MAGIC = round(44000 / 1.05)    # +5% adjustment
 # Number of lines in startup banner
 BANNER_LINES = 3
 
-LIMITS = (
+_COMMON = (
     LimitLow('FixtureLock', 200),
     LimitDelta('HwVer8', 4400.0, 250.0),  # Rev 8+
     LimitDelta('ACin', VAC, 5.0),
@@ -103,14 +102,40 @@ LIMITS = (
     LimitInteger('Vout_OV', 0),     # Over-voltage not triggered
     )
 
+LIMITS_SR = _COMMON
+
+#LIMITS_PM = ()
+
+#LIMITS_HA = _COMMON
+
+# Variant specific configuration data. Indexed by test program parameter.
+#   'Limits': Test limits.
+#   'HwVer': Hardware version data.
+CONFIG = {
+    'SR': {
+        'Limits': LIMITS_SR,
+        'HwVer': (10, 1, 'A'),
+        },
+#    'PM': {
+#        'Limits': LIMITS_PM,
+#        'HwVer': (10, 2, 'A'),
+#        },
+#    'HA': {
+#        'Limits': LIMITS_HA,
+#        'HwVer': (10, 3, 'A'),
+#        },
+    }
+
 
 class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
     def open(self):
-        """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        """Prepare for testing."""
+        self.config = CONFIG[self.parameter]
+        super().open(
+            self.config['Limits'], LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('ProgramPIC', self._step_program_pic, not self.fifo),
@@ -187,7 +212,7 @@ class Initial(share.TestSequence):
         bp35['NVWIPE'] = True
         reset.pulse(0.1)
         bp35.action(None, delay=1.5, expected=BANNER_LINES)  # Flush banner
-        bp35['HW_VER'] = ARM_HW_VER
+        bp35['HW_VER'] = self.config['HwVer']
         bp35['SER_ID'] = self.sernum
         bp35['NVWRITE'] = True
         bp35['SR_DEL_CAL'] = True
