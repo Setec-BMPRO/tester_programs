@@ -12,7 +12,7 @@ class BP35Initial(ProgramTestCase):
     """BP35 Initial program test suite."""
 
     prog_class = bp35.Initial
-    parameter = None
+    parameter = 'SR'
     debug = True
 
     def setUp(self):
