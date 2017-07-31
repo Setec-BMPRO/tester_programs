@@ -63,7 +63,6 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         self['acsource'].reset()
         self['dcl'].output(0.0, False)
-        super().close()
 
 
 class Sensors(share.Sensors):
