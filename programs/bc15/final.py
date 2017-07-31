@@ -4,16 +4,18 @@
 
 import tester
 from tester import (
-    LimitLow, LimitDelta, LimitPercent, LimitBoolean
+    LimitLow, LimitDelta, LimitBoolean
     )
 import share
 
+OCP_NOMINAL = 10.0
+
 LIMITS = (
     LimitBoolean('Notify', True),
-    LimitPercent('VoutNL', 13.85, 1.0),
-    LimitPercent('Vout', 13.85, 5.0),
-    LimitLow('InOCP', 12.0),
-    LimitDelta('OCP', 14.0, 2.0),
+    LimitDelta('VoutNL', 13.6, 0.3),
+    LimitDelta('Vout', 13.6, 0.7),
+    LimitLow('InOCP', 12.5),
+    LimitDelta('OCP', OCP_NOMINAL, 1.0),
     )
 
 
@@ -83,7 +85,10 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['vout'],
             detect_limit=(self.limits['InOCP'], ),
-            start=10.0, stop=17.0, step=0.5, delay=0.1)
+            start=OCP_NOMINAL - 1.0,
+            stop=OCP_NOMINAL + 2.0,
+            step=0.1,
+            delay=0.2)
 
 
 class Measurements(share.Measurements):
