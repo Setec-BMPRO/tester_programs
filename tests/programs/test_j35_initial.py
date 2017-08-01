@@ -74,7 +74,7 @@ class _J35Initial(ProgramTestCase):
                         (12.8, ) * len(sen['arm_loads'])),
                     ),
                 'RemoteSw': (
-                    (sen['ovload'], (0.0, 12.8)),
+                    (sen['ovload'], (12.8, )),
                     ),
                 'Load': (
                     (sen['ovbat'], 12.8),
@@ -95,12 +95,20 @@ class _J35Initial(ProgramTestCase):
                      ('', ) * 4 +
                      ('Banner1\r\nBanner2', ) +
                      ('', ) + (j35.initial.ARM_VERSION, ),
-                'Aux': ('', '13500', '1100', ''),
-                'Solar': ('', ''),
-                'PowerUp': pwr_con,
-                'Output': ('', ) * (1 + len(sen['arm_loads']) + 1),
-                'Load': ('0x5555555', '41731 -> 42241', '4000', ),
-                'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
+                'Aux':
+                    ('', '13500', '1100', ''),
+                'Solar':
+                    ('', ''),
+                'PowerUp':
+                    pwr_con,
+                'Output':
+                    ('', ) * (1 + len(sen['arm_loads']) + 1),
+                'RemoteSw':
+                    ('1', ),
+                'Load':
+                    ('0x5555555', '41731 -> 42241', '4000', ),
+                'CanBus':
+                    ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
                 'CanBus': ('RRQ,36,0,7,0,0,0,0,0,0,0\r\n', ),

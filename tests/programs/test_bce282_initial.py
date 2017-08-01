@@ -84,7 +84,7 @@ class BCE282_12_Initial(_BCE282Initial):
     """BCE282-12 Initial program test suite."""
 
     parameter = '12'
-    vout = 13.8
+    vout = 13.5
     inocp = 12.9
     debug = False
 
@@ -98,7 +98,7 @@ class BCE282_24_Initial(_BCE282Initial):
     """BCE282-12 Initial program test suite."""
 
     parameter = '24'
-    vout = 27.7
+    vout = 27.6
     inocp = 25.9
     debug = False
 
