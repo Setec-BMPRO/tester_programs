@@ -12,12 +12,7 @@ ParameterFloat = console.ParameterFloat
 ParameterBoolean = console.ParameterBoolean
 
 
-class ConsoleResponseError():
-
-    """Console Response Error."""
-
-
-class Console(console.BadUartConsole):
+class Console(console.BaseConsole):
 
     """Communications to BCE282 console."""
 
@@ -63,8 +58,10 @@ class Console(console.BadUartConsole):
         self['UNLOCK'] = True
         self['NV-WRITE'] = True
         self['RESTART'] = True
+        time.sleep(1)
         self['ECHO'] = True
         self['UNLOCK'] = True
+        time.sleep(0.5)
 
     def test_mode(self):
         """Enable Manual Mode"""
@@ -75,3 +72,15 @@ class Console(console.BadUartConsole):
         """Reset internal filters."""
         self['FL-RELOAD'] = True
         time.sleep(1)
+
+    def action(self, command=None, delay=0.0, expected=0):
+        """Send a command, and read the response.
+
+        @param command Command string.
+        @param delay Delay between sending command and reading response.
+        @param expected Expected number of responses.
+        @return Response (None / String / ListOfStrings).
+        @raises ConsoleError.
+
+        """
+        super().action(command, 0.1, expected)
