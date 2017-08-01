@@ -62,7 +62,7 @@ class Console(console.BadUartConsole):
         'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
         'BUS_ICAL': ParameterFloat(
             'ICONV', writeable=True,    # an undocumented command...
-            write_format='{0} "{1} CAL', write_expected=1, 
+            write_format='{0} "{1} CAL', write_expected=1,
             scale=1000),
         'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
         'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
@@ -99,6 +99,9 @@ class Console(console.BadUartConsole):
         'NVWRITE': ParameterBoolean('NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
         }
+    # Event timer for entry into Manual Mode
+    _myevent = None
+    _mytimer = None
 
     def __init__(self, port, verbose=False):
         """Create console instance."""
@@ -107,9 +110,6 @@ class Console(console.BadUartConsole):
         for i in range(1, 15):
             self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
-        # Event timer for entry into Manual Mode
-        self._myevent = None
-        self._mytimer = None
 
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""

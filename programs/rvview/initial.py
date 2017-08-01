@@ -138,6 +138,7 @@ class LogicalDevices(share.LogicalDevices):
         self['rvview'] = console.DirectConsole(rvview_ser, verbose=False)
         # Power to fixture Comms circuits.
         self['dcs_vcom'].output(9.0, True)
+        self.add_closer(lambda: self['dcs_vcom'].output(0, False))
 
     def reset(self):
         """Reset instruments."""
@@ -145,11 +146,6 @@ class LogicalDevices(share.LogicalDevices):
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
-
-    def close(self):
-        """Finished testing."""
-        self['dcs_vcom'].output(0, False)
-        super().close()
 
 
 class Sensors(share.Sensors):

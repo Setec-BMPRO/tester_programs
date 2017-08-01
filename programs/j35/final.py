@@ -104,6 +104,7 @@ class LogicalDevices(share.LogicalDevices):
             ):
             self[name] = devtype(self.physical_devices[phydevname], doc)
         self['dcs_photo'].output(12.0, True)
+        self.add_closer(lambda: self['dcs_photo'].output(0.0, False))
 
     def reset(self):
         """Reset instruments."""
@@ -111,10 +112,6 @@ class LogicalDevices(share.LogicalDevices):
         self['dcl_out'].output(15.0, delay=2)
         self['dcl_out'].output(0.0, False)
 
-    def close(self):
-        """Finished testing."""
-        self['dcs_photo'].output(0.0, False)
-        super().close()
 
 class Sensors(share.Sensors):
 

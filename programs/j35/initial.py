@@ -340,6 +340,7 @@ class LogicalDevices(share.LogicalDevices):
         self['j35'] = console.Console(j35_ser, verbose=False)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(22.0, True)
+        self.add_closer(lambda: self['dcs_vcom'].output(0, False))
 
     def reset(self):
         """Reset instruments."""
@@ -353,11 +354,6 @@ class LogicalDevices(share.LogicalDevices):
             self[dev].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot', 'rla_loadsw'):
             self[rla].set_off()
-
-    def close(self):
-        """Finished testing."""
-        self['dcs_vcom'].output(0, False)
-        super().close()
 
 
 class Sensors(share.Sensors):

@@ -425,9 +425,9 @@ class LogicalDevices(share.LogicalDevices):
         ard_ser.port = ARDUINO_PORT
         self['ard'] = arduino.Arduino(ard_ser, verbose=False)
         # Switch on power to fixture circuits
-        self['dcs_Arduino'].output(12.0, output=True)
-        self['dcs_Vcom'].output(12.0, output=True)
-        self['dcs_DigPot'].output(12.0, output=True)
+        for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
+            self[dcs].output(12.0, output=True)
+            self.add_closer(lambda: self[dcs].output(0.0, output=False))
         time.sleep(2)   # Allow OS to detect the new ports
 
     def reset(self):
@@ -447,13 +447,6 @@ class LogicalDevices(share.LogicalDevices):
         for rla in ('rla_pic1', 'rla_pic2', 'rla_boot',
             'rla_pson', 'rla_0Vp'):
             self[rla].set_off()
-
-    def close(self):
-        """Finished testing."""
-        self['dcs_Arduino'].output(0.0, output=False)
-        self['dcs_Vcom'].output(0.0, output=False)
-        self['dcs_DigPot'].output(0.0, output=False)
-        super().close()
 
 
 class Sensors(share.Sensors):

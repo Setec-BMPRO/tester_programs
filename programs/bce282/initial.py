@@ -219,6 +219,7 @@ class LogicalDevices(share.LogicalDevices):
         self['msp'] = console.Console(self['msp_ser'], verbose=False)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(9.0, True)
+        self.add_closer(lambda: self['dcs_vcom'].output(0.0, False))
 
     def reset(self):
         """Reset instruments."""
@@ -232,12 +233,6 @@ class LogicalDevices(share.LogicalDevices):
         for dcs in ('dcs_vccbias', 'dcs_vcom'):
             self[dcs].output(0.0, False)
         self['rla_prog'].set_off()
-
-    def close(self):
-        """Finished testing."""
-        # Remove power to fixture circuits.
-        self['dcs_vcom'].output(0.0, False)
-        super().close()
 
 
 class Sensors(share.Sensors):

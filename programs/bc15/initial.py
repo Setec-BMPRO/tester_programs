@@ -162,6 +162,7 @@ class LogicalDevices(share.LogicalDevices):
         self['bc15'] = console.Console(self['bc15_ser'], verbose=False)
         # Apply power to fixture Comms circuit.
         self['dcs_vcom'].output(12.0, True)
+        self.add_closer(lambda: self['dcs_vcom'].output(0, False))
         time.sleep(4)       # Allow OS to detect USB serial port
 
     def reset(self):
@@ -176,11 +177,6 @@ class LogicalDevices(share.LogicalDevices):
             self[dcs].output(0.0, output=False)
         for rla in ('rla_reset', 'rla_boot', 'rla_outrev'):
             self[rla].set_off()
-
-    def close(self):
-        """Close logical devices."""
-        self['dcs_vcom'].output(0, False)
-        super().close()
 
 
 class Sensors(share.Sensors):

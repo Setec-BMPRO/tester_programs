@@ -303,6 +303,7 @@ class LogicalDevices(share.LogicalDevices):
         self['arm'] = console.Console(arm_ser, verbose=False)
         # Switch on fixture power
         self['dcs_fixture'].output(10.0, output=True)
+        self.add_closer(lambda: self['dcs_fixture'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -316,11 +317,6 @@ class LogicalDevices(share.LogicalDevices):
         self['dcs_5v'].output(0.0, False)
         for rla in ('rla_12v2off', 'rla_pson', 'rla_reset', 'rla_boot'):
             self[rla].set_off()
-
-    def close(self):
-        """Switch on fixture power."""
-        self['dcs_fixture'].output(0.0, output=False)
-        super().close()
 
     def loads(self, i5=None, i12=None, i24=None, output=True):
         """Set output loads.

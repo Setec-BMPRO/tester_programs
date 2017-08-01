@@ -92,7 +92,6 @@ class LogicalDevices(share.LogicalDevices):
         self['acsource'].reset()
         self['dcs_Input'].output(0.0, False)
         self['dcl_Output'].output(0.0, False)
-        super().close()
 
 
 class Sensors(share.Sensors):

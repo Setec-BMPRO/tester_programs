@@ -134,6 +134,7 @@ class LogicalDevices(share.LogicalDevices):
         self['trek2'] = console.DirectConsole(trek2_ser, verbose=False)
         # Apply power to fixture circuits.
         self['dcs_Vcom'].output(12.0, output=True, delay=2)
+        self.add_closer(lambda: self['dcs_Vcom'].output(0.0, False))
 
     def reset(self):
         """Reset instruments."""
@@ -141,11 +142,6 @@ class LogicalDevices(share.LogicalDevices):
         self['dcs_Vin'].output(0.0, output=False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
-
-    def close(self):
-        """Close logical devices."""
-        self['dcs_Vcom'].output(0.0, False)   # Remove power from fixture.
-        super().close()
 
 
 class Sensors(share.Sensors):

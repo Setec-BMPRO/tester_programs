@@ -416,6 +416,7 @@ class LogicalDevices(share.LogicalDevices):
         self['bp35'] = console.Console(bp35_ser, verbose=False)
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
+        self.add_closer(lambda: self['dcs_vcom'].output(0, False))
 
     def reset(self):
         """Reset instruments."""
@@ -430,11 +431,6 @@ class LogicalDevices(share.LogicalDevices):
         for rla in ('rla_reset', 'rla_boot', 'rla_pic',
                     'rla_loadsw', 'rla_vbat', 'rla_acsw'):
             self[rla].set_off()
-
-    def close(self):
-        """Close logical devices."""
-        self['dcs_vcom'].output(0, False)   # Remove power from fixture.
-        super().close()
 
 
 class Sensors(share.Sensors):

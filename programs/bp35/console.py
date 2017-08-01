@@ -147,6 +147,9 @@ class Console(console.BadUartConsole):
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
         }
+    # Event timer for entry into Manual Mode
+    _myevent = None
+    _mytimer = None
 
     def __init__(self, port, verbose=False):
         """Create console instance."""

@@ -17,13 +17,10 @@ class TestSequence(tester.TestSequence):
 
     """
 
-    def __init__(self):
-        """Create the test program instance."""
-        self.devices = None
-        self.limits = None
-        self.sensors = None
-        self.measurements = None
-        super().__init__()
+    devices = None
+    limits = None
+    sensors = None
+    measurements = None
 
     @abc.abstractmethod
     def open(self, limits, cls_devices, cls_sensors, cls_measurements):
@@ -169,6 +166,11 @@ class LogicalDevices(abc.ABC, dict):
 
     """Logical Devices abstract base class."""
 
+    physical_devices = None
+    fifo = None
+    parameter = None
+    _close_callables = None         # Callbacks when close() is called
+
     def __init__(self, physical_devices, fifo):
         """Create instance.
 
@@ -179,7 +181,6 @@ class LogicalDevices(abc.ABC, dict):
         super().__init__()
         self.physical_devices = physical_devices
         self.fifo = fifo
-        self.parameter = None
 
     @abc.abstractmethod
     def open(self):
@@ -189,14 +190,28 @@ class LogicalDevices(abc.ABC, dict):
     def reset(self):
         """Reset instruments."""
 
+    def add_closer(self, callable):
+        """Add a callable to be called upon close()."""
+        if self._close_callables is None:
+            self._close_callables = []
+        self._close_callables.append(callable)
+
     def close(self):
         """Close logical devices."""
+        if self._close_callables is not None:
+            for a_call in self._close_callables:
+                a_call()
+        self._close_callables = None
         self.clear()
 
 
 class Sensors(abc.ABC, dict):
 
     """Sensors."""
+
+    devices = None
+    limits = None
+    parameter = None
 
     def __init__(self, devices, limits):
         """Create Sensors instance.
@@ -208,7 +223,6 @@ class Sensors(abc.ABC, dict):
         super().__init__()
         self.devices = devices
         self.limits = limits
-        self.parameter = None
 
     @abc.abstractmethod
     def open(self):
@@ -232,6 +246,10 @@ class Measurements(abc.ABC, dict):
 
     """Measurements."""
 
+    sensors = None
+    limits = None
+    parameter = None
+
     def __init__(self, sensors, limits):
         """Create measurement instance.
 
@@ -242,7 +260,6 @@ class Measurements(abc.ABC, dict):
         super().__init__()
         self.sensors = sensors
         self.limits = limits
-        self.parameter = None
 
     @abc.abstractmethod
     def open(self):

@@ -175,6 +175,7 @@ class LogicalDevices(share.LogicalDevices):
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)
+        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -185,12 +186,6 @@ class LogicalDevices(share.LogicalDevices):
                 'rla_s2', 'rla_s3', 'rla_s4',
                 ):
             self[rla].set_off()
-
-    def close(self):
-        """Close logical devices."""
-        # Remove power from fixture
-        self['dcs_vcom'].output(0.0, output=False)
-        super().close()
 
 
 class Sensors(share.Sensors):

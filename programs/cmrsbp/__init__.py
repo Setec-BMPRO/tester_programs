@@ -299,6 +299,7 @@ class LogicalDevices(share.LogicalDevices):
             simulation=self.fifo,
             port=CMR_PORT, baudrate=9600, timeout=0.1)
         self['cmr'] = cmrsbp.CmrSbp(cmr_ser, data_timeout=10)
+        self.add_closer(self['cmr'].close)
         # EV2200 board
         ev_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=9600, timeout=4)
@@ -321,11 +322,6 @@ class LogicalDevices(share.LogicalDevices):
                 'rla_vbat', 'rla_PicReset', 'rla_Prog',
                 'rla_EVM', 'rla_Pic', 'rla_Erase'):
             self[rla].set_off()
-
-    def close(self):
-        """Close logical devices."""
-        self['cmr'].close()
-        super().close()
 
 
 class Sensors(share.Sensors):

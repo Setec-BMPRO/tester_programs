@@ -102,24 +102,6 @@ class ParameterString(_Parameter):
 
     """String parameter type."""
 
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        super().write(value, func)
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Function to use to read the value.
-        @return String data value.
-
-        """
-        return super().read(func)
-
 
 class ParameterBoolean(_Parameter):
 
