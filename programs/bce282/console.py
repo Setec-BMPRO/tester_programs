@@ -83,4 +83,4 @@ class Console(console.BaseConsole):
         @raises ConsoleError.
 
         """
-        super().action(command, 0.1, expected)
+        return super().action(command, 0.1, expected)
