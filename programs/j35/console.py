@@ -68,6 +68,7 @@ class Console(console.BadUartConsole):
         'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
         'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
         'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
+        'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
         'CONV_MAX': ParameterFloat(
             'MLC_MAX_CONVERTER_MW', writeable=True, scale=1000),
         'CONV_RATED': ParameterFloat(

@@ -14,7 +14,7 @@ from tester import (
 import share
 from . import console
 
-ARM_VERSION = '1.2.14549.989'      # ARM versions
+ARM_VERSION = '1.2.14549.989'      # ARM version
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
 # ARM software image file
@@ -87,6 +87,7 @@ _COMMON = (
         doc='ARM battery current reading'),
     LimitDelta('ARM-LoadI', LOAD_PER_OUTPUT, delta=0.9,
         doc='ARM output current reading'),
+    LimitInteger('ARM-RemoteClosed', 1),
     LimitDelta('CanPwr', VOUT_SET, delta=1.8, doc='CAN bus power supply'),
     LimitInteger('LOAD_SET', 0x5555555, doc='ARM output load enable setting'),
     LimitInteger('CAN_BIND', _CAN_BIND, doc='ARM reports CAN bus operational'),
@@ -260,9 +261,10 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_remote_sw(self, dev, mes):
         """Test the remote switch."""
-        dev['rla_loadsw'].set_on()
-        mes['dmm_vloadoff'](timeout=5)
-        dev['rla_loadsw'].set_off()
+        relay = dev['rla_loadsw']
+        relay.set_on()
+        mes['arm_remote'](timeout=5)
+        relay.set_off()
         mes['dmm_vload'](timeout=5)
 
     @share.teststep
@@ -393,6 +395,7 @@ class Sensors(share.Sensors):
                 ('arm_bati', 'BATT_I'),
                 ('arm_canbind', 'CAN_BIND'),
                 ('arm_loadset', 'LOAD_SET'),
+                ('arm_remote', 'BATT_SWITCH'),
             ):
             self[name] = console.Sensor(j35, cmdkey)
         self['arm_swver'] = console.Sensor(
@@ -454,6 +457,7 @@ class Measurements(share.Measurements):
             ('rx_can', 'CAN_RX', 'mir_can', ''),
             ('arm_can_bind', 'CAN_BIND', 'arm_canbind', ''),
             ('arm_loadset', 'LOAD_SET', 'arm_loadset', ''),
+            ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', ''),
             ))
         # Generate load current measurements
         loads = []
