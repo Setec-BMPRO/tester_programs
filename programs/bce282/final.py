@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """BCE282-12/24 Final Program."""
 
-import time
 import tester
 from tester import (
     TestStep,
@@ -114,8 +113,7 @@ class LogicalDevices(share.LogicalDevices):
     def reset(self):
         """Reset instruments."""
         self['acsource'].reset()
-        self['dcl_Vout'].output(10.0, True)
-        time.sleep(0.5)
+        self['dcl_Vout'].output(10.0, output=True, delay=0.5)
         for dcl in ('dcl_Vout', 'dcl_Vbat'):
             self[dcl].output(0.0, False)
 

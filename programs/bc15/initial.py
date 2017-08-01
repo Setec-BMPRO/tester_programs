@@ -74,7 +74,7 @@ class Initial(share.TestSequence):
     def _step_program(self, dev, mes):
         """Program the ARM device."""
         dev['dcs_3v3'].output(9.0, True)
-        mes['dmm_3V3'].measure(timeout=5)
+        mes['dmm_3V3'](timeout=5)
         time.sleep(2)
         dev['programmer'].program()
 
@@ -90,7 +90,7 @@ class Initial(share.TestSequence):
         bc15['UNLOCK'] = True
         bc15['NVDEFAULT'] = True
         bc15['NVWRITE'] = True
-        mes['arm_SwVer'].measure()
+        mes['arm_SwVer']()
         dev['dcs_3v3'].output(0.0, False)
 
     @share.teststep
@@ -108,19 +108,17 @@ class Initial(share.TestSequence):
     def _step_output(self, dev, mes):
         """Tests of the output."""
         bc15 = dev['bc15']
-        dev['dcl'].output(2.0, True)
-        time.sleep(0.5)
+        dev['dcl'].output(2.0, True, delay=0.5)
         bc15.stat()
         vout = self.measure(
             ('dmm_vout', 'arm_vout', 'arm_2amp', 'arm_switch', )).reading1
         bc15.cal_vout(vout)
-        mes['dmm_vout_cal'].measure()
+        mes['dmm_vout_cal']()
 
     @share.teststep
     def _step_loaded(self, dev, mes):
         """Tests of the output."""
-        dev['dcl'].output(OCP_NOMINAL - 1.0, True)
-        time.sleep(0.5)
+        dev['dcl'].output(OCP_NOMINAL - 1.0, True, delay=0.5)
         bc15 = dev['bc15']
         bc15.stat()
         self.measure(('dmm_vout', 'arm_vout', 'arm_14amp', 'ramp_ocp', ))
@@ -169,8 +167,7 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         self['bc15'].close()
         self['acsource'].reset()
-        self['dcl'].output(2.0)
-        time.sleep(1)
+        self['dcl'].output(2.0, delay=1)
         self['discharge'].pulse()
         self['dcl'].output(0.0, False)
         for dcs in ('dcs_3v3', 'dcs_out'):

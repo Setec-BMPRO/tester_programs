@@ -437,8 +437,7 @@ class LogicalDevices(share.LogicalDevices):
         self['acsource'].reset()
         self['dcl_5Vsb'].output(1.0)
         self['dcl_12V'].output(5.0)
-        self['dcl_24V'].output(5.0)
-        time.sleep(1)
+        self['dcl_24V'].output(5.0, delay=1)
         self['discharge'].pulse()
         for ld in ('dcl_5Vsb', 'dcl_12V', 'dcl_24V'):
             self[ld].output(0.0)

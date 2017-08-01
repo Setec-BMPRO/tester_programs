@@ -98,8 +98,7 @@ class Initial(share.TestSequence):
         self.measure(('dmm_5v', 'dmm_3v3', ), timeout=2)
         dev['programmer'].program()
         # Reset micro, wait for ARM startup
-        dev['rla_reset'].pulse(0.1)
-        time.sleep(1)
+        dev['rla_reset'].pulse(0.1, delay=1)
 
     @share.teststep
     def _step_initialise_arm(self, dev, mes):

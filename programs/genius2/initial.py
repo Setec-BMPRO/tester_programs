@@ -193,8 +193,7 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         # Switch off AC Source & discharge the unit
         self['acsource'].reset()
-        self['dcl'].output(10.0)
-        time.sleep(1)
+        self['dcl'].output(10.0, delay=1)
         self['discharge'].pulse()
         for dev in (
                 'dcs_vout', 'dcs_vbat', 'dcs_vaux', 'dcs_vbatctl', 'dcl'):

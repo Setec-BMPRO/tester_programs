@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """GSU360-1TA Initial Test Program."""
 
-import time
 import tester
 from tester import (
     TestStep,
@@ -50,7 +49,6 @@ class Initial(share.TestSequence):
         """Power up unit at 92Vac and measure primary voltages."""
         dev['acsource'].output(92.0, output=True, delay=0.5)
         mes['dmm_ACin'](timeout=5)
-        time.sleep(2)
         self.measure(
             ('dmm_PFC', 'dmm_PriCtl', 'dmm_PriVref', 'dmm_24Vnl',
              'dmm_Fan12V', 'dmm_SecCtl', 'dmm_SecVref', ), timeout=5)

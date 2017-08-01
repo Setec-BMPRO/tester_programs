@@ -6,7 +6,6 @@
 import os
 import math
 import inspect
-import time
 import tester
 from tester import (
     TestStep,
@@ -347,8 +346,7 @@ class LogicalDevices(share.LogicalDevices):
         self['j35'].close()
         # Switch off AC Source & discharge the unit
         self['acsource'].reset()
-        self['dcl_out'].output(2.0)
-        time.sleep(1)
+        self['dcl_out'].output(2.0, delay=1)
         self['discharge'].pulse()
         for dev in ('dcs_vbat', 'dcs_vaux', 'dcs_solar', 'dcl_out', 'dcl_bat'):
             self[dev].output(0.0, False)

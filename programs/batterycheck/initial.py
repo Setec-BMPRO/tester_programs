@@ -88,8 +88,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program_avr(self, dev, mes):
         """Program the AVR ATtiny10 device."""
-        dev['rla_avr'].set_on()
-        time.sleep(2)   # Wait for the programmer to 'see' the 5V power
+        dev['rla_avr'].set_on(delay=2)  # let programmer to 'see' the 5V power
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         avr_cmd = [
@@ -136,13 +135,13 @@ class Initial(share.TestSequence):
         arm = dev['arm']
         arm.open()
         dev['rla_reset'].pulse_on(0.1)
-        time.sleep(2.0)  # ARM startup delay
+        time.sleep(2)    # ARM startup delay
         arm['UNLOCK'] = True
         arm['NVWRITE'] = True
-        time.sleep(1.0)  # NVWRITE delay
+        time.sleep(1)    # NVWRITE delay
         arm['SER_ID'] = self.sernum
         arm['NVWRITE'] = True
-        time.sleep(1.0)  # NVWRITE delay
+        time.sleep(1)    # NVWRITE delay
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
@@ -174,7 +173,7 @@ class Initial(share.TestSequence):
 
         """
         dev['rla_reset'].pulse_on(0.1)
-        time.sleep(2.0)  # ARM startup delay
+        time.sleep(2)       # ARM startup delay
         blue = dev['bt']
         blue.open()
         mes['BTscan'].sensor.store(blue.scan(self.sernum))

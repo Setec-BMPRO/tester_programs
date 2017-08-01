@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016 SETEC Pty Ltd
 """SMU750-70 Initial Test Program."""
-import time
+
 import tester
 from tester import (
     TestStep,
@@ -62,8 +62,7 @@ class Initial(share.TestSequence):
             'dmm_voutpre'),
               timeout=5)
         dev['acsource'].output(voltage=0.0)
-        dev['dcl'].output(10.0)
-        time.sleep(2)
+        dev['dcl'].output(10.0, delay=2)
         dev['discharge'].pulse()
         mes['dmm_vbusoff'](timeout=5)
         dev['dcl'].output(0.0)
@@ -120,8 +119,7 @@ class LogicalDevices(share.LogicalDevices):
     def reset(self):
         """Reset instruments."""
         self['acsource'].reset()
-        self['dcl'].output(5.0)
-        time.sleep(1)
+        self['dcl'].output(5.0, delay=1)
         self['discharge'].pulse()
         self['dcl'].output(0.0, False)
         self['dcs_fixfan'].output(0.0, False)

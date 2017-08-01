@@ -189,8 +189,7 @@ class Initial(share.TestSequence):
         # Cold Reset microprocessor for units that are reprogrammed
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
         dcsource.output(0.0)
-        load.output(1.0)
-        time.sleep(1)
+        load.output(1.0, delay=1)
         load.output(0.0)
         dcsource.output(VBAT_IN)
 
@@ -423,8 +422,7 @@ class LogicalDevices(share.LogicalDevices):
         self['bp35'].close()
         # Switch off AC Source & discharge the unit
         self['acsource'].reset()
-        self['dcl_bat'].output(2.0)
-        time.sleep(1)
+        self['dcl_bat'].output(2.0, delay=1)
         self['discharge'].pulse()
         for dev in ('dcs_vbat', 'dcs_vaux', 'dcs_sreg', 'dcl_out', 'dcl_bat'):
             self[dev].output(0.0, False)
