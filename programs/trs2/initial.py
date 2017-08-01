@@ -7,7 +7,7 @@ import inspect
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitBoolean, LimitRegExp
+    LimitLow, LimitHigh, LimitDelta, LimitBoolean, LimitRegExp
     )
 import share
 from . import console
@@ -21,9 +21,23 @@ ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM18'}[os.name]
 # Serial port for the Bluetooth module.
 BLE_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM19'}[os.name]
 
+VBATT = 12.0
+
 LIMITS = (
     LimitDelta('Vin', 12.0, 0.5),
     LimitDelta('3V3', 3.3, 0.25),
+    LimitLow('BrakeOff', 0.5),
+    LimitDelta('BrakeOn', VBATT, (0.5, 0)),
+    LimitLow('LightOff', 0.5),
+    LimitDelta('LightOn', VBATT, (0.25, 0)),
+    LimitLow('RemoteOff', 0.5),
+    LimitDelta('RemoteOn', VBATT, (0.25, 0)),
+    LimitHigh('RedLedOff', 3.0),
+    LimitLow('RedLedOn', 0.1),
+    LimitHigh('GreenLedOff', 3.0),
+    LimitLow('GreenLedOn', 0.1),
+    LimitHigh('BlueLedOff', 3.0),
+    LimitLow('BlueLedOn', 0.1),
     LimitRegExp('BtMac', r'^[0-F]{12}$'),
     LimitBoolean('DetectBT', True),
     LimitBoolean('Notify', True),
@@ -40,6 +54,7 @@ class Initial(share.TestSequence):
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Test', self._step_test),
             TestStep('Bluetooth', self._step_bluetooth),
             )
 
@@ -51,7 +66,7 @@ class Initial(share.TestSequence):
 
         """
         dev['rla_pin'].set_on()
-        dev['dcs_vin'].output(12.0, True)
+        dev['dcs_vin'].output(VBATT, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
@@ -60,10 +75,14 @@ class Initial(share.TestSequence):
         dev['program_sam'].program()
 
     @share.teststep
+    def _step_test(self, dev, mes):
+        """Test the operation of TRS2."""
+
+    @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(12.0, delay=15.0)
+        dev['dcs_vin'].output(VBATT, delay=15.0)
         btmac = mes['trs2_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         if self.fifo:
@@ -157,6 +176,18 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
             ('dmm_3v3', '3V3', '3v3', ''),
+            ('dmm_brakeoff', 'BrakeOff', 'brake', ''),
+            ('dmm_brakeon', 'BrakeOn', 'brake', ''),
+            ('dmm_lightoff', 'LightOff', 'light', ''),
+            ('dmm_lighton', 'LightOn', 'light', ''),
+            ('dmm_remoteoff', 'RemoteOff', 'remote', ''),
+            ('dmm_remoteon', 'RemoteOn', 'remote', ''),
+            ('dmm_redoff', 'RedLedOff', 'red', ''),
+            ('dmm_redon', 'RedLedOn', 'red', ''),
+            ('dmm_greenoff', 'RedLedOff', 'green', ''),
+            ('dmm_greenon', 'RedLedOn', 'green', ''),
+            ('dmm_blueoff', 'RedLedOff', 'blue', ''),
+            ('dmm_blueon', 'RedLedOn', 'blue', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('trs2_btmac', 'BtMac', 'btmac', ''),
             ))

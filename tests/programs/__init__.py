@@ -51,6 +51,7 @@ from . import test_sx750_safety
 from . import test_trek2_final
 from . import test_trek2_initial
 from . import test_trs1_initial
+from . import test_trs2_initial
 from . import test_ts3020h_initial
 from . import test_ts3020h_final
 from . import test_ts3520_final
@@ -106,6 +107,7 @@ __all__ = [
     'test_trek2_final',
     'test_trek2_initial',
     'test_trs1_initial',
+    'test_trs2_initial',
     'test_ts3020h_initial',
     'test_ts3020h_final',
     'test_ts3520_final',
