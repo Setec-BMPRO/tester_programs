@@ -29,6 +29,8 @@ MSP_PASSWORD = {    # Needs to be writable by the tester login
     'posix': '/home/setec/testdata/bslpassword.txt',
     'nt': r'C:\TestGear\TestData\bslpassword.txt',
     }[os.name]
+# Factor to tighten the calibration check
+_CAL_FACTOR = 0.5
 
 _COMMON = (
     LimitLow('FixtureLock', 200),
@@ -47,8 +49,8 @@ LIMITS_12 = _COMMON + (
     LimitBetween('OutOCP', 20.05, 24.00),
     LimitBetween('BattOCP', 14.175, 15.825),
     LimitLow('InOCP', 13.0),
-    LimitPercent('VoutPreCal', 13.8, 2.6),
-    LimitDelta('VoutPostCal', 13.8, 0.15),
+    LimitPercent('VoutPreCal', 13.5, 2.6),
+    LimitDelta('VoutPostCal', 13.5, _CAL_FACTOR * 0.15),
     LimitBetween('MspVout', 13.0, 14.6),
     )
 
@@ -56,8 +58,8 @@ LIMITS_24 = _COMMON + (
     LimitBetween('OutOCP', 10.0, 12.0),
     LimitBetween('BattOCP', 6.0, 9.0),
     LimitLow('InOCP', 26.0),
-    LimitPercent('VoutPreCal', 27.5, 2.6),
-    LimitDelta('VoutPostCal', 27.6, 0.15),
+    LimitPercent('VoutPreCal', 27.6, 2.6),
+    LimitDelta('VoutPostCal', 27.6, _CAL_FACTOR * 0.25),
     LimitBetween('MspVout', 26.0, 29.2),
     )
 
