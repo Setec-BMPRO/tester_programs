@@ -56,11 +56,11 @@ class _BCE282Initial(ProgramTestCase):
                         ' Built 11:57:54 on 8/8/2012.\r'
                         ' Error code: 1(p8=0, p16=0).\r'
                         ' Restart code: 4.', ) +
-                    (' -> ', ) * 2 +
+                    (' -> ', ) * 3 +
                     (' -> 0 ', ) +
-                    (' -> ', ) * 2 +
+                    (' -> ', ) +
                     # Both models respond with 12V output.
-                    (' -> 13800 ', ) +
+                    (' -> 13500 ', ) +
                     (' -> ', ) +
                     (' -> ', ) +
                     (' -> 0 ', ),

@@ -42,19 +42,18 @@ class Console(console.BaseConsole):
             'X-SUPPLY-VOLTAGE X@ PRINT', read_format='{0}'),
         'CAL-V': ParameterFloat(
             'CAL-VSET', writeable=True, write_format='{0} {1}',
-            read_format='{0}', minimum=12000, maximum=15000),
+            read_format='{0}'),
         'PASSWD': ParameterString(
             'BSL-PASSWORD', read_format='{0}'),
         }
 
-    def config(self, value):
-        """Configure scale values for each model."""
+    def scaling(self, value):
+        """Set scale values for each model."""
         self.cmd_data['MSP-VOUT'].scale = value
         self.cmd_data['CAL-V'].scale = value
 
-    def open(self):
-        """Open & setup console for calibration."""
-        super().open()
+    def initialise(self):
+        """Setup console for calibration."""
         self['ECHO'] = True
         self['UNLOCK'] = True
         self['NV-WRITE'] = True
@@ -64,7 +63,7 @@ class Console(console.BaseConsole):
         self['TEST-MODE'] = True
 
     def filter_reload(self):
-        """Reset internal filters."""
+        """Reset internal filters and wait for readings to settle."""
         self['FL-RELOAD'] = True
         time.sleep(1)
 

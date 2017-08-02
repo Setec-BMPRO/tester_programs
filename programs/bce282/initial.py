@@ -98,7 +98,7 @@ class Initial(share.TestSequence):
             TestStep('Calibration', self._step_cal),
             TestStep('OCP', self._step_ocp),
             )
-        self.devices['msp'].config(LIMITS[self.parameter]['ScaleFactor'])
+        self.devices['msp'].scaling(LIMITS[self.parameter]['ScaleFactor'])
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -194,6 +194,7 @@ class Initial(share.TestSequence):
         """Calibration."""
         msp = dev['msp']
         msp.open()
+        msp.initialise()
         mes['msp_status']()
         msp.filter_reload()
         mes['msp_vout']()
