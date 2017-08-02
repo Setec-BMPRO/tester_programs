@@ -58,6 +58,7 @@ class Console(console.BaseConsole):
         self['UNLOCK'] = True
         self['NV-WRITE'] = True
         self['RESTART'] = True
+        time.sleep(1)
         self['ECHO'] = True
         self['UNLOCK'] = True
         self['TEST-MODE'] = True
