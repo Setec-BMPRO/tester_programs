@@ -49,8 +49,8 @@ LIMITS_12 = _COMMON + (
     LimitBetween('OutOCP', 20.05, 24.00),
     LimitBetween('BattOCP', 14.175, 15.825),
     LimitLow('InOCP', 13.0),
-    LimitPercent('VoutPreCal', 13.5, 2.6),
-    LimitDelta('VoutPostCal', 13.5, _CAL_FACTOR * 0.15),
+    LimitPercent('VoutPreCal', 13.8, 2.6),
+    LimitDelta('VoutPostCal', 13.8, _CAL_FACTOR * 0.15),
     LimitBetween('MspVout', 13.0, 14.6),
     )
 
