@@ -91,7 +91,7 @@ class Initial(share.TestSequence):
         mes['dmm_VrefOff'](timeout=5)
         dev['dcs_VsecBias'].output(12.0)
         mes['dmm_GreenOn'](timeout=5)
-        dev['dcs_Vbias'].output(12.0)
+        dev['dcs_Vbias'].output(12.0, output=True)
         self.measure(('dmm_Vcc', 'ramp_OVP'), timeout=5)
         self.dcsource(
             (('dcs_Vout', 0.0), ('dcs_Vbias', 0.0), ('dcs_VsecBias', 0.0)),
