@@ -108,7 +108,28 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the board."""
+        """Program the board.
+
+        Notes from the BCE282 Testing Notes:
+        The bootloader software is programmed into the MSP430 processor at
+        the factory and cannot be erased. This software requires a password
+        to be sent with any command that can read or write the internal
+        Flash as a security measure. This password consists of a dump of
+        the top 32 bytes of Flash memory, so it is a run of 32 0xFF values
+        for an unprogrammed part, which allows a fresh part to be programmed
+        initially. If a previous version of the software is installed on the
+        BCE282, the required password can be read using a command from
+        the serial port.
+
+        Performing a mass erase will erase some further special locations
+        in Flash that are factory programmed with values for calibrating
+        the on chip oscillator. If the contents of these locations are lost
+        then the processor becomes useless as the on-chip oscillator
+        frequency can no longer be set to a sufficient accuracy for
+        reliable timing or serial comms. So when re-programming a part it
+        is essential that these values be saved and restored.
+
+        """
         # Get any existing password & write to MSP_PASSWORD file
         msp = dev['msp']
         password = None
@@ -173,10 +194,7 @@ class Initial(share.TestSequence):
         """Calibration."""
         msp = dev['msp']
         msp.open()
-        time.sleep(1)
-        msp.setup()
         mes['msp_status']()
-        msp.test_mode()
         msp.filter_reload()
         mes['msp_vout']()
         dmm_V = mes['dmm_voutpre'](timeout=5).reading1
@@ -184,6 +202,7 @@ class Initial(share.TestSequence):
         mes['dmm_voutpost'](timeout=5)
         msp['NV-WRITE'] = True
         mes['msp_status']()
+        msp.close()
 
     @share.teststep
     def _step_ocp(self, dev, mes):
@@ -225,6 +244,7 @@ class LogicalDevices(share.LogicalDevices):
 
     def reset(self):
         """Reset instruments."""
+        self['msp'].close()
         self['acsource'].reset()
         self['dcl_vout'].output(2.0)
         self['dcl_vbat'].output(2.0)

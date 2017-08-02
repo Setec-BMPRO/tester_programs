@@ -24,27 +24,27 @@ class Console(console.BaseConsole):
     puts_prompt = '\r> '
     cmd_data = {
         'ECHO': ParameterBoolean(
-            'echo', writeable=True, write_format='{0} {1}', read_format='{0}'),
+            'ECHO', writeable=True, write_format='{0} {1}', read_format='{0}'),
         'UNLOCK': ParameterBoolean(
-            '$deadbea7 unlock', writeable=True, write_format='{1}'),
+            '$DEADBEA7 UNLOCK', writeable=True, write_format='{1}'),
         'NV-WRITE': ParameterBoolean(
-            'nv-factory-write', writeable=True, write_format='{1}'),
+            'NV-FACTORY-WRITE', writeable=True, write_format='{1}'),
         'RESTART': ParameterBoolean(
-            'restart', writeable=True, write_format='{1}',
+            'RESTART', writeable=True, write_format='{1}',
             write_expected=5),  # 5 lines of startup banner
         'TEST-MODE': ParameterBoolean(
-            'test-mode-enable', writeable=True, write_format='{1}'),
+            'TEST-MODE-ENABLE', writeable=True, write_format='{1}'),
         'FL-RELOAD': ParameterBoolean(
-            'adc-filter-reload', writeable=True, write_format='{1}'),
+            'ADC-FILTER-RELOAD', writeable=True, write_format='{1}'),
         'MSP-STATUS': ParameterFloat(
-            'nv-status PRINT', read_format='{0}'),
+            'NV-STATUS PRINT', read_format='{0}'),
         'MSP-VOUT': ParameterFloat(
-            'x-supply-voltage x@ print', read_format='{0}'),
+            'X-SUPPLY-VOLTAGE X@ PRINT', read_format='{0}'),
         'CAL-V': ParameterFloat(
-            'cal-vset', writeable=True, write_format='{0} {1}',
-            read_format='{0}', minimum=0, maximum=15000),
+            'CAL-VSET', writeable=True, write_format='{0} {1}',
+            read_format='{0}', minimum=12000, maximum=15000),
         'PASSWD': ParameterString(
-            'bsl-password', read_format='{0}'),
+            'BSL-PASSWORD', read_format='{0}'),
         }
 
     def config(self, value):
@@ -52,21 +52,16 @@ class Console(console.BaseConsole):
         self.cmd_data['MSP-VOUT'].scale = value
         self.cmd_data['CAL-V'].scale = value
 
-    def setup(self):
-        """Setup console for calibration."""
+    def open(self):
+        """Open & setup console for calibration."""
+        super().open()
         self['ECHO'] = True
         self['UNLOCK'] = True
         self['NV-WRITE'] = True
         self['RESTART'] = True
-        time.sleep(1)
         self['ECHO'] = True
         self['UNLOCK'] = True
-        time.sleep(0.5)
-
-    def test_mode(self):
-        """Enable Manual Mode"""
         self['TEST-MODE'] = True
-        time.sleep(0.1)
 
     def filter_reload(self):
         """Reset internal filters."""
@@ -74,7 +69,7 @@ class Console(console.BaseConsole):
         time.sleep(1)
 
     def action(self, command=None, delay=0.0, expected=0):
-        """Send a command, and read the response.
+        """Send a command, and read the response (force a 0.1s delay).
 
         @param command Command string.
         @param delay Delay between sending command and reading response.
