@@ -8,6 +8,7 @@ import share
 
 LIMITS = (
     tester.LimitDelta('Vbat', 12.8, 0.2),
+    tester.LimitBoolean('Notify', True),
     )
 
 
@@ -26,7 +27,7 @@ class Final(share.TestSequence):
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit and measure output voltages."""
         dev['acsource'].output(voltage=240.0, output=True)
-        mes['dmm_vbat'].measure(timeout=10)
+        self.measure(('dmm_vbat', 'ui_yesnogreen',), timeout=10)
 
 
 class LogicalDevices(share.LogicalDevices):
@@ -49,8 +50,12 @@ class Sensors(share.Sensors):
 
     def open(self):
         """Create all Sensors."""
+        sensor = tester.sensor
         self['vbat'] = tester.sensor.Vdc(
             self.devices['dmm'], high=2, low=2, rng=100, res=0.001)
+        self['yesnogreen'] = sensor.YesNo(
+            message=tester.translate('bp35_final', 'IsOutputLedGreen?'),
+            caption=tester.translate('bp35_final', 'capOutputLed'))
 
 
 class Measurements(share.Measurements):
@@ -59,5 +64,7 @@ class Measurements(share.Measurements):
 
     def open(self):
         """Create all Measurements."""
-        self['dmm_vbat'] = tester.Measurement(
-            self.limits['Vbat'], self.sensors['vbat'])
+        self.create_from_names((
+            ('dmm_vbat', 'Vbat', 'vbat', ''),
+            ('ui_yesnogreen', 'Notify', 'yesnogreen', ''),
+            ))

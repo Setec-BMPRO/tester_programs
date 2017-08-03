@@ -21,7 +21,7 @@ class BP35Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['vbat'], 12.8),
+                    (sen['vbat'], 12.8), (sen['yesnogreen'], True),
                     ),
                 },
             }
@@ -29,6 +29,6 @@ class BP35Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(1, len(result.readings))   # Reading count
+        self.assertEqual(2, len(result.readings))   # Reading count
         # And did all steps run in turn?
         self.assertEqual(['PowerUp'], self.tester.ut_steps)
