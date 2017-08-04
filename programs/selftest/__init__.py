@@ -210,8 +210,8 @@ class LogicalDevices(share.LogicalDevices):
     def reset(self):
         """Reset instruments."""
         self['acsource'].reset()
-        for ld in self['dcl', False]:
-            ld.output(0.0)
+        for ld in self['dcl']:
+            ld.output(0.0, False)
         for dcs in self['dcs']:
             dcs.output(0.0, False)
         for rla in self['relays']:
