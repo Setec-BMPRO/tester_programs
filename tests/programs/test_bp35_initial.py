@@ -119,7 +119,7 @@ class _BP35Initial(ProgramTestCase):
                 'RemoteSw':
                     ('1', ),
                 'PmSolar':
-                    ('1', '', ),
+                    ('1', '555', '', '', '66', ),
                 'OCP':
                     ('240', '50000', '350', '12800', '500', ) +
                     ('', '4000', '32000', '12341234', '', ''),
@@ -201,7 +201,7 @@ class BP35_PM_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_PM,
-            63,
+            65,
             ['Prepare', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],
             )

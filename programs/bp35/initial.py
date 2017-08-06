@@ -119,6 +119,8 @@ _SR_SOLAR = (
 
 _PM_SOLAR = (
     LimitInteger('PM-Alive', 1, doc='PM Solar present'),
+    LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6, doc='PM zero reading before cal'),
+    LimitDelta('ARM-PmSolarIz-Post', 0, 0.1, doc='PM zero reading after cal'),
     )
 
 # Variant specific configuration data. Indexed by test program parameter.
@@ -364,10 +366,13 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_pm_solar(self, dev, mes):
         """PM type Solar regulator."""
-        mes['arm_pm_alive']()
+        bp35 = dev['bp35']
         # Wait for settling time (from 'Initialise' to here) to finish
         self._myevent.wait()
-        dev['bp35']['PM_ZEROCAL'] = 0
+        self.measure(('arm_pm_alive', 'arm_pm_iz_pre', ))
+        bp35['PM_ZEROCAL'] = 0
+        bp35['NVWRITE'] = True
+        mes['arm_pm_iz_post']()
 
     @share.teststep
     def _step_ocp(self, dev, mes):
@@ -539,6 +544,7 @@ class Sensors(share.Sensors):
                 ('arm_sr_vin', 'SR_VIN'),
                 # PM Solar Regulator
                 ('arm_pm_alive', 'PM_ALIVE'),
+                ('arm_pm_iout', 'PM_IOUT'),
             ):
             self[name] = console.Sensor(bp35, cmdkey)
         self['arm_swver'] = console.Sensor(
@@ -600,6 +606,8 @@ class Measurements(share.Measurements):
         if self.parameter == 'PM':      # PM Solar Regulator
             self.create_from_names((
                 ('arm_pm_alive', 'PM-Alive', 'arm_pm_alive', ''),
+                ('arm_pm_iz_pre', 'ARM-PmSolarIz-Pre', 'arm_pm_iout', ''),
+                ('arm_pm_iz_post', 'ARM-PmSolarIz-Post', 'arm_pm_iout', ''),
                 ))
         else:                           # SR Solar Regulator
             self.create_from_names((
