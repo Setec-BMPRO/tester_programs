@@ -6,6 +6,7 @@
 import os
 import inspect
 import time
+import threading
 import tester
 from tester import (
     TestStep,
@@ -16,6 +17,7 @@ import share
 from . import console
 
 ARM_VERSION = '2.0.16018.4543'
+ARM_HW_VER = 10
 PIC_VERSION = '1.4.14454.271'
 PIC_HW_VER = 3
 # Serial port for the ARM. Used by programmer and ARM comms module.
@@ -28,14 +30,6 @@ PIC_FILE = 'bp35sr_{0}.hex'.format(PIC_VERSION)
 CAN_ECHO = 'TQQ,32,0'
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
-# Solar Reg settings
-SOLAR_VSET = 13.650
-SOLAR_VSET_SETTLE = 0.05
-SOLAR_ISET = 30.0
-SOLAR_ICAL = 10.0
-SOLAR_VIN = 20.0
-SOLAR_VIN_PRE_PERCENT = 6.0
-SOLAR_VIN_POST_PERCENT = 1.5
 # Injected Vbat & Vaux
 VBAT_IN = 12.4
 VAUX_IN = 13.5
@@ -51,79 +45,98 @@ VOUT_SET = 12.8
 OCP_SET = 35.0
 # This magic number is the OCP setpoint.
 # 44000 is the inbuilt default, which we reduce, to increase OCP.
-_OCP_MAGIC = round(44000 / 1.05)    # +5% adjustment
+OCP_MAGIC = round(44000 / 1.05)    # +5% adjustment
 # Number of lines in startup banner
 BANNER_LINES = 3
+# SR Solar Reg settings
+SR_VSET = 13.650
+SR_VSET_SETTLE = 0.05
+SR_ISET = 30.0
+SR_ICAL = 10.0
+SR_VIN = 20.0
+SR_VIN_PRE_PERCENT = 6.0
+SR_VIN_POST_PERCENT = 1.5
+# PM Solar Reg settings
+PM_ZERO_WAIT = 30     # Settling delay for zero calibration
 
 _COMMON = (
-    LimitLow('FixtureLock', 200),
-    LimitDelta('HwVer8', 4400.0, 250.0),  # Rev 8+
-    LimitDelta('ACin', VAC, 5.0),
-    LimitBetween('Vpfc', 401.0, 424.0),
-    LimitBetween('12Vpri', 11.5, 13.0),
+    LimitLow('FixtureLock', 200, doc='Fixture microswitch pressed'),
+    LimitDelta('HwVer8', 4400.0, 250.0, doc='Hardware Rev 8 or higher'),
+    LimitDelta('ACin', VAC, 5.0, doc='Injected AC voltage'),
+    LimitBetween('Vpfc', 401.0, 424.0, doc='PFC output voltage'),
+    LimitBetween('12Vpri', 11.5, 13.0, doc='12V primary control rail'),
     LimitBetween('15Vs', 11.5, 13.0),
-    LimitBetween('Vload', 12.0, 12.9),
-    LimitLow('VloadOff', 0.5),
+    LimitBetween('Vload', 12.0, 12.9, doc='Load output is ON'),
+    LimitLow('VloadOff', 0.5, doc='Load output is OFF'),
     LimitDelta('VbatIn', 12.0, 0.5),
     LimitBetween('Vbat', 12.2, 13.0),
     LimitDelta('Vaux', 13.4, 0.4),
-    LimitDelta('3V3', 3.30, 0.05),
-    LimitDelta('FanOn', 12.5, 0.5),
-    LimitLow('FanOff', 0.5),
-    LimitDelta('SolarVcc', 3.3, 0.1),
-    LimitDelta('SolarVin', SOLAR_VIN, 0.5),
-    LimitPercent('VsetPre', SOLAR_VSET, 6.0),
-    LimitPercent('VsetPost', SOLAR_VSET, 1.5),
-    LimitPercent('ARM-IoutPre', SOLAR_ICAL, 9.0),
-    LimitPercent('ARM-IoutPost', SOLAR_ICAL, 3.0),
-    LimitPercent('OCP', OCP_SET, 4.0),
-    LimitLow('InOCP', 11.6),
-    LimitRegExp('ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    LimitDelta('ARM-AcV', VAC, 10.0),
-    LimitDelta('ARM-AcF', 50.0, 1.0),
+    LimitDelta('3V3', 3.30, 0.05, doc='Micro power supply'),
+    LimitDelta('FanOn', 12.5, 0.5, doc='Fans ON'),
+    LimitLow('FanOff', 0.5, doc='Fans OFF'),
+    LimitPercent('OCP', OCP_SET, 4.0, doc='OCP setpoint'),
+    LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
+    LimitRegExp('ARM-SwVer', '^{0}$'.format(ARM_VERSION.replace('.', r'\.')),
+        doc='Reported software version'),
+    LimitDelta('ARM-AcV', VAC, 10.0, doc='AC voltage reported by ARM'),
+    LimitDelta('ARM-AcF', 50.0, 1.0, doc='AC frequency reported by ARM'),
     LimitBetween('ARM-SecT', 8.0, 70.0),
     LimitDelta('ARM-Vout', 12.45, 0.45),
-    LimitPercent('ARM-SolarVin-Pre', SOLAR_VIN, SOLAR_VIN_PRE_PERCENT),
-    LimitPercent('ARM-SolarVin-Post', SOLAR_VIN, SOLAR_VIN_POST_PERCENT),
-    LimitBetween('ARM-Fan', 0, 100),
-    LimitDelta('ARM-LoadI', 2.1, 0.9),
-    LimitDelta('ARM-BattI', IBATT, 1.0),
+    LimitBetween('ARM-Fan', 0, 100, doc='Fan speed (%) reported by ARM'),
+    LimitDelta('ARM-LoadI', 2.1, 0.9, doc='Load current reported by ARM'),
+    LimitDelta('ARM-BattI', IBATT, 1.0, doc='Battery current reported by ARM'),
     LimitDelta('ARM-BusI', ILOAD + IBATT, 3.0),
     LimitPercent('ARM-AuxV', VAUX_IN, percent=2.0, delta=0.3,
         doc='ARM Aux voltage reading'),
-    LimitBetween('ARM-AuxI', 0.0, 1.5),
-    LimitInteger('ARM-RemoteClosed', 1),
-    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    LimitRegExp('CAN_RX', r'^RRQ,32,0'),
-    LimitInteger('CAN_BIND', _CAN_BIND),
-    LimitInteger('SOLAR_ALIVE', 1),
-    LimitInteger('SOLAR_RELAY', 1),
-    LimitInteger('SOLAR_ERROR', 0),
-    LimitInteger('Vout_OV', 0),     # Over-voltage not triggered
+    LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current reported by ARM'),
+    LimitInteger('ARM-RemoteClosed', 1, doc='REMOTE input reported by ARM'),
+    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$',
+        doc='Valid serial number format'),
+    LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
+    LimitInteger('CAN_BIND', _CAN_BIND, doc='CAN comms established'),
+    LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
     )
 
-LIMITS_SR = _COMMON
+_SR_SOLAR = (
+    LimitDelta('SolarVcc', 3.3, 0.1, doc='Vcc on the PIC micro'),
+    LimitDelta('SolarVin', SR_VIN, 0.5, doc='SR Solar input voltage'),
+    LimitPercent('VsetPre', SR_VSET, 6.0,
+        doc='SR Solar Vout before calibration'),
+    LimitPercent('VsetPost', SR_VSET, 1.5,
+        doc='SR Solar Vout after calibration'),
+    LimitPercent('ARM-IoutPre', SR_ICAL, 9.0,
+        doc='SR Solar Iout before calibration'),
+    LimitPercent('ARM-IoutPost', SR_ICAL, 3.0,
+        doc='SR Solar Iout before calibration'),
+    LimitPercent('ARM-SolarVin-Pre', SR_VIN, SR_VIN_PRE_PERCENT,
+        doc='SR Solar Vin before calibration'),
+    LimitPercent('ARM-SolarVin-Post', SR_VIN, SR_VIN_POST_PERCENT,
+        doc='SR Solar Vin before calibration'),
+    LimitInteger('SR-Alive', 1, doc='SR Solar present'),
+    LimitInteger('SR-Relay', 1, doc='SR Solar input relay ON'),
+    LimitInteger('SR-Error', 0, doc='No SR Solar error'),
+    )
 
-#LIMITS_PM = ()
-
-#LIMITS_HA = _COMMON
+_PM_SOLAR = (
+    LimitInteger('PM-Alive', 1, doc='PM Solar present'),
+    )
 
 # Variant specific configuration data. Indexed by test program parameter.
 #   'Limits': Test limits.
 #   'HwVer': Hardware version data.
 CONFIG = {
     'SR': {
-        'Limits': LIMITS_SR,
-        'HwVer': (10, 1, 'A'),
+        'Limits': _COMMON + _SR_SOLAR,
+        'HwVer': (ARM_HW_VER, 1, 'A'),
         },
-#    'PM': {
-#        'Limits': LIMITS_PM,
-#        'HwVer': (10, 2, 'A'),
-#        },
-#    'HA': {
-#        'Limits': LIMITS_HA,
-#        'HwVer': (10, 3, 'A'),
-#        },
+    'PM': {
+        'Limits': _COMMON + _PM_SOLAR,
+        'HwVer': (ARM_HW_VER, 2, 'A'),
+        },
+    'HA': {
+        'Limits': _COMMON + _SR_SOLAR,
+        'HwVer': (ARM_HW_VER, 3, 'A'),
+        },
     }
 
 
@@ -131,42 +144,48 @@ class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
+    sernum = None   # Unit Serial number
+    pm = False      # True if this is a 'PM' solar version unit
+    # Event timer for PM Solar calibration (about 30sec)
+    _myevent = None
+    _mytimer = None
+
     def open(self):
         """Prepare for testing."""
         self.config = CONFIG[self.parameter]
+        self.pm = (self.parameter == 'PM')
         super().open(
             self.config['Limits'], LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
-            TestStep('ProgramPIC', self._step_program_pic, not self.fifo),
+            TestStep(
+                'ProgramPIC', self._step_program_pic,
+                not self.pm and not self.fifo),
             TestStep('ProgramARM', self._step_program_arm, not self.fifo),
             TestStep('Initialise', self._step_initialise_arm),
-            TestStep('SolarReg', self._step_solar_reg),
+            TestStep('SrSolar', self._step_sr_solar, not self.pm),
             TestStep('Aux', self._step_aux),
             TestStep('PowerUp', self._step_powerup),
             TestStep('Output', self._step_output),
             TestStep('RemoteSw', self._step_remote_sw),
+            TestStep('PmSolar', self._step_pm_solar, self.pm),
             TestStep('OCP', self._step_ocp),
             TestStep('CanBus', self._step_canbus),
             )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
         Measure fixture lock and part detection micro-switches.
-        Apply power to the unit's Battery terminals and Solar Reg input
-        to power up the micros.
+        Apply power to the unit's Battery terminals to power up the ARM.
 
         """
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(('dmm_lock', 'hardware8', ), timeout=5)
-        # Apply DC Sources to Battery terminals and Solar Reg input
         dev['dcs_vbat'].output(VBAT_IN, True)
         dev['rla_vbat'].set_on()
-        dev['dcs_sreg'].output(SOLAR_VIN, True)
-        self.measure(('dmm_vbatin', 'dmm_3v3', 'dmm_solarvcc'), timeout=5)
+        self.measure(('dmm_vbatin', 'dmm_3v3'), timeout=5)
 
     @share.teststep
     def _step_program_pic(self, dev, mes):
@@ -175,8 +194,10 @@ class Initial(share.TestSequence):
         Device is powered by Solar Reg input voltage.
 
         """
+        dev['SR_LowPower'].output(SR_VIN, output=True)
+        mes['dmm_solarvcc'](timeout=5)
         dev['program_pic'].program()
-        dev['dcs_sreg'].output(0.0)     # Switch off the Solar
+        dev['SR_LowPower'].output(0.0)
 
     @share.teststep
     def _step_program_arm(self, dev, mes):
@@ -186,7 +207,7 @@ class Initial(share.TestSequence):
 
         """
         dev['program_arm'].program()
-        # Cold Reset microprocessor for units that are reprogrammed
+        # Cold Reset microprocessor for units that were already programmed
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
         dcsource.output(0.0)
         load.output(1.0, delay=1)
@@ -206,67 +227,71 @@ class Initial(share.TestSequence):
         bp35, reset = dev['bp35'], dev['rla_reset']
         bp35.open()
         reset.pulse(0.1)
-        dev['dcs_sreg'].output(SOLAR_VIN)
-        bp35.action(None, delay=1.5, expected=BANNER_LINES)  # Flush banner
+        if not self.pm:
+            dev['SR_LowPower'].output(SR_VIN)
+        bp35.action(None, delay=1.5, expected=BANNER_LINES)
         bp35['NVWIPE'] = True
         reset.pulse(0.1)
-        bp35.action(None, delay=1.5, expected=BANNER_LINES)  # Flush banner
+        bp35.action(None, delay=1.5, expected=BANNER_LINES)
         bp35['HW_VER'] = self.config['HwVer']
         bp35['SER_ID'] = self.sernum
         bp35['NVWRITE'] = True
-        bp35['SR_DEL_CAL'] = True
-        bp35['SR_HW_VER'] = PIC_HW_VER
+        if not self.pm:
+            bp35['SR_DEL_CAL'] = True
+            bp35['SR_HW_VER'] = PIC_HW_VER
         reset.pulse(0.1)    # Reset is required because of HW_VER setting
-        bp35.action(None, delay=1.5, expected=BANNER_LINES)  # Flush banner
+        bp35.action(None, delay=1.5, expected=BANNER_LINES)
         mes['arm_swver']()
-        bp35.manual_mode(start=True) # Start the change to manual mode
+        if self.pm:
+            bp35['PM_RELAY'] = False
+            time.sleep(0.5)
+            bp35['PM_RELAY'] = True
+            # Start a timer for the PM Solar ADC settling time (30sec)
+            self._myevent = threading.Event()
+            self._mytimer = threading.Timer(PM_ZERO_WAIT, self._myevent.set)
+            self._mytimer.start()
+        bp35.manual_mode(start=True)    # Start the change to manual mode
 
     @share.teststep
-    def _step_solar_reg(self, dev, mes):
+    def _step_sr_solar(self, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         bp35 = dev['bp35']
-        # Switch on fixture BCE282 to power Solar Reg input
-        dev['rla_acsw'].set_on()
-        dev['acsource'].output(voltage=VAC, output=True)
-        dev['dcs_sreg'].output(0.0, output=False)
-        self.measure(('arm_solar_alive', 'arm_vout_ov', ), timeout=5)
+        dev['SR_HighPower'].output(True)
+        dev['SR_LowPower'].output(0.0, output=False)
+        self.measure(('arm_sr_alive', 'arm_vout_ov', ), timeout=5)
         # The SR needs V & I set to zero after power up or it won't start.
-        bp35.solar_set(0, 0)
+        bp35.sr_set(0, 0)
         # Now set the actual output settings
-        bp35.solar_set(SOLAR_VSET, SOLAR_ISET)
-        time.sleep(2)           # Wait for the Solar to start & overshoot
+        bp35.sr_set(SR_VSET, SR_ISET, delay=2)
         bp35['VOUT_OV'] = 2     # Reset OVP Latch because of Solar overshoot
-        # Read solar input voltage and patch ARM measurement limits
-        solar_vin = mes['dmm_solarvin'](timeout=5).reading1
-        mes['arm_solar_vin_pre'].testlimit = (
+        # Read solar input voltage and patch measurement limits
+        sr_vin = mes['dmm_solarvin'](timeout=5).reading1
+        mes['arm_sr_vin_pre'].testlimit = (
             LimitPercent(
-                'ARM-SolarVin-Pre', solar_vin, SOLAR_VIN_PRE_PERCENT), )
-        mes['arm_solar_vin_post'].testlimit = (
+                'ARM-SolarVin-Pre', sr_vin, SR_VIN_PRE_PERCENT), )
+        mes['arm_sr_vin_post'].testlimit = (
             LimitPercent(
-                'ARM-SolarVin-Post', solar_vin, SOLAR_VIN_POST_PERCENT), )
+                'ARM-SolarVin-Post', sr_vin, SR_VIN_POST_PERCENT), )
         # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
         self.measure(
-            ('arm_solar_error', 'arm_solar_relay', 'arm_solar_vin_pre', ), timeout=5)
+            ('arm_sr_error', 'arm_sr_relay', 'arm_sr_vin_pre', ),
+            timeout=5)
         # Wait for the voltage to settle
-        vmeasured = mes['dmm_vsetpre'].stable(SOLAR_VSET_SETTLE).reading1
-        bp35['SR_VCAL'] = vmeasured   # Calibrate output voltage setpoint
-        bp35['SR_VIN_CAL'] = solar_vin  # Calibrate input voltage reading
-        # New solar sw ver 182 is too dumb to change the setpoint until a
-        # DIFFERENT voltage setpoint is given...
-        bp35.solar_set(SOLAR_VSET - 0.05, SOLAR_ISET)
-        time.sleep(0.2)
-        bp35.solar_set(SOLAR_VSET, SOLAR_ISET)
-        time.sleep(1)
-        self.measure(('arm_solar_vin_post', 'dmm_vsetpost', ))
-        dev['dcl_bat'].output(SOLAR_ICAL, True)
+        vmeasured = mes['dmm_vsetpre'].stable(SR_VSET_SETTLE).reading1
+        bp35['SR_VCAL'] = vmeasured     # Calibrate output voltage setpoint
+        bp35['SR_VIN_CAL'] = sr_vin     # Calibrate input voltage reading
+        # Solar sw ver 182 will not change the setpoint until a DIFFERENT
+        # voltage setpoint is given...
+        bp35.sr_set(SR_VSET - 0.05, SR_ISET, delay=0.2)
+        bp35.sr_set(SR_VSET, SR_ISET, delay=1)
+        self.measure(('arm_sr_vin_post', 'dmm_vsetpost', ))
+        dev['dcl_bat'].output(SR_ICAL, True)
         mes['arm_ioutpre'](timeout=5)
-        bp35['SR_ICAL'] = SOLAR_ICAL  # Calibrate current setpoint
+        bp35['SR_ICAL'] = SR_ICAL       # Calibrate current setpoint
         time.sleep(1)
         mes['arm_ioutpost'](timeout=5)
         dev['dcl_bat'].output(0.0)
-        # Switch off fixture BCE282
-        dev['acsource'].output(voltage=0.0)
-        dev['rla_acsw'].set_off()
+        dev['SR_HighPower'].output(False)
 
     @share.teststep
     def _step_aux(self, dev, mes):
@@ -296,13 +321,13 @@ class Initial(share.TestSequence):
         # Remove injected Battery voltage
         dev['rla_vbat'].set_off()
         dev['dcs_vbat'].output(0.0, output=False)
-        # Is it now running on it's own?
         mes['arm_vout_ov']()
+        # Is it now running on it's own?
         self.measure(('dmm_3v3', 'dmm_15vs'), timeout=10)
         # Calibrate Vout setting and reading
-        data = self.measure(('dmm_vbat', ), timeout=10)
-        bp35['VSET_CAL'] = data.reading1
-        bp35['VBUS_CAL'] = data.reading1
+        v_actual = self.measure(('dmm_vbat', ), timeout=10).reading1
+        bp35['VSET_CAL'] = v_actual
+        bp35['VBUS_CAL'] = v_actual
         bp35['NVWRITE'] = True
 
     @share.teststep
@@ -337,6 +362,14 @@ class Initial(share.TestSequence):
         mes['dmm_vload'](timeout=5)
 
     @share.teststep
+    def _step_pm_solar(self, dev, mes):
+        """PM type Solar regulator."""
+        mes['arm_pm_alive']()
+        # Wait for settling time (from 'Initialise' to here) to finish
+        self._myevent.wait()
+        dev['bp35']['PM_ZEROCAL'] = 0
+
+    @share.teststep
     def _step_ocp(self, dev, mes):
         """Test functions of the unit."""
         bp35 = dev['bp35']
@@ -349,7 +382,7 @@ class Initial(share.TestSequence):
         dev['dcl_bat'].output(IBATT, output=True)
         self.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
         bp35['BUS_ICAL'] = ILOAD + IBATT    # Calibrate current reading
-        bp35['OCP_CAL'] = _OCP_MAGIC        # Calibrate current setpoint
+        bp35['OCP_CAL'] = OCP_MAGIC         # Adjust current setpoint
         bp35['NVWRITE'] = True
         for load in range(OUTPUTS):
             with tester.PathName('L{0}'.format(load + 1)):
@@ -372,6 +405,30 @@ class Initial(share.TestSequence):
         rx_can.measure()
 
 
+class SrHighPower():
+
+    """High power source to power the SR Solar Regulator.
+
+    It is a BCE282 inside the fixture which is powered by the AC Source.
+    A relay feeds the AC Source to either the BCE282 (ON) or to the BP35 (OFF).
+
+    """
+
+    def __init__(self, relay, acsource):
+        """Create the High Power source."""
+        self.relay = relay
+        self.acsource = acsource
+
+    def output(self, output=False):
+        """Switch on the source."""
+        if output:
+            self.relay.set_on()
+            self.acsource.output(voltage=240, output=True, delay=0.5)
+        else:
+            self.acsource.output(voltage=0.0)
+            self.relay.set_off()
+
+
 class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
@@ -386,7 +443,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
                 ('dcs_vaux', tester.DCSource, 'DCS3'),
-                ('dcs_sreg', tester.DCSource, 'DCS4'),
+                ('SR_LowPower', tester.DCSource, 'DCS4'),
                 ('dcl_out', tester.DCLoad, 'DCL1'),
                 ('dcl_bat', tester.DCLoad, 'DCL5'),
                 ('rla_reset', tester.Relay, 'RLA1'),
@@ -413,6 +470,8 @@ class LogicalDevices(share.LogicalDevices):
         bp35_ser.port = ARM_PORT
         # BP35 Console driver
         self['bp35'] = console.Console(bp35_ser, verbose=False)
+        # High power source for the SR Solar Regulator
+        self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))
@@ -424,7 +483,8 @@ class LogicalDevices(share.LogicalDevices):
         self['acsource'].reset()
         self['dcl_bat'].output(2.0, delay=1)
         self['discharge'].pulse()
-        for dev in ('dcs_vbat', 'dcs_vaux', 'dcs_sreg', 'dcl_out', 'dcl_bat'):
+        for dev in (
+                'dcs_vbat', 'dcs_vaux', 'SR_LowPower', 'dcl_out', 'dcl_bat'):
             self[dev].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot', 'rla_pic',
                     'rla_loadsw', 'rla_vbat', 'rla_acsw'):
@@ -469,13 +529,16 @@ class Sensors(share.Sensors):
                 ('arm_ibus', 'BUS_I'),
                 ('arm_vaux', 'AUX_V'),
                 ('arm_iaux', 'AUX_I'),
-                ('arm_solar_alive', 'SR_ALIVE'),
-                ('arm_solar_relay', 'SR_RELAY'),
-                ('arm_solar_error', 'SR_ERROR'),
                 ('arm_vout_ov', 'VOUT_OV'),
                 ('arm_iout', 'SR_IOUT'),
-                ('arm_solar_vin', 'SR_VIN'),
                 ('arm_remote', 'BATT_SWITCH'),
+                # SR Solar Regulator
+                ('arm_sr_alive', 'SR_ALIVE'),
+                ('arm_sr_relay', 'SR_RELAY'),
+                ('arm_sr_error', 'SR_ERROR'),
+                ('arm_sr_vin', 'SR_VIN'),
+                # PM Solar Regulator
+                ('arm_pm_alive', 'PM_ALIVE'),
             ):
             self[name] = console.Sensor(bp35, cmdkey)
         self['arm_swver'] = console.Sensor(
@@ -514,16 +577,10 @@ class Measurements(share.Measurements):
             ('dmm_vloadoff', 'VloadOff', 'vload', ''),
             ('dmm_vbatin', 'VbatIn', 'vbat', ''),
             ('dmm_vbat', 'Vbat', 'vbat', ''),
-            ('dmm_vsetpre', 'VsetPre', 'vset', ''),
-            ('dmm_vsetpost', 'VsetPost', 'vset', ''),
-            ('arm_ioutpre', 'ARM-IoutPre', 'arm_iout', ''),
-            ('arm_ioutpost', 'ARM-IoutPost', 'arm_iout', ''),
             ('dmm_vaux', 'Vaux', 'vbat', ''),
             ('dmm_3v3', '3V3', 'o3v3', ''),
             ('dmm_fanon', 'FanOn', 'fan', ''),
             ('dmm_fanoff', 'FanOff', 'fan', ''),
-            ('dmm_solarvcc', 'SolarVcc', 'solarvcc', ''),
-            ('dmm_solarvin', 'SolarVin', 'solarvin', ''),
             ('ramp_ocp', 'OCP', 'ocp', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
@@ -537,14 +594,27 @@ class Measurements(share.Measurements):
             ('arm_ibus', 'ARM-BusI', 'arm_ibus', ''),
             ('arm_vaux', 'ARM-AuxV', 'arm_vaux', ''),
             ('arm_iaux', 'ARM-AuxI', 'arm_iaux', ''),
-            ('arm_solar_alive', 'SOLAR_ALIVE', 'arm_solar_alive', ''),
-            ('arm_solar_relay', 'SOLAR_RELAY', 'arm_solar_relay', ''),
-            ('arm_solar_error', 'SOLAR_ERROR', 'arm_solar_error', ''),
             ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov', ''),
-            ('arm_solar_vin_pre', 'ARM-SolarVin-Pre', 'arm_solar_vin', ''),
-            ('arm_solar_vin_post', 'ARM-SolarVin-Post', 'arm_solar_vin', ''),
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', ''),
             ))
+        if self.parameter == 'PM':      # PM Solar Regulator
+            self.create_from_names((
+                ('arm_pm_alive', 'PM-Alive', 'arm_pm_alive', ''),
+                ))
+        else:                           # SR Solar Regulator
+            self.create_from_names((
+                ('dmm_solarvcc', 'SolarVcc', 'solarvcc', ''),
+                ('dmm_solarvin', 'SolarVin', 'solarvin', ''),
+                ('arm_sr_alive', 'SR-Alive', 'arm_sr_alive', ''),
+                ('arm_sr_relay', 'SR-Relay', 'arm_sr_relay', ''),
+                ('arm_sr_error', 'SR-Error', 'arm_sr_error', ''),
+                ('arm_sr_vin_pre', 'ARM-SolarVin-Pre', 'arm_sr_vin', ''),
+                ('arm_sr_vin_post', 'ARM-SolarVin-Post', 'arm_sr_vin', ''),
+                ('dmm_vsetpre', 'VsetPre', 'vset', ''),
+                ('dmm_vsetpost', 'VsetPost', 'vset', ''),
+                ('arm_ioutpre', 'ARM-IoutPre', 'arm_iout', ''),
+                ('arm_ioutpost', 'ARM-IoutPost', 'arm_iout', ''),
+                ))
         # Generate load current measurements
         loads = []
         for sen in self.sensors['arm_loads']:

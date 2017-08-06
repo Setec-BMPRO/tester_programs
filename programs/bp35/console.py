@@ -22,7 +22,7 @@ _CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
 # "CAN Bound" is STATUS bit 28
 _CAN_BOUND = (1 << 28)
 
-# Time it takes for Manual Mode command to take effect
+# Time it takes for Manual Mode command to take effect (sec)
 _MANUAL_MODE_WAIT = 2.1
 
 
@@ -52,11 +52,11 @@ class Console(console.BadUartConsole):
         'NVWIPE': ParameterBoolean('NV-FACTORY-WIPE',
             writeable=True, readable=False, write_format='{1}'),
         # Product specific commands
-        'VSET_CAL': ParameterFloat(      # Voltage reading
+        'VSET_CAL': ParameterFloat(     # Voltage reading
             'VSET', writeable=True,
             write_format='{0} "{1} CAL',
             scale=1000, write_expected=1),
-        'VBUS_CAL': ParameterFloat(      # Voltage setpoint
+        'VBUS_CAL': ParameterFloat(     # Voltage setpoint
             'VBUS', writeable=True,
             write_format='{0} "{1} CAL',
             scale=1000, write_expected=1),
@@ -96,28 +96,6 @@ class Console(console.BadUartConsole):
         'TASK_STARTUP': ParameterFloat(
             'TASK_STARTUP', writeable=True,
             minimum=0, maximum=3, scale=1),
-        'SR_HW_VER': ParameterFloat(
-            'SOLAR_REG_HW_VERS', writeable=True,
-            scale=1),
-        'SR_VSET': ParameterFloat(
-            'SOLAR_REG_V', writeable=True,
-            scale=1000),
-        'SR_ISET': ParameterFloat(
-            'SOLAR_REG_I', writeable=True,
-            scale=1000),
-        'SR_VCAL': ParameterFloat(
-            'SOLAR_REG_CAL_V_OUT', writeable=True,
-            scale=1000),
-        'SR_ICAL': ParameterFloat(
-            'SOLAR_REG_CAL_I_OUT', writeable=True,
-            scale=1000),
-        'SR_IOUT': ParameterFloat('SOLAR_REG_IOUT', scale=1000),
-        'SR_DEL_CAL': ParameterBoolean(
-            'SOLAR_REG_DEL_CAL', writeable=True),
-        'SR_VIN': ParameterFloat('SOLAR_REG_VIN', scale=1000),
-        'SR_VIN_CAL': ParameterFloat(
-            'SOLAR_REG_CAL_V_IN', writeable=True,
-            scale=1000),
         'BATT_TYPE': ParameterFloat('BATTERY_TYPE_SWITCH', scale=1),
         'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
         'PRI_T': ParameterFloat('PRIMARY_TEMPERATURE', scale=10),
@@ -134,10 +112,6 @@ class Console(console.BadUartConsole):
         'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
         'I2C_FAULTS': ParameterFloat('I2C_FAULTS', scale=1),
         'SPI_FAULTS': ParameterFloat('SPI_FAULTS', scale=1),
-        'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
-        'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
-        'SR_ERROR': ParameterFloat('SOLAR_REG_ERRORCODE'),
-        'SR_RELAY': ParameterFloat('SOLAR_REG_RELAY'),
         'OPERATING_MODE': ParameterHex('CHARGER_MODE'),
         'OCP_CAL': ParameterFloat(      # OCP setpoint
             'CAL_I_CONVSET', writeable=True, maximum=65535),
@@ -146,6 +120,34 @@ class Console(console.BadUartConsole):
         'CAN_BIND': ParameterHex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
+        # SR Solar Regulator commands
+        'SR_HW_VER': ParameterFloat(
+            'SOLAR_REG_HW_VERS', writeable=True, scale=1),
+        'SR_VSET': ParameterFloat(
+            'SOLAR_REG_V', writeable=True, scale=1000),
+        'SR_ISET': ParameterFloat(
+            'SOLAR_REG_I', writeable=True, scale=1000),
+        'SR_VCAL': ParameterFloat(
+            'SOLAR_REG_CAL_V_OUT', writeable=True, scale=1000),
+        'SR_ICAL': ParameterFloat(
+            'SOLAR_REG_CAL_I_OUT', writeable=True, scale=1000),
+        'SR_IOUT': ParameterFloat('SOLAR_REG_IOUT', scale=1000),
+        'SR_DEL_CAL': ParameterBoolean(
+            'SOLAR_REG_DEL_CAL', writeable=True),
+        'SR_VIN': ParameterFloat('SOLAR_REG_VIN', scale=1000),
+        'SR_VIN_CAL': ParameterFloat(
+            'SOLAR_REG_CAL_V_IN', writeable=True, scale=1000),
+        'SR_TEMP': ParameterFloat('SOLAR_REG_TEMP', scale=10),
+        'SR_ALIVE': ParameterBoolean('SOLAR_REG_ALIVE'),
+        'SR_ERROR': ParameterFloat('SOLAR_REG_ERRORCODE'),
+        'SR_RELAY': ParameterFloat('SOLAR_REG_RELAY'),
+        # PM Solar Regulator commands
+        'PM_ALIVE': ParameterBoolean('SOLAR_SI_ALIVE'),
+        'PM_RELAY': ParameterBoolean('SOLAR_SI_RAW_OUTPUTS', writeable=True),
+        'PM_ICAL': ParameterFloat('CAL_IZ_SOLAR_SI', writeable=True),
+        'PM_IOUT': ParameterFloat('SOLAR_SI_MA', scale=1000),
+        'PM_ZEROCAL': ParameterFloat(
+            'ISSI', writeable=True, write_format='{0} "{1} CAL', scale=1000),
         }
     # Event timer for entry into Manual Mode
     _myevent = None
@@ -191,7 +193,7 @@ class Console(console.BadUartConsole):
         time.sleep(0.5)
         self['DCDC_EN'] = True
         time.sleep(0.5)
-        self['VOUT_OV'] = 2     # OVP Latch reset
+        self['VOUT_OV'] = 2         # OVP Latch reset
 
     def load_set(self, set_on=True, loads=()):
         """Set the state of load outputs.
@@ -213,16 +215,17 @@ class Console(console.BadUartConsole):
         self['LOAD_SET'] = value
 
 
-    def solar_set(self, voltage, current):
-        """Set the state of Solar Regulator.
+    def sr_set(self, voltage, current, delay=0):
+        """Set the state of the SR Solar Regulator.
 
-        @param voltage Voltage setpoint
-        @param current Current setpoint
+        @param voltage Voltage setpoint (V)
+        @param current Current setpoint (A)
 
         """
         self.action(
             '{0} {1} SOLAR-SETP-V-I'.format(
-                int(voltage * 1000), int(current * 1000)))
+                round(voltage * 1000), round(current * 1000)))
+        time.sleep(delay)
 
     def can_testmode(self, state):
         """Enable or disable CAN Test Mode.

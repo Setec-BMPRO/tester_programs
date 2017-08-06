@@ -12,7 +12,7 @@ class TRSInitial(ProgramTestCase):
 
     prog_class = trs2.Initial
     parameter = None
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""

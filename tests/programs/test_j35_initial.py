@@ -45,7 +45,7 @@ class _J35Initial(ProgramTestCase):
         for sensor in sen['arm_loads']:
             sensor.store(value)
 
-    def _pass_run(self, pwr_con,  rdg_count, steps):
+    def _pass_run(self, pwr_con, rdg_count, steps):
         """PASS run of the program."""
         sen = self.test_program.sensors
         dev = self.test_program.devices

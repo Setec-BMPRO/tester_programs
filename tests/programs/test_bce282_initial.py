@@ -39,7 +39,7 @@ class _BCE282Initial(ProgramTestCase):
                     (sen['vbat'], 0.0), (sen['alarm'], 2200),
                     ),
                 'Calibration': (
-                    (sen['vout'], (self.vout, ) * 2),
+                    (sen['vout'], (self.vout, ) * 4),
                     ),
                 'OCP': (
                     (sen['alarm'], 12000),
@@ -60,7 +60,7 @@ class _BCE282Initial(ProgramTestCase):
                     (' -> 0 ', ) +
                     (' -> ', ) +
                     # Both models respond with 12V output.
-                    (' -> 13500 ', ) +
+                    (' -> 13800 ', ) +
                     (' -> ', ) +
                     (' -> ', ) +
                     (' -> 0 ', ),
@@ -84,7 +84,7 @@ class BCE282_12_Initial(_BCE282Initial):
     """BCE282-12 Initial program test suite."""
 
     parameter = '12'
-    vout = 13.5
+    vout = 13.8
     inocp = 12.9
     debug = False
 
