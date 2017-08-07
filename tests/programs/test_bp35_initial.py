@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BP35 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bp35
 
@@ -36,16 +36,10 @@ class _BP35Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        patcher = patch('share.BackgroundTimer')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
-        # Patch threading.Event & threading.Timer for console.manual_mode()
-        mymock = MagicMock()
-        mymock.is_set.return_value = True   # threading.Event.is_set()
-        patcher = patch('threading.Event', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('threading.Timer', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
@@ -119,7 +113,7 @@ class _BP35Initial(ProgramTestCase):
                 'RemoteSw':
                     ('1', ),
                 'PmSolar':
-                    ('1', '555', '', '', '66', ),
+                    ('1', '555', '1234 -> 1235', '', '66', ),
                 'OCP':
                     ('240', '50000', '350', '12800', '500', ) +
                     ('', '4000', '32000', '12341234', '', ''),

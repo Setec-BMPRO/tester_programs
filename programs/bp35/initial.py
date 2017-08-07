@@ -6,7 +6,6 @@
 import os
 import inspect
 import time
-import threading
 import tester
 from tester import (
     TestStep,
@@ -245,7 +244,7 @@ class Initial(share.TestSequence):
             bp35['PM_RELAY'] = False
             time.sleep(0.5)
             bp35['PM_RELAY'] = True
-            dev['PmTimer'].start()
+            dev['PmTimer'].start(PM_ZERO_WAIT)
         bp35.manual_mode(start=True)    # Start the change to manual mode
 
     @share.teststep
@@ -427,36 +426,6 @@ class SrHighPower():
             self.relay.set_off()
 
 
-class PmTimer():
-
-    """A timer to run the PM Solar ADC settling time."""
-
-    _myevent = None
-    _mytimer = None
-    _wait_time = None
-
-    def __init__(self, wait_time):
-        """Create the Timer."""
-        self._myevent = threading.Event()
-        self._wait_time = wait_time
-
-    def start(self):
-        """Start the timer."""
-        self._myevent.clear()
-        self._mytimer = threading.Timer(self._wait_time, self._myevent.set)
-        self._mytimer.start()
-
-    def wait(self):
-        """Wait for the timer to finish."""
-        self._myevent.wait()
-
-    def cancel(self):
-        """Cancel the timer."""
-        if self._mytimer:
-            self._mytimer.cancel()
-        self._mytimer = None
-
-
 class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
@@ -500,7 +469,7 @@ class LogicalDevices(share.LogicalDevices):
         self['bp35'] = console.Console(bp35_ser, verbose=False)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
-        self['PmTimer'] = PmTimer(PM_ZERO_WAIT)
+        self['PmTimer'] = share.BackgroundTimer()
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))

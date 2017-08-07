@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for J35 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
@@ -28,16 +28,10 @@ class _J35Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        patcher = patch('share.BackgroundTimer')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
-        # Patch threading.Event & threading.Timer for console.manual_mode()
-        mymock = MagicMock()
-        mymock.is_set.return_value = True   # threading.Event.is_set()
-        patcher = patch('threading.Event', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('threading.Timer', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""

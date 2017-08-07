@@ -3,18 +3,17 @@
 """J35 ARM processor console driver."""
 
 import time
-import threading
-from share import console
+import share
 
-Sensor = console.Sensor
+Sensor = share.console.Sensor
 
 # Some easier to use short names
-ParameterString = console.ParameterString
-ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
-ParameterHex = console.ParameterHex
-ParameterCAN = console.ParameterCAN
-ParameterRaw = console.ParameterRaw
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
+ParameterHex = share.console.ParameterHex
+ParameterCAN = share.console.ParameterCAN
+ParameterRaw = share.console.ParameterRaw
 
 # CAN Test mode controlled by STATUS bit 29
 _CAN_ON = (1 << 29)
@@ -26,7 +25,7 @@ _CAN_BOUND = (1 << 28)
 _MANUAL_MODE_WAIT = 2.1
 
 
-class Console(console.BadUartConsole):
+class Console(share.console.BadUartConsole):
 
     """Communications to J35 console."""
 
@@ -100,9 +99,6 @@ class Console(console.BadUartConsole):
         'NVWRITE': ParameterBoolean('NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
         }
-    # Event timer for entry into Manual Mode
-    _myevent = None
-    _mytimer = None
 
     def __init__(self, port, verbose=False):
         """Create console instance."""
@@ -111,6 +107,7 @@ class Console(console.BadUartConsole):
         for i in range(1, 15):
             self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
+        self._timer = share.BackgroundTimer()
 
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
@@ -138,12 +135,9 @@ class Console(console.BadUartConsole):
         """
         if start:  # Trigger manual mode, and start a timer
             self['SLEEP_MODE'] = 3
-            self._myevent = threading.Event()
-            self._mytimer = threading.Timer(
-                _MANUAL_MODE_WAIT, self._myevent.set)
-            self._mytimer.start()
+            self._timer.start(_MANUAL_MODE_WAIT)
         else:   # Complete manual mode setup once the timer is done.
-            self._myevent.wait()
+            self._timer.wait()
             self['TASK_STARTUP'] = 0
             self['IOUT'] = iout
             self['VOUT'] = vout
