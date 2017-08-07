@@ -148,9 +148,6 @@ class Initial(share.TestSequence):
 
     sernum = None   # Unit Serial number
     pm = False      # True if this is a 'PM' solar version unit
-    # Event timer for PM Solar calibration (about 30sec)
-    _myevent = None
-    _mytimer = None
 
     def open(self):
         """Prepare for testing."""
@@ -248,10 +245,7 @@ class Initial(share.TestSequence):
             bp35['PM_RELAY'] = False
             time.sleep(0.5)
             bp35['PM_RELAY'] = True
-            # Start a timer for the PM Solar ADC settling time (30sec)
-            self._myevent = threading.Event()
-            self._mytimer = threading.Timer(PM_ZERO_WAIT, self._myevent.set)
-            self._mytimer.start()
+            dev['PmTimer'].start()
         bp35.manual_mode(start=True)    # Start the change to manual mode
 
     @share.teststep
@@ -367,8 +361,7 @@ class Initial(share.TestSequence):
     def _step_pm_solar(self, dev, mes):
         """PM type Solar regulator."""
         bp35 = dev['bp35']
-        # Wait for settling time (from 'Initialise' to here) to finish
-        self._myevent.wait()
+        dev['PmTimer'].wait()
         self.measure(('arm_pm_alive', 'arm_pm_iz_pre', ))
         bp35['PM_ZEROCAL'] = 0
         bp35['NVWRITE'] = True
@@ -434,6 +427,36 @@ class SrHighPower():
             self.relay.set_off()
 
 
+class PmTimer():
+
+    """A timer to run the PM Solar ADC settling time."""
+
+    _myevent = None
+    _mytimer = None
+    _wait_time = None
+
+    def __init__(self, wait_time):
+        """Create the Timer."""
+        self._myevent = threading.Event()
+        self._wait_time = wait_time
+
+    def start(self):
+        """Start the timer."""
+        self._myevent.clear()
+        self._mytimer = threading.Timer(self._wait_time, self._myevent.set)
+        self._mytimer.start()
+
+    def wait(self):
+        """Wait for the timer to finish."""
+        self._myevent.wait()
+
+    def cancel(self):
+        """Cancel the timer."""
+        if self._mytimer:
+            self._mytimer.cancel()
+        self._mytimer = None
+
+
 class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
@@ -477,6 +500,7 @@ class LogicalDevices(share.LogicalDevices):
         self['bp35'] = console.Console(bp35_ser, verbose=False)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
+        self['PmTimer'] = PmTimer(PM_ZERO_WAIT)
         # Apply power to fixture (Comms & Trek2) circuits.
         self['dcs_vcom'].output(12.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))
@@ -484,6 +508,7 @@ class LogicalDevices(share.LogicalDevices):
     def reset(self):
         """Reset instruments."""
         self['bp35'].close()
+        self['PmTimer'].cancel()
         # Switch off AC Source & discharge the unit
         self['acsource'].reset()
         self['dcl_bat'].output(2.0, delay=1)
@@ -545,6 +570,7 @@ class Sensors(share.Sensors):
                 # PM Solar Regulator
                 ('arm_pm_alive', 'PM_ALIVE'),
                 ('arm_pm_iout', 'PM_IOUT'),
+                ('arm_pm_iout_rev', 'PM_IOUT_REV'),
             ):
             self[name] = console.Sensor(bp35, cmdkey)
         self['arm_swver'] = console.Sensor(

@@ -146,8 +146,10 @@ class Console(console.BadUartConsole):
         'PM_RELAY': ParameterBoolean('SOLAR_SI_RAW_OUTPUTS', writeable=True),
         'PM_ICAL': ParameterFloat('CAL_IZ_SOLAR_SI', writeable=True),
         'PM_IOUT': ParameterFloat('SOLAR_SI_MA', scale=1000),
+        'PM_IOUT_REV': ParameterFloat('SOLAR_SI_MA_REVERSED', scale=1000),
         'PM_ZEROCAL': ParameterFloat(
-            'ISSI', writeable=True, write_format='{0} "{1} CAL', scale=1000),
+            'ISSI', writeable=True, write_format='{0} "{1} CAL',
+            scale=1000, write_expected=1),
         }
     # Event timer for entry into Manual Mode
     _myevent = None
