@@ -31,7 +31,7 @@ ARM_BIN = 'sx750_arm_{}.bin'.format(BIN_VERSION)
 PFC_STABLE = 0.05
 
 # Fan ON threshold temperature (C)
-FAN_THRESHOLD = 65.0
+FAN_THRESHOLD = 55.0
 
 _5VSB_EXT = 6.3
 PRICTL_EXT = 13.0
