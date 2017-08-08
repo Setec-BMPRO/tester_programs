@@ -3,6 +3,7 @@
 """Tester program loader."""
 
 import os
+import traceback
 import time
 import inspect
 import configparser
@@ -14,7 +15,7 @@ import tester
 import programs
 
 # Configuration of logger.
-_CONSOLE_LOG_LEVEL = logging.INFO   #  DEBUG
+_CONSOLE_LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
 
 
@@ -72,11 +73,16 @@ def _main():
     logger.info('Open Program "%s"', test_program)
     tst.open(pgm)
     logger.info('Running Test')
-    tst.test(('UUT1', ))
-#    tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
-    logger.info('Close Program')
-    time.sleep(2)
-    tst.close()
+    try:
+        tst.test(('UUT1', ))
+#         tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
+    except Exception:
+        exc_str = traceback.format_exc()
+        logger.error('Test Run Exception:\n%s', exc_str)
+    finally:
+        logger.info('Close Program')
+        time.sleep(2)
+        tst.close()
     logger.info('Stop Tester')
     tst.stop()
     tst.join()
