@@ -428,7 +428,7 @@ class LogicalDevices(share.LogicalDevices):
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
             self[dcs].output(12.0, output=True)
             self.add_closer(lambda: self[dcs].output(0.0, output=False))
-        time.sleep(2)   # Allow OS to detect the new ports
+        time.sleep(4)   # Allow OS to detect the new ports
 
     def reset(self):
         """Reset instruments."""
