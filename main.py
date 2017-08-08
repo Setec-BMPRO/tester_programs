@@ -15,7 +15,7 @@ import tester
 import programs
 
 # Configuration of logger.
-_CONSOLE_LOG_LEVEL = logging.INFO
+_CONSOLE_LOG_LEVEL = logging.DEBUG
 _LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
 
 
