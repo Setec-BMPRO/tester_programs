@@ -22,7 +22,7 @@ AVR_HEX = 'BatteryCheckSupervisor-2.hex'
 # Serial port for the ARM console module.
 ARM_CON = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
 # Serial port for the ARM programmer.
-ARM_PGM = {'posix': '/dev/ttyUSB1', 'nt': r'\\.\COM2'}[os.name]
+ARM_PGM = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
 # Serial port for the Bluetooth device
 BT_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM4'}[os.name]
 
