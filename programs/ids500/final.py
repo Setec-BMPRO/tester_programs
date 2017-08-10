@@ -3,7 +3,6 @@
 # Copyright 2017 SETEC Pty Ltd
 """IDS-500 Final Test Program."""
 
-import os
 import time
 import tester
 from tester import (
@@ -14,7 +13,7 @@ import share
 from . import console
 
 # Serial port for the PIC.
-PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+PIC_PORT = share.port('017048', 'PIC')
 
 _LDD_6_ERROR_LIMITS = 0.07
 _LDD_50_ERROR_LIMITS = 0.7

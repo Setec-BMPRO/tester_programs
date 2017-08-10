@@ -19,9 +19,9 @@ from . import cmrsbp
 PIC_HEX = 'CMR-SBP-9.hex'
 
 # Serial port for the EV2200.
-EV_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+EV_PORT = share.port('017789', 'EV')
 # Serial port for the CMR.
-CMR_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
+CMR_PORT = share.port('017789', 'CMR')
 
 #   Tuple ( Tuple (name, identity, low, high, string, boolean))
 LIMITS_INI = (

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck Final Test Program."""
 
-import os
 import tester
 from tester import (
     TestStep,
@@ -12,7 +11,7 @@ import share
 
 ARM_VERSION = '1.7.4080'        # Software binary version
 
-BT_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM9'}[os.name]
+BT_PORT = share.port('027013', 'BT')
 
 LIMITS = (
     LimitDelta('12V', 12.0, 0.1),

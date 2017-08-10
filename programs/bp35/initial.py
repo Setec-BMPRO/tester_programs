@@ -20,7 +20,7 @@ ARM_HW_VER = 10
 PIC_VERSION = '1.4.14454.271'
 PIC_HW_VER = 3
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
+ARM_PORT = share.port('027176', 'ARM')
 # ARM software image file
 ARM_FILE = 'bp35_{0}.bin'.format(ARM_VERSION)
 # dsPIC software image file

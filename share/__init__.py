@@ -14,6 +14,7 @@ from .programmer import *       # pylint:disable=W0401
 from .ticker import *           # pylint:disable=W0401
 from .timed_data import *       # pylint:disable=W0401
 from .timer import *            # pylint:disable=W0401
+from .fixture import *          # pylint:disable=W0401
 
 
 def deprecated(func):

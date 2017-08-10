@@ -14,12 +14,10 @@ from . import console
 
 SAM_HEX = 'trs2_test.hex'
 
-# Serial port for the programmer.
-PROG_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM17'}[os.name]
 # Serial port for the ARM. Used by ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM18'}[os.name]
+ARM_PORT = share.port('030451', 'ARM')
 # Serial port for the Bluetooth module.
-BLE_PORT = {'posix': '/dev/ttyUSB2', 'nt': 'COM19'}[os.name]
+BLE_PORT = share.port('030451', 'BLE')
 
 VBATT = 12.0
 

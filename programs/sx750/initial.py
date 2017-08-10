@@ -21,9 +21,9 @@ PIC_HEX1 = 'sx750_pic5Vsb_1.hex'
 PIC_HEX2 = 'sx750_picPwrSw_2.hex'
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM7'}[os.name]
+ARM_PORT = share.port('022837', 'ARM')
 # Serial port for the Arduino.
-ARDUINO_PORT = {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name]
+ARDUINO_PORT = share.port('022837', 'ARDUINO')
 # Software image filenames
 ARM_BIN = 'sx750_arm_{}.bin'.format(BIN_VERSION)
 

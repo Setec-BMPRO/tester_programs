@@ -17,11 +17,11 @@ ARM_VERSION = '1.1.13665.176'      # Software binary version
 HW_VER = (4, 0, 'A')
 
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM15'}[os.name]
+ARM_PORT = share.port('028468', 'ARM')
 # ARM software image file
 ARM_FILE = 'cn101_{}.bin'.format(ARM_VERSION)
 # Serial port for the Bluetooth module.
-BLE_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM14'}[os.name]
+BLE_PORT = share.port('028468', 'BLE')
 # CAN echo request messages
 CAN_ECHO = 'TQQ,32,0'
 

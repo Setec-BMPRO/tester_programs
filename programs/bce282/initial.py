@@ -16,9 +16,9 @@ from . import console
 from . import tosbsl
 
 # Serial port for programming MSP430.
-MSP_PORT1 = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+MSP_PORT1 = share.port('020827', 'MSP1')
 # Serial port used by MSP430 comms module.
-MSP_PORT2 = {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name]
+MSP_PORT2 = share.port('020827', 'MSP2')
 # Calibration data save file (TI Text format)
 MSP_SAVEFILE = {    # Needs to be writable by the tester login
     'posix': '/home/setec/testdata/bslsavedata.txt',

@@ -14,7 +14,7 @@ import share
 from . import console
 
 # Serial port for the PIC.
-PIC_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name]
+PIC_PORT = share.port('021299', 'PIC')
 
 FORCE_OFFSET = -8
 FORCE_THRESHOLD = 160

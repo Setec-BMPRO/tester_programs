@@ -16,7 +16,7 @@ from . import console
 
 ARM_VERSION = '1.2.14549.989'      # ARM version
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
+ARM_PORT = share.port('029242', 'ARM')
 # ARM software image file
 ARM_FILE = 'j35_{}.bin'.format(ARM_VERSION)
 # CAN echo request messages

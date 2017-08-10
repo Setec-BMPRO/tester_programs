@@ -18,7 +18,7 @@ BIN_VERSION = '1.0.14022.985'   # Software binary version
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 ARM_HW_VER = (2, 0, 'A')
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
+ARM_PORT = share.port('029687', 'ARM')
 # Software image filename
 ARM_FILE = 'RvView_{0}.bin'.format(BIN_VERSION)
 # CAN echo request messages

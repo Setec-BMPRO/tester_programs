@@ -21,9 +21,9 @@ BIN_VERSION = '1.5.15833.150'   # Software binary version
 HW_VER = (5, 0, 'B')
 
 # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
-CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
+CAN_PORT = share.port('027420', 'CAN')
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM10'}[os.name]
+ARM_PORT = share.port('027420', 'ARM')
 # Software image filename
 ARM_FILE = 'Trek2_{0}.bin'.format(BIN_VERSION)
 # CAN echo request messages

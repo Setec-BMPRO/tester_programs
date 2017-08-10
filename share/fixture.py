@@ -17,8 +17,8 @@ DATA = {
     # Fixtures using Non-USB serial ports
 
     '020827': {     # BCE282 Initial
-        'MSP1': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
-        'MSP2': {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name],
+        'MSP1': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name], # programming
+        'MSP2': {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name], # comms
         },
     '017789': {     # CMR-SBP Initial
         'EV': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
@@ -77,8 +77,7 @@ DATA = {
         # Hub port 2: Arduino
         'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
         # Hub port 3: SETEC FTDI
-# FIXME: This port should be set to SETEC_FTDI_HUB[3]
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': 'COM7'}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI_HUB[3]}[os.name],
         },
     '027420': {     # Trek2 Initial/Final
         # Hub port 3: SETEC FTDI

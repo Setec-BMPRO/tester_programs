@@ -22,7 +22,7 @@ PFC_STABLE = 0.05
 # Reading to reading difference for 12V voltage stability
 V12_STABLE = 0.005
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM6'}[os.name]
+ARM_PORT = share.port('025197', 'ARM')
 # Software image filename
 ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
 

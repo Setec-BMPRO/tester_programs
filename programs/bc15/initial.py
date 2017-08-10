@@ -15,7 +15,7 @@ from . import console
 
 BIN_VERSION = '2.0.16032.2000'      # Software binary version
 # Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = {'posix': '/dev/ttyUSB0', 'nt': 'COM16'}[os.name]
+ARM_PORT = share.port('028467', 'ARM')
 # ARM software image file
 ARM_FILE = 'bc15_{}.bin'.format(BIN_VERSION)
 # Setpoints
