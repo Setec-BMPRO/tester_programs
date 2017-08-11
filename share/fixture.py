@@ -86,12 +86,10 @@ DATA = {
         'CAN': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[4]}[os.name],
         },
     '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
-        # Hub port X: HID Atmel programmer
-#        'PROG': {'posix': '/dev/ttyUSB0', 'nt': 'COM17'}[os.name],
-        # Hub port X: SETEC FTDI
-        'ARM': {'posix': '/dev/ttyUSB1', 'nt': 'COM18'}[os.name],
-        # Hub port X: SETEC FTDI
-        'BLE': {'posix': '/dev/ttyUSB2', 'nt': 'COM19'}[os.name],
+        # Hub port 1: SETEC FTDI
+        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI_HUB[1]}[os.name],
+        # Hub port 2: SETEC FTDI
+        'BLE': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[2]}[os.name],
         },
     }
 
