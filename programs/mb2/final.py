@@ -9,11 +9,11 @@ from tester import (
     )
 import share
 
-VSTART = 12.8
+VSTART = 12.9
 VSTOP = 9.0
 
 LIMITS = (
-    LimitDelta('Vin', 12.8, 0.1),
+    LimitDelta('Vin', 12.9, 0.1),
     LimitPercent('Vout', 14.4, 3.0),
     LimitBoolean('Notify', True),
     )
@@ -34,7 +34,7 @@ class Final(share.TestSequence):
     def _step_power_on(self, dev, mes):
         """Power up unit."""
         dev['dcs_vin'].output(VSTART, True, delay=0.5)
-        dev['dcl_vout'].output(0.5, True)
+        dev['dcl_vout'].output(0.1, True)
         self.measure(
             ('dmm_vin', 'ui_yesnolight', 'dmm_vout'),
             timeout=5)
