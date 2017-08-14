@@ -20,8 +20,8 @@ class MB2Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerOn': (
-                    (sen['vin'], (12.8,) * 2), (sen['vout'], 14.4),
-                    (sen['yesnolight'], True),
+                    (sen['vin'], 12.8), (sen['yesnolight'], True),
+                    (sen['vout'], 14.4), (sen['yesnooff'], True),
                     ),
                 },
             }
@@ -29,7 +29,7 @@ class MB2Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(3, len(result.readings))    # Reading count
+        self.assertEqual(4, len(result.readings))    # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerOn', ],

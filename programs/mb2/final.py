@@ -5,17 +5,16 @@
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitPercent, LimitLow, LimitBoolean
+    LimitDelta, LimitPercent, LimitBoolean
     )
 import share
 
 VSTART = 12.8
-VSTOP = 9.2
+VSTOP = 9.0
 
 LIMITS = (
     LimitDelta('Vin', 12.8, 0.1),
     LimitPercent('Vout', 14.4, 3.0),
-    LimitLow('VoutOff', 0.5),
     LimitBoolean('Notify', True),
     )
 
@@ -34,12 +33,13 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Power up unit."""
-        dev['dcs_vin'].output(VSTART, True)
-        dev['dcl_vout'].output(1.0, True)
-        mes['dmm_vin'].stable(delta=0.005)
-        mes['dmm_vout'](timeout=5)
+        dev['dcs_vin'].output(VSTART, True, delay=0.5)
+        dev['dcl_vout'].output(0.5, True)
+        self.measure(
+            ('dmm_vin', 'ui_yesnolight', 'dmm_vout'),
+            timeout=5)
         dev['dcs_vin'].output(VSTOP)
-        mes['ui_yesnolight'](timeout=5)
+        mes['ui_yesnooff'](timeout=5)
 
 
 class LogicalDevices(share.LogicalDevices):
@@ -75,6 +75,9 @@ class Sensors(share.Sensors):
         self['yesnolight'] = sensor.YesNo(
             message=tester.translate('mb2_final', 'IsLightOn?'),
             caption=tester.translate('mb2_final', 'capLight'))
+        self['yesnooff'] = sensor.YesNo(
+            message=tester.translate('mb2_final', 'IsLightOff?'),
+            caption=tester.translate('mb2_final', 'capLight'))
 
 
 class Measurements(share.Measurements):
@@ -86,6 +89,6 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
             ('dmm_vout', 'Vout', 'vout', ''),
-            ('dmm_voutoff', 'VoutOff', 'vout', ''),
             ('ui_yesnolight', 'Notify', 'yesnolight', ''),
+            ('ui_yesnooff', 'Notify', 'yesnooff', ''),
             ))
