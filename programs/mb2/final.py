@@ -5,15 +5,15 @@
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitPercent, LimitBoolean
+    LimitBetween, LimitPercent, LimitBoolean
     )
 import share
 
 VSTART = 12.9
-VSTOP = 9.0
+VSTOP = 9.1
 
 LIMITS = (
-    LimitDelta('Vin', 12.9, 0.1),
+    LimitBetween('Vin', 9.0, 13.0),
     LimitPercent('Vout', 14.4, 3.0),
     LimitBoolean('Notify', True),
     )
@@ -36,10 +36,10 @@ class Final(share.TestSequence):
         dev['dcs_vin'].output(VSTART, True, delay=0.5)
         dev['dcl_vout'].output(0.1, True)
         self.measure(
-            ('dmm_vin', 'ui_yesnolight', 'dmm_vout'),
-            timeout=5)
+            ('dmm_vin', 'ui_yesnolight', 'dmm_vout'), timeout=5)
         dev['dcs_vin'].output(VSTOP)
-        mes['ui_yesnooff'](timeout=5)
+        self.measure(
+            ('dmm_vin', 'ui_yesnooff',), timeout=5)
 
 
 class LogicalDevices(share.LogicalDevices):
