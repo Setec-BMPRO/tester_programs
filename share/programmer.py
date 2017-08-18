@@ -7,6 +7,7 @@ import subprocess
 import logging
 import tester
 import isplpc
+import jsonrpclib       # Install with: pip install jsonrpclib-pelix
 
 
 # Result values to store into the mirror sensor
@@ -14,56 +15,67 @@ _SUCCESS = 0
 _FAILURE = 1
 
 
-class ProgramSAM():
+class ProgramSAMB11():
 
-    pic_binary = {
-        'posix': 'pickit3',
-        'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
-        }[os.name]
+    """Connection to a networked SAMB11 programmer.
 
-    """Atmel SAM device programmer using a Atmel-ICE Debugger."""
+    A 64-bit Windows PC is required to run the SAMB11 programmer tool.
+    We run a JSON-RPC network server on a Windows laptop to do the programming
+    when instructed.
 
-    def __init__(self,
-                 hexfile, working_dir, device_type,
-                 relay, limitname='Program'):
-        """Create a programmer.
+    """
 
-        @param hexfile Full pathname of HEX file
-        @param working_dir Working directory
-        @param device_type SAM device type (eg: 'SAM B11-MR210CA')
+    # Default server URL
+    default_server = 'http://te-laptop1.mel.setec.com.au:8888/'
+    # The networked JSON-RPC programmer instance
+    server = None
+    # jsonrpclib uses non-standard 'application/json-rpc' by default
+    #   Set the standard content_type here
+    content_type = 'application/json'
+    # Relay to connect the target device to the programmer
+    relay = None
+    # Measurement for the programming result
+    _mes = None
+
+    def __init__(self, relay, server=None, limitname='Program'):
+        """Create a programmer instance.
+
         @param relay Relay device to connect programmer to target
+        @param server URL of the networked programmer
         @param limitname Testlimit name
 
         """
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self.hexfile = hexfile
-        self.working_dir = working_dir
-        self.device_type = device_type
+        if server is None:
+            server = self.default_server
+        self.server = jsonrpclib.ServerProxy(
+            server,
+            config=jsonrpclib.config.Config(content_type=self.content_type)
+            )
         self.relay = relay
         limit = tester.LimitInteger(
             limitname, _SUCCESS, doc='Programming succeeded')
-        self._sam = tester.Measurement(limit, tester.sensor.Mirror())
+        self._mes = tester.Measurement(limit, tester.sensor.Mirror())
+
+    def echo(self, message):
+        """Call the echo() method of the server.
+
+        @param message Message to be echoed by the server.
+        @return The server response
+
+        """
+        return self.server.echo(message)
 
     def program(self):
         """Program a device."""
         try:
-            command = [
-                self.pic_binary,
-                '/P{}'.format(self.device_type),
-                '/F{}'.format(self.hexfile),
-                '/E',
-                '/M',
-                '/Y'
-                ]
             self.relay.set_on()
-            subprocess.check_output(command, cwd=self.working_dir)
-            self._sam.sensor.store(_SUCCESS)
-        except subprocess.CalledProcessError as err:
+            self.server.program()
+            self._mes.sensor.store(_SUCCESS)
+        except Exception as err:
             self._logger.debug('Error: %s', err.output)
-            self._sam.sensor.store(_FAILURE)
+            self._mes.sensor.store(_FAILURE)
         self.relay.set_off()
-        self._sam.measure()
+        self._mes.measure()
 
 
 class ProgramPIC():
