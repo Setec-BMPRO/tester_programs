@@ -34,7 +34,7 @@ class Initial(share.TestSequence):
         LimitHigh('BlueLedOff', 3.0),
         LimitLow('BlueLedOn', 0.1),
         LimitLow('TestPinCover', 0.5),
-        LimitRegExp('BtMac', r'^[0-F]{12}$'),
+        LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         LimitBoolean('Notify', True),
         )

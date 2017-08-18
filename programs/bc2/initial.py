@@ -18,7 +18,7 @@ class Initial(share.TestSequence):
     limits = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
-        LimitRegExp('BtMac', r'^[0-F]{12}$'),
+        LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         LimitBoolean('Notify', True),
         )
