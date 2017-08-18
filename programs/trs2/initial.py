@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """TRS2 Initial Program."""
 
-import os
-import inspect
 import tester
 from tester import (
     TestStep,
@@ -11,8 +9,6 @@ from tester import (
     )
 import share
 from . import console
-
-SAM_HEX = 'trs2_test.hex'
 
 # Serial port for the ARM. Used by ARM comms module.
 ARM_PORT = share.port('030451', 'ARM')
@@ -36,6 +32,7 @@ LIMITS = (
     LimitLow('GreenLedOn', 0.1),
     LimitHigh('BlueLedOff', 3.0),
     LimitLow('BlueLedOn', 0.1),
+    LimitLow('TestPinCover', 0.5),
     LimitRegExp('BtMac', r'^[0-F]{12}$'),
     LimitBoolean('DetectBT', True),
     LimitBoolean('Notify', True),
@@ -52,7 +49,7 @@ class Initial(share.TestSequence):
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Program', self._step_program, not self.fifo),
-            TestStep('Test', self._step_test),
+            TestStep('TestARM', self._step_test_arm),
             TestStep('Bluetooth', self._step_bluetooth),
             )
 
@@ -63,18 +60,25 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
+        mes['dmm_tstpincov'](timeout=5)
         dev['rla_pin'].set_on()
         dev['dcs_vin'].output(VBATT, True)
-        self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
+        self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
+        dev['rla_pin'].set_off()
+        mes['dmm_brakeon'](timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the SAM device."""
-        dev['program_sam'].program()
+        dev['samb11'].program()
 
     @share.teststep
-    def _step_test(self, dev, mes):
+    def _step_test_arm(self, dev, mes):
         """Test the operation of TRS2."""
+        trs2 = dev['trs2']
+        trs2.open()
+        dev['rla_reset'].pulse(0.1)
+#        trs2.action(None, delay=1.5, expected=2)  # Flush banner
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -104,17 +108,15 @@ class LogicalDevices(share.LogicalDevices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS1'),
+                ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_prog', tester.Relay, 'RLA2'),
-                ('rla_pin', tester.Relay, 'RLA5'),
+                ('rla_reset', tester.Relay, 'RLA5'),
+                ('rla_pin', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # SAM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_sam'] = share.ProgramSAM(
-            SAM_HEX, folder, 'SAM B11-MR210CA', self['rla_prog'])
+        self['samb11'] = share.ProgramSAMB11(relay=self['rla_prog'])
         # Serial connection to the console
         self['trs2_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
@@ -129,13 +131,14 @@ class LogicalDevices(share.LogicalDevices):
         self['ble_ser'].port = BLE_PORT
         self['ble'] = share.BleRadio(self['ble_ser'])
         # Apply power to fixture circuits.
-        self['dcs_vcom'].output(9.0, output=True, delay=5)
+        self['dcs_vfix'].output(9.0, output=True, delay=5)
+        self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
-        for dev in ('dcs_vcom', 'dcs_vin',):
+        for dev in ('dcs_vin', ):
             self[dev].output(0.0, False)
-        for rla in ('rla_prog', 'rla_pin', ):
+        for rla in ('rla_prog', 'rla_reset', 'rla_pin'):
             self[rla].set_off()
 
 
@@ -155,6 +158,8 @@ class Sensors(share.Sensors):
         self['brake'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.01)
         self['light'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.01)
         self['remote'] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
+        self['tstpin_cover'] = sensor.Vdc(
+            dmm, high=16, low=1, rng=100, res=0.01)
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         trs2 = self.devices['trs2']
@@ -186,6 +191,7 @@ class Measurements(share.Measurements):
             ('dmm_greenon', 'RedLedOn', 'green', ''),
             ('dmm_blueoff', 'RedLedOff', 'blue', ''),
             ('dmm_blueon', 'RedLedOn', 'blue', ''),
+            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('trs2_btmac', 'BtMac', 'btmac', ''),
             ))

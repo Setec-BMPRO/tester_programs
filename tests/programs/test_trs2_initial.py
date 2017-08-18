@@ -12,7 +12,7 @@ class TRSInitial(ProgramTestCase):
 
     prog_class = trs2.Initial
     parameter = None
-    debug = False
+    debug = True
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -22,7 +22,8 @@ class TRSInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
-                    (sen['vin'], 12.0), (sen['3v3'], 3.30),
+                    (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
+                    (sen['3v3'], 3.30), (sen['brake'], (0.0, 12.0)),
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
@@ -34,8 +35,8 @@ class TRSInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(4, len(result.readings))  # Reading count
+        self.assertEqual(7, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
-            ['Prepare', 'Test', 'Bluetooth'],
+            ['Prepare', 'TestARM', 'Bluetooth'],
             self.tester.ut_steps)
