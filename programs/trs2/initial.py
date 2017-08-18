@@ -10,42 +10,38 @@ from tester import (
 import share
 from . import console
 
-# Serial port for the ARM. Used by ARM comms module.
-ARM_PORT = share.port('030451', 'ARM')
-# Serial port for the Bluetooth module.
-BLE_PORT = share.port('030451', 'BLE')
-
-VBATT = 12.0
-
-LIMITS = (
-    LimitDelta('Vin', 12.0, 0.5),
-    LimitDelta('3V3', 3.3, 0.25),
-    LimitLow('BrakeOff', 0.5),
-    LimitDelta('BrakeOn', VBATT, (0.5, 0)),
-    LimitLow('LightOff', 0.5),
-    LimitDelta('LightOn', VBATT, (0.25, 0)),
-    LimitLow('RemoteOff', 0.5),
-    LimitDelta('RemoteOn', VBATT, (0.25, 0)),
-    LimitHigh('RedLedOff', 3.0),
-    LimitLow('RedLedOn', 0.1),
-    LimitHigh('GreenLedOff', 3.0),
-    LimitLow('GreenLedOn', 0.1),
-    LimitHigh('BlueLedOff', 3.0),
-    LimitLow('BlueLedOn', 0.1),
-    LimitLow('TestPinCover', 0.5),
-    LimitRegExp('BtMac', r'^[0-F]{12}$'),
-    LimitBoolean('DetectBT', True),
-    LimitBoolean('Notify', True),
-    )
-
 
 class Initial(share.TestSequence):
 
     """TRS2 Initial Test Program."""
 
+    # Injected Vbatt
+    vbatt = 12.0
+    # Test limits
+    limits = (
+        LimitDelta('Vin', 12.0, 0.5),
+        LimitDelta('3V3', 3.3, 0.25),
+        LimitLow('BrakeOff', 0.5),
+        LimitDelta('BrakeOn', vbatt, (0.5, 0)),
+        LimitLow('LightOff', 0.5),
+        LimitDelta('LightOn', vbatt, (0.25, 0)),
+        LimitLow('RemoteOff', 0.5),
+        LimitDelta('RemoteOn', vbatt, (0.25, 0)),
+        LimitHigh('RedLedOff', 3.0),
+        LimitLow('RedLedOn', 0.1),
+        LimitHigh('GreenLedOff', 3.0),
+        LimitLow('GreenLedOn', 0.1),
+        LimitHigh('BlueLedOff', 3.0),
+        LimitLow('BlueLedOn', 0.1),
+        LimitLow('TestPinCover', 0.5),
+        LimitRegExp('BtMac', r'^[0-F]{12}$'),
+        LimitBoolean('DetectBT', True),
+        LimitBoolean('Notify', True),
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Program', self._step_program, not self.fifo),
@@ -62,7 +58,7 @@ class Initial(share.TestSequence):
         """
         mes['dmm_tstpincov'](timeout=5)
         dev['rla_pin'].set_on()
-        dev['dcs_vin'].output(VBATT, True)
+        dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
         dev['rla_pin'].set_off()
         mes['dmm_brakeon'](timeout=5)
@@ -84,7 +80,7 @@ class Initial(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(VBATT, delay=15.0)
+        dev['dcs_vin'].output(self.vbatt, delay=15.0)
         btmac = mes['trs2_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         if self.fifo:
@@ -102,6 +98,9 @@ class Initial(share.TestSequence):
 class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
+
+    # Test fixture item number
+    fixture = '030451'
 
     def open(self):
         """Create all Logical Instruments."""
@@ -121,14 +120,14 @@ class LogicalDevices(share.LogicalDevices):
         self['trs2_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['trs2_ser'].port = ARM_PORT
+        self['trs2_ser'].port = share.port(self.fixture, 'ARM')
         # Console driver
         self['trs2'] = console.Console(self['trs2_ser'], verbose=False)
         # Serial connection to the BLE module
         self['ble_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        self['ble_ser'].port = BLE_PORT
+        self['ble_ser'].port = share.port(self.fixture, 'BLE')
         self['ble'] = share.BleRadio(self['ble_ser'])
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

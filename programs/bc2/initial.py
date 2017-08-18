@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """BC2 Initial Program."""
 
-import os
-import inspect
 import tester
 from tester import (
     TestStep,
@@ -12,29 +10,22 @@ from tester import (
 import share
 from . import console
 
-SAM_HEX = 'bc2_test.hex'
-
-# Serial port for the ARM. Used by ARM comms module.
-ARM_PORT = share.port('030451', 'ARM')
-# Serial port for the Bluetooth module.
-BLE_PORT = share.port('030451', 'BLE')
-
-LIMITS = (
-    LimitDelta('Vin', 12.0, 0.5),
-    LimitDelta('3V3', 3.3, 0.25),
-    LimitRegExp('BtMac', r'^[0-F]{12}$'),
-    LimitBoolean('DetectBT', True),
-    LimitBoolean('Notify', True),
-    )
-
 
 class Initial(share.TestSequence):
 
     """BC2 Initial Test Program."""
 
+    limits = (
+        LimitDelta('Vin', 12.0, 0.5),
+        LimitDelta('3V3', 3.3, 0.25),
+        LimitRegExp('BtMac', r'^[0-F]{12}$'),
+        LimitBoolean('DetectBT', True),
+        LimitBoolean('Notify', True),
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Program', self._step_program, not self.fifo),
@@ -79,6 +70,9 @@ class LogicalDevices(share.LogicalDevices):
 
     """Logical Devices."""
 
+    # Test fixture item number
+    fixture = '030451'
+
     def open(self):
         """Create all Logical Instruments."""
         # Physical Instrument based devices
@@ -91,22 +85,19 @@ class LogicalDevices(share.LogicalDevices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # SAM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_sam'] = share.ProgramSAM(
-            SAM_HEX, folder, 'SAM B11-MR210CA', self['rla_prog'])
+        self['program_sam'] = share.ProgramSAMB11(relay=self['rla_prog'])
         # Serial connection to the console
         self['bc2_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['bc2_ser'].port = ARM_PORT
+        self['bc2_ser'].port = share.port(self.fixture, 'ARM')
         # Console driver
         self['bc2'] = console.Console(self['bc2_ser'], verbose=False)
         # Serial connection to the BLE module
         self['ble_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        self['ble_ser'].port = BLE_PORT
+        self['ble_ser'].port = share.port(self.fixture, 'BLE')
         self['ble'] = share.BleRadio(self['ble_ser'])
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(9.0, output=True, delay=5)
