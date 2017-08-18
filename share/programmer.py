@@ -25,8 +25,8 @@ class ProgramSAMB11():
 
     """
 
-    # Default server URL
-    default_server = 'http://te-laptop1.mel.setec.com.au:8888/'
+    # Default server URL (Static address, non-domain member)
+    default_server = 'http://192.168.168.72:8888/'
     # The networked JSON-RPC programmer instance
     server = None
     # jsonrpclib uses non-standard 'application/json-rpc' by default
