@@ -22,15 +22,14 @@ _BLE_ON = (1 << 27)
 _BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
 
 
-class Console(console.BadUartConsole):
+#class Console(console.BadUartConsole):
+class Console(console.BaseConsole):
 
     """Communications to TRS2 console."""
 
     # Auto add prompt to puts strings
     puts_prompt = '\r\n> '
     cmd_data = {
-        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
-            writeable=True, readable=False, write_format='{1}'),
         'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': ParameterBoolean('NV-WRITE',
@@ -45,6 +44,23 @@ class Console(console.BadUartConsole):
         'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
         'STATUS': ParameterHex('STATUS', writeable=True,
             minimum=0, maximum=0xF0000000),
+        'LIGHT': ParameterFloat(
+            'TRS2_BRAKE_LIGHT_EN_OVERRIDE', writeable=True,
+            minimum=0, maximum=2),
+        'MONITOR': ParameterFloat(
+            'TRS2_MONITOR_EN_OVERRIDE', writeable=True,
+            minimum=0, maximum=2),
+        'RED_LED': ParameterFloat(
+            'TRS2_RED_LED_OVERRIDE', writeable=True,
+            minimum=0, maximum=2),
+        'GREEN_LED': ParameterFloat(
+            'TRS2_GREEN_LED_OVERRIDE', writeable=True,
+            minimum=0, maximum=2),
+        'BLUE_LED': ParameterFloat(
+            'TRS2_BLUE_LED_OVERRIDE', writeable=True,
+            minimum=0, maximum=2),
+        'VBATT': ParameterFloat(
+            'TRS2_BATT_MV', scale=1000),
         }
 
     def testmode(self, state):

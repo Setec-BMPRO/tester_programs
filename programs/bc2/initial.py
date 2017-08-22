@@ -15,9 +15,13 @@ class Initial(share.TestSequence):
 
     """BC2 Initial Test Program."""
 
+    arm_version = '1.2.14549.989'
     limits = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
+        LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+        LimitRegExp('ARM-SwVer',
+            '^{}$'.format(arm_version.replace('.', r'\.'))),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         LimitBoolean('Notify', True),
@@ -31,6 +35,7 @@ class Initial(share.TestSequence):
             TestStep('Program', self._step_program, not self.fifo),
             TestStep('Bluetooth', self._step_bluetooth),
             )
+        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -39,6 +44,8 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
+        self.sernum = share.get_sernum(
+            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
         dev['dcs_vin'].output(12.0, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
@@ -78,10 +85,12 @@ class LogicalDevices(share.LogicalDevices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS1'),
+                ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_shunt', tester.DCSource, 'DCS3'),
                 ('rla_prog', tester.Relay, 'RLA1'),
+                ('rla_reset', tester.Relay, 'RLA5'),
+                ('rla_wdog', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # SAM device programmer
@@ -100,13 +109,14 @@ class LogicalDevices(share.LogicalDevices):
         self['ble_ser'].port = share.port(self.fixture, 'BLE')
         self['ble'] = share.BleRadio(self['ble_ser'])
         # Apply power to fixture circuits.
-        self['dcs_vcom'].output(9.0, output=True, delay=5)
+        self['dcs_vfix'].output(9.0, output=True, delay=5)
+        self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
-        for dev in ('dcs_vcom', 'dcs_vin', 'dcs_shunt'):
+        for dev in ('dcs_vin', 'dcs_shunt'):
             self[dev].output(0.0, False)
-        for rla in ('rla_prog', ):
+        for rla in ('rla_prog', 'rla_reset', 'rla_wdog'):
             self[rla].set_off()
 
 
@@ -123,11 +133,13 @@ class Sensors(share.Sensors):
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         bc2 = self.devices['bc2']
-        for name, cmdkey in (
-                ('btmac', 'BT_MAC'),
-            ):
-            self[name] = console.Sensor(
-                bc2, cmdkey, rdgtype=sensor.ReadingString)
+        self['btmac'] = console.Sensor(
+            bc2, 'BT_MAC', rdgtype=sensor.ReadingString)
+        self['sernum'] = sensor.DataEntry(
+            message=tester.translate('trs2_initial', 'msgSnEntry'),
+            caption=tester.translate('trs2_initial', 'capSnEntry'))
+        self['arm_swver'] = console.Sensor(
+            bc2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -141,4 +153,6 @@ class Measurements(share.Measurements):
             ('dmm_3v3', '3V3', '3v3', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('bc2_btmac', 'BtMac', 'btmac', ''),
+            ('ui_sernum', 'SerNum', 'sernum', ''),
+            ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
             ))

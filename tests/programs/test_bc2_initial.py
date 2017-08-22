@@ -22,6 +22,7 @@ class BC2Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
+                    (sen['sernum'], ('A1526040123', )),
                     (sen['vin'], 12.0), (sen['3v3'], 3.30),
                     ),
                 },

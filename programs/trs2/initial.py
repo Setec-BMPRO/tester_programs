@@ -15,6 +15,9 @@ class Initial(share.TestSequence):
 
     """TRS2 Initial Test Program."""
 
+    arm_version = '1.2.14549.989'
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    hw_ver = (5, 0, 'B')
     # Injected Vbatt
     vbatt = 12.0
     # Test limits
@@ -34,6 +37,9 @@ class Initial(share.TestSequence):
         LimitHigh('BlueLedOff', 3.0),
         LimitLow('BlueLedOn', 0.1),
         LimitLow('TestPinCover', 0.5),
+        LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
+        LimitRegExp('ARM-SwVer',
+            '^{}$'.format(arm_version.replace('.', r'\.'))),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         LimitBoolean('Notify', True),
@@ -45,9 +51,10 @@ class Initial(share.TestSequence):
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Program', self._step_program, not self.fifo),
-            TestStep('TestARM', self._step_test_arm),
+            TestStep('TestArm', self._step_test_arm),
             TestStep('Bluetooth', self._step_bluetooth),
             )
+        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -56,6 +63,8 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
+        self.sernum = share.get_sernum(
+            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
         mes['dmm_tstpincov'](timeout=5)
         dev['rla_pin'].set_on()
         dev['dcs_vin'].output(self.vbatt, True)
@@ -74,7 +83,13 @@ class Initial(share.TestSequence):
         trs2 = dev['trs2']
         trs2.open()
         dev['rla_reset'].pulse(0.1)
-#        trs2.action(None, delay=1.5, expected=2)  # Flush banner
+        trs2.action(None, delay=5.0, expected=2)  # Flush banner
+        trs2['HW_VER'] = self.hw_ver
+        trs2['SER_ID'] = self.sernum
+        trs2['NVDEFAULT'] = True
+        trs2['NVWRITE'] = True
+        mes['arm_swver']()
+        trs2['LIGHT'] = 0
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -111,7 +126,8 @@ class LogicalDevices(share.LogicalDevices):
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_prog', tester.Relay, 'RLA2'),
                 ('rla_reset', tester.Relay, 'RLA5'),
-                ('rla_pin', tester.Relay, 'RLA6'),
+                ('rla_wdog', tester.Relay, 'RLA6'),
+                ('rla_pin', tester.Relay, 'RLA7'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # SAM device programmer
@@ -137,7 +153,7 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         for dev in ('dcs_vin', ):
             self[dev].output(0.0, False)
-        for rla in ('rla_prog', 'rla_reset', 'rla_pin'):
+        for rla in ('rla_prog', 'rla_reset', 'rla_wdog', 'rla_pin'):
             self[rla].set_off()
 
 
@@ -162,11 +178,18 @@ class Sensors(share.Sensors):
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         trs2 = self.devices['trs2']
+        self['btmac'] = console.Sensor(
+            trs2, 'BT_MAC', rdgtype=sensor.ReadingString)
         for name, cmdkey in (
                 ('btmac', 'BT_MAC'),
             ):
             self[name] = console.Sensor(
                 trs2, cmdkey, rdgtype=sensor.ReadingString)
+        self['sernum'] = sensor.DataEntry(
+            message=tester.translate('trs2_initial', 'msgSnEntry'),
+            caption=tester.translate('trs2_initial', 'capSnEntry'))
+        self['arm_swver'] = console.Sensor(
+            trs2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -193,4 +216,6 @@ class Measurements(share.Measurements):
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('trs2_btmac', 'BtMac', 'btmac', ''),
+            ('ui_sernum', 'SerNum', 'sernum', ''),
+            ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
             ))
