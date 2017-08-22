@@ -104,6 +104,7 @@ PROGRAMS = {
     'Trek2 Final': trek2.Final,
     'TRS1 Initial': trs1.Initial,
     'TRS2 Initial': trs2.Initial,
+    'TRS2 Final': trs2.Final,
     'TS3020-H Initial': ts3020h.Initial,
     'TS3020-H Final': ts3020h.Final,
     'TS3520 Final': ts3520.Final,
