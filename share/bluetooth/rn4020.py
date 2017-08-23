@@ -8,17 +8,17 @@ The RN4020 module is connected to a FTDI USB Serial interface.
 Before use, the module must be configured for use by this module.
 The RN4020 module must have Firmware version > 1.20 to be used by this module.
 This procedure assumes a module set to the factory defaults.
-    Connect to the module @ 115200Bd, no HW flow control
-    '+' to turn echo ON
-    'SF,2' for a full factory defaults reset
-    'R,1' to restart the module
-    '+' again to turn echo ON
+    Connect to the module at 115200Bd, no hardware flow control.
+    '+'             to turn echo ON
+    'SF,2'          for a full factory defaults reset
+    'R,1'           to restart the module
+    '+'             again to turn echo ON
     'SN,ATE_Tester' to set the module's Bluetooth name
-    'SR,42100000' to configure:
-            40000000 for Real-Time reading
-            02000000 for hardware Flow Control ON
-            00100000 to not save bonding information
-    'R,1' to restart the module
+    'SR,42100000'   to configure:
+        40000000        for Real-Time reading
+        02000000        for hardware Flow Control ON
+        00100000        to not save bonding information
+    'R,1'           to restart the module
     Now, turn on hardware flow control on the port
 The module will now remember these settings in NV Memory.
 
@@ -27,34 +27,26 @@ The module will now remember these settings in NV Memory.
 import logging
 
 
-# Module command strings
-_CMD_VER = 'V'               # Version query
-_CMD_SCAN_START = 'F'       # Start device scan
-_CMD_SCAN_STOP = 'X'        # Stop device scan
-
-# Module response strings
-_RESPONSE_OK = 'AOK'        # 'OK' module response
-_RESPONSE_VER = 'MCHP BTLE' # Reply is like: MCHP BTLE v1.23.5 8/7/2015
-
-# Mapping of commands to expected responses
-_EXPECT = {
-    _CMD_VER: _RESPONSE_VER,
-    _CMD_SCAN_START: _RESPONSE_OK,
-    _CMD_SCAN_STOP: _RESPONSE_OK,
-    }
-
-
-class BleError(Exception):
-
-    """BLE communications error."""
-
-
 class BleRadio():
 
     """Bluetooth Low Energy (BLE) Radio interface functions."""
 
+    # Module command strings
+    cmd_ver = 'V'               # Version query
+    cmd_scan_start = 'F'        # Start device scan
+    cmd_scan_stop = 'X'         # Stop device scan
+    # Module response strings
+    response_ok = 'AOK'         # 'OK' module response
+    response_ver = 'MCHP BTLE'  # Reply is like: MCHP BTLE v1.23.5 8/7/2015
+    # Mapping of commands to expected responses
+    expect = {
+        cmd_ver: response_ver,
+        cmd_scan_start: response_ok,
+        cmd_scan_stop: response_ok,
+        }
+
     def __init__(self, port):
-        """Create."""
+        """Create instance and setup logging."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
@@ -67,8 +59,8 @@ class BleRadio():
         try:
             self._cmdresp('')
         except BleError as err:
-            self._log('Received: {}'.format(err))
-        self._cmdresp(_CMD_VER)
+            self._log('Received: {0}'.format(err))
+        self._cmdresp(self.cmd_ver)
 
     def close(self):
         """Close BLE Radio."""
@@ -91,24 +83,22 @@ class BleRadio():
         @returns True if found, else False
 
         """
-        self._log('Scanning for MAC {}'.format(btmac))
-        self._cmdresp(_CMD_SCAN_START)  # Start scan
-        #   F
-        #   AOK
-        #   001EC025B69B,0,,534554454320434E3130310000000000,-53
-        # Read responses until completed.
+        self._log('Scanning for MAC {0}'.format(btmac))
+        self._cmdresp(self.cmd_scan_start)
         found = False
         for retry in range(0, 10):
             try:
+                # Scan responses look like this:
+                #   001EC025B69B,0,,534554454320434E3130310000000000,-53
                 line = self._readline()
-                self._log('<--- {!r}'.format(line))
+                self._log('<--- {0!r}'.format(line))
             except BleError:
                 continue
             data = line.split(sep=',')  # CSV formatted response
             if data[0] == btmac:
                 found = True
                 break
-        self._cmdresp(_CMD_SCAN_STOP)  # Stop scanning
+        self._cmdresp(self.cmd_scan_stop)
         return found
 
     def _log(self, message):
@@ -119,31 +109,37 @@ class BleRadio():
         """Send a command to the module and process the response.
 
         @param cmd Command to send
+        @return Response from the command
         @raises BleError upon error.
 
         """
         self.port.flushInput()
-        self._log('--> {!r}'.format(cmd))
-        self._write(cmd + '\r')
+        self._log('--> {0!r}'.format(cmd))
+        self.port.write(cmd.encode())
+        self.port.write(b'\r')
         reply = self._readline()
-        self._log('<-- {!r}'.format(reply))
-        try:    # Lookup any expected reponse
-            expect = _EXPECT[cmd]
+        self._log('<-- {0!r}'.format(reply))
+        try:    # Lookup any expected response
+            expect = self.expect[cmd]
         except KeyError:
             expect = None
         if expect:
             if reply[:len(expect)] != expect:
-                raise BleError('Expected {}, got {}'.format(expect, reply))
+                raise BleError('Expected {0}, got {1}'.format(expect, reply))
         return reply
 
     def _readline(self):
-        """Read a line from the port and decode to a string."""
+        """Read a line from the port and decode to a string.
+
+        @return Response from the module
+
+        """
         line = self.port.readline().decode(errors='ignore')
         if len(line) == 0:
             raise BleError('No response')
-        else:
-            return line.replace('\r\n', '')
+        return line.replace('\r\n', '')
 
-    def _write(self, data):
-        """Encode data and write to the port."""
-        self.port.write(data.encode())
+
+class BleError(Exception):
+
+    """BLE communications error."""
