@@ -86,7 +86,7 @@ class BleRadio():
         self._log('Scanning for MAC {0}'.format(btmac))
         self._cmdresp(self.cmd_scan_start)
         found = False
-        for retry in range(0, 10):
+        for _ in range(0, 10):
             try:
                 # Scan responses look like this:
                 #   001EC025B69B,0,,534554454320434E3130310000000000,-53

@@ -12,28 +12,26 @@ import re
 import json
 
 
-# Command to escape from streaming data mode
-_ESCAPE = '^^^'
-
-
-class BtError(Exception):
-
-    """Bluetooth error."""
-
-
 class BtRadio():
 
     """BT Radio interface functions."""
+
+    cmd_escape = '^^^'  # Command to escape from streaming data mode
+    port = None         # Serial port
+    _mac = None         # MAC address
+    _pin = None         # PIN
+    _sernum = None      # Serial number
+    _datamode = False   # True for data mode
+    _logger = None      # logging.logger
+    # Some magic numbers for PIN generation from a serial number
+    hash_start = 56210
+    hash_mult = 29
 
     def __init__(self, port):
         """Create."""
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
-        self._mac = None
-        self._pin = None
-        self._sernum = None
-        self._datamode = False
 
     def open(self):
         """Open communications with BT Radio.
@@ -47,7 +45,7 @@ class BtRadio():
         self.port.open()
         time.sleep(1)
         self.port.flushInput()
-        for retry in range(0, 5):
+        for _ in range(0, 5):
             try:
                 self._cmdresp('AT+JRES')    # reset
                 self._cmdresp('AT+JSEC=4,1,04,1111,2,1')    # security mode
@@ -92,7 +90,7 @@ class BtRadio():
 
         """
         self.port.flushInput()
-        if cmd == _ESCAPE:
+        if cmd == self.cmd_escape:
             time.sleep(1)       # need long guard time before first letter
             for _ in range(0, 3):
                 time.sleep(0.2) # need short guard time between letters
@@ -120,10 +118,9 @@ class BtRadio():
         """
         if len(sernum) != 11:
             raise BtError('Serial number must be 11 characters')
-        HASH_START, HASH_MULT = 56210, 29
-        pin = HASH_START
-        for c in sernum:
-            pin = ((pin * HASH_MULT) & 0xFFFF) ^ ord(c)
+        pin = self.hash_start
+        for char in sernum:
+            pin = ((pin * self.hash_mult) & 0xFFFF) ^ ord(char)
         return '{:04}'.format(pin % 10000)
 
     def scan(self, sernum):
@@ -144,7 +141,7 @@ class BtRadio():
         if retry == max_try - 1:
             raise BtError('Cannot start device scan')
         # Read responses until completed.
-        for retry in range(0, 20):
+        for _ in range(0, 20):
             line = self._readline()
             self._log('<--- {!r}'.format(line))
             if len(line) == 0:
@@ -163,14 +160,14 @@ class BtRadio():
         return self._mac is not None
 
     def pair(self):
-        """Pair with bluetooth device previously found by a scan.
+        """Pair with the device previously found by a scan.
 
         @raises BtError upon failure to pair.
 
         """
         self._log('Pairing with mac {}'.format(self._mac))
         self._cmdresp('AT+JCCR=' + self._mac + ',01')
-        for retry in range(0, 10):
+        for _ in range(0, 10):
             line = self._readline()
             self._log('<--- {!r}'.format(line))
             if len(line) == 0:
@@ -212,13 +209,13 @@ class BtRadio():
         """
         self._log('Unpairing')
         self._cmdresp('AT+JSDR')
-        for retry in range(0, 10):  # about 20s due to 2s serial rx timeout
+        for _ in range(0, 10):      # about 20s due to 2s serial rx timeout
             time.sleep(2)
             line = self._readline()
             if len(line) == 0:
                 continue
             self._log('<--- {!r}'.format(line))
-            if line == '+RDII':    # good unpairing response
+            if line == '+RDII':     # good unpairing response
                 self._log('Now Un-Paired.')
                 return
         raise BtError('Unpairing timed out')
@@ -242,10 +239,10 @@ class BtRadio():
         """
         self._log('Leaving streaming mode')
         if self._datamode:
-            self._cmdresp(_ESCAPE)
+            self._cmdresp(self.cmd_escape)
             self._datamode = False
 
-    def jsonrpc(self, method, params={}):
+    def jsonrpc(self, method, params=None):
         """Make a JSON-RPC call (when in streaming data mode).
 
         @param method Method name to call.
@@ -255,6 +252,8 @@ class BtRadio():
         """
         if not self._datamode:
             raise BtError('JSON-RPC requires streaming data mode')
+        if params is None:
+            params = {}
         request = {
             'jsonrpc': '2.0', 'id': 8256,
             'method': method, 'params': params}
@@ -265,3 +264,8 @@ class BtRadio():
         response = self._readline()
         self._log('<--- {!r}'.format(response))
         return json.loads(response)['result']
+
+
+class BtError(Exception):
+
+    """Bluetooth error."""

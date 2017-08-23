@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2017 SETEC Pty Ltd
 """A Tunneled Console over CAN.
 
 Creates an interface to tunnel data across a CAN bus to a remote device
@@ -12,38 +13,26 @@ Just enough to open and run a tunnel.
 
 The required process to run a tunnel...
     Echo OFF
-        '0 ECHO'                    ' -> \r\n> '
+        '0 ECHO'                            ' -> <CR><LF> '
     CAN Filter
-        '"RF,ALL CAN'               None
+        '"RF,ALL CAN'                       None
     CAN Print Packets
-        '"STATUS XN?'               '0x12345678'
-        '0x12345678 "STATUS XN!'    None
+        '"STATUS XN?'                       '0x12345678'
+        '0x12345678 "STATUS XN!'            None
     Open CAN Tunnel
-        '"TCC,{},3,{},1 CAN'        None
+        '"TCC,<target>,3,<local>,1 CAN'     None
     Send Data
-        '"TCC,{},4,{} CAN'          None
+        '"TCC,<target>,4,<local> CAN'       None
     Receive Data
-        None                        'RRC,{},4,{count},{data},...'
+        None                                'RRC,<target>,4,<count>,<data>,...'
     Close CAN Tunnel
-        '"TCC,{},3,{},0 CAN'        None
+        '"TCC,<target>,3,<local>,0 CAN'     None
 
 """
 
 import logging
 import time
 import tester
-
-# "CAN Print Packets" mode controlled by STATUS bit 29
-_CAN_ON = (1 << 29)
-_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
-# Investigation shows that time.sleep() <= 1ms doesn't do anything.
-# Only delays >1ms are implemented.
-_INTER_CHAR_DELAY = 0.002
-
-
-class TunnelError(Exception):
-
-    """Tunnel Error."""
 
 
 class ConsoleCanTunnel():
@@ -61,20 +50,26 @@ class ConsoleCanTunnel():
 
     """
 
-    def __init__(self,
-                 port, local_id=16, target_id=32,
-                 simulation=False, verbose=False):
+    # "CAN Print Packets" mode controlled by STATUS bit 29
+    can_on = (1 << 29)
+    # Investigation shows that time.sleep() <= 1ms doesn't do anything.
+    # Only delays >1ms are implemented.
+    inter_char_delay = 2e-3
+    # Ignored response strings
+    ignore = (' -> ', ' \r\n', '\r\n', '"', )
+    # CAN ID numbers
+    local_id = 16       # My CAN bus ID
+    target_id = 32      # Remote CAN bus ID
+
+    def __init__(self, port, simulation=False, verbose=False):
         """Initialise communications.
 
         @param port SimSerial port to connect to Serial to CAN interface.
-        @param local_id My CAN bus ID.
-        @param target_id Remote CAN bus ID.
+        @param simulation True for simulation mode.
+        @param verbose True for verbose logging.
 
         """
         self.port = port
-        self._local_id = '{},{}'.format(
-            (local_id & 0xFF00) >> 8, (local_id & 0xFF) )
-        self._target_id = target_id
         self.simulation = simulation
         self.verbose = verbose
         self._logger = logging.getLogger(
@@ -85,11 +80,13 @@ class ConsoleCanTunnel():
 
     def open(self):
         """Open the CAN tunnel."""
+        self.local_id = '{0},{1}'.format(
+            (self.local_id & 0xFF00) >> 8, (self.local_id & 0xFF))
         self._logger.debug('Open CAN tunnel buffer port')
         self._buf_port.open()
         self._logger.debug('Open CAN tunnel serial port')
         self.port.open()
-        self.port.write(b'\r')      # Need this 'sometimes' to wake the unit up...
+        self.port.write(b'\r')  # Need this 'sometimes' to wake the unit up...
         time.sleep(0.1)
         # Switch console echo OFF
         self.port.flushInput()
@@ -107,27 +104,27 @@ class ConsoleCanTunnel():
         # Switch CAN Print Packet mode ON
         try:
             reply = self.action('"STATUS XN?')
-            new_status = _CAN_ON | int(reply, 16)
-            self.action('${:08X} "STATUS XN!'.format(new_status))
+            new_status = self.can_on | int(reply, 16)
+            self.action('${0:08X} "STATUS XN!'.format(new_status))
         except Exception as exc:
             raise TunnelError('Set CAN print mode failed') from exc
         # Open a console tunnel
         try:
             self.action(
-                '"TCC,{},3,{},1 CAN'.format(self._target_id, self._local_id))
+                '"TCC,{0},3,{1},1 CAN'.format(self.target_id, self.local_id))
             reply = self.action(delay=0.2)  # RRC... is expected
         except Exception as exc:
             raise TunnelError('CAN Tunnel Mode failed') from exc
-        expected = 'RRC,{},3,3,{},1'.format(self._target_id, self._local_id)
+        expected = 'RRC,{0},3,3,{1},1'.format(self.target_id, self.local_id)
         if reply != expected:
             raise TunnelError(
-                'Bad CAN tunnel mode reply: {}'.format(reply))
+                'Bad CAN tunnel mode reply: {0}'.format(reply))
         self._logger.debug('CAN Tunnel opened')
 
     def close(self):
         """Close the CAN tunnel."""
         self.action(
-            '"TCC,{},3,{},0 CAN'.format(self._target_id, self._local_id))
+            '"TCC,{0},3,{1},0 CAN'.format(self.target_id, self.local_id))
         self._logger.debug('Close CAN tunnel serial port')
         self.port.close()
         self._logger.debug('Close CAN tunnel buffer port')
@@ -145,28 +142,25 @@ class ConsoleCanTunnel():
         """
         if command:
             if self.verbose:
-                self._logger.debug('--> %s', repr(command))
+                self._logger.debug('--> {0!r}'.format(command))
             cmd_data = command.encode()
             for a_byte in cmd_data:             # write 1 byte at a time...
                 a_byte = bytes([a_byte])
                 self.port.write(a_byte)
-                time.sleep(_INTER_CHAR_DELAY)   # ...with a gap between each
+                time.sleep(self.inter_char_delay)   # ... a gap between each
             self.port.write(b'\r')
-        if delay:
-            time.sleep(delay)
+        time.sleep(delay)
         if get_response:
             buf = self.port.readline()
             response = None
             if self.verbose:
-                self._logger.debug('Rx <--- %s', repr(buf))
+                self._logger.debug('Rx <--- {0!r}'.format(buf))
             if len(buf) > 0:
                 response = buf.decode(errors='ignore')
-                response = response.replace(' -> ', '')
-                response = response.replace(' \r\n', '')
-                response = response.replace('\r\n', '')
-                response = response.replace('"', '')
+                for pattern in self.ignore:
+                    response = response.replace(pattern, '')
             if self.verbose:
-                self._logger.debug('<-- %s', repr(response))
+                self._logger.debug('<-- {0!r}'.format(response))
             return response
 
     def _decode(self, message):
@@ -180,20 +174,20 @@ class ConsoleCanTunnel():
         if message is None:
             return data
         # Pattern to match a console data packet
-        pattern = ['RRC', str(self._target_id), '4']
+        pattern = ['RRC', str(self.target_id), '4']
         pat_len = len(pattern)
-        chunks = message.split(',')     # Chop into CSV pieces
-        if chunks[:pat_len] == pattern: # if it's a console data packet
+        chunks = message.split(',')         # Chop into CSV pieces
+        if chunks[:pat_len] == pattern:     # if it's a console data packet
             count = len(chunks) - pat_len   # chunks after the pattern
             if count < 2:   # No data in the packet
                 return ''
             byte_count = int(chunks[len(pattern)])
-            if byte_count + 1 != count: # Data count mismatch in the packet
+            if byte_count + 1 != count:     # Data count mismatch
                 return ''
             for i in range(pat_len + 1, pat_len + 1 + byte_count):
                 data += chr(int(chunks[i]))
         if self.verbose:
-            self._logger.debug('Decode %s => %s', repr(message), repr(data))
+            self._logger.debug('Decode {0!r} => {1!r}'.format(message, data))
         return data
 
 ####    START of SimSerial compatible interface      ####
@@ -203,19 +197,23 @@ class ConsoleCanTunnel():
         self._buf_port.puts(string_data, preflush, postflush, priority)
 
     def read(self, size=1):
-        """Serial: Read the input buffer."""
+        """Serial: Read the input buffer.
+
+        @return data from the tunnel
+
+        """
         while self.port.inWaiting():
             reply = self.action()       # read any CAN data
             if reply:
                 reply_bytes = self._decode(reply)
                 if self.verbose:
                     self._logger.debug(
-                        'read() reply_bytes %s', repr(reply_bytes))
+                        'read() reply_bytes {0!r}'.format(reply_bytes))
                 self.puts(reply_bytes)  # push any CAN data into buffer port
                 time.sleep(0.1)
         data = self._buf_port.read(size)    # now read from the buffer port
         if self.verbose:
-            self._logger.debug('read(%s) = %s', size, repr(data))
+            self._logger.debug('read({0}) = {1!r}'.format(size, data))
         return data
 
     def write(self, data):
@@ -228,7 +226,7 @@ class ConsoleCanTunnel():
 
         """
         if self.verbose:
-            self._logger.debug('write(%s)', repr(data))
+            self._logger.debug('write({0!r})'.format(data))
         while len(data) > 0:
             if len(data) > 8:           # Use 8 bytes max at a time
                 byte_data = data[:8]
@@ -237,13 +235,13 @@ class ConsoleCanTunnel():
                 byte_data = data
                 data = b''
             byte_data = ','.join(str(c) for c in byte_data)
-            command = '"TCC,{},4,{} CAN'.format(self._target_id, byte_data)
+            command = '"TCC,{0},4,{1} CAN'.format(self.target_id, byte_data)
             reply = self.action(command, delay=0.2)
             if reply:
                 reply_bytes = self._decode(reply)
                 self.puts(reply_bytes)  # push any CAN data into my buffer port
 
-    def inWaiting(self):
+    def inWaiting(self):        # pylint:disable=C0103
         """Serial: Return the number of bytes in the input buffer."""
         return self._buf_port.inWaiting()
 
@@ -251,12 +249,17 @@ class ConsoleCanTunnel():
         """Serial: Wait until all output data has been sent."""
         self.port.flush()
 
-    def flushInput(self):
+    def flushInput(self):       # pylint:disable=C0103
         """Serial: Discard waiting input."""
         self._buf_port.flushInput()
 
-    def flushOutput(self):
+    def flushOutput(self):      # pylint:disable=C0103
         """Serial: Discard waiting output."""
         self._buf_port.flushOutput()
 
 ####    END of SimSerial compatible interface      ####
+
+
+class TunnelError(Exception):
+
+    """Tunnel Error."""
