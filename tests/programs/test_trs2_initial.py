@@ -26,9 +26,17 @@ class TRSInitial(ProgramTestCase):
                     (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
                     (sen['3v3'], 3.30), (sen['brake'], (0.0, 12.0)),
                     ),
+                'TestArm': (
+                    (sen['light'], (11.9, 0.0)), (sen['remote'], (11.9, 0.0)),
+                    (sen['red'], (0.0, 3.0)), (sen['green'], (0.0, 3.0)),
+                    (sen['blue'], (0.0, 3.0)),
+                    ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
-                'TestArm':   ('Banner1\r\nBanner2', ),
+                'TestArm':   ('Banner1\r\nBanner2', ) +
+                                ('', ) * 4 +
+                                (trs2.initial.Initial.arm_version, ) +
+                                ('', ) * 15,
                 'Bluetooth': ('001EC030BC15', ),
                 },
             }
@@ -37,7 +45,7 @@ class TRSInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(8, len(result.readings))  # Reading count
+        self.assertEqual(19, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'TestArm', 'Bluetooth'],

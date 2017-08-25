@@ -19,6 +19,7 @@ class Initial(share.TestSequence):
     limits = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
+        LimitDelta('Shunt', 50.0, 100.0),
         LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
             '^{}$'.format(arm_version.replace('.', r'\.'))),
@@ -32,7 +33,6 @@ class Initial(share.TestSequence):
         super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
-            TestStep('Program', self._step_program, not self.fifo),
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
@@ -48,11 +48,6 @@ class Initial(share.TestSequence):
             self.uuts, self.limits['SerNum'], mes['ui_sernum'])
         dev['dcs_vin'].output(12.0, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
-
-    @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the SAM device."""
-        dev['program_sam'].program()
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -88,13 +83,10 @@ class LogicalDevices(share.LogicalDevices):
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_shunt', tester.DCSource, 'DCS3'),
-                ('rla_prog', tester.Relay, 'RLA1'),
                 ('rla_reset', tester.Relay, 'RLA5'),
                 ('rla_wdog', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # SAM device programmer
-        self['program_sam'] = share.ProgramSAMB11(relay=self['rla_prog'])
         # Serial connection to the console
         self['bc2_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
@@ -116,7 +108,7 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         for dev in ('dcs_vin', 'dcs_shunt'):
             self[dev].output(0.0, False)
-        for rla in ('rla_prog', 'rla_reset', 'rla_wdog'):
+        for rla in ('rla_reset', 'rla_wdog', ):
             self[rla].set_off()
 
 
@@ -130,14 +122,16 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['shunt'] = sensor.Vdc(
+            dmm, high=3, low=1, rng=10, res=0.001, scale=1000)
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         bc2 = self.devices['bc2']
         self['btmac'] = console.Sensor(
             bc2, 'BT_MAC', rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
-            message=tester.translate('trs2_initial', 'msgSnEntry'),
-            caption=tester.translate('trs2_initial', 'capSnEntry'))
+            message=tester.translate('bc2_initial', 'msgSnEntry'),
+            caption=tester.translate('bc2_initial', 'capSnEntry'))
         self['arm_swver'] = console.Sensor(
             bc2, 'SW_VER', rdgtype=sensor.ReadingString)
 
@@ -151,6 +145,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
             ('dmm_3v3', '3V3', '3v3', ''),
+            ('dmm_shunt', 'Shunt', 'shunt', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('bc2_btmac', 'BtMac', 'btmac', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),

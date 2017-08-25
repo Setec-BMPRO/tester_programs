@@ -10,7 +10,6 @@ from tester import (
 import share
 from . import console
 
-
 class Initial(share.TestSequence):
 
     """TRS2 Initial Test Program."""
@@ -20,6 +19,10 @@ class Initial(share.TestSequence):
     hw_ver = (5, 0, 'B')
     # Injected Vbatt
     vbatt = 12.0
+    #Manual override parameters
+    force_on = 2
+    force_off = 1
+    normal = 0
     # Test limits
     limits = (
         LimitDelta('Vin', 12.0, 0.5),
@@ -50,7 +53,6 @@ class Initial(share.TestSequence):
         super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
-            TestStep('Program', self._step_program, not self.fifo),
             TestStep('TestArm', self._step_test_arm),
             TestStep('Bluetooth', self._step_bluetooth),
             )
@@ -73,11 +75,6 @@ class Initial(share.TestSequence):
         mes['dmm_brakeon'](timeout=5)
 
     @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the SAM device."""
-        dev['samb11'].program()
-
-    @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test the operation of TRS2."""
         trs2 = dev['trs2']
@@ -89,7 +86,15 @@ class Initial(share.TestSequence):
         trs2['NVDEFAULT'] = True
         trs2['NVWRITE'] = True
         mes['arm_swver']()
-        trs2['LIGHT'] = 0
+        trs2.override(self.force_on)
+        self.measure(
+            ('dmm_lighton', 'dmm_remoteon', 'dmm_redon', 'dmm_greenon',
+            'dmm_blueon'), timeout=5)
+        trs2.override(self.force_off)
+        self.measure(
+            ('dmm_lightoff', 'dmm_remoteoff', 'dmm_redoff', 'dmm_greenoff',
+            'dmm_blueoff'), timeout=5)
+        trs2.override(self.normal)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -124,14 +129,11 @@ class LogicalDevices(share.LogicalDevices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('rla_prog', tester.Relay, 'RLA2'),
                 ('rla_reset', tester.Relay, 'RLA5'),
                 ('rla_wdog', tester.Relay, 'RLA6'),
                 ('rla_pin', tester.Relay, 'RLA7'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # SAM device programmer
-        self['samb11'] = share.ProgramSAMB11(relay=self['rla_prog'])
         # Serial connection to the console
         self['trs2_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
@@ -153,7 +155,7 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         for dev in ('dcs_vin', ):
             self[dev].output(0.0, False)
-        for rla in ('rla_prog', 'rla_reset', 'rla_wdog', 'rla_pin'):
+        for rla in ('rla_reset', 'rla_wdog', 'rla_pin'):
             self[rla].set_off()
 
 

@@ -44,31 +44,32 @@ class Console(console.BaseConsole):
         'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
         'STATUS': ParameterHex('STATUS', writeable=True,
             minimum=0, maximum=0xF0000000),
-        'LIGHT': ParameterFloat(
+        'BR_LIGHT': ParameterFloat(
             'TRS2_BRAKE_LIGHT_EN_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
         'MONITOR': ParameterFloat(
             'TRS2_MONITOR_EN_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
-        'RED_LED': ParameterFloat(
+        'RED': ParameterFloat(
             'TRS2_RED_LED_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
-        'GREEN_LED': ParameterFloat(
+        'GREEN': ParameterFloat(
             'TRS2_GREEN_LED_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
-        'BLUE_LED': ParameterFloat(
+        'BLUE': ParameterFloat(
             'TRS2_BLUE_LED_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
         'VBATT': ParameterFloat(
             'TRS2_BATT_MV', scale=1000),
         }
 
-    def testmode(self, state):
-        """Enable or disable Test Mode."""
-        self._logger.debug('Test Mode = %s', state)
-        reply = self['STATUS']
-        if state:
-            value = _TEST_ON | reply
-        else:
-            value = _TEST_OFF & reply
-        self['STATUS'] = value
+    def override(self, state=0):
+        """Manually override functions of the unit.
+
+        ON: state = 2
+        OFF: state = 1
+        NORMAL OPERATION: state = 0
+        """
+        self._logger.debug('Override state = %s', state)
+        for func in ('BR_LIGHT', 'MONITOR', 'RED', 'GREEN', 'BLUE'):
+            self[func] = state

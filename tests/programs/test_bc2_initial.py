@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for BC2 Final Test program."""
+"""UnitTest for BC2 Initial Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc2
@@ -8,7 +8,7 @@ from programs import bc2
 
 class BC2Initial(ProgramTestCase):
 
-    """BC2 Final program test suite."""
+    """BC2 Initial program test suite."""
 
     prog_class = bc2.Initial
     parameter = None
