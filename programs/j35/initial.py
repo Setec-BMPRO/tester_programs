@@ -340,7 +340,7 @@ class LogicalDevices(share.LogicalDevices):
         # J35 Console driver
         self['j35'] = console.Console(j35_ser, verbose=False)
         # Apply power to fixture circuits.
-        self['dcs_vcom'].output(22.0, True)
+        self['dcs_vcom'].output(22.0, output=True, delay=2)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))
 
     def reset(self):

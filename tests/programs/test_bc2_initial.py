@@ -35,7 +35,7 @@ class BC2Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(4, len(result.readings))  # Reading count
+        self.assertEqual(5, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'Bluetooth'],
