@@ -22,7 +22,7 @@ The required process to run a tunnel...
     Open CAN Tunnel
         '"TCC,<target>,3,<local>,1 CAN'     None
     Send Data
-        '"TCC,<target>,4,<local> CAN'       None
+        '"TCC,<target>,4,<data> CAN'        None
     Receive Data
         None                                'RRC,<target>,4,<count>,<data>,...'
     Close CAN Tunnel
