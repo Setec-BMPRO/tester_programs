@@ -59,6 +59,9 @@ class Console(console.BaseConsole):
         'BLUE': ParameterFloat(
             'TRS2_BLUE_LED_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
+        'BLUETOOTH': ParameterFloat(
+            'TRS2_BLUETOOTH_EN_OVERRIDE', writeable=True,
+            minimum=0, maximum=2),
         'VBATT': ParameterFloat(
             'TRS2_BATT_MV', scale=1000),
         }

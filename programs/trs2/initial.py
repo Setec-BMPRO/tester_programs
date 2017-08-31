@@ -14,9 +14,9 @@ class Initial(share.TestSequence):
 
     """TRS2 Initial Test Program."""
 
-    arm_version = '1.2.14549.989'
+    arm_version = '1.0.16277.445'
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (5, 0, 'B')
+    hw_ver = (1, 0, 'A')
     # Injected Vbatt
     vbatt = 12.0
     #Manual override parameters
@@ -33,12 +33,12 @@ class Initial(share.TestSequence):
         LimitDelta('LightOn', vbatt, (0.25, 0)),
         LimitLow('RemoteOff', 0.5),
         LimitDelta('RemoteOn', vbatt, (0.25, 0)),
-        LimitHigh('RedLedOff', 3.0),
-        LimitLow('RedLedOn', 0.1),
-        LimitHigh('GreenLedOff', 3.0),
-        LimitLow('GreenLedOn', 0.1),
-        LimitHigh('BlueLedOff', 3.0),
-        LimitLow('BlueLedOn', 0.1),
+        LimitHigh('RedLedOff', 3.1),
+        LimitLow('RedLedOn', 0.3),
+        LimitHigh('GreenLedOff', 3.1),
+        LimitLow('GreenLedOn', 0.3),
+        LimitHigh('BlueLedOff', 3.1),
+        LimitLow('BlueLedOn', 0.3),
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
@@ -65,9 +65,9 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
+        mes['dmm_tstpincov'](timeout=5)
         self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes['ui_sernum'])
-        mes['dmm_tstpincov'](timeout=5)
         dev['rla_pin'].set_on()
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
@@ -86,6 +86,8 @@ class Initial(share.TestSequence):
         trs2['NVDEFAULT'] = True
         trs2['NVWRITE'] = True
         mes['arm_swver']()
+        self.measure(
+            ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
         trs2.override(self.force_on)
         self.measure(
             ('dmm_lighton', 'dmm_remoteon', 'dmm_redon', 'dmm_greenon',
@@ -95,13 +97,16 @@ class Initial(share.TestSequence):
             ('dmm_lightoff', 'dmm_remoteoff', 'dmm_redoff', 'dmm_greenoff',
             'dmm_blueoff'), timeout=5)
         trs2.override(self.normal)
+        mes['ui_yesnoblue'](timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
+        trs2 = dev['trs2']
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(self.vbatt, delay=15.0)
         btmac = mes['trs2_btmac']().reading1
+        trs2['BLUETOOTH'] = 2
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         if self.fifo:
             reply = True
@@ -111,6 +116,7 @@ class Initial(share.TestSequence):
             reply = ble.scan(btmac)
             ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
+        trs2['BLUETOOTH'] = 0
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
 
@@ -130,7 +136,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_reset', tester.Relay, 'RLA5'),
-                ('rla_wdog', tester.Relay, 'RLA6'),
+                ('rla_wdg', tester.Relay, 'RLA6'),  #Normally closed
                 ('rla_pin', tester.Relay, 'RLA7'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -155,7 +161,7 @@ class LogicalDevices(share.LogicalDevices):
         """Reset instruments."""
         for dev in ('dcs_vin', ):
             self[dev].output(0.0, False)
-        for rla in ('rla_reset', 'rla_wdog', 'rla_pin'):
+        for rla in ('rla_reset', 'rla_wdg', 'rla_pin'):
             self[rla].set_off()
 
 
@@ -187,11 +193,17 @@ class Sensors(share.Sensors):
             ):
             self[name] = console.Sensor(
                 trs2, cmdkey, rdgtype=sensor.ReadingString)
+        self['arm_swver'] = console.Sensor(
+            trs2, 'SW_VER', rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_initial', 'msgSnEntry'),
             caption=tester.translate('trs2_initial', 'capSnEntry'))
-        self['arm_swver'] = console.Sensor(
-            trs2, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['yesnoblue'] = sensor.YesNo(
+            message=tester.translate('trs2_initial', 'IsBlueFlash?'),
+            caption=tester.translate('trs2_initial', 'capBlueLed'))
+        self['yesnooff'] = sensor.YesNo(
+            message=tester.translate('trs2_initial', 'IsLedOff?'),
+            caption=tester.translate('trs2_initial', 'capLeds'))
 
 
 class Measurements(share.Measurements):
@@ -211,13 +223,15 @@ class Measurements(share.Measurements):
             ('dmm_remoteon', 'RemoteOn', 'remote', ''),
             ('dmm_redoff', 'RedLedOff', 'red', ''),
             ('dmm_redon', 'RedLedOn', 'red', ''),
-            ('dmm_greenoff', 'RedLedOff', 'green', ''),
-            ('dmm_greenon', 'RedLedOn', 'green', ''),
-            ('dmm_blueoff', 'RedLedOff', 'blue', ''),
-            ('dmm_blueon', 'RedLedOn', 'blue', ''),
+            ('dmm_greenoff', 'GreenLedOff', 'green', ''),
+            ('dmm_greenon', 'GreenLedOn', 'green', ''),
+            ('dmm_blueoff', 'BlueLedOff', 'blue', ''),
+            ('dmm_blueon', 'BlueLedOn', 'blue', ''),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('trs2_btmac', 'BtMac', 'btmac', ''),
-            ('ui_sernum', 'SerNum', 'sernum', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
+            ('ui_sernum', 'SerNum', 'sernum', ''),
+            ('ui_yesnoblue', 'Notify', 'yesnoblue', ''),
+            ('ui_yesnooff', 'Notify', 'yesnooff', ''),
             ))

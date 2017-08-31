@@ -28,8 +28,9 @@ class TRSInitial(ProgramTestCase):
                     ),
                 'TestArm': (
                     (sen['light'], (11.9, 0.0)), (sen['remote'], (11.9, 0.0)),
-                    (sen['red'], (0.0, 3.0)), (sen['green'], (0.0, 3.0)),
-                    (sen['blue'], (0.0, 3.0)),
+                    (sen['red'], (3.1, 0.0, 3.1)),
+                    (sen['green'], (3.1, 0.0, 3.1)),
+                    (sen['blue'], (3.1, 0.0, 3.1)), (sen['yesnoblue'], True),
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
@@ -37,7 +38,8 @@ class TRSInitial(ProgramTestCase):
                                 ('', ) * 4 +
                                 (trs2.initial.Initial.arm_version, ) +
                                 ('', ) * 15,
-                'Bluetooth': ('001EC030BC15', ),
+                'Bluetooth': ('F8F005FE6621', ) +
+                                ('', ) * 2,
                 },
             }
         self.tester.ut_load(
@@ -45,7 +47,7 @@ class TRSInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(19, len(result.readings))  # Reading count
+        self.assertEqual(23, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Prepare', 'TestArm', 'Bluetooth'],
