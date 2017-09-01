@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """TRS2 Initial Program."""
 
+import time
 import tester
 from tester import (
     TestStep,
@@ -14,7 +15,7 @@ class Initial(share.TestSequence):
 
     """TRS2 Initial Test Program."""
 
-    arm_version = '1.0.16277.445'
+    arm_version = '1.0.16281.446'
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
     hw_ver = (1, 0, 'A')
     # Injected Vbatt
@@ -32,13 +33,14 @@ class Initial(share.TestSequence):
         LimitLow('LightOff', 0.5),
         LimitDelta('LightOn', vbatt, (0.25, 0)),
         LimitLow('RemoteOff', 0.5),
-        LimitDelta('RemoteOn', vbatt, (0.25, 0)),
+#        LimitDelta('RemoteOn', vbatt, (0.25, 0)),
+        LimitDelta('RemoteOn', vbatt, 0.25),
         LimitHigh('RedLedOff', 3.1),
-        LimitLow('RedLedOn', 0.3),
+        LimitLow('RedLedOn', 0.5),
         LimitHigh('GreenLedOff', 3.1),
-        LimitLow('GreenLedOn', 0.3),
+        LimitLow('GreenLedOn', 0.5),
         LimitHigh('BlueLedOff', 3.1),
-        LimitLow('BlueLedOn', 0.3),
+        LimitLow('BlueLedOn', 0.5),
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
@@ -66,8 +68,9 @@ class Initial(share.TestSequence):
 
         """
         mes['dmm_tstpincov'](timeout=5)
-        self.sernum = share.get_sernum(
-            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
+#        self.sernum = share.get_sernum(
+#            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
+        self.sernum = 'A0000000000'
         dev['rla_pin'].set_on()
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
@@ -81,13 +84,17 @@ class Initial(share.TestSequence):
         trs2.open()
         dev['rla_reset'].pulse(0.1)
         trs2.action(None, delay=5.0, expected=2)  # Flush banner
+        trs2['FAULT_CODE']
+        trs2['BATT_CHANGE']
+        trs2['STATE']
         trs2['HW_VER'] = self.hw_ver
         trs2['SER_ID'] = self.sernum
         trs2['NVDEFAULT'] = True
         trs2['NVWRITE'] = True
         mes['arm_swver']()
         self.measure(
-            ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
+            ('dmm_redoff', 'dmm_greenoff'), timeout=5)
+        mes['ui_yesnoblue'](timeout=5)
         trs2.override(self.force_on)
         self.measure(
             ('dmm_lighton', 'dmm_remoteon', 'dmm_redon', 'dmm_greenon',
@@ -97,7 +104,6 @@ class Initial(share.TestSequence):
             ('dmm_lightoff', 'dmm_remoteoff', 'dmm_redoff', 'dmm_greenoff',
             'dmm_blueoff'), timeout=5)
         trs2.override(self.normal)
-        mes['ui_yesnoblue'](timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -106,17 +112,18 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(self.vbatt, delay=15.0)
         btmac = mes['trs2_btmac']().reading1
-        trs2['BLUETOOTH'] = 2
+        trs2['BLUETOOTH'] = self.force_on
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         if self.fifo:
             reply = True
         else:
             ble = dev['ble']
             ble.open()
+            time.sleep(3)
             reply = ble.scan(btmac)
             ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
-        trs2['BLUETOOTH'] = 0
+        trs2['BLUETOOTH'] = self.normal
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
 

@@ -88,8 +88,8 @@ DATA = {
     '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
         # Hub port 1: SETEC FTDI
         'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI_HUB[1]}[os.name],
-        # Hub port 2: SETEC FTDI
-        'BLE': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[2]}[os.name],
+        # Hub port 2: FTDI
+        'BLE': {'posix': '/dev/ttyUSB1', 'nt': 'COM7'}[os.name],
         },
     }
 

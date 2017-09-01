@@ -64,6 +64,12 @@ class Console(console.BaseConsole):
             minimum=0, maximum=2),
         'VBATT': ParameterFloat(
             'TRS2_BATT_MV', scale=1000),
+        'FAULT_CODE': ParameterString(
+            'TRS2_FAULT_CODE_BITS', ),
+        'BATT_CHANGE': ParameterString(
+            'TRS2_BATT_CHANGE', ),
+        'STATE': ParameterString(
+            'TRS2_STATE', ),
         }
 
     def override(self, state=0):
