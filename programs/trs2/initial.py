@@ -33,14 +33,14 @@ class Initial(share.TestSequence):
         LimitLow('LightOff', 0.5),
         LimitDelta('LightOn', vbatt, (0.25, 0)),
         LimitLow('RemoteOff', 0.5),
-#        LimitDelta('RemoteOn', vbatt, (0.25, 0)),
-        LimitDelta('RemoteOn', vbatt, 0.25),
+        LimitDelta('RemoteOn', vbatt, (0.25, 0)),
         LimitHigh('RedLedOff', 3.1),
-        LimitLow('RedLedOn', 0.5),
+        LimitDelta('RedLedOn', 0.5, 0.05),
         LimitHigh('GreenLedOff', 3.1),
-        LimitLow('GreenLedOn', 0.5),
+        LimitLow('GreenLedOn', 0.15),
         LimitHigh('BlueLedOff', 3.1),
-        LimitLow('BlueLedOn', 0.5),
+        LimitDelta('BlueLedOn', 0.25, 0.05),
+        LimitDelta('BlueLedFlash', 1.6, 0.2),
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
@@ -68,9 +68,8 @@ class Initial(share.TestSequence):
 
         """
         mes['dmm_tstpincov'](timeout=5)
-#        self.sernum = share.get_sernum(
-#            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
-        self.sernum = 'A0000000000'
+        self.sernum = share.get_sernum(
+            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
         dev['rla_pin'].set_on()
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
@@ -93,8 +92,7 @@ class Initial(share.TestSequence):
         trs2['NVWRITE'] = True
         mes['arm_swver']()
         self.measure(
-            ('dmm_redoff', 'dmm_greenoff'), timeout=5)
-        mes['ui_yesnoblue'](timeout=5)
+            ('dmm_redoff', 'dmm_greenoff', 'dmm_blueflash'), timeout=5)
         trs2.override(self.force_on)
         self.measure(
             ('dmm_lighton', 'dmm_remoteon', 'dmm_redon', 'dmm_greenon',
@@ -184,7 +182,7 @@ class Sensors(share.Sensors):
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['red'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
         self['green'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
-        self['blue'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01)
+        self['blue'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01, nplc=10)
         self['brake'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.01)
         self['light'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.01)
         self['remote'] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
@@ -234,6 +232,7 @@ class Measurements(share.Measurements):
             ('dmm_greenon', 'GreenLedOn', 'green', ''),
             ('dmm_blueoff', 'BlueLedOff', 'blue', ''),
             ('dmm_blueon', 'BlueLedOn', 'blue', ''),
+            ('dmm_blueflash', 'BlueLedFlash', 'blue', ''),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('trs2_btmac', 'BtMac', 'btmac', ''),
