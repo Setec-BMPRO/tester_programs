@@ -73,7 +73,7 @@ class TimedStore():
 
         """
         with self._lock:
-            del self.data[name]
+            self.data.pop(name)
         self._timer = self._timeout / self._tick
 
     def __len__(self):
