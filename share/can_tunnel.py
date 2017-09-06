@@ -35,7 +35,7 @@ import time
 import tester
 
 
-class ConsoleCanTunnel():
+class OldConsoleCanTunnel():
 
     """A CAN Tunnel to another Console.
 
@@ -77,6 +77,12 @@ class ConsoleCanTunnel():
         # Create & open a SimSerial in simulation mode.
         # We can open it any time as there is no actual serial port.
         self._buf_port = tester.SimSerial(simulation=True)
+        # Callable SimSerial compatible interface
+        self.puts = self._buf_port.puts
+        self.inWaiting = self._buf_port.inWaiting
+        self.flush = self.port.flush
+        self.flushInput = self._buf_port.flushInput
+        self.flushOutput = self._buf_port.flushOutput
 
     def open(self):
         """Open the CAN tunnel."""
@@ -190,12 +196,6 @@ class ConsoleCanTunnel():
             self._logger.debug('Decode {0!r} => {1!r}'.format(message, data))
         return data
 
-####    START of SimSerial compatible interface      ####
-
-    def puts(self, string_data, preflush=0, postflush=0, priority=False):
-        """Serial: Put a string into the _buf_port read-back buffer."""
-        self._buf_port.puts(string_data, preflush, postflush, priority)
-
     def read(self, size=1):
         """Serial: Read the input buffer.
 
@@ -240,24 +240,6 @@ class ConsoleCanTunnel():
             if reply:
                 reply_bytes = self._decode(reply)
                 self.puts(reply_bytes)  # push any CAN data into my buffer port
-
-    def inWaiting(self):        # pylint:disable=C0103
-        """Serial: Return the number of bytes in the input buffer."""
-        return self._buf_port.inWaiting()
-
-    def flush(self):
-        """Serial: Wait until all output data has been sent."""
-        self.port.flush()
-
-    def flushInput(self):       # pylint:disable=C0103
-        """Serial: Discard waiting input."""
-        self._buf_port.flushInput()
-
-    def flushOutput(self):      # pylint:disable=C0103
-        """Serial: Discard waiting output."""
-        self._buf_port.flushOutput()
-
-####    END of SimSerial compatible interface      ####
 
 
 class TunnelError(Exception):

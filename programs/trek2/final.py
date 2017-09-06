@@ -105,7 +105,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         ser_can.port = CAN_PORT
         # CAN Console tunnel driver
-        self['tunnel'] = share.ConsoleCanTunnel(
+        self['tunnel'] = share.OldConsoleCanTunnel(
             port=ser_can, simulation=self.fifo, verbose=False)
         # Trek2 Console driver (using the CAN Tunnel)
         self['trek2'] = console.TunnelConsole(
