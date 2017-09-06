@@ -50,13 +50,13 @@ class Console(console.BaseConsole):
         'MONITOR': ParameterFloat(
             'TRS2_MONITOR_EN_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
-        'RED': ParameterFloat(
+        'RED_LED': ParameterFloat(
             'TRS2_RED_LED_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
-        'GREEN': ParameterFloat(
+        'GREEN_LED': ParameterFloat(
             'TRS2_GREEN_LED_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
-        'BLUE': ParameterFloat(
+        'BLUE_LED': ParameterFloat(
             'TRS2_BLUE_LED_OVERRIDE', writeable=True,
             minimum=0, maximum=2),
         'BLUETOOTH': ParameterFloat(
@@ -66,10 +66,6 @@ class Console(console.BaseConsole):
             'TRS2_BATT_MV', scale=1000),
         'FAULT_CODE': ParameterString(
             'TRS2_FAULT_CODE_BITS', ),
-        'BATT_CHANGE': ParameterString(
-            'TRS2_BATT_CHANGE', ),
-        'STATE': ParameterString(
-            'TRS2_STATE', ),
         }
 
     def override(self, state=0):
@@ -80,5 +76,5 @@ class Console(console.BaseConsole):
         NORMAL OPERATION: state = 0
         """
         self._logger.debug('Override state = %s', state)
-        for func in ('BR_LIGHT', 'MONITOR', 'RED', 'GREEN', 'BLUE'):
+        for func in ('BR_LIGHT', 'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED'):
             self[func] = state

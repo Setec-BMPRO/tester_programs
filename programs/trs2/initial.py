@@ -45,6 +45,7 @@ class Initial(share.TestSequence):
         LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
             '^{}$'.format(arm_version.replace('.', r'\.'))),
+        LimitRegExp('ARM-FltCode', '^0x00000000$'),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         LimitBoolean('Notify', True),
@@ -70,10 +71,10 @@ class Initial(share.TestSequence):
         mes['dmm_tstpincov'](timeout=5)
         self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes['ui_sernum'])
-        dev['rla_pin'].set_on()
+        dev['rla_pin'].set_on()     # Pin in
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
-        dev['rla_pin'].set_off()
+        dev['rla_pin'].set_off()    # Pin out
         mes['dmm_brakeon'](timeout=5)
 
     @share.teststep
@@ -82,15 +83,13 @@ class Initial(share.TestSequence):
         trs2 = dev['trs2']
         trs2.open()
         dev['rla_reset'].pulse(0.1)
-        trs2.action(None, delay=5.0, expected=2)  # Flush banner
-        trs2['FAULT_CODE']
-        trs2['BATT_CHANGE']
-        trs2['STATE']
+        trs2.action(None, delay=5.0, expected=3)  # Flush banner
         trs2['HW_VER'] = self.hw_ver
         trs2['SER_ID'] = self.sernum
         trs2['NVDEFAULT'] = True
         trs2['NVWRITE'] = True
         mes['arm_swver']()
+        mes['arm_fltcode']()
         self.measure(
             ('dmm_redoff', 'dmm_greenoff', 'dmm_blueflash'), timeout=5)
         trs2.override(self.force_on)
@@ -140,6 +139,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
+                ('dcs_cover', tester.DCSource, 'DCS5'),
                 ('rla_reset', tester.Relay, 'RLA5'),
                 ('rla_wdg', tester.Relay, 'RLA6'),  #Normally closed
                 ('rla_pin', tester.Relay, 'RLA7'),
@@ -161,6 +161,8 @@ class LogicalDevices(share.LogicalDevices):
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
+        self['dcs_cover'].output(9.0, output=True)
+        self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -182,7 +184,8 @@ class Sensors(share.Sensors):
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['red'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
         self['green'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
-        self['blue'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01, nplc=10)
+        self['blue'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01,
+                                nplc=10)
         self['brake'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.01)
         self['light'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.01)
         self['remote'] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
@@ -200,15 +203,11 @@ class Sensors(share.Sensors):
                 trs2, cmdkey, rdgtype=sensor.ReadingString)
         self['arm_swver'] = console.Sensor(
             trs2, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['arm_fltcode'] = console.Sensor(
+            trs2, 'FAULT_CODE', rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_initial', 'msgSnEntry'),
             caption=tester.translate('trs2_initial', 'capSnEntry'))
-        self['yesnoblue'] = sensor.YesNo(
-            message=tester.translate('trs2_initial', 'IsBlueFlash?'),
-            caption=tester.translate('trs2_initial', 'capBlueLed'))
-        self['yesnooff'] = sensor.YesNo(
-            message=tester.translate('trs2_initial', 'IsLedOff?'),
-            caption=tester.translate('trs2_initial', 'capLeds'))
 
 
 class Measurements(share.Measurements):
@@ -237,7 +236,6 @@ class Measurements(share.Measurements):
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('trs2_btmac', 'BtMac', 'btmac', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
+            ('arm_fltcode', 'ARM-FltCode', 'arm_fltcode', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
-            ('ui_yesnoblue', 'Notify', 'yesnoblue', ''),
-            ('ui_yesnooff', 'Notify', 'yesnooff', ''),
             ))

@@ -28,15 +28,16 @@ class TRSInitial(ProgramTestCase):
                     ),
                 'TestArm': (
                     (sen['light'], (11.9, 0.0)), (sen['remote'], (11.9, 0.0)),
-                    (sen['red'], (3.1, 0.0, 3.1)),
+                    (sen['red'], (3.1, 0.5, 3.1)),
                     (sen['green'], (3.1, 0.0, 3.1)),
-                    (sen['blue'], (3.1, 0.0, 3.1)), (sen['yesnoblue'], True),
+                    (sen['blue'], (1.6, 0.25, 3.1)),
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
-                'TestArm':   ('Banner1\r\nBanner2', ) +
+                'TestArm':   ('Banner1\r\nBanner2\r\nBanner3', ) +
                                 ('', ) * 4 +
                                 (trs2.initial.Initial.arm_version, ) +
+                                ('0x00000000', ) +
                                 ('', ) * 15,
                 'Bluetooth': ('F8F005FE6621', ) +
                                 ('', ) * 2,
