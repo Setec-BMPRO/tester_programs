@@ -6,6 +6,7 @@ from . import selftest
 from . import _2040
 from . import atxg450
 from . import batterycheck
+from . import bc2
 from . import bc15
 from . import bce4
 from . import bce282
@@ -55,6 +56,8 @@ PROGRAMS = {
     'ATXG-450-2V Final': atxg450.Final2V,
     'BatteryCheck Initial': batterycheck.Initial,
     'BatteryCheck Final': batterycheck.Final,
+    'BC2 Initial': bc2.Initial,
+    'BC2 Final': bc2.Final,
     'BC15 Initial': bc15.Initial,
     'BC15 Final': bc15.Final,
     'BCE4/5 Final': bce4.Final,

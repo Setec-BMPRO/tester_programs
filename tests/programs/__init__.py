@@ -10,6 +10,7 @@ from . import test_atxg4502v_final
 from . import test_batterycheck_final
 from . import test_batterycheck_initial
 from . import test_bc2_initial
+from . import test_bc2_final
 from . import test_bc15_initial
 from . import test_bc15_final
 from . import test_bp35_final
@@ -67,6 +68,7 @@ __all__ = [
     'test_batterycheck_final',
     'test_batterycheck_initial',
     'test_bc2_initial',
+    'test_bc2_final',
     'test_bc15_initial',
     'test_bc15_final',
     'test_bp35_final',
