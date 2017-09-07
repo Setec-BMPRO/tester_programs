@@ -18,6 +18,7 @@ from . import test_bp35_initial
 from . import test_bce282_final
 from . import test_bce282_initial
 from . import test_bce4_final
+from . import test_ble2can_initial
 from . import test_c15a15_initial
 from . import test_c15a15_final
 from . import test_c15d15_initial
@@ -54,6 +55,7 @@ from . import test_trek2_initial
 from . import test_trs1_initial
 from . import test_trs2_initial
 from . import test_trs2_final
+from . import test_trsrfm_initial
 from . import test_ts3020h_initial
 from . import test_ts3020h_final
 from . import test_ts3520_final
@@ -76,6 +78,7 @@ __all__ = [
     'test_bce282_final',
     'test_bce282_initial',
     'test_bce4_final',
+    'test_ble2can_initial',
     'test_c15a15_initial',
     'test_c15a15_final',
     'test_c15d15_initial',
@@ -112,6 +115,7 @@ __all__ = [
     'test_trs1_initial',
     'test_trs2_initial',
     'test_trs2_final',
+    'test_trsrfm_initial',
     'test_ts3020h_initial',
     'test_ts3020h_final',
     'test_ts3520_final',
