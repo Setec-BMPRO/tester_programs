@@ -466,7 +466,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         bp35_ser.port = ARM_PORT
         # BP35 Console driver
-        self['bp35'] = console.Console(bp35_ser, verbose=False)
+        self['bp35'] = console.Console(bp35_ser)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = share.BackgroundTimer()

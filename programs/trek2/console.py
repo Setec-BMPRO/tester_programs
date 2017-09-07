@@ -64,10 +64,6 @@ class _Console():
         'TANK4': ParameterFloat('TANK_4_LEVEL'),
         }
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        super().__init__(port, verbose)
-
     def testmode(self, state):
         """Enable or disable Test Mode.
 

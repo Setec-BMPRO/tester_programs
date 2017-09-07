@@ -238,7 +238,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         self['msp_ser'].port = MSP_PORT2
         # MSP430 Console driver
-        self['msp'] = console.Console(self['msp_ser'], verbose=False)
+        self['msp'] = console.Console(self['msp_ser'])
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(9.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, False))

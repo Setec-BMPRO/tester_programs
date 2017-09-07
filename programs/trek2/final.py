@@ -106,10 +106,9 @@ class LogicalDevices(share.LogicalDevices):
         ser_can.port = CAN_PORT
         # CAN Console tunnel driver
         self['tunnel'] = share.OldConsoleCanTunnel(
-            port=ser_can, simulation=self.fifo, verbose=False)
+            port=ser_can, simulation=self.fifo)
         # Trek2 Console driver (using the CAN Tunnel)
-        self['trek2'] = console.TunnelConsole(
-            port=self['tunnel'], verbose=False)
+        self['trek2'] = console.TunnelConsole(port=self['tunnel'])
 
     def reset(self):
         """Reset instruments."""

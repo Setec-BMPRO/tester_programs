@@ -29,7 +29,7 @@ class BaseConsole(unittest.TestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         sim_ser = tester.SimSerial(simulation=True)
-        self.mycon = share.console.BaseConsole(sim_ser, verbose=False)
+        self.mycon = share.console.BaseConsole(sim_ser)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
 
@@ -88,7 +88,7 @@ class BadUartConsole(unittest.TestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         sim_ser = tester.SimSerial(simulation=True)
-        self.mycon = share.console.BadUartConsole(sim_ser, verbose=False)
+        self.mycon = share.console.BadUartConsole(sim_ser)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
 

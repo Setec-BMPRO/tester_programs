@@ -93,7 +93,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         self['bc2_ser'].port = share.port(self.fixture, 'ARM')
         # Console driver
-        self['bc2'] = console.Console(self['bc2_ser'], verbose=False)
+        self['bc2'] = console.Console(self['bc2_ser'])
         # Serial connection to the BLE module
         self['ble_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)

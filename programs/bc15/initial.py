@@ -157,7 +157,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         self['bc15_ser'].port = ARM_PORT
         # Console driver
-        self['bc15'] = console.Console(self['bc15_ser'], verbose=False)
+        self['bc15'] = console.Console(self['bc15_ser'])
         # Apply power to fixture Comms circuit.
         self['dcs_vcom'].output(12.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))

@@ -299,7 +299,7 @@ class LogicalDevices(share.LogicalDevices):
             simulation=self.fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
         arm_ser.port = ARM_PORT
-        self['arm'] = console.Console(arm_ser, verbose=False)
+        self['arm'] = console.Console(arm_ser)
         # Switch on fixture power
         self['dcs_fixture'].output(10.0, output=True)
         self.add_closer(lambda: self['dcs_fixture'].output(0.0, output=False))

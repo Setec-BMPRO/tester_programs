@@ -417,13 +417,13 @@ class LogicalDevices(share.LogicalDevices):
             simulation=self.fifo, baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = ARM_PORT
-        self['arm'] = console.Console(arm_ser, verbose=False)
+        self['arm'] = console.Console(arm_ser)
         # Serial connection to the Arduino console
         ard_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = ARDUINO_PORT
-        self['ard'] = arduino.Arduino(ard_ser, verbose=False)
+        self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
             self[dcs].output(12.0, output=True)

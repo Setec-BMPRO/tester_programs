@@ -106,11 +106,13 @@ class BaseConsole():
     _read_key = None
     # Data readings: Key=Name, Value=Parameter
     cmd_data = {}
+    # True for verbose logging
+    verbose = False
 # TODO: Remove this logger once we implement response_count != expected
-    # Last command sent (for debug message @ line 280)
+    # Last command sent (for debug message @ line 270)
     last_cmd = None
 
-    def __init__(self, port, verbose=False):
+    def __init__(self, port):
         """Initialise communications.
 
         @param port SimSerial instance to use
@@ -119,15 +121,13 @@ class BaseConsole():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
-        self._verbose = verbose
+        self.open = port.open
+        self.close = port.close
+        self.opc = lambda: None         # Sensor: Dummy OPC
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
         self._read_key = key
-
-    def opc(self):
-        """Sensor: Dummy OPC."""
-        pass
 
     def read(self):
         """Sensor: Read ARM data using the last defined key.
@@ -144,8 +144,7 @@ class BaseConsole():
         @return Reading
 
         """
-        parameter = self.cmd_data[key]
-        return parameter.read(self.action)
+        return self.cmd_data[key].read(self.action)
 
     def __setitem__(self, key, value):
         """Write a value to the console.
@@ -154,12 +153,7 @@ class BaseConsole():
         @param value Data value
 
         """
-        parameter = self.cmd_data[key]
-        parameter.write(value, self.action)
-
-    def open(self):
-        """Open port."""
-        self.port.open()
+        self.cmd_data[key].write(value, self.action)
 
     def puts(self, string_data,
              preflush=0, postflush=0,
@@ -180,10 +174,6 @@ class BaseConsole():
             if addprompt and len(self.puts_prompt) > 0:
                 string_data = string_data + self.puts_prompt
             self.port.puts(string_data, preflush, postflush, priority)
-
-    def close(self):
-        """Close serial communications."""
-        self.port.close()
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
@@ -231,7 +221,7 @@ class BaseConsole():
         self.port.write(cmd_bytes + b'\r')
         # Read back the echo of the command
         cmd_echo = self.port.read(len(cmd_bytes))
-        if self._verbose:
+        if self.verbose:
             self._logger.debug('Echo <-- %s', repr(cmd_echo))
         # The echo must match what we sent
         if cmd_echo != cmd_bytes:
@@ -252,7 +242,7 @@ class BaseConsole():
         buf = bytearray()           # Buffer for the response bytes
         while self.cmd_prompt not in buf:
             data = self.port.read(1)
-            if self._verbose:
+            if self.verbose:
                 self._logger.debug('Read <-- %s', repr(data))
             if len(data) == 0:              # No data means a timeout
                 raise ConsoleResponseError('Response timeout')
@@ -308,7 +298,7 @@ class BadUartConsole(BaseConsole):
             a_byte = bytes([a_byte])    # We need a byte, not an integer
             self.port.write(a_byte)
             echo = self.port.read(1)
-            if self._verbose:
+            if self.verbose:
                 self._logger.debug(' Tx -> %s Rx <- %s', a_byte, echo)
             if echo != a_byte:
                 raise ConsoleCommandError(

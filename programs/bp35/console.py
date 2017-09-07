@@ -151,9 +151,9 @@ class Console(share.console.BadUartConsole):
             scale=1000, write_expected=1),
         }
 
-    def __init__(self, port, verbose=False):
+    def __init__(self, port):
         """Create console instance."""
-        super().__init__(port, verbose)
+        super().__init__(port)
         # Add in the 14 load switch current readings
         for i in range(1, 15):
             self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(

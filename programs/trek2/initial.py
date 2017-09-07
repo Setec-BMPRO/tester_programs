@@ -131,7 +131,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         trek2_ser.port = ARM_PORT
         # Console driver
-        self['trek2'] = console.DirectConsole(trek2_ser, verbose=False)
+        self['trek2'] = console.DirectConsole(trek2_ser)
         # Apply power to fixture circuits.
         self['dcs_Vcom'].output(12.0, output=True, delay=2)
         self.add_closer(lambda: self['dcs_Vcom'].output(0.0, False))

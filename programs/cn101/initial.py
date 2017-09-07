@@ -166,7 +166,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         cn101_ser.port = ARM_PORT
         # Console driver
-        self['cn101'] = console.Console(cn101_ser, verbose=False)
+        self['cn101'] = console.Console(cn101_ser)
         # Serial connection to the BLE module
         ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)

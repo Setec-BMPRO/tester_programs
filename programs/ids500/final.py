@@ -273,7 +273,7 @@ class LogicalDevices(share.LogicalDevices):
             simulation=self.fifo, baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         pic_ser.port = PIC_PORT
-        self['pic'] = console.Console(pic_ser, verbose=False)
+        self['pic'] = console.Console(pic_ser)
 
     def reset(self):
         """Reset instruments."""

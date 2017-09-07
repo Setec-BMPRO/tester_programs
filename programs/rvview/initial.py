@@ -135,7 +135,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         rvview_ser.port = ARM_PORT
         # rvview Console driver
-        self['rvview'] = console.DirectConsole(rvview_ser, verbose=False)
+        self['rvview'] = console.DirectConsole(rvview_ser)
         # Power to fixture Comms circuits.
         self['dcs_vcom'].output(9.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))

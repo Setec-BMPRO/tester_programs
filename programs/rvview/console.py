@@ -48,10 +48,6 @@ class _Console():
         'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
         }
 
-    def __init__(self, port, verbose=False):
-        """Create console instance."""
-        super().__init__(port, verbose)
-
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
         reset_relay.pulse(0.1)

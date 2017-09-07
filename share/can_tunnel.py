@@ -60,18 +60,18 @@ class OldConsoleCanTunnel():
     # CAN ID numbers
     local_id = 16       # My CAN bus ID
     target_id = 32      # Remote CAN bus ID
+    # True for verbose logging
+    verbose = False
 
-    def __init__(self, port, simulation=False, verbose=False):
+    def __init__(self, port, simulation=False):
         """Initialise communications.
 
         @param port SimSerial port to connect to Serial to CAN interface.
         @param simulation True for simulation mode.
-        @param verbose True for verbose logging.
 
         """
         self.port = port
         self.simulation = simulation
-        self.verbose = verbose
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         # Create & open a SimSerial in simulation mode.
