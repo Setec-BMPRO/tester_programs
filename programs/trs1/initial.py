@@ -9,34 +9,35 @@ from tester import (
     )
 import share
 
-LOW_BATT_L = 10.85
-LOW_BATT_U = 11.55
-
-LIMITS = (
-    LimitLow('VinOff', 0.5),
-    LimitBetween('Vin', 11.0, 12.0),
-    LimitLow('5VOff', 0.1),
-    LimitDelta('5VOn', 5.0, 0.1),
-    LimitLow('BrakeOff', 0.1),
-    LimitDelta('BrakeOn', 12.0, 0.1),
-    LimitLow('LightOff', 0.3),
-    LimitDelta('LightOn', 12.0, 0.3),
-    LimitLow('RemoteOff', 0.1),
-    LimitDelta('RemoteOn', 12.0, 0.1),
-    LimitHigh('RedLedOff', 9.0),
-    LimitLow('RedLedOn', 0.1),
-    LimitDelta('FreqTP3', 0.56, 0.2),
-    LimitBoolean('Notify', True),
-    )
-
 
 class Initial(share.TestSequence):
 
     """TRS1 Initial Test Program."""
 
+    # Low battery condition voltage limits
+    low_batt_l = 10.85
+    low_batt_h = 11.55
+    # Test limits
+    limits = (
+        LimitLow('VinOff', 0.5),
+        LimitBetween('Vin', 11.0, 12.0),
+        LimitLow('5VOff', 0.1),
+        LimitDelta('5VOn', 5.0, 0.1),
+        LimitLow('BrakeOff', 0.1),
+        LimitDelta('BrakeOn', 12.0, 0.1),
+        LimitLow('LightOff', 0.3),
+        LimitDelta('LightOn', 12.0, 0.3),
+        LimitLow('RemoteOff', 0.1),
+        LimitDelta('RemoteOn', 12.0, 0.1),
+        LimitHigh('RedLedOff', 9.0),
+        LimitLow('RedLedOn', 0.1),
+        LimitDelta('FreqTP3', 0.56, 0.2),
+        LimitBoolean('Notify', True),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('BreakAway', self._step_breakaway),
@@ -64,9 +65,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_batt_low(self, dev, mes):
         """Check operation of Red Led under low battery condition."""
-        dev['dcs_Vin'].output(LOW_BATT_L)
+        dev['dcs_Vin'].output(self.low_batt_l)
         mes['dmm_redon'](timeout=5)
-        dev['dcs_Vin'].output(LOW_BATT_U)
+        dev['dcs_Vin'].output(self.low_batt_h)
         mes['dmm_redoff'](timeout=5)
 
 
