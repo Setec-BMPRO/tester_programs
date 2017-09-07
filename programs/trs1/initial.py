@@ -50,8 +50,8 @@ class Initial(share.TestSequence):
         dev['rla_pin'].set_on()
         dev['dcs_Vin'].output(12.0, output=True, delay=0.8)
         self.measure(
-            ('dmm_vinoff', 'dmm_5Voff', 'dmm_brakeoff', 'dmm_lightoff',
-             'dmm_remoteoff'), timeout=5)
+            ('dmm_vinoff', 'dmm_5Voff', 'dmm_brakeoff', 'dmm_lightoff'),
+            timeout=5)
 
     @share.teststep
     def _step_breakaway(self, dev, mes):
@@ -59,7 +59,7 @@ class Initial(share.TestSequence):
         dev['rla_pin'].set_off()
         self.measure(
             ('dmm_vin', 'dmm_5Von', 'dmm_brakeon', 'dmm_lighton',
-             'dmm_remoteon', 'dmm_redoff', 'dso_tp3', 'ui_YesNoGreen'),
+             'dmm_redoff', 'dso_tp3', 'ui_YesNoGreen'),
             timeout=5)
 
     @share.teststep
