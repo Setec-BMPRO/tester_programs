@@ -10,6 +10,7 @@ from . import bc2
 from . import bc15
 from . import bce4
 from . import bce282
+from . import ble2can
 from . import bp35
 from . import c15a15
 from . import c15d15
@@ -33,6 +34,7 @@ from . import sx750
 from . import trek2
 from . import trs1
 from . import trs2
+from . import trsrfm
 from . import ts3020h
 from . import ts3520
 from . import uni750
@@ -63,6 +65,7 @@ PROGRAMS = {
     'BCE4/5 Final': bce4.Final,
     'BCE282 Initial': bce282.Initial,
     'BCE282 Final': bce282.Final,
+    'BLE2CAN Initial': ble2can.Initial,
     'BP35 Initial': bp35.Initial,
     'BP35 Final': bp35.Final,
     'C15A-15 Initial': c15a15.Initial,
@@ -108,6 +111,7 @@ PROGRAMS = {
     'TRS1 Initial': trs1.Initial,
     'TRS2 Initial': trs2.Initial,
     'TRS2 Final': trs2.Final,
+    'TRSRFM Initial': trsrfm.Initial,
     'TS3020-H Initial': ts3020h.Initial,
     'TS3020-H Final': ts3020h.Final,
     'TS3520 Final': ts3520.Final,
