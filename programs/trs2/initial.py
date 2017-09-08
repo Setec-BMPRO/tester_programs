@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """TRS2 Initial Program."""
 
-import time
 import tester
 from tester import (
     TestStep,
@@ -26,8 +25,8 @@ class Initial(share.TestSequence):
     normal = 0
     # Test limits
     limits = (
-        LimitDelta('Vin', 12.0, 0.5),
-        LimitDelta('3V3', 3.3, 0.25),
+        LimitDelta('Vin', 12.0, 0.2),
+        LimitDelta('3V3', 3.3, 0.1),
         LimitLow('BrakeOff', 0.5),
         LimitDelta('BrakeOn', vbatt, (0.5, 0)),
         LimitLow('LightOff', 0.5),
@@ -35,17 +34,17 @@ class Initial(share.TestSequence):
         LimitLow('RemoteOff', 0.5),
         LimitDelta('RemoteOn', vbatt, (0.25, 0)),
         LimitHigh('RedLedOff', 3.1),
-        LimitDelta('RedLedOn', 0.5, 0.05),
+        LimitDelta('RedLedOn', 0.5, 0.1),
         LimitHigh('GreenLedOff', 3.1),
-        LimitLow('GreenLedOn', 0.15),
+        LimitLow('GreenLedOn', 0.14),
         LimitHigh('BlueLedOff', 3.1),
-        LimitDelta('BlueLedOn', 0.25, 0.05),
-        LimitDelta('BlueLedFlash', 1.6, 0.2),
+        LimitDelta('BlueLedOn', 0.25, 0.1),
+        LimitDelta('BlueLedFlash', 1.65, 0.2),
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
             '^{}$'.format(arm_version.replace('.', r'\.'))),
-        LimitRegExp('ARM-FltCode', '^0x00000000$'),
+        LimitLow('ARM-FltCode', 0),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         LimitBoolean('Notify', True),
@@ -69,13 +68,13 @@ class Initial(share.TestSequence):
 
         """
         mes['dmm_tstpincov'](timeout=5)
+        dev['dcs_vin'].output(self.vbatt, True)
         self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes['ui_sernum'])
-        dev['rla_pin'].set_on()     # Pin in
-        dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
-        dev['rla_pin'].set_off()    # Pin out
+        dev['rla_pin'].set_on()    # Pin out
         mes['dmm_brakeon'](timeout=5)
+        dev['rla_pin'].set_off()    # Pin in
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
@@ -116,7 +115,6 @@ class Initial(share.TestSequence):
         else:
             ble = dev['ble']
             ble.open()
-            time.sleep(3)
             reply = ble.scan(btmac)
             ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
@@ -196,15 +194,10 @@ class Sensors(share.Sensors):
         trs2 = self.devices['trs2']
         self['btmac'] = console.Sensor(
             trs2, 'BT_MAC', rdgtype=sensor.ReadingString)
-        for name, cmdkey in (
-                ('btmac', 'BT_MAC'),
-            ):
-            self[name] = console.Sensor(
-                trs2, cmdkey, rdgtype=sensor.ReadingString)
         self['arm_swver'] = console.Sensor(
             trs2, 'SW_VER', rdgtype=sensor.ReadingString)
         self['arm_fltcode'] = console.Sensor(
-            trs2, 'FAULT_CODE', rdgtype=sensor.ReadingString)
+            trs2, 'FAULT_CODE')
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_initial', 'msgSnEntry'),
             caption=tester.translate('trs2_initial', 'capSnEntry'))
