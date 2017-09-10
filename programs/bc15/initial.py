@@ -13,7 +13,7 @@ from tester import (
 import share
 from . import console
 
-BIN_VERSION = '2.0.16032.2000'      # Software binary version
+BIN_VERSION = '2.0.16258.2002'      # Software binary version
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = share.port('028467', 'ARM')
 # ARM software image file
