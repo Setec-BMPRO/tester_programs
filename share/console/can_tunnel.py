@@ -153,7 +153,7 @@ class OldConsoleCanTunnel():
 
     def open(self):
         """Open the CAN tunnel."""
-        self.local_id = '{0},{1}'.format(
+        self.local_id_str = '{0},{1}'.format(
             (self.local_id & 0xFF00) >> 8, (self.local_id & 0xFF))
         self._logger.debug('Open CAN tunnel buffer port')
         self._buf_port.open()
@@ -184,11 +184,13 @@ class OldConsoleCanTunnel():
         # Open a console tunnel
         try:
             self.action(
-                '"TCC,{0},3,{1},1 CAN'.format(self.target_id, self.local_id))
+                '"TCC,{0},3,{1},1 CAN'.format(
+                    self.target_id, self.local_id_str))
             reply = self.action(delay=0.2)  # RRC... is expected
         except Exception as exc:
             raise TunnelError('CAN Tunnel Mode failed') from exc
-        expected = 'RRC,{0},3,3,{1},1'.format(self.target_id, self.local_id)
+        expected = 'RRC,{0},3,3,{1},1'.format(
+            self.target_id, self.local_id_str)
         if reply != expected:
             raise TunnelError(
                 'Bad CAN tunnel mode reply: {0}'.format(reply))
@@ -197,7 +199,7 @@ class OldConsoleCanTunnel():
     def close(self):
         """Close the CAN tunnel."""
         self.action(
-            '"TCC,{0},3,{1},0 CAN'.format(self.target_id, self.local_id))
+            '"TCC,{0},3,{1},0 CAN'.format(self.target_id, self.local_id_str))
         self._logger.debug('Close CAN tunnel serial port')
         self.port.close()
         self._logger.debug('Close CAN tunnel buffer port')
