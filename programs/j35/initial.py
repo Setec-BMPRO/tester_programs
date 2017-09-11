@@ -14,7 +14,7 @@ from tester import (
 import share
 from . import console
 
-ARM_VERSION = '1.2.14549.989'      # ARM version
+ARM_VERSION = '1.3.15775.997'      # ARM version
 # Serial port for the ARM. Used by programmer and ARM comms module.
 ARM_PORT = share.port('029242', 'ARM')
 # ARM software image file
@@ -134,7 +134,7 @@ CONFIG = {
     'C': {
         'Limits': LIMITS_C,
         'LoadCount': 14,
-        'HwVer': (7, 3, 'A'),
+        'HwVer': (7, 3, 'B'),
         'SolarCan': True,
         'Derate': False,
         },
