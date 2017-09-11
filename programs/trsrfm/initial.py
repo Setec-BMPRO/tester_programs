@@ -5,7 +5,7 @@
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitHigh, LimitDelta, LimitBoolean, LimitRegExp
+    LimitLow, LimitDelta, LimitBoolean, LimitRegExp
     )
 import share
 from . import console
@@ -79,13 +79,10 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(self.vbatt, delay=15.0)
         btmac = mes['trsrfm_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        if self.fifo:
-            reply = True
-        else:
-            ble = dev['ble']
-            ble.open()
-            reply = ble.scan(btmac)
-            ble.close()
+        ble = dev['ble']
+        ble.open()
+        reply = ble.scan(btmac)
+        ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
@@ -117,7 +114,7 @@ class LogicalDevices(share.LogicalDevices):
         # Set port separately, as we don't want it opened yet
         self['trsrfm_ser'].port = share.port(self.fixture, 'ARM')
         # Console driver
-        self['trsrfm'] = console.Console(self['trsrfm_ser'], verbose=False)
+        self['trsrfm'] = console.Console(self['trsrfm_ser'])
         # Serial connection to the BLE module
         self['ble_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)

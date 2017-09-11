@@ -39,15 +39,13 @@ class Final(share.TestSequence):
         self.sernum = share.get_sernum(
             self.uuts, self.limits['SerNum'], mes['ui_sernum'])
         self.measure(('dmm_vin', ), timeout=5)
-        btmac = ''
+# FIXME: Where do we get the MAC from?
+        btmac = '001EC030BC15'
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        if self.fifo:
-            reply = True
-        else:
-            ble = dev['ble']
-            ble.open()
-            reply = ble.scan(btmac)
-            ble.close()
+        ble = dev['ble']
+        ble.open()
+        reply = ble.scan(btmac)
+        ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()

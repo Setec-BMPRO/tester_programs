@@ -110,13 +110,10 @@ class Initial(share.TestSequence):
         btmac = mes['trs2_btmac']().reading1
         trs2['BLUETOOTH'] = self.force_on
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        if self.fifo:
-            reply = True
-        else:
-            ble = dev['ble']
-            ble.open()
-            reply = ble.scan(btmac)
-            ble.close()
+        ble = dev['ble']
+        ble.open()
+        reply = ble.scan(btmac)
+        ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         trs2['BLUETOOTH'] = self.normal
         mes['detectBT'].sensor.store(reply)

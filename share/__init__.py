@@ -9,7 +9,6 @@ import logging
 from .testsequence import *     # pylint:disable=W0401
 from .bluetooth import *        # pylint:disable=W0401
 from .console import *          # pylint:disable=W0401
-from .can_tunnel import *       # pylint:disable=W0401
 from .programmer import *       # pylint:disable=W0401
 from .ticker import *           # pylint:disable=W0401
 from .timed_data import *       # pylint:disable=W0401

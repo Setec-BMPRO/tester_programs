@@ -56,13 +56,10 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(12.0, delay=15.0)
         btmac = mes['bc2_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        if self.fifo:
-            reply = True
-        else:
-            ble = dev['ble']
-            ble.open()
-            reply = ble.scan(btmac)
-            ble.close()
+        ble = dev['ble']
+        ble.open()
+        reply = ble.scan(btmac)
+        ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()

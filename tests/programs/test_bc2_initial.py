@@ -13,6 +13,7 @@ class BC2Initial(ProgramTestCase):
     prog_class = bc2.Initial
     parameter = None
     debug = True
+    btmac = '001EC030BC15'
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -27,16 +28,28 @@ class BC2Initial(ProgramTestCase):
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
-                'Bluetooth': ('001EC030BC15', ),
+                'Bluetooth':
+                    (self.btmac, ) +
+                    ('', ) * 2,
+                },
+            UnitTester.key_ext: {       # Tuples of extra strings
+                'Bluetooth': (
+                    (None, 'AOK', ) +
+                    (None, 'MCHP BTLE v1', ) +
+                    (None, 'AOK', ) +
+                    (self.btmac + ',0,,53....,-53', ) +
+                    (None, 'AOK', )
+                    ),
                 },
             }
         self.tester.ut_load(
-            data, self.test_program.fifo_push, dev['bc2'].puts)
+            data,
+            self.test_program.fifo_push,
+            dev['bc2'].puts,
+            dev['ble'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
         self.assertEqual(5, len(result.readings))  # Reading count
         # And did all steps run in turn?
-        self.assertEqual(
-            ['Prepare', 'Bluetooth'],
-            self.tester.ut_steps)
+        self.assertEqual(['Prepare', 'Bluetooth'], self.tester.ut_steps)

@@ -13,12 +13,12 @@ class BC2Final(ProgramTestCase):
     prog_class = bc2.Final
     parameter = None
     debug = True
+    btmac = '001EC030BC15'
 
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-#        dev = self.test_program.devices
-#        dev['bc2_ser'].flushInput()    # Flush console input buffer
+        dev = self.test_program.devices
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Bluetooth': (
@@ -27,16 +27,29 @@ class BC2Final(ProgramTestCase):
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
-                'Bluetooth': ('001EC030BC15', ),
+                'Bluetooth':
+                    (self.btmac, ) +
+                    ('', ) * 2,
+                },
+            UnitTester.key_ext: {       # Tuples of extra strings
+                'Bluetooth': (
+                    (None, 'AOK', ) +
+                    (None, 'MCHP BTLE v1', ) +
+                    (None, 'AOK', ) +
+                    (self.btmac + ',0,,53....,-53', ) +
+                    (None, 'AOK', )
+                    ),
                 },
             }
         self.tester.ut_load(
-#            data, self.test_program.fifo_push, dev['bc2'].puts)
-            data, self.test_program.fifo_push)
+            data,
+            self.test_program.fifo_push,
+            lambda msg, addprompt: None,    # Dummy console.puts()
+            dev['ble'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(4, len(result.readings))  # Reading count
+        self.assertEqual(3, len(result.readings))   # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['Bluetooth', 'Cal'],

@@ -5,3 +5,4 @@
 # Easy access to utility methods and classes
 from ._base import *
 from .protocol import *
+from .can_tunnel import *

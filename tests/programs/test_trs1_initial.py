@@ -22,13 +22,12 @@ class TRS1Initial(ProgramTestCase):
                 'PowerUp': (
                     (sen['oVin'], 0.0), (sen['o5V'], 0.0),
                     (sen['oBrake'], 0.0), (sen['oLight'], 0.0),
-                    (sen['oRemote'], 0.0),
                     ),
                 'BreakAway': (
                     (sen['oVin'], 12.0), (sen['o5V'], 5.0),
                     (sen['oBrake'], 12.0), (sen['oLight'], 12.0),
-                    (sen['oRemote'], 12.0), (sen['oRed'], 10.0),
-                    (sen['oYesNoGreen'], True), (sen['tp3'], ((0.56,),)),
+                    (sen['oRed'], 10.0), (sen['oYesNoGreen'], True),
+                    (sen['tp3'], ((0.56,),)),
                     ),
                 'BattLow': (
                     (sen['oRed'], (0.0, 10.0)),
@@ -39,7 +38,7 @@ class TRS1Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(15, len(result.readings))  # Reading count
+        self.assertEqual(13, len(result.readings))  # Reading count
         # And did all steps run in turn?
         self.assertEqual(
             ['PowerUp', 'BreakAway', 'BattLow'], self.tester.ut_steps)

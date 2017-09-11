@@ -19,11 +19,11 @@ class Tunnel(unittest.TestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         sim_ser = tester.SimSerial(simulation=True)
-        self.mycon = share.can_tunnel.OldConsoleCanTunnel(sim_ser)
+        self.mycon = share.console.can_tunnel.OldConsoleCanTunnel(sim_ser)
 
     def test_1_open_fail(self):
         """No echo from the CAN interface."""
-        with self.assertRaises(share.can_tunnel.TunnelError):
+        with self.assertRaises(share.console.can_tunnel.TunnelError):
             self.mycon.open()
 
     def test_2_open_ok(self):
