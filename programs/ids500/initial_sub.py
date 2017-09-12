@@ -6,107 +6,13 @@ import os
 import inspect
 import time
 import tester
+from tester import (
+    TestStep,
+    LimitLow, LimitRegExp, LimitBetween, LimitDelta, LimitPercent, LimitInteger
+    )
 import share
 from . import console
 
-# Serial port for the PIC.
-PIC_PORT = share.port('017056', 'PIC')
-
-PIC_HEX_MIC = 'ids_picMic_2.hex'
-PIC_HEX_SYN = 'ids_picSyn_2.hex'
-
-LIMITS_MIC = tester.testlimit.limitset((
-    ('5V', 1, 4.95, 5.05, None, None),
-    ('SwRev', 1, None, None, '2', None),
-    ('MicroTemp', 1, None, None, 'MICRO Temp', None),
-    ))
-
-LIMITS_AUX = tester.testlimit.limitset((
-    ('5V', 1, 4.90, 5.10, None, None),
-    ('5VOff', 1, 0.5, None, None, None),
-    ('15VpOff', 1, 0.5, None, None, None),
-    ('15Vp', 1, 14.25, 15.75, None, None),
-    ('15VpSwOff', 1, 0.5, None, None, None),
-    ('15VpSw', 1, 14.25, 15.75, None, None),
-    ('20VL', 1, 18.0, 25.0, None, None),
-    ('-20V', 1, -25.0, -18.0, None, None),
-    ('15V', 1, 14.25, 15.75, None, None),
-    ('-15V', 1, -15.75, -14.25, None, None),
-    ('PwrGoodOff', 1, 0.5, None, None, None),
-    ('PwrGood', 1, 4.8, 5.1, None, None),
-    ('ACurr_5V_1', 1, -0.1, 0.1, None, None),
-    ('ACurr_5V_2', 1, 1.76, 2.15, None, None),
-    ('ACurr_15V_1', 1, -0.1, 0.13, None, None),
-    ('ACurr_15V_2', 1, 1.16, 1.42, None, None),
-    ('AuxTemp', 1, 2.1, 4.3, None, None),
-    ('InOCP5V', 1, 4.8, None, None, None),
-    ('InOCP15Vp', 1, 14.2, None, None, None),
-    ('OCP', 1, 7.0, 10.0, None, None),
-    ('FixtureLock', 0, 20, None, None, None),
-    ))
-
-LIMITS_BIAS = tester.testlimit.limitset((
-    ('400V', 1, 390, 410, None, None),
-    ('PVcc', 1, 12.8, 14.5, None, None),
-    ('12VsbRaw', 1, 12.7, 13.49, None, None),
-    ('OCP Trip', 1, 12.6, None, None, None),
-    ('InOCP', 1, 12.6, None, None, None),
-    ('OCP', 1, 1.2, 2.1, None, None),
-    ('FixtureLock', 0, 20, None, None, None),
-    ))
-
-LIMITS_BUS = tester.testlimit.limitset((
-    ('400V', 1, 390, 410, None, None),
-    ('20VT_load0_out', 1, 22.0, 24.0, None, None),
-    ('9V_load0_out', 1, 10.8, 12.0, None, None),
-    ('20VL_load0_out', 1, 22.0, 24.0, None, None),
-    ('-20V_load0_out', 1, -25.0, -22.0, None, None),
-    ('20VT_load1_out', 1, 22.0, 25.0, None, None),
-    ('9V_load1_out', 1, 9.0, 11.0, None, None),
-    ('20VL_load1_out', 1, 22.0, 25.0, None, None),
-    ('-20V_load1_out', 1, -26.0, -22.0, None, None),
-    ('20VT_load2_out', 1, 19.0, 24.0, None, None),
-    ('9V_load2_out', 1, 9.0, 11.0, None, None),
-    ('20VL_load2_out', 1, 19.0, 21.5, None, None),
-    ('-20V_load2_out', 1, -22.2, -20.0, None, None),
-    ('20VT_load3_out', 1, 17.5, 20.0, None, None),
-    ('9V_load3_out', 1, 9.0, 12.0, None, None),
-    ('20VL_load3_out', 1, 22.0, 24.0, None, None),
-    ('-20V_load3_out', 1, -26.0, -22.0, None, None),
-    ('FixtureLock', 0, 20, None, None, None),
-    ))
-
-LIMITS_SYN = tester.testlimit.limitset((
-    ('20VT', 1, 18.5, 22.0, None, None),
-    ('-20V', 1, -22.0, -18.0, None, None),
-    ('9V', 1, 8.0, 11.5, None, None),
-    ('TecOff', 1, -0.5, 0.5, None, None),
-    ('Tec0V', 1, -0.5, 1.0, None, None),
-    ('Tec2V5', 1, 7.3, 7.8, None, None),
-    ('Tec5V', 1, 14.75, 15.5, None, None),
-    ('Tec5V_Rev', 1, -15.5, -14.5, None, None),
-    ('LddOff', 1, -0.5, 0.5, None, None),
-    ('Ldd0V', 1, -0.5, 0.5, None, None),
-    ('Ldd0V6', 1, 0.6, 1.8, None, None),
-    ('Ldd5V', 1, 1.0, 2.5, None, None),
-    ('LddVmonOff', 1, -0.5, 0.5, None, None),
-    ('LddImonOff', 1, -0.5, 0.5, None, None),
-    ('LddImon0V', 1, -0.05, 0.05, None, None),
-    ('LddImon0V6', 1, 0.55, 0.65, None, None),
-    ('LddImon5V', 1, 4.9, 5.1, None, None),
-    ('ISIout0A', 1, -1.0, 1.0, None, None),
-    ('ISIout6A', 1, 5.0, 7.0, None, None),
-    ('ISIout50A', 1, 49.0, 51.0, None, None),
-    ('ISIset5V', 1, 4.95, 5.05, None, None),
-    ('AdjLimits', 1, 49.9, 50.1, None, None),
-    ('TecVmonOff', 1, -0.5, 0.5, None, None),
-    ('TecVmon0V', 1, -0.5, 0.8, None, None),
-    ('TecVmon2V5', 1, 2.4375, 2.5625, None, None),
-    ('TecVmon5V', 1, 4.925, 5.075, None, None),
-    ('TecVsetOff', 1, -0.5, 0.5, None, None),
-    ('FixtureLock', 0, 20, None, None, None),
-    ('Notify', 2, None, None, None, True),
-    ))
 
 # These are module level variables to avoid having to use 'self.' everywhere.
 d = s = m = t = None
@@ -127,57 +33,148 @@ class _Main(tester.TestSequence):
         d.reset()
 
 
-class InitialMicro(_Main):
+class InitialMicro(share.TestSequence):
 
     """IDS-500 Initial Micro Test Program."""
 
+    # Serial port for the PIC.
+    pic_port = share.port('017056', 'PIC')
+    # Firmware image
+    pic_hex_mic = 'ids_picMic_2.hex'
+    # test limits
+    limitdata = (
+        LimitBetween('5V', 4.95, 5.05),
+        LimitRegExp('SwRev', '2'),
+        LimitRegExp('MicroTemp', 'MICRO Temp'),
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open()
+        super().open(
+            self.limitdata, LogicalDevMicro, SensorMicro, MeasureMicro)
         self.steps = (
-            tester.TestStep('Program', self._step_program, not self.fifo),
-            tester.TestStep('Comms', self._step_comms),
+            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Comms', self._step_comms),
             )
-        self._limits = LIMITS_MIC
-        global d, m, s
-        d = LogicalDevMicro(self.physical_devices, self.fifo)
-        s = SensorMicro(d, self._limits)
-        m = MeasureMicro(s, self._limits)
-        d.rla_comm.set_on()
 
-    def close(self):
-        """Finished testing."""
-        d.rla_comm.set_off()
-        super().close()
-
-    def _step_program(self):
+    @share.teststep
+    def _step_program(self, dev, mes):
         """Apply Vcc and program the board."""
-        self.fifo_push(((s.oVsec5VuP, 5.0), ))
+#        self.fifo_push(((s.Vsec5VuP, 5.0), ))
+        dev['dcs_vcc'].output(5.0, True)
+        mes['dmm_vsec5VuP'](timeout=5)
+        dev['program_picMic'].program()
 
-        d.dcs_vcc.output(5.0, True)
-        m.dmm_vsec5VuP.measure(timeout=5)
-        d.program_picMic.program()
-
-    def _step_comms(self):
+    @share.teststep
+    def _step_comms(self, dev, mes):
         """Communicate with the PIC console."""
-        for str in (
-                ('', ) +
-                ('M,1,Incorrectformat!Type?.?forhelp', ) +
-                ('M,3,UnknownCommand!Type?.?forhelp', ) +
-                ('2', ) +
-                ('MICRO Temp', )
-                ):
-            d.pic.puts(str)
+#        for str in (
+#                ('', ) +
+#                ('M,1,Incorrectformat!Type?.?forhelp', ) +
+#                ('M,3,UnknownCommand!Type?.?forhelp', ) +
+#                ('2', ) +
+#                ('MICRO Temp', )
+#                ):
+#            d.pic.puts(str)
+        pic = dev['pic']
+        pic.open()
+        pic.clear_port()
+        pic.expected = 1
+        self.measure(('swrev', 'microtemp', ))
 
-        d.pic.open()
-        d.pic.clear_port()
-        d.pic.expected = 1
-        tester.MeasureGroup((m.swrev, m.microtemp, ))
+
+class LogicalDevMicro(share.LogicalDevices):
+
+    """Micro Logical Devices."""
+
+    def open(self):
+        """Create all Logical Instruments."""
+        # Physical Instrument based devices
+        for name, devtype, phydevname in (
+                ('dmm', tester.DMM, 'DMM'),
+                ('dcs_vcc', tester.DCSource, 'DCS1'),
+                ('rla_mic', tester.Relay, 'RLA10'),
+                ('rla_comm', tester.Relay, 'RLA13'),
+            ):
+            self[name] = devtype(self.physical_devices[phydevname])
+        # PIC device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self['program_picMic'] = share.ProgramPIC(
+            InitialMicro.pic_hex_mic, folder, '18F4520', self.rla_mic)
+        # Serial connection to the console
+        pic_ser = tester.SimSerial(
+            simulation=self.fifo, baudrate=19200, timeout=2.0)
+        # Set port separately, as we don't want it opened yet
+        pic_ser.port = InitialMicro.pic_port
+        self['pic'] = console.Console(pic_ser)
+        self['rla_comm'].set_on()
+        self.add_closer(lambda: self['rla_comm'].set_off())
+
+    def reset(self):
+        """Reset instruments."""
+        self['pic'].close()
+        self['dcs_vcc'].output(0.0, False)
+        self['rla_mic'].set_off()
+
+
+class SensorMicro(share.Sensors):
+
+    """Micro Sensors."""
+
+    def open(self):
+        """Create all Sensor instances."""
+        dmm = self.devices['dmm']
+        pic = self.devices['pic']
+        sensor = tester.sensor
+        self['Vsec5VuP'] = sensor.Vdc(dmm, high=19, low=1, rng=10, res=0.001)
+        self['SwRev'] = console.Sensor(
+                pic, 'PIC-SwRev', rdgtype=sensor.ReadingString)
+        self['MicroTemp'] = console.Sensor(
+                pic, 'PIC-MicroTemp', rdgtype=sensor.ReadingString)
+
+
+class MeasureMicro(share.Measurements):
+
+    """Micro Measurements."""
+
+    def open(self):
+        """Create all Measurement instances."""
+        self.create_from_names((
+            ('dmm_vsec5VuP', '5V', 'Vsec5VuP', ''),
+            ('swrev', 'SwRev', 'SwRev', ''),
+            ('microtemp', 'MicroTemp', 'MicroTemp', ''),
+            ))
 
 
 class InitialAux(_Main):
 
     """IDS-500 Initial Aux Test Program."""
+
+    # Test limits
+    limitdata = tester.testlimit.limitset((
+        ('5V', 1, 4.90, 5.10, None, None),
+        ('5VOff', 1, 0.5, None, None, None),
+        ('15VpOff', 1, 0.5, None, None, None),
+        ('15Vp', 1, 14.25, 15.75, None, None),
+        ('15VpSwOff', 1, 0.5, None, None, None),
+        ('15VpSw', 1, 14.25, 15.75, None, None),
+        ('20VL', 1, 18.0, 25.0, None, None),
+        ('-20V', 1, -25.0, -18.0, None, None),
+        ('15V', 1, 14.25, 15.75, None, None),
+        ('-15V', 1, -15.75, -14.25, None, None),
+        ('PwrGoodOff', 1, 0.5, None, None, None),
+        ('PwrGood', 1, 4.8, 5.1, None, None),
+        ('ACurr_5V_1', 1, -0.1, 0.1, None, None),
+        ('ACurr_5V_2', 1, 1.76, 2.15, None, None),
+        ('ACurr_15V_1', 1, -0.1, 0.13, None, None),
+        ('ACurr_15V_2', 1, 1.16, 1.42, None, None),
+        ('AuxTemp', 1, 2.1, 4.3, None, None),
+        ('InOCP5V', 1, 4.8, None, None, None),
+        ('InOCP15Vp', 1, 14.2, None, None, None),
+        ('OCP', 1, 7.0, 10.0, None, None),
+        ('FixtureLock', 0, 20, None, None, None),
+        ))
 
     def open(self):
         """Prepare for testing."""
@@ -188,7 +185,7 @@ class InitialAux(_Main):
             tester.TestStep('ACurrent', self._step_acurrent),
             tester.TestStep('OCP', self._step_ocp),
             )
-        self._limits = LIMITS_AUX
+        self._limits = self.limitdata
         global d, m, s, t
         d = LogicalDevAux(self.physical_devices, self.fifo)
         s = SensorAux(d, self._limits)
@@ -236,6 +233,17 @@ class InitialBias(_Main):
 
     """IDS-500 Initial Bias Test Program."""
 
+    # Test limits
+    limitdata = tester.testlimit.limitset((
+        ('400V', 1, 390, 410, None, None),
+        ('PVcc', 1, 12.8, 14.5, None, None),
+        ('12VsbRaw', 1, 12.7, 13.49, None, None),
+        ('OCP Trip', 1, 12.6, None, None, None),
+        ('InOCP', 1, 12.6, None, None, None),
+        ('OCP', 1, 1.2, 2.1, None, None),
+        ('FixtureLock', 0, 20, None, None, None),
+        ))
+
     def open(self):
         """Prepare for testing."""
         super().open()
@@ -243,7 +251,7 @@ class InitialBias(_Main):
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('OCP', self._step_ocp),
             )
-        self._limits = LIMITS_BIAS
+        self._limits = self.limitdata
         global d, m, s
         d = LogicalDevBias(self.physical_devices, self.fifo)
         s = SensorBias(d, self._limits)
@@ -273,6 +281,28 @@ class InitialBus(_Main):
 
     """IDS-500 Initial Bus Test Program."""
 
+    # Test limits
+    limitdata = tester.testlimit.limitset((
+        ('400V', 1, 390, 410, None, None),
+        ('20VT_load0_out', 1, 22.0, 24.0, None, None),
+        ('9V_load0_out', 1, 10.8, 12.0, None, None),
+        ('20VL_load0_out', 1, 22.0, 24.0, None, None),
+        ('-20V_load0_out', 1, -25.0, -22.0, None, None),
+        ('20VT_load1_out', 1, 22.0, 25.0, None, None),
+        ('9V_load1_out', 1, 9.0, 11.0, None, None),
+        ('20VL_load1_out', 1, 22.0, 25.0, None, None),
+        ('-20V_load1_out', 1, -26.0, -22.0, None, None),
+        ('20VT_load2_out', 1, 19.0, 24.0, None, None),
+        ('9V_load2_out', 1, 9.0, 11.0, None, None),
+        ('20VL_load2_out', 1, 19.0, 21.5, None, None),
+        ('-20V_load2_out', 1, -22.2, -20.0, None, None),
+        ('20VT_load3_out', 1, 17.5, 20.0, None, None),
+        ('9V_load3_out', 1, 9.0, 12.0, None, None),
+        ('20VL_load3_out', 1, 22.0, 24.0, None, None),
+        ('-20V_load3_out', 1, -26.0, -22.0, None, None),
+        ('FixtureLock', 0, 20, None, None, None),
+        ))
+
     def open(self):
         """Prepare for testing."""
         super().open()
@@ -280,7 +310,7 @@ class InitialBus(_Main):
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('TecLddStartup', self._step_tec_ldd),
             )
-        self._limits = LIMITS_BUS
+        self._limits = self.limitdata
         global d, m, s, t
         d = LogicalDevBus(self.physical_devices, self.fifo)
         s = SensorBus(d, self._limits)
@@ -310,6 +340,41 @@ class InitialSyn(_Main):
 
     """IDS-500 Initial SynBuck Test Program."""
 
+    # Firmware image
+    pic_hex_syn = 'ids_picSyn_2.hex'
+    # Test limits
+    limitdata = tester.testlimit.limitset((
+        ('20VT', 1, 18.5, 22.0, None, None),
+        ('-20V', 1, -22.0, -18.0, None, None),
+        ('9V', 1, 8.0, 11.5, None, None),
+        ('TecOff', 1, -0.5, 0.5, None, None),
+        ('Tec0V', 1, -0.5, 1.0, None, None),
+        ('Tec2V5', 1, 7.3, 7.8, None, None),
+        ('Tec5V', 1, 14.75, 15.5, None, None),
+        ('Tec5V_Rev', 1, -15.5, -14.5, None, None),
+        ('LddOff', 1, -0.5, 0.5, None, None),
+        ('Ldd0V', 1, -0.5, 0.5, None, None),
+        ('Ldd0V6', 1, 0.6, 1.8, None, None),
+        ('Ldd5V', 1, 1.0, 2.5, None, None),
+        ('LddVmonOff', 1, -0.5, 0.5, None, None),
+        ('LddImonOff', 1, -0.5, 0.5, None, None),
+        ('LddImon0V', 1, -0.05, 0.05, None, None),
+        ('LddImon0V6', 1, 0.55, 0.65, None, None),
+        ('LddImon5V', 1, 4.9, 5.1, None, None),
+        ('ISIout0A', 1, -1.0, 1.0, None, None),
+        ('ISIout6A', 1, 5.0, 7.0, None, None),
+        ('ISIout50A', 1, 49.0, 51.0, None, None),
+        ('ISIset5V', 1, 4.95, 5.05, None, None),
+        ('AdjLimits', 1, 49.9, 50.1, None, None),
+        ('TecVmonOff', 1, -0.5, 0.5, None, None),
+        ('TecVmon0V', 1, -0.5, 0.8, None, None),
+        ('TecVmon2V5', 1, 2.4375, 2.5625, None, None),
+        ('TecVmon5V', 1, 4.925, 5.075, None, None),
+        ('TecVsetOff', 1, -0.5, 0.5, None, None),
+        ('FixtureLock', 0, 20, None, None, None),
+        ('Notify', 2, None, None, None, True),
+        ))
+
     def open(self):
         """Prepare for testing."""
         super().open()
@@ -321,7 +386,7 @@ class InitialSyn(_Main):
             tester.TestStep('LddEnable', self._step_ldd_enable),
             tester.TestStep('ISSetAdj', self._step_ISset_adj),
             )
-        self._limits = LIMITS_SYN
+        self._limits = self.limitdata
         global d, m, s, t
         d = LogicalDevSyn(self.physical_devices, self.fifo)
         s = SensorSyn(d, self._limits)
@@ -392,40 +457,6 @@ class InitialSyn(_Main):
         self._limits['AdjLimits'].limit = lo_lim, hi_lim
         s.oAdjLdd.low, s.oAdjLdd.high = lo_lim, hi_lim
         tester.MeasureGroup((m.ui_AdjLdd, m.dmm_ISIoutPost, ), timeout=2)
-
-
-class LogicalDevMicro():
-
-    """Micro Logical Devices."""
-
-    def __init__(self, devices, fifo):
-        """Create all Logical Instruments.
-
-           @param devices Physical instruments of the Tester
-
-        """
-        self._fifo = fifo
-        self.dmm = tester.DMM(devices['DMM'])
-        self.dcs_vcc = tester.DCSource(devices['DCS1'])
-        self.rla_mic = tester.Relay(devices['RLA10'])
-        self.rla_comm = tester.Relay(devices['RLA13'])
-        # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self.program_picMic = share.ProgramPIC(
-            PIC_HEX_MIC, folder, '18F4520', self.rla_mic)
-        # Serial connection to the console to communicate with the PIC
-        pic_ser = tester.SimSerial(
-            simulation=self._fifo, baudrate=19200, timeout=2.0)
-        # Set port separately, as we don't want it opened yet
-        pic_ser.port = PIC_PORT
-        self.pic = console.Console(pic_ser)
-
-    def reset(self):
-        """Reset instruments."""
-        self.pic.close()
-        self.dcs_vcc.output(0.0, False)
-        self.rla_mic.set_off()
 
 
 class LogicalDevAux():
@@ -520,8 +551,7 @@ class LogicalDevBus():
         self.discharge.pulse()
         for dcs in (self.dcs_prictl, self.dcs_fan, ):
             dcs.output(0.0, False)
-        for dcl in (self.dcl_20VT, self.dcl_9V, self.dcl_20VL,
-                    self.dcl__20):
+        for dcl in (self.dcl_20VT, self.dcl_9V, self.dcl_20VL, self.dcl__20):
             dcl.output(0.0, False)
         for rla in (self.rla_enT, self.rla_enBC9, self.rla_enL,
                     self.rla_enBC20):
@@ -557,7 +587,7 @@ class LogicalDevSyn():
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self.program_picSyn = share.ProgramPIC(
-            PIC_HEX_SYN, folder, '18F4321', self.rla_syn)
+            InitialSyn.pic_hex_syn, folder, '18F4321', self.rla_syn)
 
     def reset(self):
         """Reset instruments."""
@@ -571,27 +601,6 @@ class LogicalDevSyn():
                     self.rla_interlock, self.rla_lddtest, self.rla_tecphase,
                     self.rla_enable, self.rla_syn):
             rla.set_off()
-
-
-class SensorMicro():
-
-    """Micro Sensors."""
-
-    def __init__(self, logical_devices, limits):
-        """Create all Sensor instances.
-
-           @param logical_devices Logical instruments used
-           @param limits Product test limits
-
-        """
-        dmm = logical_devices.dmm
-        pic = logical_devices.pic
-        sensor = tester.sensor
-        self.oVsec5VuP = sensor.Vdc(dmm, high=19, low=1, rng=10, res=0.001)
-        self.oSwRev = console.Sensor(
-                pic, 'PIC-SwRev', rdgtype=sensor.ReadingString)
-        self.oMicroTemp = console.Sensor(
-                pic, 'PIC-MicroTemp', rdgtype=sensor.ReadingString)
 
 
 class SensorAux():
@@ -705,23 +714,6 @@ class SensorSyn():
             low=lo_lim, high=hi_lim,
             message=tester.translate('IDS500 Initial Syn', 'AdjR489'),
             caption=tester.translate('IDS500 Initial Syn', 'capAdjLdd'))
-
-
-class MeasureMicro():
-
-    """Micro Measurements."""
-
-    def __init__(self, sense, limits):
-        """Create all Measurement instances.
-
-           @param sense Sensors used
-           @param limits Product test limits
-
-        """
-        Measurement = tester.Measurement
-        self.dmm_vsec5VuP = Measurement(limits['5V'], sense.oVsec5VuP)
-        self.swrev = Measurement(limits['SwRev'], sense.oSwRev)
-        self.microtemp = Measurement(limits['MicroTemp'], sense.oMicroTemp)
 
 
 class MeasureAux():
