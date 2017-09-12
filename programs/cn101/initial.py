@@ -69,8 +69,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.sernum = share.get_sernum(
-            self.uuts, self.limits['SerNum'], mes['ui_serialnum'])
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(8.6, output=True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 

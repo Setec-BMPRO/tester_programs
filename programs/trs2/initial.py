@@ -69,8 +69,7 @@ class Initial(share.TestSequence):
         """
         mes['dmm_tstpincov'](timeout=5)
         dev['dcs_vin'].output(self.vbatt, True)
-        self.sernum = share.get_sernum(
-            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_brakeoff'), timeout=5)
         dev['rla_pin'].set_on()    # Pin out
         mes['dmm_brakeon'](timeout=5)

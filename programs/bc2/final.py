@@ -36,8 +36,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self.sernum = share.get_sernum(
-            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(('dmm_vin', ), timeout=5)
 # FIXME: Where do we get the MAC from?
         btmac = '001EC030BC15'

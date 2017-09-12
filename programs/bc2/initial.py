@@ -44,8 +44,7 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
-        self.sernum = share.get_sernum(
-            self.uuts, self.limits['SerNum'], mes['ui_sernum'])
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(12.0, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
