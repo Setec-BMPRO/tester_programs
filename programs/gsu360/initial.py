@@ -3,35 +3,32 @@
 """GSU360-1TA Initial Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
-
-LIMITS = (
-    LimitDelta('ACin', 90, 5),
-    LimitBetween('PFC', 389.0, 415.0),
-    LimitBetween('PriCtl', 12.0, 14.0),
-    LimitBetween('PriVref', 7.3, 7.6),
-    LimitBetween('24Vnl', 23.40, 24.60),
-    LimitBetween('24Vfl', 23.32, 24.60),
-    LimitBetween('Fan12V', 11.4, 12.6),
-    LimitBetween('SecCtl', 22.0, 28.0),
-    LimitBetween('SecVref', 2.4, 2.6),
-    LimitLow('FixtureLock', 20),
-    LimitBetween('OCP', 15.2, 21.0),
-    LimitLow('inOCP', 23.0),
-    )
 
 
 class Initial(share.TestSequence):
 
     """GSU360-1TA Initial Test Program."""
 
+    limits = (
+        LimitDelta('ACin', 90, 5),
+        LimitBetween('PFC', 389.0, 415.0),
+        LimitBetween('PriCtl', 12.0, 14.0),
+        LimitBetween('PriVref', 7.3, 7.6),
+        LimitBetween('24Vnl', 23.40, 24.60),
+        LimitBetween('24Vfl', 23.32, 24.60),
+        LimitBetween('Fan12V', 11.4, 12.6),
+        LimitBetween('SecCtl', 22.0, 28.0),
+        LimitBetween('SecVref', 2.4, 2.6),
+        LimitLow('FixtureLock', 20),
+        LimitBetween('OCP', 15.2, 21.0),
+        LimitLow('inOCP', 23.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('PowerUp', self._step_power_up),

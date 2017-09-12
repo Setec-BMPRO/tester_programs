@@ -6,40 +6,49 @@
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitBoolean, LimitBetween, LimitPercent, LimitDelta
+    LimitLow, LimitBetween, LimitPercent, LimitDelta
     )
 import share
-
-# Load reg of output (%)
-VOUT_LOAD_REG = 0.4
-
-LIMITS = (
-    LimitLow('FixtureLock', 200, doc='Closed micro switch'),
-    LimitBetween('InrushOff', 120, 180,
-        doc='Inrush resistors with K1 off'),
-    LimitBetween('VacMin', 95.0, 105.0, doc='Min AC input voltage'),
-    LimitBetween('Vac', 237.0, 242.0, doc='AC input voltage'),
-    LimitDelta('Vbus', 399.0, 11.0, doc='PFC voltage'),
-    LimitLow('VbusOff', 50.0, doc='PFC voltage off'),
-    LimitBetween('Vdd', 12.0, 14.0, doc='Driver_vdd internal rail'),
-    LimitBetween('VsecCtl', 11.0, 15.0, doc='VsecCtl internal rail'),
-    LimitBetween('VoutPre', 61.3, 78.5, doc='Output voltage before adjust'),
-    LimitPercent('Vout', 70.0, 1.0, doc='Output voltage after adjust'),
-    LimitLow('VoutOff', 5.0, doc='Output voltage off'),
-    LimitBetween('OCP', 9.3, 13.3, doc='OCP trip limits before fine tuning'),
-    LimitLow('InOCP', 9999.0,
-        doc='Calculated trip voltage [Vout - (Vout * %Load Reg) / 100]'),
-    LimitBoolean('Notify', True, doc='OK clicked'),
-    )
 
 
 class Initial(share.TestSequence):
 
     """SMU750-70 Initial Test Program."""
 
+    # Load reg of output (%)
+    vout_load_reg = 0.4
+
+    limits = (
+        LimitLow('FixtureLock', 200,
+            doc='Closed micro switch'),
+        LimitBetween('InrushOff', 120, 180,
+            doc='Inrush resistors with K1 off'),
+        LimitBetween('VacMin', 95.0, 105.0,
+            doc='Min AC input voltage'),
+        LimitBetween('Vac', 237.0, 242.0,
+            doc='AC input voltage'),
+        LimitDelta('Vbus', 399.0, 11.0,
+            doc='PFC voltage'),
+        LimitLow('VbusOff', 50.0,
+            doc='PFC voltage off'),
+        LimitBetween('Vdd', 12.0, 14.0,
+            doc='Driver_vdd internal rail'),
+        LimitBetween('VsecCtl', 11.0, 15.0,
+            doc='VsecCtl internal rail'),
+        LimitBetween('VoutPre', 61.3, 78.5,
+            doc='Output voltage before adjust'),
+        LimitPercent('Vout', 70.0, 1.0,
+            doc='Output voltage after adjust'),
+        LimitLow('VoutOff', 5.0, doc='Output voltage off'),
+        LimitBetween('OCP', 9.3, 13.3,
+            doc='OCP trip limits before fine tuning'),
+        LimitLow('InOCP', 9999.0,
+            doc='Calculated trip voltage [Vout - (Vout * %Load Reg) / 100]'),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('PowerOn', self._step_pwron),
@@ -91,7 +100,7 @@ class Initial(share.TestSequence):
         """Test OCP."""
         dev['dcl'].output(0.1)
         vout = mes['dmm_vout'](timeout=5).reading1
-        trip_level = vout - (vout * VOUT_LOAD_REG) / 100
+        trip_level = vout - (vout * self.vout_load_reg) / 100
         self.limits['InOCP'].limit = trip_level
         mes['ramp_ocp'](timeout=5)
         low, high = self.limits['OCP'].limit

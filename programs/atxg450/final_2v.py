@@ -3,48 +3,44 @@
 """ATXG-450-2V Final Test Program."""
 import tester
 import share
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitBoolean
-    )
-
-LIMITS = (
-    LimitBetween('5Vsb', 4.845, 5.202),
-    LimitLow('5Vsbinocp', 4.70),
-    LimitBetween('5Vsbocp', 2.6, 4.0),
-    LimitLow('24Voff', 0.5),
-    LimitBetween('24Von', 23.75, 26.25),
-    LimitLow('24Vinocp', 22.8),
-    LimitBetween('24Vocp', 18.0, 24.0),
-    LimitLow('12Voff', 0.5),
-    LimitBetween('12Von', 11.685, 12.669),
-    LimitLow('12Vinocp', 10.0),
-    LimitBetween('12Vocp', 20.5, 26.0),
-    LimitLow('5Voff', 0.5),
-    LimitBetween('5Von', 4.725, 5.4075),
-    LimitLow('5Vinocp', 4.75),
-    LimitBetween('5Vocp', 20.5, 26.0),
-    LimitLow('3V3off', 0.5),
-    LimitBetween('3V3on', 3.1825, 3.4505),
-    LimitLow('3V3inocp', 3.20),
-    LimitBetween('3V3ocp', 17.0, 26.0),
-    LimitHigh('-12Voff', -0.5),
-    LimitBetween('-12Von', -12.48, -11.52),
-    LimitLow('PwrGoodOff', 0.5),
-    LimitHigh('PwrGoodOn', 4.5),
-    LimitHigh('PwrFailOff', 4.5),
-    LimitLow('PwrFailOn', 0.5),
-    LimitBoolean('Notify', True),
-    )
+from tester import TestStep, LimitLow, LimitHigh, LimitBetween
 
 
 class Final2V(share.TestSequence):
 
     """ATXG-450-2V Final Test Program."""
 
+    limits = (
+        LimitBetween('5Vsb', 4.845, 5.202),
+        LimitLow('5Vsbinocp', 4.70),
+        LimitBetween('5Vsbocp', 2.6, 4.0),
+        LimitLow('24Voff', 0.5),
+        LimitBetween('24Von', 23.75, 26.25),
+        LimitLow('24Vinocp', 22.8),
+        LimitBetween('24Vocp', 18.0, 24.0),
+        LimitLow('12Voff', 0.5),
+        LimitBetween('12Von', 11.685, 12.669),
+        LimitLow('12Vinocp', 10.0),
+        LimitBetween('12Vocp', 20.5, 26.0),
+        LimitLow('5Voff', 0.5),
+        LimitBetween('5Von', 4.725, 5.4075),
+        LimitLow('5Vinocp', 4.75),
+        LimitBetween('5Vocp', 20.5, 26.0),
+        LimitLow('3V3off', 0.5),
+        LimitBetween('3V3on', 3.1825, 3.4505),
+        LimitLow('3V3inocp', 3.20),
+        LimitBetween('3V3ocp', 17.0, 26.0),
+        LimitHigh('-12Voff', -0.5),
+        LimitBetween('-12Von', -12.48, -11.52),
+        LimitLow('PwrGoodOff', 0.5),
+        LimitHigh('PwrGoodOn', 4.5),
+        LimitHigh('PwrFailOff', 4.5),
+        LimitLow('PwrFailOn', 0.5),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('SwitchOn', self._step_switch_on),

@@ -26,51 +26,52 @@ ARM_PORT = share.port('025197', 'ARM')
 # Software image filename
 ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
 
-LIMITS = (
-    LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
-    LimitHigh('FanShort', 20),     # Short on fan connector
-    LimitLow('FixtureLock', 200),
-    LimitLow('5Voff', 0.5),
-    LimitPercent('5Vset', 5.10, 1.0),
-    LimitPercent('5V', 5.10, 2.0),
-    LimitLow('12Voff', 0.5),
-    LimitDelta('12Vpre', 12.1, 1.0),
-    LimitDelta('12Vset', 12.18, 0.01),
-    LimitPercent('12V', 12.18, 2.5),
-    LimitLow('12V2off', 0.5),
-    LimitDelta('12V2pre', 12.0, 1.0),
-    LimitBetween('12V2', 11.8146, 12.4845),   # 12.18 +2.5% -3.0%
-    LimitLow('24Voff', 0.5),
-    LimitDelta('24Vpre', 24.0, 2.0),   # TestEng estimate
-    LimitBetween('24V', 22.80, 25.68),        # 24.0 +7% -5%
-    LimitLow('VdsQ103', 0.30),
-    LimitPercent('3V3', 3.30, 10.0),   # TestEng estimate
-    LimitLow('PwrFail', 0.5),
-    LimitDelta('InputFuse', 240, 10),
-    LimitBetween('12Vpri', 11.4, 17.0),
-    LimitDelta('PFCpre', 435, 15),
-    LimitDelta('PFCpost1', 440.0, 0.8),
-    LimitDelta('PFCpost2', 440.0, 0.8),
-    LimitDelta('PFCpost3', 440.0, 0.8),
-    LimitDelta('PFCpost4', 440.0, 0.8),
-    LimitDelta('PFCpost', 440.0, 0.9),
-    LimitDelta('ARM-AcFreq', 50, 10),
-    LimitLow('ARM-AcVolt', 300),
-    LimitDelta('ARM-5V', 5.0, 1.0),
-    LimitDelta('ARM-12V', 12.0, 1.0),
-    LimitDelta('ARM-24V', 24.0, 2.0),
-    LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
-    LimitRegExp('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
-    )
-
 
 class Initial(share.TestSequence):
 
     """GEN8 Initial Test Program."""
 
+    limits = (
+        LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
+        LimitHigh('FanShort', 20),     # Short on fan connector
+        LimitLow('FixtureLock', 200),
+        LimitLow('5Voff', 0.5),
+        LimitPercent('5Vset', 5.10, 1.0),
+        LimitPercent('5V', 5.10, 2.0),
+        LimitLow('12Voff', 0.5),
+        LimitDelta('12Vpre', 12.1, 1.0),
+        LimitDelta('12Vset', 12.18, 0.01),
+        LimitPercent('12V', 12.18, 2.5),
+        LimitLow('12V2off', 0.5),
+        LimitDelta('12V2pre', 12.0, 1.0),
+        LimitBetween('12V2', 11.8146, 12.4845),   # 12.18 +2.5% -3.0%
+        LimitLow('24Voff', 0.5),
+        LimitDelta('24Vpre', 24.0, 2.0),   # TestEng estimate
+        LimitBetween('24V', 22.80, 25.68),        # 24.0 +7% -5%
+        LimitLow('VdsQ103', 0.30),
+        LimitPercent('3V3', 3.30, 10.0),   # TestEng estimate
+        LimitLow('PwrFail', 0.5),
+        LimitDelta('InputFuse', 240, 10),
+        LimitBetween('12Vpri', 11.4, 17.0),
+        LimitDelta('PFCpre', 435, 15),
+        LimitDelta('PFCpost1', 440.0, 0.8),
+        LimitDelta('PFCpost2', 440.0, 0.8),
+        LimitDelta('PFCpost3', 440.0, 0.8),
+        LimitDelta('PFCpost4', 440.0, 0.8),
+        LimitDelta('PFCpost', 440.0, 0.9),
+        LimitDelta('ARM-AcFreq', 50, 10),
+        LimitLow('ARM-AcVolt', 300),
+        LimitDelta('ARM-5V', 5.0, 1.0),
+        LimitDelta('ARM-12V', 12.0, 1.0),
+        LimitDelta('ARM-24V', 24.0, 2.0),
+        LimitRegExp('SwVer', '^{0}$'.format(
+            BIN_VERSION[:3].replace('.', r'\.'))),
+        LimitRegExp('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program, not self.fifo),

@@ -3,28 +3,24 @@
 """GSU360-1TA Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitBoolean
-    )
+from tester import TestStep, LimitLow, LimitBetween
 import share
-
-LIMITS = (
-    LimitBetween('24V', 23.40, 24.60),
-    LimitLow('24Vinocp', 23.4),
-    LimitBetween('24Vocp', 15.5, 20.0),
-    LimitLow('24Voff', 5.0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """GSU360-1TA Final Test Program."""
 
+    limits = (
+        LimitBetween('24V', 23.40, 24.60),
+        LimitLow('24Vinocp', 23.4),
+        LimitBetween('24Vocp', 15.5, 20.0),
+        LimitLow('24Voff', 5.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('FullLoad', self._step_full_load),

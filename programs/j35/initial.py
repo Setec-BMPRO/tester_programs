@@ -65,8 +65,6 @@ _COMMON = (
     LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
     LimitDelta('FanOn', VOUT_SET, delta=1.0, doc='Fan running'),
     LimitLow('FanOff', 0.5, doc='Fan not running'),
-    LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$',
-        doc='Valid serial number'),
     LimitRegExp('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.')),
         doc='Arm Software version'),
     LimitPercent('ARM-AuxV', AUX_SOLAR_INJECT, percent=2.0, delta=0.3,

@@ -10,23 +10,22 @@ import share
 
 PIC_HEX = 'etracII-2A.hex'
 
-LIMITS = (
-    LimitBetween('Vin', 12.9, 13.1),
-    LimitBetween('Vin2', 10.8, 12.8),
-    LimitBetween('5V', 4.95, 5.05),
-    LimitBetween('5Vusb', 4.75, 5.25),
-    LimitBetween('Vbat', 8.316, 8.484),
-    )
-
-
 
 class Initial(share.TestSequence):
 
     """ETrac-II Initial Test Program."""
 
+    limits = (
+        LimitBetween('Vin', 12.9, 13.1),
+        LimitBetween('Vin2', 10.8, 12.8),
+        LimitBetween('5V', 4.95, 5.05),
+        LimitBetween('5Vusb', 4.75, 5.25),
+        LimitBetween('Vbat', 8.316, 8.484),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('Program', self._step_program, not self.fifo),

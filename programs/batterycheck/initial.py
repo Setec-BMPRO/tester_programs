@@ -10,8 +10,7 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitRegExp,
-    LimitBetween, LimitDelta, LimitBoolean, LimitInteger
+    LimitLow, LimitRegExp, LimitBetween, LimitDelta, LimitBoolean, LimitInteger
     )
 import share
 from . import console
@@ -35,30 +34,30 @@ ARM_BIN = 'BatteryCheckControl_{}.bin'.format(ARM_VERSION)
 
 SHUNT_SCALE = 0.08     # Ishunt * this = DC Source voltage
 
-LIMITS = (
-    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    LimitDelta('3V3', 3.3, 0.1),
-    LimitDelta('5VReg', 5.0, 0.1),
-    LimitDelta('12VReg', 12.0, 0.1),
-    LimitBetween('shunt', -65.0, -60.0),
-    LimitLow('Relay', 100),
-    LimitInteger('PgmAVR', 0),
-    LimitInteger('DetectBT', 0),
-    LimitRegExp('ARM_SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    LimitDelta('ARM_Volt', 12.0, 0.5),
-    LimitBetween('ARM_Curr', -65.0, -60.0),
-    LimitDelta('Batt_Curr_Err', 0, 5.0),
-    LimitBoolean('BTscan', True),
-    )
-
 
 class Initial(share.TestSequence):
 
     """BatteryCheck Initial Test Program."""
 
+    limits = (
+        LimitDelta('3V3', 3.3, 0.1),
+        LimitDelta('5VReg', 5.0, 0.1),
+        LimitDelta('12VReg', 12.0, 0.1),
+        LimitBetween('shunt', -65.0, -60.0),
+        LimitLow('Relay', 100),
+        LimitInteger('PgmAVR', 0),
+        LimitInteger('DetectBT', 0),
+        LimitRegExp('ARM_SwVer', '^{0}$'.format(
+            ARM_VERSION.replace('.', r'\.'))),
+        LimitDelta('ARM_Volt', 12.0, 0.5),
+        LimitBetween('ARM_Curr', -65.0, -60.0),
+        LimitDelta('Batt_Curr_Err', 0, 5.0),
+        LimitBoolean('BTscan', True),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PreProgram', self._step_pre_program),
             TestStep('ProgramAVR', self._step_program_avr, not self.fifo),

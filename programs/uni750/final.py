@@ -3,35 +3,31 @@
 """UNI-750 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBoolean, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
-
-LIMITS = (
-    LimitDelta('AcUnsw', 240, 10),
-    LimitLow('AcSwOff', 0.5),
-    LimitDelta('AcSwOn', 240, 10),
-    LimitBetween('24V', 23.256, 24.552),
-    LimitBetween('24Vfl', 23.5, 24.3),
-    LimitDelta('15V', 15.0, 0.75),
-    LimitDelta('12V', 12.0, 0.6),
-    LimitBetween('5V', 5.0, 5.212),
-    LimitBetween('3.3V', 3.25, 3.423),
-    LimitBetween('5Vi', 4.85, 5.20),
-    LimitBetween('PGood', 5.0, 5.25),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """UNI-750 Final Test Program."""
 
+    limits = (
+        LimitDelta('AcUnsw', 240, 10),
+        LimitLow('AcSwOff', 0.5),
+        LimitDelta('AcSwOn', 240, 10),
+        LimitBetween('24V', 23.256, 24.552),
+        LimitBetween('24Vfl', 23.5, 24.3),
+        LimitDelta('15V', 15.0, 0.75),
+        LimitDelta('12V', 12.0, 0.6),
+        LimitBetween('5V', 5.0, 5.212),
+        LimitBetween('3.3V', 3.25, 3.423),
+        LimitBetween('5Vi', 4.85, 5.20),
+        LimitBetween('PGood', 5.0, 5.25),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('PowerOn', self._step_power_on),

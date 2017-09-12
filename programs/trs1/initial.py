@@ -3,10 +3,7 @@
 """TRS1 Initial Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBoolean, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
 import share
 
 
@@ -32,7 +29,6 @@ class Initial(share.TestSequence):
         LimitHigh('RedLedOff', 9.0),
         LimitLow('RedLedOn', 0.1),
         LimitDelta('FreqTP3', 0.56, 0.2),
-        LimitBoolean('Notify', True),
         )
 
     def open(self):

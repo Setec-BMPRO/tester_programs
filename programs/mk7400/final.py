@@ -3,34 +3,30 @@
 """MK7-400-1 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBoolean, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
 import share
-
-LIMITS = (
-    LimitDelta('ACon', 240, 10),
-    LimitLow('ACoff', 10),
-    LimitDelta('5V', 5.00, 0.25),
-    LimitLow('12Voff', 0.5),
-    LimitBetween('12Von', 12.0, 12.6),
-    LimitLow('24Voff', 0.5),
-    LimitDelta('24Von', 24.0, 0.6),
-    LimitLow('24V2off', 0.5),
-    LimitDelta('24V2on', 24.0, 0.6),
-    LimitHigh('PwrFailOff', 11.0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """MK7-400-1 Final Test Program."""
 
+    limits = (
+        LimitDelta('ACon', 240, 10),
+        LimitLow('ACoff', 10),
+        LimitDelta('5V', 5.00, 0.25),
+        LimitLow('12Voff', 0.5),
+        LimitBetween('12Von', 12.0, 12.6),
+        LimitLow('24Voff', 0.5),
+        LimitDelta('24Von', 24.0, 0.6),
+        LimitLow('24V2off', 0.5),
+        LimitDelta('24V2on', 24.0, 0.6),
+        LimitHigh('PwrFailOff', 11.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('PowerOn', self._step_power_on),

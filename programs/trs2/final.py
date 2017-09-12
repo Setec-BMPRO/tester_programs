@@ -3,10 +3,7 @@
 """TRS2 Final Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitDelta, LimitBoolean, LimitRegExp
-    )
+from tester import TestStep, LimitLow, LimitDelta, LimitBoolean, LimitRegExp
 import share
 from . import console
 
@@ -23,7 +20,6 @@ class Final(share.TestSequence):
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
-        LimitBoolean('Notify', True),
         )
 
     def open(self):

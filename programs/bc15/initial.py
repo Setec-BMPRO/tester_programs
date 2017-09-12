@@ -23,39 +23,40 @@ VAC = 240.0
 VOUT_SET = 14.40
 OCP_NOMINAL = 15.0
 
-LIMITS = (
-    LimitLow('FixtureLock', 20),
-    LimitHigh('FanShort', 100),
-    LimitDelta('ACin', VAC, 5.0),
-    LimitDelta('Vbus', math.sqrt(2) * VAC, 10.0),
-    LimitDelta('14Vpri', 14.0, 1.0),
-    LimitBetween('12Vs', 11.7, 13.0),
-    LimitDelta('5Vs', 5.0, 0.1),
-    LimitBetween('3V3', 3.20, 3.35),
-    LimitLow('FanOn', 0.5),
-    LimitHigh('FanOff', 11.0),
-    LimitDelta('15Vs', 15.5, 1.0),
-    LimitPercent('Vout', VOUT_SET, 4.0),
-    LimitPercent('VoutCal', VOUT_SET, 1.0),
-    LimitLow('VoutOff', 2.0),
-    LimitPercent('OCP', OCP_NOMINAL, (4.0, 7.0)),
-    LimitLow('InOCP', 13.5),
-    # Data reported by the ARM
-    LimitRegExp('ARM-SwVer', '^{}$'.format(BIN_VERSION.replace('.', r'\.'))),
-    LimitPercent('ARM-Vout', VOUT_SET, 5.0),
-    LimitPercent('ARM-2amp', 2.0, percent=1.7, delta=1.0),
-    LimitPercent('ARM-14amp', 14.0, percent=1.7, delta=1.0),
-    LimitInteger('ARM-switch', 3),
-    )
-
 
 class Initial(share.TestSequence):
 
     """BC15 Initial Test Program."""
 
+    limits = (
+        LimitLow('FixtureLock', 20),
+        LimitHigh('FanShort', 100),
+        LimitDelta('ACin', VAC, 5.0),
+        LimitDelta('Vbus', math.sqrt(2) * VAC, 10.0),
+        LimitDelta('14Vpri', 14.0, 1.0),
+        LimitBetween('12Vs', 11.7, 13.0),
+        LimitDelta('5Vs', 5.0, 0.1),
+        LimitBetween('3V3', 3.20, 3.35),
+        LimitLow('FanOn', 0.5),
+        LimitHigh('FanOff', 11.0),
+        LimitDelta('15Vs', 15.5, 1.0),
+        LimitPercent('Vout', VOUT_SET, 4.0),
+        LimitPercent('VoutCal', VOUT_SET, 1.0),
+        LimitLow('VoutOff', 2.0),
+        LimitPercent('OCP', OCP_NOMINAL, (4.0, 7.0)),
+        LimitLow('InOCP', 13.5),
+        # Data reported by the ARM
+        LimitRegExp('ARM-SwVer', '^{0}$'.format(
+            BIN_VERSION.replace('.', r'\.'))),
+        LimitPercent('ARM-Vout', VOUT_SET, 5.0),
+        LimitPercent('ARM-2amp', 2.0, percent=1.7, delta=1.0),
+        LimitPercent('ARM-14amp', 14.0, percent=1.7, delta=1.0),
+        LimitInteger('ARM-switch', 3),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
             tester.TestStep('Program', self._step_program, not self.fifo),

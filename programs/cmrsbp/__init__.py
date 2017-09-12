@@ -44,7 +44,7 @@ LIMITS_INI = (
     # 298K nominal +/- 2.5K in Kelvin (25C +/- 2.5C in Celsius).
     LimitDelta('BQ-Temp', 300, 4.5),
     # SerialDate
-    LimitRegExp('SerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
+    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
     )
 
 _FIN_COMMON = (   # Common Final Test limits
@@ -62,21 +62,21 @@ LIMITS_8 = _FIN_COMMON + (
     LimitBetween('SenseRes', 39.0, 91.0),
     LimitBetween('Capacity', 6400, 11000),
     LimitDelta('StateOfCharge', 100.0, 10.5),
-    LimitRegExp('SerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
+    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
     )
 
 LIMITS_13 = _FIN_COMMON + (
     LimitBetween('SenseRes', 221.0, 280.0),
     LimitBetween('Capacity', 11000, 15000),
     LimitDelta('StateOfCharge', 100.0, 10.5),
-    LimitRegExp('SerNum', r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$'),
+    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$'),
     )
 
 LIMITS_17 = _FIN_COMMON + (
     LimitBetween('SenseRes', 400.0, 460.0),
     LimitBetween('Capacity', 15500, 20000),
     LimitLow('StateOfCharge', 30.0),
-    LimitRegExp('SerNum', r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$'),
+    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$'),
     )
 
 LIMITS_FIN = {      # Test limit selection keyed by program parameter
@@ -382,7 +382,7 @@ class MeasureIni(share.Measurements):
             ('dmm_VErase', 'VErase', 'oVcc', ''),
             ('dmm_Vchge', 'Vchge', 'oVchge', ''),
             ('dmm_ibat', 'Ibat', 'oibat', ''),
-            ('ui_SnEntry', 'SerNum', 'sn_entry_ini', ''),
+            ('ui_SnEntry', 'CmrSerNum', 'sn_entry_ini', ''),
             ))
 
 
@@ -393,7 +393,7 @@ class MeasureFin(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('ui_SnEntry', 'SerNum', 'sn_entry_fin', ''),
+            ('ui_SnEntry', 'CmrSerNum', 'sn_entry_fin', ''),
             ('dmm_vbatIn', 'VbatIn', 'ovbatIn', ''),
             ('cmr_vbatIn', 'VbatIn', 'oMirvbatIn', ''),
             ('cmr_ErrV', 'ErrV', 'oMirErrV', ''),

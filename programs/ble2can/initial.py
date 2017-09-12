@@ -28,12 +28,10 @@ class Initial(share.TestSequence):
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
         LimitLow('TestPinCover', 0.5),
-        LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
             '^{}$'.format(arm_version.replace('.', r'\.'))),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
-        LimitBoolean('Notify', True),
         )
 
     def open(self):

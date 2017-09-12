@@ -3,31 +3,27 @@
 
 from pydispatch import dispatcher
 import tester
-from tester import (
-    TestStep,
-    LimitBoolean, LimitBetween
-    )
+from tester import TestStep, LimitBetween
 import share
-
-LIMITS = (
-    LimitBetween('T1level1', 3.0, 3.5),
-    LimitBetween('T2level1', 3.0, 3.5),
-    LimitBetween('T3level1', 3.0, 3.5),
-    LimitBetween('level1', 3.0, 3.5),
-    LimitBetween('level2', 2.33, 2.58),
-    LimitBetween('level3', 1.62, 1.79),
-    LimitBetween('level4', 0.0, 0.5),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """WTSI200 Final Test Program."""
 
+    limits = (
+        LimitBetween('T1level1', 3.0, 3.5),
+        LimitBetween('T2level1', 3.0, 3.5),
+        LimitBetween('T3level1', 3.0, 3.5),
+        LimitBetween('level1', 3.0, 3.5),
+        LimitBetween('level2', 2.33, 2.58),
+        LimitBetween('level3', 1.62, 1.79),
+        LimitBetween('level4', 0.0, 0.5),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerOn', self._step_power_on),
             TestStep('Tank1', self._step_tank1),

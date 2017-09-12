@@ -3,29 +3,26 @@
 """BC15 Final Test Program."""
 
 import tester
-from tester import (
-    LimitLow, LimitDelta, LimitBoolean
-    )
+from tester import LimitLow, LimitDelta
 import share
 
 OCP_NOMINAL = 10.0
-
-LIMITS = (
-    LimitBoolean('Notify', True),
-    LimitDelta('VoutNL', 13.6, 0.3),
-    LimitDelta('Vout', 13.6, 0.7),
-    LimitLow('InOCP', 12.5),
-    LimitDelta('OCP', OCP_NOMINAL, 1.0),
-    )
 
 
 class Final(share.TestSequence):
 
     """BC15 Final Test Program."""
 
+    limits = (
+        LimitDelta('VoutNL', 13.6, 0.3),
+        LimitDelta('Vout', 13.6, 0.7),
+        LimitLow('InOCP', 12.5),
+        LimitDelta('OCP', OCP_NOMINAL, 1.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_loaded),

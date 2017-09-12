@@ -6,19 +6,18 @@
 import tester
 import share
 
-LIMITS = (
-    tester.LimitDelta('Vbat', 12.8, 0.2),
-    tester.LimitBoolean('Notify', True),
-    )
-
 
 class Final(share.TestSequence):
 
     """BP35 Final Test Program."""
 
+    limits = (
+        tester.LimitDelta('Vbat', 12.8, 0.2),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
             )

@@ -3,40 +3,36 @@
 """RM-50-24 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBoolean, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
 import share
-
-LIMITS = (
-    LimitDelta('Rsense', 1000, 20),
-    LimitLow('Vsense', 0.0001),
-    LimitLow('uSwitch', 100),
-    LimitLow('Vdrop', 0.4),
-    LimitBetween('24Vdcin', 23.0, 24.4),
-    LimitBetween('24Vdcout', 23.6, 24.4),
-    LimitLow('24Voff', 1.0),
-    LimitBetween('24Vnl', 23.6, 24.4),
-    LimitBetween('24Vfl', 23.4, 24.1),
-    LimitBetween('24Vpl', 23.0, 24.1),
-    LimitBetween('OCP', 3.2, 4.3),
-    LimitLow('inOCP', 23.0),
-    LimitLow('CurrShunt', 2.5),
-    LimitBetween('PowNL', 1.0, 5.0),
-    LimitBetween('PowFL', 40.0, 70.0),
-    LimitHigh('Eff', 84.0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """RM-50-24 Final Test Program."""
 
+    limits = (
+        LimitDelta('Rsense', 1000, 20),
+        LimitLow('Vsense', 0.0001),
+        LimitLow('uSwitch', 100),
+        LimitLow('Vdrop', 0.4),
+        LimitBetween('24Vdcin', 23.0, 24.4),
+        LimitBetween('24Vdcout', 23.6, 24.4),
+        LimitLow('24Voff', 1.0),
+        LimitBetween('24Vnl', 23.6, 24.4),
+        LimitBetween('24Vfl', 23.4, 24.1),
+        LimitBetween('24Vpl', 23.0, 24.1),
+        LimitBetween('OCP', 3.2, 4.3),
+        LimitLow('inOCP', 23.0),
+        LimitLow('CurrShunt', 2.5),
+        LimitBetween('PowNL', 1.0, 5.0),
+        LimitBetween('PowFL', 40.0, 70.0),
+        LimitHigh('Eff', 84.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('DCInputLeakage', self._step_dcinput_leakage),

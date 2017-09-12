@@ -3,58 +3,54 @@
 """TS3020H Initial Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitDelta, LimitBetween, LimitBoolean
-    )
+from tester import TestStep, LimitLow, LimitDelta, LimitBetween
 import share
-
-LIMITS = (
-    LimitBetween('FanConn', 100, 200),
-    LimitBetween('InrushOff', 120, 180),
-    LimitLow('InrushOn', 10),
-    LimitBetween('SecCtlExt', 12.8, 14.0),
-    LimitBetween('SecCtl2Ext', 13.6, 14.0),
-    LimitBetween('SecCtl', 9.6, 15.0),
-    LimitBetween('SecCtl2', 7.0, 15.0),
-    LimitBetween('LedOn', 1.5, 2.2),
-    LimitBetween('LedOff', -0.1, 0.1),
-    LimitBetween('FanOff', 13.4, 14.0),
-    LimitBetween('FanOn', -0.5, 1.0),
-    LimitLow('inVP', 12.5),
-    LimitBetween('OVP', 14.95, 16.45),
-    LimitBetween('UVP', 9.96, 10.96),
-    LimitDelta('VbusExt', 120.0, 2.0),
-    LimitLow('VbusOff', 70.0),
-    LimitBetween('Vbus', 380.0, 410.0),
-    LimitBetween('Vbias', 11.2, 12.8),
-    LimitBetween('AcDetOff', -0.1, 6.0),
-    LimitBetween('AcDetOn', 8.0, 14.0),
-    LimitDelta('VacMin', 100.0, 5.0),
-    LimitDelta('Vac', 240.0, 5.0),
-    LimitBetween('VoutExt', 13.6, 14.0),
-    LimitBetween('VoutPre', 12.6, 15.0),
-    LimitBetween('VoutSet', 13.775, 13.825),
-    LimitBetween('Vout', 13.5, 13.825),
-    LimitLow('VoutOff', 5.0),
-    LimitLow('Reg', 2.0),
-    LimitBetween('SecShdnOff', 12.5, 13.5),
-    LimitBetween('PwmShdnOn', 9.0, 15.0),
-    LimitLow('PwmShdnOff', 1.0),
-    LimitBetween('VacShdnOn', 9.0, 15.0),
-    LimitLow('VacShdnOff', 1.0),
-    LimitLow('FixtureLock', 20),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Initial(share.TestSequence):
 
     """TS3020H Initial Test Program."""
 
+    limits = (
+        LimitBetween('FanConn', 100, 200),
+        LimitBetween('InrushOff', 120, 180),
+        LimitLow('InrushOn', 10),
+        LimitBetween('SecCtlExt', 12.8, 14.0),
+        LimitBetween('SecCtl2Ext', 13.6, 14.0),
+        LimitBetween('SecCtl', 9.6, 15.0),
+        LimitBetween('SecCtl2', 7.0, 15.0),
+        LimitBetween('LedOn', 1.5, 2.2),
+        LimitBetween('LedOff', -0.1, 0.1),
+        LimitBetween('FanOff', 13.4, 14.0),
+        LimitBetween('FanOn', -0.5, 1.0),
+        LimitLow('inVP', 12.5),
+        LimitBetween('OVP', 14.95, 16.45),
+        LimitBetween('UVP', 9.96, 10.96),
+        LimitDelta('VbusExt', 120.0, 2.0),
+        LimitLow('VbusOff', 70.0),
+        LimitBetween('Vbus', 380.0, 410.0),
+        LimitBetween('Vbias', 11.2, 12.8),
+        LimitBetween('AcDetOff', -0.1, 6.0),
+        LimitBetween('AcDetOn', 8.0, 14.0),
+        LimitDelta('VacMin', 100.0, 5.0),
+        LimitDelta('Vac', 240.0, 5.0),
+        LimitBetween('VoutExt', 13.6, 14.0),
+        LimitBetween('VoutPre', 12.6, 15.0),
+        LimitBetween('VoutSet', 13.775, 13.825),
+        LimitBetween('Vout', 13.5, 13.825),
+        LimitLow('VoutOff', 5.0),
+        LimitLow('Reg', 2.0),
+        LimitBetween('SecShdnOff', 12.5, 13.5),
+        LimitBetween('PwmShdnOn', 9.0, 15.0),
+        LimitLow('PwmShdnOff', 1.0),
+        LimitBetween('VacShdnOn', 9.0, 15.0),
+        LimitLow('VacShdnOff', 1.0),
+        LimitLow('FixtureLock', 20),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('FuseCheck', self._step_fuse_check),

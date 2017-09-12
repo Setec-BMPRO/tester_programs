@@ -6,20 +6,20 @@ import tester
 import share
 from tester import TestStep, LimitBetween
 
-LIMITS = (
-    LimitBetween('gnd', 20, 100),
-    LimitBetween('arc', -0.001, 0),
-    LimitBetween('acw', 2.0, 4.0),
-    )
-
 
 class Safety(share.TestSequence):
 
     """SX-750 Safety Test Program."""
 
+    limits = (
+        LimitBetween('gnd', 20, 100),
+        LimitBetween('arc', -0.001, 0),
+        LimitBetween('acw', 2.0, 4.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Gnd1', self._step_gnd1),
             TestStep('Gnd2', self._step_gnd2),

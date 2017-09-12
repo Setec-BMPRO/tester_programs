@@ -2,45 +2,42 @@
 # -*- coding: utf-8 -*-
 """Selfchecker Test Program."""
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
-
-LIMITS = (
-    LimitDelta('12V', 12.0, 0.5),
-    LimitDelta('5V', 5.0, 0.5),
-    LimitDelta('ShieldOFF', 6.0, 0.5),
-    LimitDelta('ShieldON', 0.0, 0.5),
-    LimitDelta('Dso8', 8.0, 0.5),
-    LimitDelta('Dso6', 6.0, 0.5),
-    LimitDelta('Dso4', 4.0, 0.5),
-    LimitBetween('Dso2', 1.35, 2.5),
-    LimitDelta('Dcs5', 5.0, 0.5),
-    LimitDelta('Dcs10', 10.0, 0.5),
-    LimitDelta('Dcs20', 20.0, 0.5),
-    LimitDelta('Dcs35', 35.0, 0.5),
-    LimitDelta('120Vac', 120.0, 5.0),
-    LimitDelta('240Vac', 240.0, 5.0),
-    LimitDelta('Dcl05', 5.0, 1),
-    LimitDelta('Dcl10', 10.0, 1),
-    LimitDelta('Dcl20', 20.0, 1),
-    LimitDelta('Dcl40', 40.0, 1),
-    LimitDelta('RlaOff', 12.0, 0.5),
-    LimitLow('RlaOn', 1.5),
-    LimitDelta('Disch_on', 10.0, 1.0),
-    LimitLow('Disch_off', 0.5),
-    )
 
 
 class Main(share.TestSequence):
 
     """Selfchecker Test Program."""
 
+    limits = (
+        LimitDelta('12V', 12.0, 0.5),
+        LimitDelta('5V', 5.0, 0.5),
+        LimitDelta('ShieldOFF', 6.0, 0.5),
+        LimitDelta('ShieldON', 0.0, 0.5),
+        LimitDelta('Dso8', 8.0, 0.5),
+        LimitDelta('Dso6', 6.0, 0.5),
+        LimitDelta('Dso4', 4.0, 0.5),
+        LimitBetween('Dso2', 1.35, 2.5),
+        LimitDelta('Dcs5', 5.0, 0.5),
+        LimitDelta('Dcs10', 10.0, 0.5),
+        LimitDelta('Dcs20', 20.0, 0.5),
+        LimitDelta('Dcs35', 35.0, 0.5),
+        LimitDelta('120Vac', 120.0, 5.0),
+        LimitDelta('240Vac', 240.0, 5.0),
+        LimitDelta('Dcl05', 5.0, 1),
+        LimitDelta('Dcl10', 10.0, 1),
+        LimitDelta('Dcl20', 20.0, 1),
+        LimitDelta('Dcl40', 40.0, 1),
+        LimitDelta('RlaOff', 12.0, 0.5),
+        LimitLow('RlaOn', 1.5),
+        LimitDelta('Disch_on', 10.0, 1.0),
+        LimitLow('Disch_off', 0.5),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         is_ate2 = self.devices.is_ate2
         self.steps = (
             TestStep('ACSource', self._step_acsource),

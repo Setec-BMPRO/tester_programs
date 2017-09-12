@@ -3,38 +3,34 @@
 """SX-750 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBoolean, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
-
-LIMITS = (
-    LimitDelta('InRes', 70000, 10000),
-    LimitLow('IECoff', 0.5),
-    LimitDelta('IEC', 240, 5),
-    LimitBetween('5V', 5.034, 5.177),
-    LimitLow('12Voff', 0.5),
-    LimitBetween('12Von', 12.005, 12.495),
-    LimitBetween('24Von', 23.647, 24.613),
-    LimitBetween('5Vfl', 4.820, 5.380),
-    LimitBetween('12Vfl', 11.270, 13.230),
-    LimitBetween('24Vfl', 21.596, 26.663),
-    LimitLow('PwrGood', 0.5),
-    LimitDelta('AcFail', 5.0, 0.5),
-    LimitBetween('Reg12V', 0.5, 5.0),
-    LimitBetween('Reg24V', 0.2, 5.0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """SX-750 Final Test Program."""
 
+    limits = (
+        LimitDelta('InRes', 70000, 10000),
+        LimitLow('IECoff', 0.5),
+        LimitDelta('IEC', 240, 5),
+        LimitBetween('5V', 5.034, 5.177),
+        LimitLow('12Voff', 0.5),
+        LimitBetween('12Von', 12.005, 12.495),
+        LimitBetween('24Von', 23.647, 24.613),
+        LimitBetween('5Vfl', 4.820, 5.380),
+        LimitBetween('12Vfl', 11.270, 13.230),
+        LimitBetween('24Vfl', 21.596, 26.663),
+        LimitLow('PwrGood', 0.5),
+        LimitDelta('AcFail', 5.0, 0.5),
+        LimitBetween('Reg12V', 0.5, 5.0),
+        LimitBetween('Reg24V', 0.2, 5.0),
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('InputRes', self._step_inres),
             TestStep('PowerUp', self._step_powerup),

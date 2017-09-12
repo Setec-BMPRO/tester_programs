@@ -5,55 +5,49 @@
 import os
 import inspect
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitDelta, LimitBoolean, LimitInteger
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta, LimitInteger
 import share
 
 PIC_HEX = 'c45a-15.hex'
-
-OCP_PERCENT_REG = 0.015
-
-LIMITS = (
-    LimitDelta('VacStart', 95.0, 3.0),
-    LimitDelta('Vac', 240.0, 5.0),
-    LimitDelta('Vbus', 340.0, 10.0),
-    LimitBetween('Vcc', 9.5, 15.0),
-    LimitDelta('SecBiasIn', 12.0, 0.1),
-    LimitDelta('Vref', 5.0, 0.1),
-    LimitLow('VrefOff', 1.0),
-    LimitDelta('VoutPreExt', 12.0, 0.1),
-    LimitDelta('VoutExt', 12.0, 0.1),
-    LimitDelta('VoutPre', 12.0, 0.1),
-    LimitBetween('VoutLow', 8.55, 9.45),
-    LimitBetween('Vout', 15.2, 16.8),
-    LimitBetween('VsenseLow', 8.2, 10.0),
-    LimitBetween('VsenseOn', 11.8, 12.1),
-    LimitLow('VsenseOff', 1.0),
-    LimitBetween('GreenOn', 1.8, 2.2),
-    LimitBetween('YellowOn', 1.6, 2.2),
-    LimitBetween('RedOn', 4.0, 5.5),
-    LimitBetween('RedFlash', 2.0, 2.75),
-    LimitLow('LedOff', 0.2),
-    LimitLow('inOVP', 6.5),
-    LimitBetween('OVP', 18.0, 21.0),
-    LimitBetween('Reg', -1.5, 0),
-    LimitLow('inOCP', 1e6),
-    LimitBetween('OCP', 2.85, 3.15),
-    LimitLow('FixtureLock', 20),
-    LimitInteger('Program', 0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Initial(share.TestSequence):
 
     """C45A-15 Initial Test Program."""
 
+    limits = (
+        LimitDelta('VacStart', 95.0, 3.0),
+        LimitDelta('Vac', 240.0, 5.0),
+        LimitDelta('Vbus', 340.0, 10.0),
+        LimitBetween('Vcc', 9.5, 15.0),
+        LimitDelta('SecBiasIn', 12.0, 0.1),
+        LimitDelta('Vref', 5.0, 0.1),
+        LimitLow('VrefOff', 1.0),
+        LimitDelta('VoutPreExt', 12.0, 0.1),
+        LimitDelta('VoutExt', 12.0, 0.1),
+        LimitDelta('VoutPre', 12.0, 0.1),
+        LimitBetween('VoutLow', 8.55, 9.45),
+        LimitBetween('Vout', 15.2, 16.8),
+        LimitBetween('VsenseLow', 8.2, 10.0),
+        LimitBetween('VsenseOn', 11.8, 12.1),
+        LimitLow('VsenseOff', 1.0),
+        LimitBetween('GreenOn', 1.8, 2.2),
+        LimitBetween('YellowOn', 1.6, 2.2),
+        LimitBetween('RedOn', 4.0, 5.5),
+        LimitBetween('RedFlash', 2.0, 2.75),
+        LimitLow('LedOff', 0.2),
+        LimitLow('inOVP', 6.5),
+        LimitBetween('OVP', 18.0, 21.0),
+        LimitBetween('Reg', -1.5, 0),
+        LimitLow('inOCP', 1e6),
+        LimitBetween('OCP', 2.85, 3.15),
+        LimitLow('FixtureLock', 20),
+        LimitInteger('Program', 0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('SecCheck', self._step_sec_check),

@@ -7,7 +7,7 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitRegExp, LimitBoolean,
+    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitRegExp
     )
 import share
 from . import console
@@ -18,53 +18,53 @@ PIC_PORT = share.port('017048', 'PIC')
 _LDD_6_ERROR_LIMITS = 0.07
 _LDD_50_ERROR_LIMITS = 0.7
 
-LIMITS = (
-    LimitLow('TecOff', 1.5),
-    LimitLow('TecVmonOff', 1.5),
-    LimitLow('LddOff', 1.5),
-    LimitLow('IsVmonOff', 0.5),
-    LimitLow('15VOff', 1.5),
-    LimitHigh('-15VOff', -1.5),
-    LimitLow('15VpOff', 1.5),
-    LimitLow('15VpSwOff', 1.5),
-    LimitLow('5VOff', 1.5),
-    LimitDelta('15V', 15.00, 0.75),
-    LimitDelta('-15V', -15.00, 0.75),
-    LimitDelta('15Vp', 15.00, 0.75),
-    LimitDelta('15VpSw', 15.00, 0.75),
-    LimitDelta('5V', 4.95, 0.15),
-    LimitDelta('Tec', 15.00, 0.30),
-    LimitDelta('TecPhase', -15.00, 0.30),
-    LimitBetween('TecVset', 4.95, 5.05),
-    LimitLow('TecVmon0V', 0.5),
-    LimitDelta('TecVmon', 5.00, 0.10),
-    LimitDelta('TecErr', 0.000, 0.275),
-    LimitDelta('TecVmonErr', 0.000, 0.030),
-    LimitBetween('Ldd', -0.4, 2.5),
-    LimitBetween('IsVmon', -0.4, 2.5),
-    LimitDelta('IsOut0V', 0.000, 0.001),
-    LimitDelta('IsOut06V', 0.006, 0.001),
-    LimitDelta('IsOut5V', 0.050, 0.002),
-    LimitDelta('IsIout0V', 0.00, 0.05),
-    LimitDelta('IsIout06V', 0.60, 0.02),
-    LimitDelta('IsIout5V', 5.00, 0.10),
-    LimitDelta('IsSet06V', 0.60, 0.05),
-    LimitDelta('IsSet5V', 5.00, 0.05),
-    LimitDelta('SetMonErr', 0, _LDD_6_ERROR_LIMITS),    # these 3 are patched and
-    LimitDelta('SetOutErr', 0, _LDD_6_ERROR_LIMITS),    # then restored during
-    LimitDelta('MonOutErr', 0, _LDD_6_ERROR_LIMITS),    # the LDD accuracy test
-    LimitRegExp('HwRev', r'^[0-9]{2}[AB]$'),
-    LimitRegExp('SerNum', r'^[AS][0-9]{4}[0-9,A-Z]{2}[0-9]{4}$'),
-    LimitBoolean('Notify', True),
-    )
 
 class Final(share.TestSequence):
 
     """IDS-500 Final Test Programes."""
 
+    limits = (
+        LimitLow('TecOff', 1.5),
+        LimitLow('TecVmonOff', 1.5),
+        LimitLow('LddOff', 1.5),
+        LimitLow('IsVmonOff', 0.5),
+        LimitLow('15VOff', 1.5),
+        LimitHigh('-15VOff', -1.5),
+        LimitLow('15VpOff', 1.5),
+        LimitLow('15VpSwOff', 1.5),
+        LimitLow('5VOff', 1.5),
+        LimitDelta('15V', 15.00, 0.75),
+        LimitDelta('-15V', -15.00, 0.75),
+        LimitDelta('15Vp', 15.00, 0.75),
+        LimitDelta('15VpSw', 15.00, 0.75),
+        LimitDelta('5V', 4.95, 0.15),
+        LimitDelta('Tec', 15.00, 0.30),
+        LimitDelta('TecPhase', -15.00, 0.30),
+        LimitBetween('TecVset', 4.95, 5.05),
+        LimitLow('TecVmon0V', 0.5),
+        LimitDelta('TecVmon', 5.00, 0.10),
+        LimitDelta('TecErr', 0.000, 0.275),
+        LimitDelta('TecVmonErr', 0.000, 0.030),
+        LimitBetween('Ldd', -0.4, 2.5),
+        LimitBetween('IsVmon', -0.4, 2.5),
+        LimitDelta('IsOut0V', 0.000, 0.001),
+        LimitDelta('IsOut06V', 0.006, 0.001),
+        LimitDelta('IsOut5V', 0.050, 0.002),
+        LimitDelta('IsIout0V', 0.00, 0.05),
+        LimitDelta('IsIout06V', 0.60, 0.02),
+        LimitDelta('IsIout5V', 5.00, 0.10),
+        LimitDelta('IsSet06V', 0.60, 0.05),
+        LimitDelta('IsSet5V', 5.00, 0.05),
+        # these 3 are patched and then restored during the LDD accuracy test
+        LimitDelta('SetMonErr', 0, _LDD_6_ERROR_LIMITS),
+        LimitDelta('SetOutErr', 0, _LDD_6_ERROR_LIMITS),
+        LimitDelta('MonOutErr', 0, _LDD_6_ERROR_LIMITS),
+        LimitRegExp('HwRev', r'^[0-9]{2}[AB]$'),
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_pwr_up),
             TestStep('KeySw1', self._step_key_sw1),

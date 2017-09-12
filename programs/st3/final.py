@@ -4,10 +4,7 @@
 
 import time
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitBoolean, LimitRegExp
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitRegExp
 import share
 
 _COMMON = (
@@ -19,7 +16,6 @@ _COMMON = (
     LimitLow('inOCP', 11.6),
     LimitLow('FuseOut', 0.5),
     LimitBetween('FuseIn', 13.60, 13.70),
-    LimitBoolean('Notify', True),
     )
 
 LIMITS_20 = _COMMON + (

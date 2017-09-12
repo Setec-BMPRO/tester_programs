@@ -5,14 +5,13 @@
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitBetween, LimitDelta, LimitBoolean
+    LimitLow, LimitBetween, LimitDelta
     )
 import share
 
 _COMMON = (
     LimitDelta('AlarmOpen', 10000, 1000, doc='Contacts open'),
     LimitLow('AlarmClosed', 100, doc='Contacts closed'),
-    LimitBoolean('Notify', True, doc='YES response'),
     )
 
 LIMITS_12 = _COMMON + (

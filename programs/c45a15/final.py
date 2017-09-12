@@ -3,28 +3,24 @@
 """C45A-15 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBoolean, LimitBetween
-    )
+from tester import TestStep, LimitLow, LimitBetween
 import share
-
-LIMITS = (
-    LimitBetween('Vstart', 8.55, 9.45),
-    LimitBetween('Vout', 15.6, 16.4),
-    LimitLow('Vshdn', 8.0),
-    LimitLow('Voff', 1.0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """C45A-15 Final Test Program."""
 
+    limits = (
+        LimitBetween('Vstart', 8.55, 9.45),
+        LimitBetween('Vout', 15.6, 16.4),
+        LimitLow('Vshdn', 8.0),
+        LimitLow('Voff', 1.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('ConnectCMR', self._step_connect_cmr),

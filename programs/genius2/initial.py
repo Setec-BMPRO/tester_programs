@@ -7,10 +7,7 @@ import os
 import inspect
 import time
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitBoolean
-    )
+from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
 import share
 
 PIC_HEX = 'genius2_3a.hex'
@@ -38,7 +35,6 @@ _BASE_DATA = (
     LimitBetween('FanOn', 12.0, 14.1),
     LimitLow('InOCP', 13.24),
     LimitBetween('OCP', _OCP_LOW, _OCP_HIGH),
-    LimitBoolean('Notify', True),
     LimitLow('FixtureLock', 200),
     )
 

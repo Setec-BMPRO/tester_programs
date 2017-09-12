@@ -21,6 +21,16 @@ class TestSequence(tester.TestSequence):
     limits = None
     sensors = None
     measurements = None
+    limit_builtin = (
+        tester.LimitRegExp(
+            'SerNum',
+            r'^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$',
+            doc='Valid serial number format'),
+        tester.LimitBoolean(
+            'Notify',
+            True,
+            doc='YES response'),
+        )
 
     @abc.abstractmethod
     def open(self, limits, cls_devices, cls_sensors, cls_measurements):
@@ -33,7 +43,7 @@ class TestSequence(tester.TestSequence):
 
         """
         super().open()
-        self.limits = tester.limitdict(limits)
+        self.limits = tester.limitdict(self.limit_builtin + limits)
         self.devices = cls_devices(self.physical_devices, self.fifo)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)

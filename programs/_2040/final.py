@@ -4,26 +4,25 @@
 
 import tester
 from tester import (
-    LimitLow, LimitBetween, LimitDelta, LimitBoolean
+    LimitLow, LimitBetween, LimitDelta
     )
 import share
-
-LIMITS = (
-    LimitDelta('20V', 20.0, 0.4),
-    LimitBetween('20Vload', 19.4, 20.4),
-    LimitLow('20Voff', 1.0),
-    LimitDelta('OCP', 14.0, 2.0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """2040 Final Test Program."""
 
+    limits = (
+        LimitDelta('20V', 20.0, 0.4),
+        LimitBetween('20Vload', 19.4, 20.4),
+        LimitLow('20Voff', 1.0),
+        LimitDelta('OCP', 14.0, 2.0),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('DCPowerOn', self._step_dcpower_on),
             tester.TestStep('DCLoad', self._step_dcload),

@@ -9,7 +9,7 @@ import tester
 from tester import (
     TestStep,
     LimitLow, LimitRegExp, LimitDelta,
-    LimitPercent, LimitInteger, LimitBoolean
+    LimitPercent, LimitInteger
     )
 import share
 from . import console
@@ -34,26 +34,24 @@ VIN_SET = 12.75
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
 
-LIMITS = (
-    LimitDelta('Vin', VIN_SET - 0.75, 0.5),
-    LimitPercent('3V3', 3.3, 3.0),
-    LimitLow('BkLghtOff', 0.5),
-    LimitDelta('BkLghtOn', 4.0, 0.55),      # 40mA = 4V with 100R (1%)
-    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    LimitRegExp('CAN_RX', r'^RRQ,16,0'),
-    LimitInteger('CAN_BIND', _CAN_BIND),
-    LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION.replace('.', r'\.'))),
-    LimitBoolean('Notify', True),
-    )
-
 
 class Initial(share.TestSequence):
 
     """Trek2 Initial Test Program."""
 
+    limits = (
+        LimitDelta('Vin', VIN_SET - 0.75, 0.5),
+        LimitPercent('3V3', 3.3, 3.0),
+        LimitLow('BkLghtOff', 0.5),
+        LimitDelta('BkLghtOn', 4.0, 0.55),      # 40mA = 4V with 100R (1%)
+        LimitRegExp('CAN_RX', r'^RRQ,16,0'),
+        LimitInteger('CAN_BIND', _CAN_BIND),
+        LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION.replace('.', r'\.'))),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('Program', self._step_program, not self.fifo),

@@ -41,13 +41,11 @@ class Initial(share.TestSequence):
         LimitDelta('BlueLedOn', 0.25, 0.1),
         LimitDelta('BlueLedFlash', 1.65, 0.2),
         LimitLow('TestPinCover', 0.5),
-        LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('ARM-SwVer',
             '^{}$'.format(arm_version.replace('.', r'\.'))),
         LimitLow('ARM-FltCode', 0),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
-        LimitBoolean('Notify', True),
         )
 
     def open(self):

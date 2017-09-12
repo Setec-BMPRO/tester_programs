@@ -13,29 +13,28 @@ ARM_VERSION = '1.7.4080'        # Software binary version
 
 BT_PORT = share.port('027013', 'BT')
 
-LIMITS = (
-    LimitDelta('12V', 12.0, 0.1),
-    LimitBoolean('BTscan', True),
-    LimitBoolean('BTpair', True),
-    LimitBoolean('ARMSerNum', True),
-    LimitRegExp('ARMSwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    )
-
 
 class Final(share.TestSequence):
 
     """BatteryCheck Final Test Program."""
 
+    limits = (
+        LimitDelta('12V', 12.0, 0.1),
+        LimitBoolean('BTscan', True),
+        LimitBoolean('BTpair', True),
+        LimitBoolean('ARMSerNum', True),
+        LimitRegExp('ARMSwVer', '^{0}$'.format(
+            ARM_VERSION.replace('.', r'\.'))),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('TestBlueTooth', self._step_test_bluetooth),
             )
         self.sernum = None
-
 
     @share.teststep
     def _step_power_up(self, dev, mes):

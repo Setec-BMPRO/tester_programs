@@ -36,65 +36,65 @@ FAN_THRESHOLD = 55.0
 _5VSB_EXT = 6.3
 PRICTL_EXT = 13.0
 
-LIMITS = (
-    LimitDelta('8.5V Arduino', 8.5, 0.4),
-    LimitLow('5Voff', 0.5),
-    LimitDelta('5Vext', _5VSB_EXT - 0.8, 1.0),
-    LimitDelta('5Vunsw', _5VSB_EXT - 0.8 - 0.7, 1.0),
-    LimitPercent('5Vsb_set', 5.10, 1.5),
-    LimitPercent('5Vsb', 5.10, 5.5),
-    LimitLow('5Vsb_reg', 3.0),        # Load Reg < 3.0%
-    LimitLow('12Voff', 0.5),
-    LimitPercent('12V_set', 12.25, 2.0),
-    LimitPercent('12V', 12.25, 8.0),
-    LimitLow('12V_reg', 3.0),         # Load Reg < 3.0%
-    LimitBetween('12V_ocp', 4, 63),     # Digital Pot setting - counts up from MIN
-    LimitHigh('12V_inOCP', 4.0),       # Detect OCP when TP405 > 4V
-    LimitBetween('12V_OCPchk', 36.2, 37.0),
-    LimitLow('24Voff', 0.5),
-    LimitPercent('24V_set', 24.13, 2.0),
-    LimitPercent('24V', 24.13, 10.5),
-    LimitLow('24V_reg', 7.5),         # Load Reg < 7.5%
-    LimitBetween('24V_ocp', 4, 63),     # Digital Pot setting - counts up from MIN
-    LimitHigh('24V_inOCP', 4.0),       # Detect OCP when TP404 > 4V
-    LimitBetween('24V_OCPchk', 18.1, 18.5),
-    LimitBetween('PriCtl', 11.40, 17.0),
-    LimitLow('PGOOD', 0.5),
-    LimitDelta('ACFAIL', 5.0, 0.5),
-    LimitLow('ACOK', 0.5),
-    LimitDelta('3V3', 3.3, 0.1),
-    LimitDelta('ACin', 240, 10),
-    LimitDelta('PFCpre', 420, 20),
-    LimitDelta('PFCpost', 435, 1.0),
-    LimitDelta('OCP12pre', 36, 2),
-    LimitBetween('OCP12post', 35.7, 36.5),
-    LimitLow('OCP12step', 0.116),
-    LimitDelta('OCP24pre', 18, 1),
-    LimitDelta('OCP24post', 18.2, 0.1),
-    LimitLow('OCP24step', 0.058),
-    # Data reported by the ARM
-    LimitLow('ARM-AcFreq', 999),
-    LimitLow('ARM-AcVolt', 999),
-    LimitLow('ARM-12V', 999),
-    LimitLow('ARM-24V', 999),
-    LimitRegExp(
-        'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
-    LimitRegExp('ARM-SwBld', '^{}$'.format(BIN_VERSION[4:])),
-    LimitLow('FixtureLock', 200),
-    LimitLow('PartCheck', 1.0),           # Photo sensor on D404
-    LimitBetween('Snubber', 1000, 3000),    # Snubbing resistors
-    LimitRegExp('Reply', '^OK$'),
-    LimitInteger('Program', 0)
-    )
-
 
 class Initial(share.TestSequence):
 
     """SX-750 Initial Test Program."""
 
+    limits = (
+        LimitDelta('8.5V Arduino', 8.5, 0.4),
+        LimitLow('5Voff', 0.5),
+        LimitDelta('5Vext', _5VSB_EXT - 0.8, 1.0),
+        LimitDelta('5Vunsw', _5VSB_EXT - 0.8 - 0.7, 1.0),
+        LimitPercent('5Vsb_set', 5.10, 1.5),
+        LimitPercent('5Vsb', 5.10, 5.5),
+        LimitLow('5Vsb_reg', 3.0),        # Load Reg < 3.0%
+        LimitLow('12Voff', 0.5),
+        LimitPercent('12V_set', 12.25, 2.0),
+        LimitPercent('12V', 12.25, 8.0),
+        LimitLow('12V_reg', 3.0),         # Load Reg < 3.0%
+        LimitBetween('12V_ocp', 4, 63),     # Digital Pot setting - counts up from MIN
+        LimitHigh('12V_inOCP', 4.0),       # Detect OCP when TP405 > 4V
+        LimitBetween('12V_OCPchk', 36.2, 37.0),
+        LimitLow('24Voff', 0.5),
+        LimitPercent('24V_set', 24.13, 2.0),
+        LimitPercent('24V', 24.13, 10.5),
+        LimitLow('24V_reg', 7.5),         # Load Reg < 7.5%
+        LimitBetween('24V_ocp', 4, 63),     # Digital Pot setting - counts up from MIN
+        LimitHigh('24V_inOCP', 4.0),       # Detect OCP when TP404 > 4V
+        LimitBetween('24V_OCPchk', 18.1, 18.5),
+        LimitBetween('PriCtl', 11.40, 17.0),
+        LimitLow('PGOOD', 0.5),
+        LimitDelta('ACFAIL', 5.0, 0.5),
+        LimitLow('ACOK', 0.5),
+        LimitDelta('3V3', 3.3, 0.1),
+        LimitDelta('ACin', 240, 10),
+        LimitDelta('PFCpre', 420, 20),
+        LimitDelta('PFCpost', 435, 1.0),
+        LimitDelta('OCP12pre', 36, 2),
+        LimitBetween('OCP12post', 35.7, 36.5),
+        LimitLow('OCP12step', 0.116),
+        LimitDelta('OCP24pre', 18, 1),
+        LimitDelta('OCP24post', 18.2, 0.1),
+        LimitLow('OCP24step', 0.058),
+        # Data reported by the ARM
+        LimitLow('ARM-AcFreq', 999),
+        LimitLow('ARM-AcVolt', 999),
+        LimitLow('ARM-12V', 999),
+        LimitLow('ARM-24V', 999),
+        LimitRegExp(
+            'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
+        LimitRegExp('ARM-SwBld', '^{}$'.format(BIN_VERSION[4:])),
+        LimitLow('FixtureLock', 200),
+        LimitLow('PartCheck', 1.0),           # Photo sensor on D404
+        LimitBetween('Snubber', 1000, 3000),    # Snubbing resistors
+        LimitRegExp('Reply', '^OK$'),
+        LimitInteger('Program', 0)
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program_micros),

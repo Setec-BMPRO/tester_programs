@@ -89,8 +89,6 @@ _COMMON = (
         doc='ARM Aux voltage reading'),
     LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current reported by ARM'),
     LimitInteger('ARM-RemoteClosed', 1, doc='REMOTE input reported by ARM'),
-    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$',
-        doc='Valid serial number format'),
     LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
     LimitInteger('CAN_BIND', _CAN_BIND, doc='CAN comms established'),
     LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),

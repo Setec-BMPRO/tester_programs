@@ -3,29 +3,25 @@
 """MB2 Final Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitBetween, LimitPercent, LimitBoolean
-    )
+from tester import TestStep, LimitBetween, LimitPercent
 import share
-
-VSTART = 12.9
-VSTOP = 9.1
-
-LIMITS = (
-    LimitBetween('Vin', 9.0, 13.0),
-    LimitPercent('Vout', 14.4, 3.0),
-    LimitBoolean('Notify', True),
-    )
 
 
 class Final(share.TestSequence):
 
     """MB2 Final Test Program."""
 
+    vstart = 12.9
+    vstop = 9.1
+
+    limits = (
+        LimitBetween('Vin', 9.0, 13.0),
+        LimitPercent('Vout', 14.4, 3.0),
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerOn', self._step_power_on),
             )
@@ -33,11 +29,11 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Power up unit."""
-        dev['dcs_vin'].output(VSTART, True, delay=0.5)
+        dev['dcs_vin'].output(self.vstart, True, delay=0.5)
         dev['dcl_vout'].output(0.1, True)
         self.measure(
             ('dmm_vin', 'ui_yesnolight', 'dmm_vout'), timeout=5)
-        dev['dcs_vin'].output(VSTOP)
+        dev['dcs_vin'].output(self.vstop)
         self.measure(
             ('dmm_vin', 'ui_yesnooff',), timeout=5)
 

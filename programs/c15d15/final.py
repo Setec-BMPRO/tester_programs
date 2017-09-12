@@ -3,19 +3,8 @@
 """C15D-15 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBoolean, LimitBetween, LimitPercent
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitPercent
 import share
-
-LIMITS = (
-    LimitPercent('Vout', 15.5, 2.0),
-    LimitLow('VoutOverLoad', 5.0),
-    LimitBetween('OCP', 1.0, 1.4),
-    LimitLow('inOCP', 13.6),
-    LimitBoolean('Notify', True),
-    )
 
 # Resistive loading during OCP
 ILOAD = 1.0
@@ -25,9 +14,16 @@ class Final(share.TestSequence):
 
     """C15D-15 Final Test Program."""
 
+    limits = (
+        LimitPercent('Vout', 15.5, 2.0),
+        LimitLow('VoutOverLoad', 5.0),
+        LimitBetween('OCP', 1.0, 1.4),
+        LimitLow('inOCP', 13.6),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('OCP', self._step_ocp),

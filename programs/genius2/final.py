@@ -5,7 +5,7 @@
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitBetween, LimitDelta, LimitBoolean
+    LimitLow, LimitBetween, LimitDelta
     )
 import share
 
@@ -19,7 +19,6 @@ LIMITS_COMMON = (
     LimitBetween('ExtBatt', 11.5, 12.8),
     LimitLow('InOCP', 13.24),
     LimitBetween('OCP', 34.0, 43.0),
-    LimitBoolean('Notify', True),
     )
 
 LIMITS = {      # Test limit selection keyed by program parameter

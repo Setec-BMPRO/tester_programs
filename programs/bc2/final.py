@@ -18,10 +18,8 @@ class Final(share.TestSequence):
     limits = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('Shunt', 50.0, 100.0),
-        LimitRegExp('SerNum', '^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
-        LimitBoolean('Notify', True),
         )
 
     def open(self):

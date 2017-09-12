@@ -3,36 +3,33 @@
 """C15A-15 Initial Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh,  LimitBetween, LimitPercent
-    )
+from tester import TestStep, LimitLow, LimitHigh,  LimitBetween, LimitPercent
 import share
-
-LIMITS = (
-    LimitBetween('AcMin', 85, 95),
-    LimitBetween('VbusMin', 120, 135),
-    LimitBetween('VccMin', 7, 14),
-    LimitBetween('Ac', 230, 245),
-    LimitBetween('Vbus', 330, 350),
-    LimitBetween('Vcc', 10, 14),
-    LimitHigh('LedOn', 6.5),
-    LimitLow('LedOff', 0.5),
-    LimitPercent('Vout', 15.5, 2.0),
-    LimitBetween('OCP_Range', 0.9, 1.4),
-    LimitLow('inOCP', 15.2),
-    LimitBetween('OCP', 1.05, 1.35),
-    LimitBetween('VoutOcp', 5, 16),
-    )
 
 
 class Initial(share.TestSequence):
 
     """C15A-15 Initial Test Program."""
 
+    limits = (
+        LimitBetween('AcMin', 85, 95),
+        LimitBetween('VbusMin', 120, 135),
+        LimitBetween('VccMin', 7, 14),
+        LimitBetween('Ac', 230, 245),
+        LimitBetween('Vbus', 330, 350),
+        LimitBetween('Vcc', 10, 14),
+        LimitHigh('LedOn', 6.5),
+        LimitLow('LedOff', 0.5),
+        LimitPercent('Vout', 15.5, 2.0),
+        LimitBetween('OCP_Range', 0.9, 1.4),
+        LimitLow('inOCP', 15.2),
+        LimitBetween('OCP', 1.05, 1.35),
+        LimitBetween('VoutOcp', 5, 16),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Power90', self._step_power_90),
             TestStep('Power240', self._step_power_240),

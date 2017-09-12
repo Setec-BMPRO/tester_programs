@@ -7,8 +7,7 @@ import inspect
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitRegExp, LimitBoolean,
-    LimitDelta, LimitPercent, LimitInteger
+    LimitLow, LimitRegExp, LimitBoolean, LimitDelta, LimitPercent, LimitInteger
     )
 import share
 from . import console
@@ -28,28 +27,26 @@ CAN_ECHO = 'TQQ,32,0'
 # CAN Bus is operational if status bit 28 is set
 _CAN_BIND = 1 << 28
 
-LIMITS = (
-    LimitLow('Part', 20.0),
-    LimitDelta('Vin', 8.0, 0.5),
-    LimitPercent('3V3', 3.30, 3.0),
-    LimitRegExp('SerNum', r'^A[0-9]{4}[0-9A-Z]{2}[0-9]{4}$'),
-    LimitRegExp('CAN_RX', r'^RRQ,32,0'),
-    LimitInteger('CAN_BIND', _CAN_BIND),
-    LimitRegExp('SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
-    LimitRegExp('BtMac', r'^[0-F]{12}$'),
-    LimitBoolean('DetectBT', True),
-    LimitInteger('Tank', 5),
-    LimitBoolean('Notify', True),
-    )
-
 
 class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
 
+    limits = (
+        LimitLow('Part', 20.0),
+        LimitDelta('Vin', 8.0, 0.5),
+        LimitPercent('3V3', 3.30, 3.0),
+        LimitRegExp('CAN_RX', r'^RRQ,32,0'),
+        LimitInteger('CAN_BIND', _CAN_BIND),
+        LimitRegExp('SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
+        LimitRegExp('BtMac', r'^[0-F]{12}$'),
+        LimitBoolean('DetectBT', True),
+        LimitInteger('Tank', 5),
+        )
+
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(LIMITS, LogicalDevices, Sensors, Measurements)
+        super().open(self.limits, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartCheck', self._step_part_check),
             TestStep('PowerUp', self._step_power_up),
