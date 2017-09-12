@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """UNI-750 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('AcUnsw', 240, 10),
         LimitLow('AcSwOff', 0.5),
         LimitDelta('AcSwOn', 240, 10),
@@ -27,7 +27,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('PowerOn', self._step_power_on),

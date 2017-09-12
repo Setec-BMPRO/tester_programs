@@ -12,7 +12,7 @@ class Final(share.TestSequence):
 
     """GEN8 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('Iecon', 240, 10),
         LimitLow('Iecoff', 10),
         LimitBetween('5V', 4.998, 5.202),
@@ -27,7 +27,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_pwrup),
             TestStep('PowerOn', self._step_pwron),

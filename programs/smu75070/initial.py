@@ -18,7 +18,7 @@ class Initial(share.TestSequence):
     # Load reg of output (%)
     vout_load_reg = 0.4
 
-    limits = (
+    limitdata = (
         LimitLow('FixtureLock', 200,
             doc='Closed micro switch'),
         LimitBetween('InrushOff', 120, 180,
@@ -48,7 +48,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('PowerOn', self._step_pwron),

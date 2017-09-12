@@ -16,7 +16,7 @@ class Initial(share.TestSequence):
     """BC2 Initial Test Program."""
 
     arm_version = '1.2.14549.989'
-    limits = (
+    limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
         LimitDelta('Shunt', 50.0, 100.0),
@@ -28,7 +28,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Bluetooth', self._step_bluetooth),

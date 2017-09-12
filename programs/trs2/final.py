@@ -15,7 +15,7 @@ class Final(share.TestSequence):
     # Injected Vbatt
     vbatt = 12.0
     # Test limits
-    limits = (
+    limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
@@ -24,7 +24,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Bluetooth', self._step_bluetooth),

@@ -39,7 +39,7 @@ class Initial(share.TestSequence):
 
     """BatteryCheck Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('3V3', 3.3, 0.1),
         LimitDelta('5VReg', 5.0, 0.1),
         LimitDelta('12VReg', 12.0, 0.1),
@@ -57,7 +57,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PreProgram', self._step_pre_program),
             TestStep('ProgramAVR', self._step_program_avr, not self.fifo),

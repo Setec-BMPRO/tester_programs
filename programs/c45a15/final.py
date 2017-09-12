@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """C45A-15 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('Vstart', 8.55, 9.45),
         LimitBetween('Vout', 15.6, 16.4),
         LimitLow('Vshdn', 8.0),
@@ -20,7 +20,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('ConnectCMR', self._step_connect_cmr),

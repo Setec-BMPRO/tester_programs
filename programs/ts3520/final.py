@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """TS3520 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitLow('12Voff', 0.5),
         LimitBetween('12V', 13.7, 13.9),
         LimitBetween('12Vfl', 13.43, 13.9),
@@ -21,7 +21,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FuseCheck', self._step_fuse_check),
             TestStep('PowerUp', self._step_power_up),

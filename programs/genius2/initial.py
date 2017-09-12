@@ -10,62 +10,59 @@ import tester
 from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
 import share
 
-PIC_HEX = 'genius2_3a.hex'
-
-_OCP_LOW = 34.0
-_OCP_HIGH = 43.0
-
-_BASE_DATA = (
-    LimitLow('DetectDiode', 0.3),
-    LimitDelta('FlyLead', 30.0, 10.0),
-    LimitDelta('AcIn', 240.0, 5.0),
-    LimitDelta('Vbus', 330.0, 20.0),
-    LimitBetween('Vcc', 13.8, 22.5),
-    LimitLow('VccOff', 5.0),
-    LimitDelta('Vdd', 5.00, 0.1),
-    LimitBetween('VbatCtl', 12.7, 13.5),
-    LimitDelta('Vctl', 12.0, 0.5),
-    LimitBetween('VoutPre', 12.5, 15.0),
-    LimitDelta('Vout', 13.65, 0.05),
-    LimitLow('VoutOff', 1.0),
-    LimitBetween('VbatPre', 12.5, 15.0),
-    LimitDelta('Vbat', 13.65, 0.05),
-    LimitDelta('Vaux', 13.70, 0.5),
-    LimitLow('FanOff', 0.5),
-    LimitBetween('FanOn', 12.0, 14.1),
-    LimitLow('InOCP', 13.24),
-    LimitBetween('OCP', _OCP_LOW, _OCP_HIGH),
-    LimitLow('FixtureLock', 200),
-    )
-
-LIMITS_STD = _BASE_DATA + (
-    LimitLow('VbatOCP', 10.0),
-    )
-
-LIMITS_H = _BASE_DATA + (
-    LimitHigh('VbatOCP', 13.0),
-    )
-
-LIMITS = {      # Test limit selection keyed by program parameter
-    'STD': {
-        'Limits': LIMITS_STD,
-        'LoadRatio': (29, 14),      # Iout:Ibat
-        },
-    'H': {
-        'Limits': LIMITS_H,
-        'LoadRatio': (5, 30),       # Iout:Ibat
-        },
-    }
-
 
 class Initial(share.TestSequence):
 
     """GENIUS-II Initial Test Program."""
 
+    # PIC firmware image file
+    pic_hex = 'genius2_3a.hex'
+    # OCP limits
+    _ocp_low = 34.0
+    _ocp_high = 43.0
+    # Test limits common to both versions
+    _common = (
+        LimitLow('DetectDiode', 0.3),
+        LimitDelta('FlyLead', 30.0, 10.0),
+        LimitDelta('AcIn', 240.0, 5.0),
+        LimitDelta('Vbus', 330.0, 20.0),
+        LimitBetween('Vcc', 13.8, 22.5),
+        LimitLow('VccOff', 5.0),
+        LimitDelta('Vdd', 5.00, 0.1),
+        LimitBetween('VbatCtl', 12.7, 13.5),
+        LimitDelta('Vctl', 12.0, 0.5),
+        LimitBetween('VoutPre', 12.5, 15.0),
+        LimitDelta('Vout', 13.65, 0.05),
+        LimitLow('VoutOff', 1.0),
+        LimitBetween('VbatPre', 12.5, 15.0),
+        LimitDelta('Vbat', 13.65, 0.05),
+        LimitDelta('Vaux', 13.70, 0.5),
+        LimitLow('FanOff', 0.5),
+        LimitBetween('FanOn', 12.0, 14.1),
+        LimitLow('InOCP', 13.24),
+        LimitBetween('OCP', _ocp_low, _ocp_high),
+        LimitLow('FixtureLock', 200),
+        )
+    # Test limit selection keyed by program parameter
+    limitdata = {
+        'STD': {
+            'Limits': _common + (
+                LimitLow('VbatOCP', 10.0),
+                ),
+            'LoadRatio': (29, 14),      # Iout:Ibat
+            },
+        'H': {
+            'Limits': _common + (
+                LimitHigh('VbatOCP', 13.0),
+                ),
+            'LoadRatio': (5, 30),       # Iout:Ibat
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
@@ -147,7 +144,7 @@ class Initial(share.TestSequence):
         dev['dcl_vbat'].output(0.0)
         mes['dmm_vbat'](timeout=10)
         time.sleep(2)
-        dev['dcl'].binary(0.0, _OCP_LOW - 2.0, 5.0)
+        dev['dcl'].binary(0.0, self._ocp_low - 2.0, 5.0)
         mes['ramp_OCP'].measure()
 
 
@@ -176,14 +173,14 @@ class LogicalDevices(share.LogicalDevices):
                 ('rla_shdwn2', tester.Relay, 'RLA7'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        r_out, r_bat = LIMITS[self.parameter]['LoadRatio']
+        r_out, r_bat = Initial.limitdata[self.parameter]['LoadRatio']
         self['dcl'] = tester.DCLoadParallel(
             ((self['dcl_vout'], r_out), (self['dcl_vbat'], r_bat)))
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.ProgramPIC(
-            PIC_HEX, folder, '16F1828', self['rla_prog'])
+            Initial.pic_hex, folder, '16F1828', self['rla_prog'])
 
     def reset(self):
         """Reset instruments."""
@@ -233,7 +230,9 @@ class Sensors(share.Sensors):
         self['oOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl'], sensor=self['ovout'],
             detect_limit=(self.limits['InOCP'], ),
-            start=_OCP_LOW - 1.0, stop=_OCP_HIGH + 1.0, step=0.2)
+            start=Initial._ocp_low - 1.0,
+            stop=Initial._ocp_high + 1.0,
+            step=0.2)
 
 
 class Measurements(share.Measurements):

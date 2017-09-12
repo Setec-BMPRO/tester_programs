@@ -7,53 +7,50 @@ import tester
 from tester import TestStep, LimitLow, LimitBetween, LimitRegExp
 import share
 
-_COMMON = (
-    LimitLow('Voff', 2.0),
-    LimitBetween('Vout', 13.60, 13.70),
-    LimitBetween('Vbat', 13.40, 13.70),
-    LimitBetween('Vtrickle', 3.90, 5.70),
-    LimitBetween('Vboost', 13.80, 14.10),
-    LimitLow('inOCP', 11.6),
-    LimitLow('FuseOut', 0.5),
-    LimitBetween('FuseIn', 13.60, 13.70),
-    )
-
-LIMITS_20 = _COMMON + (
-    LimitBetween('LoadOCP', 20.5, 26.0),
-    LimitBetween('BattOCP', 9.0, 11.5),
-    LimitRegExp('FuseLabel', '^ST20\-III$'),
-    )
-
-LIMITS_35 = _COMMON + (
-    LimitBetween('LoadOCP', 35.1, 42.5),
-    LimitBetween('BattOCP', 14.0, 17.0),
-    LimitRegExp('FuseLabel', '^ST35\-III$'),
-    )
-
-LIMITS = {      # Test limit selection keyed by program parameter
-    '20': {
-        'Limits': LIMITS_20,
-        'FullLoad': 20.1,
-        'LoadOCPramp': (19.5, 28.0),
-        'BattOCPramp': (8.0, 13.5),
-        },
-    '35': {
-        'Limits': LIMITS_35,
-        'FullLoad': 35.1,
-        'LoadOCPramp': (34.1, 43.5),
-        'BattOCPramp': (13.0, 19.0),
-        },
-    }
-
 
 class Final(share.TestSequence):
 
     """STxx-III Final Test Program."""
 
+    # Test limits common to both versions
+    _common = (
+        LimitLow('Voff', 2.0),
+        LimitBetween('Vout', 13.60, 13.70),
+        LimitBetween('Vbat', 13.40, 13.70),
+        LimitBetween('Vtrickle', 3.90, 5.70),
+        LimitBetween('Vboost', 13.80, 14.10),
+        LimitLow('inOCP', 11.6),
+        LimitLow('FuseOut', 0.5),
+        LimitBetween('FuseIn', 13.60, 13.70),
+        )
+    # Test limit selection keyed by program parameter
+    limitdata = {
+        '20': {
+            'Limits': _common + (
+                LimitBetween('LoadOCP', 20.5, 26.0),
+                LimitBetween('BattOCP', 9.0, 11.5),
+                LimitRegExp('FuseLabel', '^ST20\-III$'),
+                ),
+            'FullLoad': 20.1,
+            'LoadOCPramp': (19.5, 28.0),
+            'BattOCPramp': (8.0, 13.5),
+            },
+        '35': {
+            'Limits': _common + (
+                LimitBetween('LoadOCP', 35.1, 42.5),
+                LimitBetween('BattOCP', 14.0, 17.0),
+                LimitRegExp('FuseLabel', '^ST35\-III$'),
+                ),
+            'FullLoad': 35.1,
+            'LoadOCPramp': (34.1, 43.5),
+            'BattOCPramp': (13.0, 19.0),
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FuseLabel', self._step_label),
@@ -95,7 +92,8 @@ class Final(share.TestSequence):
     def _step_load_ocp(self, dev, mes):
         """Measure Load OCP point."""
         mes['ramp_LoadOCP']()
-        dev['dcl_Load'].output(LIMITS[self.parameter]['FullLoad'] * 1.30)
+        dev['dcl_Load'].output(
+            self.limitdata[self.parameter]['FullLoad'] * 1.30)
         mes['dmm_Overload'](timeout=5)
         dev['dcl_Load'].output(0.0)
         mes['dmm_Load'](timeout=10)
@@ -165,13 +163,13 @@ class Sensors(share.Sensors):
         self['oYesNoRedOff'] = sensor.YesNo(
             message=tester.translate('st3_final', 'ReplaceBattFuseIsRedOff?'),
             caption=tester.translate('st3_final', 'capRed'))
-        ocp_start, ocp_stop = LIMITS[self.parameter]['LoadOCPramp']
+        ocp_start, ocp_stop = Final.limitdata[self.parameter]['LoadOCPramp']
         self['oLoadOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl_Load'],
             sensor=self['oLoad'],
             detect_limit=(self.limits['inOCP'], ),
             start=ocp_start, stop=ocp_stop, step=0.2, delay=0.1, reset=False)
-        ocp_start, ocp_stop = LIMITS[self.parameter]['BattOCPramp']
+        ocp_start, ocp_stop = Final.limitdata[self.parameter]['BattOCPramp']
         self['oBattOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl_Batt'],
             sensor=self['oBatt'],

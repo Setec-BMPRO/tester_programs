@@ -9,90 +9,50 @@ import inspect
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitBetween, LimitDelta, LimitBoolean,
-    LimitRegExp,  LimitInteger
+    LimitLow, LimitBetween, LimitDelta, LimitBoolean, LimitRegExp, LimitInteger
     )
 import share
 from . import ev2200
 from . import cmrsbp
-
-PIC_HEX = 'CMR-SBP-9.hex'
-
-# Serial port for the EV2200.
-EV_PORT = share.port('017789', 'EV')
-# Serial port for the CMR.
-CMR_PORT = share.port('017789', 'CMR')
-
-#   Tuple ( Tuple (name, identity, low, high, string, boolean))
-LIMITS_INI = (
-    LimitDelta('Vbat', 12.0, 0.10),
-    LimitBetween('VbatCharge', 11.8, 12.5),
-    LimitDelta('Vcc', 3.3, 0.2),
-    LimitBetween('VErase', 4.8, 5.05),
-    LimitLow('IStart', 0.02),
-    LimitBetween('Vchge', 12.8, 15.0),
-    # 2.0A +/- 10mA
-    LimitDelta('Ibat', -2.00, 0.01),
-    LimitLow('Final Not Connected', 1.0),
-    LimitDelta('SenseRes', 250, 30),
-    LimitDelta('Halfcell', 110, 10),
-    LimitDelta('VChgeOn', 350, 50),
-    LimitDelta('ErrVUncal', 0.0, 0.5),
-    LimitDelta('ErrVCal', 0.0, 0.03),
-    LimitDelta('ErrIUncal', 0.0, 0.060),
-    LimitDelta('ErrICal', 0.0, 0.015),
-    # 298K nominal +/- 2.5K in Kelvin (25C +/- 2.5C in Celsius).
-    LimitDelta('BQ-Temp', 300, 4.5),
-    # SerialDate
-    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
-    )
-
-_FIN_COMMON = (   # Common Final Test limits
-    LimitBetween('VbatIn', 12.8, 15.0),
-    LimitDelta('ErrV', 0.0, 0.03),
-    LimitBetween('CycleCnt', 0.5, 20.5),
-    LimitBoolean('RelrnFlg', False),
-    LimitInteger('RotarySw', 256),
-    LimitDelta('Halfcell', 400, 50),
-    LimitBoolean('VFCcalStatus', True),
-    LimitRegExp('SerNumChk', ''),
-    )
-
-LIMITS_8 = _FIN_COMMON + (
-    LimitBetween('SenseRes', 39.0, 91.0),
-    LimitBetween('Capacity', 6400, 11000),
-    LimitDelta('StateOfCharge', 100.0, 10.5),
-    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
-    )
-
-LIMITS_13 = _FIN_COMMON + (
-    LimitBetween('SenseRes', 221.0, 280.0),
-    LimitBetween('Capacity', 11000, 15000),
-    LimitDelta('StateOfCharge', 100.0, 10.5),
-    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$'),
-    )
-
-LIMITS_17 = _FIN_COMMON + (
-    LimitBetween('SenseRes', 400.0, 460.0),
-    LimitBetween('Capacity', 15500, 20000),
-    LimitLow('StateOfCharge', 30.0),
-    LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$'),
-    )
-
-LIMITS_FIN = {      # Test limit selection keyed by program parameter
-    '8': LIMITS_8,
-    '13': LIMITS_13,
-    '17': LIMITS_17,
-    }
 
 
 class Initial(share.TestSequence):
 
     """CMR-SBP Initial Test Program."""
 
+    # PIC firmware image file
+    pic_hex = 'CMR-SBP-9.hex'
+    # Serial port for the EV2200.
+    ev_port = share.port('017789', 'EV')
+    # Serial port for the CMR.
+    cmr_port = share.port('017789', 'CMR')
+    # Test limits
+    limitdata = (
+        LimitDelta('Vbat', 12.0, 0.10),
+        LimitBetween('VbatCharge', 11.8, 12.5),
+        LimitDelta('Vcc', 3.3, 0.2),
+        LimitBetween('VErase', 4.8, 5.05),
+        LimitLow('IStart', 0.02),
+        LimitBetween('Vchge', 12.8, 15.0),
+        # 2.0A +/- 10mA
+        LimitDelta('Ibat', -2.00, 0.01),
+        LimitLow('Final Not Connected', 1.0),
+        LimitDelta('SenseRes', 250, 30),
+        LimitDelta('Halfcell', 110, 10),
+        LimitDelta('VChgeOn', 350, 50),
+        LimitDelta('ErrVUncal', 0.0, 0.5),
+        LimitDelta('ErrVCal', 0.0, 0.03),
+        LimitDelta('ErrIUncal', 0.0, 0.060),
+        LimitDelta('ErrICal', 0.0, 0.015),
+        # 298K nominal +/- 2.5K in Kelvin (25C +/- 2.5C in Celsius).
+        LimitDelta('BQ-Temp', 300, 4.5),
+        # SerialDate
+        LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
+        )
+
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS_INI, LogicalDevices, Sensors, MeasureIni)
+        super().open(self.limitdata, LogicalDevices, Sensors, MeasureIni)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('Program', self._step_program, not self.fifo),
@@ -191,7 +151,7 @@ class SerialDate(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(LIMITS_INI, LogicalDevices, Sensors, MeasureIni)
+        super().open(Initial.limitdata, LogicalDevices, Sensors, MeasureIni)
         self.steps = (
             TestStep('SerialDate', self._step_sn_date),
             )
@@ -215,10 +175,47 @@ class Final(share.TestSequence):
 
     """CMR-SBP Final Test Program."""
 
+    # Common test limits
+    _common = (
+        LimitBetween('VbatIn', 12.8, 15.0),
+        LimitDelta('ErrV', 0.0, 0.03),
+        LimitBetween('CycleCnt', 0.5, 20.5),
+        LimitBoolean('RelrnFlg', False),
+        LimitInteger('RotarySw', 256),
+        LimitDelta('Halfcell', 400, 50),
+        LimitBoolean('VFCcalStatus', True),
+        LimitRegExp('SerNumChk', ''),
+        )
+    # Test limit selection keyed by program parameter
+    limitdata = {
+        '8': _common + (
+            LimitBetween('SenseRes', 39.0, 91.0),
+            LimitBetween('Capacity', 6400, 11000),
+            LimitDelta('StateOfCharge', 100.0, 10.5),
+            LimitRegExp(
+                'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
+            ),
+        '13': _common + (
+            LimitBetween('SenseRes', 221.0, 280.0),
+            LimitBetween('Capacity', 11000, 15000),
+            LimitDelta('StateOfCharge', 100.0, 10.5),
+            LimitRegExp(
+                'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$'),
+            ),
+        '17': _common + (
+            LimitBetween('SenseRes', 400.0, 460.0),
+            LimitBetween('Capacity', 15500, 20000),
+            LimitLow('StateOfCharge', 30.0),
+            LimitRegExp(
+                'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$'),
+            ),
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS_FIN[self.parameter], LogicalDevices, Sensors, MeasureFin)
+            self.limitdata[self.parameter],
+            LogicalDevices, Sensors, MeasureFin)
         self.steps = (
             TestStep('Startup', self._step_startup),
             TestStep('Verify', self._step_verify),
@@ -297,20 +294,20 @@ class LogicalDevices(share.LogicalDevices):
         # Open serial connection to data monitor
         cmr_ser = tester.SimSerial(
             simulation=self.fifo,
-            port=CMR_PORT, baudrate=9600, timeout=0.1)
+            port=Initial.cmr_port, baudrate=9600, timeout=0.1)
         self['cmr'] = cmrsbp.CmrSbp(cmr_ser, data_timeout=10)
         self.add_closer(self['cmr'].close)
         # EV2200 board
         ev_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=9600, timeout=4)
         # Set port separately, as we don't want it opened yet
-        ev_ser.port = EV_PORT
+        ev_ser.port = Initial.ev_port
         self['ev'] = ev2200.EV2200(ev_ser)
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.ProgramPIC(
-            PIC_HEX, folder, '18F252', self['rla_Prog'])
+            Initial.pic_hex, folder, '18F252', self['rla_Prog'])
 
     def reset(self):
         """Reset instruments."""

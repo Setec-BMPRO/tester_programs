@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """RM-50-24 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('Rsense', 1000, 20),
         LimitLow('Vsense', 0.0001),
         LimitLow('uSwitch', 100),
@@ -32,7 +32,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('DCInputLeakage', self._step_dcinput_leakage),

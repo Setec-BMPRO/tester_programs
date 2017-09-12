@@ -41,7 +41,7 @@ class Initial(share.TestSequence):
 
     """SX-750 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('8.5V Arduino', 8.5, 0.4),
         LimitLow('5Voff', 0.5),
         LimitDelta('5Vext', _5VSB_EXT - 0.8, 1.0),
@@ -94,7 +94,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program_micros),

@@ -32,7 +32,7 @@ class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitLow('Part', 20.0),
         LimitDelta('Vin', 8.0, 0.5),
         LimitPercent('3V3', 3.30, 3.0),
@@ -46,7 +46,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartCheck', self._step_part_check),
             TestStep('PowerUp', self._step_power_up),

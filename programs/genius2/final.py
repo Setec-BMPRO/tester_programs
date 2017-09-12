@@ -3,46 +3,44 @@
 """Final Test Program for GENIUS-II and GENIUS-II-H."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
-
-LIMITS_COMMON = (
-    LimitBetween('InRes', 80e3, 170e3),
-    LimitDelta('Vout', 13.675, 0.1),
-    LimitLow('VoutOff', 2.0),
-    LimitBetween('VoutStartup', 13.60, 14.10),
-    LimitDelta('Vbat', 13.675, 0.1),
-    LimitLow('VbatOff', 1.0),
-    LimitBetween('ExtBatt', 11.5, 12.8),
-    LimitLow('InOCP', 13.24),
-    LimitBetween('OCP', 34.0, 43.0),
-    )
-
-LIMITS = {      # Test limit selection keyed by program parameter
-    'STD': {
-        'Limits': LIMITS_COMMON,
-        'MaxBattLoad': 15.0,
-        'LoadRatio': (29, 14),      # Vout:Vbat load ratio
-        },
-    'H': {
-        'Limits': LIMITS_COMMON,
-        'MaxBattLoad': 30.0,
-        'LoadRatio': (5, 30),       # Vout:Vbat load ratio
-        },
-    }
 
 
 class Final(share.TestSequence):
 
     """GENIUS-II Final Test Program."""
 
+    # Common test limits
+    _common = (
+        LimitBetween('InRes', 80e3, 170e3),
+        LimitDelta('Vout', 13.675, 0.1),
+        LimitLow('VoutOff', 2.0),
+        LimitBetween('VoutStartup', 13.60, 14.10),
+        LimitDelta('Vbat', 13.675, 0.1),
+        LimitLow('VbatOff', 1.0),
+        LimitBetween('ExtBatt', 11.5, 12.8),
+        LimitLow('InOCP', 13.24),
+        LimitBetween('OCP', 34.0, 43.0),
+        )
+    # Test limit selection keyed by program parameter
+    limitdata = {
+        'STD': {
+            'Limits': _common,
+            'MaxBattLoad': 15.0,
+            'LoadRatio': (29, 14),      # Vout:Vbat load ratio
+            },
+        'H': {
+            'Limits': _common,
+            'MaxBattLoad': 30.0,
+            'LoadRatio': (5, 30),       # Vout:Vbat load ratio
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('InputRes', self._step_inres),
@@ -112,7 +110,7 @@ class LogicalDevices(share.LogicalDevices):
                 ('rla_RemoteSw', tester.Relay, 'RLA1')
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        ratio_vout, ratio_vbat = LIMITS[self.parameter]['LoadRatio']
+        ratio_vout, ratio_vbat = Final.limitdata[self.parameter]['LoadRatio']
         self['dcl'] = tester.DCLoadParallel(
             ((self['dcl_vout'], ratio_vout),
              (self['dcl_vbat'], ratio_vbat), )

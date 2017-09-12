@@ -28,7 +28,7 @@ class Initial(share.TestSequence):
 
     """BC15 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitLow('FixtureLock', 20),
         LimitHigh('FanShort', 100),
         LimitDelta('ACin', VAC, 5.0),
@@ -56,7 +56,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
             tester.TestStep('Program', self._step_program, not self.fifo),

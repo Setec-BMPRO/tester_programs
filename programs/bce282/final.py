@@ -3,61 +3,55 @@
 """BCE282-12/24 Final Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
-
-_COMMON = (
-    LimitDelta('AlarmOpen', 10000, 1000, doc='Contacts open'),
-    LimitLow('AlarmClosed', 100, doc='Contacts closed'),
-    )
-
-LIMITS_12 = _COMMON + (
-    LimitDelta('VoutNL', 13.55, 0.20, doc='Output at no load'),
-    LimitBetween('VbatNL', 13.20, 13.75, doc='Output at no load'),
-    LimitBetween('Vout', 12.98, 13.75, doc='Output with load'),
-    LimitBetween('Vbat', 12.98, 13.75, doc='Output with load'),
-    LimitLow('inOCP', 12.98, doc='OCP active'),
-    LimitBetween('OCPLoad', 20.0, 25.0, doc='OCP point'),
-    LimitBetween('OCPBatt', 10.0, 12.0, doc='OCP point'),
-    )
-
-LIMITS_24 = _COMMON + (
-    LimitDelta('VoutNL', 27.60, 0.25, doc='Output at no load'),
-    LimitBetween('VbatNL', 27.35, 27.85, doc='Output at no load'),
-    LimitBetween('Vout', 26.80, 27.85, doc='Output with load'),
-    LimitBetween('Vbat', 26.80, 27.85, doc='Output with load'),
-    LimitLow('inOCP', 26.80, doc='OCP active'),
-    LimitBetween('OCPLoad', 10.0, 13.0, doc='OCP point'),
-    LimitBetween('OCPBatt', 5.0, 6.0, doc='OCP point'),
-    )
-
-LIMITS = {      # Test limit selection keyed by program parameter
-    '12': {
-        'Limits': LIMITS_12,
-        'FullLoad': 20.1,
-        'OCPrampLoad': (20.0, 25.5),
-        'OCPrampBatt': (10.0, 12.5),
-        },
-    '24': {
-        'Limits': LIMITS_24,
-        'FullLoad': 10.1,
-        'OCPrampLoad': (10.0, 13.5),
-        'OCPrampBatt': (5.0, 6.5),
-        },
-    }
 
 
 class Final(share.TestSequence):
 
     """BCE282-12/24 Final Test Program."""
 
+    # Limits common to both versions
+    _common = (
+        LimitDelta('AlarmOpen', 10000, 1000, doc='Contacts open'),
+        LimitLow('AlarmClosed', 100, doc='Contacts closed'),
+        )
+    # Test limit selection keyed by program parameter
+    limitdata = {
+        '12': {
+            'Limits': _common + (
+                LimitDelta('VoutNL', 13.55, 0.20, doc='Output at no load'),
+                LimitBetween('VbatNL', 13.20, 13.75, doc='Output at no load'),
+                LimitBetween('Vout', 12.98, 13.75, doc='Output with load'),
+                LimitBetween('Vbat', 12.98, 13.75, doc='Output with load'),
+                LimitLow('inOCP', 12.98, doc='OCP active'),
+                LimitBetween('OCPLoad', 20.0, 25.0, doc='OCP point'),
+                LimitBetween('OCPBatt', 10.0, 12.0, doc='OCP point'),
+                ),
+            'FullLoad': 20.1,
+            'OCPrampLoad': (20.0, 25.5),
+            'OCPrampBatt': (10.0, 12.5),
+            },
+        '24': {
+            'Limits': _common + (
+                LimitDelta('VoutNL', 27.60, 0.25, doc='Output at no load'),
+                LimitBetween('VbatNL', 27.35, 27.85, doc='Output at no load'),
+                LimitBetween('Vout', 26.80, 27.85, doc='Output with load'),
+                LimitBetween('Vbat', 26.80, 27.85, doc='Output with load'),
+                LimitLow('inOCP', 26.80, doc='OCP active'),
+                LimitBetween('OCPLoad', 10.0, 13.0, doc='OCP point'),
+                LimitBetween('OCPBatt', 5.0, 6.0, doc='OCP point'),
+                ),
+            'FullLoad': 10.1,
+            'OCPrampLoad': (10.0, 13.5),
+            'OCPrampBatt': (5.0, 6.5),
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
@@ -82,7 +76,7 @@ class Final(share.TestSequence):
         mes['YesNoGreen']()
         self.dcload(
             (('dcl_Vbat', 0.0),
-             ('dcl_Vout', LIMITS[self.parameter]['FullLoad'])))
+             ('dcl_Vout', self.limitdata[self.parameter]['FullLoad'])))
         self.measure(('Vout', 'Vbat'), timeout=5)
 
     @share.teststep
@@ -135,14 +129,14 @@ class Sensors(share.Sensors):
             message=tester.translate('bce282_final', 'IsGreenFlash?'),
             caption=tester.translate('bce282_final', 'capLedGreen'))
         self['YesNoGreen'].doc = 'Operator response'
-        ocp_start, ocp_stop = LIMITS[self.parameter]['OCPrampLoad']
+        ocp_start, ocp_stop = Final.limitdata[self.parameter]['OCPrampLoad']
         self['OCPLoad'] = sensor.Ramp(
             stimulus=self.devices['dcl_Vout'],
             sensor=self['Vout'],
             detect_limit=(self.limits['inOCP'], ),
             start=ocp_start, stop=ocp_stop, step=0.05, delay=0.1)
         self['OCPLoad'].doc = 'Load OCP point'
-        ocp_start, ocp_stop = LIMITS[self.parameter]['OCPrampBatt']
+        ocp_start, ocp_stop = Final.limitdata[self.parameter]['OCPrampBatt']
         self['OCPBatt'] = sensor.Ramp(
             stimulus=self.devices['dcl_Vbat'],
             sensor=self['Vbat'],

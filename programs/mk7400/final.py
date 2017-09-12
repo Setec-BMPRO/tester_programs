@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """MK7-400-1 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('ACon', 240, 10),
         LimitLow('ACoff', 10),
         LimitDelta('5V', 5.00, 0.25),
@@ -26,7 +26,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('PowerOn', self._step_power_on),

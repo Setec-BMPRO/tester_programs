@@ -24,7 +24,7 @@ class Initial(share.TestSequence):
     force_off = 1
     normal = 0
     # Test limits
-    limits = (
+    limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
         LimitLow('TestPinCover', 0.5),
@@ -36,7 +36,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('TestArm', self._step_test_arm),

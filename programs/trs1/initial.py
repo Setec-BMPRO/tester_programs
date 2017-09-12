@@ -15,7 +15,7 @@ class Initial(share.TestSequence):
     low_batt_l = 10.85
     low_batt_h = 11.55
     # Test limits
-    limits = (
+    limitdata = (
         LimitLow('VinOff', 0.5),
         LimitBetween('Vin', 11.0, 12.0),
         LimitLow('5VOff', 0.1),
@@ -33,7 +33,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('BreakAway', self._step_breakaway),

@@ -10,7 +10,7 @@ class Final2V(share.TestSequence):
 
     """ATXG-450-2V Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('5Vsb', 4.845, 5.202),
         LimitLow('5Vsbinocp', 4.70),
         LimitBetween('5Vsbocp', 2.6, 4.0),
@@ -40,7 +40,7 @@ class Final2V(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('SwitchOn', self._step_switch_on),

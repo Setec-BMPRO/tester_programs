@@ -18,7 +18,7 @@ class Final(share.TestSequence):
 
     """BatteryCheck Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('12V', 12.0, 0.1),
         LimitBoolean('BTscan', True),
         LimitBoolean('BTpair', True),
@@ -29,7 +29,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('TestBlueTooth', self._step_test_bluetooth),

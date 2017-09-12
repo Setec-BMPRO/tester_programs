@@ -6,69 +6,62 @@ import os
 import inspect
 import time
 import tester
-from tester import (
-    TestStep,
-    LimitBetween, LimitDelta, LimitInteger
-    )
+from tester import TestStep, LimitBetween, LimitDelta, LimitInteger
 import share
 from . import console
-
-# Serial port for the PIC.
-PIC_PORT = share.port('021299', 'PIC')
-
-FORCE_OFFSET = -8
-FORCE_THRESHOLD = 160
-
-_COMMON = (
-    LimitDelta('Vin', 12.0, 0.1),
-    LimitDelta('Vsw', 0, 100),
-    LimitDelta('Vref', 0, 100),
-    LimitDelta('Vcc', 3.30, 0.07),
-    LimitDelta('Isense', -90, 5),
-    LimitBetween('3V3', -2.8, -2.5),
-    LimitDelta('%ErrorV', 0, 2.24),
-    LimitDelta('%CalV', 0, 0.36),
-    LimitDelta('%ErrorI', 0, 2.15),
-    LimitDelta('%CalI', 0, 0.50),
-    # Data reported by the PIC
-    LimitInteger('PicStatus 0', 0),
-    LimitDelta('PicZeroChk', 0, 65.0),
-    LimitDelta('PicVin', 12.0, 0.5),
-    LimitDelta('PicIsense', -90, 5),
-    LimitDelta('PicVfactor', 20000, 1000),
-    LimitDelta('PicIfactor', 15000, 1000),
-    LimitBetween('PicIoffset', -8.01, -8),
-    LimitBetween('PicIthreshold', 160, 160.01),
-    )
-
-LIMITS_STD = _COMMON + (
-    LimitBetween('0V8', -1.2, -0.4),
-    )
-
-LIMITS_BM = _COMMON + (
-    LimitBetween('0V8', -1.4, -0.6),
-    )
-
-LIMITS = {      # Test limit selection keyed by program parameter
-    'STD': {
-        'Limits': LIMITS_STD,
-        'Software': 'Drifter-5.hex',
-        },
-    'BM': {
-        'Limits': LIMITS_BM,
-        'Software': 'DrifterBM-2.hex',
-        },
-    }
 
 
 class Initial(share.TestSequence):
 
     """Drifter Initial Test Program."""
 
+    # Serial port for the PIC.
+    pic_port = share.port('021299', 'PIC')
+    # Calibration values
+    force_offset = -8
+    force_threshold = 160
+    # Limits common to both versions
+    _common = (
+        LimitDelta('Vin', 12.0, 0.1),
+        LimitDelta('Vsw', 0, 100),
+        LimitDelta('Vref', 0, 100),
+        LimitDelta('Vcc', 3.30, 0.07),
+        LimitDelta('Isense', -90, 5),
+        LimitBetween('3V3', -2.8, -2.5),
+        LimitDelta('%ErrorV', 0, 2.24),
+        LimitDelta('%CalV', 0, 0.36),
+        LimitDelta('%ErrorI', 0, 2.15),
+        LimitDelta('%CalI', 0, 0.50),
+        # Data reported by the PIC
+        LimitInteger('PicStatus 0', 0),
+        LimitDelta('PicZeroChk', 0, 65.0),
+        LimitDelta('PicVin', 12.0, 0.5),
+        LimitDelta('PicIsense', -90, 5),
+        LimitDelta('PicVfactor', 20000, 1000),
+        LimitDelta('PicIfactor', 15000, 1000),
+        LimitBetween('PicIoffset', -8.01, -8),
+        LimitBetween('PicIthreshold', 160, 160.01),
+        )
+    # Test limit selection keyed by program parameter
+    limitdata = {
+        'STD': {
+            'Limits': _common + (
+                LimitBetween('0V8', -1.2, -0.4),
+                ),
+            'Software': 'Drifter-5.hex',
+            },
+        'BM': {
+            'Limits': _common + (
+                LimitBetween('0V8', -1.4, -0.6),
+                ),
+            'Software': 'DrifterBM-2.hex',
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
@@ -116,8 +109,8 @@ class Initial(share.TestSequence):
         # Auto-zero the PIC current
         pic['CAL_I_ZERO'] = True
         # Assign forced offset & threshold for current display
-        pic['CAL_OFFSET_CURRENT'] = FORCE_OFFSET
-        pic['ZERO-CURRENT-DISPLAY-THRESHOLD'] = FORCE_THRESHOLD
+        pic['CAL_OFFSET_CURRENT'] = self.force_offset
+        pic['ZERO-CURRENT-DISPLAY-THRESHOLD'] = self.force_threshold
         # Calibrate voltage
         dmm_vin = mes['dmm_vin'](timeout=5).reading1
         pic_vin = mes['pic_vin'](timeout=5).reading1
@@ -193,13 +186,13 @@ class LogicalDevices(share.LogicalDevices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.ProgramPIC(
-            LIMITS[self.parameter]['Software'],
+            Initial.limitdata[self.parameter]['Software'],
             folder, '18F87J93', self['rla_Prog'])
         # Serial connection to the console
         pic_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = PIC_PORT
+        pic_ser.port = Initial.pic_port
         self['pic'] = console.Console(pic_ser)
 
     def reset(self):

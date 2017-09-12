@@ -39,7 +39,7 @@ class Initial(share.TestSequence):
 
     """Trek2 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('Vin', VIN_SET - 0.75, 0.5),
         LimitPercent('3V3', 3.3, 3.0),
         LimitLow('BkLghtOff', 0.5),
@@ -51,7 +51,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('Program', self._step_program, not self.fifo),

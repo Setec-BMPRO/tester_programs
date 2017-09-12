@@ -11,7 +11,7 @@ class Initial(share.TestSequence):
 
     """TS3020H Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('FanConn', 100, 200),
         LimitBetween('InrushOff', 120, 180),
         LimitLow('InrushOn', 10),
@@ -50,7 +50,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('FuseCheck', self._step_fuse_check),

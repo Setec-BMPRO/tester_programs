@@ -88,7 +88,7 @@ class _J35Initial(ProgramTestCase):
                     ('Banner1\r\nBanner2', ) +
                      ('', ) * 4 +
                      ('Banner1\r\nBanner2', ) +
-                     ('', ) + (j35.initial.ARM_VERSION, ),
+                     ('', ) + (j35.initial.Initial.arm_version, ),
                 'Aux':
                     ('', '13500', '1100', ''),
                 'Solar':

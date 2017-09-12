@@ -14,138 +14,133 @@ from tester import (
 import share
 from . import console
 
-ARM_VERSION = '1.3.15775.997'      # ARM version
-# Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = share.port('029242', 'ARM')
-# ARM software image file
-ARM_FILE = 'j35_{}.bin'.format(ARM_VERSION)
-# CAN echo request messages
-CAN_ECHO = 'TQQ,36,0'
-# CAN Bus is operational if status bit 28 is set
-_CAN_BIND = 1 << 28
-# Number of outputs of each product version
-OUTPUT_COUNT_A = 7
-OUTPUT_COUNT_BC = 14
-# Injected voltages
-VBAT_INJECT = 12.6          # Battery bus
-AUX_SOLAR_INJECT = 13.5      # Aux or Solar inputs
-# AC voltage powering the unit
-AC_VOLT = 240.0
-AC_FREQ = 50.0
-# Output set points when running in manual mode
-VOUT_SET = 12.8
-OCP_SET = 35.0
-# Battery load current
-BATT_CURRENT = 4.0
-# Load on each output channel
-LOAD_PER_OUTPUT = 2.0
-
-
-_COMMON = (
-    LimitDelta('ACin', AC_VOLT, delta=5.0, doc='AC input voltage'),
-    LimitDelta('Vbus', AC_VOLT * math.sqrt(2), delta=10.0,
-        doc='Peak of AC input'),
-    LimitBetween('12Vpri', 11.5, 13.0, doc='12Vpri rail'),
-    LimitPercent('Vload', VOUT_SET, percent=3.0,
-        doc='AC-DC convertor voltage setpoint'),
-    LimitLow('VloadOff', 0.5, doc='When output is OFF'),
-    LimitDelta('VbatIn', VBAT_INJECT, delta=1.0,
-        doc='Voltage at Batt when 12.6V is injected into Batt'),
-    LimitDelta('VbatOut', AUX_SOLAR_INJECT, delta=0.5,
-        doc='Voltage at Batt when 13.5V is injected into Aux'),
-    LimitDelta('Vbat', VOUT_SET, delta=0.2,
-        doc='Voltage at Batt when unit is running'),
-    LimitPercent('VbatLoad', VOUT_SET, percent=5.0,
-        doc='Voltage at Batt when unit is running under load'),
-    LimitDelta('Vair', AUX_SOLAR_INJECT, delta=0.5,
-        doc='Voltage at Air when 13.5V is injected into Solar'),
-    LimitPercent('3V3U', 3.30, percent=1.5,
-        doc='3V3 unswitched when 12.6V is injected into Batt'),
-    LimitPercent('3V3', 3.30, percent=1.5, doc='3V3 internal rail'),
-    LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
-    LimitDelta('FanOn', VOUT_SET, delta=1.0, doc='Fan running'),
-    LimitLow('FanOff', 0.5, doc='Fan not running'),
-    LimitRegExp('ARM-SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.')),
-        doc='Arm Software version'),
-    LimitPercent('ARM-AuxV', AUX_SOLAR_INJECT, percent=2.0, delta=0.3,
-        doc='ARM Aux voltage reading'),
-    LimitBetween('ARM-AuxI', 0.0, 1.5,
-        doc='ARM Aux current reading'),
-    LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
-    LimitPercent('ARM-AcV', AC_VOLT, percent=4.0, delta=1.0,
-        doc='ARM AC voltage reading'),
-    LimitPercent('ARM-AcF', AC_FREQ, percent=4.0, delta=1.0,
-        doc='ARM AC frequency reading'),
-    LimitBetween('ARM-SecT', 8.0, 70.0,
-        doc='ARM secondary temperature sensor'),
-    LimitPercent('ARM-Vout', VOUT_SET, percent=2.0, delta=0.1,
-        doc='ARM measured Vout'),
-    LimitBetween('ARM-Fan', 0, 100, doc='ARM fan speed'),
-    LimitPercent('ARM-BattI', BATT_CURRENT, percent=1.7, delta=1.0,
-        doc='ARM battery current reading'),
-    LimitDelta('ARM-LoadI', LOAD_PER_OUTPUT, delta=0.9,
-        doc='ARM output current reading'),
-    LimitInteger('ARM-RemoteClosed', 1),
-    LimitDelta('CanPwr', VOUT_SET, delta=1.8, doc='CAN bus power supply'),
-    LimitInteger('LOAD_SET', 0x5555555, doc='ARM output load enable setting'),
-    LimitInteger('CAN_BIND', _CAN_BIND, doc='ARM reports CAN bus operational'),
-    LimitRegExp('CAN_RX', '^RRQ,36,0', doc='Response to CAN echo message'),
-    LimitLow('InOCP', VOUT_SET - 1.2, doc='Output is in OCP'),
-    LimitLow('FixtureLock', 200, doc='Test fixture lid microswitch'),
-    )
-
-LIMITS_A = _COMMON + (
-    LimitLow('LOAD_COUNT', OUTPUT_COUNT_A),
-    LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip range'),
-    )
-
-LIMITS_B = _COMMON + (
-    LimitLow('LOAD_COUNT', OUTPUT_COUNT_BC),
-    LimitPercent('OCP', OCP_SET, (4.0, 7.0), doc='OCP trip range'),
-    )
-
-LIMITS_C = _COMMON + (
-    LimitLow('LOAD_COUNT', OUTPUT_COUNT_BC),
-    LimitPercent('OCP', OCP_SET, (4.0, 7.0), doc='OCP trip range'),
-    )
-
-# Variant specific configuration data. Indexed by test program parameter.
-#   'Limits': Test limits.
-#   'HwVer': Hardware version data.
-#   'SolarCan': Enable Solar input & CAN bus tests.
-#   'Derate': Derate output current.
-CONFIG = {
-    'A': {
-        'Limits': LIMITS_A,
-        'LoadCount': 7,
-        'HwVer': (2, 1, 'A'),
-        'SolarCan': False,
-        'Derate': True,
-        },
-    'B': {
-        'Limits': LIMITS_B,
-        'LoadCount': 14,
-        'HwVer': (2, 2, 'A'),
-        'SolarCan': False,
-        'Derate': False,
-        },
-    'C': {
-        'Limits': LIMITS_C,
-        'LoadCount': 14,
-        'HwVer': (7, 3, 'B'),
-        'SolarCan': True,
-        'Derate': False,
-        },
-    }
-
 
 class Initial(share.TestSequence):
 
     """J35 Initial Test Program."""
 
+    # ARM version
+    arm_version = '1.3.15775.997'
+    # Serial port for the ARM. Used by programmer and ARM comms module.
+    arm_port = share.port('029242', 'ARM')
+    # ARM software image file
+    arm_file = 'j35_{}.bin'.format(arm_version)
+    # CAN echo request messages
+    can_echo = 'TQQ,36,0'
+    # CAN Bus is operational if status bit 28 is set
+    _can_bind = 1 << 28
+    # Number of outputs of each product version
+    output_count_a = 7
+    output_count_bc = 14
+    # Injected voltages
+    #  Battery bus
+    vbat_inject = 12.6
+    #  Aux or Solar inputs
+    aux_solar_inject = 13.5
+    # AC voltage powering the unit
+    ac_volt = 240.0
+    ac_freq = 50.0
+    # Output set points when running in manual mode
+    vout_set = 12.8
+    ocp_set = 35.0
+    # Battery load current
+    batt_current = 4.0
+    # Load on each output channel
+    load_per_output = 2.0
+    # Test limits common to all versions
+    _common = (
+        LimitDelta('ACin', ac_volt, delta=5.0, doc='AC input voltage'),
+        LimitDelta('Vbus', ac_volt * math.sqrt(2), delta=10.0,
+            doc='Peak of AC input'),
+        LimitBetween('12Vpri', 11.5, 13.0, doc='12Vpri rail'),
+        LimitPercent('Vload', vout_set, percent=3.0,
+            doc='AC-DC convertor voltage setpoint'),
+        LimitLow('VloadOff', 0.5, doc='When output is OFF'),
+        LimitDelta('VbatIn', vbat_inject, delta=1.0,
+            doc='Voltage at Batt when 12.6V is injected into Batt'),
+        LimitDelta('VbatOut', aux_solar_inject, delta=0.5,
+            doc='Voltage at Batt when 13.5V is injected into Aux'),
+        LimitDelta('Vbat', vout_set, delta=0.2,
+            doc='Voltage at Batt when unit is running'),
+        LimitPercent('VbatLoad', vout_set, percent=5.0,
+            doc='Voltage at Batt when unit is running under load'),
+        LimitDelta('Vair', aux_solar_inject, delta=0.5,
+            doc='Voltage at Air when 13.5V is injected into Solar'),
+        LimitPercent('3V3U', 3.30, percent=1.5,
+            doc='3V3 unswitched when 12.6V is injected into Batt'),
+        LimitPercent('3V3', 3.30, percent=1.5, doc='3V3 internal rail'),
+        LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
+        LimitDelta('FanOn', vout_set, delta=1.0, doc='Fan running'),
+        LimitLow('FanOff', 0.5, doc='Fan not running'),
+        LimitRegExp('ARM-SwVer', '^{}$'.format(arm_version.replace('.', r'\.')),
+            doc='Arm Software version'),
+        LimitPercent('ARM-AuxV', aux_solar_inject, percent=2.0, delta=0.3,
+            doc='ARM Aux voltage reading'),
+        LimitBetween('ARM-AuxI', 0.0, 1.5,
+            doc='ARM Aux current reading'),
+        LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
+        LimitPercent('ARM-AcV', ac_volt, percent=4.0, delta=1.0,
+            doc='ARM AC voltage reading'),
+        LimitPercent('ARM-AcF', ac_freq, percent=4.0, delta=1.0,
+            doc='ARM AC frequency reading'),
+        LimitBetween('ARM-SecT', 8.0, 70.0,
+            doc='ARM secondary temperature sensor'),
+        LimitPercent('ARM-Vout', vout_set, percent=2.0, delta=0.1,
+            doc='ARM measured Vout'),
+        LimitBetween('ARM-Fan', 0, 100, doc='ARM fan speed'),
+        LimitPercent('ARM-BattI', batt_current, percent=1.7, delta=1.0,
+            doc='ARM battery current reading'),
+        LimitDelta('ARM-LoadI', load_per_output, delta=0.9,
+            doc='ARM output current reading'),
+        LimitInteger('ARM-RemoteClosed', 1),
+        LimitDelta('CanPwr', vout_set, delta=1.8, doc='CAN bus power supply'),
+        LimitInteger('LOAD_SET', 0x5555555, doc='ARM output load enable setting'),
+        LimitInteger('CAN_BIND', _can_bind, doc='ARM reports CAN bus operational'),
+        LimitRegExp('CAN_RX', '^RRQ,36,0', doc='Response to CAN echo message'),
+        LimitLow('InOCP', vout_set - 1.2, doc='Output is in OCP'),
+        LimitLow('FixtureLock', 200, doc='Test fixture lid microswitch'),
+        )
+    # Variant specific configuration data. Indexed by test program parameter.
+    #   'Limits': Test limits.
+    #   'HwVer': Hardware version data.
+    #   'SolarCan': Enable Solar input & CAN bus tests.
+    #   'Derate': Derate output current.
+    limitdata = {
+        'A': {
+            'Limits': _common + (
+                LimitLow('LOAD_COUNT', output_count_a),
+                LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip range'),
+                ),
+            'LoadCount': 7,
+            'HwVer': (2, 1, 'A'),
+            'SolarCan': False,
+            'Derate': True,
+            },
+        'B': {
+            'Limits': _common + (
+                LimitLow('LOAD_COUNT', output_count_bc),
+                LimitPercent('OCP', ocp_set, (4.0, 7.0), doc='OCP trip range'),
+                ),
+            'LoadCount': 14,
+            'HwVer': (2, 2, 'A'),
+            'SolarCan': False,
+            'Derate': False,
+            },
+        'C': {
+            'Limits': _common + (
+                LimitLow('LOAD_COUNT', output_count_bc),
+                LimitPercent('OCP', ocp_set, (4.0, 7.0), doc='OCP trip range'),
+                ),
+            'LoadCount': 14,
+            'HwVer': (7, 3, 'B'),
+            'SolarCan': True,
+            'Derate': False,
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
-        self.config = CONFIG[self.parameter]
+        self.config = self.limitdata[self.parameter]
         super().open(
             self.config['Limits'], LogicalDevices, Sensors, Measurements)
         self.steps = (
@@ -176,7 +171,7 @@ class Initial(share.TestSequence):
         mes['dmm_lock'](timeout=5)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Apply DC Source to Battery terminals
-        dev['dcs_vbat'].output(VBAT_INJECT, True)
+        dev['dcs_vbat'].output(self.vbat_inject, True)
         self.measure(('dmm_vbatin', 'dmm_3v3u'), timeout=5)
 
     @share.teststep
@@ -197,7 +192,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_aux(self, dev, mes):
         """Test Auxiliary input."""
-        dev['dcs_vaux'].output(AUX_SOLAR_INJECT, True)
+        dev['dcs_vaux'].output(self.aux_solar_inject, True)
         dev['dcl_bat'].output(0.5, True)
         j35 = dev['j35']
         j35['AUX_RELAY'] = True
@@ -209,7 +204,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_solar(self, dev, mes):
         """Test Solar input."""
-        dev['dcs_solar'].output(AUX_SOLAR_INJECT, True)
+        dev['dcs_solar'].output(self.aux_solar_inject, True)
         j35 = dev['j35']
         j35['SOLAR'] = True
         mes['dmm_vair'](timeout=5)
@@ -221,10 +216,10 @@ class Initial(share.TestSequence):
         """Power-Up the Unit with 240Vac."""
         j35 = dev['j35']
         # Complete the change to manual mode
-        j35.manual_mode(vout=VOUT_SET, iout=OCP_SET)
+        j35.manual_mode(vout=self.vout_set, iout=self.ocp_set)
         if self.config['Derate']:
             j35.derate()      # Derate for lower output current
-        dev['acsource'].output(voltage=AC_VOLT, output=True)
+        dev['acsource'].output(voltage=self.ac_volt, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12vpri', 'arm_vout_ov'),
             timeout=5)
@@ -272,12 +267,12 @@ class Initial(share.TestSequence):
         val = mes['arm_loadset']().reading1
         self._logger.debug('0x{:08X}'.format(int(val)))
         load_count = self.config['LoadCount']
-        dev['dcl_out'].binary(1.0, load_count * LOAD_PER_OUTPUT, 5.0)
+        dev['dcl_out'].binary(1.0, load_count * self.load_per_output, 5.0)
         for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
-        j35['BUS_ICAL'] = load_count * LOAD_PER_OUTPUT
-        dev['dcl_bat'].output(BATT_CURRENT, True)
+        j35['BUS_ICAL'] = load_count * self.load_per_output
+        dev['dcl_bat'].output(self.batt_current, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 
     @share.teststep
@@ -294,7 +289,7 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         j35.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
-        j35['CAN'] = CAN_ECHO
+        j35['CAN'] = self.can_echo
         echo_reply = j35.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         rx_can = mes['rx_can']
@@ -328,13 +323,13 @@ class LogicalDevices(share.LogicalDevices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.ProgramARM(
-            ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
+            Initial.arm_port, os.path.join(folder, Initial.arm_file), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the console
         j35_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        j35_ser.port = ARM_PORT
+        j35_ser.port = Initial.arm_port
         # J35 Console driver
         self['j35'] = console.Console(j35_ser)
         # Apply power to fixture circuits.
@@ -404,7 +399,7 @@ class Sensors(share.Sensors):
         for i in range(load_count):
             sen = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
             self['arm_loads'].append(sen)
-        load_current = load_count * LOAD_PER_OUTPUT
+        load_current = load_count * Initial.load_per_output
         low, high = self.limits['OCP'].limit
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_bat'],

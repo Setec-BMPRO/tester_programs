@@ -3,58 +3,52 @@
 """BCE4/5 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitDelta
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
-
-_COMMON = (
-    LimitDelta('AlarmOpen', 10.0, 1.0, doc='Contacts open'),
-    LimitLow('AlarmClosed', 1.0, doc='Contacts closed'),
-    LimitBetween('Dropout', 150.0, 180.0, doc='AC dropout voltage'),
-    )
-
-LIMITS_4 = _COMMON + (
-    LimitBetween('VoutNL', 13.50, 13.80),
-    LimitBetween('Vout', 13.28, 13.80),
-    LimitBetween('Vbat', 13.28, 13.92),
-    LimitLow('inOCP', 13.28),
-    LimitBetween('OCP', 10.2, 13.0),
-    LimitLow('InDropout', 13.28),
-    )
-
-LIMITS_5 = _COMMON + (
-    LimitBetween('VoutNL', 27.00, 27.60),
-    LimitBetween('Vout', 26.56, 27.84),
-    LimitBetween('Vbat', 26.56, 27.84),
-    LimitLow('inOCP', 26.56),
-    LimitBetween('OCP', 5.1, 6.3),
-    LimitLow('InDropout', 26.56),
-    )
-
-LIMITS = {      # Test limit selection keyed by program parameter
-    '4': {
-        'Limits': LIMITS_4,
-        'FullLoad': 10.1,
-        'OCPramp': (10.0, 13.5),
-        },
-    '5': {
-        'Limits': LIMITS_5,
-        'FullLoad': 5.1,
-        'OCPramp': (5.0, 7.0),
-        },
-    }
 
 
 class Final(share.TestSequence):
 
     """BCE4/5 Final Test Program."""
 
+    # Limits common to both versions
+    _common = (
+        LimitDelta('AlarmOpen', 10.0, 1.0, doc='Contacts open'),
+        LimitLow('AlarmClosed', 1.0, doc='Contacts closed'),
+        LimitBetween('Dropout', 150.0, 180.0, doc='AC dropout voltage'),
+        )
+    # Test limit selection keyed by program parameter
+    limitdata = {
+        '4': {
+            'Limits': _common + (
+                LimitBetween('VoutNL', 13.50, 13.80),
+                LimitBetween('Vout', 13.28, 13.80),
+                LimitBetween('Vbat', 13.28, 13.92),
+                LimitLow('inOCP', 13.28),
+                LimitBetween('OCP', 10.2, 13.0),
+                LimitLow('InDropout', 13.28),
+                ),
+            'FullLoad': 10.1,
+            'OCPramp': (10.0, 13.5),
+            },
+        '5': {
+            'Limits': _common + (
+                LimitBetween('VoutNL', 27.00, 27.60),
+                LimitBetween('Vout', 26.56, 27.84),
+                LimitBetween('Vbat', 26.56, 27.84),
+                LimitLow('inOCP', 26.56),
+                LimitBetween('OCP', 5.1, 6.3),
+                LimitLow('InDropout', 26.56),
+                ),
+            'FullLoad': 5.1,
+            'OCPramp': (5.0, 7.0),
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
@@ -80,7 +74,7 @@ class Final(share.TestSequence):
     def _step_full_load(self, dev, mes):
         """Measure outputs at full-load."""
         self.dcload(
-            (('dcl_Vout', LIMITS[self.parameter]['FullLoad']),
+            (('dcl_Vout', self.limitdata[self.parameter]['FullLoad']),
             ('dcl_Vbat', 0.1)), )
         self.measure(('dmm_Vout', 'dmm_Vbat'), timeout=5)
 
@@ -133,7 +127,7 @@ class Sensors(share.Sensors):
         self['oVout'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
         self['oVbat'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self['oAlarm'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.01)
-        ocp_start, ocp_stop = LIMITS[self.parameter]['OCPramp']
+        ocp_start, ocp_stop = Final.limitdata[self.parameter]['OCPramp']
         self['oOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl_Vout'],
             sensor=self['oVout'],

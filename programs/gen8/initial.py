@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
 
     """GEN8 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
         LimitHigh('FanShort', 20),     # Short on fan connector
         LimitLow('FixtureLock', 200),
@@ -71,7 +71,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program, not self.fifo),

@@ -11,7 +11,7 @@ class Safety(share.TestSequence):
 
     """SX-750 Safety Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('gnd', 20, 100),
         LimitBetween('arc', -0.001, 0),
         LimitBetween('acw', 2.0, 4.0),
@@ -19,7 +19,7 @@ class Safety(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Gnd1', self._step_gnd1),
             TestStep('Gnd2', self._step_gnd2),

@@ -13,7 +13,7 @@ class Final(share.TestSequence):
 
     """2040 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('20V', 20.0, 0.4),
         LimitBetween('20Vload', 19.4, 20.4),
         LimitLow('20Voff', 1.0),
@@ -22,7 +22,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('DCPowerOn', self._step_dcpower_on),
             tester.TestStep('DCLoad', self._step_dcload),

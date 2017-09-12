@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """SX-750 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('InRes', 70000, 10000),
         LimitLow('IECoff', 0.5),
         LimitDelta('IEC', 240, 5),
@@ -30,7 +30,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('InputRes', self._step_inres),
             TestStep('PowerUp', self._step_powerup),

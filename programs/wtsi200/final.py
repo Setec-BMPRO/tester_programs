@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """WTSI200 Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('T1level1', 3.0, 3.5),
         LimitBetween('T2level1', 3.0, 3.5),
         LimitBetween('T3level1', 3.0, 3.5),
@@ -23,7 +23,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerOn', self._step_power_on),
             TestStep('Tank1', self._step_tank1),

@@ -7,15 +7,16 @@ import tester
 from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
 import share
 
-_LDD_6_ERROR_LIMITS = 0.07
-_LDD_50_ERROR_LIMITS = 0.7
-
 
 class InitialMain(share.TestSequence):
 
     """IDS-500 Initial Main Test Program."""
 
-    limits = (
+    # LDD limit values
+    _ldd_6_error_limits = 0.07
+    _ldd_50_error_limits = 0.7
+    # Test limits
+    limitdata = (
         LimitDelta('PfcOff', 340.0, 10.0),
         LimitBetween('PfcOn', 395.0, 410.0),
         LimitLow('TecOff', 1.5),
@@ -50,9 +51,9 @@ class InitialMain(share.TestSequence):
         LimitDelta('IsSet06V', 0.60, 0.05),
         LimitDelta('IsSet5V', 5.00, 0.05),
         # these 3 are patched and then restored during the LDD accuracy test
-        LimitDelta('SetMonErr', 0, _LDD_6_ERROR_LIMITS),
-        LimitDelta('SetOutErr', 0, _LDD_6_ERROR_LIMITS),
-        LimitDelta('MonOutErr', 0, _LDD_6_ERROR_LIMITS),
+        LimitDelta('SetMonErr', 0, _ldd_6_error_limits),
+        LimitDelta('SetOutErr', 0, _ldd_6_error_limits),
+        LimitDelta('MonOutErr', 0, _ldd_6_error_limits),
         LimitBetween('OCP5V', 7.0, 10.0),
         LimitLow('inOCP5V', 4.0),
         LimitBetween('OCP15Vp', 7.0, 10.0),
@@ -64,7 +65,7 @@ class InitialMain(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_pwr_up),
             TestStep('KeySw1', self._step_key_sw1),
@@ -175,12 +176,12 @@ class InitialMain(share.TestSequence):
                 patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
                 for name in patch_limits:
                     self.limits[name].limit = (
-                    -_LDD_50_ERROR_LIMITS, _LDD_50_ERROR_LIMITS)
+                    -self._ldd_50_error_limits, self._ldd_50_error_limits)
                 self._ldd_err(mes, Iset, Iout, Imon)
             finally:    # Restore the limits for 6A checks
                 for name in patch_limits:
                     self.limits[name].limit = (
-                    -_LDD_6_ERROR_LIMITS, _LDD_6_ERROR_LIMITS)
+                    -self._ldd_6_error_limits, self._ldd_6_error_limits)
             mes['ui_YesNoLddRed']()
         # LDD off
         dev['dcs_isset'].output(0.0, False)

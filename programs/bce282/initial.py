@@ -7,89 +7,82 @@ import os
 import inspect
 import time
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitDelta, LimitPercent
-    )
+from tester import TestStep, LimitLow, LimitBetween, LimitDelta, LimitPercent
 import share
 from . import console
 from . import tosbsl
 
-# Serial port for programming MSP430.
-MSP_PORT1 = share.port('020827', 'MSP1')
 # Serial port used by MSP430 comms module.
 MSP_PORT2 = share.port('020827', 'MSP2')
-# Calibration data save file (TI Text format)
-MSP_SAVEFILE = {    # Needs to be writable by the tester login
-    'posix': '/home/setec/testdata/bslsavedata.txt',
-    'nt': r'C:\TestGear\TestData\bslsavedata.txt',
-    }[os.name]
-# Password data save file
-MSP_PASSWORD = {    # Needs to be writable by the tester login
-    'posix': '/home/setec/testdata/bslpassword.txt',
-    'nt': r'C:\TestGear\TestData\bslpassword.txt',
-    }[os.name]
-# Factor to tighten the calibration check
-_CAL_FACTOR = 0.5
-
-_COMMON = (
-    LimitLow('FixtureLock', 200),
-    LimitDelta('VccBiasExt', 15.0, 1.0),
-    LimitDelta('Vac', 240.0, 5.0),
-    LimitBetween('Vbus', 330.0, 350.0),
-    LimitPercent('VccPri', 15.6, 5.0),
-    LimitPercent('VccBias', 15.0, 13.0),
-    LimitLow('VbatOff', 0.5),
-    LimitBetween('AlarmClosed', 1000, 3000),
-    LimitBetween('AlarmOpen', 11000, 13000),
-    LimitBetween('Status 0', -0.1, 0.1),
-    )
-
-LIMITS_12 = _COMMON + (
-    LimitBetween('OutOCP', 20.05, 24.00),
-    LimitBetween('BattOCP', 14.175, 15.825),
-    LimitLow('InOCP', 13.0),
-    LimitPercent('VoutPreCal', 13.8, 2.6),
-    LimitDelta('VoutPostCal', 13.8, _CAL_FACTOR * 0.15),
-    LimitBetween('MspVout', 13.0, 14.6),
-    )
-
-LIMITS_24 = _COMMON + (
-    LimitBetween('OutOCP', 10.0, 12.0),
-    LimitBetween('BattOCP', 6.0, 9.0),
-    LimitLow('InOCP', 26.0),
-    LimitPercent('VoutPreCal', 27.6, 2.6),
-    LimitDelta('VoutPostCal', 27.6, _CAL_FACTOR * 0.25),
-    LimitBetween('MspVout', 26.0, 29.2),
-    )
-
-# ScaleFactor: 24V model responds with 12V output to measurement "msp_vout"
-# and is designed to be calibrated with half its measured output voltage.
-LIMITS = {      # Test limit selection keyed by program parameter
-    '12': {
-        'Limits': LIMITS_12,
-        'LoadRatio': (20, 14),      # Iout:Ibat
-        'ScaleFactor': 1000,
-        'HexFile': 'bce282_12_3a.txt' # TI Text format
-
-        },
-    '24': {
-        'Limits': LIMITS_24,
-        'LoadRatio': (10, 6),       # Iout:Ibat
-        'ScaleFactor': 500,
-        'HexFile': 'bce282_3a.txt' # TI Text format
-        },
-    }
 
 
 class Initial(share.TestSequence):
 
     """BCE282-12/24 Initial Test Program."""
 
+    # Serial port for programming MSP430.
+    msp_port1 = share.port('020827', 'MSP1')
+    # Calibration data save file (TI Text format)
+    msp_savefile = {    # Needs to be writable by the tester login
+        'posix': '/home/setec/testdata/bslsavedata.txt',
+        'nt': r'C:\TestGear\TestData\bslsavedata.txt',
+        }[os.name]
+    # Password data save file
+    msp_password = {    # Needs to be writable by the tester login
+        'posix': '/home/setec/testdata/bslpassword.txt',
+        'nt': r'C:\TestGear\TestData\bslpassword.txt',
+        }[os.name]
+    # Factor to tighten the calibration check
+    _cal_factor = 0.5
+    # Limits common to both versions
+    _common = (
+        LimitLow('FixtureLock', 200),
+        LimitDelta('VccBiasExt', 15.0, 1.0),
+        LimitDelta('Vac', 240.0, 5.0),
+        LimitBetween('Vbus', 330.0, 350.0),
+        LimitPercent('VccPri', 15.6, 5.0),
+        LimitPercent('VccBias', 15.0, 13.0),
+        LimitLow('VbatOff', 0.5),
+        LimitBetween('AlarmClosed', 1000, 3000),
+        LimitBetween('AlarmOpen', 11000, 13000),
+        LimitBetween('Status 0', -0.1, 0.1),
+        )
+    # ScaleFactor: 24V model responds with 12V output to measurement "msp_vout"
+    # and is designed to be calibrated with half its measured output voltage.
+    limitdata = {      # Test limit selection keyed by program parameter
+        '12': {
+            'Limits': _common + (
+                LimitBetween('OutOCP', 20.05, 24.00),
+                LimitBetween('BattOCP', 14.175, 15.825),
+                LimitLow('InOCP', 13.0),
+                LimitPercent('VoutPreCal', 13.8, 2.6),
+                LimitDelta('VoutPostCal', 13.8, _cal_factor * 0.15),
+                LimitBetween('MspVout', 13.0, 14.6),
+                ),
+            'LoadRatio': (20, 14),      # Iout:Ibat
+            'ScaleFactor': 1000,
+            'HexFile': 'bce282_12_3a.txt' # TI Text format
+
+            },
+        '24': {
+            'Limits': _common + (
+                LimitBetween('OutOCP', 10.0, 12.0),
+                LimitBetween('BattOCP', 6.0, 9.0),
+                LimitLow('InOCP', 26.0),
+                LimitPercent('VoutPreCal', 27.6, 2.6),
+                LimitDelta('VoutPostCal', 27.6, _cal_factor * 0.25),
+                LimitBetween('MspVout', 26.0, 29.2),
+                ),
+            'LoadRatio': (10, 6),       # Iout:Ibat
+            'ScaleFactor': 500,
+            'HexFile': 'bce282_3a.txt' # TI Text format
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            LIMITS[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
@@ -98,7 +91,8 @@ class Initial(share.TestSequence):
             TestStep('Calibration', self._step_cal),
             TestStep('OCP', self._step_ocp),
             )
-        self.devices['msp'].scaling(LIMITS[self.parameter]['ScaleFactor'])
+        self.devices['msp'].scaling(
+            self.limitdata[self.parameter]['ScaleFactor'])
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -138,7 +132,7 @@ class Initial(share.TestSequence):
             msp.measurement_fail_on_error = False
             password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
             if not self.fifo:
-                with open(MSP_PASSWORD, 'w') as fout:
+                with open(self.msp_password, 'w') as fout:
                     fout.write(password)
         except share.console.protocol.ConsoleError:
             pass
@@ -148,31 +142,31 @@ class Initial(share.TestSequence):
         dev['rla_prog'].set_on()
         # STEP 1 - SAVE INTERNAL CALIBRATION
         sys.argv = (['',
-            '--comport={0}'.format(MSP_PORT1), ] +
-            (['-P', MSP_PASSWORD, ] if password else []) +
+            '--comport={0}'.format(self.msp_port1), ] +
+            (['-P', self.msp_password, ] if password else []) +
             ['--upload=0x10C0', '--size=64', '--ti', ]
             )
         tosbsl.main()
         # Write TI Text format calibration data to a file for use later
         if not self.fifo:
-            with open(MSP_SAVEFILE, 'w') as fout:
+            with open(self.msp_savefile, 'w') as fout:
                 for aline in tosbsl.SAVEDATA:
                     fout.write(aline)
                     fout.write('\n')
         # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
         sys.argv = ['',
-            '--comport={0}'.format(MSP_PORT1),
+            '--comport={0}'.format(self.msp_port1),
             '--masserase',
-            '--program', MSP_SAVEFILE,
+            '--program', self.msp_savefile,
             ]
         tosbsl.main()
         # STEP 3 - PROGRAM
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         sys.argv = ['',
-            '--comport={0}'.format(MSP_PORT1),
+            '--comport={0}'.format(self.msp_port1),
             '--program', os.path.join(folder,
-                LIMITS[self.parameter]['HexFile']),
+                self.limitdata[self.parameter]['HexFile']),
             ]
         tosbsl.main()
         dev['rla_prog'].set_off()

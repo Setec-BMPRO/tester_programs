@@ -11,7 +11,7 @@ class Initial(share.TestSequence):
 
     """C15A-15 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('AcMin', 85, 95),
         LimitBetween('VbusMin', 120, 135),
         LimitBetween('VccMin', 7, 14),
@@ -29,7 +29,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('Power90', self._step_power_90),
             TestStep('Power240', self._step_power_240),

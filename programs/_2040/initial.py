@@ -11,7 +11,7 @@ class Initial(share.TestSequence):
 
     """2040 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('VccAC', 9.0, 16.5),
         LimitBetween('VccDC', 7.8, 14.0),
         LimitDelta('VbusMin', 130.0, 10.0),
@@ -36,7 +36,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('SecCheck', self._step_sec_check),

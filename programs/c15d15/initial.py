@@ -20,7 +20,7 @@ class Initial(share.TestSequence):
 
     """C15D-15 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('Vin', VIN_SET, 2.0),
         LimitBetween('Vcc', 11.0, 14.0),
         LimitPercent('VoutNL', VOUT, 2.0),
@@ -34,7 +34,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('OCP', self._step_ocp),

@@ -17,7 +17,7 @@ class Final(share.TestSequence):
     """Trek2 Final Test Program."""
 
     bin_version = '1.5.15833.150'   # Software binary version
-    limits = (
+    limitdata = (
         LimitRegExp('SwVer', '^{0}$'.format(bin_version.replace('.', r'\.'))),
         LimitInteger('ARM-level1', 1),
         LimitInteger('ARM-level2', 2),
@@ -27,7 +27,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('TunnelOpen', self._step_tunnel_open),

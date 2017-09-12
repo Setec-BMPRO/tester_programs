@@ -5,61 +5,56 @@
 
 import tester
 import share
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitDelta, LimitPercent
-    )
-
-# Load on each output channel
-LOAD_PER_OUTPUT = 2.0
-
-_COMMON = (
-    LimitLow('FanOff', 1.0, doc='No airflow seen'),
-    LimitHigh('FanOn', 10.0, doc='Airflow seen'),
-    LimitDelta('Vout', 12.8, delta=0.2, doc='No load output voltage'),
-    LimitPercent('Vload', 12.8, percent=5, doc='Loaded output voltage'),
-    LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
-    )
-
-LIMITS_A = _COMMON + (
-    LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip current'),
-    )
-
-LIMITS_BC = _COMMON + (
-    LimitPercent('OCP', 35.0, (4.0, 7.0), doc='OCP trip current'),
-    )
-
-CONFIG = {      # Test configuration keyed by program parameter
-    'A': {
-        'Limits': LIMITS_A,
-        'LoadCount': 7,
-        },
-    'B': {
-        'Limits': LIMITS_BC,
-        'LoadCount': 14,
-        },
-    'C': {
-        'Limits': LIMITS_BC,
-        'LoadCount': 14,
-        },
-    }
+from tester import TestStep, LimitLow, LimitHigh, LimitDelta, LimitPercent
 
 
 class Final(share.TestSequence):
 
     """J35 Final Test Program."""
 
+    # Load on each output channel
+    load_per_output = 2.0
+    # Test limits common to all versions
+    _common = (
+        LimitLow('FanOff', 1.0, doc='No airflow seen'),
+        LimitHigh('FanOn', 10.0, doc='Airflow seen'),
+        LimitDelta('Vout', 12.8, delta=0.2, doc='No load output voltage'),
+        LimitPercent('Vload', 12.8, percent=5, doc='Loaded output voltage'),
+        LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
+        )
+    # Test limits common to the -B and -C versions
+    limits_bc = (
+        LimitPercent('OCP', 35.0, (4.0, 7.0), doc='OCP trip current'),
+        )
+    # Test configuration keyed by program parameter
+    limitdata = {
+        'A': {
+            'Limits': _common + (
+                LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip current'),
+                ),
+            'LoadCount': 7,
+            },
+        'B': {
+            'Limits': _common + limits_bc,
+            'LoadCount': 14,
+            },
+        'C': {
+            'Limits': _common + limits_bc,
+            'LoadCount': 14,
+            },
+        }
+
     def open(self):
         """Prepare for testing."""
         super().open(
-            CONFIG[self.parameter]['Limits'],
+            self.limitdata[self.parameter]['Limits'],
             LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_powerup),
             TestStep('Load', self._step_load),
             TestStep('OCP', self._step_ocp),
             )
-        self.load_count = CONFIG[self.parameter]['LoadCount']
+        self.load_count = self.limitdata[self.parameter]['LoadCount']
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -75,7 +70,7 @@ class Final(share.TestSequence):
     def _step_load(self, dev, mes):
         """Test outputs with load."""
         dev['dcl_out'].output(1.0,  output=True)
-        dev['dcl_out'].binary(1.0, self.load_count * LOAD_PER_OUTPUT, 5.0)
+        dev['dcl_out'].binary(1.0, self.load_count * self.load_per_output, 5.0)
         for load in range(self.load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vloads'][load](timeout=5)
@@ -125,7 +120,7 @@ class Sensors(share.Sensors):
         self['photo'].doc = 'Airflow detector'
         # Generate load voltage sensors
         vloads = []
-        for i in range(CONFIG[self.parameter]['LoadCount']):
+        for i in range(Final.limitdata[self.parameter]['LoadCount']):
             s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
             s.doc = 'Output #{0}'.format(i + 1)
             vloads.append(s)

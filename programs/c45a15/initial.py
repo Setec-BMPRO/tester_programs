@@ -15,7 +15,7 @@ class Initial(share.TestSequence):
 
     """C45A-15 Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('VacStart', 95.0, 3.0),
         LimitDelta('Vac', 240.0, 5.0),
         LimitDelta('Vbus', 340.0, 10.0),
@@ -47,7 +47,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('SecCheck', self._step_sec_check),

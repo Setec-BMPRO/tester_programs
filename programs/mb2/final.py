@@ -14,14 +14,14 @@ class Final(share.TestSequence):
     vstart = 12.9
     vstop = 9.1
 
-    limits = (
+    limitdata = (
         LimitBetween('Vin', 9.0, 13.0),
         LimitPercent('Vout', 14.4, 3.0),
         )
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerOn', self._step_power_on),
             )

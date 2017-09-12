@@ -12,18 +12,18 @@ from tester import (
 import share
 from . import console
 
-# Serial port for the PIC.
-PIC_PORT = share.port('017048', 'PIC')
-
-_LDD_6_ERROR_LIMITS = 0.07
-_LDD_50_ERROR_LIMITS = 0.7
-
 
 class Final(share.TestSequence):
 
     """IDS-500 Final Test Programes."""
 
-    limits = (
+    # Serial port for the PIC.
+    pic_port = share.port('017048', 'PIC')
+    # LDD limit values
+    _ldd_6_error_limits = 0.07
+    _ldd_50_error_limits = 0.7
+    # Test limits
+    limitdata = (
         LimitLow('TecOff', 1.5),
         LimitLow('TecVmonOff', 1.5),
         LimitLow('LddOff', 1.5),
@@ -56,15 +56,15 @@ class Final(share.TestSequence):
         LimitDelta('IsSet06V', 0.60, 0.05),
         LimitDelta('IsSet5V', 5.00, 0.05),
         # these 3 are patched and then restored during the LDD accuracy test
-        LimitDelta('SetMonErr', 0, _LDD_6_ERROR_LIMITS),
-        LimitDelta('SetOutErr', 0, _LDD_6_ERROR_LIMITS),
-        LimitDelta('MonOutErr', 0, _LDD_6_ERROR_LIMITS),
+        LimitDelta('SetMonErr', 0, _ldd_6_error_limits),
+        LimitDelta('SetOutErr', 0, _ldd_6_error_limits),
+        LimitDelta('MonOutErr', 0, _ldd_6_error_limits),
         LimitRegExp('HwRev', r'^[0-9]{2}[AB]$'),
         )
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_pwr_up),
             TestStep('KeySw1', self._step_key_sw1),
@@ -171,12 +171,12 @@ class Final(share.TestSequence):
                 patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
                 for name in patch_limits:
                     self.limits[name].limit = (
-                        -_LDD_50_ERROR_LIMITS, _LDD_50_ERROR_LIMITS)
+                        -self._ldd_50_error_limits, self._ldd_50_error_limits)
                 self._ldd_err(mes, Iset, Iout, Imon)
             finally:    # Restore the limits for 6A checks
                 for name in patch_limits:
                     self.limits[name].limit = (
-                        -_LDD_6_ERROR_LIMITS, _LDD_6_ERROR_LIMITS)
+                        -self._ldd_6_error_limits, self._ldd_6_error_limits)
             mes['ui_YesNoLddRed']()
         # LDD off
         dev['dcs_isset'].output(0.0, False)
@@ -272,7 +272,7 @@ class LogicalDevices(share.LogicalDevices):
         pic_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = PIC_PORT
+        pic_ser.port = Final.pic_port
         self['pic'] = console.Console(pic_ser)
 
     def reset(self):

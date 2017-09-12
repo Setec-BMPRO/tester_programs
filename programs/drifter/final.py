@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """Drifter Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitLow('SwOff', 1.0),
         LimitHigh('SwOn', 10.0),
         LimitDelta('USB5V', 5.00, 0.25),
@@ -19,7 +19,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('DisplayCheck', self._step_displ_check),
             TestStep('SwitchCheck', self._step_sw_check),

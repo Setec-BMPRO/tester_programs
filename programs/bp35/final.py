@@ -11,13 +11,13 @@ class Final(share.TestSequence):
 
     """BP35 Final Test Program."""
 
-    limits = (
+    limitdata = (
         tester.LimitDelta('Vbat', 12.8, 0.2),
         )
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
             )

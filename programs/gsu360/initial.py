@@ -11,7 +11,7 @@ class Initial(share.TestSequence):
 
     """GSU360-1TA Initial Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('ACin', 90, 5),
         LimitBetween('PFC', 389.0, 415.0),
         LimitBetween('PriCtl', 12.0, 14.0),
@@ -28,7 +28,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('PowerUp', self._step_power_up),

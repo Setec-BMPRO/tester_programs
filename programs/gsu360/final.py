@@ -11,7 +11,7 @@ class Final(share.TestSequence):
 
     """GSU360-1TA Final Test Program."""
 
-    limits = (
+    limitdata = (
         LimitBetween('24V', 23.40, 24.60),
         LimitLow('24Vinocp', 23.4),
         LimitBetween('24Vocp', 15.5, 20.0),
@@ -20,7 +20,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('FullLoad', self._step_full_load),

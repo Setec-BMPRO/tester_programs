@@ -10,7 +10,7 @@ class Main(share.TestSequence):
 
     """Selfchecker Test Program."""
 
-    limits = (
+    limitdata = (
         LimitDelta('12V', 12.0, 0.5),
         LimitDelta('5V', 5.0, 0.5),
         LimitDelta('ShieldOFF', 6.0, 0.5),
@@ -37,7 +37,7 @@ class Main(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limits, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
         is_ate2 = self.devices.is_ate2
         self.steps = (
             TestStep('ACSource', self._step_acsource),
