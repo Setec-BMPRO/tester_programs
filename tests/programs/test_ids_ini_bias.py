@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for SMU750-70 Final Test program."""
+"""UnitTest for IDS500 Bias Initial Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import smu75070
+from programs import ids500
 
 
-class SMU750Final(ProgramTestCase):
+class Ids500InitialBias(ProgramTestCase):
 
-    """SMU750-70 Final program test suite."""
+    """IDS500 Bias Initial program test suite."""
 
-    prog_class = smu75070.Final
+    prog_class = ids500.InitialBias
     parameter = None
     debug = False
 
@@ -20,16 +20,11 @@ class SMU750Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['o70V'], 70.0), (sen['oYesNoFan'], True),
-                    ),
-                'FullLoad': (
-                    (sen['o70V'], 70.0),
+                    (sen['olock'], 0.0), (sen['o400V'], 400.0),
+                    (sen['oPVcc'], 14.0),
                     ),
                 'OCP': (
-                    (sen['o70V'], (70.0, ) * 15 + (69.2, ), ),
-                    ),
-                'Shutdown': (
-                    (sen['o70V'], (10.0, 70.0)),
+                    (sen['o12Vsbraw'], (13.0, ) * 4 + (12.5, 0.0), ),
                     ),
                 },
             }
@@ -38,6 +33,4 @@ class SMU750Final(ProgramTestCase):
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
         self.assertEqual(6, len(result.readings))
-        self.assertEqual(
-            ['PowerUp', 'FullLoad', 'OCP', 'Shutdown'],
-            self.tester.ut_steps)
+        self.assertEqual(['PowerUp', 'OCP'], self.tester.ut_steps)

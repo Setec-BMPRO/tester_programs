@@ -14,12 +14,6 @@ class Ids500Final(ProgramTestCase):
     parameter = None
     debug = False
 
-    def _arm_loads(self, value):
-        """Fill all ARM Load sensors with a value."""
-        sen = self.test_program.sensors
-        for sensor in sen.arm_loads:
-            sensor.store(value)
-
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
@@ -84,9 +78,8 @@ class Ids500Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push, dev['pic'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(70, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(70, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD',
              'Comms', 'EmergStop'],

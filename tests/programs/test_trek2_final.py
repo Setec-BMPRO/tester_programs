@@ -74,9 +74,8 @@ class Trek2Final(ProgramTestCase):
         self.real_tunnel_puts = dev['tunnel'].port.puts
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(19, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(19, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'TunnelOpen', 'Display', 'Tanks'],
             self.tester.ut_steps)

@@ -63,9 +63,8 @@ class BatteryCheckInitial(ProgramTestCase):
             dev['arm'].puts, dev['bt'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(11, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(11, len(result.readings))
         self.assertEqual(
             ['PreProgram', 'InitialiseARM', 'ARM', 'BlueTooth'],
             self.tester.ut_steps)

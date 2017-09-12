@@ -33,9 +33,6 @@ class TRSFinal(ProgramTestCase):
             data, self.test_program.fifo_push, dev['trs2'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(4, len(result.readings))  # Reading count
-        # And did all steps run in turn?
-        self.assertEqual(
-            ['Prepare', 'Bluetooth', ],
-            self.tester.ut_steps)
+        self.assertEqual('P', result.code)
+        self.assertEqual(4, len(result.readings))
+        self.assertEqual(['Prepare', 'Bluetooth', ], self.tester.ut_steps)

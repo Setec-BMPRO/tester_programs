@@ -40,9 +40,8 @@ class UNI750Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(18, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(18, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PowerOn', 'FullLoad'],
             self.tester.ut_steps)

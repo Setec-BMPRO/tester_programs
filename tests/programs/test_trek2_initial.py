@@ -41,8 +41,7 @@ class Trek2Initial(ProgramTestCase):
             data, self.test_program.fifo_push, dev['trek2'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(6, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(6, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'TestArm', 'CanBus'], self.tester.ut_steps)

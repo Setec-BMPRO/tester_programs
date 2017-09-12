@@ -27,8 +27,7 @@ class InitialMicro(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(
-            self.limitdata, LogicalDevMicro, SensorMicro, MeasureMicro)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Program', self._step_program, not self.fifo),
             TestStep('Comms', self._step_comms),
@@ -37,7 +36,6 @@ class InitialMicro(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Apply Vcc and program the board."""
-#        self.fifo_push(((s.Vsec5VuP, 5.0), ))
         dev['dcs_vcc'].output(5.0, True)
         mes['dmm_vsec5VuP'](timeout=5)
         dev['program_picMic'].program()
@@ -45,14 +43,6 @@ class InitialMicro(share.TestSequence):
     @share.teststep
     def _step_comms(self, dev, mes):
         """Communicate with the PIC console."""
-#        for str in (
-#                ('', ) +
-#                ('M,1,Incorrectformat!Type?.?forhelp', ) +
-#                ('M,3,UnknownCommand!Type?.?forhelp', ) +
-#                ('2', ) +
-#                ('MICRO Temp', )
-#                ):
-#            d.pic.puts(str)
         pic = dev['pic']
         pic.open()
         pic.clear_port()
@@ -60,12 +50,12 @@ class InitialMicro(share.TestSequence):
         self.measure(('swrev', 'microtemp', ))
 
 
-class LogicalDevMicro(share.LogicalDevices):
+class Devices(share.LogicalDevices):
 
-    """Micro Logical Devices."""
+    """Micro Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -78,7 +68,7 @@ class LogicalDevMicro(share.LogicalDevices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_picMic'] = share.ProgramPIC(
-            InitialMicro.pic_hex_mic, folder, '18F4520', self.rla_mic)
+            InitialMicro.pic_hex_mic, folder, '18F4520', self['rla_mic'])
         # Serial connection to the console
         pic_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=19200, timeout=2.0)
@@ -95,7 +85,7 @@ class LogicalDevMicro(share.LogicalDevices):
         self['rla_mic'].set_off()
 
 
-class SensorMicro(share.Sensors):
+class Sensors(share.Sensors):
 
     """Micro Sensors."""
 
@@ -111,7 +101,7 @@ class SensorMicro(share.Sensors):
                 pic, 'PIC-MicroTemp', rdgtype=sensor.ReadingString)
 
 
-class MeasureMicro(share.Measurements):
+class Measurements(share.Measurements):
 
     """Micro Measurements."""
 

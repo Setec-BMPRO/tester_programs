@@ -47,9 +47,8 @@ class RvViewInitial(ProgramTestCase):
             data, self.test_program.fifo_push, dev['rvview'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(10, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(10, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'Initialise', 'Display', 'CanBus'],
             self.tester.ut_steps)

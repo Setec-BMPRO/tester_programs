@@ -93,9 +93,8 @@ class CMRSBPInitial(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(15, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(15, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'CheckPicValues', 'CheckVcharge',
              'CalBQvolts', 'CalBQcurrent'],
@@ -138,9 +137,8 @@ class CMRSBPSerialDate(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(2, len(result.readings))   # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(2, len(result.readings))
         self.assertEqual(['SerialDate'], self.tester.ut_steps)
         # Check S/N & Date were written
         self.myev.sn_date.assert_called_once_with(
@@ -183,9 +181,8 @@ class _CMRSBPFin(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(13, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(13, len(result.readings))
         self.assertEqual(['Startup', 'Verify'], self.tester.ut_steps)
         # Access to the CMR data driver
         self.mycmr.read.assert_called_once_with()

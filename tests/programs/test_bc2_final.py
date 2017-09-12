@@ -48,9 +48,6 @@ class BC2Final(ProgramTestCase):
             dev['ble'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(3, len(result.readings))   # Reading count
-        # And did all steps run in turn?
-        self.assertEqual(
-            ['Bluetooth', 'Cal'],
-            self.tester.ut_steps)
+        self.assertEqual('P', result.code)
+        self.assertEqual(3, len(result.readings))
+        self.assertEqual(['Bluetooth', 'Cal'], self.tester.ut_steps)

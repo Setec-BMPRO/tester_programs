@@ -37,9 +37,8 @@ class _2040Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(12, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
             ['DCPowerOn', 'DCLoad', 'ACPowerOn', 'ACLoad', 'Recover'],
             self.tester.ut_steps)
@@ -65,6 +64,6 @@ class _2040Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('F', result.code)      # Must have failed
+        self.assertEqual('F', result.code)
         self.assertEqual(1, len(result.readings))
         self.assertEqual(['DCPowerOn'], self.tester.ut_steps)

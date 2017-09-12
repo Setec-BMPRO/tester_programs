@@ -89,9 +89,8 @@ class SX750Initial(ProgramTestCase):
             dev['arm'].puts, dev['ard'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(53, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(53, len(result.readings))
         self.assertEqual(
             ['PartDetect', 'Program', 'Initialise', 'PowerUp',
              '5Vsb', '12V', '24V', 'PeakPower'],

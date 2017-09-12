@@ -18,9 +18,8 @@ class _BCE282Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
+        self.assertEqual('P', result.code)
         self.assertEqual(10, len(result.readings))
-        # And did all steps run in turn?
         self.assertEqual(['PowerUp', 'FullLoad', 'OCP'], self.tester.ut_steps)
 
 
@@ -37,19 +36,19 @@ class BCE282_12_Final(_BCE282Final):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['Alarm'], (10, 10000)), 
+                    (sen['Alarm'], (10, 10000)),
                     (sen['Vout'], (13.6, 13.55)),
                     (sen['Vbat'], 13.3),
-                    ), 
+                    ),
                 'FullLoad': (
                     (sen['YesNoGreen'], True),
                     (sen['Vout'], 13.4),
                     (sen['Vbat'], 13.3),
-                    ), 
+                    ),
                 'OCP': (
                     (sen['Vout'], (13.4, ) * 15 + (13.0, ), ),
                     (sen['Vbat'], (13.4, ) * 15 + (13.0, ), ),
-                    ), 
+                    ),
                 },
             }
         super()._pass_run(data)
@@ -68,19 +67,19 @@ class BCE282_24_Final(_BCE282Final):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['Alarm'], (10, 10000)), 
+                    (sen['Alarm'], (10, 10000)),
                     (sen['Vout'], (27.6, 27.6)),
                     (sen['Vbat'], 27.5),
-                    ), 
+                    ),
                 'FullLoad': (
                     (sen['YesNoGreen'], True),
                     (sen['Vout'], 27.2),
                     (sen['Vbat'], 27.1),
-                    ), 
+                    ),
                 'OCP': (
                     (sen['Vout'], (27.3, ) * 8 + (26.0, ), ),
                     (sen['Vbat'], (27.3, ) * 8 + (26.0, ), ),
-                    ), 
+                    ),
                 },
             }
         super()._pass_run(data)

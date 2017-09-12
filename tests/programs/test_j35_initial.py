@@ -111,9 +111,8 @@ class _J35Initial(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push, dev['j35'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('P', result.code)          # Test Result
-        self.assertEqual(rdg_count, len(result.readings))  # Reading count
-        # And did all steps run in turn?
+        self.assertEqual('P', result.code)
+        self.assertEqual(rdg_count, len(result.readings))
         self.assertEqual(steps, self.tester.ut_steps)
 
     def _fail_run(self):
@@ -130,7 +129,7 @@ class _J35Initial(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
-        self.assertEqual('F', result.code)          # Must have failed
+        self.assertEqual('F', result.code)
         self.assertEqual(3, len(result.readings))
         self.assertEqual(['Prepare'], self.tester.ut_steps)
 
