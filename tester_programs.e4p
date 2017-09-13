@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-09-13, 09:36:06 -->
+<!-- Saved: 2017-09-13, 10:06:44 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -189,6 +189,7 @@
     <Source>tests/programs/test_gsu360_final.py</Source>
     <Source>tests/programs/test_gsu360_initial.py</Source>
     <Source>tests/programs/test_ids_final.py</Source>
+    <Source>tests/programs/test_ids_ini_aux.py</Source>
     <Source>tests/programs/test_ids_ini_bias.py</Source>
     <Source>tests/programs/test_ids_ini_main.py</Source>
     <Source>tests/programs/test_ids_ini_micro.py</Source>

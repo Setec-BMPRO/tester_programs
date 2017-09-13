@@ -37,6 +37,7 @@ from . import test_genius2_initial
 from . import test_gsu360_final
 from . import test_gsu360_initial
 from . import test_ids_final
+from . import test_ids_ini_aux
 from . import test_ids_ini_bias
 from . import test_ids_ini_main
 from . import test_ids_ini_micro
@@ -99,8 +100,9 @@ __all__ = [
     'test_gsu360_final',
     'test_gsu360_initial',
     'test_ids_final',
-    'test_ids_ini_main',
+    'test_ids_ini_aux',
     'test_ids_ini_bias',
+    'test_ids_ini_main',
     'test_ids_ini_micro',
     'test_j35_final',
     'test_j35_initial',
