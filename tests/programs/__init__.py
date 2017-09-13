@@ -42,6 +42,7 @@ from . import test_ids_ini_bias
 from . import test_ids_ini_bus
 from . import test_ids_ini_main
 from . import test_ids_ini_micro
+from . import test_ids_ini_syn
 from . import test_j35_final
 from . import test_j35_initial
 from . import test_mb2_final
@@ -106,6 +107,7 @@ __all__ = [
     'test_ids_ini_bus',
     'test_ids_ini_main',
     'test_ids_ini_micro',
+    'test_ids_ini_syn',
     'test_j35_final',
     'test_j35_initial',
     'test_mb2_final',
