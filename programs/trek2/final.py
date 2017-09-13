@@ -27,7 +27,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('TunnelOpen', self._step_tunnel_open),
@@ -72,12 +72,12 @@ class Final(share.TestSequence):
         tester.MeasureGroup(mes['arm_level4'], timeout=12)
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 # Power USB devices + Fixture Trek2.

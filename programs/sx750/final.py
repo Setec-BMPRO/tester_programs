@@ -30,7 +30,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('InputRes', self._step_inres),
             TestStep('PowerUp', self._step_powerup),
@@ -79,12 +79,12 @@ class Final(share.TestSequence):
             self.measure(('reg12v', 'reg24v', ))
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),

@@ -75,10 +75,10 @@ class InitialBus(tester.TestSequence):
 
 class LogicalDevBus():
 
-    """Bus Logical Devices."""
+    """Bus Devices."""
 
     def __init__(self, devices, fifo):
-        """Create all Logical Instruments.
+        """Create all Instruments.
 
            @param devices Physical instruments of the Tester
 

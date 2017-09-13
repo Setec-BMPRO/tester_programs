@@ -21,7 +21,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('FuseCheck', self._step_fuse_check),
             TestStep('PowerUp', self._step_power_up),
@@ -70,12 +70,12 @@ class Final(share.TestSequence):
             ('ui_NotifyMains', 'dmm_12Voff', 'ui_YesNoOff'), timeout=5)
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),

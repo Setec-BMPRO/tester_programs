@@ -36,7 +36,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('SecCheck', self._step_sec_check),
@@ -101,12 +101,12 @@ class Initial(share.TestSequence):
             ('dmm_ACtyp', 'dmm_VccAC', 'dmm_Vout', 'ramp_OCP'), timeout=5)
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
             ('dmm', tester.DMM, 'DMM'),

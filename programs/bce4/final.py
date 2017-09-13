@@ -49,7 +49,7 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         super().open(
             self.limitdata[self.parameter]['Limits'],
-            LogicalDevices, Sensors, Measurements)
+            Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('FullLoad', self._step_full_load),
@@ -91,12 +91,12 @@ class Final(share.TestSequence):
         self.measure(('dmm_Vout', 'dropout', ))
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),

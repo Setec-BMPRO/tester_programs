@@ -19,7 +19,7 @@ class Safety(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Gnd1', self._step_gnd1),
             TestStep('Gnd2', self._step_gnd2),
@@ -48,12 +48,12 @@ class Safety(share.TestSequence):
         mes['acw']()
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         self['st'] = tester.SafetyTester(self.physical_devices['SAF'])
 

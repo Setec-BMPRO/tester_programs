@@ -151,7 +151,7 @@ class Initial(share.TestSequence):
         self.config = CONFIG[self.parameter]
         self.pm = (self.parameter == 'PM')
         super().open(
-            self.config['Limits'], LogicalDevices, Sensors, Measurements)
+            self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep(
@@ -424,12 +424,12 @@ class SrHighPower():
             self.relay.set_off()
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),

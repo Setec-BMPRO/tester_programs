@@ -137,10 +137,10 @@ class InitialSyn(tester.TestSequence):
 
 class LogicalDevSyn():
 
-    """Logical Devices."""
+    """Devices."""
 
     def __init__(self, devices, fifo):
-        """Create all Logical Instruments.
+        """Create all Instruments.
 
            @param devices Physical instruments of the Tester
 

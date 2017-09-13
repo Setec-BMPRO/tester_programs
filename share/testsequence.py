@@ -37,7 +37,7 @@ class TestSequence(tester.TestSequence):
         """Open test program by creating supporting instances.
 
         @param limits Tuple of test limits
-        @param cls_devices Logical Devices class
+        @param cls_devices Devices class
         @param cls_sensors Sensors class
         @param cls_measurements Measurements class
 
@@ -172,9 +172,9 @@ class TestSequence(tester.TestSequence):
         return sernum
 
 
-class LogicalDevices(abc.ABC, dict):
+class Devices(abc.ABC, dict):
 
-    """Logical Devices abstract base class."""
+    """Devices abstract base class."""
 
     physical_devices = None
     fifo = None
@@ -194,7 +194,7 @@ class LogicalDevices(abc.ABC, dict):
 
     @abc.abstractmethod
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
 
     @abc.abstractmethod
     def reset(self):

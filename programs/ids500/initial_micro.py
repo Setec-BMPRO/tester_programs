@@ -50,7 +50,7 @@ class InitialMicro(share.TestSequence):
         self.measure(('swrev', 'microtemp', ))
 
 
-class Devices(share.LogicalDevices):
+class Devices(share.Devices):
 
     """Micro Devices."""
 

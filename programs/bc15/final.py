@@ -22,7 +22,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_loaded),
@@ -42,12 +42,12 @@ class Final(share.TestSequence):
         self.measure(('vout', 'ocp', 'ch_mode', ), timeout=5)
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
             ('dmm', tester.DMM, 'DMM'),

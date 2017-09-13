@@ -51,7 +51,7 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         super().open(
             self.limitdata[self.parameter]['Limits'],
-            LogicalDevices, Sensors, Measurements)
+            Devices, Sensors, Measurements)
         self.steps = (
             TestStep('FuseLabel', self._step_label),
             TestStep('PowerUp', self._step_power_up),
@@ -107,12 +107,12 @@ class Final(share.TestSequence):
         mes['dmm_Batt'](timeout=5)
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),

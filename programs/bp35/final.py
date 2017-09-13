@@ -17,7 +17,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
             )
@@ -29,12 +29,12 @@ class Final(share.TestSequence):
         self.measure(('dmm_vbat', 'ui_yesnogreen',), timeout=10)
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         self['dmm'] = tester.DMM(self.physical_devices['DMM'])
         self['acsource'] = tester.ACSource(self.physical_devices['ACS'])
 

@@ -142,7 +142,7 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.config = self.limitdata[self.parameter]
         super().open(
-            self.config['Limits'], LogicalDevices, Sensors, Measurements)
+            self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep(
@@ -297,12 +297,12 @@ class Initial(share.TestSequence):
         rx_can.measure()
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),

@@ -94,7 +94,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
             TestStep('Program', self._step_program_micros),
@@ -381,12 +381,12 @@ class Initial(share.TestSequence):
             dmm_out.measure()
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """SX-750 Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),

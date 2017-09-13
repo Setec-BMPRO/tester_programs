@@ -96,10 +96,10 @@ class InitialAux(tester.TestSequence):
 
 class LogicalDevAux():
 
-    """Aux Logical Devices."""
+    """Aux Devices."""
 
     def __init__(self, devices, fifo):
-        """Create all Logical Instruments.
+        """Create all Instruments.
 
            @param devices Physical instruments of the Tester
 

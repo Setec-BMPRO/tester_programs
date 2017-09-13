@@ -52,7 +52,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limitdata, LogicalDevices, Sensors, MeasureIni)
+        super().open(self.limitdata, Devices, Sensors, MeasureIni)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('Program', self._step_program, not self.fifo),
@@ -151,7 +151,7 @@ class SerialDate(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(Initial.limitdata, LogicalDevices, Sensors, MeasureIni)
+        super().open(Initial.limitdata, Devices, Sensors, MeasureIni)
         self.steps = (
             TestStep('SerialDate', self._step_sn_date),
             )
@@ -215,7 +215,7 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         super().open(
             self.limitdata[self.parameter],
-            LogicalDevices, Sensors, MeasureFin)
+            Devices, Sensors, MeasureFin)
         self.steps = (
             TestStep('Startup', self._step_startup),
             TestStep('Verify', self._step_verify),
@@ -265,12 +265,12 @@ class Final(share.TestSequence):
         return True if num & mask else False
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),

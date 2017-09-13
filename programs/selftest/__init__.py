@@ -37,7 +37,7 @@ class Main(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         is_ate2 = self.devices.is_ate2
         self.steps = (
             TestStep('ACSource', self._step_acsource),
@@ -155,12 +155,12 @@ class Main(share.TestSequence):
             timeout=5)
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         self.is_ate2 = (self.physical_devices.tester_type[:4] == 'ATE2')
         for name, devtype, phydevname in (

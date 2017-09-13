@@ -24,7 +24,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().open(self.limitdata, LogicalDevices, Sensors, Measurements)
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Bluetooth', self._step_bluetooth),
             TestStep('Cal', self._step_cal),
@@ -52,15 +52,15 @@ class Final(share.TestSequence):
         """Prepare to run a test."""
 
 
-class LogicalDevices(share.LogicalDevices):
+class Devices(share.Devices):
 
-    """Logical Devices."""
+    """Devices."""
 
     # Test fixture item number
     fixture = '030451'
 
     def open(self):
-        """Create all Logical Instruments."""
+        """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('acsource', tester.ACSource, 'ACS'),

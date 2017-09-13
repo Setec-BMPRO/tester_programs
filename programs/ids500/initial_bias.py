@@ -43,7 +43,7 @@ class InitialBias(share.TestSequence):
             ('dmm_12Vsbraw', 'ramp_OCP', 'dmm_12Vsbraw2',), timeout=1)
 
 
-class Devices(share.LogicalDevices):
+class Devices(share.Devices):
 
     """Bias Devices."""
 
