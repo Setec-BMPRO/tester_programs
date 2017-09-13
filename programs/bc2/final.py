@@ -69,11 +69,11 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the BLE module
-        self['ble_ser'] = tester.SimSerial(
+        ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        self['ble_ser'].port = share.port(self.fixture, 'BLE')
-        self['ble'] = share.BleRadio(self['ble_ser'])
+        ble_ser.port = share.port(self.fixture, 'BLE')
+        self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))

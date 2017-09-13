@@ -14,9 +14,6 @@ ParameterHex = console.ParameterHex
 ParameterCAN = console.ParameterCAN
 ParameterRaw = console.ParameterRaw
 
-# Test mode controlled by STATUS bit 31
-_TEST_ON = (1 << 31)
-_TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
 # Bluetooth ready controlled by STATUS bit 27
 _BLE_ON = (1 << 27)
 _BLE_OFF = ~_BLE_ON & 0xFFFFFFFF

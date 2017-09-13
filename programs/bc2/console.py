@@ -14,15 +14,12 @@ ParameterHex = console.ParameterHex
 ParameterCAN = console.ParameterCAN
 ParameterRaw = console.ParameterRaw
 
-# Test mode controlled by STATUS bit 31
-_TEST_ON = (1 << 31)
-_TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
 # Bluetooth ready controlled by STATUS bit 27
 _BLE_ON = (1 << 27)
 _BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
 
 
-class Console(console.BadUartConsole):
+class Console(console.BaseConsole):
 
     """Communications to BC2 console."""
 
@@ -43,16 +40,4 @@ class Console(console.BadUartConsole):
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
         'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
-        'STATUS': ParameterHex('STATUS', writeable=True,
-            minimum=0, maximum=0xF0000000),
         }
-
-    def testmode(self, state):
-        """Enable or disable Test Mode."""
-        self._logger.debug('Test Mode = %s', state)
-        reply = self['STATUS']
-        if state:
-            value = _TEST_ON | reply
-        else:
-            value = _TEST_OFF & reply
-        self['STATUS'] = value

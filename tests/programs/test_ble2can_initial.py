@@ -19,7 +19,7 @@ class BLE2CANInitial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         dev = self.test_program.devices
-        dev['ble2can_ser'].flushInput()    # Flush console input buffer
+        dev['ble2can'].port.flushInput()  # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
