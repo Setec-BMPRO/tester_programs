@@ -5,24 +5,14 @@
 import time
 import share
 
-Sensor = share.console.Sensor
-
 # Some easier to use short names
+Sensor = share.console.Sensor
 ParameterString = share.console.ParameterString
 ParameterBoolean = share.console.ParameterBoolean
 ParameterFloat = share.console.ParameterFloat
 ParameterHex = share.console.ParameterHex
 ParameterCAN = share.console.ParameterCAN
 ParameterRaw = share.console.ParameterRaw
-
-# CAN Test mode controlled by STATUS bit 29
-_CAN_ON = (1 << 29)
-_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
-# "CAN Bound" is STATUS bit 28
-_CAN_BOUND = (1 << 28)
-
-# Time it takes for Manual Mode command to take effect
-_MANUAL_MODE_WAIT = 2.1
 
 
 class Console(share.console.BadUartConsole):
@@ -31,7 +21,51 @@ class Console(share.console.BadUartConsole):
 
     # Auto add prompt to puts strings
     puts_prompt = '\r\n> '
+    # Number of lines in startup banner
+    banner_lines = 2
+    # CAN Test mode controlled by STATUS bit 29
+    _can_on = (1 << 29)
+    _can_off = ~_can_on & 0xFFFFFFFF
+    # "CAN Bound" is STATUS bit 28
+    _can_bound = (1 << 28)
+    # Time it takes for Manual Mode command to take effect
+    _manual_mode_wait = 2.1
     cmd_data = {
+        # Common commands
+        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'RESTART': ParameterBoolean('RESTART',
+            writeable=True, readable=False, write_format='{1}'),
+        'SER_ID': ParameterString(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{0} {1}'),
+        'HW_VER': ParameterString(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
+        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean('NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVWIPE': ParameterBoolean('NV-FACTORY-WIPE',
+            writeable=True, readable=False, write_format='{1}'),
+        # Product specific commands
+        'VSET_CAL': ParameterFloat(     # Voltage reading
+            'VSET', writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=1000, write_expected=1),
+        'VBUS_CAL': ParameterFloat(     # Voltage setpoint
+            'VBUS', writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=1000, write_expected=1),
+        'BUS_ICAL': ParameterFloat(     # Current reading
+            'ICONV', writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=1000, write_expected=1),
+        'CAN': ParameterString('CAN',
+            writeable=True, write_format='"{0} {1}'),
+        'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
+        # X-Register product specific parameters
         'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
         'VOUT': ParameterFloat(
             'CONVERTER_VOLTS_SETPOINT', writeable=True,
@@ -56,13 +90,10 @@ class Console(share.console.BadUartConsole):
         'TASK_STARTUP': ParameterFloat(
             'TASK_STARTUP', writeable=True,
             minimum=0, maximum=3, scale=1),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
         'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
         'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
-        'BUS_ICAL': ParameterFloat(
-            'ICONV', writeable=True,    # an undocumented command...
-            write_format='{0} "{1} CAL', write_expected=1,
-            scale=1000),
+        'OCP_CAL': ParameterFloat(      # OCP setpoint
+            'CAL_I_CONVSET', writeable=True, maximum=65535),
         'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
         'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
         'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
@@ -80,24 +111,11 @@ class Console(share.console.BadUartConsole):
             'LOAD_SWITCH_INHIBITED_BY_AUX', writeable=True,),
         'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
         'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
-        'SER_ID': ParameterString(
-            'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{} {}'),
-        'HW_VER': ParameterString(
-            'SET-HW-VER', writeable=True, readable=False,
-            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'STATUS': ParameterHex(
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
         'CAN_BIND': ParameterHex(
             'STATUS', writeable=True,
-            minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
-        'CAN': ParameterString('CAN',
-            writeable=True, write_format='"{} {}'),
-        'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
-            writeable=True, readable=False, write_format='{1}'),
+            minimum=0, maximum=0xF0000000, mask=_can_bound),
         }
 
     def __init__(self, port):
@@ -112,14 +130,16 @@ class Console(share.console.BadUartConsole):
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
         reset_relay.pulse(0.1)
-        self.action(None, delay=1.5, expected=2)  # Flush banner
+        self.action(None, delay=1.5, expected=self.banner_lines)
+        self['NVWIPE'] = True
+        reset_relay.pulse(0.1)
+        self.action(None, delay=1.5, expected=self.banner_lines)
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
-        # Restart required because of HW_VER setting
         reset_relay.pulse(0.1)
-        self.action(None, delay=1.5, expected=2)  # Flush banner
+        self.action(None, delay=1.5, expected=self.banner_lines)
 
     def manual_mode(self, start=False, vout=None, iout=None):
         """Set the unit to Manual Mode.
@@ -135,7 +155,7 @@ class Console(share.console.BadUartConsole):
         """
         if start:  # Trigger manual mode, and start a timer
             self['SLEEP_MODE'] = 3
-            self._timer.start(_MANUAL_MODE_WAIT)
+            self._timer.start(self._manual_mode_wait)
         else:   # Complete manual mode setup once the timer is done.
             self._timer.wait()
             self['TASK_STARTUP'] = 0
@@ -189,7 +209,7 @@ class Console(share.console.BadUartConsole):
         self.action('"RF,ALL CAN')
         reply = self['STATUS']
         if state:
-            value = _CAN_ON | reply
+            value = self._can_on | reply
         else:
-            value = _CAN_OFF & reply
+            value = self._can_off & reply
         self['STATUS'] = value

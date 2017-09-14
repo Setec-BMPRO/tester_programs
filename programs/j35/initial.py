@@ -40,9 +40,12 @@ class Initial(share.TestSequence):
     # AC voltage powering the unit
     ac_volt = 240.0
     ac_freq = 50.0
+    # Nominal OCP points of each product version
+    ocp_set_bc = 35.0
+    ocp_set_a = 20.0
     # Output set points when running in manual mode
     vout_set = 12.8
-    ocp_set = 35.0
+    ocp_set = ocp_set_bc
     # Battery load current
     batt_current = 4.0
     # Load on each output channel
@@ -72,7 +75,8 @@ class Initial(share.TestSequence):
         LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
         LimitDelta('FanOn', vout_set, delta=1.0, doc='Fan running'),
         LimitLow('FanOff', 0.5, doc='Fan not running'),
-        LimitRegExp('ARM-SwVer', '^{}$'.format(arm_version.replace('.', r'\.')),
+        LimitRegExp(
+            'ARM-SwVer', '^{}$'.format(arm_version.replace('.', r'\.')),
             doc='Arm Software version'),
         LimitPercent('ARM-AuxV', aux_solar_inject, percent=2.0, delta=0.3,
             doc='ARM Aux voltage reading'),
@@ -93,10 +97,14 @@ class Initial(share.TestSequence):
         LimitDelta('ARM-LoadI', load_per_output, delta=0.9,
             doc='ARM output current reading'),
         LimitInteger('ARM-RemoteClosed', 1),
-        LimitDelta('CanPwr', vout_set, delta=1.8, doc='CAN bus power supply'),
-        LimitInteger('LOAD_SET', 0x5555555, doc='ARM output load enable setting'),
-        LimitInteger('CAN_BIND', _can_bind, doc='ARM reports CAN bus operational'),
-        LimitRegExp('CAN_RX', '^RRQ,36,0', doc='Response to CAN echo message'),
+        LimitDelta('CanPwr', vout_set, delta=1.8,
+            doc='CAN bus power supply'),
+        LimitInteger('LOAD_SET', 0x5555555,
+            doc='ARM output load enable setting'),
+        LimitInteger('CAN_BIND', _can_bind,
+            doc='ARM reports CAN bus operational'),
+        LimitRegExp('CAN_RX', '^RRQ,36,0',
+            doc='Response to CAN echo message'),
         LimitLow('InOCP', vout_set - 1.2, doc='Output is in OCP'),
         LimitLow('FixtureLock', 200, doc='Test fixture lid microswitch'),
         )
@@ -109,32 +117,44 @@ class Initial(share.TestSequence):
         'A': {
             'Limits': _common + (
                 LimitLow('LOAD_COUNT', output_count_a),
-                LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip range'),
+                LimitPercent('OCP_pre', ocp_set_a, (14.0, 20.0),
+                    doc='OCP trip range before adjustment'),
+                LimitPercent('OCP', ocp_set_a, (4.0, 10.0),
+                    doc='OCP trip range after adjustment'),
                 ),
             'LoadCount': 7,
             'HwVer': (2, 1, 'A'),
             'SolarCan': False,
             'Derate': True,
+            'OCP': ocp_set_a,
             },
         'B': {
             'Limits': _common + (
                 LimitLow('LOAD_COUNT', output_count_bc),
-                LimitPercent('OCP', ocp_set, (4.0, 7.0), doc='OCP trip range'),
+                LimitPercent('OCP_pre', ocp_set_bc, (14.0, 17.0),
+                    doc='OCP trip range before adjustment'),
+                LimitPercent('OCP', ocp_set_bc, (4.0, 7.0),
+                    doc='OCP trip range after adjustment'),
                 ),
             'LoadCount': 14,
             'HwVer': (2, 2, 'A'),
             'SolarCan': False,
             'Derate': False,
+            'OCP': ocp_set_bc,
             },
         'C': {
             'Limits': _common + (
                 LimitLow('LOAD_COUNT', output_count_bc),
-                LimitPercent('OCP', ocp_set, (4.0, 7.0), doc='OCP trip range'),
+                LimitPercent('OCP_pre', ocp_set_bc, (14.0, 17.0),
+                    doc='OCP trip range before adjustment'),
+                LimitPercent('OCP', ocp_set_bc, (4.0, 7.0),
+                    doc='OCP trip range after adjustment'),
                 ),
             'LoadCount': 14,
             'HwVer': (7, 3, 'B'),
             'SolarCan': True,
             'Derate': False,
+            'OCP': ocp_set_bc,
             },
         }
 
@@ -186,7 +206,7 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         j35.open()
         j35.brand(self.config['HwVer'], self.sernum, dev['rla_reset'])
-        j35.manual_mode(start=True) # Start the change to manual mode
+        j35.manual_mode(start=True)     # Start the change to manual mode
         mes['arm_swver']()
 
     @share.teststep
@@ -230,6 +250,10 @@ class Initial(share.TestSequence):
             ('arm_vout_ov', 'dmm_3v3', 'dmm_15vs', 'dmm_vbat', 'dmm_fanOff',
              'arm_acv', 'arm_acf', 'arm_secT', 'arm_vout', 'arm_fan'),
             timeout=5)
+        v_actual = self.measure(('dmm_vbat', ), timeout=10).reading1
+        j35['VSET_CAL'] = v_actual  # Calibrate Vout setting and reading
+        j35['VBUS_CAL'] = v_actual
+        j35['NVWRITE'] = True
         j35['FAN'] = 100
         mes['dmm_fanOn'](timeout=5)
 
@@ -271,13 +295,21 @@ class Initial(share.TestSequence):
         for load in range(load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
+        # Calibrate current reading
         j35['BUS_ICAL'] = load_count * self.load_per_output
+        j35['NVWRITE'] = True
         dev['dcl_bat'].output(self.batt_current, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 
     @share.teststep
     def _step_ocp(self, dev, mes):
         """Test OCP."""
+        j35 = dev['j35']
+        ocp_actual = mes['ramp_ocp'](timeout=5).reading1
+        # Adjust current setpoint
+        j35['OCP_CAL'] = round(
+            j35['OCP_CAL'] * ocp_actual / self.config['OCP'])
+        j35['NVWRITE'] = True
         mes['ramp_ocp'](timeout=5)
         dev['dcl_out'].output(0.0)
         dev['dcl_bat'].output(0.0)
@@ -400,6 +432,17 @@ class Sensors(share.Sensors):
             sen = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
             self['arm_loads'].append(sen)
         load_current = load_count * Initial.load_per_output
+        # Pre-adjust OCP
+        low, high = self.limits['OCP_pre'].limit
+        self['ocp_pre'] = sensor.Ramp(
+            stimulus=self.devices['dcl_bat'],
+            sensor=self['ovbat'],
+            detect_limit=(self.limits['InOCP'], ),
+            start=low - load_current - 1,
+            stop=high - load_current + 1,
+            step=0.1, delay=0.1)
+        self['ocp_pre'].on_read = lambda value: value + load_current
+        # Post-adjust OCP
         low, high = self.limits['OCP'].limit
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_bat'],
@@ -434,6 +477,7 @@ class Measurements(share.Measurements):
             ('dmm_15vs', '15Vs', 'o15Vs', ''),
             ('dmm_fanOn', 'FanOn', 'ofan', ''),
             ('dmm_fanOff', 'FanOff', 'ofan', ''),
+            ('ramp_ocp_pre', 'OCP_pre', 'ocp_pre', ''),
             ('ramp_ocp', 'OCP', 'ocp', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
