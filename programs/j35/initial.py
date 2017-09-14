@@ -43,6 +43,8 @@ class Initial(share.TestSequence):
     # Nominal OCP points of each product version
     ocp_set_bc = 35.0
     ocp_set_a = 20.0
+    # Extra % error in OCP allowed before adjustment
+    ocp_adjust_percent = 10.0
     # Output set points when running in manual mode
     vout_set = 12.8
     ocp_set = ocp_set_bc
@@ -117,7 +119,9 @@ class Initial(share.TestSequence):
         'A': {
             'Limits': _common + (
                 LimitLow('LOAD_COUNT', output_count_a),
-                LimitPercent('OCP_pre', ocp_set_a, (14.0, 20.0),
+                LimitPercent(
+                    'OCP_pre', ocp_set_a,
+                    (ocp_adjust_percent + 4.0, ocp_adjust_percent + 10.0),
                     doc='OCP trip range before adjustment'),
                 LimitPercent('OCP', ocp_set_a, (4.0, 10.0),
                     doc='OCP trip range after adjustment'),
@@ -131,7 +135,9 @@ class Initial(share.TestSequence):
         'B': {
             'Limits': _common + (
                 LimitLow('LOAD_COUNT', output_count_bc),
-                LimitPercent('OCP_pre', ocp_set_bc, (14.0, 17.0),
+                LimitPercent(
+                    'OCP_pre', ocp_set_bc,
+                    (ocp_adjust_percent + 4.0, ocp_adjust_percent + 7.0),
                     doc='OCP trip range before adjustment'),
                 LimitPercent('OCP', ocp_set_bc, (4.0, 7.0),
                     doc='OCP trip range after adjustment'),
@@ -145,7 +151,9 @@ class Initial(share.TestSequence):
         'C': {
             'Limits': _common + (
                 LimitLow('LOAD_COUNT', output_count_bc),
-                LimitPercent('OCP_pre', ocp_set_bc, (14.0, 17.0),
+                LimitPercent(
+                    'OCP_pre', ocp_set_bc,
+                    (ocp_adjust_percent + 4.0, ocp_adjust_percent + 7.0),
                     doc='OCP trip range before adjustment'),
                 LimitPercent('OCP', ocp_set_bc, (4.0, 7.0),
                     doc='OCP trip range after adjustment'),
@@ -305,7 +313,7 @@ class Initial(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         j35 = dev['j35']
-        ocp_actual = mes['ramp_ocp'](timeout=5).reading1
+        ocp_actual = mes['ramp_ocp_pre'](timeout=5).reading1
         # Adjust current setpoint
         j35['OCP_CAL'] = round(
             j35['OCP_CAL'] * ocp_actual / self.config['OCP'])
