@@ -132,24 +132,24 @@ class Devices(share.Devices):
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_cover', tester.DCSource, 'DCS5'),
-                ('rla_reset', tester.Relay, 'RLA5'),
-                ('rla_wdg', tester.Relay, 'RLA6'),  #Normally closed
-                ('rla_pin', tester.Relay, 'RLA7'),
+                ('rla_reset', tester.Relay, 'RLA1'),
+                ('rla_wdg', tester.Relay, 'RLA2'),  #Normally closed
+                ('rla_pin', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
-        self['trs2_ser'] = tester.SimSerial(
+        trs2_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['trs2_ser'].port = share.port(self.fixture, 'ARM')
+        trs2_ser.port = share.port(self.fixture, 'ARM')
         # Console driver
-        self['trs2'] = console.Console(self['trs2_ser'])
+        self['trs2'] = console.Console(trs2_ser)
         # Serial connection to the BLE module
-        self['ble_ser'] = tester.SimSerial(
+        ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        self['ble_ser'].port = share.port(self.fixture, 'BLE')
-        self['ble'] = share.BleRadio(self['ble_ser'])
+        ble_ser.port = share.port(self.fixture, 'BLE')
+        self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
