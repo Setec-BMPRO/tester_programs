@@ -10,13 +10,13 @@ from programs import j35
 _POWERUP_CON_BC = (
     ('', ) * 5 +    # Manual mode
     ('0', '', '', '0', '240', '50000',
-     '350', '12800', '500', '', )
+     '350', '12800', '500', )
     )
 _POWERUP_CON_A = (
     ('', ) * 5 +    # Manual mode
     ('', ) * 6 +    # Derate
     ('0', '', '', '0', '240', '50000',
-     '350', '12800', '500', '', )
+     '350', '12800', '500', )
     )
 
 
@@ -60,7 +60,7 @@ class _J35Initial(ProgramTestCase):
                 'PowerUp': (
                     (sen['oacin'], 240.0), (sen['ovbus'], 340.0),
                     (sen['o12Vpri'], 12.5), (sen['o3V3'], 3.3),
-                    (sen['o15Vs'], 12.5), (sen['ovbat'], (12.8, 12.8, )),
+                    (sen['o15Vs'], 12.5), (sen['ovbat'], (12.8, 12.8, 12.8, )),
                     (sen['ofan'], (0, 12)),
                     ),
                 'Output': (
@@ -75,6 +75,7 @@ class _J35Initial(ProgramTestCase):
                     ),
                 'OCP': (
                     (sen['ovbat'], (12.8, ) * 20 + (11.0, ), ),
+                    (sen['ovbat'], (12.8, ) * 20 + (11.0, ), ),
                     ),
                 'CanBus': (
                     (sen['ocanpwr'], 12.5),
@@ -85,22 +86,27 @@ class _J35Initial(ProgramTestCase):
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise':
-                    ('Banner1\r\nBanner2', ) +
-                     ('', ) * 4 +
-                     ('Banner1\r\nBanner2', ) +
-                     ('', ) + (j35.initial.Initial.arm_version, ),
+                    ('B1\r\nB2', ) +
+                    ('', ) +
+                    ('B1\r\nB2', ) +
+                    ('', ) * 4 +
+                    ('B1\r\nB2', ) +
+                    ('', ) + (j35.initial.Initial.arm_version, ),
                 'Aux':
                     ('', '13500', '1100', ''),
                 'Solar':
                     ('', ''),
                 'PowerUp':
-                    pwr_con,
+                    pwr_con +
+                    ('41731 -> 42241', '41731 -> 42241', '', '', ),
                 'Output':
                     ('', ) * (1 + len(sen['arm_loads']) + 1),
                 'RemoteSw':
                     ('1', ),
-                'Load':
-                    ('0x5555555', '41731 -> 42241', '4000', ),
+                'Load':(
+                    '0x5555555', '41731 -> 42241', '', '4000',
+                    '41000', '41731 -> 42241', '',
+                    ),
                 'CanBus':
                     ('0x10000000', '', '0x10000000', '', '', ),
                 },
@@ -145,7 +151,7 @@ class J35_A_Initial(_J35Initial):
         """PASS run of the A program."""
         super()._pass_run(
             _POWERUP_CON_A,
-            45,
+            47,
             ['Prepare', 'Initialise', 'Aux', 'PowerUp', 'Output',
              'RemoteSw', 'Load', 'OCP']
             )
@@ -162,7 +168,7 @@ class J35_B_Initial(_J35Initial):
         """PASS run of the B program."""
         super()._pass_run(
             _POWERUP_CON_BC,
-            59,
+            61,
             ['Prepare', 'Initialise', 'Aux', 'PowerUp', 'Output',
              'RemoteSw', 'Load', 'OCP']
             )
@@ -179,7 +185,7 @@ class J35_C_Initial(_J35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _POWERUP_CON_BC,
-            63,
+            65,
             ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp', 'Output',
              'RemoteSw', 'Load', 'OCP', 'CanBus']
             )
