@@ -13,7 +13,7 @@ _INIT_CON_SRHA = (
     ('B1\r\nB2\r\nB3', ) +
     ('', ) * 5 +
     ('B1\r\nB2\r\nB3', ) +
-    (bp35.initial.ARM_VERSION, ) +
+    (bp35.initial.Initial.arm_version, ) +
     ('', )
     )
 _INIT_CON_PM = (
@@ -22,7 +22,7 @@ _INIT_CON_PM = (
     ('B1\r\nB2\r\nB3', ) +
     ('', ) * 3 +        # Missing 2 x SR commands here
     ('B1\r\nB2\r\nB3', ) +
-    (bp35.initial.ARM_VERSION, ) +
+    (bp35.initial.Initial.arm_version, ) +
     ('', ) * 2 +
     ('', )
     )
@@ -83,6 +83,7 @@ class _BP35Initial(ProgramTestCase):
                 'OCP': (
                     (sen['fan'], (0, 12.0)), (sen['vbat'], 12.8),
                     (sen['vbat'], (12.8, ) * 20 + (11.0, ), ),
+                    (sen['vbat'], (12.8, ) * 20 + (11.0, ), ),
                     ),
                 },
             UnitTester.key_call: {      # Callables
@@ -116,7 +117,7 @@ class _BP35Initial(ProgramTestCase):
                     ('1', '555', '1234 -> 1235', '', '66', ),
                 'OCP':
                     ('240', '50000', '350', '12800', '500', ) +
-                    ('', '4000', '32000', '12341234', '', ''),
+                    ('', '4000', '32000', '12341234', '41000', '12341234', '', ),
                 'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
                 },
             UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
@@ -160,7 +161,7 @@ class BP35_SR_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_SRHA,
-            73,
+            74,
             ['Prepare', 'Initialise', 'SrSolar', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
@@ -177,7 +178,7 @@ class BP35_HA_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_SRHA,
-            73,
+            74,
             ['Prepare', 'Initialise', 'SrSolar', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
@@ -194,7 +195,7 @@ class BP35_PM_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_PM,
-            65,
+            66,
             ['Prepare', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],
             )

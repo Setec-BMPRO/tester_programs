@@ -31,6 +31,8 @@ class Console(share.console.BadUartConsole):
 
     # Auto add prompt to puts strings
     puts_prompt = '\r\n> '
+    # Number of lines in startup banner
+    banner_lines = 3
     cmd_data = {
         # Common commands
         'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
@@ -159,6 +161,22 @@ class Console(share.console.BadUartConsole):
             self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
         self._timer = share.BackgroundTimer()
+
+    def brand(self, hw_ver, sernum, reset_relay, is_pm, pic_hw_ver):
+        """Brand the unit with Hardware ID & Serial Number."""
+        reset_relay.pulse(0.1)
+        self.action(None, delay=1.5, expected=self.banner_lines)
+        self['NVWIPE'] = True
+        reset_relay.pulse(0.1)
+        self.action(None, delay=1.5, expected=self.banner_lines)
+        self['HW_VER'] = hw_ver
+        self['SER_ID'] = sernum
+        self['NVWRITE'] = True
+        if not is_pm:
+            self['SR_DEL_CAL'] = True
+            self['SR_HW_VER'] = pic_hw_ver
+        reset_relay.pulse(0.1)    # Reset is required because of HW_VER setting
+        self.action(None, delay=1.5, expected=self.banner_lines)
 
     def manual_mode(self, start=False, vout=None, iout=None):
         """Set the unit to Manual Mode.
