@@ -19,7 +19,7 @@ class TRSRFMInitial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         dev = self.test_program.devices
-        dev['trsrfm_ser'].flushInput()    # Flush console input buffer
+        dev['trsrfm'].port.flushInput()   # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
@@ -28,14 +28,18 @@ class TRSRFMInitial(ProgramTestCase):
                     (sen['3v3'], 3.30),
                     ),
                 'TestArm': (
-#                    (sen['light'], (11.9, 0.0)),
+                    (sen['red'], (3.1, 0.5, 3.1)),
+                    (sen['green'], (3.1, 0.0, 3.1)),
+                    (sen['blue'], (1.6, 0.25, 3.1)),
                     ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'TestArm':
                     ('Banner1\r\nBanner2\r\nBanner3', ) +
                     ('', ) * 4 +
-                    (trsrfm.initial.Initial.arm_version, ),
+                    (trsrfm.initial.Initial.arm_version, ) +
+                    ('0x00000000', ) +
+                    ('', ) * 9,
                 'Bluetooth':
                     (self.btmac, ) +
                     ('', ) * 2,
@@ -58,6 +62,6 @@ class TRSRFMInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(7, len(result.readings))
+        self.assertEqual(17, len(result.readings))
         self.assertEqual(
             ['Prepare', 'TestArm', 'Bluetooth'], self.tester.ut_steps)

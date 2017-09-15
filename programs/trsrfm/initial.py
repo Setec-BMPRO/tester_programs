@@ -3,7 +3,8 @@
 """TRSRFM Initial Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitDelta, LimitBoolean, LimitRegExp
+from tester import (TestStep, LimitLow, LimitHigh, LimitDelta,
+                    LimitBoolean, LimitRegExp)
 import share
 from . import console
 
@@ -25,9 +26,17 @@ class Initial(share.TestSequence):
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
+        LimitHigh('RedLedOff', 3.1),
+        LimitDelta('RedLedOn', 0.5, 0.1),
+        LimitHigh('GreenLedOff', 3.1),
+        LimitLow('GreenLedOn', 0.14),
+        LimitHigh('BlueLedOff', 3.1),
+        LimitDelta('BlueLedOn', 0.25, 0.1),
+        LimitDelta('BlueLedFlash', 1.65, 0.2),
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(arm_version.replace('.', r'\.'))),
+        LimitLow('ARM-FltCode', 0),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         )
@@ -56,16 +65,26 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
-        """Test the operation of BLE2CAN."""
-        ble2can = dev['trsrfm']
-        ble2can.open()
+        """Test the operation of TRSRFM."""
+        trsrfm = dev['trsrfm']
+        trsrfm.open()
         dev['rla_reset'].pulse(0.1)
-        ble2can.action(None, delay=5.0, expected=2)  # Flush banner
-        ble2can['HW_VER'] = self.hw_ver
-        ble2can['SER_ID'] = self.sernum
-        ble2can['NVDEFAULT'] = True
-        ble2can['NVWRITE'] = True
+        trsrfm.action(None, delay=5.0, expected=2)  # Flush banner
+        trsrfm['HW_VER'] = self.hw_ver
+        trsrfm['SER_ID'] = self.sernum
+        trsrfm['NVDEFAULT'] = True
+        trsrfm['NVWRITE'] = True
         mes['arm_swver']()
+        mes['arm_fltcode']()
+        self.measure(
+            ('dmm_redoff', 'dmm_greenoff', 'dmm_blueflash'), timeout=5)
+        trsrfm.override(self.force_on)
+        self.measure(
+            ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
+        trsrfm.override(self.force_off)
+        self.measure(
+            ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
+        trsrfm.override(self.normal)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -98,24 +117,24 @@ class Devices(share.Devices):
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_cover', tester.DCSource, 'DCS5'),
-                ('rla_reset', tester.Relay, 'RLA5'),
-                ('rla_wdog', tester.Relay, 'RLA6'),
-                ('rla_pin', tester.Relay, 'RLA7'),
+                ('rla_reset', tester.Relay, 'RLA1'),
+                ('rla_wdog', tester.Relay, 'RLA2'),
+                ('rla_pin', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
-        self['trsrfm_ser'] = tester.SimSerial(
+        trsrfm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['trsrfm_ser'].port = share.port(self.fixture, 'ARM')
+        trsrfm_ser.port = share.port(self.fixture, 'ARM')
         # Console driver
-        self['trsrfm'] = console.Console(self['trsrfm_ser'])
+        self['trsrfm'] = console.Console(trsrfm_ser)
         # Serial connection to the BLE module
-        self['ble_ser'] = tester.SimSerial(
+        ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        self['ble_ser'].port = share.port(self.fixture, 'BLE')
-        self['ble'] = share.BleRadio(self['ble_ser'])
+        ble_ser.port = share.port(self.fixture, 'BLE')
+        self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
@@ -140,6 +159,10 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['red'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
+        self['green'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
+        self['blue'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01,
+                                nplc=10)
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
         self['mirbt'] = sensor.Mirror()
@@ -147,11 +170,13 @@ class Sensors(share.Sensors):
         trsrfm = self.devices['trsrfm']
         self['btmac'] = console.Sensor(
             trsrfm, 'BT_MAC', rdgtype=sensor.ReadingString)
+        self['arm_swver'] = console.Sensor(
+            trsrfm, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['arm_fltcode'] = console.Sensor(
+            trsrfm, 'FAULT_CODE')
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trsrfm_initial', 'msgSnEntry'),
             caption=tester.translate('trsrfm_initial', 'capSnEntry'))
-        self['arm_swver'] = console.Sensor(
-            trsrfm, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -163,9 +188,17 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
             ('dmm_3v3', '3V3', '3v3', ''),
+            ('dmm_redoff', 'RedLedOff', 'red', ''),
+            ('dmm_redon', 'RedLedOn', 'red', ''),
+            ('dmm_greenoff', 'GreenLedOff', 'green', ''),
+            ('dmm_greenon', 'GreenLedOn', 'green', ''),
+            ('dmm_blueoff', 'BlueLedOff', 'blue', ''),
+            ('dmm_blueon', 'BlueLedOn', 'blue', ''),
+            ('dmm_blueflash', 'BlueLedFlash', 'blue', ''),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('trsrfm_btmac', 'BtMac', 'btmac', ''),
-            ('ui_sernum', 'SerNum', 'sernum', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
+            ('arm_fltcode', 'ARM-FltCode', 'arm_fltcode', ''),
+            ('ui_sernum', 'SerNum', 'sernum', ''),
             ))
