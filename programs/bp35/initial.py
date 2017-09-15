@@ -78,7 +78,8 @@ class Initial(share.TestSequence):
         LimitPercent('OCP', ocp_set, 4.0,
             doc='OCP setpoint after adjustment'),
         LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
-        LimitRegExp('ARM-SwVer', '^{0}$'.format(arm_version.replace('.', r'\.')),
+        LimitRegExp(
+            'ARM-SwVer', '^{0}$'.format(arm_version.replace('.', r'\.')),
             doc='Reported software version'),
         LimitDelta('ARM-AcV', vac, 10.0, doc='AC voltage reported by ARM'),
         LimitDelta('ARM-AcF', 50.0, 1.0, doc='AC frequency reported by ARM'),
@@ -86,12 +87,14 @@ class Initial(share.TestSequence):
         LimitDelta('ARM-Vout', 12.45, 0.45),
         LimitBetween('ARM-Fan', 0, 100, doc='Fan speed (%) reported by ARM'),
         LimitDelta('ARM-LoadI', 2.1, 0.9, doc='Load current reported by ARM'),
-        LimitDelta('ARM-BattI', ibatt, 1.0, doc='Battery current reported by ARM'),
+        LimitDelta('ARM-BattI', ibatt, 1.0,
+            doc='Battery current reported by ARM'),
         LimitDelta('ARM-BusI', iload + ibatt, 3.0),
         LimitPercent('ARM-AuxV', vaux_in, percent=2.0, delta=0.3,
             doc='ARM Aux voltage reading'),
         LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current reported by ARM'),
-        LimitInteger('ARM-RemoteClosed', 1, doc='REMOTE input reported by ARM'),
+        LimitInteger('ARM-RemoteClosed', 1,
+            doc='REMOTE input reported by ARM'),
         LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
         LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
         LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
@@ -119,8 +122,10 @@ class Initial(share.TestSequence):
     # PM Solar specific limits
     _pm_solar = (
         LimitInteger('PM-Alive', 1, doc='PM Solar present'),
-        LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6, doc='PM zero reading before cal'),
-        LimitDelta('ARM-PmSolarIz-Post', 0, 0.1, doc='PM zero reading after cal'),
+        LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6,
+            doc='PM zero reading before cal'),
+        LimitDelta('ARM-PmSolarIz-Post', 0, 0.1,
+            doc='PM zero reading after cal'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     #   'Limits': Test limits.
