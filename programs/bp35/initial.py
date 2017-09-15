@@ -579,7 +579,7 @@ class Measurements(share.Measurements):
             ('dmm_3v3', '3V3', 'o3v3', ''),
             ('dmm_fanon', 'FanOn', 'fan', ''),
             ('dmm_fanoff', 'FanOff', 'fan', ''),
-            ('ramp_ocp_pre', 'OCP', 'ocp', ''),
+            ('ramp_ocp_pre', 'OCP_pre', 'ocp', ''),
             ('ramp_ocp', 'OCP', 'ocp', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
