@@ -2,20 +2,17 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BC15/25 Final Test program."""
 
-from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc15_25
 
 
-class BC15_25_Final(ProgramTestCase):
+class _BC15_25_Final(ProgramTestCase):
 
     """BC15/25 Final program test suite."""
 
     prog_class = bc15_25.Final
-    parameter = None
-    debug = False
 
-    def test_pass_run(self):
+    def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
@@ -34,27 +31,26 @@ class BC15_25_Final(ProgramTestCase):
         self.assertEqual(5, len(result.readings))
         self.assertEqual(['PowerOn', 'Load'], self.tester.ut_steps)
 
-    def test_fail_run(self):
-        """FAIL 1st Vbat reading."""
-        # Patch threading.Event & threading.Timer to remove delays
-        mymock = MagicMock()
-        mymock.is_set.return_value = True   # threading.Event.is_set()
-        patcher = patch('threading.Event', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('threading.Timer', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        sen = self.test_program.sensors
-        data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerOn':
-                    ((sen['ps_mode'], True), (sen['vout'], 3.80), ),
-                },
-            }
-        self.tester.ut_load(data, self.test_program.fifo_push)
-        self.tester.test(('UUT1', ))
-        result = self.tester.ut_result
-        self.assertEqual('F', result.code)
-        self.assertEqual(2, len(result.readings))
-        self.assertEqual(['PowerOn'], self.tester.ut_steps)
+
+class BC15_Final(_BC15_25_Final):
+
+    """BC15 Initial program test suite."""
+
+    parameter = '15'
+    debug = False
+
+    def test_pass_run(self):
+        """PASS run of the BC15 program."""
+        super()._pass_run()
+
+
+class BC25_Final(_BC15_25_Final):
+
+    """BC25 Initial program test suite."""
+
+    parameter = '25'
+    debug = False
+
+    def test_pass_run(self):
+        """PASS run of the BC25 program."""
+        super()._pass_run()

@@ -3,26 +3,45 @@
 """BC15/25 Final Test Program."""
 
 import tester
-from tester import LimitLow, LimitDelta
+from tester import LimitLow, LimitDelta, LimitPercent
 import share
-
-OCP_NOMINAL = 10.0
 
 
 class Final(share.TestSequence):
 
     """BC15/25 Final Test Program."""
 
-    limitdata = (
+    # Setpoints
+    ocp_nominal_15 = 10.0
+    ocp_nominal_25 = 20.0
+    # Common limits
+    _common = (
         LimitDelta('VoutNL', 13.6, 0.3),
         LimitDelta('Vout', 13.6, 0.7),
         LimitLow('InOCP', 12.5),
-        LimitDelta('OCP', OCP_NOMINAL, 1.0),
         )
+    # Variant specific configuration data. Indexed by test program parameter.
+    limitdata = {
+        '15': {
+            'OCP_Nominal': ocp_nominal_15,
+            'Limits': _common + (
+                LimitPercent('OCP', ocp_nominal_15, 10.0),
+                ),
+            },
+        '25': {
+            'OCP_Nominal': ocp_nominal_25,
+            'Limits': _common + (
+                LimitPercent('OCP', ocp_nominal_25, 10.0),
+                ),
+            },
+        }
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.config = self.limitdata[self.parameter]
+        Sensors.ocp_nominal = self.config['OCP_Nominal']
+        super().open(
+            self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_loaded),
@@ -66,6 +85,8 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    ocp_nominal = None      # Nominal OCP point of unit
+
     def open(self):
         """Create all Sensors."""
         dmm = self.devices['dmm']
@@ -81,8 +102,8 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['vout'],
             detect_limit=(self.limits['InOCP'], ),
-            start=OCP_NOMINAL - 1.0,
-            stop=OCP_NOMINAL + 2.0,
+            start=self.ocp_nominal - 1.0,
+            stop=self.ocp_nominal + 2.0,
             step=0.1,
             delay=0.2)
 

@@ -46,6 +46,9 @@ DATA = {
     '028467': {     # BC15 Initial
         'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
         },
+    '031032': {     # BC25 Initial
+        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
+        },
     '027176': {     # BP35 Initial
         'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
         },
