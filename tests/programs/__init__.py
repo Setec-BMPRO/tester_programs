@@ -11,8 +11,8 @@ from . import test_batterycheck_final
 from . import test_batterycheck_initial
 from . import test_bc2_initial
 from . import test_bc2_final
-from . import test_bc15_initial
-from . import test_bc15_final
+from . import test_bc15_25_initial
+from . import test_bc15_25_final
 from . import test_bp35_final
 from . import test_bp35_initial
 from . import test_bce282_final
@@ -76,8 +76,8 @@ __all__ = [
     'test_batterycheck_initial',
     'test_bc2_initial',
     'test_bc2_final',
-    'test_bc15_initial',
-    'test_bc15_final',
+    'test_bc15_25_initial',
+    'test_bc15_25_final',
     'test_bp35_final',
     'test_bp35_initial',
     'test_bce282_final',

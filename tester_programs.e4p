@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-09-13, 13:15:18 -->
+<!-- Saved: 2017-09-19, 10:43:08 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -24,10 +24,10 @@
     <Source>programs/batterycheck/console.py</Source>
     <Source>programs/batterycheck/final.py</Source>
     <Source>programs/batterycheck/initial.py</Source>
-    <Source>programs/bc15/__init__.py</Source>
-    <Source>programs/bc15/console.py</Source>
-    <Source>programs/bc15/final.py</Source>
-    <Source>programs/bc15/initial.py</Source>
+    <Source>programs/bc15_25/__init__.py</Source>
+    <Source>programs/bc15_25/console.py</Source>
+    <Source>programs/bc15_25/final.py</Source>
+    <Source>programs/bc15_25/initial.py</Source>
     <Source>programs/bc2/__init__.py</Source>
     <Source>programs/bc2/console.py</Source>
     <Source>programs/bc2/final.py</Source>
@@ -161,8 +161,8 @@
     <Source>tests/programs/test_atxg4502v_final.py</Source>
     <Source>tests/programs/test_batterycheck_final.py</Source>
     <Source>tests/programs/test_batterycheck_initial.py</Source>
-    <Source>tests/programs/test_bc15_final.py</Source>
-    <Source>tests/programs/test_bc15_initial.py</Source>
+    <Source>tests/programs/test_bc15_25_final.py</Source>
+    <Source>tests/programs/test_bc15_25_initial.py</Source>
     <Source>tests/programs/test_bc2_final.py</Source>
     <Source>tests/programs/test_bc2_initial.py</Source>
     <Source>tests/programs/test_bce282_final.py</Source>

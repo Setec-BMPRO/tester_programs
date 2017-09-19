@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""BC15 Initial Test Program."""
+"""BC15/25 Initial Test Program."""
 
 import os
 import inspect
@@ -26,7 +26,7 @@ OCP_NOMINAL = 15.0
 
 class Initial(share.TestSequence):
 
-    """BC15 Initial Test Program."""
+    """BC15/25 Initial Test Program."""
 
     limitdata = (
         LimitLow('FixtureLock', 20),

@@ -7,7 +7,7 @@ from . import _2040
 from . import atxg450
 from . import batterycheck
 from . import bc2
-from . import bc15
+from . import bc15_25
 from . import bce4
 from . import bce282
 from . import ble2can
@@ -60,8 +60,8 @@ PROGRAMS = {
     'BatteryCheck Final': batterycheck.Final,
     'BC2 Initial': bc2.Initial,
     'BC2 Final': bc2.Final,
-    'BC15 Initial': bc15.Initial,
-    'BC15 Final': bc15.Final,
+    'BC15_25 Initial': bc15_25.Initial,
+    'BC15_25 Final': bc15_25.Final,
     'BCE4/5 Final': bce4.Final,
     'BCE282 Initial': bce282.Initial,
     'BCE282 Final': bce282.Final,

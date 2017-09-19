@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for BC15 Initial Test program."""
+"""UnitTest for BC15/25 Initial Test program."""
 
 from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import bc15
+from programs import bc15_25
 
 
-class BC15Initial(ProgramTestCase):
+class BC15_25_Initial(ProgramTestCase):
 
-    """BC15 Initial program test suite."""
+    """BC15/25 Initial program test suite."""
 
-    prog_class = bc15.Initial
+    prog_class = bc15_25.Initial
     parameter = None
     debug = False
     startup_banner = (
@@ -41,7 +41,7 @@ class BC15Initial(ProgramTestCase):
                     (None, ) +  # Terminate port.flushInput()
                     (self.startup_banner, ) +
                     ('', ) * 3 +
-                    ('{}'.format(bc15.initial.BIN_VERSION), )
+                    ('{}'.format(bc15_25.initial.BIN_VERSION), )
                     ),
                 'PowerUp': (
                     (self.startup_banner, ) +

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""BC15 Final Test Program."""
+"""BC15/25 Final Test Program."""
 
 import tester
 from tester import LimitLow, LimitDelta
@@ -11,7 +11,7 @@ OCP_NOMINAL = 10.0
 
 class Final(share.TestSequence):
 
-    """BC15 Final Test Program."""
+    """BC15/25 Final Test Program."""
 
     limitdata = (
         LimitDelta('VoutNL', 13.6, 0.3),

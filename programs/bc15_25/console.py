@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""BC15 ARM processor console driver."""
+"""BC15/25 ARM processor console driver."""
 
 import re
 from share import console
@@ -15,7 +15,7 @@ ParameterFloat = console.ParameterFloat
 
 class Console(console.BaseConsole):
 
-    """Communications to BC15 console."""
+    """Communications to BC15/25 console."""
 
     # Auto add prompt to puts strings
     puts_prompt = '\r\n> '

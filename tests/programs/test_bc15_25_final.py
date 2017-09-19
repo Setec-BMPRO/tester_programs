@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for BC15 Final Test program."""
+"""UnitTest for BC15/25 Final Test program."""
 
 from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import bc15
+from programs import bc15_25
 
 
-class BC15Final(ProgramTestCase):
+class BC15_25_Final(ProgramTestCase):
 
-    """BC15 Final program test suite."""
+    """BC15/25 Final program test suite."""
 
-    prog_class = bc15.Final
+    prog_class = bc15_25.Final
     parameter = None
     debug = False
 
