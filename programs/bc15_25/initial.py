@@ -19,7 +19,7 @@ class Initial(share.TestSequence):
     """BC15/25 Initial Test Program."""
 
     bin_version_15 = '2.0.16258.2002'
-    bin_version_25 = '1.0.16471.135'
+    bin_version_25 = '1.0.16489.137'
     # Serial port for the programmer and ARM comms module
     #   BC15 (028467) & BC25 (031032) use the same port
     arm_port = share.port('028467', 'ARM')
