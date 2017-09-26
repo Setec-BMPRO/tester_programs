@@ -57,7 +57,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_loaded(self, dev, mes):
         """Load the Unit."""
-        dev['dcl'].output(10.0)
+        dev['dcl'].output(self.config['OCP_Nominal'] - 1.0)
         self.measure(('vout', 'ocp', 'ch_mode', ), timeout=5)
 
 
