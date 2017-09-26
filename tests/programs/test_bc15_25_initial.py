@@ -28,8 +28,9 @@ class _BC15_25_Initial(ProgramTestCase):
                     ((sen['lock'], 0.0), (sen['fanshort'], 3300.0), ),
                 'PowerUp':
                     ((sen['ACin'], 240.0), (sen['Vbus'], 330.0),
-                     (sen['12Vs'], 12.0), (sen['3V3'], 3.3),
-                     (sen['15Vs'], 15.0), (sen['Vout'], 0.2), ),
+                     (sen['12Vs'], 12.0), (sen['5Vs'], 5.0),
+                     (sen['3V3'], 3.3), (sen['15Vs'], 15.0),
+                     (sen['Vout'], 0.2), ),
                 'Output': ((sen['Vout'], 14.40), (sen['Vout'], 14.40), ),
                 'Loaded': ((sen['Vout'], (14.4, ) * 5 + (11.0, ), ), ),
                 },
@@ -69,7 +70,7 @@ class _BC15_25_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(18, len(result.readings))
+        self.assertEqual(19, len(result.readings))
         self.assertEqual(
             ['PartDetect', 'Initialise', 'PowerUp', 'Output', 'Loaded'],
             self.tester.ut_steps)

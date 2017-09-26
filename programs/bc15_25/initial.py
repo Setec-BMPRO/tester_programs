@@ -36,7 +36,6 @@ class Initial(share.TestSequence):
         LimitDelta('Vbus', math.sqrt(2) * vac, 10.0),
         LimitDelta('14Vpri', 14.0, 1.0),
         LimitBetween('12Vs', 11.7, 13.0),
-        LimitDelta('5Vs', 5.0, 0.1),
         LimitBetween('3V3', 3.20, 3.35),
         LimitLow('FanOn', 0.5),
         LimitHigh('FanOff', 11.0),
@@ -56,6 +55,7 @@ class Initial(share.TestSequence):
             'BinVersion': bin_version_15,
             'OCP_Nominal': ocp_nominal_15,
             'Limits': _common + (
+                LimitLow('5Vs', 99.0),  # No test point
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_15.replace('.', r'\.'))),
                 LimitPercent('OCP', ocp_nominal_15, (4.0, 7.0)),
@@ -67,6 +67,7 @@ class Initial(share.TestSequence):
             'BinVersion': bin_version_25,
             'OCP_Nominal': ocp_nominal_25,
             'Limits': _common + (
+                LimitDelta('5Vs', 5.0, 0.1),
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_25.replace('.', r'\.'))),
                 LimitPercent('OCP', ocp_nominal_25, (4.0, 7.0)),
@@ -110,7 +111,6 @@ class Initial(share.TestSequence):
         arm = dev['arm']
         arm.open()
         arm.port.flushInput()
-        dev['dcs_3v3'].output(9.0, True)
         dev['rla_reset'].pulse(0.1)
         arm.action(None, delay=2, expected=3)  # Flush banner
         arm['UNLOCK'] = True
@@ -124,7 +124,7 @@ class Initial(share.TestSequence):
         """Power up the Unit."""
         dev['acsource'].output(voltage=self.vac, output=True)
         self.measure(
-            ('dmm_acin', 'dmm_vbus', 'dmm_12Vs', 'dmm_3V3',
+            ('dmm_acin', 'dmm_vbus', 'dmm_12Vs', 'dmm_5Vs', 'dmm_3V3',
              'dmm_15Vs', 'dmm_voutoff', ), timeout=5)
         arm = dev['arm']
         arm.action(None, delay=1.5, expected=3)  # Flush banner
@@ -166,11 +166,9 @@ class Devices(share.Devices):
             ('discharge', tester.Discharge, 'DIS'),
             ('dcs_vcom', tester.DCSource, 'DCS1'),
             ('dcs_3v3', tester.DCSource, 'DCS2'),
-            ('dcs_out', tester.DCSource, 'DCS3'),
             ('dcl', tester.DCLoad, 'DCL1'),
             ('rla_reset', tester.Relay, 'RLA1'),
             ('rla_boot', tester.Relay, 'RLA2'),
-            ('rla_outrev', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
@@ -190,7 +188,7 @@ class Devices(share.Devices):
         # Console driver
         self['arm'] = console.Console(arm_ser)
         # Apply power to fixture Comms circuit.
-        self['dcs_vcom'].output(12.0, True)
+        self['dcs_vcom'].output(9.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))
         time.sleep(4)       # Allow OS to detect USB serial port
 
@@ -200,10 +198,9 @@ class Devices(share.Devices):
         self['acsource'].reset()
         self['dcl'].output(2.0, delay=1)
         self['discharge'].pulse()
+        self['dcs_3v3'].output(0.0, output=False)
         self['dcl'].output(0.0, False)
-        for dcs in ('dcs_3v3', 'dcs_out'):
-            self[dcs].output(0.0, output=False)
-        for rla in ('rla_reset', 'rla_boot', 'rla_outrev'):
+        for rla in ('rla_reset', 'rla_boot', ):
             self[rla].set_off()
 
 
