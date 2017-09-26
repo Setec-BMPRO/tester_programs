@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
                 LimitDelta('5Vs', 5.0, 0.1),
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_25.replace('.', r'\.'))),
-                LimitPercent('OCP', ocp_nominal_25, (4.0, 7.0)),
+                LimitPercent('OCP', ocp_nominal_25, (4.0, 10.0)),
                 LimitPercent('ARM-HIamp', 24.0, percent=1.7, delta=1.0),
                 ),
             },
