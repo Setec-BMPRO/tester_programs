@@ -2,30 +2,53 @@
 # -*- coding: utf-8 -*-
 """TRS2 Console driver."""
 
-from share import console
-
-Sensor = console.Sensor
+import enum
+import share
 
 # Some easier to use short names
-ParameterString = console.ParameterString
-ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
-ParameterHex = console.ParameterHex
-ParameterCAN = console.ParameterCAN
-ParameterRaw = console.ParameterRaw
-
-# Bluetooth ready controlled by STATUS bit 27
-_BLE_ON = (1 << 27)
-_BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
+Sensor = share.console.Sensor
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
+ParameterCalibration = share.console.ParameterCalibration
+ParameterHex = share.console.ParameterHex
+ParameterCAN = share.console.ParameterCAN
+ParameterRaw = share.console.ParameterRaw
 
 
-class Console(console.BaseConsole):
+@enum.unique
+class Override(enum.IntEnum):
+
+    """Console manual override constants."""
+
+    normal = 0
+    force_off = 1
+    force_on = 2
+
+
+class ParameterOverride(ParameterFloat):
+
+    """A parameter for overriding unit operation."""
+
+    def __init__(self, command):
+        super().__init__(
+            command,
+            writeable=True,
+            minimum=min(Override),
+            maximum=max(Override)
+            )
+
+
+class Console(share.console.BaseConsole):
 
     """Communications to TRS2 console."""
 
     # Auto add prompt to puts strings
     puts_prompt = '\r\n> '
+    # Number of lines in startup banner
+    banner_lines = 3
     cmd_data = {
+        # Commands
         'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': ParameterBoolean('NV-WRITE',
@@ -38,37 +61,38 @@ class Console(console.BaseConsole):
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
         'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
-        'BR_LIGHT': ParameterFloat(
-            'TRS2_BRAKE_LIGHT_EN_OVERRIDE', writeable=True,
-            minimum=0, maximum=2),
-        'MONITOR': ParameterFloat(
-            'TRS2_MONITOR_EN_OVERRIDE', writeable=True,
-            minimum=0, maximum=2),
-        'RED_LED': ParameterFloat(
-            'TRS2_RED_LED_OVERRIDE', writeable=True,
-            minimum=0, maximum=2),
-        'GREEN_LED': ParameterFloat(
-            'TRS2_GREEN_LED_OVERRIDE', writeable=True,
-            minimum=0, maximum=2),
-        'BLUE_LED': ParameterFloat(
-            'TRS2_BLUE_LED_OVERRIDE', writeable=True,
-            minimum=0, maximum=2),
-        'BLUETOOTH': ParameterFloat(
-            'TRS2_BLUETOOTH_EN_OVERRIDE', writeable=True,
-            minimum=0, maximum=2),
-        'VBATT': ParameterFloat(
-            'TRS2_BATT_MV', scale=1000),
-        'FAULT_CODE': ParameterHex('TRS2_FAULT_CODE_BITS',
-            minimum=0, maximum=0x00000003),
+        # X-Register values
+        'VBATT': ParameterFloat('TRS2_BATT_MV', scale=1000),
+        'VBRAKE': ParameterFloat('TRS2_BRAKE_MV', scale=1000),
+        'IBRAKE': ParameterFloat('TRS2_BRAKE_MA', scale=1000),
+        'VPIN': ParameterFloat('TRS2_DROP_ACROSS_PIN_MV', scale=1000),
+        'FAULT_CODE': ParameterHex(
+            'TRS2_FAULT_CODE_BITS', minimum=0, maximum=0x3),
+        # Calibration commands
+        'VBRAKE_OFFSET': ParameterCalibration('BRAKEV_OFF_SET'),
+        'VBRAKE_GAIN': ParameterCalibration('BRAKEV_GAIN_SET'),
+        # Override commands
+        'BR_LIGHT': ParameterOverride('TRS2_BRAKE_LIGHT_EN_OVERRIDE'),
+        'MONITOR': ParameterOverride('TRS2_MONITOR_EN_OVERRIDE'),
+        'RED_LED': ParameterOverride('TRS2_RED_LED_OVERRIDE'),
+        'GREEN_LED': ParameterOverride('TRS2_GREEN_LED_OVERRIDE'),
+        'BLUE_LED': ParameterOverride('TRS2_BLUE_LED_OVERRIDE'),
+        'BLUETOOTH': ParameterOverride('TRS2_BLUETOOTH_EN_OVERRIDE'),
         }
 
-    def override(self, state=0):
+    def brand(self, hw_ver, sernum):
+        """Brand the unit with Hardware ID & Serial Number."""
+        self['HW_VER'] = hw_ver
+        self['SER_ID'] = sernum
+        self['NVDEFAULT'] = True
+        self['NVWRITE'] = True
+
+    def override(self, state=Override.normal):
         """Manually override functions of the unit.
 
-        ON: state = 2
-        OFF: state = 1
-        NORMAL OPERATION: state = 0
+        @param state Override enumeration
+
         """
-        self._logger.debug('Override state = %s', state)
-        for func in ('BR_LIGHT', 'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED'):
+        for func in (
+                'BR_LIGHT', 'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED'):
             self[func] = state

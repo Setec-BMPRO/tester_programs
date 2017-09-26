@@ -24,23 +24,31 @@ class TRSInitial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], ('A1526040123', )),
-                    (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
-                    (sen['3v3'], 3.30), (sen['brake'], (0.0, 12.0)),
+                    (sen['tstpin_cover'], 0.0),
+                    (sen['vin'], 12.0),
+                    (sen['3v3'], 3.30),
+                    (sen['brake'], (0.0, 12.0)),
                     ),
-                'TestArm': (
-                    (sen['light'], (11.9, 0.0)), (sen['remote'], (11.9, 0.0)),
+                'Operation': (
+                    (sen['light'], (11.9, 0.0)),
+                    (sen['remote'], (11.9, 0.0)),
                     (sen['red'], (3.1, 0.5, 3.1)),
                     (sen['green'], (3.1, 0.0, 3.1)),
                     (sen['blue'], (1.6, 0.25, 3.1)),
                     ),
+                'Calibrate': (
+                    (sen['brake'], (0.3, 12.0)),
+                    ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
-                'TestArm':
-                    ('Banner1\r\nBanner2\r\nBanner3', ) +
+                'Operation':
                     ('', ) * 4 +
                     (trs2.initial.Initial.arm_version, ) +
                     ('0x00000000', ) +
                     ('', ) * 15,
+                'Calibrate':
+                    ('x', ) * 2 +
+                    ('', '12001', '12002', '101', '102', ),
                 'Bluetooth':
                     (self.btmac, ) +
                     ('', ) * 2,
@@ -63,7 +71,7 @@ class TRSInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(23, len(result.readings))
+        self.assertEqual(29, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'TestArm', 'Bluetooth'],
+            ['Prepare', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)

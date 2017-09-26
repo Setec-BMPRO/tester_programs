@@ -3,17 +3,16 @@
 """BC15/25 ARM processor console driver."""
 
 import re
-from share import console
-
-Sensor = console.Sensor
+import share
 
 # Some easier to use short names
-ParameterString = console.ParameterString
-ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
+Sensor = share.console.Sensor
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
 
 
-class Console(console.BaseConsole):
+class Console(share.console.BaseConsole):
 
     """Communications to BC15/25 console."""
 
@@ -26,8 +25,8 @@ class Console(console.BaseConsole):
             writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': ParameterBoolean('NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-        'SWITCH': ParameterFloat('SW', read_format='{}?'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
+        'SWITCH': ParameterFloat('SW', read_format='{0}?'),
         }
     stat_data = {}  # Data readings: Key=Name, Value=Reading
     stat_regexp = re.compile('^([a-z\-]+)=([0-9]+).*$')
@@ -75,8 +74,8 @@ class Console(console.BaseConsole):
         """
         self.action('0 MAINLOOP')
         self.action('STOP')
-        self.action('{0} SETMA'.format(int(current * 1000)))
-        self.action('{0} SETMV'.format(int(voltage * 1000)))
+        self.action('{0} SETMA'.format(round(current * 1000)))
+        self.action('{0} SETMV'.format(round(voltage * 1000)))
         self.action('0 0 PULSE')
         self.action('RESETOVERVOLT')
         self.action('1 SETDCDCEN')
@@ -112,9 +111,9 @@ class Console(console.BaseConsole):
         # Calculate new numerator using measured voltage.
         mv_num_new = round(((pwm * mv_den) / (voltage * 1000)) + 0.5)
         # Write new numerator and save it.
-        self.action('{} "SET_VOLTS_MV_NUM CAL'.format(mv_num_new))
+        self.action('{0} "SET_VOLTS_MV_NUM CAL'.format(mv_num_new))
         self['NVWRITE'] = True
-        self.action('{} SETMV'.format(round(mv_set)))
+        self.action('{0} SETMV'.format(round(mv_set)))
 
 # Sample console responses 2017-06-27
 #

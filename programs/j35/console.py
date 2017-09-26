@@ -10,6 +10,7 @@ Sensor = share.console.Sensor
 ParameterString = share.console.ParameterString
 ParameterBoolean = share.console.ParameterBoolean
 ParameterFloat = share.console.ParameterFloat
+ParameterCalibration = share.console.ParameterCalibration
 ParameterHex = share.console.ParameterHex
 ParameterCAN = share.console.ParameterCAN
 ParameterRaw = share.console.ParameterRaw
@@ -24,12 +25,12 @@ class Console(share.console.BadUartConsole):
     # Number of lines in startup banner
     banner_lines = 2
     # CAN Test mode controlled by STATUS bit 29
-    _can_on = (1 << 29)
-    _can_off = ~_can_on & 0xFFFFFFFF
+    can_on = 1 << 29
+    can_off = ~can_on & 0xFFFFFFFF
     # "CAN Bound" is STATUS bit 28
-    _can_bound = (1 << 28)
+    can_bound = 1 << 28
     # Time it takes for Manual Mode command to take effect
-    _manual_mode_wait = 2.1
+    manual_mode_wait = 2.1
     cmd_data = {
         # Common commands
         'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
@@ -50,18 +51,9 @@ class Console(share.console.BadUartConsole):
         'NVWIPE': ParameterBoolean('NV-FACTORY-WIPE',
             writeable=True, readable=False, write_format='{1}'),
         # Product specific commands
-        'VSET_CAL': ParameterFloat(     # Voltage reading
-            'VSET', writeable=True,
-            write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
-        'VBUS_CAL': ParameterFloat(     # Voltage setpoint
-            'VBUS', writeable=True,
-            write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
-        'BUS_ICAL': ParameterFloat(     # Current reading
-            'ICONV', writeable=True,
-            write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
+        'VSET_CAL': ParameterCalibration('VSET'),    # Voltage reading
+        'VBUS_CAL': ParameterCalibration('VBUS'),    # Voltage setpoint
+        'BUS_ICAL': ParameterCalibration('ICONV'),   # Current reading
         'CAN': ParameterString('CAN',
             writeable=True, write_format='"{0} {1}'),
         'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
@@ -74,8 +66,7 @@ class Console(share.console.BadUartConsole):
             'CONVERTER_CURRENT_SETPOINT', writeable=True,
             minimum=15.0, maximum=35.0, scale=1000),
         'FAN': ParameterFloat(
-            'FAN_SPEED', writeable=True,
-            minimum=0, maximum=100, scale=10),
+            'FAN_SPEED', writeable=True, minimum=0, maximum=100, scale=10),
         'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
         'SOLAR': ParameterBoolean('SOLAR_CHARGE_RELAY', writeable=True),
         'LOAD_SET': ParameterHex(
@@ -85,11 +76,9 @@ class Console(share.console.BadUartConsole):
             'CONVERTER_OVERVOLT', writeable=True,
             minimum=0, maximum=2, scale=1),
         'SLEEP_MODE': ParameterFloat(
-            'SLEEPMODE', writeable=True,
-            minimum=0, maximum=3, scale=1),
+            'SLEEPMODE', writeable=True, minimum=0, maximum=3, scale=1),
         'TASK_STARTUP': ParameterFloat(
-            'TASK_STARTUP', writeable=True,
-            minimum=0, maximum=3, scale=1),
+            'TASK_STARTUP', writeable=True, minimum=0, maximum=3, scale=1),
         'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
         'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
         'OCP_CAL': ParameterFloat(      # OCP setpoint
@@ -115,7 +104,7 @@ class Console(share.console.BadUartConsole):
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
         'CAN_BIND': ParameterHex(
             'STATUS', writeable=True,
-            minimum=0, maximum=0xF0000000, mask=_can_bound),
+            minimum=0, maximum=0xF0000000, mask=can_bound),
         }
 
     def __init__(self, port):
@@ -155,7 +144,7 @@ class Console(share.console.BadUartConsole):
         """
         if start:  # Trigger manual mode, and start a timer
             self['SLEEP_MODE'] = 3
-            self._timer.start(self._manual_mode_wait)
+            self._timer.start(self.manual_mode_wait)
         else:   # Complete manual mode setup once the timer is done.
             self._timer.wait()
             self['TASK_STARTUP'] = 0
@@ -208,8 +197,5 @@ class Console(share.console.BadUartConsole):
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
         reply = self['STATUS']
-        if state:
-            value = self._can_on | reply
-        else:
-            value = self._can_off & reply
+        value = self.can_on | reply if state else self.can_off & reply
         self['STATUS'] = value

@@ -5,24 +5,15 @@
 import time
 import share
 
-Sensor = share.console.Sensor
-
 # Some easier to use short names
+Sensor = share.console.Sensor
 ParameterString = share.console.ParameterString
 ParameterBoolean = share.console.ParameterBoolean
 ParameterFloat = share.console.ParameterFloat
+ParameterCalibration = share.console.ParameterCalibration
 ParameterHex = share.console.ParameterHex
 ParameterCAN = share.console.ParameterCAN
 ParameterRaw = share.console.ParameterRaw
-
-# CAN Test mode controlled by STATUS bit 29
-_CAN_ON = (1 << 29)
-_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
-# "CAN Bound" is STATUS bit 28
-_CAN_BOUND = (1 << 28)
-
-# Time it takes for Manual Mode command to take effect (sec)
-_MANUAL_MODE_WAIT = 2.1
 
 
 class Console(share.console.BadUartConsole):
@@ -33,6 +24,13 @@ class Console(share.console.BadUartConsole):
     puts_prompt = '\r\n> '
     # Number of lines in startup banner
     banner_lines = 3
+    # Time it takes for Manual Mode command to take effect (sec)
+    manual_mode_wait = 2.1
+    # CAN Test mode controlled by STATUS bit 29
+    can_on = 1 << 29
+    can_off = ~can_on & 0xFFFFFFFF
+    # "CAN Bound" is STATUS bit 28
+    can_bound = 1 << 28
     cmd_data = {
         # Common commands
         'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
@@ -53,18 +51,9 @@ class Console(share.console.BadUartConsole):
         'NVWIPE': ParameterBoolean('NV-FACTORY-WIPE',
             writeable=True, readable=False, write_format='{1}'),
         # Product specific commands
-        'VSET_CAL': ParameterFloat(     # Voltage reading
-            'VSET', writeable=True,
-            write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
-        'VBUS_CAL': ParameterFloat(     # Voltage setpoint
-            'VBUS', writeable=True,
-            write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
-        'BUS_ICAL': ParameterFloat(     # Current reading
-            'ICONV', writeable=True,
-            write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
+        'VSET_CAL': ParameterCalibration('VSET'),    # Voltage reading
+        'VBUS_CAL': ParameterCalibration('VBUS'),    # Voltage setpoint
+        'BUS_ICAL': ParameterCalibration('ICONV'),   # Current reading
         'CAN': ParameterString('CAN',
             writeable=True, write_format='"{0} {1}'),
         'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
@@ -120,7 +109,7 @@ class Console(share.console.BadUartConsole):
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
         'CAN_BIND': ParameterHex(
             'STATUS', writeable=True,
-            minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
+            minimum=0, maximum=0xF0000000, mask=can_bound),
         # SR Solar Regulator commands
         'SR_HW_VER': ParameterFloat(
             'SOLAR_REG_HW_VERS', writeable=True, scale=1),
@@ -148,9 +137,7 @@ class Console(share.console.BadUartConsole):
         'PM_ICAL': ParameterFloat('CAL_IZ_SOLAR_SI', writeable=True),
         'PM_IOUT': ParameterFloat('SOLAR_SI_MA', scale=1000),
         'PM_IOUT_REV': ParameterFloat('SOLAR_SI_MA_REVERSED', scale=1000),
-        'PM_ZEROCAL': ParameterFloat(
-            'ISSI', writeable=True, write_format='{0} "{1} CAL',
-            scale=1000, write_expected=1),
+        'PM_ZEROCAL': ParameterCalibration('ISSI'),
         }
 
     def __init__(self, port):
@@ -192,7 +179,7 @@ class Console(share.console.BadUartConsole):
         """
         if start:  # Trigger manual mode, and start a timer
             self['SLEEP_MODE'] = 3
-            self._timer.start(_MANUAL_MODE_WAIT)
+            self._timer.start(self.manual_mode_wait)
         else:   # Complete manual mode setup once the timer is done.
             self._timer.wait()
             self['TASK_STARTUP'] = 0
@@ -252,8 +239,5 @@ class Console(share.console.BadUartConsole):
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
         reply = self['STATUS']
-        if state:
-            value = _CAN_ON | reply
-        else:
-            value = _CAN_OFF & reply
+        value = self.can_on | reply if state else self.can_off & reply
         self['STATUS'] = value

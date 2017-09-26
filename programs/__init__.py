@@ -47,9 +47,8 @@ from . import wtsi200
 #           Note that this name must match the entry in:
 #               The ATE4 storage system (No size limit)
 #               The ATE2 database (maximum of 50 characters)
-#       Value: Tuple of 2 items:
-#           1) The class to use to create a program instance,
-#           2) Test limit data structure for testlimit.limitset()
+#       Value:
+#           The class to use to create a program instance
 
 PROGRAMS = {
     'Self-Test': selftest.Main,

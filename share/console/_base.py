@@ -173,6 +173,20 @@ class ParameterFloat(_Parameter):
         return float(value) / self.scale
 
 
+class ParameterCalibration(ParameterFloat):
+
+    """A parameter for calibration commands."""
+
+    def __init__(self, command, scale=1000):
+        super().__init__(
+            command,
+            writeable=True,
+            write_format='{0} "{1} CAL',
+            scale=scale,
+            write_expected=1
+            )
+
+
 class ParameterHex(_Parameter):
 
     """Hex parameter type with the older '$' prefix hex literal."""
