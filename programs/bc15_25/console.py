@@ -31,7 +31,9 @@ class Console(share.console.BaseConsole):
     stat_data = {}  # Data readings: Key=Name, Value=Reading
     stat_regexp = re.compile('^([a-z\-]+)=([0-9]+).*$')
     cal_data = {}   # Calibration readings: Key=Name, Value=Setting
-    cal_regexp = re.compile('^([a-z_]+) +([0-9]+) $')
+    cal_regexp = re.compile('^([a-z_0-9]+) +([\-0-9]+) $')
+    # Number of responses to a CAL? command
+    cal_expected = 0
 
     def __getitem__(self, key):
         """Read a value."""
@@ -57,6 +59,7 @@ class Console(share.console.BaseConsole):
         """Use CAL? command to read calibration values."""
         self._logger.debug('Cal')
         self.cal_data.clear()
+# FIXME: expected = 43 for a BC25
         response = self.action('CAL?', expected=39)
         for line in response:
             match = self.cal_regexp.match(line)
@@ -107,13 +110,16 @@ class Console(share.console.BaseConsole):
         mv_set = float(self['mv-set'])
         # Calculate the PWM value (0-1023) given the numerator, denominator,
         # and millivolt setpoint.
-        pwm = round(((mv_set * mv_num) / mv_den) + 0.5)
+        pwm = round((mv_set * mv_num) / mv_den)
         # Calculate new numerator using measured voltage.
-        mv_num_new = round(((pwm * mv_den) / (voltage * 1000)) + 0.5)
+        mv_num_new = round((pwm * mv_den) / (voltage * 1000))
         # Write new numerator and save it.
         self.action('{0} "SET_VOLTS_MV_NUM CAL'.format(mv_num_new))
         self['NVWRITE'] = True
         self.action('{0} SETMV'.format(round(mv_set)))
+
+#   get_current_ma_num
+#   get_current_ma_den
 
 # Sample console responses 2017-06-27
 #

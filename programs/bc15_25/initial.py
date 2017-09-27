@@ -59,7 +59,7 @@ class Initial(share.TestSequence):
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_15.replace('.', r'\.'))),
                 LimitPercent('OCP', ocp_nominal_15, (4.0, 7.0)),
-                LimitPercent('ARM-HIamp', 14.0, percent=1.7, delta=1.0),
+                LimitPercent('ARM-HIamp', ocp_nominal_15 - 1.0, percent=1.7, delta=1.0),
                 ),
             },
         '25': {
@@ -71,7 +71,7 @@ class Initial(share.TestSequence):
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_25.replace('.', r'\.'))),
                 LimitPercent('OCP', ocp_nominal_25, (4.0, 10.0)),
-                LimitPercent('ARM-HIamp', 24.0, percent=1.7, delta=1.0),
+                LimitPercent('ARM-HIamp', ocp_nominal_25 - 1.0, percent=1.7, delta=1.0),
                 ),
             },
         }
@@ -147,7 +147,7 @@ class Initial(share.TestSequence):
         dev['dcl'].output(self.config['OCP_Nominal'] - 1.0, True, delay=0.5)
         arm = dev['arm']
         arm.stat()
-        self.measure(('dmm_vout', 'arm_vout', 'arm_14amp', 'ramp_ocp', ))
+        self.measure(('dmm_vout', 'arm_vout', 'arm_Hiamp', 'ramp_ocp', ))
         arm.powersupply()
 
 
@@ -270,5 +270,5 @@ class Measurements(share.Measurements):
             ('arm_vout', 'ARM-Vout', 'arm_vout', ''),
             ('arm_2amp', 'ARM-2amp', 'arm_iout', ''),
             ('arm_switch', 'ARM-switch', 'arm_switch', ''),
-            ('arm_14amp', 'ARM-HIamp', 'arm_iout', ''),
+            ('arm_Hiamp', 'ARM-HIamp', 'arm_iout', ''),
             ))
