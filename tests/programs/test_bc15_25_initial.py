@@ -32,7 +32,7 @@ class _BC15_25_Initial(ProgramTestCase):
                      (sen['3V3'], 3.3), (sen['15Vs'], 15.0),
                      (sen['Vout'], 0.2), ),
                 'Output': ((sen['Vout'], 14.40), (sen['Vout'], 14.40), ),
-                'Loaded': ((sen['Vout'], (14.4, ) * 5 + (11.0, ), ), ),
+                'Loaded': ((sen['Vout'], (14.4, ) * 10 + (11.0, ), ), ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise': (
@@ -46,24 +46,34 @@ class _BC15_25_Initial(ProgramTestCase):
                     ('', ) * 10
                     ),
                 'Output':
-                    ('#\r\n' * 44 +     # Dummy response lines
+                    ('#\r\n' * 44 +     # STAT response lines
                         'not-pulsing-volts=14432 ;mV \r\n'
                         'not-pulsing-current=1987 ;mA ',
                     '3',
-                    '#\r\n' * 44 +      # Dummy response lines
+                    '#\r\n' * 44 +      # STAT response lines
                         'mv-set=14400 ;mV \r\n'
                         'not-pulsing-volts=14432 ;mV ',
-                    '#\r\n' * 37 +      # Dummy response lines
+                    '#\r\n' * (self.cal_lines - 2) +    # CAL response lines
                         'set_volts_mv_num                        902 \r\n'
                         'set_volts_mv_den                      14400 ', ) +
                     ('', ) * 3,
                 'Loaded':
-                    ('#\r\n' * 44 +     # Dummy response lines
-                        'not-pulsing-volts=14432 ;mV \r\n'
-                        'not-pulsing-current={0} ;mA '.format(
+                    ('#\r\n' * 44 +      # STAT response lines
+                        'not-pulsing-current={0} ;mA \r\n'
+                        'ma-set={0} ;mA \r\n'.format(
                             round(1000 *
-                                self.test_program.config['OCP_Nominal'])), ) +
-                    ('OK', ) * 2,
+                                self.test_program.config['OCP_Nominal'])),
+                    '#\r\n' * (self.cal_lines - 2) +    # CAL response lines
+                        'get_current_ma_num                      568 \r\n'
+                        'set_current_ma_num                     1000 ',
+                    '', '', '', '',
+                    '#\r\n' * 44 +      # STAT response lines
+                        'not-pulsing-volts=14400 ;mV \r\n'
+                        'not-pulsing-current={0} ;mV '.format(
+                            round(1000 *
+                                self.test_program.config['OCP_Nominal'])),
+                    '', '',
+                    )
                 },
             }
         self.tester.ut_load(data, self.test_program.fifo_push, dev['arm'].puts)
@@ -82,6 +92,7 @@ class BC15_Initial(_BC15_25_Initial):
 
     parameter = '15'
     debug = False
+    cal_lines = 39
 
     def test_pass_run(self):
         """PASS run of the BC15 program."""
@@ -94,6 +105,7 @@ class BC25_Initial(_BC15_25_Initial):
 
     parameter = '25'
     debug = False
+    cal_lines = 43
 
     def test_pass_run(self):
         """PASS run of the BC25 program."""

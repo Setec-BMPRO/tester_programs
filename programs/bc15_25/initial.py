@@ -20,9 +20,6 @@ class Initial(share.TestSequence):
 
     bin_version_15 = '2.0.16258.2002'
     bin_version_25 = '1.0.16489.137'
-    # Serial port for the programmer and ARM comms module
-    #   BC15 (028467) & BC25 (031032) use the same port
-    arm_port = share.port('028467', 'ARM')
     # Setpoints
     vac = 240.0
     vout_set = 14.40
@@ -52,6 +49,7 @@ class Initial(share.TestSequence):
     limitdata = {
         '15': {
             'ARMfile': 'bc15_{}.bin'.format(bin_version_15),
+            'ARMport': share.port('028467', 'ARM'),
             'BinVersion': bin_version_15,
             'OCP_Nominal': ocp_nominal_15,
             'Limits': _common + (
@@ -59,11 +57,13 @@ class Initial(share.TestSequence):
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_15.replace('.', r'\.'))),
                 LimitPercent('OCP', ocp_nominal_15, (4.0, 7.0)),
-                LimitPercent('ARM-HIamp', ocp_nominal_15 - 1.0, percent=1.7, delta=1.0),
+                LimitPercent(
+                    'ARM-HIamp', ocp_nominal_15 - 1.0, percent=1.7, delta=1.0),
                 ),
             },
         '25': {
             'ARMfile': 'bc25_{}.bin'.format(bin_version_25),
+            'ARMport': share.port('031032', 'ARM'),
             'BinVersion': bin_version_25,
             'OCP_Nominal': ocp_nominal_25,
             'Limits': _common + (
@@ -71,7 +71,8 @@ class Initial(share.TestSequence):
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_25.replace('.', r'\.'))),
                 LimitPercent('OCP', ocp_nominal_25, (4.0, 20.0)),
-                LimitPercent('ARM-HIamp', ocp_nominal_25 - 1.0, percent=1.7, delta=1.0),
+                LimitPercent(
+                    'ARM-HIamp', ocp_nominal_25 - 1.0, percent=1.7, delta=1.0),
                 ),
             },
         }
@@ -80,6 +81,7 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.config = self.limitdata[self.parameter]
         Devices.arm_file = self.config['ARMfile']
+        Devices.arm_port = self.config['ARMport']
         Sensors.ocp_nominal = self.config['OCP_Nominal']
         super().open(
             self.config['Limits'], Devices, Sensors, Measurements)
@@ -110,12 +112,7 @@ class Initial(share.TestSequence):
         """Initialise the ARM device."""
         arm = dev['arm']
         arm.open()
-        arm.port.flushInput()
-        dev['rla_reset'].pulse(0.1)
-        arm.action(None, delay=2, expected=3)  # Flush banner
-        arm['UNLOCK'] = True
-        arm['NVDEFAULT'] = True
-        arm['NVWRITE'] = True
+        arm.initialise(dev['rla_reset'])
         mes['arm_SwVer']()
         dev['dcs_3v3'].output(0.0, False)
 
@@ -125,9 +122,10 @@ class Initial(share.TestSequence):
         dev['acsource'].output(voltage=self.vac, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12Vs', 'dmm_5Vs', 'dmm_3V3',
-             'dmm_15Vs', 'dmm_voutoff', ), timeout=5)
+             'dmm_15Vs', 'dmm_voutoff', ),
+            timeout=5)
         arm = dev['arm']
-        arm.action(None, delay=1.5, expected=3)  # Flush banner
+        arm.banner()
         arm.ps_mode(self.vout_set, self.config['OCP_Nominal'])
 
     @share.teststep
@@ -158,6 +156,7 @@ class Devices(share.Devices):
     """Devices."""
 
     arm_file = None     # Firmware image filename
+    arm_port = None     # Serial port for ARM programming & console
 
     def open(self):
         """Create all Instruments."""
@@ -177,7 +176,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.ProgramARM(
-            Initial.arm_port,
+            self.arm_port,
             os.path.join(folder, self.arm_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
@@ -186,7 +185,7 @@ class Devices(share.Devices):
         arm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = Initial.arm_port
+        arm_ser.port = self.arm_port
         # Console driver
         self['arm'] = console.Console(arm_ser)
         self['arm'].parameter = self.parameter

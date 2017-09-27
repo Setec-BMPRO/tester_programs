@@ -18,6 +18,8 @@ class Console(share.console.BaseConsole):
 
     # Auto add prompt to puts strings
     puts_prompt = '\r\n> '
+    # Number of lines in startup banner
+    banner_lines = 3
     cmd_data = {
         'UNLOCK': ParameterBoolean('0xDEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
@@ -32,8 +34,23 @@ class Console(share.console.BaseConsole):
     stat_regexp = re.compile('^([a-z\-]+)=([0-9]+).*$')
     cal_data = {}   # Calibration readings: Key=Name, Value=Setting
     cal_regexp = re.compile('^([a-z_0-9]+) +([\-0-9]+) $')
-    # Program parameter ('15' or '25')
+    # Program parameter ('15' for BC15 or '25' for BC25)
     parameter = None
+    # OCP setpoint adjustment factor
+    ocp_setpoint_factor = 0.9
+
+    def initialise(self, reset_relay):
+        """Initialise the unit."""
+        self.port.flushInput()
+        reset_relay.pulse(0.1)
+        self.banner()
+        self['UNLOCK'] = True
+        self['NVDEFAULT'] = True
+        self['NVWRITE'] = True
+
+    def banner(self):
+        """Consume the startup banner."""
+        self.action(None, delay=2, expected=self.banner_lines)
 
     def __getitem__(self, key):
         """Read a value."""
@@ -99,8 +116,8 @@ class Console(share.console.BaseConsole):
 
         """
         # Randall said:
-        # I looked at the pwm calibration in the code, its possible for you to
-        # employ a simple formula, taking data from the stat command and
+        # I looked at the PWM calibration in the code, its possible for you to
+        # employ a simple formula, taking data from the STAT command and
         # issuing a modification to just the numerator leaving the
         # denominator alone.
         self.stat()
@@ -109,7 +126,7 @@ class Console(share.console.BaseConsole):
         mv_den = float(self['set_volts_mv_den'])
         mv_set = float(self['mv-set'])
         # Calculate the PWM value (0-1023) given the numerator, denominator,
-        # and millivolt setpoint.
+        # and millivolt set point.
         pwm = round((mv_set * mv_num) / mv_den)
         # Calculate new numerator using measured voltage.
         mv_num_new = round((pwm * mv_den) / (voltage * 1000))
@@ -119,7 +136,7 @@ class Console(share.console.BaseConsole):
         self.action('{0} SETMV'.format(round(mv_set)))
 
     def cal_iout(self, current):
-        """Calibrate the output current reading.
+        """Calibrate the output current reading & setpoint.
 
         This product does not have a calibration command, so we must adjust
         the internal calibration constants ourselves.
@@ -127,14 +144,17 @@ class Console(share.console.BaseConsole):
         """
         self.stat()
         self.cal_read()
+        # Output current reading closed-loop correction
         ma_num = float(self['get_current_ma_num'])
         ma_rdg = float(self['not-pulsing-current'])
         ma_set = self['ma-set']
         ma_num_new = round((current * 1000 * ma_num) / ma_rdg)
         self.action('{0} "GET_CURRENT_MA_NUM CAL'.format(ma_num_new))
-        # Push OCP setting down from 568 default
-        new_set_num = round(float(self['set_current_ma_num']) * 0.9)
+        # OCP setting open-loop adjustment
+        new_set_num = round(
+            float(self['set_current_ma_num']) * self.ocp_setpoint_factor)
         self.action('{0} "SET_CURRENT_MA_NUM CAL'.format(new_set_num))
+        # Save & refresh
         self['NVWRITE'] = True
         self.action('{0} SETMA'.format(ma_set))
 
