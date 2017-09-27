@@ -32,8 +32,8 @@ class Console(share.console.BaseConsole):
     stat_regexp = re.compile('^([a-z\-]+)=([0-9]+).*$')
     cal_data = {}   # Calibration readings: Key=Name, Value=Setting
     cal_regexp = re.compile('^([a-z_0-9]+) +([\-0-9]+) $')
-    # Number of responses to a CAL? command
-    cal_expected = 0
+    # Program parameter ('15' or '25')
+    parameter = None
 
     def __getitem__(self, key):
         """Read a value."""
@@ -59,8 +59,8 @@ class Console(share.console.BaseConsole):
         """Use CAL? command to read calibration values."""
         self._logger.debug('Cal')
         self.cal_data.clear()
-# FIXME: expected = 43 for a BC25
-        response = self.action('CAL?', expected=39)
+        expected = {'15': 39,  '25': 43}[self.parameter]
+        response = self.action('CAL?', expected=expected)
         for line in response:
             match = self.cal_regexp.match(line)
             if match:
@@ -118,8 +118,25 @@ class Console(share.console.BaseConsole):
         self['NVWRITE'] = True
         self.action('{0} SETMV'.format(round(mv_set)))
 
-#   get_current_ma_num
-#   get_current_ma_den
+    def cal_iout(self, current):
+        """Calibrate the output current reading.
+
+        This product does not have a calibration command, so we must adjust
+        the internal calibration constants ourselves.
+
+        """
+        self.stat()
+        self.cal_read()
+        ma_num = float(self['get_current_ma_num'])
+        ma_rdg = float(self['not-pulsing-current'])
+        ma_set = self['ma-set']
+        ma_num_new = round((current * 1000 * ma_num) / ma_rdg)
+        self.action('{0} "GET_CURRENT_MA_NUM CAL'.format(ma_num_new))
+        # Push OCP setting down from 568 default
+        new_set_num = round(float(self['set_current_ma_num']) * 0.9)
+        self.action('{0} "SET_CURRENT_MA_NUM CAL'.format(new_set_num))
+        self['NVWRITE'] = True
+        self.action('{0} SETMA'.format(ma_set))
 
 # Sample console responses 2017-06-27
 #
@@ -213,6 +230,3 @@ class Console(share.console.BaseConsole):
 #    'powersupply_mv                        13600 ',
 #    'powersupply_ma                        10000 ',
 #    ]
-#
-#print('stat', len(stat))
-#print('cal', len(cal))

@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
                 LimitDelta('5Vs', 5.0, 0.1),
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_25.replace('.', r'\.'))),
-                LimitPercent('OCP', ocp_nominal_25, (4.0, 10.0)),
+                LimitPercent('OCP', ocp_nominal_25, (4.0, 20.0)),
                 LimitPercent('ARM-HIamp', ocp_nominal_25 - 1.0, percent=1.7, delta=1.0),
                 ),
             },
@@ -144,8 +144,10 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_loaded(self, dev, mes):
         """Tests of the output."""
-        dev['dcl'].output(self.config['OCP_Nominal'] - 1.0, True, delay=0.5)
+        current = self.config['OCP_Nominal'] - 1.0
+        dev['dcl'].output(current, True, delay=0.5)
         arm = dev['arm']
+        arm.cal_iout(current)
         arm.stat()
         self.measure(('dmm_vout', 'arm_vout', 'arm_Hiamp', 'ramp_ocp', ))
         arm.powersupply()
@@ -187,6 +189,7 @@ class Devices(share.Devices):
         arm_ser.port = Initial.arm_port
         # Console driver
         self['arm'] = console.Console(arm_ser)
+        self['arm'].parameter = self.parameter
         # Apply power to fixture Comms circuit.
         self['dcs_vcom'].output(9.0, True)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))
@@ -230,7 +233,7 @@ class Sensors(share.Sensors):
             sensor=self['Vout'],
             detect_limit=(self.limits['InOCP'], ),
             start=self.ocp_nominal - 1.0,
-            stop=self.ocp_nominal + 2.0,
+            stop=self.ocp_nominal + 3.0,
             step=0.1,
             delay=0.2)
         # Console sensors
