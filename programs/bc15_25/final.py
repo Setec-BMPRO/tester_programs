@@ -12,7 +12,7 @@ class Final(share.TestSequence):
     """BC15/25 Final Test Program."""
 
     # Setpoints
-    ocp_nominal_15 = 10.0
+    ocp_nominal_15 = 11.0
     ocp_nominal_25 = 20.0
     # Common limits
     _common = (
@@ -25,13 +25,13 @@ class Final(share.TestSequence):
         '15': {
             'OCP_Nominal': ocp_nominal_15,
             'Limits': _common + (
-                LimitPercent('OCP', ocp_nominal_15, 10.0),
+                LimitPercent('OCP', ocp_nominal_15, (4.0, 7.0)),
                 ),
             },
         '25': {
             'OCP_Nominal': ocp_nominal_25,
             'Limits': _common + (
-                LimitPercent('OCP', ocp_nominal_25, 10.0),
+                LimitPercent('OCP', ocp_nominal_25, (4.0, 7.0)),
                 ),
             },
         }
@@ -92,12 +92,18 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vout'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
+        if self.parameter == '15':
+            msg_psmode = tester.translate('bc15_final', 'GoToPsMode')
+            msg_chrg = tester.translate('bc15_final', 'GoToChargeMode')
+        else:
+            msg_psmode = tester.translate('bc25_final', 'GoToPsMode')
+            msg_chrg = tester.translate('bc25_final', 'GoToChargeMode')
+        cap_psmode = tester.translate('bc15_25_final', 'capPsMode')
+        cap_chrg = tester.translate('bc15_25_final', 'capChargeMode')
         self['ps_mode'] = sensor.Notify(
-            message=tester.translate('bc15_final', 'GoToPsMode'),
-            caption=tester.translate('bc15_final', 'capPsMode'))
+            message=msg_psmode, caption=cap_psmode)
         self['ch_mode'] = sensor.Notify(
-            message=tester.translate('bc15_final', 'GoToChargeMode'),
-            caption=tester.translate('bc15_final', 'capChargeMode'))
+            message=msg_chrg, caption=cap_chrg)
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl'],
             sensor=self['vout'],
