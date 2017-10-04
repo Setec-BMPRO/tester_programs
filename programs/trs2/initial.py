@@ -16,9 +16,9 @@ class Initial(share.TestSequence):
 
     """TRS2 Initial Test Program."""
 
-    arm_version = '1.2.3.4'
+    arm_version = '1.0.16487.472'
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (4, 0, 'A')
+    hw_ver = (3, 0, 'A')
     # Injected Vbatt
     vbatt = 12.0
     # Injected Vbrake for offset calibration
