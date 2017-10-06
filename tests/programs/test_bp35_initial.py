@@ -39,6 +39,12 @@ class _BP35Initial(ProgramTestCase):
         patcher = patch('share.BackgroundTimer')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('share.ProgramPIC')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def _arm_loads(self, value):
@@ -58,6 +64,9 @@ class _BP35Initial(ProgramTestCase):
                     (sen['sernum'], ('A1626010123', )),
                     (sen['lock'], 10.0), (sen['hardware'], 4400),
                     (sen['vbat'], 12.0), (sen['o3v3'], 3.3),
+                    ),
+                'ProgramPIC': (
+                    (sen['solarvcc'], 3.3),
                     ),
                 'Initialise': (
                     (sen['sernum'], ('A1626010123', )),
@@ -161,9 +170,9 @@ class BP35_SR_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_SRHA,
-            74,
-            ['Prepare', 'Initialise', 'SrSolar', 'Aux', 'PowerUp',
-             'Output', 'RemoteSw', 'OCP', 'CanBus'],
+            75,
+            ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
+             'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
 
 
@@ -178,9 +187,9 @@ class BP35_HA_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_SRHA,
-            74,
-            ['Prepare', 'Initialise', 'SrSolar', 'Aux', 'PowerUp',
-             'Output', 'RemoteSw', 'OCP', 'CanBus'],
+            75,
+            ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
+             'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
 
 
@@ -196,6 +205,6 @@ class BP35_PM_Initial(_BP35Initial):
         super()._pass_run(
             _INIT_CON_PM,
             66,
-            ['Prepare', 'Initialise', 'Aux', 'PowerUp',
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],
             )

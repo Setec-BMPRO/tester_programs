@@ -148,16 +148,13 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.config = self.limitdata[self.parameter]
-        self.pm = (self.parameter == 'PM')
-        self.sernum = None
         super().open(
             self.config['Limits'], Devices, Sensors, Measurements)
+        self.pm = (self.parameter == 'PM')
         self.steps = (
             TestStep('Prepare', self._step_prepare),
-            TestStep(
-                'ProgramPIC', self._step_program_pic,
-                not self.pm and not self.fifo),
-            TestStep('ProgramARM', self._step_program_arm, not self.fifo),
+            TestStep('ProgramPIC', self._step_program_pic, not self.pm),
+            TestStep('ProgramARM', self._step_program_arm),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('SrSolar', self._step_sr_solar, not self.pm),
             TestStep('Aux', self._step_aux),
@@ -168,6 +165,7 @@ class Initial(share.TestSequence):
             TestStep('OCP', self._step_ocp),
             TestStep('CanBus', self._step_canbus),
             )
+        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -192,8 +190,8 @@ class Initial(share.TestSequence):
         """
         dev['SR_LowPower'].output(self.sr_vin, output=True)
         mes['dmm_solarvcc'](timeout=5)
-        dev['program_pic'].program()
-        dev['SR_LowPower'].output(0.0)
+        # Start programming in the background
+        dev['program_pic'].program_begin()
 
     @share.teststep
     def _step_program_arm(self, dev, mes):
@@ -203,10 +201,15 @@ class Initial(share.TestSequence):
 
         """
         dev['program_arm'].program()
+        if not self.pm:
+            # PIC programming should be finished by now
+            dev['program_pic'].program_wait()
+            dev['SR_LowPower'].output(0.0)
         # Cold Reset microprocessor for units that were already programmed
+        # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
         dcsource.output(0.0)
-        load.output(1.0, delay=1)
+        load.output(1.0, delay=0.5)
         load.output(0.0)
         dcsource.output(self.vbat_in)
 
@@ -326,11 +329,11 @@ class Initial(share.TestSequence):
         # A little load on the output.
         dev['dcl_out'].output(1.0, True)
         mes['dmm_vloadoff'](timeout=2)
-        # One at a time ON
-        for load in range(self.outputs):
-            with tester.PathName('L{0}'.format(load + 1)):
-                bp35.load_set(set_on=True, loads=(load, ))
-                mes['dmm_vload'](timeout=2)
+#        # One at a time ON
+#        for load in range(self.outputs):
+#            with tester.PathName('L{0}'.format(load + 1)):
+#                bp35.load_set(set_on=True, loads=(load, ))
+#                mes['dmm_vload'](timeout=2)
         # All outputs ON
         bp35.load_set(set_on=False, loads=())
 

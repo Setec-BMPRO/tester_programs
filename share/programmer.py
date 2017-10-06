@@ -4,7 +4,6 @@
 
 import os
 import subprocess
-import logging
 import tester
 import isplpc
 import jsonrpclib       # Install with: pip install jsonrpclib-pelix
@@ -27,34 +26,27 @@ class ProgramSAMB11():
 
     # Default server URL (Static address, non-domain member)
     default_server = 'http://192.168.168.72:8888/'
-    # The networked JSON-RPC programmer instance
-    server = None
-    # jsonrpclib uses non-standard 'application/json-rpc' by default
-    #   Set the standard content_type here
-    content_type = 'application/json'
-    # Relay to connect the target device to the programmer
-    relay = None
-    # Measurement for the programming result
-    _mes = None
+    limitname = 'Program'   # Testlimit name to use
 
-    def __init__(self, relay, server=None, limitname='Program'):
+    def __init__(self, relay, server=None):
         """Create a programmer instance.
 
         @param relay Relay device to connect programmer to target
         @param server URL of the networked programmer
-        @param limitname Testlimit name
 
         """
         if server is None:
             server = self.default_server
         self.server = jsonrpclib.ServerProxy(
             server,
-            config=jsonrpclib.config.Config(content_type=self.content_type)
+            config=jsonrpclib.config.Config(content_type='application/json')
             )
         self.relay = relay
-        limit = tester.LimitInteger(
-            limitname, _SUCCESS, doc='Programming succeeded')
-        self._mes = tester.Measurement(limit, tester.sensor.Mirror())
+        self.measurement = tester.Measurement(
+            tester.LimitInteger(
+                self.limitname, _SUCCESS, doc='Programming succeeded'),
+            tester.sensor.Mirror()
+            )
 
     def echo(self, message):
         """Call the echo() method of the server.
@@ -70,72 +62,77 @@ class ProgramSAMB11():
         try:
             self.relay.set_on()
             self.server.program()
-            self._mes.sensor.store(_SUCCESS)
+            self.measurement.sensor.store(_SUCCESS)
         except Exception as err:
             self._logger.debug('Error: %s', err.output)
-            self._mes.sensor.store(_FAILURE)
+            self.measurement.sensor.store(_FAILURE)
         self.relay.set_off()
-        self._mes.measure()
+        self.measurement()
 
 
 class ProgramPIC():
 
-    pic_binary = {
+    """Microchip PIC programmer using a PicKit3."""
+
+    pic_binary = {          # Executable to use
         'posix': 'pickit3',
         'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
         }[os.name]
+    limitname = 'Program'   # Testlimit name to use
 
-    """Microchip PIC programmer using a PicKit3."""
-
-    def __init__(self,
-                 hexfile, working_dir, device_type,
-                 relay, limitname='Program'):
+    def __init__(self, hexfile, working_dir, device_type, relay):
         """Create a programmer.
 
-        @param hexfile Full pathname of HEX file
+        @param hexfile HEX filename
         @param working_dir Working directory
-        @param device_type PIC device type (eg: '10F320')
+        @param device_type PIC device type
         @param relay Relay device to connect programmer to target
-        @param limitname Testlimit name
 
         """
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
         self.hexfile = hexfile
         self.working_dir = working_dir
         self.device_type = device_type
         self.relay = relay
-        limit = tester.LimitInteger(
-            limitname, _SUCCESS, doc='Programming succeeded')
-        self._pic = tester.Measurement(limit, tester.sensor.Mirror())
+        self.measurement = tester.Measurement(
+            tester.LimitInteger(
+                self.limitname, _SUCCESS, doc='Programming succeeded'),
+            tester.sensor.Mirror()
+            )
+        self.process = None
 
     def program(self):
-        """Program a device."""
-        try:
-            command = [
-                self.pic_binary,
-                '/P{}'.format(self.device_type),
-                '/F{}'.format(self.hexfile),
-                '/E',
-                '/M',
-                '/Y'
-                ]
-            self.relay.set_on()
-            subprocess.check_output(command, cwd=self.working_dir)
-            self._pic.sensor.store(_SUCCESS)
-        except subprocess.CalledProcessError as err:
-            self._logger.debug('Error: %s', err.output)
-            self._pic.sensor.store(_FAILURE)
+        """Program a device and return when finished."""
+        self.program_begin()
+        self.program_wait()
+
+    def program_begin(self):
+        """Begin device programming."""
+        command = [
+            self.pic_binary,
+            '/P{0}'.format(self.device_type),
+            '/F{0}'.format(self.hexfile),
+            '/E',
+            '/M',
+            '/Y'
+            ]
+        self.relay.set_on()
+        self.process = subprocess.Popen(command, cwd=self.working_dir)
+
+    def program_wait(self):
+        """Wait for device programming to finish."""
+        self.measurement.sensor.store(self.process.wait())
         self.relay.set_off()
-        self._pic.measure()
+        self.measurement()
 
 
 class ProgramARM():
 
     """ARM programmer using the isplpc package."""
 
+    limitname = 'Program'   # Testlimit name to use
+
     def __init__(self, port, filename,
-        baudrate=115200, limitname='Program',
+        baudrate=115200,
         erase_only=False, verify=False, crpmode=None,
         boot_relay=None, reset_relay=None):
         """Create a programmer.
@@ -143,7 +140,6 @@ class ProgramARM():
         @param port Serial port to use
         @param filename Software image filename
         @param baudrate Serial baudrate
-        @param limitname Testlimit name
         @param erase_only True: Device should be erased only
         @param verify True: Verify the programmed device
         @param crpmode Code Protection:
@@ -154,7 +150,6 @@ class ProgramARM():
         """
         self._port = port
         self._baudrate = baudrate
-        self._limitname = limitname
         self._erase_only = erase_only
         self._verify = verify
         self._crpmode = crpmode
@@ -162,9 +157,11 @@ class ProgramARM():
         self._reset_relay = reset_relay
         with open(filename, 'rb') as infile:
             self._bindata = bytearray(infile.read())
-        limit = tester.LimitInteger(
-            limitname, _SUCCESS, doc='Programming succeeded')
-        self._arm = tester.Measurement(limit, tester.sensor.Mirror())
+        self.measurement = tester.Measurement(
+            tester.LimitInteger(
+                self.limitname, _SUCCESS, doc='Programming succeeded'),
+            tester.sensor.Mirror()
+            )
 
     def program(self):
         """Program a device.
@@ -187,11 +184,11 @@ class ProgramARM():
                 crpmode=self._crpmode)
             try:
                 pgm.program()
-                self._arm.sensor.store(_SUCCESS)
+                self.measurement.sensor.store(_SUCCESS)
             except isplpc.ProgrammingError:
-                self._arm.sensor.store(_FAILURE)
+                self.measurement.sensor.store(_FAILURE)
         finally:
             ser.close()
             if self._boot_relay:
                 self._boot_relay.set_off()
-        self._arm.measure()
+        self.measurement()
