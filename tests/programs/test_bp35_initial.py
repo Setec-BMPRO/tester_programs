@@ -84,7 +84,7 @@ class _BP35Initial(ProgramTestCase):
                     (sen['vbat'], 12.8), (sen['vpfc'], (415.0, 415.0), ),
                     ),
                 'Output': (
-                    (sen['vload'], (0.0, ) + (12.8, ) * 14),
+                    (sen['vload'], 0.0),
                     ),
                 'RemoteSw': (
                     (sen['vload'], (12.34, )),
@@ -119,7 +119,7 @@ class _BP35Initial(ProgramTestCase):
                     ('12341234', ) * 2 + # Calibrations
                     ('', ),
                 'Output':
-                    ('', ) * (1 + 14 + 1),
+                    ('', ) * (1 + 1),
                 'RemoteSw':
                     ('1', ),
                 'PmSolar':
@@ -170,7 +170,7 @@ class BP35_SR_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_SRHA,
-            75,
+            61,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
@@ -187,7 +187,7 @@ class BP35_HA_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_SRHA,
-            75,
+            61,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
@@ -204,7 +204,7 @@ class BP35_PM_Initial(_BP35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _INIT_CON_PM,
-            66,
+            52,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],
             )
