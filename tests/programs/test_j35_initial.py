@@ -31,6 +31,9 @@ class _J35Initial(ProgramTestCase):
         patcher = patch('share.BackgroundTimer')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def _arm_loads(self, value):
@@ -64,8 +67,7 @@ class _J35Initial(ProgramTestCase):
                     (sen['ofan'], (0, 12)),
                     ),
                 'Output': (
-                    (sen['ovload'], (0.0, ) +
-                        (12.8, ) * len(sen['arm_loads'])),
+                    (sen['ovload'], 0.0),
                     ),
                 'RemoteSw': (
                     (sen['ovload'], (12.8, )),
@@ -100,7 +102,7 @@ class _J35Initial(ProgramTestCase):
                     pwr_con +
                     ('41731 -> 42241', '41731 -> 42241', '', '', ),
                 'Output':
-                    ('', ) * (1 + len(sen['arm_loads']) + 1),
+                    ('', ) * (1 + 1),
                 'RemoteSw':
                     ('1', ),
                 'Load':(
@@ -151,9 +153,9 @@ class J35_A_Initial(_J35Initial):
         """PASS run of the A program."""
         super()._pass_run(
             _POWERUP_CON_A,
-            47,
-            ['Prepare', 'Initialise', 'Aux', 'PowerUp', 'Output',
-             'RemoteSw', 'Load', 'OCP']
+            40,
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
+             'Output', 'RemoteSw', 'Load', 'OCP']
             )
 
 
@@ -168,9 +170,9 @@ class J35_B_Initial(_J35Initial):
         """PASS run of the B program."""
         super()._pass_run(
             _POWERUP_CON_BC,
-            61,
-            ['Prepare', 'Initialise', 'Aux', 'PowerUp', 'Output',
-             'RemoteSw', 'Load', 'OCP']
+            47,
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
+             'Output', 'RemoteSw', 'Load', 'OCP']
             )
 
 
@@ -185,7 +187,7 @@ class J35_C_Initial(_J35Initial):
         """PASS run of the C program."""
         super()._pass_run(
             _POWERUP_CON_BC,
-            65,
-            ['Prepare', 'Initialise', 'Aux', 'Solar', 'PowerUp', 'Output',
-             'RemoteSw', 'Load', 'OCP', 'CanBus']
+            51,
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar', 'PowerUp',
+             'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']
             )

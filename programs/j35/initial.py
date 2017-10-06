@@ -173,9 +173,7 @@ class Initial(share.TestSequence):
             self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
-            TestStep(
-                'ProgramARM',
-                self.devices['program_arm'].program, not self.fifo),
+            TestStep('ProgramARM', self.devices['program_arm'].program),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('Aux', self._step_aux),
             TestStep('Solar', self._step_solar, self.config['SolarCan']),
@@ -267,21 +265,12 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_output(self, dev, mes):
-        """Test the output switches.
-
-        Each output is turned ON in turn.
-        All outputs are then left ON.
-
-        """
+        """Test the output switches."""
         j35 = dev['j35']
-        j35.load_set(set_on=True, loads=())   # All outputs OFF
-        dev['dcl_out'].output(1.0, True)  # A little load on the output
+        j35.load_set(set_on=True, loads=())     # All outputs OFF
+        dev['dcl_out'].output(1.0, True)        # A little load
         mes['dmm_vloadoff'](timeout=2)
-        for load in range(self.config['LoadCount']):  # One at a time ON
-            with tester.PathName('L{0}'.format(load + 1)):
-                j35.load_set(set_on=True, loads=(load, ))
-                mes['dmm_vload'](timeout=2)
-        j35.load_set(set_on=False, loads=())  # All outputs ON
+        j35.load_set(set_on=False, loads=())    # All outputs ON
 
     @share.teststep
     def _step_remote_sw(self, dev, mes):
@@ -313,12 +302,12 @@ class Initial(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         j35 = dev['j35']
-        ocp_actual = mes['ramp_ocp_pre'](timeout=5).reading1
+        ocp_actual = mes['ramp_ocp_pre']().reading1
         # Adjust current setpoint
         j35['OCP_CAL'] = round(
             j35['OCP_CAL'] * ocp_actual / self.config['OCP'])
         j35['NVWRITE'] = True
-        mes['ramp_ocp'](timeout=5)
+        mes['ramp_ocp']()
         dev['dcl_out'].output(0.0)
         dev['dcl_bat'].output(0.0)
 
@@ -448,7 +437,7 @@ class Sensors(share.Sensors):
             detect_limit=(self.limits['InOCP'], ),
             start=low - load_current - 1,
             stop=high - load_current + 1,
-            step=0.1, delay=0.1)
+            step=0.1)
         self['ocp_pre'].on_read = lambda value: value + load_current
         # Post-adjust OCP
         low, high = self.limits['OCP'].limit
@@ -458,7 +447,7 @@ class Sensors(share.Sensors):
             detect_limit=(self.limits['InOCP'], ),
             start=low - load_current - 1,
             stop=high - load_current + 1,
-            step=0.1, delay=0.1)
+            step=0.1)
         self['ocp'].on_read = lambda value: value + load_current
 
 
