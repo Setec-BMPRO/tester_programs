@@ -20,10 +20,10 @@ class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
-    arm_version = '2.0.16018.4543'
-    arm_hw_ver = 10
+    arm_version = '2.1.16538.4544'
+    arm_hw_ver = 12
     pic_version = '1.4.14454.271'
-    pic_hw_ver = 3
+    pic_hw_ver = 4
     # Serial port for the ARM. Used by programmer and ARM comms module.
     arm_port = share.port('027176', 'ARM')
     # ARM software image file
