@@ -329,11 +329,6 @@ class Initial(share.TestSequence):
         # A little load on the output.
         dev['dcl_out'].output(1.0, True)
         mes['dmm_vloadoff'](timeout=2)
-#        # One at a time ON
-#        for load in range(self.outputs):
-#            with tester.PathName('L{0}'.format(load + 1)):
-#                bp35.load_set(set_on=True, loads=(load, ))
-#                mes['dmm_vload'](timeout=2)
         # All outputs ON
         bp35.load_set(set_on=False, loads=())
 
@@ -372,11 +367,11 @@ class Initial(share.TestSequence):
         for load in range(self.outputs):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
-        ocp_actual = mes['ramp_ocp_pre'](timeout=5).reading1
+        ocp_actual = mes['ramp_ocp_pre']().reading1
         # Adjust current setpoint
         bp35['OCP_CAL'] = round(bp35['OCP_CAL'] * ocp_actual / self.ocp_set)
         bp35['NVWRITE'] = True
-        mes['ramp_ocp'](timeout=5)
+        mes['ramp_ocp']()
         dev['dcl_out'].output(0.0)
         dev['dcl_bat'].output(0.0)
 
@@ -551,7 +546,7 @@ class Sensors(share.Sensors):
             detect_limit=(self.limits['InOCP'], ),
             start=low - Initial.iload - 1,
             stop=high - Initial.iload + 1,
-            step=0.1, delay=0.1)
+            step=0.1)
         self['ocp_pre'].on_read = lambda value: value + Initial.iload
         # Post-adjust OCP
         low, high = self.limits['OCP'].limit
@@ -561,7 +556,7 @@ class Sensors(share.Sensors):
             detect_limit=(self.limits['InOCP'], ),
             start=low - Initial.iload - 1,
             stop=high - Initial.iload + 1,
-            step=0.1, delay=0.1)
+            step=0.1)
         self['ocp'].on_read = lambda value: value + Initial.iload
 
 
