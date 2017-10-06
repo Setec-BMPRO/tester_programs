@@ -16,52 +16,44 @@ import share
 from . import arduino
 from . import console
 
-BIN_VERSION = '3.1.2118'        # Software versions
-PIC_HEX1 = 'sx750_pic5Vsb_1.hex'
-PIC_HEX2 = 'sx750_picPwrSw_2.hex'
-
-# Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = share.port('022837', 'ARM')
-# Serial port for the Arduino.
-ARDUINO_PORT = share.port('022837', 'ARDUINO')
-# Software image filenames
-ARM_BIN = 'sx750_arm_{}.bin'.format(BIN_VERSION)
-
-# Reading to reading difference for PFC voltage stability
-PFC_STABLE = 0.05
-
-# Fan ON threshold temperature (C)
-FAN_THRESHOLD = 55.0
-
-_5VSB_EXT = 6.3
-PRICTL_EXT = 13.0
-
 
 class Initial(share.TestSequence):
 
     """SX-750 Initial Test Program."""
 
+    # Software version
+    bin_version = '3.1.2118'
+    # Software image filenames
+    arm_bin = 'sx750_arm_{0}.bin'.format(bin_version)
+    # Reading to reading difference for PFC voltage stability
+    pfc_stable = 0.05
+    # Fan ON threshold temperature (C)
+    fan_threshold = 55.0
+    # Injected voltages
+    _5vsb_ext = 6.3
+    prictl_ext = 13.0
+
     limitdata = (
         LimitDelta('8.5V Arduino', 8.5, 0.4),
         LimitLow('5Voff', 0.5),
-        LimitDelta('5Vext', _5VSB_EXT - 0.8, 1.0),
-        LimitDelta('5Vunsw', _5VSB_EXT - 0.8 - 0.7, 1.0),
+        LimitDelta('5Vext', _5vsb_ext - 0.8, 1.0),
+        LimitDelta('5Vunsw', _5vsb_ext - 0.8 - 0.7, 1.0),
         LimitPercent('5Vsb_set', 5.10, 1.5),
         LimitPercent('5Vsb', 5.10, 5.5),
-        LimitLow('5Vsb_reg', 3.0),        # Load Reg < 3.0%
+        LimitLow('5Vsb_reg', 3.0),      # Load Reg < 3.0%
         LimitLow('12Voff', 0.5),
         LimitPercent('12V_set', 12.25, 2.0),
         LimitPercent('12V', 12.25, 8.0),
-        LimitLow('12V_reg', 3.0),         # Load Reg < 3.0%
-        LimitBetween('12V_ocp', 4, 63),     # Digital Pot setting - counts up from MIN
-        LimitHigh('12V_inOCP', 4.0),       # Detect OCP when TP405 > 4V
+        LimitLow('12V_reg', 3.0),       # Load Reg < 3.0%
+        LimitBetween('12V_ocp', 4, 63), # Digital Pot setting - counts up from MIN
+        LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405 > 4V
         LimitBetween('12V_OCPchk', 36.2, 37.0),
         LimitLow('24Voff', 0.5),
         LimitPercent('24V_set', 24.13, 2.0),
         LimitPercent('24V', 24.13, 10.5),
-        LimitLow('24V_reg', 7.5),         # Load Reg < 7.5%
-        LimitBetween('24V_ocp', 4, 63),     # Digital Pot setting - counts up from MIN
-        LimitHigh('24V_inOCP', 4.0),       # Detect OCP when TP404 > 4V
+        LimitLow('24V_reg', 7.5),       # Load Reg < 7.5%
+        LimitBetween('24V_ocp', 4, 63), # Digital Pot setting - counts up from MIN
+        LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404 > 4V
         LimitBetween('24V_OCPchk', 18.1, 18.5),
         LimitBetween('PriCtl', 11.40, 17.0),
         LimitLow('PGOOD', 0.5),
@@ -83,8 +75,8 @@ class Initial(share.TestSequence):
         LimitLow('ARM-12V', 999),
         LimitLow('ARM-24V', 999),
         LimitRegExp(
-            'ARM-SwVer', '^{}$'.format(BIN_VERSION[:3].replace('.', r'\.'))),
-        LimitRegExp('ARM-SwBld', '^{}$'.format(BIN_VERSION[4:])),
+            'ARM-SwVer', '^{0}$'.format(bin_version[:3].replace('.', r'\.'))),
+        LimitRegExp('ARM-SwBld', '^{0}$'.format(bin_version[4:])),
         LimitLow('FixtureLock', 200),
         LimitLow('PartCheck', 1.0),           # Photo sensor on D404
         LimitBetween('Snubber', 1000, 3000),    # Snubbing resistors
@@ -128,32 +120,26 @@ class Initial(share.TestSequence):
         # Set BOOT active before power-on so the ARM boot-loader runs
         dev['rla_boot'].set_on()
         # Apply and check injected 5Vsb
-        dev['dcs_5Vsb'].output(_5VSB_EXT, True)
+        dev['dcs_5Vsb'].output(self._5vsb_ext, True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
             timeout=5)
-        if self.fifo:
-            self._logger.info(
-                '**** Programming skipped due to active FIFOs ****')
-        else:
-            dev['programmer'].program()  # Program the ARM device
+        dev['programmer'].program()     # Program the ARM device
         dev['ard'].open()
-        time.sleep(2)        # Wait for Arduino to start
-        dev['rla_pic1'].set_on()
+        dev['rla_pic1'].set_on(delay=2) # Wait for Arduino to start
         dev['rla_pic1'].opc()
         mes['dmm_5Vunsw'](timeout=2)
-        mes['pgm_5vsb']()
+        mes['pgm_5vsb']()               # Program the 5V Switch Board
         dev['rla_pic1'].set_off()
         # Switch off 5Vsb rail and discharge the 5Vsb to stop the ARM
         dev['dcs_5Vsb'].output(0)
-        self.dcload(
-            (('dcl_5Vsb', 0.1), ), output=True, delay=0.5)
+        self.dcload((('dcl_5Vsb', 0.1), ), output=True, delay=0.5)
         # Apply and check injected 12V PriCtl
-        dev['dcs_PriCtl'].output(PRICTL_EXT, True)
+        dev['dcs_PriCtl'].output(self.prictl_ext, True)
         mes['dmm_PriCtl'](timeout=2)
         dev['rla_pic2'].set_on()
         dev['rla_pic2'].opc()
-        mes['pgm_pwrsw']()
+        mes['pgm_pwrsw']()              # Program the Power Switch Board
         dev['rla_pic2'].set_off()
         dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
         mes['ocp_max']()
@@ -174,17 +160,15 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         arm.open()
-        dev['dcs_5Vsb'].output(_5VSB_EXT, True)
-        self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
-        time.sleep(2)           # ARM startup delay
+        dev['dcs_5Vsb'].output(self._5vsb_ext, True)
+        self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
         arm['UNLOCK'] = True
-        arm['FAN_SET'] = FAN_THRESHOLD
+        arm['FAN_SET'] = self.fan_threshold
         arm['NVWRITE'] = True
-        time.sleep(1.0)
+        time.sleep(1)
         # Switch everything off
         dev['dcs_5Vsb'].output(0, False)
-        dev['dcl_5Vsb'].output(0.1)
-        time.sleep(0.5)
+        dev['dcl_5Vsb'].output(0.1, delay=0.5)
         dev['dcl_5Vsb'].output(0)
 
     @share.teststep
@@ -216,18 +200,18 @@ class Initial(share.TestSequence):
              'arm_SwVer', 'arm_SwBld'), )
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
-        pfc = mes['dmm_PFCpre'].stable(PFC_STABLE).reading1
+        pfc = mes['dmm_PFCpre'].stable(self.pfc_stable).reading1
         arm.calpfc(pfc)
         # Prevent a fail from failing the unit
         mes['dmm_PFCpost'].position_fail = False
-        result = mes['dmm_PFCpost'].stable(PFC_STABLE).result
+        result = mes['dmm_PFCpost'].stable(self.pfc_stable).result
         # Allow a fail to fail the unit
         mes['dmm_PFCpost'].position_fail = True
         if not result:
             self._logger.info('Retry PFC calibration')
-            pfc = mes['dmm_PFCpre'].stable(PFC_STABLE).reading1
+            pfc = mes['dmm_PFCpre'].stable(self.pfc_stable).reading1
             arm.calpfc(pfc)
-            mes['dmm_PFCpost'].stable(PFC_STABLE)
+            mes['dmm_PFCpost'].stable(self.pfc_stable)
         # Leave the loads at zero
         dev['dcl_12V'].output(0)
         dev['dcl_24V'].output(0)
@@ -385,6 +369,11 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    # Serial port for the ARM. Used by programmer and ARM comms module.
+    arm_port = share.port('022837', 'ARM')
+    # Serial port for the Arduino.
+    arduino_port = share.port('022837', 'ARDUINO')
+
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -409,20 +398,20 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        file = os.path.join(folder, ARM_BIN)
+        file = os.path.join(folder, Initial.arm_bin)
         self['programmer'] = share.ProgramARM(
-            ARM_PORT, file, boot_relay=self['rla_boot'])
+            self.arm_port, file, boot_relay=self['rla_boot'])
         # Serial connection to the ARM console
         arm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = ARM_PORT
+        arm_ser.port = self.arm_port
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Arduino console
         ard_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = ARDUINO_PORT
+        ard_ser.port = self.arduino_port
         self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):

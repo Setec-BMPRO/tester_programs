@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for SX750 Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import sx750
 
@@ -13,6 +14,13 @@ class SX750Initial(ProgramTestCase):
     prog_class = sx750.Initial
     parameter = None
     debug = False
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -74,8 +82,8 @@ class SX750Initial(ProgramTestCase):
                     ('240Vrms ', ) +    # ARM_AcVolt
                     ('12180mV ', ) +    # ARM_12V
                     ('24000mV ', ) +    # ARM_24V
-                    (sx750.initial.BIN_VERSION[:3], ) +   # ARM SwVer
-                    (sx750.initial.BIN_VERSION[4:], ) +   # ARM BuildNo
+                    (sx750.Initial.bin_version[:3], ) +   # ARM SwVer
+                    (sx750.Initial.bin_version[4:], ) +   # ARM BuildNo
                     ('', ) * 4,
                 },
             UnitTester.key_ext: {       # Tuples of extra strings

@@ -71,18 +71,21 @@ class TestSequence(tester.TestSequence):
         self.devices = None
         super().close()
 
-    def measure(self, names, timeout=0):
+    def measure(self, names, timeout=0, delay=0):
         """Measure a group of measurements given the measurement names.
 
         @param names Measurement names
         @param timeout Measurement timeout
+        @param delay Time delay after measurements
         @return Measurement result
 
         """
         measurements = []
         for name in names:
             measurements.append(self.measurements[name])
-        return tester.MeasureGroup(measurements, timeout)
+        result = tester.MeasureGroup(measurements, timeout)
+        time.sleep(delay)
+        return result
 
     def dcload(self, setting, output=True, delay=0):
         """DC Load setter.
