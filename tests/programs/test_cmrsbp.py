@@ -61,6 +61,9 @@ class CMRSBPInitial(ProgramTestCase):
             'programs.cmrsbp.cmrsbp.CmrSbp', return_value=self.mycmr)
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('share.ProgramPIC')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def test_pass(self):
@@ -74,6 +77,9 @@ class CMRSBPInitial(ProgramTestCase):
                 'PowerUp': (
                     (sen['ovbatIn'], 0.5), (sen['ovbat'], 12.0),
                     (sen['oVcc'], 3.3),
+                    ),
+                'Program': (
+                    (sen['oVcc'], 5.0),
                     ),
                 'CheckPicValues': (
                     ),
@@ -94,9 +100,9 @@ class CMRSBPInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(15, len(result.readings))
+        self.assertEqual(16, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'CheckPicValues', 'CheckVcharge',
+            ['PowerUp', 'Program', 'CheckPicValues', 'CheckVcharge',
              'CalBQvolts', 'CalBQcurrent'],
             self.tester.ut_steps)
         # Check EV2200 calls

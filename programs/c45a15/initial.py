@@ -51,7 +51,7 @@ class Initial(share.TestSequence):
         self.steps = (
             TestStep('FixtureLock', self._step_fixture_lock),
             TestStep('SecCheck', self._step_sec_check),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self.devices['program_pic'].program),
             TestStep('OVP', self._step_ovp),
             TestStep('PowerUp', self._step_power_up),
             TestStep('Load', self._step_load),
@@ -72,11 +72,6 @@ class Initial(share.TestSequence):
         dev['dcs_VsecBias'].output(12.0, output=True, delay=1)
         self.measure(
             ('dmm_Vref', 'dmm_VsenseOn', 'dmm_VoutExt',), timeout=5)
-
-    @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the PIC device."""
-        dev['program_pic'].program()
 
     @share.teststep
     def _step_ovp(self, dev, mes):

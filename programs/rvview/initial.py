@@ -47,8 +47,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
-            TestStep(
-                'Program', self.devices['programmer'].program, not self.fifo),
+            TestStep('Program', self.devices['programmer'].program),
             TestStep('Initialise', self._step_initialise),
             TestStep('Display', self._step_display),
             TestStep('CanBus', self._step_canbus),

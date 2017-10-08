@@ -50,7 +50,7 @@ class Initial(share.TestSequence):
         self.steps = (
             TestStep('PartCheck', self._step_part_check),
             TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self.devices['programmer'].program),
             TestStep('TestArm', self._step_test_arm),
             TestStep('TankSense', self._step_tank_sense),
             TestStep('Bluetooth', self._step_bluetooth),
@@ -69,11 +69,6 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(8.6, output=True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
-
-    @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the ARM device."""
-        dev['programmer'].program()
 
     @share.teststep
     def _step_test_arm(self, dev, mes):

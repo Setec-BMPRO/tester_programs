@@ -65,7 +65,7 @@ class Initial(share.TestSequence):
             Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self.devices['program_pic'].program),
             TestStep('CalPre', self._step_cal_pre),
             TestStep('Calibrate', self._step_calibrate),
             )
@@ -75,11 +75,6 @@ class Initial(share.TestSequence):
         """Apply input DC and measure voltages."""
         dev['dcs_Vin'].output(12.0, output=True, delay=2)
         self.measure(('dmm_vin', 'dmm_Vcc'), timeout=5)
-
-    @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the PIC device."""
-        dev['program_pic'].program()
 
     @share.teststep
     def _step_cal_pre(self, dev, mes):

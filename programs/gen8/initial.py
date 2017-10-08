@@ -15,21 +15,19 @@ from tester import (
 import share
 from . import console
 
-BIN_VERSION = '1.4.645'     # Software binary version
-
-# Reading to reading difference for PFC voltage stability
-PFC_STABLE = 0.05
-# Reading to reading difference for 12V voltage stability
-V12_STABLE = 0.005
-# Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = share.port('025197', 'ARM')
-# Software image filename
-ARM_BIN = 'gen8_{0}.bin'.format(BIN_VERSION)
-
 
 class Initial(share.TestSequence):
 
     """GEN8 Initial Test Program."""
+
+    # Software binary version
+    bin_version = '1.4.645'
+    # Reading to reading difference for PFC voltage stability
+    pfc_stable = 0.05
+    # Reading to reading difference for 12V voltage stability
+    v12_stable = 0.005
+    # Software image filename
+    arm_bin = 'gen8_{0}.bin'.format(bin_version)
 
     limitdata = (
         LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
@@ -65,8 +63,8 @@ class Initial(share.TestSequence):
         LimitDelta('ARM-12V', 12.0, 1.0),
         LimitDelta('ARM-24V', 24.0, 2.0),
         LimitRegExp('SwVer', '^{0}$'.format(
-            BIN_VERSION[:3].replace('.', r'\.'))),
-        LimitRegExp('SwBld', '^{0}$'.format(BIN_VERSION[4:])),
+            bin_version[:3].replace('.', r'\.'))),
+        LimitRegExp('SwBld', '^{0}$'.format(bin_version[4:])),
         )
 
     def open(self):
@@ -74,7 +72,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PartDetect', self._step_part_detect),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self._step_program),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('PowerUp', self._step_powerup),
             TestStep('5V', self._step_reg_5v),
@@ -151,34 +149,34 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         dev.loads(i12=1.0, i24=1.0)
         # Calibrate the PFC set voltage
-        pfc = mes['dmm_pfcpre'].stable(PFC_STABLE).reading1
+        pfc = mes['dmm_pfcpre'].stable(self.pfc_stable).reading1
         arm.calpfc(pfc)
-        result, _, pfc = mes['dmm_pfcpost1'].stable(PFC_STABLE)
+        result, _, pfc = mes['dmm_pfcpost1'].stable(self.pfc_stable)
         if not result:      # 1st retry
             arm.calpfc(pfc)
-            result, _, pfc = mes['dmm_pfcpost2'].stable(PFC_STABLE)
+            result, _, pfc = mes['dmm_pfcpost2'].stable(self.pfc_stable)
         if not result:      # 2nd retry
             arm.calpfc(pfc)
-            result, _, pfc = mes['dmm_pfcpost3'].stable(PFC_STABLE)
+            result, _, pfc = mes['dmm_pfcpost3'].stable(self.pfc_stable)
         if not result:      # 3rd retry
             arm.calpfc(pfc)
-            mes['dmm_pfcpost4'].stable(PFC_STABLE)
+            mes['dmm_pfcpost4'].stable(self.pfc_stable)
         # A final PFC setup check
-        mes['dmm_pfcpost'].stable(PFC_STABLE)
+        mes['dmm_pfcpost'].stable(self.pfc_stable)
         # no load for 12V calibration
         dev.loads(i12=0, i24=0)
         # Calibrate the 12V set voltage
-        v12 = mes['dmm_12vpre'].stable(V12_STABLE).reading1
+        v12 = mes['dmm_12vpre'].stable(self.v12_stable).reading1
         arm.cal12v(v12)
         # Prevent a fail from failing the unit
         mes['dmm_12vset'].position_fail = False
-        result = mes['dmm_12vset'].stable(V12_STABLE).result
+        result = mes['dmm_12vset'].stable(self.v12_stable).result
         # Allow a fail to fail the unit
         mes['dmm_12vset'].position_fail = True
         if not result:
-            v12 = mes['dmm_12vpre'].stable(V12_STABLE).reading1
+            v12 = mes['dmm_12vpre'].stable(self.v12_stable).reading1
             arm.cal12v(v12)
-            mes['dmm_12vset'].stable(V12_STABLE)
+            mes['dmm_12vset'].stable(self.v12_stable)
         self.measure(
             ('arm_acfreq', 'arm_acvolt', 'arm_5v', 'arm_12v', 'arm_24v',
              'arm_swver', 'arm_swbld'), )
@@ -269,6 +267,9 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    # Serial port for the ARM. Used by programmer and ARM comms module.
+    arm_port = share.port('025197', 'ARM')
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -293,13 +294,13 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.ProgramARM(
-            ARM_PORT, os.path.join(folder, ARM_BIN),
+            self.arm_port, os.path.join(folder, Initial.arm_bin),
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the ARM console
         arm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
-        arm_ser.port = ARM_PORT
+        arm_ser.port = self.arm_port
         self['arm'] = console.Console(arm_ser)
         # Switch on fixture power
         self['dcs_fixture'].output(10.0, output=True)

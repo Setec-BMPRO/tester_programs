@@ -29,7 +29,7 @@ class InitialMicro(share.TestSequence):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self._step_program),
             TestStep('Comms', self._step_comms),
             )
 

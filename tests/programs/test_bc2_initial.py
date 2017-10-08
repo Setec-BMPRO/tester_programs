@@ -12,7 +12,7 @@ class BC2Initial(ProgramTestCase):
 
     prog_class = bc2.Initial
     parameter = None
-    debug = True
+    debug = False
     btmac = '001EC030BC15'
 
     def test_pass_run(self):

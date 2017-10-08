@@ -51,7 +51,7 @@ class InitialSyn(share.TestSequence):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self._step_program),
             TestStep('PowerUp', self._step_pwrup),
             TestStep('TecEnable', self._step_tec_enable),
             TestStep('TecReverse', self._step_tec_rev),

@@ -12,7 +12,7 @@ class TRSInitial(ProgramTestCase):
 
     prog_class = trs2.Initial
     parameter = None
-    debug = True
+    debug = False
     btmac = '001EC030BC15'
 
     def test_pass_run(self):

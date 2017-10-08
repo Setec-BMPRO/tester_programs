@@ -55,7 +55,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, MeasureIni)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self._step_program),
             TestStep('CheckPicValues', self._step_check_pic_vals),
             TestStep('CheckVcharge', self._step_check_vchge),
             TestStep('CalBQvolts', self._step_calv),

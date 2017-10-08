@@ -28,7 +28,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self.devices['program_pic'].program),
             TestStep('Load', self._step_load),
             )
 
@@ -39,11 +39,6 @@ class Initial(share.TestSequence):
         dev['dcs_Vin'].output(13.0, output=True)
         self.measure(
             ('dmm_Vin', 'dmm_Vin2', 'dmm_5V', ), timeout=10)
-
-    @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the PIC micro."""
-        dev['program_pic'].program()
 
     @share.teststep
     def _step_load(self, dev, mes):

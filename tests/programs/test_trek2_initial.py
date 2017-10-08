@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for Trek2 Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trek2
 
@@ -13,6 +14,13 @@ class Trek2Initial(ProgramTestCase):
     prog_class = trek2.Initial
     parameter = None
     debug = False
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -44,4 +52,4 @@ class Trek2Initial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(6, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'TestArm', 'CanBus'], self.tester.ut_steps)
+            ['PowerUp', 'Program', 'TestArm', 'CanBus'], self.tester.ut_steps)

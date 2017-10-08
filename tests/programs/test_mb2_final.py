@@ -12,7 +12,7 @@ class MB2Final(ProgramTestCase):
 
     prog_class = mb2.Final
     parameter = None
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""

@@ -87,7 +87,7 @@ class Initial(share.TestSequence):
             self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
-            tester.TestStep('Program', self._step_program, not self.fifo),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('Output', self._step_output),

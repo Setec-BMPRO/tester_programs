@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for C45A-15 Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import c45a15
 
@@ -13,6 +14,13 @@ class C45A15Initial(ProgramTestCase):
     prog_class = c45a15.Initial
     parameter = None
     debug = False
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramPIC')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -51,5 +59,6 @@ class C45A15Initial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(28, len(result.readings))
         self.assertEqual(
-            ['FixtureLock', 'SecCheck', 'OVP', 'PowerUp', 'Load', 'OCP'],
+            ['FixtureLock', 'SecCheck', 'Program',
+             'OVP', 'PowerUp', 'Load', 'OCP'],
             self.tester.ut_steps)

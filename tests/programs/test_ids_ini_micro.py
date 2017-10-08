@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for IDS500 Micro Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import ids500
 
@@ -14,11 +15,24 @@ class Ids500MicroInitial(ProgramTestCase):
     parameter = None
     debug = False
 
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramPIC')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
     def test_pass_run(self):
         """PASS run of the program."""
+        sen = self.test_program.sensors
         dev = self.test_program.devices
         dev['pic'].port.flushInput()    # Flush console input buffer
         data = {
+            UnitTester.key_sen: {       # Tuples of sensor data
+                'Program': (
+                    (sen['Vsec5VuP'], 5.0),
+                    ),
+                },
             UnitTester.key_con: {       # Tuples of console strings
                 'Comms': (
                     '',
@@ -33,5 +47,5 @@ class Ids500MicroInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(2, len(result.readings))
-        self.assertEqual(['Comms'], self.tester.ut_steps)
+        self.assertEqual(3, len(result.readings))
+        self.assertEqual(['Program', 'Comms'], self.tester.ut_steps)

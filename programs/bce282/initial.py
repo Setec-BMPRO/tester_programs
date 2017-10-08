@@ -131,9 +131,8 @@ class Initial(share.TestSequence):
             msp.open()
             msp.measurement_fail_on_error = False
             password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
-            if not self.fifo:
-                with open(self.msp_password, 'w') as fout:
-                    fout.write(password)
+            with open(self.msp_password, 'w') as fout:
+                fout.write(password)
         except share.console.protocol.ConsoleError:
             pass
         finally:
@@ -148,11 +147,10 @@ class Initial(share.TestSequence):
             )
         tosbsl.main()
         # Write TI Text format calibration data to a file for use later
-        if not self.fifo:
-            with open(self.msp_savefile, 'w') as fout:
-                for aline in tosbsl.SAVEDATA:
-                    fout.write(aline)
-                    fout.write('\n')
+        with open(self.msp_savefile, 'w') as fout:
+            for aline in tosbsl.SAVEDATA:
+                fout.write(aline)
+                fout.write('\n')
         # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
         sys.argv = ['',
             '--comport={0}'.format(self.msp_port1),

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for Drifter(BM) Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import drifter
 
@@ -11,6 +12,13 @@ class _DrifterInitial(ProgramTestCase):
     """Drifter(BM) Initial program test suite."""
 
     prog_class = drifter.Initial
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramPIC')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def _pass_run(self):
         """PASS run of the program."""
@@ -50,7 +58,7 @@ class _DrifterInitial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(22, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'CalPre','Calibrate'], self.tester.ut_steps)
+            ['PowerUp', 'Program', 'CalPre','Calibrate'], self.tester.ut_steps)
 
 
 class Drifter_Initial(_DrifterInitial):

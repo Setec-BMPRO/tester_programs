@@ -12,7 +12,7 @@ class BLE2CANInitial(ProgramTestCase):
 
     prog_class = ble2can.Initial
     parameter = None
-    debug = True
+    debug = False
     btmac = '001EC030BC15'
 
     def test_pass_run(self):

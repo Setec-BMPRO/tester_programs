@@ -66,7 +66,7 @@ class Initial(share.TestSequence):
             Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
-            TestStep('Program', self._step_program, not self.fifo),
+            TestStep('Program', self._step_program),
             TestStep('Aux', self._step_aux),
             TestStep('PowerUp', self._step_powerup),
             TestStep('VoutAdj', self._step_vout_adj),

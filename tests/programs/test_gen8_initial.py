@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for GEN8 Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import gen8
 
@@ -14,6 +15,13 @@ class Gen8Initial(ProgramTestCase):
     parameter = None
     debug = False
 
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
@@ -24,6 +32,9 @@ class Gen8Initial(ProgramTestCase):
                 'PartDetect': (
                     (sen['lock'], 10.0), (sen['part'], 10.0),
                     (sen['fanshort'], 200.0),
+                    ),
+                'Program': (
+                    (sen['o5v'], 5.0), (sen['o3v3'], 3.3),
                     ),
                 'PowerUp': (
                     (sen['acin'], 240.0), (sen['o5v'], (5.05, 5.11, )),
@@ -61,15 +72,16 @@ class Gen8Initial(ProgramTestCase):
                     ('5050mV ', ) +     # ARM_5V
                     ('12180mV ', ) +    # ARM_12V
                     ('24000mV ', ) +    # ARM_24V
-                    (gen8.initial.BIN_VERSION[:3], ) +    # ARM SwVer
-                    (gen8.initial.BIN_VERSION[4:], ),     # ARM BuildNo
+                    (gen8.initial.Initial.bin_version[:3], ) +  # ARM SwVer
+                    (gen8.initial.Initial.bin_version[4:], ),   # ARM BuildNo
                 },
             }
         self.tester.ut_load(data, self.test_program.fifo_push, dev['arm'].puts)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(39, len(result.readings))
+        self.assertEqual(41, len(result.readings))
         self.assertEqual(
-            ['PartDetect', 'Initialise', 'PowerUp', '5V', '12V', '24V'],
+            ['PartDetect', 'Program', 'Initialise', 'PowerUp',
+             '5V', '12V', '24V'],
             self.tester.ut_steps)

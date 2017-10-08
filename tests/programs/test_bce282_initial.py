@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BCE282-12/24 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, mock_open
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bce282
 
@@ -17,8 +17,10 @@ class _BCE282Initial(ProgramTestCase):
         """Per-Test setup."""
         # Patch tosbsl driver
         self.mybsl = MagicMock(name='tosbsl')
-        patcher = patch(
-            'programs.bce282.tosbsl.main', new=self.mybsl)
+        patcher = patch('programs.bce282.tosbsl.main', new=self.mybsl)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('builtins.open', mock_open())
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

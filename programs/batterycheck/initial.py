@@ -60,8 +60,8 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PreProgram', self._step_pre_program),
-            TestStep('ProgramAVR', self._step_program_avr, not self.fifo),
-            TestStep('ProgramARM', self._step_program_arm, not self.fifo),
+            TestStep('ProgramAVR', self._step_program_avr),
+            TestStep('ProgramARM', self._step_program_arm),
             TestStep('InitialiseARM', self._step_initialise_arm),
             TestStep('ARM', self._step_test_arm),
             TestStep('BlueTooth', self._step_test_bluetooth),

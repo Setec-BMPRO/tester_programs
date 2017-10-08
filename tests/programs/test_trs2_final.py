@@ -12,7 +12,7 @@ class TRSFinal(ProgramTestCase):
 
     prog_class = trs2.Final
     parameter = None
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""

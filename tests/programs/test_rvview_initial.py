@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVVIEW Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvview
 
@@ -13,6 +14,13 @@ class RvViewInitial(ProgramTestCase):
     prog_class = rvview.Initial
     parameter = None
     debug = False
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -50,5 +58,5 @@ class RvViewInitial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(10, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'Initialise', 'Display', 'CanBus'],
+            ['PowerUp', 'Program', 'Initialise', 'Display', 'CanBus'],
             self.tester.ut_steps)

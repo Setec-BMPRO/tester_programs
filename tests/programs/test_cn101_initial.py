@@ -16,6 +16,13 @@ class CN101Initial(ProgramTestCase):
     debug = False
     btmac = '001EC030BC15'
 
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
@@ -60,7 +67,7 @@ class CN101Initial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(15, len(result.readings))
         self.assertEqual(
-            ['PartCheck', 'PowerUp', 'TestArm',
+            ['PartCheck', 'PowerUp', 'Program', 'TestArm',
              'TankSense', 'Bluetooth', 'CanBus'],
             self.tester.ut_steps)
 

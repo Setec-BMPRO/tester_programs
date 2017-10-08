@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BatteryCheck Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import batterycheck
 
@@ -14,6 +15,16 @@ class BatteryCheckInitial(ProgramTestCase):
     parameter = None
     debug = False
     serial = 'A1509020010'
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('subprocess.check_output')  # for step ProgramAVR
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -64,7 +75,8 @@ class BatteryCheckInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(11, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
-            ['PreProgram', 'InitialiseARM', 'ARM', 'BlueTooth'],
+            ['PreProgram', 'ProgramAVR', 'ProgramARM',
+             'InitialiseARM', 'ARM', 'BlueTooth'],
             self.tester.ut_steps)

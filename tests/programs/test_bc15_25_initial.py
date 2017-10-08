@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BC15/25 Initial Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc15_25
 
@@ -17,6 +18,13 @@ class _BC15_25_Initial(ProgramTestCase):
         'Banner line 3\r\n'
         )
 
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramARM')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
     def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
@@ -24,15 +32,24 @@ class _BC15_25_Initial(ProgramTestCase):
         dev['arm'].port.flushInput()    # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'PartDetect':
-                    ((sen['lock'], 0.0), (sen['fanshort'], 3300.0), ),
-                'PowerUp':
-                    ((sen['ACin'], 240.0), (sen['Vbus'], 330.0),
-                     (sen['12Vs'], 12.0), (sen['5Vs'], 5.0),
-                     (sen['3V3'], 3.3), (sen['15Vs'], 15.0),
-                     (sen['Vout'], 0.2), ),
-                'Output': ((sen['Vout'], 14.40), (sen['Vout'], 14.40), ),
-                'Loaded': ((sen['Vout'], (14.4, ) * 10 + (11.0, ), ), ),
+                'PartDetect': (
+                    (sen['lock'], 0.0), (sen['fanshort'], 3300.0),
+                    ),
+                'Program': (
+                    (sen['3V3'], 3.3),
+                    ),
+                'PowerUp': (
+                    (sen['ACin'], 240.0), (sen['Vbus'], 330.0),
+                    (sen['12Vs'], 12.0), (sen['5Vs'], 5.0),
+                    (sen['3V3'], 3.3), (sen['15Vs'], 15.0),
+                    (sen['Vout'], 0.2),
+                    ),
+                'Output': (
+                    (sen['Vout'], 14.40), (sen['Vout'], 14.40),
+                    ),
+                'Loaded': (
+                    (sen['Vout'], (14.4, ) * 10 + (11.0, ), ),
+                    ),
                 },
             UnitTester.key_con: {       # Tuples of console strings
                 'Initialise': (
@@ -80,9 +97,10 @@ class _BC15_25_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(19, len(result.readings))
+        self.assertEqual(20, len(result.readings))
         self.assertEqual(
-            ['PartDetect', 'Initialise', 'PowerUp', 'Output', 'Loaded'],
+            ['PartDetect', 'Program', 'Initialise', 'PowerUp',
+             'Output', 'Loaded'],
             self.tester.ut_steps)
 
 

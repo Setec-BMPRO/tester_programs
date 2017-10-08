@@ -13,6 +13,13 @@ class _Genius2Initial(ProgramTestCase):
 
     prog_class = genius2.Initial
 
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('share.ProgramPIC')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
     def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
@@ -46,7 +53,8 @@ class _Genius2Initial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(28, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'Aux', 'PowerUp', 'VoutAdj', 'ShutDown', 'OCP'],
+            ['Prepare', 'Program', 'Aux', 'PowerUp', 'VoutAdj',
+             'ShutDown', 'OCP'],
             self.tester.ut_steps)
 
     def _fail_run(self):
