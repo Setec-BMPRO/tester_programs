@@ -12,9 +12,6 @@ import share
 from . import console
 from . import tosbsl
 
-# Serial port used by MSP430 comms module.
-MSP_PORT2 = share.port('020827', 'MSP2')
-
 
 class Initial(share.TestSequence):
 
@@ -22,6 +19,8 @@ class Initial(share.TestSequence):
 
     # Serial port for programming MSP430.
     msp_port1 = share.port('020827', 'MSP1')
+    # Serial port used by MSP430 comms module.
+    msp_port2 = share.port('020827', 'MSP2')
     # Calibration data save file (TI Text format)
     msp_savefile = {    # Needs to be writable by the tester login
         'posix': '/home/setec/testdata/bslsavedata.txt',
@@ -139,36 +138,38 @@ class Initial(share.TestSequence):
             msp.measurement_fail_on_error = True
             msp.close()
         dev['rla_prog'].set_on()
-        # STEP 1 - SAVE INTERNAL CALIBRATION
-        sys.argv = (['',
-            '--comport={0}'.format(self.msp_port1), ] +
-            (['-P', self.msp_password, ] if password else []) +
-            ['--upload=0x10C0', '--size=64', '--ti', ]
-            )
-        tosbsl.main()
-        # Write TI Text format calibration data to a file for use later
-        with open(self.msp_savefile, 'w') as fout:
-            for aline in tosbsl.SAVEDATA:
-                fout.write(aline)
-                fout.write('\n')
-        # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
-        sys.argv = ['',
-            '--comport={0}'.format(self.msp_port1),
-            '--masserase',
-            '--program', self.msp_savefile,
-            ]
-        tosbsl.main()
-        # STEP 3 - PROGRAM
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        sys.argv = ['',
-            '--comport={0}'.format(self.msp_port1),
-            '--program', os.path.join(folder,
-                self.limitdata[self.parameter]['HexFile']),
-            ]
-        tosbsl.main()
-        dev['rla_prog'].set_off()
-        dev['dcs_vccbias'].output(0.0, delay=1)
+        try:
+            # STEP 1 - SAVE INTERNAL CALIBRATION
+            sys.argv = (['',
+                '--comport={0}'.format(self.msp_port1), ] +
+                (['-P', self.msp_password, ] if password else []) +
+                ['--upload=0x10C0', '--size=64', '--ti', ]
+                )
+            tosbsl.main()
+            # Write TI Text format calibration data to a file for use later
+            with open(self.msp_savefile, 'w') as fout:
+                for aline in tosbsl.SAVEDATA:
+                    fout.write(aline)
+                    fout.write('\n')
+            # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
+            sys.argv = ['',
+                '--comport={0}'.format(self.msp_port1),
+                '--masserase',
+                '--program', self.msp_savefile,
+                ]
+            tosbsl.main()
+            # STEP 3 - PROGRAM
+            folder = os.path.dirname(
+                os.path.abspath(inspect.getfile(inspect.currentframe())))
+            sys.argv = ['',
+                '--comport={0}'.format(self.msp_port1),
+                '--program', os.path.join(folder,
+                    self.limitdata[self.parameter]['HexFile']),
+                ]
+            tosbsl.main()
+        finally:
+            dev['rla_prog'].set_off()
+            dev['dcs_vccbias'].output(0.0, delay=1)
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -228,7 +229,7 @@ class Devices(share.Devices):
         self['msp_ser'] = tester.SimSerial(
             simulation=self.fifo, baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['msp_ser'].port = MSP_PORT2
+        self['msp_ser'].port = Initial.msp_port2
         # MSP430 Console driver
         self['msp'] = console.Console(self['msp_ser'])
         # Apply power to fixture circuits.

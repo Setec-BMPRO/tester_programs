@@ -1858,8 +1858,10 @@ def main():
         elif filename:
             bsl.data.loadFile(filename)             #autodetect otherwise
 
-    if DEBUG > 3: sys.stderr.write("File: %r" % filename)
+    if DEBUG > 3:
+        sys.stderr.write("File: %r" % filename)
 
+    sys.stderr.write('Open serial port')
     bsl.comInit(comPort)                            #init port
 
     try:
@@ -1938,6 +1940,7 @@ def main():
             wait = 0    # wait makes no sense as after the upload the device
                         # is still in BSL
     finally:
+        sys.stderr.write('Close serial port')
         bsl.comDone()           #Release serial communication port
 
     if wait:                                        #wait at the end if desired
