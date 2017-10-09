@@ -756,7 +756,11 @@ class LowLevel:
 
             self.serialport.write(bytearray([self.BSL_SYNC]))   #Send synchronization byte
             c = self.serialport.read(1)             #read answer
-            if type(c) != str: c = chr(c[0])        #for version 3
+            if type(c) != str:                      #for Python 3
+                try:
+                    c = chr(c[0])
+                except IndexError:
+                    c = None
             if c == chr(self.DATA_ACK):             #ACk
                 if DEBUG > 1:
                     sys.stderr.write("  bslSync() OK\n")
