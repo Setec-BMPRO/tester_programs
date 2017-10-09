@@ -246,7 +246,7 @@ class Devices(share.Devices):
         self['discharge'].pulse()
         for ld in ('dcl_vout', 'dcl_vbat'):
             self[ld].output(0.0, False)
-        for dcs in ('dcs_vccbias'):
+        for dcs in ('dcs_vccbias', ):
             self[dcs].output(0.0, False)
         self['rla_prog'].set_off()
 
