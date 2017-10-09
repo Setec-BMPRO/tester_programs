@@ -62,6 +62,7 @@ class Console(console.BaseConsole):
         self['ECHO'] = True
         self['UNLOCK'] = True
         self['TEST-MODE'] = True
+        time.sleep(0.1)
 
     def filter_reload(self):
         """Reset internal filters and wait for readings to settle."""
