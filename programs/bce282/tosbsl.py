@@ -882,7 +882,7 @@ class Memory:
             length  = int(l[1:3],16)
             address = int(l[3:7],16)
             type    = int(l[7:9],16)
-            check   = int(l[-2:],16)
+#            check   = int(l[-2:],16)
             if type == 0x00:
                 if currentAddr != address:
                     if segmentdata:
@@ -1049,9 +1049,9 @@ class BootStrapLoader(LowLevel):
                         raise BSLException(self.ERR_ERASE_CHECK_FAILED) #Erase Check failed!
                     continue
 
-    def readBlk(self,adr,len):
-        """Read a block of memory."""
-        blkin = self.bslTxRx(self.BSL_RXBLK, addr, len(blkout))
+#    def readBlk(self,adr,len):
+#        """Read a block of memory."""
+#        blkin = self.bslTxRx(self.BSL_RXBLK, addr, len(blkout))
 
     def memOffset(self, addr):
         """
@@ -1862,87 +1862,88 @@ def main():
 
     bsl.comInit(comPort)                            #init port
 
-    #initialization list
-    if toinit:  #erase and erase check
-        if DEBUG: sys.stderr.write("Preparing device ...\n")
-        #bsl.actionStartBSL(usepatch=0, adjsp=0)     #no workarounds needed
-        #if speed: bsl.actionChangeBaudrate(speed)   #change baud rate as fast as possible
-        for f in toinit: f()
+    try:
+        #initialization list
+        if toinit:  #erase and erase check
+            if DEBUG: sys.stderr.write("Preparing device ...\n")
+            #bsl.actionStartBSL(usepatch=0, adjsp=0)     #no workarounds needed
+            #if speed: bsl.actionChangeBaudrate(speed)   #change baud rate as fast as possible
+            for f in toinit: f()
 
-    if todo or goaddr or startaddr:
-        if DEBUG: sys.stderr.write("Actions ...\n")
-        #connect to the BSL
-        bsl.actionStartBSL(
-            usepatch=not unpatched,
-            replacementBSL=bslrepl,
-            forceBSL=forceBSL,
-            mayuseBSL=mayuseBSL,
-            speed=speed,
-        )
+        if todo or goaddr or startaddr:
+            if DEBUG: sys.stderr.write("Actions ...\n")
+            #connect to the BSL
+            bsl.actionStartBSL(
+                usepatch=not unpatched,
+                replacementBSL=bslrepl,
+                forceBSL=forceBSL,
+                mayuseBSL=mayuseBSL,
+                speed=speed,
+            )
 
-    #work list
-    if todo:
-        if DEBUG > 0:       #debug
-            #show a nice list of sheduled actions
-            sys.stderr.write("TODO list:\n")
-            for f in todo:
-                try:
-                    sys.stderr.write("   %s\n" % f.__name__)
-                except AttributeError:
-                    sys.stderr.write("   %r\n" % f)
-        for f in todo: f()                          #work through todo list
+        #work list
+        if todo:
+            if DEBUG > 0:       #debug
+                #show a nice list of sheduled actions
+                sys.stderr.write("TODO list:\n")
+                for f in todo:
+                    try:
+                        sys.stderr.write("   %s\n" % f.__name__)
+                    except AttributeError:
+                        sys.stderr.write("   %r\n" % f)
+            for f in todo: f()                          #work through todo list
 
-    if reset:                                       #reset device first if desired
-        bsl.actionReset()
+        if reset:                                       #reset device first if desired
+            bsl.actionReset()
 
-    if goaddr is not None:                          #start user programm at specified address
-        bsl.actionRun(goaddr)                       #load PC and execute
+        if goaddr is not None:                          #start user programm at specified address
+            bsl.actionRun(goaddr)                       #load PC and execute
 
-    #upload datablock and output
-    if startaddr is not None:
-        if goaddr:                                  #if a program was started...
-            #don't restart BSL but wait for the device to enter it itself
-            sys.stderr.write("Waiting for device to reconnect for upload: ")
-            sys.stderr.flush()
-            bsl.txPasswd(bsl.passwd, wait=1)        #synchronize, try forever...
-            data = bsl.uploadData(startaddr, size)  #upload data
-        else:
-            data = bsl.uploadData(startaddr, size)  #upload data
-        if hexoutput == 1:                          # Hex format
-            m = 0
-            while m < len(data):                    #print a hex display
-                print(hexify(startaddr + m, data[m:m + 16]))
-                m = m + 16
-        elif hexoutput == 2:                        #TI Text
-# Start SETEC modification
-#            print('@%04x' % startaddr)
-#            m = 0
-#            while m < len(data):
-#                print(' '.join(['%02x' % d for d in data[m:m+16]]))
-#                m = m + 16
-#            print('q')
-# Replace the print() with a 'savedata' string representation
-            SAVEDATA.clear()
-            SAVEDATA.append('@%04x' % startaddr)
-            m = 0
-            while m < len(data):
-                SAVEDATA.append(' '.join(['%02x' % d for d in data[m:m+16]]))
-                m = m + 16
-            SAVEDATA.append('q')
-            for aline in SAVEDATA:
-                print(aline)
-# End SETEC modification
-        else:
-            sys.stdout.write(data)                  #binary output w/o newline!
-        wait = 0    # wait makes no sense as after the upload the device
-                    # is still in BSL
+        #upload datablock and output
+        if startaddr is not None:
+            if goaddr:                                  #if a program was started...
+                #don't restart BSL but wait for the device to enter it itself
+                sys.stderr.write("Waiting for device to reconnect for upload: ")
+                sys.stderr.flush()
+                bsl.txPasswd(bsl.passwd, wait=1)        #synchronize, try forever...
+                data = bsl.uploadData(startaddr, size)  #upload data
+            else:
+                data = bsl.uploadData(startaddr, size)  #upload data
+            if hexoutput == 1:                          # Hex format
+                m = 0
+                while m < len(data):                    #print a hex display
+                    print(hexify(startaddr + m, data[m:m + 16]))
+                    m = m + 16
+            elif hexoutput == 2:                        #TI Text
+    # Start SETEC modification
+    #            print('@%04x' % startaddr)
+    #            m = 0
+    #            while m < len(data):
+    #                print(' '.join(['%02x' % d for d in data[m:m+16]]))
+    #                m = m + 16
+    #            print('q')
+    # Replace the print() with a 'savedata' string representation
+                SAVEDATA.clear()
+                SAVEDATA.append('@%04x' % startaddr)
+                m = 0
+                while m < len(data):
+                    SAVEDATA.append(' '.join(['%02x' % d for d in data[m:m+16]]))
+                    m = m + 16
+                SAVEDATA.append('q')
+                for aline in SAVEDATA:
+                    print(aline)
+    # End SETEC modification
+            else:
+                sys.stdout.write(data)                  #binary output w/o newline!
+            wait = 0    # wait makes no sense as after the upload the device
+                        # is still in BSL
+    finally:
+        bsl.comDone()           #Release serial communication port
 
     if wait:                                        #wait at the end if desired
         sys.stderr.write("Press <ENTER> ...\n")     #display a prompt
         sys.stderr.flush()
         input()                                 #wait for newline
-
-    bsl.comDone()           #Release serial communication port
 
 
 if __name__ == '__main__':
