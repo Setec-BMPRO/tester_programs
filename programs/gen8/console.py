@@ -5,7 +5,6 @@
 from share import console
 
 Sensor = console.Sensor
-
 # Some easier to use short names
 ParameterString = console.ParameterString
 ParameterFloat = console.ParameterFloat
@@ -16,21 +15,21 @@ class Console(console.BaseConsole):
 
     """Communications to GEN8 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r> '
     cmd_data = {
         'AcFreq': ParameterFloat(
-            'X-AC-LINE-FREQUENCY', read_format='{} X?'),
-        'AcVolt': ParameterFloat('X-AC-LINE-VOLTS', read_format='{} X?'),
+            'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
+        'AcVolt': ParameterFloat(
+            'X-AC-LINE-VOLTS', read_format='{0} X?'),
         '5V': ParameterFloat(
-            'X-RAIL-VOLTAGE-5V', scale=1000, read_format='{} X?'),
+            'X-RAIL-VOLTAGE-5V', scale=1000, read_format='{0} X?'),
         '12V': ParameterFloat(
-            'X-RAIL-VOLTAGE-12V', scale=1000, read_format='{} X?'),
+            'X-RAIL-VOLTAGE-12V', scale=1000, read_format='{0} X?'),
         '24V': ParameterFloat(
-            'X-RAIL-VOLTAGE-24V', scale=1000, read_format='{} X?'),
+            'X-RAIL-VOLTAGE-24V', scale=1000, read_format='{0} X?'),
         'SwVer': ParameterString(
-            'X-SOFTWARE-VERSION', read_format='{} X?'),
-        'SwBld': ParameterString('X-BUILD-NUMBER', read_format='{} X?'),
+            'X-SOFTWARE-VERSION', read_format='{0} X?'),
+        'SwBld': ParameterString(
+            'X-BUILD-NUMBER', read_format='{0} X?'),
         'CAL_PFC': ParameterFloat(
             'CAL-PFC-BUS-VOLTS', writeable=True, readable=False,
             scale=1000, write_format='{0} {1}'),

@@ -20,13 +20,14 @@ class Gen8Initial(ProgramTestCase):
         patcher = patch('share.ProgramARM')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('programs.gen8.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['arm'].port.flushInput()    # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PartDetect': (
@@ -53,6 +54,11 @@ class Gen8Initial(ProgramTestCase):
                          12.14, 12.14,      # 2nd reading
                          12.18, 12.18,      # Final reading
                         )),
+                    (sen['arm_acfreq'], 50), (sen['arm_acvolt'], 240),
+                    (sen['arm_5v'], 5.05), (sen['arm_12v'], 12.180),
+                    (sen['arm_24v'], 24.0),
+                    (sen['arm_swver'], gen8.initial.Initial.bin_version[:3]),
+                    (sen['arm_swbld'], gen8.initial.Initial.bin_version[4:]),
                     ),
                 '5V': ((sen['o5v'], (5.15, 5.14, 5.10)), ),
                 '12V': (
@@ -64,19 +70,8 @@ class Gen8Initial(ProgramTestCase):
                     (sen['vdsfet'], 0.05),
                     ),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Initialise': ('', ) * 2,
-                'PowerUp': ('', ) * 9 +
-                    ('50Hz ', ) +       # ARM_AcFreq
-                    ('240Vrms ', ) +    # ARM_AcVolt
-                    ('5050mV ', ) +     # ARM_5V
-                    ('12180mV ', ) +    # ARM_12V
-                    ('24000mV ', ) +    # ARM_24V
-                    (gen8.initial.Initial.bin_version[:3], ) +  # ARM SwVer
-                    (gen8.initial.Initial.bin_version[4:], ),   # ARM BuildNo
-                },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev['arm'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

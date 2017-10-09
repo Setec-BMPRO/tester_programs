@@ -9,22 +9,20 @@ from tester import (
     )
 import share
 
-ARM_VERSION = '1.7.4080'        # Software binary version
-
-BT_PORT = share.port('027013', 'BT')
-
 
 class Final(share.TestSequence):
 
     """BatteryCheck Final Test Program."""
 
+    # Software binary version
+    arm_version = '1.7.4080'
     limitdata = (
         LimitDelta('12V', 12.0, 0.1),
         LimitBoolean('BTscan', True),
         LimitBoolean('BTpair', True),
         LimitBoolean('ARMSerNum', True),
-        LimitRegExp('ARMSwVer', '^{0}$'.format(
-            ARM_VERSION.replace('.', r'\.'))),
+        LimitRegExp(
+            'ARMSwVer', '^{0}$'.format(arm_version.replace('.', r'\.'))),
         )
 
     def open(self):
@@ -71,6 +69,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    bt_port = share.port('027013', 'BT')
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -83,7 +83,7 @@ class Devices(share.Devices):
         btport = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        btport.port = BT_PORT
+        btport.port = self.bt_port
         # BT Radio driver
         self['bt'] = share.BtRadio(btport)
 

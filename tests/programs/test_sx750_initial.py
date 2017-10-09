@@ -20,14 +20,14 @@ class SX750Initial(ProgramTestCase):
         patcher = patch('share.ProgramARM')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('programs.sx750.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['arm'].port.flushInput()    # Flush console input buffer
-        dev['ard'].port.flushInput()    # Flush Arduino input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PartDetect':(
@@ -38,7 +38,8 @@ class SX750Initial(ProgramTestCase):
                 'Program': (
                     (sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], (5.0,) * 2),
                     (sen['o3V3'], 3.21), (sen['o8V5Ard'], 8.5),
-                    (sen['PriCtl'], 12.34),
+                    (sen['PriCtl'], 12.34), (sen['pgm5Vsb'], 0),
+                    (sen['pgmPwrSw'], 0), (sen['ocpMax'], 0),
                     ),
                 'Initialise': ((sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], 5.0), ),
                 'PowerUp': (
@@ -52,6 +53,10 @@ class SX750Initial(ProgramTestCase):
                          433.0, 433.0,     # 2nd reading
                          435.0, 435.0,     # Final value
                         )),
+                    (sen['ARM_AcFreq'], 50), (sen['ARM_AcVolt'], 240),
+                    (sen['ARM_12V'], 12.180), (sen['ARM_24V'], 24.0),
+                    (sen['ARM_SwVer'], sx750.initial.Initial.bin_version[:3]),
+                    (sen['ARM_SwBld'], sx750.initial.Initial.bin_version[4:]),
                     ),
                 '5Vsb': ((sen['o5Vsb'], (5.20, 5.15, 5.14, 5.10, )), ),
                 '12V': (
@@ -61,6 +66,8 @@ class SX750Initial(ProgramTestCase):
                     (sen['o12VinOCP'],
                         ((0.123, ) * 32 + (4.444, )) +
                         ((0.123, ) * 37 + (4.444, ))),
+                    (sen['ocp12Unlock'], 0), (sen['ocpStepDn'], (0, ) * 35),
+                    (sen['ocpLock'], 0),
                     ),
                 '24V': (
                     (sen['o24V'], (24.44, 24.33, 24.22, 24.11, 24.24)),
@@ -69,32 +76,17 @@ class SX750Initial(ProgramTestCase):
                     (sen['o24VinOCP'],
                         ((0.123, ) * 32 + (4.444, )) +
                         ((0.123, ) * 18 + (4.444, ))),
+                    (sen['ocp24Unlock'], 0), (sen['ocpStepDn'], (0, ) * 35),
+                    (sen['ocpLock'], 0),
                     ),
                 'PeakPower': (
                     (sen['o5Vsb'], 5.15), (sen['o12V'], 12.22),
                     (sen['o24V'], 24.44), (sen['PGOOD'], 0.15),
                     ),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Initialise': ('', ) * 3,
-                'PowerUp': ('', ) +
-                    ('50Hz ', ) +       # ARM_AcFreq
-                    ('240Vrms ', ) +    # ARM_AcVolt
-                    ('12180mV ', ) +    # ARM_12V
-                    ('24000mV ', ) +    # ARM_24V
-                    (sx750.Initial.bin_version[:3], ) +   # ARM SwVer
-                    (sx750.Initial.bin_version[4:], ) +   # ARM BuildNo
-                    ('', ) * 4,
-                },
-            UnitTester.key_ext: {       # Tuples of extra strings
-                'Program': ('OK', ) * 3,    # ard
-                '12V': ('OK', ) * 35,    # ard
-                '24V': ('OK', ) * 35,    # ard
-                },
             }
         self.tester.ut_load(
-            data, self.test_program.fifo_push,
-            dev['arm'].puts, dev['ard'].puts)
+            data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

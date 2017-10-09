@@ -15,30 +15,21 @@ from tester import (
 import share
 from . import console
 
-ARM_VERSION = '1.7.4080'        # Software binary version
-AVR_HEX = 'BatteryCheckSupervisor-2.hex'
-
-# Serial port for the ARM console module.
-ARM_CON = share.port('029083', 'ARM_CON')
-# Serial port for the ARM programmer.
-ARM_PGM = share.port('029083', 'ARM_PGM')
-# Serial port for the Bluetooth device
-BT_PORT = share.port('029083', 'BT')
-
-AVRDUDE = {
-    'posix': 'avrdude',
-    'nt': r'C:\Program Files\AVRdude\avrdude.exe',
-    }[os.name]
-
-ARM_BIN = 'BatteryCheckControl_{}.bin'.format(ARM_VERSION)
-
-SHUNT_SCALE = 0.08     # Ishunt * this = DC Source voltage
-
 
 class Initial(share.TestSequence):
 
     """BatteryCheck Initial Test Program."""
 
+    # Software binary version
+    arm_version = '1.7.4080'
+    avr_hex = 'BatteryCheckSupervisor-2.hex'
+    avrdude = {
+        'posix': 'avrdude',
+        'nt': r'C:\Program Files\AVRdude\avrdude.exe',
+        }[os.name]
+    arm_bin = 'BatteryCheckControl_{}.bin'.format(arm_version)
+    # Ishunt * this = DC Source voltage
+    shunt_scale = 0.08
     limitdata = (
         LimitDelta('3V3', 3.3, 0.1),
         LimitDelta('5VReg', 5.0, 0.1),
@@ -47,8 +38,8 @@ class Initial(share.TestSequence):
         LimitLow('Relay', 100),
         LimitInteger('PgmAVR', 0),
         LimitInteger('DetectBT', 0),
-        LimitRegExp('ARM_SwVer', '^{0}$'.format(
-            ARM_VERSION.replace('.', r'\.'))),
+        LimitRegExp(
+            'ARM_SwVer', '^{0}$'.format(arm_version.replace('.', r'\.'))),
         LimitDelta('ARM_Volt', 12.0, 0.5),
         LimitBetween('ARM_Curr', -65.0, -60.0),
         LimitDelta('Batt_Curr_Err', 0, 5.0),
@@ -91,11 +82,11 @@ class Initial(share.TestSequence):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         avr_cmd = [
-            AVRDUDE,
+            self.avrdude,
             '-P', 'usb',
             '-p', 't10',
             '-c', 'avrisp2',
-            '-U', 'flash:w:' + AVR_HEX,
+            '-U', 'flash:w:' + self.avr_hex,
             '-U', 'fuse:w:0xfe:m',
             ]
         try:
@@ -151,7 +142,7 @@ class Initial(share.TestSequence):
 
         """
         arm = dev['arm']
-        dev['dcs_shunt'].output(62.5 * SHUNT_SCALE, True, delay=1.5)
+        dev['dcs_shunt'].output(62.5 * self.shunt_scale, True, delay=1.5)
         batt_curr, curr_ARM = self.measure(
             ('dmm_shunt', 'currARM'), timeout=5).readings
         # Compare simulated battery current against ARM reading, in %
@@ -184,6 +175,13 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    # Serial port for the ARM console module.
+    arm_con = share.port('029083', 'ARM_CON')
+    # Serial port for the ARM programmer.
+    arm_pgm = share.port('029083', 'ARM_PGM')
+    # Serial port for the Bluetooth device
+    bt_port = share.port('029083', 'BT')
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -200,19 +198,19 @@ class Devices(share.Devices):
         # ARM device programmer
         file = os.path.join(os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe()))),
-            ARM_BIN)
-        self['programmer'] = share.ProgramARM(ARM_PGM, file, crpmode=False)
+            Initial.arm_bin)
+        self['programmer'] = share.ProgramARM(self.arm_pgm, file, crpmode=False)
         # Serial connection to the console
         arm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = ARM_CON
+        arm_ser.port = self.arm_con
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Bluetooth device
         btport = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        btport.port = BT_PORT
+        btport.port = self.bt_port
         # BT Radio driver
         self['bt'] = share.BtRadio(btport)
 
