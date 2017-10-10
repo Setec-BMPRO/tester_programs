@@ -15,25 +15,21 @@ class _BP35Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.bp35.console.Console', new=self._makecon)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('share.BackgroundTimer')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('share.ProgramPIC')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        super().setUp()
-
-    def _makecon(self, _):
         mycon = MagicMock(name='MyConsole')
         mycon.ocp_cal.return_value = 1
         mycon.port.readline.return_value = b'RRQ,32,0'
-        return mycon
+        patcher = patch('programs.bp35.console.Console', return_value=mycon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        for target in (
+                'share.BackgroundTimer',
+                'share.ProgramARM',
+                'share.ProgramPIC',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
+        super().setUp()
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""

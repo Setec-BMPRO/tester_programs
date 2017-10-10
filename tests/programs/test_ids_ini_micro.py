@@ -17,12 +17,13 @@ class Ids500MicroInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.ids500.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('share.ProgramPIC')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.ProgramPIC',
+                'programs.ids500.console.Console',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):

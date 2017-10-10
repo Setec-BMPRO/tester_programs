@@ -18,19 +18,16 @@ class BatteryCheckFinal(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.BtRadio', new=self._makebt)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        super().setUp()
-
-    def _makebt(self, x):
         mybt = MagicMock(name='MyBtRadio')
         mybt.scan.return_value = True
         mybt.jsonrpc.return_value = {
             'SoftwareVersion': batterycheck.Final.arm_version,
             'SerialID': self.serial,
             }
-        return mybt
+        patcher = patch('share.BtRadio', return_value=mybt)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""

@@ -17,12 +17,13 @@ class Trek2Final(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.trek2.console.TunnelConsole')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.ProgramARM',
+                'programs.trek2.console.TunnelConsole',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def _tank_sensors(self, value):

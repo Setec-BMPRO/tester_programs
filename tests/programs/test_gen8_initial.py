@@ -17,12 +17,13 @@ class Gen8Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.gen8.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.ProgramARM',
+                'programs.gen8.console.Console',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):

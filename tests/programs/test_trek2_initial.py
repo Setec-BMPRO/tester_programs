@@ -18,22 +18,20 @@ class Trek2Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch(
-            'programs.trek2.console.DirectConsole', new=self._makecon)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.trek2.console.TunnelConsole')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        super().setUp()
-
-    def _makecon(self, _):
         mycon = MagicMock(name='MyConsole')
         mycon.port.readline.return_value = b'RRQ,16,0'
-        return mycon
+        patcher = patch(
+            'programs.trek2.console.DirectConsole', return_value=mycon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        for target in (
+                'share.ProgramARM',
+                'programs.trek2.console.TunnelConsole',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""

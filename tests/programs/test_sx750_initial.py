@@ -17,15 +17,14 @@ class SX750Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.sx750.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.sx750.arduino.Arduino')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.ProgramARM',
+                'programs.sx750.console.Console',
+                'programs.sx750.arduino.Arduino',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):

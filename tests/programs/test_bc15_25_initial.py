@@ -12,20 +12,16 @@ class _BC15_25_Initial(ProgramTestCase):
     """BC15/25 Initial program test suite."""
 
     prog_class = bc15_25.Initial
-    startup_banner = (
-        'Banner line 1\r\n'
-        'Banner line 2\r\n'
-        'Banner line 3\r\n'
-        )
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.bc15_25.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.ProgramARM',
+                'programs.bc15_25.console.Console',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def _pass_run(self):

@@ -28,8 +28,8 @@ class BaseConsole(unittest.TestCase):
         patcher = patch('time.sleep')   # Remove time delays
         self.addCleanup(patcher.stop)
         patcher.start()
-        sim_ser = tester.SimSerial()
-        self.mycon = share.console.BaseConsole(sim_ser)
+        port = tester.SimSerial()
+        self.mycon = share.console.BaseConsole(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
 
@@ -88,8 +88,8 @@ class BadUartConsole(unittest.TestCase):
         patcher = patch('time.sleep')   # Remove time delays
         self.addCleanup(patcher.stop)
         patcher.start()
-        sim_ser = tester.SimSerial()
-        self.mycon = share.console.BadUartConsole(sim_ser)
+        port = tester.SimSerial()
+        self.mycon = share.console.BadUartConsole(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
 

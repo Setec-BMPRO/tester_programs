@@ -15,12 +15,13 @@ class _DrifterInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramPIC')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.drifter.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.ProgramPIC',
+                'programs.drifter.console.Console',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def _pass_run(self):

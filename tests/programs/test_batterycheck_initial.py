@@ -18,24 +18,20 @@ class BatteryCheckInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('subprocess.check_output')  # for step ProgramAVR
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.batterycheck.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('share.BtRadio', new=self._makebt)
+        for target in (
+                'share.ProgramARM',
+                'subprocess.check_output',  # for step ProgramAVR
+                'programs.batterycheck.console.Console',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
+        mybt = MagicMock(name='MyBtRadio')
+        mybt.scan.return_value = True
+        patcher = patch('share.BtRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
-
-    def _makebt(self, x):
-        mybt = MagicMock(name='MyBtRadio')
-        mybt.scan.return_value = True
-        return mybt
 
     def test_pass_run(self):
         """PASS run of the program."""

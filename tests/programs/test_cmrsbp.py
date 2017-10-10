@@ -61,12 +61,13 @@ class CMRSBPInitial(ProgramTestCase):
             'programs.cmrsbp.cmrsbp.CmrSbp', return_value=self.mycmr)
         self.addCleanup(patcher.stop)
         patcher.start()
-        patcher = patch('share.ProgramPIC')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('serial.Serial')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.ProgramPIC',
+                'serial.Serial',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass(self):

@@ -20,15 +20,12 @@ class BC2Final(ProgramTestCase):
         patcher = patch('programs.bc2.console.Console')
         self.addCleanup(patcher.stop)
         patcher.start()
-        patcher = patch('share.BleRadio', new=self._makebt)
+        mybt = MagicMock(name='MyBleRadio')
+        mybt.scan.return_value = True
+        patcher = patch('share.BleRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
-
-    def _makebt(self, x):
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        return mybt
 
     def test_pass_run(self):
         """PASS run of the program."""

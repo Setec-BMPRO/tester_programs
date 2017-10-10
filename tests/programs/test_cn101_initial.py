@@ -21,23 +21,17 @@ class CN101Initial(ProgramTestCase):
         patcher = patch('share.ProgramARM')
         self.addCleanup(patcher.stop)
         patcher.start()
-        patcher = patch('programs.cn101.console.Console', new=self._makecon)
+        mycon = MagicMock(name='MyConsole')
+        mycon.port.readline.return_value = b'RRQ,32,0'
+        patcher = patch('programs.cn101.console.Console', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
-        patcher = patch('share.BleRadio', new=self._makebt)
+        mybt = MagicMock(name='MyBleRadio')
+        mybt.scan.return_value = True
+        patcher = patch('share.BleRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
-
-    def _makecon(self, _):
-        mycon = MagicMock(name='MyConsole')
-        mycon.port.readline.return_value = b'RRQ,32,0'
-        return mycon
-
-    def _makebt(self, x):
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        return mybt
 
     def test_pass_run(self):
         """PASS run of the program."""

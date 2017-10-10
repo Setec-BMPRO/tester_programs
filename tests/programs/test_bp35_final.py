@@ -21,7 +21,8 @@ class BP35Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['vbat'], 12.8), (sen['yesnogreen'], True),
+                    (sen['vbat'], 12.8),
+                    (sen['yesnogreen'], True),
                     ),
                 },
             }

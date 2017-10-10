@@ -18,22 +18,20 @@ class RvViewInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch(
-            'programs.rvview.console.DirectConsole', new=self._makecon)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('programs.rvview.console.TunnelConsole')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        super().setUp()
-
-    def _makecon(self, _):
         mycon = MagicMock(name='MyConsole')
         mycon.port.readline.return_value = b'RRQ,32,0'
-        return mycon
+        patcher = patch(
+            'programs.rvview.console.DirectConsole', return_value=mycon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        for target in (
+                'share.ProgramARM',
+                'programs.rvview.console.TunnelConsole',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
