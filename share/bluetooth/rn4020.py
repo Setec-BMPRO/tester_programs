@@ -67,15 +67,6 @@ class BleRadio():
         self._logger.debug('Close')
         self.port.close()
 
-    def puts(self,
-             string_data, preflush=0, postflush=0, priority=False,
-             addprompt=True):
-        """Push string data into the buffer if simulating."""
-        if self.port.simulation:
-            if addprompt:
-                string_data = string_data + '\r\n'
-            self.port.puts(string_data, preflush, postflush, priority)
-
     def scan(self, btmac):
         """Scan for bluetooth device with 'btmac' MAC address.
 

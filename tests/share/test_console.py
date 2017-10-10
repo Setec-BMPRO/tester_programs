@@ -35,31 +35,32 @@ class BaseConsole(unittest.TestCase):
 
     def test_response2(self):
         """Multiple responses."""
-        self.mycon.puts('R1\rR2\r> ')
+        self.mycon.port.puts('R1\rR2\r> ')
         response = self.mycon.action(expected=2)
         self.assertEqual(response, ['R1','R2'])
 
     def test_response1(self):
         """A single response."""
-        self.mycon.puts(' -> 1234\r> ')
+        self.mycon.port.puts('D', preflush=1)
+        self.mycon.port.puts(' -> 1234\r> ')
         response = self.mycon.action('D', expected=1)
         self.assertEqual(response, '1234')
 
     def test_response_missing(self):
         """Not enough responses."""
-        self.mycon.puts('R1\r> ')
+        self.mycon.port.puts('R1\r> ')
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action(expected=2)
 
     @unittest.skip('Feature not implemented yet')
     def test_response_extra(self):
         """Too many responses."""
-        self.mycon.puts('R1\rR2\r> ')
+        self.mycon.port.puts('R1\rR2\r> ')
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action(expected=1)
 
     def test_noprompt(self):
-        self.mycon.puts(' -> \r')
+        self.mycon.port.puts(' -> \r')
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action('NP')
 
@@ -93,17 +94,18 @@ class BadUartConsole(unittest.TestCase):
         self.mycon.open()
 
     def test_action2(self):
-        self.mycon.puts('R1\r\nR2\r\n> ')
+        self.mycon.port.puts('R1\r\nR2\r\n> ')
         response = self.mycon.action(expected=2)
         self.assertEqual(response, ['R1','R2'])
 
     def test_action1(self):
-        self.mycon.puts(' -> 1234\r\n> ')
+        self.mycon.port.puts('D', preflush=1)
+        self.mycon.port.puts(' -> 1234\r\n> ')
         response = self.mycon.action('D', expected=1)
         self.assertEqual(response, '1234')
 
     def test_noprompt(self):
-        self.mycon.puts(' -> \r\n')
+        self.mycon.port.puts(' -> \r\n')
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action('NP')
 

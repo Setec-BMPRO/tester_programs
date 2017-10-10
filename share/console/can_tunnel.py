@@ -18,25 +18,21 @@ class ConsoleCanTunnel():
 
     """A CAN Tunnel to another Console.
 
-    A SimSerial port is used to communicate with a SerialToCan interface.
-
-    Another SimSerial object is used in simulation mode to do input data
-    buffering of the decoded data received from the CAN Tunnel.
+    A SimSerial object is used to do input data buffering of the decoded
+    data received from the CAN Tunnel.
 
     """
 
     # True for verbose logging
     verbose = False
 
-    def __init__(self, port, simulation=False):
+    def __init__(self, port):
         """Initialise communications.
 
         @param port SimSerial port to connect to SerialToCan interface.
-        @param simulation True for simulation mode.
 
         """
         self.port = port
-        self.simulation = simulation
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._can_port = tester.SerialToCan(port)
@@ -131,15 +127,13 @@ class OldConsoleCanTunnel():
     # True for verbose logging
     verbose = False
 
-    def __init__(self, port, simulation=False):
+    def __init__(self, port):
         """Initialise communications.
 
         @param port SimSerial port to connect to Serial to CAN interface.
-        @param simulation True for simulation mode.
 
         """
         self.port = port
-        self.simulation = simulation
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         # The buffer for tunneled console data.

@@ -24,10 +24,6 @@ class UnitTester(tester.Tester):
     # Dictionary keys into data given to ut_load() method
     key_sen = 'Sen'
     key_call = 'Call'
-    key_con = 'Con'
-    key_con_np = 'ConNP'
-    key_ext = 'Ext'
-    key_ext_np = 'ExtNP'
 
     def __init__(self, prog_class, parameter):
         """Initalise the data feeder."""
@@ -66,7 +62,7 @@ class UnitTester(tester.Tester):
             signal=tester.signals.TestRun.result)
         super().stop()
 
-    def ut_load(self, data, fifo_pusher, console_puts=None, extra_puts=None):
+    def ut_load(self, data, fifo_pusher):
         """Per-Test data load.
 
         @param data Dictionary of FIFO data
@@ -76,8 +72,6 @@ class UnitTester(tester.Tester):
         """
         self.ut_data = data
         self.ut_fifo_pusher = fifo_pusher
-        self.ut_console_puts = console_puts
-        self.ut_extra_puts = extra_puts
         self.ut_steps.clear()
         self.ut_result = None
 
@@ -87,10 +81,6 @@ class UnitTester(tester.Tester):
         self.ut_steps.append(stepname)
         self._load_sensors(stepname)
         self._load_callables(stepname)
-        self._load_console(stepname)
-        self._load_console_np(stepname)
-        self._load_extra(stepname)
-        self._load_extra_np(stepname)
 
     def _load_sensors(self, stepname):
         """Sensor FIFOs."""
@@ -105,54 +95,6 @@ class UnitTester(tester.Tester):
         try:
             dat, val = self.ut_data[self.key_call][stepname]
             dat(val)
-        except KeyError:
-            pass
-
-    def _load_console(self, stepname):
-        """Console strings, or None to add a flush stopper."""
-        try:
-            dat = self.ut_data[self.key_con][stepname]
-            for msg in dat:
-                if msg is None:
-                    self.ut_console_puts('', postflush=1, addprompt=False)
-                else:
-                    self.ut_console_puts(msg, addprompt=True)
-        except KeyError:
-            pass
-
-    def _load_console_np(self, stepname):
-        """Console strings with addprompt=False."""
-        try:
-            dat = self.ut_data[self.key_con_np][stepname]
-            for msg in dat:
-                if msg is None:
-                    self.ut_console_puts('', postflush=1, addprompt=False)
-                else:
-                    self.ut_console_puts(msg, addprompt=False)
-        except KeyError:
-            pass
-
-    def _load_extra(self, stepname):
-        """Extra strings."""
-        try:
-            dat = self.ut_data[self.key_ext][stepname]
-            for msg in dat:
-                if msg is None:
-                    self.ut_extra_puts('', postflush=1, addprompt=False)
-                else:
-                    self.ut_extra_puts(msg, addprompt=True)
-        except KeyError:
-            pass
-
-    def _load_extra_np(self, stepname):
-        """Extra strings with addprompt=False."""
-        try:
-            dat = self.ut_data[self.key_ext_np][stepname]
-            for msg in dat:
-                if msg is None:
-                    self.ut_extra_puts('', postflush=1, addprompt=False)
-                else:
-                    self.ut_extra_puts(msg, addprompt=False)
         except KeyError:
             pass
 

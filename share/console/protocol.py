@@ -155,26 +155,6 @@ class BaseConsole():
         """
         self.cmd_data[key].write(value, self.action)
 
-    def puts(self, string_data,
-             preflush=0, postflush=0,
-             priority=False, addprompt=True):
-        """Put a string into the read-back buffer if simulating.
-
-        If a 'puts_prompt' has been set, it will be appended by default,
-        unless addprompt is set to False.
-
-        @param string_data Data string, or tuple of data strings.
-        @param preflush Number of _FLUSH to be entered before the data.
-        @param postflush Number of _FLUSH to be entered after the data.
-        @param priority True to put in front of the buffer.
-        @param addprompt True to append prompt to pushed data.
-
-        """
-        if self.port.simulation:
-            if addprompt and len(self.puts_prompt) > 0:
-                string_data = string_data + self.puts_prompt
-            self.port.puts(string_data, preflush, postflush, priority)
-
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
 
@@ -189,8 +169,6 @@ class BaseConsole():
         try:
             if command:
                 self.last_cmd = command
-                if self.port.simulation:   # Auto simulate the command echo
-                    self.port.puts(command, preflush=1, priority=True)
                 self.port.flushInput()
                 self._write_command(command)
             if delay:
