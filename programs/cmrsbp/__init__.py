@@ -178,7 +178,6 @@ class Final(share.TestSequence):
 
     # Common test limits
     _common = (
-        LimitBetween('VbatIn', 12.8, 15.0),
         LimitDelta('ErrV', 0.0, 0.03),
         LimitBetween('CycleCnt', 0.5, 20.5),
         LimitBoolean('RelrnFlg', False),
@@ -190,6 +189,7 @@ class Final(share.TestSequence):
     # Test limit selection keyed by program parameter
     limitdata = {
         '8': _common + (
+            LimitBetween('VbatIn', 12.8, 15.0),
             LimitBetween('SenseRes', 39.0, 91.0),
             LimitBetween('Capacity', 6400, 11000),
             LimitDelta('StateOfCharge', 100.0, 10.5),
@@ -197,6 +197,7 @@ class Final(share.TestSequence):
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
             ),
         '13': _common + (
+            LimitBetween('VbatIn', 12.8, 15.0),
             LimitBetween('SenseRes', 221.0, 280.0),
             LimitBetween('Capacity', 11000, 15000),
             LimitDelta('StateOfCharge', 100.0, 10.5),
@@ -204,6 +205,7 @@ class Final(share.TestSequence):
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$'),
             ),
         '17': _common + (
+            LimitBetween('VbatIn', 11.8, 15.0),     # Due to <30% charge
             LimitBetween('SenseRes', 400.0, 460.0),
             LimitBetween('Capacity', 15500, 20000),
             LimitLow('StateOfCharge', 30.0),
