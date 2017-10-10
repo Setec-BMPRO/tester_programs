@@ -18,13 +18,14 @@ class _DrifterInitial(ProgramTestCase):
         patcher = patch('share.ProgramPIC')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('programs.drifter.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['pic'].port.flushInput()    # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
@@ -33,26 +34,22 @@ class _DrifterInitial(ProgramTestCase):
                 'CalPre': (
                     (sen['oVsw'], 3.3), (sen['oVref'], 3.3),
                     (sen['o3V3'], -2.7), (sen['o0V8'], -0.8),
+                    (sen['pic_Status'], 0),
                     ),
                 'Calibrate': (
                     (sen['oVin'], 12.0), (sen['oIsense'], 0.090),
                     (sen['oVcc'], 3.3),
+                    (sen['pic_ZeroChk'], -65),
+                    (sen['pic_Vin'], (11.95, 11.98, )),
+                    (sen['pic_isense'], (-89.0, -89.9, )),
+                    (sen['pic_Vfactor'], 20000),
+                    (sen['pic_Ifactor'], 15000),
+                    (sen['pic_Ioffset'], -8),
+                    (sen['pic_Ithreshold'], 160),
                     ),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                'CalPre':
-                    ('', ) * 2 +
-                    ('Banner1\r\nBanner2\r\nBanner3', ) +
-                    ('', '0', ''),
-                'Calibrate':
-                    ('', '-35', '', '', '', ) +
-                    ('11950', '', '', '11980', ) +
-                    ('-89000', '', '', '-89900', ) +
-                    ('', ) +
-                    ('20000', '15000', '-8', '160', ),
-                },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev['pic'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

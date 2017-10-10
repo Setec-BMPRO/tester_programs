@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for Trek2 Initial Test program."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trek2
 
@@ -14,39 +14,47 @@ class Trek2Initial(ProgramTestCase):
     prog_class = trek2.Initial
     parameter = None
     debug = False
+    sernum = 'A1526040123'
 
     def setUp(self):
         """Per-Test setup."""
         patcher = patch('share.ProgramARM')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch(
+            'programs.trek2.console.DirectConsole', new=self._makecon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('programs.trek2.console.TunnelConsole')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
+
+    def _makecon(self, _):
+        mycon = MagicMock(name='MyConsole')
+        mycon.port.readline.return_value = b'RRQ,16,0'
+        return mycon
 
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['trek2'].port.flushInput()  # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp':
-                    ((sen['oSnEntry'], ('A1526040123', )),
-                    (sen['oVin'], 12.0), (sen['o3V3'], 3.3), ),
-                },
-            UnitTester.key_con: {       # Tuples of console strings
-                'TestArm':
-                    ('Banner1\r\nBanner2', ) +
-                    ('', ) + ('success', ) * 2 + ('', ) * 2 +
-                    (trek2.initial.BIN_VERSION, ),
-                'CanBus':
-                    ('0x10000000', '', '0x10000000', '', '', ),
-                },
-            UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
-                'CanBus': ('RRQ,16,0,7,0,0,0,0,0,0,0\r\n', ),
+                'PowerUp': (
+                    (sen['oSnEntry'],
+                    (self.sernum, )),
+                    (sen['oVin'], 12.0),
+                    (sen['o3V3'], 3.3),
+                    ),
+                'TestArm': (
+                    (sen['oSwVer'], (trek2.Initial.bin_version, )),
+                    ),
+                'CanBus': (
+                    (sen['oCANBIND'], 1 << 28),
+                    ),
                 },
             }
-        self.tester.ut_load(
-            data, self.test_program.fifo_push, dev['trek2'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

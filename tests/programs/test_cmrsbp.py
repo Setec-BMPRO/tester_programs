@@ -93,8 +93,6 @@ class CMRSBPInitial(ProgramTestCase):
                     (sen['oibat'], -0.02),
                     ),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                },
             }
         self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))

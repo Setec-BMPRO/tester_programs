@@ -4,48 +4,46 @@
 
 from share import console
 
-Sensor = console.Sensor
-
 # Some easier to use short names
+Sensor = console.Sensor
 ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
 ParameterHex = console.ParameterHex
-
-# "Test" mode controlled by STATUS bit 31
-_TEST_ON = (1 << 31)
-_TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
-# "CAN Print Packets" mode controlled by STATUS bit 29
-_CAN_ON = (1 << 29)
-_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
-# "CAN Bound" is STATUS bit 28
-_CAN_BOUND = (1 << 28)
 
 
 class _Console():
 
     """Base class for a RVVIEW console."""
 
+    # Test mode controlled by STATUS bit 31
+    _test_on = (1 << 31)
+    _test_off = ~_test_on & 0xFFFFFFFF
+    # CAN Test mode controlled by STATUS bit 29
+    _can_on = (1 << 29)
+    _can_off = ~_can_on & 0xFFFFFFFF
+    # "CAN Bound" is STATUS bit 28
+    _can_bound = (1 << 28)
+
     cmd_data = {
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
-            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': ParameterBoolean(
+            'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean(
+            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
         'SER_ID': ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{} {}'),
+            write_format='"{0} {1}'),
         'HW_VER': ParameterString(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
         'STATUS': ParameterHex(
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
         'CAN_BIND': ParameterHex(
             'STATUS', writeable=True,
-            minimum=0, maximum=0xF0000000, mask=_CAN_BOUND),
+            minimum=0, maximum=0xF0000000, mask=_can_bound),
         'CAN': ParameterString(
-            'CAN', writeable=True, write_format='"{} {}'),
-        'CAN_STATS': ParameterHex('CANSTATS', read_format='{}?'),
+            'CAN', writeable=True, write_format='"{0} {1}'),
+        'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
         }
 
     def brand(self, hw_ver, sernum, reset_relay):
@@ -70,9 +68,9 @@ class _Console():
         self._logger.debug('Test Mode = %s', state)
         reply = self['STATUS']
         if state:
-            value = _TEST_ON | reply
+            value = self._test_on | reply
         else:
-            value = _TEST_OFF & reply
+            value = self._test_off & reply
         self['STATUS'] = value
 
     def can_testmode(self, state):
@@ -87,18 +85,15 @@ class _Console():
         self.action('"RF,ALL CAN')
         reply = self['STATUS']
         if state:
-            value = _CAN_ON | reply
+            value = self._can_on | reply
         else:
-            value = _CAN_OFF & reply
+            value = self._can_off & reply
         self['STATUS'] = value
 
 
 class DirectConsole(_Console, console.BadUartConsole):
 
     """Console for a direct connection to a RVVIEW."""
-
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n> '
 
 
 class TunnelConsole(_Console, console.BaseConsole):

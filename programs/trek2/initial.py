@@ -8,45 +8,41 @@ import time
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitRegExp, LimitDelta,
-    LimitPercent, LimitInteger
+    LimitLow, LimitRegExp, LimitDelta, LimitPercent, LimitInteger
     )
 import share
 from . import console
-
-
-BIN_VERSION = '1.5.15833.150'   # Software binary version
-
-# Hardware version (Major [1-255], Minor [1-255], Mod [character])
-HW_VER = (5, 0, 'B')
-
-# Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
-CAN_PORT = share.port('027420', 'CAN')
-# Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = share.port('027420', 'ARM')
-# Software image filename
-ARM_FILE = 'Trek2_{0}.bin'.format(BIN_VERSION)
-# CAN echo request messages
-CAN_ECHO = 'TQQ,16,0'
-# Input voltage to power the unit
-VIN_SET = 12.75
-
-# CAN Bus is operational if status bit 28 is set
-_CAN_BIND = 1 << 28
 
 
 class Initial(share.TestSequence):
 
     """Trek2 Initial Test Program."""
 
+    # Software binary version
+    bin_version = '1.5.15833.150'
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    hw_ver = (5, 0, 'B')
+    # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
+    can_port = share.port('027420', 'CAN')
+    # Serial port for the ARM. Used by programmer and ARM comms module.
+    arm_port = share.port('027420', 'ARM')
+    # Software image filename
+    arm_file = 'Trek2_{0}.bin'.format(bin_version)
+    # CAN echo request messages
+    can_echo = 'TQQ,16,0'
+    # Input voltage to power the unit
+    vin_set = 12.75
+    # CAN Bus is operational if status bit 28 is set
+    _can_bind = 1 << 28
+
     limitdata = (
-        LimitDelta('Vin', VIN_SET - 0.75, 0.5),
+        LimitDelta('Vin', vin_set - 0.75, 0.5),
         LimitPercent('3V3', 3.3, 3.0),
         LimitLow('BkLghtOff', 0.5),
         LimitDelta('BkLghtOn', 4.0, 0.55),      # 40mA = 4V with 100R (1%)
         LimitRegExp('CAN_RX', r'^RRQ,16,0'),
-        LimitInteger('CAN_BIND', _CAN_BIND),
-        LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION.replace('.', r'\.'))),
+        LimitInteger('CAN_BIND', _can_bind),
+        LimitRegExp('SwVer', '^{0}$'.format(bin_version.replace('.', r'\.'))),
         )
 
     def open(self):
@@ -64,7 +60,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_SnEntry')
-        dev['dcs_Vin'].output(VIN_SET, output=True)
+        dev['dcs_Vin'].output(self.vin_set, output=True)
         self.measure(('dmm_Vin', 'dmm_3V3'), timeout=5)
 
     @share.teststep
@@ -75,7 +71,7 @@ class Initial(share.TestSequence):
         dev['rla_reset'].pulse(0.1)
         trek2.action(None, delay=1.5, expected=2)  # Flush banner
         trek2['UNLOCK'] = True
-        trek2['HW_VER'] = HW_VER
+        trek2['HW_VER'] = self.hw_ver
         trek2['SER_ID'] = self.sernum
         trek2['NVDEFAULT'] = True
         trek2['NVWRITE'] = True
@@ -89,7 +85,7 @@ class Initial(share.TestSequence):
         trek2.can_testmode(True)
         time.sleep(2)   # Let other CAN messages come in...
         # From here, Command-Response mode is broken by the CAN debug messages!
-        trek2['CAN'] = CAN_ECHO
+        trek2['CAN'] = self.can_echo
         echo_reply = trek2.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         mes['rx_can'].sensor.store(echo_reply)
@@ -115,13 +111,16 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.ProgramARM(
-            ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
-            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+            Initial.arm_port,
+            os.path.join(folder, Initial.arm_file),
+            crpmode=False,
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset'])
         # Serial connection to the console
         trek2_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trek2_ser.port = ARM_PORT
+        trek2_ser.port = Initial.arm_port
         # Console driver
         self['trek2'] = console.DirectConsole(trek2_ser)
         # Apply power to fixture circuits.

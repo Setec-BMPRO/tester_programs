@@ -5,15 +5,9 @@
 import time
 from share import console
 
-Sensor = console.Sensor
 # Some easier to use short names
+Sensor = console.Sensor
 ParameterString = console.ParameterString
-ParameterFloat = console.ParameterFloat
-ParameterBoolean = console.ParameterBoolean
-# Magic number to unlock test mode
-_TESTMODE_MAGIC_1 = 0
-_TESTMODE_MAGIC_2 = 2230
-_TESTMODE_MAGIC_3 = 42
 
 
 class ConsoleResponseError():
@@ -25,8 +19,11 @@ class Console(console.BaseConsole):
 
     """Communications to IDS-500 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n'
+    # Magic numbers to unlock test mode
+    _testmode_magic_1 = 0
+    _testmode_magic_2 = 2230
+    _testmode_magic_3 = 42
+
     cmd_data = {
         'PIC-SwRev': ParameterString('?,I,1', read_format='{0}'),
         'PIC-MicroTemp': ParameterString('?,D,16', read_format='{0}'),
@@ -54,10 +51,10 @@ class Console(console.BaseConsole):
     def sw_test_mode(self):
         """Access Software Test Mode"""
         self.expected = 3
-        self['SwTstMode'] = _TESTMODE_MAGIC_1
-        self['SwTstMode'] = _TESTMODE_MAGIC_2
+        self['SwTstMode'] = self._testmode_magic_1
+        self['SwTstMode'] = self._testmode_magic_2
         self.expected = 4
-        self['SwTstMode'] = _TESTMODE_MAGIC_3
+        self['SwTstMode'] = self._testmode_magic_3
         self.expected = 0
 
     def action(self, command=None, delay=0, expected=0):
@@ -83,7 +80,6 @@ class Console(console.BaseConsole):
         @param command Command string.
 
         """
-        # Send the command with a '\r\n'
         cmd_data = command.encode()
         self._logger.debug('Cmd --> %s', repr(cmd_data))
         self.port.write(cmd_data + b'\r\n')
@@ -99,8 +95,8 @@ class Console(console.BaseConsole):
         all_response = []
         for _ in range(expected):
             data = self.port.readline()
-            data = data.replace(b'\r', b'')   # Remove '\r'
-            data = data.replace(b'\n', b'')   # Remove '\n'
+            data = data.replace(b'\r', b'')
+            data = data.replace(b'\n', b'')
             response = data.decode(errors='ignore')
             if len(response) == 0:
                 response = None

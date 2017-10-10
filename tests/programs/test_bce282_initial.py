@@ -43,7 +43,7 @@ class _BCE282Initial(ProgramTestCase):
                 'Calibration': (
                     (sen['vout'], (self.vout, ) * 4),
                     (sen['msp_stat'], (0, 0, )),
-                    (sen['msp_vo'], 13.8),  # Both respond with 12V output.
+                    (sen['msp_vo'], self.vout),
                     ),
                 'OCP': (
                     (sen['alarm'], 12000),

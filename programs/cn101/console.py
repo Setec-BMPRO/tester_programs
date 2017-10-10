@@ -4,60 +4,57 @@
 
 from share import console
 
-Sensor = console.Sensor
-
 # Some easier to use short names
+Sensor = console.Sensor
 ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 ParameterHex = console.ParameterHex
-ParameterCAN = console.ParameterCAN
-ParameterRaw = console.ParameterRaw
-
-# Test mode controlled by STATUS bit 31
-_TEST_ON = (1 << 31)
-_TEST_OFF = ~_TEST_ON & 0xFFFFFFFF
-# CAN Test mode controlled by STATUS bit 29
-_CAN_ON = (1 << 29)
-_CAN_OFF = ~_CAN_ON & 0xFFFFFFFF
-# Bluetooth ready controlled by STATUS bit 27
-_BLE_ON = (1 << 27)
-_BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
 
 
 class Console(console.BadUartConsole):
 
     """Communications to CN101 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n> '
+    # Test mode controlled by STATUS bit 31
+    _test_on = (1 << 31)
+    _test_off = ~_test_on & 0xFFFFFFFF
+    # CAN Test mode controlled by STATUS bit 29
+    _can_on = (1 << 29)
+    _can_off = ~_can_on & 0xFFFFFFFF
+    # Bluetooth ready controlled by STATUS bit 27
+    _ble_on = (1 << 27)
+    _ble_off = ~_ble_on & 0xFFFFFFFF
+
     cmd_data = {
-        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+        'UNLOCK': ParameterBoolean(
+            '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
-            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': ParameterBoolean(
+            'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean(
+            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
         'SER_ID': ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{} {}'),
+            write_format='"{0} {1}'),
         'HW_VER': ParameterString(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-        'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
-        'STATUS': ParameterHex('STATUS', writeable=True,
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': ParameterString('BLE-MAC', read_format='{0}?'),
+        'STATUS': ParameterHex(
+            'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000),
-        'CAN_BIND': ParameterHex('STATUS', writeable=True,
+        'CAN_BIND': ParameterHex(
+            'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=(1 << 28)),
         'CAN': ParameterString('CAN',
-            writeable=True, write_format='"{} {}'),
+            writeable=True, write_format='"{0} {1}'),
         'TANK1': ParameterFloat('TANK_1_LEVEL'),
         'TANK2': ParameterFloat('TANK_2_LEVEL'),
         'TANK3': ParameterFloat('TANK_3_LEVEL'),
         'TANK4': ParameterFloat('TANK_4_LEVEL'),
-        'ADC_SCAN': ParameterFloat(
-            'ADC_SCAN_INTERVAL_MSEC', writeable=True),
+        'ADC_SCAN': ParameterFloat('ADC_SCAN_INTERVAL_MSEC', writeable=True),
         }
 
     def testmode(self, state):
@@ -65,9 +62,9 @@ class Console(console.BadUartConsole):
         self._logger.debug('Test Mode = %s', state)
         reply = self['STATUS']
         if state:
-            value = _TEST_ON | reply
+            value = self._test_on | reply
         else:
-            value = _TEST_OFF & reply
+            value = self._test_off & reply
         self['STATUS'] = value
 
     def can_testmode(self, state):
@@ -82,7 +79,7 @@ class Console(console.BadUartConsole):
         self.action('"RF,ALL CAN')
         reply = self['STATUS']
         if state:
-            value = _CAN_ON | reply
+            value = self._can_on | reply
         else:
-            value = _CAN_OFF & reply
+            value = self._can_off & reply
         self['STATUS'] = value

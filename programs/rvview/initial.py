@@ -13,33 +13,33 @@ from tester import (
 import share
 from . import console
 
-BIN_VERSION = '1.0.14022.985'   # Software binary version
-# Hardware version (Major [1-255], Minor [1-255], Mod [character])
-ARM_HW_VER = (2, 0, 'A')
-# Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = share.port('029687', 'ARM')
-# Software image filename
-ARM_FILE = 'RvView_{0}.bin'.format(BIN_VERSION)
-# CAN echo request messages
-CAN_ECHO = 'TQQ,32,0'
-# Input voltage to power the unit
-VIN_SET = 8.1
-# CAN Bus is operational if status bit 28 is set
-_CAN_BIND = 1 << 28
-
 
 class Initial(share.TestSequence):
 
     """RVVIEW Initial Test Program."""
+
+    bin_version = '1.0.14022.985'   # Software binary version
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    arm_hw_ver = (2, 0, 'A')
+    # Serial port for the ARM. Used by programmer and ARM comms module.
+    arm_port = share.port('029687', 'ARM')
+    # Software image filename
+    arm_file = 'RvView_{0}.bin'.format(bin_version)
+    # CAN echo request messages
+    can_echo = 'TQQ,32,0'
+    # Input voltage to power the unit
+    vin_set = 8.1
+    # CAN Bus is operational if status bit 28 is set
+    _can_bind = 1 << 28
 
     limitdata = (
         LimitBetween('Vin', 7.0, 8.0),
         LimitPercent('3V3', 3.3, 3.0),
         LimitLow('BkLghtOff', 0.5),
         LimitBetween('BkLghtOn', 2.5, 3.5),
-        LimitRegExp('SwVer', '^{0}$'.format(BIN_VERSION.replace('.', r'\.'))),
+        LimitRegExp('SwVer', '^{0}$'.format(bin_version.replace('.', r'\.'))),
         LimitRegExp('CAN_RX', r'^RRQ,32,0'),
-        LimitInteger('CAN_BIND', _CAN_BIND),
+        LimitInteger('CAN_BIND', _can_bind),
         )
 
     def open(self):
@@ -58,7 +58,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input voltage and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_SnEntry')
-        dev['dcs_vin'].output(VIN_SET, True)
+        dev['dcs_vin'].output(self.vin_set, True)
         self.measure(('dmm_vin', 'dmm_3V3'), timeout=5)
 
     @share.teststep
@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
         """
         rvview = dev['rvview']
         rvview.open()
-        rvview.brand(ARM_HW_VER, self.sernum, dev['rla_reset'])
+        rvview.brand(self.arm_hw_ver, self.sernum, dev['rla_reset'])
         mes['arm_swver']()
 
     @share.teststep
@@ -95,7 +95,7 @@ class Initial(share.TestSequence):
         mes['arm_can_bind'](timeout=10)
         rvview.can_testmode(True)
         # From here, Command-Response mode is broken by the CAN debug messages!
-        rvview['CAN'] = CAN_ECHO
+        rvview['CAN'] = self.can_echo
         echo_reply = rvview.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         rx_can = mes['rx_can']
@@ -121,15 +121,15 @@ class Devices(share.Devices):
         file = os.path.join(
             os.path.dirname(
                 os.path.abspath(inspect.getfile(inspect.currentframe()))),
-            ARM_FILE)
+            Initial.arm_file)
         self['programmer'] = share.ProgramARM(
-            ARM_PORT, file, crpmode=False,
+            Initial.arm_port, file, crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the rvview console
         rvview_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        rvview_ser.port = ARM_PORT
+        rvview_ser.port = Initial.arm_port
         # rvview Console driver
         self['rvview'] = console.DirectConsole(rvview_ser)
         # Power to fixture Comms circuits.

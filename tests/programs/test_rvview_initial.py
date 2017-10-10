@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVVIEW Initial Test program."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvview
 
@@ -14,45 +14,51 @@ class RvViewInitial(ProgramTestCase):
     prog_class = rvview.Initial
     parameter = None
     debug = False
+    sernum = 'A1626010123'
 
     def setUp(self):
         """Per-Test setup."""
         patcher = patch('share.ProgramARM')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch(
+            'programs.rvview.console.DirectConsole', new=self._makecon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('programs.rvview.console.TunnelConsole')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
+
+    def _makecon(self, _):
+        mycon = MagicMock(name='MyConsole')
+        mycon.port.readline.return_value = b'RRQ,32,0'
+        return mycon
 
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['rvview'].port.flushInput() # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp':
-                    ((sen['oSnEntry'], ('A1626010123', )),
-                     (sen['oVin'], 7.5),
-                     (sen['o3V3'], 3.3), ),
-                'Display':
-                    ((sen['oYesNoOn'], True),
-                     (sen['oYesNoOff'], True),
-                     (sen['oBkLght'], (3.0, 0.0)), ),
-                },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Initialise':
-                    ('Banner1\r\nBanner2', ) +
-                    ('', ) + ('success', ) * 2 + ('', ) +
-                    ('Banner1\r\nBanner2', ) +
-                    (rvview.initial.BIN_VERSION, ),
-                'Display': ('0x10000000', '', '0x10000000', '', ),
-                'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
-                },
-            UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
-                'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
+                'PowerUp': (
+                    (sen['oSnEntry'], (self.sernum, )),
+                    (sen['oVin'], 7.5),
+                    (sen['o3V3'], 3.3),
+                    ),
+                'Initialise': (
+                    (sen['oSwVer'], (rvview.Initial.bin_version, )),
+                    ),
+                'Display': (
+                    (sen['oYesNoOn'], True),
+                    (sen['oYesNoOff'], True),
+                    (sen['oBkLght'], (3.0, 0.0)),
+                    ),
+                'CanBus': (
+                    (sen['arm_canbind'], 1 << 28),
+                    ),
                 },
             }
-        self.tester.ut_load(
-            data, self.test_program.fifo_push, dev['rvview'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

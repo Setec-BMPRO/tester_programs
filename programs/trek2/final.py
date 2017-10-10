@@ -8,13 +8,13 @@ from tester import TestStep, LimitInteger, LimitRegExp
 import share
 from . import console
 
-# Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
-CAN_PORT = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
-
 
 class Final(share.TestSequence):
 
     """Trek2 Final Test Program."""
+
+    # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
+    can_port = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
 
     bin_version = '1.5.15833.150'   # Software binary version
     limitdata = (
@@ -84,10 +84,10 @@ class Devices(share.Devices):
                 ('dcs_Vcom', tester.DCSource, 'DCS2'),
                 # Power unit under test.
                 ('dcs_Vin', tester.DCSource, 'DCS3'),
-                # As the water level rises the "switches" close. The order of switch
-                # closure does not matter, just the number closed.
-                # The lowest bar always flashes. Closing these relays makes the other
-                # bars come on.
+                # As the water level rises the "switches" close.
+                # The order of switch closure does not matter, just the number
+                # closed. The lowest bar always flashes.
+                # Closing these relays makes the other bars come on.
                 ('rla_s1', tester.Relay, 'RLA3'),
                 ('rla_s2', tester.Relay, 'RLA4'),
                 ('rla_s3', tester.Relay, 'RLA5'),
@@ -97,7 +97,7 @@ class Devices(share.Devices):
         ser_can = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        ser_can.port = CAN_PORT
+        ser_can.port = Final.can_port
         # CAN Console tunnel driver
         self['tunnel'] = share.console.OldConsoleCanTunnel(
             port=ser_can, simulation=self.fifo)

@@ -12,33 +12,28 @@ from tester import (
 import share
 from . import console
 
-ARM_VERSION = '1.1.13665.176'      # Software binary version
-HW_VER = (4, 0, 'A')
-
-# Serial port for the ARM. Used by programmer and ARM comms module.
-ARM_PORT = share.port('028468', 'ARM')
-# ARM software image file
-ARM_FILE = 'cn101_{}.bin'.format(ARM_VERSION)
-# Serial port for the Bluetooth module.
-BLE_PORT = share.port('028468', 'BLE')
-# CAN echo request messages
-CAN_ECHO = 'TQQ,32,0'
-
-# CAN Bus is operational if status bit 28 is set
-_CAN_BIND = 1 << 28
-
 
 class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
 
+    # Software binary version
+    arm_version = '1.1.13665.176'
+    # Hardware version
+    hw_ver = (4, 0, 'A')
+    # ARM software image file
+    arm_file = 'cn101_{}.bin'.format(arm_version)
+    # CAN echo request messages
+    can_echo = 'TQQ,32,0'
+    # CAN Bus is operational if status bit 28 is set
+    can_bind = 1 << 28
     limitdata = (
         LimitLow('Part', 20.0),
         LimitDelta('Vin', 8.0, 0.5),
         LimitPercent('3V3', 3.30, 3.0),
         LimitRegExp('CAN_RX', r'^RRQ,32,0'),
-        LimitInteger('CAN_BIND', _CAN_BIND),
-        LimitRegExp('SwVer', '^{}$'.format(ARM_VERSION.replace('.', r'\.'))),
+        LimitInteger('CAN_BIND', can_bind),
+        LimitRegExp('SwVer', '^{}$'.format(arm_version.replace('.', r'\.'))),
         LimitRegExp('BtMac', r'^[0-F]{12}$'),
         LimitBoolean('DetectBT', True),
         LimitInteger('Tank', 5),
@@ -78,7 +73,7 @@ class Initial(share.TestSequence):
         dev['rla_reset'].pulse(0.1)
         cn101.action(None, delay=1.5, expected=0)   # Flush banner
         cn101['UNLOCK'] = True
-        cn101['HW_VER'] = HW_VER
+        cn101['HW_VER'] = self.hw_ver
         cn101['SER_ID'] = self.sernum
         cn101['NVDEFAULT'] = True
         cn101['NVWRITE'] = True
@@ -117,8 +112,8 @@ class Initial(share.TestSequence):
         cn101 = dev['cn101']
         cn101.can_testmode(True)
         # From here Command-Response mode is broken by the CAN debug messages!
-        self._logger.debug('CAN Echo Request --> %s', repr(CAN_ECHO))
-        cn101['CAN'] = CAN_ECHO
+        self._logger.debug('CAN Echo Request --> %s', repr(self.can_echo))
+        cn101['CAN'] = self.can_echo
         echo_reply = cn101.port.readline().decode(errors='ignore')
         echo_reply = echo_reply.replace('\r\n', '')
         self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
@@ -129,6 +124,11 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
 
     """Devices."""
+
+    # Serial port for the ARM. Used by programmer and ARM comms module.
+    arm_port = share.port('028468', 'ARM')
+    # Serial port for the Bluetooth module.
+    ble_port = share.port('028468', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -149,20 +149,23 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.ProgramARM(
-            ARM_PORT, os.path.join(folder, ARM_FILE), crpmode=False,
-            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+            self.arm_port,
+            os.path.join(folder, Initial.arm_file),
+            crpmode=False,
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset'])
         # Serial connection to the console
         cn101_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        cn101_ser.port = ARM_PORT
+        cn101_ser.port = self.arm_port
         # Console driver
         self['cn101'] = console.Console(cn101_ser)
         # Serial connection to the BLE module
         ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = BLE_PORT
+        ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)
