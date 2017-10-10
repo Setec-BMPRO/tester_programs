@@ -369,7 +369,7 @@ class Initial(share.TestSequence):
                 mes['arm_loads'][load](timeout=5)
         ocp_actual = mes['ramp_ocp_pre']().reading1
         # Adjust current setpoint
-        bp35['OCP_CAL'] = round(bp35['OCP_CAL'] * ocp_actual / self.ocp_set)
+        bp35['OCP_CAL'] = round(bp35.ocp_cal() * ocp_actual / self.ocp_set)
         bp35['NVWRITE'] = True
         mes['ramp_ocp']()
         dev['dcl_out'].output(0.0)

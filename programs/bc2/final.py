@@ -56,8 +56,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Test fixture item number
-    fixture = '030451'
+    ble_port = share.port('030451', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -72,7 +71,7 @@ class Devices(share.Devices):
         ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port(self.fixture, 'BLE')
+        ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

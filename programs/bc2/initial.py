@@ -37,11 +37,7 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_prepare(self, dev, mes):
-        """Prepare to run a test.
-
-        Set the Input DC voltage to 12V.
-
-        """
+        """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(12.0, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
@@ -66,8 +62,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Test fixture item number
-    fixture = '030451'
+    arm_port = share.port('030451', 'ARM')
+    ble_port = share.port('030451', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -85,14 +81,14 @@ class Devices(share.Devices):
         bc2_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bc2_ser.port = share.port(self.fixture, 'ARM')
+        bc2_ser.port = self.arm_port
         # Console driver
         self['bc2'] = console.Console(bc2_ser)
         # Serial connection to the BLE module
         ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port(self.fixture, 'BLE')
+        ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

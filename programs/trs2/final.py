@@ -32,11 +32,7 @@ class Final(share.TestSequence):
 
     @share.teststep
     def _step_prepare(self, dev, mes):
-        """Prepare to run a test.
-
-        Set the Input DC voltage to 12V.
-
-        """
+        """Prepare to run a test."""
         mes['dmm_tstpincov'](timeout=5)
         dev['rla_pin'].set_on()
         dev['dcs_vin'].output(self.vbatt, True)
@@ -49,13 +45,10 @@ class Final(share.TestSequence):
         dev['dcs_vin'].output(self.vbatt, delay=15.0)
         btmac = mes['trs2_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        if self.fifo:
-            reply = True
-        else:
-            ble = dev['ble']
-            ble.open()
-            reply = ble.scan(btmac)
-            ble.close()
+        ble = dev['ble']
+        ble.open()
+        reply = ble.scan(btmac)
+        ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
@@ -65,8 +58,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Test fixture item number
-    fixture = '030451'
+    arm_port = share.port('030451', 'ARM')
+    ble_port = share.port('030451', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -82,14 +75,14 @@ class Devices(share.Devices):
         trs2_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trs2_ser.port = share.port(self.fixture, 'ARM')
+        trs2_ser.port = self.arm_port
         # Console driver
         self['trs2'] = console.Console(trs2_ser)
         # Serial connection to the BLE module
         ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port(self.fixture, 'BLE')
+        ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

@@ -2,22 +2,9 @@
 # -*- coding: utf-8 -*-
 """UnitTest for J35 Initial Test program."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import j35
-
-# Console response string for "PowerUp" step
-_POWERUP_CON_BC = (
-    ('', ) * 5 +    # Manual mode
-    ('0', '', '', '0', '240', '50000',
-     '350', '12800', '500', )
-    )
-_POWERUP_CON_A = (
-    ('', ) * 5 +    # Manual mode
-    ('', ) * 6 +    # Derate
-    ('0', '', '', '0', '240', '50000',
-     '350', '12800', '500', )
-    )
 
 
 class _J35Initial(ProgramTestCase):
@@ -28,6 +15,9 @@ class _J35Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        patcher = patch('programs.j35.console.Console', new=self._makecon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
         patcher = patch('share.BackgroundTimer')
         self.addCleanup(patcher.stop)
         patcher.start()
@@ -36,26 +26,35 @@ class _J35Initial(ProgramTestCase):
         patcher.start()
         super().setUp()
 
+    def _makecon(self, _):
+        mycon = MagicMock(name='MyConsole')
+        mycon.ocp_cal.return_value = 1
+        mycon.port.readline.return_value = b'RRQ,36,0'
+        return mycon
+
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
         sen = self.test_program.sensors
         for sensor in sen['arm_loads']:
             sensor.store(value)
 
-    def _pass_run(self, pwr_con, rdg_count, steps):
+    def _pass_run(self, rdg_count, steps):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['j35'].port.flushInput()    # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['olock'], 10.0), (sen['sernum'], ('A1626010123', )),
                     (sen['ovbat'], 12.0), (sen['o3V3U'], 3.3),
                     ),
-                'Initialise': ((sen['sernum'], ('A1526040123', )), ),
+                'Initialise': (
+                    (sen['sernum'], ('A1526040123', )),
+                    (sen['arm_swver'], j35.initial.Initial.arm_version),
+                    ),
                 'Aux': (
                     (sen['ovbat'], 13.5),
+                    (sen['arm_auxv'], 13.5),
+                    (sen['arm_auxi'], 1.1),
                     ),
                 'Solar': (
                     (sen['oair'], 13.5),
@@ -65,6 +64,13 @@ class _J35Initial(ProgramTestCase):
                     (sen['o12Vpri'], 12.5), (sen['o3V3'], 3.3),
                     (sen['o15Vs'], 12.5), (sen['ovbat'], (12.8, 12.8, 12.8, )),
                     (sen['ofan'], (0, 12)),
+                    (sen['arm_vout_ov'], (0, 0, )),
+                    (sen['arm_acv'], 240),
+                    (sen['arm_acf'], 50),
+                    (sen['arm_sect'], 35),
+                    (sen['arm_vout'], 12.80),
+                    (sen['arm_fan'], 50),
+                    (sen['arm_bati'], 4.0),
                     ),
                 'Output': (
                     (sen['ovload'], 0.0),
@@ -74,6 +80,7 @@ class _J35Initial(ProgramTestCase):
                     ),
                 'Load': (
                     (sen['ovbat'], 12.8),
+                    (sen['arm_loadset'], 0x5555555),
                     ),
                 'OCP': (
                     (sen['ovbat'], (12.8, ) * 20 + (11.0, ), ),
@@ -81,42 +88,14 @@ class _J35Initial(ProgramTestCase):
                     ),
                 'CanBus': (
                     (sen['ocanpwr'], 12.5),
+                    (sen['arm_canbind'], 1 << 28),
                     ),
                 },
             UnitTester.key_call: {      # Callables
                 'Load': (self._arm_loads, 2.0),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Initialise':
-                    ('B1\r\nB2', ) +
-                    ('', ) +
-                    ('B1\r\nB2', ) +
-                    ('', ) * 4 +
-                    ('B1\r\nB2', ) +
-                    ('', ) + (j35.initial.Initial.arm_version, ),
-                'Aux':
-                    ('', '13500', '1100', ''),
-                'Solar':
-                    ('', ''),
-                'PowerUp':
-                    pwr_con +
-                    ('41731 -> 42241', '41731 -> 42241', '', '', ),
-                'Output':
-                    ('', ) * (1 + 1),
-                'RemoteSw':
-                    ('1', ),
-                'Load':(
-                    '0x5555555', '41731 -> 42241', '', '4000',
-                    '41000', '41731 -> 42241', '',
-                    ),
-                'CanBus':
-                    ('0x10000000', '', '0x10000000', '', '', ),
-                },
-            UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
-                'CanBus': ('RRQ,36,0,7,0,0,0,0,0,0,0\r\n', ),
-                },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev['j35'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
@@ -152,7 +131,6 @@ class J35_A_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the A program."""
         super()._pass_run(
-            _POWERUP_CON_A,
             40,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'Load', 'OCP']
@@ -169,7 +147,6 @@ class J35_B_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the B program."""
         super()._pass_run(
-            _POWERUP_CON_BC,
             47,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'Load', 'OCP']
@@ -186,7 +163,6 @@ class J35_C_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the C program."""
         super()._pass_run(
-            _POWERUP_CON_BC,
             51,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar', 'PowerUp',
              'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']

@@ -3,8 +3,9 @@
 """TRSRFM Initial Program."""
 
 import tester
-from tester import (TestStep, LimitLow, LimitHigh, LimitDelta,
-                    LimitBoolean, LimitRegExp)
+from tester import (
+    TestStep, LimitLow, LimitHigh, LimitDelta, LimitBoolean, LimitRegExp
+    )
 import share
 from . import console
 
@@ -106,8 +107,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Test fixture item number
-    fixture = '030451'
+    arm_port = share.port('030451', 'ARM')
+    ble_port = share.port('030451', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -126,14 +127,14 @@ class Devices(share.Devices):
         trsrfm_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trsrfm_ser.port = share.port(self.fixture, 'ARM')
+        trsrfm_ser.port = self.arm_port
         # Console driver
         self['trsrfm'] = console.Console(trsrfm_ser)
         # Serial connection to the BLE module
         ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port(self.fixture, 'BLE')
+        ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
@@ -161,8 +162,8 @@ class Sensors(share.Sensors):
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['red'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
         self['green'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
-        self['blue'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01,
-                                nplc=10)
+        self['blue'] = sensor.Vdc(
+            dmm, high=7, low=1, rng=10, res=0.01, nplc=10)
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
         self['mirbt'] = sensor.Mirror()

@@ -20,8 +20,6 @@ class Console(console.BaseConsole):
     cmd_prompt = b'\r> '
     # Command suffix between echo of a command and the response.
     res_suffix = b' -> '
-    # Auto add prompt to puts strings
-    puts_prompt = '\r> '
     cmd_data = {
         'ECHO': ParameterBoolean(
             'ECHO', writeable=True, write_format='{0} {1}', read_format='{0}'),

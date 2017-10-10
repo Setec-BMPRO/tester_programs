@@ -2,30 +2,9 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BP35 Initial Test program."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bp35
-
-# Console response string for "Initialise" step
-_INIT_CON_SRHA = (
-    ('B1\r\nB2\r\nB3', ) +
-    ('', ) +
-    ('B1\r\nB2\r\nB3', ) +
-    ('', ) * 5 +
-    ('B1\r\nB2\r\nB3', ) +
-    (bp35.initial.Initial.arm_version, ) +
-    ('', )
-    )
-_INIT_CON_PM = (
-    ('B1\r\nB2\r\nB3', ) +
-    ('', ) +
-    ('B1\r\nB2\r\nB3', ) +
-    ('', ) * 3 +        # Missing 2 x SR commands here
-    ('B1\r\nB2\r\nB3', ) +
-    (bp35.initial.Initial.arm_version, ) +
-    ('', ) * 2 +
-    ('', )
-    )
 
 
 class _BP35Initial(ProgramTestCase):
@@ -36,6 +15,9 @@ class _BP35Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        patcher = patch('programs.bp35.console.Console', new=self._makecon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
         patcher = patch('share.BackgroundTimer')
         self.addCleanup(patcher.stop)
         patcher.start()
@@ -47,17 +29,21 @@ class _BP35Initial(ProgramTestCase):
         patcher.start()
         super().setUp()
 
+    def _makecon(self, _):
+        mycon = MagicMock(name='MyConsole')
+        mycon.ocp_cal.return_value = 1
+        mycon.port.readline.return_value = b'RRQ,32,0'
+        return mycon
+
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
         sen = self.test_program.sensors
         for sensor in sen['arm_loads']:
             sensor.store(value)
 
-    def _pass_run(self, init_con, rdg_count, steps):
+    def _pass_run(self, rdg_count, steps):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['bp35'].port.flushInput()   # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
@@ -70,70 +56,61 @@ class _BP35Initial(ProgramTestCase):
                     ),
                 'Initialise': (
                     (sen['sernum'], ('A1626010123', )),
+                    (sen['arm_swver'], bp35.initial.Initial.arm_version),
                     ),
                 'SrSolar': (
                     (sen['vset'], (13.0, 13.0, 13.5)),
                     (sen['solarvin'], 19.55),
+                    (sen['arm_sr_alive'], 1),
+                    (sen['arm_vout_ov'], 0),
+                    (sen['arm_sr_relay'], 1),
+                    (sen['arm_sr_error'], 0),
+                    (sen['arm_sr_vin'], (19.900, 19.501, )),
+                    (sen['arm_iout'], (10.5, 10.1, )),
                     ),
                 'Aux': (
                     (sen['vbat'], (12.0, 13.5)),
+                    (sen['arm_vaux'], 13.5),
+                    (sen['arm_iaux'], 1.1),
                     ),
                 'PowerUp': (
                     (sen['acin'], 240.0), (sen['pri12v'], 12.5),
                     (sen['o3v3'], 3.3), (sen['o15vs'], 12.5),
                     (sen['vbat'], 12.8), (sen['vpfc'], (415.0, 415.0), ),
+                    (sen['arm_vout_ov'], (0, 0, )),
                     ),
                 'Output': (
                     (sen['vload'], 0.0),
                     ),
                 'RemoteSw': (
                     (sen['vload'], (12.34, )),
+                    (sen['arm_remote'], 1),
+                    ),
+                'PmSolar': (
+                    (sen['arm_pm_alive'], 1),
+                    (sen['arm_pm_iout'], (0.55, 0.07, )),
                     ),
                 'OCP': (
+                    (sen['arm_acv'], 240),
+                    (sen['arm_acf'], 50),
+                    (sen['arm_sect'], 35),
+                    (sen['arm_vout'], 12.80),
+                    (sen['arm_fan'], 50),
                     (sen['fan'], (0, 12.0)), (sen['vbat'], 12.8),
+                    (sen['arm_ibat'], 4.0),
+                    (sen['arm_ibus'], 32.0),
                     (sen['vbat'], (12.8, ) * 20 + (11.0, ), ),
                     (sen['vbat'], (12.8, ) * 20 + (11.0, ), ),
+                    ),
+                'CanBus': (
+                    (sen['arm_canbind'], 1 << 28),
                     ),
                 },
             UnitTester.key_call: {      # Callables
                 'OCP': (self._arm_loads, 2.0),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Initialise':
-                    init_con,
-                'SrSolar':
-                    ('1 ', '0') +      # Solar alive, Vout OV
-                    ('', ) * 3 +        # 2 x Solar VI, Vout OV
-                    ('0 ', '1') +        # Errorcode, Relay
-                    ('19900', ) +       # Vin pre
-                    ('', ) * 2 +        # 2 x Vcal
-                    ('', ) * 2 +        # 2 x Solar VI
-                    ('19501', ) +       # Vin post
-                    ('10500', ) +       # IoutPre
-                    ('', ) +            # Ical
-                    ('10100', ),        # IoutPost
-                'Aux': ('', '13500', '1100', ''),
-                'PowerUp':
-                    ('', ) * 8 +       # Manual mode
-                    ('0', ) * 2 +
-                    ('12341234', ) * 2 + # Calibrations
-                    ('', ),
-                'Output':
-                    ('', ) * (1 + 1),
-                'RemoteSw':
-                    ('1', ),
-                'PmSolar':
-                    ('1', '555', '1234 -> 1235', '', '66', ),
-                'OCP':
-                    ('240', '50000', '350', '12800', '500', ) +
-                    ('', '4000', '32000', '12341234', '41000', '', '', ),
-                'CanBus': ('0x10000000', '', '0x10000000', '', '', ),
-                },
-            UnitTester.key_con_np: {    # Tuples of strings, addprompt=False
-                'CanBus': ('RRQ,32,0,7,0,0,0,0,0,0,0\r\n', ),
-                },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev['bp35'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
@@ -169,7 +146,6 @@ class BP35_SR_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the C program."""
         super()._pass_run(
-            _INIT_CON_SRHA,
             61,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
@@ -186,7 +162,6 @@ class BP35_HA_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the C program."""
         super()._pass_run(
-            _INIT_CON_SRHA,
             61,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
@@ -203,7 +178,6 @@ class BP35_PM_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the C program."""
         super()._pass_run(
-            _INIT_CON_PM,
             52,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],

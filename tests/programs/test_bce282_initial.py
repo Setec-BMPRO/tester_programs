@@ -15,7 +15,9 @@ class _BCE282Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        # Patch tosbsl driver
+        patcher = patch('programs.bce282.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         self.mybsl = MagicMock(name='tosbsl')
         patcher = patch('programs.bce282.tosbsl.main', new=self.mybsl)
         self.addCleanup(patcher.stop)
@@ -28,8 +30,6 @@ class _BCE282Initial(ProgramTestCase):
     def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['msp_ser'].flushInput()     # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
@@ -42,6 +42,8 @@ class _BCE282Initial(ProgramTestCase):
                     ),
                 'Calibration': (
                     (sen['vout'], (self.vout, ) * 4),
+                    (sen['msp_stat'], (0, 0, )),
+                    (sen['msp_vo'], 13.8),  # Both respond with 12V output.
                     ),
                 'OCP': (
                     (sen['alarm'], 12000),
@@ -49,26 +51,8 @@ class _BCE282Initial(ProgramTestCase):
                     (sen['vbat'], (self.vout, ) * 15 + (self.inocp, ), ),
                     ),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Program':
-                    ('55 AA ' * 16, ),
-                'Calibration':
-                    (' -> ', ) * 3 +
-                    (' ->\r\x07BCE282 V3.0, build 2759.\r'
-                        ' Built 11:57:54 on 8/8/2012.\r'
-                        ' Error code: 1(p8=0, p16=0).\r'
-                        ' Restart code: 4.', ) +
-                    (' -> ', ) * 3 +
-                    (' -> 0 ', ) +
-                    (' -> ', ) +
-                    # Both models respond with 12V output.
-                    (' -> 13800 ', ) +
-                    (' -> ', ) +
-                    (' -> ', ) +
-                    (' -> 0 ', ),
-                },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev['msp'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

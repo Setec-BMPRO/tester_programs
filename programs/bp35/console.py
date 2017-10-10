@@ -12,16 +12,12 @@ ParameterBoolean = share.console.ParameterBoolean
 ParameterFloat = share.console.ParameterFloat
 ParameterCalibration = share.console.ParameterCalibration
 ParameterHex = share.console.ParameterHex
-ParameterCAN = share.console.ParameterCAN
-ParameterRaw = share.console.ParameterRaw
 
 
 class Console(share.console.BadUartConsole):
 
     """Communications to BP35 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n> '
     # Number of lines in startup banner
     banner_lines = 3
     # Time it takes for Manual Mode command to take effect (sec)
@@ -33,10 +29,11 @@ class Console(share.console.BadUartConsole):
     can_bound = 1 << 28
     cmd_data = {
         # Common commands
-        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+        'UNLOCK': ParameterBoolean(
+            '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'RESTART': ParameterBoolean('RESTART',
-            writeable=True, readable=False, write_format='{1}'),
+        'RESTART': ParameterBoolean(
+            'RESTART', writeable=True, readable=False, write_format='{1}'),
         'SER_ID': ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
@@ -44,18 +41,19 @@ class Console(share.console.BadUartConsole):
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWIPE': ParameterBoolean('NV-FACTORY-WIPE',
+        'NVDEFAULT': ParameterBoolean(
+            'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean(
+            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
+        'NVWIPE': ParameterBoolean(
+            'NV-FACTORY-WIPE',
             writeable=True, readable=False, write_format='{1}'),
         # Product specific commands
         'VSET_CAL': ParameterCalibration('VSET'),    # Voltage reading
         'VBUS_CAL': ParameterCalibration('VBUS'),    # Voltage setpoint
         'BUS_ICAL': ParameterCalibration('ICONV'),   # Current reading
-        'CAN': ParameterString('CAN',
-            writeable=True, write_format='"{0} {1}'),
+        'CAN': ParameterString(
+            'CAN', writeable=True, write_format='"{0} {1}'),
         'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
         # X-Register product specific parameters
         'PFC_EN': ParameterBoolean('PFC_ENABLE', writeable=True),
@@ -215,7 +213,6 @@ class Console(share.console.BadUartConsole):
             value = value & mask | bits
         self['LOAD_SET'] = value
 
-
     def sr_set(self, voltage, current, delay=0):
         """Set the state of the SR Solar Regulator.
 
@@ -227,6 +224,15 @@ class Console(share.console.BadUartConsole):
             '{0} {1} SOLAR-SETP-V-I'.format(
                 round(voltage * 1000), round(current * 1000)))
         time.sleep(delay)
+
+    def ocp_cal(self):
+        """Read the OCP calibration constant.
+
+        Implemented as a method to enable unittest.
+        Unittest cannot override __getattr__ used for element indexing.
+
+        """
+        return self['OCP_CAL']
 
     def can_testmode(self, state):
         """Enable or disable CAN Test Mode.

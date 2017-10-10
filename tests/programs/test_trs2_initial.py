@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for TRS2 Initial Test program."""
 
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trs2
 
@@ -14,6 +15,21 @@ class TRSInitial(ProgramTestCase):
     parameter = None
     debug = False
     btmac = '001EC030BC15'
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('programs.trs2.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('share.BleRadio', new=self._makebt)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
+    def _makebt(self, x):
+        mybt = MagicMock(name='MyBleRadio')
+        mybt.scan.return_value = True
+        return mybt
 
     def test_pass_run(self):
         """PASS run of the program."""

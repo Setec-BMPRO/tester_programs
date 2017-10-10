@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BLE2CAN Initial Test program."""
 
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import ble2can
 
@@ -15,11 +16,24 @@ class BLE2CANInitial(ProgramTestCase):
     debug = False
     btmac = '001EC030BC15'
 
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('programs.ble2can.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('share.BleRadio', new=self._makebt)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
+    def _makebt(self, x):
+        mybt = MagicMock(name='MyBleRadio')
+        mybt.scan.return_value = True
+        return mybt
+
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['ble2can'].port.flushInput()  # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
@@ -28,32 +42,14 @@ class BLE2CANInitial(ProgramTestCase):
                     (sen['3v3'], 3.30),
                     ),
                 'TestArm': (
-#                    (sen['light'], (11.9, 0.0)),
+                    (sen['arm_swver'], ble2can.initial.Initial.arm_version),
                     ),
-                },
-            UnitTester.key_con: {       # Tuples of console strings
-                'TestArm':
-                    ('Banner1\r\nBanner2\r\nBanner3', ) +
-                    ('', ) * 4 +
-                    (ble2can.initial.Initial.arm_version, ),
-                'Bluetooth':
-                    (self.btmac, ),
-                },
-            UnitTester.key_ext: {       # Tuples of extra strings
                 'Bluetooth': (
-                    (None, 'AOK', ) +
-                    (None, 'MCHP BTLE v1', ) +
-                    (None, 'AOK', ) +
-                    (self.btmac + ',0,,53....,-53', ) +
-                    (None, 'AOK', )
+                    (sen['btmac'], self.btmac),
                     ),
                 },
             }
-        self.tester.ut_load(
-            data,
-            self.test_program.fifo_push,
-            dev['ble2can'].puts,
-            dev['ble'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

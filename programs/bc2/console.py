@@ -4,40 +4,32 @@
 
 from share import console
 
-Sensor = console.Sensor
-
 # Some easier to use short names
+Sensor = console.Sensor
 ParameterString = console.ParameterString
 ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
-ParameterHex = console.ParameterHex
-ParameterCAN = console.ParameterCAN
-ParameterRaw = console.ParameterRaw
-
-# Bluetooth ready controlled by STATUS bit 27
-_BLE_ON = (1 << 27)
-_BLE_OFF = ~_BLE_ON & 0xFFFFFFFF
 
 
 class Console(console.BaseConsole):
 
     """Communications to BC2 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n> '
     cmd_data = {
-        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+        'UNLOCK': ParameterBoolean(
+            '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+        'NVDEFAULT': ParameterBoolean(
+            'NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
+        'NVWRITE': ParameterBoolean(
+            'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
         'SER_ID': ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{} {}'),
+            write_format='"{0} {1}'),
         'HW_VER': ParameterString(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-        'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': ParameterString('BLE-MAC', read_format='{0}?'),
         }

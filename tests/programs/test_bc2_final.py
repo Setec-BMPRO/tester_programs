@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BC2 Final Test program."""
 
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc2
 
@@ -13,12 +14,25 @@ class BC2Final(ProgramTestCase):
     prog_class = bc2.Final
     parameter = None
     debug = False
-    btmac = '001EC030BC15'
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch('programs.bc2.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('share.BleRadio', new=self._makebt)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        super().setUp()
+
+    def _makebt(self, x):
+        mybt = MagicMock(name='MyBleRadio')
+        mybt.scan.return_value = True
+        return mybt
 
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Bluetooth': (
@@ -26,26 +40,8 @@ class BC2Final(ProgramTestCase):
                     (sen['vin'], 12.0),
                     ),
                 },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Bluetooth':
-                    (self.btmac, ) +
-                    ('', ) * 2,
-                },
-            UnitTester.key_ext: {       # Tuples of extra strings
-                'Bluetooth': (
-                    (None, 'AOK', ) +
-                    (None, 'MCHP BTLE v1', ) +
-                    (None, 'AOK', ) +
-                    (self.btmac + ',0,,53....,-53', ) +
-                    (None, 'AOK', )
-                    ),
-                },
             }
-        self.tester.ut_load(
-            data,
-            self.test_program.fifo_push,
-            lambda msg, addprompt: None,    # Dummy console.puts()
-            dev['ble'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

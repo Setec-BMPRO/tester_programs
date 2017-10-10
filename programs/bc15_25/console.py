@@ -16,16 +16,17 @@ class Console(share.console.BaseConsole):
 
     """Communications to BC15/25 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n> '
     # Number of lines in startup banner
     banner_lines = 3
     cmd_data = {
-        'UNLOCK': ParameterBoolean('0xDEADBEA7 UNLOCK',
+        'UNLOCK': ParameterBoolean(
+            '0xDEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+        'NVDEFAULT': ParameterBoolean(
+            'NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
+        'NVWRITE': ParameterBoolean(
+            'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
         'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
         'SWITCH': ParameterFloat('SW', read_format='{0}?'),

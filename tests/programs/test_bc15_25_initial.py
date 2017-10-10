@@ -23,13 +23,14 @@ class _BC15_25_Initial(ProgramTestCase):
         patcher = patch('share.ProgramARM')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('programs.bc15_25.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
-        dev = self.test_program.devices
-        dev['arm'].port.flushInput()    # Flush console input buffer
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PartDetect': (
@@ -37,6 +38,9 @@ class _BC15_25_Initial(ProgramTestCase):
                     ),
                 'Program': (
                     (sen['3V3'], 3.3),
+                    ),
+                'Initialise': (
+                    (sen['arm_swver'], self.test_program.config['BinVersion']),
                     ),
                 'PowerUp': (
                     (sen['ACin'], 240.0), (sen['Vbus'], 330.0),
@@ -46,54 +50,19 @@ class _BC15_25_Initial(ProgramTestCase):
                     ),
                 'Output': (
                     (sen['Vout'], 14.40), (sen['Vout'], 14.40),
+                    (sen['arm_vout'], 14432),
+                    (sen['arm_iout'], 1987),
+                    (sen['arm_switch'], 3),
                     ),
                 'Loaded': (
                     (sen['Vout'], (14.4, ) * 10 + (11.0, ), ),
+                    (sen['arm_vout'], 14400),
+                    (sen['arm_iout'],
+                     round(1000 * self.test_program.config['OCP_Nominal'])),
                     ),
-                },
-            UnitTester.key_con: {       # Tuples of console strings
-                'Initialise': (
-                    (None, ) +  # Terminate port.flushInput()
-                    (self.startup_banner, ) +
-                    ('', ) * 3 +
-                    ('{}'.format(self.test_program.config['BinVersion']), )
-                    ),
-                'PowerUp': (
-                    (self.startup_banner, ) +
-                    ('', ) * 10
-                    ),
-                'Output':
-                    ('#\r\n' * 44 +     # STAT response lines
-                        'not-pulsing-volts=14432 ;mV \r\n'
-                        'not-pulsing-current=1987 ;mA ',
-                    '3',
-                    '#\r\n' * 44 +      # STAT response lines
-                        'mv-set=14400 ;mV \r\n'
-                        'not-pulsing-volts=14432 ;mV ',
-                    '#\r\n' * (self.cal_lines - 2) +    # CAL response lines
-                        'set_volts_mv_num                        902 \r\n'
-                        'set_volts_mv_den                      14400 ', ) +
-                    ('', ) * 3,
-                'Loaded':
-                    ('#\r\n' * 44 +      # STAT response lines
-                        'not-pulsing-current={0} ;mA \r\n'
-                        'ma-set={0} ;mA \r\n'.format(
-                            round(1000 *
-                                self.test_program.config['OCP_Nominal'])),
-                    '#\r\n' * (self.cal_lines - 2) +    # CAL response lines
-                        'get_current_ma_num                      568 \r\n'
-                        'set_current_ma_num                     1000 ',
-                    '', '', '', '',
-                    '#\r\n' * 44 +      # STAT response lines
-                        'not-pulsing-volts=14400 ;mV \r\n'
-                        'not-pulsing-current={0} ;mV '.format(
-                            round(1000 *
-                                self.test_program.config['OCP_Nominal'])),
-                    '', '',
-                    )
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push, dev['arm'].puts)
+        self.tester.ut_load(data, self.test_program.fifo_push)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

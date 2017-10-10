@@ -112,12 +112,10 @@ class Initial(share.TestSequence):
         brakes = dev['dcs_brakes']
         # Offset calibration at low voltage
         brakes.output(self.vbrake_offset, output=True, delay=0.5)
-        vactual = mes['dmm_BrakeOffset'](timeout=5).reading1
-        trs2['VBRAKE_OFFSET'] = vactual
+        trs2['VBRAKE_OFFSET'] = mes['dmm_BrakeOffset'](timeout=5).reading1
         # Gain calibration at nominal voltage
         brakes.output(self.vbatt, output=True, delay=0.5)
-        vactual = mes['dmm_BrakeOn'](timeout=5).reading1
-        trs2['VBRAKE_GAIN'] = vactual
+        trs2['VBRAKE_GAIN'] = mes['dmm_BrakeOn'](timeout=5).reading1
         # Save new calibration settings
         trs2['NVWRITE'] = True
         # Measure the analog inputs
@@ -148,8 +146,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Test fixture item number
-    fixture = '030451'
+    arm_port = share.port('030451', 'ARM')
+    ble_port = share.port('030451', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -173,14 +171,14 @@ class Devices(share.Devices):
         trs2_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trs2_ser.port = share.port(self.fixture, 'ARM')
+        trs2_ser.port = self.arm_port
         # Console driver
         self['trs2'] = console.Console(trs2_ser)
         # Serial connection to the BLE module
         ble_ser = tester.SimSerial(
             simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port(self.fixture, 'BLE')
+        ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)
         # Enable the watchdog
         self['rla_wdg'].set_on()

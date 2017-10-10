@@ -12,16 +12,12 @@ ParameterBoolean = share.console.ParameterBoolean
 ParameterFloat = share.console.ParameterFloat
 ParameterCalibration = share.console.ParameterCalibration
 ParameterHex = share.console.ParameterHex
-ParameterCAN = share.console.ParameterCAN
-ParameterRaw = share.console.ParameterRaw
 
 
 class Console(share.console.BadUartConsole):
 
     """Communications to J35 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n> '
     # Number of lines in startup banner
     banner_lines = 2
     # CAN Test mode controlled by STATUS bit 29
@@ -33,10 +29,11 @@ class Console(share.console.BadUartConsole):
     manual_mode_wait = 2.1
     cmd_data = {
         # Common commands
-        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+        'UNLOCK': ParameterBoolean(
+            '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'RESTART': ParameterBoolean('RESTART',
-            writeable=True, readable=False, write_format='{1}'),
+        'RESTART': ParameterBoolean(
+            'RESTART', writeable=True, readable=False, write_format='{1}'),
         'SER_ID': ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
@@ -44,11 +41,14 @@ class Console(share.console.BadUartConsole):
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
+        'NVDEFAULT': ParameterBoolean(
+            'NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
+        'NVWRITE': ParameterBoolean(
+            'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWIPE': ParameterBoolean('NV-FACTORY-WIPE',
+        'NVWIPE': ParameterBoolean(
+            'NV-FACTORY-WIPE',
             writeable=True, readable=False, write_format='{1}'),
         # Product specific commands
         'VSET_CAL': ParameterCalibration('VSET'),    # Voltage reading
@@ -112,8 +112,8 @@ class Console(share.console.BadUartConsole):
         super().__init__(port)
         # Add in the 14 load switch current readings
         for i in range(1, 15):
-            self.cmd_data['LOAD_{}'.format(i)] = ParameterFloat(
-                'LOAD_SWITCH_CURRENT_{}'.format(i), scale=1000)
+            self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
+                'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
         self._timer = share.BackgroundTimer()
 
     def brand(self, hw_ver, sernum, reset_relay):
@@ -185,6 +185,15 @@ class Console(share.console.BadUartConsole):
             bits = code << (load * 2)
             value = value & mask | bits
         self['LOAD_SET'] = value
+
+    def ocp_cal(self):
+        """Read the OCP calibration constant.
+
+        Implemented as a method to enable unittest.
+        Unittest cannot override __getattr__ used for element indexing.
+
+        """
+        return self['OCP_CAL']
 
     def can_testmode(self, state):
         """Enable or disable CAN Test Mode.

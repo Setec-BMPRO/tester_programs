@@ -12,8 +12,6 @@ ParameterBoolean = share.console.ParameterBoolean
 ParameterFloat = share.console.ParameterFloat
 ParameterCalibration = share.console.ParameterCalibration
 ParameterHex = share.console.ParameterHex
-ParameterCAN = share.console.ParameterCAN
-ParameterRaw = share.console.ParameterRaw
 
 
 @enum.unique
@@ -49,18 +47,18 @@ class Console(share.console.BaseConsole):
     banner_lines = 3
     cmd_data = {
         # Commands
-        'NVDEFAULT': ParameterBoolean('NV-DEFAULT',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
-            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': ParameterBoolean(
+            'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': ParameterBoolean(
+            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
         'SER_ID': ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{} {}'),
+            write_format='"{0} {1}'),
         'HW_VER': ParameterString(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{}?'),
-        'BT_MAC': ParameterString('BLE-MAC', read_format='{}?'),
+        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': ParameterString('BLE-MAC', read_format='{0}?'),
         # X-Register values
         'VBATT': ParameterFloat('TRS2_BATT_MV', scale=1000),
         'VBRAKE': ParameterFloat('TRS2_BRAKE_MV', scale=1000),
