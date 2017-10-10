@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """BC2 Initial Program."""
 
+import serial
 import tester
 from tester import (
     TestStep,
@@ -78,15 +79,13 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
-        bc2_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        bc2_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         bc2_ser.port = self.arm_port
         # Console driver
         self['bc2'] = console.Console(bc2_ser)
         # Serial connection to the BLE module
-        ble_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
+        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)

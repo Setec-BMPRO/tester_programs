@@ -37,7 +37,7 @@ class ConsoleCanTunnel():
             '.'.join((__name__, self.__class__.__name__)))
         self._can_port = tester.SerialToCan(port)
         # The buffer for tunneled console data.
-        self._buf_port = tester.SimSerial(simulation=True)
+        self._buf_port = tester.SimSerial()
         # SimSerial compatible interface callables
         self.puts = self._buf_port.puts
         self.inWaiting = self._buf_port.inWaiting
@@ -89,9 +89,9 @@ class OldConsoleCanTunnel():
     A SimSerial object is used to do input data buffering of the decoded data
     received over the CAN Tunnel.
 
-    Another SimSerial port is used to communicate with a Serial to CAN
-    interface device (A modified Trek2 inside a test fixture), which we talk
-    to using it's console serial port.
+    A Serial port is used to communicate with a Serial to CAN interface device
+    (A modified Trek2 inside a test fixture), which we talk to using it's
+    console serial port.
     This driver implements a simplified version of the generic console driver.
     Just enough to open and run a tunnel.
 
@@ -137,7 +137,7 @@ class OldConsoleCanTunnel():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         # The buffer for tunneled console data.
-        self._buf_port = tester.SimSerial(simulation=True)
+        self._buf_port = tester.SimSerial()
         # SimSerial compatible interface callables
         self.puts = self._buf_port.puts
         self.inWaiting = self._buf_port.inWaiting

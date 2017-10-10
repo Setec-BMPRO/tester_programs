@@ -3,6 +3,7 @@
 """Trek2 Final Test Program."""
 
 import os
+import serial
 import tester
 from tester import TestStep, LimitInteger, LimitRegExp
 import share
@@ -94,8 +95,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Connection to the Serial-to-CAN Trek2 inside the fixture
-        ser_can = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        ser_can = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         ser_can.port = Final.can_port
         # CAN Console tunnel driver

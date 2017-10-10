@@ -5,6 +5,7 @@
 import os
 import inspect
 import time
+import serial
 import tester
 from tester import TestStep, LimitBetween, LimitDelta, LimitInteger
 import share
@@ -184,8 +185,7 @@ class Devices(share.Devices):
             Initial.limitdata[self.parameter]['Software'],
             folder, '18F87J93', self['rla_Prog'])
         # Serial connection to the console
-        pic_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=9600, timeout=5)
+        pic_ser = serial.Serial(baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
         pic_ser.port = Initial.pic_port
         self['pic'] = console.Console(pic_ser)

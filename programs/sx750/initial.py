@@ -6,6 +6,7 @@
 import os
 import inspect
 import time
+import serial
 import tester
 from tester import (
     TestStep,
@@ -402,14 +403,12 @@ class Devices(share.Devices):
         self['programmer'] = share.ProgramARM(
             self.arm_port, file, boot_relay=self['rla_boot'])
         # Serial connection to the ARM console
-        arm_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=57600, timeout=2.0)
+        arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = self.arm_port
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Arduino console
-        ard_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=2.0)
+        ard_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = self.arduino_port
         self['ard'] = arduino.Arduino(ard_ser)

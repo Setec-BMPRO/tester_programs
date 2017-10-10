@@ -6,6 +6,7 @@
 import os
 import math
 import inspect
+import serial
 import tester
 from tester import (
     TestStep,
@@ -354,8 +355,7 @@ class Devices(share.Devices):
             Initial.arm_port, os.path.join(folder, Initial.arm_file), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the console
-        j35_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        j35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         j35_ser.port = Initial.arm_port
         # J35 Console driver

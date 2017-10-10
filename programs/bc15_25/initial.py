@@ -6,6 +6,7 @@ import os
 import inspect
 import time
 import math
+import serial
 import tester
 from tester import (
     LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitPercent,
@@ -182,8 +183,7 @@ class Devices(share.Devices):
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # Serial connection to the console
-        arm_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=2.0)
+        arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = self.arm_port
         # Console driver

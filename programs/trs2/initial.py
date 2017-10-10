@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """TRS2 Initial Program."""
 
+import serial
 import tester
 from tester import (
     TestStep,
@@ -168,15 +169,13 @@ class Devices(share.Devices):
         pin.insert = pin.set_off
         pin.remove = pin.set_on
         # Serial connection to the console
-        trs2_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        trs2_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         trs2_ser.port = self.arm_port
         # Console driver
         self['trs2'] = console.Console(trs2_ser)
         # Serial connection to the BLE module
-        ble_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
+        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)

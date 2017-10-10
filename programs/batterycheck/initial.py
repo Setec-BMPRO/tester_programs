@@ -7,6 +7,7 @@ import os
 import inspect
 import subprocess
 import time
+import serial
 import tester
 from tester import (
     TestStep,
@@ -201,14 +202,12 @@ class Devices(share.Devices):
             Initial.arm_bin)
         self['programmer'] = share.ProgramARM(self.arm_pgm, file, crpmode=False)
         # Serial connection to the console
-        arm_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=9600, timeout=2)
+        arm_ser = serial.Serial(baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = self.arm_con
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Bluetooth device
-        btport = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=2)
+        btport = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         btport.port = self.bt_port
         # BT Radio driver

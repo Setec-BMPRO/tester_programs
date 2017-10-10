@@ -64,6 +64,9 @@ class CMRSBPInitial(ProgramTestCase):
         patcher = patch('share.ProgramPIC')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('serial.Serial')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def test_pass(self):
@@ -125,6 +128,9 @@ class CMRSBPSerialDate(ProgramTestCase):
             'programs.cmrsbp.ev2200.EV2200', return_value=self.myev)
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('serial.Serial')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def test_pass(self):
@@ -165,6 +171,9 @@ class _CMRSBPFin(ProgramTestCase):
         self.mycmr.read.return_value = self.mycmrdata
         patcher = patch(
             'programs.cmrsbp.cmrsbp.CmrSbp', return_value=self.mycmr)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('serial.Serial')
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

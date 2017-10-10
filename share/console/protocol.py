@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Console driver Command-Response protocol processor.
 
-Filter layer between the SimSerial port that implements the Command/Response
+Filter layer between the Serial port that implements the Command/Response
 protocol of the console.
 Several versions of console 'languages' exist, that each use different syntax.
 
@@ -115,7 +115,7 @@ class BaseConsole():
     def __init__(self, port):
         """Initialise communications.
 
-        @param port SimSerial instance to use
+        @param port Serial instance to use
 
         """
         self._logger = logging.getLogger(

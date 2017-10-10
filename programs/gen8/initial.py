@@ -6,6 +6,7 @@
 import os
 import inspect
 import time
+import serial
 import tester
 from tester import (
     TestStep,
@@ -297,8 +298,7 @@ class Devices(share.Devices):
             self.arm_port, os.path.join(folder, Initial.arm_bin),
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the ARM console
-        arm_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=57600, timeout=2.0)
+        arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
         arm_ser.port = self.arm_port
         self['arm'] = console.Console(arm_ser)

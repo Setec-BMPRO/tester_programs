@@ -6,6 +6,7 @@
 import os
 import inspect
 import time
+import serial
 import tester
 from tester import (
     TestStep,
@@ -450,8 +451,7 @@ class Devices(share.Devices):
         self['program_pic'] = share.ProgramPIC(
             Initial.pic_file, folder, '33FJ16GS402', self['rla_pic'])
         # Serial connection to the BP35 console
-        bp35_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         bp35_ser.port = Initial.arm_port
         # BP35 Console driver

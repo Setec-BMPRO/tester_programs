@@ -6,6 +6,7 @@ import sys
 import os
 import inspect
 import time
+import serial
 import tester
 from tester import TestStep, LimitLow, LimitBetween, LimitDelta, LimitPercent
 import share
@@ -226,8 +227,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console to communicate with the MSP430
-        self['msp_ser'] = tester.SimSerial(
-            simulation=self.fifo, baudrate=57600, timeout=5.0)
+        self['msp_ser'] = serial.Serial(baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         self['msp_ser'].port = Initial.msp_port2
         # MSP430 Console driver

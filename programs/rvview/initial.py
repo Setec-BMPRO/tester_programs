@@ -5,6 +5,7 @@
 
 import os
 import inspect
+import serial
 import tester
 from tester import (
     TestStep,
@@ -126,8 +127,7 @@ class Devices(share.Devices):
             Initial.arm_port, file, crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the rvview console
-        rvview_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        rvview_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         rvview_ser.port = Initial.arm_port
         # rvview Console driver

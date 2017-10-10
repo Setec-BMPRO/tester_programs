@@ -6,6 +6,7 @@ import os
 import datetime
 import time
 import inspect
+import serial
 import tester
 from tester import (
     TestStep,
@@ -292,14 +293,12 @@ class Devices(share.Devices):
              tester.DCSource(self.physical_devices['DCS5']),
             ))
         # Open serial connection to data monitor
-        cmr_ser = tester.SimSerial(
-            simulation=self.fifo,
+        cmr_ser = serial.Serial(
             port=Initial.cmr_port, baudrate=9600, timeout=0.1)
         self['cmr'] = cmrsbp.CmrSbp(cmr_ser, data_timeout=10)
         self.add_closer(self['cmr'].close)
         # EV2200 board
-        ev_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=9600, timeout=4)
+        ev_ser = serial.Serial(baudrate=9600, timeout=4)
         # Set port separately, as we don't want it opened yet
         ev_ser.port = Initial.ev_port
         self['ev'] = ev2200.EV2200(ev_ser)

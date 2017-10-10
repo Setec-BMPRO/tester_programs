@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck Final Test Program."""
 
+import serial
 import tester
 from tester import (
     TestStep,
@@ -80,8 +81,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the Bluetooth device
-        btport = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=2)
+        btport = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
         btport.port = self.bt_port
         # BT Radio driver

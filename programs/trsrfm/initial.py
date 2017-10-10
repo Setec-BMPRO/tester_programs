@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """TRSRFM Initial Program."""
 
+import serial
 import tester
 from tester import (
     TestStep, LimitLow, LimitHigh, LimitDelta, LimitBoolean, LimitRegExp
@@ -124,15 +125,13 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
-        trsrfm_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        trsrfm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         trsrfm_ser.port = self.arm_port
         # Console driver
         self['trsrfm'] = console.Console(trsrfm_ser)
         # Serial connection to the BLE module
-        ble_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
+        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)

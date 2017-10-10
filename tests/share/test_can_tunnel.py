@@ -18,7 +18,7 @@ class Tunnel(unittest.TestCase):
         patcher = patch('time.sleep')   # Remove time delays
         self.addCleanup(patcher.stop)
         patcher.start()
-        sim_ser = tester.SimSerial(simulation=True)
+        sim_ser = tester.SimSerial()
         self.mycon = share.console.can_tunnel.OldConsoleCanTunnel(sim_ser)
 
     def test_1_open_fail(self):

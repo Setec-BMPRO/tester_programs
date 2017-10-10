@@ -4,6 +4,7 @@
 
 import os
 import inspect
+import serial
 import tester
 from tester import TestStep, LimitRegExp, LimitBetween
 import share
@@ -70,8 +71,7 @@ class Devices(share.Devices):
         self['program_picMic'] = share.ProgramPIC(
             InitialMicro.pic_hex_mic, folder, '18F4520', self['rla_mic'])
         # Serial connection to the console
-        pic_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=19200, timeout=2.0)
+        pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         pic_ser.port = InitialMicro.pic_port
         self['pic'] = console.Console(pic_ser)

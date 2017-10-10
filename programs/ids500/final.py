@@ -4,6 +4,7 @@
 """IDS-500 Final Test Program."""
 
 import time
+import serial
 import tester
 from tester import (
     TestStep,
@@ -269,8 +270,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console to communicate with the PIC
-        pic_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=19200, timeout=2.0)
+        pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         pic_ser.port = Final.pic_port
         self['pic'] = console.Console(pic_ser)

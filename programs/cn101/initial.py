@@ -4,6 +4,7 @@
 
 import os
 import inspect
+import serial
 import tester
 from tester import (
     TestStep,
@@ -155,15 +156,13 @@ class Devices(share.Devices):
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # Serial connection to the console
-        cn101_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=5.0)
+        cn101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         cn101_ser.port = self.arm_port
         # Console driver
         self['cn101'] = console.Console(cn101_ser)
         # Serial connection to the BLE module
-        ble_ser = tester.SimSerial(
-            simulation=self.fifo, baudrate=115200, timeout=0.1, rtscts=True)
+        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)

@@ -23,6 +23,9 @@ class SX750Initial(ProgramTestCase):
         patcher = patch('programs.sx750.console.Console')
         self.addCleanup(patcher.stop)
         patcher.start()
+        patcher = patch('programs.sx750.arduino.Arduino')
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def test_pass_run(self):
