@@ -193,7 +193,7 @@ class ParameterHex(_Parameter):
 
     def __init__(self,
             command, writeable=False, readable=True,
-            minimum=0, maximum=1000, mask=0xFFFFFFFF,
+            minimum=0, maximum=1000, scale=1, mask=0xFFFFFFFF,
             write_format='${0:08X} "{1} XN!', read_format='"{0} XN?',
             write_expected=0, read_expected=1):
         """Remember the data limits."""
@@ -202,9 +202,10 @@ class ParameterHex(_Parameter):
             writeable, readable,
             write_format, read_format,
             write_expected, read_expected)
-        self._min = minimum
-        self._max = maximum
-        self._mask = mask
+        self.min = minimum
+        self.max = maximum
+        self.scale = scale
+        self.mask = mask
 
     def write(self, value, func):
         """Write parameter value.
@@ -213,10 +214,10 @@ class ParameterHex(_Parameter):
         @param func Function to use to write the value.
 
         """
-        if value < self._min or value > self._max:
+        if value < self.min or value > self.max:
             raise ParameterError(
-                'Value out of range {0} - {1}'.format(self._min, self._max))
-        super().write(round(value), func)
+                'Value out of range {0} - {1}'.format(self.min, self.max))
+        super().write(round(value * self.scale), func)
 
     def read(self, func):
         """Read parameter value.
@@ -228,7 +229,7 @@ class ParameterHex(_Parameter):
         value = super().read(func)
         if value is None:
             value = '0'
-        return int(value, 16) & self._mask
+        return (int(value, 16) & self.mask) / self.scale
 
 
 class ParameterHex0x(ParameterHex):

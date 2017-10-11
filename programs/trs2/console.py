@@ -60,10 +60,10 @@ class Console(share.console.BaseConsole):
         'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
         'BT_MAC': ParameterString('BLE-MAC', read_format='{0}?'),
         # X-Register values
-        'VBATT': ParameterFloat('TRS2_BATT_MV', scale=1000),
-        'VBRAKE': ParameterFloat('TRS2_BRAKE_MV', scale=1000),
-        'IBRAKE': ParameterFloat('TRS2_BRAKE_MA', scale=1000),
-        'VPIN': ParameterFloat('TRS2_DROP_ACROSS_PIN_MV', scale=1000),
+        'VBATT': ParameterHex('TRS2_BATT_MV', scale=1000),
+        'VBRAKE': ParameterHex('TRS2_BRAKE_MV', scale=1000),
+        'IBRAKE': ParameterHex('TRS2_BRAKE_MA', scale=1000),
+        'VPIN': ParameterHex('TRS2_DROP_ACROSS_PIN_MV', scale=1000),
         'FAULT_CODE': ParameterHex(
             'TRS2_FAULT_CODE_BITS', minimum=0, maximum=0x3),
         # Calibration commands

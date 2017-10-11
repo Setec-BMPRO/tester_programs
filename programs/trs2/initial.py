@@ -47,10 +47,12 @@ class Initial(share.TestSequence):
             '^{0}$'.format(arm_version.replace('.', r'\.'))),
         LimitLow('ARM-FaultCode', 0),
 # FIXME: The next 4 need adjusting
-        LimitPercent('ARM-Vbatt', vbatt, 1.234, delta=0),
-        LimitPercent('ARM-Vbrake', vbatt, 1.234, delta=0),
-        LimitPercent('ARM-Ibrake', 0.1, 12.34, delta=0),
-        LimitPercent('ARM-Vpin', 0.1, 12.34, delta=0),
+#        LimitPercent('ARM-Vbatt', vbatt, 0.6, delta=0.033),
+        LimitPercent('ARM-Vbatt', vbatt, 2.0, delta=0),
+        LimitPercent('ARM-Vbrake', vbatt, 2.0, delta=0),
+        LimitPercent('ARM-Ibrake', 0.4, 10.0, delta=0),
+#        LimitPercent('ARM-Vpin', 0.1, 10.0, delta=0),
+        LimitDelta('ARM-Vpin', 0.0, 1.0),
 
         LimitRegExp('BtMac', '^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
@@ -87,6 +89,8 @@ class Initial(share.TestSequence):
         """Test the operation of LEDs."""
         trs2 = dev['trs2']
         trs2.open()
+        dev['rla_reset'].pulse(0.1)
+        trs2.action(None, delay=5.0, expected=3)   # Flush banner
         trs2.brand(self.hw_ver, self.sernum)
         self.measure(
             ('arm_swver', 'arm_fltcode',
@@ -190,6 +194,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
+        self['trs2'].close()
         for dev in ('dcs_vin', 'dcs_brakes', ):
             self[dev].output(0.0, False)
         for rla in ('rla_reset', 'rla_pin', ):
