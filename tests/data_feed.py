@@ -28,7 +28,7 @@ class UnitTester(tester.Tester):
     def __init__(self, prog_class, parameter):
         """Initalise the data feeder."""
         # Create a 'real' Tester instance
-        super().__init__('MockATE', {repr(prog_class): prog_class}, fifo=True)
+        super().__init__('MockATE', {repr(prog_class): prog_class})
         self.ut_program = tester.TestProgram(
             repr(prog_class), per_panel=1, parameter=parameter, test_limits=[])
         self.ut_result = None

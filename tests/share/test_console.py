@@ -17,7 +17,7 @@ class BaseConsole(unittest.TestCase):
     def setUpClass(cls):
         logging_setup()
         # We need a tester to get MeasurementFailedError
-        cls.tester = tester.Tester('MockATE', {}, fifo=True)
+        cls.tester = tester.Tester('MockATE', {})
 
     @classmethod
     def tearDownClass(cls):
@@ -77,7 +77,7 @@ class BadUartConsole(unittest.TestCase):
     def setUpClass(cls):
         logging_setup()
         # We need a tester to get MeasurementFailedError
-        cls.tester = tester.Tester('MockATE', {}, fifo=True)
+        cls.tester = tester.Tester('MockATE', {})
 
     @classmethod
     def tearDownClass(cls):

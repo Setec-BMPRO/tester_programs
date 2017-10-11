@@ -38,9 +38,6 @@ def _main():
     if debug_gpib is None:
         debug_gpib = False
     gpib.DEBUG_GPIB.enabled = debug_gpib
-    fifo = config['DEFAULT'].getboolean('FIFO')
-    if fifo is None:
-        fifo = True
     test_program = config['DEFAULT'].get('Program')
     if test_program is None:
         test_program = 'Dummy'
@@ -64,7 +61,7 @@ def _main():
         signal=tester.signals.Status.result)
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
-    tst = tester.Tester(tester_type, programs.PROGRAMS, fifo)
+    tst = tester.Tester(tester_type, programs.PROGRAMS)
     tst.start()
     logger.info('Create Program "%s"', test_program)
     # Make a TEST PROGRAM descriptor

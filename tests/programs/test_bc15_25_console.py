@@ -15,7 +15,7 @@ class BC25_Console(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # We need a tester to get MeasurementFailedError.
-        cls.tester = tester.Tester('MockATE', {}, fifo=True)
+        cls.tester = tester.Tester('MockATE', {})
 
     @classmethod
     def tearDownClass(cls):

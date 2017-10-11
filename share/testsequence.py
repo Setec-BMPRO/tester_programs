@@ -44,7 +44,7 @@ class TestSequence(tester.TestSequence):
         """
         super().open()
         self.limits = tester.limitdict(self.limit_builtin + limits)
-        self.devices = cls_devices(self.physical_devices, self.fifo)
+        self.devices = cls_devices(self.physical_devices)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
         self.sensors.parameter = self.parameter
@@ -179,21 +179,16 @@ class Devices(abc.ABC, dict):
 
     """Devices abstract base class."""
 
-    physical_devices = None
-    fifo = None
-    parameter = None
-    _close_callables = None         # Callbacks when close() is called
-
-    def __init__(self, physical_devices, fifo):
+    def __init__(self, physical_devices):
         """Create instance.
 
         @param physical_devices Physical instruments
-        @param fifo True if FIFOs are active
 
         """
         super().__init__()
         self.physical_devices = physical_devices
-        self.fifo = fifo
+        self.parameter = None
+        self._close_callables = None    # Callbacks when close() is called
 
     @abc.abstractmethod
     def open(self):
