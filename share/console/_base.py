@@ -229,7 +229,7 @@ class ParameterHex(_Parameter):
         value = super().read(func)
         if value is None:
             value = '0'
-        return (int(value, 16) & self.mask) / self.scale
+        return round((int(value, 16) & self.mask) / self.scale)
 
 
 class ParameterHex0x(ParameterHex):

@@ -127,6 +127,7 @@ class ParameterHex(unittest.TestCase):
         self.func.return_value = response
         value = self.param.read(self.func)
         self.assertEqual(int(response, 16), value)
+        self.assertIsInstance(value, int)
         self.func.assert_called_with('"{0} XN?'.format(_CMD), expected=1)
 
     def test_2_wr_cmd(self):
@@ -153,6 +154,7 @@ class ParameterHex0x(unittest.TestCase):
         self.func.return_value = response
         value = self.param.read(self.func)
         self.assertEqual(int(response, 16), value)
+        self.assertIsInstance(value, int)
         self.func.assert_called_with('"{0} XN?'.format(_CMD), expected=1)
 
     def test_2_wr_cmd(self):
