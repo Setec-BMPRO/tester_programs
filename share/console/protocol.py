@@ -98,7 +98,6 @@ class BaseConsole():
     cmd_prompt = b'\r> '
     # Command suffix between echo of a command and the start of the response.
     res_suffix = b' -> '
-    puts_prompt = ''
     ignore = ()    # Tuple of strings to remove from responses
     # Fail a measurement upon a ConsoleError
     measurement_fail_on_error = True
@@ -243,7 +242,7 @@ class BaseConsole():
 # FIXME: Next line should be:   if response_count != expected:
         if response_count < expected:
             raise ConsoleResponseError(
-                'Expected {}, actual {}'.format(expected, response_count))
+                'Expected {0}, actual {1}'.format(expected, response_count))
 # TODO: Remove this logger once we implement response_count != expected
         if response_count > expected:
             self._logger.error(
