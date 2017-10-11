@@ -108,7 +108,7 @@ class Initial(share.TestSequence):
             doc='SR Solar Vout before calibration'),
         LimitPercent('VsetPost', sr_vset, 1.5,
             doc='SR Solar Vout after calibration'),
-        LimitPercent('ARM-IoutPre', sr_ical, 9.0,
+        LimitPercent('ARM-IoutPre', sr_ical, (9.0, 20.0),
             doc='SR Solar Iout before calibration'),
         LimitPercent('ARM-IoutPost', sr_ical, 3.0,
             doc='SR Solar Iout before calibration'),
