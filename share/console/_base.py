@@ -238,13 +238,13 @@ class ParameterHex0x(ParameterHex):
 
     def __init__(self,
             command, writeable=False, readable=True,
-            minimum=0, maximum=1000, mask=0xFFFFFFFF,
+            minimum=0, maximum=1000, scale=1, mask=0xFFFFFFFF,
             write_expected=0, read_expected=1):
         """Remember the data limits."""
         super().__init__(
             command,
             writeable, readable,
-            minimum, maximum, mask,
+            minimum, maximum, scale, mask,
             write_format='0x{0:08X} "{1} XN!',
             write_expected=0, read_expected=1)
 
