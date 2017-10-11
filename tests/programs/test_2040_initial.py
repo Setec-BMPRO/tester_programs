@@ -39,7 +39,7 @@ class _2040Initial(ProgramTestCase):
                      (sen['oVout'], (20.0, ) * 15 + (18.0, ), ), ),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
@@ -66,7 +66,7 @@ class _2040Initial(ProgramTestCase):
                     ((sen['oLock'], 1000.0), ),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('F', result.code)

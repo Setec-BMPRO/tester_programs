@@ -34,7 +34,7 @@ class _2040Final(ProgramTestCase):
                     ((sen['o20V'], 0.0), (sen['o20V'], 20.0), ),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
@@ -61,7 +61,7 @@ class _2040Final(ProgramTestCase):
                     ((sen['o20V'], 10.0), ),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('F', result.code)

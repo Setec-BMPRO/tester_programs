@@ -35,7 +35,7 @@ class _J35Final(ProgramTestCase):
                 'Load': (self._dmm_loads, 12.7),
                 },
             }
-        self.tester.ut_load(data, self.test_program.fifo_push)
+        self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)

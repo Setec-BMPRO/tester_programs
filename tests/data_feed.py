@@ -34,7 +34,7 @@ class UnitTester(tester.Tester):
         self.ut_result = None
         self.ut_steps = []
         self.ut_data = None
-        self.ut_fifo_pusher = None
+        self.ut_sensor_storer = None
         self.ut_console_puts = None
         self.extra_puts = None
         dispatcher.connect(     # Subscribe to the TestStep signals
@@ -62,16 +62,16 @@ class UnitTester(tester.Tester):
             signal=tester.signals.TestRun.result)
         super().stop()
 
-    def ut_load(self, data, fifo_pusher):
+    def ut_load(self, data, sensor_storer):
         """Per-Test data load.
 
         @param data Dictionary of FIFO data
-        @param fifo_pusher Callable to push FIFO data into sensors
+        @param sensor_storer Callable to push FIFO data into sensors
         @param console_puts Callable to push console data
 
         """
         self.ut_data = data
-        self.ut_fifo_pusher = fifo_pusher
+        self.ut_sensor_storer = sensor_storer
         self.ut_steps.clear()
         self.ut_result = None
 
@@ -86,7 +86,7 @@ class UnitTester(tester.Tester):
         """Sensor FIFOs."""
         try:
             dat = self.ut_data[self.key_sen][stepname]
-            self.ut_fifo_pusher(dat)
+            self.ut_sensor_storer(dat)
         except KeyError:
             pass
 
