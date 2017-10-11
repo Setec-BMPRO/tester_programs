@@ -129,7 +129,9 @@ class CMRSBPSerialDate(ProgramTestCase):
             'programs.cmrsbp.ev2200.EV2200', return_value=self.myev)
         self.addCleanup(patcher.stop)
         patcher.start()
-        patcher = patch('serial.Serial')
+        myser = MagicMock(name='SerialPort')
+        myser.read.return_value = b''
+        patcher = patch('serial.Serial', return_value=myser)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
