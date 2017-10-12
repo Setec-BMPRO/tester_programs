@@ -6,7 +6,6 @@ import serial
 import tester
 from tester import TestStep, LimitLow, LimitDelta, LimitBoolean, LimitRegExp
 import share
-from . import console
 
 
 class Final(share.TestSequence):
@@ -17,9 +16,9 @@ class Final(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', 12.0, 0.5),
-        LimitLow('TestPinCover', 0.5),
-        LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
+        LimitDelta('Vin', vbatt, 0.2),
+        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
+        LimitRegExp('BtMac', '^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         )
 
@@ -34,17 +33,14 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
-        mes['dmm_tstpincov'](timeout=5)
-        dev['rla_pin'].set_on()
         dev['dcs_vin'].output(self.vbatt, True)
-        self.measure(('dmm_vin', ), timeout=5)
+        self.measure(
+            ('dmm_tstpincov', 'dmm_vin', ), timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(self.vbatt, delay=15.0)
-        btmac = mes['trs2_btmac']().reading1
+        btmac = ''
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
@@ -59,7 +55,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    arm_port = share.port('030451', 'ARM')
     ble_port = share.port('030451', 'BLE')
 
     def open(self):
@@ -69,15 +64,14 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
+                ('dcs_cover', tester.DCSource, 'DCS5'),
                 ('rla_pin', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Serial connection to the console
-        trs2_ser = serial.Serial(baudrate=115200, timeout=5.0)
-        # Set port separately, as we don't want it opened yet
-        trs2_ser.port = self.arm_port
-        # Console driver
-        self['trs2'] = console.Console(trs2_ser)
+        # Some more obvious ways to use this relay
+        pin = self['rla_pin']
+        pin.insert = pin.set_off
+        pin.remove = pin.set_on
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
@@ -86,6 +80,8 @@ class Devices(share.Devices):
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
+        self['dcs_cover'].output(9.0, output=True)
+        self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -105,13 +101,6 @@ class Sensors(share.Sensors):
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
         self['mirbt'] = sensor.Mirror()
-        # Console sensors
-        trs2 = self.devices['trs2']
-        for name, cmdkey in (
-                ('btmac', 'BT_MAC'),
-            ):
-            self[name] = console.Sensor(
-                trs2, cmdkey, rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -124,5 +113,4 @@ class Measurements(share.Measurements):
             ('dmm_vin', 'Vin', 'vin', ''),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
-            ('trs2_btmac', 'BtMac', 'btmac', ''),
             ))

@@ -48,12 +48,11 @@ class Initial(share.TestSequence):
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(arm_version.replace('.', r'\.'))),
         LimitLow('ARM-FaultCode', 0),
-# FIXME: The next 4 need adjusting
         LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088),
         LimitPercent('ARM-Vbrake', vbatt, 4.6, delta=0.088),
         LimitPercent('ARM-Vbatt-Cal', vbatt, 0.6, delta=0.033),
         LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033),
-        LimitPercent('ARM-Ibrake', ibrake, 1.0, delta=0.9),
+        LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82),
         LimitDelta('ARM-Vpin', 0.0, 0.2),
 
         LimitRegExp('BtMac', '^[0-9A-F]{12}$'),
@@ -82,7 +81,8 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcl_brake'].output(0.1, output=True)
-        self.measure(('dmm_vin', 'dmm_3v3', 'dmm_BrakeOff'), timeout=5)
+        self.measure(
+            ('dmm_vin', 'dmm_3v3', 'dmm_BrakeOff'), timeout=5)
         dev['rla_pin'].remove()
         mes['dmm_BrakeOn'](timeout=5)
         dev['rla_pin'].insert()
@@ -113,13 +113,18 @@ class Initial(share.TestSequence):
     def _step_calibrate(self, dev, mes):
         """Calibrate BRAKE input voltage.
 
-        Pin is IN, console is open, Vbatt is at 12V.
+        Vbatt is at 12V, console is open.
 
         """
         trs2 = dev['trs2']
         brakes = dev['dcs_brakes']
+        dev['rla_pin'].remove()
+        dev['dcl_brake'].output(self.ibrake)
         self.measure(
-            ('arm_Vbatt', 'arm_Vbrake', ), timeout=5)
+            ('arm_Vbatt', 'arm_Vbrake', 'arm_Ibrake', 'arm_Vpin'),
+            timeout=5)
+        dev['dcl_brake'].output(0.0)
+        dev['rla_pin'].insert()     # Pin IN for calibration
         # Offset calibration at low voltage
         brakes.output(self.vbrake_offset, output=True, delay=0.5)
         trs2['VBRAKE_OFFSET'] = mes['dmm_BrakeOffset'](timeout=5).reading1
@@ -130,11 +135,6 @@ class Initial(share.TestSequence):
         trs2['NVWRITE'] = True
         self.measure(
             ('arm_Vbatt_cal', 'arm_Vbrake_cal', ), timeout=5)
-        dev['rla_pin'].remove()
-        dev['dcl_brake'].output(1.0)
-        self.measure(
-            ('arm_Ibrake', 'arm_Vpin', ), timeout=5)
-        dev['dcl_brake'].output(0.0)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):

@@ -67,8 +67,8 @@ class Console(share.console.BaseConsole):
         'FAULT_CODE': ParameterHex(
             'TRS2_FAULT_CODE_BITS', minimum=0, maximum=0x3),
         # Calibration commands
-        'VBRAKE_OFFSET': ParameterCalibration('BRAKEV_OFF_SET'),
-        'VBRAKE_GAIN': ParameterCalibration('BRAKEV_GAIN_SET'),
+        'VBRAKE_OFFSET': ParameterCalibration('BRAKEV_OFF_SET', write_expected=2),
+        'VBRAKE_GAIN': ParameterCalibration('BRAKEV_GAIN_SET', write_expected=2),
         # Override commands
         'BR_LIGHT': ParameterOverride('TRS2_BRAKE_LIGHT_EN_OVERRIDE'),
         'MONITOR': ParameterOverride('TRS2_MONITOR_EN_OVERRIDE'),
