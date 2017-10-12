@@ -210,13 +210,13 @@ class ParameterCalibration(ParameterFloat):
 
     """A parameter for calibration commands."""
 
-    def __init__(self, command, scale=1000):
+    def __init__(self, command, scale=1000, write_expected=1):
         super().__init__(
             command,
             writeable=True,
             write_format='{0} "{1} CAL',
             scale=scale,
-            write_expected=1
+            write_expected=write_expected
             )
 
 
