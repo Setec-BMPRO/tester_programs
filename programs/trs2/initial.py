@@ -24,6 +24,8 @@ class Initial(share.TestSequence):
     vbatt = 12.0
     # Injected Vbrake for offset calibration
     vbrake_offset = 0.3
+    # Brake current
+    ibrake = 1.0
     # Test limits
     limitdata = (
         LimitDelta('Vin', vbatt, 0.2),
@@ -47,12 +49,12 @@ class Initial(share.TestSequence):
             '^{0}$'.format(arm_version.replace('.', r'\.'))),
         LimitLow('ARM-FaultCode', 0),
 # FIXME: The next 4 need adjusting
-#        LimitPercent('ARM-Vbatt', vbatt, 0.6, delta=0.033),
-        LimitPercent('ARM-Vbatt', vbatt, 2.0, delta=0),
-        LimitPercent('ARM-Vbrake', vbatt, 2.0, delta=0),
-        LimitPercent('ARM-Ibrake', 0.4, 10.0, delta=0),
-#        LimitPercent('ARM-Vpin', 0.1, 10.0, delta=0),
-        LimitDelta('ARM-Vpin', 0.0, 1.0),
+        LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088),
+        LimitPercent('ARM-Vbrake', vbatt, 4.6, delta=0.088),
+        LimitPercent('ARM-Vbatt-Cal', vbatt, 0.6, delta=0.033),
+        LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033),
+        LimitPercent('ARM-Ibrake', ibrake, 1.0, delta=0.9),
+        LimitDelta('ARM-Vpin', 0.0, 0.2),
 
         LimitRegExp('BtMac', '^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
@@ -79,6 +81,7 @@ class Initial(share.TestSequence):
         mes['dmm_tstpincov'](timeout=5)
         dev['dcs_vin'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        dev['dcl_brake'].output(0.1, output=True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_BrakeOff'), timeout=5)
         dev['rla_pin'].remove()
         mes['dmm_BrakeOn'](timeout=5)
@@ -115,6 +118,8 @@ class Initial(share.TestSequence):
         """
         trs2 = dev['trs2']
         brakes = dev['dcs_brakes']
+        self.measure(
+            ('arm_Vbatt', 'arm_Vbrake', ), timeout=5)
         # Offset calibration at low voltage
         brakes.output(self.vbrake_offset, output=True, delay=0.5)
         trs2['VBRAKE_OFFSET'] = mes['dmm_BrakeOffset'](timeout=5).reading1
@@ -123,10 +128,13 @@ class Initial(share.TestSequence):
         trs2['VBRAKE_GAIN'] = mes['dmm_BrakeOn'](timeout=5).reading1
         # Save new calibration settings
         trs2['NVWRITE'] = True
-        # Measure the analog inputs
         self.measure(
-            ('arm_Vbatt', 'arm_Vbrake', 'arm_Ibrake', 'arm_Vpin', ),
-            timeout=5)
+            ('arm_Vbatt_cal', 'arm_Vbrake_cal', ), timeout=5)
+        dev['rla_pin'].remove()
+        dev['dcl_brake'].output(1.0)
+        self.measure(
+            ('arm_Ibrake', 'arm_Vpin', ), timeout=5)
+        dev['dcl_brake'].output(0.0)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -163,6 +171,7 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_brakes', tester.DCSource, 'DCS3'),
                 ('dcs_cover', tester.DCSource, 'DCS5'),
+                ('dcl_brake', tester.DCLoad, 'DCL5'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_wdg', tester.Relay, 'RLA2'),  #Normally closed
                 ('rla_pin', tester.Relay, 'RLA3'),
@@ -197,6 +206,7 @@ class Devices(share.Devices):
         self['trs2'].close()
         for dev in ('dcs_vin', 'dcs_brakes', ):
             self[dev].output(0.0, False)
+        self['dcl_brake'].output(0.0, False)
         for rla in ('rla_reset', 'rla_pin', ):
             self[rla].set_off()
 
@@ -272,6 +282,8 @@ class Measurements(share.Measurements):
             ('arm_fltcode', 'ARM-FaultCode', 'arm_Fault', ''),
             ('arm_Vbatt', 'ARM-Vbatt', 'arm_Vbatt', ''),
             ('arm_Vbrake', 'ARM-Vbrake', 'arm_Vbrake', ''),
+            ('arm_Vbatt_cal', 'ARM-Vbatt-Cal', 'arm_Vbatt', ''),
+            ('arm_Vbrake_cal', 'ARM-Vbrake-Cal', 'arm_Vbrake', ''),
             ('arm_Ibrake', 'ARM-Ibrake', 'arm_Ibrake', ''),
             ('arm_Vpin', 'ARM-Vpin', 'arm_Vpin', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
