@@ -72,11 +72,8 @@ class _Console():
 
         """
         self._logger.debug('Test Mode = %s', state)
-        reply = self['STATUS']
-        if state:
-            value = self._test_on | reply
-        else:
-            value = self._test_off & reply
+        reply = round(self['STATUS'])
+        value = self._test_on | reply if state else self._test_off & reply
         self['STATUS'] = value
 
     def can_testmode(self, state):
@@ -89,11 +86,8 @@ class _Console():
         """
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
-        reply = self['STATUS']
-        if state:
-            value = self._can_on | reply
-        else:
-            value = self._can_off & reply
+        reply = round(self['STATUS'])
+        value = self._can_on | reply if state else self._can_off & reply
         self['STATUS'] = value
 
 

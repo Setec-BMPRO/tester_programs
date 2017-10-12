@@ -140,7 +140,7 @@ class BP35_SR_Initial(_BP35Initial):
     debug = False
 
     def test_pass_run(self):
-        """PASS run of the C program."""
+        """PASS run of the SR program."""
         super()._pass_run(
             61,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
@@ -156,7 +156,7 @@ class BP35_HA_Initial(_BP35Initial):
     debug = False
 
     def test_pass_run(self):
-        """PASS run of the C program."""
+        """PASS run of the HA program."""
         super()._pass_run(
             61,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
@@ -172,7 +172,7 @@ class BP35_PM_Initial(_BP35Initial):
     debug = False
 
     def test_pass_run(self):
-        """PASS run of the C program."""
+        """PASS run of the PM program."""
         super()._pass_run(
             52,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',

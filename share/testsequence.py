@@ -25,7 +25,7 @@ class TestSequence(tester.TestSequence):
         tester.LimitRegExp(
             'SerNum',
             r'^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$',
-            doc='Valid serial number format'),
+            doc='Serial Number'),
         tester.LimitBoolean(
             'Notify',
             True,

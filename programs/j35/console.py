@@ -205,6 +205,6 @@ class Console(share.console.BadUartConsole):
         """
         self._logger.debug('CAN Mode Enabled> %s', state)
         self.action('"RF,ALL CAN')
-        reply = self['STATUS']
+        reply = round(self['STATUS'])
         value = self.can_on | reply if state else self.can_off & reply
         self['STATUS'] = value

@@ -18,7 +18,10 @@ class Sensor(tester.sensor.Sensor):
         self._arm = arm
         self._key = key
         self._rdgtype = rdgtype
-        self._scale = scale
+        self.scale = scale
+        self.on_read = None     # Callback for read() to use
+        self._doc = None        # Optional documentation string
+        self.units = None       # Optional unit of measured value
 
     def configure(self):
         """Configure measurement."""
@@ -32,9 +35,39 @@ class Sensor(tester.sensor.Sensor):
         """
         value = super().read()
         if self._rdgtype is tester.sensor.Reading:
-            value = float(value) * self._scale
+            value = float(value) * self.scale
         rdg = self._rdgtype(value, position=self.position)
+        if self.on_read is not None:
+            rdg = self.on_read(rdg)
         return (rdg, )
+
+    def __str__(self):
+        """Sensor as a string.
+
+        @return String representation of Sensor.
+
+        """
+        return 'ARM Serial Console: {0.doc}'.format(self)
+
+    @property
+    def doc(self):
+        """Get a documentation entry, if present.
+
+        @return Formatted doc string, or empty string
+
+        """
+        if self.units:
+            result = ' ({0})'.format(self.units)
+        else:
+            result = ''
+        if self._doc:
+            result += ' {0!r}'.format(self._doc)
+        return result.strip()
+
+    @doc.setter
+    def doc(self, value):
+        """Set doc property."""
+        self._doc = value
 
 
 class ParameterError(Exception):
@@ -229,7 +262,7 @@ class ParameterHex(_Parameter):
         value = super().read(func)
         if value is None:
             value = '0'
-        return round((int(value, 16) & self.mask) / self.scale)
+        return (int(value, 16) & self.mask) / self.scale
 
 
 class ParameterHex0x(ParameterHex):
