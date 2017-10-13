@@ -60,74 +60,66 @@ class Initial(share.TestSequence):
     pm_zero_wait = 30     # Settling delay for zero calibration
     # Common limits
     _common = (
-        LimitLow('FixtureLock', 200, doc='Microswitch closed'),
+        LimitLow('FixtureLock', 200, doc='Contacts closed'),
         LimitDelta('HwVer8', 4400.0, 250.0, doc='Hardware Rev ≥8'),
         LimitDelta('ACin', vac, 5.0, doc='Injected AC voltage present'),
         LimitBetween('Vpfc', 401.0, 424.0, doc='PFC running'),
-        LimitBetween('12Vpri', 11.5, 13.0, doc='12V primary control rail up'),
-        LimitBetween('15Vs', 11.5, 13.0, doc='15Vs control rail up'),
-        LimitBetween('Vload', 12.0, 12.9, doc='Load output is ON'),
-        LimitLow('VloadOff', 0.5, doc='Load output is OFF'),
+        LimitBetween('12Vpri', 11.5, 13.0, doc='Control rail present'),
+        LimitBetween('15Vs', 11.5, 13.0, doc='Control rail present'),
+        LimitBetween('Vload', 12.0, 12.9, doc='Load output present'),
+        LimitLow('VloadOff', 0.5, doc='Load output off'),
         LimitDelta('VbatIn', 12.0, 0.5, doc='Injected Vbatt present'),
-        LimitBetween('Vbat', 12.2, 13.0, doc='Vbatt up'),
-        LimitDelta('Vaux', 13.4, 0.4, doc='Vaux up'),
+        LimitBetween('Vbat', 12.2, 13.0, doc='Vbatt present'),
+        LimitDelta('Vaux', 13.4, 0.4, doc='Vaux present'),
         LimitDelta('3V3', 3.30, 0.05, doc='3V3 present'),
         LimitDelta('FanOn', 12.5, 0.5, doc='Fans ON'),
         LimitLow('FanOff', 0.5, doc='Fans OFF'),
         LimitPercent('OCP_pre', ocp_set, 4.0 + ocp_adjust_percent,
-            doc='OCP setpoint before adjustment'),
-        LimitPercent('OCP', ocp_set, 4.0,
-            doc='OCP setpoint after adjustment'),
+            doc='Before adjustment'),
+        LimitPercent('OCP', ocp_set, 4.0, doc='After adjustment'),
         LimitLow('InOCP', 11.6, doc='Output voltage in OCP'),
         LimitRegExp(
             'ARM-SwVer', '^{0}$'.format(arm_version.replace('.', r'\.')),
             doc='Software version'),
         LimitDelta('ARM-AcV', vac, 10.0, doc='AC voltage'),
         LimitDelta('ARM-AcF', 50.0, 1.0, doc='AC frequency'),
-        LimitBetween('ARM-SecT', 8.0, 70.0, doc='Temperature'),
+        LimitBetween('ARM-SecT', 8.0, 70.0, doc='Reading ok'),
         LimitDelta('ARM-Vout', 12.45, 0.45),
         LimitBetween('ARM-Fan', 0, 100, doc='Fan running'),
         LimitDelta('ARM-LoadI', 2.1, 0.9, doc='Load current flowing'),
-        LimitDelta('ARM-BattI', ibatt, 1.0,
-            doc='Battery current flowing'),
-        LimitDelta('ARM-BusI', iload + ibatt, 3.0,
-            doc='ARM Bus current flowing'),
+        LimitDelta('ARM-BattI', ibatt, 1.0, doc='Battery current flowing'),
+        LimitDelta('ARM-BusI', iload + ibatt, 3.0, doc='Bus current flowing'),
         LimitPercent('ARM-AuxV', vaux_in, percent=2.0, delta=0.3,
-            doc='ARM Aux voltage reading'),
-        LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current'),
-        LimitInteger('ARM-RemoteClosed', 1,
-            doc='REMOTE input'),
+            doc='AUX present'),
+        LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current flowing'),
+        LimitInteger('ARM-RemoteClosed', 1, doc='REMOTE input connected'),
         LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
         LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
         LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
         )
     # SR Solar specific limits
     _sr_solar = (
-        LimitDelta('SolarVcc', 3.3, 0.1, doc='Vcc on the PIC micro'),
-        LimitDelta('SolarVin', sr_vin, 0.5, doc='SR Solar input voltage'),
-        LimitPercent('VsetPre', sr_vset, 6.0,
-            doc='SR Solar Vout before calibration'),
-        LimitPercent('VsetPost', sr_vset, 1.5,
-            doc='SR Solar Vout after calibration'),
+        LimitDelta('SolarVcc', 3.3, 0.1, doc='Vcc present'),
+        LimitDelta('SolarVin', sr_vin, 0.5, doc='Input present'),
+        LimitPercent('VsetPre', sr_vset, 6.0, doc='Vout before calibration'),
+        LimitPercent('VsetPost', sr_vset, 1.5, doc='Vout after calibration'),
         LimitPercent('ARM-IoutPre', sr_ical, (9.0, 20.0),
-            doc='SR Solar Iout before calibration'),
+            doc='Iout before calibration'),
         LimitPercent('ARM-IoutPost', sr_ical, 3.0,
-            doc='SR Solar Iout after calibration'),
+            doc='Iout after calibration'),
         LimitPercent('ARM-SolarVin-Pre', sr_vin, sr_vin_pre_percent,
-            doc='SR Solar Vin before calibration'),
+            doc='Vin before calibration'),
         LimitPercent('ARM-SolarVin-Post', sr_vin, sr_vin_post_percent,
-            doc='SR Solar Vin after calibration'),
-        LimitInteger('SR-Alive', 1, doc='SR Solar present'),
-        LimitInteger('SR-Relay', 1, doc='SR Solar input relay ON'),
-        LimitInteger('SR-Error', 0, doc='No SR Solar error'),
+            doc='Vin after calibration'),
+        LimitInteger('SR-Alive', 1, doc='Detected'),
+        LimitInteger('SR-Relay', 1, doc='Input relay ON'),
+        LimitInteger('SR-Error', 0, doc='No error'),
         )
     # PM Solar specific limits
     _pm_solar = (
-        LimitInteger('PM-Alive', 1, doc='PM Solar present'),
-        LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6,
-            doc='PM zero reading before cal'),
-        LimitDelta('ARM-PmSolarIz-Post', 0, 0.1,
-            doc='PM zero reading after cal'),
+        LimitInteger('PM-Alive', 1, doc='Detected'),
+        LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6, doc='Zero reading before cal'),
+        LimitDelta('ARM-PmSolarIz-Post', 0, 0.1, doc='Zero reading after cal'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     #   'Limits': Test limits.
@@ -168,8 +160,8 @@ class Initial(share.TestSequence):
             TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
-#        for mes in self.measurements:
-#            print(str(self.measurements[mes]) + '\n')
+        for mes in self.measurements:
+            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -492,53 +484,64 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['acin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
+        self['acin'].doc = 'Across C101'
         self['vpfc'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
         self['vpfc'].doc = 'Voltage on C111'
         self['vload'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
+        self['vload'].doc = 'All Load outputs combined'
         self['vbat'] = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
+        self['vbat'].doc = 'Battery output'
         self['vset'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
+        self['vset'].doc = 'Between TP308,9 and Vout'
         self['pri12v'] = sensor.Vdc(dmm, high=5, low=2, rng=100, res=0.001)
+        self['pri12v'].doc = 'Across C213'
         self['o3v3'] = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.001)
+        self['o3v3'].doc = 'U307 Output'
         self['fan'] = sensor.Vdc(dmm, high=7, low=5, rng=100, res=0.01)
+        self['fan'].doc = 'Across C402'
         self['hardware'] = sensor.Res(dmm, high=8, low=4, rng=100000, res=1)
+        self['hardware'].doc = 'Across R631'
         self['o15vs'] = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
+        self['o15vs'].doc = 'Across C312'
         self['lock'] = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
         self['lock'].doc = 'Microswitch contacts'
         self['solarvcc'] = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.001)
+        self['solarvcc'].doc = 'TP301'
         self['solarvin'] = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
+        self['solarvin'].doc = 'TP306,7'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bp35_initial', 'msgSnEntry'),
             caption=tester.translate('bp35_initial', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
         # Console sensors
         bp35 = self.devices['bp35']
-        for name, cmdkey, doc, units in (
-                ('arm_acv', 'AC_V', '', 'Vac'),
-                ('arm_acf', 'AC_F', '', 'Hz'),
-                ('arm_sect', 'SEC_T', '', 'C'),
-                ('arm_vout', 'BUS_V', '', 'V'),
-                ('arm_fan', 'FAN', '', '%'),
-                ('arm_canbind', 'CAN_BIND', '', ''),
-                ('arm_ibat', 'BATT_I', '', 'A'),
-                ('arm_ibus', 'BUS_I', '', 'A'),
-                ('arm_vaux', 'AUX_V', '', 'V'),
-                ('arm_iaux', 'AUX_I', '', 'A'),
-                ('arm_vout_ov', 'VOUT_OV', '', ''),
-                ('arm_iout', 'SR_IOUT', '', 'A'),
-                ('arm_remote', 'BATT_SWITCH', '', ''),
+        for name, cmdkey, units in (
+                ('arm_acv', 'AC_V', 'Vac'),
+                ('arm_acf', 'AC_F', 'Hz'),
+                ('arm_sect', 'SEC_T', '°C'),
+                ('arm_vout', 'BUS_V', 'V'),
+                ('arm_fan', 'FAN', '%'),
+                ('arm_canbind', 'CAN_BIND', ''),
+                ('arm_ibat', 'BATT_I', 'A'),
+                ('arm_ibus', 'BUS_I', 'A'),
+                ('arm_vaux', 'AUX_V', 'V'),
+                ('arm_iaux', 'AUX_I', 'A'),
+                ('arm_vout_ov', 'VOUT_OV', ''),
+                ('arm_iout', 'SR_IOUT', 'A'),
+                ('arm_remote', 'BATT_SWITCH', ''),
                 # SR Solar Regulator
-                ('arm_sr_alive', 'SR_ALIVE', '', '0/1'),
-                ('arm_sr_relay', 'SR_RELAY', '', '0/1'),
-                ('arm_sr_error', 'SR_ERROR', '', ''),
-                ('arm_sr_vin', 'SR_VIN', '', 'V'),
+                ('arm_sr_alive', 'SR_ALIVE', '0/1'),
+                ('arm_sr_relay', 'SR_RELAY', '0/1'),
+                ('arm_sr_error', 'SR_ERROR', ''),
+                ('arm_sr_vin', 'SR_VIN', 'V'),
                 # PM Solar Regulator
-                ('arm_pm_alive', 'PM_ALIVE', '', '0/1'),
-                ('arm_pm_iout', 'PM_IOUT', '', 'A'),
-                ('arm_pm_iout_rev', 'PM_IOUT_REV', '', '-A'),
+                ('arm_pm_alive', 'PM_ALIVE', '0/1'),
+                ('arm_pm_iout', 'PM_IOUT', 'A'),
+                ('arm_pm_iout_rev', 'PM_IOUT_REV', '-A'),
             ):
             self[name] = console.Sensor(bp35, cmdkey)
-            self[name].doc = doc
-            self[name].units = units
+            if units:
+                self[name].units = units
         self['arm_swver'] = console.Sensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
         # Generate load current sensors
@@ -566,7 +569,6 @@ class Sensors(share.Sensors):
             start=low - Initial.iload - 1,
             stop=high - Initial.iload + 1,
             step=0.1)
-        self['ocp'].doc = ''
         self['ocp'].units = 'A'
         self['ocp'].on_read = lambda value: value + Initial.iload
 
@@ -578,68 +580,37 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('hardware8', 'HwVer8', 'hardware',
-                'Hardware version'),
-            ('rx_can', 'CAN_RX', 'mir_can',
-                'CAN received message'),
-            ('dmm_lock', 'FixtureLock', 'lock',
-                'Fixture closed'),
-            ('dmm_acin', 'ACin', 'acin',
-                'AC input voltage'),
-            ('dmm_vpfc', 'Vpfc', 'vpfc',
-                'PFC output voltage'),
-            ('dmm_pri12v', '12Vpri', 'pri12v',
-                'Primary 12V control rail'),
-            ('dmm_15vs', '15Vs', 'o15vs',
-                'Secondary 15V rail'),
-            ('dmm_vload', 'Vload', 'vload',
-                'Output ON voltage'),
-            ('dmm_vloadoff', 'VloadOff', 'vload',
-                'Output OFF voltage'),
-            ('dmm_vbatin', 'VbatIn', 'vbat',
-                'Injected Vbatt voltage'),
-            ('dmm_vbat', 'Vbat', 'vbat',
-                'Vbatt output voltage'),
-            ('dmm_vaux', 'Vaux', 'vbat',
-                'Vaux output voltage'),
-            ('dmm_3v3', '3V3', 'o3v3',
-                '3V3 rail voltage'),
-            ('dmm_fanon', 'FanOn', 'fan',
-                'Fan ON drive voltage'),
-            ('dmm_fanoff', 'FanOff', 'fan',
-                'Fan OFF drive voltage'),
-            ('ramp_ocp_pre', 'OCP_pre', 'ocp',
-                'OCP point (pre-cal)'),
-            ('ramp_ocp', 'OCP', 'ocp',
-                'OCP point (post-cal)'),
-            ('ui_sernum', 'SerNum', 'sernum',
-                'Unit serial number'),
-            ('arm_swver', 'ARM-SwVer', 'arm_swver',
-                'Unit software version'),
-            ('arm_acv', 'ARM-AcV', 'arm_acv',
-                'AC voltage'),
-            ('arm_acf', 'ARM-AcF', 'arm_acf',
-                'AC frequency'),
-            ('arm_sect', 'ARM-SecT', 'arm_sect',
-                'Temperature'),
-            ('arm_vout', 'ARM-Vout', 'arm_vout',
-                'Vbatt'),
-            ('arm_fan', 'ARM-Fan', 'arm_fan',
-                'FAN setting'),
-            ('arm_can_bind', 'CAN_BIND', 'arm_canbind',
-                'CAN bind'),
-            ('arm_ibat', 'ARM-BattI', 'arm_ibat',
-                'Battery current'),
-            ('arm_ibus', 'ARM-BusI', 'arm_ibus',
-                'Bus current'),
-            ('arm_vaux', 'ARM-AuxV', 'arm_vaux',
-                'Aux voltage'),
-            ('arm_iaux', 'ARM-AuxI', 'arm_iaux',
-                'Aux current'),
-            ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov',
-                'Vout OVP'),
-            ('arm_remote', 'ARM-RemoteClosed', 'arm_remote',
-                'Remote input'),
+            ('hardware8', 'HwVer8', 'hardware', 'Hardware version'),
+            ('rx_can', 'CAN_RX', 'mir_can', 'CAN received message'),
+            ('dmm_lock', 'FixtureLock', 'lock', 'Fixture lid closed'),
+            ('dmm_acin', 'ACin', 'acin', 'AC input voltage'),
+            ('dmm_vpfc', 'Vpfc', 'vpfc', 'PFC output voltage'),
+            ('dmm_pri12v', '12Vpri', 'pri12v', 'Primary 12V control rail'),
+            ('dmm_15vs', '15Vs', 'o15vs', 'Secondary 15V rail'),
+            ('dmm_vload', 'Vload', 'vload', 'Outputs on'),
+            ('dmm_vloadoff', 'VloadOff', 'vload', 'Outputs off'),
+            ('dmm_vbatin', 'VbatIn', 'vbat', 'Injected Vbatt voltage'),
+            ('dmm_vbat', 'Vbat', 'vbat', 'Vbatt output voltage'),
+            ('dmm_vaux', 'Vaux', 'vbat', 'Vaux output voltage'),
+            ('dmm_3v3', '3V3', 'o3v3', '3V3 rail voltage'),
+            ('dmm_fanon', 'FanOn', 'fan', 'Fans running'),
+            ('dmm_fanoff', 'FanOff', 'fan', 'Fans off'),
+            ('ramp_ocp_pre', 'OCP_pre', 'ocp', 'OCP point (pre-cal)'),
+            ('ramp_ocp', 'OCP', 'ocp', 'OCP point (post-cal)'),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('arm_swver', 'ARM-SwVer', 'arm_swver', 'Unit software version'),
+            ('arm_acv', 'ARM-AcV', 'arm_acv', 'AC voltage'),
+            ('arm_acf', 'ARM-AcF', 'arm_acf', 'AC frequency'),
+            ('arm_sect', 'ARM-SecT', 'arm_sect', 'Temperature'),
+            ('arm_vout', 'ARM-Vout', 'arm_vout', 'Vbatt'),
+            ('arm_fan', 'ARM-Fan', 'arm_fan', 'FAN speed setting'),
+            ('arm_can_bind', 'CAN_BIND', 'arm_canbind', 'CAN bound'),
+            ('arm_ibat', 'ARM-BattI', 'arm_ibat', 'Battery current'),
+            ('arm_ibus', 'ARM-BusI', 'arm_ibus', 'Bus current'),
+            ('arm_vaux', 'ARM-AuxV', 'arm_vaux', 'Aux voltage'),
+            ('arm_iaux', 'ARM-AuxI', 'arm_iaux', 'Aux current'),
+            ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov', 'Vout OVP'),
+            ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', 'Remote input'),
             ))
         if self.parameter == 'PM':      # PM Solar Regulator
             self.create_from_names((
@@ -653,15 +624,15 @@ class Measurements(share.Measurements):
         else:                           # SR Solar Regulator
             self.create_from_names((
                 ('dmm_solarvcc', 'SolarVcc', 'solarvcc',
-                    'Solar Vcc rail voltage'),
+                    'Solar Vcc rrunning'),
                 ('dmm_solarvin', 'SolarVin', 'solarvin',
-                    'Solar input voltage'),
+                    'Solar input present'),
                 ('arm_sr_alive', 'SR-Alive', 'arm_sr_alive',
                     'Solar alive'),
                 ('arm_sr_relay', 'SR-Relay', 'arm_sr_relay',
-                    'Solar relay'),
+                    'Solar relay on'),
                 ('arm_sr_error', 'SR-Error', 'arm_sr_error',
-                    'Solar error flag'),
+                    'Solar error flag clear'),
                 ('arm_sr_vin_pre', 'ARM-SolarVin-Pre', 'arm_sr_vin',
                     'Solar input voltage (pre-cal)'),
                 ('arm_sr_vin_post', 'ARM-SolarVin-Post', 'arm_sr_vin',

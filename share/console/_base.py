@@ -10,13 +10,13 @@ class Sensor(tester.sensor.Sensor):
     """Console data exposed as a Sensor."""
 
     def __init__(self,
-            arm, key,
+            console, key,
             rdgtype=tester.sensor.Reading, position=1,
             scale=1.0):
         """Create a sensor."""
-        super().__init__(arm, position)
-        self._arm = arm
-        self._key = key
+        super().__init__(console, position)
+        self.console = console
+        self.key = key
         self._rdgtype = rdgtype
         self.scale = scale
         self.on_read = None     # Callback for read() to use
@@ -25,7 +25,7 @@ class Sensor(tester.sensor.Sensor):
 
     def configure(self):
         """Configure measurement."""
-        self._arm.configure(self._key)
+        self.console.configure(self.key)
 
     def read(self):
         """Take a reading.
@@ -47,7 +47,7 @@ class Sensor(tester.sensor.Sensor):
         @return String representation of Sensor.
 
         """
-        return 'ARM Serial Console: {0.doc}'.format(self)
+        return 'Console: {0.doc}'.format(self)
 
     @property
     def doc(self):
@@ -56,12 +56,10 @@ class Sensor(tester.sensor.Sensor):
         @return Formatted doc string, or empty string
 
         """
-        if self.units:
-            result = ' ({0})'.format(self.units)
-        else:
-            result = ''
+        result = '({0})'.format(self.units) if self.units else ''
+        result += ' {0!r}'.format(self.console.cmd_data[self.key].command)
         if self._doc:
-            result += ' {0!r}'.format(self._doc)
+            result += ' {0}'.format(self._doc)
         return result.strip()
 
     @doc.setter
@@ -92,11 +90,11 @@ class _Parameter():
 
         @param command Command verb of this parameter.
         @param writeable True if this parameter can be written.
-        @param write_format Format string for writing (value, self._cmd)
-        @param read_format Format string for reading (self._cmd)
+        @param write_format Format string for writing (value, self.command)
+        @param read_format Format string for reading (self.command)
 
         """
-        self._cmd = command
+        self.command = command
         self._writeable = writeable
         self._readable = readable
         if write_format:
@@ -115,7 +113,7 @@ class _Parameter():
         """
         if not self._writeable:
             raise ParameterError('Parameter is not writeable')
-        write_cmd = self._wr_fmt.format(value, self._cmd)
+        write_cmd = self._wr_fmt.format(value, self.command)
         func(write_cmd, expected=self.write_expected)
 
     def read(self, func):
@@ -127,7 +125,7 @@ class _Parameter():
         """
         if not self._readable:
             raise ParameterError('Parameter is not readable')
-        read_cmd = self._rd_fmt.format(self._cmd)
+        read_cmd = self._rd_fmt.format(self.command)
         return func(read_cmd, expected=self.read_expected)
 
 

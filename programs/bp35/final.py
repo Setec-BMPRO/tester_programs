@@ -12,7 +12,7 @@ class Final(share.TestSequence):
     """BP35 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta('Vbat', 12.8, 0.2),
+        tester.LimitDelta('Vbat', 12.8, 0.2, doc='Output voltage'),
         )
 
     def open(self):
@@ -52,6 +52,7 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vbat'] = tester.sensor.Vdc(
             self.devices['dmm'], high=2, low=2, rng=100, res=0.001)
+        self['vbat'].doc = 'Unit output'
         self['yesnogreen'] = sensor.YesNo(
             message=tester.translate('bp35_final', 'IsOutputLedGreen?'),
             caption=tester.translate('bp35_final', 'capOutputLed'))
@@ -64,6 +65,6 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vbat', 'Vbat', 'vbat', ''),
-            ('ui_yesnogreen', 'Notify', 'yesnogreen', ''),
+            ('dmm_vbat', 'Vbat', 'vbat', 'Output ok'),
+            ('ui_yesnogreen', 'Notify', 'yesnogreen', 'LED Green'),
             ))
