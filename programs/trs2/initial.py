@@ -119,38 +119,38 @@ class Initial(share.TestSequence):
         trs2 = dev['trs2']
         brakes = dev['dcs_brakes']
         dev['rla_pin'].remove()
-        dev['dcl_brake'].output(self.ibrake)
         self.measure(
-            ('arm_Vbatt', 'arm_Vbrake', 'arm_Ibrake', 'arm_Vpin'),
-            timeout=5)
-        dev['dcl_brake'].output(0.0)
+            ('arm_Vbatt', 'arm_Vbrake', ), timeout=5)
         dev['rla_pin'].insert()     # Pin IN for calibration
         # Offset calibration at low voltage
-        brakes.output(self.vbrake_offset, output=True, delay=0.5)
-        trs2['VBRAKE_OFFSET'] = mes['dmm_BrakeOffset'](timeout=5).reading1
+        brakes.output(self.vbrake_offset, output=True)
+        dmm_V = mes['dmm_BrakeOffset'].stable(delta=0.001).reading1
+        trs2['VBRAKE_OFFSET'] = dmm_V
         # Gain calibration at nominal voltage
-        brakes.output(self.vbatt, output=True, delay=0.5)
-        trs2['VBRAKE_GAIN'] = mes['dmm_BrakeOn'](timeout=5).reading1
+        brakes.output(self.vbatt, output=True)
+        dmm_V = mes['dmm_BrakeOn'].stable(delta=0.001).reading1
+        trs2['VBRAKE_GAIN'] = dmm_V
         # Save new calibration settings
         trs2['NVWRITE'] = True
         self.measure(
             ('arm_Vbatt_cal', 'arm_Vbrake_cal', ), timeout=5)
+        dev['rla_pin'].remove()
+        dev['dcl_brake'].output(self.ibrake)
+        self.measure(
+            ('arm_Ibrake', 'arm_Vpin', ),
+            timeout=5)
+        dev['dcl_brake'].output(0.0)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        trs2 = dev['trs2']
-        dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(self.vbatt, delay=15.0)
         btmac = mes['arm_btmac']().reading1
-        trs2['BLUETOOTH'] = Override.force_on
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
         reply = ble.scan(btmac)
         ble.close()
         self._logger.debug('Bluetooth MAC detected: %s', reply)
-        trs2['BLUETOOTH'] = Override.normal
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
 
