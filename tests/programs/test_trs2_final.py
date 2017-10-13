@@ -37,14 +37,11 @@ class TRSFinal(ProgramTestCase):
                     (sen['tstpin_cover'], 0.0),
                     (sen['vin'], 12.0),
                     ),
-                'Bluetooth': (
-                    (sen['btmac'], self.btmac),
-                    ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(3, len(result.readings))
         self.assertEqual(['Prepare', 'Bluetooth', ], self.tester.ut_steps)
