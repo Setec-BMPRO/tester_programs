@@ -14,9 +14,9 @@ ParameterCalibration = share.console.ParameterCalibration
 ParameterHex = share.console.ParameterHex
 
 
-class Console(share.console.BadUartConsole):
+class _Console():
 
-    """Communications to BP35 console."""
+    """Base class for a BP35 console."""
 
     # Number of lines in startup banner
     banner_lines = 3
@@ -247,3 +247,17 @@ class Console(share.console.BadUartConsole):
         reply = round(self['STATUS'])
         value = self.can_on | reply if state else self.can_off & reply
         self['STATUS'] = value
+
+
+class DirectConsole(_Console, share.console.BadUartConsole):
+
+    """Console for a direct connection to a BP35."""
+
+
+class TunnelConsole(_Console, share.console.BaseConsole):
+
+    """Console for a CAN tunneled connection to a BP35.
+
+    The CAN tunnel does not need the BadUartConsole stuff.
+
+    """

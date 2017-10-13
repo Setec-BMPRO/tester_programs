@@ -160,8 +160,8 @@ class Initial(share.TestSequence):
             TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
-        for mes in self.measurements:
-            print(str(self.measurements[mes]) + '\n')
+#        for mes in self.measurements:
+#            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -450,7 +450,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         bp35_ser.port = Initial.arm_port
         # BP35 Console driver
-        self['bp35'] = console.Console(bp35_ser)
+        self['bp35'] = console.DirectConsole(bp35_ser)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = share.BackgroundTimer()

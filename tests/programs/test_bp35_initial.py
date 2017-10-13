@@ -12,13 +12,15 @@ class _BP35Initial(ProgramTestCase):
     """BP35 Initial program test suite."""
 
     prog_class = bp35.Initial
+    sernum = 'A1626010123'
 
     def setUp(self):
         """Per-Test setup."""
         mycon = MagicMock(name='MyConsole')
         mycon.ocp_cal.return_value = 1
         mycon.port.readline.return_value = b'RRQ,32,0'
-        patcher = patch('programs.bp35.console.Console', return_value=mycon)
+        patcher = patch(
+            'programs.bp35.console.DirectConsole', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
@@ -43,7 +45,7 @@ class _BP35Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
-                    (sen['sernum'], ('A1626010123', )),
+                    (sen['sernum'], self.sernum),
                     (sen['lock'], 10.0), (sen['hardware'], 4400),
                     (sen['vbat'], 12.0), (sen['o3v3'], 3.3),
                     ),
@@ -51,8 +53,8 @@ class _BP35Initial(ProgramTestCase):
                     (sen['solarvcc'], 3.3),
                     ),
                 'Initialise': (
-                    (sen['sernum'], ('A1626010123', )),
-                    (sen['arm_swver'], bp35.initial.Initial.arm_version),
+                    (sen['sernum'], self.sernum),
+                    (sen['arm_swver'], bp35.Initial.arm_version),
                     ),
                 'SrSolar': (
                     (sen['vset'], (13.0, 13.0, 13.5)),
@@ -118,10 +120,12 @@ class _BP35Initial(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare':
-                    ((sen['lock'], 10.0), (sen['hardware'], 4400),
-                     (sen['sernum'], ('A1626010123', )),
-                     (sen['vbat'], 2.5), ),   # Vbat will fail
+                'Prepare': (
+                    (sen['lock'], 10.0),
+                    (sen['hardware'], 4400),
+                    (sen['sernum'], self.sernum),
+                    (sen['vbat'], 2.5),     # Vbat will fail
+                    ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)

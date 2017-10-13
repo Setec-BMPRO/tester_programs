@@ -26,20 +26,21 @@ class ConsoleCanTunnel():
     # True for verbose logging
     verbose = False
 
-    def __init__(self, port):
+    def __init__(self, port, target):
         """Initialise communications.
 
-        @param port SimSerial port to connect to SerialToCan interface.
+        @param port Serial port to connect to SerialToCan interface.
+        @param target CAN target device ID.
 
         """
         self.port = port
+        self.target = target
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._can_port = tester.SerialToCan(port)
         # The buffer for tunneled console data.
         self._buf_port = tester.SimSerial()
-        # SimSerial compatible interface callables
-        self.puts = self._buf_port.puts
+        # Serial compatible interface callables
         self.inWaiting = self._buf_port.inWaiting
         self.flush = self.port.flush
         self.flushInput = self._buf_port.flushInput
@@ -47,14 +48,12 @@ class ConsoleCanTunnel():
 
     def open(self):
         """Open the CAN tunnel."""
-        self._can_port.open()
-        self._can_port.open_tunnel()
+        self._can_port.open_tunnel(self.target)
         self._logger.debug('CAN Tunnel opened')
 
     def close(self):
         """Close the CAN tunnel."""
         self._can_port.close_tunnel()
-        self._can_port.close()
         self._logger.debug('CAN Tunnel closed')
 
     def read(self, size=1):
@@ -63,9 +62,10 @@ class ConsoleCanTunnel():
         @return data from the tunnel
 
         """
-        while self._can_port.ready_tunnel:
-            data = self._can_port.read_tunnel()
-            self.puts(data.decode(errors='ignore'))
+        while self._can_port.ready_tunnel:  # Read all waiting data
+            self._buf_port.put(self._can_port.read_tunnel())
+        while self.inWaiting() < size:      # Wait for required data size
+            self._buf_port.put(self._can_port.read_tunnel())
         data = self._buf_port.read(size)
         if self.verbose:
             self._logger.debug('read({0}) = {1!r}'.format(size, data))
