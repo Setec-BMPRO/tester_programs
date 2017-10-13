@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-10-11, 12:36:28 -->
+<!-- Saved: 2017-10-13, 17:35:22 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -43,6 +43,7 @@
     <Source>programs/ble2can/console.py</Source>
     <Source>programs/ble2can/initial.py</Source>
     <Source>programs/bp35/__init__.py</Source>
+    <Source>programs/bp35/config.py</Source>
     <Source>programs/bp35/console.py</Source>
     <Source>programs/bp35/final.py</Source>
     <Source>programs/bp35/initial.py</Source>

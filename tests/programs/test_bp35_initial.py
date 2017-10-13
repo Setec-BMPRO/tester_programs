@@ -54,7 +54,7 @@ class _BP35Initial(ProgramTestCase):
                     ),
                 'Initialise': (
                     (sen['sernum'], self.sernum),
-                    (sen['arm_swver'], bp35.Initial.arm_version),
+                    (sen['arm_swver'], bp35.config.ARM_SW_VERSION),
                     ),
                 'SrSolar': (
                     (sen['vset'], (13.0, 13.0, 13.5)),
