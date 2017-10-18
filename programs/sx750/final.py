@@ -11,6 +11,9 @@ class Final(share.TestSequence):
 
     """SX-750 Final Test Program."""
 
+    # Injected voltage at PS_ON via diode and 100R to prevent startup.
+    dsble_pwr = 5.5
+    # Test limits
     limitdata = (
         LimitDelta('InRes', 70000, 10000),
         LimitLow('IECoff', 0.5),
@@ -46,6 +49,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Switch on unit at 240Vac, light load, not enabled."""
+        dev['dcs_disable_pwr'].output(self.dsble_pwr, output=True)
         self.dcload(
             (('dcl_5v', 0.0), ('dcl_12v', 0.1), ('dcl_24v', 0.1)),
             output=True)
@@ -58,7 +62,8 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_poweron(self, dev, mes):
         """Enable all outputs and check that the LED goes blue."""
-        dev['rla_PwrOn'].set_on()
+        dev['dcs_disable_pwr'].output(0.0)
+        dev['rla_pwron'].set_on()
         self.measure(
             ('ui_YesNoBlue', 'dmm_5v', 'dmm_PwrGood', 'dmm_AcFail', ),
             timeout=5)
@@ -88,10 +93,11 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
+                ('dcs_disable_pwr', tester.DCSource, 'DCS2'),
                 ('dcl_12v', tester.DCLoad, 'DCL1'),
                 ('dcl_24v', tester.DCLoad, 'DCL2'),
                 ('dcl_5v', tester.DCLoad, 'DCL3'),
-                ('rla_PwrOn', tester.Relay, 'RLA1'),
+                ('rla_pwron', tester.Relay, 'RLA1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
 
@@ -101,7 +107,8 @@ class Devices(share.Devices):
         self['dcl_12v'].output(10, delay=0.5)
         for load in ('dcl_12v', 'dcl_24v', 'dcl_5v'):
             self[load].output(0.0, False)
-        self['rla_PwrOn'].set_off()
+        self['dcs_disable_pwr'].output(0.0, False)
+        self['rla_pwron'].set_off()
 
 
 class Sensors(share.Sensors):
