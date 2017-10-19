@@ -3,8 +3,6 @@
 # Copyright 2017 SETEC Pty Ltd
 """BP35 Final Test Program."""
 
-import os
-import serial
 import tester
 import share
 from . import console
@@ -16,9 +14,7 @@ class Final(share.TestSequence):
     """BP35 Final Test Program."""
 
     arm_version = config.ARM_SW_VERSION
-    # Serial port for CAN interface
-    can_port = {'posix': '/dev/ttyUSB0', 'nt': 'COM20'}[os.name]
-    # CAN ID
+    # CAN ID of the BP35
     can_id = 16
     # Test limits
     limitdata = (
@@ -63,8 +59,8 @@ class Devices(share.Devices):
         """Create all Instruments."""
         self['dmm'] = tester.DMM(self.physical_devices['DMM'])
         self['acsource'] = tester.ACSource(self.physical_devices['ACS'])
-        port = serial.Serial(Final.can_port, baudrate=115200, timeout=0.1)
-        tunnel = share.ConsoleCanTunnel(port, Final.can_id)
+        tunnel = share.ConsoleCanTunnel(
+            self.physical_devices['CAN'], Final.can_id)
         self['bp35'] = console.TunnelConsole(tunnel)
 
     def reset(self):

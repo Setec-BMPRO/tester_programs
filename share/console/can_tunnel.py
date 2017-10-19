@@ -26,29 +26,28 @@ class ConsoleCanTunnel():
     # True for verbose logging
     verbose = False
 
-    def __init__(self, port, target):
+    def __init__(self, interface, target):
         """Initialise communications.
 
-        @param port Serial port to connect to SerialToCan interface.
+        @param interface SerialToCan interface.
         @param target CAN target device ID.
 
         """
-        self.port = port
-        self.target = target
+        self._target = target
+        self._can_port = interface
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
-        self._can_port = tester.SerialToCan(port)
         # The buffer for tunneled console data.
         self._buf_port = tester.SimSerial()
         # Serial compatible interface callables
         self.inWaiting = self._buf_port.inWaiting
-        self.flush = self.port.flush
         self.flushInput = self._buf_port.flushInput
         self.flushOutput = self._buf_port.flushOutput
+        self.flush = self.flushOutput
 
     def open(self):
         """Open the CAN tunnel."""
-        self._can_port.open_tunnel(self.target)
+        self._can_port.open_tunnel(self._target)
         self._logger.debug('CAN Tunnel opened')
 
     def close(self):
