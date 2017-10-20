@@ -4,7 +4,6 @@
 
 import os
 import inspect
-import time
 import serial
 import tester
 from tester import (
@@ -13,37 +12,25 @@ from tester import (
     )
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
 
     """Trek2 Initial Test Program."""
 
-    # Software binary version
-    bin_version = '1.5.15833.150'
-    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (5, 0, 'B')
-    # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
-    can_port = share.port('027420', 'CAN')
-    # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.port('027420', 'ARM')
-    # Software image filename
-    arm_file = 'Trek2_{0}.bin'.format(bin_version)
-    # CAN echo request messages
-    can_echo = 'TQQ,16,0'
     # Input voltage to power the unit
     vin_set = 12.75
-    # CAN Bus is operational if status bit 28 is set
-    _can_bind = 1 << 28
-
+    # Test limits
     limitdata = (
         LimitDelta('Vin', vin_set - 0.75, 0.5),
         LimitPercent('3V3', 3.3, 3.0),
         LimitLow('BkLghtOff', 0.5),
         LimitDelta('BkLghtOn', 4.0, 0.55),      # 40mA = 4V with 100R (1%)
-        LimitRegExp('CAN_RX', r'^RRQ,16,0'),
-        LimitInteger('CAN_BIND', _can_bind),
-        LimitRegExp('SwVer', '^{0}$'.format(bin_version.replace('.', r'\.'))),
+        # CAN Bus is operational if status bit 28 is set
+        LimitInteger('CAN_BIND', 1 << 28),
+        LimitRegExp('SwVer', '^{0}$'.format(
+            config.SW_VERSION.replace('.', r'\.'))),
         )
 
     def open(self):
@@ -69,28 +56,17 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         trek2 = dev['trek2']
         trek2.open()
-        dev['rla_reset'].pulse(0.1)
-        trek2.action(None, delay=1.5, expected=2)  # Flush banner
-        trek2['UNLOCK'] = True
-        trek2['HW_VER'] = self.hw_ver
-        trek2['SER_ID'] = self.sernum
-        trek2['NVDEFAULT'] = True
-        trek2['NVWRITE'] = True
-        mes['trek2_SwVer']()
+        trek2.brand(config.HW_VERSION, self.sernum, dev['rla_reset'])
+        mes['SwVer']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        mes['trek2_can_bind'](timeout=10)
-        trek2 = dev['trek2']
-        trek2.can_testmode(True)
-        time.sleep(2)   # Let other CAN messages come in...
-        # From here, Command-Response mode is broken by the CAN debug messages!
-        trek2['CAN'] = self.can_echo
-        echo_reply = trek2.port.readline().decode(errors='ignore')
-        echo_reply = echo_reply.replace('\r\n', '')
-        mes['rx_can'].sensor.store(echo_reply)
-        mes['rx_can']()
+        mes['can_bind'](timeout=10)
+        trek2tunnel = dev['trek2tunnel']
+        trek2tunnel.open()
+        mes['TunnelSwVer']()
+        trek2tunnel.close()
 
 
 class Devices(share.Devices):
@@ -112,17 +88,21 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.ProgramARM(
-            Initial.arm_port,
-            os.path.join(folder, Initial.arm_file),
+            share.port('027420', 'ARM'),
+            os.path.join(
+                folder, 'Trek2_{0}.bin'.format(config.SW_VERSION)),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
-        # Serial connection to the console
+        # Direct Console driver
         trek2_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trek2_ser.port = Initial.arm_port
-        # Console driver
+        trek2_ser.port = share.port('027420', 'ARM')
         self['trek2'] = console.DirectConsole(trek2_ser)
+        # Tunneled Console driver
+        tunnel = share.ConsoleCanTunnel(
+            self.physical_devices['CAN'], config.CAN_ID)
+        self['trek2tunnel'] = console.TunnelConsole(tunnel)
         # Apply power to fixture circuits.
         self['dcs_Vcom'].output(12.0, output=True, delay=2)
         self.add_closer(lambda: self['dcs_Vcom'].output(0.0, False))
@@ -130,6 +110,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['trek2'].close()
+        self['trek2tunnel'].close()
         self['dcs_Vin'].output(0.0, output=False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
@@ -143,6 +124,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         trek2 = self.devices['trek2']
+        trek2tunnel = self.devices['trek2tunnel']
         sensor = tester.sensor
         self['oMirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
@@ -154,8 +136,10 @@ class Sensors(share.Sensors):
             timeout=300)
         # Console sensors
         self['oCANBIND'] = console.Sensor(trek2, 'CAN_BIND')
-        self['oSwVer'] = console.Sensor(
+        self['SwVer'] = console.Sensor(
             trek2, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['TunnelSwVer'] = console.Sensor(
+            trek2tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -165,12 +149,12 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('rx_can', 'CAN_RX', 'oMirCAN', ''),
             ('dmm_Vin', 'Vin', 'oVin', ''),
             ('dmm_3V3', '3V3', 'o3V3', ''),
             ('dmm_BkLghtOff', 'BkLghtOff', 'oBkLght', ''),
             ('dmm_BkLghtOn', 'BkLghtOn', 'oBkLght', ''),
             ('ui_SnEntry', 'SerNum', 'oSnEntry', ''),
-            ('trek2_can_bind', 'CAN_BIND', 'oCANBIND', ''),
-            ('trek2_SwVer', 'SwVer', 'oSwVer', ''),
+            ('can_bind', 'CAN_BIND', 'oCANBIND', ''),
+            ('SwVer', 'SwVer', 'SwVer', ''),
+            ('TunnelSwVer', 'SwVer', 'TunnelSwVer', ''),
             ))

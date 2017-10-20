@@ -67,6 +67,9 @@ DATA = {
     '029687': {     # RvView Initial
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
+    '027420': {     # Trek2 Initial/Final
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
+        },
 
     # Fixtures with a USB Hub
 
@@ -87,12 +90,6 @@ DATA = {
         'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
         # Hub port 3: SETEC FTDI
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[3]}[os.name],
-        },
-    '027420': {     # Trek2 Initial/Final
-        # Hub port 3: SETEC FTDI
-        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[3]}[os.name],
-        # Hub port 4: SETEC FTDI
-        'CAN': {'posix': '/dev/ttyUSB2', 'nt': SETEC_FTDI_HUB[4]}[os.name],
         },
     '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
         # Hub port 1: SETEC FTDI
