@@ -22,16 +22,10 @@ class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
-    arm_version = config.ARM_SW_VERSION
-    arm_hw_ver = config.ARM_HW_VERSION
-    pic_version = config.PIC_SW_VERSION
-    pic_hw_ver = config.PIC_HW_VERSION
-    # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.port('027176', 'ARM')
     # ARM software image file
-    arm_file = 'bp35_{0}.bin'.format(arm_version)
+    arm_file = 'bp35_{0}.bin'.format(config.ARM_SW_VERSION)
     # dsPIC software image file
-    pic_file = 'bp35sr_{0}.hex'.format(pic_version)
+    pic_file = 'bp35sr_{0}.hex'.format(config.PIC_SW_VERSION)
     # CAN echo request messages
     can_echo = 'TQQ,32,0'
     # Injected Vbat & Vaux
@@ -80,7 +74,8 @@ class Initial(share.TestSequence):
         LimitPercent('OCP', ocp_set, 4.0, doc='After adjustment'),
         LimitLow('InOCP', 11.6, doc='Output voltage in OCP'),
         LimitRegExp(
-            'ARM-SwVer', '^{0}$'.format(arm_version.replace('.', r'\.')),
+            'ARM-SwVer', '^{0}$'.format(
+                config.ARM_SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
         LimitDelta('ARM-AcV', vac, 10.0, doc='AC voltage'),
         LimitDelta('ARM-AcF', 50.0, 1.0, doc='AC frequency'),
@@ -128,15 +123,15 @@ class Initial(share.TestSequence):
     limitdata = {
         'SR': {
             'Limits': _common + _sr_solar,
-            'HwVer': (arm_hw_ver, 1, 'A'),
+            'HwVer': (config.ARM_HW_VERSION, 1, 'A'),
             },
         'PM': {
             'Limits': _common + _pm_solar,
-            'HwVer': (arm_hw_ver, 2, 'A'),
+            'HwVer': (config.ARM_HW_VERSION, 2, 'A'),
             },
         'HA': {
             'Limits': _common + _sr_solar,
-            'HwVer': (arm_hw_ver, 3, 'A'),
+            'HwVer': (config.ARM_HW_VERSION, 3, 'A'),
             },
         }
 
@@ -226,7 +221,7 @@ class Initial(share.TestSequence):
         bp35.open()
         bp35.brand(
             self.config['HwVer'], self.sernum, dev['rla_reset'],
-            self.pm, self.pic_hw_ver)
+            self.pm, config.PIC_HW_VERSION)
         mes['arm_swver']()
         if self.pm:
             bp35['PM_RELAY'] = False
@@ -440,7 +435,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.ProgramARM(
-            Initial.arm_port,
+            share.port('027176', 'ARM'),
             os.path.join(folder, Initial.arm_file), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # PIC device programmer
@@ -449,7 +444,7 @@ class Devices(share.Devices):
         # Serial connection to the BP35 console
         bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bp35_ser.port = Initial.arm_port
+        bp35_ser.port = share.port('027176', 'ARM')
         # BP35 Console driver
         self['bp35'] = console.DirectConsole(bp35_ser)
         # High power source for the SR Solar Regulator
