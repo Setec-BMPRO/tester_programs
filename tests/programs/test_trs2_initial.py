@@ -13,7 +13,7 @@ class TRSInitial(ProgramTestCase):
 
     prog_class = trs2.Initial
     parameter = None
-    debug = True
+    debug = False
     btmac = '001EC030BC15'
 
     def setUp(self):
@@ -50,9 +50,9 @@ class TRSInitial(ProgramTestCase):
                     (sen['arm_Fault'], 0),
                     ),
                 'Calibrate': (
-                    (sen['brake'], (0.3, 12.0)),
-                    (sen['arm_Vbatt'], (12.1, 12.001)),
-                    (sen['arm_Vbrake'], (12.2, 12.002)),
+                    (sen['brake'], (0.3, 0.3, 12.0, 12.0, )),
+                    (sen['arm_Vbatt'], (12.1, 12.001, )),
+                    (sen['arm_Vbrake'], (12.2, 12.002, )),
                     (sen['arm_Ibrake'], 1.5),
                     (sen['arm_Vpin'], 0.1),
                     ),

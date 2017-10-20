@@ -37,7 +37,7 @@ class Trek2Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Display': (
-                    (sen['oSwVer'], (trek2.final.Final.bin_version, )),
+                    (sen['SwVer'], (trek2.config.SW_VERSION, )),
                     (sen['oYesNoSeg'], True),
                     (sen['oYesNoBklight'], True),
                     ),
