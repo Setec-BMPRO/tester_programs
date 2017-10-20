@@ -78,7 +78,6 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_Vcom', tester.DCSource, 'DCS2'),
                 ('dcs_Vin', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
@@ -103,9 +102,6 @@ class Devices(share.Devices):
         tunnel = share.ConsoleCanTunnel(
             self.physical_devices['CAN'], config.CAN_ID)
         self['trek2tunnel'] = console.TunnelConsole(tunnel)
-        # Apply power to fixture circuits.
-        self['dcs_Vcom'].output(12.0, output=True, delay=2)
-        self.add_closer(lambda: self['dcs_Vcom'].output(0.0, False))
 
     def reset(self):
         """Reset instruments."""
