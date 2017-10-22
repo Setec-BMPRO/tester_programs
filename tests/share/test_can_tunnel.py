@@ -3,53 +3,40 @@
 """UnitTest for CAN Tunneled console."""
 
 import unittest
-from unittest.mock import patch
-import tester
+from unittest.mock import MagicMock
 import share
-from .. import logging_setup
 
 
 class Tunnel(unittest.TestCase):
 
     """CAN Tunnel Console test suite."""
 
+    targetid = 32       # CAN target device ID
+
     def setUp(self):
-        logging_setup()
-        patcher = patch('time.sleep')   # Remove time delays
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        port = tester.SimSerial()
-        self.mycon = share.console.can_tunnel.OldConsoleCanTunnel(port)
+        self.interface = MagicMock(name='serial2can')
+        self.mycon = share.ConsoleCanTunnel(self.interface, self.targetid)
 
-    def test_1_open_fail(self):
-        """No echo from the CAN interface."""
-        with self.assertRaises(share.console.can_tunnel.TunnelError):
-            self.mycon.open()
-
-    def test_2_open_ok(self):
-        """Successful open."""
-        puts = self.mycon.port.puts
-        puts('0 ECHO -> \r\n', preflush=1)
-        puts('\r\n')
-        puts('\r\n')
-        puts('0x10000000\r\n\r\n')
-        puts('\r\nRRC,32,3,3,0,16,1\r\n')
+    def test_open(self):
+        """Open."""
         self.mycon.open()
+        self.interface.open_tunnel.assert_called_once_with(self.targetid)
 
-    def test_3_writeread(self):
-        """Write & Read data."""
-        self.mycon.port.puts(
-            '"RRC,32,4,7,87,79,82,76,68,13,10\r\n') # 'WORLD\r\n'
-        self.mycon.port.get()    # Empty the output capture buffer
-        self.mycon.write(b'HELLO\r')
-        written = self.mycon.port.get()
-        self.assertEqual(written, b'"TCC,32,4,72,69,76,76,79,13 CAN\r')
-        reply = self.mycon.read(100)
-        self.assertEqual(reply, b'WORLD\r\n')
+    def test_close(self):
+        """Close."""
+        self.mycon.close()
+        self.interface.close_tunnel.assert_called_once_with()
 
-    def test_4_read(self):
+    def test_write(self):
+        """Write data."""
+        data = b'hello'
+        self.mycon.write(data)
+        self.interface.write_tunnel.assert_called_once_with(data)
+
+    def test_read(self):
         """Read data."""
-        self.mycon.port.puts(
-            '"RRC,32,4,7,87,79,82,76,68,13,10\r\n') # 'WORLD\r\n'
-        reply = self.mycon.read(100)
-        self.assertEqual(reply, b'WORLD\r\n')
+        data = b'hello'
+        self.interface.ready_tunnel = 0
+        self.interface.read_tunnel.return_value = data
+        read_data = self.mycon.read(size=len(data))
+        self.assertEqual(data, read_data)
