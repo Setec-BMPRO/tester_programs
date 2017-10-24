@@ -4,6 +4,7 @@
 
 import unittest
 from unittest.mock import MagicMock
+import tester
 import share
 
 
@@ -21,6 +22,17 @@ class Tunnel(unittest.TestCase):
         """Open."""
         self.mycon.open()
         self.interface.open_tunnel.assert_called_once_with(self.targetid)
+
+    def test_open_error(self):
+        """Open error."""
+        # We need a tester to get MeasurementFailedError
+        mytester = tester.Tester('MockATE', {})
+        self.interface.open_tunnel.side_effect = tester.SerialToCanError
+        try:
+            with self.assertRaises(tester.MeasurementFailedError):
+                self.mycon.open()
+        finally:
+            mytester.stop()
 
     def test_close(self):
         """Close."""

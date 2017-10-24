@@ -9,7 +9,6 @@ used as the 'port' by another Console driver.
 
 """
 
-import logging
 import tester
 
 
@@ -34,8 +33,9 @@ class ConsoleCanTunnel():
         """
         self._target = target
         self._can_port = interface
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
+        # Simple callables
+        self.close = self._can_port.close_tunnel
+        self.write = self._can_port.write_tunnel
         # The buffer for tunneled console data.
         self._buf_port = tester.SimSerial()
         # Serial compatible interface callables
@@ -43,16 +43,20 @@ class ConsoleCanTunnel():
         self.flushInput = self._buf_port.flushInput
         self.flushOutput = self._buf_port.flushOutput
         self.flush = self.flushOutput
+        # A Measurement to generate MeasurementFailedError
+        self.measurement = tester.Measurement(
+            tester.LimitBoolean(
+                'CANtunnel', True, doc='Tunnel operation succeeded'),
+            tester.sensor.Mirror()
+            )
 
     def open(self):
         """Open the CAN tunnel."""
-        self._can_port.open_tunnel(self._target)
-        self._logger.debug('CAN Tunnel opened')
-
-    def close(self):
-        """Close the CAN tunnel."""
-        self._can_port.close_tunnel()
-        self._logger.debug('CAN Tunnel closed')
+        try:    # Change any SystemError into a MeasurementFailedError
+            self._can_port.open_tunnel(self._target)
+        except tester.SerialToCanError:
+            self.measurement.sensor.store(False)
+            self.measurement()
 
     def read(self, size=1):
         """Serial: Read the input buffer.
@@ -60,21 +64,10 @@ class ConsoleCanTunnel():
         @return data from the tunnel
 
         """
-        while self._can_port.ready_tunnel:  # Read all waiting data
+        # Read all waiting data from the CAN tunnel into my buffer
+        while self._can_port.ready_tunnel:
             self._buf_port.put(self._can_port.read_tunnel())
-        while self.inWaiting() < size:      # Wait for required data size
+        # Wait for required data in my buffer
+        while self.inWaiting() < size:
             self._buf_port.put(self._can_port.read_tunnel())
-        data = self._buf_port.read(size)
-        if self.verbose:
-            self._logger.debug('read({0}) = {1!r}'.format(size, data))
-        return data
-
-    def write(self, data):
-        """Serial: Write data bytes to the tunnel.
-
-        @param data Byte data to send.
-
-        """
-        if self.verbose:
-            self._logger.debug('write({0!r})'.format(data))
-        self._can_port.write_tunnel(data)
+        return self._buf_port.read(size)
