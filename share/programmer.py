@@ -7,68 +7,10 @@ import subprocess
 import tester
 import isplpc
 import serial
-import jsonrpclib       # Install with: pip install jsonrpclib-pelix
-
 
 # Result values to store into the mirror sensor
 _SUCCESS = 0
 _FAILURE = 1
-
-
-class ProgramSAMB11():
-
-    """Connection to a networked SAMB11 programmer.
-
-    A 64-bit Windows PC is required to run the SAMB11 programmer tool.
-    We run a JSON-RPC network server on a Windows laptop to do the programming
-    when instructed.
-
-    """
-
-    # Default server URL (Static address, non-domain member)
-    default_server = 'http://192.168.168.72:8888/'
-    limitname = 'Program'   # Testlimit name to use
-
-    def __init__(self, relay, server=None):
-        """Create a programmer instance.
-
-        @param relay Relay device to connect programmer to target
-        @param server URL of the networked programmer
-
-        """
-        if server is None:
-            server = self.default_server
-        self.server = jsonrpclib.ServerProxy(
-            server,
-            config=jsonrpclib.config.Config(content_type='application/json')
-            )
-        self.relay = relay
-        self.measurement = tester.Measurement(
-            tester.LimitInteger(
-                self.limitname, _SUCCESS, doc='Programming succeeded'),
-            tester.sensor.Mirror()
-            )
-
-    def echo(self, message):
-        """Call the echo() method of the server.
-
-        @param message Message to be echoed by the server.
-        @return The server response
-
-        """
-        return self.server.echo(message)
-
-    def program(self):
-        """Program a device."""
-        try:
-            self.relay.set_on()
-            self.server.program()
-            self.measurement.sensor.store(_SUCCESS)
-        except Exception as err:
-            self._logger.debug('Error: %s', err.output)
-            self.measurement.sensor.store(_FAILURE)
-        self.relay.set_off()
-        self.measurement()
 
 
 class ProgramPIC():

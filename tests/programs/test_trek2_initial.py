@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for Trek2 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trek2
 
@@ -18,14 +18,9 @@ class Trek2Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        mycon = MagicMock(name='MyConsole')
-        mycon.port.readline.return_value = b'RRQ,16,0'
-        patcher = patch(
-            'programs.trek2.console.DirectConsole', return_value=mycon)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         for target in (
                 'share.ProgramARM',
+                'programs.trek2.console.DirectConsole',
                 'programs.trek2.console.TunnelConsole',
                 ):
             patcher = patch(target)
@@ -45,10 +40,11 @@ class Trek2Initial(ProgramTestCase):
                     (sen['o3V3'], 3.3),
                     ),
                 'TestArm': (
-                    (sen['oSwVer'], (trek2.Initial.bin_version, )),
+                    (sen['SwVer'], (trek2.config.SW_VERSION, )),
                     ),
                 'CanBus': (
                     (sen['oCANBIND'], 1 << 28),
+                    (sen['TunnelSwVer'], (trek2.config.SW_VERSION, )),
                     ),
                 },
             }

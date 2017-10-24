@@ -5,7 +5,13 @@
 
 import os
 
-# Windows COM port mapping that must be manually set on each tester
+# Windows testers:
+#   COM port mapping must be manually set on each tester
+#   Use COM30 for the Serial2Can interface device
+
+# Linux testers:
+#   Use /dev/ttyACM0 for the GEN4 (Arduino) device
+#   Use /dev/ttyUSB0 for the Serial2Can interface device
 
 # A single direct connected SETEC FTDI, ID: 0403:6001
 SETEC_FTDI = 'COM16'
@@ -35,64 +41,61 @@ DATA = {
 
     '027013': {     # BatteryCheck Final
         # Panasonic eUniStone PAN1322 (FTDI with S/N)
-        'BT': {'posix': '/dev/ttyUSB0', 'nt': 'COM9'}[os.name],
+        'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM9'}[os.name],
         },
     '025197': {     # GEN8 Initial (Prolific)
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': 'COM6'}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
         },
 
     # Fixtures with a single SETEC FTDI (without any S/N)
 
     '028467': {     # BC15 Initial
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '031032': {     # BC25 Initial
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '027176': {     # BP35 Initial
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '017056': {     # IDS-500 SubBoard Initial
-        'PIC': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
+        'PIC': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '029242': {     # J35 Initial
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '029687': {     # RvView Initial
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
+        },
+    '027420': {     # Trek2 Initial/Final
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
 
     # Fixtures with a USB Hub
 
     '029083': {     # Batterycheck Initial
-        'ARM_CON': {'posix': '/dev/ttyUSB0', 'nt': 'COM1'}[os.name],
-        'ARM_PGM': {'posix': '/dev/ttyUSB1', 'nt': 'COM2'}[os.name],
+        'ARM_CON': {'posix': '/dev/ttyUSB1', 'nt': 'COM1'}[os.name],
+        'ARM_PGM': {'posix': '/dev/ttyUSB2', 'nt': 'COM2'}[os.name],
         # Hub port X: Panasonic eUniStone PAN1322 (FTDI with S/N)
         'BT': {'posix': '/dev/ttyUSB2', 'nt': 'COM4'}[os.name],
         },
     '028468': {     # CN101 Initial
         # Hub port 1: SETEC FTDI
-        'BLE': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI_HUB[1]}[os.name],
+        'BLE': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[1]}[os.name],
         # Hub port 2: SETEC FTDI
-        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[2]}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB2', 'nt': SETEC_FTDI_HUB[2]}[os.name],
         },
     '022837': {     # SX-750 Initial
         # Hub port 2: Arduino
         'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
         # Hub port 3: SETEC FTDI
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI_HUB[3]}[os.name],
-        },
-    '027420': {     # Trek2 Initial/Final
-        # Hub port 3: SETEC FTDI
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI_HUB[3]}[os.name],
-        # Hub port 4: SETEC FTDI
-        'CAN': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[4]}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[3]}[os.name],
         },
     '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
         # Hub port 1: SETEC FTDI
-        'ARM': {'posix': '/dev/ttyUSB0', 'nt': SETEC_FTDI_HUB[1]}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[1]}[os.name],
         # Hub port 2: FTDI
-        'BLE': {'posix': '/dev/ttyUSB1', 'nt': 'COM7'}[os.name],
+        'BLE': {'posix': '/dev/ttyUSB2', 'nt': 'COM7'}[os.name],
         },
     }
 

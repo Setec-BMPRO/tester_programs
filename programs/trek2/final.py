@@ -2,24 +2,21 @@
 # -*- coding: utf-8 -*-
 """Trek2 Final Test Program."""
 
-import os
-import serial
 import tester
 from tester import TestStep, LimitInteger, LimitRegExp
 import share
 from . import console
+from . import config
 
 
 class Final(share.TestSequence):
 
     """Trek2 Final Test Program."""
 
-    # Serial port for the Trek2 in the fixture. Used for the CAN Tunnel port
-    can_port = {'posix': '/dev/ttyUSB1', 'nt': 'COM11'}[os.name]
-
-    bin_version = '1.5.15833.150'   # Software binary version
+    # Test limits
     limitdata = (
-        LimitRegExp('SwVer', '^{0}$'.format(bin_version.replace('.', r'\.'))),
+        LimitRegExp('SwVer', '^{0}$'.format(
+            config.SW_VERSION.replace('.', r'\.'))),
         LimitInteger('ARM-level1', 1),
         LimitInteger('ARM-level2', 2),
         LimitInteger('ARM-level3', 3),
@@ -52,7 +49,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Display tests."""
-        self.measure(('trek2_SwVer', 'ui_YesNoSeg', 'ui_YesNoBklight', ))
+        self.measure(('SwVer', 'ui_YesNoSeg', 'ui_YesNoBklight', ))
         dev['trek2'].testmode(False)
 
     @share.teststep
@@ -94,21 +91,13 @@ class Devices(share.Devices):
                 ('rla_s3', tester.Relay, 'RLA5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Connection to the Serial-to-CAN Trek2 inside the fixture
-        ser_can = serial.Serial(baudrate=115200, timeout=5.0)
-        # Set port separately, as we don't want it opened yet
-        ser_can.port = Final.can_port
-        # CAN Console tunnel driver
-        self['tunnel'] = share.console.OldConsoleCanTunnel(port=ser_can)
-        # Trek2 Console driver (using the CAN Tunnel)
-        self['trek2'] = console.TunnelConsole(port=self['tunnel'])
+        tunnel = share.ConsoleCanTunnel(
+            self.physical_devices['CAN'], config.CAN_ID)
+        self['trek2'] = console.TunnelConsole(tunnel)
 
     def reset(self):
         """Reset instruments."""
-        try:
-            self['trek2'].close()
-        except Exception:   # Ignore serial port close errors
-            pass
+        self['trek2'].close()
         for src in ('dcs_Vin', 'dcs_Vcom'):
             self[src].output(0.0, output=False)
         for rla in ('rla_s1', 'rla_s2', 'rla_s3'):
@@ -136,7 +125,7 @@ class Sensors(share.Sensors):
             console.Sensor(trek2, 'TANK4'),
             )
         # Console sensors
-        self['oSwVer'] = console.Sensor(
+        self['SwVer'] = console.Sensor(
             trek2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
@@ -149,7 +138,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('ui_YesNoSeg', 'Notify', 'oYesNoSeg', ''),
             ('ui_YesNoBklight', 'Notify', 'oYesNoBklight', ''),
-            ('trek2_SwVer', 'SwVer', 'oSwVer', ''),
+            ('SwVer', 'SwVer', 'SwVer', ''),
             ))
         self['arm_level1'] = []
         self['arm_level2'] = []

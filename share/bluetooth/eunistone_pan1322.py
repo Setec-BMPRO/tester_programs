@@ -16,22 +16,24 @@ class BtRadio():
 
     """BT Radio interface functions."""
 
-    cmd_escape = '^^^'  # Command to escape from streaming data mode
-    port = None         # Serial port
-    _mac = None         # MAC address
-    _pin = None         # PIN
-    _sernum = None      # Serial number
-    _datamode = False   # True for data mode
-    _logger = None      # logging.logger
+    # Command to escape from streaming data mode
+    cmd_escape = '^^^'
     # Some magic numbers for PIN generation from a serial number
     hash_start = 56210
     hash_mult = 29
 
     def __init__(self, port):
-        """Create."""
+        """Create.
+
+        @param port Serial port
+
+        """
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
+        self._mac = None         # MAC address
+        self._pin = None         # PIN
+        self._datamode = False   # True for data mode
 
     def open(self):
         """Open communications with BT Radio.
@@ -87,10 +89,10 @@ class BtRadio():
                 time.sleep(0.2) # need short guard time between letters
                 self._write('^')
         else:
-            self._log('--> {!r}'.format(cmd))
+            self._log('--> {0!r}'.format(cmd))
             self._write(cmd + '\r\n')
         line = self._readline()
-        self._log('<-- {!r}'.format(line))
+        self._log('<-- {0!r}'.format(line))
         # Request for firmware version returns only simple integer
         if cmd == 'AT+JRRI':
             if not re.search('^[0-9]+$', line):
@@ -101,7 +103,8 @@ class BtRadio():
             if not re.search('^R?OK$', line):
                 raise BtError('OK response not received')
 
-    def _pin_calculate(self, sernum):
+    @classmethod
+    def _pin_calculate(cls, sernum):
         """Generate a PIN from a serial number.
 
         @return 4 character PIN number string
@@ -109,9 +112,9 @@ class BtRadio():
         """
         if len(sernum) != 11:
             raise BtError('Serial number must be 11 characters')
-        pin = self.hash_start
+        pin = cls.hash_start
         for char in sernum:
-            pin = ((pin * self.hash_mult) & 0xFFFF) ^ ord(char)
+            pin = ((pin * cls.hash_mult) & 0xFFFF) ^ ord(char)
         return '{:04}'.format(pin % 10000)
 
     def scan(self, sernum):
@@ -120,8 +123,7 @@ class BtRadio():
         @returns True if a match is found, else returns False
 
         """
-        self._log('Scanning for serial number {}'.format(sernum))
-        self._sernum = sernum
+        self._log('Scanning for serial number {0}'.format(sernum))
         max_try = 5
         for retry in range(0, max_try):
             try:
@@ -134,7 +136,7 @@ class BtRadio():
         # Read responses until completed.
         for _ in range(0, 20):
             line = self._readline()
-            self._log('<--- {!r}'.format(line))
+            self._log('<--- {0!r}'.format(line))
             if len(line) == 0:
                 continue
             if line == '+RDDSCNF=0':   # no more responses
@@ -144,8 +146,8 @@ class BtRadio():
             if match:
                 data = match.groups()
                 if len(data) >= 2:
-                    if self._sernum == data[1]:
-                        self._log('SN match found:{}'.format(data[1]))
+                    if sernum == data[1]:
+                        self._log('SN match found:{0}'.format(data[1]))
                         self._mac = data[0]
                         self._pin = self._pin_calculate(data[1])
         return self._mac is not None
@@ -156,7 +158,7 @@ class BtRadio():
         @raises BtError upon failure to pair.
 
         """
-        self._log('Pairing with mac {}'.format(self._mac))
+        self._log('Pairing with mac {0}'.format(self._mac))
         self._cmdresp('AT+JCCR=' + self._mac + ',01')
         for _ in range(0, 10):
             line = self._readline()
@@ -165,7 +167,7 @@ class BtRadio():
                 continue
             # Device we are pairing to has asked for a pin code
             if line[:6] == '+RPCI=':
-                self._log('Sending pin code:{}'.format(self._pin))
+                self._log('Sending pin code: {0}'.format(self._pin))
                 self._cmdresp('AT+JPCR=04,' + self._pin)
                 continue
             # Device we are pairing to has asked to verify 6 digit id
@@ -186,7 +188,7 @@ class BtRadio():
                     continue
                 mtu = int(data[0])
                 if mtu == 500:
-                    self._log('Now Paired, MTU {} bytes.'.format(mtu))
+                    self._log('Now Paired, MTU {0} bytes.'.format(mtu))
                     return
                 self._log('Pairing failed.')
                 continue
@@ -205,7 +207,7 @@ class BtRadio():
             line = self._readline()
             if len(line) == 0:
                 continue
-            self._log('<--- {!r}'.format(line))
+            self._log('<--- {0!r}'.format(line))
             if line == '+RDII':     # good unpairing response
                 self._log('Now Un-Paired.')
                 return
@@ -249,11 +251,11 @@ class BtRadio():
             'jsonrpc': '2.0', 'id': 8256,
             'method': method, 'params': params}
         cmd = json.dumps(request)
-        self._log('JSONRPC request: {!r}'.format(cmd))
+        self._log('JSONRPC request: {0!r}'.format(cmd))
         self.port.flushInput()
         self._write(cmd + '\r')
         response = self._readline()
-        self._log('<--- {!r}'.format(response))
+        self._log('<--- {0!r}'.format(response))
         return json.loads(response)['result']
 
 

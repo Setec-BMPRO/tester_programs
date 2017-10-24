@@ -13,14 +13,12 @@ class Final(share.TestSequence):
 
     """BP35 Final Test Program."""
 
-    arm_version = config.ARM_SW_VERSION
-    # CAN ID of the BP35
-    can_id = 16
     # Test limits
     limitdata = (
         tester.LimitDelta('Vbat', 12.8, 0.2, doc='Output voltage'),
         tester.LimitRegExp(
-            'ARM-SwVer', '^{0}$'.format(arm_version.replace('.', r'\.')),
+            'ARM-SwVer', '^{0}$'.format(
+                config.ARM_SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
         )
 
@@ -61,7 +59,7 @@ class Devices(share.Devices):
         self['dmm'] = tester.DMM(self.physical_devices['DMM'])
         self['acsource'] = tester.ACSource(self.physical_devices['ACS'])
         tunnel = share.ConsoleCanTunnel(
-            self.physical_devices['CAN'], Final.can_id)
+            self.physical_devices['CAN'], config.CAN_ID)
         self['bp35'] = console.TunnelConsole(tunnel)
 
     def reset(self):
