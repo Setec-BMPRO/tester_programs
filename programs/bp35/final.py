@@ -50,6 +50,7 @@ class Final(share.TestSequence):
         bp35['SER_ID'] = self.sernum
         bp35['NVWRITE'] = True
         bp35.close()
+        mes['ui_notifycable']()
 
 class Devices(share.Devices):
 
@@ -86,6 +87,10 @@ class Sensors(share.Sensors):
             message=tester.translate('bp35_final', 'IsOutputLedGreen?'),
             caption=tester.translate('bp35_final', 'capOutputLed'))
         self['yesnogreen'].doc = 'Tester operator'
+        self['notifycable'] = sensor.Notify(
+            message=tester.translate('bp35_final', 'PullCableOut'),
+            caption=tester.translate('bp35_final', 'capCableOut'))
+        self['notifycable'].doc = 'Tester operator'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bp35_final', 'msgSnEntry'),
             caption=tester.translate('bp35_final', 'capSnEntry'))
@@ -101,6 +106,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vbat', 'Vbat', 'vbat', 'Output ok'),
             ('ui_yesnogreen', 'Notify', 'yesnogreen', 'LED Green'),
+            ('ui_notifycable', 'Notify', 'notifycable', 'CAN cable removed'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', 'Unit software version'),
             ))
