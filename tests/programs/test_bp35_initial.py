@@ -18,7 +18,6 @@ class _BP35Initial(ProgramTestCase):
         """Per-Test setup."""
         mycon = MagicMock(name='MyConsole')
         mycon.ocp_cal.return_value = 1
-        mycon.port.readline.return_value = b'RRQ,32,0'
         patcher = patch(
             'programs.bp35.console.DirectConsole', return_value=mycon)
         self.addCleanup(patcher.stop)
@@ -27,6 +26,7 @@ class _BP35Initial(ProgramTestCase):
                 'share.BackgroundTimer',
                 'share.ProgramARM',
                 'share.ProgramPIC',
+                'programs.bp35.console.TunnelConsole',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -102,6 +102,7 @@ class _BP35Initial(ProgramTestCase):
                     ),
                 'CanBus': (
                     (sen['arm_canbind'], 1 << 28),
+                    (sen['TunnelSwVer'], (bp35.config.ARM_SW_VERSION, )),
                     ),
                 },
             UnitTester.key_call: {      # Callables

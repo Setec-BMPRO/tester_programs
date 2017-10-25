@@ -309,12 +309,7 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_output(self, dev, mes):
-        """Test the output switches.
-
-        Each output is turned ON in turn.
-        All outputs are then left ON.
-
-        """
+        """Test the output switches."""
         bp35 = dev['bp35']
         # All outputs OFF
         bp35.load_set(set_on=True, loads=())
@@ -370,16 +365,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        bp35 = dev['bp35']
         mes['arm_can_bind'](timeout=10)
-        bp35.can_testmode(True)
-        # From here, Command-Response mode is broken by the CAN debug messages!
-        bp35['CAN'] = self.can_echo
-        echo_reply = bp35.port.readline().decode(errors='ignore')
-        echo_reply = echo_reply.replace('\r\n', '')
-        rx_can = mes['rx_can']
-        rx_can.sensor.store(echo_reply)
-        rx_can.measure()
+        bp35tunnel = dev['bp35tunnel']
+        bp35tunnel.open()
+        mes['TunnelSwVer']()
+        bp35tunnel.close()
 
 
 class SrHighPower():
@@ -417,7 +407,6 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-                ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
                 ('dcs_vaux', tester.DCSource, 'DCS3'),
                 ('SR_LowPower', tester.DCSource, 'DCS4'),
@@ -447,16 +436,18 @@ class Devices(share.Devices):
         bp35_ser.port = share.port('027176', 'ARM')
         # BP35 Console driver
         self['bp35'] = console.DirectConsole(bp35_ser)
+        # Tunneled Console driver
+        tunnel = share.ConsoleCanTunnel(
+            self.physical_devices['CAN'], config.CAN_ID)
+        self['bp35tunnel'] = console.TunnelConsole(tunnel)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = share.BackgroundTimer()
-        # Apply power to fixture (Comms & Trek2) circuits.
-        self['dcs_vcom'].output(12.0, True)
-        self.add_closer(lambda: self['dcs_vcom'].output(0, False))
 
     def reset(self):
         """Reset instruments."""
         self['bp35'].close()
+        self['bp35tunnel'].close()
         self['PmTimer'].cancel()
         # Switch off AC Source & discharge the unit
         self['acsource'].reset()
@@ -511,6 +502,7 @@ class Sensors(share.Sensors):
         self['sernum'].doc = 'Barcode scanner'
         # Console sensors
         bp35 = self.devices['bp35']
+        bp35tunnel = self.devices['bp35tunnel']
         for name, cmdkey, units in (
                 ('arm_acv', 'AC_V', 'Vac'),
                 ('arm_acf', 'AC_F', 'Hz'),
@@ -540,6 +532,8 @@ class Sensors(share.Sensors):
                 self[name].units = units
         self['arm_swver'] = console.Sensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['TunnelSwVer'] = console.Sensor(
+            bp35tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
         # Generate load current sensors
         loads = []
         for i in range(1, Initial.outputs + 1):
@@ -607,6 +601,7 @@ class Measurements(share.Measurements):
             ('arm_iaux', 'ARM-AuxI', 'arm_iaux', 'Aux current'),
             ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov', 'Vout OVP'),
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', 'Remote input'),
+            ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
             ))
         if self.parameter == 'PM':      # PM Solar Regulator
             self.create_from_names((
