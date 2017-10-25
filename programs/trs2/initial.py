@@ -90,8 +90,7 @@ class Initial(share.TestSequence):
         """Test the operation of LEDs."""
         trs2 = dev['trs2']
         trs2.open()
-        dev['rla_reset'].pulse(0.1)
-        trs2.action(None, delay=5.0, expected=3)   # Flush banner
+        trs2.action(None, delay=7.0, expected=3)   # Flush banner
         trs2.brand(self.hw_ver, self.sernum)
         self.measure(
             ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
