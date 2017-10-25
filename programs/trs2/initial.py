@@ -6,7 +6,7 @@ import serial
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitHigh, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
+    LimitLow, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
     )
 import share
 from . import console
@@ -37,12 +37,12 @@ class Initial(share.TestSequence):
         LimitDelta('LightOn', vbatt, (0.25, 0)),
         LimitLow('RemoteOff', 0.5),
         LimitDelta('RemoteOn', vbatt, (0.25, 0)),
-        LimitHigh('RedLedOff', 3.1),
-        LimitDelta('RedLedOn', 0.5, 0.1),
-        LimitHigh('GreenLedOff', 3.1),
-        LimitLow('GreenLedOn', 0.14),
-        LimitHigh('BlueLedOff', 3.1),
-        LimitDelta('BlueLedOn', 0.25, 0.1),
+        LimitLow('RedLedOff', 1.0),
+        LimitDelta('RedLedOn', 1.5, 0.1),
+        LimitLow('GreenLedOff', 1.0),
+        LimitDelta('GreenLedOn', 2.0, 0.1),
+        LimitLow('BlueLedOff', 1.0),
+        LimitDelta('BlueLedOn', 2.7, 0.1),
         LimitDelta('BlueLedFlash', 1.65, 0.2),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
@@ -54,7 +54,6 @@ class Initial(share.TestSequence):
         LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033),
         LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82),
         LimitDelta('ARM-Vpin', 0.0, 0.2),
-
         LimitRegExp('BtMac', '^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         )
@@ -221,10 +220,10 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['red'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
-        self['green'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
+        self['red'] = sensor.Vdc(dmm, high=2, low=2, rng=10, res=0.01)
+        self['green'] = sensor.Vdc(dmm, high=2, low=3, rng=10, res=0.01)
         self['blue'] = sensor.Vdc(
-            dmm, high=7, low=1, rng=10, res=0.01, nplc=10)
+            dmm, high=2, low=4, rng=10, res=0.01, nplc=10)
         self['brake'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.01)
         self['light'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.01)
         self['remote'] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)

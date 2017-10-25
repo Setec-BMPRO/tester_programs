@@ -43,9 +43,9 @@ class TRSInitial(ProgramTestCase):
                 'Operation': (
                     (sen['light'], (11.9, 0.0)),
                     (sen['remote'], (11.9, 0.0)),
-                    (sen['red'], (3.1, 0.5, 3.1)),
-                    (sen['green'], (3.1, 0.0, 3.1)),
-                    (sen['blue'], (1.6, 0.25, 3.1)),
+                    (sen['red'], (1.5, 0.5, 1.5)),
+                    (sen['green'], (2.0, 0.5, 2.0)),
+                    (sen['blue'], (2.7, 0.5, 2.7)),
                     (sen['arm_SwVer'], (trs2.Initial.arm_version, )),
                     (sen['arm_Fault'], 0),
                     ),
