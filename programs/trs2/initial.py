@@ -38,12 +38,11 @@ class Initial(share.TestSequence):
         LimitLow('RemoteOff', 0.5),
         LimitDelta('RemoteOn', vbatt, (0.25, 0)),
         LimitLow('RedLedOff', 1.0),
-        LimitDelta('RedLedOn', 1.5, 0.1),
+        LimitDelta('RedLedOn', 1.8, 0.14),
         LimitLow('GreenLedOff', 1.0),
-        LimitDelta('GreenLedOn', 2.0, 0.1),
+        LimitDelta('GreenLedOn', 2.5, 0.14),
         LimitLow('BlueLedOff', 1.0),
-        LimitDelta('BlueLedOn', 2.7, 0.1),
-        LimitDelta('BlueLedFlash', 1.65, 0.2),
+        LimitDelta('BlueLedOn', 2.8, 0.14),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(arm_version.replace('.', r'\.'))),
@@ -95,8 +94,7 @@ class Initial(share.TestSequence):
         trs2.action(None, delay=5.0, expected=3)   # Flush banner
         trs2.brand(self.hw_ver, self.sernum)
         self.measure(
-            ('arm_swver', 'arm_fltcode',
-             'dmm_redoff', 'dmm_greenoff', 'dmm_blueflash'),
+            ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
             timeout=5)
         trs2.override(Override.force_on)
         self.measure(
@@ -222,8 +220,7 @@ class Sensors(share.Sensors):
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['red'] = sensor.Vdc(dmm, high=2, low=2, rng=10, res=0.01)
         self['green'] = sensor.Vdc(dmm, high=2, low=3, rng=10, res=0.01)
-        self['blue'] = sensor.Vdc(
-            dmm, high=2, low=4, rng=10, res=0.01, nplc=10)
+        self['blue'] = sensor.Vdc(dmm, high=2, low=4, rng=10, res=0.01)
         self['brake'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.01)
         self['light'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.01)
         self['remote'] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
@@ -273,7 +270,6 @@ class Measurements(share.Measurements):
             ('dmm_greenon', 'GreenLedOn', 'green', ''),
             ('dmm_blueoff', 'BlueLedOff', 'blue', ''),
             ('dmm_blueon', 'BlueLedOn', 'blue', ''),
-            ('dmm_blueflash', 'BlueLedFlash', 'blue', ''),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
             ('arm_btmac', 'BtMac', 'arm_BtMAC', ''),
