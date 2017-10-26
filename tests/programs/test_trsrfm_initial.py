@@ -42,11 +42,11 @@ class TRSRFMInitial(ProgramTestCase):
                     (sen['red'], (3.1, 0.5, 3.1)),
                     (sen['green'], (3.1, 0.0, 3.1)),
                     (sen['blue'], (1.6, 0.25, 3.1)),
-                    (sen['arm_swver'], trsrfm.initial.Initial.arm_version),
-                    (sen['arm_fltcode'], 0),
+                    (sen['arm_SwVer'], trsrfm.initial.Initial.arm_version),
+                    (sen['arm_Fault'], 0),
                     ),
                 'Bluetooth': (
-                    (sen['btmac'], self.btmac),
+                    (sen['arm_BtMAC'], self.btmac),
                     ),
                 },
             }
@@ -54,6 +54,6 @@ class TRSRFMInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(17, len(result.readings))
+        self.assertEqual(16, len(result.readings))
         self.assertEqual(
             ['Prepare', 'TestArm', 'Bluetooth'], self.tester.ut_steps)
