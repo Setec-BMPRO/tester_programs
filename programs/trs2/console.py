@@ -41,8 +41,6 @@ class Console(share.console.BaseConsole):
 
     """Communications to TRS2 console."""
 
-    # Auto add prompt to puts strings
-    puts_prompt = '\r\n> '
     # Number of lines in startup banner
     banner_lines = 3
     cmd_data = {
@@ -80,6 +78,7 @@ class Console(share.console.BaseConsole):
 
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
+        self.action(None, delay=7.0, expected=self.banner_lines)
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True

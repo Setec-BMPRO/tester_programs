@@ -9,6 +9,7 @@ from tester import (
     )
 import share
 from . import console
+from .console import Override
 
 
 class Initial(share.TestSequence):
@@ -20,10 +21,6 @@ class Initial(share.TestSequence):
     hw_ver = (5, 0, 'B')
     # Injected Vbatt
     vbatt = 12.0
-    #Manual override parameters
-    force_on = 2
-    force_off = 1
-    normal = 0
     # Test limits
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
@@ -70,23 +67,17 @@ class Initial(share.TestSequence):
         """Test the operation of TRSRFM."""
         trsrfm = dev['trsrfm']
         trsrfm.open()
-        dev['rla_reset'].pulse(0.1)
-        trsrfm.action(None, delay=5.0, expected=2)  # Flush banner
-        trsrfm['HW_VER'] = self.hw_ver
-        trsrfm['SER_ID'] = self.sernum
-        trsrfm['NVDEFAULT'] = True
-        trsrfm['NVWRITE'] = True
-        mes['arm_swver']()
-        mes['arm_fltcode']()
+        trsrfm.brand(self.hw_ver, self.sernum)
+        self.measure(('arm_swver', 'arm_fltcode', ))
         self.measure(
             ('dmm_redoff', 'dmm_greenoff', 'dmm_blueflash'), timeout=5)
-        trsrfm.override(self.force_on)
+        trsrfm.override(Override.force_on)
         self.measure(
             ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
-        trsrfm.override(self.force_off)
+        trsrfm.override(Override.force_off)
         self.measure(
             ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
-        trsrfm.override(self.normal)
+        trsrfm.override(Override.normal)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -94,12 +85,10 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(self.vbatt, delay=15.0)
         btmac = mes['trsrfm_btmac']().reading1
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
         reply = ble.scan(btmac)
         ble.close()
-        self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
 
@@ -107,9 +96,6 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
 
     """Devices."""
-
-    arm_port = share.port('030451', 'ARM')
-    ble_port = share.port('030451', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -127,13 +113,13 @@ class Devices(share.Devices):
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trsrfm_ser.port = self.arm_port
+        trsrfm_ser.port = share.port('030451', 'ARM')
         # Console driver
         self['trsrfm'] = console.Console(trsrfm_ser)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = self.ble_port
+        ble_ser.port = share.port('030451', 'BLE')
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
@@ -172,8 +158,7 @@ class Sensors(share.Sensors):
             trsrfm, 'BT_MAC', rdgtype=sensor.ReadingString)
         self['arm_swver'] = console.Sensor(
             trsrfm, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['arm_fltcode'] = console.Sensor(
-            trsrfm, 'FAULT_CODE')
+        self['arm_fltcode'] = console.Sensor(trsrfm, 'FAULT_CODE')
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trsrfm_initial', 'msgSnEntry'),
             caption=tester.translate('trsrfm_initial', 'capSnEntry'))

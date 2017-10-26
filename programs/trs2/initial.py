@@ -100,7 +100,6 @@ class Initial(share.TestSequence):
         """Test the operation of LEDs."""
         trs2 = dev['trs2']
         trs2.open()
-        trs2.action(None, delay=7.0, expected=3)   # Flush banner
         trs2.brand(self.hw_ver, self.sernum)
         self.measure(
             ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
@@ -165,9 +164,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    arm_port = share.port('030451', 'ARM')
-    ble_port = share.port('030451', 'BLE')
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -190,13 +186,13 @@ class Devices(share.Devices):
         # Serial connection to the console
         trs2_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trs2_ser.port = self.arm_port
+        trs2_ser.port = share.port('030451', 'ARM')
         # Console driver
         self['trs2'] = console.Console(trs2_ser)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = self.ble_port
+        ble_ser.port = share.port('030451', 'BLE')
         self['ble'] = share.BleRadio(ble_ser)
         # Enable the watchdog
         self['rla_wdg'].set_on()
