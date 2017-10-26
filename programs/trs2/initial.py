@@ -28,33 +28,41 @@ class Initial(share.TestSequence):
     ibrake = 1.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', vbatt, 0.2),
-        LimitPercent('3V3', 3.3, 0.5),
-        LimitLow('BrakeOff', 0.5),
-        LimitDelta('BrakeOn', vbatt, (0.5, 0)),
-        LimitDelta('BrakeOffset', vbrake_offset, 0.1),
-        LimitLow('LightOff', 0.5),
-        LimitDelta('LightOn', vbatt, (0.25, 0)),
-        LimitLow('RemoteOff', 0.5),
-        LimitDelta('RemoteOn', vbatt, (0.25, 0)),
-        LimitLow('RedLedOff', 1.0),
-        LimitDelta('RedLedOn', 1.8, 0.14),
-        LimitLow('GreenLedOff', 1.0),
-        LimitDelta('GreenLedOn', 2.5, 0.14),
-        LimitLow('BlueLedOff', 1.0),
-        LimitDelta('BlueLedOn', 2.8, 0.14),
+        LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
+        LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
+        LimitLow('BrakeOff', 0.5, doc='Brakes off'),
+        LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
+        LimitDelta('BrakeOffset', vbrake_offset, 0.1,
+            doc='Input voltage present'),
+        LimitDelta('BrakeGain', vbatt, 0.1, doc='Input voltage present'),
+        LimitLow('LightOff', 0.5, doc='Lights off'),
+        LimitDelta('LightOn', vbatt, (0.25, 0), doc='Lights on'),
+        LimitLow('RemoteOff', 0.5, doc='Remote off'),
+        LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
+        LimitLow('RedLedOff', 1.0, doc='Led off'),
+        LimitDelta('RedLedOn', 1.8, 0.14, doc='Led on'),
+        LimitLow('GreenLedOff', 1.0, doc='Led off'),
+        LimitDelta('GreenLedOn', 2.5, 0.14, doc='Led on'),
+        LimitLow('BlueLedOff', 1.0, doc='Led off'),
+        LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(arm_version.replace('.', r'\.'))),
-        LimitLow('ARM-FaultCode', 0),
-        LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088),
-        LimitPercent('ARM-Vbrake', vbatt, 4.6, delta=0.088),
-        LimitPercent('ARM-Vbatt-Cal', vbatt, 0.6, delta=0.033),
-        LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033),
-        LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82),
-        LimitDelta('ARM-Vpin', 0.0, 0.2),
-        LimitRegExp('BtMac', '^[0-9A-F]{12}$'),
-        LimitBoolean('DetectBT', True),
+            '^{0}$'.format(arm_version.replace('.', r'\.')),
+            doc='Software version'),
+        LimitLow('ARM-FaultCode', 0, doc='No error'),
+        LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088,
+            doc='Voltage present'),
+        LimitPercent('ARM-Vbrake', vbatt, 4.6, delta=0.088,
+            doc='Voltage present'),
+        LimitPercent('ARM-Vbatt-Cal', vbatt, 0.6, delta=0.033,
+            doc='Voltage present'),
+        LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033,
+            doc='Voltage present'),
+        LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82,
+            doc='Brake current flowing'),
+        LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
+        LimitRegExp('BtMac', '^[0-9A-F]{12}$', doc='Valid MAC address '),
+        LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
 
     def open(self):
@@ -67,6 +75,8 @@ class Initial(share.TestSequence):
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
+        for mes in self.measurements:
+            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -124,7 +134,7 @@ class Initial(share.TestSequence):
         trs2['VBRAKE_OFFSET'] = dmm_V
         # Gain calibration at nominal voltage
         brakes.output(self.vbatt, output=True)
-        dmm_V = mes['dmm_BrakeOn'].stable(delta=0.001).reading1
+        dmm_V = mes['dmm_BrakeGain'].stable(delta=0.001).reading1
         trs2['VBRAKE_GAIN'] = dmm_V
         # Save new calibration settings
         trs2['NVWRITE'] = True
@@ -216,19 +226,29 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'].doc = 'Across X1-X3'
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['3v3'].doc = 'U1 output'
         self['red'] = sensor.Vdc(dmm, high=2, low=2, rng=10, res=0.01)
+        self['red'].doc = 'Across led'
         self['green'] = sensor.Vdc(dmm, high=2, low=3, rng=10, res=0.01)
+        self['green'].doc = 'Across led'
         self['blue'] = sensor.Vdc(dmm, high=2, low=4, rng=10, res=0.01)
+        self['blue'].doc = 'Across led'
         self['brake'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.01)
+        self['brake'].doc = 'Brakes output'
         self['light'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.01)
+        self['light'].doc = 'Lights output'
         self['remote'] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
+        self['remote'].doc = 'Remote output'
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
+        self['tstpin_cover'].doc = 'Photo sensor'
         self['mirbt'] = sensor.Mirror()
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_initial', 'msgSnEntry'),
             caption=tester.translate('trs2_initial', 'capSnEntry'))
+        self['sernum'].doc = 'Barcode scanner'
         # Console sensors
         trs2 = self.devices['trs2']
         for name, cmdkey in (
@@ -237,14 +257,16 @@ class Sensors(share.Sensors):
             ):
             self[name] = console.Sensor(
                 trs2, cmdkey, rdgtype=sensor.ReadingString)
-        for name, cmdkey in (
-                ('arm_Fault', 'FAULT_CODE'),
-                ('arm_Vbatt', 'VBATT'),
-                ('arm_Vbrake', 'VBRAKE'),
-                ('arm_Ibrake', 'IBRAKE'),
-                ('arm_Vpin', 'VPIN'),
+        for name, cmdkey, units in (
+                ('arm_Fault', 'FAULT_CODE', '0/1'),
+                ('arm_Vbatt', 'VBATT', 'V'),
+                ('arm_Vbrake', 'VBRAKE', 'V'),
+                ('arm_Ibrake', 'IBRAKE', 'A'),
+                ('arm_Vpin', 'VPIN', 'V'),
             ):
             self[name] = console.Sensor(trs2, cmdkey)
+            if units:
+                self[name].units = units
 
 
 class Measurements(share.Measurements):
@@ -254,31 +276,40 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', ''),
-            ('dmm_3v3', '3V3', '3v3', ''),
-            ('dmm_BrakeOff', 'BrakeOff', 'brake', ''),
-            ('dmm_BrakeOn', 'BrakeOn', 'brake', ''),
-            ('dmm_BrakeOffset', 'BrakeOffset', 'brake', ''),
-            ('dmm_lightoff', 'LightOff', 'light', ''),
-            ('dmm_lighton', 'LightOn', 'light', ''),
-            ('dmm_remoteoff', 'RemoteOff', 'remote', ''),
-            ('dmm_remoteon', 'RemoteOn', 'remote', ''),
-            ('dmm_redoff', 'RedLedOff', 'red', ''),
-            ('dmm_redon', 'RedLedOn', 'red', ''),
-            ('dmm_greenoff', 'GreenLedOff', 'green', ''),
-            ('dmm_greenon', 'GreenLedOn', 'green', ''),
-            ('dmm_blueoff', 'BlueLedOff', 'blue', ''),
-            ('dmm_blueon', 'BlueLedOn', 'blue', ''),
-            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
-            ('detectBT', 'DetectBT', 'mirbt', ''),
-            ('arm_btmac', 'BtMac', 'arm_BtMAC', ''),
-            ('arm_swver', 'ARM-SwVer', 'arm_SwVer', ''),
-            ('arm_fltcode', 'ARM-FaultCode', 'arm_Fault', ''),
-            ('arm_Vbatt', 'ARM-Vbatt', 'arm_Vbatt', ''),
-            ('arm_Vbrake', 'ARM-Vbrake', 'arm_Vbrake', ''),
-            ('arm_Vbatt_cal', 'ARM-Vbatt-Cal', 'arm_Vbatt', ''),
-            ('arm_Vbrake_cal', 'ARM-Vbrake-Cal', 'arm_Vbrake', ''),
-            ('arm_Ibrake', 'ARM-Ibrake', 'arm_Ibrake', ''),
-            ('arm_Vpin', 'ARM-Vpin', 'arm_Vpin', ''),
-            ('ui_sernum', 'SerNum', 'sernum', ''),
+            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
+            ('dmm_BrakeOff', 'BrakeOff', 'brake', 'Brakes output off'),
+            ('dmm_BrakeOn', 'BrakeOn', 'brake', 'Brakes output on'),
+            ('dmm_BrakeOffset', 'BrakeOffset', 'brake',
+                'Calibration input voltage (Offset)'),
+            ('dmm_BrakeGain', 'BrakeGain', 'brake',
+                'Calibration input voltage (Gain)'),
+            ('dmm_lightoff', 'LightOff', 'light', 'Lights output off'),
+            ('dmm_lighton', 'LightOn', 'light', 'Lights output on'),
+            ('dmm_remoteoff', 'RemoteOff', 'remote', 'Remote output off'),
+            ('dmm_remoteon', 'RemoteOn', 'remote', 'Remote output on'),
+            ('dmm_redoff', 'RedLedOff', 'red', 'Red led off'),
+            ('dmm_redon', 'RedLedOn', 'red', 'Red led on'),
+            ('dmm_greenoff', 'GreenLedOff', 'green', 'Green led off'),
+            ('dmm_greenon', 'GreenLedOn', 'green', 'Green led on'),
+            ('dmm_blueoff', 'BlueLedOff', 'blue', 'Blue led off'),
+            ('dmm_blueon', 'BlueLedOn', 'blue', 'Blue led on'),
+            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
+                'Cover over BC2 test pins'),
+            ('arm_btmac', 'BtMac', 'arm_BtMAC', 'MAC address'),
+            ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
+            ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
+            ('arm_fltcode', 'ARM-FaultCode', 'arm_Fault', 'Fault code'),
+            ('arm_Vbatt', 'ARM-Vbatt', 'arm_Vbatt',
+                'Vbatt before cal'),
+            ('arm_Vbrake', 'ARM-Vbrake', 'arm_Vbrake',
+                'Brakes voltage before cal'),
+            ('arm_Vbatt_cal', 'ARM-Vbatt-Cal', 'arm_Vbatt',
+                'Vbatt after cal'),
+            ('arm_Vbrake_cal', 'ARM-Vbrake-Cal', 'arm_Vbrake',
+                'Brakes voltage after cal'),
+            ('arm_Ibrake', 'ARM-Ibrake', 'arm_Ibrake', 'Brakes current'),
+            ('arm_Vpin', 'ARM-Vpin', 'arm_Vpin',
+                'Voltage across breakaway switch with pin OUT'),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ))

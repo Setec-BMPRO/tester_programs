@@ -43,16 +43,16 @@ class TRSInitial(ProgramTestCase):
                 'Operation': (
                     (sen['light'], (11.9, 0.0)),
                     (sen['remote'], (11.9, 0.0)),
-                    (sen['red'], (1.5, 0.5, 1.5)),
-                    (sen['green'], (2.0, 0.5, 2.0)),
-                    (sen['blue'], (2.7, 0.5, 2.7)),
+                    (sen['red'], (0.0, 1.8, 0.0)),
+                    (sen['green'], (0.0, 2.5, 0.0)),
+                    (sen['blue'], (0.0, 2.8, 0.0)),
                     (sen['arm_SwVer'], (trs2.Initial.arm_version, )),
                     (sen['arm_Fault'], 0),
                     ),
                 'Calibrate': (
-                    (sen['brake'], (0.3, 0.3, 12.0, 12.0, )),
-                    (sen['arm_Vbatt'], (12.1, 12.001, )),
-                    (sen['arm_Vbrake'], (12.2, 12.002, )),
+                    (sen['brake'], (0.2999, 0.3, 11.999, 12.0)),
+                    (sen['arm_Vbatt'], (12.1, 12.001)),
+                    (sen['arm_Vbrake'], (12.2, 12.002)),
                     (sen['arm_Ibrake'], 1.5),
                     (sen['arm_Vpin'], 0.1),
                     ),
@@ -65,7 +65,7 @@ class TRSInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(31, len(result.readings))
+        self.assertEqual(30, len(result.readings))
         self.assertEqual(
             ['Prepare', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)
