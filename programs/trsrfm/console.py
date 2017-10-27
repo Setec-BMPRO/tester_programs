@@ -14,8 +14,6 @@ class Console(share.SamB11Console):
 
     """Communications to TRSRFM console."""
 
-    # Number of lines in startup banner
-    banner_lines = 2
     cmd_data = {
         # X-Register values
         'FAULT_CODE': ParameterHex(

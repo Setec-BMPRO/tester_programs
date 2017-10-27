@@ -10,7 +10,6 @@ from tester import (
     )
 import share
 from . import console
-from .console import Override
 
 
 class Initial(share.TestSequence):
@@ -19,7 +18,7 @@ class Initial(share.TestSequence):
 
     arm_version = '1.0.16487.472'
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (3, 0, 'A')
+    hw_ver = (4, 0, 'A')
     # Injected Vbatt
     vbatt = 12.0
     # Injected Vbrake for offset calibration
@@ -75,8 +74,6 @@ class Initial(share.TestSequence):
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
-#        for mes in self.measurements:
-#            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -104,15 +101,15 @@ class Initial(share.TestSequence):
         self.measure(
             ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
             timeout=5)
-        trs2.override(Override.force_on)
+        trs2.override(share.Override.force_on)
         self.measure(
             ('dmm_lighton', 'dmm_remoteon', 'dmm_redon', 'dmm_greenon',
              'dmm_blueon'), timeout=5)
-        trs2.override(Override.force_off)
+        trs2.override(share.Override.force_off)
         self.measure(
             ('dmm_lightoff', 'dmm_remoteoff', 'dmm_redoff', 'dmm_greenoff',
              'dmm_blueoff'), timeout=5)
-        trs2.override(Override.normal)
+        trs2.override(share.Override.normal)
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
@@ -184,7 +181,7 @@ class Devices(share.Devices):
         pin.insert = pin.set_off
         pin.remove = pin.set_on
         # Serial connection to the console
-        trs2_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        trs2_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
         trs2_ser.port = share.port('030451', 'ARM')
         # Console driver

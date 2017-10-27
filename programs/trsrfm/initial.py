@@ -10,7 +10,6 @@ from tester import (
     )
 import share
 from . import console
-from .console import Override
 
 
 class Initial(share.TestSequence):
@@ -19,7 +18,7 @@ class Initial(share.TestSequence):
 
     arm_version = '1.0.16546.2195'
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (5, 0, 'B')
+    hw_ver = (4, 0, 'A')
     # Injected Vbatt
     vbatt = 12.0
     # Test limits
@@ -77,13 +76,13 @@ class Initial(share.TestSequence):
 #            'arm_fltcode',
             'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)
-        trsrfm.override(Override.force_on)
+        trsrfm.override(share.Override.force_on)
         self.measure(
             ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
-        trsrfm.override(Override.force_off)
+        trsrfm.override(share.Override.force_off)
         self.measure(
             ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
-        trsrfm.override(Override.normal)
+        trsrfm.override(share.Override.normal)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -95,11 +94,11 @@ class Initial(share.TestSequence):
         ble = dev['ble']
         ble.open()
         trsrfm = dev['trsrfm']
-        trsrfm['BLUETOOTH'] = Override.force_on
+        trsrfm['BLUETOOTH'] = share.Override.force_on
         time.sleep(2)
         reply = ble.scan(btmac)
         ble.close()
-        trsrfm['BLUETOOTH'] = Override.force_off
+        trsrfm['BLUETOOTH'] = share.Override.force_off
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
