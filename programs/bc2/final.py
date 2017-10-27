@@ -15,7 +15,6 @@ class Final(share.TestSequence):
 
     """BC2 Final Test Program."""
 
-    arm_version = '1.2.14549.989'
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('Shunt', 50.0, 100.0),

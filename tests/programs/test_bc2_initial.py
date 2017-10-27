@@ -34,8 +34,11 @@ class BC2Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
-                    (sen['sernum'], ('A1526040123', )),
+                    (sen['sernum'], 'A1526040123'),
                     (sen['vin'], 12.0), (sen['3v3'], 3.30),
+                    ),
+                'TestArm': (
+                    (sen['arm_swver'], bc2.config.SW_VERSION),
                     ),
                 'Bluetooth': (
                     (sen['btmac'], self.btmac),
@@ -46,5 +49,6 @@ class BC2Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
-        self.assertEqual(['Prepare', 'Bluetooth'], self.tester.ut_steps)
+        self.assertEqual(6, len(result.readings))
+        self.assertEqual(
+            ['Prepare', 'TestArm', 'Bluetooth'], self.tester.ut_steps)

@@ -10,15 +10,13 @@ from tester import (
     )
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
 
     """TRSRFM Initial Test Program."""
 
-    arm_version = '1.0.16546.2195'
-    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (4, 0, 'A')
     # Injected Vbatt
     vbatt = 12.0
     # Test limits
@@ -33,7 +31,7 @@ class Initial(share.TestSequence):
         LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(arm_version.replace('.', r'\.')),
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$', doc='Valid MAC address'),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
@@ -48,8 +46,6 @@ class Initial(share.TestSequence):
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
-#        for mes in self.measurements:
-#            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -68,7 +64,7 @@ class Initial(share.TestSequence):
         """Test the operation of TRSRFM."""
         trsrfm = dev['trsrfm']
         trsrfm.open()
-        trsrfm.brand(self.hw_ver, self.sernum)
+        trsrfm.brand(config.HW_VERSION, self.sernum)
         self.measure(
             ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)

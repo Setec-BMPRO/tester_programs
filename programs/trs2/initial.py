@@ -10,15 +10,13 @@ from tester import (
     )
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
 
     """TRS2 Initial Test Program."""
 
-    arm_version = '1.0.16487.472'
-    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (4, 0, 'A')
     # Injected Vbatt
     vbatt = 12.0
     # Injected Vbrake for offset calibration
@@ -46,7 +44,7 @@ class Initial(share.TestSequence):
         LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(arm_version.replace('.', r'\.')),
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
         LimitLow('ARM-FaultCode', 0, doc='No error'),
         LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088,
@@ -97,7 +95,7 @@ class Initial(share.TestSequence):
         """Test the operation of LEDs."""
         trs2 = dev['trs2']
         trs2.open()
-        trs2.brand(self.hw_ver, self.sernum)
+        trs2.brand(config.HW_VERSION, self.sernum)
         self.measure(
             ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
             timeout=5)

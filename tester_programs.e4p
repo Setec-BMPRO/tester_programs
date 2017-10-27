@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-10-27, 14:02:59 -->
+<!-- Saved: 2017-10-27, 16:28:16 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -29,6 +29,7 @@
     <Source>programs/bc15_25/final.py</Source>
     <Source>programs/bc15_25/initial.py</Source>
     <Source>programs/bc2/__init__.py</Source>
+    <Source>programs/bc2/config.py</Source>
     <Source>programs/bc2/console.py</Source>
     <Source>programs/bc2/final.py</Source>
     <Source>programs/bc2/initial.py</Source>
@@ -40,6 +41,7 @@
     <Source>programs/bce4/__init__.py</Source>
     <Source>programs/bce4/final.py</Source>
     <Source>programs/ble2can/__init__.py</Source>
+    <Source>programs/ble2can/config.py</Source>
     <Source>programs/ble2can/console.py</Source>
     <Source>programs/ble2can/initial.py</Source>
     <Source>programs/bp35/__init__.py</Source>
@@ -121,10 +123,12 @@
     <Source>programs/trs1/__init__.py</Source>
     <Source>programs/trs1/initial.py</Source>
     <Source>programs/trs2/__init__.py</Source>
+    <Source>programs/trs2/config.py</Source>
     <Source>programs/trs2/console.py</Source>
     <Source>programs/trs2/final.py</Source>
     <Source>programs/trs2/initial.py</Source>
     <Source>programs/trsrfm/__init__.py</Source>
+    <Source>programs/trsrfm/config.py</Source>
     <Source>programs/trsrfm/console.py</Source>
     <Source>programs/trsrfm/initial.py</Source>
     <Source>programs/ts3020h/__init__.py</Source>

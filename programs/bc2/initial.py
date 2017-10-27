@@ -10,19 +10,20 @@ from tester import (
     )
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
 
     """BC2 Initial Test Program."""
 
-    arm_version = '1.2.14549.989'
+    # Test limits
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
         LimitDelta('Shunt', 50.0, 100.0),
         LimitRegExp('ARM-SwVer',
-            '^{}$'.format(arm_version.replace('.', r'\.'))),
+            '^{}$'.format(config.SW_VERSION.replace('.', r'\.'))),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         )
@@ -32,6 +33,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
+            TestStep('TestArm', self._step_test_arm),
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
@@ -42,6 +44,14 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(12.0, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
+
+    @share.teststep
+    def _step_test_arm(self, dev, mes):
+        """Test operation."""
+        bc2 = dev['bc2']
+        bc2.open()
+        bc2.brand(config.HW_VERSION, self.sernum)
+        mes['arm_swver']()
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -63,9 +73,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    arm_port = share.port('030451', 'ARM')
-    ble_port = share.port('030451', 'BLE')
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -79,15 +86,15 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
-        bc2_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        bc2_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        bc2_ser.port = self.arm_port
+        bc2_ser.port = share.port('030451', 'ARM')
         # Console driver
         self['bc2'] = console.Console(bc2_ser)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = self.ble_port
+        ble_ser.port = share.port('030451', 'BLE')
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

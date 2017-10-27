@@ -34,16 +34,15 @@ class TRSRFMInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
-                    (sen['sernum'], ('A1526040123', )),
+                    (sen['sernum'], 'A1526040123'),
                     (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
                     (sen['3v3'], 3.30),
                     ),
                 'TestArm': (
-                    (sen['red'], (3.1, 0.5, 3.1)),
-                    (sen['green'], (3.1, 0.0, 3.1)),
-                    (sen['blue'], (1.6, 0.25, 3.1)),
-                    (sen['arm_SwVer'], trsrfm.initial.Initial.arm_version),
-                    (sen['arm_Fault'], 0),
+                    (sen['red'], (3.1, 0.5, 3.1, )),
+                    (sen['green'], (3.1, 0.0, 3.1, )),
+                    (sen['blue'], (3.1, 0.25, 3.1, )),
+                    (sen['arm_SwVer'], trsrfm.config.SW_VERSION),
                     ),
                 'Bluetooth': (
                     (sen['arm_BtMAC'], self.btmac),

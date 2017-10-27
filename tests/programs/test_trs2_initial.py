@@ -34,7 +34,7 @@ class TRSInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
-                    (sen['sernum'], ('A1526040123', )),
+                    (sen['sernum'], 'A1526040123'),
                     (sen['tstpin_cover'], 0.0),
                     (sen['vin'], 12.0),
                     (sen['3v3'], 3.30),
@@ -46,7 +46,7 @@ class TRSInitial(ProgramTestCase):
                     (sen['red'], (0.0, 1.8, 0.0)),
                     (sen['green'], (0.0, 2.5, 0.0)),
                     (sen['blue'], (0.0, 2.8, 0.0)),
-                    (sen['arm_SwVer'], (trs2.Initial.arm_version, )),
+                    (sen['arm_SwVer'], trs2.config.SW_VERSION),
                     (sen['arm_Fault'], 0),
                     ),
                 'Calibrate': (

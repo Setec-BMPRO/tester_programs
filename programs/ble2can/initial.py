@@ -10,27 +10,22 @@ from tester import (
     )
 import share
 from . import console
+from . import config
+
 
 class Initial(share.TestSequence):
 
     """BLE2CAN Initial Test Program."""
 
-    arm_version = '1.2.14549.989'
-    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_ver = (5, 0, 'B')
     # Injected Vbatt
     vbatt = 12.0
-    #Manual override parameters
-    force_on = 2
-    force_off = 1
-    normal = 0
     # Test limits
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
         LimitLow('TestPinCover', 0.5),
         LimitRegExp('ARM-SwVer',
-            '^{}$'.format(arm_version.replace('.', r'\.'))),
+            '^{}$'.format(config.SW_VERSION.replace('.', r'\.'))),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
         LimitBoolean('DetectBT', True),
         )
@@ -59,15 +54,10 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
-        """Test the operation of BLE2CAN."""
+        """Test operation."""
         ble2can = dev['ble2can']
         ble2can.open()
-        dev['rla_reset'].pulse(0.1)
-        ble2can.action(None, delay=5.0, expected=2)  # Flush banner
-        ble2can['HW_VER'] = self.hw_ver
-        ble2can['SER_ID'] = self.sernum
-        ble2can['NVDEFAULT'] = True
-        ble2can['NVWRITE'] = True
+        ble2can.brand(config.HW_VERSION, self.sernum)
         mes['arm_swver']()
 
     @share.teststep
@@ -90,9 +80,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Test fixture item number
-    fixture = '030451'
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -107,15 +94,15 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
-        ble2can_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        ble2can_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        ble2can_ser.port = share.port(self.fixture, 'ARM')
+        ble2can_ser.port = share.port('030451', 'ARM')
         # Console driver
         self['ble2can'] = console.Console(ble2can_ser)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port(self.fixture, 'BLE')
+        ble_ser.port = share.port('030451', 'BLE')
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

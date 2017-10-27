@@ -34,12 +34,12 @@ class BLE2CANInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
-                    (sen['sernum'], ('A1526040123', )),
+                    (sen['sernum'], 'A1526040123'),
                     (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
                     (sen['3v3'], 3.30),
                     ),
                 'TestArm': (
-                    (sen['arm_swver'], ble2can.initial.Initial.arm_version),
+                    (sen['arm_swver'], ble2can.config.SW_VERSION),
                     ),
                 'Bluetooth': (
                     (sen['btmac'], self.btmac),
