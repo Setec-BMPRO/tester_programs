@@ -133,7 +133,7 @@ class Initial(share.TestSequence):
             password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
             with open(self.msp_password, 'w') as fout:
                 fout.write(password)
-        except share.console.protocol.ConsoleError:
+        except share.ConsoleError:
             pass
         finally:
             msp.measurement_fail_on_error = True

@@ -6,12 +6,12 @@ import time
 import share
 
 # Some easier to use short names
-Sensor = share.console.Sensor
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-ParameterCalibration = share.console.ParameterCalibration
-ParameterHex = share.console.ParameterHex
+Sensor = share.Sensor
+ParameterString = share.ParameterString
+ParameterBoolean = share.ParameterBoolean
+ParameterFloat = share.ParameterFloat
+ParameterCalibration = share.ParameterCalibration
+ParameterHex = share.ParameterHex
 
 
 class _Console():
@@ -249,12 +249,12 @@ class _Console():
         self['STATUS'] = value
 
 
-class DirectConsole(_Console, share.console.BadUartConsole):
+class DirectConsole(_Console, share.BadUartConsole):
 
     """Console for a direct connection to a BP35."""
 
 
-class TunnelConsole(_Console, share.console.BaseConsole):
+class TunnelConsole(_Console, share.BaseConsole):
 
     """Console for a CAN tunneled connection to a BP35.
 

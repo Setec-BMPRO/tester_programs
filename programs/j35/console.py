@@ -6,15 +6,15 @@ import time
 import share
 
 # Some easier to use short names
-Sensor = share.console.Sensor
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-ParameterCalibration = share.console.ParameterCalibration
-ParameterHex = share.console.ParameterHex
+Sensor = share.Sensor
+ParameterString = share.ParameterString
+ParameterBoolean = share.ParameterBoolean
+ParameterFloat = share.ParameterFloat
+ParameterCalibration = share.ParameterCalibration
+ParameterHex = share.ParameterHex
 
 
-class Console(share.console.BadUartConsole):
+class Console(share.BadUartConsole):
 
     """Communications to J35 console."""
 

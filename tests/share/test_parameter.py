@@ -56,7 +56,7 @@ class ParameterBoolean(unittest.TestCase):
     def test_6_wr_invalid(self):
         """Invalid data values."""
         for val in (1, 'x', '1', ''):
-            with self.assertRaises(share.console.ParameterError):
+            with self.assertRaises(share.ParameterError):
                 self.param.write(val, self.func)
 
 
@@ -183,7 +183,7 @@ class ParameterCAN(unittest.TestCase):
 
     def test_2_wr_cmd(self):
         """Write command."""
-        with self.assertRaises(share.console.ParameterError):
+        with self.assertRaises(share.ParameterError):
             self.param.write('x', self.func)
 
 
@@ -206,5 +206,5 @@ class ParameterRaw(unittest.TestCase):
 
     def test_2_wr_cmd(self):
         """Write command."""
-        with self.assertRaises(share.console.ParameterError):
+        with self.assertRaises(share.ParameterError):
             self.param.write('x', self.func)

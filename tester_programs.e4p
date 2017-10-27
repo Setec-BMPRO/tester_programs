@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-10-20, 15:10:29 -->
+<!-- Saved: 2017-10-27, 14:02:59 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -149,6 +149,7 @@
     <Source>share/console/_base.py</Source>
     <Source>share/console/can_tunnel.py</Source>
     <Source>share/console/protocol.py</Source>
+    <Source>share/console/samb11.py</Source>
     <Source>share/fixture.py</Source>
     <Source>share/programmer.py</Source>
     <Source>share/testsequence.py</Source>
