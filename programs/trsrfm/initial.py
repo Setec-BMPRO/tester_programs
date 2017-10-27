@@ -5,7 +5,8 @@
 import serial
 import tester
 from tester import (
-    TestStep, LimitLow, LimitHigh, LimitDelta, LimitBoolean, LimitRegExp
+    TestStep,
+    LimitLow, LimitHigh, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
     )
 import share
 from . import console
@@ -16,7 +17,7 @@ class Initial(share.TestSequence):
 
     """TRSRFM Initial Test Program."""
 
-    arm_version = '1.2.14549.989'
+    arm_version = '1.0.16546.2195'
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
     hw_ver = (5, 0, 'B')
     # Injected Vbatt
@@ -24,13 +25,13 @@ class Initial(share.TestSequence):
     # Test limits
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
-        LimitDelta('3V3', 3.3, 0.25, doc='3V3 present'),
+        LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
         LimitHigh('RedLedOff', 3.1, doc='Led off'),
         LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
         LimitHigh('GreenLedOff', 3.1, doc='Led off'),
-        LimitLow('GreenLedOn', 0.14, doc='Led on'),
+        LimitLow('GreenLedOn', 0.2, doc='Led on'),
         LimitHigh('BlueLedOff', 3.1, doc='Led off'),
-        LimitDelta('BlueLedOn', 0.25, 0.1, doc='Led on'),
+        LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(arm_version.replace('.', r'\.')),
@@ -59,7 +60,8 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
-        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+#        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        self.sernum = 'A0000000000'
         mes['dmm_tstpincov'](timeout=5)
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
@@ -71,7 +73,9 @@ class Initial(share.TestSequence):
         trsrfm.open()
         trsrfm.brand(self.hw_ver, self.sernum)
         self.measure(
-            ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
+            ('arm_swver',
+#            'arm_fltcode',
+            'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)
         trsrfm.override(Override.force_on)
         self.measure(
@@ -84,13 +88,19 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(self.vbatt, delay=15.0)
+        import time
+        time.sleep(10)
         btmac = mes['arm_btmac']().reading1
+        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
+        trsrfm = dev['trsrfm']
+        trsrfm['BLUETOOTH'] = Override.force_on
+        time.sleep(2)
         reply = ble.scan(btmac)
         ble.close()
+        trsrfm['BLUETOOTH'] = Override.force_off
+        self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
 
@@ -112,7 +122,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
-        trsrfm_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
         trsrfm_ser.port = share.port('030451', 'ARM')
         # Console driver
