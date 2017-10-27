@@ -35,7 +35,6 @@ class Initial(share.TestSequence):
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(arm_version.replace('.', r'\.')),
             doc='Software version'),
-        LimitLow('ARM-FaultCode', 0, doc='No error'),
         LimitRegExp('BtMac', r'^[0-9A-F]{12}$', doc='Valid MAC address'),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
@@ -59,8 +58,7 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
-#        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        self.sernum = 'A0000000000'
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         mes['dmm_tstpincov'](timeout=5)
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
@@ -72,9 +70,7 @@ class Initial(share.TestSequence):
         trsrfm.open()
         trsrfm.brand(self.hw_ver, self.sernum)
         self.measure(
-            ('arm_swver',
-#            'arm_fltcode',
-            'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
+            ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)
         trsrfm.override(share.Override.force_on)
         self.measure(
@@ -87,18 +83,12 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        import time
-        time.sleep(10)
         btmac = mes['arm_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
-        trsrfm = dev['trsrfm']
-        trsrfm['BLUETOOTH'] = share.Override.force_on
-        time.sleep(2)
         reply = ble.scan(btmac)
         ble.close()
-        trsrfm['BLUETOOTH'] = share.Override.force_off
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
@@ -175,8 +165,6 @@ class Sensors(share.Sensors):
             ):
             self[name] = console.Sensor(
                 trsrfm, cmdkey, rdgtype=sensor.ReadingString)
-        self['arm_Fault'] = console.Sensor(trsrfm, 'FAULT_CODE')
-        self['arm_Fault'].units = '0/1'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trsrfm_initial', 'msgSnEntry'),
             caption=tester.translate('trsrfm_initial', 'capSnEntry'))
@@ -203,6 +191,5 @@ class Measurements(share.Measurements):
             ('arm_btmac', 'BtMac', 'arm_BtMAC', 'MAC address'),
             ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
             ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
-            ('arm_fltcode', 'ARM-FaultCode', 'arm_Fault', 'Fault code'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ))
