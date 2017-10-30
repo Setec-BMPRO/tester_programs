@@ -39,10 +39,13 @@ class BLE2CANInitial(ProgramTestCase):
                     (sen['3v3'], 3.30),
                     ),
                 'TestArm': (
-                    (sen['arm_swver'], ble2can.config.SW_VERSION),
+                    (sen['red'], (3.1, 0.5, 3.1, )),
+                    (sen['green'], (3.1, 0.0, 3.1, )),
+                    (sen['blue'], (3.1, 0.25, 3.1, )),
+                    (sen['arm_SwVer'], ble2can.config.SW_VERSION),
                     ),
                 'Bluetooth': (
-                    (sen['btmac'], self.btmac),
+                    (sen['arm_BtMAC'], self.btmac),
                     ),
                 },
             }
@@ -50,7 +53,6 @@ class BLE2CANInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(7, len(result.readings))
+        self.assertEqual(16, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'TestArm', 'Bluetooth'],
-            self.tester.ut_steps)
+            ['Prepare', 'TestArm', 'Bluetooth'], self.tester.ut_steps)
