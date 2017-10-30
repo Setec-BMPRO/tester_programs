@@ -27,7 +27,7 @@ class Final(share.TestSequence):
         LimitBetween('24Vfl', 21.596, 26.663),
         LimitLow('PwrGood', 0.5),
         LimitDelta('AcFail', 5.0, 0.5),
-        LimitBetween('Reg12V', 0.5, 5.0),
+        LimitBetween('Reg12V', 0.2, 5.0),
         LimitBetween('Reg24V', 0.2, 5.0),
         )
 
