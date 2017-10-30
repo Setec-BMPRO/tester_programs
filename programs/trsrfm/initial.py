@@ -80,6 +80,10 @@ class Initial(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         btmac = mes['arm_btmac']().reading1
+        dev['dcs_vin'].output(0.0, True, delay=1.0)
+        dev['rla_pair_btn'].set_on()
+        dev['dcs_vin'].output(self.vbatt, True, delay=7.0)
+        dev['rla_pair_btn'].set_off()
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
@@ -104,6 +108,7 @@ class Devices(share.Devices):
                 ('dcs_cover', tester.DCSource, 'DCS5'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_wdog', tester.Relay, 'RLA2'),
+                ('rla_pair_btn', tester.Relay, 'RLA8'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
@@ -127,7 +132,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         for dev in ('dcs_vin', ):
             self[dev].output(0.0, False)
-        for rla in ('rla_reset', 'rla_wdog'):
+        for rla in ('rla_reset', 'rla_wdog', 'rla_pair_btn'):
             self[rla].set_off()
 
 
