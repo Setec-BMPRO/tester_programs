@@ -6,7 +6,7 @@ import serial
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitDelta, LimitBoolean, LimitRegExp
+    LimitLow, LimitHigh, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
     )
 import share
 from . import console
@@ -21,13 +21,20 @@ class Initial(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', 12.0, 0.5),
-        LimitDelta('3V3', 3.3, 0.25),
-        LimitLow('TestPinCover', 0.5),
+        LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
+        LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
+        LimitHigh('RedLedOff', 3.1, doc='Led off'),
+        LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
+        LimitHigh('GreenLedOff', 3.1, doc='Led off'),
+        LimitLow('GreenLedOn', 0.2, doc='Led on'),
+        LimitHigh('BlueLedOff', 3.1, doc='Led off'),
+        LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
+        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
-            '^{}$'.format(config.SW_VERSION.replace('.', r'\.'))),
-        LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
-        LimitBoolean('DetectBT', True),
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            doc='Software version'),
+        LimitRegExp('BtMac', r'^[0-9A-F]{12}$', doc='Valid MAC address'),
+        LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
 
     def open(self):
@@ -58,14 +65,25 @@ class Initial(share.TestSequence):
         ble2can = dev['ble2can']
         ble2can.open()
         ble2can.brand(config.HW_VERSION, self.sernum)
-        mes['arm_swver']()
+        self.measure(
+            ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
+            timeout=5)
+        ble2can.override(share.Override.force_on)
+        self.measure(
+            ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
+        ble2can.override(share.Override.force_off)
+        self.measure(
+            ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
+        ble2can.override(share.Override.normal)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(self.vbatt, delay=15.0)
-        btmac = mes['ble2can_btmac']().reading1
+        btmac = mes['arm_btmac']().reading1
+        dev['dcs_vin'].output(0.0, True, delay=3.0)
+        dev['rla_pair_btn'].set_on(delay=0.1)
+        dev['dcs_vin'].output(self.vbatt, True, delay=5.0)
+        dev['rla_pair_btn'].set_off()
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
@@ -90,7 +108,7 @@ class Devices(share.Devices):
                 ('dcs_cover', tester.DCSource, 'DCS5'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_wdog', tester.Relay, 'RLA2'),
-                ('rla_pin', tester.Relay, 'RLA3'),
+                ('rla_pair_btn', tester.Relay, 'RLA8'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the console
@@ -112,9 +130,9 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        for dev in ('dcs_vin', ):
-            self[dev].output(0.0, False)
-        for rla in ('rla_reset', 'rla_wdog', 'rla_pin'):
+        self['ble2can'].close()
+        self['dcs_vin'].output(0.0, False)
+        for rla in ('rla_reset', 'rla_wdog', 'rla_pair_btn'):
             self[rla].set_off()
 
 
@@ -127,19 +145,31 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'].doc = 'X1/X2'
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['3v3'].doc = 'U4 output'
+        self['red'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
+        self['red'].doc = 'Led cathode'
+        self['green'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
+        self['green'].doc = 'Led cathode'
+        self['blue'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01)
+        self['blue'].doc = 'Led cathode'
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
+        self['tstpin_cover'].doc = 'Photo sensor'
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         ble2can = self.devices['ble2can']
-        self['btmac'] = console.Sensor(
-            ble2can, 'BT_MAC', rdgtype=sensor.ReadingString)
+        for name, cmdkey in (
+                ('arm_BtMAC', 'BT_MAC'),
+                ('arm_SwVer', 'SW_VER'),
+            ):
+            self[name] = console.Sensor(
+                ble2can, cmdkey, rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('ble2can_initial', 'msgSnEntry'),
             caption=tester.translate('ble2can_initial', 'capSnEntry'))
-        self['arm_swver'] = console.Sensor(
-            ble2can, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['sernum'].doc = 'Barcode scanner'
 
 
 class Measurements(share.Measurements):
@@ -149,11 +179,18 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', ''),
-            ('dmm_3v3', '3V3', '3v3', ''),
-            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
-            ('detectBT', 'DetectBT', 'mirbt', ''),
-            ('ble2can_btmac', 'BtMac', 'btmac', ''),
-            ('ui_sernum', 'SerNum', 'sernum', ''),
-            ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
+            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
+            ('dmm_redoff', 'RedLedOff', 'red', 'Red led off'),
+            ('dmm_redon', 'RedLedOn', 'red', 'Red led on'),
+            ('dmm_greenoff', 'GreenLedOff', 'green', 'Green led off'),
+            ('dmm_greenon', 'GreenLedOn', 'green', 'Green led on'),
+            ('dmm_blueoff', 'BlueLedOff', 'blue', 'Blue led off'),
+            ('dmm_blueon', 'BlueLedOn', 'blue', 'Blue led on'),
+            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
+                'Cover over BC2 test pins'),
+            ('arm_btmac', 'BtMac', 'arm_BtMAC', 'MAC address'),
+            ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
+            ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ))
