@@ -80,9 +80,9 @@ class Initial(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         btmac = mes['arm_btmac']().reading1
-        dev['dcs_vin'].output(0.0, True, delay=1.0)
-        dev['rla_pair_btn'].set_on()
-        dev['dcs_vin'].output(self.vbatt, True, delay=7.0)
+        dev['dcs_vin'].output(0.0, True, delay=3.0)
+        dev['rla_pair_btn'].set_on(delay=0.1)
+        dev['dcs_vin'].output(self.vbatt, True, delay=5.0)
         dev['rla_pair_btn'].set_off()
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
