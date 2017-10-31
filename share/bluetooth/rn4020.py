@@ -24,6 +24,7 @@ The module will now remember these settings in NV Memory.
 
 """
 
+import threading
 import logging
 
 
@@ -67,17 +68,21 @@ class BleRadio():
         self._logger.debug('Close')
         self.port.close()
 
-    def scan(self, btmac):
+    def scan(self, btmac, timeout=30):
         """Scan for bluetooth device with 'btmac' MAC address.
 
         @param btmac Bluetooth MAC address to find
+        @param timeout Timeout in sec for the scan
         @returns True if found, else False
 
         """
         self._log('Scanning for MAC {0}'.format(btmac))
+        timeup = threading.Event()
+        timer = threading.timer(timeout, timeup.set)
+        timer.start()
         self._cmdresp(self.cmd_scan_start)
         found = False
-        for _ in range(0, 10):
+        while not found and not timeup.is_set():
             try:
                 # Scan responses look like this:
                 #   001EC025B69B,0,,534554454320434E3130310000000000,-53
@@ -87,8 +92,8 @@ class BleRadio():
                 continue
             data = line.split(sep=',')  # CSV formatted response
             if data[0] == btmac:
+                timer.cancel()
                 found = True
-                break
         self._cmdresp(self.cmd_scan_stop)
         return found
 
