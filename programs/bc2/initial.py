@@ -92,7 +92,7 @@ class Devices(share.Devices):
         # Console driver
         self['bc2'] = console.Console(bc2_ser)
         # Serial connection to the BLE module
-        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
+        ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = share.port('030451', 'BLE')
         self['ble'] = share.BleRadio(ble_ser)

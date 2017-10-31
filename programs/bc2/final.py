@@ -68,7 +68,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial connection to the BLE module
-        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
+        ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = self.ble_port
         self['ble'] = share.BleRadio(ble_ser)
