@@ -60,7 +60,7 @@ class Final(share.TestSequence):
         LimitDelta('SetMonErr', 0, _ldd_6_error_limits),
         LimitDelta('SetOutErr', 0, _ldd_6_error_limits),
         LimitDelta('MonOutErr', 0, _ldd_6_error_limits),
-        LimitRegExp('HwRev', r'^[0-9]{2}[AB]$'),
+        LimitRegExp('HwRev', r'^[0-9]{2}[A-D]$'),
         )
 
     def open(self):
