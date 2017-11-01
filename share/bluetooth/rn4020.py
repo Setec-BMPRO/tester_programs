@@ -78,7 +78,7 @@ class BleRadio():
         """
         self._log('Scanning for MAC {0}'.format(btmac))
         timeup = threading.Event()
-        timer = threading.timer(timeout, timeup.set)
+        timer = threading.Timer(timeout, timeup.set)
         timer.start()
         self._cmdresp(self.cmd_scan_start)
         found = False
