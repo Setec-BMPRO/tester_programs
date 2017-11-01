@@ -24,7 +24,7 @@ class Initial(share.TestSequence):
         LimitDelta('Shunt', 50.0, 100.0),
         LimitRegExp('ARM-SwVer',
             '^{}$'.format(config.SW_VERSION.replace('.', r'\.'))),
-        LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
+        LimitRegExp('BtMac', share.BluetoothMAC.line_regex),
         LimitBoolean('DetectBT', True),
         )
 

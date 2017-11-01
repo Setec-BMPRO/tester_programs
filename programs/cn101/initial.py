@@ -35,7 +35,7 @@ class Initial(share.TestSequence):
         LimitRegExp('CAN_RX', r'^RRQ,32,0'),
         LimitInteger('CAN_BIND', can_bind),
         LimitRegExp('SwVer', '^{}$'.format(arm_version.replace('.', r'\.'))),
-        LimitRegExp('BtMac', r'^[0-F]{12}$'),
+        LimitRegExp('BtMac', share.BluetoothMAC.line_regex),
         LimitBoolean('DetectBT', True),
         LimitInteger('Tank', 5),
         )

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-10-27, 16:28:16 -->
+<!-- Saved: 2017-11-02, 10:39:29 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -147,6 +147,7 @@
     <Source>programs/wtsi200/initial/worker.py</Source>
     <Source>share/__init__.py</Source>
     <Source>share/bluetooth/__init__.py</Source>
+    <Source>share/bluetooth/_base.py</Source>
     <Source>share/bluetooth/eunistone_pan1322.py</Source>
     <Source>share/bluetooth/rn4020.py</Source>
     <Source>share/console/__init__.py</Source>

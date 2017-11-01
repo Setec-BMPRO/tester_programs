@@ -26,6 +26,7 @@ The module will now remember these settings in NV Memory.
 
 import threading
 import logging
+from ._base import BluetoothError
 
 
 class BleRadio():
@@ -59,7 +60,7 @@ class BleRadio():
         # Remove 'CMD' response and other rubbish characters at power up.
         try:
             self._cmdresp('')
-        except BleError as err:
+        except BluetoothError as err:
             self._log('Received: {0}'.format(err))
         self._cmdresp(self.cmd_ver)
 
@@ -88,7 +89,7 @@ class BleRadio():
                 #   001EC025B69B,0,,534554454320434E3130310000000000,-53
                 line = self._readline()
                 self._log('<--- {0!r}'.format(line))
-            except BleError:
+            except BluetoothError:
                 continue
             data = line.split(sep=',')  # CSV formatted response
             if data[0] == btmac:
@@ -106,7 +107,7 @@ class BleRadio():
 
         @param cmd Command to send
         @return Response from the command
-        @raises BleError upon error.
+        @raises BluetoothError upon error.
 
         """
         self.port.flushInput()
@@ -121,7 +122,8 @@ class BleRadio():
             expect = None
         if expect:
             if reply[:len(expect)] != expect:
-                raise BleError('Expected {0}, got {1}'.format(expect, reply))
+                raise BluetoothError(
+                    'Expected {0}, got {1}'.format(expect, reply))
         return reply
 
     def _readline(self):
@@ -132,10 +134,5 @@ class BleRadio():
         """
         line = self.port.readline().decode(errors='ignore')
         if len(line) == 0:
-            raise BleError('No response')
+            raise BluetoothError('No response')
         return line.replace('\r\n', '')
-
-
-class BleError(Exception):
-
-    """BLE communications error."""

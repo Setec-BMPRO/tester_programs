@@ -58,7 +58,8 @@ class Initial(share.TestSequence):
         LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82,
             doc='Brake current flowing'),
         LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
-        LimitRegExp('BtMac', '^[0-9A-F]{12}$', doc='Valid MAC address '),
+        LimitRegExp('BtMac', share.BluetoothMAC.line_regex,
+            doc='Valid MAC address '),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
 

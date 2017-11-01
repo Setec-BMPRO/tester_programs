@@ -18,7 +18,7 @@ class Final(share.TestSequence):
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('Shunt', 50.0, 100.0),
-        LimitRegExp('BtMac', r'^[0-9A-F]{12}$'),
+        LimitRegExp('BtMac', share.BluetoothMAC.line_regex),
         LimitBoolean('DetectBT', True),
         )
 

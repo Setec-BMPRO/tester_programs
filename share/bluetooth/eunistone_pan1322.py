@@ -10,6 +10,7 @@ import logging
 import time
 import re
 import json
+from ._base import BluetoothError, BluetoothMAC
 
 
 class BtRadio():
@@ -52,10 +53,10 @@ class BtRadio():
                 self._cmdresp('AT+JRES')    # reset
                 self._cmdresp('AT+JSEC=4,1,04,1111,2,1')    # security mode
                 return
-            except BtError:
+            except BluetoothError:
                 time.sleep(2)
                 continue
-        raise BtError('Unable to reset radio')
+        raise BluetoothError('Unable to reset radio')
 
     def close(self):
         """Close serial communications with BT Radio."""
@@ -79,7 +80,7 @@ class BtRadio():
     def _cmdresp(self, cmd):
         """Send a command to the modem and process the response.
 
-        @raises BtError upon error.
+        @raises BluetoothError upon error.
 
         """
         self.port.flushInput()
@@ -96,12 +97,12 @@ class BtRadio():
         # Request for firmware version returns only simple integer
         if cmd == 'AT+JRRI':
             if not re.search('^[0-9]+$', line):
-                raise BtError('Unknown firmware version response')
+                raise BluetoothError('Unknown firmware version response')
         else:
             # Other requests return OK,
             #  or ROK if AT+JRES and after hardware reset
             if not re.search('^R?OK$', line):
-                raise BtError('OK response not received')
+                raise BluetoothError('OK response not received')
 
     @classmethod
     def _pin_calculate(cls, sernum):
@@ -111,7 +112,7 @@ class BtRadio():
 
         """
         if len(sernum) != 11:
-            raise BtError('Serial number must be 11 characters')
+            raise BluetoothError('Serial number must be 11 characters')
         pin = cls.hash_start
         for char in sernum:
             pin = ((pin * cls.hash_mult) & 0xFFFF) ^ ord(char)
@@ -129,10 +130,10 @@ class BtRadio():
             try:
                 self._cmdresp('AT+JDDS=0')  # start device scan
                 break
-            except BtError:
+            except BluetoothError:
                 continue
         if retry == max_try - 1:
-            raise BtError('Cannot start device scan')
+            raise BluetoothError('Cannot start device scan')
         # Read responses until completed.
         for _ in range(0, 20):
             line = self._readline()
@@ -142,7 +143,9 @@ class BtRadio():
             if line == '+RDDSCNF=0':   # no more responses
                 break
             match = re.search(
-                '^\+RDDSRES=([0-9A-F]{12}),BCheck ([^,]*),.*', line)
+                '^\+RDDSRES=({0}),BCheck ([^,]*),.*'.format(
+                    BluetoothMAC.regex),
+                line)
             if match:
                 data = match.groups()
                 if len(data) >= 2:
@@ -155,7 +158,7 @@ class BtRadio():
     def pair(self):
         """Pair with the device previously found by a scan.
 
-        @raises BtError upon failure to pair.
+        @raises BluetoothError upon failure to pair.
 
         """
         self._log('Pairing with mac {0}'.format(self._mac))
@@ -192,7 +195,7 @@ class BtRadio():
                     return
                 self._log('Pairing failed.')
                 continue
-        raise BtError('Unable to pair with device')
+        raise BluetoothError('Unable to pair with device')
 
     def unpair(self):
         """Unpair with bluetooth device.
@@ -211,7 +214,7 @@ class BtRadio():
             if line == '+RDII':     # good unpairing response
                 self._log('Now Un-Paired.')
                 return
-        raise BtError('Unpairing timed out')
+        raise BluetoothError('Unpairing timed out')
 
     def data_mode_enter(self):
         """Enter streaming data mode.
@@ -244,7 +247,7 @@ class BtRadio():
 
         """
         if not self._datamode:
-            raise BtError('JSON-RPC requires streaming data mode')
+            raise BluetoothError('JSON-RPC requires streaming data mode')
         if params is None:
             params = {}
         request = {
@@ -257,8 +260,3 @@ class BtRadio():
         response = self._readline()
         self._log('<--- {0!r}'.format(response))
         return json.loads(response)['result']
-
-
-class BtError(Exception):
-
-    """Bluetooth error."""

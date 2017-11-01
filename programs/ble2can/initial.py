@@ -33,7 +33,8 @@ class Initial(share.TestSequence):
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitRegExp('BtMac', r'^[0-9A-F]{12}$', doc='Valid MAC address'),
+        LimitRegExp('BtMac', share.BluetoothMAC.line_regex,
+            doc='Valid MAC address'),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
 
