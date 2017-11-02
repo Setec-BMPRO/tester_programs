@@ -26,8 +26,6 @@ class Initial(share.TestSequence):
     arm_file = 'bp35_{0}.bin'.format(config.ARM_SW_VERSION)
     # dsPIC software image file
     pic_file = 'bp35sr_{0}.hex'.format(config.PIC_SW_VERSION)
-    # CAN echo request messages
-    can_echo = 'TQQ,32,0'
     # Injected Vbat & Vaux
     vbat_in = 12.4
     vaux_in = 13.5
@@ -469,7 +467,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['acin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self['acin'].doc = 'Across C101'
         self['vpfc'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
@@ -571,7 +568,6 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('hardware8', 'HwVer8', 'hardware', 'Hardware version'),
-            ('rx_can', 'CAN_RX', 'mir_can', 'CAN received message'),
             ('dmm_lock', 'FixtureLock', 'lock', 'Fixture lid closed'),
             ('dmm_acin', 'ACin', 'acin', 'AC input voltage'),
             ('dmm_vpfc', 'Vpfc', 'vpfc', 'PFC output voltage'),

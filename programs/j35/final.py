@@ -5,7 +5,8 @@
 
 import tester
 import share
-from tester import TestStep, LimitLow, LimitHigh, LimitDelta, LimitPercent
+from . import console
+from . import config
 
 
 class Final(share.TestSequence):
@@ -16,21 +17,27 @@ class Final(share.TestSequence):
     load_per_output = 2.0
     # Test limits common to all versions
     _common = (
-        LimitLow('FanOff', 1.0, doc='No airflow seen'),
-        LimitHigh('FanOn', 10.0, doc='Airflow seen'),
-        LimitDelta('Vout', 12.8, delta=0.2, doc='No load output voltage'),
-        LimitPercent('Vload', 12.8, percent=5, doc='Loaded output voltage'),
-        LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
+        tester.LimitLow('FanOff', 1.0, doc='No airflow seen'),
+        tester.LimitHigh('FanOn', 10.0, doc='Airflow seen'),
+        tester.LimitDelta('Vout', 12.8, delta=0.2,
+            doc='No load output voltage'),
+        tester.LimitPercent('Vload', 12.8, percent=5,
+            doc='Loaded output voltage'),
+        tester.LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
+        tester.LimitRegExp(
+            'ARM-SwVer', '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            doc='Software version'),
         )
     # Test limits common to the -B and -C versions
     limits_bc = (
-        LimitPercent('OCP', 35.0, (4.0, 7.0), doc='OCP trip current'),
+        tester.LimitPercent('OCP', 35.0, (4.0, 7.0), doc='OCP trip current'),
         )
     # Test configuration keyed by program parameter
     limitdata = {
         'A': {
             'Limits': _common + (
-                LimitPercent('OCP', 20.0, (4.0, 10.0), doc='OCP trip current'),
+                tester.LimitPercent(
+                    'OCP', 20.0, (4.0, 10.0), doc='OCP trip current'),
                 ),
             'LoadCount': 7,
             },
@@ -50,21 +57,34 @@ class Final(share.TestSequence):
             self.limitdata[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('Load', self._step_load),
-            TestStep('OCP', self._step_ocp),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('CAN', self._step_can),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
             )
         self.load_count = self.limitdata[self.parameter]['LoadCount']
 
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac and measure output voltage."""
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
         mes['dmm_fanon'](timeout=15)
         for load in range(self.load_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vouts'][load](timeout=5)
+
+    @share.teststep
+    def _step_can(self, dev, mes):
+        """Access the unit console using the CAN bus."""
+        j35 = dev['j35']
+        j35.open()
+        mes['arm_swver']()
+        # Set unit internal Serial Number to match the outside label
+        j35['SER_ID'] = self.sernum
+        j35['NVWRITE'] = True
+        j35.close()
 
     @share.teststep
     def _step_load(self, dev, mes):
@@ -79,6 +99,8 @@ class Final(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         mes['ramp_ocp'](timeout=5)
+        dev['acsource'].reset()
+        mes['ui_notifycable']()
 
 
 class Devices(share.Devices):
@@ -98,6 +120,9 @@ class Devices(share.Devices):
                  'Load shared by all outputs'),
             ):
             self[name] = devtype(self.physical_devices[phydevname], doc)
+        tunnel = share.ConsoleCanTunnel(
+            self.physical_devices['CAN'], config.CAN_ID)
+        self['j35'] = console.TunnelConsole(tunnel)
         self['dcs_photo'].output(12.0, True)
         self.add_closer(lambda: self['dcs_photo'].output(0.0, False))
 
@@ -106,6 +131,7 @@ class Devices(share.Devices):
         self['acsource'].reset()
         self['dcl_out'].output(15.0, delay=2)
         self['dcl_out'].output(0.0, False)
+        self['j35'].close()
 
 
 class Sensors(share.Sensors):
@@ -132,6 +158,17 @@ class Sensors(share.Sensors):
             start=low - 1, stop=high + 1, step=0.1, delay=0.1)
         self['ocp'].doc = 'OCP trip value'
         self['ocp'].units = 'Adc'
+        j35 = self.devices['j35']
+        self['arm_swver'] = console.Sensor(
+            j35, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['notifycable'] = sensor.Notify(
+            message=tester.translate('j35_final', 'PullCableOut'),
+            caption=tester.translate('j35_final', 'capCableOut'))
+        self['notifycable'].doc = 'Tester operator'
+        self['sernum'] = sensor.DataEntry(
+            message=tester.translate('j35_final', 'msgSnEntry'),
+            caption=tester.translate('j35_final', 'capSnEntry'))
+        self['sernum'].doc = 'Barcode scanner'
 
 
 class Measurements(share.Measurements):
@@ -141,9 +178,12 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurement instances."""
         self.create_from_names((
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('dmm_fanoff', 'FanOff', 'photo', 'Fan not running'),
             ('dmm_fanon', 'FanOn', 'photo', 'Fan running'),
             ('ramp_ocp', 'OCP', 'ocp', 'Output OCP'),
+            ('arm_swver', 'ARM-SwVer', 'arm_swver', 'Unit software version'),
+            ('ui_notifycable', 'Notify', 'notifycable', 'CAN cable removed'),
             ))
         # Generate load measurements
         vouts = []

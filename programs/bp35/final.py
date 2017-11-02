@@ -48,6 +48,7 @@ class Final(share.TestSequence):
         bp35['SER_ID'] = self.sernum
         bp35['NVWRITE'] = True
         bp35.close()
+        dev['acsource'].reset()
         mes['ui_notifycable']()
 
 class Devices(share.Devices):

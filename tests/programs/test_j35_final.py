@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for J35C Final Test program."""
 
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
@@ -14,7 +15,20 @@ class _J35Final(ProgramTestCase):
     """J35 Final program base test suite."""
 
     prog_class = j35.Final
+    sernum = 'A1626010123'
     parameter = None
+
+    def setUp(self):
+        """Per-Test setup."""
+        for target in (
+                'serial.Serial',
+                'share.ConsoleCanTunnel',
+                'programs.j35.console.TunnelConsole',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
+        super().setUp()
 
     def _dmm_loads(self, value):
         """Fill all DMM Load sensors with a value."""
@@ -27,12 +41,23 @@ class _J35Final(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': ((sen['photo'], (0.0, 12.0)), ),
-                'OCP': ((sen['vloads'][0], (12.7, ) * 20 + (11.0, ), ), ),
+                'PowerUp': (
+                    (sen['photo'], (0.0, 12.0)),
+                    (sen['sernum'], self.sernum),
+                    ),
+                'OCP': (
+                    (sen['vloads'][0], (12.7, ) * 20 + (11.0, ), ),
+                    ),
+                'CAN': (
+                    (sen['arm_swver'], j35.config.SW_VERSION),
+                    (sen['notifycable'], True),
+                    ),
                 },
             UnitTester.key_call: {      # Callables
-                'PowerUp': (self._dmm_loads, 12.7),
-                'Load': (self._dmm_loads, 12.7),
+                'PowerUp':
+                    (self._dmm_loads, 12.7),
+                'Load':
+                    (self._dmm_loads, 12.7),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
@@ -40,7 +65,8 @@ class _J35Final(ProgramTestCase):
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
         self.assertEqual(rdg_count, len(result.readings))
-        self.assertEqual(['PowerUp', 'Load', 'OCP'], self.tester.ut_steps)
+        self.assertEqual(
+            ['PowerUp', 'CAN', 'Load', 'OCP'], self.tester.ut_steps)
 
 
 class J35_A_Final(_J35Final):
@@ -52,7 +78,7 @@ class J35_A_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the A program."""
-        super()._pass_run(17)
+        super()._pass_run(20)
 
 
 class J35_B_Final(_J35Final):
@@ -64,7 +90,7 @@ class J35_B_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the B program."""
-        super()._pass_run(31)
+        super()._pass_run(34)
 
 
 class J35_C_Final(_J35Final):
@@ -76,4 +102,4 @@ class J35_C_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the C program."""
-        super()._pass_run(31)
+        super()._pass_run(34)

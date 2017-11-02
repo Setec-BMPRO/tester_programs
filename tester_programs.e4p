@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-11-02, 10:39:29 -->
+<!-- Saved: 2017-11-02, 15:30:29 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -90,6 +90,7 @@
     <Source>programs/ids500/initial_micro.py</Source>
     <Source>programs/ids500/initial_syn.py</Source>
     <Source>programs/j35/__init__.py</Source>
+    <Source>programs/j35/config.py</Source>
     <Source>programs/j35/console.py</Source>
     <Source>programs/j35/final.py</Source>
     <Source>programs/j35/initial.py</Source>

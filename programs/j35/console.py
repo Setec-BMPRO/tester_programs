@@ -14,7 +14,7 @@ ParameterCalibration = share.ParameterCalibration
 ParameterHex = share.ParameterHex
 
 
-class Console(share.BadUartConsole):
+class _Console():
 
     """Communications to J35 console."""
 
@@ -208,3 +208,17 @@ class Console(share.BadUartConsole):
         reply = round(self['STATUS'])
         value = self.can_on | reply if state else self.can_off & reply
         self['STATUS'] = value
+
+
+class DirectConsole(_Console, share.BadUartConsole):
+
+    """Console for a direct connection."""
+
+
+class TunnelConsole(_Console, share.BaseConsole):
+
+    """Console for a CAN tunneled connection.
+
+    The CAN tunnel does not need the BadUartConsole stuff.
+
+    """

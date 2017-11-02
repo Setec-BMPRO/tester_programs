@@ -14,22 +14,15 @@ from tester import (
     )
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
 
     """J35 Initial Test Program."""
 
-    # ARM version
-    arm_version = '1.3.15775.997'
-    # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.port('029242', 'ARM')
     # ARM software image file
-    arm_file = 'j35_{}.bin'.format(arm_version)
-    # CAN echo request messages
-    can_echo = 'TQQ,36,0'
-    # CAN Bus is operational if status bit 28 is set
-    _can_bind = 1 << 28
+    arm_file = 'j35_{}.bin'.format(config.SW_VERSION)
     # Number of outputs of each product version
     output_count_a = 7
     output_count_bc = 14
@@ -79,7 +72,7 @@ class Initial(share.TestSequence):
         LimitDelta('FanOn', vout_set, delta=1.0, doc='Fan running'),
         LimitLow('FanOff', 0.5, doc='Fan not running'),
         LimitRegExp(
-            'ARM-SwVer', '^{}$'.format(arm_version.replace('.', r'\.')),
+            'ARM-SwVer', '^{}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Arm Software version'),
         LimitPercent('ARM-AuxV', aux_solar_inject, percent=2.0, delta=0.3,
             doc='ARM Aux voltage reading'),
@@ -104,7 +97,7 @@ class Initial(share.TestSequence):
             doc='CAN bus power supply'),
         LimitInteger('LOAD_SET', 0x5555555,
             doc='ARM output load enable setting'),
-        LimitInteger('CAN_BIND', _can_bind,
+        LimitInteger('CAN_BIND', 1 << 28,
             doc='ARM reports CAN bus operational'),
         LimitRegExp('CAN_RX', '^RRQ,36,0',
             doc='Response to CAN echo message'),
@@ -128,7 +121,7 @@ class Initial(share.TestSequence):
                     doc='OCP trip range after adjustment'),
                 ),
             'LoadCount': 7,
-            'HwVer': (2, 1, 'A'),
+            'HwVer': (config.HW_VERSION, 1, 'A'),
             'SolarCan': False,
             'Derate': True,
             'OCP': ocp_set_a,
@@ -144,7 +137,7 @@ class Initial(share.TestSequence):
                     doc='OCP trip range after adjustment'),
                 ),
             'LoadCount': 14,
-            'HwVer': (2, 2, 'A'),
+            'HwVer': (config.HW_VERSION, 2, 'A'),
             'SolarCan': False,
             'Derate': False,
             'OCP': ocp_set_bc,
@@ -160,7 +153,7 @@ class Initial(share.TestSequence):
                     doc='OCP trip range after adjustment'),
                 ),
             'LoadCount': 14,
-            'HwVer': (7, 3, 'B'),
+            'HwVer': (config.HW_VERSION, 3, 'A'),
             'SolarCan': True,
             'Derate': False,
             'OCP': ocp_set_bc,
@@ -315,15 +308,10 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         self.measure(('dmm_canpwr', 'arm_can_bind', ), timeout=10)
-        j35 = dev['j35']
-        j35.can_testmode(True)
-        # From here, Command-Response mode is broken by the CAN debug messages!
-        j35['CAN'] = self.can_echo
-        echo_reply = j35.port.readline().decode(errors='ignore')
-        echo_reply = echo_reply.replace('\r\n', '')
-        rx_can = mes['rx_can']
-        rx_can.sensor.store(echo_reply)
-        rx_can.measure()
+        j35tunnel = dev['j35tunnel']
+        j35tunnel.open()
+        mes['TunnelSwVer']()
+        j35tunnel.close()
 
 
 class Devices(share.Devices):
@@ -352,14 +340,21 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.ProgramARM(
-            Initial.arm_port, os.path.join(folder, Initial.arm_file), crpmode=False,
-            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+            share.port('029242', 'ARM'),
+            os.path.join(folder, Initial.arm_file),
+            crpmode=False,
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset'])
         # Serial connection to the console
         j35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        j35_ser.port = Initial.arm_port
+        j35_ser.port = share.port('029242', 'ARM')
         # J35 Console driver
-        self['j35'] = console.Console(j35_ser)
+        self['j35'] = console.DirectConsole(j35_ser)
+        # Tunneled Console driver
+        tunnel = share.ConsoleCanTunnel(
+            self.physical_devices['CAN'], config.CAN_ID)
+        self['j35tunnel'] = console.TunnelConsole(tunnel)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(22.0, output=True, delay=2)
         self.add_closer(lambda: self['dcs_vcom'].output(0, False))
@@ -384,9 +379,7 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
-        j35 = self.devices['j35']
         sensor = tester.sensor
-        self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['olock'] = sensor.Res(dmm, high=17, low=8, rng=10000, res=0.1)
         self['oacin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self['ovbus'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.1)
@@ -404,6 +397,7 @@ class Sensors(share.Sensors):
             caption=tester.translate('j35_initial', 'capSnEntry'))
         # Console sensors
         j35 = self.devices['j35']
+        j35tunnel = self.devices['j35tunnel']
         for name, cmdkey in (
                 ('arm_auxv', 'AUX_V'),
                 ('arm_auxi', 'AUX_I'),
@@ -421,6 +415,8 @@ class Sensors(share.Sensors):
             self[name] = console.Sensor(j35, cmdkey)
         self['arm_swver'] = console.Sensor(
             j35, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['TunnelSwVer'] = console.Sensor(
+            j35tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
         # Generate load current sensors
         load_count = self.limits['LOAD_COUNT'].limit
         self['arm_loads'] = []
@@ -487,10 +483,10 @@ class Measurements(share.Measurements):
             ('arm_fan', 'ARM-Fan', 'arm_fan', ''),
             ('arm_battI', 'ARM-BattI', 'arm_bati', ''),
             ('dmm_canpwr', 'CanPwr', 'ocanpwr', ''),
-            ('rx_can', 'CAN_RX', 'mir_can', ''),
             ('arm_can_bind', 'CAN_BIND', 'arm_canbind', ''),
             ('arm_loadset', 'LOAD_SET', 'arm_loadset', ''),
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', ''),
+            ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
             ))
         # Generate load current measurements
         loads = []
