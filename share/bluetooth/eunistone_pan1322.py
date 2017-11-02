@@ -37,32 +37,31 @@ class BtRadio():
         self._datamode = False   # True for data mode
 
     def open(self):
-        """Open communications with BT Radio.
-
-           Software reset.
-           Enable security.
-
-        """
+        """Open communications with BT Radio."""
         self._logger.debug('Open')
         self.port.rtscts = True
         self.port.open()
         time.sleep(1)
-        self.port.flushInput()
-        for _ in range(0, 5):
-            try:
-                self._cmdresp('AT+JRES')    # reset
-                self._cmdresp('AT+JSEC=4,1,04,1111,2,1')    # security mode
-                return
-            except BluetoothError:
-                time.sleep(2)
-                continue
-        raise BluetoothError('Unable to reset radio')
+        self.reset()
 
     def close(self):
-        """Close serial communications with BT Radio."""
+        """Close communications with BT Radio."""
         self._logger.debug('Close')
         self.port.rtscts = False   # so close() does not hang
         self.port.close()
+
+    def reset(self):
+        """Reset the module."""
+        self._logger.debug('Reset')
+        self.port.flushInput()
+        for _ in range(5):
+            try:
+                self._cmdresp('AT+JRES')                    # Reset
+                self._cmdresp('AT+JSEC=4,1,04,1111,2,1')    # Security mode
+                return
+            except BluetoothError:
+                time.sleep(2)
+        raise BluetoothError('Unable to reset radio')
 
     def _log(self, message):
         """Helper method to Log messages."""
@@ -119,7 +118,7 @@ class BtRadio():
         return '{:04}'.format(pin % 10000)
 
     def scan(self, sernum):
-        """Scan for bluetooth device with 'sernum' name.
+        """Scan for Bluetooth device with 'sernum' name.
 
         @returns True if a match is found, else returns False
 
@@ -251,8 +250,11 @@ class BtRadio():
         if params is None:
             params = {}
         request = {
-            'jsonrpc': '2.0', 'id': 8256,
-            'method': method, 'params': params}
+            'jsonrpc': '2.0',
+            'id': 8256,
+            'method': method,
+            'params': params,
+            }
         cmd = json.dumps(request)
         self._log('JSONRPC request: {0!r}'.format(cmd))
         self.port.flushInput()

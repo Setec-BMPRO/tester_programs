@@ -50,6 +50,7 @@ class Final(share.TestSequence):
         mes['BTscan'].sensor.store(blue.scan(self.sernum))
         mes['BTscan']()
         try:
+            blue.reset()
             blue.pair()
             _paired = True
         except share.BluetoothError:
