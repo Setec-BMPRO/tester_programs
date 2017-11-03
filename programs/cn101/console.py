@@ -17,7 +17,7 @@ class _Console():
     """Base class for a CN101 console."""
 
     # Number of lines in startup banner
-    banner_lines = 2
+    banner_lines = 0
     cmd_data = {
         'UNLOCK': ParameterBoolean(
             '$DEADBEA7 UNLOCK',
