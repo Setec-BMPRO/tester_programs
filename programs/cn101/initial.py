@@ -12,6 +12,7 @@ from tester import (
     )
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
@@ -108,18 +109,12 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_canbus(self, dev, mes):
-        """Test the CAN interface."""
+        """Test the Can Bus."""
         mes['cn101_can_bind'](timeout=10)
-        cn101 = dev['cn101']
-        cn101.can_testmode(True)
-        # From here Command-Response mode is broken by the CAN debug messages!
-        self._logger.debug('CAN Echo Request --> %s', repr(self.can_echo))
-        cn101['CAN'] = self.can_echo
-        echo_reply = cn101.port.readline().decode(errors='ignore')
-        echo_reply = echo_reply.replace('\r\n', '')
-        self._logger.debug('CAN Reply <-- %s', repr(echo_reply))
-        mes['cn101_rx_can'].sensor.store(echo_reply)
-        mes['cn101_rx_can']()
+        cn101tunnel = dev['cn101tunnel']
+        cn101tunnel.open()
+        mes['TunnelSwVer']()
+        cn101tunnel.close()
 
 
 class Devices(share.Devices):
@@ -159,8 +154,12 @@ class Devices(share.Devices):
         cn101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         cn101_ser.port = self.arm_port
-        # Console driver
-        self['cn101'] = console.Console(cn101_ser)
+        # CN101 Console driver
+        self['cn101'] = console.DirectConsole(cn101_ser)
+        # Tunneled Console driver
+        tunnel = share.ConsoleCanTunnel(
+            self.physical_devices['CAN'], config.CAN_ID)
+        self['cn101tunnel'] = console.TunnelConsole(tunnel)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet

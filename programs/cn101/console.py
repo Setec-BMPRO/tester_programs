@@ -2,19 +2,20 @@
 # -*- coding: utf-8 -*-
 """CN101 Console driver."""
 
-from share import console
+import share
+
 
 # Some easier to use short names
-Sensor = console.Sensor
-ParameterString = console.ParameterString
-ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
-ParameterHex = console.ParameterHex
+Sensor = share.Sensor
+ParameterString = share.ParameterString
+ParameterBoolean = share.ParameterBoolean
+ParameterFloat = share.ParameterFloat
+ParameterHex = share.ParameterHex
 
 
-class Console(console.BadUartConsole):
+class _Console():
 
-    """Communications to CN101 console."""
+    """Base class for a CN101 console."""
 
     # Test mode controlled by STATUS bit 31
     _test_on = (1 << 31)
@@ -77,3 +78,17 @@ class Console(console.BadUartConsole):
         reply = round(self['STATUS'])
         value = self._can_on | reply if state else self._can_off & reply
         self['STATUS'] = value
+
+
+class DirectConsole(_Console, share.BadUartConsole):
+
+    """Console for a direct connection to a CN101."""
+
+
+class TunnelConsole(_Console, share.BaseConsole):
+
+    """Console for a CAN tunneled connection to a CN101.
+
+    The CAN tunnel does not need the BadUartConsole stuff.
+
+    """
