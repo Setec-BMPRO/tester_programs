@@ -12,7 +12,7 @@ used as the 'port' by another Console driver.
 import tester
 
 
-class ConsoleCanTunnel():
+class CanTunnel():
 
     """A CAN Tunnel to another Console.
 

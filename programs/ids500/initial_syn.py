@@ -162,7 +162,7 @@ class Devices(share.Devices):
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_picSyn'] = share.ProgramPIC(
+        self['program_picSyn'] = share.programmer.PIC(
             InitialSyn.pic_hex_syn, folder, '18F4321', self['rla_syn'])
 
     def reset(self):

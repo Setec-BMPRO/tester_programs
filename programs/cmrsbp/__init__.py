@@ -24,9 +24,9 @@ class Initial(share.TestSequence):
     # PIC firmware image file
     pic_hex = 'CMR-SBP-9.hex'
     # Serial port for the EV2200.
-    ev_port = share.port('017789', 'EV')
+    ev_port = share.fixture.port('017789', 'EV')
     # Serial port for the CMR.
-    cmr_port = share.port('017789', 'CMR')
+    cmr_port = share.fixture.port('017789', 'CMR')
     # Test limits
     limitdata = (
         LimitDelta('Vbat', 12.0, 0.10),
@@ -307,7 +307,7 @@ class Devices(share.Devices):
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_pic'] = share.ProgramPIC(
+        self['program_pic'] = share.programmer.PIC(
             Initial.pic_hex, folder, '18F252', self['rla_Prog'])
 
     def reset(self):

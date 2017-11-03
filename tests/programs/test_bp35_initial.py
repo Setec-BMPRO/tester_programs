@@ -23,9 +23,9 @@ class _BP35Initial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-                'share.BackgroundTimer',
-                'share.ProgramARM',
-                'share.ProgramPIC',
+                'share.timers.BackgroundTimer',
+                'share.programmer.ARM',
+                'share.programmer.PIC',
                 'programs.bp35.console.TunnelConsole',
                 ):
             patcher = patch(target)

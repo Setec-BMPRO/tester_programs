@@ -15,7 +15,7 @@ class ParameterBoolean(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.ParameterBoolean(_CMD, writeable=True)
+        self.param = share.console.ParameterBoolean(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -56,7 +56,7 @@ class ParameterBoolean(unittest.TestCase):
     def test_6_wr_invalid(self):
         """Invalid data values."""
         for val in (1, 'x', '1', ''):
-            with self.assertRaises(share.ParameterError):
+            with self.assertRaises(share.console.ParameterError):
                 self.param.write(val, self.func)
 
 
@@ -66,7 +66,7 @@ class ParameterString(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.ParameterString(_CMD, writeable=True)
+        self.param = share.console.ParameterString(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -92,7 +92,7 @@ class ParameterFloat(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.ParameterFloat(_CMD, writeable=True)
+        self.param = share.console.ParameterFloat(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -118,7 +118,7 @@ class ParameterHex(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.ParameterHex(_CMD, writeable=True)
+        self.param = share.console.ParameterHex(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -144,7 +144,7 @@ class ParameterHex0x(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.ParameterHex0x(_CMD, writeable=True)
+        self.param = share.console.ParameterHex0x(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -170,7 +170,7 @@ class ParameterCAN(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.ParameterCAN(_CMD, writeable=True)
+        self.param = share.console.ParameterCAN(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -183,7 +183,7 @@ class ParameterCAN(unittest.TestCase):
 
     def test_2_wr_cmd(self):
         """Write command."""
-        with self.assertRaises(share.ParameterError):
+        with self.assertRaises(share.console.ParameterError):
             self.param.write('x', self.func)
 
 
@@ -194,7 +194,7 @@ class ParameterRaw(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.func = MagicMock(name='Parameter')
-        self.param = share.ParameterRaw(_CMD, writeable=True, func=self.func)
+        self.param = share.console.ParameterRaw(_CMD, writeable=True, func=self.func)
 
     def test_1_rd_cmd(self):
         """Read command."""
@@ -206,5 +206,5 @@ class ParameterRaw(unittest.TestCase):
 
     def test_2_wr_cmd(self):
         """Write command."""
-        with self.assertRaises(share.ParameterError):
+        with self.assertRaises(share.console.ParameterError):
             self.param.write('x', self.func)

@@ -11,7 +11,7 @@ ParameterFloat = console.ParameterFloat
 ParameterBoolean = console.ParameterBoolean
 
 
-class Console(console.BaseConsole):
+class Console(console.Base):
 
     """Communications to GEN8 console."""
 

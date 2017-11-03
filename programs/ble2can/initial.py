@@ -33,7 +33,7 @@ class Initial(share.TestSequence):
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitRegExp('BtMac', share.BluetoothMAC.line_regex,
+        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address'),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
@@ -69,13 +69,13 @@ class Initial(share.TestSequence):
         self.measure(
             ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)
-        ble2can.override(share.Override.force_on)
+        ble2can.override(share.console.Override.force_on)
         self.measure(
             ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
-        ble2can.override(share.Override.force_off)
+        ble2can.override(share.console.Override.force_off)
         self.measure(
             ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
-        ble2can.override(share.Override.normal)
+        ble2can.override(share.console.Override.normal)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -115,14 +115,14 @@ class Devices(share.Devices):
         # Serial connection to the console
         ble2can_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        ble2can_ser.port = share.port('030451', 'ARM')
+        ble2can_ser.port = share.fixture.port('030451', 'ARM')
         # Console driver
         self['ble2can'] = console.Console(ble2can_ser)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port('030451', 'BLE')
-        self['ble'] = share.BleRadio(ble_ser)
+        ble_ser.port = share.fixture.port('030451', 'BLE')
+        self['ble'] = share.bluetooth.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))

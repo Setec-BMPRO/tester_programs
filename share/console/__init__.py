@@ -4,6 +4,6 @@
 
 # Easy access to utility methods and classes
 from ._base import *
-from .protocol import *
-from .can_tunnel import *
-from .samb11 import *
+from .protocol import Base, BadUart, Error, CommandError, ResponseError
+from .can_tunnel import CanTunnel
+from .samb11 import SamB11, Override, ParameterOverride

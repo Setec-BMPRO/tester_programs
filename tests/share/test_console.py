@@ -29,7 +29,7 @@ class BaseConsole(unittest.TestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         port = tester.SimSerial()
-        self.mycon = share.BaseConsole(port)
+        self.mycon = share.console.Base(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
 
@@ -89,7 +89,7 @@ class BadUartConsole(unittest.TestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         port = tester.SimSerial()
-        self.mycon = share.BadUartConsole(port)
+        self.mycon = share.console.BadUart(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
 

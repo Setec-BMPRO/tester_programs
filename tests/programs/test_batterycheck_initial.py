@@ -19,7 +19,7 @@ class BatteryCheckInitial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.ProgramARM',
+                'share.programmer.ARM',
                 'subprocess.check_output',  # for step ProgramAVR
                 'programs.batterycheck.console.Console',
                 ):
@@ -28,7 +28,7 @@ class BatteryCheckInitial(ProgramTestCase):
             patcher.start()
         mybt = MagicMock(name='MyBtRadio')
         mybt.scan.return_value = True
-        patcher = patch('share.BtRadio', return_value=mybt)
+        patcher = patch('share.bluetooth.BtRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

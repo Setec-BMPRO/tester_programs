@@ -5,10 +5,10 @@
 import share
 
 # Some easier to use short names
-Sensor = share.Sensor
+Sensor = share.console.Sensor
 
 
-class Console(share.SamB11Console):
+class Console(share.console.SamB11):
 
     """Communications to BC2 console."""
 

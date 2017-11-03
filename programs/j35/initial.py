@@ -339,8 +339,8 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_arm'] = share.ProgramARM(
-            share.port('029242', 'ARM'),
+        self['program_arm'] = share.programmer.ARM(
+            share.fixture.port('029242', 'ARM'),
             os.path.join(folder, Initial.arm_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
@@ -348,12 +348,12 @@ class Devices(share.Devices):
         # Serial connection to the console
         j35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        j35_ser.port = share.port('029242', 'ARM')
+        j35_ser.port = share.fixture.port('029242', 'ARM')
         # J35 Console driver
         self['j35'] = console.DirectConsole(j35_ser)
         # Tunneled Console driver
-        tunnel = share.ConsoleCanTunnel(
-            self.physical_devices['CAN'], config.CAN_ID)
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.j35)
         self['j35tunnel'] = console.TunnelConsole(tunnel)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(22.0, output=True, delay=2)

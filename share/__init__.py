@@ -3,15 +3,30 @@
 # Copyright 2016 SETEC Pty Ltd
 """Shared modules for Tester programs."""
 
-import functools
-import logging
-
+import enum
 # Easy access to utility methods and classes
-from .testsequence import *     # pylint:disable=W0401
-from .bluetooth import *        # pylint:disable=W0401
-from .console import *          # pylint:disable=W0401
-from .programmer import *       # pylint:disable=W0401
-from .ticker import *           # pylint:disable=W0401
-from .timed_data import *       # pylint:disable=W0401
-from .timer import *            # pylint:disable=W0401
-from .fixture import *          # pylint:disable=W0401
+from .testsequence import Devices, Sensors, Measurements, TestSequence
+from .testsequence import teststep      # a decorator
+from . import fixture
+from . import console
+from . import bluetooth
+from . import timers
+
+
+@enum.unique
+class CanID(enum.IntEnum):
+
+    """CAN device ID values for different products.
+
+    From "SetecCANandBLECommunicationsProtocol Ver2B".
+
+    """
+
+    cn100 = 4
+    bp35 = 16
+    j35 = 20
+    trek2 = 32
+    cn101 = 36
+    ble2can = 40
+    rvview = 44
+    bc2 = 128

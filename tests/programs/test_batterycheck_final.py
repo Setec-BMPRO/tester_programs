@@ -24,7 +24,7 @@ class BatteryCheckFinal(ProgramTestCase):
             'SoftwareVersion': batterycheck.Final.arm_version,
             'SerialID': self.serial,
             }
-        patcher = patch('share.BtRadio', return_value=mybt)
+        patcher = patch('share.bluetooth.BtRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

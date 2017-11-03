@@ -6,11 +6,6 @@ import enum
 from . import _base
 from . import protocol
 
-# Some easier to use short names
-ParameterString = _base.ParameterString
-ParameterBoolean = _base.ParameterBoolean
-ParameterFloat = _base.ParameterFloat
-
 
 @enum.unique
 class Override(enum.IntEnum):
@@ -35,7 +30,7 @@ class ParameterOverride(_base.ParameterFloat):
             )
 
 
-class SamB11Console(protocol.BaseConsole):
+class SamB11(protocol.Base):
 
     """Communications to SamB11 based console."""
 

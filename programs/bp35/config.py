@@ -8,5 +8,3 @@ ARM_HW_VERSION = 12
 # 'SR' type Solar Regulator versions
 PIC_SW_VERSION = '1.5.16253.282'
 PIC_HW_VERSION = 4
-# CAN ID of a BP35
-CAN_ID = 16

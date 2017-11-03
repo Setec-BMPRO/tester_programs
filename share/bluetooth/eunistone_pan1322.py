@@ -10,7 +10,7 @@ import logging
 import time
 import re
 import json
-from ._base import BluetoothError, BluetoothMAC
+from ._base import BluetoothError, MAC
 
 
 class BtRadio():
@@ -143,7 +143,7 @@ class BtRadio():
                 break
             match = re.search(
                 '^\+RDDSRES=({0}),BCheck ([^,]*),.*'.format(
-                    BluetoothMAC.regex),
+                    MAC.regex),
                 line)
             if match:
                 data = match.groups()

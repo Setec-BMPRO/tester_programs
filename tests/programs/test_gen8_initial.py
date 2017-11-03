@@ -18,7 +18,7 @@ class Gen8Initial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.ProgramARM',
+                'share.programmer.ARM',
                 'programs.gen8.console.Console',
                 ):
             patcher = patch(target)

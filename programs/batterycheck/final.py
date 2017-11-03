@@ -71,7 +71,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    bt_port = share.port('027013', 'BT')
+    bt_port = share.fixture.port('027013', 'BT')
 
     def open(self):
         """Create all Instruments."""
@@ -86,7 +86,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         btport.port = self.bt_port
         # BT Radio driver
-        self['bt'] = share.BtRadio(btport)
+        self['bt'] = share.bluetooth.BtRadio(btport)
 
     def reset(self):
         """Reset instruments."""

@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
     """Drifter Initial Test Program."""
 
     # Serial port for the PIC.
-    pic_port = share.port('021299', 'PIC')
+    pic_port = share.fixture.port('021299', 'PIC')
     # Calibration values
     force_offset = -8
     force_threshold = 160
@@ -181,7 +181,7 @@ class Devices(share.Devices):
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_pic'] = share.ProgramPIC(
+        self['program_pic'] = share.programmer.PIC(
             Initial.limitdata[self.parameter]['Software'],
             folder, '18F87J93', self['rla_Prog'])
         # Serial connection to the console

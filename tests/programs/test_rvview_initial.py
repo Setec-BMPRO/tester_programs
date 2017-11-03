@@ -25,7 +25,7 @@ class RvViewInitial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-                'share.ProgramARM',
+                'share.programmer.ARM',
                 'programs.rvview.console.TunnelConsole',
                 ):
             patcher = patch(target)

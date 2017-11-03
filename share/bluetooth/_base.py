@@ -9,7 +9,7 @@ class BluetoothError(Exception):
     """Bluetooth error."""
 
 
-class BluetoothMAC():
+class MAC():
 
     """Bluetooth MAC patterns."""
 

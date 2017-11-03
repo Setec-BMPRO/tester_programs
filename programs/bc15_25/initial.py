@@ -50,7 +50,7 @@ class Initial(share.TestSequence):
     limitdata = {
         '15': {
             'ARMfile': 'bc15_{}.bin'.format(bin_version_15),
-            'ARMport': share.port('028467', 'ARM'),
+            'ARMport': share.fixture.port('028467', 'ARM'),
             'BinVersion': bin_version_15,
             'OCP_Nominal': ocp_nominal_15,
             'Limits': _common + (
@@ -64,7 +64,7 @@ class Initial(share.TestSequence):
             },
         '25': {
             'ARMfile': 'bc25_{}.bin'.format(bin_version_25),
-            'ARMport': share.port('031032', 'ARM'),
+            'ARMport': share.fixture.port('031032', 'ARM'),
             'BinVersion': bin_version_25,
             'OCP_Nominal': ocp_nominal_25,
             'Limits': _common + (
@@ -176,7 +176,7 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['programmer'] = share.ProgramARM(
+        self['programmer'] = share.programmer.ARM(
             self.arm_port,
             os.path.join(folder, self.arm_file),
             crpmode=False,

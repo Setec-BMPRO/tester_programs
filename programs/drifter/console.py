@@ -10,7 +10,7 @@ ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 
 
-class Console(console.BaseConsole):
+class Console(console.Base):
 
     """Communications to Drifter console."""
 

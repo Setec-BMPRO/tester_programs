@@ -20,11 +20,11 @@ class CN101Initial(ProgramTestCase):
         """Per-Test setup."""
         mybt = MagicMock(name='MyBleRadio')
         mybt.scan.return_value = True
-        patcher = patch('share.BleRadio', return_value=mybt)
+        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-                'share.ProgramARM',
+                'share.programmer.ARM',
                 'programs.cn101.console.DirectConsole',
                 'programs.cn101.console.TunnelConsole',
                 ):

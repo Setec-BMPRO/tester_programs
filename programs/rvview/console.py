@@ -85,12 +85,12 @@ class _Console():
         self['STATUS'] = value
 
 
-class DirectConsole(_Console, console.BadUartConsole):
+class DirectConsole(_Console, console.BadUart):
 
     """Console for a direct connection to a RVVIEW."""
 
 
-class TunnelConsole(_Console, console.BaseConsole):
+class TunnelConsole(_Console, console.Base):
 
     """Console for a CAN tunneled connection to a RVVIEW.
 

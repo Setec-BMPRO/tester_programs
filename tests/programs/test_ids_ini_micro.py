@@ -18,7 +18,7 @@ class Ids500MicroInitial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.ProgramPIC',
+                'share.programmer.PIC',
                 'programs.ids500.console.Console',
                 ):
             patcher = patch(target)

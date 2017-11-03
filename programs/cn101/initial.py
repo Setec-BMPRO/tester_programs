@@ -29,7 +29,7 @@ class Initial(share.TestSequence):
         LimitInteger('CAN_BIND', 1 << 28),
         LimitRegExp(
             'SwVer', '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
-        LimitRegExp('BtMac', share.BluetoothMAC.line_regex),
+        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
         LimitBoolean('DetectBT', True),
         LimitInteger('Tank', 5),
         )
@@ -126,8 +126,8 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['programmer'] = share.ProgramARM(
-            share.port('028468', 'ARM'),
+        self['programmer'] = share.programmer.ARM(
+            share.fixture.port('028468', 'ARM'),
             os.path.join(folder, Initial.arm_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
@@ -135,18 +135,18 @@ class Devices(share.Devices):
         # Serial connection to the console
         cn101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        cn101_ser.port = share.port('028468', 'ARM')
+        cn101_ser.port = share.fixture.port('028468', 'ARM')
         # CN101 Console driver
         self['cn101'] = console.DirectConsole(cn101_ser)
         # Tunneled Console driver
-        tunnel = share.ConsoleCanTunnel(
-            self.physical_devices['CAN'], config.CAN_ID)
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.cn101)
         self['cn101tunnel'] = console.TunnelConsole(tunnel)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port('028468', 'BLE')
-        self['ble'] = share.BleRadio(ble_ser)
+        ble_ser.port = share.fixture.port('028468', 'BLE')
+        self['ble'] = share.bluetooth.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))

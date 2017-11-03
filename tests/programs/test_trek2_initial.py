@@ -19,7 +19,7 @@ class Trek2Initial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.ProgramARM',
+                'share.programmer.ARM',
                 'programs.trek2.console.DirectConsole',
                 'programs.trek2.console.TunnelConsole',
                 ):

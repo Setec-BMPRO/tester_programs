@@ -58,7 +58,7 @@ class Initial(share.TestSequence):
         LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82,
             doc='Brake current flowing'),
         LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
-        LimitRegExp('BtMac', share.BluetoothMAC.line_regex,
+        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address '),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
@@ -100,15 +100,15 @@ class Initial(share.TestSequence):
         self.measure(
             ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
             timeout=5)
-        trs2.override(share.Override.force_on)
+        trs2.override(share.console.Override.force_on)
         self.measure(
             ('dmm_lighton', 'dmm_remoteon', 'dmm_redon', 'dmm_greenon',
              'dmm_blueon'), timeout=5)
-        trs2.override(share.Override.force_off)
+        trs2.override(share.console.Override.force_off)
         self.measure(
             ('dmm_lightoff', 'dmm_remoteoff', 'dmm_redoff', 'dmm_greenoff',
              'dmm_blueoff'), timeout=5)
-        trs2.override(share.Override.normal)
+        trs2.override(share.console.Override.normal)
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
@@ -182,14 +182,14 @@ class Devices(share.Devices):
         # Serial connection to the console
         trs2_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        trs2_ser.port = share.port('030451', 'ARM')
+        trs2_ser.port = share.fixture.port('030451', 'ARM')
         # Console driver
         self['trs2'] = console.Console(trs2_ser)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.port('030451', 'BLE')
-        self['ble'] = share.BleRadio(ble_ser)
+        ble_ser.port = share.fixture.port('030451', 'BLE')
+        self['ble'] = share.bluetooth.BleRadio(ble_ser)
         # Enable the watchdog
         self['rla_wdg'].set_on()
         self.add_closer(self['rla_wdg'].set_off)

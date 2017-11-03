@@ -5,7 +5,7 @@
 from share import console
 
 
-class Arduino(console.BaseConsole):
+class Arduino(console.Base):
 
     """Communications to SX-750 Arduino console."""
 

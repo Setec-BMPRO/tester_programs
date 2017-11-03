@@ -18,7 +18,7 @@ class Trek2Final(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.ProgramARM',
+                'share.programmer.ARM',
                 'programs.trek2.console.TunnelConsole',
                 ):
             patcher = patch(target)

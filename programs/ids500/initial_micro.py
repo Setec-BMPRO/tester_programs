@@ -16,7 +16,7 @@ class InitialMicro(share.TestSequence):
     """IDS-500 Initial Micro Test Program."""
 
     # Serial port for the PIC.
-    pic_port = share.port('017056', 'PIC')
+    pic_port = share.fixture.port('017056', 'PIC')
     # Firmware image
     pic_hex_mic = 'ids_picMic_2.hex'
     # test limits
@@ -68,7 +68,7 @@ class Devices(share.Devices):
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_picMic'] = share.ProgramPIC(
+        self['program_picMic'] = share.programmer.PIC(
             InitialMicro.pic_hex_mic, folder, '18F4520', self['rla_mic'])
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)

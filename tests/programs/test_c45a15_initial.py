@@ -17,7 +17,7 @@ class C45A15Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramPIC')
+        patcher = patch('share.programmer.PIC')
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

@@ -23,7 +23,7 @@ class Initial(share.TestSequence):
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
     arm_hw_ver = (2, 0, 'A')
     # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.port('029687', 'ARM')
+    arm_port = share.fixture.port('029687', 'ARM')
     # Software image filename
     arm_file = 'RvView_{0}.bin'.format(bin_version)
     # CAN echo request messages
@@ -123,7 +123,7 @@ class Devices(share.Devices):
             os.path.dirname(
                 os.path.abspath(inspect.getfile(inspect.currentframe()))),
             Initial.arm_file)
-        self['programmer'] = share.ProgramARM(
+        self['programmer'] = share.programmer.ARM(
             Initial.arm_port, file, crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the rvview console

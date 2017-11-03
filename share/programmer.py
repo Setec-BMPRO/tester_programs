@@ -8,12 +8,8 @@ import tester
 import isplpc
 import serial
 
-# Result values to store into the mirror sensor
-_SUCCESS = 0
-_FAILURE = 1
 
-
-class ProgramPIC():
+class PIC():
 
     """Microchip PIC programmer using a PicKit3."""
 
@@ -38,7 +34,7 @@ class ProgramPIC():
         self.relay = relay
         self.measurement = tester.Measurement(
             tester.LimitInteger(
-                self.limitname, _SUCCESS, doc='Programming succeeded'),
+                self.limitname, 0, doc='Programming succeeded'),
             tester.sensor.Mirror()
             )
         self.process = None
@@ -68,7 +64,7 @@ class ProgramPIC():
         self.measurement()
 
 
-class ProgramARM():
+class ARM():
 
     """ARM programmer using the isplpc package."""
 
@@ -102,7 +98,7 @@ class ProgramARM():
             self._bindata = bytearray(infile.read())
         self.measurement = tester.Measurement(
             tester.LimitInteger(
-                self.limitname, _SUCCESS, doc='Programming succeeded'),
+                self.limitname, 0, doc='Programming succeeded'),
             tester.sensor.Mirror()
             )
 
@@ -127,9 +123,9 @@ class ProgramARM():
                 crpmode=self._crpmode)
             try:
                 pgm.program()
-                self.measurement.sensor.store(_SUCCESS)
+                self.measurement.sensor.store(0)
             except isplpc.ProgrammingError:
-                self.measurement.sensor.store(_FAILURE)
+                self.measurement.sensor.store(1)
         finally:
             ser.close()
             if self._boot_relay:

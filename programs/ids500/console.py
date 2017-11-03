@@ -10,12 +10,7 @@ Sensor = console.Sensor
 ParameterString = console.ParameterString
 
 
-class ConsoleResponseError():
-
-    """Console Response Error."""
-
-
-class Console(console.BaseConsole):
+class Console(console.Base):
 
     """Communications to IDS-500 console."""
 

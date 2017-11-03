@@ -5,13 +5,13 @@
 import share
 
 # Some easier to use short names
-Sensor = share.Sensor
-ParameterCalibration = share.ParameterCalibration
-ParameterHex = share.ParameterHex
-ParameterOverride = share.ParameterOverride
+Sensor = share.console.Sensor
+ParameterCalibration = share.console.ParameterCalibration
+ParameterHex = share.console.ParameterHex
+ParameterOverride = share.console.ParameterOverride
 
 
-class Console(share.SamB11Console):
+class Console(share.console.SamB11):
 
     """Communications to TRS2 console."""
 

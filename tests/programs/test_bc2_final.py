@@ -22,7 +22,7 @@ class BC2Final(ProgramTestCase):
         patcher.start()
         mybt = MagicMock(name='MyBleRadio')
         mybt.scan.return_value = True
-        patcher = patch('share.BleRadio', return_value=mybt)
+        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

@@ -5,11 +5,11 @@
 import share
 
 # Some easier to use short names
-Sensor = share.Sensor
-ParameterOverride = share.ParameterOverride
+Sensor = share.console.Sensor
+ParameterOverride = share.console.ParameterOverride
 
 
-class Console(share.SamB11Console):
+class Console(share.console.SamB11):
 
     """Communications to TRSRFM console."""
 

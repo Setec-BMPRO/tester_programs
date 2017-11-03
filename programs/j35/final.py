@@ -120,8 +120,8 @@ class Devices(share.Devices):
                  'Load shared by all outputs'),
             ):
             self[name] = devtype(self.physical_devices[phydevname], doc)
-        tunnel = share.ConsoleCanTunnel(
-            self.physical_devices['CAN'], config.CAN_ID)
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.j35)
         self['j35'] = console.TunnelConsole(tunnel)
         self['dcs_photo'].output(12.0, True)
         self.add_closer(lambda: self['dcs_photo'].output(0.0, False))

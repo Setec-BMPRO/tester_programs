@@ -65,22 +65,22 @@ import tester
 
 
 
-class ConsoleError(Exception):
+class Error(Exception):
 
     """Console Error."""
 
 
-class ConsoleCommandError(ConsoleError):
+class CommandError(Error):
 
     """Console Command Error."""
 
 
-class ConsoleResponseError(ConsoleError):
+class ResponseError(Error):
 
     """Console Response Error."""
 
 
-class BaseConsole():
+class Base():
 
     """Formatter for the base console. Implements Protocols 1 & 4.
 
@@ -99,7 +99,7 @@ class BaseConsole():
     # Command suffix between echo of a command and the start of the response.
     res_suffix = b' -> '
     ignore = ()    # Tuple of strings to remove from responses
-    # Fail a measurement upon a ConsoleError
+    # Fail a measurement upon a console Error
     measurement_fail_on_error = True
     # Operating as a sensor: key value
     _read_key = None
@@ -161,7 +161,7 @@ class BaseConsole():
         @param delay Delay between sending command and reading response.
         @param expected Expected number of responses.
         @return Response (None / String / ListOfStrings).
-        @raises ConsoleError.
+        @raises Error.
 
         """
         reply = None
@@ -173,9 +173,9 @@ class BaseConsole():
             if delay:
                 time.sleep(delay)
             reply = self._read_response(expected)
-        except ConsoleError as err:
+        except Error as err:
             if self.measurement_fail_on_error:
-                self._logger.debug('Caught ConsoleError: "%s"', err)
+                self._logger.debug('Caught Error: "%s"', err)
                 comms = tester.Measurement(
                     tester.LimitInteger('Action', 0, doc='Command succeeded'),
                     tester.sensor.Mirror())
@@ -189,7 +189,7 @@ class BaseConsole():
         """Write a command and verify the echo.
 
         @param command Command string.
-        @raises ConsoleCommandError.
+        @raises CommandError.
 
         """
         # Send the command with a '\r'
@@ -202,7 +202,7 @@ class BaseConsole():
             self._logger.debug('Echo <-- %s', repr(cmd_echo))
         # The echo must match what we sent
         if cmd_echo != cmd_bytes:
-            raise ConsoleCommandError('Command echo error')
+            raise CommandError('Command echo error')
 
     def _read_response(self, expected):
         """Read the response to a command.
@@ -212,7 +212,7 @@ class BaseConsole():
 
         @param expected Expected number of responses.
         @return Response (None / String / ListOfStrings).
-        @raises ConsoleResponseError.
+        @raises ResponseError.
 
         """
         # Read bytes until the command prompt is seen.
@@ -222,7 +222,7 @@ class BaseConsole():
             if self.verbose:
                 self._logger.debug('Read <-- %s', repr(data))
             if len(data) == 0:              # No data means a timeout
-                raise ConsoleResponseError('Response timeout')
+                raise ResponseError('Response timeout')
             buf += data
             buf = buf.replace(b'\n', b'')   # Remove all '\n'
         buf = buf.replace(self.cmd_prompt, b'') # Remove the command prompt
@@ -241,7 +241,7 @@ class BaseConsole():
         self._logger.debug('Response <-- %s', repr(response))
 # FIXME: Next line should be:   if response_count != expected:
         if response_count < expected:
-            raise ConsoleResponseError(
+            raise ResponseError(
                 'Expected {0}, actual {1}'.format(expected, response_count))
 # TODO: Remove this logger once we implement response_count != expected
         if response_count > expected:
@@ -251,7 +251,7 @@ class BaseConsole():
         return response
 
 
-class BadUartConsole(BaseConsole):
+class BadUart(Base):
 
     """Formatter for the 'Bad UART' consoles. Implements Protocols 2 & 3
 
@@ -265,7 +265,7 @@ class BadUartConsole(BaseConsole):
         """Write a command and verify the echo of each byte in turn.
 
         @param command Command string.
-        @raises ConsoleCommandError.
+        @raises CommandError.
 
         """
         cmd_bytes = command.encode()
@@ -278,7 +278,7 @@ class BadUartConsole(BaseConsole):
             if self.verbose:
                 self._logger.debug(' Tx -> %s Rx <- %s', a_byte, echo)
             if echo != a_byte:
-                raise ConsoleCommandError(
+                raise CommandError(
                     'Command echo error. Tx: {}, Rx: {}'.format(
                         a_byte, echo))
         # And the '\r' without echo

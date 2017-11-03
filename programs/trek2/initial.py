@@ -86,8 +86,8 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['programmer'] = share.ProgramARM(
-            share.port('027420', 'ARM'),
+        self['programmer'] = share.programmer.ARM(
+            share.fixture.port('027420', 'ARM'),
             os.path.join(
                 folder, 'Trek2_{0}.bin'.format(config.SW_VERSION)),
             crpmode=False,
@@ -96,11 +96,11 @@ class Devices(share.Devices):
         # Direct Console driver
         trek2_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trek2_ser.port = share.port('027420', 'ARM')
+        trek2_ser.port = share.fixture.port('027420', 'ARM')
         self['trek2'] = console.DirectConsole(trek2_ser)
         # Tunneled Console driver
-        tunnel = share.ConsoleCanTunnel(
-            self.physical_devices['CAN'], config.CAN_ID)
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.trek2)
         self['trek2tunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):

@@ -179,7 +179,7 @@ class Devices(share.Devices):
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_pic'] = share.ProgramPIC(
+        self['program_pic'] = share.programmer.PIC(
             Initial.pic_hex, folder, '16F1828', self['rla_prog'])
 
     def reset(self):

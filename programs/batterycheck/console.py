@@ -11,7 +11,7 @@ ParameterBoolean = console.ParameterBoolean
 ParameterFloat = console.ParameterFloat
 
 
-class Console(console.BadUartConsole):
+class Console(console.BadUart):
 
     """Communications to BatteryCheck console."""
 

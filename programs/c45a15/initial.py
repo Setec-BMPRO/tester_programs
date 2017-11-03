@@ -145,7 +145,7 @@ class Devices(share.Devices):
         # PIC device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_pic'] = share.ProgramPIC(
+        self['program_pic'] = share.programmer.PIC(
             PIC_HEX, folder, '16F684', self['rla_Prog'])
 
     def reset(self):

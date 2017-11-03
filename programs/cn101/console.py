@@ -5,11 +5,11 @@
 import share
 
 # Some easier to use short names
-Sensor = share.Sensor
-ParameterString = share.ParameterString
-ParameterBoolean = share.ParameterBoolean
-ParameterFloat = share.ParameterFloat
-ParameterHex = share.ParameterHex
+Sensor = share.console.Sensor
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
+ParameterHex = share.console.ParameterHex
 
 
 class _Console():
@@ -60,12 +60,12 @@ class _Console():
         self['NVWRITE'] = True
 
 
-class DirectConsole(_Console, share.BadUartConsole):
+class DirectConsole(_Console, share.console.BadUart):
 
     """Console for a direct connection."""
 
 
-class TunnelConsole(_Console, share.BaseConsole):
+class TunnelConsole(_Console, share.console.Base):
 
     """Console for a CAN tunneled connection.
 

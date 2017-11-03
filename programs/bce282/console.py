@@ -12,7 +12,7 @@ ParameterFloat = console.ParameterFloat
 ParameterBoolean = console.ParameterBoolean
 
 
-class Console(console.BaseConsole):
+class Console(console.Base):
 
     """Communications to BCE282 console."""
 
@@ -74,7 +74,7 @@ class Console(console.BaseConsole):
         @param delay Delay between sending command and reading response.
         @param expected Expected number of responses.
         @return Response (None / String / ListOfStrings).
-        @raises ConsoleError.
+        @raises console.Error.
 
         """
         return super().action(command, 0.1, expected)

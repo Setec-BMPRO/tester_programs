@@ -19,9 +19,9 @@ class Initial(share.TestSequence):
     """BCE282-12/24 Initial Test Program."""
 
     # Serial port for programming MSP430.
-    msp_port1 = share.port('020827', 'MSP1')
+    msp_port1 = share.fixture.port('020827', 'MSP1')
     # Serial port used by MSP430 comms module.
-    msp_port2 = share.port('020827', 'MSP2')
+    msp_port2 = share.fixture.port('020827', 'MSP2')
     # Calibration data save file (TI Text format)
     msp_savefile = {    # Needs to be writable by the tester login
         'posix': '/home/setec/testdata/bslsavedata.txt',
@@ -133,7 +133,7 @@ class Initial(share.TestSequence):
             password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
             with open(self.msp_password, 'w') as fout:
                 fout.write(password)
-        except share.ConsoleError:
+        except share.console.Error:
             pass
         finally:
             msp.measurement_fail_on_error = True

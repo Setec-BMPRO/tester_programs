@@ -6,12 +6,12 @@ import time
 import share
 
 # Some easier to use short names
-Sensor = share.Sensor
-ParameterString = share.ParameterString
-ParameterBoolean = share.ParameterBoolean
-ParameterFloat = share.ParameterFloat
-ParameterCalibration = share.ParameterCalibration
-ParameterHex = share.ParameterHex
+Sensor = share.console.Sensor
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
+ParameterCalibration = share.console.ParameterCalibration
+ParameterHex = share.console.ParameterHex
 
 
 class _Console():
@@ -142,7 +142,7 @@ class _Console():
         for i in range(1, 15):
             self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
                 'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
-        self._timer = share.BackgroundTimer()
+        self._timer = share.timers.BackgroundTimer()
 
     def brand(self, hw_ver, sernum, reset_relay, is_pm, pic_hw_ver):
         """Brand the unit with Hardware ID & Serial Number."""
@@ -232,12 +232,12 @@ class _Console():
         return self['OCP_CAL']
 
 
-class DirectConsole(_Console, share.BadUartConsole):
+class DirectConsole(_Console, share.console.BadUart):
 
     """Console for a direct connection."""
 
 
-class TunnelConsole(_Console, share.BaseConsole):
+class TunnelConsole(_Console, share.console.Base):
 
     """Console for a CAN tunneled connection.
 

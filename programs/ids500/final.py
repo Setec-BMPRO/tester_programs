@@ -19,7 +19,7 @@ class Final(share.TestSequence):
     """IDS-500 Final Test Programes."""
 
     # Serial port for the PIC.
-    pic_port = share.port('017048', 'PIC')
+    pic_port = share.fixture.port('017048', 'PIC')
     # LDD limit values
     _ldd_6_error_limits = 0.07
     _ldd_50_error_limits = 0.7

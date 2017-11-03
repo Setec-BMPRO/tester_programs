@@ -91,8 +91,8 @@ class Devices(share.Devices):
                 ('rla_s3', tester.Relay, 'RLA5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        tunnel = share.ConsoleCanTunnel(
-            self.physical_devices['CAN'], config.CAN_ID)
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.trek2)
         self['trek2'] = console.TunnelConsole(tunnel)
 
     def reset(self):

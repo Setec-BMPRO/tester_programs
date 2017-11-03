@@ -5,10 +5,10 @@
 import share
 
 # Some easier to use short names
-Sensor = share.Sensor
+Sensor = share.console.Sensor
 
 
-class Console(share.SamB11Console):
+class Console(share.console.SamB11):
 
     """Communications to BLE2CAN console."""
 
@@ -18,20 +18,20 @@ class Console(share.SamB11Console):
         # Values:
         #   0 = LED off, 1 = LED on
         # "-1" for normal LED operation
-        'LEDS': share.ParameterHex(
+        'LEDS': share.console.ParameterHex(
             'LEDS_OVERRIDE', writeable=True, readable=False),
         }
 
-    def override(self, state=share.Override.normal):
+    def override(self, state=share.console.Override.normal):
         """Manually override LED operation.
 
         @param state Override enumeration
 
         """
-        if state == share.Override.normal:
+        if state == share.console.Override.normal:
             value = 0xFFFFFFFF
-        if state == share.Override.force_on:
+        if state == share.console.Override.force_on:
             value = 0b111
-        if state == share.Override.force_off:
+        if state == share.console.Override.force_off:
             value = 0b000
         self['LEDS'] = value

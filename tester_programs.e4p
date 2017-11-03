@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-11-03, 15:22:21 -->
+<!-- Saved: 2017-11-03, 16:31:03 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -161,9 +161,7 @@
     <Source>share/fixture.py</Source>
     <Source>share/programmer.py</Source>
     <Source>share/testsequence.py</Source>
-    <Source>share/ticker.py</Source>
-    <Source>share/timed_data.py</Source>
-    <Source>share/timer.py</Source>
+    <Source>share/timers.py</Source>
     <Source>tests/__init__.py</Source>
     <Source>tests/data_feed.py</Source>
     <Source>tests/programs/__init__.py</Source>

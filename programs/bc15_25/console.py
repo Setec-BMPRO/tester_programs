@@ -6,13 +6,13 @@ import re
 import share
 
 # Some easier to use short names
-Sensor = share.Sensor
-ParameterString = share.ParameterString
-ParameterBoolean = share.ParameterBoolean
-ParameterFloat = share.ParameterFloat
+Sensor = share.console.Sensor
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
 
 
-class Console(share.BaseConsole):
+class Console(share.console.Base):
 
     """Communications to BC15/25 console."""
 

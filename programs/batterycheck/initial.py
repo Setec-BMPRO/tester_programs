@@ -177,11 +177,11 @@ class Devices(share.Devices):
     """Devices."""
 
     # Serial port for the ARM console module.
-    arm_con = share.port('029083', 'ARM_CON')
+    arm_con = share.fixture.port('029083', 'ARM_CON')
     # Serial port for the ARM programmer.
-    arm_pgm = share.port('029083', 'ARM_PGM')
+    arm_pgm = share.fixture.port('029083', 'ARM_PGM')
     # Serial port for the Bluetooth device
-    bt_port = share.port('029083', 'BT')
+    bt_port = share.fixture.port('029083', 'BT')
 
     def open(self):
         """Create all Instruments."""
@@ -200,7 +200,7 @@ class Devices(share.Devices):
         file = os.path.join(os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe()))),
             Initial.arm_bin)
-        self['programmer'] = share.ProgramARM(self.arm_pgm, file, crpmode=False)
+        self['programmer'] = share.programmer.ARM(self.arm_pgm, file, crpmode=False)
         # Serial connection to the console
         arm_ser = serial.Serial(baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
@@ -211,7 +211,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         btport.port = self.bt_port
         # BT Radio driver
-        self['bt'] = share.BtRadio(btport)
+        self['bt'] = share.bluetooth.BtRadio(btport)
 
     def reset(self):
         """Reset instruments."""

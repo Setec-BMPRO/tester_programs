@@ -18,7 +18,7 @@ class SX750Initial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.ProgramARM',
+                'share.programmer.ARM',
                 'programs.sx750.console.Console',
                 'programs.sx750.arduino.Arduino',
                 ):

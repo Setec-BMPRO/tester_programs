@@ -421,26 +421,26 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_arm'] = share.ProgramARM(
-            share.port('027176', 'ARM'),
+        self['program_arm'] = share.programmer.ARM(
+            share.fixture.port('027176', 'ARM'),
             os.path.join(folder, Initial.arm_file), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # PIC device programmer
-        self['program_pic'] = share.ProgramPIC(
+        self['program_pic'] = share.programmer.PIC(
             Initial.pic_file, folder, '33FJ16GS402', self['rla_pic'])
         # Serial connection to the BP35 console
         bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bp35_ser.port = share.port('027176', 'ARM')
+        bp35_ser.port = share.fixture.port('027176', 'ARM')
         # BP35 Console driver
         self['bp35'] = console.DirectConsole(bp35_ser)
         # Tunneled Console driver
-        tunnel = share.ConsoleCanTunnel(
-            self.physical_devices['CAN'], config.CAN_ID)
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.bp35)
         self['bp35tunnel'] = console.TunnelConsole(tunnel)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
-        self['PmTimer'] = share.BackgroundTimer()
+        self['PmTimer'] = share.timers.BackgroundTimer()
 
     def reset(self):
         """Reset instruments."""

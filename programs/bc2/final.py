@@ -18,7 +18,7 @@ class Final(share.TestSequence):
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('Shunt', 50.0, 100.0),
-        LimitRegExp('BtMac', share.BluetoothMAC.line_regex),
+        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
         LimitBoolean('DetectBT', True),
         )
 
@@ -56,7 +56,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    ble_port = share.port('030451', 'BLE')
+    ble_port = share.fixture.port('030451', 'BLE')
 
     def open(self):
         """Create all Instruments."""
@@ -71,7 +71,7 @@ class Devices(share.Devices):
         ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
         ble_ser.port = self.ble_port
-        self['ble'] = share.BleRadio(ble_ser)
+        self['ble'] = share.bluetooth.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))

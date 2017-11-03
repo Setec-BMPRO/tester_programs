@@ -269,7 +269,7 @@ class Devices(share.Devices):
     """Devices."""
 
     # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.port('025197', 'ARM')
+    arm_port = share.fixture.port('025197', 'ARM')
 
     def open(self):
         """Create all Instruments."""
@@ -294,7 +294,7 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['programmer'] = share.ProgramARM(
+        self['programmer'] = share.programmer.ARM(
             self.arm_port, os.path.join(folder, Initial.arm_bin),
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the ARM console

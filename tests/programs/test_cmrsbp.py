@@ -62,7 +62,7 @@ class CMRSBPInitial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-                'share.ProgramPIC',
+                'share.programmer.PIC',
                 'serial.Serial',
                 ):
             patcher = patch(target)
