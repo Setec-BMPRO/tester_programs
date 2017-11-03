@@ -22,9 +22,6 @@ class _Console():
     banner_lines = 3
     # Time it takes for Manual Mode command to take effect (sec)
     manual_mode_wait = 2.1
-    # CAN Test mode controlled by STATUS bit 29
-    can_on = 1 << 29
-    can_off = ~can_on & 0xFFFFFFFF
     # "CAN Bound" is STATUS bit 28
     can_bound = 1 << 28
     cmd_data = {
@@ -234,29 +231,15 @@ class _Console():
         """
         return self['OCP_CAL']
 
-    def can_testmode(self, state):
-        """Enable or disable CAN Test Mode.
-
-        Once test mode is active, all CAN packets received will display onto
-        the console. This means that the Command-Response protocol cannot
-        be used any more as it breaks with the extra asynchronous messages.
-
-        """
-        self._logger.debug('CAN Mode Enabled> %s', state)
-        self.action('"RF,ALL CAN')
-        reply = round(self['STATUS'])
-        value = self.can_on | reply if state else self.can_off & reply
-        self['STATUS'] = value
-
 
 class DirectConsole(_Console, share.BadUartConsole):
 
-    """Console for a direct connection to a BP35."""
+    """Console for a direct connection."""
 
 
 class TunnelConsole(_Console, share.BaseConsole):
 
-    """Console for a CAN tunneled connection to a BP35.
+    """Console for a CAN tunneled connection.
 
     The CAN tunnel does not need the BadUartConsole stuff.
 

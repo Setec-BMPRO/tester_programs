@@ -19,23 +19,16 @@ class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
 
-    # Software binary version
-    arm_version = '1.1.13665.176'
-    # Hardware version
-    hw_ver = (4, 0, 'A')
     # ARM software image file
-    arm_file = 'cn101_{}.bin'.format(arm_version)
-    # CAN echo request messages
-    can_echo = 'TQQ,32,0'
-    # CAN Bus is operational if status bit 28 is set
-    can_bind = 1 << 28
+    arm_file = 'cn101_{0}.bin'.format(config.SW_VERSION)
+    # Test limits
     limitdata = (
         LimitLow('Part', 20.0),
         LimitDelta('Vin', 8.0, 0.5),
         LimitPercent('3V3', 3.30, 3.0),
-        LimitRegExp('CAN_RX', r'^RRQ,32,0'),
-        LimitInteger('CAN_BIND', can_bind),
-        LimitRegExp('SwVer', '^{}$'.format(arm_version.replace('.', r'\.'))),
+        LimitInteger('CAN_BIND', 1 << 28),
+        LimitRegExp(
+            'SwVer', '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
         LimitRegExp('BtMac', share.BluetoothMAC.line_regex),
         LimitBoolean('DetectBT', True),
         LimitInteger('Tank', 5),
@@ -72,13 +65,7 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         cn101 = dev['cn101']
         cn101.open()
-        dev['rla_reset'].pulse(0.1)
-        cn101.action(None, delay=1.5, expected=0)   # Flush banner
-        cn101['UNLOCK'] = True
-        cn101['HW_VER'] = self.hw_ver
-        cn101['SER_ID'] = self.sernum
-        cn101['NVDEFAULT'] = True
-        cn101['NVWRITE'] = True
+        cn101.brand(config.HW_VERSION, self.sernum, dev['rla_reset'])
         mes['cn101_swver']()
 
     @share.teststep
@@ -121,11 +108,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.port('028468', 'ARM')
-    # Serial port for the Bluetooth module.
-    ble_port = share.port('028468', 'BLE')
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -145,7 +127,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.ProgramARM(
-            self.arm_port,
+            share.port('028468', 'ARM'),
             os.path.join(folder, Initial.arm_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
@@ -153,7 +135,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         cn101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        cn101_ser.port = self.arm_port
+        cn101_ser.port = share.port('028468', 'ARM')
         # CN101 Console driver
         self['cn101'] = console.DirectConsole(cn101_ser)
         # Tunneled Console driver
@@ -163,7 +145,7 @@ class Devices(share.Devices):
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = self.ble_port
+        ble_ser.port = share.port('028468', 'BLE')
         self['ble'] = share.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)
@@ -172,6 +154,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['cn101'].close()
+        self['cn101tunnel'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in (
                 'rla_reset', 'rla_boot', 'rla_s1',
@@ -189,7 +172,6 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['oMirBT'] = sensor.Mirror()
-        self['oMirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['microsw'] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
         self['sw1'] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
         self['sw2'] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
@@ -200,6 +182,7 @@ class Sensors(share.Sensors):
             caption=tester.translate('cn101_initial', 'capSnEntry'))
         # Console sensors
         cn101 = self.devices['cn101']
+        cn101tunnel = self.devices['cn101tunnel']
         for name, cmdkey in (
                 ('oCANBIND', 'CAN_BIND'),
                 ('tank1', 'TANK1'),
@@ -208,12 +191,13 @@ class Sensors(share.Sensors):
                 ('tank4', 'TANK4'),
             ):
             self[name] = console.Sensor(cn101, cmdkey)
-        for name, cmdkey in (
-                ('oSwVer', 'SW_VER'),
-                ('oBtMac', 'BT_MAC'),
+        for device, name, cmdkey in (
+                (cn101, 'oSwVer', 'SW_VER'),
+                (cn101, 'oBtMac', 'BT_MAC'),
+                (cn101tunnel, 'TunnelSwVer', 'SW_VER'),
             ):
             self[name] = console.Sensor(
-                cn101, cmdkey, rdgtype=sensor.ReadingString)
+                device, cmdkey, rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -237,5 +221,5 @@ class Measurements(share.Measurements):
             ('cn101_s3', 'Tank', 'tank3', ''),
             ('cn101_s4', 'Tank', 'tank4', ''),
             ('cn101_can_bind', 'CAN_BIND', 'oCANBIND', ''),
-            ('cn101_rx_can', 'CAN_RX', 'oMirCAN', ''),
+            ('TunnelSwVer', 'SwVer', 'TunnelSwVer', ''),
             ))

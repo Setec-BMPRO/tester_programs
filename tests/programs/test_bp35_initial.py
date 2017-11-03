@@ -102,7 +102,7 @@ class _BP35Initial(ProgramTestCase):
                     ),
                 'CanBus': (
                     (sen['arm_canbind'], 1 << 28),
-                    (sen['TunnelSwVer'], (bp35.config.ARM_SW_VERSION, )),
+                    (sen['TunnelSwVer'], bp35.config.ARM_SW_VERSION),
                     ),
                 },
             UnitTester.key_call: {      # Callables

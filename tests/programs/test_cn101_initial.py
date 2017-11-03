@@ -18,19 +18,19 @@ class CN101Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.ProgramARM')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        mycon = MagicMock(name='MyConsole')
-        mycon.port.readline.return_value = b'RRQ,32,0'
-        patcher = patch('programs.cn101.console.Console', return_value=mycon)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         mybt = MagicMock(name='MyBleRadio')
         mybt.scan.return_value = True
         patcher = patch('share.BleRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
+        for target in (
+                'share.ProgramARM',
+                'programs.cn101.console.DirectConsole',
+                'programs.cn101.console.TunnelConsole',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):
@@ -43,11 +43,11 @@ class CN101Initial(ProgramTestCase):
                     (sen['sw2'], 10.0),
                     ),
                 'PowerUp': (
-                    (sen['oSnEntry'], ('A1526040123', )),
+                    (sen['oSnEntry'], 'A1526040123'),
                     (sen['oVin'], 8.0), (sen['o3V3'], 3.3),
                     ),
                 'TestArm': (
-                    (sen['oSwVer'], cn101.Initial.arm_version ),
+                    (sen['oSwVer'], cn101.config.SW_VERSION),
                     ),
                 'TankSense': (
                     (sen['tank1'], 5),
@@ -60,6 +60,7 @@ class CN101Initial(ProgramTestCase):
                     ),
                 'CanBus': (
                     (sen['oCANBIND'], 1 << 28),
+                    (sen['TunnelSwVer'], cn101.config.SW_VERSION),
                     ),
                 },
             }

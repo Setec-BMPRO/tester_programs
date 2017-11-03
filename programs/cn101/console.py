@@ -4,7 +4,6 @@
 
 import share
 
-
 # Some easier to use short names
 Sensor = share.Sensor
 ParameterString = share.ParameterString
@@ -17,16 +16,8 @@ class _Console():
 
     """Base class for a CN101 console."""
 
-    # Test mode controlled by STATUS bit 31
-    _test_on = (1 << 31)
-    _test_off = ~_test_on & 0xFFFFFFFF
-    # CAN Test mode controlled by STATUS bit 29
-    _can_on = (1 << 29)
-    _can_off = ~_can_on & 0xFFFFFFFF
-    # Bluetooth ready controlled by STATUS bit 27
-    _ble_on = (1 << 27)
-    _ble_off = ~_ble_on & 0xFFFFFFFF
-
+    # Number of lines in startup banner
+    banner_lines = 2
     cmd_data = {
         'UNLOCK': ParameterBoolean(
             '$DEADBEA7 UNLOCK',
@@ -58,36 +49,25 @@ class _Console():
         'ADC_SCAN': ParameterFloat('ADC_SCAN_INTERVAL_MSEC', writeable=True),
         }
 
-    def testmode(self, state):
-        """Enable or disable Test Mode."""
-        self._logger.debug('Test Mode = %s', state)
-        reply = round(self['STATUS'])
-        value = self._test_on | reply if state else self._test_off & reply
-        self['STATUS'] = value
-
-    def can_testmode(self, state):
-        """Enable or disable CAN Test Mode.
-
-        Once test mode is active, all CAN packets received will display onto
-        the console. This means that the Command-Response protocol cannot
-        be used any more as it breaks with the extra asynchronous messages.
-
-        """
-        self._logger.debug('CAN Mode Enabled> %s', state)
-        self.action('"RF,ALL CAN')
-        reply = round(self['STATUS'])
-        value = self._can_on | reply if state else self._can_off & reply
-        self['STATUS'] = value
+    def brand(self, hw_ver, sernum, reset_relay):
+        """Brand the unit with Hardware ID & Serial Number."""
+        reset_relay.pulse(0.1)
+        self.action(None, delay=1.5, expected=self.banner_lines)
+        self['UNLOCK'] = True
+        self['HW_VER'] = hw_ver
+        self['SER_ID'] = sernum
+        self['NVDEFAULT'] = True
+        self['NVWRITE'] = True
 
 
 class DirectConsole(_Console, share.BadUartConsole):
 
-    """Console for a direct connection to a CN101."""
+    """Console for a direct connection."""
 
 
 class TunnelConsole(_Console, share.BaseConsole):
 
-    """Console for a CAN tunneled connection to a CN101.
+    """Console for a CAN tunneled connection.
 
     The CAN tunnel does not need the BadUartConsole stuff.
 
