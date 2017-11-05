@@ -3,16 +3,15 @@
 """BCE282 MSP430 processor console driver."""
 
 import time
-from share import console
+import share
 
-Sensor = console.Sensor
 # Some easier to use short names
-ParameterString = console.ParameterString
-ParameterFloat = console.ParameterFloat
-ParameterBoolean = console.ParameterBoolean
+ParameterString = share.console.ParameterString
+ParameterFloat = share.console.ParameterFloat
+ParameterBoolean = share.console.ParameterBoolean
 
 
-class Console(console.Base):
+class Console(share.console.Base):
 
     """Communications to BCE282 console."""
 

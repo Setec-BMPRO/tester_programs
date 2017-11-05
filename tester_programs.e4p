@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-11-03, 16:31:03 -->
+<!-- Saved: 2017-11-04, 14:46:49 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -154,10 +154,11 @@
     <Source>share/bluetooth/raspblue.py</Source>
     <Source>share/bluetooth/rn4020.py</Source>
     <Source>share/console/__init__.py</Source>
-    <Source>share/console/_base.py</Source>
     <Source>share/console/can_tunnel.py</Source>
+    <Source>share/console/parameter.py</Source>
     <Source>share/console/protocol.py</Source>
     <Source>share/console/samb11.py</Source>
+    <Source>share/console/sensor.py</Source>
     <Source>share/fixture.py</Source>
     <Source>share/programmer.py</Source>
     <Source>share/testsequence.py</Source>

@@ -419,10 +419,11 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
+        arm_port = share.fixture.port('027176', 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.programmer.ARM(
-            share.fixture.port('027176', 'ARM'),
+            arm_port,
             os.path.join(folder, Initial.arm_file), crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # PIC device programmer
@@ -431,7 +432,7 @@ class Devices(share.Devices):
         # Serial connection to the BP35 console
         bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bp35_ser.port = share.fixture.port('027176', 'ARM')
+        bp35_ser.port = arm_port
         # BP35 Console driver
         self['bp35'] = console.DirectConsole(bp35_ser)
         # Tunneled Console driver
@@ -524,17 +525,17 @@ class Sensors(share.Sensors):
                 ('arm_pm_iout', 'PM_IOUT', 'A'),
                 ('arm_pm_iout_rev', 'PM_IOUT_REV', '-A'),
             ):
-            self[name] = console.Sensor(bp35, cmdkey)
+            self[name] = share.console.Sensor(bp35, cmdkey)
             if units:
                 self[name].units = units
-        self['arm_swver'] = console.Sensor(
+        self['arm_swver'] = share.console.Sensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['TunnelSwVer'] = console.Sensor(
+        self['TunnelSwVer'] = share.console.Sensor(
             bp35tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
         # Generate load current sensors
         loads = []
         for i in range(1, Initial.outputs + 1):
-            loads.append(console.Sensor(bp35, 'LOAD_{0}'.format(i)))
+            loads.append(share.console.Sensor(bp35, 'LOAD_{0}'.format(i)))
         self['arm_loads'] = loads
         # Pre-adjust OCP
         low, high = self.limits['OCP_pre'].limit

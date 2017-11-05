@@ -18,8 +18,6 @@ class Final(share.TestSequence):
 
     """IDS-500 Final Test Programes."""
 
-    # Serial port for the PIC.
-    pic_port = share.fixture.port('017048', 'PIC')
     # LDD limit values
     _ldd_6_error_limits = 0.07
     _ldd_50_error_limits = 0.7
@@ -272,7 +270,7 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the PIC
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = Final.pic_port
+        pic_ser.port = share.fixture.port('017048', 'PIC')
         self['pic'] = console.Console(pic_ser)
 
     def reset(self):
@@ -338,9 +336,9 @@ class Sensors(share.Sensors):
             message=tester.translate('ids500_final', 'msgHwRev'),
             caption=tester.translate('ids500_final', 'capHwRev'))
         self['oHwRevEntry'].on_read = lambda value: value.upper().strip()
-        self['hwrev'] = console.Sensor(
+        self['hwrev'] = share.console.Sensor(
             pic, 'PIC-HwRev', rdgtype=sensor.ReadingString)
-        self['sernum'] = console.Sensor(
+        self['sernum'] = share.console.Sensor(
             pic, 'PIC-SerNum', rdgtype=sensor.ReadingString)
 
 

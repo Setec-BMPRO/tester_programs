@@ -159,7 +159,7 @@ class Sensors(share.Sensors):
         self['ocp'].doc = 'OCP trip value'
         self['ocp'].units = 'Adc'
         j35 = self.devices['j35']
-        self['arm_swver'] = console.Sensor(
+        self['arm_swver'] = share.console.Sensor(
             j35, 'SW_VER', rdgtype=sensor.ReadingString)
         self['notifycable'] = sensor.Notify(
             message=tester.translate('j35_final', 'PullCableOut'),

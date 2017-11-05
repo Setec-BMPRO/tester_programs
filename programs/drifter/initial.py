@@ -16,8 +16,6 @@ class Initial(share.TestSequence):
 
     """Drifter Initial Test Program."""
 
-    # Serial port for the PIC.
-    pic_port = share.fixture.port('021299', 'PIC')
     # Calibration values
     force_offset = -8
     force_threshold = 160
@@ -187,7 +185,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = Initial.pic_port
+        pic_ser.port = share.fixture.port('021299', 'PIC')
         self['pic'] = console.Console(pic_ser)
 
     def reset(self):
@@ -218,15 +216,17 @@ class Sensors(share.Sensors):
             dmm, high=5, low=1, rng=10, res=0.00001, scale=-1000.0)
         self['o3V3'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
         self['o0V8'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.001)
-        self['pic_Status'] = console.Sensor(pic, 'NVSTATUS')
-        self['pic_ZeroChk'] = console.Sensor(pic, 'ZERO_CURRENT')
-        self['pic_Vin'] = console.Sensor(pic, 'VOLTAGE')
-        self['pic_isense'] = console.Sensor(pic, 'CURRENT')
-        self['pic_Vfactor'] = console.Sensor(pic, 'V_FACTOR')
-        self['pic_Ifactor'] = console.Sensor(pic, 'I_FACTOR')
-        self['pic_Ioffset'] = console.Sensor(pic, 'CAL_OFFSET_CURRENT')
-        self['pic_Ithreshold'] = console.Sensor(
-            pic, 'ZERO-CURRENT-DISPLAY-THRESHOLD')
+        for sen, cmd in (
+            ('pic_Status', 'NVSTATUS'),
+            ('pic_ZeroChk', 'ZERO_CURRENT'),
+            ('pic_Vin', 'VOLTAGE'),
+            ('pic_isense', 'CURRENT'),
+            ('pic_Vfactor', 'V_FACTOR'),
+            ('pic_Ifactor', 'I_FACTOR'),
+            ('pic_Ioffset', 'CAL_OFFSET_CURRENT'),
+            ('pic_Ithreshold', 'ZERO-CURRENT-DISPLAY-THRESHOLD'),
+            ):
+            self[sen] = share.console.Sensor(pic, cmd)
 
 
 class Measurements(share.Measurements):

@@ -3,7 +3,7 @@
 """SamB11 device Base console driver."""
 
 import enum
-from . import _base
+from . import parameter
 from . import protocol
 
 
@@ -17,7 +17,7 @@ class Override(enum.IntEnum):
     force_on = 2
 
 
-class ParameterOverride(_base.ParameterFloat):
+class ParameterOverride(parameter.ParameterFloat):
 
     """A parameter for overriding unit operation."""
 
@@ -38,18 +38,18 @@ class SamB11(protocol.Base):
     banner_lines = 3
     # Common commands
     common_commands = {
-        'NVDEFAULT': _base.ParameterBoolean(
+        'NVDEFAULT': parameter.ParameterBoolean(
             'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': _base.ParameterBoolean(
+        'NVWRITE': parameter.ParameterBoolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': _base.ParameterString(
+        'SER_ID': parameter.ParameterString(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
-        'HW_VER': _base.ParameterString(
+        'HW_VER': parameter.ParameterString(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': _base.ParameterString('SW-VERSION', read_format='{0}?'),
-        'BT_MAC': _base.ParameterString('BLE-MAC', read_format='{0}?'),
+        'SW_VER': parameter.ParameterString('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': parameter.ParameterString('BLE-MAC', read_format='{0}?'),
         }
 
     def __init__(self, port):

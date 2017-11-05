@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 """RVVIEW ARM processor console driver."""
 
-from share import console
+import share
 
 # Some easier to use short names
-Sensor = console.Sensor
-ParameterString = console.ParameterString
-ParameterBoolean = console.ParameterBoolean
-ParameterHex = console.ParameterHex
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterHex = share.console.ParameterHex
 
 
 class _Console():
@@ -85,12 +84,12 @@ class _Console():
         self['STATUS'] = value
 
 
-class DirectConsole(_Console, console.BadUart):
+class DirectConsole(_Console, share.console.BadUart):
 
     """Console for a direct connection to a RVVIEW."""
 
 
-class TunnelConsole(_Console, console.Base):
+class TunnelConsole(_Console, share.console.Base):
 
     """Console for a CAN tunneled connection to a RVVIEW.
 

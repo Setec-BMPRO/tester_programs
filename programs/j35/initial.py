@@ -336,11 +336,12 @@ class Devices(share.Devices):
                 ('rla_loadsw', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        arm_port = share.fixture.port('029242', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.programmer.ARM(
-            share.fixture.port('029242', 'ARM'),
+            arm_port,
             os.path.join(folder, Initial.arm_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
@@ -348,7 +349,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         j35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        j35_ser.port = share.fixture.port('029242', 'ARM')
+        j35_ser.port = arm_port
         # J35 Console driver
         self['j35'] = console.DirectConsole(j35_ser)
         # Tunneled Console driver
@@ -412,16 +413,16 @@ class Sensors(share.Sensors):
                 ('arm_loadset', 'LOAD_SET'),
                 ('arm_remote', 'BATT_SWITCH'),
             ):
-            self[name] = console.Sensor(j35, cmdkey)
-        self['arm_swver'] = console.Sensor(
+            self[name] = share.console.Sensor(j35, cmdkey)
+        self['arm_swver'] = share.console.Sensor(
             j35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['TunnelSwVer'] = console.Sensor(
+        self['TunnelSwVer'] = share.console.Sensor(
             j35tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
         # Generate load current sensors
         load_count = self.limits['LOAD_COUNT'].limit
         self['arm_loads'] = []
         for i in range(load_count):
-            sen = console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
+            sen = share.console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
             self['arm_loads'].append(sen)
         load_current = load_count * Initial.load_per_output
         # Pre-adjust OCP

@@ -3,14 +3,13 @@
 """IDS-500 PIC processor console driver."""
 
 import time
-from share import console
+import share
 
 # Some easier to use short names
-Sensor = console.Sensor
-ParameterString = console.ParameterString
+ParameterString = share.console.ParameterString
 
 
-class Console(console.Base):
+class Console(share.console.Base):
 
     """Communications to IDS-500 console."""
 

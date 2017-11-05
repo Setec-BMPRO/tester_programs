@@ -119,13 +119,13 @@ class Sensors(share.Sensors):
             message=tester.translate('trek2_final', 'IsBacklightOk?'),
             caption=tester.translate('trek2_final', 'capBacklight'))
         self['otanks'] = (
-            console.Sensor(trek2, 'TANK1'),
-            console.Sensor(trek2, 'TANK2'),
-            console.Sensor(trek2, 'TANK3'),
-            console.Sensor(trek2, 'TANK4'),
+            share.console.Sensor(trek2, 'TANK1'),
+            share.console.Sensor(trek2, 'TANK2'),
+            share.console.Sensor(trek2, 'TANK3'),
+            share.console.Sensor(trek2, 'TANK4'),
             )
         # Console sensors
-        self['SwVer'] = console.Sensor(
+        self['SwVer'] = share.console.Sensor(
             trek2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 

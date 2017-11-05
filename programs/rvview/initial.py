@@ -22,8 +22,6 @@ class Initial(share.TestSequence):
     bin_version = '1.0.14022.985'   # Software binary version
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
     arm_hw_ver = (2, 0, 'A')
-    # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.fixture.port('029687', 'ARM')
     # Software image filename
     arm_file = 'RvView_{0}.bin'.format(bin_version)
     # CAN echo request messages
@@ -118,18 +116,20 @@ class Devices(share.Devices):
                 ('rla_boot', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Serial port for the ARM. Used by programmer and ARM comms module.
+        arm_port = share.fixture.port('029687', 'ARM')
         # ARM device programmer
         file = os.path.join(
             os.path.dirname(
                 os.path.abspath(inspect.getfile(inspect.currentframe()))),
             Initial.arm_file)
         self['programmer'] = share.programmer.ARM(
-            Initial.arm_port, file, crpmode=False,
+            arm_port, file, crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the rvview console
         rvview_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        rvview_ser.port = Initial.arm_port
+        rvview_ser.port = arm_port
         # rvview Console driver
         self['rvview'] = console.DirectConsole(rvview_ser)
         # Power to fixture Comms circuits.
@@ -167,8 +167,8 @@ class Sensors(share.Sensors):
         self['oYesNoOff'] = sensor.YesNo(
             message=tester.translate('rvview_initial', 'PushButtonOff?'),
             caption=tester.translate('rvview_initial', 'capButtonOff'))
-        self['arm_canbind'] = console.Sensor(rvview, 'CAN_BIND')
-        self['oSwVer'] = console.Sensor(
+        self['arm_canbind'] = share.console.Sensor(rvview, 'CAN_BIND')
+        self['oSwVer'] = share.console.Sensor(
             rvview, 'SW_VER', rdgtype=sensor.ReadingString)
 
 

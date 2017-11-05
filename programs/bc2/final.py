@@ -56,8 +56,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    ble_port = share.fixture.port('030451', 'BLE')
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -70,7 +68,7 @@ class Devices(share.Devices):
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = self.ble_port
+        ble_ser.port = share.fixture.port('030451', 'BLE')
         self['ble'] = share.bluetooth.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

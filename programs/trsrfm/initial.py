@@ -164,7 +164,7 @@ class Sensors(share.Sensors):
                 ('arm_BtMAC', 'BT_MAC'),
                 ('arm_SwVer', 'SW_VER'),
             ):
-            self[name] = console.Sensor(
+            self[name] = share.console.Sensor(
                 trsrfm, cmdkey, rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trsrfm_initial', 'msgSnEntry'),

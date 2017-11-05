@@ -176,13 +176,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Serial port for the ARM console module.
-    arm_con = share.fixture.port('029083', 'ARM_CON')
-    # Serial port for the ARM programmer.
-    arm_pgm = share.fixture.port('029083', 'ARM_PGM')
-    # Serial port for the Bluetooth device
-    bt_port = share.fixture.port('029083', 'BT')
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -200,16 +193,17 @@ class Devices(share.Devices):
         file = os.path.join(os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe()))),
             Initial.arm_bin)
-        self['programmer'] = share.programmer.ARM(self.arm_pgm, file, crpmode=False)
+        self['programmer'] = share.programmer.ARM(
+            share.fixture.port('029083', 'ARM_PGM'), file,crpmode=False)
         # Serial connection to the console
         arm_ser = serial.Serial(baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = self.arm_con
+        arm_ser.port = share.fixture.port('029083', 'ARM_CON')
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Bluetooth device
         btport = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        btport.port = self.bt_port
+        btport.port = share.fixture.port('029083', 'BT')
         # BT Radio driver
         self['bt'] = share.bluetooth.BtRadio(btport)
 
@@ -232,9 +226,9 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         arm = self.devices['arm']
         sensor = tester.sensor
-        self['ARMvolt'] = console.Sensor(arm, 'VOLTAGE')
-        self['ARMcurr'] = console.Sensor(arm, 'CURRENT')
-        self['ARMsoft'] = console.Sensor(
+        self['ARMvolt'] = share.console.Sensor(arm, 'VOLTAGE')
+        self['ARMcurr'] = share.console.Sensor(arm, 'CURRENT')
+        self['ARMsoft'] = share.console.Sensor(
             arm, 'SW_VER', rdgtype=sensor.ReadingString)
         self['oMirAVR'] = sensor.Mirror()
         self['oMirBT'] = sensor.Mirror()

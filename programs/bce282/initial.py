@@ -18,10 +18,6 @@ class Initial(share.TestSequence):
 
     """BCE282-12/24 Initial Test Program."""
 
-    # Serial port for programming MSP430.
-    msp_port1 = share.fixture.port('020827', 'MSP1')
-    # Serial port used by MSP430 comms module.
-    msp_port2 = share.fixture.port('020827', 'MSP2')
     # Calibration data save file (TI Text format)
     msp_savefile = {    # Needs to be writable by the tester login
         'posix': '/home/setec/testdata/bslsavedata.txt',
@@ -124,6 +120,8 @@ class Initial(share.TestSequence):
         is essential that these values be saved and restored.
 
         """
+        # Serial port for programming MSP430.
+        msp_port1 = share.fixture.port('020827', 'MSP1')
         # Get any existing password & write to MSP_PASSWORD file
         msp = dev['msp']
         password = None
@@ -142,7 +140,7 @@ class Initial(share.TestSequence):
         try:
             # STEP 1 - SAVE INTERNAL CALIBRATION
             sys.argv = (['',
-                '--comport={0}'.format(self.msp_port1), ] +
+                '--comport={0}'.format(msp_port1), ] +
                 (['-P', self.msp_password, ] if password else []) +
                 ['--upload=0x10C0', '--size=64', '--ti', ]
                 )
@@ -154,7 +152,7 @@ class Initial(share.TestSequence):
                     fout.write('\n')
             # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
             sys.argv = ['',
-                '--comport={0}'.format(self.msp_port1),
+                '--comport={0}'.format(msp_port1),
                 '--masserase',
                 '--program', self.msp_savefile,
                 ]
@@ -163,7 +161,7 @@ class Initial(share.TestSequence):
             folder = os.path.dirname(
                 os.path.abspath(inspect.getfile(inspect.currentframe())))
             sys.argv = ['',
-                '--comport={0}'.format(self.msp_port1),
+                '--comport={0}'.format(msp_port1),
                 '--program', os.path.join(folder,
                     self.limitdata[self.parameter]['HexFile']),
                 ]
@@ -229,7 +227,7 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the MSP430
         self['msp_ser'] = serial.Serial(baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['msp_ser'].port = Initial.msp_port2
+        self['msp_ser'].port = share.fixture.port('020827', 'MSP2')
         # MSP430 Console driver
         self['msp'] = console.Console(self['msp_ser'])
         # Apply power to fixture circuits.
@@ -268,9 +266,9 @@ class Sensors(share.Sensors):
         self['vout'] = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
         self['vbat'] = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
         self['alarm'] = sensor.Res(dmm, high=9, low=5, rng=100000, res=1)
-        self['msp_stat'] = console.Sensor(msp, 'MSP-STATUS')
+        self['msp_stat'] = share.console.Sensor(msp, 'MSP-STATUS')
         self['msp_stat'].doc = 'MSP430 console'
-        self['msp_vo'] = console.Sensor(msp, 'MSP-VOUT')
+        self['msp_vo'] = share.console.Sensor(msp, 'MSP-VOUT')
         self['msp_vo'].doc = 'MSP430 console'
         low, high = self.limits['OutOCP'].limit
         self['ocp_out'] = sensor.Ramp(

@@ -83,11 +83,12 @@ class Devices(share.Devices):
                 ('rla_boot', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        arm_port = share.fixture.port('027420', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
-            share.fixture.port('027420', 'ARM'),
+            arm_port,
             os.path.join(
                 folder, 'Trek2_{0}.bin'.format(config.SW_VERSION)),
             crpmode=False,
@@ -96,7 +97,7 @@ class Devices(share.Devices):
         # Direct Console driver
         trek2_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trek2_ser.port = share.fixture.port('027420', 'ARM')
+        trek2_ser.port = arm_port
         self['trek2'] = console.DirectConsole(trek2_ser)
         # Tunneled Console driver
         tunnel = share.console.CanTunnel(
@@ -131,10 +132,10 @@ class Sensors(share.Sensors):
             caption=tester.translate('trek2_initial', 'capSnEntry'),
             timeout=300)
         # Console sensors
-        self['oCANBIND'] = console.Sensor(trek2, 'CAN_BIND')
-        self['SwVer'] = console.Sensor(
+        self['oCANBIND'] = share.console.Sensor(trek2, 'CAN_BIND')
+        self['SwVer'] = share.console.Sensor(
             trek2, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['TunnelSwVer'] = console.Sensor(
+        self['TunnelSwVer'] = share.console.Sensor(
             trek2tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
 
 

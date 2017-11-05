@@ -123,12 +123,12 @@ class Sensors(share.Sensors):
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         bc2 = self.devices['bc2']
-        self['btmac'] = console.Sensor(
+        self['btmac'] = share.console.Sensor(
             bc2, 'BT_MAC', rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bc2_initial', 'msgSnEntry'),
             caption=tester.translate('bc2_initial', 'capSnEntry'))
-        self['arm_swver'] = console.Sensor(
+        self['arm_swver'] = share.console.Sensor(
             bc2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 

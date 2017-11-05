@@ -124,10 +124,11 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
+        arm_port = share.fixture.port('028468', 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
-            share.fixture.port('028468', 'ARM'),
+            arm_port,
             os.path.join(folder, Initial.arm_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
@@ -135,7 +136,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         cn101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        cn101_ser.port = share.fixture.port('028468', 'ARM')
+        cn101_ser.port = arm_port
         # CN101 Console driver
         self['cn101'] = console.DirectConsole(cn101_ser)
         # Tunneled Console driver
@@ -190,13 +191,13 @@ class Sensors(share.Sensors):
                 ('tank3', 'TANK3'),
                 ('tank4', 'TANK4'),
             ):
-            self[name] = console.Sensor(cn101, cmdkey)
+            self[name] = share.console.Sensor(cn101, cmdkey)
         for device, name, cmdkey in (
                 (cn101, 'oSwVer', 'SW_VER'),
                 (cn101, 'oBtMac', 'BT_MAC'),
                 (cn101tunnel, 'TunnelSwVer', 'SW_VER'),
             ):
-            self[name] = console.Sensor(
+            self[name] = share.console.Sensor(
                 device, cmdkey, rdgtype=sensor.ReadingString)
 
 

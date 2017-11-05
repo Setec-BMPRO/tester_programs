@@ -23,10 +23,6 @@ class Initial(share.TestSequence):
 
     # PIC firmware image file
     pic_hex = 'CMR-SBP-9.hex'
-    # Serial port for the EV2200.
-    ev_port = share.fixture.port('017789', 'EV')
-    # Serial port for the CMR.
-    cmr_port = share.fixture.port('017789', 'CMR')
     # Test limits
     limitdata = (
         LimitDelta('Vbat', 12.0, 0.10),
@@ -296,13 +292,15 @@ class Devices(share.Devices):
             ))
         # Open serial connection to data monitor
         cmr_ser = serial.Serial(
-            port=Initial.cmr_port, baudrate=9600, timeout=0.1)
+            port=share.fixture.port('017789', 'CMR'),
+            baudrate=9600,
+            timeout=0.1)
         self['cmr'] = cmrsbp.CmrSbp(cmr_ser, data_timeout=10)
         self.add_closer(self['cmr'].close)
         # EV2200 board
         ev_ser = serial.Serial(baudrate=9600, timeout=4)
         # Set port separately, as we don't want it opened yet
-        ev_ser.port = Initial.ev_port
+        ev_ser.port = share.fixture.port('017789', 'EV')
         self['ev'] = ev2200.EV2200(ev_ser)
         # PIC device programmer
         folder = os.path.dirname(

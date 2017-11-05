@@ -15,8 +15,6 @@ class InitialMicro(share.TestSequence):
 
     """IDS-500 Initial Micro Test Program."""
 
-    # Serial port for the PIC.
-    pic_port = share.fixture.port('017056', 'PIC')
     # Firmware image
     pic_hex_mic = 'ids_picMic_2.hex'
     # test limits
@@ -73,7 +71,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = InitialMicro.pic_port
+        pic_ser.port = share.fixture.port('017056', 'PIC')
         self['pic'] = console.Console(pic_ser)
         self['rla_comm'].set_on()
         self.add_closer(lambda: self['rla_comm'].set_off())
@@ -95,9 +93,9 @@ class Sensors(share.Sensors):
         pic = self.devices['pic']
         sensor = tester.sensor
         self['Vsec5VuP'] = sensor.Vdc(dmm, high=19, low=1, rng=10, res=0.001)
-        self['SwRev'] = console.Sensor(
+        self['SwRev'] = share.console.Sensor(
                 pic, 'PIC-SwRev', rdgtype=sensor.ReadingString)
-        self['MicroTemp'] = console.Sensor(
+        self['MicroTemp'] = share.console.Sensor(
                 pic, 'PIC-MicroTemp', rdgtype=sensor.ReadingString)
 
 

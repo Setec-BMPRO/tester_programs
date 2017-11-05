@@ -237,12 +237,12 @@ class Sensors(share.Sensors):
             delay=0.2)
         # Console sensors
         arm = self.devices['arm']
-        self['arm_vout'] = console.Sensor(
+        self['arm_vout'] = share.console.Sensor(
             arm, 'not-pulsing-volts', scale=0.001)
-        self['arm_iout'] = console.Sensor(
+        self['arm_iout'] = share.console.Sensor(
             arm, 'not-pulsing-current', scale=0.001)
-        self['arm_switch'] = console.Sensor(arm, 'SWITCH')
-        self['arm_swver'] = console.Sensor(
+        self['arm_switch'] = share.console.Sensor(arm, 'SWITCH')
+        self['arm_swver'] = share.console.Sensor(
             arm, 'SW_VER', rdgtype=sensor.ReadingString)
 
 

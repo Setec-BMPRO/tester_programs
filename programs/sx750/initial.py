@@ -370,11 +370,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.fixture.port('022837', 'ARM')
-    # Serial port for the Arduino.
-    arduino_port = share.fixture.port('022837', 'ARDUINO')
-
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -396,21 +391,23 @@ class Devices(share.Devices):
                 ('rla_0Vp', tester.Relay, 'RLA5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Serial port for the ARM. Used by programmer and ARM comms module.
+        arm_port = share.fixture.port('022837', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         file = os.path.join(folder, Initial.arm_bin)
         self['programmer'] = share.programmer.ARM(
-            self.arm_port, file, boot_relay=self['rla_boot'])
+            arm_port, file, boot_relay=self['rla_boot'])
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = self.arm_port
+        arm_ser.port = arm_port
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = self.arduino_port
+        ard_ser.port = share.fixture.port('022837', 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
@@ -486,7 +483,7 @@ class Sensors(share.Sensors):
                 ('ocpStepDn', 'OCP_STEP_DN'),
                 ('ocpLock', 'OCP_LOCK'),
             ):
-            self[name] = console.Sensor(
+            self[name] = share.console.Sensor(
                 ard, cmdkey, rdgtype=sensor.ReadingString)
         # ARM sensors
         arm = self.devices['arm']
@@ -496,12 +493,12 @@ class Sensors(share.Sensors):
                 ('ARM_12V', 'ARM-12V'),
                 ('ARM_24V', 'ARM-24V'),
             ):
-            self[name] = console.Sensor(arm, cmdkey)
+            self[name] = share.console.Sensor(arm, cmdkey)
         for name, cmdkey in (
                 ('ARM_SwVer', 'ARM_SwVer'),
                 ('ARM_SwBld', 'ARM_SwBld'),
             ):
-            self[name] = console.Sensor(
+            self[name] = share.console.Sensor(
                 arm, cmdkey, rdgtype=sensor.ReadingString)
 
 

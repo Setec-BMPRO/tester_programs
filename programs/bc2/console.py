@@ -4,9 +4,6 @@
 
 import share
 
-# Some easier to use short names
-Sensor = share.console.Sensor
-
 
 class Console(share.console.SamB11):
 

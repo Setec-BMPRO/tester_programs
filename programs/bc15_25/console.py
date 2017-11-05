@@ -6,7 +6,6 @@ import re
 import share
 
 # Some easier to use short names
-Sensor = share.console.Sensor
 ParameterString = share.console.ParameterString
 ParameterBoolean = share.console.ParameterBoolean
 ParameterFloat = share.console.ParameterFloat

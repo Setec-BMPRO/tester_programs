@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 """Drifter console driver."""
 
-from share import console
+import share
 
 # Some easier to use short names
-Sensor = console.Sensor
-ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
 
 
-class Console(console.Base):
+class Console(share.console.Base):
 
     """Communications to Drifter console."""
 

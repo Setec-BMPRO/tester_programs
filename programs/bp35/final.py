@@ -80,7 +80,7 @@ class Sensors(share.Sensors):
             self.devices['dmm'], high=2, low=2, rng=100, res=0.001)
         self['vbat'].doc = 'Unit output'
         bp35 = self.devices['bp35']
-        self['arm_swver'] = console.Sensor(
+        self['arm_swver'] = share.console.Sensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
         self['yesnogreen'] = sensor.YesNo(
             message=tester.translate('bp35_final', 'IsOutputLedGreen?'),

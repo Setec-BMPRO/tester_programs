@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 """SX-750 ARM processor console driver."""
 
-from share import console
+import share
 
-Sensor = console.Sensor
 # Some easier to use short names
-ParameterString = console.ParameterString
-ParameterFloat = console.ParameterFloat
-ParameterBoolean = console.ParameterBoolean
+ParameterString = share.console.ParameterString
+ParameterFloat = share.console.ParameterFloat
+ParameterBoolean = share.console.ParameterBoolean
 
 
-class Console(console.Base):
+class Console(share.console.Base):
 
     """Communications to SX-750 console."""
 

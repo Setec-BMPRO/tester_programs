@@ -5,7 +5,6 @@
 import share
 
 # Some easier to use short names
-Sensor = share.console.Sensor
 ParameterCalibration = share.console.ParameterCalibration
 ParameterHex = share.console.ParameterHex
 ParameterOverride = share.console.ParameterOverride

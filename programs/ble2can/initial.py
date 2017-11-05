@@ -165,7 +165,7 @@ class Sensors(share.Sensors):
                 ('arm_BtMAC', 'BT_MAC'),
                 ('arm_SwVer', 'SW_VER'),
             ):
-            self[name] = console.Sensor(
+            self[name] = share.console.Sensor(
                 ble2can, cmdkey, rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('ble2can_initial', 'msgSnEntry'),

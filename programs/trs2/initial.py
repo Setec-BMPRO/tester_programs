@@ -247,7 +247,7 @@ class Sensors(share.Sensors):
                 ('arm_BtMAC', 'BT_MAC'),
                 ('arm_SwVer', 'SW_VER'),
             ):
-            self[name] = console.Sensor(
+            self[name] = share.console.Sensor(
                 trs2, cmdkey, rdgtype=sensor.ReadingString)
         for name, cmdkey, units in (
                 ('arm_Fault', 'FAULT_CODE', '0/1'),
@@ -256,7 +256,7 @@ class Sensors(share.Sensors):
                 ('arm_Ibrake', 'IBRAKE', 'A'),
                 ('arm_Vpin', 'VPIN', 'V'),
             ):
-            self[name] = console.Sensor(trs2, cmdkey)
+            self[name] = share.console.Sensor(trs2, cmdkey)
             if units:
                 self[name].units = units
 

@@ -268,9 +268,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Serial port for the ARM. Used by programmer and ARM comms module.
-    arm_port = share.fixture.port('025197', 'ARM')
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -291,16 +288,18 @@ class Devices(share.Devices):
         self['dcl_12v'] = tester.DCLoadParallel(
             ((tester.DCLoad(self.physical_devices['DCL2']), 12),
              (tester.DCLoad(self.physical_devices['DCL3']), 10)))
+        # Serial port for the ARM. Used by programmer and ARM comms module.
+        arm_port = share.fixture.port('025197', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
-            self.arm_port, os.path.join(folder, Initial.arm_bin),
+            arm_port, os.path.join(folder, Initial.arm_bin),
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
-        arm_ser.port = self.arm_port
+        arm_ser.port = arm_port
         self['arm'] = console.Console(arm_ser)
         # Switch on fixture power
         self['dcs_fixture'].output(10.0, output=True)
@@ -366,12 +365,12 @@ class Sensors(share.Sensors):
                 ('arm_12v', '12V'),
                 ('arm_24v', '24V'),
             ):
-            self[name] = console.Sensor(arm, cmdkey)
+            self[name] = share.console.Sensor(arm, cmdkey)
         for name, cmdkey in (
                 ('arm_swver', 'SwVer'),
                 ('arm_swbld', 'SwBld'),
             ):
-            self[name] = console.Sensor(
+            self[name] = share.console.Sensor(
                 arm, cmdkey, rdgtype=sensor.ReadingString)
 
 

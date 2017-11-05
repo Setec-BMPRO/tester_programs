@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 """BatteryCheck ARM processor console driver."""
 
-from share import console
+import share
 
-Sensor = console.Sensor
 # Some easier to use short names
-ParameterString = console.ParameterString
-ParameterBoolean = console.ParameterBoolean
-ParameterFloat = console.ParameterFloat
+ParameterString = share.console.ParameterString
+ParameterBoolean = share.console.ParameterBoolean
+ParameterFloat = share.console.ParameterFloat
 
 
-class Console(console.BadUart):
+class Console(share.console.BadUart):
 
     """Communications to BatteryCheck console."""
 
