@@ -13,32 +13,26 @@ from tester import (
     )
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
 
     """RVVIEW Initial Test Program."""
 
-    bin_version = '1.0.14022.985'   # Software binary version
-    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    arm_hw_ver = (2, 0, 'A')
-    # Software image filename
-    arm_file = 'RvView_{0}.bin'.format(bin_version)
-    # CAN echo request messages
-    can_echo = 'TQQ,32,0'
+    # ARM software image file
+    arm_file = 'RvView_{0}.bin'.format(config.SW_VERSION)
     # Input voltage to power the unit
     vin_set = 8.1
-    # CAN Bus is operational if status bit 28 is set
-    _can_bind = 1 << 28
 
     limitdata = (
         LimitBetween('Vin', 7.0, 8.0),
         LimitPercent('3V3', 3.3, 3.0),
         LimitLow('BkLghtOff', 0.5),
         LimitBetween('BkLghtOn', 2.5, 3.5),
-        LimitRegExp('SwVer', '^{0}$'.format(bin_version.replace('.', r'\.'))),
-        LimitRegExp('CAN_RX', r'^RRQ,32,0'),
-        LimitInteger('CAN_BIND', _can_bind),
+        LimitRegExp(
+            'SwVer', '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
+        LimitInteger('CAN_BIND', 1 << 28),
         )
 
     def open(self):
@@ -69,7 +63,7 @@ class Initial(share.TestSequence):
         """
         rvview = dev['rvview']
         rvview.open()
-        rvview.brand(self.arm_hw_ver, self.sernum, dev['rla_reset'])
+        rvview.brand(config.HW_VERSION, self.sernum, dev['rla_reset'])
         mes['arm_swver']()
 
     @share.teststep
@@ -90,16 +84,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        rvview = dev['rvview']
         mes['arm_can_bind'](timeout=10)
-        rvview.can_testmode(True)
-        # From here, Command-Response mode is broken by the CAN debug messages!
-        rvview['CAN'] = self.can_echo
-        echo_reply = rvview.port.readline().decode(errors='ignore')
-        echo_reply = echo_reply.replace('\r\n', '')
-        rx_can = mes['rx_can']
-        rx_can.sensor.store(echo_reply)
-        rx_can()
+        rvviewtunnel = dev['rvviewtunnel']
+        rvviewtunnel.open()
+        mes['TunnelSwVer']()
+        rvviewtunnel.close()
 
 
 class Devices(share.Devices):
@@ -110,7 +99,6 @@ class Devices(share.Devices):
         """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
@@ -126,15 +114,16 @@ class Devices(share.Devices):
         self['programmer'] = share.programmer.ARM(
             arm_port, file, crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
-        # Serial connection to the rvview console
+        # Serial connection to the console
         rvview_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         rvview_ser.port = arm_port
-        # rvview Console driver
+        # Console driver
         self['rvview'] = console.DirectConsole(rvview_ser)
-        # Power to fixture Comms circuits.
-        self['dcs_vcom'].output(9.0, True)
-        self.add_closer(lambda: self['dcs_vcom'].output(0, False))
+        # Tunneled Console driver
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.rvview)
+        self['rvviewtunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):
         """Reset instruments."""
@@ -151,7 +140,6 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
-        rvview = self.devices['rvview']
         sensor = tester.sensor
         self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
@@ -167,9 +155,14 @@ class Sensors(share.Sensors):
         self['oYesNoOff'] = sensor.YesNo(
             message=tester.translate('rvview_initial', 'PushButtonOff?'),
             caption=tester.translate('rvview_initial', 'capButtonOff'))
-        self['arm_canbind'] = share.console.Sensor(rvview, 'CAN_BIND')
+        # Console sensors
+        rvview = self.devices['rvview']
+        rvviewtunnel = self.devices['rvviewtunnel']
+        self['oCANBIND'] = share.console.Sensor(rvview, 'CAN_BIND')
         self['oSwVer'] = share.console.Sensor(
             rvview, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['TunnelSwVer'] = share.console.Sensor(
+            rvviewtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -185,8 +178,8 @@ class Measurements(share.Measurements):
             ('dmm_BkLghtOn', 'BkLghtOn', 'oBkLght', ''),
             ('ui_SnEntry', 'SerNum', 'oSnEntry', ''),
             ('arm_swver', 'SwVer', 'oSwVer', ''),
-            ('rx_can', 'CAN_RX', 'mir_can', ''),
-            ('arm_can_bind', 'CAN_BIND', 'arm_canbind', ''),
             ('ui_YesNoOn', 'Notify', 'oYesNoOn', ''),
             ('ui_YesNoOff', 'Notify', 'oYesNoOff', ''),
+            ('arm_can_bind', 'CAN_BIND', 'oCANBIND', ''),
+            ('TunnelSwVer', 'SwVer', 'TunnelSwVer', ''),
             ))
