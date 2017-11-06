@@ -36,7 +36,7 @@ class BLE2CANInitial(ProgramTestCase):
                 'Prepare': (
                     (sen['sernum'], 'A1526040123'),
                     (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
-                    (sen['3v3'], 3.30),
+                    (sen['3v3'], 3.30), (sen['5v'], 5.0),
                     ),
                 'TestArm': (
                     (sen['red'], (3.1, 0.5, 3.1, )),
@@ -47,12 +47,16 @@ class BLE2CANInitial(ProgramTestCase):
                 'Bluetooth': (
                     (sen['arm_BtMAC'], self.btmac),
                     ),
+                'CanBus': (
+                    (sen['oCANBIND'], 1 << 28),
+                    (sen['TunnelSwVer'], ble2can.config.SW_VERSION),
+                    ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(16, len(result.readings))
+        self.assertEqual(19, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'TestArm', 'Bluetooth'], self.tester.ut_steps)
+            ['Prepare', 'TestArm', 'Bluetooth', 'CanBus'], self.tester.ut_steps)

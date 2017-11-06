@@ -6,7 +6,8 @@ import serial
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitHigh, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
+    LimitLow, LimitHigh, LimitDelta, LimitPercent,
+    LimitBoolean, LimitRegExp, LimitInteger
     )
 import share
 from . import console
@@ -23,6 +24,7 @@ class Initial(share.TestSequence):
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
         LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
+        LimitPercent('5V', 5.0, 0.5, doc='5V present'),
         LimitHigh('RedLedOff', 3.1, doc='Led off'),
         LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
         LimitHigh('GreenLedOff', 3.1, doc='Led off'),
@@ -36,6 +38,7 @@ class Initial(share.TestSequence):
         LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address'),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
+        LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
         )
 
     def open(self):
@@ -45,6 +48,7 @@ class Initial(share.TestSequence):
             TestStep('Prepare', self._step_prepare),
             TestStep('TestArm', self._step_test_arm),
             TestStep('Bluetooth', self._step_bluetooth),
+            TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
 
@@ -58,7 +62,7 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         mes['dmm_tstpincov'](timeout=5)
         dev['dcs_vin'].output(self.vbatt, True)
-        self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
+        self.measure(('dmm_vin', 'dmm_3v3', 'dmm_5v'), timeout=5)
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
@@ -94,6 +98,15 @@ class Initial(share.TestSequence):
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
 
+    @share.teststep
+    def _step_canbus(self, dev, mes):
+        """Test the Can Bus."""
+        mes['arm_can_bind'](timeout=10)
+        ble2cantunnel = dev['ble2cantunnel']
+        ble2cantunnel.open()
+        mes['TunnelSwVer']()
+        ble2cantunnel.close()
+
 
 class Devices(share.Devices):
 
@@ -118,6 +131,10 @@ class Devices(share.Devices):
         ble2can_ser.port = share.fixture.port('030451', 'ARM')
         # Console driver
         self['ble2can'] = console.Console(ble2can_ser)
+        # Tunneled Console driver
+        tunnel = share.console.CanTunnel(
+            self.physical_devices['CAN'], share.CanID.ble2can)
+        self['ble2cantunnel'] = console.Console(tunnel)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
@@ -149,6 +166,8 @@ class Sensors(share.Sensors):
         self['vin'].doc = 'X1/X2'
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['3v3'].doc = 'U4 output'
+        self['5v'] = sensor.Vdc(dmm, high=4, low=1, rng=10, res=0.01)
+        self['5v'].doc = 'U5 output'
         self['red'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
         self['red'].doc = 'Led cathode'
         self['green'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
@@ -161,12 +180,16 @@ class Sensors(share.Sensors):
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         ble2can = self.devices['ble2can']
+        ble2cantunnel = self.devices['ble2cantunnel']
+        self['oCANBIND'] = share.console.Sensor(ble2can, 'CAN_BIND')
         for name, cmdkey in (
                 ('arm_BtMAC', 'BT_MAC'),
                 ('arm_SwVer', 'SW_VER'),
             ):
             self[name] = share.console.Sensor(
                 ble2can, cmdkey, rdgtype=sensor.ReadingString)
+        self['TunnelSwVer'] = share.console.Sensor(
+            ble2cantunnel, 'SW_VER', rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('ble2can_initial', 'msgSnEntry'),
             caption=tester.translate('ble2can_initial', 'capSnEntry'))
@@ -182,6 +205,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
             ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
+            ('dmm_5v', '5V', '5v', '5V rail voltage'),
             ('dmm_redoff', 'RedLedOff', 'red', 'Red led off'),
             ('dmm_redon', 'RedLedOn', 'red', 'Red led on'),
             ('dmm_greenoff', 'GreenLedOff', 'green', 'Green led off'),
@@ -194,4 +218,6 @@ class Measurements(share.Measurements):
             ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
             ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('arm_can_bind', 'CAN_BIND', 'oCANBIND', 'CAN bound'),
+            ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
             ))
