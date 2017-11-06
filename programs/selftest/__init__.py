@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Selfchecker Test Program."""
+
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitDelta
 import share
 
 
@@ -11,28 +11,28 @@ class Main(share.TestSequence):
     """Selfchecker Test Program."""
 
     limitdata = (
-        LimitDelta('12V', 12.0, 0.5),
-        LimitDelta('5V', 5.0, 0.5),
-        LimitDelta('ShieldOFF', 6.0, 0.5),
-        LimitDelta('ShieldON', 0.0, 0.5),
-        LimitDelta('Dso8', 8.0, 0.5),
-        LimitDelta('Dso6', 6.0, 0.5),
-        LimitDelta('Dso4', 4.0, 0.5),
-        LimitBetween('Dso2', 1.35, 2.5),
-        LimitDelta('Dcs5', 5.0, 0.5),
-        LimitDelta('Dcs10', 10.0, 0.5),
-        LimitDelta('Dcs20', 20.0, 0.5),
-        LimitDelta('Dcs35', 35.0, 0.5),
-        LimitDelta('120Vac', 120.0, 5.0),
-        LimitDelta('240Vac', 240.0, 5.0),
-        LimitDelta('Dcl05', 5.0, 1),
-        LimitDelta('Dcl10', 10.0, 1),
-        LimitDelta('Dcl20', 20.0, 1),
-        LimitDelta('Dcl40', 40.0, 1),
-        LimitDelta('RlaOff', 12.0, 0.5),
-        LimitLow('RlaOn', 1.5),
-        LimitDelta('Disch_on', 10.0, 1.0),
-        LimitLow('Disch_off', 0.5),
+        tester.LimitDelta('12V', 12.0, 0.5),
+        tester.LimitDelta('5V', 5.0, 0.5),
+        tester.LimitDelta('ShieldOFF', 6.0, 0.5),
+        tester.LimitDelta('ShieldON', 0.0, 0.5),
+        tester.LimitDelta('Dso8', 8.0, 0.5),
+        tester.LimitDelta('Dso6', 6.0, 0.5),
+        tester.LimitDelta('Dso4', 4.0, 0.5),
+        tester.LimitBetween('Dso2', 1.35, 2.5),
+        tester.LimitDelta('Dcs5', 5.0, 0.5),
+        tester.LimitDelta('Dcs10', 10.0, 0.5),
+        tester.LimitDelta('Dcs20', 20.0, 0.5),
+        tester.LimitDelta('Dcs35', 35.0, 0.5),
+        tester.LimitDelta('120Vac', 120.0, 5.0),
+        tester.LimitDelta('240Vac', 240.0, 5.0),
+        tester.LimitDelta('Dcl05', 5.0, 1),
+        tester.LimitDelta('Dcl10', 10.0, 1),
+        tester.LimitDelta('Dcl20', 20.0, 1),
+        tester.LimitDelta('Dcl40', 40.0, 1),
+        tester.LimitDelta('RlaOff', 12.0, 0.5),
+        tester.LimitLow('RlaOn', 1.5),
+        tester.LimitDelta('Disch_on', 10.0, 1.0),
+        tester.LimitLow('Disch_off', 0.5),
         )
 
     def open(self):
@@ -40,13 +40,13 @@ class Main(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         is_ate2 = self.devices.is_ate2
         self.steps = (
-            TestStep('ACSource', self._step_acsource),
-            TestStep('Checker', self._step_checker),
-            TestStep('DSO', self._step_dso, not is_ate2),
-            TestStep('DCSource', self._step_dcsource),
-            TestStep('DCLoad', self._step_dcload),
-            TestStep('RelayDriver', self._step_relaydriver),
-            TestStep('Discharge', self._step_discharge),
+            tester.TestStep('ACSource', self._step_acsource),
+            tester.TestStep('Checker', self._step_checker),
+            tester.TestStep('DSO', self._step_dso, not is_ate2),
+            tester.TestStep('DCSource', self._step_dcsource),
+            tester.TestStep('DCLoad', self._step_dcload),
+            tester.TestStep('RelayDriver', self._step_relaydriver),
+            tester.TestStep('Discharge', self._step_discharge),
             )
 
     @share.teststep

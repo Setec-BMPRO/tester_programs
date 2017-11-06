@@ -2,5 +2,7 @@
 # -*- coding: utf-8 -*-
 """ATXG-450 Test Programs."""
 
-# Easy access to utility methods and classes
 from .final_2v import Final2V
+
+
+__all__ = ['Final2V']

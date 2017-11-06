@@ -2,5 +2,7 @@
 # -*- coding: utf-8 -*-
 """CN101 Test Programs."""
 
-# Easy access to utility methods and classes
 from .initial import Initial
+
+
+__all__ = ['Initial']

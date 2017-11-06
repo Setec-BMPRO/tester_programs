@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """SMU750-70 Test Programs."""
 
-# Easy access to utility methods and classes
 from .initial import Initial
 from .final import Final
+
+
+__all__ = ['Final', 'Initial']

@@ -4,13 +4,23 @@
 """Shared modules for Tester programs."""
 
 import enum
-# Easy access to utility methods and classes
 from .testsequence import Devices, Sensors, Measurements, TestSequence
 from .testsequence import teststep      # a decorator
 from . import fixture
 from . import console
 from . import bluetooth
 from . import timers
+
+
+__all__ = [
+    'Devices', 'Sensors', 'Measurements', 'TestSequence',
+    'teststep',
+    'test_can_tunnel',
+    'fixture',
+    'console',
+    'bluetooth',
+    'timers',
+    ]
 
 
 @enum.unique
