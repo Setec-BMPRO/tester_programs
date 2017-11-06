@@ -2,32 +2,8 @@
 # -*- coding: utf-8 -*-
 """SamB11 device Base console driver."""
 
-import enum
 from . import parameter
 from . import protocol
-
-
-@enum.unique
-class Override(enum.IntEnum):
-
-    """Console manual override constants."""
-
-    normal = 0
-    force_off = 1
-    force_on = 2
-
-
-class ParameterOverride(parameter.ParameterFloat):
-
-    """A parameter for overriding unit operation."""
-
-    def __init__(self, command):
-        super().__init__(
-            command,
-            writeable=True,
-            minimum=min(Override),
-            maximum=max(Override)
-            )
 
 
 class SamB11(protocol.Base):
@@ -70,7 +46,7 @@ class SamB11(protocol.Base):
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
 
-    def override(self, state=Override.normal):
+    def override(self, state=parameter.Override.normal):
         """Manually override functions of the unit.
 
         @param state Override enumeration

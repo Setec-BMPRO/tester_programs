@@ -1,20 +1,34 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2017 SETEC Pty Ltd
-"""A Tunneled Console over CAN.
+"""CAN bus utilities."""
 
-An interface to tunnel console data across a CAN bus to a remote device.
-The interface is compatible with that of a SimSerial port, and is
-used as the 'port' by another Console driver.
-
-"""
-
+import enum
 import tester
 
 
-class CanTunnel():
+@enum.unique
+class ID(enum.IntEnum):
 
-    """A CAN Tunnel to another Console.
+    """CAN device ID values for different products.
+
+    From "SetecCANandBLECommunicationsProtocol Ver2B".
+
+    """
+
+    cn100 = 4
+    bp35 = 16
+    j35 = 20
+    trek2 = 32
+    cn101 = 36
+    ble2can = 40
+    rvview = 44
+    bc2 = 128
+
+
+class Tunnel():
+
+    """A CAN Tunnel to product console interface.
 
     A SimSerial object is used to do input data buffering of the decoded
     data received from the CAN Tunnel.

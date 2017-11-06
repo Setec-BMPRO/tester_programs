@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Parameters for Serial Consoles."""
 
+import enum
+
 
 class ParameterError(Exception):
 
@@ -198,84 +200,24 @@ class ParameterHex(_Parameter):
         return (int(value, 16) & self.mask) / self.scale
 
 
-class ParameterHex0x(ParameterHex):
+@enum.unique
+class Override(enum.IntEnum):
 
-    """Hex parameter type with the newer '0x' prefix hex literal."""
+    """Console manual override constants."""
 
-    def __init__(self,
-            command, writeable=False, readable=True,
-            minimum=0, maximum=1000, scale=1, mask=0xFFFFFFFF,
-            write_expected=0, read_expected=1):
-        """Remember the data limits."""
+    normal = 0
+    force_off = 1
+    force_on = 2
+
+
+class ParameterOverride(ParameterFloat):
+
+    """A parameter for overriding SamB11 unit operation."""
+
+    def __init__(self, command):
         super().__init__(
             command,
-            writeable, readable,
-            minimum, maximum, scale, mask,
-            write_format='0x{0:08X} "{1} XN!',
-            write_expected=0, read_expected=1)
-
-
-class ParameterCAN(_Parameter):
-
-    """CAN Parameter class."""
-
-    def __init__(self, command, writeable=False):
-        """Set a new read_format."""
-        super().__init__(command, writeable, read_format='"{0} CAN')
-
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        raise ParameterError('CAN parameters are read-only')
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Function to use to read the value.
-        @return String value.
-
-        """
-        value = super().read(func)
-        if value is None:
-            value = ''
-        return value
-
-
-class ParameterRaw(_Parameter):
-
-    """Raw Parameter class.
-
-    Calls a function directly rather than generating command strings and
-    using console.action().
-
-    """
-
-    def __init__(self, command, writeable=False, func=None):
-        """Remember function to call."""
-        super().__init__(command, writeable)
-        self._func = func
-
-    def write(self, value, func):
-        """Write parameter value.
-
-        @param value Data value.
-        @param func Function to use to write the value.
-
-        """
-        raise ParameterError('Raw parameters are read-only')
-
-    def read(self, func):
-        """Read parameter value.
-
-        @param func Ignored.
-        @return String value.
-
-        """
-        value = self._func()
-        if value is None:
-            value = ''
-        return value
+            writeable=True,
+            minimum=min(Override),
+            maximum=max(Override)
+            )

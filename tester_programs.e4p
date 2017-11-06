@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-11-06, 13:07:49 -->
+<!-- Saved: 2017-11-06, 17:04:16 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -155,8 +155,8 @@
     <Source>share/bluetooth/eunistone_pan1322.py</Source>
     <Source>share/bluetooth/raspblue.py</Source>
     <Source>share/bluetooth/rn4020.py</Source>
+    <Source>share/can.py</Source>
     <Source>share/console/__init__.py</Source>
-    <Source>share/console/can_tunnel.py</Source>
     <Source>share/console/parameter.py</Source>
     <Source>share/console/protocol.py</Source>
     <Source>share/console/samb11.py</Source>

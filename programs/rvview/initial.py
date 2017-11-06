@@ -121,8 +121,8 @@ class Devices(share.Devices):
         # Console driver
         self['rvview'] = console.DirectConsole(rvview_ser)
         # Tunneled Console driver
-        tunnel = share.console.CanTunnel(
-            self.physical_devices['CAN'], share.CanID.rvview)
+        tunnel = share.can.Tunnel(
+            self.physical_devices['CAN'], share.can.ID.rvview)
         self['rvviewtunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):

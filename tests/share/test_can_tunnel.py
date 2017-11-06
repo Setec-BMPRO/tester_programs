@@ -16,7 +16,7 @@ class Tunnel(unittest.TestCase):
 
     def setUp(self):
         self.interface = MagicMock(name='serial2can')
-        self.mycon = share.console.CanTunnel(self.interface, self.targetid)
+        self.mycon = share.can.Tunnel(self.interface, self.targetid)
 
     def test_open(self):
         """Open."""
