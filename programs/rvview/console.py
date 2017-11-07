@@ -4,11 +4,6 @@
 
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterHex = share.console.ParameterHex
-
 
 class _Console():
 
@@ -17,25 +12,25 @@ class _Console():
     # Test mode controlled by STATUS bit 31
     _test_on = (1 << 31)
     _test_off = ~_test_on & 0xFFFFFFFF
-
+    parameter = share.console.parameter
     cmd_data = {
-        'NVDEFAULT': ParameterBoolean(
+        'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': ParameterString(
+        'SER_ID': parameter.String(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
-        'HW_VER': ParameterString(
+        'HW_VER': parameter.String(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-        'STATUS': ParameterHex(
+        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'STATUS': parameter.Hex(
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
-        'CAN_BIND': ParameterHex(
+        'CAN_BIND': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-        'CAN': ParameterString(
+        'CAN': parameter.String(
             'CAN', writeable=True, write_format='"{0} {1}'),
         }
 

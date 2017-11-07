@@ -4,61 +4,58 @@
 
 import share
 
-# Some easier to use short names
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-
 
 class Console(share.console.Base):
 
     """Communications to Drifter console."""
 
+    parameter = share.console.parameter
     cmd_data = {
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             'XDEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean(
+        'NVDEFAULT': parameter.Boolean(
             'NV-WRITE-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
-        'NVSTATUS': ParameterFloat('NV-STATUS PRINT', read_format='{0}'),
-        'RESTART': ParameterBoolean(
+        'NVSTATUS': parameter.Float('NV-STATUS PRINT', read_format='{0}'),
+        'RESTART': parameter.Boolean(
             'RESTART', writeable=True, readable=False, write_format='{1}',
             write_expected=3),
-        'APS_DISABLE': ParameterFloat(
+        'APS_DISABLE': parameter.Float(
             'APS-DISABLE',
             writeable=True, readable=False, write_format='{0} {1}'),
-        'CAL_RELOAD': ParameterBoolean(
+        'CAL_RELOAD': parameter.Boolean(
             'CAL-RELOAD', writeable=True, readable=False, write_format='{1}'),
-        'CAL_I_ZERO': ParameterBoolean(
+        'CAL_I_ZERO': parameter.Boolean(
             'CAL-I-ZERO', writeable=True, readable=False, write_format='{1}'),
-        'CAL_I_SLOPE': ParameterFloat(
+        'CAL_I_SLOPE': parameter.Float(
             'CAL-I-SLOPE',
             writeable=True, readable=False, scale=1000,
             minimum=-200000, maximum=200000, write_format='{0} {1}'),
-        'CAL_V_SLOPE': ParameterFloat(
+        'CAL_V_SLOPE': parameter.Float(
             'CAL-V-SLOPE',
             writeable=True, readable=False, scale=1000,
             write_format='{0} {1}'),
-        'CAL_OFFSET_CURRENT': ParameterFloat(
+        'CAL_OFFSET_CURRENT': parameter.Float(
             'X-CAL-OFFSET-CURRENT',
             writeable=True, scale=1, minimum=-1000,
             write_format='{0} {1} X!', read_format='{0} X?'),
-        'VOLTAGE': ParameterFloat(
+        'VOLTAGE': parameter.Float(
             'X-VOLTS-FILTERED', scale=1000, read_format='{0} X?'),
-        'CURRENT': ParameterFloat(
+        'CURRENT': parameter.Float(
             'X-CURRENT-FILTERED', scale=1000, read_format='{0} X?'),
-        'ZERO_CURRENT': ParameterFloat(
+        'ZERO_CURRENT': parameter.Float(
             'X-CURRENT-FILTERED', scale=1, read_format='{0} X?'),
-        'ZERO-CURRENT-DISPLAY-THRESHOLD': ParameterFloat(
+        'ZERO-CURRENT-DISPLAY-THRESHOLD': parameter.Float(
             'X-ZERO-CURRENT-DISPLAY-THRESHOLD',
             writeable=True, scale=1, minimum=-1000,
             write_format='{0} {1} X!', read_format='{0} X?'),
-        'V_FACTOR': ParameterFloat(
+        'V_FACTOR': parameter.Float(
             'X-CAL-FACTOR-VOLTS', read_format='{0} X?'),
-        'I_FACTOR': ParameterFloat(
+        'I_FACTOR': parameter.Float(
             'X-CAL-FACTOR-CURRENT', read_format='{0} X?'),
         }
     # Strings to ignore in responses

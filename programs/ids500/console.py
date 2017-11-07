@@ -5,9 +5,6 @@
 import time
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-
 
 class Console(share.console.Base):
 
@@ -17,18 +14,18 @@ class Console(share.console.Base):
     _testmode_magic_1 = 0
     _testmode_magic_2 = 2230
     _testmode_magic_3 = 42
-
+    parameter = share.console.parameter
     cmd_data = {
-        'PIC-SwRev': ParameterString('?,I,1', read_format='{0}'),
-        'PIC-MicroTemp': ParameterString('?,D,16', read_format='{0}'),
-        'PIC-Clear': ParameterString('', read_format='{0}'),
-        'PIC-HwRev': ParameterString('?,I,2', read_format='{0}'),
-        'PIC-SerNum': ParameterString('?,I,3', read_format='{0}'),
-        'SwTstMode': ParameterString(
+        'PIC-SwRev': parameter.String('?,I,1', read_format='{0}'),
+        'PIC-MicroTemp': parameter.String('?,D,16', read_format='{0}'),
+        'PIC-Clear': parameter.String('', read_format='{0}'),
+        'PIC-HwRev': parameter.String('?,I,2', read_format='{0}'),
+        'PIC-SerNum': parameter.String('?,I,3', read_format='{0}'),
+        'SwTstMode': parameter.String(
             'S,:,', writeable=True, write_format='{1}{0}'),
-        'WriteHwRev': ParameterString(
+        'WriteHwRev': parameter.String(
             'S,@,', writeable=True, write_format='{1}{0}'),
-        'WriteSerNum': ParameterString(
+        'WriteSerNum': parameter.String(
             'S,#,', writeable=True, write_format='{1}{0}'),
         }
     expected = 0

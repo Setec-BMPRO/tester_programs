@@ -4,12 +4,6 @@
 
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-ParameterHex = share.console.ParameterHex
-
 
 class _Console():
 
@@ -22,44 +16,44 @@ class _Console():
     _test_off = ~_test_on & 0xFFFFFFFF
     # "CAN Bound" is STATUS bit 28
     _can_bound = (1 << 28)
-
+    parameter = share.console.parameter
     cmd_data = {
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean(
+        'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': ParameterString(
+        'SER_ID': parameter.String(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
-        'HW_VER': ParameterString(
+        'HW_VER': parameter.String(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-        'PROMPT': ParameterString(
+        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'PROMPT': parameter.String(
             'PROMPT', writeable=True, write_format='"{0} {1}'),
-        'STATUS': ParameterHex(
+        'STATUS': parameter.Hex(
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
-        'CAN_BIND': ParameterHex(
+        'CAN_BIND': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=_can_bound),
-        'CAN': ParameterString(
+        'CAN': parameter.String(
             'CAN', writeable=True, write_format='"{0} {1}'),
-        'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
-        'BACKLIGHT': ParameterFloat(
+        'CAN_STATS': parameter.Hex('CANSTATS', read_format='{0}?'),
+        'BACKLIGHT': parameter.Float(
             'BACKLIGHT_INTENSITY', writeable=True,
             minimum=0, maximum=100, scale=1),
-        'CONFIG': ParameterHex(
+        'CONFIG': parameter.Hex(
             'CONFIG', writeable=True, minimum=0, maximum=0xFFFF),
-        'TANK_SPEED': ParameterFloat(
+        'TANK_SPEED': parameter.Float(
             'ADC_SCAN_INTERVAL_MSEC', writeable=True,
             minimum=0, maximum=10, scale=1000),
-        'TANK1': ParameterFloat('TANK_1_LEVEL'),
-        'TANK2': ParameterFloat('TANK_2_LEVEL'),
-        'TANK3': ParameterFloat('TANK_3_LEVEL'),
-        'TANK4': ParameterFloat('TANK_4_LEVEL'),
+        'TANK1': parameter.Float('TANK_1_LEVEL'),
+        'TANK2': parameter.Float('TANK_2_LEVEL'),
+        'TANK3': parameter.Float('TANK_3_LEVEL'),
+        'TANK4': parameter.Float('TANK_4_LEVEL'),
         }
 
     def brand(self, hw_ver, sernum, reset_relay):

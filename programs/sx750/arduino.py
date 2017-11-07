@@ -10,24 +10,24 @@ class Arduino(share.console.Base):
     """Communications to SX-750 Arduino console."""
 
     cmd_data = {
-        'VERSION': share.console.ParameterString(
+        'VERSION': share.console.parameter.String(
             'VERSION?', read_format='{0}'),
-        'DEBUG': share.console.ParameterString(
+        'DEBUG': share.console.parameter.String(
             '1 DEBUG', read_format='{0}'),
-        'QUIET': share.console.ParameterString(
+        'QUIET': share.console.parameter.String(
             '0 DEBUG', read_format='{0}'),
-        'PGM_5VSB': share.console.ParameterString(
+        'PGM_5VSB': share.console.parameter.String(
             'PROGRAM-5VSB', read_format='{0}'),
-        'PGM_PWRSW': share.console.ParameterString(
+        'PGM_PWRSW': share.console.parameter.String(
             'PROGRAM-PWRSW', read_format='{0}'),
-        'OCP_MAX': share.console.ParameterString(
+        'OCP_MAX': share.console.parameter.String(
             'OCP-MAX', read_format='{0}'),
-        '12_OCP_UNLOCK': share.console.ParameterString(
+        '12_OCP_UNLOCK': share.console.parameter.String(
             '12 OCP-UNLOCK', read_format='{0}'),
-        '24_OCP_UNLOCK': share.console.ParameterString(
+        '24_OCP_UNLOCK': share.console.parameter.String(
             '24 OCP-UNLOCK', read_format='{0}'),
-        'OCP_STEP_DN': share.console.ParameterString(
+        'OCP_STEP_DN': share.console.parameter.String(
             'OCP-STEP-DN', read_format='{0}'),
-        'OCP_LOCK': share.console.ParameterString(
+        'OCP_LOCK': share.console.parameter.String(
             'OCP-LOCK', read_format='{0}'),
         }

@@ -4,36 +4,32 @@
 
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-
 
 class Console(share.console.BadUart):
 
     """Communications to BatteryCheck console."""
 
+    parameter = share.console.parameter
     cmd_data = {
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
-        'SW_VER': ParameterString(
+        'SW_VER': parameter.String(
             'SW-VERSION', read_format='{0}?'),
-        'SER_ID': ParameterString(
+        'SER_ID': parameter.String(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='{1} {0}'),
-        'VOLTAGE': ParameterFloat(
+        'VOLTAGE': parameter.Float(
             'X-BATTERY-VOLTS', scale=1000, read_format='{0} X?'),
-        'CURRENT': ParameterFloat(
+        'CURRENT': parameter.Float(
             'X-BATTERY-CURRENT', scale=1000, read_format='{0} X?'),
-        'SYS_EN': ParameterFloat(
+        'SYS_EN': parameter.Float(
             'X-SYSTEM-ENABLE',
             writeable=True, readable=False, write_format='{0} {1} X!'),
-        'ALARM-RELAY': ParameterBoolean(
+        'ALARM-RELAY': parameter.Boolean(
             'ALARM-RELAY',
             writeable=True, readable=False, write_format='{0} {1}'),
         }

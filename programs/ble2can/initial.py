@@ -73,13 +73,13 @@ class Initial(share.TestSequence):
         self.measure(
             ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)
-        ble2can.override(share.console.Override.force_on)
+        ble2can.override(share.console.parameter.OverrideTo.force_on)
         self.measure(
             ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
-        ble2can.override(share.console.Override.force_off)
+        ble2can.override(share.console.parameter.OverrideTo.force_off)
         self.measure(
             ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
-        ble2can.override(share.console.Override.normal)
+        ble2can.override(share.console.parameter.OverrideTo.normal)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):

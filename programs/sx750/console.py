@@ -4,41 +4,37 @@
 
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterFloat = share.console.ParameterFloat
-ParameterBoolean = share.console.ParameterBoolean
-
 
 class Console(share.console.Base):
 
     """Communications to SX-750 console."""
 
+    parameter = share.console.parameter
     cmd_data = {
-        'ARM-AcFreq': ParameterFloat(
+        'ARM-AcFreq': parameter.Float(
             'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
-        'ARM-AcVolt': ParameterFloat(
+        'ARM-AcVolt': parameter.Float(
             'X-AC-LINE-VOLTS', read_format='{0} X?'),
-        'ARM-12V': ParameterFloat(
+        'ARM-12V': parameter.Float(
             'X-RAIL-VOLTAGE-12V', scale=1000, read_format='{0} X?'),
-        'ARM-24V': ParameterFloat(
+        'ARM-24V': parameter.Float(
             'X-RAIL-VOLTAGE-24V', scale=1000, read_format='{0} X?'),
-        'ARM_SwVer': ParameterString(
+        'ARM_SwVer': parameter.String(
             'X-SOFTWARE-VERSION', read_format='{0} X?'),
-        'ARM_SwBld': ParameterString(
+        'ARM_SwBld': parameter.String(
             'X-BUILD-NUMBER', read_format='{0} X?'),
-        'FAN_SET': ParameterFloat(
+        'FAN_SET': parameter.Float(
             'X-TEMPERATURE-CONTROLLER-SETPOINT',
             writeable=True,
             write_format='{0} {1} X!'),
-        'CAL_PFC': ParameterFloat(
+        'CAL_PFC': parameter.Float(
             'CAL-PFC-BUS-VOLTS',
             writeable=True, readable=False, scale=1000,
             write_format='{0} {1}'),
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
         }
     # Strings to ignore in responses

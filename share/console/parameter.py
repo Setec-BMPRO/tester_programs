@@ -66,12 +66,12 @@ class _Parameter():
         return func(read_cmd, expected=self.read_expected)
 
 
-class ParameterString(_Parameter):
+class String(_Parameter):
 
     """String parameter type."""
 
 
-class ParameterBoolean(_Parameter):
+class Boolean(_Parameter):
 
     """Boolean parameter type."""
 
@@ -96,7 +96,7 @@ class ParameterBoolean(_Parameter):
         return bool(int(super().read(func).strip()))
 
 
-class ParameterFloat(_Parameter):
+class Float(_Parameter):
 
     """Float parameter type."""
 
@@ -141,7 +141,7 @@ class ParameterFloat(_Parameter):
         return float(value) / self.scale
 
 
-class ParameterCalibration(ParameterFloat):
+class Calibration(Float):
 
     """A parameter for calibration commands."""
 
@@ -155,7 +155,7 @@ class ParameterCalibration(ParameterFloat):
             )
 
 
-class ParameterHex(_Parameter):
+class Hex(_Parameter):
 
     """Hex parameter type with the older '$' prefix hex literal."""
 
@@ -201,7 +201,7 @@ class ParameterHex(_Parameter):
 
 
 @enum.unique
-class Override(enum.IntEnum):
+class OverrideTo(enum.IntEnum):
 
     """Console manual override constants."""
 
@@ -210,7 +210,7 @@ class Override(enum.IntEnum):
     force_on = 2
 
 
-class ParameterOverride(ParameterFloat):
+class Override(Float):
 
     """A parameter for overriding SamB11 unit operation."""
 
@@ -218,6 +218,6 @@ class ParameterOverride(ParameterFloat):
         super().__init__(
             command,
             writeable=True,
-            minimum=min(Override),
-            maximum=max(Override)
+            minimum=min(OverrideTo),
+            maximum=max(OverrideTo)
             )

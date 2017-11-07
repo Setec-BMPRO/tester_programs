@@ -4,21 +4,13 @@
 
 from .sensor import Sensor
 from . import parameter
-from .parameter import (
-    ParameterError,
-    ParameterBoolean, ParameterCalibration, ParameterFloat, ParameterHex,
-    ParameterString, Override, ParameterOverride
-    )
 from .protocol import Base, BadUart, Error, CommandError, ResponseError
 from .samb11 import SamB11
 
 
 __all__ = [
     'Sensor',
-    'parameter', 'ParameterError',
-    'ParameterBoolean', 'ParameterCalibration',
-    'ParameterFloat', 'ParameterHex', 'ParameterString',
-    'Override', 'ParameterOverride',
+    'parameter',
     'Base', 'BadUart', 'Error', 'CommandError', 'ResponseError',
     'SamB11',
     ]

@@ -14,18 +14,18 @@ class SamB11(protocol.Base):
     banner_lines = 3
     # Common commands
     common_commands = {
-        'NVDEFAULT': parameter.ParameterBoolean(
+        'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': parameter.ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': parameter.ParameterString(
+        'SER_ID': parameter.String(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
-        'HW_VER': parameter.ParameterString(
+        'HW_VER': parameter.String(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': parameter.ParameterString('SW-VERSION', read_format='{0}?'),
-        'BT_MAC': parameter.ParameterString('BLE-MAC', read_format='{0}?'),
+        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         }
 
     def __init__(self, port):
@@ -46,10 +46,10 @@ class SamB11(protocol.Base):
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
 
-    def override(self, state=parameter.Override.normal):
+    def override(self, state=parameter.OverrideTo.normal):
         """Manually override functions of the unit.
 
-        @param state Override enumeration
+        @param state OverrideTo enumeration
 
         """
         for func in self.override_commands:

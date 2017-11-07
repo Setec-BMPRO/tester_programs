@@ -5,11 +5,6 @@
 import time
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterFloat = share.console.ParameterFloat
-ParameterBoolean = share.console.ParameterBoolean
-
 
 class Console(share.console.Base):
 
@@ -19,28 +14,29 @@ class Console(share.console.Base):
     cmd_prompt = b'\r> '
     # Command suffix between echo of a command and the response.
     res_suffix = b' -> '
+    parameter = share.console.parameter
     cmd_data = {
-        'ECHO': ParameterBoolean(
+        'ECHO': parameter.Boolean(
             'ECHO', writeable=True, write_format='{0} {1}', read_format='{0}'),
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK', writeable=True, write_format='{1}'),
-        'NV-WRITE': ParameterBoolean(
+        'NV-WRITE': parameter.Boolean(
             'NV-FACTORY-WRITE', writeable=True, write_format='{1}'),
-        'RESTART': ParameterBoolean(
+        'RESTART': parameter.Boolean(
             'RESTART', writeable=True, write_format='{1}',
             write_expected=5),  # 5 lines of startup banner
-        'TEST-MODE': ParameterBoolean(
+        'TEST-MODE': parameter.Boolean(
             'TEST-MODE-ENABLE', writeable=True, write_format='{1}'),
-        'FL-RELOAD': ParameterBoolean(
+        'FL-RELOAD': parameter.Boolean(
             'ADC-FILTER-RELOAD', writeable=True, write_format='{1}'),
-        'MSP-STATUS': ParameterFloat(
+        'MSP-STATUS': parameter.Float(
             'NV-STATUS PRINT', read_format='{0}'),
-        'MSP-VOUT': ParameterFloat(
+        'MSP-VOUT': parameter.Float(
             'X-SUPPLY-VOLTAGE X@ PRINT', read_format='{0}'),
-        'CAL-V': ParameterFloat(
+        'CAL-V': parameter.Float(
             'CAL-VSET', writeable=True, write_format='{0} {1}',
             read_format='{0}'),
-        'PASSWD': ParameterString(
+        'PASSWD': parameter.String(
             'BSL-PASSWORD', read_format='{0}'),
         }
 

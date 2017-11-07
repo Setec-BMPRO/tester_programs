@@ -5,13 +5,6 @@
 import time
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-ParameterCalibration = share.console.ParameterCalibration
-ParameterHex = share.console.ParameterHex
-
 
 class _Console():
 
@@ -23,82 +16,83 @@ class _Console():
     can_bound = 1 << 28
     # Time it takes for Manual Mode command to take effect
     manual_mode_wait = 2.1
+    parameter = share.console.parameter
     cmd_data = {
         # Common commands
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'RESTART': ParameterBoolean(
+        'RESTART': parameter.Boolean(
             'RESTART', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': ParameterString(
+        'SER_ID': parameter.String(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
-        'HW_VER': ParameterString(
+        'HW_VER': parameter.String(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-        'NVDEFAULT': ParameterBoolean(
+        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWIPE': ParameterBoolean(
+        'NVWIPE': parameter.Boolean(
             'NV-FACTORY-WIPE',
             writeable=True, readable=False, write_format='{1}'),
         # Product specific commands
-        'VSET_CAL': ParameterCalibration('VSET'),    # Voltage reading
-        'VBUS_CAL': ParameterCalibration('VBUS'),    # Voltage setpoint
-        'BUS_ICAL': ParameterCalibration('ICONV'),   # Current reading
-        'CAN': ParameterString('CAN',
+        'VSET_CAL': parameter.Calibration('VSET'),    # Voltage reading
+        'VBUS_CAL': parameter.Calibration('VBUS'),    # Voltage setpoint
+        'BUS_ICAL': parameter.Calibration('ICONV'),   # Current reading
+        'CAN': parameter.String('CAN',
             writeable=True, write_format='"{0} {1}'),
-        'CAN_STATS': ParameterHex('CANSTATS', read_format='{0}?'),
+        'CAN_STATS': parameter.Hex('CANSTATS', read_format='{0}?'),
         # X-Register product specific parameters
-        'DCDC_EN': ParameterBoolean('CONVERTER_ENABLE', writeable=True),
-        'VOUT': ParameterFloat(
+        'DCDC_EN': parameter.Boolean('CONVERTER_ENABLE', writeable=True),
+        'VOUT': parameter.Float(
             'CONVERTER_VOLTS_SETPOINT', writeable=True,
             minimum=0.0, maximum=14.0, scale=1000),
-        'IOUT': ParameterFloat(
+        'IOUT': parameter.Float(
             'CONVERTER_CURRENT_SETPOINT', writeable=True,
             minimum=15.0, maximum=35.0, scale=1000),
-        'FAN': ParameterFloat(
+        'FAN': parameter.Float(
             'FAN_SPEED', writeable=True, minimum=0, maximum=100, scale=10),
-        'AUX_RELAY': ParameterBoolean('AUX_CHARGE_RELAY', writeable=True),
-        'SOLAR': ParameterBoolean('SOLAR_CHARGE_RELAY', writeable=True),
-        'LOAD_SET': ParameterHex(
+        'AUX_RELAY': parameter.Boolean('AUX_CHARGE_RELAY', writeable=True),
+        'SOLAR': parameter.Boolean('SOLAR_CHARGE_RELAY', writeable=True),
+        'LOAD_SET': parameter.Hex(
             'LOAD_SWITCH_STATE_0', writeable=True,
             minimum=0, maximum=0x0FFFFFFF),
-        'VOUT_OV': ParameterFloat(
+        'VOUT_OV': parameter.Float(
             'CONVERTER_OVERVOLT', writeable=True,
             minimum=0, maximum=2, scale=1),
-        'SLEEP_MODE': ParameterFloat(
+        'SLEEP_MODE': parameter.Float(
             'SLEEPMODE', writeable=True, minimum=0, maximum=3, scale=1),
-        'TASK_STARTUP': ParameterFloat(
+        'TASK_STARTUP': parameter.Float(
             'TASK_STARTUP', writeable=True, minimum=0, maximum=3, scale=1),
-        'SEC_T': ParameterFloat('SECONDARY_TEMPERATURE', scale=10),
-        'BUS_V': ParameterFloat('BUS_VOLTS', scale=1000),
-        'OCP_CAL': ParameterFloat(      # OCP setpoint
+        'SEC_T': parameter.Float('SECONDARY_TEMPERATURE', scale=10),
+        'BUS_V': parameter.Float('BUS_VOLTS', scale=1000),
+        'OCP_CAL': parameter.Float(      # OCP setpoint
             'CAL_I_CONVSET', writeable=True, maximum=65535),
-        'AUX_V': ParameterFloat('AUX_INPUT_VOLTS', scale=1000),
-        'AUX_I': ParameterFloat('AUX_INPUT_CURRENT', scale=1000),
-        'CAN_V': ParameterFloat('CAN_BUS_VOLTS_SENSE', scale=1000),
-        'BATT_I': ParameterFloat('BATTERY_CURRENT', scale=1000),
-        'BATT_SWITCH': ParameterBoolean('BATTERY_ISOLATE_SWITCH'),
-        'CONV_MAX': ParameterFloat(
+        'AUX_V': parameter.Float('AUX_INPUT_VOLTS', scale=1000),
+        'AUX_I': parameter.Float('AUX_INPUT_CURRENT', scale=1000),
+        'CAN_V': parameter.Float('CAN_BUS_VOLTS_SENSE', scale=1000),
+        'BATT_I': parameter.Float('BATTERY_CURRENT', scale=1000),
+        'BATT_SWITCH': parameter.Boolean('BATTERY_ISOLATE_SWITCH'),
+        'CONV_MAX': parameter.Float(
             'MLC_MAX_CONVERTER_MW', writeable=True, scale=1000),
-        'CONV_RATED': ParameterFloat(
+        'CONV_RATED': parameter.Float(
             'MLC_CONVERTER_RATED_MA', writeable=True, scale=1000),
-        'CONV_DERATED': ParameterFloat(
+        'CONV_DERATED': parameter.Float(
             'MLC_CONVERTER_DERATED_MA', writeable=True, scale=1000),
-        'CONV_FAULT': ParameterFloat(
+        'CONV_FAULT': parameter.Float(
             'MLC_CONVERTER_FAULT_MA', writeable=True, scale=1000),
-        'INHIBIT_BY_AUX': ParameterBoolean(
+        'INHIBIT_BY_AUX': parameter.Boolean(
             'LOAD_SWITCH_INHIBITED_BY_AUX', writeable=True,),
-        'AC_F': ParameterFloat('AC_LINE_FREQUENCY', scale=1000),
-        'AC_V': ParameterFloat('AC_LINE_VOLTS', scale=1),
-        'STATUS': ParameterHex(
+        'AC_F': parameter.Float('AC_LINE_FREQUENCY', scale=1000),
+        'AC_V': parameter.Float('AC_LINE_VOLTS', scale=1),
+        'STATUS': parameter.Hex(
             'STATUS', writeable=True, minimum=0, maximum=0xF0000000),
-        'CAN_BIND': ParameterHex(
+        'CAN_BIND': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=can_bound),
         }
@@ -108,8 +102,10 @@ class _Console():
         super().__init__(port)
         # Add in the 14 load switch current readings
         for i in range(1, 15):
-            self.cmd_data['LOAD_{0}'.format(i)] = ParameterFloat(
-                'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
+            self.cmd_data['LOAD_{0}'.format(i)] = (
+                share.console.parameter.Float(
+                    'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
+                )
         self._timer = share.timers.BackgroundTimer()
 
     def brand(self, hw_ver, sernum, reset_relay):

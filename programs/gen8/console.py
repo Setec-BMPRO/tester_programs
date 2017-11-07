@@ -4,40 +4,36 @@
 
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterFloat = share.console.ParameterFloat
-ParameterBoolean = share.console.ParameterBoolean
-
 
 class Console(share.console.Base):
 
     """Communications to GEN8 console."""
 
+    parameter = share.console.parameter
     cmd_data = {
-        'AcFreq': ParameterFloat(
+        'AcFreq': parameter.Float(
             'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
-        'AcVolt': ParameterFloat(
+        'AcVolt': parameter.Float(
             'X-AC-LINE-VOLTS', read_format='{0} X?'),
-        '5V': ParameterFloat(
+        '5V': parameter.Float(
             'X-RAIL-VOLTAGE-5V', scale=1000, read_format='{0} X?'),
-        '12V': ParameterFloat(
+        '12V': parameter.Float(
             'X-RAIL-VOLTAGE-12V', scale=1000, read_format='{0} X?'),
-        '24V': ParameterFloat(
+        '24V': parameter.Float(
             'X-RAIL-VOLTAGE-24V', scale=1000, read_format='{0} X?'),
-        'SwVer': ParameterString(
+        'SwVer': parameter.String(
             'X-SOFTWARE-VERSION', read_format='{0} X?'),
-        'SwBld': ParameterString(
+        'SwBld': parameter.String(
             'X-BUILD-NUMBER', read_format='{0} X?'),
-        'CAL_PFC': ParameterFloat(
+        'CAL_PFC': parameter.Float(
             'CAL-PFC-BUS-VOLTS', writeable=True, readable=False,
             scale=1000, write_format='{0} {1}'),
-        'CAL_12V': ParameterFloat(
+        'CAL_12V': parameter.Float(
             'CAL-CONVERTER-VOLTS', writeable=True, readable=False,
             scale=1000, write_format='{0} {1}'),
-        'UNLOCK': ParameterBoolean('$DEADBEA7 UNLOCK',
+        'UNLOCK': parameter.Boolean('$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean('NV-WRITE',
+        'NVWRITE': parameter.Boolean('NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
         }
     # Strings to ignore in responses

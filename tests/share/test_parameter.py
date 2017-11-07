@@ -9,13 +9,13 @@ import share
 _CMD = 'x'
 
 
-class ParameterBoolean(unittest.TestCase):
+class Boolean(unittest.TestCase):
 
-    """ParameterBoolean test suite."""
+    """Boolean test suite."""
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.console.ParameterBoolean(_CMD, writeable=True)
+        self.param = share.console.parameter.Boolean(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -56,17 +56,17 @@ class ParameterBoolean(unittest.TestCase):
     def test_6_wr_invalid(self):
         """Invalid data values."""
         for val in (1, 'x', '1', ''):
-            with self.assertRaises(share.console.ParameterError):
+            with self.assertRaises(share.console.parameter.ParameterError):
                 self.param.write(val, self.func)
 
 
-class ParameterString(unittest.TestCase):
+class String(unittest.TestCase):
 
-    """ParameterString test suite."""
+    """String test suite."""
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.console.ParameterString(_CMD, writeable=True)
+        self.param = share.console.parameter.String(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -86,13 +86,13 @@ class ParameterString(unittest.TestCase):
             expected=0)
 
 
-class ParameterFloat(unittest.TestCase):
+class Float(unittest.TestCase):
 
-    """ParameterFloat test suite."""
+    """Float test suite."""
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.console.ParameterFloat(_CMD, writeable=True)
+        self.param = share.console.parameter.Float(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):
@@ -112,13 +112,13 @@ class ParameterFloat(unittest.TestCase):
             expected=0)
 
 
-class ParameterHex(unittest.TestCase):
+class Hex(unittest.TestCase):
 
-    """ParameterHex test suite."""
+    """Hex test suite."""
 
     def setUp(self):
         """Per-Test setup."""
-        self.param = share.console.ParameterHex(_CMD, writeable=True)
+        self.param = share.console.parameter.Hex(_CMD, writeable=True)
         self.func = MagicMock(name='Parameter')
 
     def test_1_rd_cmd(self):

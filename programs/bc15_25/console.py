@@ -5,11 +5,6 @@
 import re
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-
 
 class Console(share.console.Base):
 
@@ -17,18 +12,19 @@ class Console(share.console.Base):
 
     # Number of lines in startup banner
     banner_lines = 3
+    parameter = share.console.parameter
     cmd_data = {
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             '0xDEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean(
+        'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-        'SWITCH': ParameterFloat('SW', read_format='{0}?'),
+        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'SWITCH': parameter.Float('SW', read_format='{0}?'),
         }
     stat_data = {}  # Data readings: Key=Name, Value=Reading
     stat_regexp = re.compile('^([a-z\-]+)=([0-9]+).*$')

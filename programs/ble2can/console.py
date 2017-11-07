@@ -4,10 +4,6 @@
 
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterHex = share.console.ParameterHex
-
 
 class Console(share.console.SamB11):
 
@@ -19,25 +15,25 @@ class Console(share.console.SamB11):
         # Values:
         #   0 = LED off, 1 = LED on
         # "-1" for normal LED operation
-        'LEDS': share.console.ParameterHex(
+        'LEDS': share.console.parameter.Hex(
             'LEDS_OVERRIDE', writeable=True, readable=False),
-        'CAN_BIND': ParameterHex(
+        'CAN_BIND': share.console.parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-        'CAN': ParameterString(
+        'CAN': share.console.parameter.String(
             'CAN', writeable=True, write_format='"{0} {1}'),
         }
 
-    def override(self, state=share.console.Override.normal):
+    def override(self, state=share.console.parameter.OverrideTo.normal):
         """Manually override LED operation.
 
-        @param state Override enumeration
+        @param state OverrideTo enumeration
 
         """
-        if state == share.console.Override.normal:
+        if state == share.console.parameter.OverrideTo.normal:
             value = 0xFFFFFFFF
-        if state == share.console.Override.force_on:
+        if state == share.console.parameter.OverrideTo.force_on:
             value = 0b111
-        if state == share.console.Override.force_off:
+        if state == share.console.parameter.OverrideTo.force_off:
             value = 0b000
         self['LEDS'] = value

@@ -4,12 +4,6 @@
 
 import share
 
-# Some easier to use short names
-ParameterString = share.console.ParameterString
-ParameterBoolean = share.console.ParameterBoolean
-ParameterFloat = share.console.ParameterFloat
-ParameterHex = share.console.ParameterHex
-
 
 class _Console():
 
@@ -17,35 +11,36 @@ class _Console():
 
     # Number of lines in startup banner
     banner_lines = 0
+    parameter = share.console.parameter
     cmd_data = {
-        'UNLOCK': ParameterBoolean(
+        'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': ParameterBoolean(
+        'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': ParameterBoolean(
+        'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': ParameterString(
+        'SER_ID': parameter.String(
             'SET-SERIAL-ID', writeable=True, readable=False,
             write_format='"{0} {1}'),
-        'HW_VER': ParameterString(
+        'HW_VER': parameter.String(
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': ParameterString('SW-VERSION', read_format='{0}?'),
-        'BT_MAC': ParameterString('BLE-MAC', read_format='{0}?'),
-        'STATUS': ParameterHex(
+        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
+        'STATUS': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000),
-        'CAN_BIND': ParameterHex(
+        'CAN_BIND': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-        'CAN': ParameterString('CAN',
+        'CAN': parameter.String('CAN',
             writeable=True, write_format='"{0} {1}'),
-        'TANK1': ParameterFloat('TANK_1_LEVEL'),
-        'TANK2': ParameterFloat('TANK_2_LEVEL'),
-        'TANK3': ParameterFloat('TANK_3_LEVEL'),
-        'TANK4': ParameterFloat('TANK_4_LEVEL'),
-        'ADC_SCAN': ParameterFloat('ADC_SCAN_INTERVAL_MSEC', writeable=True),
+        'TANK1': parameter.Float('TANK_1_LEVEL'),
+        'TANK2': parameter.Float('TANK_2_LEVEL'),
+        'TANK3': parameter.Float('TANK_3_LEVEL'),
+        'TANK4': parameter.Float('TANK_4_LEVEL'),
+        'ADC_SCAN': parameter.Float('ADC_SCAN_INTERVAL_MSEC', writeable=True),
         }
 
     def brand(self, hw_ver, sernum, reset_relay):
