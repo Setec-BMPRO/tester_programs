@@ -10,7 +10,8 @@ Record the test result.
 """
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+import queue
 import logging
 from . import logging_setup
 from pydispatch import dispatcher
@@ -27,7 +28,7 @@ class UnitTester(tester.Tester):
 
     def __init__(self, prog_class, parameter):
         """Initalise the data feeder."""
-        # Create a 'real' Tester instance
+        # Create a Tester instance
         super().__init__('MockATE', {repr(prog_class): prog_class})
         self.ut_program = tester.TestProgram(
             repr(prog_class), per_panel=1, parameter=parameter, test_limits=[])
@@ -35,8 +36,6 @@ class UnitTester(tester.Tester):
         self.ut_steps = []
         self.ut_data = None
         self.ut_sensor_storer = None
-        self.ut_console_puts = None
-        self.extra_puts = None
         dispatcher.connect(     # Subscribe to the TestStep signals
             self._signal_step,
             sender=tester.signals.Thread.tester,
@@ -104,6 +103,36 @@ class UnitTester(tester.Tester):
         self.ut_result = result
 
 
+class MockATE(dict):
+
+    """A Mock ATE."""
+
+    def __init__(self, tester_type):
+        """Create Mock ATE."""
+        self.tester_type = tester_type
+        # Dummy methods
+        self.opc = lambda: None
+        self.error = lambda: None
+        self.close = lambda: None
+        # Build a dictionary of Mocks
+        storage = {}
+        for dev_name in ('GEN', 'ACS', 'DIS', 'PWR', 'SAF', 'CAN', ):
+            storage[dev_name] = MagicMock(name=dev_name)
+        gen = storage['GEN']
+        for dev_name in ('DMM', 'DSO'):
+            storage[dev_name] = (MagicMock(name=dev_name), gen)
+        for i in range(1, 8):           # DC Sources 1 - 7
+            dev_name = 'DCS{0}'.format(i)
+            storage[dev_name] = MagicMock(name=dev_name)
+        for i in range(1, 8):           # DC Loads 1 - 7
+            dev_name = 'DCL{0}'.format(i)
+            storage[dev_name] = MagicMock(name=dev_name)
+        for i in range(1, 23):          # Relays 1 - 22
+            dev_name = 'RLA{0}'.format(i)
+            storage[dev_name] = (gen, i)
+        super().__init__(storage)
+
+
 class ProgramTestCase(unittest.TestCase):
 
     """Product test program wrapper."""
@@ -114,7 +143,7 @@ class ProgramTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Per-Class setup. Startup logging."""
+        """Per-Class setup."""
         logging_setup()
         # Set lower level logging level
         for name in cls._logger_names:
@@ -123,11 +152,22 @@ class ProgramTestCase(unittest.TestCase):
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
+        # Patch tester physical instruments
+        cls.tst_patcher = patch(
+            'tester.devphysical.PhysicalDevices', new=MockATE)
+        cls.tst_patcher.start()
+        # Create the tester instance
         cls.tester = UnitTester(cls.prog_class, cls.parameter)
 
     def setUp(self):
         """Per-Test setup."""
+        # Patch queue.get to speed up open() by removing the UI ping delays
+        myq = MagicMock(name='MyQueue')
+        myq.get.side_effect = queue.Empty
+        patcher = patch('queue.Queue', return_value=myq)
+        patcher.start()
         self.tester.open()
+        patcher.stop()
         self.test_program = self.tester.runner.program
 
     def tearDown(self):
@@ -142,4 +182,5 @@ class ProgramTestCase(unittest.TestCase):
             log = logging.getLogger(name)
             log.setLevel(logging.INFO)
         cls.patcher.stop()
+        cls.tst_patcher.stop()
         cls.tester.stop()
