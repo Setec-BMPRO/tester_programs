@@ -16,7 +16,8 @@ class Console(share.console.SamB11):
         #   0 = LED off, 1 = LED on
         # "-1" for normal LED operation
         'LEDS': share.console.parameter.Hex(
-            'LEDS_OVERRIDE', writeable=True, readable=False),
+            'LEDS_OVERRIDE', writeable=True, readable=False,
+            minimum=0, maximum=0xFFFFFFFF),
         'CAN_BIND': share.console.parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=(1 << 28)),

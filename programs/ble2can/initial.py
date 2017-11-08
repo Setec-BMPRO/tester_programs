@@ -26,16 +26,17 @@ class Initial(share.TestSequence):
         LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
         LimitPercent('5V', 5.0, 0.5, doc='5V present'),
         LimitHigh('RedLedOff', 3.1, doc='Led off'),
-        LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
+        LimitDelta('RedLedOn', 0.45, 0.05, doc='Led on'),
         LimitHigh('GreenLedOff', 3.1, doc='Led off'),
         LimitLow('GreenLedOn', 0.2, doc='Led on'),
         LimitHigh('BlueLedOff', 3.1, doc='Led off'),
-        LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
+        LimitDelta('BlueLedOn', 0.3, 0.05, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+#        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+        LimitRegExp('BtMac', '^([0-9A-F]{2}[:]){5}[0-9A-F]{2}$',
             doc='Valid MAC address'),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
@@ -84,11 +85,10 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = mes['arm_btmac']().reading1
-        dev['dcs_vin'].output(0.0, True, delay=3.0)
-        dev['rla_pair_btn'].set_on(delay=0.1)
-        dev['dcs_vin'].output(self.vbatt, True, delay=5.0)
-        dev['rla_pair_btn'].set_off()
+        btmac = mes['arm_btmac']().reading1.replace(':', '')
+        dev['dcs_vin'].output(0.0, True, delay=1.0)
+        dev['rla_pair_btn'].set_on(delay=0.2)
+        dev['dcs_vin'].output(self.vbatt, True)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
