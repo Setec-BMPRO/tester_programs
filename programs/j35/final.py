@@ -25,44 +25,48 @@ class Final(share.TestSequence):
             doc='Loaded output voltage'),
         tester.LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
         tester.LimitRegExp(
-            'ARM-SwVer', '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            'SwVer', '^{0}$'.format(config.J35.sw_version.replace('.', r'\.')),
             doc='Software version'),
         )
-    # Test limits common to the -B and -C versions
-    limits_bc = (
-        tester.LimitPercent('OCP', 35.0, (4.0, 7.0), doc='OCP trip current'),
-        )
     # Test configuration keyed by program parameter
-    limitdata = {
+    config_data = {
         'A': {
+            'Config': config.J35A,
             'Limits': _common + (
-                tester.LimitPercent(
-                    'OCP', 20.0, (4.0, 10.0), doc='OCP trip current'),
+                tester.LimitPercent('OCP', config.J35A.ocp_set, (4.0, 10.0),
+                    doc='OCP trip current'),
                 ),
-            'LoadCount': 7,
             },
         'B': {
-            'Limits': _common + limits_bc,
-            'LoadCount': 14,
+            'Config': config.J35B,
+            'Limits': _common + (
+                tester.LimitPercent('OCP', config.J35B.ocp_set, (4.0, 7.0),
+                    doc='OCP trip current'),
+                ),
             },
         'C': {
-            'Limits': _common + limits_bc,
-            'LoadCount': 14,
+            'Config': config.J35C,
+            'Limits': _common + (
+                tester.LimitPercent('OCP', config.J35C.ocp_set, (4.0, 7.0),
+                    doc='OCP trip current'),
+                ),
             },
         }
 
     def open(self):
         """Prepare for testing."""
+        self.config = self.config_data[self.parameter]['Config']
         super().open(
-            self.limitdata[self.parameter]['Limits'],
+            self.config_data[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('CAN', self._step_can),
+            tester.TestStep('CAN', self._step_can, self.config.can),
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep(
+                'CanCable', self._step_can_cable, self.config.can),
             )
-        self.load_count = self.limitdata[self.parameter]['LoadCount']
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -71,7 +75,7 @@ class Final(share.TestSequence):
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
         mes['dmm_fanon'](timeout=15)
-        for load in range(self.load_count):
+        for load in range(self.config.output_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vouts'][load](timeout=5)
 
@@ -80,18 +84,18 @@ class Final(share.TestSequence):
         """Access the unit console using the CAN bus."""
         j35 = dev['j35']
         j35.open()
-        mes['arm_swver']()
+        mes['swver']()
         # Set unit internal Serial Number to match the outside label
-        j35['SER_ID'] = self.sernum
-        j35['NVWRITE'] = True
+        j35.set_sernum(self.sernum)
         j35.close()
 
     @share.teststep
     def _step_load(self, dev, mes):
         """Test outputs with load."""
         dev['dcl_out'].output(1.0,  output=True)
-        dev['dcl_out'].binary(1.0, self.load_count * self.load_per_output, 5.0)
-        for load in range(self.load_count):
+        dev['dcl_out'].binary(
+            1.0, self.config.output_count * self.load_per_output, 5.0)
+        for load in range(self.config.output_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vloads'][load](timeout=5)
 
@@ -100,6 +104,10 @@ class Final(share.TestSequence):
         """Test OCP."""
         mes['ramp_ocp'](timeout=5)
         dev['acsource'].reset()
+
+    @share.teststep
+    def _step_can_cable(self, dev, mes):
+        """Remove CAN cable."""
         mes['ui_notifycable']()
 
 
@@ -146,7 +154,8 @@ class Sensors(share.Sensors):
         self['photo'].doc = 'Airflow detector'
         # Generate load voltage sensors
         vloads = []
-        for i in range(Final.limitdata[self.parameter]['LoadCount']):
+        output_count = Final.config_data[self.parameter]['Config'].output_count
+        for i in range(output_count):
             s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
             s.doc = 'Output #{0}'.format(i + 1)
             vloads.append(s)
@@ -159,7 +168,7 @@ class Sensors(share.Sensors):
         self['ocp'].doc = 'OCP trip value'
         self['ocp'].units = 'Adc'
         j35 = self.devices['j35']
-        self['arm_swver'] = share.console.Sensor(
+        self['swver'] = share.console.Sensor(
             j35, 'SW_VER', rdgtype=sensor.ReadingString)
         self['notifycable'] = sensor.Notify(
             message=tester.translate('j35_final', 'PullCableOut'),
@@ -182,7 +191,7 @@ class Measurements(share.Measurements):
             ('dmm_fanoff', 'FanOff', 'photo', 'Fan not running'),
             ('dmm_fanon', 'FanOn', 'photo', 'Fan running'),
             ('ramp_ocp', 'OCP', 'ocp', 'Output OCP'),
-            ('arm_swver', 'ARM-SwVer', 'arm_swver', 'Unit software version'),
+            ('swver', 'SwVer', 'swver', 'Unit software version'),
             ('ui_notifycable', 'Notify', 'notifycable', 'CAN cable removed'),
             ))
         # Generate load measurements

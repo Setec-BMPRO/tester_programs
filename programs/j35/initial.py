@@ -22,10 +22,7 @@ class Initial(share.TestSequence):
     """J35 Initial Test Program."""
 
     # ARM software image file
-    arm_file = 'j35_{}.bin'.format(config.SW_VERSION)
-    # Number of outputs of each product version
-    output_count_a = 7
-    output_count_bc = 14
+    arm_file = 'j35_{}.bin'.format(config.J35.sw_version)
     # Injected voltages
     #  Battery bus
     vbat_inject = 12.6
@@ -34,14 +31,11 @@ class Initial(share.TestSequence):
     # AC voltage powering the unit
     ac_volt = 240.0
     ac_freq = 50.0
-    # Nominal OCP points of each product version
-    ocp_set_bc = 35.0
-    ocp_set_a = 20.0
     # Extra % error in OCP allowed before adjustment
     ocp_adjust_percent = 10.0
     # Output set points when running in manual mode
     vout_set = 12.8
-    ocp_set = ocp_set_bc
+    ocp_set = config.J35C.ocp_set
     # Battery load current
     batt_current = 4.0
     # Load on each output channel
@@ -72,7 +66,8 @@ class Initial(share.TestSequence):
         LimitDelta('FanOn', vout_set, delta=1.0, doc='Fan running'),
         LimitLow('FanOff', 0.5, doc='Fan not running'),
         LimitRegExp(
-            'ARM-SwVer', '^{}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            'ARM-SwVer', '^{}$'.format(
+                config.J35.sw_version.replace('.', r'\.')),
             doc='Arm Software version'),
         LimitPercent('ARM-AuxV', aux_solar_inject, percent=2.0, delta=0.3,
             doc='ARM Aux voltage reading'),
@@ -104,79 +99,64 @@ class Initial(share.TestSequence):
         LimitLow('InOCP', vout_set - 1.2, doc='Output is in OCP'),
         LimitLow('FixtureLock', 200, doc='Test fixture lid microswitch'),
         )
-    # Variant specific configuration data. Indexed by test program parameter.
-    #   'Limits': Test limits.
-    #   'HwVer': Hardware version data.
-    #   'SolarCan': Enable Solar input & CAN bus tests.
-    #   'Derate': Derate output current.
-    limitdata = {
+    # Version specific configuration data. Indexed by test program parameter.
+    config_data = {
         'A': {
+            'Config': config.J35A,
             'Limits': _common + (
-                LimitLow('LOAD_COUNT', output_count_a),
+                LimitLow('LOAD_COUNT', config.J35A.output_count),
                 LimitPercent(
-                    'OCP_pre', ocp_set_a,
+                    'OCP_pre', config.J35A.ocp_set,
                     (ocp_adjust_percent + 4.0, ocp_adjust_percent + 10.0),
                     doc='OCP trip range before adjustment'),
-                LimitPercent('OCP', ocp_set_a, (4.0, 10.0),
+                LimitPercent('OCP', config.J35A.ocp_set, (4.0, 10.0),
                     doc='OCP trip range after adjustment'),
                 ),
-            'LoadCount': 7,
-            'HwVer': (config.HW_VERSION, 1, 'A'),
-            'SolarCan': False,
-            'Derate': True,
-            'OCP': ocp_set_a,
             },
         'B': {
+            'Config': config.J35B,
             'Limits': _common + (
-                LimitLow('LOAD_COUNT', output_count_bc),
+                LimitLow('LOAD_COUNT', config.J35B.output_count),
                 LimitPercent(
-                    'OCP_pre', ocp_set_bc,
+                    'OCP_pre', config.J35B.ocp_set,
                     (ocp_adjust_percent + 4.0, ocp_adjust_percent + 7.0),
                     doc='OCP trip range before adjustment'),
-                LimitPercent('OCP', ocp_set_bc, (4.0, 7.0),
+                LimitPercent('OCP', config.J35B.ocp_set, (4.0, 7.0),
                     doc='OCP trip range after adjustment'),
                 ),
-            'LoadCount': 14,
-            'HwVer': (config.HW_VERSION, 2, 'A'),
-            'SolarCan': False,
-            'Derate': False,
-            'OCP': ocp_set_bc,
             },
         'C': {
+            'Config': config.J35C,
             'Limits': _common + (
-                LimitLow('LOAD_COUNT', output_count_bc),
+                LimitLow('LOAD_COUNT', config.J35C.output_count),
                 LimitPercent(
-                    'OCP_pre', ocp_set_bc,
+                    'OCP_pre', config.J35C.ocp_set,
                     (ocp_adjust_percent + 4.0, ocp_adjust_percent + 7.0),
                     doc='OCP trip range before adjustment'),
-                LimitPercent('OCP', ocp_set_bc, (4.0, 7.0),
+                LimitPercent('OCP', config.J35C.ocp_set, (4.0, 7.0),
                     doc='OCP trip range after adjustment'),
                 ),
-            'LoadCount': 14,
-            'HwVer': (config.HW_VERSION, 3, 'A'),
-            'SolarCan': True,
-            'Derate': False,
-            'OCP': ocp_set_bc,
             },
         }
 
     def open(self):
         """Prepare for testing."""
-        self.config = self.limitdata[self.parameter]
+        self.config = self.config_data[self.parameter]['Config']
         super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
+            self.config_data[self.parameter]['Limits'],
+            Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('ProgramARM', self.devices['program_arm'].program),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('Aux', self._step_aux),
-            TestStep('Solar', self._step_solar, self.config['SolarCan']),
+            TestStep('Solar', self._step_solar, self.config.solar),
             TestStep('PowerUp', self._step_powerup),
             TestStep('Output', self._step_output),
             TestStep('RemoteSw', self._step_remote_sw),
             TestStep('Load', self._step_load),
             TestStep('OCP', self._step_ocp),
-            TestStep('CanBus', self._step_canbus, self.config['SolarCan']),
+            TestStep('CanBus', self._step_canbus, self.config.can),
             )
         self.sernum = None
 
@@ -205,7 +185,7 @@ class Initial(share.TestSequence):
         """
         j35 = dev['j35']
         j35.open()
-        j35.brand(self.config['HwVer'], self.sernum, dev['rla_reset'])
+        j35.brand(self.config.hw_version, self.sernum, dev['rla_reset'])
         j35.manual_mode(start=True)     # Start the change to manual mode
         mes['arm_swver']()
 
@@ -237,7 +217,7 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         # Complete the change to manual mode
         j35.manual_mode(vout=self.vout_set, iout=self.ocp_set)
-        if self.config['Derate']:
+        if self.config.derate:
             j35.derate()      # Derate for lower output current
         dev['acsource'].output(voltage=self.ac_volt, output=True)
         self.measure(
@@ -281,13 +261,13 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         val = mes['arm_loadset']().reading1
         self._logger.debug('0x{:08X}'.format(int(val)))
-        load_count = self.config['LoadCount']
-        dev['dcl_out'].binary(1.0, load_count * self.load_per_output, 5.0)
-        for load in range(load_count):
+        output_count = self.config.output_count
+        dev['dcl_out'].binary(1.0, output_count * self.load_per_output, 5.0)
+        for load in range(output_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
         # Calibrate current reading
-        j35['BUS_ICAL'] = load_count * self.load_per_output
+        j35['BUS_ICAL'] = output_count * self.load_per_output
         j35['NVWRITE'] = True
         dev['dcl_bat'].output(self.batt_current, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
@@ -298,7 +278,8 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         ocp_actual = mes['ramp_ocp_pre']().reading1
         # Adjust current setpoint
-        j35['OCP_CAL'] = round(j35.ocp_cal() * ocp_actual / self.config['OCP'])
+        j35['OCP_CAL'] = round(
+            j35.ocp_cal() * ocp_actual / self.config.ocp_set)
         j35['NVWRITE'] = True
         mes['ramp_ocp']()
         dev['dcl_out'].output(0.0)

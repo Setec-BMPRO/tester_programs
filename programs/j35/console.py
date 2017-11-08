@@ -122,6 +122,11 @@ class _Console():
         reset_relay.pulse(0.1)
         self.action(None, delay=1.5, expected=self.banner_lines)
 
+    def set_sernum(self, sernum):
+        """Brand the unit with Serial Number."""
+        self['SER_ID'] = sernum
+        self['NVWRITE'] = True
+
     def manual_mode(self, start=False, vout=None, iout=None):
         """Set the unit to Manual Mode.
 

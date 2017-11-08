@@ -36,7 +36,7 @@ class _J35Final(ProgramTestCase):
         for sensor in sen['vloads']:
             sensor.store(value)
 
-    def _pass_run(self, rdg_count):
+    def _pass_run(self, rdg_count, steps_run):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
@@ -45,11 +45,13 @@ class _J35Final(ProgramTestCase):
                     (sen['photo'], (0.0, 12.0)),
                     (sen['sernum'], self.sernum),
                     ),
+                'CAN': (
+                    (sen['swver'], j35.config.J35.sw_version),
+                    ),
                 'OCP': (
                     (sen['vloads'][0], (12.7, ) * 20 + (11.0, ), ),
                     ),
-                'CAN': (
-                    (sen['arm_swver'], j35.config.SW_VERSION),
+                'CanCable': (
                     (sen['notifycable'], True),
                     ),
                 },
@@ -65,8 +67,7 @@ class _J35Final(ProgramTestCase):
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
         self.assertEqual(rdg_count, len(result.readings))
-        self.assertEqual(
-            ['PowerUp', 'CAN', 'Load', 'OCP'], self.tester.ut_steps)
+        self.assertEqual(steps_run, self.tester.ut_steps)
 
 
 class J35_A_Final(_J35Final):
@@ -78,7 +79,7 @@ class J35_A_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the A program."""
-        super()._pass_run(20)
+        super()._pass_run(18, ['PowerUp', 'Load', 'OCP'])
 
 
 class J35_B_Final(_J35Final):
@@ -90,7 +91,7 @@ class J35_B_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the B program."""
-        super()._pass_run(34)
+        super()._pass_run(32, ['PowerUp', 'Load', 'OCP'])
 
 
 class J35_C_Final(_J35Final):
@@ -102,4 +103,4 @@ class J35_C_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the C program."""
-        super()._pass_run(34)
+        super()._pass_run(34, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])

@@ -50,7 +50,7 @@ class _J35Initial(ProgramTestCase):
                     ),
                 'Initialise': (
                     (sen['sernum'], self.sernum),
-                    (sen['arm_swver'], j35.config.SW_VERSION),
+                    (sen['arm_swver'], j35.config.J35.sw_version),
                     ),
                 'Aux': (
                     (sen['ovbat'], 13.5),
@@ -93,7 +93,7 @@ class _J35Initial(ProgramTestCase):
                 'CanBus': (
                     (sen['ocanpwr'], 12.5),
                     (sen['arm_canbind'], 1 << 28),
-                    (sen['TunnelSwVer'], j35.config.SW_VERSION),
+                    (sen['TunnelSwVer'], j35.config.J35.sw_version),
                     ),
                 },
             UnitTester.key_call: {      # Callables
