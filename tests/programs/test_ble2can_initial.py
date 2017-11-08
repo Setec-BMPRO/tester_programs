@@ -14,7 +14,7 @@ class BLE2CANInitial(ProgramTestCase):
     prog_class = ble2can.Initial
     parameter = None
     debug = False
-    btmac = '001EC030BC15'
+    btmac = '00:1E:C0:30:BC:15'
 
     def setUp(self):
         """Per-Test setup."""

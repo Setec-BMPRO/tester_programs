@@ -13,7 +13,7 @@ class Trek2Final(ProgramTestCase):
 
     prog_class = trek2.Final
     parameter = None
-    debug = True
+    debug = False
 
     def setUp(self):
         """Per-Test setup."""

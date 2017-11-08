@@ -60,8 +60,7 @@ chargestate=ERROR
 # Fault__Stage1  2  3  4  5  6   ChemA  B  C  D   SizeA  B  C__D
 #     .       .  .  .  .  .  .       *  .  .  .       .  .  *  .
 """
-    cal_reply = """
-get_volts_mv_num                      16022
+    cal_reply = """get_volts_mv_num                      16022
 get_volts_mv_den                       1024
 get_volts_mv_off                          0
 get_current_ma_num                     2365

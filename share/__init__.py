@@ -6,6 +6,7 @@
 from .testsequence import Devices, Sensors, Measurements, TestSequence
 from .testsequence import teststep      # a decorator
 from . import fixture
+from . import programmer
 from . import console
 from . import bluetooth
 from . import timers
@@ -13,11 +14,11 @@ from . import can
 
 
 __all__ = [
-    'Devices', 'Sensors', 'Measurements', 'TestSequence',
-    'teststep',
-    'fixture',
-    'console',
+    'Devices', 'Sensors', 'Measurements', 'TestSequence', 'teststep',
     'bluetooth',
-    'timers',
     'can',
+    'console',
+    'fixture',
+    'programmer',
+    'timers',
     ]
