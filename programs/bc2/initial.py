@@ -17,6 +17,8 @@ class Initial(share.TestSequence):
 
     """BC2 Initial Test Program."""
 
+    # Injected Vbatt
+    vbatt = 12.0
     # Test limits
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5),
@@ -42,7 +44,7 @@ class Initial(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        dev['dcs_vin'].output(12.0, True)
+        dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
@@ -56,9 +58,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(12.0, delay=15.0)
-        btmac = mes['bc2_btmac']().reading1
+        btmac = mes['arm_btmac']().reading1
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
@@ -143,7 +143,7 @@ class Measurements(share.Measurements):
             ('dmm_3v3', '3V3', '3v3', ''),
             ('dmm_shunt', 'Shunt', 'shunt', ''),
             ('detectBT', 'DetectBT', 'mirbt', ''),
-            ('bc2_btmac', 'BtMac', 'btmac', ''),
+            ('arm_btmac', 'BtMac', 'btmac', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
             ))
