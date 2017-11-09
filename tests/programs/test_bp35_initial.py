@@ -116,26 +116,6 @@ class _BP35Initial(ProgramTestCase):
         self.assertEqual(rdg_count, len(result.readings))
         self.assertEqual(steps, self.tester.ut_steps)
 
-    def _fail_run(self):
-        """FAIL 1st Vbat reading."""
-        sen = self.test_program.sensors
-        data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare': (
-                    (sen['lock'], 10.0),
-                    (sen['hardware'], 4400),
-                    (sen['sernum'], self.sernum),
-                    (sen['vbat'], 2.5),     # Vbat will fail
-                    ),
-                },
-            }
-        self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
-        result = self.tester.ut_result
-        self.assertEqual('F', result.code)      # Must have failed
-        self.assertEqual(4, len(result.readings))
-        self.assertEqual(['Prepare'], self.tester.ut_steps)
-
 
 class BP35_SR_Initial(_BP35Initial):
 

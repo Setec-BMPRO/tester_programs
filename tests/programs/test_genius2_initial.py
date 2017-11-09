@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for GENIUS-II Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import genius2
 
@@ -57,31 +57,6 @@ class _Genius2Initial(ProgramTestCase):
              'ShutDown', 'OCP'],
             self.tester.ut_steps)
 
-    def _fail_run(self):
-        """FAIL 1st reading."""
-        # Patch threading.Event & threading.Timer to remove delays
-        mymock = MagicMock()
-        mymock.is_set.return_value = True   # threading.Event.is_set()
-        patcher = patch('threading.Event', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('threading.Timer', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        sen = self.test_program.sensors
-        data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare':
-                    ((sen['olock'], 1000), ),
-                },
-            }
-        self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
-        result = self.tester.ut_result
-        self.assertEqual('F', result.code)
-        self.assertEqual(1, len(result.readings))
-        self.assertEqual(['Prepare'], self.tester.ut_steps)
-
 
 class _Genius2_Initial(_Genius2Initial):
 
@@ -94,9 +69,6 @@ class _Genius2_Initial(_Genius2Initial):
     def test_pass_run(self):
         super()._pass_run()
 
-    def test_fail_run(self):
-        super()._fail_run()
-
 
 class _Genius2_H_Initial(_Genius2Initial):
 
@@ -108,6 +80,3 @@ class _Genius2_H_Initial(_Genius2Initial):
 
     def test_pass_run(self):
         super()._pass_run()
-
-    def test_fail_run(self):
-        super()._fail_run()

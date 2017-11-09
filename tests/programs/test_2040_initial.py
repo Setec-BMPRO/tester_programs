@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """UnitTest for 2040 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import _2040
 
@@ -47,28 +46,3 @@ class _2040Initial(ProgramTestCase):
         self.assertEqual(
             ['FixtureLock', 'SecCheck', 'DCPowerOn', 'ACPowerOn'],
             self.tester.ut_steps)
-
-    def test_fail_run(self):
-        """FAIL 1st Vbat reading."""
-        # Patch threading.Event & threading.Timer to remove delays
-        mymock = MagicMock()
-        mymock.is_set.return_value = True   # threading.Event.is_set()
-        patcher = patch('threading.Event', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('threading.Timer', return_value=mymock)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        sen = self.test_program.sensors
-        data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'FixtureLock':
-                    ((sen['oLock'], 1000.0), ),
-                },
-            }
-        self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
-        result = self.tester.ut_result
-        self.assertEqual('F', result.code)
-        self.assertEqual(1, len(result.readings))
-        self.assertEqual(['FixtureLock'], self.tester.ut_steps)
