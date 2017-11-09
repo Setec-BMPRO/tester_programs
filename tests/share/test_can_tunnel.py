@@ -12,7 +12,7 @@ class Tunnel(unittest.TestCase):
 
     """CAN Tunnel Console test suite."""
 
-    targetid = 32       # CAN target device ID
+    targetid = share.can.ID.trek2       # CAN target device ID
 
     def setUp(self):
         self.interface = MagicMock(name='serial2can')
