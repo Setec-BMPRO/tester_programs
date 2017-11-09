@@ -42,10 +42,10 @@ class Tunnel():
         """Initialise communications.
 
         @param interface SerialToCan interface.
-        @param target CAN target device ID.
+        @param target CAN target device ID enum member.
 
         """
-        self._target = target
+        self._target = target.value
         self._can_port = interface
         # Simple callables
         self.close = self._can_port.close_tunnel
