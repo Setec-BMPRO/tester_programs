@@ -26,7 +26,7 @@ for name, filename in _FILE_DATA:
 
     # Output the configuration word
     print('\n// START of software image from file: "{!s}"\n'.format(filename))
-    config = 'const unsigned {}_config = 0x{:04X};\n'.format(
+    config = 'const unsigned {0}_config = 0x{1:04X};\n'.format(
         name,
         (ih[0x400E] + (ih[0x400F] << 8)) & _MASK)
     print(config)
@@ -43,10 +43,10 @@ for name, filename in _FILE_DATA:
         if trimming:
             row_count -= 1  # The entire row was 0xFF
     # Output the image size in words
-    print('const unsigned {}_rows = {};\n'.format(name, row_count))
+    print('const unsigned {0}_rows = {1};\n'.format(name, row_count))
 
     # Output the firmware image as an array of unsigned integers
-    data = 'const PROGMEM unsigned {}_data[] = {{\n'.format(name)
+    data = 'const PROGMEM unsigned {0}_data[] = {{\n'.format(name)
     for i in range(row_count):
         for j in range(0, 32, 2):
             idx = 32 * i + j

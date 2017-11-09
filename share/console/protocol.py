@@ -279,7 +279,7 @@ class BadUart(Base):
                 self._logger.debug(' Tx -> %s Rx <- %s', a_byte, echo)
             if echo != a_byte:
                 raise CommandError(
-                    'Command echo error. Tx: {}, Rx: {}'.format(
+                    'Command echo error. Tx: {0}, Rx: {1}'.format(
                         a_byte, echo))
         # And the '\r' without echo
         self.port.write(b'\r')

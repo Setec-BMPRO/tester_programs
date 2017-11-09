@@ -17,16 +17,28 @@ class Bluetooth(unittest.TestCase):
         """Create from short mac."""
         mac = share.bluetooth.MAC(self.mac_short)
         self.assertEqual(self.mac_short, mac.dumps())
-        self.assertEqual(self.mac_long, mac.dumps(separator=':'))
 
     def test_long(self):
         """Create from long mac."""
         mac = share.bluetooth.MAC(self.mac_long)
         self.assertEqual(self.mac_short, mac.dumps())
-        self.assertEqual(
-            self.mac_long.replace(':', ' '), mac.dumps(separator=' '))
 
     def test_bad(self):
         """Invalid mac."""
         with self.assertRaises(share.bluetooth.BluetoothError):
             share.bluetooth.MAC('junk')
+
+    def test_str(self):
+        """str(MAC)."""
+        mac = share.bluetooth.MAC(self.mac_short)
+        self.assertEqual(self.mac_short, str(mac))
+
+    def test_dumps(self):
+        """Dumping MAC as a string."""
+        mac = share.bluetooth.MAC(self.mac_short)
+        self.assertEqual(self.mac_short, mac.dumps())
+        self.assertEqual(self.mac_long, mac.dumps(separator=':'))
+        self.assertEqual(
+            self.mac_long.replace(':', ' '), mac.dumps(separator=' '))
+        self.assertEqual(
+            self.mac_short.lower(), mac.dumps(lowercase=True))

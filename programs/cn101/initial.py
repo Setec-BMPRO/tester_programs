@@ -84,7 +84,7 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(12.0, delay=15.0)
-        btmac = mes['cn101_btmac']().reading1
+        btmac = share.bluetooth.MAC(mes['cn101_btmac']().reading1)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()

@@ -80,7 +80,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = mes['arm_btmac']().reading1
+        btmac = share.bluetooth.MAC(mes['arm_btmac']().reading1)
         dev['dcs_vin'].output(0.0, True, delay=1.0)
         dev['rla_pair_btn'].set_on(delay=0.2)
         dev['dcs_vin'].output(self.vbatt, True)

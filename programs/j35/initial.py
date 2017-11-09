@@ -22,7 +22,7 @@ class Initial(share.TestSequence):
     """J35 Initial Test Program."""
 
     # ARM software image file
-    arm_file = 'j35_{}.bin'.format(config.J35.sw_version)
+    arm_file = 'j35_{0}.bin'.format(config.J35.sw_version)
     # Injected voltages
     #  Battery bus
     vbat_inject = 12.6
@@ -66,7 +66,7 @@ class Initial(share.TestSequence):
         LimitDelta('FanOn', vout_set, delta=1.0, doc='Fan running'),
         LimitLow('FanOff', 0.5, doc='Fan not running'),
         LimitRegExp(
-            'ARM-SwVer', '^{}$'.format(
+            'ARM-SwVer', '^{0}$'.format(
                 config.J35.sw_version.replace('.', r'\.')),
             doc='Arm Software version'),
         LimitPercent('ARM-AuxV', aux_solar_inject, percent=2.0, delta=0.3,

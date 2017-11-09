@@ -49,7 +49,7 @@ class Initial(share.TestSequence):
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
         '15': {
-            'ARMfile': 'bc15_{}.bin'.format(bin_version_15),
+            'ARMfile': 'bc15_{0}.bin'.format(bin_version_15),
             'ARMport': share.fixture.port('028467', 'ARM'),
             'BinVersion': bin_version_15,
             'OCP_Nominal': ocp_nominal_15,
@@ -63,7 +63,7 @@ class Initial(share.TestSequence):
                 ),
             },
         '25': {
-            'ARMfile': 'bc25_{}.bin'.format(bin_version_25),
+            'ARMfile': 'bc25_{0}.bin'.format(bin_version_25),
             'ARMport': share.fixture.port('031032', 'ARM'),
             'BinVersion': bin_version_25,
             'OCP_Nominal': ocp_nominal_25,

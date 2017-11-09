@@ -201,7 +201,7 @@ class Devices(share.Devices):
         self['relays'] = []
         for num in range(1, 23):
             self['relays'].append(
-                tester.Relay(self.physical_devices['RLA{}'.format(num)])
+                tester.Relay(self.physical_devices['RLA{0}'.format(num)])
                 )
 
     def reset(self):

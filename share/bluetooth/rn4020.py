@@ -72,11 +72,12 @@ class BleRadio():
     def scan(self, btmac, timeout=30):
         """Scan for bluetooth device with 'btmac' MAC address.
 
-        @param btmac Bluetooth MAC address to find
+        @param btmac share.bluetooth.MAC instance to find
         @param timeout Timeout in sec for the scan
         @returns True if found, else False
 
         """
+        mac_str = btmac.dumps()
         self._log('Scanning for MAC {0}'.format(btmac))
         timeup = threading.Event()
         timer = threading.Timer(timeout, timeup.set)
@@ -92,7 +93,7 @@ class BleRadio():
             except BluetoothError:
                 continue
             data = line.split(sep=',')  # CSV formatted response
-            if data[0] == btmac:
+            if data[0] == mac_str:
                 timer.cancel()
                 found = True
         self._cmdresp(self.cmd_scan_stop)

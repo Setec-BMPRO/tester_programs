@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
         LimitDelta('3V3', 3.3, 0.25),
         LimitDelta('Shunt', 50.0, 100.0),
         LimitRegExp('ARM-SwVer',
-            '^{}$'.format(config.SW_VERSION.replace('.', r'\.'))),
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
         LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
         LimitBoolean('DetectBT', True),
         )
@@ -58,7 +58,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = mes['arm_btmac']().reading1
+        btmac = share.bluetooth.MAC(mes['arm_btmac']().reading1)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()

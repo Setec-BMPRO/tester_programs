@@ -24,7 +24,7 @@ class Worker():
             self._get_hex_file()
             self._make_program_file()
             self._message(
-                'Header file complete. Program size: {} bytes\n'
+                'Header file complete. Program size: {0} bytes\n'
                 'Upload the sketch to the Arduino board.\n'
                 ''.format(self.program_size))
         except Exception as err:
@@ -47,7 +47,7 @@ class Worker():
         output_file = open('wtsi200/myprogram.h', 'w')
         self.program_size = int(len(self.text_string) >> 1)
         size = (
-            'int program_size = {}; //Bytes ({})\n'
+            'int program_size = {0}; //Bytes ({1})\n'
             ''.format(self.program_size, self.filename))
         self._logger.debug(size)
         output_file.write(size)

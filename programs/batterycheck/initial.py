@@ -28,7 +28,7 @@ class Initial(share.TestSequence):
         'posix': 'avrdude',
         'nt': r'C:\Program Files\AVRdude\avrdude.exe',
         }[os.name]
-    arm_bin = 'BatteryCheckControl_{}.bin'.format(arm_version)
+    arm_bin = 'BatteryCheckControl_{0}.bin'.format(arm_version)
     # Ishunt * this = DC Source voltage
     shunt_scale = 0.08
     limitdata = (
@@ -95,7 +95,7 @@ class Initial(share.TestSequence):
             result = 0
             self._logger.debug(console)
         except subprocess.CalledProcessError:
-            err_msg = '{} {}'.format(sys.exc_info()[0], sys.exc_info()[1])
+            err_msg = '{0} {1}'.format(sys.exc_info()[0], sys.exc_info()[1])
             result = 1
             self._logger.warning(err_msg)
         dev['rla_avr'].set_off()

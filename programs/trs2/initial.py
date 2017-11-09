@@ -145,7 +145,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = mes['arm_btmac']().reading1
+        btmac = share.bluetooth.MAC(mes['arm_btmac']().reading1)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()

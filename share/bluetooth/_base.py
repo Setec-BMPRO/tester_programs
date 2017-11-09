@@ -29,10 +29,19 @@ class MAC():
             raise BluetoothError('Invalid MAC string')
         self._mac = bytes.fromhex(mac.replace(':', ''))
 
-    def dumps(self, separator=''):
+    def __str__(self):
+        """MAC address as a string.
+
+        @return MAC address as 12 uppercase hex digits
+
+        """
+        return self.dumps()
+
+    def dumps(self, separator='', lowercase=False):
         """Dump the MAC as a string.
 
         @param separator String to separate the bytes.
+        @param lowercase Convert to lowercase.
         @return MAC as a string.
 
         """
@@ -40,4 +49,6 @@ class MAC():
         for abyte in self._mac:
             data.append('{0:02X}'.format(abyte))
         data_str = separator.join(data)
+        if lowercase:
+            data_str = data_str.lower()
         return data_str
