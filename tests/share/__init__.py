@@ -3,11 +3,13 @@
 # Copyright 2017 SETEC Pty Ltd.
 """Unittests for Share."""
 
+from . import test_bluetooth
 from . import test_can_tunnel
 from . import test_console
 from . import test_parameter
 
 __all__ = [
+    'test_bluetooth',
     'test_can_tunnel',
     'test_console',
     'test_parameter',
