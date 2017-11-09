@@ -3,6 +3,6 @@
 """RVVIEW Configuration."""
 
 # Software binary version
-SW_VERSION = '1.0.14022.985'
+SW_VERSION = '1.1.16188.1004'
 # Hardware version
-HW_VERSION = (2, 0, 'A')
+HW_VERSION = (3, 0, 'A')
