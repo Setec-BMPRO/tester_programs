@@ -84,10 +84,12 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
+        ble2can = dev['ble2can']
         btmac = share.bluetooth.MAC(mes['arm_btmac']().reading1)
         dev['dcs_vin'].output(0.0, True, delay=1.0)
         dev['rla_pair_btn'].set_on(delay=0.2)
         dev['dcs_vin'].output(self.vbatt, True)
+        ble2can.action(None, expected=ble2can.banner_lines)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
@@ -100,7 +102,14 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        mes['arm_can_bind'](timeout=10)
+        ble2can = dev['ble2can']
+        dev['rla_pair_btn'].set_off()
+        dev['dcs_vin'].output(0.0, True, delay=5)
+        dev['dcs_vin'].output(self.vbatt, True)
+        ble2can.action(None, expected=ble2can.banner_lines)
+# FIXME: Present software release has really s-l-o-w CAN...
+#        mes['arm_can_bind'](timeout=10)
+        mes['arm_can_bind'](timeout=90)
 # FIXME: Present software release does not have CAN tunnelling
 #        ble2cantunnel = dev['ble2cantunnel']
 #        ble2cantunnel.open()
