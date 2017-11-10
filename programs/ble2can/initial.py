@@ -101,10 +101,11 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes['arm_can_bind'](timeout=10)
-        ble2cantunnel = dev['ble2cantunnel']
-        ble2cantunnel.open()
-        mes['TunnelSwVer']()
-        ble2cantunnel.close()
+# FIXME: Present software release does not have CAN tunnelling
+#        ble2cantunnel = dev['ble2cantunnel']
+#        ble2cantunnel.open()
+#        mes['TunnelSwVer']()
+#        ble2cantunnel.close()
 
 
 class Devices(share.Devices):

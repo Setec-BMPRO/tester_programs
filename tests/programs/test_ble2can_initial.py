@@ -57,6 +57,6 @@ class BLE2CANInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(19, len(result.readings))
+        self.assertEqual(18, len(result.readings))
         self.assertEqual(
             ['Prepare', 'TestArm', 'Bluetooth', 'CanBus'], self.tester.ut_steps)
