@@ -67,6 +67,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test operation."""
+        dev['rla_wdog'].disable()
         ble2can = dev['ble2can']
         ble2can.open()
         ble2can.brand(config.HW_VERSION, self.sernum)
@@ -84,12 +85,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        ble2can = dev['ble2can']
         btmac = share.bluetooth.MAC(mes['arm_btmac']().reading1)
-        dev['dcs_vin'].output(0.0, True, delay=1.0)
-        dev['rla_pair_btn'].set_on(delay=0.2)
-        dev['dcs_vin'].output(self.vbatt, True)
-        ble2can.action(None, expected=ble2can.banner_lines)
+        dev['rla_pair_btn'].press()
+        self._reset_unit()
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
         ble = dev['ble']
         ble.open()
@@ -102,11 +100,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        ble2can = dev['ble2can']
-        dev['rla_pair_btn'].set_off()
-        dev['dcs_vin'].output(0.0, True, delay=5)
-        dev['dcs_vin'].output(self.vbatt, True)
-        ble2can.action(None, expected=ble2can.banner_lines)
+        dev['rla_pair_btn'].release()
+        self._reset_unit()
 # FIXME: Present software release has really s-l-o-w CAN...
 #        mes['arm_can_bind'](timeout=10)
         mes['arm_can_bind'](timeout=90)
@@ -115,6 +110,15 @@ class Initial(share.TestSequence):
 #        ble2cantunnel.open()
 #        mes['TunnelSwVer']()
 #        ble2cantunnel.close()
+
+    def _reset_unit(self):
+        """Reset the unit."""
+        dev = self.devices
+        ble2can = dev['ble2can']
+        dev['rla_wdog'].enable()
+        dev['rla_reset'].pulse(0.1)
+        dev['rla_wdog'].disable()
+        dev['ble2can'].action(None, expected=ble2can.banner_lines)
 
 
 class Devices(share.Devices):
@@ -134,6 +138,13 @@ class Devices(share.Devices):
                 ('rla_pair_btn', tester.Relay, 'RLA8'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Some more obvious ways to use the relays
+        wdog = self['rla_wdog']
+        wdog.disable = wdog.set_on
+        wdog.enable = wdog.set_off
+        pair = self['rla_pair_btn']
+        pair.press = pair.set_on
+        pair.release = pair.set_off
         # Serial connection to the console
         ble2can_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
