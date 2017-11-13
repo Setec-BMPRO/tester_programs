@@ -53,7 +53,7 @@ class Final(share.TestSequence):
             blue.reset()
             blue.pair()
             _paired = True
-        except share.BluetoothError:
+        except share.bluetooth.BluetoothError:
             _paired = False
         mes['BTpair'].sensor.store(_paired)
         mes['BTpair']()

@@ -124,6 +124,8 @@ class BtRadio():
 
         """
         self._log('Scanning for serial number {0}'.format(sernum))
+        regex = r'^\+RDDSRES=({0}),BCheck {1},.*'.format(MAC.regex, sernum)
+        self._log('Search pattern: {0!r}'.format(regex))
         max_try = 5
         for retry in range(0, max_try):
             try:
@@ -141,17 +143,12 @@ class BtRadio():
                 continue
             if line == '+RDDSCNF=0':   # no more responses
                 break
-            match = re.search(
-                '^\+RDDSRES=({0}),BCheck ([^,]*),.*'.format(
-                    MAC.regex),
-                line)
+            match = re.search(regex, line)
             if match:
                 data = match.groups()
-                if len(data) >= 2:
-                    if sernum == data[1]:
-                        self._log('SN match found:{0}'.format(data[1]))
-                        self._mac = data[0]
-                        self._pin = self._pin_calculate(data[1])
+                self._log('SN match found')
+                self._mac = data[0]
+                self._pin = self._pin_calculate(sernum)
         return self._mac is not None
 
     def pair(self):
