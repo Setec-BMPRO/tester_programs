@@ -32,8 +32,11 @@ class Console(share.console.Base):
     cal_regexp = re.compile('^([a-z_0-9]+) +([\-0-9]+) $')
     # Program parameter ('15' for BC15 or '25' for BC25)
     parameter = None
-    # OCP setpoint adjustment factor
-    ocp_setpoint_factor = 0.9
+    # OCP setpoint adjustment factors
+    ocp_setpoint_factor = {
+        '15': 0.95,
+        '25': 0.90,
+        }
 
     def initialise(self, reset_relay):
         """Initialise the unit."""
@@ -148,7 +151,8 @@ class Console(share.console.Base):
         self.action('{0} "GET_CURRENT_MA_NUM CAL'.format(ma_num_new))
         # OCP setting open-loop adjustment
         new_set_num = round(
-            float(self['set_current_ma_num']) * self.ocp_setpoint_factor)
+            float(self['set_current_ma_num']) *
+            self.ocp_setpoint_factor[self.parameter])
         self.action('{0} "SET_CURRENT_MA_NUM CAL'.format(new_set_num))
         # Save & refresh
         self['NVWRITE'] = True
