@@ -27,7 +27,7 @@ class BatteryCheckInitial(ProgramTestCase):
             self.addCleanup(patcher.stop)
             patcher.start()
         mybt = MagicMock(name='MyBtRadio')
-        mybt.scan.return_value = True
+        mybt.scan.return_value = True, '1234'
         patcher = patch('share.bluetooth.BtRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()

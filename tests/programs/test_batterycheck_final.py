@@ -19,7 +19,7 @@ class BatteryCheckFinal(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         mybt = MagicMock(name='MyBtRadio')
-        mybt.scan.return_value = True
+        mybt.scan.return_value = True, '1234'
         mybt.jsonrpc.return_value = {
             'SoftwareVersion': batterycheck.Final.arm_version,
             'SerialID': self.serial,

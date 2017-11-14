@@ -22,6 +22,11 @@ class BtRadio():
     # Some magic numbers for PIN generation from a serial number
     hash_start = 56210
     hash_mult = 29
+    # Retry counters
+    reset_retries = 5
+    scan_retries = 5
+    pair_retries = 4
+    unpair_retries = 10
 
     def __init__(self, port):
         """Create.
@@ -32,8 +37,6 @@ class BtRadio():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
-        self._mac = None         # MAC address
-        self._pin = None         # PIN
         self._datamode = False   # True for data mode
 
     def open(self):
@@ -54,7 +57,7 @@ class BtRadio():
         """Reset the module."""
         self._logger.debug('Reset')
         self.port.flushInput()
-        for _ in range(5):
+        for _ in range(self.reset_retries):
             try:
                 self._cmdresp('AT+JRES')                    # Reset
                 self._cmdresp('AT+JSEC=4,1,04,1111,2,1')    # Security mode
@@ -69,8 +72,9 @@ class BtRadio():
 
     def _readline(self):
         """Read a line from the port and decode to a string."""
-        line = self.port.readline().decode(errors='ignore')
-        return line.replace('\r\n', '')
+        line = self.port.readline().decode(errors='ignore').replace('\r\n', '')
+        self._log('<--- {0!r}'.format(line))
+        return line
 
     def _write(self, data):
         """Encode data and write to the port."""
@@ -85,14 +89,13 @@ class BtRadio():
         self.port.flushInput()
         if cmd == self.cmd_escape:
             time.sleep(1)       # need long guard time before first letter
-            for _ in range(0, 3):
+            for char in cmd:
                 time.sleep(0.2) # need short guard time between letters
-                self._write('^')
+                self._write(char)
         else:
             self._log('--> {0!r}'.format(cmd))
             self._write(cmd + '\r\n')
         line = self._readline()
-        self._log('<-- {0!r}'.format(line))
         # Request for firmware version returns only simple integer
         if cmd == 'AT+JRRI':
             if not re.search('^[0-9]+$', line):
@@ -115,98 +118,96 @@ class BtRadio():
         pin = cls.hash_start
         for char in sernum:
             pin = ((pin * cls.hash_mult) & 0xFFFF) ^ ord(char)
-        return '{:04}'.format(pin % 10000)
+        return '{0:04}'.format(pin % 10000)
 
     def scan(self, sernum):
         """Scan for Bluetooth device with 'sernum' name.
 
-        @returns True if a match is found, else returns False
+        @returns Tuple (MAC address, or None, PIN or None)
 
         """
         self._log('Scanning for serial number {0}'.format(sernum))
-        regex = r'^\+RDDSRES=({0}),BCheck {1},.*'.format(MAC.regex, sernum)
-        self._log('Search pattern: {0!r}'.format(regex))
-        max_try = 5
-        for retry in range(0, max_try):
+        regex = re.compile(
+            r'^\+RDDSRES=({0}),BCheck {1},.*'.format(MAC.regex, sernum))
+        for retry in range(self.scan_retries):
             try:
                 self._cmdresp('AT+JDDS=0')  # start device scan
                 break
             except BluetoothError:
                 continue
-        if retry == max_try - 1:
+        if retry == self.scan_retries - 1:
             raise BluetoothError('Cannot start device scan')
         # Read responses until completed.
-        for _ in range(0, 20):
+        mac = None
+        pin = self._pin_calculate(sernum)
+        for _ in range(20):
             line = self._readline()
-            self._log('<--- {0!r}'.format(line))
-            if len(line) == 0:
+            if line == '':
                 continue
             if line == '+RDDSCNF=0':   # no more responses
                 break
-            match = re.search(regex, line)
+            match = regex.match(line)
             if match:
                 data = match.groups()
-                self._log('SN match found')
-                self._mac = data[0]
-                self._pin = self._pin_calculate(sernum)
-        return self._mac is not None
+                mac = MAC(data[0])
+                self._log('Found: MAC %s, PIN %s', mac, pin)
+        return mac, pin
 
-    def pair(self):
-        """Pair with the device previously found by a scan.
+    def pair(self, mac, pin):
+        """Pair with a device.
 
+        @param mac MAC address to pair to.
+        @param pin PIN.
         @raises BluetoothError upon failure to pair.
 
         """
-        self._log('Pairing with mac {0}'.format(self._mac))
-        self._cmdresp('AT+JCCR=' + self._mac + ',01')
-        for _ in range(0, 10):
-            line = self._readline()
-            self._log('<--- {!r}'.format(line))
-            if len(line) == 0:
-                continue
-            # Device we are pairing to has asked for a pin code
-            if line[:6] == '+RPCI=':
-                self._log('Sending pin code: {0}'.format(self._pin))
-                self._cmdresp('AT+JPCR=04,' + self._pin)
-                continue
-            # Device we are pairing to has asked to verify 6 digit id
-            if line[:6] == '+RUCE=':
-                self._log('Sending confirmation')
-                self._cmdresp('AT+JUCR=1')
-                continue
-            # Example of good pairing response: '+RCCRCNF=500,0000,0'
-            # The first 500 is MTU and is 000 on error.
-            # The ',0' on the end means good status and ',1' would be an error.
-            if line[:9] == '+RCCRCNF=':
-                match = re.search(
-                    '^\+RCCRCNF=([1-9][0-9]{2}),([0-9]{4}),([0-9])$', line)
-                if not match:
+        self._log('Pair with MAC {0} using PIN {1}'.format(mac, pin))
+        for retry in range(self.pair_retries):
+            if retry > 0:
+                self._log('Pairing retry {0}'.format(retry))
+            self._cmdresp('AT+JCCR={0},01'.format(mac))
+            for _ in range(10):
+                line = self._readline()
+                if line == '':
                     continue
-                data = match.groups()
-                if len(data) < 3:
+                # Device we are pairing to has asked for a pin code
+                if line[:6] == '+RPCI=':
+                    self._log('Sending PIN')
+                    self._cmdresp('AT+JPCR=04,{0}'.format(pin))
                     continue
-                mtu = int(data[0])
-                if mtu == 500:
-                    self._log('Now Paired, MTU {0} bytes.'.format(mtu))
-                    return
-                self._log('Pairing failed.')
-                continue
+                # Device we are pairing to has asked to verify 6 digit id
+                if line[:6] == '+RUCE=':
+                    self._log('Sending confirmation')
+                    self._cmdresp('AT+JUCR=1')
+                    continue
+                # Example of good pairing response: '+RCCRCNF=500,0000,0'
+                # The first 500 is MTU and is 000 on error.
+                # The ',0' means good status and ',1' would be an error.
+                if line[:9] == '+RCCRCNF=':
+                    match = re.search(
+                        '^\+RCCRCNF=([1-9][0-9]{2}),([0-9]{4}),([0-9])$', line)
+                    if not match:
+                        continue
+                    data = match.groups()
+                    if len(data) < 3:
+                        continue
+                    mtu = int(data[0])
+                    if mtu == 500:
+                        self._log('Now Paired, MTU {0} bytes.'.format(mtu))
+                        return
+                    self._log('Pairing failed.')
+                    continue
         raise BluetoothError('Unable to pair with device')
 
     def unpair(self):
-        """Unpair with bluetooth device.
-
-        @return True for ok, else False.
-
-        """
+        """Unpair with bluetooth device."""
         self._log('Unpairing')
         self._cmdresp('AT+JSDR')
-        for _ in range(0, 10):      # about 20s due to 2s serial rx timeout
+        for _ in range(self.unpair_retries):
             time.sleep(2)
             line = self._readline()
-            if len(line) == 0:
+            if line == '':
                 continue
-            self._log('<--- {0!r}'.format(line))
             if line == '+RDII':     # good unpairing response
                 self._log('Now Un-Paired.')
                 return
@@ -257,5 +258,4 @@ class BtRadio():
         self.port.flushInput()
         self._write(cmd + '\r')
         response = self._readline()
-        self._log('<--- {0!r}'.format(response))
         return json.loads(response)['result']

@@ -47,11 +47,12 @@ class Final(share.TestSequence):
         """Scan for BT devices and match against serial number."""
         blue = dev['bt']
         blue.open()
-        mes['BTscan'].sensor.store(blue.scan(self.sernum))
+        mac, pin = blue.scan(self.sernum)
+        mes['BTscan'].sensor.store(mac is not None)
         mes['BTscan']()
         try:
             blue.reset()
-            blue.pair()
+            blue.pair(mac, pin)
             _paired = True
         except share.bluetooth.BluetoothError:
             _paired = False

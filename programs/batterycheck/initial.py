@@ -167,7 +167,8 @@ class Initial(share.TestSequence):
         time.sleep(2)       # ARM startup delay
         blue = dev['bt']
         blue.open()
-        mes['BTscan'].sensor.store(blue.scan(self.sernum))
+        mac, _ = blue.scan(self.sernum)
+        mes['BTscan'].sensor.store(mac is not None)
         mes['BTscan']()
         blue.close()
 
