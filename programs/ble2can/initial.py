@@ -105,7 +105,7 @@ class Initial(share.TestSequence):
 # FIXME: Present software release has really s-l-o-w CAN...
 #        mes['arm_can_bind'](timeout=10)
         mes['arm_can_bind'](timeout=90)
-# FIXME: Present software release does not have CAN tunnelling
+# FIXME: Present software release does not have CAN tunneling
 #        ble2cantunnel = dev['ble2cantunnel']
 #        ble2cantunnel.open()
 #        mes['TunnelSwVer']()
@@ -114,11 +114,10 @@ class Initial(share.TestSequence):
     def _reset_unit(self):
         """Reset the unit."""
         dev = self.devices
-        ble2can = dev['ble2can']
         dev['rla_wdog'].enable()
         dev['rla_reset'].pulse(0.1)
         dev['rla_wdog'].disable()
-        dev['ble2can'].action(None, expected=ble2can.banner_lines)
+        dev['ble2can'].banner()
 
 
 class Devices(share.Devices):

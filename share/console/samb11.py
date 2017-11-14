@@ -40,11 +40,15 @@ class SamB11(protocol.Base):
 
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
-        self.action(None, expected=self.banner_lines)
+        self.banner()
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
+
+    def banner(self):
+        """Flush the startup banner lines."""
+        self.action(None, expected=self.banner_lines)
 
     def override(self, state=parameter.OverrideTo.normal):
         """Manually override functions of the unit.
