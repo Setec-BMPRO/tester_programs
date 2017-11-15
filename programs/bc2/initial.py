@@ -102,6 +102,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
+        self['bc2'].close()
         for dev in ('dcs_vin', 'dcs_shunt'):
             self[dev].output(0.0, False)
         for rla in ('rla_reset', 'rla_wdog', ):

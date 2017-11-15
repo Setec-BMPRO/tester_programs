@@ -168,6 +168,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['ble2can'].close()
+        self['ble2cantunnel'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_wdog', 'rla_pair_btn'):
             self[rla].set_off()
