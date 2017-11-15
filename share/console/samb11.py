@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""SamB11 device Base console driver."""
+"""SamB11 device Base console driver.
+
+The UART does have an 8-byte buffer, but the console task runs at a lower
+priority, so it can still drop characters of the longer command strings.
+Thus, use the BadUart protocol.
+
+"""
 
 from . import parameter
 from . import protocol
 
 
-class SamB11(protocol.Base):
+class SamB11(protocol.BadUart):
 
     """Communications to SamB11 based console."""
 
