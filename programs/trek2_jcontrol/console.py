@@ -7,7 +7,7 @@ import share
 
 class _Console():
 
-    """Base class for a Trek2 console."""
+    """Base class for a Trek2/JControl console."""
 
     # Number of lines in startup banner
     banner_lines = 2
@@ -81,12 +81,12 @@ class _Console():
 
 class DirectConsole(_Console, share.console.BadUart):
 
-    """Console for a direct connection to a Trek2."""
+    """Console for a direct connection to a Trek2/JControl."""
 
 
 class TunnelConsole(_Console, share.console.Base):
 
-    """Console for a CAN tunneled connection to a Trek2.
+    """Console for a CAN tunneled connection to a Trek2/JControl.
 
     The CAN tunnel does not need the BadUartConsole stuff.
 

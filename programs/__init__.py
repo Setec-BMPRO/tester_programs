@@ -32,7 +32,7 @@ from . import smu75070
 from . import st3
 from . import sx750
 from . import trek2
-from . import trek2jcontrol
+from . import trek2_jcontrol
 from . import trs1
 from . import trs2
 from . import trsrfm
@@ -108,8 +108,8 @@ PROGRAMS = {
     'SX-750 Safety': sx750.Safety,
     'Trek2 Initial': trek2.Initial,
     'Trek2 Final': trek2.Final,
-    'Trek2JControl Initial': trek2jcontrol.Initial,
-    'Trek2JControl Final': trek2jcontrol.Final,
+    'Trek2JControl Initial': trek2_jcontrol.Initial,
+    'Trek2JControl Final': trek2_jcontrol.Final,
     'TRS1 Initial': trs1.Initial,
     'TRS2 Initial': trs2.Initial,
     'TRS2 Final': trs2.Final,
