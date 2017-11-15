@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-11-09, 20:20:29 -->
+<!-- Saved: 2017-11-14, 13:25:26 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -124,6 +124,11 @@
     <Source>programs/trek2/console.py</Source>
     <Source>programs/trek2/final.py</Source>
     <Source>programs/trek2/initial.py</Source>
+    <Source>programs/trek2_jcontrol/__init__.py</Source>
+    <Source>programs/trek2_jcontrol/config.py</Source>
+    <Source>programs/trek2_jcontrol/console.py</Source>
+    <Source>programs/trek2_jcontrol/final.py</Source>
+    <Source>programs/trek2_jcontrol/initial.py</Source>
     <Source>programs/trs1/__init__.py</Source>
     <Source>programs/trs1/initial.py</Source>
     <Source>programs/trs2/__init__.py</Source>
@@ -223,6 +228,8 @@
     <Source>tests/programs/test_sx750_safety.py</Source>
     <Source>tests/programs/test_trek2_final.py</Source>
     <Source>tests/programs/test_trek2_initial.py</Source>
+    <Source>tests/programs/test_trek2_jcontrol_final.py</Source>
+    <Source>tests/programs/test_trek2_jcontrol_initial.py</Source>
     <Source>tests/programs/test_trs1_initial.py</Source>
     <Source>tests/programs/test_trs2_final.py</Source>
     <Source>tests/programs/test_trs2_initial.py</Source>

@@ -20,6 +20,7 @@ class ID(enum.IntEnum):
     bp35 = 16
     j35 = 20
     trek2 = 32
+    jcontrol = 00
     cn101 = 36
     ble2can = 40
     rvview = 44
