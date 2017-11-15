@@ -104,7 +104,7 @@ class Initial(share.TestSequence):
         self._reset_unit()
 # FIXME: Present software release has really s-l-o-w CAN...
 #        mes['arm_can_bind'](timeout=10)
-        mes['arm_can_bind'](timeout=90)
+        mes['arm_can_bind'](timeout=120)
 # FIXME: Present software release does not have CAN tunneling
 #        ble2cantunnel = dev['ble2cantunnel']
 #        ble2cantunnel.open()
