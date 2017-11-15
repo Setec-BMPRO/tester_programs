@@ -150,7 +150,7 @@ class BtRadio():
             if match:
                 data = match.groups()
                 mac = MAC(data[0])
-                self._log('Found: MAC %s, PIN %s', mac, pin)
+                self._log('Found: MAC {0}, PIN {1}'.format(mac, pin))
         return mac, pin
 
     def pair(self, mac, pin):
