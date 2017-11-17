@@ -5,7 +5,6 @@
 import serial
 import tester
 from tester import (
-    TestStep,
     LimitLow, LimitHigh, LimitDelta, LimitPercent,
     LimitBoolean, LimitRegExp, LimitInteger
     )
@@ -32,23 +31,23 @@ class Initial(share.TestSequence):
         LimitHigh('BlueLedOff', 3.1, doc='Led off'),
         LimitDelta('BlueLedOn', 0.3, 0.05, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
-        LimitRegExp('ARM-SwVer',
+        LimitRegExp('SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
         LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address'),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
-        LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
+        LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
         )
 
     def open(self):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('TestArm', self._step_test_arm),
-            TestStep('Bluetooth', self._step_bluetooth),
-            TestStep('CanBus', self._step_canbus),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
 
@@ -72,7 +71,7 @@ class Initial(share.TestSequence):
         ble2can.open()
         ble2can.brand(config.HW_VERSION, self.sernum)
         self.measure(
-            ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
+            ('SwVer', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)
         ble2can.override(share.console.parameter.OverrideTo.force_on)
         self.measure(
@@ -85,7 +84,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = share.bluetooth.MAC(mes['arm_btmac']().reading1)
+        btmac = share.bluetooth.MAC(mes['BtMac']().reading1)
         dev['rla_pair_btn'].press()
         self._reset_unit()
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
@@ -102,7 +101,7 @@ class Initial(share.TestSequence):
         """Test the Can Bus."""
         dev['rla_pair_btn'].release()
         self._reset_unit()
-        mes['arm_can_bind'](timeout=10)
+        mes['CANbind'](timeout=10)
 # FIXME: Present software release does not have CAN tunneling
 #        ble2cantunnel = dev['ble2cantunnel']
 #        ble2cantunnel.open()
@@ -199,10 +198,10 @@ class Sensors(share.Sensors):
         # Console sensors
         ble2can = self.devices['ble2can']
         ble2cantunnel = self.devices['ble2cantunnel']
-        self['oCANBIND'] = share.console.Sensor(ble2can, 'CAN_BIND')
+        self['CANbind'] = share.console.Sensor(ble2can, 'CAN_BIND')
         for name, cmdkey in (
-                ('arm_BtMAC', 'BT_MAC'),
-                ('arm_SwVer', 'SW_VER'),
+                ('BtMac', 'BT_MAC'),
+                ('SwVer', 'SW_VER'),
             ):
             self[name] = share.console.Sensor(
                 ble2can, cmdkey, rdgtype=sensor.ReadingString)
@@ -232,10 +231,11 @@ class Measurements(share.Measurements):
             ('dmm_blueon', 'BlueLedOn', 'blue', 'Blue led on'),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
                 'Cover over BC2 test pins'),
-            ('arm_btmac', 'BtMac', 'arm_BtMAC', 'MAC address'),
+            ('BtMac', 'BtMac', 'BtMac', 'MAC address'),
             ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
-            ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
+            ('SwVer', 'SwVer', 'SwVer', 'Unit software version'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
-            ('arm_can_bind', 'CAN_BIND', 'oCANBIND', 'CAN bound'),
-            ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
+            ('CANbind', 'CAN_BIND', 'CANbind', 'CAN bound'),
+            ('TunnelSwVer', 'SwVer', 'TunnelSwVer',
+                'Unit software version'),
             ))

@@ -38,19 +38,19 @@ class Final(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         dev['dcs_Vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
-
-    @share.teststep
-    def _step_tunnel_open(self, dev, mes):
-        """Open console tunnel."""
-        dev['trek2'].open()
-        # Send the Preconditions packet (for Trek2)
+        # Send the "Preconditions" packet (for Trek2)
         pkt = Packet()
         msg = pkt.header.message
         msg.device_id = share.can.ID.bp35.value
         msg.msg_type = MessageType.announce.value
         msg.data_id = DataID.preconditions.value
-        pkt.data.extend(b'\x00\x00')    # Dummy data
+        pkt.data.extend(b'\x00\x00')    # Dummy preconditions data
         self.physical_devices['CAN'].send('t{0}'.format(pkt))
+
+    @share.teststep
+    def _step_tunnel_open(self, dev, mes):
+        """Open console tunnel."""
+        dev['trek2'].open()
         dev['trek2'].testmode(True)
 
     @share.teststep
