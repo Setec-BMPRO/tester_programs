@@ -4,7 +4,6 @@
 
 import tester
 from tester import TestStep, LimitInteger, LimitRegExp
-from tester.devphysical.can import Packet, MessageType, DataID
 import share
 from . import console
 from . import config
@@ -55,12 +54,12 @@ class Final(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         dev['dcs_Vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
-        # Send the Preconditions packet (for Trek2)
-        pkt = Packet()
+        # Send a Preconditions packet (for Trek2)
+        pkt = tester.CAN.Packet()
         msg = pkt.header.message
-        msg.device_id = share.can.ID.bp35.value
-        msg.msg_type = MessageType.announce.value
-        msg.data_id = DataID.preconditions.value
+        msg.device_id = tester.CAN.DeviceID.bp35.value
+        msg.msg_type = tester.CAN.MessageType.announce.value
+        msg.data_id = tester.CAN.DataID.preconditions.value
         pkt.data.extend(b'\x00\x00')    # Dummy data
         self.physical_devices['CAN'].send('t{0}'.format(pkt))
 
