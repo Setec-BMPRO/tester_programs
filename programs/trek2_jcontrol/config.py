@@ -4,6 +4,6 @@
 
 # Software versions
 SW_VERSION_TK2 = '1.5.15833.150'
-SW_VERSION_JC = '0.0.00000.000'
+SW_VERSION_JC = '1.6.16798.273'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 HW_VERSION = (6, 0, 'A')

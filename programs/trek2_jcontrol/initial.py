@@ -59,7 +59,7 @@ class Initial(share.TestSequence):
             self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self.devices['programmer'].program),
+#            TestStep('Program', self.devices['programmer'].program),
             TestStep('TestArm', self._step_test_arm),
             TestStep('CanBus', self._step_canbus),
             )
