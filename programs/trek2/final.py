@@ -4,6 +4,7 @@
 
 import tester
 from tester import TestStep, LimitInteger, LimitRegExp
+from tester.devphysical.can import Packet, MessageType, DataID
 import share
 from . import console
 from . import config
@@ -36,14 +37,20 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        # Switch on the USB hub & Serial ports
-        dev['dcs_Vcom'].output(12.0, output=True)
         dev['dcs_Vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
 
     @share.teststep
     def _step_tunnel_open(self, dev, mes):
         """Open console tunnel."""
         dev['trek2'].open()
+        # Send the Preconditions packet (for Trek2)
+        pkt = Packet()
+        msg = pkt.header.message
+        msg.device_id = share.can.ID.bp35.value
+        msg.msg_type = MessageType.announce.value
+        msg.data_id = DataID.preconditions.value
+        pkt.data.extend(b'\x00\x00')    # Dummy data
+        self.physical_devices['CAN'].send('t{0}'.format(pkt))
         dev['trek2'].testmode(True)
 
     @share.teststep
@@ -78,9 +85,6 @@ class Devices(share.Devices):
         """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                # Power USB devices + Fixture Trek2.
-                ('dcs_Vcom', tester.DCSource, 'DCS2'),
-                # Power unit under test.
                 ('dcs_Vin', tester.DCSource, 'DCS3'),
                 # As the water level rises the "switches" close.
                 # The order of switch closure does not matter, just the number
@@ -98,8 +102,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['trek2'].close()
-        for src in ('dcs_Vin', 'dcs_Vcom'):
-            self[src].output(0.0, output=False)
+        self['dcs_Vin'].output(0.0, output=False)
         for rla in ('rla_s1', 'rla_s2', 'rla_s3'):
             self[rla].set_off()
 
