@@ -42,8 +42,8 @@ class Initial(share.TestSequence):
                 ),
             },
         'JC': {
-            'Product': 'JControl',
-            'BinVer': config.SW_VERSION_JC,
+            'Product': 'Trek2',
+            'BinVer': config.SW_VERSION_TK2,
             'CanId': share.can.ID.jcontrol,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
@@ -62,7 +62,7 @@ class Initial(share.TestSequence):
             self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self.devices['programmer'].program),
+#            TestStep('Program', self.devices['programmer'].program),
             TestStep('TestArm', self._step_test_arm),
             TestStep('CanBus', self._step_canbus),
             )
