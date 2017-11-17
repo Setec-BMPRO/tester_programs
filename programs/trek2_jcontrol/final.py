@@ -24,7 +24,6 @@ class Final(share.TestSequence):
     limitdata = {
         'TK2': {
             'BinVer': config.SW_VERSION_TK2,
-            'CanId': share.can.ID.trek2,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
                     config.SW_VERSION_TK2.replace('.', r'\.'))),
@@ -32,7 +31,6 @@ class Final(share.TestSequence):
             },
         'JC': {
             'BinVer': config.SW_VERSION_JC,
-            'CanId': share.can.ID.jcontrol,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
                     config.SW_VERSION_JC.replace('.', r'\.'))),
@@ -43,7 +41,6 @@ class Final(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.config = self.limitdata[self.parameter]
-        Devices.can_id = self.config['CanId']
         super().open(
             self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
@@ -56,8 +53,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        # Switch on the USB hub & Serial ports
-        dev['dcs_Vcom'].output(12.0, output=True)
         dev['dcs_Vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
 
     @share.teststep
@@ -94,14 +89,10 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    can_id = None
-
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                # Power USB devices + Fixture Trek2.
-                ('dcs_Vcom', tester.DCSource, 'DCS2'),
                 # Power unit under test.
                 ('dcs_Vin', tester.DCSource, 'DCS3'),
                 # As the water level rises the "switches" close.
@@ -113,14 +104,14 @@ class Devices(share.Devices):
                 ('rla_s3', tester.Relay, 'RLA5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        tunnel = share.can.Tunnel(self.physical_devices['CAN'], self.can_id)
+        tunnel = share.can.Tunnel(
+            self.physical_devices['CAN'], tester.CAN.DeviceID.trek2)
         self['armtunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):
         """Reset instruments."""
         self['armtunnel'].close()
-        for src in ('dcs_Vin', 'dcs_Vcom'):
-            self[src].output(0.0, output=False)
+        self['dcs_Vin'].output(0.0, output=False)
         for rla in ('rla_s1', 'rla_s2', 'rla_s3'):
             self[rla].set_off()
 

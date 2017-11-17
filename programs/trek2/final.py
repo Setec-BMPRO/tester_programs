@@ -41,7 +41,7 @@ class Final(share.TestSequence):
         # Send the "Preconditions" packet (for Trek2)
         pkt = Packet()
         msg = pkt.header.message
-        msg.device_id = share.can.ID.bp35.value
+        msg.device_id = tester.CAN.DeviceID.bp35.value
         msg.msg_type = MessageType.announce.value
         msg.data_id = DataID.preconditions.value
         pkt.data.extend(b'\x00\x00')    # Dummy preconditions data
@@ -96,7 +96,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         tunnel = share.can.Tunnel(
-            self.physical_devices['CAN'], share.can.ID.trek2)
+            self.physical_devices['CAN'], tester.CAN.DeviceID.trek2)
         self['trek2'] = console.TunnelConsole(tunnel)
 
     def reset(self):

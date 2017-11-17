@@ -12,7 +12,7 @@ class Tunnel(unittest.TestCase):
 
     """CAN Tunnel Console test suite."""
 
-    targetid = share.can.ID.trek2       # CAN target device ID
+    targetid = tester.CAN.DeviceID.trek2    # CAN target device ID
 
     def setUp(self):
         self.interface = MagicMock(name='serial2can')
@@ -27,7 +27,7 @@ class Tunnel(unittest.TestCase):
         """Open error."""
         # We need a tester to get MeasurementFailedError
         mytester = tester.Tester('MockATE', {})
-        self.interface.open_tunnel.side_effect = tester.SerialToCanError
+        self.interface.open_tunnel.side_effect = tester.CAN.SerialToCanError
         try:
             with self.assertRaises(tester.MeasurementFailedError):
                 self.mycon.open()

@@ -3,28 +3,7 @@
 # Copyright 2017 SETEC Pty Ltd
 """CAN bus utilities."""
 
-import enum
 import tester
-
-
-@enum.unique
-class ID(enum.IntEnum):
-
-    """CAN device ID values for different products.
-
-    From "SetecCANandBLECommunicationsProtocol Ver2B".
-
-    """
-
-    cn100 = 4
-    bp35 = 16
-    j35 = 20
-    trek2 = 32
-    jcontrol = 00
-    cn101 = 36
-    ble2can = 40
-    rvview = 44
-    bc2 = 128
 
 
 class Tunnel():
@@ -69,7 +48,7 @@ class Tunnel():
         """Open the CAN tunnel."""
         try:    # Change any SystemError into a MeasurementFailedError
             self._can_port.open_tunnel(self._target)
-        except tester.SerialToCanError:
+        except tester.CAN.SerialToCanError:
             self.measurement.sensor.store(False)
             self.measurement()
 

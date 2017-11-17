@@ -335,7 +335,7 @@ class Devices(share.Devices):
         self['j35'] = console.DirectConsole(j35_ser)
         # Tunneled Console driver
         tunnel = share.can.Tunnel(
-            self.physical_devices['CAN'], share.can.ID.j35)
+            self.physical_devices['CAN'], tester.CAN.DeviceID.j35)
         self['j35tunnel'] = console.TunnelConsole(tunnel)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(22.0, output=True, delay=2)

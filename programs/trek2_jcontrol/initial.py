@@ -35,7 +35,6 @@ class Initial(share.TestSequence):
         'TK2': {
             'Product': 'Trek2',
             'BinVer': config.SW_VERSION_TK2,
-            'CanId': share.can.ID.trek2,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
                     config.SW_VERSION_TK2.replace('.', r'\.'))),
@@ -44,7 +43,6 @@ class Initial(share.TestSequence):
         'JC': {
             'Product': 'JControl',
             'BinVer': config.SW_VERSION_JC,
-            'CanId': share.can.ID.jcontrol,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
                     config.SW_VERSION_JC.replace('.', r'\.'))),
@@ -55,7 +53,6 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.config = self.limitdata[self.parameter]
-        Devices.can_id = self.config['CanId']
         Devices.prdt = self.config['Product']
         Devices.sw_ver = self.config['BinVer']
         super().open(
@@ -97,7 +94,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    can_id = None
     sw_ver = None
     prdt = None
 
@@ -128,7 +124,8 @@ class Devices(share.Devices):
         arm_ser.port = arm_port
         self['arm'] = console.DirectConsole(arm_ser)
         # Tunneled Console driver
-        tunnel = share.can.Tunnel(self.physical_devices['CAN'], self.can_id)
+        tunnel = share.can.Tunnel(
+            self.physical_devices['CAN'], tester.CAN.DeviceID.trek2)
         self['armtunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):
