@@ -62,7 +62,7 @@ PROGRAMS = {
     'BC2 Final': bc2.Final,
     'BC15_25 Initial': bc15_25.Initial,
     'BC15_25 Final': bc15_25.Final,
-    'BCE4/5 Final': bce4.Final,
+    'BCE4_5 Final': bce4.Final,
     'BCE282 Initial': bce282.Initial,
     'BCE282 Final': bce282.Final,
     'BLE2CAN Initial': ble2can.Initial,
