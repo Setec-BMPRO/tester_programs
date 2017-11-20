@@ -14,7 +14,6 @@ import share
 from . import console
 from . import config
 
-
 class Initial(share.TestSequence):
 
     """Trek2/JControl Initial Test Program."""
@@ -31,32 +30,31 @@ class Initial(share.TestSequence):
         LimitInteger('CAN_BIND', 1 << 28),
         )
     # Variant specific configuration data. Indexed by test program parameter.
-    limitdata = {
+    config_data = {
         'TK2': {
-            'Product': 'Trek2',
-            'BinVer': config.SW_VERSION_TK2,
+            'Config': config.Trek2,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
-                    config.SW_VERSION_TK2.replace('.', r'\.'))),
+                    config.Trek2.sw_version.replace('.', r'\.'))),
                 ),
             },
         'JC': {
-            'Product': 'JControl',
-            'BinVer': config.SW_VERSION_JC,
+            'Config': config.JControl,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
-                    config.SW_VERSION_JC.replace('.', r'\.'))),
+                    config.JControl.sw_version.replace('.', r'\.'))),
                 ),
             },
         }
 
     def open(self):
         """Create the test program as a linear sequence."""
-        self.config = self.limitdata[self.parameter]
-        Devices.prdt = self.config['Product']
-        Devices.sw_ver = self.config['BinVer']
+        self.config = self.config_data[self.parameter]['Config']
+        Devices.prdt = self.config.product_name
+        Devices.sw_ver = self.config.sw_version
         super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
+            self.config_data[self.parameter]['Limits'],
+            Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('Program', self.devices['programmer'].program),
@@ -77,7 +75,7 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         arm = dev['arm']
         arm.open()
-        arm.brand(config.HW_VERSION, self.sernum, dev['rla_reset'])
+        arm.brand(self.config.hw_version, self.sernum, dev['rla_reset'])
         mes['SwVer']()
 
     @share.teststep

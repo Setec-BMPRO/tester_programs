@@ -21,28 +21,29 @@ class Final(share.TestSequence):
         LimitInteger('ARM-level4', 4),
         )
     # Variant specific configuration data. Indexed by test program parameter.
-    limitdata = {
+    config_data = {
         'TK2': {
-            'BinVer': config.SW_VERSION_TK2,
+            'Config': config.Trek2,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
-                    config.SW_VERSION_TK2.replace('.', r'\.'))),
+                    config.Trek2.sw_version.replace('.', r'\.'))),
                 ),
             },
         'JC': {
-            'BinVer': config.SW_VERSION_JC,
+            'Config': config.JControl,
             'Limits': _common + (
                 LimitRegExp('SwVer', '^{0}$'.format(
-                    config.SW_VERSION_JC.replace('.', r'\.'))),
+                    config.JControl.sw_version.replace('.', r'\.'))),
                 ),
             },
         }
 
     def open(self):
         """Prepare for testing."""
-        self.config = self.limitdata[self.parameter]
+        self.config = self.config_data[self.parameter]['Config']
         super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
+            self.config_data[self.parameter]['Limits'],
+            Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
             TestStep('TunnelOpen', self._step_tunnel_open),
