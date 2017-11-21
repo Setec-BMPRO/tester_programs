@@ -50,8 +50,6 @@ class Final(share.TestSequence):
             TestStep('Display', self._step_display),
             TestStep('Tanks', self._step_test_tanks),
             )
-        for mes in self.measurements:
-            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_power_up(self, dev, mes):
