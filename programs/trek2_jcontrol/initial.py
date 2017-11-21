@@ -8,7 +8,7 @@ import serial
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitRegExp, LimitDelta, LimitPercent, LimitInteger
+    LimitRegExp, LimitDelta, LimitPercent, LimitInteger
     )
 import share
 from . import console
@@ -22,12 +22,10 @@ class Initial(share.TestSequence):
     vin_set = 12.75
     # Common limits
     _common = (
-        LimitDelta('Vin', vin_set - 0.75, 0.5),
-        LimitPercent('3V3', 3.3, 3.0),
-        LimitLow('BkLghtOff', 0.5),
-        LimitDelta('BkLghtOn', 4.0, 0.55),      # 40mA = 4V with 100R (1%)
+        LimitDelta('Vin', vin_set - 0.75, 0.5, doc='Input voltage present'),
+        LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
         # CAN Bus is operational if status bit 28 is set
-        LimitInteger('CAN_BIND', 1 << 28),
+        LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
@@ -50,7 +48,6 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]['Config']
-        Devices.prdt = self.config.product_name
         Devices.sw_ver = self.config.sw_version
         super().open(
             self.config_data[self.parameter]['Limits'],
@@ -66,9 +63,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_SnEntry')
-        dev['dcs_Vin'].output(self.vin_set, output=True)
-        self.measure(('dmm_Vin', 'dmm_3V3'), timeout=5)
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        dev['dcs_vin'].output(self.vin_set, output=True)
+        self.measure(('dmm_vin', 'dmm_3v3'), timeout=5)
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
@@ -76,7 +73,7 @@ class Initial(share.TestSequence):
         arm = dev['arm']
         arm.open()
         arm.brand(self.config.hw_version, self.sernum, dev['rla_reset'])
-        mes['SwVer']()
+        mes['sw_ver']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -84,7 +81,7 @@ class Initial(share.TestSequence):
         mes['can_bind'](timeout=10)
         armtunnel = dev['armtunnel']
         armtunnel.open()
-        mes['TunnelSwVer']()
+        mes['tunnel_swver']()
         armtunnel.close()
 
 
@@ -93,14 +90,13 @@ class Devices(share.Devices):
     """Devices."""
 
     sw_ver = None
-    prdt = None
 
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_Vin', tester.DCSource, 'DCS3'),
+                ('dcs_vin', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
             ):
@@ -111,8 +107,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
             arm_port,
-            os.path.join(
-                folder, '{0}_{1}.bin'.format(self.prdt, self.sw_ver)),
+            os.path.join(folder, self.sw_ver),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
@@ -130,7 +125,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['arm'].close()
         self['armtunnel'].close()
-        self['dcs_Vin'].output(0.0, output=False)
+        self['dcs_vin'].output(0.0, output=False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
 
@@ -145,19 +140,20 @@ class Sensors(share.Sensors):
         arm = self.devices['arm']
         armtunnel = self.devices['armtunnel']
         sensor = tester.sensor
-        self['oMirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingString)
-        self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['o3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['oBkLght'] = sensor.Vdc(dmm, high=1, low=4, rng=10, res=0.01)
-        self['oSnEntry'] = sensor.DataEntry(
+        self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'].doc = 'X207'
+        self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['3v3'].doc = 'U4 output'
+        self['sernum'] = sensor.DataEntry(
             message=tester.translate('trek2_jcontrol_initial', 'msgSnEntry'),
             caption=tester.translate('trek2_jcontrol_initial', 'capSnEntry'),
             timeout=300)
+        self['sernum'].doc = 'Barcode scanner'
         # Console sensors
-        self['oCANBIND'] = share.console.Sensor(arm, 'CAN_BIND')
-        self['SwVer'] = share.console.Sensor(
+        self['canbind'] = share.console.Sensor(arm, 'CAN_BIND')
+        self['swver'] = share.console.Sensor(
             arm, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['TunnelSwVer'] = share.console.Sensor(
+        self['tunnelswver'] = share.console.Sensor(
             armtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
@@ -168,12 +164,10 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_Vin', 'Vin', 'oVin', ''),
-            ('dmm_3V3', '3V3', 'o3V3', ''),
-            ('dmm_BkLghtOff', 'BkLghtOff', 'oBkLght', ''),
-            ('dmm_BkLghtOn', 'BkLghtOn', 'oBkLght', ''),
-            ('ui_SnEntry', 'SerNum', 'oSnEntry', ''),
-            ('can_bind', 'CAN_BIND', 'oCANBIND', ''),
-            ('SwVer', 'SwVer', 'SwVer', ''),
-            ('TunnelSwVer', 'SwVer', 'TunnelSwVer', ''),
+            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('can_bind', 'CAN_BIND', 'canbind', 'CAN bound'),
+            ('sw_ver', 'SwVer', 'swver', 'Unit software version'),
+            ('tunnel_swver', 'SwVer', 'tunnelswver', 'Unit software version'),
             ))

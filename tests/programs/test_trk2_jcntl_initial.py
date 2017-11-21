@@ -12,7 +12,7 @@ class _CommonInitial(ProgramTestCase):
     """Trek2/JControl Initial program test suite."""
 
     prog_class = trek2_jcontrol.Initial
-    sernum = 'A1526040123'
+    ser_num = 'A1526040123'
 
     def setUp(self):
         """Per-Test setup."""
@@ -32,17 +32,17 @@ class _CommonInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['oSnEntry'],
-                    (self.sernum, )),
-                    (sen['oVin'], 12.0),
-                    (sen['o3V3'], 3.3),
+                    (sen['sernum'],
+                    (self.ser_num, )),
+                    (sen['vin'], 12.0),
+                    (sen['3v3'], 3.3),
                     ),
                 'TestArm': (
-                    (sen['SwVer'], self.test_program.config.sw_version),
+                    (sen['swver'], self.test_program.config.sw_version),
                     ),
                 'CanBus': (
-                    (sen['oCANBIND'], 1 << 28),
-                    (sen['TunnelSwVer'], self.test_program.config.sw_version),
+                    (sen['canbind'], 1 << 28),
+                    (sen['tunnelswver'], self.test_program.config.sw_version),
                     ),
                 },
             }
@@ -55,7 +55,7 @@ class _CommonInitial(ProgramTestCase):
             ['PowerUp', 'Program', 'TestArm', 'CanBus'], self.tester.ut_steps)
 
 
-class Trek2_Initial(_CommonInitial):
+class Trek2Initial(_CommonInitial):
 
     """Trek2 Initial program test suite."""
 
@@ -67,7 +67,7 @@ class Trek2_Initial(_CommonInitial):
         super()._pass_run()
 
 
-class JControl_Initial(_CommonInitial):
+class JControlInitial(_CommonInitial):
 
     """JControl Initial program test suite."""
 

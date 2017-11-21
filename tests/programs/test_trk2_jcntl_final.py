@@ -26,7 +26,7 @@ class _CommonFinal(ProgramTestCase):
 
     def _tank_sensors(self, value):
         """Fill all tank sensors with a value."""
-        for sen in self.test_program.sensors['otanks']:
+        for sen in self.test_program.sensors['tank1-4']:
             sen.store(value)
 
     def _pass_run(self):
@@ -35,9 +35,9 @@ class _CommonFinal(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Display': (
-                    (sen['SwVer'], self.test_program.config.sw_version),
-                    (sen['oYesNoSeg'], True),
-                    (sen['oYesNoBklight'], True),
+                    (sen['swver'], self.test_program.config.sw_version),
+                    (sen['yesnoseg'], True),
+                    (sen['yesnobklght'], True),
                     ),
                 },
             UnitTester.key_call: {      # Callables
@@ -56,7 +56,7 @@ class _CommonFinal(ProgramTestCase):
             self.tester.ut_steps)
 
 
-class Trek2_Final(_CommonFinal):
+class Trek2Final(_CommonFinal):
 
     """Trek2 Final program test suite."""
 
@@ -68,7 +68,7 @@ class Trek2_Final(_CommonFinal):
         super()._pass_run()
 
 
-class JControl_Final(_CommonFinal):
+class JControlFinal(_CommonFinal):
 
     """JControl Final program test suite."""
 
