@@ -14,31 +14,31 @@ class J35A(J35):
 
     """J35A configuration."""
 
-    hw_version = (2, 1, 'A')
+    hw_version = (8, 1, 'A')
     output_count = 7
     ocp_set = 20.0
     derate = True
     solar = False
-    can = False
+    can = True
 
 
 class J35B(J35):
 
     """J35B configuration."""
 
-    hw_version = (2, 2, 'A')
+    hw_version = (8, 2, 'A')
     output_count = 14
     ocp_set = 35.0
-    derate = False
-    solar = False
-    can = False
+    derate = True
+    solar = True
+    can = True
 
 
 class J35C(J35):
 
     """J35C configuration."""
 
-    hw_version = (7, 3, 'A')
+    hw_version = (8, 3, 'A')
     output_count = 14
     ocp_set = 35.0
     derate = False

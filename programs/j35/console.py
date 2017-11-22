@@ -88,6 +88,14 @@ class _Console():
             'MLC_CONVERTER_FAULT_MA', writeable=True, scale=1000),
         'INHIBIT_BY_AUX': parameter.Boolean(
             'LOAD_SWITCH_INHIBITED_BY_AUX', writeable=True,),
+        'SOLAR_FAN_HI': parameter.Float(
+            'MLC_SOLARTEMP_FANHIX10', writeable=True),
+        'SOLAR_FAN_LO': parameter.Float(
+            'MLC_SOLARTEMP_FANLOX10', writeable=True),
+        'SOLAR_FAN_LOHYST': parameter.Float(
+            'MLC_SOLARTEMP_FANLOHYSTX10', writeable=True),
+        'SOLAR_CURR_MAX': parameter.Float(
+            'MLC_SOLAR_CURRENT_MAX_MA', writeable=True, scale=1000),
         'AC_F': parameter.Float('AC_LINE_FREQUENCY', scale=1000),
         'AC_V': parameter.Float('AC_LINE_VOLTS', scale=1),
         'STATUS': parameter.Hex(
@@ -150,7 +158,7 @@ class _Console():
             self['VOUT_OV'] = 2     # OVP Latch reset
             self['FAN'] = 0
 
-    def derate(self):
+    def derate_A(self):
         """Derate for the 20A version (J35-A)."""
         self['CONV_MAX'] = 288
         self['CONV_RATED'] = 20.0
@@ -158,6 +166,13 @@ class _Console():
         self['CONV_FAULT'] = 25.0
         self['INHIBIT_BY_AUX'] = False
         self['IOUT'] = 20.0
+
+    def derate_B(self):
+        """Derate for J35-B."""
+        self['SOLAR_FAN_HI'] = 700
+        self['SOLAR_FAN_LO'] = 450
+        self['SOLAR_FAN_LOHYST'] = 400
+        self['SOLAR_CURR_MAX'] = 20.0
 
     def dcdc_on(self):
         """Power ON the DC-DC converter circuits."""
