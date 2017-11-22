@@ -156,7 +156,7 @@ class Initial(share.TestSequence):
             TestStep('RemoteSw', self._step_remote_sw),
             TestStep('Load', self._step_load),
             TestStep('OCP', self._step_ocp),
-            TestStep('CanBus', self._step_canbus, self.config.can),
+            TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
 

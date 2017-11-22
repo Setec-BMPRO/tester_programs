@@ -19,7 +19,6 @@ class J35A(J35):
     ocp_set = 20.0
     derate = True
     solar = False
-    can = True
 
 
 class J35B(J35):
@@ -31,7 +30,6 @@ class J35B(J35):
     ocp_set = 35.0
     derate = True
     solar = True
-    can = True
 
 
 class J35C(J35):
@@ -43,4 +41,3 @@ class J35C(J35):
     ocp_set = 35.0
     derate = False
     solar = True
-    can = True
