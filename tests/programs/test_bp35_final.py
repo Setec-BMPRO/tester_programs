@@ -21,7 +21,7 @@ class BP35Final(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'serial.Serial',
-                'share.can.Tunnel',
+                'tester.CANTunnel',
                 'programs.bp35.console.TunnelConsole',
                 ):
             patcher = patch(target)

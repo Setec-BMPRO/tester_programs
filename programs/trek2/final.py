@@ -38,13 +38,13 @@ class Final(share.TestSequence):
         """Apply input 12Vdc and measure voltages."""
         dev['dcs_Vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
         # Send a "Preconditions" packet (for Trek2)
-        pkt = tester.CAN.Packet()
+        pkt = tester.devphysical.can.Packet()
         msg = pkt.header.message
-        msg.device_id = tester.CAN.DeviceID.bp35.value
-        msg.msg_type = tester.CAN.MessageType.announce.value
-        msg.data_id = tester.CAN.DataID.preconditions.value
+        msg.device_id = tester.devphysical.can.DeviceID.bp35.value
+        msg.msg_type = tester.devphysical.can.MessageType.announce.value
+        msg.data_id = tester.devphysical.can.DataID.preconditions.value
         pkt.data.extend(b'\x00\x00')    # Dummy preconditions data
-        self.physical_devices['CAN'].send('t{0}'.format(pkt))
+        self.physical_devices['CAN'][0].send('t{0}'.format(pkt))
 
     @share.teststep
     def _step_tunnel_open(self, dev, mes):
@@ -94,8 +94,9 @@ class Devices(share.Devices):
                 ('rla_s3', tester.Relay, 'RLA5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        tunnel = share.can.Tunnel(
-            self.physical_devices['CAN'], tester.CAN.DeviceID.trek2)
+        tunnel = tester.CANTunnel(
+            self.physical_devices['CAN'],
+            tester.devphysical.can.DeviceID.trek2)
         self['trek2'] = console.TunnelConsole(tunnel)
 
     def reset(self):

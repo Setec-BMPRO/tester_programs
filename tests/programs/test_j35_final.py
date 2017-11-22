@@ -22,7 +22,7 @@ class _J35Final(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'serial.Serial',
-                'share.can.Tunnel',
+                'tester.CANTunnel',
                 'programs.j35.console.TunnelConsole',
                 ):
             patcher = patch(target)

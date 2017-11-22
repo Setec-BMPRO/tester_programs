@@ -436,8 +436,9 @@ class Devices(share.Devices):
         # BP35 Console driver
         self['bp35'] = console.DirectConsole(bp35_ser)
         # Tunneled Console driver
-        tunnel = share.can.Tunnel(
-            self.physical_devices['CAN'], tester.CAN.DeviceID.bp35)
+        tunnel = tester.CANTunnel(
+            self.physical_devices['CAN'],
+            tester.devphysical.can.DeviceID.bp35)
         self['bp35tunnel'] = console.TunnelConsole(tunnel)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])

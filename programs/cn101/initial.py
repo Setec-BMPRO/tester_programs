@@ -140,8 +140,9 @@ class Devices(share.Devices):
         # CN101 Console driver
         self['cn101'] = console.DirectConsole(cn101_ser)
         # Tunneled Console driver
-        tunnel = share.can.Tunnel(
-            self.physical_devices['CAN'], tester.CAN.DeviceID.cn101)
+        tunnel = tester.CANTunnel(
+            self.physical_devices['CAN'],
+            tester.devphysical.can.DeviceID.cn101)
         self['cn101tunnel'] = console.TunnelConsole(tunnel)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)

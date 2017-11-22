@@ -108,7 +108,7 @@ class Base():
     # True for verbose logging
     verbose = False
 # TODO: Remove this logger once we implement response_count != expected
-    # Last command sent (for debug message @ line 270)
+    # Last command sent (for debug message @ line 248)
     last_cmd = None
 
     def __init__(self, port):
@@ -281,5 +281,41 @@ class BadUart(Base):
                 raise CommandError(
                     'Command echo error. Tx: {0}, Rx: {1}'.format(
                         a_byte, echo))
+        # And the '\r' without echo
+        self.port.write(b'\r')
+
+
+class CANTunnel(Base):
+
+    """Formatter for the 'CAN Tunnel' consoles. Implements Protocols 2 & 3
+
+    - Allow for possible CAN packet loss by send commands in blocks of
+      8-bytes maximum. Wait for the echo of each sent block.
+      The trailing '\r' is not echoed back.
+    - Response is the same as the BaseConsole class.
+
+    """
+
+    def _write_command(self, command):
+        """Write a command and verify the echo of each block in turn.
+
+        @param command Command string.
+        @raises CommandError.
+
+        """
+        cmd_bytes = command.encode()
+        self._logger.debug('Cmd --> %s', repr(cmd_bytes))
+        can_packet_size = 8
+        while len(cmd_bytes) > 0:
+            packet = cmd_bytes[:can_packet_size]
+            cmd_bytes = cmd_bytes[can_packet_size:]
+            self.port.write(packet)
+            echo = self.port.read(len(packet))
+            if self.verbose:
+                self._logger.debug(' Tx -> %s Rx <- %s', packet, echo)
+            if echo != packet:
+                raise CommandError(
+                    'Command echo error. Tx: {0}, Rx: {1}'.format(
+                        packet, echo))
         # And the '\r' without echo
         self.port.write(b'\r')

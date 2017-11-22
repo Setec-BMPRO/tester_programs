@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2017-11-20, 13:12:24 -->
+<!-- Saved: 2017-11-22, 11:23:12 -->
 <!-- Copyright (C) 2017 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -160,7 +160,6 @@
     <Source>share/bluetooth/eunistone_pan1322.py</Source>
     <Source>share/bluetooth/raspblue.py</Source>
     <Source>share/bluetooth/rn4020.py</Source>
-    <Source>share/can.py</Source>
     <Source>share/console/__init__.py</Source>
     <Source>share/console/parameter.py</Source>
     <Source>share/console/protocol.py</Source>
@@ -241,7 +240,6 @@
     <Source>tests/programs/test_wtsi200_final.py</Source>
     <Source>tests/share/__init__.py</Source>
     <Source>tests/share/test_bluetooth.py</Source>
-    <Source>tests/share/test_can_tunnel.py</Source>
     <Source>tests/share/test_console.py</Source>
     <Source>tests/share/test_parameter.py</Source>
     <Source>testsuite.py</Source>

@@ -59,10 +59,6 @@ class DirectConsole(_Console, share.console.BadUart):
     """Console for a direct connection."""
 
 
-class TunnelConsole(_Console, share.console.Base):
+class TunnelConsole(_Console, share.console.CANTunnel):
 
-    """Console for a CAN tunneled connection.
-
-    The CAN tunnel does not need the BadUartConsole stuff.
-
-    """
+    """Console for a CAN tunneled connection."""

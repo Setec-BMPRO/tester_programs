@@ -84,10 +84,6 @@ class DirectConsole(_Console, share.console.BadUart):
     """Console for a direct connection to a Trek2."""
 
 
-class TunnelConsole(_Console, share.console.Base):
+class TunnelConsole(_Console, share.console.CANTunnel):
 
-    """Console for a CAN tunneled connection to a Trek2.
-
-    The CAN tunnel does not need the BadUartConsole stuff.
-
-    """
+    """Console for a CAN tunneled connection to a Trek2."""

@@ -59,8 +59,9 @@ class Devices(share.Devices):
         """Create all Instruments."""
         self['dmm'] = tester.DMM(self.physical_devices['DMM'])
         self['acsource'] = tester.ACSource(self.physical_devices['ACS'])
-        tunnel = share.can.Tunnel(
-            self.physical_devices['CAN'], tester.CAN.DeviceID.bp35)
+        tunnel = tester.CANTunnel(
+            self.physical_devices['CAN'],
+            tester.devphysical.can.DeviceID.bp35)
         self['bp35'] = console.TunnelConsole(tunnel)
 
     def reset(self):

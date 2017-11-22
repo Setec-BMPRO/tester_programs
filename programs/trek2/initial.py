@@ -100,8 +100,8 @@ class Devices(share.Devices):
         trek2_ser.port = arm_port
         self['trek2'] = console.DirectConsole(trek2_ser)
         # Tunneled Console driver
-        tunnel = share.can.Tunnel(
-            self.physical_devices['CAN'], tester.CAN.DeviceID.trek2)
+        tunnel = tester.CANTunnel(
+            self.physical_devices['CAN'], tester.devphysical.can.DeviceID.trek2)
         self['trek2tunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):

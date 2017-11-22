@@ -10,13 +10,11 @@ from . import programmer
 from . import console
 from . import bluetooth
 from . import timers
-from . import can
 
 
 __all__ = [
     'Devices', 'Sensors', 'Measurements', 'TestSequence', 'teststep',
     'bluetooth',
-    'can',
     'console',
     'fixture',
     'programmer',

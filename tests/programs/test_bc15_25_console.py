@@ -117,7 +117,7 @@ powersupply_ma                        10000
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        port = tester.SimSerial()
+        port = tester.devphysical.sim_serial.SimSerial()
         port.echo = True
         self.con = bc15_25.console.Console(port)
         self.con.parameter = '15'
