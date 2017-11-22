@@ -54,7 +54,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        dev['dcs_Vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
+        dev['dcs_vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
         # Send a Preconditions packet (for Trek2)
         pkt = tester.devphysical.can.Packet()
         msg = pkt.header.message
@@ -73,7 +73,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Display tests."""
-        self.measure(('SwVer', 'ui_YesNoSeg', 'ui_YesNoBklight', ))
+        self.measure(('sw_ver', 'ui_yesnoseg', 'ui_yesnobklght', ))
         dev['armtunnel'].testmode(False)
 
     @share.teststep
@@ -103,7 +103,7 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 # Power unit under test.
-                ('dcs_Vin', tester.DCSource, 'DCS3'),
+                ('dcs_vin', tester.DCSource, 'DCS3'),
                 # As the water level rises the "switches" close.
                 # The order of switch closure does not matter, just the number
                 # closed. The lowest bar always flashes.
@@ -121,7 +121,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['armtunnel'].close()
-        self['dcs_Vin'].output(0.0, output=False)
+        self['dcs_vin'].output(0.0, output=False)
         for rla in ('rla_s1', 'rla_s2', 'rla_s3'):
             self[rla].set_off()
 
@@ -134,20 +134,22 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         armtunnel = self.devices['armtunnel']
         sensor = tester.sensor
-        self['oYesNoSeg'] = sensor.YesNo(
+        self['yesnoseg'] = sensor.YesNo(
             message=tester.translate('trek2_jcontrol_final', 'AreSegmentsOn?'),
             caption=tester.translate('trek2_jcontrol_final', 'capSegments'))
-        self['oYesNoBklight'] = sensor.YesNo(
+        self['yesnoseg'].doc = 'Operator input'
+        self['yesnobklght'] = sensor.YesNo(
             message=tester.translate('trek2_jcontrol_final', 'IsBacklightOk?'),
             caption=tester.translate('trek2_jcontrol_final', 'capBacklight'))
-        self['otanks'] = (
+        self['yesnobklght'].doc = 'Operator input'
+        self['tank1-4'] = (
             share.console.Sensor(armtunnel, 'TANK1'),
             share.console.Sensor(armtunnel, 'TANK2'),
             share.console.Sensor(armtunnel, 'TANK3'),
             share.console.Sensor(armtunnel, 'TANK4'),
             )
         # Console sensors
-        self['SwVer'] = share.console.Sensor(
+        self['swver'] = share.console.Sensor(
             armtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
@@ -158,16 +160,16 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurement instances."""
         self.create_from_names((
-            ('ui_YesNoSeg', 'Notify', 'oYesNoSeg', ''),
-            ('ui_YesNoBklight', 'Notify', 'oYesNoBklight', ''),
-            ('SwVer', 'SwVer', 'SwVer', ''),
+            ('ui_yesnoseg', 'Notify', 'yesnoseg', 'Segment display'),
+            ('ui_yesnobklght', 'Notify', 'yesnobklght', 'Backlight'),
+            ('sw_ver', 'SwVer', 'swver', 'Unit software version'),
             ))
         self['arm_level1'] = []
         self['arm_level2'] = []
         self['arm_level3'] = []
         self['arm_level4'] = []
         meas = tester.Measurement
-        for sens in self.sensors['otanks']:
+        for sens in self.sensors['tank1-4']:
             self['arm_level1'].append(
                 meas(self.limits['ARM-level1'], sens))
             self['arm_level2'].append(
