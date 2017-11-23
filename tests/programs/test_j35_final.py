@@ -79,7 +79,7 @@ class J35_A_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the A program."""
-        super()._pass_run(18, ['PowerUp', 'Load', 'OCP'])
+        super()._pass_run(20, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
 
 
 class J35_B_Final(_J35Final):
@@ -91,7 +91,7 @@ class J35_B_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the B program."""
-        super()._pass_run(32, ['PowerUp', 'Load', 'OCP'])
+        super()._pass_run(34, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
 
 
 class J35_C_Final(_J35Final):

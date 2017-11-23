@@ -59,6 +59,7 @@ class _J35Initial(ProgramTestCase):
                     ),
                 'Solar': (
                     (sen['oair'], 13.5),
+                    (sen['ovbat'], 13.5),
                     ),
                 'PowerUp': (
                     (sen['oacin'], 240.0),
@@ -129,7 +130,7 @@ class J35_B_Initial(_J35Initial):
     """J35-B Initial program test suite."""
 
     parameter = 'B'
-    debug = False
+    debug = True
 
     def test_pass_run(self):
         """PASS run of the B program."""

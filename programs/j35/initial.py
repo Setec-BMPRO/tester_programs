@@ -207,7 +207,9 @@ class Initial(share.TestSequence):
         dev['dcs_solar'].output(self.aux_solar_inject, True)
         j35 = dev['j35']
         j35['SOLAR'] = True
-        mes['dmm_vair'](timeout=5)
+        # Only the 'C' has Air Suspension
+        measurement = 'dmm_vair' if self.parameter == 'C' else 'dmm_vbatout'
+        mes[measurement](timeout=5)
         j35['SOLAR'] = False
         dev['dcs_solar'].output(0.0, False)
 

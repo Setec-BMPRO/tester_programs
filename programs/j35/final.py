@@ -61,11 +61,10 @@ class Final(share.TestSequence):
             Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('CAN', self._step_can, self.config.can),
+            tester.TestStep('CAN', self._step_can),
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
-            tester.TestStep(
-                'CanCable', self._step_can_cable, self.config.can),
+            tester.TestStep('CanCable', self._step_can_cable),
             )
 
     @share.teststep
