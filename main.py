@@ -8,9 +8,7 @@ import time
 import inspect
 import configparser
 import logging.handlers
-from unittest.mock import patch
 from pydispatch import dispatcher
-import gpib
 import tester
 import programs
 
@@ -34,10 +32,6 @@ def _main():
     # Read settings from the configuration file
     config = configparser.ConfigParser()
     config.read(config_file)
-    debug_gpib = config['DEFAULT'].getboolean('DebugGPIB')
-    if debug_gpib is None:
-        debug_gpib = False
-    gpib.DEBUG_GPIB.enabled = debug_gpib
     test_program = config['DEFAULT'].get('Program')
     if test_program is None:
         test_program = 'Dummy'
@@ -45,13 +39,6 @@ def _main():
     tester_type = config['DEFAULT'].get('TesterType')
     if tester_type is None:
         tester_type = 'ATE3'
-    no_delays = config['DEFAULT'].getboolean('NoDelays')
-    if no_delays is None:
-        no_delays = False
-    if no_delays:
-        # Patch time.sleep to remove delays
-        patcher = patch('time.sleep')
-        patcher.start()
     # Receive Test Result signals here
     def test_result(result):
         logger.info('Test Result: %s', result)
@@ -84,8 +71,6 @@ def _main():
     tst.stop()
     tst.join()
     logger.info('Finished')
-    if no_delays:
-        patcher.stop()
 
 
 def _logging_setup():
