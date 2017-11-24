@@ -130,7 +130,7 @@ class J35_B_Initial(_J35Initial):
     """J35-B Initial program test suite."""
 
     parameter = 'B'
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the B program."""

@@ -14,6 +14,7 @@ import share
 from . import console
 from . import config
 
+
 class Initial(share.TestSequence):
 
     """Trek2/JControl Initial Test Program."""
@@ -48,7 +49,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]['Config']
-        Devices.sw_ver = self.config.sw_version
+        Devices.sw_file = self.config.sw_file
         super().open(
             self.config_data[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
@@ -89,7 +90,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_ver = None
+    sw_file = None
 
     def open(self):
         """Create all Instruments."""
@@ -107,7 +108,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, self.sw_ver),
+            os.path.join(folder, self.sw_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])

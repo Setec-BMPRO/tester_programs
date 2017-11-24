@@ -56,8 +56,6 @@ from . import test_st3_final
 from . import test_sx750_final
 from . import test_sx750_initial
 from . import test_sx750_safety
-from . import test_trek2_final
-from . import test_trek2_initial
 from . import test_trk2_jcntl_final
 from . import test_trk2_jcntl_initial
 from . import test_trs1_initial
@@ -124,8 +122,6 @@ __all__ = [
     'test_sx750_final',
     'test_sx750_initial',
     'test_sx750_safety',
-    'test_trek2_final',
-    'test_trek2_initial',
     'test_trk2_jcntl_final',
     'test_trk2_jcntl_initial',
     'test_trs1_initial',
