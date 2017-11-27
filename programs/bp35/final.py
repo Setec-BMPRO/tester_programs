@@ -16,6 +16,7 @@ class Final(share.TestSequence):
     # Test limits
     limitdata = (
         tester.LimitDelta('Vbat', 12.8, 0.2, doc='Output voltage'),
+        tester.LimitDelta('Can12V', 12.0, delta=1.0, doc='CAN_POWER rail'),
         tester.LimitRegExp(
             'ARM-SwVer', '^{0}$'.format(
                 config.ARM_SW_VERSION.replace('.', r'\.')),
@@ -41,6 +42,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_can(self, dev, mes):
         """Access the unit console using the CAN bus."""
+        mes['dmm_can12v'](timeout=5)
         bp35 = dev['bp35']
         bp35.open()
         mes['arm_swver']()
@@ -76,10 +78,12 @@ class Sensors(share.Sensors):
 
     def open(self):
         """Create all Sensors."""
+        dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['vbat'] = tester.sensor.Vdc(
-            self.devices['dmm'], high=2, low=2, rng=100, res=0.001)
+        self['vbat'] = tester.sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.001)
         self['vbat'].doc = 'Unit output'
+        self['can12v'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.1)
+        self['can12v'].doc = 'X303 CAN_POWER'
         bp35 = self.devices['bp35']
         self['arm_swver'] = share.console.Sensor(
             bp35, 'SW_VER', rdgtype=sensor.ReadingString)
@@ -105,6 +109,7 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vbat', 'Vbat', 'vbat', 'Output ok'),
+            ('dmm_can12v', 'Can12V', 'can12v', 'CAN Bus 12V'),
             ('ui_yesnogreen', 'Notify', 'yesnogreen', 'LED Green'),
             ('ui_notifycable', 'Notify', 'notifycable', 'CAN cable removed'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),

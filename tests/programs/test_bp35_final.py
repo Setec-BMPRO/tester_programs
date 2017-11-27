@@ -40,6 +40,7 @@ class BP35Final(ProgramTestCase):
                     (sen['yesnogreen'], True),
                     ),
                 'CAN': (
+                    (sen['can12v'], 12.0),
                     (sen['arm_swver'], bp35.config.ARM_SW_VERSION),
                     (sen['notifycable'], True),
                     ),
@@ -49,5 +50,5 @@ class BP35Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
+        self.assertEqual(6, len(result.readings))
         self.assertEqual(['PowerUp', 'CAN'], self.tester.ut_steps)
