@@ -46,6 +46,7 @@ class _J35Final(ProgramTestCase):
                     (sen['sernum'], self.sernum),
                     ),
                 'CAN': (
+                    (sen['can12v'], 12.0),
                     (sen['swver'], j35.config.J35.sw_version),
                     ),
                 'OCP': (
@@ -79,7 +80,7 @@ class J35_A_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the A program."""
-        super()._pass_run(20, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
+        super()._pass_run(21, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
 
 
 class J35_B_Final(_J35Final):
@@ -91,7 +92,7 @@ class J35_B_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the B program."""
-        super()._pass_run(34, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
+        super()._pass_run(35, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
 
 
 class J35_C_Final(_J35Final):
@@ -103,4 +104,4 @@ class J35_C_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the C program."""
-        super()._pass_run(34, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
+        super()._pass_run(35, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])

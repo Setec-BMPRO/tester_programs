@@ -19,6 +19,7 @@ class Final(share.TestSequence):
     _common = (
         tester.LimitLow('FanOff', 1.0, doc='No airflow seen'),
         tester.LimitHigh('FanOn', 10.0, doc='Airflow seen'),
+        tester.LimitDelta('Can12V', 12.0, delta=1.0, doc='CAN_POWER rail'),
         tester.LimitDelta('Vout', 12.8, delta=0.2,
             doc='No load output voltage'),
         tester.LimitPercent('Vload', 12.8, percent=5,
@@ -81,6 +82,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_can(self, dev, mes):
         """Access the unit console using the CAN bus."""
+        mes['dmm_can12v'](timeout=5)
         j35 = dev['j35']
         j35.open()
         mes['swver']()
@@ -152,6 +154,8 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['photo'] = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.1)
         self['photo'].doc = 'Airflow detector'
+        self['can12v'] = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.1)
+        self['can12v'].doc = 'X303 CAN_POWER'
         # Generate load voltage sensors
         vloads = []
         output_count = Final.config_data[self.parameter]['Config'].output_count
@@ -189,6 +193,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('dmm_fanoff', 'FanOff', 'photo', 'Fan not running'),
+            ('dmm_can12v', 'Can12V', 'can12v', 'CAN Bus 12V'),
             ('dmm_fanon', 'FanOn', 'photo', 'Fan running'),
             ('ramp_ocp', 'OCP', 'ocp', 'Output OCP'),
             ('swver', 'SwVer', 'swver', 'Unit software version'),
