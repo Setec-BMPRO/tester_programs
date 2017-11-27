@@ -166,7 +166,6 @@ class Devices(share.Devices):
             ('dmm', tester.DMM, 'DMM'),
             ('acsource', tester.ACSource, 'ACS'),
             ('discharge', tester.Discharge, 'DIS'),
-            ('dcs_vcom', tester.DCSource, 'DCS1'),
             ('dcs_3v3', tester.DCSource, 'DCS2'),
             ('dcl', tester.DCLoad, 'DCL1'),
             ('rla_reset', tester.Relay, 'RLA1'),
@@ -189,10 +188,6 @@ class Devices(share.Devices):
         # Console driver
         self['arm'] = console.Console(arm_ser)
         self['arm'].parameter = self.parameter
-        # Apply power to fixture Comms circuit.
-        self['dcs_vcom'].output(9.0, True)
-        self.add_closer(lambda: self['dcs_vcom'].output(0, False))
-        time.sleep(4)       # Allow OS to detect USB serial port
 
     def reset(self):
         """Reset instruments."""
