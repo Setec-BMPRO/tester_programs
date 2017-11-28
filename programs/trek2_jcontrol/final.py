@@ -13,6 +13,8 @@ class Final(share.TestSequence):
 
     """Trek2/JControl Final Test Program."""
 
+    # Input voltage to power the unit
+    vin_set = 12.0
     # Common limits
     _common = (
         LimitInteger('ARM-level1', 1),
@@ -54,7 +56,8 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        dev['dcs_vin'].output(12.0, output=True, delay=9) # Wait for CAN bind
+        dev['dcs_vin'].output(
+            self.vin_set, output=True, delay=9) # Wait for CAN bind
         # Send a Preconditions packet (for Trek2)
         pkt = tester.devphysical.can.Packet()
         msg = pkt.header.message

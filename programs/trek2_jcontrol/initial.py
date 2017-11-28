@@ -19,8 +19,10 @@ class Initial(share.TestSequence):
 
     """Trek2/JControl Initial Test Program."""
 
+    # Startup voltage
+    vin_start = 8.0
     # Input voltage to power the unit
-    vin_set = 12.75
+    vin_set = 12.0
     # Common limits
     _common = (
         LimitDelta('Vin', vin_set - 0.75, 0.5, doc='Input voltage present'),
@@ -65,8 +67,9 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        dev['dcs_vin'].output(self.vin_set, output=True)
+        dev['dcs_vin'].output(self.vin_start, output=True)
         self.measure(('dmm_vin', 'dmm_3v3'), timeout=5)
+        dev['dcs_vin'].output(self.vin_set)
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
