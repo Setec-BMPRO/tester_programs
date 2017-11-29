@@ -34,7 +34,7 @@ class _CommonInitial(ProgramTestCase):
                 'PowerUp': (
                     (sen['sernum'],
                     (self.ser_num, )),
-                    (sen['vin'], 12.0),
+                    (sen['vin'], (7.0, 12.0)),
                     (sen['3v3'], 3.3),
                     ),
                 'TestArm': (

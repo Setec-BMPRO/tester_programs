@@ -68,7 +68,7 @@ class Initial(share.TestSequence):
             'BinVersion': bin_version_25,
             'OCP_Nominal': ocp_nominal_25,
             'Limits': _common + (
-                LimitDelta('5Vs', 5.0, 0.1),
+                LimitDelta('5Vs', 4.95, 0.15),
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_25.replace('.', r'\.'))),
                 LimitPercent('OCP', ocp_nominal_25, (4.0, 20.0)),
