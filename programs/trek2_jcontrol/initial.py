@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
     vin_set = 12.0
     # Common limits
     _common = (
-        LimitDelta('Vin', vin_set - 0.75, 0.5, doc='Input voltage present'),
+        LimitDelta('Vin', vin_start - 0.75, 0.5, doc='Input voltage present'),
         LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
         # CAN Bus is operational if status bit 28 is set
         LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
