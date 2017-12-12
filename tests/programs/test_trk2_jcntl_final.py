@@ -12,6 +12,7 @@ class _CommonFinal(ProgramTestCase):
     """Trek2/JControl Final program test suite."""
 
     prog_class = trek2_jcontrol.Final
+    sernum = 'A1726011234'
 
     def setUp(self):
         """Per-Test setup."""
@@ -34,6 +35,9 @@ class _CommonFinal(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
+                'PowerUp': (
+                    (sen['sernum'], self.sernum),
+                    ),
                 'Display': (
                     (sen['swver'], self.test_program.config.sw_version),
                     (sen['yesnoseg'], True),
@@ -50,7 +54,7 @@ class _CommonFinal(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(19, len(result.readings))
+        self.assertEqual(20, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'TunnelOpen', 'Display', 'Tanks'],
             self.tester.ut_steps)

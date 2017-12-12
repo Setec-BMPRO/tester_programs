@@ -66,6 +66,11 @@ class _Console():
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
 
+    def set_sernum(self, sernum):
+        """Brand the unit with Serial Number."""
+        self['SER_ID'] = sernum
+        self['NVWRITE'] = True
+
     def testmode(self, state):
         """Enable or disable Test Mode.
 

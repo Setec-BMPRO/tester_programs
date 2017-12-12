@@ -15,6 +15,8 @@ class Final(share.TestSequence):
 
     # Input voltage to power the unit
     vin_set = 12.0
+    # Time to wait for CAN binding (sec)
+    can_bind_time = 9
     # Common limits
     _common = (
         LimitInteger('ARM-level1', 1),
@@ -56,35 +58,34 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(
-            self.vin_set, output=True, delay=9) # Wait for CAN bind
-        # Send a Preconditions packet (for Trek2)
-        pkt = tester.devphysical.can.Packet()
-        msg = pkt.header.message
-        msg.device_id = tester.devphysical.can.DeviceID.bp35.value
-        msg.msg_type = tester.devphysical.can.MessageType.announce.value
-        msg.data_id = tester.devphysical.can.DataID.preconditions.value
-        pkt.data.extend(b'\x00\x00')    # Dummy data
-        self.physical_devices['CAN'][0].send('t{0}'.format(pkt))
+            self.vin_set, output=True, delay=self.can_bind_time)
+        self.send_preconditions(self.physical_devices['CAN'][0])
 
     @share.teststep
     def _step_tunnel_open(self, dev, mes):
         """Open console tunnel."""
-        dev['armtunnel'].open()
-        dev['armtunnel'].testmode(True)
+        unit = dev['armtunnel']
+        unit.open()
+        unit.testmode(True)
 
     @share.teststep
     def _step_display(self, dev, mes):
         """Display tests."""
+        unit = dev['armtunnel']
         self.measure(('sw_ver', 'ui_yesnoseg', 'ui_yesnobklght', ))
-        dev['armtunnel'].testmode(False)
+        # Set unit internal Serial Number to match the outside label
+        unit.set_sernum(self.sernum)
+        unit.testmode(False)
 
     @share.teststep
     def _step_test_tanks(self, dev, mes):
         """Test all tanks one level at a time."""
-        dev['armtunnel']['CONFIG'] = 0x7E00      # Enable all 4 tanks
-        dev['armtunnel']['TANK_SPEED'] = 0.1     # Change update interval
-        # No sensors - Tanks empty!
+        unit = dev['armtunnel']
+        unit['CONFIG'] = 0x7E00         # Enable all 4 tanks
+        unit['TANK_SPEED'] = 0.1        # Change update interval
+        # No sensors - Tanks empty
         tester.MeasureGroup(mes['arm_level1'], timeout=12)
         # 1 sensor
         dev['rla_s1'].set_on()
@@ -95,6 +96,17 @@ class Final(share.TestSequence):
         # 3 sensors
         dev['rla_s3'].set_on()
         tester.MeasureGroup(mes['arm_level4'], timeout=12)
+
+    @staticmethod
+    def send_preconditions(serial2can):
+        """Send a Preconditions packet (for Trek2)."""
+        pkt = tester.devphysical.can.Packet()
+        msg = pkt.header.message
+        msg.device_id = tester.devphysical.can.DeviceID.bp35.value
+        msg.msg_type = tester.devphysical.can.MessageType.announce.value
+        msg.data_id = tester.devphysical.can.DataID.preconditions.value
+        pkt.data.extend(b'\x00\x00')    # Dummy data
+        serial2can.send('t{0}'.format(pkt))
 
 
 class Devices(share.Devices):
@@ -151,9 +163,12 @@ class Sensors(share.Sensors):
             share.console.Sensor(armtunnel, 'TANK3'),
             share.console.Sensor(armtunnel, 'TANK4'),
             )
-        # Console sensors
         self['swver'] = share.console.Sensor(
             armtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['sernum'] = sensor.DataEntry(
+            message=tester.translate('j35_final', 'msgSnEntry'),
+            caption=tester.translate('j35_final', 'capSnEntry'))
+        self['sernum'].doc = 'Barcode scanner'
 
 
 class Measurements(share.Measurements):
@@ -163,6 +178,7 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurement instances."""
         self.create_from_names((
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('ui_yesnoseg', 'Notify', 'yesnoseg', 'Segment display'),
             ('ui_yesnobklght', 'Notify', 'yesnobklght', 'Backlight'),
             ('sw_ver', 'SwVer', 'swver', 'Unit software version'),
