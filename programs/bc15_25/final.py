@@ -52,13 +52,13 @@ class Final(share.TestSequence):
         """Power up the Unit and measure output with min load."""
         dev['dcl'].output(1.0, output=True)
         dev['acsource'].output(240.0, output=True)
-        self.measure(('ps_mode', 'vout_nl', ), timeout=5)
+        self.measure(('ui_yesnopsmode', 'vout_nl', ), timeout=5)
 
     @share.teststep
     def _step_loaded(self, dev, mes):
         """Load the Unit."""
         dev['dcl'].output(self.config['OCP_Nominal'] - 1.0)
-        self.measure(('vout', 'ocp', 'ch_mode', ), timeout=5)
+        self.measure(('vout', 'ocp', 'ui_yesnochmode', ), timeout=5)
 
 
 class Devices(share.Devices):
@@ -100,9 +100,9 @@ class Sensors(share.Sensors):
             msg_chrg = tester.translate('bc25_final', 'GoToChargeMode')
         cap_psmode = tester.translate('bc15_25_final', 'capPsMode')
         cap_chrg = tester.translate('bc15_25_final', 'capChargeMode')
-        self['ps_mode'] = sensor.Notify(
+        self['yesnopsmode'] = sensor.YesNo(
             message=msg_psmode, caption=cap_psmode)
-        self['ch_mode'] = sensor.Notify(
+        self['yesnochmode'] = sensor.YesNo(
             message=msg_chrg, caption=cap_chrg)
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl'],
@@ -123,7 +123,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('vout_nl', 'VoutNL', 'vout', ''),
             ('vout', 'Vout', 'vout', ''),
-            ('ps_mode', 'Notify', 'ps_mode', ''),
-            ('ch_mode', 'Notify', 'ch_mode', ''),
+            ('ui_yesnopsmode', 'Notify', 'yesnopsmode', ''),
+            ('ui_yesnochmode', 'Notify', 'yesnochmode', ''),
             ('ocp', 'OCP', 'ocp', ''),
             ))

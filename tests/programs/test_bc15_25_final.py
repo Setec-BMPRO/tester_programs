@@ -18,10 +18,10 @@ class _BC15_25_Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerOn':
-                    ((sen['ps_mode'], True), (sen['vout'], 13.80), ),
+                    ((sen['yesnopsmode'], True), (sen['vout'], 13.80), ),
                 'Load':
                     ((sen['vout'], (14.23, ) + (14.2, ) * 8 + (11.0, )),
-                     (sen['ch_mode'], True), ),
+                     (sen['yesnochmode'], True), ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
