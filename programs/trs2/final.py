@@ -4,7 +4,7 @@
 
 import serial
 import tester
-from tester import TestStep, LimitLow, LimitDelta, LimitBoolean, LimitRegExp
+from tester import TestStep, LimitLow, LimitDelta
 import share
 
 
@@ -17,9 +17,7 @@ class Final(share.TestSequence):
     # Test limits
     limitdata = (
         LimitDelta('Vin', vbatt, 0.2),
-        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
-        LimitBoolean('DetectBT', True),
+        LimitLow('TestPinCover', 0.5),
         )
 
     def open(self):
@@ -40,16 +38,14 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-# FIXME: Where do we get the MAC from?
-        btmac = share.bluetooth.MAC('001EC030BC15')
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        ble = dev['ble']
-        ble.open()
-        reply = ble.scan(btmac)
-        ble.close()
-        self._logger.debug('Bluetooth MAC detected: %s', reply)
-        mes['detectBT'].sensor.store(reply)
-        mes['detectBT']()
+        sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        pibluetooth = share.bluetooth.RaspberryBluetooth()
+        reply = pibluetooth.echo('Hello World')
+        print(reply)
+        self._logger.debug('Open bluetooth connection to console of unit'
+                           'with serial: "%s"', sernum)
+        pibluetooth.open('A1526040123')
+        pibluetooth.close()
 
 
 class Devices(share.Devices):
@@ -99,7 +95,9 @@ class Sensors(share.Sensors):
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
-        self['mirbt'] = sensor.Mirror()
+        self['sernum'] = sensor.DataEntry(
+            message=tester.translate('trs2_final', 'msgSnEntry'),
+            caption=tester.translate('trs2_final', 'capSnEntry'))
 
 
 class Measurements(share.Measurements):
@@ -111,5 +109,5 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
-            ('detectBT', 'DetectBT', 'mirbt', ''),
+            ('ui_sernum', 'SerNum', 'sernum', ''),
             ))
