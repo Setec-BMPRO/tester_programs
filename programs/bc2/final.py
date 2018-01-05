@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """BC2 Final Program."""
 
-import serial
+#import serial
 import tester
 from tester import (
     TestStep,
@@ -16,7 +16,7 @@ class Final(share.TestSequence):
     """BC2 Final Test Program."""
 
     limitdata = (
-        LimitDelta('Vin', 12.0, 0.5),
+        LimitDelta('Vin', 13.5, 0.5),
         LimitLow('TestPinCover', 0.5),
         LimitDelta('Shunt', 50.0, 100.0),
         )
@@ -29,7 +29,11 @@ class Final(share.TestSequence):
             TestStep('Bluetooth', self._step_bluetooth),
             TestStep('Cal', self._step_cal),
             )
-        self.sernum = None
+        self.pi_bt = share.bluetooth.RaspberryBluetooth()
+        import time
+        time.sleep(2)
+        reply = self.pi_bt.echo('OK')
+        self._logger.debug('Echo Test: "%s"', reply)
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -41,17 +45,17 @@ class Final(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        pibluetooth = share.bluetooth.RaspberryBluetooth()
-        reply = pibluetooth.echo('Hello World')
-        print(reply)
-        self._logger.debug('Open bluetooth connection to console of unit'
+        self._logger.debug('Open bluetooth connection to console of unit '
                            'with serial: "%s"', sernum)
-        pibluetooth.open('A1526040123')
-        pibluetooth.close()
+        self.pi_bt.open(sernum)
+        self._logger.debug('Send a command to the console')
+#        reply = self.pi_bt.action(command='SERIAL-ID?', prompts=1, timeout=10)
+#        print(reply)
 
     @share.teststep
     def _step_cal(self, dev, mes):
         """Prepare to run a test."""
+        self.pi_bt.close()
 
 
 class Devices(share.Devices):
@@ -64,18 +68,12 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('acsource', tester.ACSource, 'ACS'),
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vfix', tester.DCSource, 'DCS1'),
+                ('dcs_cover', tester.DCSource, 'DCS5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Serial connection to the BLE module
-        ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
-        # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.fixture.port('030451', 'BLE')
-        self['ble'] = share.bluetooth.BleRadio(ble_ser)
-        # Apply power to fixture circuits.
-        self['dcs_vfix'].output(9.0, output=True, delay=5)
-        self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
-        self['acsource'].output(voltage=240.0, output=True)
+        self['dcs_cover'].output(9.0, output=True, delay=5)
+        self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
+        self['acsource'].output(voltage=240.0, output=True, delay=1.0)
         self.add_closer(lambda: self['acsource'].output(0.0, output=False))
 
     def reset(self):
