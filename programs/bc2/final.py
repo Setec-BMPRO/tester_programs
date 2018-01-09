@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 """BC2 Final Program."""
 
-#import serial
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitDelta
+    LimitLow, LimitDelta, LimitRegExp
     )
 import share
+from . import config
 
 
 class Final(share.TestSequence):
@@ -19,6 +19,8 @@ class Final(share.TestSequence):
         LimitDelta('Vin', 13.5, 0.5),
         LimitLow('TestPinCover', 0.5),
         LimitDelta('Shunt', 50.0, 100.0),
+        LimitRegExp('ARM-SwVer',
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
         )
 
     def open(self):
@@ -29,33 +31,35 @@ class Final(share.TestSequence):
             TestStep('Bluetooth', self._step_bluetooth),
             TestStep('Cal', self._step_cal),
             )
-        self.pi_bt = share.bluetooth.RaspberryBluetooth()
-        import time
-        time.sleep(2)
-        reply = self.pi_bt.echo('OK')
-        self._logger.debug('Echo Test: "%s"', reply)
+        Devices.pi_bt = share.bluetooth.RaspberryBluetooth()
+        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(
             ('dmm_tstpincov', 'dmm_vin', ), timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        reply = dev.pi_bt.echo('OK')
+        self._logger.debug('Echo Test: "%s"', reply)
         self._logger.debug('Open bluetooth connection to console of unit '
-                           'with serial: "%s"', sernum)
-        self.pi_bt.open(sernum)
+                           'with serial: "%s"', self.sernum)
+        dev.pi_bt.open(self.sernum)
         self._logger.debug('Send a command to the console')
-#        reply = self.pi_bt.action(command='SERIAL-ID?', prompts=1, timeout=10)
-#        print(reply)
+        reply = dev.pi_bt.sndrcve(command='SW-VERSION?', prompts=1, timeout=10)
+        swver = reply.split('\r\n')[1]
+        swver = '1.0.16764.1813'
+        self._logger.debug('Sofware version detected: %s', swver)
+        mes['detectSW'].sensor.store(swver)
+        mes['detectSW']()
 
     @share.teststep
     def _step_cal(self, dev, mes):
         """Prepare to run a test."""
-        self.pi_bt.close()
 
 
 class Devices(share.Devices):
@@ -64,6 +68,10 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
+
+        pi_bt = None
+        pi_bt = pi_bt
+
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('acsource', tester.ACSource, 'ACS'),
@@ -78,6 +86,8 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
+        print('Closing connection')
+        self.pi_bt.close()
 
 
 class Sensors(share.Sensors):
@@ -96,6 +106,7 @@ class Sensors(share.Sensors):
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bc2_final', 'msgSnEntry'),
             caption=tester.translate('bc2_final', 'capSnEntry'))
+        self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -109,4 +120,5 @@ class Measurements(share.Measurements):
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
             ('dmm_shunt', 'Shunt', 'shunt', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
+            ('detectSW', 'ARM-SwVer', 'mirbt', ''),
             ))
