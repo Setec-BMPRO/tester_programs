@@ -50,9 +50,8 @@ class Final(share.TestSequence):
                            'with serial: "%s"', self.sernum)
         dev.pi_bt.open(self.sernum)
         self._logger.debug('Send a command to the console')
-        reply = dev.pi_bt.sndrcve(command='SW-VERSION?', prompts=1, timeout=10)
+        reply = dev.pi_bt.action(command='SW-VERSION?', prompts=1, timeout=10)
         swver = reply.split('\r\n')[1]
-        swver = '1.0.16764.1813'
         self._logger.debug('Sofware version detected: %s', swver)
         mes['detectSW'].sensor.store(swver)
         mes['detectSW']()
@@ -86,7 +85,6 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        print('Closing connection')
         self.pi_bt.close()
 
 

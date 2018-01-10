@@ -25,10 +25,6 @@ class RaspberryBluetooth():
             config=jsonrpclib.config.Config(content_type='application/json')
             )
 
-    def sndrcve(self, command, prompts=1, timeout=60):
-        """Command-Response to an open console."""
-        return self.server.action(command, prompts, timeout)
-
     def echo(self, value):
         """Echo function for diagnostic purposes.
 
@@ -76,7 +72,7 @@ class RaspberryBluetooth():
         @return Response to the command
 
         """
-        return self.server.action(self, command, prompts, timeout)
+        return self.server.action(command, prompts, timeout)
 
     def close(self):
         """Close an open console."""
