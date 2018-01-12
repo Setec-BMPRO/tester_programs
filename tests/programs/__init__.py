@@ -31,6 +31,7 @@ from . import test_cn101_initial
 from . import test_drifter_final
 from . import test_drifter_initial
 from . import test_etrac_initial
+from . import test_ebs3_initial
 from . import test_gen8_final
 from . import test_gen8_initial
 from . import test_genius2_final
@@ -97,6 +98,7 @@ __all__ = [
     'test_drifter_final',
     'test_drifter_initial',
     'test_etrac_initial',
+    'test_ebs3_initial',
     'test_gen8_final',
     'test_gen8_initial',
     'test_genius2_final',
