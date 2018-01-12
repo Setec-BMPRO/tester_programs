@@ -53,7 +53,8 @@ class Final(share.TestSequence):
                            'with serial: "%s"', self.sernum)
         dev.pi_bt.open(self.sernum)
         self._logger.debug('Send a command to the console')
-        reply = dev.pi_bt.action(command='SW-VERSION?', prompts=1, timeout=10)
+        reply = dev.pi_bt.action(command='SW-VERSION?', prompts=1)
+        self._logger.debug(reply)
         swver = reply.split('\r\n')[1]
         self._logger.debug('Sofware version detected: %s', swver)
         mes['detectSW'].sensor.store(swver)
