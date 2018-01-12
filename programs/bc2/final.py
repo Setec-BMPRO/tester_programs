@@ -16,11 +16,12 @@ class Final(share.TestSequence):
     """BC2 Final Test Program."""
 
     limitdata = (
-        LimitDelta('Vin', 13.5, 0.5),
-        LimitLow('TestPinCover', 0.5),
+        LimitDelta('Vin', 13.5, 0.5, doc='Input voltage present'),
+        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitDelta('Shunt', 50.0, 100.0),
         LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            doc='Software version'),
         )
 
     def open(self):
@@ -78,6 +79,7 @@ class Devices(share.Devices):
                 ('dcs_cover', tester.DCSource, 'DCS5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Apply power to fixture circuits. Power to unit from a BCE282-12.
         self['dcs_cover'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
         self['acsource'].output(voltage=240.0, output=True, delay=1.0)
@@ -85,6 +87,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
+        self['acsource'].reset()
         self.pi_bt.close()
 
 
@@ -97,13 +100,16 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'].doc = 'Within Fixture'
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
+        self['tstpin_cover'].doc = 'Photo sensor'
         self['shunt'] = sensor.Vdc(
             dmm, high=3, low=1, rng=10, res=0.001, scale=1000)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bc2_final', 'msgSnEntry'),
             caption=tester.translate('bc2_final', 'capSnEntry'))
+        self['sernum'].doc = 'Barcode scanner'
         self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
 
 
@@ -114,9 +120,10 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', ''),
-            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
+            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
+                'Cover over BC2 test pins'),
             ('dmm_shunt', 'Shunt', 'shunt', ''),
-            ('ui_sernum', 'SerNum', 'sernum', ''),
-            ('detectSW', 'ARM-SwVer', 'mirbt', ''),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('detectSW', 'ARM-SwVer', 'mirbt', 'Detect SW Ver over bluetooth'),
             ))

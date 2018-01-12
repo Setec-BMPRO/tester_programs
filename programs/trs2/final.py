@@ -19,10 +19,11 @@ class Final(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', vbatt, 0.2),
-        LimitLow('TestPinCover', 0.5),
+        LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
+        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            doc='Software version'),
         )
 
     def open(self):
@@ -76,13 +77,13 @@ class Devices(share.Devices):
                 ('dcs_cover', tester.DCSource, 'DCS5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Apply power to fixture circuits.
         self['dcs_cover'].output(9.0, output=True)
         self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
-        for dev in ('dcs_vin', ):
-            self[dev].output(0.0, False)
+        self['dcs_vin'].output(0.0, False)
         self.pi_bt.close()
 
 
@@ -95,11 +96,14 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'].doc = 'Within Fixture'
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
+        self['tstpin_cover'].doc = 'Photo sensor'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_final', 'msgSnEntry'),
             caption=tester.translate('trs2_final', 'capSnEntry'))
+        self['sernum'].doc = 'Barcode scanner'
         self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
 
 
@@ -110,8 +114,9 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', ''),
-            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover', ''),
-            ('ui_sernum', 'SerNum', 'sernum', ''),
-            ('detectSW', 'ARM-SwVer', 'mirbt', ''),
+            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
+                'Cover over BC2 test pins'),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('detectSW', 'ARM-SwVer', 'mirbt', 'Detect SW Ver over bluetooth'),
             ))
