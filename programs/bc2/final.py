@@ -45,8 +45,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        reply = dev.pi_bt.echo('OK')
-        self._logger.debug('Echo Test: "%s"', reply)
         self._logger.debug('Open bluetooth connection to console of unit '
                            'with serial: "%s"', self.sernum)
         dev.pi_bt.open(self.sernum)
