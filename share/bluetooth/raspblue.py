@@ -24,6 +24,20 @@ class RaspberryBluetooth():
             server,
             config=jsonrpclib.config.Config(content_type='application/json')
             )
+        self.flushInput = lambda: None      # Dummy Serial method
+        self.response = None                # bytearray
+
+    def write(self, bytes):
+        """Simulate Serial.write
+
+        @param bytes Byte data with appended '\r'
+
+        """
+        self.action(bytes[:-1].decode())
+
+    def read(self, count=1):
+        """Simulate Serial.read"""
+        return self.response.pop(0) if len(self.response) > 0 else None
 
     def echo(self, value):
         """Echo function for diagnostic purposes.
@@ -72,7 +86,9 @@ class RaspberryBluetooth():
         @return Response to the command
 
         """
-        return self.server.action(command, prompts, timeout)
+        reply = self.server.action(command, prompts, timeout)
+        self.response = bytearray(reply.encode())
+        return reply
 
     def close(self):
         """Close an open console."""

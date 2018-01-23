@@ -39,3 +39,6 @@ class BTConsole(Console):
         @raises CommandError.
 
         """
+        super().super()._write_command(command)
+# TODO: does this call console.Console._write_command
+#       or console.BadUart._write_command
