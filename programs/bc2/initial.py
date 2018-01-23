@@ -19,8 +19,8 @@ class Initial(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
-    # Test limits
-    limitdata = (
+    # Common limits
+    _common = (
         LimitDelta('Vin', 12.0, 0.5),
         LimitDelta('3V3', 3.3, 0.25),
         LimitDelta('Shunt', 50.0, 100.0),
@@ -29,10 +29,25 @@ class Initial(share.TestSequence):
         LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
         LimitBoolean('DetectBT', True),
         )
+    # Variant specific configuration data. Indexed by test program parameter.
+    limitdata = {
+        'STD': {
+            'Model': 0,
+            'Limits': _common + (
+                ),
+            },
+        'H': {
+            'Model': 1,
+            'Limits': _common + (
+                ),
+            },
+        }
 
     def open(self):
-        """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        """Create the test program as a linear sequence."""
+        self.config = self.limitdata[self.parameter]
+        super().open(
+            self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('TestArm', self._step_test_arm),
@@ -53,6 +68,7 @@ class Initial(share.TestSequence):
         bc2 = dev['bc2']
         bc2.open()
         bc2.brand(config.HW_VERSION, self.sernum)
+        bc2['MODEL'] = self.config['Model']
         mes['arm_swver']()
 
     @share.teststep

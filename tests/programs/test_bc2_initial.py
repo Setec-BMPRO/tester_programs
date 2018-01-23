@@ -7,13 +7,11 @@ from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc2
 
 
-class BC2Initial(ProgramTestCase):
+class _BC2Initial(ProgramTestCase):
 
     """BC2 Initial program test suite."""
 
     prog_class = bc2.Initial
-    parameter = None
-    debug = False
     btmac = '001EC030BC15'
 
     def setUp(self):
@@ -28,7 +26,7 @@ class BC2Initial(ProgramTestCase):
         patcher.start()
         super().setUp()
 
-    def test_pass_run(self):
+    def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
@@ -52,3 +50,27 @@ class BC2Initial(ProgramTestCase):
         self.assertEqual(6, len(result.readings))
         self.assertEqual(
             ['Prepare', 'TestArm', 'Bluetooth'], self.tester.ut_steps)
+
+
+class BC2_Initial(_BC2Initial):
+
+    """BC2 Initial program test suite."""
+
+    parameter = 'STD'
+    debug = False
+
+    def test_pass_run(self):
+        """PASS run of the BC2 program."""
+        super()._pass_run()
+
+
+class BC2H_Initial(_BC2Initial):
+
+    """BC2H Initial program test suite."""
+
+    parameter = 'H'
+    debug = False
+
+    def test_pass_run(self):
+        """PASS run of the BC2H program."""
+        super()._pass_run()

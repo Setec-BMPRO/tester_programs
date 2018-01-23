@@ -5,34 +5,58 @@
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitDelta, LimitRegExp
+    LimitLow, LimitDelta, LimitRegExp, LimitPercent, LimitBetween
     )
 import share
+from . import console
 from . import config
 
 
 class Final(share.TestSequence):
 
     """BC2 Final Test Program."""
-
-    limitdata = (
-        LimitDelta('Vin', 13.5, 0.5, doc='Input voltage present'),
+    # Injected Vbatt
+    vbatt = 13.5
+    # Common limits
+    _common = (
+        LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
-        LimitDelta('Shunt', 50.0, 100.0),
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
+        LimitBetween('ARM-I_ADCOffset', -3, 3,
+            doc='Current ADC offset calibrated'),
+        LimitPercent('ARM-VbattLSB', 2391, 2489,
+            doc='LSB voltage calibrated'),
+        LimitBetween('ARM-Vbatt', -2147483648, 2147483647,
+            doc='Battery voltage calibrated'),
         )
+    # Variant specific configuration data. Indexed by test program parameter.
+    limitdata = {
+        'STD': {
+            'Limits': _common + (
+                LimitPercent('ARM-ShuntRes', 800000, 5,
+                    doc='Shunt resistance calibrated'),
+                ),
+            },
+        'H': {
+            'Limits': _common + (
+                LimitPercent('ARM-ShuntRes', 90000, 30,
+                    doc='Shunt resistance calibrated'),
+                ),
+            },
+        }
 
     def open(self):
-        """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        """Create the test program as a linear sequence."""
+        self.config = self.limitdata[self.parameter]
+        super().open(
+            self.config['Limits'], Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Bluetooth', self._step_bluetooth),
-            TestStep('Cal', self._step_cal),
+            TestStep('Calibrate', self._step_cal),
             )
-        Devices.pi_bt = share.bluetooth.RaspberryBluetooth()
         self.sernum = None
 
     @share.teststep
@@ -51,13 +75,23 @@ class Final(share.TestSequence):
         self._logger.debug('Send a command to the console')
         reply = dev.pi_bt.action(command='SW-VERSION?', prompts=1, timeout=10)
         swver = reply.split('\r\n')[1]
+#        swver = '1.0.16764.1813'
         self._logger.debug('Sofware version detected: %s', swver)
         mes['detectSW'].sensor.store(swver)
         mes['detectSW']()
 
     @share.teststep
     def _step_cal(self, dev, mes):
-        """Prepare to run a test."""
+        """Calibrate the shunt."""
+        bc2 = dev['bc2']
+        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
+        bc2['BATT_V_CAL'] = dmm_V
+        bc2['ZERO_I_CAL'] = 0
+        dev['dcl'].output(voltage=10.0, output=True, delay=1.0)
+        bc2['SHUNT_RES_CAL'] = 10.0
+        self.measure(
+            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_vbatt'),
+            timeout=5)
 
 
 class Devices(share.Devices):
@@ -66,15 +100,12 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-
-        pi_bt = None
-        pi_bt = pi_bt
-
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('acsource', tester.ACSource, 'ACS'),
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_cover', tester.DCSource, 'DCS5'),
+                ('dcl', tester.DCLoad, 'DCL1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Apply power to fixture circuits. Power to unit from a BCE282-12.
@@ -82,10 +113,15 @@ class Devices(share.Devices):
         self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
         self['acsource'].output(voltage=240.0, output=True, delay=1.0)
         self.add_closer(lambda: self['acsource'].output(0.0, output=False))
+        # Bluetooth connection to the console
+        self.pi_bt = share.bluetooth.RaspberryBluetooth()
+        # Console driver
+        self['bc2'] = console.BTConsole(self.pi_bt)
 
     def reset(self):
         """Reset instruments."""
         self['acsource'].reset()
+        self['dcl'].output(0.0, False)
         self.pi_bt.close()
 
 
@@ -109,6 +145,15 @@ class Sensors(share.Sensors):
             caption=tester.translate('bc2_final', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
         self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
+        # Console sensors
+        bc2 = self.devices['bc2']
+        for name, cmdkey in (
+                ('arm_Ioffset', 'I_ADC_OFFSET'),
+                ('arm_ShuntRes', 'SHUNT_RES'),
+                ('arm_VbattLSB', 'BATT_V_LSB'),
+                ('arm_Vbatt', 'BATT_V'),
+            ):
+            self[name] = share.console.Sensor(bc2, cmdkey)
 
 
 class Measurements(share.Measurements):
@@ -121,7 +166,14 @@ class Measurements(share.Measurements):
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
                 'Cover over BC2 test pins'),
-            ('dmm_shunt', 'Shunt', 'shunt', ''),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('detectSW', 'ARM-SwVer', 'mirbt', 'Detect SW Ver over bluetooth'),
+            ('arm_ioffset', 'ARM-I_ADCOffset', 'arm_Ioffset',
+                'Current ADC offset after cal'),
+            ('arm_shuntres', 'ARM-ShuntRes', 'arm_ShuntRes',
+                'Shunt resistance after cal'),
+            ('arm_vbattlsb', 'ARM-VbattLSB', 'arm_VbattLSB',
+                'Battery voltage ADC LSB voltage after cal'),
+            ('arm_vbatt', 'ARM-Vbatt', 'arm_Vbatt',
+                'Battery voltage after cal'),
             ))
