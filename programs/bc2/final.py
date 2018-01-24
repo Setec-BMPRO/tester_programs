@@ -71,14 +71,9 @@ class Final(share.TestSequence):
         """Test the Bluetooth interface."""
         self._logger.debug('Open bluetooth connection to console of unit '
                            'with serial: "%s"', self.sernum)
-#        dev.pi_bt.open(self.sernum)
-#        self._logger.debug('Send a command to the console')
-#        reply = dev.pi_bt.action(command='SW-VERSION?', prompts=1, timeout=10)
-#        swver = reply.split('\r\n')[1]
-        swver = '1.0.16764.1813'
-        self._logger.debug('Sofware version detected: %s', swver)
-        mes['detectSW'].sensor.store(swver)
-        mes['detectSW']()
+        dev.pi_bt.open(self.sernum)
+        self._logger.debug('Send a command to the console')
+        mes['arm_swver'](timeout=5)
 
     @share.teststep
     def _step_cal(self, dev, mes):
@@ -86,12 +81,12 @@ class Final(share.TestSequence):
         bc2 = dev['bc2']
         dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
         bc2['BATT_V_CAL'] = dmm_V
-#        bc2['ZERO_I_CAL'] = 0
-#        dev['dcl'].output(voltage=10.0, output=True, delay=1.0)
-#        bc2['SHUNT_RES_CAL'] = 10.0
-#        self.measure(
-#            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_vbatt'),
-#            timeout=5)
+        bc2['ZERO_I_CAL'] = 0
+        dev['dcl'].output(voltage=10.0, output=True, delay=1.0)
+        bc2['SHUNT_RES_CAL'] = 10.0
+        self.measure(
+            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_vbatt'),
+            timeout=5)
 
 
 class Devices(share.Devices):
@@ -115,14 +110,14 @@ class Devices(share.Devices):
         self.add_closer(lambda: self['acsource'].output(0.0, output=False))
         # Bluetooth connection to the console
         self.pi_bt = share.bluetooth.RaspberryBluetooth()
-        # Console driver
+        # Bluetooth console driver
         self['bc2'] = console.BTConsole(self.pi_bt)
 
     def reset(self):
         """Reset instruments."""
         self['acsource'].reset()
         self['dcl'].output(0.0, False)
-#        self.pi_bt.close()
+        self.pi_bt.close()
 
 
 class Sensors(share.Sensors):
@@ -147,6 +142,8 @@ class Sensors(share.Sensors):
         self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         # Console sensors
         bc2 = self.devices['bc2']
+        self['arm_swver'] = share.console.Sensor(
+            bc2, 'SW_VER', rdgtype=sensor.ReadingString)
         for name, cmdkey in (
                 ('arm_Ioffset', 'I_ADC_OFFSET'),
                 ('arm_ShuntRes', 'SHUNT_RES'),
@@ -167,7 +164,9 @@ class Measurements(share.Measurements):
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
                 'Cover over BC2 test pins'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
-            ('detectSW', 'ARM-SwVer', 'mirbt', 'Detect SW Ver over bluetooth'),
+            ('arm_swver', 'ARM-SwVer', 'arm_swver',
+                'Detect SW Ver over bluetooth'),
+#            ('detectSW', 'ARM-SwVer', 'mirbt', 'Detect SW Ver over bluetooth'),
             ('arm_ioffset', 'ARM-I_ADCOffset', 'arm_Ioffset',
                 'Current ADC offset after cal'),
             ('arm_shuntres', 'ARM-ShuntRes', 'arm_ShuntRes',

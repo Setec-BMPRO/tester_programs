@@ -34,9 +34,14 @@ class _BC2Final(ProgramTestCase):
                     (sen['sernum'], 'A1526040123'),
                     (sen['tstpin_cover'], 0.0), (sen['vin'], 13.5),
                     ),
+                'Bluetooth': (
+                    (sen['arm_swver'], bc2.config.SW_VERSION),
+                    ),
                 'Calibrate': (
                     (sen['vin'], (13.4990, 13.50)),
-                    (sen['arm_Ioffset'], 0.0),
+                    (sen['arm_Ioffset'], -1),
+                    (sen['arm_ShuntRes'], self.shunt_res),
+                    (sen['arm_VbattLSB'], 2440), (sen['arm_Vbatt'], 1234),
                     ),
                 },
             }
@@ -55,6 +60,7 @@ class BC2_Final(_BC2Final):
     """BC2 Final program test suite."""
 
     parameter = 'STD'
+    shunt_res = 800000
     debug = True
 
     def test_pass_run(self):
@@ -67,6 +73,7 @@ class BC2H_Final(_BC2Final):
     """BC2H Final program test suite."""
 
     parameter = 'H'
+    shunt_res = 90000
     debug = False
 
     def test_pass_run(self):

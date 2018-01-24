@@ -16,7 +16,7 @@ class Console(share.console.SamB11):
         'I_ADC_OFFSET': parameter.Float('STC3100_CURRENT_OFFSET', ),
         'SHUNT_RES': parameter.Float('SHUNT_R_NOHMS', ),
         'BATT_V_LSB': parameter.Float('STC3100_VOLTAGE_LSB_UV', ),
-        'BATT_V': parameter.Float('VOLTAGE_MV', scale=1000),
+        'BATT_V': parameter.Float('VOLTAGE_MV', ),
         # Calibration commands
         'BATT_V_CAL': parameter.Calibration(
             'STC3100_VOLTAGE_LSB_UV', write_expected=2),
@@ -35,10 +35,10 @@ class BTConsole(Console):
     def _write_command(self, command):
         """Write a command and verify the echo.
 
+        Overrides _write_command() of BadUart console.
         @param command Command string.
         @raises CommandError.
 
         """
-        super().super()._write_command(command)
-# TODO: does this call console.Console._write_command
-#       or console.BadUart._write_command
+        # Uses _write_command() of Base console.
+        super(share.console.BadUart, self)._write_command(command)
