@@ -86,7 +86,7 @@ class RaspberryBluetooth(unittest.TestCase):
             command[:-1].decode(), 1, 60)
         read_data = bytearray()
         reply = self.pibt.read()
-        while reply is not None:
-            read_data.append(reply)
+        while len(reply) > 0:       # Read until no more data
+            read_data.extend(reply)
             reply = self.pibt.read()
         self.assertEqual(bytearray(response.encode()), read_data)

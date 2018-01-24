@@ -2,29 +2,24 @@
 # -*- coding: utf-8 -*-
 """JSONRPC Client for the Raspberry Pi Bluetooth helper."""
 
+import abc
 import jsonrpclib       # Install with: pip install jsonrpclib-pelix
 
 
-class RaspberryBluetooth():
+class SerialIO(abc.ABC):
 
-    """Connection to a Raspberry Pi with Bluetooth helper running."""
+    """Serial compatible interface for RPC attached consoles.
 
-    # Default server URL (Static addressed)
-    default_server = 'http://192.168.168.62:8888/'
+    Simulates a serial console with character echo enabled.
+    A RPC attached console cannot do byte by byte IO, only Command-Response
+    calls. This class emulates the byte by byte IO functionality.
+    Commands are run when a '\r' is received.
 
-    def __init__(self, server=None):
-        """Create instance.
+    """
 
-        @param server URL of the networked programmer
-
-        """
-        if server is None:
-            server = self.default_server
-        self.server = jsonrpclib.ServerProxy(
-            server,
-            config=jsonrpclib.config.Config(content_type='application/json')
-            )
-        self.response = bytearray()         # write() & read() buffer
+    def __init__(self):
+        """Create instance."""
+        self.response = bytearray()             # received data buffer
 
     def flushInput(self):
         """Flush input data"""
@@ -38,7 +33,8 @@ class RaspberryBluetooth():
         """
         if bytes[-1] != ord('\r'):
             raise ValueError('Only complete commands are supported')
-        self.action(bytes[:-1].decode())    # call with '\r' removed
+        reply = self.action(bytes[:-1].decode())    # call with '\r' removed
+        self.response.extend(reply.encode())
 
     def read(self, count=1):
         """Simulate Serial.read
@@ -47,9 +43,43 @@ class RaspberryBluetooth():
         @return Bytes read
 
         """
-        data = self.response[:count]
+        data = bytes(self.response[:count])
         del self.response[:count]
         return data
+
+    @abc.abstractmethod
+    def action(self, command, timeout=60):
+        """Command-Response to an open console.
+
+        @param command Command string to be sent
+        @param timeout Timeout in seconds
+        @return Response to the command
+
+        """
+
+
+class RaspberryBluetooth(SerialIO):
+
+    """Connection to a Raspberry Pi with Bluetooth helper running."""
+
+    # Default server URL (Static addressed)
+    default_server = 'http://192.168.168.62:8888/'
+    # Calibration command end with this string
+    cal_command = ' CAL'
+
+    def __init__(self, server=None):
+        """Create instance.
+
+        @param server URL of the networked programmer
+
+        """
+        super().__init__()
+        if server is None:
+            server = self.default_server
+        self.server = jsonrpclib.ServerProxy(
+            server,
+            config=jsonrpclib.config.Config(content_type='application/json')
+            )
 
     def echo(self, value):
         """Echo function for diagnostic purposes.
@@ -89,18 +119,16 @@ class RaspberryBluetooth():
         """
         self.server.open(device_id, timeout)
 
-    def action(self, command, prompts=1, timeout=60):
+    def action(self, command, timeout=60):
         """Command-Response to an open console.
 
         @param command Command string to be sent
-        @param prompts Number of prompts expected in the response
         @param timeout Timeout in seconds
-        @return Response to the command
+        @return Response from the command call
 
         """
-        reply = self.server.action(command, prompts, timeout)
-        self.response.extend(reply.encode())
-        return reply
+        prompts = 2 if command.endswith(self.cal_command) else 1
+        return self.server.action(command, prompts, timeout)
 
     def close(self):
         """Close an open console."""
