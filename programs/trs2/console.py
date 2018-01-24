@@ -33,3 +33,19 @@ class Console(share.console.SamB11):
         }
     override_commands = (
         'BR_LIGHT', 'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED')
+
+
+class BTConsole(Console):
+
+    """Bluetooth communications to BC2 console."""
+
+    def _write_command(self, command):
+        """Write a command and verify the echo.
+
+        Overrides _write_command() of BadUart console.
+        @param command Command string.
+        @raises CommandError.
+
+        """
+        # Uses _write_command() of Base console.
+        super(share.console.BadUart, self)._write_command(command)

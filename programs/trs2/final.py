@@ -8,6 +8,7 @@ from tester import (
     LimitLow, LimitDelta, LimitRegExp
     )
 import share
+from . import console
 from . import config
 
 
@@ -33,7 +34,6 @@ class Final(share.TestSequence):
             TestStep('Prepare', self._step_prepare),
             TestStep('Bluetooth', self._step_bluetooth),
             )
-        Devices.pi_bt = share.bluetooth.RaspberryBluetooth()
         self.sernum = None
 
     @share.teststep
@@ -51,12 +51,7 @@ class Final(share.TestSequence):
                            'with serial: "%s"', self.sernum)
         dev.pi_bt.open(self.sernum)
         self._logger.debug('Send a command to the console')
-        reply = dev.pi_bt.action(command='SW-VERSION?', prompts=1)
-        self._logger.debug(reply)
-        swver = reply.split('\r\n')[1]
-        self._logger.debug('Sofware version detected: %s', swver)
-        mes['detectSW'].sensor.store(swver)
-        mes['detectSW']()
+        mes['arm_swver'](timeout=5)
 
 
 class Devices(share.Devices):
@@ -65,10 +60,6 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-
-        pi_bt = None
-        pi_bt = pi_bt
-
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -79,6 +70,10 @@ class Devices(share.Devices):
         # Apply power to fixture circuits.
         self['dcs_cover'].output(9.0, output=True)
         self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
+        # Bluetooth connection to the console
+        self.pi_bt = share.bluetooth.RaspberryBluetooth()
+        # Bluetooth console driver
+        self['trs2'] = console.BTConsole(self.pi_bt)
 
     def reset(self):
         """Reset instruments."""
@@ -103,7 +98,10 @@ class Sensors(share.Sensors):
             message=tester.translate('trs2_final', 'msgSnEntry'),
             caption=tester.translate('trs2_final', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
-        self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
+        # Console sensors
+        trs2 = self.devices['trs2']
+        self['arm_swver'] = share.console.Sensor(
+            trs2, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -117,5 +115,6 @@ class Measurements(share.Measurements):
             ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
                 'Cover over BC2 test pins'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
-            ('detectSW', 'ARM-SwVer', 'mirbt', 'Detect SW Ver over bluetooth'),
+            ('arm_swver', 'ARM-SwVer', 'arm_swver',
+                'Detect SW Ver over bluetooth'),
             ))

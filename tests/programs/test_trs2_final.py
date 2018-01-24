@@ -36,6 +36,9 @@ class TRSFinal(ProgramTestCase):
                     (sen['sernum'], 'A1526040123'),
                     (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
                     ),
+                'Bluetooth': (
+                    (sen['arm_swver'], trs2.config.SW_VERSION),
+                    ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)

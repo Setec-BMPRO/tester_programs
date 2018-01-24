@@ -168,7 +168,6 @@ class Measurements(share.Measurements):
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('arm_swver', 'ARM-SwVer', 'arm_swver',
                 'Detect SW Ver over bluetooth'),
-#            ('detectSW', 'ARM-SwVer', 'mirbt', 'Detect SW Ver over bluetooth'),
             ('arm_ioffset', 'ARM-I_ADCOffset', 'arm_Ioffset',
                 'Current ADC offset after cal'),
             ('arm_shuntres', 'ARM-ShuntRes', 'arm_ShuntRes',
