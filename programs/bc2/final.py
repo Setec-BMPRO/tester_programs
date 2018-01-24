@@ -79,11 +79,12 @@ class Final(share.TestSequence):
     def _step_cal(self, dev, mes):
         """Calibrate the shunt."""
         bc2 = dev['bc2']
-        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
-        bc2['BATT_V_CAL'] = dmm_V
+#        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
+#        bc2['BATT_V_CAL'] = dmm_V
         bc2['ZERO_I_CAL'] = 0
-        dev['dcl'].output(voltage=10.0, output=True, delay=1.0)
+        dev['dcl'].output(current=10.0, output=True, delay=1.0)
         bc2['SHUNT_RES_CAL'] = 10.0
+        bc2['NVWRITE'] = True
         self.measure(
             ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_vbatt'),
             timeout=5)
@@ -112,6 +113,7 @@ class Devices(share.Devices):
         self.pi_bt = share.bluetooth.RaspberryBluetooth()
         # Bluetooth console driver
         self['bc2'] = console.BTConsole(self.pi_bt)
+        self['bc2'].verbose = True
 
     def reset(self):
         """Reset instruments."""

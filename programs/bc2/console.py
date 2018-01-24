@@ -19,11 +19,11 @@ class Console(share.console.SamB11):
         'BATT_V': parameter.Float('VOLTAGE_MV', ),
         # Calibration commands
         'BATT_V_CAL': parameter.Calibration(
-            'STC3100_VOLTAGE_LSB_UV', write_expected=2),
+            'STC3100_VOLTAGE_LSB_UV', write_expected=1),
         'ZERO_I_CAL': parameter.Calibration(
-            'STC3100_CURRENT_OFFSET', write_expected=2),
+            'STC3100_CURRENT_OFFSET', write_expected=1),
         'SHUNT_RES_CAL': parameter.Calibration(
-            'SHUNT_R_NOHMS', write_expected=2),
+            'SHUNT_R_NOHMS', write_expected=1),
         }
     override_commands = ()
 
