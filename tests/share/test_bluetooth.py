@@ -76,17 +76,28 @@ class RaspberryBluetooth(unittest.TestCase):
         self.server.action.assert_called_with(command)
         self.assertEqual(response, reply)
 
-    def test_write_read(self):
-        """Write & read methods."""
-        command = b'command\r'
+    def test_write_read_cmd(self):
+        """Write & read methods with whole commands."""
+        command = b'command'
         response = 'response\r\n> '
         self.server.action.return_value = response
-        self.pibt.write(command)
-        self.server.action.assert_called_with(
-            command[:-1].decode(), 1, 60)
+        self.pibt.write(command + b'\r')
+        self.server.action.assert_called_with(command.decode(), 1, 60)
+        read_data = self.pibt.read(100)
+        self.assertEqual(bytearray(command + response.encode()), read_data)
+
+    def test_write_read(self):
+        """Write & read methods byte-by-byte."""
+        command = b'command'
+        response = 'response\r\n> '
+        self.server.action.return_value = response
+        for abyte in command:
+            self.pibt.write(bytes([abyte]))
+        self.pibt.write(b'\r')
+        self.server.action.assert_called_with(command.decode(), 1, 60)
         read_data = bytearray()
         reply = self.pibt.read()
         while len(reply) > 0:       # Read until no more data
             read_data.extend(reply)
             reply = self.pibt.read()
-        self.assertEqual(bytearray(response.encode()), read_data)
+        self.assertEqual(bytearray(command + response.encode()), read_data)

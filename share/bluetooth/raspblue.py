@@ -19,22 +19,28 @@ class SerialIO(abc.ABC):
 
     def __init__(self):
         """Create instance."""
-        self.response = bytearray()             # received data buffer
+        self.write_data = bytearray()           # write data buffer
+        self.read_data = bytearray()            # read data buffer
 
     def flushInput(self):
         """Flush input data"""
-        self.response.clear()
+        self.read_data.clear()
 
-    def write(self, bytes):
+    def write(self, data):
         """Simulate Serial.write
 
-        @param bytes Byte data with appended '\r'
+        @param data Byte data to write
 
         """
-        if bytes[-1] != ord('\r'):
-            raise ValueError('Only complete commands are supported')
-        reply = self.action(bytes[:-1].decode())    # call with '\r' removed
-        self.response.extend(reply.encode())
+        for abyte in data:
+            abyte = bytes([abyte])
+            if abyte == b'\r':
+                reply = self.action(self.write_data.decode())
+                self.write_data.clear()
+                self.read_data.extend(reply.encode())
+            else:
+                self.write_data.extend(abyte)   # save for command locating
+                self.read_data.extend(abyte)    # simulate echo
 
     def read(self, count=1):
         """Simulate Serial.read
@@ -43,8 +49,8 @@ class SerialIO(abc.ABC):
         @return Bytes read
 
         """
-        data = bytes(self.response[:count])
-        del self.response[:count]
+        data = bytes(self.read_data[:count])
+        del self.read_data[:count]
         return data
 
     @abc.abstractmethod
