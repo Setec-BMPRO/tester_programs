@@ -51,7 +51,7 @@ class _Parameter():
         if not self._writeable:
             raise ParameterError('Parameter is not writeable')
         write_cmd = self._wr_fmt.format(value, self.command)
-        func(write_cmd, expected=self.write_expected)
+        return func(write_cmd, expected=self.write_expected)
 
     def read(self, func):
         """Read parameter value.
@@ -84,7 +84,7 @@ class Boolean(_Parameter):
         """
         if not isinstance(value, bool):
             raise ParameterError('value "{0}" must be boolean'.format(value))
-        super().write(int(value), func)
+        return super().write(int(value), func)
 
     def read(self, func):
         """Read parameter value.
@@ -126,7 +126,7 @@ class Float(_Parameter):
         if value < self.min or value > self.max:
             raise ParameterError(
                 'Value out of range {0} - {1}'.format(self.min, self.max))
-        super().write(round(value * self.scale), func)
+        return super().write(round(value * self.scale), func)
 
     def read(self, func):
         """Read parameter value.
@@ -185,7 +185,7 @@ class Hex(_Parameter):
         if value < self.min or value > self.max:
             raise ParameterError(
                 'Value out of range {0} - {1}'.format(self.min, self.max))
-        super().write(round(value * self.scale), func)
+        return super().write(round(value * self.scale), func)
 
     def read(self, func):
         """Read parameter value.

@@ -110,6 +110,10 @@ class Base():
 # TODO: Remove this logger once we implement response_count != expected
     # Last command sent (for debug message @ line 248)
     last_cmd = None
+    # Response of the last call to __setitem__
+    last_setitem_response = ''
+    # Magic command key to read last __setitem__ response
+    query_last_response = 'LAST_RESPONSE?'
 
     def __init__(self, port):
         """Initialise communications.
@@ -143,7 +147,10 @@ class Base():
         @return Reading
 
         """
-        return self.cmd_data[key].read(self.action)
+        if key == self.query_last_response:
+            return self.last_setitem_response
+        else:
+            return self.cmd_data[key].read(self.action)
 
     def __setitem__(self, key, value):
         """Write a value to the console.
@@ -152,7 +159,8 @@ class Base():
         @param value Data value
 
         """
-        self.cmd_data[key].write(value, self.action)
+        self.last_setitem_response = (
+            self.cmd_data[key].write(value, self.action))
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.

@@ -11,6 +11,7 @@ class Console(share.console.SamB11):
 
     parameter = share.console.parameter
     cmd_data = {
+        share.console.Base.query_last_response: None,
         # X-Register values
         'MODEL': parameter.Float('BC2_MODEL', writeable=True),
         'I_ADC_OFFSET': parameter.Float('STC3100_CURRENT_OFFSET', ),
