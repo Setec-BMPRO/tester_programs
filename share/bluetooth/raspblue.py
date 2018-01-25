@@ -128,7 +128,11 @@ class RaspberryBluetooth(SerialIO):
 
         """
         prompts = 2 if command.endswith(self.cal_command) else 1
-        return self.server.action(command, prompts, timeout)
+        reply = self.server.action(command, prompts, timeout)
+        if prompts == 2:    # Remove the 1st response and prompt
+            lines = reply.splitlines()
+            reply = '\r\n'.join([lines[0]] + lines[3:])
+        return reply
 
     def close(self):
         """Close an open console."""
