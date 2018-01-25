@@ -2,26 +2,6 @@
 # -*- coding: utf-8 -*-
 """EBS3 Initial Test Program."""
 
-# Usage of the Digitize command and post-processing:
-#
-#    Configure acquisition
-#        :ACQ:TYPE PEAK;COMP 100;:WAVEFORM:POIN 1000;
-#
-#    Digitise ch1 & ch2
-#        :DIG CHAN1,CHAN2;
-#
-#    Read ch1 & ch2 waveforms
-#        :WAV:SOUR CHAN1;FORM BYTE;PRE?;DATA?;
-#        (Read 17000 bytes)
-#        (Process data) => t(0), dt, [data0,data1,...]
-#
-#    4 point average
-#
-#    Waveform analysis
-#        Voltage transitions => List of UP & DOWN level crosses
-#        Current average => Vavg of specified time range
-#        Peak average => Vavg of 5 sample at/after the Vpeak
-
 import tester
 from tester import (
     TestStep,
