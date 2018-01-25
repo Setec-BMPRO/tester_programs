@@ -24,6 +24,8 @@ class Final(share.TestSequence):
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
+        LimitRegExp('ARM-QueryLast', 'cal success:',
+            doc='Calibration success'),
         LimitBetween('ARM-I_ADCOffset', -3, 3,
             doc='Current ADC offset calibrated'),
         LimitPercent('ARM-VbattLSB', 2391, 2489,
@@ -79,11 +81,14 @@ class Final(share.TestSequence):
     def _step_cal(self, dev, mes):
         """Calibrate the shunt."""
         bc2 = dev['bc2']
-#        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
-#        bc2['BATT_V_CAL'] = dmm_V
+        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
+        bc2['BATT_V_CAL'] = dmm_V
+        mes['arm_query_last'](timeout=5)
         bc2['ZERO_I_CAL'] = 0
+        mes['arm_query_last'](timeout=5)
         dev['dcl'].output(current=10.0, output=True, delay=1.0)
         bc2['SHUNT_RES_CAL'] = 10.0
+        mes['arm_query_last'](timeout=5)
         bc2['NVWRITE'] = True
         self.measure(
             ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_vbatt'),
@@ -144,8 +149,11 @@ class Sensors(share.Sensors):
         self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         # Console sensors
         bc2 = self.devices['bc2']
+        qlr = share.console.Base.query_last_response
         self['arm_swver'] = share.console.Sensor(
             bc2, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['arm_query_last'] = share.console.Sensor(
+            bc2, qlr, rdgtype=sensor.ReadingString)
         for name, cmdkey in (
                 ('arm_Ioffset', 'I_ADC_OFFSET'),
                 ('arm_ShuntRes', 'SHUNT_RES'),
@@ -168,6 +176,8 @@ class Measurements(share.Measurements):
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('arm_swver', 'ARM-SwVer', 'arm_swver',
                 'Detect SW Ver over bluetooth'),
+            ('arm_query_last', 'ARM-QueryLast', 'arm_query_last',
+                'Response from a calibration command'),
             ('arm_ioffset', 'ARM-I_ADCOffset', 'arm_Ioffset',
                 'Current ADC offset after cal'),
             ('arm_shuntres', 'ARM-ShuntRes', 'arm_ShuntRes',
