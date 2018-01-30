@@ -70,27 +70,44 @@ class RaspberryBluetooth(unittest.TestCase):
     def test_action(self):
         """Action method."""
         command = 'command'
-        response = 'response'
-        self.server.action.return_value = response
-        reply = self.server.action(command)
-        self.server.action.assert_called_with(command)
+        response = 'response\r\n> '
+        # Simulate RPC server echo of the command
+        self.server.action.return_value = command + '\r\n' + response
+        reply = self.pibt.action(command)
+        self.server.action.assert_called_with(command, 1, 60)
+        self.assertEqual(response, reply)
+
+    def test_action_cal(self):
+        """Action method with CAL command."""
+        command = 'command CAL'
+        response = 'response\r\n> '
+        # Simulate RPC server echo of the CAL command
+        self.server.action.return_value = (
+            command + '\r\njunk line\r\n> \r\n' + response
+            )
+        reply = self.pibt.action(command)
+        self.server.action.assert_called_with(command, 2, 60)
         self.assertEqual(response, reply)
 
     def test_write_read_cmd(self):
         """Write & read methods with whole commands."""
         command = b'command'
         response = 'response\r\n> '
-        self.server.action.return_value = response
+        # Simulate RPC server echo of the command
+        self.server.action.return_value = command.decode() + '\r\n' + response
         self.pibt.write(command + b'\r')
         self.server.action.assert_called_with(command.decode(), 1, 60)
+        read_data = self.pibt.read(len(command))
+        self.assertEqual(command, read_data)
         read_data = self.pibt.read(100)
-        self.assertEqual(bytearray(command + response.encode()), read_data)
+        self.assertEqual(response.encode(), read_data)
 
     def test_write_read(self):
         """Write & read methods byte-by-byte."""
         command = b'command'
         response = 'response\r\n> '
-        self.server.action.return_value = response
+        # Simulate RPC server echo of the command
+        self.server.action.return_value = command.decode() + '\r\n' + response
         for abyte in command:
             self.pibt.write(bytes([abyte]))
         self.pibt.write(b'\r')
