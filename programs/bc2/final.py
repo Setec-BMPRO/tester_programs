@@ -17,6 +17,7 @@ class Final(share.TestSequence):
     """BC2 Final Test Program."""
     # Injected Vbatt
     vbatt = 13.5
+    ibatt = 10.0
     # Common limits
     _common = (
         LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
@@ -28,22 +29,24 @@ class Final(share.TestSequence):
             doc='Calibration success'),
         LimitBetween('ARM-I_ADCOffset', -3, 3,
             doc='Current ADC offset calibrated'),
-        LimitPercent('ARM-VbattLSB', 2391, 2489,
+        LimitBetween('ARM-VbattLSB', 2391, 2489,
             doc='LSB voltage calibrated'),
-        LimitBetween('ARM-Vbatt', -2147483648, 2147483647,
+        LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
             doc='Battery voltage calibrated'),
+        LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.08,
+            doc='Battery current calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
         'STD': {
             'Limits': _common + (
-                LimitPercent('ARM-ShuntRes', 800000, 5,
+                LimitBetween('ARM-ShuntRes', 760000, 840000,
                     doc='Shunt resistance calibrated'),
                 ),
             },
         'H': {
             'Limits': _common + (
-                LimitPercent('ARM-ShuntRes', 90000, 30,
+                LimitBetween('ARM-ShuntRes', 65000, 135000,
                     doc='Shunt resistance calibrated'),
                 ),
             },
@@ -91,7 +94,8 @@ class Final(share.TestSequence):
         mes['arm_query_last'](timeout=5)
         bc2['NVWRITE'] = True
         self.measure(
-            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_vbatt'),
+            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb',
+            'arm_vbatt', 'arm_ibatt'),
             timeout=5)
 
 
@@ -146,7 +150,6 @@ class Sensors(share.Sensors):
             message=tester.translate('bc2_final', 'msgSnEntry'),
             caption=tester.translate('bc2_final', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
-        self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         # Console sensors
         bc2 = self.devices['bc2']
         qlr = share.console.Base.query_last_response
@@ -159,6 +162,7 @@ class Sensors(share.Sensors):
                 ('arm_ShuntRes', 'SHUNT_RES'),
                 ('arm_VbattLSB', 'BATT_V_LSB'),
                 ('arm_Vbatt', 'BATT_V'),
+                ('arm_Ibatt', 'BATT_I'),
             ):
             self[name] = share.console.Sensor(bc2, cmdkey)
 
@@ -186,4 +190,6 @@ class Measurements(share.Measurements):
                 'Battery voltage ADC LSB voltage after cal'),
             ('arm_vbatt', 'ARM-Vbatt', 'arm_Vbatt',
                 'Battery voltage after cal'),
+            ('arm_ibatt', 'ARM-Ibatt', 'arm_Ibatt',
+                'Battery current after cal'),
             ))

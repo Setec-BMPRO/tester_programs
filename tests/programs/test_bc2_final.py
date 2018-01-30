@@ -31,17 +31,18 @@ class _BC2Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
-                    (sen['sernum'], 'A1526040123'),
-                    (sen['tstpin_cover'], 0.0), (sen['vin'], 13.5),
+                    (sen['sernum'], 'A1745120031'),
+                    (sen['tstpin_cover'], 0.0), (sen['vin'], 13.50),
                     ),
                 'Bluetooth': (
                     (sen['arm_swver'], bc2.config.SW_VERSION),
                     ),
                 'Calibrate': (
-                    (sen['vin'], (13.4990, 13.50)),
+                    (sen['vin'], (13.2499, 13.25)),
                     (sen['arm_Ioffset'], -1),
                     (sen['arm_ShuntRes'], self.shunt_res),
-                    (sen['arm_VbattLSB'], 2440), (sen['arm_Vbatt'], 1234),
+                    (sen['arm_VbattLSB'], 2440), (sen['arm_Vbatt'], 13.25),
+                    (sen['arm_Ibatt'], 10.0),
                     ),
                 },
             }
@@ -61,7 +62,7 @@ class BC2_Final(_BC2Final):
 
     parameter = 'STD'
     shunt_res = 800000
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the BC2 program."""
