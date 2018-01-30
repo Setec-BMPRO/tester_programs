@@ -121,7 +121,7 @@ class Devices(share.Devices):
         # Bluetooth connection to the console
         self.pi_bt = share.bluetooth.RaspberryBluetooth()
         # Bluetooth console driver
-        self['bc2'] = console.BTConsole(self.pi_bt)
+        self['bc2'] = console.Console(self.pi_bt)
         self['bc2'].verbose = True
 
     def reset(self):
