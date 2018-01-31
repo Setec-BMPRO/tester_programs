@@ -34,13 +34,13 @@ class SerialIO(abc.ABC):
         """
         for abyte in data:
             abyte = bytes([abyte])
+            self.read_data.extend(abyte)        # simulate echo
             if abyte == b'\r':
                 reply = self.action(self.write_data.decode())
                 self.write_data.clear()
                 self.read_data.extend(reply.encode())
             else:
                 self.write_data.extend(abyte)   # save for command locating
-                self.read_data.extend(abyte)    # simulate echo
 
     def read(self, count=1):
         """Simulate Serial.read

@@ -94,20 +94,20 @@ class RaspberryBluetooth(unittest.TestCase):
         command = b'command'
         response = 'response\r\n> '
         # Simulate RPC server echo of the command
-        self.server.action.return_value = command.decode() + '\r\n' + response
+        self.server.action.return_value = command.decode() + '\r' + response
         self.pibt.write(command + b'\r')
         self.server.action.assert_called_with(command.decode(), 1, 60)
         read_data = self.pibt.read(len(command))
         self.assertEqual(command, read_data)
         read_data = self.pibt.read(100)
-        self.assertEqual(response.encode(), read_data)
+        self.assertEqual(b'\r' + response.encode(), read_data)
 
     def test_write_read(self):
         """Write & read methods byte-by-byte."""
         command = b'command'
         response = 'response\r\n> '
         # Simulate RPC server echo of the command
-        self.server.action.return_value = command.decode() + '\r\n' + response
+        self.server.action.return_value = command.decode() + '\r' + response
         for abyte in command:
             self.pibt.write(bytes([abyte]))
         self.pibt.write(b'\r')
@@ -117,4 +117,6 @@ class RaspberryBluetooth(unittest.TestCase):
         while len(reply) > 0:       # Read until no more data
             read_data.extend(reply)
             reply = self.pibt.read()
-        self.assertEqual(bytearray(command + response.encode()), read_data)
+        self.assertEqual(
+            bytearray(command + b'\r' + response.encode()),
+            read_data)
