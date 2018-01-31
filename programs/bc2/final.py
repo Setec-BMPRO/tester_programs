@@ -16,7 +16,7 @@ class Final(share.TestSequence):
 
     """BC2 Final Test Program."""
     # Injected Vbatt
-    vbatt = 13.5
+    vbatt = 13.25
     ibatt = 10.0
     # Common limits
     _common = (
@@ -33,8 +33,8 @@ class Final(share.TestSequence):
             doc='LSB voltage calibrated'),
         LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
             doc='Battery voltage calibrated'),
-        LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.08,
-            doc='Battery current calibrated'),
+        LimitDelta('ARM-IbattZero', 0.0, 0.1,
+            doc='Zero battery current calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
@@ -42,12 +42,16 @@ class Final(share.TestSequence):
             'Limits': _common + (
                 LimitBetween('ARM-ShuntRes', 760000, 840000,
                     doc='Shunt resistance calibrated'),
+                LimitPercent('ARM-Ibatt', ibatt, 1, delta=0.015,
+                    doc='Battery current calibrated'),
                 ),
             },
         'H': {
             'Limits': _common + (
                 LimitBetween('ARM-ShuntRes', 65000, 135000,
                     doc='Shunt resistance calibrated'),
+                LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.08,
+                    doc='Battery current calibrated'),
                 ),
             },
         }
@@ -68,6 +72,7 @@ class Final(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        dev['dcl'].output(current=1.0, output=True)
         self.measure(
             ('dmm_tstpincov', 'dmm_vin', ), timeout=5)
 
@@ -78,25 +83,27 @@ class Final(share.TestSequence):
                            'with serial: "%s"', self.sernum)
         dev.pi_bt.open(self.sernum)
         self._logger.debug('Send a command to the console')
-        mes['arm_swver'](timeout=5)
+        mes['arm_swver']()
 
     @share.teststep
     def _step_cal(self, dev, mes):
         """Calibrate the shunt."""
         bc2 = dev['bc2']
         dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
+        vbatt_lim = (LimitPercent('ARM-Vbatt', dmm_V, 0.5, delta=0.02,
+                    doc='Battery voltage calibrated'), )
+        mes['arm_vbatt'].testlimit = vbatt_lim
         bc2['BATT_V_CAL'] = dmm_V
-        mes['arm_query_last'](timeout=5)
+        self.measure(('arm_query_last', 'arm_vbatt'))
+        dev['dcl'].output(current=0.0, delay=0.5)
         bc2['ZERO_I_CAL'] = 0
-        mes['arm_query_last'](timeout=5)
-        dev['dcl'].output(current=10.0, output=True, delay=1.0)
-        bc2['SHUNT_RES_CAL'] = 10.0
-        mes['arm_query_last'](timeout=5)
+        self.measure(('arm_query_last', 'arm_ibattzero'))
+        dev['dcl'].output(current=self.ibatt, delay=0.5)
+        bc2['SHUNT_RES_CAL'] = self.ibatt
+        mes['arm_query_last']()
         bc2['NVWRITE'] = True
         self.measure(
-            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb',
-            'arm_vbatt', 'arm_ibatt'),
-            timeout=5)
+            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_ibatt'))
 
 
 class Devices(share.Devices):
@@ -122,7 +129,6 @@ class Devices(share.Devices):
         self.pi_bt = share.bluetooth.RaspberryBluetooth()
         # Bluetooth console driver
         self['bc2'] = console.Console(self.pi_bt)
-        self['bc2'].verbose = True
 
     def reset(self):
         """Reset instruments."""
@@ -144,8 +150,6 @@ class Sensors(share.Sensors):
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
         self['tstpin_cover'].doc = 'Photo sensor'
-        self['shunt'] = sensor.Vdc(
-            dmm, high=3, low=1, rng=10, res=0.001, scale=1000)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bc2_final', 'msgSnEntry'),
             caption=tester.translate('bc2_final', 'capSnEntry'))
@@ -192,4 +196,6 @@ class Measurements(share.Measurements):
                 'Battery voltage after cal'),
             ('arm_ibatt', 'ARM-Ibatt', 'arm_Ibatt',
                 'Battery current after cal'),
+            ('arm_ibattzero', 'ARM-IbattZero', 'arm_Ibatt',
+                'Battery current after zero cal'),
             ))

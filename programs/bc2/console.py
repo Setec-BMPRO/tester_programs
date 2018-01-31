@@ -18,7 +18,7 @@ class Console(share.console.SamB11):
         'SHUNT_RES': parameter.Float('SHUNT_R_NOHMS', ),
         'BATT_V_LSB': parameter.Float('STC3100_VOLTAGE_LSB_UV', ),
         'BATT_V': parameter.Float('VOLTAGE_MV', scale=1000),
-        'BATT_I': parameter.Float('CURRENT_MA', scale=1000),
+        'BATT_I': parameter.Float('CURRENT_MA', scale=-1000),
         # Calibration commands
         'BATT_V_CAL': parameter.Calibration(
             'STC3100_VOLTAGE_LSB_UV', write_expected=1),

@@ -15,9 +15,6 @@ class _BC2Final(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.bc2.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
         mybt = MagicMock(name='MyBleRadio')
         mybt.scan.return_value = True
         patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
@@ -32,17 +29,16 @@ class _BC2Final(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], 'A1745120031'),
-                    (sen['tstpin_cover'], 0.0), (sen['vin'], 13.50),
+                    (sen['tstpin_cover'], 0.0), (sen['vin'], 13.25),
                     ),
                 'Bluetooth': (
                     (sen['arm_swver'], bc2.config.SW_VERSION),
                     ),
                 'Calibrate': (
-                    (sen['vin'], (13.2499, 13.25)),
-                    (sen['arm_Ioffset'], -1),
+                    (sen['vin'], (13.2499, 13.25)), (sen['arm_Vbatt'], 13.25),
+                    (sen['arm_Ibatt'], (0.0, 10.0)), (sen['arm_Ioffset'], -1),
                     (sen['arm_ShuntRes'], self.shunt_res),
-                    (sen['arm_VbattLSB'], 2440), (sen['arm_Vbatt'], 13.25),
-                    (sen['arm_Ibatt'], 10.0),
+                    (sen['arm_VbattLSB'], 2440),
                     ),
                 },
             }
