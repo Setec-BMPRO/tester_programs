@@ -123,7 +123,7 @@ class Devices(share.Devices):
                 ('rla_load', tester.Relay, 'RLA9'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Apply power to fixture circuits. Power to unit from a BCE282-12.
+        # Apply power to fixture circuits. A BCE282-12 provides 10A for calibration.
         self['dcs_cover'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
         self['acsource'].output(voltage=240.0, output=True, delay=1.0)
@@ -135,7 +135,6 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        self['acsource'].reset()
         self['dcs_vin'].output(0.0, False)
         self['dcl'].output(0.0, False)
         self['rla_load'].set_off()
