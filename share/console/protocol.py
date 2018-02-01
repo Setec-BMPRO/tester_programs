@@ -185,9 +185,9 @@ class Base():
             if self.measurement_fail_on_error:
                 self._logger.debug('Caught Error: "%s"', err)
                 comms = tester.Measurement(
-                    tester.LimitInteger('Action', 0, doc='Command succeeded'),
-                    tester.sensor.Mirror())
-                comms.sensor.store(1)
+                    tester.LimitRegExp('Action', 'ok', doc='Command succeeded'),
+                    tester.sensor.Mirror(rdgtype=tester.sensor.ReadingString))
+                comms.sensor.store(str(err))
                 comms.measure()   # Generates a test FAIL result
             else:
                 raise
@@ -210,7 +210,8 @@ class Base():
             self._logger.debug('Echo <-- %s', repr(cmd_echo))
         # The echo must match what we sent
         if cmd_echo != cmd_bytes:
-            raise CommandError('Command echo error')
+            raise CommandError('Command echo error. Tx: {0}, Rx: {1}'.format(
+                        cmd_bytes, cmd_echo))
 
     def _read_response(self, expected):
         """Read the response to a command.
@@ -279,7 +280,9 @@ class BadUart(Base):
         cmd_bytes = command.encode()
         self._logger.debug('Cmd --> %s', repr(cmd_bytes))
         # Send each byte with echo verification
+        index = -1
         for a_byte in cmd_bytes:
+            index += 1
             a_byte = bytes([a_byte])    # We need a byte, not an integer
             self.port.write(a_byte)
             echo = self.port.read(1)
@@ -287,8 +290,8 @@ class BadUart(Base):
                 self._logger.debug(' Tx -> %s Rx <- %s', a_byte, echo)
             if echo != a_byte:
                 raise CommandError(
-                    'Command echo error. Tx: {0}, Rx: {1}'.format(
-                        a_byte, echo))
+                    'Command echo error on byte {0}. Tx: {1}, Rx: {2}'.format(
+                        index, a_byte, echo))
         # And the '\r' without echo
         self.port.write(b'\r')
 
