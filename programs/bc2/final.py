@@ -16,7 +16,7 @@ class Final(share.TestSequence):
 
     """BC2 Final Test Program."""
     # Injected Vbatt
-    vbatt = 13.25
+    vbatt = 15.0
     ibatt = 10.0
     # Common limits
     _common = (
@@ -72,7 +72,7 @@ class Final(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        dev['dcl'].output(current=1.0, output=True)
+        dev['dcs_vin'].output(self.vbatt, True)
         self.measure(
             ('dmm_tstpincov', 'dmm_vin', ), timeout=5)
 
@@ -95,15 +95,16 @@ class Final(share.TestSequence):
         mes['arm_vbatt'].testlimit = vbatt_lim
         bc2['BATT_V_CAL'] = dmm_V
         self.measure(('arm_query_last', 'arm_vbatt'))
-        dev['dcl'].output(current=0.0, delay=0.5)
         bc2['ZERO_I_CAL'] = 0
         self.measure(('arm_query_last', 'arm_ibattzero'))
-        dev['dcl'].output(current=self.ibatt, delay=0.5)
+        dev['rla_load'].set_on()
+        dev['dcl'].output(current=self.ibatt, output=True, delay=0.5)
         bc2['SHUNT_RES_CAL'] = self.ibatt
         mes['arm_query_last']()
         bc2['NVWRITE'] = True
         self.measure(
             ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_ibatt'))
+        dev['dcl'].output(0.0)
 
 
 class Devices(share.Devices):
@@ -116,8 +117,10 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('acsource', tester.ACSource, 'ACS'),
                 ('dmm', tester.DMM, 'DMM'),
+                ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_cover', tester.DCSource, 'DCS5'),
                 ('dcl', tester.DCLoad, 'DCL1'),
+                ('rla_load', tester.Relay, 'RLA9'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Apply power to fixture circuits. Power to unit from a BCE282-12.
@@ -133,7 +136,9 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['acsource'].reset()
+        self['dcs_vin'].output(0.0, False)
         self['dcl'].output(0.0, False)
+        self['rla_load'].set_off()
         self.pi_bt.close()
 
 
