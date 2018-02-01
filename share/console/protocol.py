@@ -183,6 +183,14 @@ class Base():
             reply = self._read_response(expected)
         except Error as err:
             if self.measurement_fail_on_error:
+                # Read any more waiting data (a possible hard-fault message)
+                port_timeout = self.port.timeout
+                self.port.timeout = 0.1
+                data = self.port.read(1000)
+                self.port.timeout = port_timeout
+                if len(data) > 0:
+                    self._logger.error('Console Error extra data: %s', data)
+                # Generate a Measurement fialure
                 self._logger.debug('Caught Error: "%s"', err)
                 comms = tester.Measurement(
                     tester.LimitRegExp('Action', 'ok', doc='Command succeeded'),
