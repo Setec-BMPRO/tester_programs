@@ -13,7 +13,6 @@
   <Email></Email>
   <Eol index="1"/>
   <Sources>
-    <Source></Source>
     <Source>main.py</Source>
     <Source>programs/_2040/__init__.py</Source>
     <Source>programs/_2040/final.py</Source>
