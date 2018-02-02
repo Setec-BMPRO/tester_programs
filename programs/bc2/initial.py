@@ -29,7 +29,7 @@ class Initial(share.TestSequence):
         LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address '),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
-        LimitRegExp('ARM-QueryLast', 'cal success:',
+        LimitRegExp('ARM-CalOk', 'cal success:',
             doc='Calibration success'),
         LimitBetween('ARM-I_ADCOffset', -3, 3,
             doc='Current ADC offset calibrated'),
@@ -37,7 +37,7 @@ class Initial(share.TestSequence):
             doc='LSB voltage calibrated'),
         LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
             doc='Battery voltage calibrated'),
-        LimitDelta('ARM-IbattZero', 0.0, 0.1,
+        LimitDelta('ARM-IbattZero', 0.0, 0.2,
             doc='Zero battery current calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
@@ -62,7 +62,7 @@ class Initial(share.TestSequence):
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('TestArm', self._step_test_arm),
-#            TestStep('Calibrate', self._step_calibrate),
+            TestStep('Calibrate', self._step_calibrate),
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
@@ -96,11 +96,11 @@ class Initial(share.TestSequence):
                     doc='Battery voltage calibrated'), )
         mes['arm_vbatt'].testlimit = vbatt_lim
         bc2['BATT_V_CAL'] = dmm_V
-        bc2.action(None, delay=1.5, expected=1)
-        self.measure(('arm_query_last', 'arm_vbatt'))
+        mes['detectCAL'].sensor.store(bc2.action(expected=1))
+        self.measure(('detectCAL', 'arm_vbatt'))
         bc2['ZERO_I_CAL'] = 0
-        bc2.action(None, delay=1.5, expected=1)
-        self.measure(('arm_query_last', 'arm_ibattzero'))
+        mes['detectCAL'].sensor.store(bc2.action(expected=1))
+        self.measure(('detectCAL', 'arm_ibattzero'))
         bc2['NVWRITE'] = True
         self.measure(('arm_ioffset', 'arm_vbattlsb'))
 
@@ -169,21 +169,15 @@ class Sensors(share.Sensors):
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['3v3'].doc = 'U2 output'
         self['mirbt'] = sensor.Mirror()
+        self['mircal'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         # Console sensors
         bc2 = self.devices['bc2']
-        qlr = share.console.Base.query_last_response
         for name, cmdkey in (
                 ('arm_BtMAC', 'BT_MAC'),
                 ('arm_SwVer', 'SW_VER'),
             ):
             self[name] = share.console.Sensor(
                 bc2, cmdkey, rdgtype=sensor.ReadingString)
-        self['sernum'] = sensor.DataEntry(
-            message=tester.translate('bc2_initial', 'msgSnEntry'),
-            caption=tester.translate('bc2_initial', 'capSnEntry'))
-        self['sernum'].doc = 'Barcode scanner'
-        self['arm_query_last'] = share.console.Sensor(
-            bc2, qlr, rdgtype=sensor.ReadingString)
         for name, cmdkey in (
                 ('arm_Ioffset', 'I_ADC_OFFSET'),
                 ('arm_VbattLSB', 'BATT_V_LSB'),
@@ -191,6 +185,10 @@ class Sensors(share.Sensors):
                 ('arm_Ibatt', 'BATT_I'),
             ):
             self[name] = share.console.Sensor(bc2, cmdkey)
+        self['sernum'] = sensor.DataEntry(
+            message=tester.translate('bc2_initial', 'msgSnEntry'),
+            caption=tester.translate('bc2_initial', 'capSnEntry'))
+        self['sernum'].doc = 'Barcode scanner'
 
 
 class Measurements(share.Measurements):
@@ -205,8 +203,7 @@ class Measurements(share.Measurements):
             ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
             ('arm_btmac', 'BtMac', 'arm_BtMAC', 'MAC address'),
             ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
-            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
-            ('arm_query_last', 'ARM-QueryLast', 'arm_query_last',
+            ('detectCAL', 'ARM-CalOk', 'mircal',
                 'Response from a calibration command'),
             ('arm_ioffset', 'ARM-I_ADCOffset', 'arm_Ioffset',
                 'Current ADC offset after cal'),
@@ -216,4 +213,5 @@ class Measurements(share.Measurements):
                 'Battery voltage after cal'),
             ('arm_ibattzero', 'ARM-IbattZero', 'arm_Ibatt',
                 'Battery current after zero cal'),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ))

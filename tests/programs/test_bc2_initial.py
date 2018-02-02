@@ -40,7 +40,7 @@ class _BC2Initial(ProgramTestCase):
                     ),
                 'Calibrate': (
                     (sen['vin'], (14.9999, 15.0)),
-                    (sen['arm_query_last'], ('cal success:', ) * 2),
+                    (sen['mircal'], ('cal success:', ) * 2),
                     (sen['arm_Vbatt'], 15.0), (sen['arm_Ibatt'], 0.0),
                     (sen['arm_Ioffset'], -1), (sen['arm_VbattLSB'], 2440),
                     ),
