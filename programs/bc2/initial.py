@@ -6,7 +6,7 @@ import serial
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitBoolean, LimitRegExp
+    LimitDelta, LimitBetween, LimitBoolean, LimitPercent, LimitRegExp
     )
 import share
 from . import console
@@ -18,16 +18,27 @@ class Initial(share.TestSequence):
     """BC2 Initial Test Program."""
 
     # Injected Vbatt
-    vbatt = 12.0
+    vbatt = 15.0
     # Common limits
     _common = (
-        LimitDelta('Vin', 12.0, 0.5),
-        LimitDelta('3V3', 3.3, 0.25),
-        LimitDelta('Shunt', 50.0, 100.0),
+        LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
+        LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
         LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
-        LimitBoolean('DetectBT', True),
+            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            doc='Software version'),
+        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+            doc='Valid MAC address '),
+        LimitBoolean('DetectBT', True, doc='MAC address detected'),
+        LimitRegExp('ARM-QueryLast', 'cal success:',
+            doc='Calibration success'),
+        LimitBetween('ARM-I_ADCOffset', -3, 3,
+            doc='Current ADC offset calibrated'),
+        LimitBetween('ARM-VbattLSB', 2391, 2489,
+            doc='LSB voltage calibrated'),
+        LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
+            doc='Battery voltage calibrated'),
+        LimitDelta('ARM-IbattZero', 0.0, 0.1,
+            doc='Zero battery current calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
@@ -51,6 +62,7 @@ class Initial(share.TestSequence):
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('TestArm', self._step_test_arm),
+#            TestStep('Calibrate', self._step_calibrate),
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
@@ -70,6 +82,27 @@ class Initial(share.TestSequence):
         bc2.brand(config.HW_VERSION, self.sernum)
         bc2['MODEL'] = self.config['Model']
         mes['arm_swver']()
+
+    @share.teststep
+    def _step_calibrate(self, dev, mes):
+        """Calibrate battery voltage gain and 0mA shunt current.
+
+        Vbatt is at 15V, console is open.
+
+        """
+        bc2 = dev['bc2']
+        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
+        vbatt_lim = (LimitPercent('ARM-Vbatt', dmm_V, 0.5, delta=0.02,
+                    doc='Battery voltage calibrated'), )
+        mes['arm_vbatt'].testlimit = vbatt_lim
+        bc2['BATT_V_CAL'] = dmm_V
+        bc2.action(None, delay=1.5, expected=1)
+        self.measure(('arm_query_last', 'arm_vbatt'))
+        bc2['ZERO_I_CAL'] = 0
+        bc2.action(None, delay=1.5, expected=1)
+        self.measure(('arm_query_last', 'arm_ibattzero'))
+        bc2['NVWRITE'] = True
+        self.measure(('arm_ioffset', 'arm_vbattlsb'))
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -96,7 +129,6 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('dcs_shunt', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_wdog', tester.Relay, 'RLA2'),
             ):
@@ -119,8 +151,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['bc2'].close()
-        for dev in ('dcs_vin', 'dcs_shunt'):
-            self[dev].output(0.0, False)
+        self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_wdog', ):
             self[rla].set_off()
 
@@ -134,19 +165,32 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'].doc = 'X4'
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['shunt'] = sensor.Vdc(
-            dmm, high=3, low=1, rng=10, res=0.001, scale=1000)
+        self['3v3'].doc = 'U2 output'
         self['mirbt'] = sensor.Mirror()
         # Console sensors
         bc2 = self.devices['bc2']
-        self['btmac'] = share.console.Sensor(
-            bc2, 'BT_MAC', rdgtype=sensor.ReadingString)
+        qlr = share.console.Base.query_last_response
+        for name, cmdkey in (
+                ('arm_BtMAC', 'BT_MAC'),
+                ('arm_SwVer', 'SW_VER'),
+            ):
+            self[name] = share.console.Sensor(
+                bc2, cmdkey, rdgtype=sensor.ReadingString)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bc2_initial', 'msgSnEntry'),
             caption=tester.translate('bc2_initial', 'capSnEntry'))
-        self['arm_swver'] = share.console.Sensor(
-            bc2, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['sernum'].doc = 'Barcode scanner'
+        self['arm_query_last'] = share.console.Sensor(
+            bc2, qlr, rdgtype=sensor.ReadingString)
+        for name, cmdkey in (
+                ('arm_Ioffset', 'I_ADC_OFFSET'),
+                ('arm_VbattLSB', 'BATT_V_LSB'),
+                ('arm_Vbatt', 'BATT_V'),
+                ('arm_Ibatt', 'BATT_I'),
+            ):
+            self[name] = share.console.Sensor(bc2, cmdkey)
 
 
 class Measurements(share.Measurements):
@@ -156,11 +200,20 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', ''),
-            ('dmm_3v3', '3V3', '3v3', ''),
-            ('dmm_shunt', 'Shunt', 'shunt', ''),
-            ('detectBT', 'DetectBT', 'mirbt', ''),
-            ('arm_btmac', 'BtMac', 'btmac', ''),
-            ('ui_sernum', 'SerNum', 'sernum', ''),
-            ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
+            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
+            ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
+            ('arm_btmac', 'BtMac', 'arm_BtMAC', 'MAC address'),
+            ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
+            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('arm_query_last', 'ARM-QueryLast', 'arm_query_last',
+                'Response from a calibration command'),
+            ('arm_ioffset', 'ARM-I_ADCOffset', 'arm_Ioffset',
+                'Current ADC offset after cal'),
+            ('arm_vbattlsb', 'ARM-VbattLSB', 'arm_VbattLSB',
+                'Battery voltage ADC LSB voltage after cal'),
+            ('arm_vbatt', 'ARM-Vbatt', 'arm_Vbatt',
+                'Battery voltage after cal'),
+            ('arm_ibattzero', 'ARM-IbattZero', 'arm_Ibatt',
+                'Battery current after zero cal'),
             ))
