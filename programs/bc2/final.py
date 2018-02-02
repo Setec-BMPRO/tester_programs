@@ -33,7 +33,7 @@ class Final(share.TestSequence):
             doc='LSB voltage calibrated'),
         LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
             doc='Battery voltage calibrated'),
-        LimitDelta('ARM-IbattZero', 0.0, 0.1,
+        LimitDelta('ARM-IbattZero', 0.0, 0.2,
             doc='Zero battery current calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
