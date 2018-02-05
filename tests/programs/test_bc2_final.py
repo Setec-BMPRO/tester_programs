@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BC2 Final Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc2
 
@@ -15,9 +15,10 @@ class _BC2Final(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
+        patcher = patch('programs.bc2.console.Console')
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch('share.bluetooth.RaspberryBluetooth')
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -29,16 +30,20 @@ class _BC2Final(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], 'A1745120031'),
-                    (sen['tstpin_cover'], 0.0), (sen['vin'], 15.0),
+                    (sen['tstpin_cover'], 0.0),
+                    (sen['vin'], 15.0),
                     ),
                 'Bluetooth': (
                     (sen['arm_swver'], bc2.config.SW_VERSION),
                     ),
                 'Calibrate': (
-                    (sen['vin'], (14.9999, 15.0)), (sen['arm_Vbatt'], 15.0),
-                    (sen['arm_Ibatt'], (0.0, 10.0)), (sen['arm_Ioffset'], -1),
+                    (sen['vin'], (14.9999, 15.0)),
+                    (sen['arm_Vbatt'], 15.0),
+                    (sen['arm_Ibatt'], (0.0, 10.0)),
+                    (sen['arm_Ioffset'], -1),
                     (sen['arm_ShuntRes'], self.shunt_res),
                     (sen['arm_VbattLSB'], 2440),
+                    (sen['arm_query_last'], ('cal success:', ) * 3 ),
                     ),
                 },
             }
@@ -46,7 +51,7 @@ class _BC2Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
+        self.assertEqual(14, len(result.readings))
         self.assertEqual(
             ['Prepare', 'Bluetooth', 'Calibrate'],
             self.tester.ut_steps)

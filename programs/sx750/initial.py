@@ -331,7 +331,7 @@ class Initial(share.TestSequence):
                     break
             self.measurements['ocp_lock']()
             load.output(0.0)
-            olimit.check(setting, 1)
+            olimit.check(setting)
 
     @staticmethod
     def reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
@@ -359,7 +359,7 @@ class Initial(share.TestSequence):
             dcl_out.opc()
             volt = dmm_out.measure().reading1
             load_reg = 100.0 * (volt00 - volt) / volt00
-            reg_limit.check(load_reg, 1)
+            reg_limit.check(load_reg)
         with tester.PathName('PeakLoad'):
             dcl_out.output(peak_load)
             dcl_out.opc()

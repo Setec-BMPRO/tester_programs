@@ -43,7 +43,7 @@ class TestSequence(tester.TestSequence):
 
         """
         super().open()
-        self.limits = tester.limitdict(self.limit_builtin + limits)
+        self.limits = tester.LimitDict(self.limit_builtin + limits)
         self.devices = cls_devices(self.physical_devices)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
@@ -170,7 +170,7 @@ class TestSequence(tester.TestSequence):
         sernum = str(uuts[0])
         limit = self.limits[limit_name]
         measurement = self.measurements[measurement_name]
-        if not limit.check(sernum, position=1, send_signal=False):
+        if not limit.check(sernum):
             sernum = measurement.measure().reading1
         return sernum
 

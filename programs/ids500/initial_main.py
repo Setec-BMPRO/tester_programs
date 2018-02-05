@@ -172,15 +172,15 @@ class InitialMain(share.TestSequence):
             mes['dmm_isldd'](timeout=5)
             self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
             try:
-                # Patch limits for 50A checks
+                # Set limits for 50A checks
                 patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
                 for name in patch_limits:
-                    self.limits[name].limit = (
+                    self.limits[name].adjust(
                     -self._ldd_50_error_limits, self._ldd_50_error_limits)
                 self._ldd_err(mes, Iset, Iout, Imon)
             finally:    # Restore the limits for 6A checks
                 for name in patch_limits:
-                    self.limits[name].limit = (
+                    self.limits[name].adjust(
                     -self._ldd_6_error_limits, self._ldd_6_error_limits)
             mes['ui_YesNoLddRed']()
         # LDD off

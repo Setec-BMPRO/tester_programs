@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for TRS2 Final Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trs2
 
@@ -20,9 +20,7 @@ class TRSFinal(ProgramTestCase):
         patcher = patch('programs.trs2.console.Console')
         self.addCleanup(patcher.stop)
         patcher.start()
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
+        patcher = patch('share.bluetooth.RaspberryBluetooth')
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

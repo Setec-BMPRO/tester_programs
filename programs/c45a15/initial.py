@@ -115,7 +115,7 @@ class Initial(share.TestSequence):
         reg = self.limits['Reg'].limit[0]
         triplevel = noload + (noload * (reg / 100))
         self._logger.debug('OCP Trip Level: %s', triplevel)
-        self.limits['inOCP'].limit = triplevel
+        self.limits['inOCP'].adjust(triplevel)
 
     @share.teststep
     def _step_ocp(self, dev, mes):

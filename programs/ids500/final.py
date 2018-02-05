@@ -166,15 +166,15 @@ class Final(share.TestSequence):
                 timeout=5).readings
             self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
             try:
-                # Patch limits for 50A checks
+                # Set limits for 50A checks
                 patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
                 for name in patch_limits:
-                    self.limits[name].limit = (
+                    self.limits[name].adjust(
                         -self._ldd_50_error_limits, self._ldd_50_error_limits)
                 self._ldd_err(mes, Iset, Iout, Imon)
             finally:    # Restore the limits for 6A checks
                 for name in patch_limits:
-                    self.limits[name].limit = (
+                    self.limits[name].adjust(
                         -self._ldd_6_error_limits, self._ldd_6_error_limits)
             mes['ui_YesNoLddRed']()
         # LDD off
@@ -217,13 +217,13 @@ class Final(share.TestSequence):
         time.sleep(0.5)
         pic.port.flushInput()
         pic.expected = 1
-        mes['pic_hwrev'].testlimit[0].limit = hwrev
+        mes['pic_hwrev'].testlimit[0].adjust(hwrev)
         mes['pic_hwrev']()
         sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         pic.expected = 3
         pic['WriteSerNum'] = sernum
         pic.expected = 1
-        mes['pic_sernum'].testlimit[0].limit = sernum
+        mes['pic_sernum'].testlimit[0].adjust(sernum)
         mes['pic_sernum']()
 
     @share.teststep

@@ -73,27 +73,21 @@ class Final(share.TestSequence):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(self.vbatt, True)
-        self.measure(
-            ('dmm_tstpincov', 'dmm_vin', ), timeout=5)
+        self.measure(('dmm_tstpincov', 'dmm_vin', ), timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self._logger.debug('Open bluetooth connection to console of unit '
-                           'with serial: "%s"', self.sernum)
         dev.pi_bt.open(self.sernum)
-        self._logger.debug('Send a command to the console')
         mes['arm_swver']()
 
     @share.teststep
     def _step_cal(self, dev, mes):
         """Calibrate the shunt."""
         bc2 = dev['bc2']
-        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
-        vbatt_lim = (LimitPercent('ARM-Vbatt', dmm_V, 0.5, delta=0.02,
-                    doc='Battery voltage calibrated'), )
-        mes['arm_vbatt'].testlimit = vbatt_lim
-        bc2['BATT_V_CAL'] = dmm_V
+        dmm_v = mes['dmm_vin'].stable(delta=0.001).reading1
+        mes['arm_vbatt'].testlimit[0].adjust(nominal=dmm_v)
+        bc2['BATT_V_CAL'] = dmm_v
         self.measure(('arm_query_last', 'arm_vbatt'))
         bc2['ZERO_I_CAL'] = 0
         self.measure(('arm_query_last', 'arm_ibattzero'))

@@ -224,7 +224,7 @@ class Final(share.TestSequence):
     def _step_startup(self, dev, mes):
         """Power comms interface, connect to PIC."""
         sernum = mes['ui_SnEntry']().reading1
-        self.limits['SerNumChk'].limit = str(int(sernum[-4:]))
+        self.limits['SerNumChk'].adjust(str(int(sernum[-4:])))
         dev['dcs_Vcom'].output(12.0, output=True, delay=1)
         dev['rla_Pic'].set_on()
 
