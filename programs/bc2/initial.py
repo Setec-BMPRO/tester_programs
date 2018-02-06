@@ -91,11 +91,9 @@ class Initial(share.TestSequence):
 
         """
         bc2 = dev['bc2']
-        dmm_V = mes['dmm_vin'].stable(delta=0.001).reading1
-        vbatt_lim = (LimitPercent('ARM-Vbatt', dmm_V, 0.5, delta=0.02,
-                    doc='Battery voltage calibrated'), )
-        mes['arm_vbatt'].testlimit = vbatt_lim
-        bc2['BATT_V_CAL'] = dmm_V
+        dmm_v = mes['dmm_vin'].stable(delta=0.001).reading1
+        mes['arm_vbatt'].testlimit[0].adjust(nominal=dmm_v)
+        bc2['BATT_V_CAL'] = dmm_v
         mes['detectCAL'].sensor.store(bc2.action(expected=1))
         self.measure(('detectCAL', 'arm_vbatt'))
         bc2['ZERO_I_CAL'] = 0

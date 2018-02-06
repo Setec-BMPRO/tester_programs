@@ -51,7 +51,7 @@ class Final(share.TestSequence):
                            'with serial: "%s"', self.sernum)
         dev.pi_bt.open(self.sernum)
         self._logger.debug('Send a command to the console')
-        mes['arm_swver'](timeout=5)
+        mes['arm_swver']()
 
 
 class Devices(share.Devices):

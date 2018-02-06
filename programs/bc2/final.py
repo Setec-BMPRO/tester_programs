@@ -40,17 +40,17 @@ class Final(share.TestSequence):
     limitdata = {
         'STD': {
             'Limits': _common + (
-                LimitBetween('ARM-ShuntRes', 760000, 840000,
+                LimitPercent('ARM-ShuntRes', 800000, 5.0,
                     doc='Shunt resistance calibrated'),
-                LimitPercent('ARM-Ibatt', ibatt, 1, delta=0.015,
+                LimitPercent('ARM-Ibatt', ibatt, 1, delta=0.031,
                     doc='Battery current calibrated'),
                 ),
             },
         'H': {
             'Limits': _common + (
-                LimitBetween('ARM-ShuntRes', 65000, 135000,
+                LimitPercent('ARM-ShuntRes', 90000, 30.0,
                     doc='Shunt resistance calibrated'),
-                LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.08,
+                LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.3,
                     doc='Battery current calibrated'),
                 ),
             },
@@ -83,7 +83,11 @@ class Final(share.TestSequence):
 
     @share.teststep
     def _step_cal(self, dev, mes):
-        """Calibrate the shunt."""
+        """Calibrate shunt resistance at 10A.
+
+        Vbatt is at 15V, console is open via bluetooth.
+
+        """
         bc2 = dev['bc2']
         dmm_v = mes['dmm_vin'].stable(delta=0.001).reading1
         mes['arm_vbatt'].testlimit[0].adjust(nominal=dmm_v)
@@ -97,7 +101,7 @@ class Final(share.TestSequence):
         mes['arm_query_last']()
         bc2['NVWRITE'] = True
         self.measure(
-            ('arm_ioffset', 'arm_shuntres', 'arm_vbattlsb', 'arm_ibatt'))
+            ('arm_ioffset', 'arm_vbattlsb', 'arm_shuntres', 'arm_ibatt'))
         dev['dcl'].output(0.0)
 
 
