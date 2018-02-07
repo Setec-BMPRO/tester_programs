@@ -24,7 +24,7 @@ class _BC15_25_Initial(ProgramTestCase):
             patcher.start()
         super().setUp()
 
-    def _pass_run(self):
+    def _pass_run(self, ocp_steps):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
@@ -50,8 +50,11 @@ class _BC15_25_Initial(ProgramTestCase):
                     (sen['arm_iout'], 1987),
                     (sen['arm_switch'], 3),
                     ),
-                'Loaded': (
-                    (sen['Vout'], (14.4, ) * 10 + (11.0, ), ),
+                'OCP': (
+                    (sen['Vout'],
+                        (14.4, ) * 10 + (11.0, )
+                        + (14.4, ) * ocp_steps + (11.0, )
+                        ),
                     (sen['arm_vout'], 14400),
                     (sen['arm_iout'],
                      round(1000 * self.test_program.config['OCP_Nominal'])),
@@ -62,10 +65,10 @@ class _BC15_25_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(20, len(result.readings))
+        self.assertEqual(21, len(result.readings))
         self.assertEqual(
             ['PartDetect', 'Program', 'Initialise', 'PowerUp',
-             'Output', 'Loaded'],
+             'Output', 'OCP'],
             self.tester.ut_steps)
 
 
@@ -79,7 +82,7 @@ class BC15_Initial(_BC15_25_Initial):
 
     def test_pass_run(self):
         """PASS run of the BC15 program."""
-        super()._pass_run()
+        super()._pass_run(24)
 
 
 class BC25_Initial(_BC15_25_Initial):
@@ -92,4 +95,4 @@ class BC25_Initial(_BC15_25_Initial):
 
     def test_pass_run(self):
         """PASS run of the BC25 program."""
-        super()._pass_run()
+        super()._pass_run(39)

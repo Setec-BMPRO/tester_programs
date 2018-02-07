@@ -57,7 +57,8 @@ class Initial(share.TestSequence):
                 LimitLow('5Vs', 99.0),  # No test point
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_15.replace('.', r'\.'))),
-                LimitPercent('OCP', ocp_nominal_15, (4.0, 7.0)),
+                LimitPercent('OCP_pre', ocp_nominal_15, 15),
+                LimitPercent('OCP_post', ocp_nominal_15, 2.0),
                 LimitPercent(
                     'ARM-HIamp', ocp_nominal_15 - 1.0, percent=1.7, delta=1.0),
                 ),
@@ -71,7 +72,8 @@ class Initial(share.TestSequence):
                 LimitDelta('5Vs', 4.95, 0.15),
                 LimitRegExp('ARM-SwVer', '^{0}$'.format(
                     bin_version_25.replace('.', r'\.'))),
-                LimitPercent('OCP', ocp_nominal_25, (4.0, 20.0)),
+                LimitPercent('OCP_pre', ocp_nominal_25, 15),
+                LimitPercent('OCP_post', ocp_nominal_25, 2.0),
                 LimitPercent(
                     'ARM-HIamp', ocp_nominal_25 - 1.0, percent=1.7, delta=1.0),
                 ),
@@ -92,7 +94,7 @@ class Initial(share.TestSequence):
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('Output', self._step_output),
-            tester.TestStep('Loaded', self._step_loaded),
+            tester.TestStep('OCP', self._step_ocp),
             )
 
     @share.teststep
@@ -141,14 +143,21 @@ class Initial(share.TestSequence):
         mes['dmm_vout_cal']()
 
     @share.teststep
-    def _step_loaded(self, dev, mes):
-        """Tests of the output."""
-        current = self.config['OCP_Nominal'] - 1.0
-        dev['dcl'].output(current, True, delay=0.5)
+    def _step_ocp(self, dev, mes):
+        """Output current reading and OCP calibration."""
         arm = dev['arm']
-        arm.cal_iout(current)
+        dcload = dev['dcl']
+        ocp_nominal = self.config['OCP_Nominal']
+        current = ocp_nominal * 0.8
+        # Measure actual OCP setting
+        dcload.output(current, True, delay=0.5)
+        ocp_actual = mes['ramp_ocp_pre']().reading1
+        ocp_factor = ocp_nominal / ocp_actual
+        # Set load for output current reading calibration
+        dcload.output(current, delay=0.5)
+        arm.cal_iout(current, ocp_factor)
         arm.stat()
-        self.measure(('dmm_vout', 'arm_vout', 'arm_Hiamp', 'ramp_ocp', ))
+        self.measure(('dmm_vout', 'arm_vout', 'arm_Hiamp', 'ramp_ocp_post', ))
         arm.powersupply()
 
 
@@ -226,8 +235,8 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['Vout'],
             detect_limit=(self.limits['InOCP'], ),
-            start=self.ocp_nominal - 1.0,
-            stop=self.ocp_nominal + 3.0,
+            start=self.ocp_nominal * 0.85,  # ±15% ramping range
+            stop=self.ocp_nominal * 1.15,
             step=0.1,
             delay=0.2)
         # Console sensors
@@ -262,7 +271,8 @@ class Measurements(share.Measurements):
             ('dmm_vout', 'Vout', 'Vout', ''),
             ('dmm_vout_cal', 'VoutCal', 'Vout', ''),
             ('dmm_voutoff', 'VoutOff', 'Vout', ''),
-            ('ramp_ocp', 'OCP', 'ocp', ''),
+            ('ramp_ocp_pre', 'OCP_pre', 'ocp', ''),
+            ('ramp_ocp_post', 'OCP_post', 'ocp', ''),
             ('arm_SwVer', 'ARM-SwVer', 'arm_swver', ''),
             ('arm_vout', 'ARM-Vout', 'arm_vout', ''),
             ('arm_2amp', 'ARM-2amp', 'arm_iout', ''),

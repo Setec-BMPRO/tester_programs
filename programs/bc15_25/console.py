@@ -32,11 +32,6 @@ class Console(share.console.Base):
     cal_regexp = re.compile('^([a-z_0-9]+) +([\-0-9]+) $')
     # Program parameter ('15' for BC15 or '25' for BC25)
     parameter = None
-    # OCP setpoint adjustment factors
-    ocp_setpoint_factor = {
-        '15': 0.95,
-        '25': 0.90,
-        }
 
     def initialise(self, reset_relay):
         """Initialise the unit."""
@@ -113,6 +108,8 @@ class Console(share.console.Base):
         This product does not have a calibration command, so we must adjust
         the internal calibration constants ourselves.
 
+        @param voltage Actual output voltage of the unit
+
         """
         # Randall said:
         # I looked at the PWM calibration in the code, its possible for you to
@@ -134,25 +131,26 @@ class Console(share.console.Base):
         self['NVWRITE'] = True
         self.action('{0} SETMV'.format(round(mv_set)))
 
-    def cal_iout(self, current):
+    def cal_iout(self, current, ocp_factor):
         """Calibrate the output current reading & setpoint.
 
         This product does not have a calibration command, so we must adjust
         the internal calibration constants ourselves.
 
+        @param current Actual output current of the unit
+        @param ocp_factor Factor to apply to the OCP setpoint
+
         """
         self.stat()
         self.cal_read()
-        # Output current reading closed-loop correction
+        # Output current reading correction
         ma_num = float(self['get_current_ma_num'])
         ma_rdg = float(self['not-pulsing-current'])
         ma_set = self['ma-set']
         ma_num_new = round((current * 1000 * ma_num) / ma_rdg)
         self.action('{0} "GET_CURRENT_MA_NUM CAL'.format(ma_num_new))
-        # OCP setting open-loop adjustment
-        new_set_num = round(
-            float(self['set_current_ma_num']) *
-            self.ocp_setpoint_factor[self.parameter])
+        # OCP setpoint correction
+        new_set_num = round(float(self['set_current_ma_num']) * ocp_factor)
         self.action('{0} "SET_CURRENT_MA_NUM CAL'.format(new_set_num))
         # Save & refresh
         self['NVWRITE'] = True
