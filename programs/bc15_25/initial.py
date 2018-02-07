@@ -26,6 +26,7 @@ class Initial(share.TestSequence):
     vout_set = 14.40
     ocp_nominal_15 = 15.0
     ocp_nominal_25 = 25.0
+    ocp_load_factor = 0.8
     # Common limits
     _common = (
         LimitLow('FixtureLock', 20),
@@ -60,7 +61,9 @@ class Initial(share.TestSequence):
                 LimitPercent('OCP_pre', ocp_nominal_15, 15),
                 LimitPercent('OCP_post', ocp_nominal_15, 2.0),
                 LimitPercent(
-                    'ARM-HIamp', ocp_nominal_15 - 1.0, percent=1.7, delta=1.0),
+                    'ARM-HIamp',
+                    ocp_nominal_15 * ocp_load_factor,
+                    percent=1.7, delta=1.0),
                 ),
             },
         '25': {
@@ -75,7 +78,9 @@ class Initial(share.TestSequence):
                 LimitPercent('OCP_pre', ocp_nominal_25, 15),
                 LimitPercent('OCP_post', ocp_nominal_25, 2.0),
                 LimitPercent(
-                    'ARM-HIamp', ocp_nominal_25 - 1.0, percent=1.7, delta=1.0),
+                    'ARM-HIamp',
+                    ocp_nominal_25 * ocp_load_factor,
+                    percent=1.7, delta=1.0),
                 ),
             },
         }
@@ -153,8 +158,15 @@ class Initial(share.TestSequence):
         dcload.output(current, True, delay=0.5)
         ocp_actual = mes['ramp_ocp_pre']().reading1
         ocp_factor = ocp_nominal / ocp_actual
+        # Shutdown and startup
+        dev['acsource'].output(voltage=0, delay=1)
+        dev['discharge'].pulse(delay=5)
+        dcload.output(0)
+        dev['acsource'].output(voltage=self.vac)
+        arm.banner()
+        arm.ps_mode(self.vout_set, ocp_nominal)
         # Set load for output current reading calibration
-        dcload.output(current, delay=0.5)
+        dcload.linear(2.0, current, step=5.0)
         arm.cal_iout(current, ocp_factor)
         arm.stat()
         self.measure(('dmm_vout', 'arm_vout', 'arm_Hiamp', 'ramp_ocp_post', ))
