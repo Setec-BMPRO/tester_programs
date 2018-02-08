@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
 
     """BC2 Initial Test Program."""
 
-    # Injected Vbatt
+    # Injected values
     vbatt = 15.0
     # Common limits
     _common = (
@@ -37,19 +37,21 @@ class Initial(share.TestSequence):
             doc='LSB voltage calibrated'),
         LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
             doc='Battery voltage calibrated'),
-        LimitDelta('ARM-IbattZero', 0.0, 0.2,
-            doc='Zero battery current calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
         'STD': {
             'Model': 0,
             'Limits': _common + (
+                LimitDelta('ARM-IbattZero', 0.0, 0.031,
+                    doc='Zero battery current calibrated'),
                 ),
             },
         'H': {
             'Model': 1,
             'Limits': _common + (
+                LimitDelta('ARM-IbattZero', 0.0, 0.3,
+                    doc='Zero battery current calibrated'),
                 ),
             },
         }

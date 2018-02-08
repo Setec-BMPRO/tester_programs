@@ -15,7 +15,7 @@ from . import config
 class Final(share.TestSequence):
 
     """BC2 Final Test Program."""
-    # Injected Vbatt
+    # Injected values
     vbatt = 15.0
     ibatt = 10.0
     # Common limits
@@ -33,8 +33,6 @@ class Final(share.TestSequence):
             doc='LSB voltage calibrated'),
         LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
             doc='Battery voltage calibrated'),
-        LimitDelta('ARM-IbattZero', 0.0, 0.2,
-            doc='Zero battery current calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
@@ -42,6 +40,8 @@ class Final(share.TestSequence):
             'Limits': _common + (
                 LimitPercent('ARM-ShuntRes', 800000, 5.0,
                     doc='Shunt resistance calibrated'),
+                LimitDelta('ARM-IbattZero', 0.0, 0.031,
+                    doc='Zero battery current calibrated'),
                 LimitPercent('ARM-Ibatt', ibatt, 1, delta=0.031,
                     doc='Battery current calibrated'),
                 ),
@@ -50,6 +50,8 @@ class Final(share.TestSequence):
             'Limits': _common + (
                 LimitPercent('ARM-ShuntRes', 90000, 30.0,
                     doc='Shunt resistance calibrated'),
+                LimitDelta('ARM-IbattZero', 0.0, 0.3,
+                    doc='Zero battery current calibrated'),
                 LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.3,
                     doc='Battery current calibrated'),
                 ),
