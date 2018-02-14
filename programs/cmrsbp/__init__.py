@@ -187,7 +187,7 @@ class Final(share.TestSequence):
         '8': _common + (
             LimitBetween('VbatIn', 12.8, 15.0),
             LimitBetween('SenseRes', 39.0, 91.0),
-            LimitBetween('Capacity', 6400, 11000),
+            LimitBetween('Capacity', 7000, 11000),
             LimitDelta('StateOfCharge', 100.0, 10.5),
             LimitRegExp(
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
