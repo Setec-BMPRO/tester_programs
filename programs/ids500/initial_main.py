@@ -175,13 +175,11 @@ class InitialMain(share.TestSequence):
                 # Set limits for 50A checks
                 patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
                 for name in patch_limits:
-                    self.limits[name].adjust(
-                    -self._ldd_50_error_limits, self._ldd_50_error_limits)
+                    self.limits[name].adjust(0, self._ldd_50_error_limits)
                 self._ldd_err(mes, Iset, Iout, Imon)
             finally:    # Restore the limits for 6A checks
                 for name in patch_limits:
-                    self.limits[name].adjust(
-                    -self._ldd_6_error_limits, self._ldd_6_error_limits)
+                    self.limits[name].adjust(0, self._ldd_6_error_limits)
             mes['ui_YesNoLddRed']()
         # LDD off
         dev['dcs_isset'].output(0.0, False)
