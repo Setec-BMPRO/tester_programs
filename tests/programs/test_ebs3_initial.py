@@ -39,7 +39,7 @@ class _6_T2_Initial(EBS3Initial):
     """EBS3-6-T2 Initial program test suite."""
 
     parameter = '6-T2'
-    debug = True
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the EBS3-6-T2 program."""

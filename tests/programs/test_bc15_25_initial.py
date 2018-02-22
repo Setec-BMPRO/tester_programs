@@ -57,7 +57,7 @@ class _BC15_25_Initial(ProgramTestCase):
                         ),
                     (sen['arm_vout'], 14400),
                     (sen['arm_iout'],
-                     round(1000 * self.test_program.config['OCP_Nominal'])),
+                     round(1000 * 0.8 * self.test_program.config['OCP_Nominal'])),
                     ),
                 },
             }

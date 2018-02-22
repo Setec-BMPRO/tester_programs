@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd.
 """Parameters for Serial Consoles."""
 
 import enum
@@ -14,21 +15,26 @@ class _Parameter():
 
     """Parameter base class."""
 
-    # Default read/write format strings (For the X-Register based consoles)
+    # Default read/write format strings for the X-Register based consoles
     _wr_fmt = '{0} "{1} XN!'
     _rd_fmt = '"{0} XN?'
 
-    def __init__(self,
+    def __init__(
+            self,
             command,
             writeable=False, readable=True,
             write_format=None, read_format=None,
-            write_expected=0, read_expected=1):
+            write_expected=0, read_expected=1
+            ):
         """Initialise the parameter.
 
         @param command Command verb of this parameter.
         @param writeable True if this parameter can be written.
-        @param write_format Format string for writing (value, self.command)
-        @param read_format Format string for reading (self.command)
+        @param readable True if this parameter can be read.
+        @param write_format Format string for writing
+        @param read_format Format string for reading
+        @param write_expected Expected response lines for a write
+        @param read_expected Expected response lines for a read
 
         """
         self.command = command
@@ -46,24 +52,29 @@ class _Parameter():
 
         @param value Data value.
         @param func Function to use to write the value.
+        @return Command response.
 
         """
         if not self._writeable:
-            raise ParameterError('Parameter is not writeable')
+            raise ParameterError('Parameter is not writable')
         write_cmd = self._wr_fmt.format(value, self.command)
-        return func(write_cmd, expected=self.write_expected)
+        response = func(write_cmd, expected=self.write_expected)
+# TODO: Validate response with a RegEx
+        return response
 
     def read(self, func):
         """Read parameter value.
 
         @param func Function to use to read the value.
-        @return Data value string.
+        @return Command response.
 
         """
         if not self._readable:
             raise ParameterError('Parameter is not readable')
         read_cmd = self._rd_fmt.format(self.command)
-        return func(read_cmd, expected=self.read_expected)
+        response = func(read_cmd, expected=self.read_expected)
+# TODO: Validate response with a RegEx
+        return response
 
 
 class String(_Parameter):
@@ -80,6 +91,7 @@ class Boolean(_Parameter):
 
         @param value Data value.
         @param func Function to use to write the value.
+        @return Command response
 
         """
         if not isinstance(value, bool):
@@ -100,12 +112,14 @@ class Float(_Parameter):
 
     """Float parameter type."""
 
-    def __init__(self,
+    def __init__(
+            self,
             command,
             writeable=False, readable=True,
             minimum=0, maximum=1000, scale=1,
             write_format=None, read_format=None,
-            write_expected=0, read_expected=1):
+            write_expected=0, read_expected=1
+            ):
         """Remember the scaling and data limits."""
         super().__init__(
             command,
@@ -121,11 +135,12 @@ class Float(_Parameter):
 
         @param value Data value.
         @param func Function to use to write the value.
+        @return Command response
 
         """
         if value < self.min or value > self.max:
             raise ParameterError(
-                'Value out of range {0} - {1}'.format(self.min, self.max))
+                'Value out of range {0} → {1}'.format(self.min, self.max))
         return super().write(round(value * self.scale), func)
 
     def read(self, func):
@@ -143,13 +158,16 @@ class Float(_Parameter):
 
 class Calibration(Float):
 
-    """A parameter for calibration commands."""
+    """A write-only parameter for calibration commands."""
+
+    # write format string
+    _wr_fmt = '{0} "{1} CAL'
 
     def __init__(self, command, scale=1000, write_expected=1):
+        """Override write_format and create instance."""
         super().__init__(
             command,
             writeable=True,
-            write_format='{0} "{1} CAL',
             scale=scale,
             write_expected=write_expected
             )
@@ -157,13 +175,18 @@ class Calibration(Float):
 
 class Hex(_Parameter):
 
-    """Hex parameter type with the older '$' prefix hex literal."""
+    """Hex parameter type with '$' prefix hex literal."""
 
-    def __init__(self,
+    # write format string
+    _wr_fmt = '${0:08X} "{1} XN!'
+
+    def __init__(
+            self,
             command, writeable=False, readable=True,
             minimum=0, maximum=1000, scale=1, mask=0xFFFFFFFF,
-            write_format='${0:08X} "{1} XN!', read_format='"{0} XN?',
-            write_expected=0, read_expected=1):
+            write_format=None, read_format=None,
+            write_expected=0, read_expected=1
+            ):
         """Remember the data limits."""
         super().__init__(
             command,
@@ -180,11 +203,12 @@ class Hex(_Parameter):
 
         @param value Data value.
         @param func Function to use to write the value.
+        @return Command response
 
         """
         if value < self.min or value > self.max:
             raise ParameterError(
-                'Value out of range {0} - {1}'.format(self.min, self.max))
+                'Value out of range {0} → {1}'.format(self.min, self.max))
         return super().write(round(value * self.scale), func)
 
     def read(self, func):
@@ -215,6 +239,7 @@ class Override(Float):
     """A parameter for overriding SamB11 unit operation."""
 
     def __init__(self, command):
+        """Create instance."""
         super().__init__(
             command,
             writeable=True,

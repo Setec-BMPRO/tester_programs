@@ -189,7 +189,7 @@ class Final(share.TestSequence):
             LimitDelta('StateOfCharge', 100.0, 10.5),
             LimitRegExp(
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
-            ),
+            )
     # Common to both sets of 13Ah
     _common13 = _common + (
             LimitBetween('VbatIn', 12.8, 15.0),
@@ -197,7 +197,7 @@ class Final(share.TestSequence):
             LimitDelta('StateOfCharge', 100.0, 10.5),
             LimitRegExp(
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$'),
-            ),
+            )
     # Common to both sets of 17Ah
     _common17 = _common + (
             LimitBetween('VbatIn', 11.8, 15.0),     # Due to <30% charge
@@ -205,25 +205,25 @@ class Final(share.TestSequence):
             LimitLow('StateOfCharge', 30.0),
             LimitRegExp(
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$'),
-            ),
+            )
     # Test limit selection keyed by program parameter
     limitdata = {
-        '8': _common + _common8 + (
+        '8': _common8 + (
             LimitBetween('Capacity', 7000, 11000),
             ),
-        '8_RMA': _common + _common8 + (
+        '8_RMA': _common8 + (
             LimitBetween('Capacity', 6400, 11000),
             ),
-        '13': _common + _common13 + (
+        '13': _common13 + (
             LimitBetween('Capacity', 11000, 15000),
             ),
-        '13_RMA': _common + _common13 + (
+        '13_RMA': _common13 + (
             LimitBetween('Capacity', 10700, 15000),
             ),
-        '17': _common + _common17 + (
+        '17': _common17 + (
             LimitBetween('Capacity', 15500, 20000),
             ),
-        '17_RMA': _common + _common17 + (
+        '17_RMA': _common17 + (
             LimitBetween('Capacity', 13900, 20000),
             ),
         }
