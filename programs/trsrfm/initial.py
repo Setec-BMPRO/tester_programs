@@ -22,7 +22,7 @@ class Initial(share.TestSequence):
     # Test limits
     limitdata = (
         LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
+        LimitPercent('3V3', 3.3, 1.5, doc='3V3 present'),
         LimitHigh('RedLedOff', 3.1, doc='Led off'),
         LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
         LimitHigh('GreenLedOff', 3.1, doc='Led off'),
