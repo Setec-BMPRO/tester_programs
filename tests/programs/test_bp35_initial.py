@@ -101,6 +101,7 @@ class _BP35Initial(ProgramTestCase):
                     (sen['vbat'], (12.8, ) * 20 + (11.0, ), ),
                     ),
                 'CanBus': (
+                    (sen['canpwr'], 12.5),
                     (sen['arm_canbind'], 1 << 28),
                     (sen['TunnelSwVer'], bp35.config.ARM_SW_VERSION),
                     ),
@@ -127,7 +128,7 @@ class BP35_SR_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the SR program."""
         super()._pass_run(
-            61,
+            62,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
@@ -143,7 +144,7 @@ class BP35_HA_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the HA program."""
         super()._pass_run(
-            61,
+            62,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
@@ -159,7 +160,7 @@ class BP35_PM_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the PM program."""
         super()._pass_run(
-            52,
+            53,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],
             )

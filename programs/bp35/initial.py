@@ -87,6 +87,8 @@ class Initial(share.TestSequence):
             doc='AUX present'),
         LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current flowing'),
         LimitInteger('ARM-RemoteClosed', 1, doc='REMOTE input connected'),
+        LimitDelta('CanPwr', vout_set, delta=1.8,
+            doc='CAN bus power present'),
         LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
         LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
         LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
@@ -363,7 +365,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        mes['arm_can_bind'](timeout=10)
+        self.measure(('dmm_canpwr', 'arm_can_bind', ), timeout=10)
         bp35tunnel = dev['bp35tunnel']
         bp35tunnel.open()
         mes['TunnelSwVer']()
@@ -495,6 +497,8 @@ class Sensors(share.Sensors):
         self['solarvcc'].doc = 'TP301'
         self['solarvin'] = sensor.Vdc(dmm, high=12, low=3, rng=100, res=0.001)
         self['solarvin'].doc = 'TP306,7'
+        self['canpwr'] = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
+        self['canpwr'].doc = 'X303'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bp35_initial', 'msgSnEntry'),
             caption=tester.translate('bp35_initial', 'capSnEntry'))
@@ -592,6 +596,7 @@ class Measurements(share.Measurements):
             ('arm_sect', 'ARM-SecT', 'arm_sect', 'Temperature'),
             ('arm_vout', 'ARM-Vout', 'arm_vout', 'Vbatt'),
             ('arm_fan', 'ARM-Fan', 'arm_fan', 'FAN speed setting'),
+            ('dmm_canpwr', 'CanPwr', 'canpwr', 'CAN bus rail voltage'),
             ('arm_can_bind', 'CAN_BIND', 'arm_canbind', 'CAN bound'),
             ('arm_ibat', 'ARM-BattI', 'arm_ibat', 'Battery current'),
             ('arm_ibus', 'ARM-BusI', 'arm_ibus', 'Bus current'),
