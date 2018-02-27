@@ -53,6 +53,8 @@ class Final(share.TestSequence):
                 ),
             },
         }
+    config = None
+    sernum = None
 
     def open(self):
         """Prepare for testing."""
@@ -160,9 +162,9 @@ class Sensors(share.Sensors):
         vloads = []
         output_count = Final.config_data[self.parameter]['Config'].output_count
         for i in range(output_count):
-            s = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
-            s.doc = 'Output #{0}'.format(i + 1)
-            vloads.append(s)
+            sen = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
+            sen.doc = 'Output #{0}'.format(i + 1)
+            vloads.append(sen)
         self['vloads'] = vloads
         low, high = self.limits['OCP'].limit
         self['ocp'] = sensor.Ramp(

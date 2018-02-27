@@ -138,6 +138,8 @@ class Initial(share.TestSequence):
                 ),
             },
         }
+    config = None
+    sernum = None
 
     def open(self):
         """Prepare for testing."""
@@ -219,8 +221,6 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         # Complete the change to manual mode
         j35.manual_mode(vout=self.vout_set, iout=self.ocp_set)
-        if self.config.derate:
-            j35.derate_A() if self.parameter == 'A' else j35.derate_B()
         dev['acsource'].output(voltage=self.ac_volt, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12vpri', 'arm_vout_ov'),

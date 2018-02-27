@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE Project SYSTEM "Project-6.0.dtd">
+<!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2018-01-10, 13:38:26 -->
+<!-- Saved: 2018-02-27, 14:15:36 -->
 <!-- Copyright (C) 2018 ,  -->
-<Project version="6.0">
+<Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
   <ProgLanguage mixed="0">Python3</ProgLanguage>
@@ -388,7 +388,7 @@
               <string>dialogReport</string>
             </key>
             <value>
-              <bool>True</bool>
+              <bool>False</bool>
             </value>
             <key>
               <string>disabledMessages</string>
@@ -424,13 +424,13 @@
               <string>enableFormat</string>
             </key>
             <value>
-              <bool>True</bool>
+              <bool>False</bool>
             </value>
             <key>
               <string>enableImports</string>
             </key>
             <value>
-              <bool>True</bool>
+              <bool>False</bool>
             </value>
             <key>
               <string>enableLogging</string>
@@ -496,7 +496,7 @@
               <string>txtReport</string>
             </key>
             <value>
-              <bool>False</bool>
+              <bool>True</bool>
             </value>
           </dict>
         </value>
