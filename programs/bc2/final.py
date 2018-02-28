@@ -97,7 +97,6 @@ class Final(share.TestSequence):
         self.measure(('arm_query_last', 'arm_vbatt'))
         bc2['ZERO_I_CAL'] = 0
         self.measure(('arm_query_last', 'arm_ibattzero'))
-        dev['rla_load'].set_on()
         dev['dcl'].output(current=self.ibatt, output=True, delay=0.5)
         bc2['SHUNT_RES_CAL'] = self.ibatt
         mes['arm_query_last']()
@@ -120,7 +119,6 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_cover', tester.DCSource, 'DCS5'),
                 ('dcl', tester.DCLoad, 'DCL1'),
-                ('rla_load', tester.Relay, 'RLA9'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Apply power to fixture circuits. A BCE282-12 provides 10A for calibration.
@@ -137,7 +135,6 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
         self['dcl'].output(0.0, False)
-        self['rla_load'].set_off()
         self.pi_bt.close()
 
 
