@@ -33,7 +33,6 @@ from . import smu75070
 from . import st3
 from . import sx750
 from . import trek2_jcontrol
-from . import trs1
 from . import trs2
 from . import trsrfm
 from . import ts3020h
@@ -86,7 +85,6 @@ PROGRAMS = {
     'GEN8 Initial': gen8.Initial,
     'GENIUS-II Final': genius2.Final,
     'GENIUS-II Initial': genius2.Initial,
-    'GSU360-1TA Initial': gsu360.Initial,
     'GSU360-1TA Final': gsu360.Final,
     'IDS500 Initial Micro': ids500.InitialMicro,
     'IDS500 Initial Aux': ids500.InitialAux,
@@ -109,7 +107,6 @@ PROGRAMS = {
     'SX-750 Safety': sx750.Safety,
     'Trek2JControl Initial': trek2_jcontrol.Initial,
     'Trek2JControl Final': trek2_jcontrol.Final,
-    'TRS1 Initial': trs1.Initial,
     'TRS2 Initial': trs2.Initial,
     'TRS2 Final': trs2.Final,
     'TRSRFM Initial': trsrfm.Initial,

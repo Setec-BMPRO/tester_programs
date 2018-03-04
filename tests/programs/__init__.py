@@ -37,7 +37,6 @@ from . import test_gen8_initial
 from . import test_genius2_final
 from . import test_genius2_initial
 from . import test_gsu360_final
-from . import test_gsu360_initial
 from . import test_ids_final
 from . import test_ids_ini_aux
 from . import test_ids_ini_bias
@@ -59,7 +58,6 @@ from . import test_sx750_initial
 from . import test_sx750_safety
 from . import test_trk2_jcntl_final
 from . import test_trk2_jcntl_initial
-from . import test_trs1_initial
 from . import test_trs2_initial
 from . import test_trs2_final
 from . import test_trsrfm_initial
@@ -104,7 +102,6 @@ __all__ = [
     'test_genius2_final',
     'test_genius2_initial',
     'test_gsu360_final',
-    'test_gsu360_initial',
     'test_ids_final',
     'test_ids_ini_aux',
     'test_ids_ini_bias',
@@ -126,7 +123,6 @@ __all__ = [
     'test_sx750_safety',
     'test_trk2_jcntl_final',
     'test_trk2_jcntl_initial',
-    'test_trs1_initial',
     'test_trs2_initial',
     'test_trs2_final',
     'test_trsrfm_initial',
