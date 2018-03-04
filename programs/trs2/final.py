@@ -5,7 +5,7 @@
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitDelta, LimitRegExp
+    LimitDelta, LimitRegExp
     )
 import share
 from . import console
@@ -20,8 +20,7 @@ class Final(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
-        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
+        LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
@@ -41,8 +40,7 @@ class Final(share.TestSequence):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(self.vbatt, True)
-        self.measure(
-            ('dmm_tstpincov', 'dmm_vin', ), timeout=5)
+        mes['dmm_vin'](timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -64,12 +62,8 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('dcs_cover', tester.DCSource, 'DCS5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Apply power to fixture circuits.
-        self['dcs_cover'].output(9.0, output=True)
-        self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
         # Bluetooth connection to the console
         self.pi_bt = share.bluetooth.RaspberryBluetooth()
         # Bluetooth console driver
@@ -91,9 +85,6 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['vin'].doc = 'Within Fixture'
-        self['tstpin_cover'] = sensor.Vdc(
-            dmm, high=16, low=1, rng=100, res=0.01)
-        self['tstpin_cover'].doc = 'Photo sensor'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_final', 'msgSnEntry'),
             caption=tester.translate('trs2_final', 'capSnEntry'))
@@ -112,8 +103,6 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
-            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
-                'Cover over BC2 test pins'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('arm_swver', 'ARM-SwVer', 'arm_swver',
                 'Detect SW Ver over bluetooth'),
