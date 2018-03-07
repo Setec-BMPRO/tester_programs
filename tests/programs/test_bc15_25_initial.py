@@ -53,6 +53,7 @@ class _BC15_25_Initial(ProgramTestCase):
                 'OCP': (
                     (sen['Vout'],
                         (14.4, ) * 10 + (11.0, )
+                        + (14.4, ) * 3
                         + (14.4, ) * ocp_steps + (11.0, )
                         ),
                     (sen['arm_vout'], 14400),

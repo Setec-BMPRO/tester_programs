@@ -166,7 +166,9 @@ class Initial(share.TestSequence):
         arm.banner()
         arm.ps_mode(self.vout_set, ocp_nominal)
         # Set load for output current reading calibration
-        dcload.linear(2.0, current, step=5.0)
+        mes['dmm_vout_cal'].stable(0.02)
+        dcload.linear(2.0, current, step=5.0, delay=0.5)
+        mes['dmm_vout']()
         arm.cal_iout(current, ocp_factor)
         arm.stat()
         self.measure(('dmm_vout', 'arm_vout', 'arm_Hiamp', 'ramp_ocp_post', ))
