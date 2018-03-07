@@ -30,7 +30,6 @@ class _BC2Final(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], 'A1745120031'),
-                    (sen['tstpin_cover'], 0.0),
                     (sen['vin'], 15.0),
                     ),
                 'Bluetooth': (
@@ -51,7 +50,7 @@ class _BC2Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(14, len(result.readings))
+        self.assertEqual(13, len(result.readings))
         self.assertEqual(
             ['Prepare', 'Bluetooth', 'Calibrate'],
             self.tester.ut_steps)

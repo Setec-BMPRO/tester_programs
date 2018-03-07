@@ -32,7 +32,7 @@ class TRSFinal(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], 'A1526040123'),
-                    (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
+                    (sen['vin'], 12.0),
                     ),
                 'Bluetooth': (
                     (sen['arm_swver'], trs2.config.SW_VERSION),
@@ -43,5 +43,5 @@ class TRSFinal(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(3, len(result.readings))
         self.assertEqual(['Prepare', 'Bluetooth', ], self.tester.ut_steps)

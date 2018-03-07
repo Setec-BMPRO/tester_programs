@@ -66,7 +66,7 @@ class _BC15_25_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(21, len(result.readings))
+        self.assertEqual(23, len(result.readings))
         self.assertEqual(
             ['PartDetect', 'Program', 'Initialise', 'PowerUp',
              'Output', 'OCP'],
