@@ -162,7 +162,7 @@ class Initial(share.TestSequence):
         dev['acsource'].output(voltage=0, delay=1)
         dev['discharge'].pulse(delay=5)
         dcload.output(0)
-        dev['acsource'].output(voltage=self.vac)
+        dev['acsource'].output(voltage=self.vac, delay=2)
         arm.banner()
         arm.ps_mode(self.vout_set, ocp_nominal)
         # Set load for output current reading calibration
