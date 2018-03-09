@@ -83,7 +83,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
         self['vin'].doc = 'Within Fixture'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_final', 'msgSnEntry'),

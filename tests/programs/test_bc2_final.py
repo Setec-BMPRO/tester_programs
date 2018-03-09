@@ -37,12 +37,9 @@ class _BC2Final(ProgramTestCase):
                     ),
                 'Calibrate': (
                     (sen['vin'], (14.9999, 15.0)),
-                    (sen['arm_Vbatt'], 15.0),
-                    (sen['arm_Ibatt'], (0.0, 10.0)),
-                    (sen['arm_Ioffset'], -1),
+                    (sen['arm_Ibatt'], 10.0),
                     (sen['arm_ShuntRes'], self.shunt_res),
-                    (sen['arm_VbattLSB'], 2440),
-                    (sen['arm_query_last'], ('cal success:', ) * 3 ),
+                    (sen['arm_query_last'], 'cal success:' ),
                     ),
                 },
             }
@@ -50,7 +47,7 @@ class _BC2Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(13, len(result.readings))
+        self.assertEqual(6, len(result.readings))
         self.assertEqual(
             ['Prepare', 'Bluetooth', 'Calibrate'],
             self.tester.ut_steps)

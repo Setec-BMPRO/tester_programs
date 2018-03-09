@@ -5,7 +5,7 @@
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitRegExp, LimitPercent, LimitBetween
+    LimitDelta, LimitRegExp, LimitPercent
     )
 import share
 from . import console
@@ -26,12 +26,6 @@ class Final(share.TestSequence):
             doc='Software version'),
         LimitRegExp('ARM-QueryLast', 'cal success:',
             doc='Calibration success'),
-        LimitBetween('ARM-I_ADCOffset', -3, 3,
-            doc='Current ADC offset calibrated'),
-        LimitBetween('ARM-VbattLSB', 2391, 2489,
-            doc='LSB voltage calibrated'),
-        LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
-            doc='Battery voltage calibrated'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
@@ -39,8 +33,6 @@ class Final(share.TestSequence):
             'Limits': _common + (
                 LimitPercent('ARM-ShuntRes', 800000, 5.0,
                     doc='Shunt resistance calibrated'),
-                LimitDelta('ARM-IbattZero', 0.0, 0.031,
-                    doc='Zero battery current calibrated'),
                 LimitPercent('ARM-Ibatt', ibatt, 1, delta=0.031,
                     doc='Battery current calibrated'),
                 ),
@@ -49,8 +41,6 @@ class Final(share.TestSequence):
             'Limits': _common + (
                 LimitPercent('ARM-ShuntRes', 90000, 30.0,
                     doc='Shunt resistance calibrated'),
-                LimitDelta('ARM-IbattZero', 0.0, 0.3,
-                    doc='Zero battery current calibrated'),
                 LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.3,
                     doc='Battery current calibrated'),
                 ),
@@ -90,18 +80,11 @@ class Final(share.TestSequence):
 
         """
         bc2 = dev['bc2']
-        dmm_v = mes['dmm_vin'].stable(delta=0.001).reading1
-        mes['arm_vbatt'].testlimit[0].adjust(nominal=dmm_v)
-        bc2['BATT_V_CAL'] = dmm_v
-        self.measure(('arm_query_last', 'arm_vbatt'))
-        bc2['ZERO_I_CAL'] = 0
-        self.measure(('arm_query_last', 'arm_ibattzero'))
         dev['dcl'].output(current=self.ibatt, output=True, delay=0.5)
         bc2['SHUNT_RES_CAL'] = self.ibatt
         mes['arm_query_last']()
         bc2['NVWRITE'] = True
-        self.measure(
-            ('arm_ioffset', 'arm_vbattlsb', 'arm_shuntres', 'arm_ibatt'))
+        self.measure(('arm_shuntres', 'arm_ibatt', ))
         dev['dcl'].output(0.0, False)
 
 
@@ -142,7 +125,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vin'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
         self['vin'].doc = 'Within Fixture'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bc2_final', 'msgSnEntry'),
@@ -156,10 +139,7 @@ class Sensors(share.Sensors):
         self['arm_query_last'] = share.console.Sensor(
             bc2, qlr, rdgtype=sensor.ReadingString)
         for name, cmdkey in (
-                ('arm_Ioffset', 'I_ADC_OFFSET'),
                 ('arm_ShuntRes', 'SHUNT_RES'),
-                ('arm_VbattLSB', 'BATT_V_LSB'),
-                ('arm_Vbatt', 'BATT_V'),
                 ('arm_Ibatt', 'BATT_I'),
             ):
             self[name] = share.console.Sensor(bc2, cmdkey)
@@ -178,16 +158,8 @@ class Measurements(share.Measurements):
                 'Detect SW Ver over bluetooth'),
             ('arm_query_last', 'ARM-QueryLast', 'arm_query_last',
                 'Response from a calibration command'),
-            ('arm_ioffset', 'ARM-I_ADCOffset', 'arm_Ioffset',
-                'Current ADC offset after cal'),
             ('arm_shuntres', 'ARM-ShuntRes', 'arm_ShuntRes',
                 'Shunt resistance after cal'),
-            ('arm_vbattlsb', 'ARM-VbattLSB', 'arm_VbattLSB',
-                'Battery voltage ADC LSB voltage after cal'),
-            ('arm_vbatt', 'ARM-Vbatt', 'arm_Vbatt',
-                'Battery voltage after cal'),
             ('arm_ibatt', 'ARM-Ibatt', 'arm_Ibatt',
                 'Battery current after cal'),
-            ('arm_ibattzero', 'ARM-IbattZero', 'arm_Ibatt',
-                'Battery current after zero cal'),
             ))
