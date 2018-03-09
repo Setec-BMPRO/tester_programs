@@ -47,7 +47,7 @@ class Initial(share.TestSequence):
         LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
         )
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, MeasureIni)
         self.steps = (
@@ -146,7 +146,7 @@ class SerialDate(share.TestSequence):
 
     """CMR-SBP SerialDate Test Program."""
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(Initial.limitdata, Devices, Sensors, MeasureIni)
         self.steps = (
@@ -228,7 +228,7 @@ class Final(share.TestSequence):
             ),
         }
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(
             self.limitdata[self.parameter],

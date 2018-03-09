@@ -23,7 +23,7 @@ class Final(share.TestSequence):
             doc='Software version'),
         )
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

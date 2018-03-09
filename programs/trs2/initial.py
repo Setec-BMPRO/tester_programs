@@ -63,7 +63,7 @@ class Initial(share.TestSequence):
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

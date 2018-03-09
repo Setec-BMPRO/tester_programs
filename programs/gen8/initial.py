@@ -68,7 +68,7 @@ class Initial(share.TestSequence):
         LimitRegExp('SwBld', '^{0}$'.format(bin_version[4:])),
         )
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

@@ -61,7 +61,7 @@ class Final(share.TestSequence):
         LimitRegExp('HwRev', r'^[0-9]{2}[A-D]$'),
         )
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

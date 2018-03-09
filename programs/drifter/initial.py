@@ -57,7 +57,7 @@ class Initial(share.TestSequence):
             },
         }
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(
             self.limitdata[self.parameter]['Limits'],

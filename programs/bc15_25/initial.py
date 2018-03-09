@@ -85,7 +85,7 @@ class Initial(share.TestSequence):
             },
         }
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         self.config = self.limitdata[self.parameter]
         Devices.arm_file = self.config['ARMfile']

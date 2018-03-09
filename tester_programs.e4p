@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2018-03-05, 09:54:52 -->
+<!-- Saved: 2018-03-08, 17:30:14 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -69,8 +69,6 @@
     <Source>programs/drifter/console.py</Source>
     <Source>programs/drifter/final.py</Source>
     <Source>programs/drifter/initial.py</Source>
-    <Source>programs/ebs3/__init__.py</Source>
-    <Source>programs/ebs3/initial.py</Source>
     <Source>programs/etrac/__init__.py</Source>
     <Source>programs/etrac/initial.py</Source>
     <Source>programs/gen8/__init__.py</Source>
@@ -191,7 +189,6 @@
     <Source>tests/programs/test_cn101_initial.py</Source>
     <Source>tests/programs/test_drifter_final.py</Source>
     <Source>tests/programs/test_drifter_initial.py</Source>
-    <Source>tests/programs/test_ebs3_initial.py</Source>
     <Source>tests/programs/test_etrac_initial.py</Source>
     <Source>tests/programs/test_gen8_final.py</Source>
     <Source>tests/programs/test_gen8_initial.py</Source>

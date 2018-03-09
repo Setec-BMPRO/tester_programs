@@ -31,7 +31,7 @@ class Final(share.TestSequence):
         LimitBetween('Reg24V', 0.2, 5.0),
         )
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

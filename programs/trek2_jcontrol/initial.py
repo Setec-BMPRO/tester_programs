@@ -48,7 +48,7 @@ class Initial(share.TestSequence):
             },
         }
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]['Config']
         Devices.sw_file = self.config.sw_file

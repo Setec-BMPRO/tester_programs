@@ -35,7 +35,7 @@ class Main(share.TestSequence):
         tester.LimitLow('Disch_off', 0.5),
         )
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         is_ate2 = self.devices.is_ate2

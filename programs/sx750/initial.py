@@ -85,7 +85,7 @@ class Initial(share.TestSequence):
         LimitInteger('Program', 0)
         )
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

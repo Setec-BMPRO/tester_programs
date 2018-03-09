@@ -17,7 +17,7 @@ class Final(share.TestSequence):
         LimitDelta('USB5V', 5.00, 0.25),
         )
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

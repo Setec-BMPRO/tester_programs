@@ -21,7 +21,7 @@ class Final(share.TestSequence):
         LimitBetween('level4', 0.0, 0.5),
         )
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

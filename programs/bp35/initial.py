@@ -135,7 +135,7 @@ class Initial(share.TestSequence):
             },
         }
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         self.config = self.limitdata[self.parameter]
         super().open(

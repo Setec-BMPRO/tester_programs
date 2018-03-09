@@ -26,7 +26,7 @@ class Final(share.TestSequence):
             'ARMSwVer', '^{0}$'.format(arm_version.replace('.', r'\.'))),
         )
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

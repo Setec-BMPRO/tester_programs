@@ -19,7 +19,6 @@ from . import cmrsbp
 from . import cn101
 from . import drifter
 from . import etrac
-from . import ebs3
 from . import gen8
 from . import genius2
 from . import gsu360
@@ -80,7 +79,6 @@ PROGRAMS = {
     'Drifter Initial': drifter.Initial,
     'Drifter Final': drifter.Final,
     'Etrac-II Initial': etrac.Initial,
-    'EBS3 Initial': ebs3.Initial,
     'GEN8 Final': gen8.Final,
     'GEN8 Initial': gen8.Initial,
     'GENIUS-II Final': genius2.Final,

@@ -32,7 +32,7 @@ class Initial(share.TestSequence):
         LimitBetween('OCP', 1.0, 1.4),
         )
 
-    def open(self):
+    def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

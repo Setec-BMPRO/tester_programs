@@ -31,7 +31,7 @@ class UnitTester(tester.Tester):
         # Create a Tester instance
         super().__init__('MockATE', {repr(prog_class): prog_class})
         self.ut_program = tester.TestProgram(
-            repr(prog_class), per_panel=1, parameter=parameter, test_limits=[])
+            repr(prog_class), per_panel=1, parameter=parameter)
         self.ut_result = None
         self.ut_steps = []
         self.ut_data = None
@@ -47,7 +47,7 @@ class UnitTester(tester.Tester):
 
     def open(self):
         """Open a program, by using our pre-built one."""
-        super().open(self.ut_program)
+        super().open(self.ut_program, uut=None)
 
     def stop(self):
         """Release resources."""

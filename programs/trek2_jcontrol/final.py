@@ -42,7 +42,7 @@ class Final(share.TestSequence):
             },
         }
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         self.config = self.config_data[self.parameter]['Config']
         super().open(

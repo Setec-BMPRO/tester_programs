@@ -24,7 +24,7 @@ class InitialMicro(share.TestSequence):
         LimitRegExp('MicroTemp', 'MICRO Temp'),
         )
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (

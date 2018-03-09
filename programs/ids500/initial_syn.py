@@ -47,7 +47,7 @@ class InitialSyn(share.TestSequence):
         LimitLow('FixtureLock', 20),
         )
 
-    def open(self):
+    def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
