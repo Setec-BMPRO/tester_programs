@@ -53,7 +53,8 @@ def _main():
     logger.info('Create Program "%s"', test_program)
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        test_program, per_panel=1, parameter=parameter, test_limits=[])
+#        test_program, per_panel=1, parameter=parameter, test_limits=[])
+        test_program, per_panel=1, parameter=parameter)
     logger.info('Open Program "%s"', test_program)
     tst.open(pgm)
     logger.info('Running Test')
