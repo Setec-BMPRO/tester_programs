@@ -22,13 +22,15 @@ DATA = {
 
     # Fixtures using Non-USB serial ports
 
+    '029083': {     # Batterycheck Initial
+        'ARM_CON': {'posix': '/dev/ttyUSB1', 'nt': 'COM1'}[os.name],
+        'ARM_PGM': {'posix': '/dev/ttyUSB2', 'nt': 'COM2'}[os.name],
+        # Hub port X: Panasonic eUniStone PAN1322 (FTDI with S/N)
+        'BT': {'posix': '/dev/ttyUSB2', 'nt': 'COM4'}[os.name],
+        },
     '020827': {     # BCE282 Initial
         'MSP1': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name], # programming
         'MSP2': {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name], # comms
-        },
-    '017789': {     # CMR-SBP Initial
-        'EV': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
-        'CMR': {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name],
         },
     '021299': {     # Drifter Initial
         'PIC': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
@@ -73,11 +75,9 @@ DATA = {
 
     # Fixtures with a USB Hub
 
-    '029083': {     # Batterycheck Initial
-        'ARM_CON': {'posix': '/dev/ttyUSB1', 'nt': 'COM1'}[os.name],
-        'ARM_PGM': {'posix': '/dev/ttyUSB2', 'nt': 'COM2'}[os.name],
-        # Hub port X: Panasonic eUniStone PAN1322 (FTDI with S/N)
-        'BT': {'posix': '/dev/ttyUSB2', 'nt': 'COM4'}[os.name],
+    '017789': {     # CMR-SBP Initial
+        'EV': {'posix': '/dev/ttyUSB1', 'nt': 'COM21'}[os.name],
+        'CMR': {'posix': '/dev/ttyUSB2', 'nt': 'COM22'}[os.name],
         },
     '028468': {     # CN101 Initial
         # Hub port 1: SETEC FTDI
