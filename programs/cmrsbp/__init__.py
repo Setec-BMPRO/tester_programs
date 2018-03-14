@@ -307,7 +307,7 @@ class Devices(share.Devices):
              tester.DCSource(self.physical_devices['DCS5']),
             ))
         # Apply power to fixture circuits.
-        self['dcs_Vcom'].output(12.0, output=True, delay=5)
+        self['dcs_Vcom'].output(12.0, output=True, delay=10)
         self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
         # Open serial connection to data monitor
         cmr_ser = serial.Serial(
