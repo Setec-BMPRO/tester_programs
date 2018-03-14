@@ -88,7 +88,7 @@ class Initial(share.TestSequence):
            Read PIC and check values.
 
         """
-        dev['dcs_Vcom'].output(12.0, output=True)
+#        dev['dcs_Vcom'].output(12.0, output=True)
         dev['dcs_Vchg'].output(12.6, output=True, delay=15)
         dev['rla_Pic'].set_on(delay=2)
         cmr_data = dev['cmr'].read()
@@ -243,7 +243,7 @@ class Final(share.TestSequence):
         """Power comms interface, connect to PIC."""
         sernum = mes['ui_SnEntry']().reading1
         self.limits['SerNumChk'].adjust(str(int(sernum[-4:])))
-        dev['dcs_Vcom'].output(12.0, output=True, delay=1)
+#        dev['dcs_Vcom'].output(12.0, output=True, delay=1)
         dev['rla_Pic'].set_on()
 
     @share.teststep
@@ -325,11 +325,14 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.programmer.PIC(
             Initial.pic_hex, folder, '18F252', self['rla_Prog'])
+        # Apply power to fixture circuits.
+        self['dcs_Vcom'].output(9.0, output=True, delay=1)
+        self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
         self['ev'].close()
-        for dcs in ('dcs_vbat', 'dcs_Vchg', 'dcs_Vcom'):
+        for dcs in ('dcs_vbat', 'dcs_Vchg'):
             self[dcs].output(0.0, False)
         self['dcl_ibat'].output(0.0)
         for rla in (
