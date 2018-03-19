@@ -199,7 +199,9 @@ class EV2200():
         volt = inv_off = 0
         samples = 3
         for num in range(samples):
-            volt += self._ram_read('Voltage')
+            volt_raw = self._ram_read('Voltage')
+            volt += volt_raw
+            self._logger.debug('Voltage = %s', float(volt_raw) / 1000)
             i = (self._ram_read('InvOffset[MSB]') & 0xFF00) >> 8
             inv_off += self._signed8bit(i)
             if num < (samples - 1):
