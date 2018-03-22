@@ -33,9 +33,8 @@ class Initial(share.TestSequence):
     ac_freq = 50.0
     # Extra % error in OCP allowed before adjustment
     ocp_adjust_percent = 10.0
-    # Output set points when running in manual mode
+    # Output set point when running in manual mode
     vout_set = 12.8
-    ocp_set = config.J35C.ocp_set
     # Battery load current
     batt_current = 4.0
     # Load on each output channel
@@ -220,7 +219,7 @@ class Initial(share.TestSequence):
         """Power-Up the Unit with 240Vac."""
         j35 = dev['j35']
         # Complete the change to manual mode
-        j35.manual_mode(vout=self.vout_set, iout=self.ocp_set)
+        j35.manual_mode(vout=self.vout_set, iout=self.config.ocp_set)
         dev['acsource'].output(voltage=self.ac_volt, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12vpri', 'arm_vout_ov'),
