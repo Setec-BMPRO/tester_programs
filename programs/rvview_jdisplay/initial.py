@@ -64,10 +64,6 @@ class Initial(share.TestSequence):
             TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
-#        for lim in self.limits:
-#            print(lim, self.limits[lim])
-        for mes in self.measurements:
-            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_power_up(self, dev, mes):
