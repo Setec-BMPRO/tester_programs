@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Trek2 Test Programs."""
+"""Trek2/JControl Test Programs."""
 
 from .initial import Initial
 from .final import Final

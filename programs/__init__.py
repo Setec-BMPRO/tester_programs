@@ -26,7 +26,7 @@ from . import ids500
 from . import j35
 from . import mb2
 from . import mk7400
-from . import rvview
+from . import rvview_jdisplay
 from . import rm50
 from . import smu75070
 from . import st3
@@ -95,7 +95,7 @@ PROGRAMS = {
     'J35 Final': j35.Final,
     'MB2 Final': mb2.Final,
     'MK7-400-1 Final': mk7400.Final,
-    'RVVIEW Initial': rvview.Initial,
+    'RvViewJDisplay Initial': rvview_jdisplay.Initial,
     'RM-50-24 Final': rm50.Final,
     'SMU750-70 Final': smu75070.Final,
     'SMU750-70 Initial': smu75070.Initial,

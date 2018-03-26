@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2018-03-08, 17:30:14 -->
+<!-- Saved: 2018-03-23, 15:58:17 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -100,10 +100,10 @@
     <Source>programs/mk7400/final.py</Source>
     <Source>programs/rm50/__init__.py</Source>
     <Source>programs/rm50/final.py</Source>
-    <Source>programs/rvview/__init__.py</Source>
-    <Source>programs/rvview/config.py</Source>
-    <Source>programs/rvview/console.py</Source>
-    <Source>programs/rvview/initial.py</Source>
+    <Source>programs/rvview_jdisplay/__init__.py</Source>
+    <Source>programs/rvview_jdisplay/config.py</Source>
+    <Source>programs/rvview_jdisplay/console.py</Source>
+    <Source>programs/rvview_jdisplay/initial.py</Source>
     <Source>programs/selftest/__init__.py</Source>
     <Source>programs/smu75070/__init__.py</Source>
     <Source>programs/smu75070/final.py</Source>
@@ -207,7 +207,7 @@
     <Source>tests/programs/test_mb2_final.py</Source>
     <Source>tests/programs/test_mk7400_final.py</Source>
     <Source>tests/programs/test_rm50_final.py</Source>
-    <Source>tests/programs/test_rvview_initial.py</Source>
+    <Source>tests/programs/test_rvw_jdisp_initial.py</Source>
     <Source>tests/programs/test_selftest.py</Source>
     <Source>tests/programs/test_smu75070_final.py</Source>
     <Source>tests/programs/test_smu75070_initial.py</Source>

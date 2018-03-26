@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""RVVIEW ARM processor console driver."""
+"""RvView/JDisplay ARM processor console driver."""
 
 import share
 
 
 class _Console():
 
-    """Base class for a RVVIEW console."""
+    """Base class for a RvView/JDisplay console."""
 
     # Test mode controlled by STATUS bit 31
     _test_on = (1 << 31)

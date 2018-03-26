@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for RVVIEW Initial Test program."""
+"""UnitTest for RvView/JDisplay Initial Test program."""
 
 from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import rvview
+from programs import rvview_jdisplay
 
 
-class RvViewInitial(ProgramTestCase):
+class _CommonInitial(ProgramTestCase):
 
-    """RVVIEW Initial program test suite."""
+    """RvView/JDisplay Initial program test suite."""
 
-    prog_class = rvview.Initial
+    prog_class = rvview_jdisplay.Initial
     parameter = None
     debug = False
     sernum = 'A1626010123'
@@ -20,35 +20,35 @@ class RvViewInitial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'programs.rvview.console.TunnelConsole',
-                'programs.rvview.console.DirectConsole',
+                'programs.rvview_jdisplay.console.TunnelConsole',
+                'programs.rvview_jdisplay.console.DirectConsole',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
         super().setUp()
 
-    def test_pass_run(self):
+    def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['oSnEntry'], self.sernum),
-                    (sen['oVin'], 7.5),
-                    (sen['o3V3'], 3.3),
+                    (sen['sernum'], self.sernum),
+                    (sen['vin'], 7.5),
+                    (sen['3v3'], 3.3),
                     ),
                 'Initialise': (
-                    (sen['oSwVer'], rvview.config.SW_VERSION),
+                    (sen['swver'], self.test_program.config.sw_version),
                     ),
                 'Display': (
                     (sen['oYesNoOn'], True),
                     (sen['oYesNoOff'], True),
-                    (sen['oBkLght'], (3.0, 0.0)),
+                    (sen['bklght'], (3.0, 0.0)),
                     ),
                 'CanBus': (
-                    (sen['oCANBIND'], 1 << 28),
-                    (sen['TunnelSwVer'], rvview.config.SW_VERSION),
+                    (sen['canbind'], 1 << 28),
+                    (sen['tunnelswver'], self.test_program.config.sw_version),
                     ),
                 },
             }
@@ -60,3 +60,27 @@ class RvViewInitial(ProgramTestCase):
         self.assertEqual(
             ['PowerUp', 'Program', 'Initialise', 'Display', 'CanBus'],
             self.tester.ut_steps)
+
+
+class RvViewInitial(_CommonInitial):
+
+    """RvView Initial program test suite."""
+
+    parameter = 'RV'
+    debug = False
+
+    def test_pass_run(self):
+        """PASS run of the RvView program."""
+        super()._pass_run()
+
+
+class JDisplayInitial(_CommonInitial):
+
+    """JDisplay Initial program test suite."""
+
+    parameter = 'JD'
+    debug = False
+
+    def test_pass_run(self):
+        """PASS run of the JDisplay program."""
+        super()._pass_run()
