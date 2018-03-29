@@ -16,6 +16,6 @@ class JDisplay():
 
     """JDisplay configuration."""
 
-    sw_version = '1.0.17269.25'
+    sw_version = '1.0.17318.27'
     sw_file = 'JDisplay_{0}.bin'.format(sw_version)
     hw_version = (3, 0, 'A')
