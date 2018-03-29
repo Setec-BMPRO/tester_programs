@@ -13,61 +13,22 @@ class Final(share.TestSequence):
 
     """J35 Final Test Program."""
 
-    # Load on each output channel
-    load_per_output = 2.0
-    # Test limits common to all versions
-    _common = (
-        tester.LimitLow('FanOff', 1.0, doc='No airflow seen'),
-        tester.LimitHigh('FanOn', 10.0, doc='Airflow seen'),
-        tester.LimitDelta('Can12V', 12.0, delta=1.0, doc='CAN_POWER rail'),
-        tester.LimitDelta('Vout', 12.8, delta=0.2,
-            doc='No load output voltage'),
-        tester.LimitPercent('Vload', 12.8, percent=5,
-            doc='Loaded output voltage'),
-        tester.LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
-        tester.LimitRegExp(
-            'SwVer', '^{0}$'.format(config.J35.sw_version.replace('.', r'\.')),
-            doc='Software version'),
-        )
-    # Test configuration keyed by program parameter
-    config_data = {
-        'A': {
-            'Config': config.J35A,
-            'Limits': _common + (
-                tester.LimitPercent('OCP', config.J35A.ocp_set, (4.0, 10.0),
-                    doc='OCP trip current'),
-                ),
-            },
-        'B': {
-            'Config': config.J35B,
-            'Limits': _common + (
-                tester.LimitPercent('OCP', config.J35B.ocp_set, (4.0, 7.0),
-                    doc='OCP trip current'),
-                ),
-            },
-        'C': {
-            'Config': config.J35C,
-            'Limits': _common + (
-                tester.LimitPercent('OCP', config.J35C.ocp_set, (4.0, 7.0),
-                    doc='OCP trip current'),
-                ),
-            },
-        }
-    config = None
-    sernum = None
+    cfg = None              # Product configuration
+    sernum = None           # Unit serial number
 
     def open(self, uut):
         """Prepare for testing."""
-        self.config = self.config_data[self.parameter]['Config']
-        super().open(
-            self.config_data[self.parameter]['Limits'],
-            Devices, Sensors, Measurements)
+        self.cfg = config.J35.select(self.parameter, uut)
+        limits = self.cfg.limits_final()
+        Sensors.output_count = self.cfg.output_count
+        super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
-            tester.TestStep('CAN', self._step_can),
+            tester.TestStep('CAN', self._step_can, self.cfg.canbus),
             tester.TestStep('Load', self._step_load),
             tester.TestStep('OCP', self._step_ocp),
-            tester.TestStep('CanCable', self._step_can_cable),
+            tester.TestStep(
+                'CanCable', self._step_can_cable, self.cfg.canbus),
             )
 
     @share.teststep
@@ -77,7 +38,7 @@ class Final(share.TestSequence):
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
         mes['dmm_fanon'](timeout=15)
-        for load in range(self.config.output_count):
+        for load in range(self.cfg.output_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vouts'][load](timeout=5)
 
@@ -97,8 +58,8 @@ class Final(share.TestSequence):
         """Test outputs with load."""
         dev['dcl_out'].output(1.0,  output=True)
         dev['dcl_out'].binary(
-            1.0, self.config.output_count * self.load_per_output, 5.0)
-        for load in range(self.config.output_count):
+            1.0, self.cfg.output_count * self.cfg.load_per_output, 5.0)
+        for load in range(self.cfg.output_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vloads'][load](timeout=5)
 
@@ -150,6 +111,8 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    output_count = None
+
     def open(self):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
@@ -160,8 +123,7 @@ class Sensors(share.Sensors):
         self['can12v'].doc = 'X303 CAN_POWER'
         # Generate load voltage sensors
         vloads = []
-        output_count = Final.config_data[self.parameter]['Config'].output_count
-        for i in range(output_count):
+        for i in range(self.output_count):
             sen = sensor.Vdc(dmm, high=i + 5, low=3, rng=100, res=0.001)
             sen.doc = 'Output #{0}'.format(i + 1)
             vloads.append(sen)

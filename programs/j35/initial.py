@@ -4,14 +4,10 @@
 """J35 Initial Test Program."""
 
 import os
-import math
 import inspect
 import serial
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitRegExp, LimitBetween, LimitDelta, LimitPercent, LimitInteger
-    )
+from tester import TestStep
 import share
 from . import console
 from . import config
@@ -21,143 +17,29 @@ class Initial(share.TestSequence):
 
     """J35 Initial Test Program."""
 
-    # ARM software image file
-    arm_file = 'j35_{0}.bin'.format(config.J35.sw_version)
-    # Injected voltages
-    #  Battery bus
-    vbat_inject = 12.6
-    #  Aux or Solar inputs
-    aux_solar_inject = 13.5
-    # AC voltage powering the unit
-    ac_volt = 240.0
-    ac_freq = 50.0
-    # Extra % error in OCP allowed before adjustment
-    ocp_adjust_percent = 10.0
-    # Output set point when running in manual mode
-    vout_set = 12.8
-    # Battery load current
-    batt_current = 4.0
-    # Load on each output channel
-    load_per_output = 2.0
-    # Test limits common to all versions
-    _common = (
-        LimitDelta('ACin', ac_volt, delta=5.0, doc='AC input voltage'),
-        LimitDelta('Vbus', ac_volt * math.sqrt(2), delta=10.0,
-            doc='Peak of AC input'),
-        LimitBetween('12Vpri', 11.5, 13.0, doc='12Vpri rail'),
-        LimitPercent('Vload', vout_set, percent=3.0,
-            doc='AC-DC convertor voltage setpoint'),
-        LimitLow('VloadOff', 0.5, doc='When output is OFF'),
-        LimitDelta('VbatIn', vbat_inject, delta=1.0,
-            doc='Voltage at Batt when 12.6V is injected into Batt'),
-        LimitDelta('VbatOut', aux_solar_inject, delta=0.5,
-            doc='Voltage at Batt when 13.5V is injected into Aux'),
-        LimitDelta('Vbat', vout_set, delta=0.2,
-            doc='Voltage at Batt when unit is running'),
-        LimitPercent('VbatLoad', vout_set, percent=5.0,
-            doc='Voltage at Batt when unit is running under load'),
-        LimitDelta('Vair', aux_solar_inject, delta=0.5,
-            doc='Voltage at Air when 13.5V is injected into Solar'),
-        LimitPercent('3V3U', 3.30, percent=1.5,
-            doc='3V3 unswitched when 12.6V is injected into Batt'),
-        LimitPercent('3V3', 3.30, percent=1.5, doc='3V3 internal rail'),
-        LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
-        LimitDelta('FanOn', vout_set, delta=1.0, doc='Fan running'),
-        LimitLow('FanOff', 0.5, doc='Fan not running'),
-        LimitRegExp(
-            'ARM-SwVer', '^{0}$'.format(
-                config.J35.sw_version.replace('.', r'\.')),
-            doc='Arm Software version'),
-        LimitPercent('ARM-AuxV', aux_solar_inject, percent=2.0, delta=0.3,
-            doc='ARM Aux voltage reading'),
-        LimitBetween('ARM-AuxI', 0.0, 1.5,
-            doc='ARM Aux current reading'),
-        LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
-        LimitPercent('ARM-AcV', ac_volt, percent=4.0, delta=1.0,
-            doc='ARM AC voltage reading'),
-        LimitPercent('ARM-AcF', ac_freq, percent=4.0, delta=1.0,
-            doc='ARM AC frequency reading'),
-        LimitBetween('ARM-SecT', 8.0, 70.0,
-            doc='ARM secondary temperature sensor'),
-        LimitPercent('ARM-Vout', vout_set, percent=2.0, delta=0.1,
-            doc='ARM measured Vout'),
-        LimitBetween('ARM-Fan', 0, 100, doc='ARM fan speed'),
-        LimitPercent('ARM-BattI', batt_current, percent=1.7, delta=1.0,
-            doc='ARM battery current reading'),
-        LimitDelta('ARM-LoadI', load_per_output, delta=0.9,
-            doc='ARM output current reading'),
-        LimitInteger('ARM-RemoteClosed', 1),
-        LimitDelta('CanPwr', vout_set, delta=1.8,
-            doc='CAN bus power supply'),
-        LimitInteger('LOAD_SET', 0x5555555,
-            doc='ARM output load enable setting'),
-        LimitInteger('CAN_BIND', 1 << 28,
-            doc='ARM reports CAN bus operational'),
-        LimitRegExp('CAN_RX', '^RRQ,36,0',
-            doc='Response to CAN echo message'),
-        LimitLow('InOCP', vout_set - 1.2, doc='Output is in OCP'),
-        LimitLow('FixtureLock', 200, doc='Test fixture lid microswitch'),
-        )
-    # Version specific configuration data. Indexed by test program parameter.
-    config_data = {
-        'A': {
-            'Config': config.J35A,
-            'Limits': _common + (
-                LimitLow('LOAD_COUNT', config.J35A.output_count),
-                LimitPercent(
-                    'OCP_pre', config.J35A.ocp_set,
-                    (ocp_adjust_percent + 4.0, ocp_adjust_percent + 10.0),
-                    doc='OCP trip range before adjustment'),
-                LimitPercent('OCP', config.J35A.ocp_set, (4.0, 10.0),
-                    doc='OCP trip range after adjustment'),
-                ),
-            },
-        'B': {
-            'Config': config.J35B,
-            'Limits': _common + (
-                LimitLow('LOAD_COUNT', config.J35B.output_count),
-                LimitPercent(
-                    'OCP_pre', config.J35B.ocp_set,
-                    (ocp_adjust_percent + 4.0, ocp_adjust_percent + 7.0),
-                    doc='OCP trip range before adjustment'),
-                LimitPercent('OCP', config.J35B.ocp_set, (4.0, 7.0),
-                    doc='OCP trip range after adjustment'),
-                ),
-            },
-        'C': {
-            'Config': config.J35C,
-            'Limits': _common + (
-                LimitLow('LOAD_COUNT', config.J35C.output_count),
-                LimitPercent(
-                    'OCP_pre', config.J35C.ocp_set,
-                    (ocp_adjust_percent + 4.0, ocp_adjust_percent + 7.0),
-                    doc='OCP trip range before adjustment'),
-                LimitPercent('OCP', config.J35C.ocp_set, (4.0, 7.0),
-                    doc='OCP trip range after adjustment'),
-                ),
-            },
-        }
-    config = None
-    sernum = None
+    cfg = None              # Product configuration
+    sernum = None           # Unit serial number
 
     def open(self, uut):
         """Prepare for testing."""
-        self.config = self.config_data[self.parameter]['Config']
-        super().open(
-            self.config_data[self.parameter]['Limits'],
-            Devices, Sensors, Measurements)
+        self.cfg = config.J35.select(self.parameter, uut)
+        limits = self.cfg.limits_initial()
+        Sensors.output_count = self.cfg.output_count
+        Sensors.load_per_output = self.cfg.load_per_output
+        Devices.sw_version = self.cfg.sw_version
+        super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('ProgramARM', self.devices['program_arm'].program),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('Aux', self._step_aux),
-            TestStep('Solar', self._step_solar, self.config.solar),
+            TestStep('Solar', self._step_solar, self.cfg.solar),
             TestStep('PowerUp', self._step_powerup),
             TestStep('Output', self._step_output),
             TestStep('RemoteSw', self._step_remote_sw),
             TestStep('Load', self._step_load),
             TestStep('OCP', self._step_ocp),
-            TestStep('CanBus', self._step_canbus),
+            TestStep('CanBus', self._step_canbus, self.cfg.canbus),
             )
         self.sernum = None
 
@@ -172,7 +54,7 @@ class Initial(share.TestSequence):
         mes['dmm_lock'](timeout=5)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Apply DC Source to Battery terminals
-        dev['dcs_vbat'].output(self.vbat_inject, True)
+        dev['dcs_vbat'].output(self.cfg.vbat_inject, True)
         self.measure(('dmm_vbatin', 'dmm_3v3u'), timeout=5)
 
     @share.teststep
@@ -186,14 +68,14 @@ class Initial(share.TestSequence):
         """
         j35 = dev['j35']
         j35.open()
-        j35.brand(self.config.hw_version, self.sernum, dev['rla_reset'])
+        j35.brand(self.cfg.hw_version, self.sernum, dev['rla_reset'])
         j35.manual_mode(start=True)     # Start the change to manual mode
         mes['arm_swver']()
 
     @share.teststep
     def _step_aux(self, dev, mes):
         """Test Auxiliary input."""
-        dev['dcs_vaux'].output(self.aux_solar_inject, True)
+        dev['dcs_vaux'].output(self.cfg.aux_solar_inject, True)
         dev['dcl_bat'].output(0.5, True)
         j35 = dev['j35']
         j35['AUX_RELAY'] = True
@@ -205,7 +87,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_solar(self, dev, mes):
         """Test Solar input."""
-        dev['dcs_solar'].output(self.aux_solar_inject, True)
+        dev['dcs_solar'].output(self.cfg.aux_solar_inject, True)
         j35 = dev['j35']
         j35['SOLAR'] = True
         # Only the 'C' has Air Suspension
@@ -219,8 +101,8 @@ class Initial(share.TestSequence):
         """Power-Up the Unit with 240Vac."""
         j35 = dev['j35']
         # Complete the change to manual mode
-        j35.manual_mode(vout=self.vout_set, iout=self.config.ocp_set)
-        dev['acsource'].output(voltage=self.ac_volt, output=True)
+        j35.manual_mode(vout=self.cfg.vout_set, iout=self.cfg.ocp_man_set)
+        dev['acsource'].output(voltage=self.cfg.ac_volt, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12vpri', 'arm_vout_ov'),
             timeout=5)
@@ -262,15 +144,16 @@ class Initial(share.TestSequence):
         j35 = dev['j35']
         val = mes['arm_loadset']().reading1
         self._logger.debug('0x{:08X}'.format(int(val)))
-        output_count = self.config.output_count
-        dev['dcl_out'].binary(1.0, output_count * self.load_per_output, 5.0)
+        output_count = self.cfg.output_count
+        dev['dcl_out'].binary(
+            1.0, output_count * self.cfg.load_per_output, 5.0)
         for load in range(output_count):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
         # Calibrate current reading
-        j35['BUS_ICAL'] = output_count * self.load_per_output
+        j35['BUS_ICAL'] = output_count * self.cfg.load_per_output
         j35['NVWRITE'] = True
-        dev['dcl_bat'].output(self.batt_current, True)
+        dev['dcl_bat'].output(self.cfg.batt_current, True)
         self.measure(('dmm_vbatload', 'arm_battI', ), timeout=5)
 
     @share.teststep
@@ -280,7 +163,7 @@ class Initial(share.TestSequence):
         ocp_actual = mes['ramp_ocp_pre']().reading1
         # Adjust current setpoint
         j35['OCP_CAL'] = round(
-            j35.ocp_cal() * ocp_actual / self.config.ocp_set)
+            j35.ocp_cal() * ocp_actual / self.cfg.ocp_set)
         j35['NVWRITE'] = True
         mes['ramp_ocp']()
         dev['dcl_out'].output(0.0)
@@ -299,6 +182,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
 
     """Devices."""
+
+    sw_version = None   # ARM software version
 
     def open(self):
         """Create all Instruments."""
@@ -324,7 +209,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, Initial.arm_file),
+            os.path.join(folder, 'j35_{0}.bin'.format(self.sw_version)),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
@@ -359,6 +244,9 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    output_count = None
+    load_per_output = None
 
     def open(self):
         """Create all Sensor instances."""
@@ -402,12 +290,11 @@ class Sensors(share.Sensors):
         self['TunnelSwVer'] = share.console.Sensor(
             j35tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
         # Generate load current sensors
-        load_count = self.limits['LOAD_COUNT'].limit
         self['arm_loads'] = []
-        for i in range(load_count):
+        for i in range(self.output_count):
             sen = share.console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
             self['arm_loads'].append(sen)
-        load_current = load_count * Initial.load_per_output
+        load_current = self.output_count * self.load_per_output
         # Pre-adjust OCP
         low, high = self.limits['OCP_pre'].limit
         self['ocp_pre'] = sensor.Ramp(
@@ -456,7 +343,7 @@ class Measurements(share.Measurements):
             ('ramp_ocp_pre', 'OCP_pre', 'ocp_pre', ''),
             ('ramp_ocp', 'OCP', 'ocp', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
-            ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
+            ('arm_swver', 'SwVer', 'arm_swver', 'Unit software version'),
             ('arm_auxv', 'ARM-AuxV', 'arm_auxv', ''),
             ('arm_auxi', 'ARM-AuxI', 'arm_auxi', ''),
             ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov', ''),
@@ -470,7 +357,7 @@ class Measurements(share.Measurements):
             ('arm_can_bind', 'CAN_BIND', 'arm_canbind', ''),
             ('arm_loadset', 'LOAD_SET', 'arm_loadset', ''),
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', ''),
-            ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
+            ('TunnelSwVer', 'SwVer', 'TunnelSwVer', 'Unit software version'),
             ))
         # Generate load current measurements
         loads = []
