@@ -5,10 +5,12 @@
 
 from . import test_bluetooth
 from . import test_console
+from . import test_lots
 from . import test_parameter
 
 __all__ = [
     'test_bluetooth',
     'test_console',
+    'test_lots',
     'test_parameter',
     ]

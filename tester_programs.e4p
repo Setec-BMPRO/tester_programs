@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2018-03-23, 15:58:17 -->
+<!-- Saved: 2018-03-29, 16:43:52 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -157,6 +157,7 @@
     <Source>share/console/samb11.py</Source>
     <Source>share/console/sensor.py</Source>
     <Source>share/fixture.py</Source>
+    <Source>share/lots.py</Source>
     <Source>share/programmer.py</Source>
     <Source>share/testsequence.py</Source>
     <Source>share/timers.py</Source>
@@ -228,6 +229,7 @@
     <Source>tests/share/__init__.py</Source>
     <Source>tests/share/test_bluetooth.py</Source>
     <Source>tests/share/test_console.py</Source>
+    <Source>tests/share/test_lots.py</Source>
     <Source>tests/share/test_parameter.py</Source>
     <Source>testsuite.py</Source>
   </Sources>
