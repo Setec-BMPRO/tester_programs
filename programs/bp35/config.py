@@ -3,7 +3,7 @@
 """BP35 Configuration."""
 
 # ARM versions
-ARM_SW_VERSION = '2.0.16617.4601'
+ARM_SW_VERSION = '2.0.17344.4603'
 ARM_HW_VERSION = 12
 # 'SR' type Solar Regulator versions
 PIC_SW_VERSION = '1.5.16253.282'
