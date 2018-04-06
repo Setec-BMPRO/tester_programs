@@ -41,7 +41,7 @@ class BP35Final(ProgramTestCase):
                     ),
                 'CAN': (
                     (sen['can12v'], 12.0),
-                    (sen['arm_swver'], bp35.config.ARM_SW_VERSION),
+                    (sen['arm_swver'], bp35.config.BP35.arm_sw_version),
                     (sen['notifycable'], True),
                     ),
                 },

@@ -19,7 +19,7 @@ class Final(share.TestSequence):
         tester.LimitDelta('Can12V', 12.0, delta=1.0, doc='CAN_POWER rail'),
         tester.LimitRegExp(
             'ARM-SwVer', '^{0}$'.format(
-                config.ARM_SW_VERSION.replace('.', r'\.')),
+                config.BP35.arm_sw_version.replace('.', r'\.')),
             doc='Software version'),
         )
 

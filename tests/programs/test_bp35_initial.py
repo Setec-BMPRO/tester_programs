@@ -54,7 +54,7 @@ class _BP35Initial(ProgramTestCase):
                     ),
                 'Initialise': (
                     (sen['sernum'], self.sernum),
-                    (sen['arm_swver'], bp35.config.ARM_SW_VERSION),
+                    (sen['arm_swver'], bp35.config.BP35.arm_sw_version),
                     ),
                 'SrSolar': (
                     (sen['vset'], (13.0, 13.0, 13.5)),
@@ -103,7 +103,7 @@ class _BP35Initial(ProgramTestCase):
                 'CanBus': (
                     (sen['canpwr'], 12.5),
                     (sen['arm_canbind'], 1 << 28),
-                    (sen['TunnelSwVer'], bp35.config.ARM_SW_VERSION),
+                    (sen['TunnelSwVer'], bp35.config.BP35.arm_sw_version),
                     ),
                 },
             UnitTester.key_call: {      # Callables
