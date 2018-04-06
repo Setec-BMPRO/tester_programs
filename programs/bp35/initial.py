@@ -123,15 +123,15 @@ class Initial(share.TestSequence):
     limitdata = {
         'SR': {
             'Limits': _common + _sr_solar,
-            'HwVer': (config.ARM_HW_VERSION, 1, 'A'),
+            'HwVer': (config.ARM_HW_VERSION, 1, 'B'),
             },
         'PM': {
             'Limits': _common + _pm_solar,
-            'HwVer': (config.ARM_HW_VERSION, 2, 'A'),
+            'HwVer': (config.ARM_HW_VERSION, 2, 'B'),
             },
         'HA': {
             'Limits': _common + _sr_solar,
-            'HwVer': (config.ARM_HW_VERSION, 3, 'A'),
+            'HwVer': (config.ARM_HW_VERSION, 3, 'B'),
             },
         }
 
