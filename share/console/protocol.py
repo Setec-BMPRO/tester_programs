@@ -132,9 +132,10 @@ class Base():
         """Sensor: Configure for next reading."""
         self._read_key = key
 
-    def read(self):
+    def read(self, callerid):
         """Sensor: Read ARM data using the last defined key.
 
+        @param callerid Identity of caller
         @return Value
 
         """
