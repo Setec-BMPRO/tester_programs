@@ -50,6 +50,8 @@ class Initial(share.TestSequence):
         LimitLow('VloadOff', 0.5, doc='When output is OFF'),
         LimitDelta('VbatIn', vbat_inject, delta=1.0,
             doc='Voltage at Batt when 12.6V is injected into Batt'),
+        LimitDelta('VfuseIn', vbat_inject, delta=1.0,
+            doc='Voltage after fuse when 12.6V is injected into Batt'),
         LimitDelta('VbatOut', aux_solar_inject, delta=0.5,
             doc='Voltage at Batt when 13.5V is injected into Aux'),
         LimitDelta('Vbat', vout_set, delta=0.2,
@@ -173,7 +175,7 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Apply DC Source to Battery terminals
         dev['dcs_vbat'].output(self.vbat_inject, True)
-        self.measure(('dmm_vbatin', 'dmm_3v3u'), timeout=5)
+        self.measure(('dmm_vbatin', 'dmm_vfusein', 'dmm_3v3u'), timeout=5)
 
     @share.teststep
     def _step_initialise_arm(self, dev, mes):
@@ -369,6 +371,7 @@ class Sensors(share.Sensors):
         self['ovbus'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.1)
         self['o12Vpri'] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)
         self['ovbat'] = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
+        self['ovfuse'] = sensor.Vdc(dmm, high=14, low=4, rng=100, res=0.001)
         self['ovload'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self['oair'] = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self['o3V3U'] = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
@@ -444,6 +447,7 @@ class Measurements(share.Measurements):
             ('dmm_vload', 'Vload', 'ovload', ''),
             ('dmm_vloadoff', 'VloadOff', 'ovload', ''),
             ('dmm_vbatin', 'VbatIn', 'ovbat', ''),
+            ('dmm_vfusein', 'VfuseIn', 'ovfuse', ''),
             ('dmm_vbatout', 'VbatOut', 'ovbat', ''),
             ('dmm_vbat', 'Vbat', 'ovbat', ''),
             ('dmm_vbatload', 'VbatLoad', 'ovbat', ''),
