@@ -168,7 +168,6 @@ class EV2200():
         """
         self._logger.debug('Voltage = %s', voltage)
         voltage *= 1000     # convert to mVolt
-        self._board_status()
         self._ee_dump()
         # Dictionary of readings to return
         readings = {}
@@ -201,7 +200,7 @@ class EV2200():
         for num in range(samples):
             volt_raw = self._ram_read('Voltage')
             volt += volt_raw
-            self._logger.debug('Voltage = %s', float(volt_raw) / 1000)
+            self._logger.debug('Voltage sample = %s', float(volt_raw) / 1000)
             i = (self._ram_read('InvOffset[MSB]') & 0xFF00) >> 8
             inv_off += self._signed8bit(i)
             if num < (samples - 1):
