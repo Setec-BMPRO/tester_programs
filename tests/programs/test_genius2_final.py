@@ -18,23 +18,23 @@ class _Genius2Final(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'InputRes': (
-                    (sen['oInpRes'], 135e3),
+                'PartDetect': (
+                    (sen['inres'], 135e3), (sen['dcinshrt'], 10e3),
                     ),
                 'PowerOn': (
-                    (sen['oVout'], 13.6), (sen['oVbat'], 13.6),
+                    (sen['vout'], 13.6), (sen['vbat'], 13.6),
                     ),
                 'BattFuse': (
-                    (sen['oYesNoFuseOut'], True), (sen['oVbat'], 0.0),
-                    (sen['oYesNoFuseIn'], True), (sen['oVout'], 13.6),
+                    (sen['yesnofuseout'], True), (sen['vbat'], 0.0),
+                    (sen['yesnofusein'], True), (sen['vout'], 13.6),
                     ),
                 'OCP': (
-                    (sen['oVout'], (13.5, ) * 11 + (13.0, ), ),
-                    (sen['oVout'], (0.1, 13.6, 13.6)),
-                    (sen['oVbat'], 13.6),
+                    (sen['vout'], (13.5, ) * 11 + (13.0, ), ),
+                    (sen['vout'], (0.1, 13.6, 13.6)),
+                    (sen['vbat'], 13.6),
                     ),
                 'RemoteSw': (
-                    (sen['oVbat'], 12.0), (sen['oVout'], (12.0, 0.0, 12.0)),
+                    (sen['vbat'], 12.0), (sen['vout'], (12.0, 0.0, 12.0)),
                     ),
                 },
             }
@@ -42,9 +42,9 @@ class _Genius2Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(16, len(result.readings))
+        self.assertEqual(17, len(result.readings))
         self.assertEqual(
-            ['InputRes','PowerOn', 'BattFuse', 'OCP', 'RemoteSw'],
+            ['PartDetect','PowerOn', 'BattFuse', 'OCP', 'RemoteSw'],
             self.tester.ut_steps)
 
 
