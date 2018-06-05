@@ -54,7 +54,7 @@ class Initial(share.TestSequence):
         mes['dmm_lock'](timeout=5)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Apply DC Source to Battery terminals
-        dev['dcs_vbat'].output(self.vbat_inject, True, delay=1.0)
+        dev['dcs_vbat'].output(self.cfg.vbat_inject, True, delay=1.0)
         self.measure(('dmm_vbatin', 'dmm_vfusein', 'dmm_3v3u'), timeout=5)
 
     @share.teststep

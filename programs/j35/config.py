@@ -19,12 +19,13 @@ class J35():
     # Adjustable configuration data values
     values = collections.namedtuple(
         'values',
-        'hw_version, output_count, ocp_set, solar, canbus')
+        'hw_version, output_count, ocp_set, solar, solar_comp, canbus')
     # These values get set per Product type & revision
     hw_version = None
     output_count = None
     ocp_set = None
     solar = None
+    solar_comp = None
     canbus = None
     # General parameters used in testing the units
     # Injected voltages
@@ -61,6 +62,8 @@ class J35():
         LimitLow('VloadOff', 0.5, doc='When output is OFF'),
         LimitDelta('VbatIn', vbat_inject, delta=1.0,
             doc='Voltage at Batt when 12.6V is injected into Batt'),
+        LimitDelta('VfuseIn', vbat_inject, delta=1.0,
+            doc='Voltage after fuse when 12.6V is injected into Batt'),
         LimitDelta('VbatOut', aux_solar_inject, delta=0.5,
             doc='Voltage at Batt when 13.5V is injected into Aux'),
         LimitDelta('Vbat', vout_set, delta=0.2,
@@ -132,6 +135,7 @@ class J35():
             'A': J35A,
             'B': J35B,
             'C': J35C,
+            'D': J35D,
             }[parameter]
         config._configure(uut)    # Adjust for the Lot Number
         return config
@@ -151,7 +155,7 @@ class J35():
             except share.lots.LotError:
                 pass
         (cls.hw_version, cls.output_count, cls.ocp_set,
-         cls.solar, cls.canbus, ) = cls._rev_data[rev]
+         cls.solar, cls.solar_comp,  cls.canbus, ) = cls._rev_data[rev]
 
 
 class J35A(J35):
@@ -159,7 +163,6 @@ class J35A(J35):
     """J35A configuration."""
 
     # Output set points when running in manual mode
-    vout_set = 12.8
     ocp_man_set = 20.0
     _lot_rev = share.lots.Revision((
         (share.lots.Range('A164809', 'A170404'), 1),    # 029622
@@ -168,30 +171,46 @@ class J35A(J35):
         # No Rev 4,5,6 created
         (share.lots.Range('A174510', 'A180408'), 8),    # 031190
         # Rev 8 Built as Rev 9
-        (share.lots.Range('A181105'), 9),               # 031190
-        # Rev 9...                                      # ??????
+        (share.lots.Range('A181105', 'A182206'), 9),    # 031190
+        # No Rev 9 production
+        # Rev 10...                                     # ??????
         ))
     _rev_data = {
         None: J35.values(
-            hw_version=(9, 1, 'A'),
-            output_count=7, ocp_set=20.0, solar=False, canbus=True),
+            hw_version=(10, 1, 'A'),
+            output_count=7, ocp_set=20.0,
+            solar=False, solar_comp=False,
+            canbus=True,
+            ),
         9: J35.values(
             hw_version=(9, 1, 'A'),
-            output_count=7, ocp_set=20.0, solar=False, canbus=True),
+            output_count=7, ocp_set=20.0,
+            solar=False, solar_comp=False,
+            canbus=True,
+            ),
         8: J35.values(
             hw_version=(8, 1, 'B'),
-            output_count=7, ocp_set=20.0, solar=False, canbus=True),
+            output_count=7, ocp_set=20.0,
+            solar=False, solar_comp=False,
+            canbus=True,
+            ),
         2: J35.values(
             hw_version=(2, 1, 'B'),
-            output_count=7, ocp_set=20.0, solar=False, canbus=False),
+            output_count=7, ocp_set=20.0,
+            solar=False, solar_comp=False,
+            canbus=True,
+            ),
         1: J35.values(
             hw_version=(1, 1, 'B'),
-            output_count=7, ocp_set=20.0, solar=False, canbus=False),
+            output_count=7, ocp_set=20.0,
+            solar=False, solar_comp=False,
+            canbus=True,
+            ),
         }
 
     @classmethod
     def limits_initial(cls):
-        """J35-A specific initial test limits.
+        """J35-A initial test limits.
 
         @return Tuple of limits
 
@@ -207,7 +226,7 @@ class J35A(J35):
 
     @classmethod
     def limits_final(cls):
-        """J35-A specific final test limits.
+        """J35-A final test limits.
 
         @return Tuple of limits
 
@@ -229,30 +248,46 @@ class J35B(J35):
         # No Rev 5,6 created
         (share.lots.Range('A174511', 'A180309'), 8),    # 031191
         # Rev 8 Built as Rev 9
-        (share.lots.Range('A181011', 'A181106'), 9),    # 031191
-        # Rev 9...                                      # ??????
+        (share.lots.Range('A181011', 'A182405'), 9),    # 031191
+        # No Rev 9 production
+        # Rev 10...                                     # ??????
         ))
     _rev_data = {
         None: J35.values(
-            hw_version=(9, 2, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            hw_version=(10, 2, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=True,
+            canbus=True,
+            ),
         9: J35.values(
             hw_version=(9, 2, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         8: J35.values(
             hw_version=(8, 2, 'B'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         2: J35.values(
             hw_version=(2, 2, 'B'),
-            output_count=14, ocp_set=35.0, solar=False, canbus=False),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         1: J35.values(
             hw_version=(1, 2, 'B'),
-            output_count=14, ocp_set=35.0, solar=False, canbus=False),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         }
 
     @classmethod
     def limits_initial(cls):
-        """J35-B specific initial test limits.
+        """J35-B/C/D initial test limits.
 
         @return Tuple of limits
 
@@ -268,7 +303,7 @@ class J35B(J35):
 
     @classmethod
     def limits_final(cls):
-        """J35-B specific final test limits.
+        """J35-B/C/D final test limits.
 
         @return Tuple of limits
 
@@ -279,7 +314,7 @@ class J35B(J35):
             )
 
 
-class J35C(J35):
+class J35C(J35B):
 
     """J35C configuration."""
 
@@ -293,63 +328,89 @@ class J35C(J35):
         (share.lots.Range('A171907', 'A173608'), 7),    # 030200
         (share.lots.Range('A174909', 'A180809'), 8),    # 031192
         # Rev 8 Built as Rev 9
-#        (share.lots.Range('A18xxxx', 'A18xxxx'), 9),    # 031192
-        # Rev 9...                                      # ??????
+        (share.lots.Range('A181409', 'A182207'), 9),    # 031192
+        # No Rev 9 production
+        # Rev 10...                                     # ??????
         ))
     _rev_data = {
         None: J35.values(
-            hw_version=(9, 3, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            hw_version=(10, 3, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=True,
+            canbus=True,
+            ),
         9: J35.values(
             hw_version=(9, 3, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         8: J35.values(
             hw_version=(8, 3, 'B'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         7: J35.values(
             hw_version=(7, 3, 'C'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         6: J35.values(
             hw_version=(6, 3, 'E'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         4: J35.values(
             hw_version=(4, 3, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         3: J35.values(
             hw_version=(3, 3, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         2: J35.values(
             hw_version=(2, 3, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         1: J35.values(
             hw_version=(1, 3, 'A'),
-            output_count=14, ocp_set=35.0, solar=True, canbus=True),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
         }
 
-    @classmethod
-    def limits_initial(cls):
-        """J35-C specific initial test limits.
 
-        @return Tuple of limits
+class J35D(J35C):
 
-        """
-        return super()._limits_initial + (
-            LimitPercent(
-                'OCP_pre', cls.ocp_set,
-                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
-                doc='OCP trip range before adjustment'),
-            LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
-                doc='OCP trip range after adjustment'),
-            )
+    """J35D configuration."""
 
-    @classmethod
-    def limits_final(cls):
-        """J35-C specific final test limits.
-
-        @return Tuple of limits
-
-        """
-        return super()._limits_final + (
-            LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
-                doc='OCP trip current'),
-            )
+    _lot_rev = share.lots.Revision((
+        # Rev 8 Built as Rev 9
+        (share.lots.Range('A181410', 'A181917'), 8),    # 031193
+        # No Rev 9 production
+        # Rev 10...                                     # ??????
+        ))
+    _rev_data = {
+        None: J35.values(
+            hw_version=(10, 4, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=True,
+            canbus=True,
+            ),
+        8: J35.values(
+            hw_version=(8, 4, 'B'),
+            output_count=14, ocp_set=35.0,
+            solar=True, solar_comp=False,
+            canbus=True,
+            ),
+        }
