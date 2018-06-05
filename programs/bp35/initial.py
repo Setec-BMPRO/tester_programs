@@ -23,9 +23,9 @@ class Initial(share.TestSequence):
     """BP35 Initial Test Program."""
 
     # ARM software image file
-    arm_file = 'bp35_{0}.bin'.format(config.ARM_SW_VERSION)
+    arm_file = 'bp35_{0}.bin'.format(config.BP35.arm_sw_version)
     # dsPIC software image file
-    pic_file = 'bp35sr_{0}.hex'.format(config.PIC_SW_VERSION)
+    pic_file = 'bp35sr_{0}.hex'.format(config.BP35.pic_sw_version)
     # Injected Vbat & Vaux
     vbat_in = 12.4
     vaux_in = 13.5
@@ -73,7 +73,7 @@ class Initial(share.TestSequence):
         LimitLow('InOCP', 11.6, doc='Output voltage in OCP'),
         LimitRegExp(
             'ARM-SwVer', '^{0}$'.format(
-                config.ARM_SW_VERSION.replace('.', r'\.')),
+                config.BP35.arm_sw_version.replace('.', r'\.')),
             doc='Software version'),
         LimitDelta('ARM-AcV', vac, 10.0, doc='AC voltage'),
         LimitDelta('ARM-AcF', 50.0, 1.0, doc='AC frequency'),
@@ -123,15 +123,15 @@ class Initial(share.TestSequence):
     limitdata = {
         'SR': {
             'Limits': _common + _sr_solar,
-            'HwVer': (config.ARM_HW_VERSION, 1, 'A'),
+            'HwVer': config.BP35SR.arm_hw_version,
             },
         'PM': {
             'Limits': _common + _pm_solar,
-            'HwVer': (config.ARM_HW_VERSION, 2, 'A'),
+            'HwVer': config.BP35PM.arm_hw_version,
             },
         'HA': {
             'Limits': _common + _sr_solar,
-            'HwVer': (config.ARM_HW_VERSION, 3, 'A'),
+            'HwVer': config.BP35HA.arm_hw_version,
             },
         }
 
@@ -221,7 +221,7 @@ class Initial(share.TestSequence):
         bp35.open()
         bp35.brand(
             self.config['HwVer'], self.sernum, dev['rla_reset'],
-            self.pm, config.PIC_HW_VERSION)
+            self.pm, config.BP35.pic_hw_version)
         mes['arm_swver']()
         if self.pm:
             bp35['PM_RELAY'] = False

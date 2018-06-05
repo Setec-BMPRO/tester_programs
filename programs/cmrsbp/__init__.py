@@ -112,7 +112,7 @@ class Initial(share.TestSequence):
         dev['dcs_vbat'].output(12.20)
         dev['dcs_Vchg'].output(0.0)
         dev['rla_Pic'].set_off()
-        dev['rla_PicReset'].set_on(delay=2)
+        dev['rla_PicReset'].set_on(delay=3)
         dev['rla_EVM'].set_on()
         dmm_vbat = mes['dmm_vbat'](timeout=5).reading1
         ev_data = evdev.read_vit()

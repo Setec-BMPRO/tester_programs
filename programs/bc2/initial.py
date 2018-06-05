@@ -100,9 +100,9 @@ class Initial(share.TestSequence):
         self.measure(('detectCAL', 'arm_vbatt'))
         bc2['ZERO_I_CAL'] = 0
         mes['detectCAL'].sensor.store(bc2.action(expected=1))
-        self.measure(('detectCAL', 'arm_ibattzero'))
+        self.measure(
+            ('detectCAL', 'arm_ioffset', 'arm_ibattzero', 'arm_vbattlsb'))
         bc2['NVWRITE'] = True
-        self.measure(('arm_ioffset', 'arm_vbattlsb'))
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):

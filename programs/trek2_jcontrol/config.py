@@ -16,6 +16,6 @@ class JControl():
 
     """JControl configuration."""
 
-    sw_version = '1.6.16905.283'
+    sw_version = '1.6.17423.285'
     sw_file = 'jcontrol_{0}.bin'.format(sw_version)
-    hw_version = (1, 2, 'A')
+    hw_version = (3, 2, 'A')
