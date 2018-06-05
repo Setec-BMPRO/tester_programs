@@ -8,9 +8,11 @@ class J35():
     """Common configuration for all J35 versions."""
 
     sw_version = '1.4.17055.1365'   # Software version
+#    sw_version = '1.5.17467.1373'   # Software version
     output_count = 14               # defaults for J35B,C
     ocp_set = 35.0
     solar = True
+    solar_comp = False
 
 
 class J35A(J35):
@@ -35,3 +37,11 @@ class J35C(J35):
     """J35C configuration."""
 
     hw_version = (9, 3, 'A')
+
+
+class J35D(J35):
+
+    """J35D configuration."""
+
+    hw_version = (10, 4, 'A')
+    solar_comp = True

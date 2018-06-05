@@ -85,6 +85,8 @@ class _Console():
         'CAN_BIND': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=can_bound),
+        'SOLAR_STATUS': parameter.Boolean('SOLAR_COMPARATOR_STATUS', writeable=True),
+        'SOLAR_OFFSET': parameter.Float('SOLAR_COMPARATOR_OFFSET', writeable=True),
         }
 
     def __init__(self, port):

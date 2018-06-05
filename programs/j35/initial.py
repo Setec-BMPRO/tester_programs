@@ -138,6 +138,18 @@ class Initial(share.TestSequence):
                     doc='OCP trip range after adjustment'),
                 ),
             },
+        'D': {
+            'Config': config.J35D,
+            'Limits': _common + (
+                LimitLow('LOAD_COUNT', config.J35D.output_count),
+                LimitPercent(
+                    'OCP_pre', config.J35D.ocp_set,
+                    (ocp_adjust_percent + 4.0, ocp_adjust_percent + 7.0),
+                    doc='OCP trip range before adjustment'),
+                LimitPercent('OCP', config.J35D.ocp_set, (4.0, 7.0),
+                    doc='OCP trip range after adjustment'),
+                ),
+            },
         }
     config = None
     sernum = None
@@ -154,6 +166,8 @@ class Initial(share.TestSequence):
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('Aux', self._step_aux),
             TestStep('Solar', self._step_solar, self.config.solar),
+            TestStep('ManualMode', self._step_manualmode),
+            TestStep('SolarComp', self._step_solarcomp, self.config.solar_comp),
             TestStep('PowerUp', self._step_powerup),
             TestStep('Output', self._step_output),
             TestStep('RemoteSw', self._step_remote_sw),
@@ -217,11 +231,24 @@ class Initial(share.TestSequence):
         dev['dcs_solar'].output(0.0, False)
 
     @share.teststep
+    def _step_manualmode(self, dev, mes):
+        """Complete the change to manual mode"""
+        j35 = dev['j35']
+        j35.manual_mode(vout=self.vout_set, iout=self.config.ocp_set)
+
+    @share.teststep
+    def _step_solarcomp(self, dev, mes):
+        """Calibrate the solar comparator."""
+        j35 = dev['j35']
+        dev['dcs_solar'].output(13.0, True, delay=2.0)
+        j35['SOLAR_STATUS'] = False
+        print(j35['SOLAR_STATUS'])
+        print(j35['SOLAR_OFFSET'])
+
+    @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac."""
         j35 = dev['j35']
-        # Complete the change to manual mode
-        j35.manual_mode(vout=self.vout_set, iout=self.config.ocp_set)
         dev['acsource'].output(voltage=self.ac_volt, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12vpri', 'arm_vout_ov'),
