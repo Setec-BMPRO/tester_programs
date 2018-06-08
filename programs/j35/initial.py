@@ -273,6 +273,7 @@ class Initial(share.TestSequence):
                 j35['SOLAR_OFFSET'] = 2     # Increase cut-off voltage threshold
             if dmm_vsolar > high:
                 j35['SOLAR_OFFSET'] = 1     # Decrease cut-off voltage threshold
+            j35['SOLAR_STATUS'] = False
             dmm_vsolar = mes['ramp_solar']().reading1
             if (low <= dmm_vsolar <= high):
                 reply = True
