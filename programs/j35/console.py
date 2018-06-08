@@ -59,6 +59,10 @@ class _Console():
             'FAN_SPEED', writeable=True, minimum=0, maximum=100, scale=10),
         'AUX_RELAY': parameter.Boolean('AUX_CHARGE_RELAY', writeable=True),
         'SOLAR': parameter.Boolean('SOLAR_CHARGE_RELAY', writeable=True),
+        'SOLAR_STATUS': parameter.Boolean(
+            'SOLAR_COMPARATOR_STATUS', writeable=True),
+        'SOLAR_OFFSET': parameter.Float(
+            'SOLAR_COMPARATOR_OFFSET', writeable=True),
         'LOAD_SET': parameter.Hex(
             'LOAD_SWITCH_STATE_0', writeable=True,
             minimum=0, maximum=0x0FFFFFFF),
@@ -85,8 +89,6 @@ class _Console():
         'CAN_BIND': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=can_bound),
-        'SOLAR_STATUS': parameter.Boolean('SOLAR_COMPARATOR_STATUS', writeable=True),
-        'SOLAR_OFFSET': parameter.Float('SOLAR_COMPARATOR_OFFSET', writeable=True),
         }
 
     def __init__(self, port):

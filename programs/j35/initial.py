@@ -10,7 +10,8 @@ import serial
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitRegExp, LimitBetween, LimitDelta, LimitPercent, LimitInteger
+    LimitLow, LimitRegExp, LimitBetween, LimitDelta,
+    LimitPercent, LimitInteger, LimitBoolean
     )
 import share
 from . import console
@@ -99,6 +100,9 @@ class Initial(share.TestSequence):
             doc='Response to CAN echo message'),
         LimitLow('InOCP', vout_set - 1.2, doc='Output is in OCP'),
         LimitLow('FixtureLock', 200, doc='Test fixture lid microswitch'),
+        LimitBoolean('Solar-Status', True,
+            doc='Solar Comparator Status is set'),
+        LimitBoolean('DetectCal', True, doc='Solar comparator calibrated'),
         )
     # Version specific configuration data. Indexed by test program parameter.
     config_data = {
@@ -112,6 +116,10 @@ class Initial(share.TestSequence):
                     doc='OCP trip range before adjustment'),
                 LimitPercent('OCP', config.J35A.ocp_set, (4.0, 10.0),
                     doc='OCP trip range after adjustment'),
+                LimitPercent('SolarCutoffPre', 14.125, percent=6,
+                    doc='Solar Cut-Off voltage threshold uncertainty'),
+                LimitBetween('SolarCutoff', 13.75, 14.5,
+                    doc='Solar Cut-Off voltage threshold range'),
                 ),
             },
         'B': {
@@ -124,6 +132,10 @@ class Initial(share.TestSequence):
                     doc='OCP trip range before adjustment'),
                 LimitPercent('OCP', config.J35B.ocp_set, (4.0, 7.0),
                     doc='OCP trip range after adjustment'),
+                LimitPercent('SolarCutoffPre', 14.125, percent=6,
+                    doc='Solar Cut-Off voltage threshold uncertainty'),
+                LimitBetween('SolarCutoff', 13.75, 14.5,
+                    doc='Solar Cut-Off voltage threshold range'),
                 ),
             },
         'C': {
@@ -136,6 +148,10 @@ class Initial(share.TestSequence):
                     doc='OCP trip range before adjustment'),
                 LimitPercent('OCP', config.J35C.ocp_set, (4.0, 7.0),
                     doc='OCP trip range after adjustment'),
+                LimitPercent('SolarCutoffPre', 14.125, percent=6,
+                    doc='Solar Cut-Off voltage threshold uncertainty'),
+                LimitBetween('SolarCutoff', 13.75, 14.5,
+                    doc='Solar Cut-Off voltage threshold range'),
                 ),
             },
         'D': {
@@ -148,6 +164,10 @@ class Initial(share.TestSequence):
                     doc='OCP trip range before adjustment'),
                 LimitPercent('OCP', config.J35D.ocp_set, (4.0, 7.0),
                     doc='OCP trip range after adjustment'),
+                LimitPercent('SolarCutoffPre', 14.3, percent=6,
+                    doc='Solar Cut-Off voltage threshold uncertainty'),
+                LimitBetween('SolarCutoff', 14.0, 14.6,
+                    doc='Solar Cut-Off voltage threshold range'),
                 ),
             },
         }
@@ -221,8 +241,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_solar(self, dev, mes):
         """Test Solar input."""
-        dev['dcs_solar'].output(self.aux_solar_inject, True)
         j35 = dev['j35']
+        dev['dcs_solar'].output(self.aux_solar_inject, True)
         j35['SOLAR'] = True
         # Only the 'C' has Air Suspension
         measurement = 'dmm_vair' if self.parameter == 'C' else 'dmm_vbatout'
@@ -240,10 +260,26 @@ class Initial(share.TestSequence):
     def _step_solarcomp(self, dev, mes):
         """Calibrate the solar comparator."""
         j35 = dev['j35']
-        dev['dcs_solar'].output(13.0, True, delay=2.0)
+        dev['dcs_solar'].output(13.0, True, delay=1.0)
+        j35['SOLAR'] = True
         j35['SOLAR_STATUS'] = False
-        print(j35['SOLAR_STATUS'])
-        print(j35['SOLAR_OFFSET'])
+        dmm_vsolar = mes['ramp_solar_pre']().reading1
+        low, high = self.limits['SolarCutoff'].limit
+        if (low <= dmm_vsolar <= high):
+            reply = True
+        else:
+            reply = False
+            if dmm_vsolar < low:
+                j35['SOLAR_OFFSET'] = 2     # Increase cut-off voltage threshold
+            if dmm_vsolar > high:
+                j35['SOLAR_OFFSET'] = 1     # Decrease cut-off voltage threshold
+            dmm_vsolar = mes['ramp_solar']().reading1
+            if (low <= dmm_vsolar <= high):
+                reply = True
+        mes['detectcal'].sensor.store(reply)
+        mes['detectcal']()
+        j35['SOLAR'] = False
+        dev['dcs_solar'].output(0.0, False)
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -401,6 +437,7 @@ class Sensors(share.Sensors):
         self['ovfuse'] = sensor.Vdc(dmm, high=14, low=4, rng=100, res=0.001)
         self['ovload'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self['oair'] = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
+        self['vsolar'] = sensor.Vdc(dmm, high=15, low=6, rng=100, res=0.001)
         self['o3V3U'] = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.001)
         self['o3V3'] = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
         self['o15Vs'] = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
@@ -409,6 +446,7 @@ class Sensors(share.Sensors):
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('j35_initial', 'msgSnEntry'),
             caption=tester.translate('j35_initial', 'capSnEntry'))
+        self['mircal'] = sensor.Mirror()
         # Console sensors
         j35 = self.devices['j35']
         j35tunnel = self.devices['j35tunnel']
@@ -425,6 +463,7 @@ class Sensors(share.Sensors):
                 ('arm_canbind', 'CAN_BIND'),
                 ('arm_loadset', 'LOAD_SET'),
                 ('arm_remote', 'BATT_SWITCH'),
+                ('arm_solar_status', 'SOLAR_STATUS'),
             ):
             self[name] = share.console.Sensor(j35, cmdkey)
         self['arm_swver'] = share.console.Sensor(
@@ -458,6 +497,16 @@ class Sensors(share.Sensors):
             stop=high - load_current + 1,
             step=0.1)
         self['ocp'].on_read = lambda value: value + load_current
+        # Solar comparator calibration
+        low, high = self.limits['SolarCutoffPre'].limit
+        self['solar_input'] = sensor.Ramp(
+            stimulus=self.devices['dcs_solar'],
+            sensor=self['arm_solar_status'],
+            detect_limit=(self.limits['Solar-Status'], ),
+            start=low - 0.15,
+            stop=high + 0.15,
+            step=0.25, delay=1.0,
+            reset=False)
 
 
 class Measurements(share.Measurements):
@@ -486,6 +535,9 @@ class Measurements(share.Measurements):
             ('dmm_fanOff', 'FanOff', 'ofan', ''),
             ('ramp_ocp_pre', 'OCP_pre', 'ocp_pre', ''),
             ('ramp_ocp', 'OCP', 'ocp', ''),
+            ('ramp_solar_pre', 'SolarCutoffPre', 'solar_input', ''),
+            ('ramp_solar', 'SolarCutoff', 'solar_input', ''),
+            ('detectcal', 'DetectCal', 'mircal', ''),
             ('ui_sernum', 'SerNum', 'sernum', ''),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', ''),
             ('arm_auxv', 'ARM-AuxV', 'arm_auxv', ''),

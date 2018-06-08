@@ -46,6 +46,7 @@ class _J35Initial(ProgramTestCase):
                     (sen['olock'], 10.0),
                     (sen['sernum'], self.sernum),
                     (sen['ovbat'], 12.0),
+                    (sen['ovfuse'], 12.0),
                     (sen['o3V3U'], 3.3),
                     ),
                 'Initialise': (
@@ -60,6 +61,10 @@ class _J35Initial(ProgramTestCase):
                 'Solar': (
                     (sen['oair'], 13.5),
                     (sen['ovbat'], 13.5),
+                    ),
+                'SolarComp': (
+                    (sen['arm_solar_status'], (False, ) * 6 + (True, ), ),
+                    (sen['arm_solar_status'], (False, ) * 5 + (True, ), ),
                     ),
                 'PowerUp': (
                     (sen['oacin'], 240.0),
@@ -119,9 +124,9 @@ class J35_A_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the A program."""
         super()._pass_run(
-            43,
-            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
-             'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']
+            44,
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'ManualMode',
+             'PowerUp', 'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']
             )
 
 
@@ -135,9 +140,10 @@ class J35_B_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the B program."""
         super()._pass_run(
-            51,
-            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar', 'PowerUp',
-             'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']
+            52,
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar',
+             'ManualMode', 'PowerUp', 'Output', 'RemoteSw', 'Load',
+             'OCP', 'CanBus']
             )
 
 
@@ -151,7 +157,24 @@ class J35_C_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the C program."""
         super()._pass_run(
-            51,
-            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar', 'PowerUp',
-             'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']
+            52,
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar',
+             'ManualMode', 'PowerUp', 'Output', 'RemoteSw', 'Load',
+             'OCP', 'CanBus']
+            )
+
+class J35_D_Initial(_J35Initial):
+
+    """J35-D Initial program test suite."""
+
+    parameter = 'D'
+    debug = True
+
+    def test_pass_run(self):
+        """PASS run of the D program."""
+        super()._pass_run(
+            55,
+            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar',
+             'ManualMode', 'SolarComp', 'PowerUp', 'Output', 'RemoteSw',
+             'Load', 'OCP', 'CanBus']
             )
