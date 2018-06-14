@@ -51,7 +51,6 @@ class _J35Initial(ProgramTestCase):
                     ),
                 'Initialise': (
                     (sen['sernum'], self.sernum),
-                    (sen['arm_swver'], j35.config.J35.sw_version),
                     ),
                 'Aux': (
                     (sen['ovbat'], 13.5),
@@ -95,11 +94,16 @@ class _J35Initial(ProgramTestCase):
                 'CanBus': (
                     (sen['ocanpwr'], 12.5),
                     (sen['arm_canbind'], 1 << 28),
-                    (sen['TunnelSwVer'], j35.config.J35.sw_version),
                     ),
                 },
             UnitTester.key_call: {      # Callables
+                'Initialise':
+                    (self.test_program.sensors['arm_swver'].store,
+                        self.test_program.cfg.sw_version),
                 'Load': (self._arm_loads, 2.0),
+                'CanBus':
+                    (self.test_program.sensors['TunnelSwVer'].store,
+                        self.test_program.cfg.sw_version),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
@@ -142,33 +146,17 @@ class J35_B_Initial(_J35Initial):
             )
 
 
-class J35_C_Initial(_J35Initial):
+class J35_C_Initial(J35_B_Initial):
 
     """J35-C Initial program test suite."""
 
     parameter = 'C'
     debug = False
 
-    def test_pass_run(self):
-        """PASS run of the C program."""
-        super()._pass_run(
-            52,
-            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar', 'PowerUp',
-             'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']
-            )
 
-
-class J35_D_Initial(_J35Initial):
+class J35_D_Initial(J35_B_Initial):
 
     """J35-D Initial program test suite."""
 
     parameter = 'D'
     debug = False
-
-    def test_pass_run(self):
-        """PASS run of the D program."""
-        super()._pass_run(
-            52,
-            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar', 'PowerUp',
-             'Output', 'RemoteSw', 'Load', 'OCP', 'CanBus']
-            )

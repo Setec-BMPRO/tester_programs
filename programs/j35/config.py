@@ -15,12 +15,19 @@ class J35():
 
     """Base configuration for J35."""
 
-    sw_version = '1.4.17055.1365'
+    # Available software versions
+    sw_15 = '1.5.17467.1373'    # Current release
+    sw_13 = '1.3.15775.997'     # For 'A' & 'B' < Rev 8
     # Adjustable configuration data values
     values = collections.namedtuple(
         'values',
-        'hw_version, output_count, ocp_set, solar, solar_comp, canbus')
+        'sw_version, hw_version,'
+        ' output_count, ocp_set,'
+        ' solar, solar_comp,'
+        ' canbus'
+        )
     # These values get set per Product type & revision
+    sw_version = None
     hw_version = None
     output_count = None
     ocp_set = None
@@ -47,9 +54,7 @@ class J35():
     load_per_output = 2.0
     # Test limits common to all tests and versions
     _limits_all = (
-        LimitRegExp(
-            'SwVer', '^{0}$'.format(sw_version.replace('.', r'\.')),
-            doc='Software version'),
+        LimitRegExp('SwVer', '', doc='Software version'),
         )
     # Initial Test limits common to all versions
     _limits_initial = _limits_all + (
@@ -130,7 +135,7 @@ class J35():
         """
 # TODO: 469 x J35C were converted to J35B via PC 4885
 #   J35C Rev 4, Lots: A164211 (x135), A164309 (x265)
-#   ==> Change parameter from 'C' to 'B' ?...
+#   ==> Should we change parameter from 'C' to 'B' ?...
         config = {
             'A': J35A,
             'B': J35B,
@@ -154,7 +159,7 @@ class J35():
                 rev = cls._lot_rev.find(lot)
             except share.lots.LotError:
                 pass
-        (cls.hw_version, cls.output_count, cls.ocp_set,
+        (cls.sw_version, cls.hw_version, cls.output_count, cls.ocp_set,
          cls.solar, cls.solar_comp,  cls.canbus, ) = cls._rev_data[rev]
 
 
@@ -177,31 +182,32 @@ class J35A(J35):
         ))
     _rev_data = {
         None: J35.values(
-            hw_version=(10, 1, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, 1, 'A'),
             output_count=7, ocp_set=20.0,
             solar=False, solar_comp=False,
             canbus=True,
             ),
         9: J35.values(
-            hw_version=(9, 1, 'A'),
+            sw_version=J35.sw_15, hw_version=(9, 1, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, solar_comp=False,
             canbus=True,
             ),
         8: J35.values(
-            hw_version=(8, 1, 'B'),
+            sw_version=J35.sw_15, hw_version=(8, 1, 'C'),
             output_count=7, ocp_set=20.0,
             solar=False, solar_comp=False,
             canbus=True,
             ),
+        # Rev <8 uses an older software version
         2: J35.values(
-            hw_version=(2, 1, 'B'),
+            sw_version=J35.sw_13, hw_version=(2, 1, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, solar_comp=False,
             canbus=True,
             ),
         1: J35.values(
-            hw_version=(1, 1, 'B'),
+            sw_version=J35.sw_13, hw_version=(1, 1, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, solar_comp=False,
             canbus=True,
@@ -254,31 +260,32 @@ class J35B(J35):
         ))
     _rev_data = {
         None: J35.values(
-            hw_version=(10, 2, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, 2, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, solar_comp=True,
             canbus=True,
             ),
         9: J35.values(
-            hw_version=(9, 2, 'A'),
+            sw_version=J35.sw_15, hw_version=(9, 2, 'B'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
         8: J35.values(
-            hw_version=(8, 2, 'B'),
+            sw_version=J35.sw_15, hw_version=(8, 2, 'C'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
+        # Rev <8 uses an older software version
         2: J35.values(
-            hw_version=(2, 2, 'B'),
+            sw_version=J35.sw_13, hw_version=(2, 2, 'D'),
             output_count=14, ocp_set=35.0,
             solar=True, solar_comp=False,
             canbus=True,
             ),
         1: J35.values(
-            hw_version=(1, 2, 'B'),
+            sw_version=J35.sw_13, hw_version=(1, 2, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, solar_comp=False,
             canbus=True,
@@ -319,6 +326,9 @@ class J35C(J35B):
     """J35C configuration."""
 
     _lot_rev = share.lots.Revision((
+        # Rev 1-3 must be scrapped per MA-328
+        #  There are no entries for Rev1-3 in _rev_data, so there will be
+        #  a runtime error, producing a SystemError test result
         (share.lots.Range('A154411'), 1),               # 027745
         (share.lots.Range('A160306'), 2),               # 028388
         (share.lots.Range('A161211'), 3),               # 028861
@@ -334,57 +344,39 @@ class J35C(J35B):
         ))
     _rev_data = {
         None: J35.values(
-            hw_version=(10, 3, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, 3, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, solar_comp=True,
             canbus=True,
             ),
         9: J35.values(
-            hw_version=(9, 3, 'A'),
+            sw_version=J35.sw_15, hw_version=(9, 3, 'B'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
         8: J35.values(
-            hw_version=(8, 3, 'B'),
+            sw_version=J35.sw_15, hw_version=(8, 3, 'C'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
         7: J35.values(
-            hw_version=(7, 3, 'C'),
+            sw_version=J35.sw_15, hw_version=(7, 3, 'C'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
         6: J35.values(
-            hw_version=(6, 3, 'E'),
+            sw_version=J35.sw_15, hw_version=(6, 3, 'E'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
         4: J35.values(
-            hw_version=(4, 3, 'A'),
+            sw_version=J35.sw_15, hw_version=(4, 3, 'B'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
-            canbus=True,
-            ),
-        3: J35.values(
-            hw_version=(3, 3, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
-            canbus=True,
-            ),
-        2: J35.values(
-            hw_version=(2, 3, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
-            canbus=True,
-            ),
-        1: J35.values(
-            hw_version=(1, 3, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
         }
@@ -396,21 +388,21 @@ class J35D(J35C):
 
     _lot_rev = share.lots.Revision((
         # Rev 8 Built as Rev 9
-        (share.lots.Range('A181410', 'A181917'), 8),    # 031193
+        (share.lots.Range('A181410', 'A181917'), 9),    # 031193
         # No Rev 9 production
         # Rev 10...                                     # ??????
         ))
     _rev_data = {
         None: J35.values(
-            hw_version=(10, 4, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, 4, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, solar_comp=True,
             canbus=True,
             ),
-        8: J35.values(
-            hw_version=(8, 4, 'B'),
+        9: J35.values(
+            sw_version=J35.sw_15, hw_version=(9, 4, 'B'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=True, solar_comp=True,
             canbus=True,
             ),
         }

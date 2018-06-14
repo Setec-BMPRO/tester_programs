@@ -47,7 +47,6 @@ class _J35Final(ProgramTestCase):
                     ),
                 'CAN': (
                     (sen['can12v'], 12.0),
-                    (sen['swver'], j35.config.J35.sw_version),
                     ),
                 'OCP': (
                     (sen['vloads'][0], (12.7, ) * 20 + (11.0, ), ),
@@ -59,6 +58,9 @@ class _J35Final(ProgramTestCase):
             UnitTester.key_call: {      # Callables
                 'PowerUp':
                     (self._dmm_loads, 12.7),
+                'CAN':
+                    (self.test_program.sensors['swver'].store,
+                        self.test_program.cfg.sw_version),
                 'Load':
                     (self._dmm_loads, 12.7),
                 },
@@ -95,13 +97,17 @@ class J35_B_Final(_J35Final):
         super()._pass_run(35, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
 
 
-class J35_C_Final(_J35Final):
+class J35_C_Final(J35_B_Final):
 
     """J35-C Final program test suite."""
 
     parameter = 'C'
     debug = False
 
-    def test_pass_run(self):
-        """PASS run of the C program."""
-        super()._pass_run(35, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
+
+class J35_D_Final(J35_B_Final):
+
+    """J35-D Final program test suite."""
+
+    parameter = 'D'
+    debug = False

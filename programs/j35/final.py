@@ -13,15 +13,14 @@ class Final(share.TestSequence):
 
     """J35 Final Test Program."""
 
-    cfg = None              # Product configuration
-    sernum = None           # Unit serial number
-
     def open(self, uut):
         """Prepare for testing."""
         self.cfg = config.J35.select(self.parameter, uut)
         limits = self.cfg.limits_final()
         Sensors.output_count = self.cfg.output_count
         super().open(limits, Devices, Sensors, Measurements)
+        self.limits['SwVer'].adjust(
+            '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('CAN', self._step_can, self.cfg.canbus),
@@ -30,6 +29,7 @@ class Final(share.TestSequence):
             tester.TestStep(
                 'CanCable', self._step_can_cable, self.cfg.canbus),
             )
+        self.sernum = None
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -83,7 +83,7 @@ class Devices(share.Devices):
         """Create all Instruments."""
         for name, devtype, phydevname, doc in (
                 ('dmm', tester.DMM, 'DMM',
-                 ''),
+                 'Multimeter'),
                 ('acsource', tester.ACSource, 'ACS',
                  'AC input power'),
                 ('dcs_photo', tester.DCSource, 'DCS3',

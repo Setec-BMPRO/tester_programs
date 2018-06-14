@@ -17,9 +17,6 @@ class Initial(share.TestSequence):
 
     """J35 Initial Test Program."""
 
-    cfg = None              # Product configuration
-    sernum = None           # Unit serial number
-
     def open(self, uut):
         """Prepare for testing."""
         self.cfg = config.J35.select(self.parameter, uut)
@@ -28,6 +25,8 @@ class Initial(share.TestSequence):
         Sensors.load_per_output = self.cfg.load_per_output
         Devices.sw_version = self.cfg.sw_version
         super().open(limits, Devices, Sensors, Measurements)
+        self.limits['SwVer'].adjust(
+            '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('ProgramARM', self.devices['program_arm'].program),
