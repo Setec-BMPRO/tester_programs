@@ -32,9 +32,9 @@ class Initial(share.TestSequence):
             TestStep('ProgramARM', self.devices['program_arm'].program),
             TestStep('Initialise', self._step_initialise_arm),
             TestStep('Aux', self._step_aux),
-            TestStep('Solar', self._step_solar, self.config.solar),
+            TestStep('Solar', self._step_solar, self.cfg.solar),
             TestStep('ManualMode', self._step_manualmode),
-            TestStep('SolarComp', self._step_solarcomp, self.config.solar_comp),
+            TestStep('SolarComp', self._step_solarcomp, self.cfg.solar_comp),
             TestStep('PowerUp', self._step_powerup),
             TestStep('Output', self._step_output),
             TestStep('RemoteSw', self._step_remote_sw),
@@ -88,7 +88,7 @@ class Initial(share.TestSequence):
     def _step_solar(self, dev, mes):
         """Test Solar input."""
         j35 = dev['j35']
-        dev['dcs_solar'].output(self.aux_solar_inject, True)
+        dev['dcs_solar'].output(self.cfg.aux_solar_inject, True)
         j35['SOLAR'] = True
         # Only the 'C' & 'D' have Air Suspension
         measurement = (
@@ -104,7 +104,7 @@ class Initial(share.TestSequence):
     def _step_manualmode(self, dev, mes):
         """Complete the change to manual mode"""
         j35 = dev['j35']
-        j35.manual_mode(vout=self.vout_set, iout=self.config.ocp_set)
+        j35.manual_mode(vout=self.cfg.vout_set, iout=self.cfg.ocp_set)
 
     @share.teststep
     def _step_solarcomp(self, dev, mes):

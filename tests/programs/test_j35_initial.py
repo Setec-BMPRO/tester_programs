@@ -145,10 +145,10 @@ class J35_B_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the B program."""
         super()._pass_run(
-            52,
+            55,
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'Solar',
-             'ManualMode', 'PowerUp', 'Output', 'RemoteSw', 'Load',
-             'OCP', 'CanBus']
+             'ManualMode', 'SolarComp', 'PowerUp', 'Output', 'RemoteSw',
+             'Load', 'OCP', 'CanBus']
             )
 
 
