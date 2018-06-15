@@ -211,13 +211,13 @@ class J35A(J35):
             sw_version=J35.sw_13, hw_version=(2, 1, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, solar_comp=False,
-            canbus=True,
+            canbus=False,
             ),
         1: J35.values(
             sw_version=J35.sw_13, hw_version=(1, 1, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, solar_comp=False,
-            canbus=True,
+            canbus=False,
             ),
         }
 
@@ -289,13 +289,13 @@ class J35B(J35):
             sw_version=J35.sw_13, hw_version=(2, 2, 'D'),
             output_count=14, ocp_set=35.0,
             solar=True, solar_comp=False,
-            canbus=True,
+            canbus=False,
             ),
         1: J35.values(
             sw_version=J35.sw_13, hw_version=(1, 2, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, solar_comp=False,
-            canbus=True,
+            canbus=False,
             ),
         }
 

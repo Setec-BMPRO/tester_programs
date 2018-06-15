@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2018-03-29, 16:43:52 -->
+<!-- Saved: 2018-06-15, 13:06:59 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -203,6 +203,7 @@
     <Source>tests/programs/test_ids_ini_main.py</Source>
     <Source>tests/programs/test_ids_ini_micro.py</Source>
     <Source>tests/programs/test_ids_ini_syn.py</Source>
+    <Source>tests/programs/test_j35_config.py</Source>
     <Source>tests/programs/test_j35_final.py</Source>
     <Source>tests/programs/test_j35_initial.py</Source>
     <Source>tests/programs/test_mb2_final.py</Source>

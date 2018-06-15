@@ -6,9 +6,6 @@ from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import j35
 
-COUNT_A = 7
-COUNT_BC = 14
-
 
 class _J35Final(ProgramTestCase):
 
