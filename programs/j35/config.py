@@ -112,10 +112,6 @@ class J35():
         LimitBoolean('Solar-Status', True,
             doc='Solar Comparator Status is set'),
         LimitBoolean('DetectCal', True, doc='Solar comparator calibrated'),
-        LimitPercent('SolarCutoffPre', 14.3, percent=6,
-            doc='Solar Cut-Off voltage threshold uncertainty'),
-        LimitBetween('SolarCutoff', 14.0, 14.6,
-            doc='Solar Cut-Off voltage threshold range'),
         )
     # Final Test limits common to all versions
     _limits_final = _limits_all + (
@@ -235,6 +231,10 @@ class J35A(J35):
                 doc='OCP trip range before adjustment'),
             LimitPercent('OCP', cls.ocp_set, (4.0, 10.0),
                 doc='OCP trip range after adjustment'),
+            LimitBetween('SolarCutoffPre', -999, 999,
+                doc='Dummy limit'),
+            LimitBetween('SolarCutoff', -999, 999,
+                doc='Dummy limit'),
             )
 
     @classmethod
@@ -301,7 +301,7 @@ class J35B(J35):
 
     @classmethod
     def limits_initial(cls):
-        """J35-B/C/D initial test limits.
+        """J35-B/C initial test limits.
 
         @return Tuple of limits
 
@@ -313,6 +313,10 @@ class J35B(J35):
                 doc='OCP trip range before adjustment'),
             LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
                 doc='OCP trip range after adjustment'),
+            LimitPercent('SolarCutoffPre', 14.125, percent=6,
+                doc='Solar Cut-Off voltage threshold uncertainty'),
+            LimitBetween('SolarCutoff', 13.75, 14.5,
+                doc='Solar Cut-Off voltage threshold range'),
             )
 
     @classmethod
@@ -413,3 +417,23 @@ class J35D(J35C):
             canbus=True,
             ),
         }
+
+    @classmethod
+    def limits_initial(cls):
+        """J35-D initial test limits.
+
+        @return Tuple of limits
+
+        """
+        return super()._limits_initial + (
+            LimitPercent(
+                'OCP_pre', cls.ocp_set,
+                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
+                doc='OCP trip range before adjustment'),
+            LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
+                doc='OCP trip range after adjustment'),
+            LimitPercent('SolarCutoffPre', 14.3, percent=6,
+                doc='Solar Cut-Off voltage threshold uncertainty'),
+            LimitBetween('SolarCutoff', 14.0, 14.6,
+                doc='Solar Cut-Off voltage threshold range'),
+            )
