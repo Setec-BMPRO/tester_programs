@@ -121,6 +121,7 @@ class Initial(share.TestSequence):
                 j35['SOLAR_OFFSET'] = 2     # Increase cut-off voltage
             if solar_trip > high:
                 j35['SOLAR_OFFSET'] = 1     # Decrease cut-off voltage
+            j35['NVWRITE'] = True
             # Check the setting after adjustment
             j35['SOLAR_STATUS'] = False
             solar_trip = mes['ramp_solar']().reading1
@@ -357,7 +358,7 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcs_solar'],
             sensor=self['arm_solar_status'],
             detect_limit=(self.limits['Solar-Status'], ),
-            start=low - 0.5,
+            start=13.0,
             stop=high + 0.5,
             step=0.25,
             delay=1.0)
