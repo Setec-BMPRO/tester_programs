@@ -4,6 +4,7 @@
 
 import math
 import collections
+import logging
 from tester import (
     LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitPercent,
     LimitInteger, LimitRegExp, LimitBoolean,
@@ -162,6 +163,7 @@ class J35():
                 rev = cls._lot_rev.find(lot)
             except share.lots.LotError:
                 pass
+        logging.getLogger(__name__).debug('Revision detected as %s', rev)
         (cls.sw_version, cls.hw_version, cls.output_count, cls.ocp_set,
          cls.solar, cls.solar_comp,  cls.canbus, ) = cls._rev_data[rev]
 
@@ -288,13 +290,13 @@ class J35B(J35):
         2: J35.values(
             sw_version=J35.sw_13, hw_version=(2, 2, 'D'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=False, solar_comp=False,
             canbus=False,
             ),
         1: J35.values(
             sw_version=J35.sw_13, hw_version=(1, 2, 'B'),
             output_count=14, ocp_set=35.0,
-            solar=True, solar_comp=False,
+            solar=False, solar_comp=False,
             canbus=False,
             ),
         }
