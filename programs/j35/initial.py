@@ -358,10 +358,9 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcs_solar'],
             sensor=self['arm_solar_status'],
             detect_limit=(self.limits['Solar-Status'], ),
-            start=13.0,
-            stop=high + 0.5,
-            step=0.25,
-            delay=1.0)
+            start=low - 0.1,
+            stop=high + 0.1,
+            step=0.05)
 
 
 class Measurements(share.Measurements):
