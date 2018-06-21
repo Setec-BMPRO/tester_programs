@@ -63,8 +63,8 @@ class _J35Initial(ProgramTestCase):
                     (sen['ovbat'], 13.5),
                     ),
                 'SolarComp': (
-                    (sen['arm_solar_status'], (False, ) * 7 + (True, ), ),
-                    (sen['arm_solar_status'], (False, ) * 5 + (True, ), ),
+                    (sen['arm_solar_status'], (False, ) * 30 + (True, ), ),
+                    (sen['arm_solar_status'], (False, ) * 20 + (True, ), ),
                     ),
                 'PowerUp': (
                     (sen['oacin'], 240.0),
