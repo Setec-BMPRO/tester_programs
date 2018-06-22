@@ -17,6 +17,11 @@ _CONSOLE_LOG_LEVEL = logging.DEBUG
 _LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
 
 
+class UUT():
+    """Simplified Unit Under Test class."""
+    lot = None
+
+
 def _main():
     """Run the Tester."""
     logger = logging.getLogger(__name__)
@@ -32,13 +37,17 @@ def _main():
     # Read settings from the configuration file
     config = configparser.ConfigParser()
     config.read(config_file)
+    tester_type = config['DEFAULT'].get('TesterType')
+    if tester_type is None:
+        tester_type = 'ATE3'
     test_program = config['DEFAULT'].get('Program')
     if test_program is None:
         test_program = 'Dummy'
     parameter = config['DEFAULT'].get('Parameter')
-    tester_type = config['DEFAULT'].get('TesterType')
-    if tester_type is None:
-        tester_type = 'ATE3'
+    sernum = config['DEFAULT'].get('Sernum')
+    if sernum is None:
+        sernum = 'A0000000001'
+    UUT.lot = sernum[:7]
     # Receive Test Result signals here
     def test_result(result):
         logger.info('Test Result: %s', result)
@@ -55,11 +64,10 @@ def _main():
     pgm = tester.TestProgram(
         test_program, per_panel=1, parameter=parameter)
     logger.info('Open Program "%s"', test_program)
-    tst.open(pgm)
+    tst.open(pgm, UUT)
     logger.info('Running Test')
     try:
-        tst.test(('UUT1', ))
-#         tst.test(('UUT1', 'UUT2', 'UUT3', 'UUT4', ))
+        tst.test((UUT, ))
     except Exception:
         exc_str = traceback.format_exc()
         logger.error('Test Run Exception:\n%s', exc_str)
