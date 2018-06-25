@@ -89,6 +89,17 @@ class _Console():
         'CAN_BIND': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000, mask=can_bound),
+        # Derating
+        'CONV_MAX': parameter.Float(
+            'MLC_MAX_CONVERTER_MW', writeable=True, scale=1000),
+        'CONV_RATED': parameter.Float(
+            'MLC_CONVERTER_RATED_MA', writeable=True, scale=1000),
+        'CONV_DERATED': parameter.Float(
+            'MLC_CONVERTER_DERATED_MA', writeable=True, scale=1000),
+        'CONV_FAULT': parameter.Float(
+            'MLC_CONVERTER_FAULT_MA', writeable=True, scale=1000),
+        'INHIBIT_BY_AUX': parameter.Boolean(
+            'LOAD_SWITCH_INHIBITED_BY_AUX', writeable=True),
         }
 
     def __init__(self, port):
@@ -176,6 +187,15 @@ class _Console():
 
         """
         return self['OCP_CAL']
+
+    def derate_A(self):
+        """Derate older J35A units (20A Model)."""
+        self['CONV_MAX'] = 288
+        self['CONV_RATED'] = 20.0
+        self['CONV_DERATED'] = 10.0
+        self['CONV_FAULT'] = 25.0
+        self['INHIBIT_BY_AUX'] = False
+        self['NVWRITE'] = True
 
 
 class DirectConsole(_Console, share.console.BadUart):

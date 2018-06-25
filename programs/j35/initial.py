@@ -43,6 +43,7 @@ class Initial(share.TestSequence):
             TestStep('CanBus', self._step_canbus, self.cfg.canbus),
             )
         self.sernum = None
+        self.derate = ((self.parameter == 'A') and (self.cfg.canbus == False))
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -70,6 +71,8 @@ class Initial(share.TestSequence):
         j35.open()
         j35.brand(self.cfg.hw_version, self.sernum, dev['rla_reset'])
         j35.manual_mode(start=True)     # Start the change to manual mode
+        if self.derate:     # Derate older version J35A units (Rev <8)
+            j35.derate_A()
         mes['arm_swver']()
 
     @share.teststep
