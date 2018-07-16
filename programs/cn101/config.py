@@ -3,6 +3,6 @@
 """CN101 Configuration."""
 
 # Software binary version
-SW_VERSION = '1.1.13665.176'
+SW_VERSION = '1.2.17835.298'
 # Hardware version
-HW_VERSION = (4, 0, 'A')
+HW_VERSION = (6, 0, 'A')
