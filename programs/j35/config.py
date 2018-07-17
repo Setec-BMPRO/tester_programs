@@ -54,11 +54,11 @@ class J35():
     # Load on each output channel
     load_per_output = 2.0
     # Test limits common to all tests and versions
-    _limits_all = (
+    _base_limits_all = (
         LimitRegExp('SwVer', '', doc='Software version'),
         )
     # Initial Test limits common to all versions
-    _limits_initial = _limits_all + (
+    _base_limits_initial = _base_limits_all + (
         LimitDelta('ACin', ac_volt, delta=5.0, doc='AC input voltage'),
         LimitDelta('Vbus', ac_volt * math.sqrt(2), delta=10.0,
             doc='Peak of AC input'),
@@ -119,7 +119,7 @@ class J35():
         LimitBoolean('DetectCal', True, doc='Solar comparator calibrated'),
         )
     # Final Test limits common to all versions
-    _limits_final = _limits_all + (
+    _base_limits_final = _base_limits_all + (
         LimitLow('FanOff', 1.0, doc='No airflow seen'),
         LimitHigh('FanOn', 10.0, doc='Airflow seen'),
         LimitDelta('Can12V', 12.5, delta=2.0, doc='CAN_POWER rail'),
@@ -230,7 +230,7 @@ class J35A(J35):
         @return Tuple of limits
 
         """
-        return super()._limits_initial + (
+        return super()._base_limits_initial + (
             LimitPercent(
                 'OCP_pre', cls.ocp_set,
                 (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 10.0),
@@ -246,7 +246,7 @@ class J35A(J35):
         @return Tuple of limits
 
         """
-        return super()._limits_final + (
+        return super()._base_limits_final + (
             LimitPercent('OCP', cls.ocp_set, (4.0, 10.0),
                     doc='OCP trip current'),
             )
@@ -301,7 +301,6 @@ class J35B(J35):
             ),
         }
 
-
     @classmethod
     def limits_initial(cls):
         """J35-B/C/D initial test limits.
@@ -309,7 +308,7 @@ class J35B(J35):
         @return Tuple of limits
 
         """
-        return super()._limits_initial + (
+        return super()._base_limits_initial + (
             LimitPercent(
                 'OCP_pre', cls.ocp_set,
                 (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
@@ -320,12 +319,12 @@ class J35B(J35):
 
     @classmethod
     def limits_final(cls):
-        """J35-B/C/D final test limits.
+        """J35-B/C final test limits.
 
         @return Tuple of limits
 
         """
-        return super()._limits_final + (
+        return super()._base_limits_final + (
             LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
                     doc='OCP trip current'),
             )
@@ -438,7 +437,7 @@ class J35D(J35C):
         @return Tuple of limits
 
         """
-        return super().limits_final() + (
+        return super()._base_limits_final + (
             LimitDelta('Vout', 14.0, delta=0.2,
                 doc='No load output voltage'),
             LimitPercent('Vload', 14.0, percent=5,
