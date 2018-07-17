@@ -122,7 +122,7 @@ class J35():
     _limits_final = _limits_all + (
         LimitLow('FanOff', 1.0, doc='No airflow seen'),
         LimitHigh('FanOn', 10.0, doc='Airflow seen'),
-        LimitDelta('Can12V', 12.0, delta=1.0, doc='CAN_POWER rail'),
+        LimitDelta('Can12V', 12.5, delta=2.0, doc='CAN_POWER rail'),
         LimitDelta('Vout', 12.8, delta=0.2, doc='No load output voltage'),
         LimitPercent('Vload', 12.8, percent=5,
             doc='Loaded output voltage'),
@@ -443,4 +443,6 @@ class J35D(J35C):
                 doc='No load output voltage'),
             LimitPercent('Vload', 14.0, percent=5,
                 doc='Loaded output voltage'),
+            LimitPercent('OCP', cls.ocp_set * (12.8 / 14.0), (4.0, 7.0),
+                    doc='OCP trip current'),
             )

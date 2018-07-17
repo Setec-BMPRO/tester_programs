@@ -14,6 +14,7 @@ class _J35Final(ProgramTestCase):
     prog_class = j35.Final
     sernum = 'A1626010123'
     parameter = None
+    vout = 12.7
 
     def setUp(self):
         """Per-Test setup."""
@@ -46,7 +47,7 @@ class _J35Final(ProgramTestCase):
                     (sen['can12v'], 12.0),
                     ),
                 'OCP': (
-                    (sen['vloads'][0], (12.7, ) * 20 + (11.0, ), ),
+                    (sen['vloads'][0], (self.vout, ) * 20 + (11.0, ), ),
                     ),
                 'CanCable': (
                     (sen['notifycable'], True),
@@ -54,12 +55,12 @@ class _J35Final(ProgramTestCase):
                 },
             UnitTester.key_call: {      # Callables
                 'PowerUp':
-                    (self._dmm_loads, 12.7),
+                    (self._dmm_loads, self.vout),
                 'CAN':
                     (self.test_program.sensors['swver'].store,
                         self.test_program.cfg.sw_version),
                 'Load':
-                    (self._dmm_loads, 12.7),
+                    (self._dmm_loads, self.vout),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
@@ -108,3 +109,4 @@ class J35_D_Final(J35_B_Final):
 
     parameter = 'D'
     debug = False
+    vout = 13.9

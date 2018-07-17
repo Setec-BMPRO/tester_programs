@@ -24,9 +24,8 @@ class Initial(share.TestSequence):
         Sensors.output_count = self.cfg.output_count
         Sensors.load_per_output = self.cfg.load_per_output
         Devices.sw_version = self.cfg.sw_version
-        tester.LimitDict.duplicate_error = False
+        self.duplicate_limit_error = False
         super().open(limits, Devices, Sensors, Measurements)
-        tester.LimitDict.duplicate_error = True
         self.limits['SwVer'].adjust(
             '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
         self.steps = (

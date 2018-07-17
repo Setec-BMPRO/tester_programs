@@ -31,6 +31,7 @@ class TestSequence(tester.TestSequence):
             True,
             doc='YES response'),
         )
+    duplicate_limit_error = False
 
     @abc.abstractmethod
     def open(self, limits, cls_devices, cls_sensors, cls_measurements):
@@ -43,7 +44,8 @@ class TestSequence(tester.TestSequence):
 
         """
         super().open()
-        self.limits = tester.LimitDict(self.limit_builtin + limits)
+        self.limits = tester.LimitDict(
+            self.limit_builtin + limits, self.duplicate_limit_error)
         self.devices = cls_devices(self.physical_devices)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
