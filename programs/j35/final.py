@@ -18,7 +18,9 @@ class Final(share.TestSequence):
         self.cfg = config.J35.select(self.parameter, uut)
         limits = self.cfg.limits_final()
         Sensors.output_count = self.cfg.output_count
+        tester.LimitDict.duplicate_error = False
         super().open(limits, Devices, Sensors, Measurements)
+        tester.LimitDict.duplicate_error = True
         self.limits['SwVer'].adjust(
             '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
         self.steps = (
