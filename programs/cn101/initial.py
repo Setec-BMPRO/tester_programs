@@ -6,10 +6,6 @@ import os
 import inspect
 import serial
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitRegExp, LimitBoolean, LimitDelta, LimitPercent, LimitInteger
-    )
 import share
 from . import console
 from . import config
@@ -19,32 +15,22 @@ class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
 
-    # ARM software image file
-    arm_file = 'cn101_{0}.bin'.format(config.SW_VERSION)
-    # Test limits
-    limitdata = (
-        LimitLow('Part', 20.0),
-        LimitDelta('Vin', 8.0, 0.5),
-        LimitPercent('3V3', 3.30, 3.0),
-        LimitInteger('CAN_BIND', 1 << 28),
-        LimitRegExp(
-            'SwVer', '^{0}$'.format(config.SW_VERSION.replace('.', r'\.'))),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
-        LimitBoolean('DetectBT', True),
-        LimitInteger('Tank', 5),
-        )
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.CN101.select(uut)
+        limits = self.cfg.limits_initial
+        Devices.sw_version = self.cfg.sw_version
+        super().open(limits, Devices, Sensors, Measurements)
+        self.limits['SwVer'].adjust(
+            '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
         self.steps = (
-            TestStep('PartCheck', self._step_part_check),
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self.devices['programmer'].program),
-            TestStep('TestArm', self._step_test_arm),
-            TestStep('TankSense', self._step_tank_sense),
-            TestStep('Bluetooth', self._step_bluetooth),
-            TestStep('CanBus', self._step_canbus),
+            tester.TestStep('PartCheck', self._step_part_check),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self.devices['programmer'].program),
+            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('TankSense', self._step_tank_sense),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
 
@@ -65,7 +51,7 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         cn101 = dev['cn101']
         cn101.open()
-        cn101.brand(config.HW_VERSION, self.sernum, dev['rla_reset'])
+        cn101.brand(self.cfg.hw_version, self.sernum, dev['rla_reset'])
         mes['cn101_swver']()
 
     @share.teststep
@@ -108,6 +94,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    sw_version = None   # ARM software version
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -129,7 +117,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, Initial.arm_file),
+            os.path.join(folder, 'cn101_{0}.bin'.format(self.sw_version)),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
