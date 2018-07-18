@@ -10,7 +10,7 @@ class _Console():
     """Base class for a CN101 console."""
 
     # Number of lines in startup banner
-    banner_lines = 0
+    banner_lines = 2
     parameter = share.console.parameter
     cmd_data = {
         'UNLOCK': parameter.Boolean(
