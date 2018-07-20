@@ -9,8 +9,6 @@ class _Console():
 
     """Base class for a CN101 console."""
 
-    # Number of lines in startup banner
-    banner_lines = 2
     parameter = share.console.parameter
     cmd_data = {
         'UNLOCK': parameter.Boolean(
@@ -43,10 +41,10 @@ class _Console():
         'ADC_SCAN': parameter.Float('ADC_SCAN_INTERVAL_MSEC', writeable=True),
         }
 
-    def brand(self, hw_ver, sernum, reset_relay):
+    def brand(self, hw_ver, sernum, reset_relay, banner_lines):
         """Brand the unit with Hardware ID & Serial Number."""
         reset_relay.pulse(0.1)
-        self.action(None, delay=1.5, expected=self.banner_lines)
+        self.action(None, delay=1.5, expected=banner_lines)
         self['UNLOCK'] = True
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum

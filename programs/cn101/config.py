@@ -34,12 +34,13 @@ class CN101():
         ))
     # Revision data dictionary
     _rev_data = {
-        None: ('1.2.17835.298', (6, 0, 'A'), ),         # CN101T (Rev 6)
-        5: ('1.1.13665.176', (5, 0, 'A'), ),            # CN101 (Rev 1-5)
+        None: ('1.2.17835.298', (6, 0, 'A'), 2),         # CN101T (Rev 6)
+        5: ('1.1.13665.176', (5, 0, 'A'), 0),            # CN101 (Rev 1-5)
         }
     # These values get set per revision by select()
     sw_version = None
     hw_version = None
+    banner_lines = None
 
     @classmethod
     def select(cls, uut):
@@ -57,5 +58,5 @@ class CN101():
             except share.lots.LotError:
                 pass
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        cls.sw_version, cls.hw_version = cls._rev_data[rev]
+        cls.sw_version, cls.hw_version, cls.banner_lines = cls._rev_data[rev]
         return cls

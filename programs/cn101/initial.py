@@ -51,7 +51,9 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         cn101 = dev['cn101']
         cn101.open()
-        cn101.brand(self.cfg.hw_version, self.sernum, dev['rla_reset'])
+        cn101.brand(
+            self.cfg.hw_version, self.sernum, dev['rla_reset'],
+            self.cfg.banner_lines)
         mes['cn101_swver']()
 
     @share.teststep
@@ -181,6 +183,14 @@ class Sensors(share.Sensors):
                 ('tank4', 'TANK4'),
             ):
             self[name] = share.console.Sensor(cn101, cmdkey)
+
+        self['tank1-4'] = (
+            share.console.Sensor(cn101tunnel, 'TANK1'),
+            share.console.Sensor(cn101tunnel, 'TANK2'),
+            share.console.Sensor(cn101tunnel, 'TANK3'),
+            share.console.Sensor(cn101tunnel, 'TANK4'),
+            )
+
         for device, name, cmdkey in (
                 (cn101, 'oSwVer', 'SW_VER'),
                 (cn101, 'oBtMac', 'BT_MAC'),
