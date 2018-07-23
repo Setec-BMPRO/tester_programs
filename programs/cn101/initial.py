@@ -65,7 +65,8 @@ class Initial(share.TestSequence):
              ('rla_s3', True), ('rla_s4', True), ),
             delay=0.2)
         self.measure(
-            ('cn101_s1', 'cn101_s2', 'cn101_s3', 'cn101_s4'), timeout=5)
+            ('tank1_level', 'tank2_level', 'tank3_level', 'tank4_level'),
+            timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -183,14 +184,6 @@ class Sensors(share.Sensors):
                 ('tank4', 'TANK4'),
             ):
             self[name] = share.console.Sensor(cn101, cmdkey)
-
-        self['tank1-4'] = (
-            share.console.Sensor(cn101tunnel, 'TANK1'),
-            share.console.Sensor(cn101tunnel, 'TANK2'),
-            share.console.Sensor(cn101tunnel, 'TANK3'),
-            share.console.Sensor(cn101tunnel, 'TANK4'),
-            )
-
         for device, name, cmdkey in (
                 (cn101, 'oSwVer', 'SW_VER'),
                 (cn101, 'oBtMac', 'BT_MAC'),
@@ -216,10 +209,10 @@ class Measurements(share.Measurements):
             ('ui_serialnum', 'SerNum', 'oSnEntry', ''),
             ('cn101_swver', 'SwVer', 'oSwVer', ''),
             ('cn101_btmac', 'BtMac', 'oBtMac', ''),
-            ('cn101_s1', 'Tank', 'tank1', ''),
-            ('cn101_s2', 'Tank', 'tank2', ''),
-            ('cn101_s3', 'Tank', 'tank3', ''),
-            ('cn101_s4', 'Tank', 'tank4', ''),
+            ('tank1_level', 'Tank', 'tank1', ''),
+            ('tank2_level', 'Tank', 'tank2', ''),
+            ('tank3_level', 'Tank', 'tank3', ''),
+            ('tank4_level', 'Tank', 'tank4', ''),
             ('cn101_can_bind', 'CAN_BIND', 'oCANBIND', ''),
             ('TunnelSwVer', 'SwVer', 'TunnelSwVer', ''),
             ))
