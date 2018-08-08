@@ -39,7 +39,7 @@ class Initial(share.TestSequence):
         LimitLow('RedLedOff', 1.0, doc='Led off'),
         LimitDelta('RedLedOn', 1.8, 0.14, doc='Led on'),
         LimitLow('GreenLedOff', 1.0, doc='Led off'),
-        LimitDelta('GreenLedOn', 2.5, 0.14, doc='Led on'),
+        LimitDelta('GreenLedOn', 2.5, 0.4, doc='Led on'),
         LimitLow('BlueLedOff', 1.0, doc='Led off'),
         LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
