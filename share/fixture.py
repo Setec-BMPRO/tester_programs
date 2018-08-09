@@ -86,10 +86,10 @@ DATA = {
         'ARM': {'posix': '/dev/ttyUSB2', 'nt': SETEC_FTDI_HUB[2]}[os.name],
         },
     '022837': {     # SX-750 Initial
+        # Hub port 1: SETEC FTDI
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[1]}[os.name],
         # Hub port 2: Arduino
         'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
-        # Hub port 3: SETEC FTDI
-        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[3]}[os.name],
         },
     '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
         # Hub port 1: SETEC FTDI
