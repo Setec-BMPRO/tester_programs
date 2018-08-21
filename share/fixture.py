@@ -75,7 +75,7 @@ DATA = {
 
     # Fixtures with a USB Hub
 
-    '017789': {     # CMR-SBP Initial
+    '017789': {     # CMR-SBP Initial (Prolific)
         'EV': {'posix': '/dev/ttyUSB1', 'nt': 'COM21'}[os.name],
         'CMR': {'posix': '/dev/ttyUSB2', 'nt': 'COM22'}[os.name],
         },

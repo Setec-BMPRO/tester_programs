@@ -23,8 +23,8 @@ class Initial(share.TestSequence):
     vbrake_offset = 0.3
     # Brake current
     ibrake = 1.0
-    # Test limits
-    limitdata = (
+    # Common limits
+    _common = (
         LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
         LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
         LimitLow('BrakeOff', 0.5, doc='Brakes off'),
@@ -62,10 +62,27 @@ class Initial(share.TestSequence):
             doc='Valid MAC address '),
         LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
+    # Variant specific configuration data. Indexed by test program parameter.
+    config_data = {
+        'STD': {
+            'Limits': _common + (
+                LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
+                LimitLow('RemoteOff', 0.5, doc='Remote off'),
+                ),
+            },
+        'AS': {
+            'Limits': _common + (
+                LimitLow('RemoteOn', 0.5, doc='Not applicable'),
+                LimitLow('RemoteOff', 0.5, doc='Not applicable'),
+                ),
+            },
+        }
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().open(
+            self.config_data[self.parameter]['Limits'],
+            Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
             TestStep('Operation', self._step_operation),

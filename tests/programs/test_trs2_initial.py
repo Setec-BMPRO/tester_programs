@@ -7,7 +7,7 @@ from ..data_feed import UnitTester, ProgramTestCase
 from programs import trs2
 
 
-class TRSInitial(ProgramTestCase):
+class _CommonInitial(ProgramTestCase):
 
     """TRS2 Initial program test suite."""
 
@@ -28,7 +28,7 @@ class TRSInitial(ProgramTestCase):
         patcher.start()
         super().setUp()
 
-    def test_pass_run(self):
+    def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
@@ -42,7 +42,7 @@ class TRSInitial(ProgramTestCase):
                     ),
                 'Operation': (
                     (sen['light'], (11.9, 0.0)),
-                    (sen['remote'], (11.9, 0.0)),
+                    (sen['remote'], (self.remote_out, 0.0)),
                     (sen['red'], (0.0, 1.8, 0.0)),
                     (sen['green'], (0.0, 2.5, 0.0)),
                     (sen['blue'], (0.0, 2.8, 0.0)),
@@ -69,3 +69,27 @@ class TRSInitial(ProgramTestCase):
         self.assertEqual(
             ['Prepare', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)
+
+
+class TRS2_Initial(_CommonInitial):
+
+    """TRS2 Initial program test suite."""
+
+    parameter = 'STD'
+    debug = False
+    remote_out = 11.9
+
+    def test_pass_run(self):
+        super()._pass_run()
+
+
+class TRS2_AS_Initial(_CommonInitial):
+
+    """TRS2 AS Initial program test suite."""
+
+    parameter = 'AS'
+    debug = False
+    remote_out = 0.0
+
+    def test_pass_run(self):
+        super()._pass_run()
