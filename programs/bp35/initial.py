@@ -194,9 +194,10 @@ class Initial(share.TestSequence):
         """
         dev['program_arm'].program()
         if not self.pm:
-            # PIC programming should be finished by now
-            dev['program_pic'].program_wait()
-            dev['SR_LowPower'].output(0.0)
+            with tester.PathName('PICcheck'):
+                # PIC programming should be finished by now
+                dev['program_pic'].program_wait()
+                dev['SR_LowPower'].output(0.0)
         # Cold Reset microprocessor for units that were already programmed
         # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
