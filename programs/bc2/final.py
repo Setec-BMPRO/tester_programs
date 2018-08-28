@@ -69,7 +69,8 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev.pi_bt.open(self.sernum)
+        dev.pi_bt.open(
+            self.sernum, passkey=console.Console.passkey(self.sernum))
         mes['arm_swver']()
 
     @share.teststep

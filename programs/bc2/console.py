@@ -26,5 +26,35 @@ class Console(share.console.SamB11):
             'STC3100_CURRENT_OFFSET', write_expected=1),
         'SHUNT_RES_CAL': parameter.Calibration(
             'SHUNT_R_NOHMS', write_expected=1),
+        # Passkey command
+        'PASSKEY': parameter.String(
+            'PASSKEY', read_format='{0}?',
+            writeable=True, write_format='"{0} SET-{1}'),
         }
     override_commands = ()
+
+    def brand(self, hw_ver, sernum):
+        """Brand the unit with Hardware ID & Serial Number.
+
+        @param hw_ver Hardware Version Tuple(Major, Minor, Rev)
+        @param sernum Serial Number
+
+        """
+        super().brand(hw_ver, sernum)
+        self['PASSKEY'] = self.passkey(sernum)
+        self['NVWRITE'] = True
+
+    @staticmethod
+    def passkey(sernum):
+        """Calculate the Passkey from the Serial Number.
+
+        @param sernum Serial Number
+        @return 6 digit passkey
+
+        """
+        hash_start, hash_mult = 56210, 29
+        hash = hash_start
+        for char in sernum[::-1]:
+            hash = ((hash * hash_mult) & 0xFFFFFF) ^ ord(char)
+        hash = hash % 1000000
+        return '{0:06}'.format(hash)
