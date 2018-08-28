@@ -116,14 +116,15 @@ class RaspberryBluetooth(SerialIO):
         """
         return self.server.scan_blemac(sernum, timeout)
 
-    def open(self, device_id, timeout=10):
+    def open(self, device_id, timeout=10, passkey=None):
         """Open a connection to a device console.
 
         @param device_id Serial Number OR MAC address to connect to
         @param timeout Timeout in seconds
+        @param passkey Device passkey string
 
         """
-        self.server.open(device_id, timeout)
+        self.server.open(device_id, timeout, passkey)
 
     def action(self, command, timeout=60):
         """Command-Response to an open console.
