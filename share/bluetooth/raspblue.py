@@ -134,14 +134,25 @@ class RaspberryBluetooth(SerialIO):
         @return Response from the command call
 
         """
-        # The CAL commands return 2 responses and 2 prompts
-        prompts = 2 if command.endswith(self.cal_command) else 1
+#        # BC2 Rev 4: The CAL commands return response-prompt-response-prompt
+#        prompts = 2 if command.endswith(self.cal_command) else 1
+#        reply = self.server.action(command, prompts, timeout)
+#        lines = reply.splitlines()
+#        # CAL command: skip command echo line & 1st response (3 lines)
+#        # Other commands: skip command echo line
+#        firstline = 3 if prompts == 2 else 1
+#        reply = '\r\n'.join(lines[firstline:])
+
+        # BC2 Rev 5: The CAL commands return response-response-prompt
+        is_cal = command.endswith(self.cal_command)
+        prompts = 1
         reply = self.server.action(command, prompts, timeout)
         lines = reply.splitlines()
         # CAL command: skip command echo line & 1st response (2 lines)
         # Other commands: skip command echo line
-        firstline = 3 if prompts == 2 else 1
+        firstline = 2 if is_cal else 1
         reply = '\r\n'.join(lines[firstline:])
+
         return reply
 
     def close(self):

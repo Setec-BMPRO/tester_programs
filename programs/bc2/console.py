@@ -21,9 +21,9 @@ class Console(share.console.SamB11):
         'BATT_I': parameter.Float('CURRENT_MA', scale=-1000),
         # Calibration commands
         'BATT_V_CAL': parameter.Calibration(
-            'STC3100_VOLTAGE_LSB_UV', write_expected=1),
+            'STC3100_VOLTAGE_LSB_UV', write_expected=2),
         'ZERO_I_CAL': parameter.Calibration(
-            'STC3100_CURRENT_OFFSET', write_expected=1),
+            'STC3100_CURRENT_OFFSET', write_expected=2),
         'SHUNT_RES_CAL': parameter.Calibration(
             'SHUNT_R_NOHMS', write_expected=1),
         # Passkey command

@@ -96,10 +96,10 @@ class Initial(share.TestSequence):
         dmm_v = mes['dmm_vin'].stable(delta=0.001).reading1
         mes['arm_vbatt'].testlimit[0].adjust(nominal=dmm_v)
         bc2['BATT_V_CAL'] = dmm_v
-        mes['detectCAL'].sensor.store(bc2.action(expected=1))
+        mes['detectCAL'].sensor.store(bc2['LAST_RESPONSE?'][1])
         self.measure(('detectCAL', 'arm_vbatt'))
         bc2['ZERO_I_CAL'] = 0
-        mes['detectCAL'].sensor.store(bc2.action(expected=1))
+        mes['detectCAL'].sensor.store(bc2['LAST_RESPONSE?'][1])
         self.measure(
             ('detectCAL', 'arm_ioffset', 'arm_ibattzero', 'arm_vbattlsb'))
         bc2['NVWRITE'] = True
