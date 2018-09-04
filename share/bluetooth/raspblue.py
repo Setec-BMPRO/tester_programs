@@ -114,7 +114,7 @@ class RaspberryBluetooth(SerialIO):
         @return True if device was found
 
         """
-        return self.server.scan_blemac(sernum, timeout)
+        return self.server.scan_sernum(sernum, timeout)
 
     def open(self, device_id, timeout=10, passkey=None):
         """Open a connection to a device console.
