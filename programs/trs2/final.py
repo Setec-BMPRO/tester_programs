@@ -8,7 +8,6 @@ from tester import (
     LimitDelta, LimitBoolean
     )
 import share
-from . import console
 
 
 class Final(share.TestSequence):
@@ -61,7 +60,7 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Bluetooth connection to the console
+        # Bluetooth connection to server
         self.pi_bt = share.bluetooth.RaspberryBluetooth()
 
     def reset(self):
