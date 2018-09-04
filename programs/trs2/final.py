@@ -63,8 +63,6 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         # Bluetooth connection to the console
         self.pi_bt = share.bluetooth.RaspberryBluetooth()
-        # Bluetooth console driver
-        self['trs2'] = console.Console(self.pi_bt)
 
     def reset(self):
         """Reset instruments."""
