@@ -5,11 +5,10 @@
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitRegExp
+    LimitDelta, LimitBoolean
     )
 import share
 from . import console
-from . import config
 
 
 class Final(share.TestSequence):
@@ -21,9 +20,7 @@ class Final(share.TestSequence):
     # Test limits
     limitdata = (
         LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
-        LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
-            doc='Software version'),
+        LimitBoolean('ScanSer', True, doc='Serial number detected'),
         )
 
     def open(self, uut):
@@ -45,11 +42,11 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self._logger.debug('Open bluetooth connection to console of unit '
-                           'with serial: "%s"', self.sernum)
-        dev.pi_bt.open(self.sernum)
-        self._logger.debug('Send a command to the console')
-        mes['arm_swver']()
+        self._logger.debug(
+                'Scan for serial number via bluetooth: "%s"', self.sernum)
+        reply = dev.pi_bt.scan_sernum(self.sernum)
+        mes['scan_ser'].sensor.store(reply)
+        mes['scan_ser']()
 
 
 class Devices(share.Devices):
@@ -89,10 +86,7 @@ class Sensors(share.Sensors):
             message=tester.translate('trs2_final', 'msgSnEntry'),
             caption=tester.translate('trs2_final', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
-        # Console sensors
-        trs2 = self.devices['trs2']
-        self['arm_swver'] = share.console.Sensor(
-            trs2, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['mirscan'] = sensor.Mirror()
 
 
 class Measurements(share.Measurements):
@@ -104,6 +98,6 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
-            ('arm_swver', 'ARM-SwVer', 'arm_swver',
-                'Detect SW Ver over bluetooth'),
+            ('scan_ser', 'ScanSer', 'mirscan',
+                'Scan for serial number over bluetooth'),
             ))
