@@ -29,13 +29,15 @@ class CN101():
     # Lot Number to Revision data
     _lot_rev = share.lots.Revision((
         # Rev 1-4: No Production
-        (share.lots.Range('A164207', 'A182702'), 5),    # 029431
+# MA-239: Upgrade all units to CN101T, so treat them as Rev 6
+#        (share.lots.Range('A164207', 'A182702'), 5),    # 029431
         # Rev 6... Rev 5 units built as Rev 6 under PC
         ))
     # Revision data dictionary
     _rev_data = {
         None: ('1.2.17835.298', (6, 0, 'A'), 2),         # CN101T (Rev 6)
-        5: ('1.1.13665.176', (5, 0, 'A'), 0),            # CN101 (Rev 1-5)
+# MA-239: Upgrade all units to CN101T, so treat them as Rev 6
+#        5: ('1.1.13665.176', (5, 0, 'A'), 0),            # CN101 (Rev 1-5)
         }
     # These values get set per revision by select()
     sw_version = None

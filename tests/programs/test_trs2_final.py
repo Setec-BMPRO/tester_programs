@@ -35,7 +35,7 @@ class TRSFinal(ProgramTestCase):
                     (sen['vin'], 12.0),
                     ),
                 'Bluetooth': (
-                    (sen['arm_swver'], trs2.config.SW_VERSION),
+                    (sen['mirscan'], True),
                     ),
                 },
             }

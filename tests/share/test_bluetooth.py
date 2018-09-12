@@ -83,10 +83,10 @@ class RaspberryBluetooth(unittest.TestCase):
         response = 'response\r\n> '
         # Simulate RPC server echo of the CAL command
         self.server.action.return_value = (
-            command + '\r\njunk line\r\n> \r\n' + response
+            command + '\r\njunk line\r\n' + response
             )
         reply = self.pibt.action(command)
-        self.server.action.assert_called_with(command, 2, 60)
+        self.server.action.assert_called_with(command, 1, 60)
         self.assertEqual(response, reply)
 
     def test_write_read_cmd(self):
