@@ -13,7 +13,7 @@ class SX750Initial(ProgramTestCase):
 
     prog_class = sx750.Initial
     parameter = None
-    debug = False
+    debug = True
 
     def setUp(self):
         """Per-Test setup."""
@@ -40,8 +40,8 @@ class SX750Initial(ProgramTestCase):
                 'Program': (
                     (sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], (5.0,) * 2),
                     (sen['o3V3'], 3.21), (sen['o8V5Ard'], 8.5),
-                    (sen['PriCtl'], 12.34), (sen['pgm5Vsb'], 0),
-                    (sen['pgmPwrSw'], 0), (sen['ocpMax'], 0),
+                    (sen['PriCtl'], 12.34), (sen['pgm5Vsb'], 'OK'),
+                    (sen['pgmPwrSw'], 'OK'), (sen['ocpMax'], 0),
                     ),
                 'Initialise': ((sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], 5.0), ),
                 'PowerUp': (
@@ -91,7 +91,7 @@ class SX750Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(53, len(result.readings))
+        self.assertEqual(55, len(result.readings))
         self.assertEqual(
             ['PartDetect', 'Program', 'Initialise', 'PowerUp',
              '5Vsb', '12V', '24V', 'PeakPower'],

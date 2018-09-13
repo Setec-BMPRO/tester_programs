@@ -556,7 +556,6 @@ class Measurements(share.Measurements):
         # Suppress signals on these measurements.
         for name in (
                 'dmm_12V_inOCP', 'dmm_24V_inOCP',
-                'pgm_5vsb', 'pgm_pwrsw',
                 'ocp_max', 'ocp12_unlock', 'ocp24_unlock',
                 'ocp_step_dn', 'ocp_lock',
                 ):
