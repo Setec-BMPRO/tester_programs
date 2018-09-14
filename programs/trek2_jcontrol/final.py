@@ -77,7 +77,7 @@ class Final(share.TestSequence):
         self.measure(('sw_ver', 'ui_yesnoseg', 'ui_yesnobklght', ))
         # Set unit internal Serial Number to match the outside label
         unit.set_sernum(self.sernum)
-        unit.testmode(False)
+#        unit.testmode(False)
 
     @share.teststep
     def _step_test_tanks(self, dev, mes):
@@ -86,16 +86,18 @@ class Final(share.TestSequence):
         unit['CONFIG'] = 0x7E00         # Enable all 4 tanks
         unit['TANK_SPEED'] = 0.1        # Change update interval
         # No sensors - Tanks empty
+        dev['rla_s1'].set_off(delay=1)
         tester.MeasureGroup(mes['arm_level1'], timeout=12)
         # 1 sensor
-        dev['rla_s1'].set_on()
+        dev['rla_s1'].set_on(delay=1)
         tester.MeasureGroup(mes['arm_level2'], timeout=12)
         # 2 sensors
-        dev['rla_s2'].set_on()
+        dev['rla_s2'].set_on(delay=1)
         tester.MeasureGroup(mes['arm_level3'], timeout=12)
         # 3 sensors
-        dev['rla_s3'].set_on()
+        dev['rla_s3'].set_on(delay=1)
         tester.MeasureGroup(mes['arm_level4'], timeout=12)
+        unit.testmode(False)
 
     @staticmethod
     def send_preconditions(serial2can):
