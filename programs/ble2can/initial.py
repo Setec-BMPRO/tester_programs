@@ -26,10 +26,10 @@ class Initial(share.TestSequence):
         LimitPercent('5V', 5.0, 0.5, doc='5V present'),
         LimitHigh('RedLedOff', 3.1, doc='Led off'),
         LimitDelta('RedLedOn', 0.45, 0.05, doc='Led on'),
+        LimitHigh('BlueLedOff', 3.1, doc='Led off'),
+        LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
         LimitHigh('GreenLedOff', 3.1, doc='Led off'),
         LimitLow('GreenLedOn', 0.2, doc='Led on'),
-        LimitHigh('BlueLedOff', 3.1, doc='Led off'),
-        LimitDelta('BlueLedOn', 0.3, 0.05, doc='Led on'),
         LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         LimitRegExp('SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
@@ -71,14 +71,14 @@ class Initial(share.TestSequence):
         ble2can.open()
         ble2can.brand(config.HW_VERSION, self.sernum)
         self.measure(
-            ('SwVer', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
+            ('SwVer', 'dmm_redoff', 'dmm_blueoff', 'dmm_greenoff'),
             timeout=5)
         ble2can.override(share.console.parameter.OverrideTo.force_on)
         self.measure(
-            ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
+            ('dmm_redon', 'dmm_blueon', 'dmm_greenon'), timeout=5)
         ble2can.override(share.console.parameter.OverrideTo.force_off)
         self.measure(
-            ('dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'), timeout=5)
+            ('dmm_redoff' , 'dmm_blueoff', 'dmm_greenoff'), timeout=5)
         ble2can.override(share.console.parameter.OverrideTo.normal)
 
     @share.teststep
