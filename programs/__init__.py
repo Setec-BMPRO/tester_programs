@@ -20,6 +20,7 @@ from . import cn101
 from . import drifter
 from . import etrac
 from . import gen8
+from . import gen9
 from . import genius2
 from . import gsu360
 from . import ids500
@@ -81,6 +82,8 @@ PROGRAMS = {
     'Etrac-II Initial': etrac.Initial,
     'GEN8 Final': gen8.Final,
     'GEN8 Initial': gen8.Initial,
+    'GEN9 Final': gen9.Final,
+    'GEN9 Initial': gen9.Initial,
     'GENIUS-II Final': genius2.Final,
     'GENIUS-II Initial': genius2.Initial,
     'GSU360-1TA Final': gsu360.Final,
