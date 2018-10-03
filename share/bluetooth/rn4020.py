@@ -96,7 +96,11 @@ class BleRadio():
             if data[0] == mac_str:
                 timer.cancel()
                 found = True
-        self._cmdresp(self.cmd_scan_stop)
+        try:
+            self.port.flushInput()
+            self._cmdresp(self.cmd_scan_stop)
+        except BluetoothError:  # A device line before AOK can cause this
+            pass
         return found
 
     def _log(self, message):
