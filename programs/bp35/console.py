@@ -176,7 +176,6 @@ class _Console():
             self['IOUT'] = iout
             self['VOUT'] = vout
             self['VOUT_OV'] = 2     # OVP Latch reset
-            self['FAN'] = 0
 
     def power_on(self):
         """Power ON the converter circuits."""

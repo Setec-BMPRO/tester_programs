@@ -156,8 +156,6 @@ class Initial(share.TestSequence):
             TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
-#        for mes in self.measurements:
-#            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -230,6 +228,7 @@ class Initial(share.TestSequence):
             bp35['PM_RELAY'] = True
             dev['PmTimer'].start(self.pm_zero_wait)
         bp35.manual_mode(start=True)    # Start the change to manual mode
+        bp35['FAN'] = 0
 
     @share.teststep
     def _step_sr_solar(self, dev, mes):
