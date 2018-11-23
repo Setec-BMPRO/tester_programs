@@ -34,7 +34,7 @@ class Sensor(tester.sensor.Sensor):
         if self._rdgtype is tester.sensor.Reading:
             value = float(value) * self.scale
         rdg = self._rdgtype(value, position=self.position)
-        return (self.on_read(rdg), )
+        return (rdg, )
 
     def __str__(self):
         """Sensor as a string.
