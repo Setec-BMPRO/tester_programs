@@ -131,3 +131,53 @@ class ARM():
             if self._boot_relay:
                 self._boot_relay.set_off()
         self.measurement()
+
+
+class Nordic():
+
+    """Nordic Semiconductors programmer using a NRF52."""
+
+    pic_binary = {          # Executable to use
+        'posix': 'nrfjprog',
+        'nt': r'C:\Program Files\Nordic Semiconductor\nrf5x\bin\nrfjprog.exe',
+        }[os.name]
+    limitname = 'Program'   # Testlimit name to use
+
+    def __init__(self, hexfile, working_dir):
+        """Create a programmer.
+
+        @param hexfile HEX filename
+        @param working_dir Working directory
+
+        """
+        self.hexfile = hexfile
+        self.working_dir = working_dir
+        self.measurement = tester.Measurement(
+            tester.LimitInteger(
+                self.limitname, 0, doc='Programming succeeded'),
+            tester.sensor.Mirror()
+            )
+        self.process = None
+
+    def program(self):
+        """Program a device and return when finished."""
+        self.program_begin()
+        self.program_wait()
+
+    def program_begin(self):
+        """Begin device programming."""
+        command = [
+            self.pic_binary,
+            '-f',
+                'NRF52',
+            '--chiperase',
+            '--program',
+                '{0}'.format(self.hexfile),
+            '--verify',
+            ]
+        self.process = subprocess.Popen(command, cwd=self.working_dir)
+
+    def program_wait(self):
+        """Wait for device programming to finish."""
+        self.measurement.sensor.store(self.process.wait())
+        self.measurement()
