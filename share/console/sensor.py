@@ -19,9 +19,6 @@ class Sensor(tester.sensor.Sensor):
         self.key = key
         self._rdgtype = rdgtype
         self.scale = scale
-        self.on_read = None     # Callback for read() to use
-        self._doc = None        # Optional documentation string
-        self.units = None       # Optional unit of measured value
 
     def configure(self):
         """Configure measurement."""
@@ -37,9 +34,7 @@ class Sensor(tester.sensor.Sensor):
         if self._rdgtype is tester.sensor.Reading:
             value = float(value) * self.scale
         rdg = self._rdgtype(value, position=self.position)
-        if self.on_read is not None:
-            rdg = self.on_read(rdg)
-        return (rdg, )
+        return (self.on_read(rdg), )
 
     def __str__(self):
         """Sensor as a string.

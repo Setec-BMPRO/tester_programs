@@ -23,7 +23,7 @@ class J35A_Config(unittest.TestCase):
             ('A172000', (2, 1, 'B'), cfg.sw_13, False, ),
             ('A180000', (8, 1, 'C'), cfg.sw_15, True, ),
             ('A181500', (9, 1, 'B'), cfg.sw_15, True, ),
-            ('A999999', (10, 1, 'A'), cfg.sw_15, True, ),
+            ('A999999', (11, 1, 'A'), cfg.sw_15, True, ),
             )
         for uut, hw_version, sw_version, canbus in checks:
             uut = UUT(uut)
@@ -45,7 +45,7 @@ class J35B_Config(unittest.TestCase):
             ('A172000', (2, 2, 'D'), cfg.sw_13, False, ),
             ('A180000', (8, 2, 'C'), cfg.sw_15, True, ),
             ('A181500', (9, 2, 'B'), cfg.sw_15, True, ),
-            ('A999999', (10, 2, 'A'), cfg.sw_15, True, ),
+            ('A999999', (11, 2, 'A'), cfg.sw_15, True, ),
             )
         for uut, hw_version, sw_version, canbus in checks:
             uut = UUT(uut)
@@ -68,7 +68,7 @@ class J35C_Config(unittest.TestCase):
             ('A172000', (7, 3, 'C'), cfg.sw_15, ),
             ('A180000', (8, 3, 'C'), cfg.sw_15, ),
             ('A181500', (9, 3, 'B'), cfg.sw_15, ),
-            ('A999999', (10, 3, 'A'), cfg.sw_15, ),
+            ('A999999', (11, 3, 'A'), cfg.sw_15, ),
             )
         for uut, hw_version, sw_version in checks:
             uut = UUT(uut)
@@ -99,7 +99,7 @@ class J35D_Config(unittest.TestCase):
         cfg = j35.config.J35D()
         checks = (
             ('A181500', (9, 4, 'B'), cfg.sw_15, ),
-            ('A999999', (10, 4, 'A'), cfg.sw_15, ),
+            ('A999999', (11, 4, 'A'), cfg.sw_15, ),
             )
         for uut, hw_version, sw_version in checks:
             uut = UUT(uut)

@@ -191,7 +191,7 @@ class Base():
                 self.port.timeout = port_timeout
                 if len(data) > 0:
                     self._logger.error('Console Error extra data: %s', data)
-                # Generate a Measurement fialure
+                # Generate a Measurement failure
                 self._logger.debug('Caught Error: "%s"', err)
                 comms = tester.Measurement(
                     tester.LimitRegExp('Action', 'ok', doc='Command succeeded'),

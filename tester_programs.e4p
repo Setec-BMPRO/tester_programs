@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2018-09-05, 20:30:38 -->
+<!-- Saved: 2018-11-23, 14:43:57 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -65,6 +65,10 @@
     <Source>programs/cn101/config.py</Source>
     <Source>programs/cn101/console.py</Source>
     <Source>programs/cn101/initial.py</Source>
+    <Source>programs/cn102/__init__.py</Source>
+    <Source>programs/cn102/config.py</Source>
+    <Source>programs/cn102/console.py</Source>
+    <Source>programs/cn102/initial.py</Source>
     <Source>programs/drifter/__init__.py</Source>
     <Source>programs/drifter/console.py</Source>
     <Source>programs/drifter/final.py</Source>
@@ -192,6 +196,7 @@
     <Source>tests/programs/test_c45a15_initial.py</Source>
     <Source>tests/programs/test_cmrsbp.py</Source>
     <Source>tests/programs/test_cn101_initial.py</Source>
+    <Source>tests/programs/test_cn102_initial.py</Source>
     <Source>tests/programs/test_drifter_final.py</Source>
     <Source>tests/programs/test_drifter_initial.py</Source>
     <Source>tests/programs/test_etrac_initial.py</Source>

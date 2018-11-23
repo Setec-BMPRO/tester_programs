@@ -17,6 +17,7 @@ from . import c15d15
 from . import c45a15
 from . import cmrsbp
 from . import cn101
+from . import cn102
 from . import drifter
 from . import etrac
 from . import gen8
@@ -77,6 +78,7 @@ PROGRAMS = {
     'CMR-SD': cmrsbp.SerialDate,
     'CMR-FIN': cmrsbp.Final,
     'CN101 Initial': cn101.Initial,
+    'CN102 Initial': cn102.Initial,
     'Drifter Initial': drifter.Initial,
     'Drifter Final': drifter.Final,
     'Etrac-II Initial': etrac.Initial,
