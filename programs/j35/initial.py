@@ -35,7 +35,7 @@ class Initial(share.TestSequence):
             TestStep('Aux', self._step_aux),
             TestStep('Solar', self._step_solar, self.cfg.solar),
             TestStep('ManualMode', self._step_manualmode),
-            TestStep('SolarComp', self._step_solarcomp, self.cfg.solar_comp),
+            TestStep('SolarComp', self._step_solarcomp, self.cfg.solar),
             TestStep('PowerUp', self._step_powerup),
             TestStep('Output', self._step_output),
             TestStep('RemoteSw', self._step_remote_sw),
