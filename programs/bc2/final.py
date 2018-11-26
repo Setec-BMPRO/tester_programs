@@ -69,7 +69,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev.pi_bt.open(
+        dev['pi_bt'].open(
             self.sernum, passkey=console.Console.passkey(self.sernum))
         mes['arm_swver']()
 
@@ -107,15 +107,15 @@ class Devices(share.Devices):
         self['acsource'].output(voltage=240.0, output=True, delay=1.0)
         self.add_closer(lambda: self['acsource'].output(0.0, output=False))
         # Bluetooth connection to the console
-        self.pi_bt = share.bluetooth.RaspberryBluetooth()
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Bluetooth console driver
-        self['bc2'] = console.Console(self.pi_bt)
+        self['bc2'] = console.Console(self['pi_bt'])
 
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
         self['dcl'].output(0.0, False)
-        self.pi_bt.close()
+        self['pi_bt'].close()
 
 
 class Sensors(share.Sensors):

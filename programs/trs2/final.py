@@ -43,7 +43,7 @@ class Final(share.TestSequence):
         """Test the Bluetooth interface."""
         self._logger.debug(
                 'Scan for serial number via bluetooth: "%s"', self.sernum)
-        reply = dev.pi_bt.scan_sernum(self.sernum)
+        reply = dev['pi_bt'].scan_sernum(self.sernum)
         mes['scan_ser'].sensor.store(reply)
         mes['scan_ser']()
 
@@ -61,12 +61,11 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Bluetooth connection to server
-        self.pi_bt = share.bluetooth.RaspberryBluetooth()
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
 
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
-        self.pi_bt.close()
 
 
 class Sensors(share.Sensors):

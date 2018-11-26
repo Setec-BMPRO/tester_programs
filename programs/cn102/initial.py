@@ -77,15 +77,9 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(12.0, delay=15.0)
-        btmac = share.bluetooth.MAC(mes['cn102_btmac']().reading1)
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        ble = dev['ble']
-        ble.open()
-        reply = ble.scan(btmac)
-        ble.close()
-        self._logger.debug('Bluetooth MAC detected: %s', reply)
-        mes['detectBT'].sensor.store(reply)
-        mes['detectBT']()
+        reply = dev['pi_bt'].scan_sernum(self.sernum)
+        mes['scan_ser'].sensor.store(reply)
+        mes['scan_ser']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -148,11 +142,8 @@ class Devices(share.Devices):
             self.physical_devices['CAN'],
             tester.devphysical.can.DeviceID.cn101)
         self['cn102tunnel'] = console.TunnelConsole(tunnel)
-        # Serial connection to the BLE module
-        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
-        # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.fixture.port('028468', 'BLE')
-        self['ble'] = share.bluetooth.BleRadio(ble_ser)
+        # Bluetooth connection to server
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
@@ -177,7 +168,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['oMirBT'] = sensor.Mirror()
+        self['mirscan'] = sensor.Mirror()
         self['microsw'] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
         self['sw1'] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
         self['sw2'] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
@@ -216,7 +207,6 @@ class Measurements(share.Measurements):
             ('dmm_microsw', 'Part', 'microsw', ''),
             ('dmm_sw1', 'Part', 'sw1', ''),
             ('dmm_sw2', 'Part', 'sw2', ''),
-            ('detectBT', 'DetectBT', 'oMirBT', ''),
             ('dmm_vin', 'Vin', 'oVin', ''),
             ('dmm_3v3', '3V3', 'o3V3', ''),
             ('ui_serialnum', 'SerNum', 'oSnEntry', ''),
@@ -228,4 +218,6 @@ class Measurements(share.Measurements):
             ('tank4_level', 'Tank', 'tank4', ''),
             ('cn102_can_bind', 'CAN_BIND', 'CANBIND', ''),
             ('TunnelSwVer', 'SwArmVer', 'TunnelSwVer', ''),
+            ('scan_ser', 'ScanSer', 'mirscan',
+                'Scan for serial number over bluetooth'),
             ))

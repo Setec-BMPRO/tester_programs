@@ -25,7 +25,6 @@ class _Console():
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
-        'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         'STATUS': parameter.Hex(
             'STATUS', writeable=True,
             minimum=0, maximum=0xF0000000),

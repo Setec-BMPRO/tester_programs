@@ -24,8 +24,7 @@ class CN102():
             LimitDelta('Vin', 8.0, 0.5),
             LimitPercent('3V3', 3.30, 3.0),
             LimitInteger('CAN_BIND', 1 << 28),
-            LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
-            LimitBoolean('DetectBT', True),
+            LimitBoolean('ScanSer', True, doc='Serial number detected'),
             LimitInteger('Tank', 5),
             )
     # Lot Number to Revision data
