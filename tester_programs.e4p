@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2018-11-23, 14:43:57 -->
+<!-- Saved: 2018-11-27, 15:25:21 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -394,7 +394,7 @@
               <string>dialogReport</string>
             </key>
             <value>
-              <bool>False</bool>
+              <bool>True</bool>
             </value>
             <key>
               <string>disabledMessages</string>
@@ -502,7 +502,7 @@
               <string>txtReport</string>
             </key>
             <value>
-              <bool>True</bool>
+              <bool>False</bool>
             </value>
           </dict>
         </value>

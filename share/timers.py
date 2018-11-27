@@ -12,12 +12,11 @@ class BackgroundTimer():
 
     """A timer to keep track of elapsed time in the background."""
 
-    _event = None
-    _timer = None
 
     def __init__(self):
         """Create the timer."""
         self._event = threading.Event()
+        self._timer = None
 
     def start(self, delay):
         """Start the timer.

@@ -17,10 +17,6 @@ class TestSequence(tester.TestSequence):
 
     """
 
-    devices = None
-    limits = None
-    sensors = None
-    measurements = None
     limit_builtin = (
         tester.LimitRegExp(
             'SerNum',
@@ -32,6 +28,15 @@ class TestSequence(tester.TestSequence):
             doc='YES response'),
         )
     duplicate_limit_error = False
+
+    def __init__(self):
+        """Create instance variables."""
+        super().__init__()
+        self.devices = None
+        self.limits = None
+        self.sensors = None
+        self.measurements = None
+        self.parameter = None
 
     @abc.abstractmethod
     def open(self, limits, cls_devices, cls_sensors, cls_measurements):
@@ -67,10 +72,6 @@ class TestSequence(tester.TestSequence):
         self.measurements.close()
         self.sensors.close()
         self.devices.close()
-        self.measurements = None
-        self.sensors = None
-        self.limits = None
-        self.devices = None
         super().close()
 
     def measure(self, names, timeout=0, delay=0):
@@ -189,8 +190,8 @@ class Devices(abc.ABC, dict):
         """
         super().__init__()
         self.physical_devices = physical_devices
+        self._close_callables = []
         self.parameter = None
-        self._close_callables = None    # Callbacks when close() is called
 
     @abc.abstractmethod
     def open(self):
@@ -200,28 +201,21 @@ class Devices(abc.ABC, dict):
     def reset(self):
         """Reset instruments."""
 
-    def add_closer(self, callable):
+    def add_closer(self, target):
         """Add a callable to be called upon close()."""
-        if self._close_callables is None:
-            self._close_callables = []
-        self._close_callables.append(callable)
+        self._close_callables.append(target)
 
     def close(self):
         """Close logical devices."""
-        if self._close_callables is not None:
-            for a_call in self._close_callables:
-                a_call()
-        self._close_callables = None
+        for target in self._close_callables:
+            target()
+        self._close_callables.clear()
         self.clear()
 
 
 class Sensors(abc.ABC, dict):
 
     """Sensors."""
-
-    devices = None
-    limits = None
-    parameter = None
 
     def __init__(self, devices, limits):
         """Create Sensors instance.
@@ -233,6 +227,7 @@ class Sensors(abc.ABC, dict):
         super().__init__()
         self.devices = devices
         self.limits = limits
+        self.parameter = None
 
     @abc.abstractmethod
     def open(self):
@@ -256,10 +251,6 @@ class Measurements(abc.ABC, dict):
 
     """Measurements."""
 
-    sensors = None
-    limits = None
-    parameter = None
-
     def __init__(self, sensors, limits):
         """Create measurement instance.
 
@@ -270,6 +261,7 @@ class Measurements(abc.ABC, dict):
         super().__init__()
         self.sensors = sensors
         self.limits = limits
+        self.parameter = None
 
     @abc.abstractmethod
     def open(self):
