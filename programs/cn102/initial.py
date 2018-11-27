@@ -77,7 +77,7 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(12.0, delay=15.0)
-        reply = dev['pi_bt'].scan_sernum(self.sernum)
+        reply = dev['pi_bt'].scan_advert_sernum(self.sernum)
         mes['scan_ser'].sensor.store(reply)
         mes['scan_ser']()
 

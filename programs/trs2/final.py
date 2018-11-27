@@ -43,7 +43,7 @@ class Final(share.TestSequence):
         """Test the Bluetooth interface."""
         self._logger.debug(
                 'Scan for serial number via bluetooth: "%s"', self.sernum)
-        reply = dev['pi_bt'].scan_sernum(self.sernum)
+        reply = dev['pi_bt'].scan_beacon_sernum(self.sernum)
         mes['scan_ser'].sensor.store(reply)
         mes['scan_ser']()
 

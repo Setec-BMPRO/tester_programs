@@ -96,25 +96,25 @@ class RaspberryBluetooth(SerialIO):
         """
         return self.server.echo(value)
 
-    def scan_blemac(self, blemac, timeout=10):
-        """Scan for a device MAC address.
-
-        @param blemac MAC address to locate
-        @param timeout Timeout in seconds
-        @return True if device was found
-
-        """
-        return self.server.scan_blemac(blemac, timeout)
-
-    def scan_sernum(self, sernum, timeout=10):
-        """Scan for a device Serial Number.
+    def scan_advert_sernum(self, sernum, timeout=10):
+        """Scan advertisment packets for a device Serial Number.
 
         @param sernum Serial Number to locate
         @param timeout Timeout in seconds
         @return True if device was found
 
         """
-        return self.server.scan_sernum(sernum, timeout)
+        return self.server.scan_advert_sernum(sernum, timeout)
+
+    def scan_beacon_sernum(self, sernum, timeout=10):
+        """Scan beacon-mode packets for a device Serial Number.
+
+        @param sernum Serial Number to locate
+        @param timeout Timeout in seconds
+        @return True if device was found
+
+        """
+        return self.server.scan_beacon_sernum(sernum, timeout)
 
     def open(self, device_id, timeout=10, passkey=None):
         """Open a connection to a device console.
@@ -134,15 +134,6 @@ class RaspberryBluetooth(SerialIO):
         @return Response from the command call
 
         """
-#        # BC2 Rev 4: The CAL commands return response-prompt-response-prompt
-#        prompts = 2 if command.endswith(self.cal_command) else 1
-#        reply = self.server.action(command, prompts, timeout)
-#        lines = reply.splitlines()
-#        # CAL command: skip command echo line & 1st response (3 lines)
-#        # Other commands: skip command echo line
-#        firstline = 3 if prompts == 2 else 1
-#        reply = '\r\n'.join(lines[firstline:])
-
         # BC2 Rev 5: The CAL commands return response-response-prompt
         is_cal = command.endswith(self.cal_command)
         prompts = 1
