@@ -169,11 +169,11 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['mirscan'] = sensor.Mirror()
-        self['microsw'] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
-        self['sw1'] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
-        self['sw2'] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
         self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['o3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['sw1'] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
+        self['sw2'] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
+        self['microsw'] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
         self['oSnEntry'] = sensor.DataEntry(
             message=tester.translate('cn102_initial', 'msgSnEntry'),
             caption=tester.translate('cn102_initial', 'capSnEntry'))
@@ -190,7 +190,6 @@ class Sensors(share.Sensors):
             self[name] = share.console.Sensor(cn102, cmdkey)
         for device, name, cmdkey in (
                 (cn102, 'SwVer', 'SW_VER'),
-                (cn102, 'BtMac', 'BT_MAC'),
                 (cn102tunnel, 'TunnelSwVer', 'SW_VER'),
             ):
             self[name] = share.console.Sensor(
@@ -211,7 +210,6 @@ class Measurements(share.Measurements):
             ('dmm_3v3', '3V3', 'o3V3', ''),
             ('ui_serialnum', 'SerNum', 'oSnEntry', ''),
             ('cn102_swver', 'SwArmVer', 'SwVer', ''),
-            ('cn102_btmac', 'BtMac', 'BtMac', ''),
             ('tank1_level', 'Tank', 'tank1', ''),
             ('tank2_level', 'Tank', 'tank2', ''),
             ('tank3_level', 'Tank', 'tank3', ''),

@@ -13,8 +13,7 @@ class CN102Initial(ProgramTestCase):
 
     prog_class = cn102.Initial
     parameter = None
-    debug = True    #False
-    btmac = '001EC030BC15'
+    debug = False
 
     def setUp(self):
         """Per-Test setup."""
@@ -26,6 +25,7 @@ class CN102Initial(ProgramTestCase):
         for target in (
                 'share.programmer.ARM',
                 'share.programmer.Nordic',
+                'share.bluetooth.RaspberryBluetooth',
                 'programs.cn102.console.DirectConsole',
                 'programs.cn102.console.TunnelConsole',
                 ):
@@ -57,7 +57,7 @@ class CN102Initial(ProgramTestCase):
                     (sen['tank4'], 5),
                     ),
                 'Bluetooth': (
-                    (sen['BtMac'], self.btmac),
+                    (sen['mirscan'], True),
                     ),
                 'CanBus': (
                     (sen['CANBIND'], 1 << 28),
@@ -69,7 +69,7 @@ class CN102Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(15, len(result.readings))
+        self.assertEqual(14, len(result.readings))
         self.assertEqual(
             ['PartCheck', 'PowerUp', 'PgmARM', 'PgmNordic', 'TestArm',
              'TankSense', 'Bluetooth', 'CanBus'],
