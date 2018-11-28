@@ -33,7 +33,7 @@ class CN102():
         ))
     # Revision data dictionary
     _rev_data = {
-        None: ('0.0.00000.000', '0.0.00000.000', (1, 0, 'A'), 2),
+        None: ('1.2.18218.1627', '1.0.18106.1260', (1, 0, 'A'), 2),
         }
     # These values get set per revision by select()
     sw_arm_version = None

@@ -48,6 +48,7 @@ class CN102Initial(ProgramTestCase):
                     (sen['oVin'], 8.0), (sen['o3V3'], 3.3),
                     ),
                 'TestArm': (
+                    (sen['o3V3'], 3.3),
                     (sen['SwVer'], cn102.config.CN102.sw_arm_version),
                     ),
                 'TankSense': (
@@ -69,7 +70,7 @@ class CN102Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(14, len(result.readings))
+        self.assertEqual(15, len(result.readings))
         self.assertEqual(
             ['PartCheck', 'PowerUp', 'PgmARM', 'PgmNordic', 'TestArm',
              'TankSense', 'Bluetooth', 'CanBus'],
