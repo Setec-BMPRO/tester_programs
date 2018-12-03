@@ -118,7 +118,7 @@ class Initial(share.TestSequence):
         j35['SOLAR'] = True
         j35['SOLAR_STATUS'] = False
         solar_trip = mes['ramp_solar_pre']().reading1
-        result = (solar_trip == self.limits['SolarCutoff'])
+        result = self.limits['SolarCutoff'].check(solar_trip)
         if not result:
             low, high = self.limits['SolarCutoff'].limit
             if solar_trip < low:
@@ -129,7 +129,7 @@ class Initial(share.TestSequence):
             # Check the setting after adjustment
             j35['SOLAR_STATUS'] = False
             solar_trip = mes['ramp_solar']().reading1
-            result = (solar_trip == self.limits['SolarCutoff'])
+            result = self.limits['SolarCutoff'].check(solar_trip)
         mes['detectcal'].sensor.store(result)
         mes['detectcal']()
         j35['SOLAR'] = False
