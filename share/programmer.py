@@ -174,6 +174,7 @@ class Nordic():
             '--program',
                 '{0}'.format(self.hexfile),
             '--verify',
+            '--log',
             ]
         self.process = subprocess.Popen(command, cwd=self.working_dir)
 

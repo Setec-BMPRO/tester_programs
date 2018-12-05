@@ -48,6 +48,7 @@ class Initial(share.TestSequence):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(8.6, output=True)
+        dev['dcs_vcom'].output(12.0, output=True, delay=5)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
@@ -148,15 +149,13 @@ class Devices(share.Devices):
         self['cn102tunnel'] = console.TunnelConsole(tunnel)
         # Bluetooth connection to server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
-        # Apply power to fixture circuits.
-        self['dcs_vcom'].output(12.0, output=True, delay=5)
-        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
         self['cn102'].close()
         self['cn102tunnel'].close()
-        self['dcs_vin'].output(0.0, False)
+        for dcs in ('dcs_vin', 'dcs_vcom'):
+            self[dcs].output(0.0, False)
         for rla in (
                 'rla_reset', 'rla_boot', 'rla_s1',
                 'rla_s2', 'rla_s3', 'rla_s4',
