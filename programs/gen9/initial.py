@@ -30,7 +30,7 @@ class Initial(share.TestSequence):
     arm_file = 'gen8_{0}.bin'.format(config.SW_VERSION)
 
     limitdata = (
-        LimitHigh('FanShort', 20),
+        LimitHigh('FanShort', 500),
         LimitLow('FixtureLock', 200),
         LimitPercent('3V3', 3.30, 10.0),
         LimitLow('5Voff', 0.5),
@@ -270,6 +270,7 @@ class Devices(share.Devices):
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_pson', tester.Relay, 'RLA3'),
+                ('rla_sw', tester.Relay, 'RLA4'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['dcl_12v'] = tester.DCLoadParallel(
@@ -305,7 +306,7 @@ class Devices(share.Devices):
         for ld in ('dcl_5v', 'dcl_12v', 'dcl_24v'):
             self[ld].output(0.0, False)
         self['dcs_5v'].output(0.0, False)
-        for rla in ('rla_pson', 'rla_reset', 'rla_boot'):
+        for rla in ('rla_reset', 'rla_boot', 'rla_pson', 'rla_sw'):
             self[rla].set_off()
 
 
@@ -318,9 +319,9 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['acin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
-        self['gpo'] = sensor.Vac(dmm, high=2, low=2, rng=1000, res=0.01)
         self['pfc'] = sensor.Vdc(dmm, high=3, low=3, rng=1000, res=0.001)
         self['o12vpri'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
+        self['o15vccpri'] = sensor.Vdc(dmm, high=16, low=3, rng=100, res=0.01)
         self['o3v3'] = sensor.Vdc(dmm, high=5, low=4, rng=10, res=0.001)
         self['o5v'] = sensor.Vdc(dmm, high=6, low=4, rng=10, res=0.001)
         self['o12v'] = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
