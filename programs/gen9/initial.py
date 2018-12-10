@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 SETEC Pty Ltd
+# Copyright 2018 SETEC Pty Ltd
 """GEN9-540 Initial Test Program."""
 
 import os
@@ -24,10 +24,8 @@ class Initial(share.TestSequence):
 
     # Reading to reading difference for PFC voltage stability
     pfc_stable = 0.05
-    # Reading to reading difference for 12V voltage stability
-    v12_stable = 0.005
     # ARM software image file
-    arm_file = 'gen8_{0}.bin'.format(config.SW_VERSION)
+    arm_file = 'gen9_{0}.bin'.format(config.SW_VERSION)
 
     limitdata = (
         LimitHigh('FanShort', 500),
@@ -37,8 +35,6 @@ class Initial(share.TestSequence):
         LimitPercent('5Vset', 5.10, 1.0),
         LimitPercent('5V', 5.10, 2.0),
         LimitLow('12Voff', 0.5),
-        LimitDelta('12Vpre', 12.1, 1.0),
-        LimitDelta('12Vset', 12.18, 0.01),
         LimitPercent('12V', 12.18, 2.5),
         LimitLow('24Voff', 0.5),
         LimitDelta('24Vpre', 24.0, 2.0),
@@ -157,20 +153,6 @@ class Initial(share.TestSequence):
             mes['dmm_pfcpost4'].stable(self.pfc_stable)
         # A final PFC setup check
         mes['dmm_pfcpost'].stable(self.pfc_stable)
-        # no load for 12V calibration
-        self.dcload((('dcl_12v', 0.0), ('dcl_24v', 0.0), ))
-        # Calibrate the 12V set voltage
-        v12 = mes['dmm_12vpre'].stable(self.v12_stable).reading1
-        arm.cal12v(v12)
-        # Prevent a fail from failing the unit
-        mes['dmm_12vset'].position_fail = False
-        result = mes['dmm_12vset'].stable(self.v12_stable).result
-        # Allow a fail to fail the unit
-        mes['dmm_12vset'].position_fail = True
-        if not result:
-            v12 = mes['dmm_12vpre'].stable(self.v12_stable).reading1
-            arm.cal12v(v12)
-            mes['dmm_12vset'].stable(self.v12_stable)
         self.measure(
             ('arm_acfreq', 'arm_acvolt', 'arm_5v', 'arm_12v', 'arm_24v',
              'arm_swver', 'arm_swbld'), )
@@ -283,7 +265,8 @@ class Devices(share.Devices):
         self['program_arm'] = share.programmer.ARM(
             arm_port,
             os.path.join(folder, Initial.arm_file),
-            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset'])
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
@@ -359,8 +342,6 @@ class Measurements(share.Measurements):
             ('dmm_5vset', '5Vset', 'o5v', ''),
             ('dmm_5v', '5V', 'o5v', ''),
             ('dmm_12voff', '12Voff', 'o12v', ''),
-            ('dmm_12vpre', '12Vpre', 'o12v', ''),
-            ('dmm_12vset', '12Vset', 'o12v', ''),
             ('dmm_12v', '12V', 'o12v', ''),
             ('dmm_24voff', '24Voff', 'o24v', ''),
             ('dmm_24vpre', '24Vpre', 'o24v', ''),

@@ -28,9 +28,6 @@ class Console(share.console.Base):
         'CAL_PFC': parameter.Float(
             'CAL-PFC-BUS-VOLTS', writeable=True, readable=False,
             scale=1000, write_format='{0} {1}'),
-        'CAL_12V': parameter.Float(
-            'CAL-CONVERTER-VOLTS', writeable=True, readable=False,
-            scale=1000, write_format='{0} {1}'),
         'UNLOCK': parameter.Boolean('$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': parameter.Boolean('NV-WRITE',
@@ -46,13 +43,4 @@ class Console(share.console.Base):
 
         """
         self['CAL_PFC'] = voltage
-        self['NVWRITE'] = True
-
-    def cal12v(self, voltage):
-        """Issue 12V calibration commands.
-
-        @param voltage Measured 12V rail voltage
-
-        """
-        self['CAL_12V'] = voltage
         self['NVWRITE'] = True
