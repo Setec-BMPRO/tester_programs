@@ -45,7 +45,8 @@ class Initial(share.TestSequence):
         LimitBetween('24V', 22.80, 25.68),
         LimitLow('PwrFail', 0.5),
         LimitDelta('ACin', 240, 10),
-        LimitBetween('12Vpri', 11.4, 17.0),
+        LimitDelta('15Vccpri', 15.0, 1.0),
+        LimitDelta('12Vpri', 12.0, 1.0),
         LimitDelta('PFCpre', 435, 15),
         LimitDelta('PFCpost1', 440.0, 0.8),
         LimitDelta('PFCpost2', 440.0, 0.8),
@@ -80,21 +81,20 @@ class Initial(share.TestSequence):
         """Prepare to run a test.
 
         Measure fixture lock and part detection micro-switches.
-        5Vsb is injected to power up the ARM.
 
         """
-        self.measure(('dmm_lock', 'dmm_fanshort'), timeout=2)
-        dev['dcs_5v'].output(5.15, True)
-        self.measure(('dmm_5v', 'dmm_3v3'), timeout=2)
+        self.measure(('dmm_lock', 'dmm_fanshort'), timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the ARM device.
 
-        Device is powered by injected 5Vsb.
+        Device is powered by injected 5VSB_Pre.
         Unit is left running the new code.
 
         """
+        dev['dcs_5v'].output(5.0, True)
+        mes['dmm_3v3'](timeout=5)
         dev['program_arm'].program()
         # Reset micro, wait for ARM startup
         dev['rla_reset'].pulse(0.1, delay=1)
@@ -103,7 +103,7 @@ class Initial(share.TestSequence):
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
 
-        Device is powered by injected 5Vsb.
+        Device is powered by injected 5VSB_Pre.
         The ARM is initialised via the serial port.
 
         Unit is left unpowered.
@@ -130,10 +130,11 @@ class Initial(share.TestSequence):
         """
         dev['acsource'].output(voltage=240.0, output=True)
         self.measure(
-            ('dmm_acin', 'dmm_5vset', 'dmm_12vpri', 'dmm_12voff',
-             'dmm_24voff', 'dmm_pwrfail', ),
+            ('dmm_acin', 'dmm_5vset', 'dmm_15vccpri', 'dmm_12vpri',
+             'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'),
             timeout=5)
         # Switch all outputs ON
+        dev['rla_sw'].set_on()
         dev['rla_pson'].set_on()
         self.measure(('dmm_5vset', 'dmm_24vpre', ), timeout=5)
         # Unlock ARM
@@ -261,7 +262,6 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-                ('dcs_fixture', tester.DCSource, 'DCS1'),
                 ('dcs_5v', tester.DCSource, 'DCS2'),
                 ('dcl_24v', tester.DCLoad, 'DCL3'),
                 ('dcl_12a', tester.DCLoad, 'DCL2'),
@@ -276,7 +276,7 @@ class Devices(share.Devices):
         self['dcl_12v'] = tester.DCLoadParallel(
             ((self['dcl_12a'], 10), (self['dcl_12b'], 10)))
         # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.fixture.port('025197', 'ARM')
+        arm_port = share.fixture.port('032715', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -289,9 +289,6 @@ class Devices(share.Devices):
         # Set port separately - don't open until after programming
         arm_ser.port = arm_port
         self['arm'] = console.Console(arm_ser)
-        # Switch on fixture power
-        self['dcs_fixture'].output(10.0, output=True)
-        self.add_closer(lambda: self['dcs_fixture'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -320,8 +317,8 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['acin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self['pfc'] = sensor.Vdc(dmm, high=3, low=3, rng=1000, res=0.001)
-        self['o12vpri'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
         self['o15vccpri'] = sensor.Vdc(dmm, high=16, low=3, rng=100, res=0.01)
+        self['o12vpri'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
         self['o3v3'] = sensor.Vdc(dmm, high=5, low=4, rng=10, res=0.001)
         self['o5v'] = sensor.Vdc(dmm, high=6, low=4, rng=10, res=0.001)
         self['o12v'] = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
@@ -356,6 +353,7 @@ class Measurements(share.Measurements):
             ('dmm_lock', 'FixtureLock', 'lock', ''),
             ('dmm_fanshort', 'FanShort', 'fanshort', ''),
             ('dmm_acin', 'ACin', 'acin', ''),
+            ('dmm_15vccpri', '15Vccpri', 'o15vccpri', ''),
             ('dmm_12vpri', '12Vpri', 'o12vpri', ''),
             ('dmm_3v3', '3V3', 'o3v3', ''),
             ('dmm_5vset', '5Vset', 'o5v', ''),

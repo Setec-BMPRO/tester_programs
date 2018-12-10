@@ -32,13 +32,16 @@ class Gen9Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PartDetect': (
-                    (sen['lock'], 10.0), (sen['fanshort'], 200.0),
-                    (sen['o5v'], 5.0), (sen['o3v3'], 3.3),
+                    (sen['lock'], 10.0), (sen['fanshort'], 700.0),
+                    ),
+                'Program': (
+                    (sen['o3v3'], 3.3),
                     ),
                 'PowerUp': (
                     (sen['acin'], 240.0), (sen['o5v'], (5.05, 5.11, )),
-                    (sen['o12vpri'], 12.12), (sen['o12v'], 0.12),
-                    (sen['o24v'], (0.24, 23.23, )), (sen['pwrfail'], 0.0),
+                    (sen['o15vccpri'], 15.0), (sen['o12vpri'], 12.0),
+                    (sen['o12v'], 0.0), (sen['o24v'], (0.0, 24.0, )),
+                    (sen['pwrfail'], 0.0),
                     (sen['pfc'],
                         (432.0, 432.0,      # Initial reading
                          442.0, 442.0,      # After 1st cal

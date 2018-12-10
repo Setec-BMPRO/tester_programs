@@ -72,6 +72,9 @@ DATA = {
     '027420': {     # Trek2 Initial/Final
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
+    '032715': {     # GEN9-540 Initial
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
+        },
 
     # Fixtures with a USB Hub
 
