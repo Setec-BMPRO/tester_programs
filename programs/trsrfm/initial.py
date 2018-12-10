@@ -157,7 +157,7 @@ class Sensors(share.Sensors):
         self['tstpin_cover'] = sensor.Vdc(
             dmm, high=16, low=1, rng=100, res=0.01)
         self['tstpin_cover'].doc = 'Photo sensor'
-        self['mirbt'] = sensor.Mirror()
+        self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         # Console sensors
         trsrfm = self.devices['trsrfm']
         for name, cmdkey in (

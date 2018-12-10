@@ -168,7 +168,7 @@ class Sensors(share.Sensors):
         self['vin'].doc = 'X4'
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['3v3'].doc = 'U2 output'
-        self['mirbt'] = sensor.Mirror()
+        self['mirbt'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['mircal'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         # Console sensors
         bc2 = self.devices['bc2']

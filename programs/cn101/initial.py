@@ -164,7 +164,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['oMirBT'] = sensor.Mirror()
+        self['oMirBT'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['microsw'] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
         self['sw1'] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
         self['sw2'] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)

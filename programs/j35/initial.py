@@ -306,7 +306,7 @@ class Sensors(share.Sensors):
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('j35_initial', 'msgSnEntry'),
             caption=tester.translate('j35_initial', 'capSnEntry'))
-        self['mircal'] = sensor.Mirror()
+        self['mircal'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         # Console sensors
         j35 = self.devices['j35']
         j35tunnel = self.devices['j35tunnel']
@@ -323,13 +323,19 @@ class Sensors(share.Sensors):
                 ('arm_canbind', 'CAN_BIND'),
                 ('arm_loadset', 'LOAD_SET'),
                 ('arm_remote', 'BATT_SWITCH'),
-                ('arm_solar_status', 'SOLAR_STATUS'),
             ):
             self[name] = share.console.Sensor(j35, cmdkey)
-        self['arm_swver'] = share.console.Sensor(
-            j35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['TunnelSwVer'] = share.console.Sensor(
-            j35tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
+        for name, cmdkey in (
+                ('arm_solar_status', 'SOLAR_STATUS'),
+            ):
+            self[name] = share.console.Sensor(
+                j35, cmdkey, rdgtype=sensor.ReadingBoolean)
+        for name, cmdkey in (
+                ('arm_swver', 'SW_VER'),
+                ('TunnelSwVer', 'SW_VER'),
+            ):
+            self[name] = share.console.Sensor(
+                j35, cmdkey, rdgtype=sensor.ReadingString)
         # Generate load current sensors
         self['arm_loads'] = []
         for i in range(self.output_count):
