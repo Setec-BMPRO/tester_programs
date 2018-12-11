@@ -9,6 +9,8 @@ class Console(share.console.Base):
 
     """Communications to GEN9-540 console."""
 
+    # Number of lines in startup banner
+    banner_lines = 4
     parameter = share.console.parameter
     cmd_data = {
         'AcFreq': parameter.Float(
@@ -26,15 +28,30 @@ class Console(share.console.Base):
         'SwBld': parameter.String(
             'X-BUILD-NUMBER', read_format='{0} X?'),
         'CAL_PFC': parameter.Float(
-            'CAL-PFC-BUS-VOLTS', writeable=True, readable=False,
-            scale=1000, write_format='{0} {1}'),
+            'CAL-PFC-BUS-VOLTS',
+            writeable=True, readable=False,
+            scale=1000,
+            write_format='{0} {1}', write_expected=1),
         'UNLOCK': parameter.Boolean('$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': parameter.Boolean('NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': parameter.Boolean('NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
         }
     # Strings to ignore in responses
     ignore = (' ', 'Hz', 'Vrms', 'mV')
+
+    def banner(self):
+        """Flush the console banner lines."""
+        self.action(None, delay=3, expected=self.banner_lines)
+
+    def initialise(self):
+        """First time initialisation of the micro."""
+        self.banner()
+        self['UNLOCK'] = True
+        self['NVDEFAULT'] = True
+        self['NVWRITE'] = True
 
     def calpfc(self, voltage):
         """Issue PFC calibration commands.

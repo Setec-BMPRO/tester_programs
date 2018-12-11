@@ -5,7 +5,6 @@
 
 import os
 import inspect
-import time
 import serial
 import tester
 from tester import (
@@ -25,7 +24,7 @@ class Initial(share.TestSequence):
     # Reading to reading difference for PFC voltage stability
     pfc_stable = 0.05
     # ARM software image file
-    arm_file = 'gen9_{0}.bin'.format(config.SW_VERSION)
+    arm_file = 'gen9_{0}.bin'.format(config.SW_IMAGE)
 
     limitdata = (
         LimitHigh('FanShort', 500),
@@ -49,13 +48,13 @@ class Initial(share.TestSequence):
         LimitDelta('PFCpost4', 426.0, 2.9),
         LimitDelta('PFCpost', 426.0, 3.0),
         LimitDelta('ARM-AcFreq', 50, 10),
-        LimitLow('ARM-AcVolt', 300),
+        LimitDelta('ARM-AcVolt', 240, 20),
         LimitDelta('ARM-5V', 5.0, 1.0),
         LimitDelta('ARM-12V', 12.0, 1.0),
         LimitDelta('ARM-24V', 24.0, 2.0),
         LimitRegExp('SwVer', '^{0}$'.format(
-            config.SW_VERSION.replace('.', r'\.'))),
-        LimitRegExp('SwBld', '^{0}$'.format(config.SW_VERSION[4:])),
+            config.SW_VER.replace('.', r'\.'))),
+        LimitRegExp('SwBld', '^{0}$'.format(config.SW_BUILD)),
         )
 
     def open(self, uut):
@@ -91,8 +90,7 @@ class Initial(share.TestSequence):
         dev['dcs_5v'].output(5.0, True)
         mes['dmm_3v3'](timeout=5)
         dev['program_arm'].program()
-        # Reset micro, wait for ARM startup
-        dev['rla_reset'].pulse(0.1, delay=1)
+        dev['rla_reset'].pulse(0.1)
 
     @share.teststep
     def _step_initialise_arm(self, dev, mes):
@@ -106,11 +104,9 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         arm.open()
-        arm['UNLOCK'] = True
-        arm['NVWRITE'] = True
+        arm.initialise()
         dev['dcs_5v'].output(0.0, False)
-        dev['dcl_5v'].output(0.1, True)
-        time.sleep(0.5)
+        dev['dcl_5v'].output(0.1, True, delay=0.5)
         dev['dcl_5v'].output(0.0, True)
 
     @share.teststep
@@ -119,21 +115,22 @@ class Initial(share.TestSequence):
 
         240Vac is applied.
         PFC voltage is calibrated.
-        12V is calibrated.
         Unit is left running at 240Vac, no load.
 
         """
         dev['acsource'].output(voltage=240.0, output=True)
+        # Switch 5V output ON
+        dev['rla_sw'].set_on()
         self.measure(
-            ('dmm_acin', 'dmm_5vset', 'dmm_15vccpri', 'dmm_12vpri',
-             'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'),
+            ('dmm_acin', 'dmm_15vccpri', 'dmm_12vpri',
+             'dmm_5vset', 'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'),
             timeout=5)
         # Switch all outputs ON
-        dev['rla_sw'].set_on()
         dev['rla_pson'].set_on()
         self.measure(('dmm_5vset', 'dmm_24v', ), timeout=5)
         # Unlock ARM
         arm = dev['arm']
+        arm.banner()
         arm['UNLOCK'] = True
         # A little load so PFC voltage falls faster
         self.dcload((('dcl_12v', 1.0), ('dcl_24v', 1.0)), output=True)
@@ -153,7 +150,8 @@ class Initial(share.TestSequence):
         # A final PFC setup check
         mes['dmm_pfcpost'].stable(self.pfc_stable)
         self.measure(
-            ('arm_acfreq', 'arm_acvolt', 'arm_5v', 'arm_12v', 'arm_24v',
+            ('arm_acfreq', 'arm_acvolt',
+             'arm_5v', 'arm_12v', 'arm_24v',
              'arm_swver', 'arm_swbld'), )
 
     @share.teststep
@@ -258,7 +256,7 @@ class Devices(share.Devices):
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # Serial connection to the ARM console
-        arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
+        arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately - don't open until after programming
         arm_ser.port = arm_port
         self['arm'] = console.Console(arm_ser)
@@ -270,8 +268,7 @@ class Devices(share.Devices):
         self['acsource'].reset()
         self['dcl_5v'].output(1.0)
         self['dcl_12v'].output(5.0)
-        self['dcl_24v'].output(5.0)
-        time.sleep(0.5)
+        self['dcl_24v'].output(5.0, delay=0.5)
         self['discharge'].pulse()
         for ld in ('dcl_5v', 'dcl_12v', 'dcl_24v'):
             self[ld].output(0.0, False)

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """GEN9-540 Configuration."""
 
-SW_VERSION = '0.0.000'
+SW_VER = '1.0'
+SW_BUILD = '2502'
+SW_IMAGE = SW_VER + '.18354.' + SW_BUILD
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 HW_VERSION = (5, 0, 'A')

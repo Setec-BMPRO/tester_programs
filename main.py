@@ -50,7 +50,9 @@ def _main():
     UUT.lot = sernum[:7]
     # Receive Test Result signals here
     def test_result(result):
-        logger.info('Test Result: %s', result)
+        logger.info('Test Result: "%s"', result.code)
+        for rdg in result.readings:
+            logger.info(' "%s", %s, %s', rdg.path, rdg.value, rdg.result)
     dispatcher.connect(
         test_result,
         sender=tester.signals.Thread.tester,

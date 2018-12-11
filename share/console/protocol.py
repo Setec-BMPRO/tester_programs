@@ -124,13 +124,26 @@ class Base():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
-        self.open = port.open
-        self.close = port.close
-        self.opc = lambda: None         # Sensor: Dummy OPC
+
+    def open(self):
+        """Open connection to unit."""
+        self.port.open()
+
+    def close(self):
+        """Close connection to unit."""
+        self.port.close()
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
         self._read_key = key
+
+    def opc(self):
+        """Sensor: Dummy OPC.
+
+        @return None
+
+        """
+        return None
 
     def read(self, callerid):
         """Sensor: Read ARM data using the last defined key.
