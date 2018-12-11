@@ -20,6 +20,7 @@ class GEN9Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
+                    (sen['airflow'], (0.0, 12.0)),
                     (sen['o5v'], 5.1), (sen['o24v'], 0.0), (sen['o12v'], 0.0),
                     ),
                 'PowerOn': (
@@ -45,7 +46,7 @@ class GEN9Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(17, len(result.readings))
+        self.assertEqual(19, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PowerOn', 'FullLoad', '115V', 'Poweroff'],
             self.tester.ut_steps)
