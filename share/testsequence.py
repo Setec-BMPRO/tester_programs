@@ -237,10 +237,10 @@ class Sensors(abc.ABC, dict):
         """Reset sensors by flushing any stored data."""
         for sensor in self:
             try:
-                self[sensor].flush()
+                self[sensor].clear()
             except AttributeError:  # if it's a List of Sensors
                 for subsensor in self[sensor]:
-                    subsensor.flush()
+                    subsensor.clear()
 
     def close(self):
         """Close sensors."""
