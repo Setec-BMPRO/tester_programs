@@ -3,7 +3,7 @@
 """Trek2/JControl Final Test Program."""
 
 import tester
-from tester import TestStep, LimitInteger, LimitRegExp
+from tester import TestStep, LimitInteger, LimitRegExp, LimitBetween
 import share
 from . import console
 from . import config
@@ -23,6 +23,7 @@ class Final(share.TestSequence):
         LimitInteger('ARM-level2', 2),
         LimitInteger('ARM-level3', 3),
         LimitInteger('ARM-level4', 4),
+        LimitBetween('ARM-tankvolts', -10, 10),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
@@ -77,7 +78,6 @@ class Final(share.TestSequence):
         self.measure(('sw_ver', 'ui_yesnoseg', 'ui_yesnobklght', ))
         # Set unit internal Serial Number to match the outside label
         unit.set_sernum(self.sernum)
-#        unit.testmode(False)
 
     @share.teststep
     def _step_test_tanks(self, dev, mes):
@@ -85,6 +85,7 @@ class Final(share.TestSequence):
         unit = dev['armtunnel']
         unit['CONFIG'] = 0x7E00         # Enable all 4 tanks
         unit['TANK_SPEED'] = 0.1        # Change update interval
+        # TODO: Catch a failure here, and call self._measure_sensors()
         # No sensors - Tanks empty
         dev['rla_s1'].set_off(delay=1)
         tester.MeasureGroup(mes['arm_level1'], timeout=12)
@@ -98,6 +99,16 @@ class Final(share.TestSequence):
         dev['rla_s3'].set_on(delay=1)
         tester.MeasureGroup(mes['arm_level4'], timeout=12)
         unit.testmode(False)
+
+    @share.teststep
+    def _measure_sensors(self, dev, mes):
+        """Measure the 16 tank sensor input voltages."""
+        self.measure((
+            'arm_tank1s1', 'arm_tank1s2', 'arm_tank1s3', 'arm_tank1s4',
+            'arm_tank2s1', 'arm_tank2s2', 'arm_tank2s3', 'arm_tank2s4',
+            'arm_tank3s1', 'arm_tank3s2', 'arm_tank3s3', 'arm_tank3s4',
+            'arm_tank4s1', 'arm_tank4s2', 'arm_tank4s3', 'arm_tank4s4',
+            ))
 
     @staticmethod
     def send_preconditions(serial2can):
@@ -159,6 +170,12 @@ class Sensors(share.Sensors):
             message=tester.translate('trek2_jcontrol_final', 'IsBacklightOk?'),
             caption=tester.translate('trek2_jcontrol_final', 'capBacklight'))
         self['yesnobklght'].doc = 'Operator input'
+        # 16 sensors: 4 Tanks, each with 4 Sensors
+        for tank in range(1, 5):
+            for sens in range(1, 5):
+                name = 'tank{0}_s{1}'.format(tank, sens)
+                cmd = 'TANK{0}_S{1}'.format(tank, sens)
+                self[name] = share.console.Sensor(armtunnel, cmd)
         self['tank1-4'] = (
             share.console.Sensor(armtunnel, 'TANK1'),
             share.console.Sensor(armtunnel, 'TANK2'),
@@ -184,6 +201,26 @@ class Measurements(share.Measurements):
             ('ui_yesnoseg', 'Notify', 'yesnoseg', 'Segment display'),
             ('ui_yesnobklght', 'Notify', 'yesnobklght', 'Backlight'),
             ('sw_ver', 'SwVer', 'swver', 'Unit software version'),
+            # Internal voltage levels for Tank1 inputs
+            ('arm_tank1s1', 'ARM-tankvolts', 'tank1_s1', 'Tank1 S1 volts'),
+            ('arm_tank1s2', 'ARM-tankvolts', 'tank1_s2', 'Tank1 S2 volts'),
+            ('arm_tank1s3', 'ARM-tankvolts', 'tank1_s3', 'Tank1 S3 volts'),
+            ('arm_tank1s4', 'ARM-tankvolts', 'tank1_s4', 'Tank1 S4 volts'),
+            # Internal voltage levels for Tank2 inputs
+            ('arm_tank2s1', 'ARM-tankvolts', 'tank2_s1', 'Tank2 S1 volts'),
+            ('arm_tank2s2', 'ARM-tankvolts', 'tank2_s2', 'Tank2 S2 volts'),
+            ('arm_tank2s3', 'ARM-tankvolts', 'tank2_s3', 'Tank2 S3 volts'),
+            ('arm_tank2s4', 'ARM-tankvolts', 'tank2_s4', 'Tank2 S4 volts'),
+            # Internal voltage levels for Tank3 inputs
+            ('arm_tank3s1', 'ARM-tankvolts', 'tank3_s1', 'Tank3 S1 volts'),
+            ('arm_tank3s2', 'ARM-tankvolts', 'tank3_s2', 'Tank3 S2 volts'),
+            ('arm_tank3s3', 'ARM-tankvolts', 'tank3_s3', 'Tank3 S3 volts'),
+            ('arm_tank3s4', 'ARM-tankvolts', 'tank3_s4', 'Tank3 S4 volts'),
+            # Internal voltage levels for Tank4 inputs
+            ('arm_tank4s1', 'ARM-tankvolts', 'tank4_s1', 'Tank4 S1 volts'),
+            ('arm_tank4s2', 'ARM-tankvolts', 'tank4_s2', 'Tank4 S2 volts'),
+            ('arm_tank4s3', 'ARM-tankvolts', 'tank4_s3', 'Tank4 S3 volts'),
+            ('arm_tank4s4', 'ARM-tankvolts', 'tank4_s4', 'Tank4 S4 volts'),
             ))
         self['arm_level1'] = []
         self['arm_level2'] = []

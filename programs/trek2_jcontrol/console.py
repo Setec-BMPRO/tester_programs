@@ -50,11 +50,34 @@ class _Console():
         'TANK_SPEED': parameter.Float(
             'ADC_SCAN_INTERVAL_MSEC', writeable=True,
             minimum=0, maximum=10, scale=1000),
+        # Tank levels
         'TANK1': parameter.Float('TANK_1_LEVEL'),
         'TANK2': parameter.Float('TANK_2_LEVEL'),
         'TANK3': parameter.Float('TANK_3_LEVEL'),
         'TANK4': parameter.Float('TANK_4_LEVEL'),
+        # Internal voltage levels for Tank1 inputs
+        'TANK1_S1': parameter.String('TANK_1_SENSOR_1_LEVEL'),
+        'TANK1_S2': parameter.String('TANK_1_SENSOR_2_LEVEL'),
+        'TANK1_S3': parameter.String('TANK_1_SENSOR_3_LEVEL'),
+        'TANK1_S4': parameter.String('TANK_1_SENSOR_4_LEVEL'),
+        # Internal voltage levels for Tank2 inputs
+        'TANK2_S1': parameter.String('TANK_2_SENSOR_1_LEVEL'),
+        'TANK2_S2': parameter.String('TANK_2_SENSOR_2_LEVEL'),
+        'TANK2_S3': parameter.String('TANK_2_SENSOR_3_LEVEL'),
+        'TANK2_S4': parameter.String('TANK_2_SENSOR_4_LEVEL'),
+        # Internal voltage levels for Tank3 inputs
+        'TANK3_S1': parameter.String('TANK_3_SENSOR_1_LEVEL'),
+        'TANK3_S2': parameter.String('TANK_3_SENSOR_2_LEVEL'),
+        'TANK3_S3': parameter.String('TANK_3_SENSOR_3_LEVEL'),
+        'TANK3_S4': parameter.String('TANK_3_SENSOR_4_LEVEL'),
+        # Internal voltage levels for Tank4 inputs
+        'TANK4_S1': parameter.String('TANK_4_SENSOR_1_LEVEL'),
+        'TANK4_S2': parameter.String('TANK_4_SENSOR_2_LEVEL'),
+        'TANK4_S3': parameter.String('TANK_4_SENSOR_3_LEVEL'),
+        'TANK4_S4': parameter.String('TANK_4_SENSOR_4_LEVEL'),
         }
+    # Strings to ignore in responses
+    ignore = (' ', 'V')
 
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
