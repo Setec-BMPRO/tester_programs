@@ -4,7 +4,10 @@
 """GEN9-540 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
+from tester import (
+    TestStep,
+    LimitLow, LimitHigh, LimitBetween, LimitPercent, LimitDelta,
+    )
 import share
 
 
@@ -18,8 +21,8 @@ class Final(share.TestSequence):
         LimitBetween('5V', 4.998, 5.202),
         LimitLow('24Voff', 0.5),
         LimitLow('12Voff', 0.5),
-        LimitBetween('24Von', 22.80, 25.44),
-        LimitBetween('12Von', 11.8755, 12.4845),
+        LimitPercent('24Von', 24.0, 2.5),
+        LimitPercent('12Von', 12.0, 2.5),
         LimitHigh('PwrFailOff', 11.0),
         )
 
@@ -38,7 +41,7 @@ class Final(share.TestSequence):
     def _step_pwrup(self, dev, mes):
         """Power Up step."""
         self.dcload(
-            (('dcl_5v', 0.0), ('dcl_24v', 0.1), ('dcl_12v', 3.5)), output=True)
+            (('dcl_5v', 0.0), ('dcl_24v', 0.1), ('dcl_12v', 1.0)), output=True)
         dev['acsource'].output(voltage=240.0, output=True, delay=1.0)
         self.measure(('dmm_5v', 'dmm_24voff', 'dmm_12voff'), timeout=5)
 
@@ -53,7 +56,7 @@ class Final(share.TestSequence):
     def _step_fullload(self, dev, mes):
         """Full Load step."""
         self.dcload(
-            (('dcl_5v', 2.5), ('dcl_24v', 5.0), ('dcl_12v', 15.0)), delay=0.5)
+            (('dcl_5v', 2.5), ('dcl_24v', 10.0), ('dcl_12v', 24.0)), delay=0.5)
         self.measure(('dmm_5v', 'dmm_24von', 'dmm_12von'), timeout=5)
 
     @share.teststep

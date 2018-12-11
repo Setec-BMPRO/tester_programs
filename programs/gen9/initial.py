@@ -35,20 +35,19 @@ class Initial(share.TestSequence):
         LimitPercent('5Vset', 5.10, 1.0),
         LimitPercent('5V', 5.10, 2.0),
         LimitLow('12Voff', 0.5),
-        LimitPercent('12V', 12.18, 2.5),
+        LimitPercent('12V', 12.0, 2.5),
         LimitLow('24Voff', 0.5),
-        LimitDelta('24Vpre', 24.0, 2.0),
-        LimitBetween('24V', 22.80, 25.68),
-        LimitLow('PwrFail', 0.5),
+        LimitPercent('24V', 24.0, 2.5),
+        LimitLow('PwrFail', 0.4),
         LimitDelta('ACin', 240, 10),
         LimitDelta('15Vccpri', 15.0, 1.0),
-        LimitDelta('12Vpri', 12.0, 1.0),
+        LimitBetween('12Vpri', 11.4, 17.0),
         LimitDelta('PFCpre', 435, 15),
-        LimitDelta('PFCpost1', 440.0, 0.8),
-        LimitDelta('PFCpost2', 440.0, 0.8),
-        LimitDelta('PFCpost3', 440.0, 0.8),
-        LimitDelta('PFCpost4', 440.0, 0.8),
-        LimitDelta('PFCpost', 440.0, 0.9),
+        LimitDelta('PFCpost1', 426.0, 2.9),
+        LimitDelta('PFCpost2', 426.0, 2.9),
+        LimitDelta('PFCpost3', 426.0, 2.9),
+        LimitDelta('PFCpost4', 426.0, 2.9),
+        LimitDelta('PFCpost', 426.0, 3.0),
         LimitDelta('ARM-AcFreq', 50, 10),
         LimitLow('ARM-AcVolt', 300),
         LimitDelta('ARM-5V', 5.0, 1.0),
@@ -162,13 +161,10 @@ class Initial(share.TestSequence):
         """Check regulation of the 5V.
 
         Min = 0, Max = 2.0A, Peak = 2.5A
-        Load = 3%, Line = 0.5%, Temp = 1.0%
-        Load regulation measured from 0A to 95% of rated current
-
         Unit is left running at no load.
 
         """
-        self.dcload((('dcl_12v', 4.0), ('dcl_24v', 0.1), ))
+        self.dcload((('dcl_12v', 1.0), ('dcl_24v', 0.1), ))
         self.reg_check(
             dmm_out=mes['dmm_5v'], dcl_out=dev['dcl_5v'],
             max_load=2.0, peak_load=2.5)
@@ -177,33 +173,27 @@ class Initial(share.TestSequence):
     def _step_reg_12v(self, dev, mes):
         """Check regulation and OCP of the 12V.
 
-        Min = 4.0, Max = 24A, Peak = 28A
-        Load = 5%, Line = 0.5%, Temp = 1.0%
-        Load regulation measured from 0A to 95% of rated current
-
+        Min = 1.0, Max = 24A, Peak = 26A
         Unit is left running at no load.
 
         """
         dev['dcl_24v'].output(0.1)
         self.reg_check(
             dmm_out=mes['dmm_12v'], dcl_out=dev['dcl_12v'],
-            max_load=24.0, peak_load=28.0)
+            max_load=24.0, peak_load=26.0)
 
     @share.teststep
     def _step_reg_24v(self, dev, mes):
         """Check regulation and OCP of the 24V.
 
-        Min = 0.1, Max = 10A, Peak = 15A
-        Load = 7.5%, Line = 0.5%, Temp = 1.0%
-        Load regulation measured from 0A to 95% of rated current
-
+        Min = 0.1, Max = 10A, Peak = 11A
         Unit is left running at no load.
 
         """
-        dev['dcl_12v'].output(4.0)
+        dev['dcl_12v'].output(1.0)
         self.reg_check(
             dmm_out=mes['dmm_24v'], dcl_out=dev['dcl_24v'],
-            max_load=10.0, peak_load=15.0)
+            max_load=10.0, peak_load=11.0)
 
     def reg_check(self, dmm_out, dcl_out, max_load, peak_load):
         """Check regulation of an output.
@@ -344,7 +334,6 @@ class Measurements(share.Measurements):
             ('dmm_12voff', '12Voff', 'o12v', ''),
             ('dmm_12v', '12V', 'o12v', ''),
             ('dmm_24voff', '24Voff', 'o24v', ''),
-            ('dmm_24vpre', '24Vpre', 'o24v', ''),
             ('dmm_24v', '24V', 'o24v', ''),
             ('dmm_pfcpre', 'PFCpre', 'pfc', ''),
             ('dmm_pfcpost1', 'PFCpost1', 'pfc', ''),
