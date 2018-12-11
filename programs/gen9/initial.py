@@ -131,7 +131,7 @@ class Initial(share.TestSequence):
         # Switch all outputs ON
         dev['rla_sw'].set_on()
         dev['rla_pson'].set_on()
-        self.measure(('dmm_5vset', 'dmm_24vpre', ), timeout=5)
+        self.measure(('dmm_5vset', 'dmm_24v', ), timeout=5)
         # Unlock ARM
         arm = dev['arm']
         arm['UNLOCK'] = True

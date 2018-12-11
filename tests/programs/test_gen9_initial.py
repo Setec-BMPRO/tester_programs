@@ -13,7 +13,7 @@ class Gen9Initial(ProgramTestCase):
 
     prog_class = gen9.Initial
     parameter = None
-    debug = False
+    debug = True # False
 
     def setUp(self):
         """Per-Test setup."""
@@ -44,19 +44,19 @@ class Gen9Initial(ProgramTestCase):
                     (sen['pwrfail'], 0.0),
                     (sen['pfc'],
                         (432.0, 432.0,      # Initial reading
-                         442.0, 442.0,      # After 1st cal
-                         440.0, 440.0,      # 2nd reading
-                         440.0, 440.0,      # Final reading
+                         430.0, 430.0,      # After 1st cal
+                         426.0, 426.0,      # 2nd reading
+                         426.0, 426.0,      # Final reading
                         )),
                     (sen['arm_acfreq'], 50), (sen['arm_acvolt'], 240),
-                    (sen['arm_5v'], 5.05), (sen['arm_12v'], 12.180),
+                    (sen['arm_5v'], 5.05), (sen['arm_12v'], 12.0),
                     (sen['arm_24v'], 24.0),
                     (sen['arm_swver'], gen9.config.SW_VERSION),
                     (sen['arm_swbld'], gen9.config.SW_VERSION[4:]),
                     ),
                 '5V': ((sen['o5v'], (5.15, 5.14, 5.10)), ),
                 '12V': (
-                    (sen['o12v'], (12.34, 12.25, 12.00)),
+                    (sen['o12v'], (12.24, 12.15, 12.00)),
                     ),
                 '24V': (
                     (sen['o24v'], (24.33, 24.22, 24.11)),
