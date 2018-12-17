@@ -50,7 +50,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_pwron(self, dev, mes):
         """Power On step."""
-        dev['rla_pson'].set_on()
+        dev['rla_pson'].set_on(delay=1.0)
         self.measure(
             ('dmm_12v', 'dmm_24v', 'dmm_pwrfailoff', 'dmm_gpo1',
              'dmm_gpo2'), timeout=5)
