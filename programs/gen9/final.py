@@ -6,7 +6,7 @@
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitPercent, LimitDelta,
+    LimitLow, LimitHigh, LimitPercent, LimitDelta,
     )
 import share
 
@@ -16,15 +16,16 @@ class Final(share.TestSequence):
     """GEN9-540 Final Test Program."""
 
     limitdata = (
-        LimitLow('FanOff', 1.0, doc='Airflow present'),
-        LimitHigh('FanOn', 10.0, doc='Airflow not present'),
-        LimitDelta('Iecon', 240, 10, doc='Voltage present'),
-        LimitLow('Iecoff', 10, doc='Voltage off'),
-        LimitBetween('5V', 4.998, 5.202, doc='5V output ok'),
-        LimitLow('24Voff', 0.5, doc='24V output off'),
+        LimitLow('FanOff', 9.0, doc='Airflow not present'),
+        LimitHigh('FanOn', 11.0, doc='Airflow present'),
+        LimitDelta('GPO1out', 240, 10, doc='Voltage present'),
+        LimitDelta('GPO2out', 240, 10, doc='Voltage present'),
+        LimitPercent('5V', 5.10, 2.0, doc='5V output ok'),
         LimitLow('12Voff', 0.5, doc='12V output off'),
-        LimitPercent('24Von', 24.0, 2.5, doc='24V output ok'),
-        LimitPercent('12Von', 12.0, 2.5, doc='12V output ok'),
+        LimitPercent('12V', 12.0, 2.5, doc='12V output ok'),
+        LimitLow('24Voff', 0.5, doc='24V output off'),
+        LimitPercent('24V', 24.0, 2.5, doc='24V output ok'),
+        LimitLow('PwrFail', 0.4, doc='PFAIL asserted'),
         LimitHigh('PwrFailOff', 11.0, doc='PFAIL not asserted'),
         )
 
@@ -35,45 +36,32 @@ class Final(share.TestSequence):
             TestStep('PowerUp', self._step_pwrup),
             TestStep('PowerOn', self._step_pwron),
             TestStep('FullLoad', self._step_fullload),
-            TestStep('115V', self._step_fullload115),
-            TestStep('Poweroff', self._step_pwroff),
             )
 
     @share.teststep
     def _step_pwrup(self, dev, mes):
         """Power Up step."""
-        self.dcload(
-            (('dcl_5v', 0.0), ('dcl_24v', 0.1), ('dcl_12v', 1.0)), output=True)
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
         mes['dmm_fanon'](timeout=15)
-        self.measure(('dmm_5v', 'dmm_24voff', 'dmm_12voff'), timeout=5)
+        self.measure(
+            ('dmm_5v', 'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'), timeout=5)
 
     @share.teststep
     def _step_pwron(self, dev, mes):
         """Power On step."""
         dev['rla_pson'].set_on()
-        self.measure(('dmm_24von', 'dmm_12von', 'dmm_pwrfailoff'), timeout=5)
-        self.measure(('dmm_iec_on', 'ui_yesno_mains', ), timeout=5)
+        self.measure(
+            ('dmm_12v', 'dmm_24v', 'dmm_pwrfailoff', 'dmm_gpo1',
+             'dmm_gpo2'), timeout=5)
 
     @share.teststep
     def _step_fullload(self, dev, mes):
         """Full Load step."""
         self.dcload(
-            (('dcl_5v', 2.5), ('dcl_24v', 10.0), ('dcl_12v', 24.0)), delay=0.5)
-        self.measure(('dmm_5v', 'dmm_24von', 'dmm_12von'), timeout=5)
-
-    @share.teststep
-    def _step_fullload115(self, dev, mes):
-        """115Vac step."""
-        dev['acsource'].output(voltage=115.0, delay=0.5)
-        self.measure(('dmm_5v', 'dmm_24von', 'dmm_12von'), timeout=5)
-
-    @share.teststep
-    def _step_pwroff(self, dev, mes):
-        """Power Off step."""
-        self.dcload((('dcl_5v', 0.5), ('dcl_24v', 0.5), ('dcl_12v', 4.0), ))
-        self.measure(('ui_notify_pwroff', 'dmm_iec_off', 'dmm_24voff', ))
+            (('dcl_5v', 2.0), ('dcl_24v', 10.0), ('dcl_12v', 24.0)),
+             output=True, delay=0.5)
+        self.measure(('dmm_5v', 'dmm_24v', 'dmm_12v'), timeout=5)
 
 
 class Devices(share.Devices):
@@ -86,14 +74,17 @@ class Devices(share.Devices):
         for name, devtype, phydevname, doc in (
                 ('dmm', tester.DMM, 'DMM', ''),
                 ('acsource', tester.ACSource, 'ACS', 'AC Input'),
-                ('dcl_24v', tester.DCLoad, 'DCL1', '24V Load'),
-                ('dcl_12v', tester.DCLoad, 'DCL2', '12V Load'),
+                ('dcl_24v', tester.DCLoad, 'DCL3', '24V Load'),
+                ('dcl_12a', tester.DCLoad, 'DCL2', '12V Load'),
+                ('dcl_12b', tester.DCLoad, 'DCL6', '12V Load'),
                 ('dcl_5v', tester.DCLoad, 'DCL4', '5V Load'),
                 ('rla_pson', tester.Relay, 'RLA3', 'PSON control'),
                 ('dcs_airflow', tester.DCSource, 'DCS3',
                  'Power to airflow detector'),
             ):
             self[name] = devtype(self.physical_devices[phydevname], doc)
+        self['dcl_12v'] = tester.DCLoadParallel(
+            ((self['dcl_12a'], 10), (self['dcl_12b'], 10)))
         self['dcs_airflow'].output(12.0, True)
         self.add_closer(lambda: self['dcs_airflow'].output(0.0, False))
 
@@ -113,19 +104,14 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['iec'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
+        self['gpo1'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
+        self['gpo2'] = sensor.Vac(dmm, high=8, low=4, rng=1000, res=0.01)
         self['airflow'] = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.1)
         self['airflow'].doc = 'Airflow detector'
         self['o5v'] = sensor.Vdc(dmm, high=3, low=3, rng=10, res=0.0001)
-        self['o24v'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self['o12v'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
+        self['o24v'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self['pwrfail'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
-        self['yn_mains'] = sensor.YesNo(
-            message=tester.translate('gen8_final', 'IsSwitchGreen?'),
-            caption=tester.translate('gen8_final', 'capSwitchGreen'))
-        self['not_pwroff'] = sensor.Notify(
-            message=tester.translate('gen8_final', 'msgSwitchOff'),
-            caption=tester.translate('gen8_final', 'capSwitchOff'))
 
 
 class Measurements(share.Measurements):
@@ -137,14 +123,13 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_fanoff', 'FanOff', 'airflow', 'Fan not running'),
             ('dmm_fanon', 'FanOn', 'airflow', 'Fan running'),
-            ('dmm_iec_on', 'Iecon', 'iec', 'IEC output ON'),
-            ('dmm_iec_off', 'Iecoff', 'iec', 'IEC output OFF'),
+            ('dmm_gpo1', 'GPO1out', 'gpo1', 'GPO1 output ON'),
+            ('dmm_gpo2', 'GPO2out', 'gpo2', 'GPO2 output ON'),
             ('dmm_5v', '5V', 'o5v', '5V output ok'),
-            ('dmm_24voff', '24Voff', 'o24v', '24V output off'),
             ('dmm_12voff', '12Voff', 'o12v', '12V output off'),
-            ('dmm_24von', '24Von', 'o24v', '24V output ok'),
-            ('dmm_12von', '12Von', 'o12v', '12V output ok'),
+            ('dmm_12v', '12V', 'o12v', '12V output ok'),
+            ('dmm_24voff', '24Voff', 'o24v', '24V output off'),
+            ('dmm_24v', '24V', 'o24v', '24V output ok'),
+            ('dmm_pwrfail', 'PwrFail', 'pwrfail', 'PFAIL asserted'),
             ('dmm_pwrfailoff', 'PwrFailOff', 'pwrfail', 'PFAIL not asserted'),
-            ('ui_yesno_mains', 'Notify', 'yn_mains', ''),
-            ('ui_notify_pwroff', 'Notify', 'not_pwroff', ''),
             ))
