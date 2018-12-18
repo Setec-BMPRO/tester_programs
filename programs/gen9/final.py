@@ -43,7 +43,6 @@ class Final(share.TestSequence):
         """Power Up step."""
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
-        mes['dmm_fanon'](timeout=15)
         self.measure(
             ('dmm_5v', 'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'), timeout=5)
 
@@ -51,6 +50,7 @@ class Final(share.TestSequence):
     def _step_pwron(self, dev, mes):
         """Power On step."""
         dev['rla_pson'].set_on(delay=1.0)
+        mes['dmm_fanon'](timeout=15)
         self.measure(
             ('dmm_12v', 'dmm_24v', 'dmm_pwrfailoff', 'dmm_gpo1',
              'dmm_gpo2'), timeout=5)

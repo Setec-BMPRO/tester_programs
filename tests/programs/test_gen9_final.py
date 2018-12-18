@@ -20,11 +20,12 @@ class GEN9Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['airflow'], (0.0, 12.0)),
+                    (sen['airflow'], 0.0),
                     (sen['o5v'], 5.0), (sen['o12v'], 0.0), (sen['o24v'], 0.0),
                     (sen['pwrfail'], 0.0),
                     ),
                 'PowerOn': (
+                    (sen['airflow'], 12.0),
                     (sen['o12v'], 12.0), (sen['o24v'], 24.0),
                     (sen['pwrfail'], 12.0), (sen['gpo1'], 240.0),
                     (sen['gpo2'], 240.0),

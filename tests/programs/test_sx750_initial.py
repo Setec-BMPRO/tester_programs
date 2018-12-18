@@ -13,7 +13,7 @@ class SX750Initial(ProgramTestCase):
 
     prog_class = sx750.Initial
     parameter = None
-    debug = True
+    debug = False
 
     def setUp(self):
         """Per-Test setup."""
