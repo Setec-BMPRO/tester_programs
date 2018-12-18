@@ -23,8 +23,6 @@ class Initial(share.TestSequence):
 
     # Reading to reading difference for PFC voltage stability
     pfc_stable = 0.05
-    # ARM software image file
-    arm_file = 'gen9_{0}.bin'.format(config.SW_IMAGE)
 
     limitdata = (
         LimitHigh('FanShort', 500),
@@ -81,29 +79,21 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the ARM device.
-
-        Device is powered by injected 5VSB_Pre.
-        Unit is left running the new code.
-
-        """
+        """Program the ARM device."""
         dev['dcs_5v'].output(5.0, True)
         mes['dmm_3v3'](timeout=5)
         dev['program_arm'].program()
-        dev['rla_reset'].pulse(0.1)
 
     @share.teststep
     def _step_initialise_arm(self, dev, mes):
         """Initialise the ARM device.
-
-        Device is powered by injected 5VSB_Pre.
-        The ARM is initialised via the serial port.
 
         Unit is left unpowered.
 
         """
         arm = dev['arm']
         arm.open()
+        dev['rla_reset'].pulse(0.1)
         arm.initialise()
         dev['dcs_5v'].output(0.0, False)
         dev['dcl_5v'].output(0.1, True, delay=0.5)
@@ -131,7 +121,7 @@ class Initial(share.TestSequence):
         # Unlock ARM
         arm = dev['arm']
         arm.banner()
-        arm['UNLOCK'] = True
+        arm.unlock()
         # A little load so PFC voltage falls faster
         self.dcload((('dcl_12v', 1.0), ('dcl_24v', 1.0)), output=True)
         # Calibrate the PFC set voltage
@@ -147,12 +137,14 @@ class Initial(share.TestSequence):
         if not result:      # 3rd retry
             arm.calpfc(pfc)
             mes['dmm_pfcpost4'].stable(self.pfc_stable)
+        arm.nvwrite()
         # A final PFC setup check
         mes['dmm_pfcpost'].stable(self.pfc_stable)
         self.measure(
             ('arm_acfreq', 'arm_acvolt',
              'arm_5v', 'arm_12v', 'arm_24v',
-             'arm_swver', 'arm_swbld'), )
+             'arm_swver', 'arm_swbld',
+             ), )
 
     @share.teststep
     def _step_reg_5v(self, dev, mes):
@@ -252,7 +244,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, Initial.arm_file),
+            os.path.join(folder, config.SW_IMAGE),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # Serial connection to the ARM console

@@ -51,8 +51,8 @@ class Gen9Initial(ProgramTestCase):
                     (sen['arm_acfreq'], 50), (sen['arm_acvolt'], 240),
                     (sen['arm_5v'], 5.05), (sen['arm_12v'], 12.0),
                     (sen['arm_24v'], 24.0),
-                    (sen['arm_swver'], gen9.config.SW_VERSION),
-                    (sen['arm_swbld'], gen9.config.SW_VERSION[4:]),
+                    (sen['arm_swver'], gen9.config.SW_VER),
+                    (sen['arm_swbld'], gen9.config.SW_BUILD),
                     ),
                 '5V': ((sen['o5v'], (5.15, 5.14, 5.10)), ),
                 '12V': (
