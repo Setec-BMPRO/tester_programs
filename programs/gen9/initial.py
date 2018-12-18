@@ -80,6 +80,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the ARM device."""
+        dev['rla_reset'].set_on()
         dev['dcs_5v'].output(5.0, True)
         mes['dmm_3v3'](timeout=5)
         dev['program_arm'].program()
