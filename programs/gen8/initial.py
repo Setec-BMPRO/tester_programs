@@ -152,15 +152,15 @@ class Initial(share.TestSequence):
         # Calibrate the PFC set voltage
         pfc = mes['dmm_pfcpre'].stable(self.pfc_stable).reading1
         arm.calpfc(pfc)
-        result, _, pfc = mes['dmm_pfcpost1'].stable(self.pfc_stable)
-        if not result:      # 1st retry
-            arm.calpfc(pfc)
-            result, _, pfc = mes['dmm_pfcpost2'].stable(self.pfc_stable)
-        if not result:      # 2nd retry
-            arm.calpfc(pfc)
-            result, _, pfc = mes['dmm_pfcpost3'].stable(self.pfc_stable)
-        if not result:      # 3rd retry
-            arm.calpfc(pfc)
+        mesres = mes['dmm_pfcpost1'].stable(self.pfc_stable)
+        if not mesres.result:      # 1st retry
+            arm.calpfc(mesres.reading1)
+            mesres = mes['dmm_pfcpost2'].stable(self.pfc_stable)
+        if not mesres.result:      # 2nd retry
+            arm.calpfc(mesres.reading1)
+            mesres = mes['dmm_pfcpost3'].stable(self.pfc_stable)
+        if not mesres.result:      # 3rd retry
+            arm.calpfc(mesres.reading1)
             mes['dmm_pfcpost4'].stable(self.pfc_stable)
         # A final PFC setup check
         mes['dmm_pfcpost'].stable(self.pfc_stable)
