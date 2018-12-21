@@ -7,7 +7,7 @@ import traceback
 import time
 import inspect
 import configparser
-import logging.handlers
+import logging
 from pydispatch import dispatcher
 import tester
 import programs
