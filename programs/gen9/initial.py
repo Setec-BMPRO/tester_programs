@@ -118,7 +118,7 @@ class Initial(share.TestSequence):
             timeout=5)
         # Switch all outputs ON
         dev['rla_pson'].set_on()
-        self.measure(('dmm_5vset', 'dmm_24v', ), timeout=5)
+        self.measure(('dmm_5vset', 'dmm_24v', 'dmm_12v', ), timeout=5)
         # Unlock ARM
         arm = dev['arm']
         arm.banner()
@@ -342,7 +342,7 @@ class Measurements(share.Measurements):
             ))
         # Prevent test failures on these limits.
         for name in (
-                'dmm_pfcpost1', 'dmm_pfcpost2', 'dmm_pfcpost3',
-                'dmm_pfcpost4',
+                'dmm_pfcpost1', 'dmm_pfcpost2',
+                'dmm_pfcpost3', 'dmm_pfcpost4',
                 ):
             self[name].position_fail = False
