@@ -43,13 +43,17 @@ class Final(share.TestSequence):
         """Power Up step."""
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
+        self.dcload(
+            (('dcl_5v', 0.1), ('dcl_24v', 0.1), ('dcl_12v', 0.1)),
+             output=True, delay=0.5)
         self.measure(
             ('dmm_5v', 'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'), timeout=5)
 
     @share.teststep
     def _step_pwron(self, dev, mes):
         """Power On step."""
-        dev['rla_pson'].set_on(delay=1.0)
+        self.dcload((('dcl_5v', 0.0), ('dcl_24v', 0.0), ('dcl_12v', 0.0)))
+        dev['rla_pson'].set_on()
         mes['dmm_fanon'](timeout=15)
         self.measure(
             ('dmm_12v', 'dmm_24v', 'dmm_pwrfailoff', 'dmm_gpo1',
@@ -60,7 +64,7 @@ class Final(share.TestSequence):
         """Full Load step."""
         self.dcload(
             (('dcl_5v', 2.0), ('dcl_24v', 10.0), ('dcl_12v', 24.0)),
-             output=True, delay=0.5)
+             delay=0.5)
         self.measure(('dmm_5v', 'dmm_24v', 'dmm_12v'), timeout=5)
 
 
@@ -90,7 +94,11 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
+        # Switch off AC Source and discharge the unit
         self['acsource'].reset()
+        self['dcl_5v'].output(1.0)
+        self['dcl_12v'].output(5.0)
+        self['dcl_24v'].output(5.0, delay=1.0)
         for ld in ('dcl_12v', 'dcl_24v', 'dcl_5v'):
             self[ld].output(0.0, False)
         self['rla_pson'].set_off()
