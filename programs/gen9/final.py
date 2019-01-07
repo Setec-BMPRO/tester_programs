@@ -44,10 +44,10 @@ class Final(share.TestSequence):
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(240.0, output=True)
         self.dcload(
-            (('dcl_5v', 0.1), ('dcl_24v', 0.1), ('dcl_12v', 0.1)),
+            (('dcl_5v', 0.1), ('dcl_24v', 1.0), ('dcl_12v', 1.0)),
              output=True, delay=0.5)
         self.measure(
-            ('dmm_5v', 'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'), timeout=5)
+            ('dmm_5v', 'dmm_12voff', 'dmm_24voff', 'dmm_pwrfail'), timeout=10)
 
     @share.teststep
     def _step_pwron(self, dev, mes):
