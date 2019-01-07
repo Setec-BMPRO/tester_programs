@@ -40,7 +40,7 @@ class Gen9Initial(ProgramTestCase):
                 'PowerUp': (
                     (sen['acin'], 240.0), (sen['o5v'], (5.05, 5.11, )),
                     (sen['o15vccpri'], 15.0), (sen['o12vpri'], 12.0),
-                    (sen['o12v'], 0.0), (sen['o24v'], (0.0, 24.0, )),
+                    (sen['o12v'], (0.0, 12.0, )), (sen['o24v'], (0.0, 24.0, )),
                     (sen['pwrfail'], 0.0),
                     (sen['pfc'],
                         (432.0, 432.0,      # Initial reading
@@ -67,7 +67,7 @@ class Gen9Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(32, len(result.readings))
+        self.assertEqual(33, len(result.readings))
         self.assertEqual(
             ['PartDetect', 'Program', 'Initialise', 'PowerUp',
              '5V', '12V', '24V'],
