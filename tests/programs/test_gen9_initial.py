@@ -13,7 +13,7 @@ class Gen9Initial(ProgramTestCase):
 
     prog_class = gen9.Initial
     parameter = None
-    debug = True # False
+    debug = False
 
     def setUp(self):
         """Per-Test setup."""

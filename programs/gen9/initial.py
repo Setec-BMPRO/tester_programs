@@ -39,7 +39,7 @@ class Initial(share.TestSequence):
         LimitDelta('ACin', 240, 10),
         LimitDelta('15Vccpri', 15.0, 1.0),
         LimitBetween('12Vpri', 11.4, 17.0),
-        LimitDelta('PFCpre', 435, 15),
+        LimitBetween('PFCpre', 408, 450),
         LimitDelta('PFCpost1', 426.0, 2.9),
         LimitDelta('PFCpost2', 426.0, 2.9),
         LimitDelta('PFCpost3', 426.0, 2.9),
