@@ -116,7 +116,10 @@ class Sensors(share.Sensors):
         self['gpo2'] = sensor.Vac(dmm, high=8, low=4, rng=1000, res=0.01)
         self['airflow'] = sensor.Vdc(dmm, high=2, low=2, rng=100, res=0.1)
         self['airflow'].doc = 'Airflow detector'
-        self['o5v'] = sensor.Vdc(dmm, high=3, low=3, rng=10, res=0.0001)
+        # The 5V output pin. Subject to load current.
+#        self['o5v'] = sensor.Vdc(dmm, high=3, low=3, rng=10, res=0.0001)
+        # The LED output pin. 5V - 100R - Diode.
+        self['o5v'] = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.0001)
         self['o12v'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self['o24v'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self['pwrfail'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
