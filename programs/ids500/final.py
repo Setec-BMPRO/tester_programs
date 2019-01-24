@@ -223,7 +223,9 @@ class Final(share.TestSequence):
         pic.expected = 3
         pic['WriteSerNum'] = sernum
         pic.expected = 1
-        mes['pic_sernum'].testlimit[0].adjust(sernum)
+        mes['pic_sernum'].testlimit[0].adjust(
+            r'^I,  3, {0},Serial Number$'.format(sernum)
+            )
         mes['pic_sernum']()
 
     @share.teststep

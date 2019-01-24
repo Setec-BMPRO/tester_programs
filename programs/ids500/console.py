@@ -93,4 +93,10 @@ class Console(share.console.Base):
                 response = None
             self._logger.debug('Response <-- %s', repr(response))
             all_response.append(response)
-        return all_response
+        response = all_response
+        response_count = len(response)
+        if response_count == 1:     # Reduce list of 1 string to a string
+            response = response[0]
+        if response_count == 0:     # Reduce empty list to None
+            response = None
+        return response
