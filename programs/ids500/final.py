@@ -215,7 +215,9 @@ class Final(share.TestSequence):
         time.sleep(0.5)
         pic.port.flushInput()
         pic.expected = 1
-        mes['pic_hwrev'].testlimit[0].adjust(hwrev)
+        mes['pic_hwrev'].testlimit[0].adjust(
+            r'^I,  2, {0},Hardware Revision$'.format(hwrev)
+            )
         mes['pic_hwrev']()
         sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         pic.expected = 3
