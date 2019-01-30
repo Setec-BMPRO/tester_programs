@@ -25,8 +25,7 @@ class RVSWT101Initial(ProgramTestCase):
         for target in (
                 'share.programmer.Nordic',
                 'share.bluetooth.RaspberryBluetooth',
-                'programs.cn102.console.DirectConsole',
-                'programs.cn102.console.TunnelConsole',
+                'programs.rvswt101.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -39,11 +38,8 @@ class RVSWT101Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['oSnEntry'], 'A1526040123'),
-                    (sen['oVin'], 8.0),
-                    ),
-                'TestArm': (
-                    (sen['SwVer'], rvswt101.config.RVSWT101.sw_arm_version),
+                    (sen['SnEntry'], 'A1526040123'),
+                    (sen['vin'], 3.3),
                     ),
                 'Bluetooth': (
                     (sen['mirscan'], True),
@@ -54,7 +50,7 @@ class RVSWT101Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(15, len(result.readings))
+        self.assertEqual(3, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmNordic', 'TestArm', 'Bluetooth'],
+            ['PowerUp', 'PgmNordic', 'Bluetooth'],
             self.tester.ut_steps)
