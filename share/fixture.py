@@ -102,7 +102,7 @@ DATA = {
         },
     '012345': {     # RVSWT101 Initial
         # Hub port 1: FTDI
-        'BL652': {'posix': '/dev/ttyUSB1', 'nt': 'COM25'}[os.name],
+        'BL652': {'posix': '/dev/ttyUSB1', 'nt': 'COM23'}[os.name],
         },
     }
 

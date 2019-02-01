@@ -3,7 +3,7 @@
 """RVSWT101 Configuration."""
 
 SW_VER = '1.0'
-SW_SVN = '18392'
-SW_BUILD = '2512'
+SW_SVN = '18106'
+SW_BUILD = '1260'
 # Software image filenames
-SW_IMAGE = 'rvswt101_{0}.{1}.{2}.hex'.format(SW_VER, SW_SVN, SW_BUILD)
+SW_IMAGE = '{0}.{1}.{2}'.format(SW_VER, SW_SVN, SW_BUILD)

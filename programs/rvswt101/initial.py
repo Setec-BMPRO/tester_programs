@@ -32,16 +32,17 @@ class Initial(share.TestSequence):
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmNordic', self.devices['progNRF'].program),
-            tester.TestStep('Bluetooth', self._step_bluetooth),
+#            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+#        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+        self.sernum = 'A0000000000'
         dev['dcs_vin'].output(3.2, output=True)
-        dev['dcs_vcom'].output(5.0, output=True, delay=5)
+        dev['dcs_vcom'].output(9.0, output=True, delay=5)
         mes['dmm_vin'](timeout=5)
         dev['rla_switch'].set_on(delay=0.1)
         dev['rla_pos1'].set_on()
