@@ -65,9 +65,10 @@ class Ids500Final(ProgramTestCase):
                     ),
                 'Comms': (
                     (sen['oSerNumEntry'], (self.sernum,)),
-                    (sen['oHwRevEntry'], ('07a ',)),
-                    (sen['hwrev'], ('07A', )),
-                    (sen['sernum'], (self.sernum, )),
+                    (sen['oHwRevEntry'], ('07A ',)),
+                    (sen['hwrev'], ('I,  2, 07A,Hardware Revision', )),
+                    (sen['sernum'], ('I,  3, {0},Serial Number'.format(
+                        self.sernum), )),
                     ),
                 'EmergStop': (
                     (sen['tec'], 0.0), (sen['tecvmon'], 0.0),
