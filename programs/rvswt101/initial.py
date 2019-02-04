@@ -27,9 +27,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.sw_image = 'rvswt101_{0}_{1}.hex'.format(
-            self.parameter,
-            config.SW_VER)
+        Devices.sw_image = config.SW_IMAGE.format(self.parameter)
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -38,6 +36,7 @@ class Initial(share.TestSequence):
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
+        self.serialtomac = config.SerialToMAC()
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -60,6 +59,8 @@ class Initial(share.TestSequence):
         self.mac = rvswt101.get_mac(dev['rla_reset'])
         mes['ble_mac'].sensor.store(self.mac)
         mes['ble_mac']()
+        # Save SerialNumber & MAC on a remote server
+        self.serialtomac.blemac_set(self.sernum, self.mac)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):

@@ -9,7 +9,7 @@ class Console(share.console.BadUart):
 
     """Communications to RVSWT101 console."""
 
-    _banner = re.compile('^ble addr ([0-9a-f]{12})$')
+    re_banner = re.compile('^ble addr ([0-9a-f]{12})$')
     banner_lines = 1
 
     def get_mac(self, reset_relay):
@@ -17,7 +17,7 @@ class Console(share.console.BadUart):
         reset_relay.pulse(0.1)
         mac = self.action(None, delay=1.5, expected=self.banner_lines)
         mac = mac.replace(':', '')
-        match = self._banner.match(mac)
+        match = self.re_banner.match(mac)
         if not match:
-            raise ValueError
+            raise ValueError('Bluetooth MAC not found in startup banner')
         return match[1]

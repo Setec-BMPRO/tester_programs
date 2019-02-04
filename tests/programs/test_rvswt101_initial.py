@@ -22,10 +22,16 @@ class RVSWT101Initial(ProgramTestCase):
         patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
         self.addCleanup(patcher.stop)
         patcher.start()
+        mycon = MagicMock(name='MyConsole')
+        mycon.get_mac.return_value = '001ec030c2be'
+        patcher = patch(
+            'programs.rvswt101.console.Console', return_value=mycon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
         for target in (
                 'share.programmer.Nordic',
                 'share.bluetooth.RaspberryBluetooth',
-                'programs.rvswt101.console.Console',
+                'programs.rvswt101.config.SerialToMAC',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -42,7 +48,8 @@ class RVSWT101Initial(ProgramTestCase):
                     (sen['vin'], 3.3),
                     ),
                 'Bluetooth': (
-                    (sen['mirscan'], True), (sen['mirmac'], '001EC030C2BE'),
+                    (sen['mirscan'], True),
+#                    (sen['mirmac'], '001EC030C2BE'),
                     ),
                 },
             }
@@ -52,5 +59,5 @@ class RVSWT101Initial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(4, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmNordic', 'Bluetooth'],
+            ['PowerUp', 'PgmNordic', 'GetMac', 'Bluetooth'],
             self.tester.ut_steps)
