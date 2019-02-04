@@ -42,7 +42,7 @@ class RVSWT101Initial(ProgramTestCase):
                     (sen['vin'], 3.3),
                     ),
                 'Bluetooth': (
-                    (sen['mirscan'], True),
+                    (sen['mirscan'], True), (sen['mirmac'], '001EC030C2BE'),
                     ),
                 },
             }
@@ -50,7 +50,7 @@ class RVSWT101Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(3, len(result.readings))
+        self.assertEqual(4, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmNordic', 'Bluetooth'],
             self.tester.ut_steps)

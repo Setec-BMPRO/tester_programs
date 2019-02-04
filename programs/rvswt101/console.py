@@ -2,13 +2,22 @@
 # -*- coding: utf-8 -*-
 """RVSWT101 Console driver."""
 
+import re
 import share
 
 class Console(share.console.BadUart):
 
     """Communications to RVSWT101 console."""
 
-    parameter = share.console.parameter
-    cmd_data = {
-        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
-        }
+    _banner = re.compile('^ble addr ([0-9a-f]{12})$')
+    banner_lines = 1
+
+    def get_mac(self, reset_relay):
+        """Get the MAC address from the console"""
+        reset_relay.pulse(0.1)
+        mac = self.action(None, delay=1.5, expected=self.banner_lines)
+        mac = mac.replace(':', '')
+        match = self._banner.match(mac)
+        if not match:
+            raise ValueError
+        return match[1]

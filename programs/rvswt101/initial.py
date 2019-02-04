@@ -21,52 +21,63 @@ class Initial(share.TestSequence):
 
     limitdata = (
         LimitDelta('Vin', 3.3, 0.3),
-        LimitRegExp('SwNrfVer', '',            # Adjusted during open()
-            doc='Nordic Software version'),
-        LimitBoolean('ScanSer', True, doc='Serial number detected'),
+        LimitBoolean('ScanMac', True, doc='MAC address detected'),
+        LimitRegExp('BleMac', '^[0-9a-f]{12}$', doc='Valid MAC address'),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        Devices.sw_image = 'rvswt101_{0}_{1}.hex'.format(
+            self.parameter,
+            config.SW_VER)
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmNordic', self.devices['progNRF'].program),
-#            tester.TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('GetMac', self._step_get_mac),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
-#        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         self.sernum = 'A0000000000'
-        dev['dcs_vin'].output(3.2, output=True)
-        dev['dcs_vcom'].output(9.0, output=True, delay=5)
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+        self.dcsource(
+            (('dcs_vcom', 9.0), ('dcs_vin', 3.3), ('dcs_switch', 12.0)),
+            output=True, delay=5)
         mes['dmm_vin'](timeout=5)
-        dev['rla_switch'].set_on(delay=0.1)
         dev['rla_pos1'].set_on()
+
+    @share.teststep
+    def _step_get_mac(self, dev, mes):
+        """Get the MAC address from the console."""
+        dev['rla_disconct'].set_on(delay=0.1)
+        rvswt101 = dev['rvswt101']
+        rvswt101.open()
+        # Reset or cycle power to get the banner from the Nordic
+        self.mac = rvswt101.get_mac(dev['rla_reset'])
+        mes['ble_mac'].sensor.store(self.mac)
+        mes['ble_mac']()
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        # Reset or cycle power to get the banner from the Nordic
-        dev['dcs_vin'].output(0, output=True, delay=2)
-        dev['dcs_vin'].output(3.3, output=True)
-
+        # Press Button2 to broadcast on bluetooth
         dev['rla_pos1'].set_off(delay=0.1)
-        dev['rla_switch'].set_off(delay=0.1)
-        dev['rla_pos1'].pulse(duration=0.1)
-        reply = dev['pi_bt'].scan_advert_sernum(self.sernum)
-        mes['scan_ser'].sensor.store(reply)
-        mes['scan_ser']()
+        dev['dcs_switch'].output(0, delay=0.1)
+        dev['rla_pos1'].pulse(0.1)
+        reply = dev['pi_bt'].scan_advert_blemac(self.mac)
+        mes['scan_mac'].sensor.store(reply)
+        mes['scan_mac']()
 
 
 class Devices(share.Devices):
 
     """Devices."""
 
-    sw_nrf_version = None   # Nordic software version
+    sw_image = None
 
     def open(self):
         """Create all Instruments."""
@@ -75,9 +86,10 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
+                ('dcs_switch', tester.DCSource, 'DCS3'),
                 ('rla_pos1', tester.Relay, 'RLA1'),
-                ('rla_switch', tester.Relay, 'RLA21'),
-                ('rla_reset', tester.Relay, 'RLA22'),
+                ('rla_reset', tester.Relay, 'RLA21'),
+                ('rla_disconct', tester.Relay, 'RLA22'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         folder = os.path.dirname(
@@ -86,7 +98,7 @@ class Devices(share.Devices):
         self['progNRF'] = share.programmer.Nordic(
             os.path.join(
                 folder,
-                'rvswt101_nrf_{0}.hex'.format(config.SW_IMAGE)),
+                'rvswt101_nrf_{0}.hex'.format(self.sw_image)),
             folder)
         # Serial connection to the BL652 console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
@@ -101,9 +113,9 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['rvswt101'].close()
-        for dcs in ('dcs_vcom', 'dcs_vin'):
+        for dcs in ('dcs_vcom', 'dcs_vin', 'dcs_switch'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_pos1', 'rla_switch', 'rla_reset'):
+        for rla in ('rla_pos1', 'rla_reset', 'rla_disconct'):
             self[rla].set_off()
 
 
@@ -115,6 +127,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
+        self['mirmac'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['mirscan'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
         self['SnEntry'] = sensor.DataEntry(
@@ -138,6 +151,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
-            ('scan_ser', 'ScanSer', 'mirscan',
-                'Scan for serial number over bluetooth'),
+            ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from console'),
+            ('scan_mac', 'ScanMac', 'mirscan',
+                'Scan for MAC address over bluetooth'),
             ))
