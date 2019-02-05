@@ -36,7 +36,6 @@ class Initial(share.TestSequence):
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
-        self.serialtomac = config.SerialToMAC()
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -60,7 +59,7 @@ class Initial(share.TestSequence):
         mes['ble_mac'].sensor.store(self.mac)
         mes['ble_mac']()
         # Save SerialNumber & MAC on a remote server
-        self.serialtomac.blemac_set(self.sernum, self.mac)
+        dev['serialtomac'].blemac_set(self.sernum, self.mac)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -97,9 +96,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # NRF52 device programmer
         self['progNRF'] = share.programmer.Nordic(
-            os.path.join(
-                folder,
-                'rvswt101_nrf_{0}.hex'.format(self.sw_image)),
+            os.path.join(folder, self.sw_image),
             folder)
         # Serial connection to the BL652 console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
@@ -108,8 +105,10 @@ class Devices(share.Devices):
         rvswt101_ser.port = bl652_port
         # RVSWT101 Console driver
         self['rvswt101'] = console.Console(rvswt101_ser)
-        # Bluetooth connection to server
+        # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
+        # Connection to Serial To MAC server
+        self['serialtomac'] = config.SerialToMAC()
 
     def reset(self):
         """Reset instruments."""

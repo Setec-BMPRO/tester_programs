@@ -25,14 +25,13 @@ class Final(share.TestSequence):
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
-        self.serialtomac = config.SerialToMAC()
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         # Lookup the MAC address from the server
-        mac = self.serialtomac.blemac_get(self.sernum)
+        mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
         # Tell user to push unit's button after clicking OK
@@ -49,12 +48,11 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Bluetooth connection to server
+        # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
+        # Connection to Serial To MAC server
+        self['serialtomac'] = config.SerialToMAC()
 
-    def reset(self):
-        """Reset instruments."""
-        pass
 
 class Sensors(share.Sensors):
 
