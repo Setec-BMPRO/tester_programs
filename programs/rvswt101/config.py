@@ -19,7 +19,7 @@ class SerialToMAC():
     #   Set the standard content_type here
     content_type = 'application/json'
     # The ERP server location
-    server_url = 'http://localhost:8888/'
+    server_url = 'http://erputil2.mel.setec.com.au:8888/'
 
     def __init__(self):
         """Create the instance."""
