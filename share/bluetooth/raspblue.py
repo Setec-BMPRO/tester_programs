@@ -96,6 +96,16 @@ class RaspberryBluetooth(SerialIO):
         """
         return self.server.echo(value)
 
+    def scan_advert_blemac(self, blemac, timeout=10):
+        """Scan advertisement packets for a device MAC address.
+
+        @param blemac Bluetooth MAC address to locate
+        @param timeout Timeout in seconds
+        @return True if device was found
+
+        """
+        return self.server.scan_advert_blemac(blemac, timeout)
+
     def scan_advert_sernum(self, sernum, timeout=10):
         """Scan advertisment packets for a device Serial Number.
 
@@ -143,7 +153,6 @@ class RaspberryBluetooth(SerialIO):
         # Other commands: skip command echo line
         firstline = 2 if is_cal else 1
         reply = '\r\n'.join(lines[firstline:])
-
         return reply
 
     def close(self):
