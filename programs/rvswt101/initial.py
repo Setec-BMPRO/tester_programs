@@ -101,7 +101,7 @@ class Devices(share.Devices):
         # Serial connection to the BL652 console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bl652_port = share.fixture.port('012345', 'BL652')
+        bl652_port = share.fixture.port('032869', 'BL652')
         rvswt101_ser.port = bl652_port
         # RVSWT101 Console driver
         self['rvswt101'] = console.Console(rvswt101_ser)

@@ -100,7 +100,7 @@ DATA = {
         # Hub port 2: FTDI
         'BLE': {'posix': '/dev/ttyUSB2', 'nt': 'COM7'}[os.name],
         },
-    '012345': {     # RVSWT101 Initial
+    '032869': {     # RVSWT101 Initial
         # Hub port 1: FTDI
         'BL652': {'posix': '/dev/ttyUSB1', 'nt': 'COM23'}[os.name],
         },
