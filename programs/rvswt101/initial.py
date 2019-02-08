@@ -42,20 +42,18 @@ class Initial(share.TestSequence):
         """Apply input 3V3dc and measure voltages."""
         self.sernum = 'A0000000000'
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        self.dcsource(
-            (('dcs_vcom', 9.0), ('dcs_vin', 3.3), ('dcs_switch', 12.0)),
-            output=True, delay=5)
+        dev['dcs_vin'].output(3.3, output=True)
         mes['dmm_vin'](timeout=5)
-        dev['rla_pos1'].set_on()
+        dev['fixture'].connect(0)
 
     @share.teststep
     def _step_get_mac(self, dev, mes):
         """Get the MAC address from the console."""
-        dev['rla_disconct'].set_on(delay=0.1)
-        rvswt101 = dev['rvswt101']
-        rvswt101.open()
-        # Reset or cycle power to get the banner from the Nordic
-        self.mac = rvswt101.get_mac(dev['rla_reset'])
+        dev['rla_nrf_reset'].disable(delay=0.1)
+        # Cycle power to get the banner from the Nordic
+        dev['dcs_vin'].output(0.0, delay=0.5)
+        dev['dcs_vin'].output(3.3, delay=0.1)
+        self.mac = dev['rvswt101'].get_mac()
         mes['ble_mac'].sensor.store(self.mac)
         mes['ble_mac']()
         # Save SerialNumber & MAC on a remote server
@@ -65,10 +63,9 @@ class Initial(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         # Press Button2 to broadcast on bluetooth
-        dev['rla_pos1'].set_off(delay=0.1)
-        dev['dcs_switch'].output(0, delay=0.1)
-        dev['rla_pos1'].pulse(0.1)
+        dev['fixture'].press(0)
         reply = dev['pi_bt'].scan_advert_blemac(self.mac)
+        dev['fixture'].release(0)
         mes['scan_mac'].sensor.store(reply)
         mes['scan_mac']()
 
@@ -89,9 +86,15 @@ class Devices(share.Devices):
                 ('dcs_switch', tester.DCSource, 'DCS3'),
                 ('rla_pos1', tester.Relay, 'RLA1'),
                 ('rla_reset', tester.Relay, 'RLA21'),
-                ('rla_disconct', tester.Relay, 'RLA22'),
+                ('rla_nrf_reset', tester.Relay, 'RLA22'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Some more obvious ways to use this relay
+        rla = self['rla_nrf_reset']
+        rla.disable = rla.set_off
+        rla.enable = rla.set_on
+        # Fixture helper device
+        self['fixture'] = Fixture(self['dcs_switch'], [self['rla_pos1']])
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # NRF52 device programmer
@@ -109,14 +112,100 @@ class Devices(share.Devices):
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
         self['serialtomac'] = config.SerialToMAC()
+        # Fixture USB hub power
+        self['dcs_vcom'].output(9.0, output=True, delay=5)
+        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
+        # Open console serial connection
+        self['rvswt101'].open()
+        self.add_closer(lambda: self['rvswt101'].close())
 
     def reset(self):
         """Reset instruments."""
-        self['rvswt101'].close()
-        for dcs in ('dcs_vcom', 'dcs_vin', 'dcs_switch'):
+        for dcs in ('dcs_vin', 'dcs_switch'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_pos1', 'rla_reset', 'rla_disconct'):
+        for rla in ('rla_pos1', 'rla_reset'):
             self[rla].set_off()
+        self['rla_nrf_reset'].disable()
+
+
+class Fixture():
+
+    """Helper class for fixture circuit control.
+
+    DC Source 'mode_dcs' drives a relay that directs relay coil power to:
+        - Button press relays (when DCS is off)
+        - Programmer/Console connection relays (when DCS is 12V)
+    The list of relays 'relays' controls each of the fixture positions.
+    Depending upon 'mode_dcs', it will either press that positions button, or
+    connect the programmer & console to that position.
+
+    This class deals with the settings and sequencing.
+
+    """
+
+    def __init__(self, mode_dcs, relays):
+        """Create instance.
+
+        @param mode_dcs DC Source instance controlling Program / Button mode
+        @param relays List of position connection relays
+
+        """
+        self.mode_dcs = mode_dcs
+        self.relays = relays
+        self.is_button_mode = None
+        self.button_mode()
+
+    def program_mode(self):
+        """Set Program/Console mode."""
+        if self.is_button_mode:
+            for rla in self.relays:
+                rla.set_off()
+            self.mode_dcs.output(12, output=True, delay=0.1)
+            self.is_button_mode = False
+
+    def button_mode(self):
+        """Set Button mode."""
+        if not self.is_button_mode:
+            for rla in self.relays:
+                rla.set_off()
+            self.mode_dcs.output(0, output=True, delay=0.1)
+            self.is_button_mode = True
+
+    def connect(self, position):
+        """Connect a position for programming.
+
+        @param position Position number
+
+        """
+        self.program_mode()
+        self.relays[position].set_on()
+
+    def disconnect(self, position):
+        """Disconnect a position for programming.
+
+        @param position Position number
+
+        """
+        self.program_mode()
+        self.relays[position].set_off()
+
+    def press(self, position):
+        """Press a button.
+
+        @param position Position number
+
+        """
+        self.button_mode()
+        self.relays[position].set_on()
+
+    def release(self, position):
+        """Release a button.
+
+        @param position Position number
+
+        """
+        self.button_mode()
+        self.relays[position].set_off()
 
 
 class Sensors(share.Sensors):
