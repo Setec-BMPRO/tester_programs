@@ -40,7 +40,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
-        self.sernum = 'A0000000000'
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(3.3, output=True)
         mes['dmm_vin'](timeout=5)
@@ -113,7 +112,7 @@ class Devices(share.Devices):
         # Connection to Serial To MAC server
         self['serialtomac'] = config.SerialToMAC()
         # Fixture USB hub power
-        self['dcs_vcom'].output(9.0, output=True, delay=5)
+        self['dcs_vcom'].output(9.0, output=True, delay=10)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
         # Open console serial connection
         self['rvswt101'].open()
