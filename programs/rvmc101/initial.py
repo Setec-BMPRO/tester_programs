@@ -7,9 +7,10 @@ import inspect
 import tester
 from tester import (
     LimitDelta,
-    LimitInteger
+    LimitInteger, LimitRegExp
     )
 import share
+from . import console
 from . import config
 
 
@@ -22,6 +23,8 @@ class Initial(share.TestSequence):
         LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
         LimitDelta('5V', 5.0, 0.2, doc='5V present'),
         LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
+        LimitRegExp('SwVer', '^{0}$'.format(
+            config.SW_VER.replace('.', r'\.'))),
         )
 
     def open(self, uut):
@@ -37,13 +40,19 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_power_up(self, dev, mes):
-        """Apply input 3V3dc and measure voltages."""
+        """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        mes['dmm_vin'](timeout=5)
+        dev['dcs_vin'].output(12.0, output=True)
+        self.measure(('dmm_vin', 'dmm_5v', 'dmm_3v3'), timeout=5)
 
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
+#        mes['can_bind'](timeout=10)
+        armtunnel = dev['armtunnel']
+        armtunnel.open()
+        mes['tunnel_swver']()
+        armtunnel.close()
 
 
 class Devices(share.Devices):
@@ -65,7 +74,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Serial port for the ARM.
-        arm_port = share.fixture.port('000000', 'ARM')
+        arm_port = share.fixture.port('032870', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -74,9 +83,15 @@ class Devices(share.Devices):
             os.path.join(folder, config.SW_IMAGE),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
+        # Tunneled Console driver
+        tunnel = tester.CANTunnel(
+            self.physical_devices['CAN'],
+            tester.devphysical.can.DeviceID.trek2)
+        self['armtunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):
         """Reset instruments."""
+        self['armtunnel'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
@@ -89,6 +104,7 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         dmm = self.devices['dmm']
+        armtunnel = self.devices['armtunnel']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['o5v'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
@@ -96,6 +112,10 @@ class Sensors(share.Sensors):
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmc101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmc101_initial', 'capSnEntry'))
+        # Console sensors
+#        self['canbind'] = share.console.Sensor(arm, 'CAN_BIND')
+        self['tunnelswver'] = share.console.Sensor(
+            armtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
 
 
 class Measurements(share.Measurements):
@@ -106,7 +126,9 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
-            ('dmm_5v', 'Vin', 'o5v', '5V rail voltage'),
-            ('dmm_3v3', 'Vin', 'o3v3', '3V3 rail voltage'),
+            ('dmm_5v', '5V', 'o5v', '5V rail voltage'),
+            ('dmm_3v3', '3V3', 'o3v3', '3V3 rail voltage'),
             ('ui_serialnum', 'SerNum', 'SnEntry', 'Unit serial number'),
+#            ('can_bind', 'CAN_BIND', 'canbind', 'CAN bound'),
+            ('tunnel_swver', 'SwVer', 'tunnelswver', 'Unit software version'),
             ))

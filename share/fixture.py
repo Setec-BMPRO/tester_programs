@@ -15,7 +15,7 @@ import os
 
 # A single direct connected SETEC FTDI, ID: 0403:6001
 SETEC_FTDI = 'COM16'
-# A single direct connected FTDI, ID:
+# A single direct connected FTDI, ID: 0403:6001
 FTDI = 'COM25'
 # SETEC FTDI connected via a USB Hub (index by hub port number [1-4])
 SETEC_FTDI_HUB = [None, 'COM14', 'COM15', 'COM10', 'COM11']
@@ -77,7 +77,7 @@ DATA = {
     '032715': {     # GEN9-540 Initial
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
-    '000000': {     # RVMC101 Initial
+    '032870': {     # RVMC101 Initial
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': FTDI}[os.name],
         },
 
