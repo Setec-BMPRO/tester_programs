@@ -4,14 +4,12 @@
 
 import os
 import inspect
-import serial
 import tester
 from tester import (
     LimitDelta,
     LimitInteger
     )
 import share
-from . import console
 from . import config
 
 
@@ -32,7 +30,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self.devices['programmer'].program),
+            tester.TestStep('Program', self.devices['program_arm'].program),
             tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
@@ -41,20 +39,11 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        self.dcsource(
-            (('dcs_vcom', 9.0), ('dcs_vin', 3.3), ('dcs_switch', 12.0)),
-            output=True, delay=5)
         mes['dmm_vin'](timeout=5)
-        dev['rla_pos1'].set_on()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        mes['cn101_can_bind'](timeout=10)
-        cn101tunnel = dev['cn101tunnel']
-        cn101tunnel.open()
-        mes['TunnelSwVer']()
-        cn101tunnel.close()
 
 
 class Devices(share.Devices):
@@ -75,25 +64,19 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        # NRF52 device programmer
-        self['progNRF'] = share.programmer.Nordic(
-            os.path.join(folder, self.sw_image),
-            folder)
-        # Serial connection to the BL652 console
-        rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
-        # Set port separately, as we don't want it opened yet
-        bl652_port = share.fixture.port('012345', 'BL652')
-        rvswt101_ser.port = bl652_port
-        # RVSWT101 Console driver
-        self['rvswt101'] = console.Console(rvswt101_ser)
-        # Connection to RaspberryPi bluetooth server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
-        # Connection to Serial To MAC server
-        self['serialtomac'] = config.SerialToMAC()
+        # Serial port for the ARM.
+        arm_port = share.fixture.port('000000', 'ARM')
+        # ARM device programmer
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        self['program_arm'] = share.programmer.ARM(
+            arm_port,
+            os.path.join(folder, config.SW_IMAGE),
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset'])
 
     def reset(self):
         """Reset instruments."""
-        self['rvswt101'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()

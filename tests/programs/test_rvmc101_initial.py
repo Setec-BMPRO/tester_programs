@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVMC101 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvmc101
 
@@ -17,20 +17,9 @@ class RVMC101Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        mycon = MagicMock(name='MyConsole')
-        mycon.get_mac.return_value = '001ec030c2be'
-        patcher = patch(
-            'programs.rvmc101.console.Console', return_value=mycon)
+        patcher = patch('share.programmer.ARM')
         self.addCleanup(patcher.stop)
         patcher.start()
-        for target in (
-                'share.programmer.Nordic',
-                'share.bluetooth.RaspberryBluetooth',
-                'programs.rvmc101.config.SerialToMAC',
-                ):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
         super().setUp()
 
     def test_pass_run(self):
@@ -40,10 +29,9 @@ class RVMC101Initial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
                     (sen['SnEntry'], 'A1526040123'),
-                    (sen['vin'], 3.3),
+                    (sen['vin'], 12.0),
                     ),
-                'Bluetooth': (
-                    (sen['mirscan'], True),
+                'CanBus': (
                     ),
                 },
             }
@@ -51,7 +39,7 @@ class RVMC101Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(2, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmNordic', 'GetMac', 'Bluetooth'],
+            ['PowerUp', 'Program', 'CanBus'],
             self.tester.ut_steps)
