@@ -51,6 +51,7 @@ class Initial(share.TestSequence):
         dev['rla_nrf_reset'].disable(delay=0.1)
         # Cycle power to get the banner from the Nordic
         dev['dcs_vin'].output(0.0, delay=0.5)
+        dev['rvswt101'].port.flushInput()
         dev['dcs_vin'].output(3.3, delay=0.1)
         self.mac = dev['rvswt101'].get_mac()
         mes['ble_mac'].sensor.store(self.mac)
@@ -63,7 +64,7 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         # Press Button2 to broadcast on bluetooth
         dev['fixture'].press(0)
-        reply = dev['pi_bt'].scan_advert_blemac(self.mac)
+        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
         dev['fixture'].release(0)
         mes['scan_mac'].sensor.store(reply)
         mes['scan_mac']()

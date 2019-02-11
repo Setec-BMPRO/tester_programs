@@ -37,7 +37,7 @@ class Final(share.TestSequence):
         # Tell user to push unit's button after clicking OK
         mes['ui_buttonpress']()
         # Scan for the RVSWT101 bluetooth transmission
-        reply = dev['pi_bt'].scan_advert_blemac(mac)
+        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
         mes['scan_mac'].sensor.store(reply)
         mes['scan_mac']()
 
