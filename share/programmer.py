@@ -138,7 +138,7 @@ class Nordic():
     """Nordic Semiconductors programmer using a NRF52."""
 
     pic_binary = {          # Executable to use
-        'posix': 'nrfjprog',
+        'posix': '/opt/nordic/nrfjprog/nrfjprog',
         'nt': r'C:\Program Files\Nordic Semiconductor\nrf5x\bin\nrfjprog.exe',
         }[os.name]
     limitname = 'Program'   # Testlimit name to use
