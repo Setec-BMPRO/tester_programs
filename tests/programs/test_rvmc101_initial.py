@@ -19,7 +19,6 @@ class RVMC101Initial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'programs.rvmc101.console.TunnelConsole',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -36,8 +35,6 @@ class RVMC101Initial(ProgramTestCase):
                     (sen['vin'], 12.0), (sen['o5v'], 5.0), (sen['o3v3'], 3.3),
                     ),
                 'CanBus': (
-#                    (sen['canbind'], 1 << 28),
-                    (sen['tunnelswver'], ''),
                     ),
                 },
             }
@@ -45,7 +42,7 @@ class RVMC101Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
+        self.assertEqual(4, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'Program', 'CanBus'],
             self.tester.ut_steps)

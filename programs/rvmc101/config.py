@@ -3,5 +3,4 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMC101 Configuration."""
 
-SW_VER = ''
 SW_IMAGE = ''
