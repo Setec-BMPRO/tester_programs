@@ -133,7 +133,7 @@ class Devices(share.Devices):
         # Tunneled Console driver
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.DeviceID.cn101)
+            tester.devphysical.can.SETECDeviceID.cn101)
         self['cn101tunnel'] = console.TunnelConsole(tunnel)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)

@@ -259,7 +259,7 @@ class Devices(share.Devices):
         # Tunneled Console driver
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.DeviceID.j35)
+            tester.devphysical.can.SETECDeviceID.j35)
         self['j35tunnel'] = console.TunnelConsole(tunnel)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(22.0, output=True, delay=2)

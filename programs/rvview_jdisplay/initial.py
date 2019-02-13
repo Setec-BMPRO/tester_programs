@@ -143,7 +143,7 @@ class Devices(share.Devices):
         # Tunneled Console driver
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.DeviceID.rvview)
+            tester.devphysical.can.SETECDeviceID.rvview)
         self['armtunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):

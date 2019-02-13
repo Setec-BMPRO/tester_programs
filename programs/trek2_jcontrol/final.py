@@ -115,9 +115,9 @@ class Final(share.TestSequence):
         """Send a Preconditions packet (for Trek2)."""
         pkt = tester.devphysical.can.Packet()
         msg = pkt.header.message
-        msg.device_id = tester.devphysical.can.DeviceID.bp35.value
-        msg.msg_type = tester.devphysical.can.MessageType.announce.value
-        msg.data_id = tester.devphysical.can.DataID.preconditions.value
+        msg.device_id = tester.devphysical.can.SETECDeviceID.bp35.value
+        msg.msg_type = tester.devphysical.can.SETECMessageType.announce.value
+        msg.data_id = tester.devphysical.can.SETECDataID.preconditions.value
         pkt.data.extend(b'\x00\x00')    # Dummy data
         serial2can.send('t{0}'.format(pkt))
 
@@ -143,7 +143,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.DeviceID.trek2)
+            tester.devphysical.can.SETECDeviceID.trek2)
         self['armtunnel'] = console.TunnelConsole(tunnel)
 
     def reset(self):

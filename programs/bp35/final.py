@@ -63,7 +63,7 @@ class Devices(share.Devices):
         self['acsource'] = tester.ACSource(self.physical_devices['ACS'])
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.DeviceID.bp35)
+            tester.devphysical.can.SETECDeviceID.bp35)
         self['bp35'] = console.TunnelConsole(tunnel)
 
     def reset(self):
