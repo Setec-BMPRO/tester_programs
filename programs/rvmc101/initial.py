@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2019 SETEC Pty Ltd.
 """RVMC101 Initial Test Program."""
 
 import os
 import inspect
 import tester
-from tester import LimitDelta
 import share
 from . import config
 
@@ -15,9 +15,9 @@ class Initial(share.TestSequence):
     """RVMC101 Initial Test Program."""
 
     limitdata = (
-        LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
-        LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
-        LimitDelta('5V', 5.0, 0.2, doc='5V present'),
+        tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
+        tester.LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
+        tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
         )
 
     def open(self, uut):

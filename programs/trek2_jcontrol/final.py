@@ -113,7 +113,7 @@ class Final(share.TestSequence):
     @staticmethod
     def send_preconditions(serial2can):
         """Send a Preconditions packet (for Trek2)."""
-        pkt = tester.devphysical.can.Packet()
+        pkt = tester.devphysical.can.SETECPacket()
         msg = pkt.header.message
         msg.device_id = tester.devphysical.can.SETECDeviceID.bp35.value
         msg.msg_type = tester.devphysical.can.SETECMessageType.announce.value
