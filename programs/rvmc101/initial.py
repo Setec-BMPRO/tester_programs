@@ -40,6 +40,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
+        dev['rla_reset'].pulse(0.1)
+        import time
+        time.sleep(10)
 
 
 class Devices(share.Devices):
@@ -56,6 +59,9 @@ class Devices(share.Devices):
                 ('rla_boot', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        self['can'] = self.physical_devices['_CAN']
+        self['can'].high_speed = True
+        self['can'].verbose = True
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Serial port for the ARM.
@@ -65,13 +71,16 @@ class Devices(share.Devices):
             arm_port,
             os.path.join(folder, config.SW_IMAGE),
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset'],
+            crpmode=False)
 
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
+        self['can'].high_speed = False
+        self['can'].verbose = False
 
 
 class Sensors(share.Sensors):
