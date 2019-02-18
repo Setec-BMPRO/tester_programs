@@ -20,7 +20,7 @@ class InitialMicro(share.TestSequence):
     # test limits
     limitdata = (
         LimitBetween('5V', 4.95, 5.05),
-        LimitRegExp('SwRev', '2'),
+        LimitRegExp('SwRev', 'I,  1, 2,Software Revision'),
         LimitRegExp('MicroTemp', 'MICRO Temp'),
         )
 
