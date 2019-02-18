@@ -36,7 +36,7 @@ class Ids500MicroInitial(ProgramTestCase):
                     ),
                 'Comms': (
                     (sen['SwRev'], ('I,  1, 2,Software Revision', )),
-                    (sen['MicroTemp'], ('MICRO Temp', )),
+                    (sen['MicroTemp'], ('D, 16,    22,MICRO Temp.(C)', )),
                     ),
                 },
             }

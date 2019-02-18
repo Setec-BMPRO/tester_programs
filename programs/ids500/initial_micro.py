@@ -21,7 +21,7 @@ class InitialMicro(share.TestSequence):
     limitdata = (
         LimitBetween('5V', 4.95, 5.05),
         LimitRegExp('SwRev', 'I,  1, 2,Software Revision'),
-        LimitRegExp('MicroTemp', 'MICRO Temp'),
+        LimitRegExp('MicroTemp', 'D, 16,    [0-9]{2},MICRO Temp\.\(C\)'),
         )
 
     def open(self, uut):
