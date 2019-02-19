@@ -42,7 +42,24 @@ class Initial(share.TestSequence):
         """Test the CAN Bus."""
         dev['rla_reset'].pulse(0.1)
         import time
+        time.sleep(2)
+        pkt = dev['can'].read_can()
+        print('Packet:', pkt)
+        self.send_led_display(dev['can'])
         time.sleep(10)
+
+    @staticmethod
+    def send_led_display(serial2can):
+        """Send a LED_DISPLAY packet."""
+        pkt = tester.devphysical.can.RVCPacket()
+        msg = pkt.header.message
+        msg.priority = 6
+        msg.reserved = 0
+        msg.DGN = tester.devphysical.can.RVCDGN.setec_led_display.value
+        msg.SA = tester.devphysical.can.RVCDeviceID.rvmn101.value
+        # A packet to show "88" on the display
+        pkt.data.extend(b'\x01\x08\x08\xFF\xFF\xFF\x01\xF0')
+        serial2can.send('t{0}'.format(pkt))
 
 
 class Devices(share.Devices):
@@ -60,7 +77,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
-        self['can'].high_speed = True
+        self['can'].rvc_mode = True
         self['can'].verbose = True
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -79,7 +96,7 @@ class Devices(share.Devices):
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
-        self['can'].high_speed = False
+        self['can'].rvc_mode = False
         self['can'].verbose = False
 
 

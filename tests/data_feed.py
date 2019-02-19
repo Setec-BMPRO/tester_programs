@@ -116,7 +116,7 @@ class MockATE(dict):
         self.close = lambda: None
         # Build a dictionary of Mocks
         storage = {}
-        for dev_name in ('GEN', 'ACS', 'DIS', 'PWR', 'SAF', 'CAN', ):
+        for dev_name in ('GEN', 'ACS', 'DIS', 'PWR', 'SAF', 'CAN', '_CAN'):
             storage[dev_name] = MagicMock(name=dev_name)
         gen = storage['GEN']
         for dev_name in ('DMM', 'DSO'):
