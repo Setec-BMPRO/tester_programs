@@ -28,7 +28,7 @@ class Initial(share.TestSequence):
             tester.TestStep('PowerUp', self._step_power_up),
 # FIXME: This image has an internal checksum, and changing the CRP value in
 #       the image will prevent the code from running...
-#            tester.TestStep('Program', self.devices['program_arm'].program),
+            tester.TestStep('Program', self.devices['program_arm'].program),
             tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
@@ -44,48 +44,46 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
         dev['rla_reset'].pulse(0.1)
-        can = dev['can']
+        candev = dev['can']
 #        import time
-#        time.sleep(2)
-#        pkt = dev['can'].read_can()
-#        print('Packet:', pkt)
-#        self.send_led_display(dev['can'])
-#        time.sleep(2)
+#        time.sleep(1)
+#        self.send_led_display(candev)
+#        time.sleep(1)
 
-        while can.ready_can:    # Flush all waiting packets
-            can.read_can()
+        while candev.ready_can:    # Flush all waiting packets
+            candev.read_can()
         try:
-            can.read_can()
+            candev.read_can()
             result = True
         except tester.devphysical.can.SerialToCanError:
             result = False
         mes['can_active'].sensor.store(result)
         mes['can_active']()
 
-    @staticmethod
-    def send_led_display(serial2can):
-        """Send a LED_DISPLAY packet."""
-        pkt = tester.devphysical.can.RVCPacket()
-        msg = pkt.header.message
-        msg.priority = 6
-        msg.reserved = 0
-        msg.DGN = tester.devphysical.can.RVCDGN.setec_led_display.value
-        msg.SA = tester.devphysical.can.RVCDeviceID.rvmn101.value
-        sequence = 1
-        # Show "88" on the display (for about 100msec)
-        # The 1st packet we send is ignored due to no previous sequence number
-        pkt.data.extend(b'\x01\xff\xff\xff\xff\xff')
-        pkt.data.extend(bytes([sequence & 0xff]))
-        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
-        serial2can.send('t{0}'.format(pkt))
-        sequence += 1
-        # The 2nd packet WILL be acted upon
-        pkt.data.clear()
-        pkt.data.extend(b'\x01\xFF\xFF\xFF\xFF\xFF')
-        pkt.data.extend(bytes([sequence & 0xff]))
-        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
-        serial2can.send('t{0}'.format(pkt))
-        sequence += 1
+#    @staticmethod
+#    def send_led_display(serial2can):
+#        """Send a LED_DISPLAY packet."""
+#        pkt = tester.devphysical.can.RVCPacket()
+#        msg = pkt.header.message
+#        msg.priority = 6
+#        msg.reserved = 0
+#        msg.DGN = tester.devphysical.can.RVCDGN.setec_led_display.value
+#        msg.SA = tester.devphysical.can.RVCDeviceID.rvmn101.value
+#        sequence = 1
+#        # Show "88" on the display (for about 100msec)
+#        # The 1st packet we send is ignored due to no previous sequence number
+#        pkt.data.extend(b'\x01\xff\xff\xff\xff\xff')
+#        pkt.data.extend(bytes([sequence & 0xff]))
+#        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
+#        serial2can.send('t{0}'.format(pkt))
+#        sequence += 1
+#        # The 2nd packet WILL be acted upon
+#        pkt.data.clear()
+#        pkt.data.extend(b'\x01\xFF\xFF\xFF\xFF\xFF')
+#        pkt.data.extend(bytes([sequence & 0xff]))
+#        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
+#        serial2can.send('t{0}'.format(pkt))
+#        sequence += 1
 
 
 class Devices(share.Devices):
@@ -139,7 +137,7 @@ class Sensors(share.Sensors):
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmc101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmc101_initial', 'capSnEntry'))
-        self['MirCAN'] = sensor.Mirror()
+        self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
 
 
 class Measurements(share.Measurements):
