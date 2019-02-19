@@ -18,6 +18,7 @@ class Initial(share.TestSequence):
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
         tester.LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
         tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
+        tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
 
     def open(self, uut):
@@ -43,12 +44,23 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
         dev['rla_reset'].pulse(0.1)
-        import time
-        time.sleep(2)
-        pkt = dev['can'].read_can()
-        print('Packet:', pkt)
-        self.send_led_display(dev['can'])
-        time.sleep(2)
+        can = dev['can']
+#        import time
+#        time.sleep(2)
+#        pkt = dev['can'].read_can()
+#        print('Packet:', pkt)
+#        self.send_led_display(dev['can'])
+#        time.sleep(2)
+
+        while can.ready_can:    # Flush all waiting packets
+            can.read_can()
+        try:
+            can.read_can()
+            result = True
+        except tester.devphysical.can.SerialToCanError:
+            result = False
+        mes['can_active'].sensor.store(result)
+        mes['can_active']()
 
     @staticmethod
     def send_led_display(serial2can):
@@ -102,8 +114,7 @@ class Devices(share.Devices):
             arm_port,
             os.path.join(folder, config.SW_IMAGE),
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'],
-            crpmode=False)
+            reset_relay=self['rla_reset'])
 
     def reset(self):
         """Reset instruments."""
@@ -128,6 +139,7 @@ class Sensors(share.Sensors):
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmc101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmc101_initial', 'capSnEntry'))
+        self['MirCAN'] = sensor.Mirror()
 
 
 class Measurements(share.Measurements):
@@ -141,4 +153,5 @@ class Measurements(share.Measurements):
             ('dmm_5v', '5V', 'o5v', '5V rail voltage'),
             ('dmm_3v3', '3V3', 'o3v3', '3V3 rail voltage'),
             ('ui_serialnum', 'SerNum', 'SnEntry', 'Unit serial number'),
+            ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ))
