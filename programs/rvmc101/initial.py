@@ -25,7 +25,9 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self.devices['program_arm'].program),
+# FIXME: This image has an internal checksum, and changing the CRP value in
+#       the image will prevent the code from running...
+#            tester.TestStep('Program', self.devices['program_arm'].program),
             tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
@@ -46,7 +48,7 @@ class Initial(share.TestSequence):
         pkt = dev['can'].read_can()
         print('Packet:', pkt)
         self.send_led_display(dev['can'])
-        time.sleep(10)
+        time.sleep(2)
 
     @staticmethod
     def send_led_display(serial2can):
@@ -57,9 +59,21 @@ class Initial(share.TestSequence):
         msg.reserved = 0
         msg.DGN = tester.devphysical.can.RVCDGN.setec_led_display.value
         msg.SA = tester.devphysical.can.RVCDeviceID.rvmn101.value
-        # A packet to show "88" on the display
-        pkt.data.extend(b'\x01\x08\x08\xFF\xFF\xFF\x01\xF0')
+        sequence = 1
+        # Show "88" on the display (for about 100msec)
+        # The 1st packet we send is ignored due to no previous sequence number
+        pkt.data.extend(b'\x01\xff\xff\xff\xff\xff')
+        pkt.data.extend(bytes([sequence & 0xff]))
+        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
         serial2can.send('t{0}'.format(pkt))
+        sequence += 1
+        # The 2nd packet WILL be acted upon
+        pkt.data.clear()
+        pkt.data.extend(b'\x01\xFF\xFF\xFF\xFF\xFF')
+        pkt.data.extend(bytes([sequence & 0xff]))
+        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
+        serial2can.send('t{0}'.format(pkt))
+        sequence += 1
 
 
 class Devices(share.Devices):
