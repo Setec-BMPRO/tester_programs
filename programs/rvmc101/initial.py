@@ -50,8 +50,7 @@ class Initial(share.TestSequence):
 #        self.send_led_display(candev)
 #        time.sleep(1)
 
-        while candev.ready_can:    # Flush all waiting packets
-            candev.read_can()
+        candev.flush_can()      # Flush all waiting packets
         try:
             candev.read_can()
             result = True

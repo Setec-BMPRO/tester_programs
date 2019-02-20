@@ -29,8 +29,9 @@ from . import j35
 from . import mb2
 from . import mk7400
 from . import rvview_jdisplay
-from . import rvswt101
 from . import rvmc101
+from . import rvmn101b
+from . import rvswt101
 from . import rm50
 from . import smu75070
 from . import st3
@@ -103,9 +104,10 @@ PROGRAMS = {
     'MB2 Final': mb2.Final,
     'MK7-400-1 Final': mk7400.Final,
     'RvViewJDisplay Initial': rvview_jdisplay.Initial,
+    'RVMC101 Initial': rvmc101.Initial,
+    'RVMN101B Initial': rvmn101b.Initial,
     'RVSWT101 Final': rvswt101.Final,
     'RVSWT101 Initial': rvswt101.Initial,
-    'RVMC101 Initial': rvmc101.Initial,
     'RM-50-24 Final': rm50.Final,
     'SMU750-70 Final': smu75070.Final,
     'SMU750-70 Initial': smu75070.Initial,

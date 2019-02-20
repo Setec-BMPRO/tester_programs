@@ -109,6 +109,12 @@ DATA = {
         # Hub port 1: FTDI
         'BL652': {'posix': '/dev/ttyUSB1', 'nt': 'COM23'}[os.name],
         },
+    '032871': {     # RVMN101B Initial
+        # Hub port 1: FTDI
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': 'COM24'}[os.name],
+        # Hub port 2: FTDI
+        'BL652': {'posix': '/dev/ttyUSB2', 'nt': 'COM25'}[os.name],
+        },
     }
 
 

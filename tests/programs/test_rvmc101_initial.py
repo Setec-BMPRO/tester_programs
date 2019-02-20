@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVMC101 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvmc101
 
@@ -17,13 +17,6 @@ class RVMC101Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        mycan = MagicMock(name='MySerial2CAN')
-        mycan.ready_can = False
-        mycan.read_can.return_value = True
-        patcher = patch(
-            'tester.devphysical.can.SerialToCan', return_value=mycan)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         for target in (
                 'share.programmer.ARM',
                 ):

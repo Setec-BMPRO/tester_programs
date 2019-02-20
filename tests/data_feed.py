@@ -10,7 +10,7 @@ Record the test result.
 """
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 import queue
 import logging
 from . import logging_setup
@@ -116,13 +116,17 @@ class MockATE(dict):
         self.close = lambda: None
         # Build a dictionary of Mocks
         storage = {}
-        for dev_name in ('GEN', 'ACS', 'DIS', 'PWR', 'SAF', 'CAN', '_CAN'):
+        for dev_name in ('GEN', 'ACS', 'DIS', 'PWR', 'SAF'):
             storage[dev_name] = MagicMock(name=dev_name)
         gen = storage['GEN']
         for dev_name in ('DMM', 'DSO'):
             storage[dev_name] = (MagicMock(name=dev_name), gen)
-        storage['CAN'] = (
-            MagicMock(name='SerialToCan'), MagicMock(name='SimSerial'))
+        # Patch a Mock SerialToCAN device
+        #   - Property 'ready_can' returns False
+        mycan = MagicMock(name='SerialToCan')
+        type(mycan).ready_can = PropertyMock(return_value=False)
+        storage['_CAN'] = mycan
+        storage['CAN'] = (mycan, MagicMock(name='SimSerial'))
         for i in range(1, 8):           # DC Sources 1 - 7
             dev_name = 'DCS{0}'.format(i)
             storage[dev_name] = MagicMock(name=dev_name)
