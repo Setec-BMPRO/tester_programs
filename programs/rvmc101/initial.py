@@ -26,8 +26,6 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-# FIXME: This image has an internal checksum, and changing the CRP value in
-#       the image will prevent the code from running...
             tester.TestStep('Program', self.devices['program_arm'].program),
             tester.TestStep('CanBus', self._step_canbus),
             )
@@ -37,6 +35,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+        dev['rla_reset'].set_on()   # Hold device in RESET
         dev['dcs_vin'].output(12.0, output=True)
         self.measure(('dmm_vin', 'dmm_5v', 'dmm_3v3'), timeout=5)
 
@@ -104,9 +103,7 @@ class Devices(share.Devices):
         self['can'].verbose = True
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        # Serial port for the ARM.
         arm_port = share.fixture.port('032870', 'ARM')
-        # ARM device programmer
         self['program_arm'] = share.programmer.ARM(
             arm_port,
             os.path.join(folder, config.SW_IMAGE),
