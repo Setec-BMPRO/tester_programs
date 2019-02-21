@@ -101,6 +101,7 @@ class Devices(share.Devices):
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
         self['can'].verbose = True
+        self.add_closer(self.close_can)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         arm_port = share.fixture.port('032870', 'ARM')
@@ -115,6 +116,9 @@ class Devices(share.Devices):
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
+
+    def close_can(self):
+        """Restore CAN interface to default settings."""
         self['can'].rvc_mode = False
         self['can'].verbose = False
 
