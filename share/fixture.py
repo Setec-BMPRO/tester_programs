@@ -41,7 +41,7 @@ DATA = {
         'PIC': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
         },
 
-    # Fixtures with a single USB Serial
+    # Fixtures with a single USB Serial (inc. FTDI with S/N)
 
     '027013': {     # BatteryCheck Final
         # Panasonic eUniStone PAN1322 (FTDI with S/N)
@@ -78,7 +78,7 @@ DATA = {
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '032870': {     # RVMC101 Initial
-        'ARM': {'posix': '/dev/ttyUSB1', 'nt': FTDI}[os.name],
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
 
     # Fixtures with a USB Hub
