@@ -6,7 +6,7 @@
 import jsonrpclib
 
 
-SW_VER = '1.1'
+SW_VER = '1.2'
 SW_IMAGE = 'rvswt101_{{0}}_{0}.hex'.format(SW_VER)
 #                      ^- This is the program parameter
 
