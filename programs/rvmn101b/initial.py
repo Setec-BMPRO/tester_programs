@@ -18,7 +18,7 @@ class Initial(share.TestSequence):
 
     limitdata = (
         tester.LimitDelta('Vbatt', 12.0, 0.5),
-        tester.LimitDelta('3V3', 3.3, 0.3),
+        tester.LimitPercent('3V3', 3.3, 6.0),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
@@ -33,8 +33,8 @@ class Initial(share.TestSequence):
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),
             tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('Initialise', self._step_initialise),
             tester.TestStep('CanBus', self._step_canbus),
-            tester.TestStep('GetMac', self._step_get_mac),
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
@@ -47,11 +47,18 @@ class Initial(share.TestSequence):
         self.measure(('dmm_vbatt', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
+    def _step_initialise(self, dev, mes):
+        """Initialise the unit."""
+#        rvmn101b = dev['rvmn101b']
+#        rvmn101b.flushInput()
+        # Cycle power to restart the unit
+        dev['dcs_vbatt'].output(0.0, delay=0.5)
+        dev['dcs_vbatt'].output(self.vbatt_set, delay=1.0)
+#        rvmn101b.brand(self.sernum)
+
+    @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        dev['dcs_vbatt'].output(0.0, delay=0.5)
-#        dev['rvmn101b'].port.flushInput()
-        dev['dcs_vbatt'].output(self.vbatt_set, delay=0.1)
         candev = dev['can']
         candev.verbose = True
         candev.flush_can()      # Flush all waiting packets
@@ -64,15 +71,9 @@ class Initial(share.TestSequence):
         mes['can_active']()
 
     @share.teststep
-    def _step_get_mac(self, dev, mes):
-        """Get the MAC address from the console."""
-#        self.mac = dev['rvmn101b'].get_mac()
-#        mes['ble_mac'].sensor.store(self.mac)
-#        mes['ble_mac']()
-
-    @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
+#        self.mac = mes['ble_mac']().reading1
 #        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
 #        mes['scan_mac'].sensor.store(reply)
 #        mes['scan_mac']()
@@ -135,8 +136,9 @@ class Devices(share.Devices):
 
     def close_can(self):
         """Restore CAN interface to default settings."""
-        self['can'].rvc_mode = False
-        self['can'].verbose = False
+        candev = self['can']
+        candev.rvc_mode = False
+        candev.verbose = False
 
 
 class Sensors(share.Sensors):
@@ -147,7 +149,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['MirMAC'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['MirScan'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['vbatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
@@ -157,11 +158,14 @@ class Sensors(share.Sensors):
             caption=tester.translate('rvmn101b_initial', 'capSnEntry'))
         # Console sensors
         rvmn101b = self.devices['rvmn101b']
-        for device, name, cmdkey in (
-                (rvmn101b, 'SwVer', 'SW_VER'),
+        for name, cmdkey in (
+                ('BleMac', 'MAC'),
+                ('SwRev', 'SW-REV'),
             ):
             self[name] = share.console.Sensor(
-                device, cmdkey, rdgtype=sensor.ReadingString)
+                rvmn101b, cmdkey, rdgtype=sensor.ReadingString)
+        # Remove colons from BLE MAC address
+        self['BleMac'].on_read = lambda value: value.replace(':', '')
 
 
 class Measurements(share.Measurements):
@@ -175,7 +179,7 @@ class Measurements(share.Measurements):
             ('dmm_vbatt', 'Vbatt', 'vbatt', ''),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
-            ('ble_mac', 'BleMac', 'MirMAC', 'Get MAC address from console'),
+            ('ble_mac', 'BleMac', 'BleMAC', 'Get MAC address from console'),
             ('scan_mac', 'ScanMac', 'MirScan',
                 'Scan for MAC address over bluetooth'),
             ))
