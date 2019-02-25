@@ -4,5 +4,5 @@
 """RVMN101B Configuration."""
 
 
-SW_VER = ''
-SW_IMAGE = 'rvmn101b_{0}.hex'.format(SW_VER)
+ARM_IMAGE = 'rvmn101b_nxp_1.9.bin'
+NORDIC_IMAGE = 'rvmn101b_nordic_0.43.hex'

@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),
-            tester.TestStep('PgmNordic', self.devices['progNRF'].program),
+            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
             tester.TestStep('CanBus', self._step_canbus),
             tester.TestStep('GetMac', self._step_get_mac),
             tester.TestStep('Bluetooth', self._step_bluetooth),
@@ -101,17 +101,17 @@ class Devices(share.Devices):
         # ARM device programmer
         self['progARM'] = share.programmer.ARM(
             share.fixture.port('032871', 'ARM'),
-            os.path.join(folder, config.SW_IMAGE),
+            os.path.join(folder, config.ARM_IMAGE),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
-        # NRF52 device programmer
-        self['progNRF'] = share.programmer.Nordic(
-            os.path.join(folder, config.SW_IMAGE),
+        # Nordic NRF52 device programmer
+        self['progNordic'] = share.programmer.Nordic(
+            os.path.join(folder, config.NORDIC_IMAGE),
             folder)
-        # Serial connection to the BL652 console
+        # Serial connection to the console
         nordic_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        nordic_ser.port = share.fixture.port('032871', 'BL652')
+        nordic_ser.port = share.fixture.port('032871', 'NORDIC')
         # Console driver
         self['rvmn101b'] = console.Console(nordic_ser)
         # Connection to RaspberryPi bluetooth server

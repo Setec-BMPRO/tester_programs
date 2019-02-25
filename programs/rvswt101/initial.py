@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('PgmNordic', self.devices['progNRF'].program),
+            tester.TestStep('PgmNordic', self.devices['progNORDIC'].program),
             tester.TestStep('GetMac', self._step_get_mac),
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
@@ -48,8 +48,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_get_mac(self, dev, mes):
         """Get the MAC address from the console."""
-        dev['rla_nrf_reset'].disable(delay=0.1)
-        # Cycle power to get the banner from the Nordic
         dev['dcs_vin'].output(0.0, delay=0.5)
         dev['rvswt101'].port.flushInput()
         dev['dcs_vin'].output(3.3, delay=0.1)
@@ -86,25 +84,20 @@ class Devices(share.Devices):
                 ('dcs_switch', tester.DCSource, 'DCS3'),
                 ('rla_pos1', tester.Relay, 'RLA1'),
                 ('rla_reset', tester.Relay, 'RLA21'),
-                ('rla_nrf_reset', tester.Relay, 'RLA22'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Some more obvious ways to use this relay
-        rla = self['rla_nrf_reset']
-        rla.disable = rla.set_off
-        rla.enable = rla.set_on
         # Fixture helper device
         self['fixture'] = Fixture(self['dcs_switch'], [self['rla_pos1']])
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        # NRF52 device programmer
-        self['progNRF'] = share.programmer.Nordic(
+        # Nordic NRF52 device programmer
+        self['progNORDIC'] = share.programmer.Nordic(
             os.path.join(folder, self.sw_image),
             folder)
-        # Serial connection to the BL652 console
+        # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bl652_port = share.fixture.port('032869', 'BL652')
+        bl652_port = share.fixture.port('032869', 'NORDIC')
         rvswt101_ser.port = bl652_port
         # RVSWT101 Console driver
         self['rvswt101'] = console.Console(rvswt101_ser)
@@ -125,7 +118,6 @@ class Devices(share.Devices):
             self[dcs].output(0.0, False)
         for rla in ('rla_pos1', 'rla_reset'):
             self[rla].set_off()
-        self['rla_nrf_reset'].disable()
 
 
 class Fixture():
