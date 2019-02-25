@@ -112,8 +112,10 @@ DATA = {
     '032871': {     # RVMN101B Initial
         # Hub port 1: FTDI
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[1]}[os.name],
-        # Hub port 3: FTDI
-        'NORDIC': {'posix': '/dev/ttyUSB2', 'nt': SETEC_FTDI_HUB[3]}[os.name],
+        # Hub port 2: FTDI
+        'NORDIC': {'posix': '/dev/ttyUSB2', 'nt': SETEC_FTDI_HUB[2]}[os.name],
+        # Hub port 3: Nordic NRF52 device programmer
+        # Hub port 4: not used
         },
     }
 

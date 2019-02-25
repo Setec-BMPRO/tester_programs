@@ -133,6 +133,10 @@ class Base():
         """Close connection to unit."""
         self.port.close()
 
+    def flushInput(self):
+        """Flush any waiting input."""
+        self.port.flushInput()
+
     def configure(self, key):
         """Sensor: Configure for next reading."""
         self._read_key = key

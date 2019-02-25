@@ -49,12 +49,12 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
-#        rvmn101b = dev['rvmn101b']
-#        rvmn101b.flushInput()
+        rvmn101b = dev['rvmn101b']
+        rvmn101b.flushInput()
         # Cycle power to restart the unit
         dev['dcs_vbatt'].output(0.0, delay=0.5)
         dev['dcs_vbatt'].output(self.vbatt_set, delay=1.0)
-#        rvmn101b.brand(self.sernum)
+        rvmn101b.brand(self.sernum, config.PRODUCT_REV)
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -73,10 +73,10 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-#        self.mac = mes['ble_mac']().reading1
-#        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
-#        mes['scan_mac'].sensor.store(reply)
-#        mes['scan_mac']()
+        self.mac = mes['ble_mac']().reading1
+        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
+        mes['scan_mac'].sensor.store(reply)
+        mes['scan_mac']()
 
 
 class Devices(share.Devices):
@@ -123,9 +123,9 @@ class Devices(share.Devices):
         # Fixture USB hub power
         self['dcs_vcom'].output(9.0, output=True, delay=10)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
-#        # Open console serial connection
-#        self['rvmn101b'].open()
-#        self.add_closer(lambda: self['rvnm101b'].close())
+        # Open console serial connection
+        self['rvmn101b'].open()
+        self.add_closer(lambda: self['rvnm101b'].close())
 
     def reset(self):
         """Reset instruments."""
@@ -151,8 +151,8 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['MirScan'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
-        self['vbatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmn101b_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101b_initial', 'capSnEntry'))
@@ -175,11 +175,11 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_3v3', '3V3', '3v3', ''),
-            ('dmm_vbatt', 'Vbatt', 'vbatt', ''),
+            ('dmm_3v3', '3V3', '3V3', ''),
+            ('dmm_vbatt', 'Vbatt', 'VBatt', ''),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
-            ('ble_mac', 'BleMac', 'BleMAC', 'Get MAC address from console'),
+            ('ble_mac', 'BleMac', 'BleMac', 'Get MAC address from console'),
             ('scan_mac', 'ScanMac', 'MirScan',
                 'Scan for MAC address over bluetooth'),
             ))

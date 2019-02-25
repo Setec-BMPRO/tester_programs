@@ -12,7 +12,7 @@ class Console(share.console.Base):
 
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\rrvmn> '
-    # Number of startup banner lines
+    # Number of startup banner lines, eg:
     #    ***** Booting Zephyr OS zephyr-v1.13.0-6-g04f6c719a *****
     #    Zephyr Shell, Zephyr version: 1.13.0
     #    Type 'help' for a list of available commands
@@ -32,11 +32,8 @@ class Console(share.console.Base):
             'sw-rev', read_format='{0}'),
         }
 
-    def brand(self, sernum):
+    def brand(self, sernum, product_rev):
         """Brand the unit with Serial Number."""
         self.action(None, expected=self.banner_lines)
         self['SERIAL'] = sernum
-
-    def flushInput(self):
-        """Flush any waiting input."""
-        self.port.flushInput()
+        self['PRODUCT-REV'] = product_rev

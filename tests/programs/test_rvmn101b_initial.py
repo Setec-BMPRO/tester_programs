@@ -26,33 +26,39 @@ class RVMN101BInitial(ProgramTestCase):
         patcher.start()
         for target in (
                 'share.programmer.ARM',
+                'share.programmer.Nordic',
+                'share.bluetooth.RaspberryBluetooth',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
         super().setUp()
 
-#    def test_pass_run(self):
-#        """PASS run of the program."""
-#        sen = self.test_program.sensors
-#        data = {
-#            UnitTester.key_sen: {       # Tuples of sensor data
-#                'PowerUp': (
-#                    (sen['SnEntry'], 'A1526040123'),
-#                    (sen['vin'], 12.0),
-#                    (sen['o5v'], 5.0),
-#                    (sen['o3v3'], 3.3),
-#                    ),
-#                'CanBus': (
-#                    (sen['MirCAN'], True),
-#                    ),
-#                },
-#            }
-#        self.tester.ut_load(data, self.test_program.sensor_store)
-#        self.tester.test(('UUT1', ))
-#        result = self.tester.ut_result
-#        self.assertEqual('P', result.code)
-#        self.assertEqual(5, len(result.readings))
-#        self.assertEqual(
-#            ['PowerUp', 'Program', 'CanBus'],
-#            self.tester.ut_steps)
+    def test_pass_run(self):
+        """PASS run of the program."""
+        sen = self.test_program.sensors
+        data = {
+            UnitTester.key_sen: {       # Tuples of sensor data
+                'PowerUp': (
+                    (sen['SnEntry'], 'A1926040123'),
+                    (sen['VBatt'], 12.0),
+                    (sen['3V3'], 3.3),
+                    ),
+                'Initialise': (
+                    ),
+                'CanBus': (
+                    (sen['MirCAN'], True),
+                    ),
+                'Bluetooth': (
+                    (sen['MirScan'], True),
+                    ),
+                },
+            }
+        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.test(('UUT1', ))
+        result = self.tester.ut_result
+        self.assertEqual('P', result.code)
+        self.assertEqual(4, len(result.readings))
+        self.assertEqual(
+            ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise', 'CanBus', 'Bluetooth'],
+            self.tester.ut_steps)
