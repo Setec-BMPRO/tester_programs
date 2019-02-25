@@ -24,6 +24,7 @@ class Initial(share.TestSequence):
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
         )
+    vbatt_set = 12.5
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
@@ -42,26 +43,17 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        dev['dcs_vbatt'].output(12.0, output=True)
+        dev['dcs_vbatt'].output(self.vbatt_set, output=True)
         self.measure(('dmm_vbatt', 'dmm_3v3', ), timeout=5)
-
-    @share.teststep
-    def _step_get_mac(self, dev, mes):
-        """Get the MAC address from the console."""
-        # Open console serial connection
-        dev['rvmn101b'].open()
-        # Cycle power to get the banner from the Nordic
-        dev['dcs_vin'].output(0.0, delay=0.5)
-        dev['rvmn101b'].port.flushInput()
-        dev['dcs_vin'].output(12.0, delay=0.1)
-        self.mac = dev['rvmn101b'].get_mac()
-        mes['ble_mac'].sensor.store(self.mac)
-        mes['ble_mac']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
+        dev['dcs_vbatt'].output(0.0, delay=0.5)
+#        dev['rvmn101b'].port.flushInput()
+        dev['dcs_vbatt'].output(self.vbatt_set, delay=0.1)
         candev = dev['can']
+        candev.verbose = True
         candev.flush_can()      # Flush all waiting packets
         try:
             candev.read_can()
@@ -72,11 +64,18 @@ class Initial(share.TestSequence):
         mes['can_active']()
 
     @share.teststep
+    def _step_get_mac(self, dev, mes):
+        """Get the MAC address from the console."""
+#        self.mac = dev['rvmn101b'].get_mac()
+#        mes['ble_mac'].sensor.store(self.mac)
+#        mes['ble_mac']()
+
+    @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
-        mes['scan_mac'].sensor.store(reply)
-        mes['scan_mac']()
+#        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
+#        mes['scan_mac'].sensor.store(reply)
+#        mes['scan_mac']()
 
 
 class Devices(share.Devices):
@@ -119,11 +118,13 @@ class Devices(share.Devices):
         # CAN interface
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
-        self['can'].verbose = True
         self.add_closer(self.close_can)
         # Fixture USB hub power
         self['dcs_vcom'].output(9.0, output=True, delay=10)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
+#        # Open console serial connection
+#        self['rvmn101b'].open()
+#        self.add_closer(lambda: self['rvnm101b'].close())
 
     def reset(self):
         """Reset instruments."""
@@ -131,7 +132,6 @@ class Devices(share.Devices):
             self[dcs].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
-        self['rvmn101b'].close()
 
     def close_can(self):
         """Restore CAN interface to default settings."""

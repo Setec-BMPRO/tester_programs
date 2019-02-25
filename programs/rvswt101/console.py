@@ -5,7 +5,7 @@
 import re
 import share
 
-class Console(share.console.BadUart):
+class Console(share.console.Base):
 
     """Communications to RVSWT101 console."""
 
