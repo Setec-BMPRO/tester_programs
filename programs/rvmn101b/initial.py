@@ -164,8 +164,10 @@ class Sensors(share.Sensors):
             ):
             self[name] = share.console.Sensor(
                 rvmn101b, cmdkey, rdgtype=sensor.ReadingString)
-        # Remove colons from BLE MAC address
-        self['BleMac'].on_read = lambda value: value.replace(':', '')
+        # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
+        self['BleMac'].on_read = (
+            lambda value: value.replace(':', '').replace(' (random)', '')
+            )
 
 
 class Measurements(share.Measurements):
