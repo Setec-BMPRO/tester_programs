@@ -67,6 +67,7 @@ class Initial(share.TestSequence):
             result = True
         except tester.devphysical.can.SerialToCanError:
             result = False
+        candev.verbose = False
         mes['can_active'].sensor.store(result)
         mes['can_active']()
 
@@ -125,7 +126,7 @@ class Devices(share.Devices):
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
         # Open console serial connection
         self['rvmn101b'].open()
-        self.add_closer(lambda: self['rvnm101b'].close())
+        self.add_closer(self['rvmn101b'].close)
 
     def reset(self):
         """Reset instruments."""
