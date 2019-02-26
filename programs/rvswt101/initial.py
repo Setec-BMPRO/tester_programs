@@ -64,7 +64,7 @@ class Initial(share.TestSequence):
         dev['fixture'].press(0)
         reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
         dev['fixture'].release(0)
-        mes['scan_mac'].sensor.store(reply)
+        mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()
 
 

@@ -16,15 +16,16 @@ class Initial(share.TestSequence):
 
     """RVMN101B Initial Test Program."""
 
+    vbatt_set = 12.5
     limitdata = (
-        tester.LimitDelta('Vbatt', 12.0, 0.5),
-        tester.LimitPercent('3V3', 3.3, 6.0),
+        tester.LimitDelta('Vbatt', vbatt_set - 0.5, 0.5, doc='Battery input'),
+        tester.LimitPercent('3V3', 3.3, 6.0, doc='Internal 3V rail'),
+        tester.LimitLow('HSoff', 10.0, doc='All HS outputs off'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
         )
-    vbatt_set = 12.5
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
@@ -55,13 +56,14 @@ class Initial(share.TestSequence):
         dev['dcs_vbatt'].output(0.0, delay=0.5)
         dev['dcs_vbatt'].output(self.vbatt_set, delay=1.0)
         rvmn101b.brand(self.sernum, config.PRODUCT_REV)
+        mes['dmm_hs_off']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
         candev = dev['can']
         candev.verbose = True
-        candev.flush_can()      # Flush all waiting packets
+        candev.flush_can()
         try:
             candev.read_can()
             result = True
@@ -76,7 +78,7 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         self.mac = mes['ble_mac']().reading1
         reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
-        mes['scan_mac'].sensor.store(reply)
+        mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()
 
 
@@ -154,6 +156,7 @@ class Sensors(share.Sensors):
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['HSout'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmn101b_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101b_initial', 'capSnEntry'))
@@ -178,11 +181,13 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_3v3', '3V3', '3V3', ''),
-            ('dmm_vbatt', 'Vbatt', 'VBatt', ''),
+            ('dmm_3v3', '3V3', '3V3', 'Micro power ok'),
+            ('dmm_vbatt', 'Vbatt', 'VBatt', 'Battery input ok'),
+            ('dmm_hs_off', 'HSoff', 'HSout', 'All high-side drivers OFF'),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
-            ('ble_mac', 'BleMac', 'BleMac', 'Get MAC address from console'),
+            ('ble_mac', 'BleMac', 'BleMac', 'MAC address from console'),
             ('scan_mac', 'ScanMac', 'MirScan',
-                'Scan for MAC address over bluetooth'),
+                'MAC address seen over bluetooth'),
             ))
+

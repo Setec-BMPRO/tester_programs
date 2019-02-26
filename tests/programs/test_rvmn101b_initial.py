@@ -28,6 +28,7 @@ class RVMN101BInitial(ProgramTestCase):
                 'share.programmer.ARM',
                 'share.programmer.Nordic',
                 'share.bluetooth.RaspberryBluetooth',
+                'programs.rvmn101b.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -45,11 +46,13 @@ class RVMN101BInitial(ProgramTestCase):
                     (sen['3V3'], 3.3),
                     ),
                 'Initialise': (
+                    (sen['HSout'], 6.0),
                     ),
                 'CanBus': (
                     (sen['MirCAN'], True),
                     ),
                 'Bluetooth': (
+                    (sen['BleMac'], '112233445566'),
                     (sen['MirScan'], True),
                     ),
                 },
@@ -58,7 +61,7 @@ class RVMN101BInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(7, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise', 'CanBus', 'Bluetooth'],
             self.tester.ut_steps)
