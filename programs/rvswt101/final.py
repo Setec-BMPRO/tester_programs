@@ -39,7 +39,7 @@ class Final(share.TestSequence):
         # Scan for the RVSWT101 bluetooth transmission
         reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
         # reply is like this:
-        #   [(255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69')]
+        #   [[255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']]
         mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()
 
