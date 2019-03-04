@@ -31,7 +31,7 @@ class Console(share.console.Base):
         'SW-REV': parameter.String(
             'sw-rev', read_format='{0}'),
         'OUTPUT': parameter.String(
-            'output', writeable=True, write_format='{1} {0}'),
+            'output', readable=False, writeable=True, write_format='{1} {0}'),
         }
 
     def brand(self, sernum, product_rev):
@@ -43,5 +43,3 @@ class Console(share.console.Base):
     def output(self, index, state=0):
         """Send an output command."""
         self['OUTPUT'] = '{0} {1}'.format(index, state)
-
-
