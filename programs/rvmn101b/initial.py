@@ -20,10 +20,10 @@ class Initial(share.TestSequence):
     limitdata = (
         tester.LimitDelta('Vbatt', vbatt_set - 0.5, 0.5, doc='Battery input'),
         tester.LimitPercent('3V3', 3.3, 6.0, doc='Internal 3V rail'),
-        tester.LimitLow('HSoff', 2.0, doc='All HS outputs off'),
+        tester.LimitLow('HSoff', 1.0, doc='All HS outputs off'),
         tester.LimitHigh('HSon', 10.0, doc='HS output on'),
         tester.LimitHigh('LSoff', 10.0, doc='LS output off'),
-        tester.LimitLow('LSon', 2.0, doc='LS output on'),
+        tester.LimitLow('LSon', 1.0, doc='LS output on'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
@@ -65,20 +65,21 @@ class Initial(share.TestSequence):
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
         rvmn101b = dev['rvmn101b']
+        dev['dcs_vhbridge'].output(self.vbatt_set, output=True)
         mes['dmm_hs_off'](timeout=5)
         for idx in rvmn101b.valid_outputs:
             with tester.PathName('HS{0}'.format(idx)):
-                rvmn101b.output(idx, 1)
+                rvmn101b.hs_output(idx, 1)
                 mes['dmm_hs_on'](timeout=5)
-                rvmn101b.output(idx, 0)
+                rvmn101b.hs_output(idx, 0)
                 mes['dmm_hs_off'](timeout=5)
-        rvmn101b.output(rvmn101b.ls_0a5_out1, 1)
+        rvmn101b.ls_output(rvmn101b.ls_0a5_out1, 1)
         mes['dmm_ls1_on'](timeout=5)
-        rvmn101b.output(rvmn101b.ls_0a5_out1, 0)
+        rvmn101b.ls_output(rvmn101b.ls_0a5_out1, 0)
         mes['dmm_ls1_off'](timeout=5)
-        rvmn101b.output(rvmn101b.ls_0a5_out2, 1)
+        rvmn101b.ls_output(rvmn101b.ls_0a5_out2, 1)
         mes['dmm_ls2_on'](timeout=5)
-        rvmn101b.output(rvmn101b.ls_0a5_out2, 0)
+        rvmn101b.ls_output(rvmn101b.ls_0a5_out2, 0)
         mes['dmm_ls2_off'](timeout=5)
 
     @share.teststep
@@ -155,7 +156,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        for dcs in ('dcs_vbatt', ):
+        for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
             self[dcs].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot'):
             self[rla].set_off()
@@ -179,9 +180,9 @@ class Sensors(share.Sensors):
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['HSout'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
-        self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
-        self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
+        self['HSout'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.1)
+        self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.1)
+        self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmn101b_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101b_initial', 'capSnEntry'))
@@ -220,4 +221,3 @@ class Measurements(share.Measurements):
             ('scan_mac', 'ScanMac', 'MirScan',
                 'MAC address seen over bluetooth'),
             ))
-

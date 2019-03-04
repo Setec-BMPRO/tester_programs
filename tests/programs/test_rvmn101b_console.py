@@ -54,11 +54,11 @@ class RVMN101B_Console(unittest.TestCase):
         self.assertEqual(mac, self.con['MAC'])
         self.assertEqual(b'mac\r', self.con.port.get())
 
-    def test_output(self):
+    def test_hs_output(self):
         """Output driver command."""
         channel, setting = 12, 1
         self.con.port.puts(self.prompt, preflush=1)
-        self.con.output(channel, setting)
+        self.con.hs_output(channel, setting)
         self.assertEqual(
             'output {0} {1}\r'.format(channel, setting).encode(),
             self.con.port.get())

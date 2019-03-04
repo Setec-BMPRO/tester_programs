@@ -80,8 +80,12 @@ class Console(share.console.Base):
         self['SERIAL'] = sernum
         self['PRODUCT-REV'] = product_rev
 
-    def output(self, index, state=0):
-        """Send an output command."""
+    def hs_output(self, index, state=0):
+        """Send a HS output command."""
         if index not in self.valid_outputs:
             raise InvalidOutputError
+        self['OUTPUT'] = '{0} {1}'.format(index, state)
+
+    def ls_output(self, index, state=0):
+        """Send a LS output command."""
         self['OUTPUT'] = '{0} {1}'.format(index, state)
