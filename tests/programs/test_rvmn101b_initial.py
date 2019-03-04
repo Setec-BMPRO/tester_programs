@@ -24,7 +24,6 @@ class RVMN101BInitial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         mycan = MagicMock(name='MySerial2CAN')
-        mycan.ready_can = False
         mycan.read_can.return_value = True
         patcher = patch(
             'tester.devphysical.can.SerialToCan', return_value=mycan)
