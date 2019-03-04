@@ -20,7 +20,10 @@ class Initial(share.TestSequence):
     limitdata = (
         tester.LimitDelta('Vbatt', vbatt_set - 0.5, 0.5, doc='Battery input'),
         tester.LimitPercent('3V3', 3.3, 6.0, doc='Internal 3V rail'),
-        tester.LimitLow('HSoff', 10.0, doc='All HS outputs off'),
+        tester.LimitLow('HSoff', 2.0, doc='All HS outputs off'),
+        tester.LimitHigh('HSon', 10.0, doc='HS output on'),
+        tester.LimitHigh('LSoff', 10.0, doc='LS output off'),
+        tester.LimitLow('LSon', 2.0, doc='LS output on'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
@@ -35,6 +38,7 @@ class Initial(share.TestSequence):
             tester.TestStep('PgmARM', self.devices['progARM'].program),
             tester.TestStep('PgmNordic', self.devices['progNordic'].program),
             tester.TestStep('Initialise', self._step_initialise),
+            tester.TestStep('Output', self._step_output),
             tester.TestStep('CanBus', self._step_canbus),
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
@@ -56,7 +60,27 @@ class Initial(share.TestSequence):
         dev['dcs_vbatt'].output(0.0, delay=0.5)
         dev['dcs_vbatt'].output(self.vbatt_set, delay=1.0)
         rvmn101b.brand(self.sernum, config.PRODUCT_REV)
-        mes['dmm_hs_off']()
+
+    @share.teststep
+    def _step_output(self, dev, mes):
+        """Test the outputs of the unit."""
+        rvmn101b = dev['rvmn101b']
+        mes['dmm_hs_off'](timeout=5)
+        print('***', rvmn101b.valid_outputs)
+        for idx in rvmn101b.valid_outputs:
+            with tester.PathName('HS{0}'.format(idx)):
+                rvmn101b.output(idx, 1)
+                mes['dmm_hs_on'](timeout=5)
+                rvmn101b.output(idx, 0)
+                mes['dmm_hs_off'](timeout=5)
+        rvmn101b.output(rvmn101b.ls_0a5_out1, 1)
+        mes['dmm_ls1_on'](timeout=5)
+        rvmn101b.output(rvmn101b.ls_0a5_out1, 0)
+        mes['dmm_ls1_off'](timeout=5)
+        rvmn101b.output(rvmn101b.ls_0a5_out2, 1)
+        mes['dmm_ls2_on'](timeout=5)
+        rvmn101b.output(rvmn101b.ls_0a5_out2, 0)
+        mes['dmm_ls2_off'](timeout=5)
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -157,6 +181,8 @@ class Sensors(share.Sensors):
         self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['HSout'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
+        self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
+        self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.01)
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmn101b_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101b_initial', 'capSnEntry'))
@@ -184,6 +210,11 @@ class Measurements(share.Measurements):
             ('dmm_3v3', '3V3', '3V3', 'Micro power ok'),
             ('dmm_vbatt', 'Vbatt', 'VBatt', 'Battery input ok'),
             ('dmm_hs_off', 'HSoff', 'HSout', 'All high-side drivers OFF'),
+            ('dmm_hs_on', 'HSon', 'HSout', 'High-side driver ON'),
+            ('dmm_ls1_off', 'LSoff', 'LSout1', 'Low-side driver1 OFF'),
+            ('dmm_ls1_on', 'LSon', 'LSout1', 'Low-side driver1 ON'),
+            ('dmm_ls2_off', 'LSoff', 'LSout2', 'Low-side driver2 OFF'),
+            ('dmm_ls2_on', 'LSon', 'LSout2', 'Low-side driver2 ON'),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ('ble_mac', 'BleMac', 'BleMac', 'MAC address from console'),

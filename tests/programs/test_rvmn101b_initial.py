@@ -13,7 +13,7 @@ class RVMN101BInitial(ProgramTestCase):
 
     prog_class = rvmn101b.Initial
     parameter = None
-    debug = False
+    debug = True
 
     def setUp(self):
         """Per-Test setup."""
@@ -46,7 +46,10 @@ class RVMN101BInitial(ProgramTestCase):
                     (sen['3V3'], 3.3),
                     ),
                 'Initialise': (
-                    (sen['HSout'], 6.0),
+                    ),
+                'Output': (
+                    (sen['HSout'], (0.0, ) + (11.5, 0.0) * 40),
+                    (sen['LSout1'], (0.0, 11.5)), (sen['LSout2'], (0.0, 11.5)),
                     ),
                 'CanBus': (
                     (sen['MirCAN'], True),
@@ -61,7 +64,8 @@ class RVMN101BInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(7, len(result.readings))
+        self.assertEqual(91, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise', 'CanBus', 'Bluetooth'],
+            ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise', 'Output',
+            'CanBus', 'Bluetooth'],
             self.tester.ut_steps)
