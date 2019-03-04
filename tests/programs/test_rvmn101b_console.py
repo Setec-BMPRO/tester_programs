@@ -4,7 +4,9 @@
 
 import unittest
 from unittest.mock import patch
+
 import tester
+
 from programs import rvmn101b
 
 
@@ -56,9 +58,9 @@ class RVMN101B_Console(unittest.TestCase):
 
     def test_hs_output(self):
         """Output driver command."""
-        channel, setting = 12, 1
+        channel, setting = 12, True
         self.con.port.puts(self.prompt, preflush=1)
         self.con.hs_output(channel, setting)
         self.assertEqual(
-            'output {0} {1}\r'.format(channel, setting).encode(),
+            'output {0} {1}\r'.format(channel, 1 if setting else 0).encode(),
             self.con.port.get())

@@ -3,9 +3,11 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMC101 Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import tester
+
 import share
 from . import config
 

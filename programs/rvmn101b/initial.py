@@ -3,13 +3,14 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101B Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import serial
 import tester
+
 import share
-from . import console
-from . import config
+from . import console, config
 
 
 class Initial(share.TestSequence):
@@ -65,22 +66,24 @@ class Initial(share.TestSequence):
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
         rvmn101b = dev['rvmn101b']
-        dev['dcs_vhbridge'].output(self.vbatt_set, output=True)
+        dev['dcs_vhbridge'].output(self.vbatt_set, output=True, delay=0.2)
         mes['dmm_hs_off'](timeout=5)
+        # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101b.valid_outputs:
             with tester.PathName('HS{0}'.format(idx)):
-                rvmn101b.hs_output(idx, 1)
+                rvmn101b.hs_output(idx, True)
                 mes['dmm_hs_on'](timeout=5)
-                rvmn101b.hs_output(idx, 0)
+                rvmn101b.hs_output(idx, False)
                 mes['dmm_hs_off'](timeout=5)
-        rvmn101b.ls_output(rvmn101b.ls_0a5_out1, 1)
-        mes['dmm_ls1_on'](timeout=5)
-        rvmn101b.ls_output(rvmn101b.ls_0a5_out1, 0)
-        mes['dmm_ls1_off'](timeout=5)
-        rvmn101b.ls_output(rvmn101b.ls_0a5_out2, 1)
-        mes['dmm_ls2_on'](timeout=5)
-        rvmn101b.ls_output(rvmn101b.ls_0a5_out2, 0)
-        mes['dmm_ls2_off'](timeout=5)
+        # Turn ON, then OFF, each LS output in turn
+        for idx, dmm_channel in (
+                (rvmn101b.ls_0a5_out1, 'dmm_ls1'),
+                (rvmn101b.ls_0a5_out2, 'dmm_ls2'),
+                ):
+            rvmn101b.ls_output(idx, True)
+            mes[dmm_channel + '_on'](timeout=5)
+            rvmn101b.ls_output(idx, False)
+            mes[dmm_channel + '_off'](timeout=5)
 
     @share.teststep
     def _step_canbus(self, dev, mes):

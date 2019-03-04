@@ -2,17 +2,14 @@
 # -*- coding: utf-8 -*-
 """RVSWT101 Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import serial
 import tester
-from tester import (
-    LimitDelta,
-    LimitRegExp, LimitBoolean
-    )
+
 import share
-from . import console
-from . import config
+from . import console, config
 
 
 class Initial(share.TestSequence):
@@ -20,9 +17,11 @@ class Initial(share.TestSequence):
     """RVSWT101 Initial Test Program."""
 
     limitdata = (
-        LimitDelta('Vin', 3.3, 0.3),
-        LimitBoolean('ScanMac', True, doc='MAC address detected'),
-        LimitRegExp('BleMac', '^[0-9a-f]{12}$', doc='Valid MAC address'),
+        tester.LimitDelta('Vin', 3.3, 0.3),
+        tester.LimitBoolean('ScanMac', True,
+            doc='MAC address detected'),
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address'),
         )
 
     def open(self, uut):

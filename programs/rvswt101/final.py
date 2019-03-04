@@ -4,6 +4,7 @@
 
 import tester
 from tester import LimitBoolean, LimitRegExp
+
 import share
 from . import config
 

@@ -3,7 +3,9 @@
 """RVSWT101 Console driver."""
 
 import re
+
 import share
+
 
 class Console(share.console.Base):
 

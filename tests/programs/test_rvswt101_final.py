@@ -3,6 +3,7 @@
 """UnitTest for RVSWT101 Final Test program."""
 
 from unittest.mock import patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvswt101
 

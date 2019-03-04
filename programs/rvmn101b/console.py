@@ -5,9 +5,10 @@
 
 import share
 
+
 class InvalidOutputError(Exception):
 
-    """Attempt to set a missing output."""
+    """Attempt to set a non-existing output."""
 
 
 class Console(share.console.Base):
@@ -75,17 +76,34 @@ class Console(share.console.Base):
                 self.valid_outputs.append(idx)
 
     def brand(self, sernum, product_rev):
-        """Brand the unit with Serial Number."""
+        """Brand the unit with Serial Number.
+
+        @param sernum SETEC Serial Number 'AYYWWLLNNNN'
+        @param product_rev Product revision from ECO eg: '03A'
+
+        """
         self.action(None, expected=self.banner_lines)
         self['SERIAL'] = sernum
         self['PRODUCT-REV'] = product_rev
 
-    def hs_output(self, index, state=0):
-        """Send a HS output command."""
+    def hs_output(self, index, state=False):
+        """Set a HS output state.
+
+        @param index Index number of the output
+        @param state True for ON, False for OFF
+
+        """
         if index not in self.valid_outputs:
             raise InvalidOutputError
-        self['OUTPUT'] = '{0} {1}'.format(index, state)
+        self['OUTPUT'] = '{0} {1}'.format(index, 1 if state else 0)
 
-    def ls_output(self, index, state=0):
-        """Send a LS output command."""
-        self['OUTPUT'] = '{0} {1}'.format(index, state)
+    def ls_output(self, index, state=False):
+        """Set a LS output state.
+
+        @param index Index number of the output
+        @param state True for ON, False for OFF
+
+        """
+        if index not in (self.ls_0a5_out1, self.ls_0a5_out2):
+            raise InvalidOutputError
+        self['OUTPUT'] = '{0} {1}'.format(index, 1 if state else 0)

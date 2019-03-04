@@ -3,6 +3,7 @@
 """UnitTest for RVMN101B Initial Test program."""
 
 from unittest.mock import MagicMock, PropertyMock, patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvmn101b
 
@@ -13,12 +14,13 @@ class RVMN101BInitial(ProgramTestCase):
 
     prog_class = rvmn101b.Initial
     parameter = None
+    hs_outputs = [1, 2, 3]
     debug = True
 
     def setUp(self):
         """Per-Test setup."""
         mycon = MagicMock(name='MyCon')
-        type(mycon).valid_outputs = PropertyMock(return_value=[1, 2, 3])
+        type(mycon).valid_outputs = PropertyMock(return_value=self.hs_outputs)
         patcher = patch(
             'programs.rvmn101b.console.Console', return_value=mycon)
         self.addCleanup(patcher.stop)
@@ -52,8 +54,10 @@ class RVMN101BInitial(ProgramTestCase):
                 'Initialise': (
                     ),
                 'Output': (
-                    (sen['HSout'], (0.0, ) + (11.5, 0.0) * 3),
-                    (sen['LSout1'], (0.0, 11.5)), (sen['LSout2'], (0.0, 11.5)),
+                    (sen['HSout'],
+                        (0.0, ) + (11.5, 0.0) * len(self.hs_outputs)),
+                    (sen['LSout1'], (0.0, 11.5)),
+                    (sen['LSout2'], (0.0, 11.5)),
                     ),
                 'CanBus': (
                     (sen['MirCAN'], True),
@@ -70,6 +74,6 @@ class RVMN101BInitial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(17, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise', 'Output',
-            'CanBus', 'Bluetooth'],
+            ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise',
+             'Output', 'CanBus', 'Bluetooth'],
             self.tester.ut_steps)
