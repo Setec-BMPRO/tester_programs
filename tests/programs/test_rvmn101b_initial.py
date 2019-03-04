@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVMN101B Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvmn101b
 
@@ -17,6 +17,12 @@ class RVMN101BInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        mycon = MagicMock(name='MyCon')
+        type(mycon).valid_outputs = PropertyMock(return_value=[1, 2, 3])
+        patcher = patch(
+            'programs.rvmn101b.console.Console', return_value=mycon)
+        self.addCleanup(patcher.stop)
+        patcher.start()
         mycan = MagicMock(name='MySerial2CAN')
         mycan.ready_can = False
         mycan.read_can.return_value = True
@@ -28,7 +34,6 @@ class RVMN101BInitial(ProgramTestCase):
                 'share.programmer.ARM',
                 'share.programmer.Nordic',
                 'share.bluetooth.RaspberryBluetooth',
-                'programs.rvmn101b.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -48,7 +53,7 @@ class RVMN101BInitial(ProgramTestCase):
                 'Initialise': (
                     ),
                 'Output': (
-                    (sen['HSout'], (0.0, ) + (11.5, 0.0) * 40),
+                    (sen['HSout'], (0.0, ) + (11.5, 0.0) * 3),
                     (sen['LSout1'], (0.0, 11.5)), (sen['LSout2'], (0.0, 11.5)),
                     ),
                 'CanBus': (
@@ -64,7 +69,7 @@ class RVMN101BInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
-        self.assertEqual(91, len(result.readings))
+        self.assertEqual(17, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise', 'Output',
             'CanBus', 'Bluetooth'],

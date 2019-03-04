@@ -66,7 +66,6 @@ class Initial(share.TestSequence):
         """Test the outputs of the unit."""
         rvmn101b = dev['rvmn101b']
         mes['dmm_hs_off'](timeout=5)
-        print('***', rvmn101b.valid_outputs)
         for idx in rvmn101b.valid_outputs:
             with tester.PathName('HS{0}'.format(idx)):
                 rvmn101b.output(idx, 1)
