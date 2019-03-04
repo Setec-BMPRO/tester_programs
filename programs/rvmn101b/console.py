@@ -30,6 +30,8 @@ class Console(share.console.Base):
             'product-rev', writeable=True, write_format='{1} {0}'),
         'SW-REV': parameter.String(
             'sw-rev', read_format='{0}'),
+        'OUTPUT': parameter.String(
+            'output', writeable=True, write_format='{1} {0}'),
         }
 
     def brand(self, sernum, product_rev):
@@ -37,3 +39,9 @@ class Console(share.console.Base):
         self.action(None, expected=self.banner_lines)
         self['SERIAL'] = sernum
         self['PRODUCT-REV'] = product_rev
+
+    def output(self, index, state=0):
+        """Send an output command."""
+        self['OUTPUT'] = '{0} {1}'.format(index, state)
+
+
