@@ -3,7 +3,6 @@
 """UnitTest for RVMN101B Console Test program."""
 
 import unittest
-from unittest.mock import patch
 
 import tester
 
@@ -18,12 +17,6 @@ class RVMN101B_Console(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-                'time.sleep',
-                ):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
         port = tester.devphysical.sim_serial.SimSerial()
         port.echo = True
         self.con = rvmn101b.console.Console(port)
