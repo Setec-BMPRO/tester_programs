@@ -134,8 +134,8 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['o5v'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['o3v3'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
+        self['o3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['o5v'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmc101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmc101_initial', 'capSnEntry'))
