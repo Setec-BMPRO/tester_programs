@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2014 - 2019 SETEC Pty Ltd.
 """Texas Instruments EV220x Controller.
 
 Uses the TI EV2200 RS232 to SMBus unit to communicate with the
@@ -17,100 +18,95 @@ import time
 import datetime
 import re
 
-# BQ2060A ADC reading cycle time
-# "2.0-2.5s, with an occasional extra 0.5s delay"
-_ADC_DELAY = 3.0
-# Time for EEPROM power-up by BQ2060A "900ms"
-_EE_POWERUP = 0.9
-# Manufacturer code to connect SMBus through to I2C
-_EE_CODE = 0x606
-# Time to wait after write to EEPROM "10ms"
-_EE_DELAY = 0.01
-# Max time to wait for  'Monitor' change, units of about 10ms
-_CALI_MAXREADS = 500
-# Number of VFC 'Monitor' changes to use
-_CALI_VFC_TICKS = 30
-# Deliberately corrupt the EEPROM Check Words after dumping
-# 0 = No Action, 1 = Write check bytes, 2 = Write all bytes
-_ZAP_EEPROM = 0
-# !=0 will dump EEPROM at 1st 'READVIT' command
-_DUMP_AT_VIT = 0
-# !=0 will wipe EEPROM at 1st 'READVIT' command
-_WIPE_AT_VIT = 0
-# !=0 will do the EEPROM write at calibration
-_WRITE_EE_AT_CAL = 1
-# Sanity check limits for Voltage Calibration
-#   FSV nominal = 20000, VOFF nominal = 0
-_FSV_MIN = 19000        # +5%
-_FSV_MAX = 21000        # -5%
-_VOFF_MIN = -20
-_VOFF_MAX = 20
-# Sanity check limits for Current Calibration
-#   ADCSRG nominal = 31250
-_ADC_MIN = 29687        # -5%
-_ADC_MAX = 32813        # +5%
-# Sanity check limits for VFC Calibration
-#   VFCSRG nominal = 20480
-_VFC_MIN = 18432        # -10%
-_VFC_MAX = 22528        # +10%
-# EV2200 Commands
-_CMD = {
-    'EchoBlock':         b'\x08',
-    'RdSMBusWord':       b'\x20',
-    'RdSMBusWordPEC':    b'\x22',
-    'SetSMBusSlave':     b'\x42',
-    'WrSMBusWord':       b'\x60',
-    'WrSMBusWordPEC':    b'\x61',
-    'BoardStatus':       b'\x80',
-    }
-# EV2200 Sub-Commands
-_SUBCMD = {
-    'ManufAccess':       b'\x00',
-    'Temperature':       b'\x08',
-    'Voltage':           b'\x09',
-    'Current':           b'\x0A',
-    'RelCharge':         b'\x0D',
-    'AbsCharge':         b'\x0E',
-    'RemCapacity1':      b'\x0F',  # Name??
-    'FullCapacity':      b'\x10',
-    'CycleCount':        b'\x17',
-    'DesCapacity':       b'\x18',
-    'ManufDate':         b'\x1B',
-    'SerialNo':          b'\x1C',
-    'LightLoadEst[MSB]': b'\x25',
-    'RemCapacity':       b'\x26',
-    'TempOffset[MSB]':   b'\x40',
-    'AdcOffset[LSB]':    b'\x41',
-    'AdcVoltGain':       b'\x43',
-    'AdcResGain':        b'\x44',
-    'VfcResGain':        b'\x45',
-    'Reset1':            b'\x4F',
-    'Monitor':           b'\x5D',
-    'InvOffset[MSB]':    b'\x5F',
-    'Reset2':            b'\x7D',
-    'EE-Check1':         b'\x00',
-    'EE-Check2':         b'\x7E',
-    'EE-ManufDate':      b'\x16',
-    'EE-SerialNo':       b'\x18',
-    'EE-VfcOffset[LSB]': b'\x60',
-    'EE-AdcOffset[LSB]': b'\x62',
-    'EE-AdcVoltGain':    b'\x66',
-    'EE-AdcResGain':     b'\x68',
-    'EE-VfcResGain':     b'\x6A',
-    'Echo':              b'\xFF',   # Dummy for EchoBlock
-    'SetBQ':             b'\x16',   # Dummy values for SlaveSet
-    'SetEE':             b'\xA0',
-    }
-
-
-class Ev2200Error(Exception):
-
-    """EV2200 Exception class."""
-
 
 class EV2200():
 
     """EV2200 Controller."""
+
+    # BQ2060A ADC reading cycle time
+    # "2.0-2.5s, with an occasional extra 0.5s delay"
+    adc_delay = 3.0
+    # Time for EEPROM power-up by BQ2060A "900ms"
+    ee_powerup_delay = 0.9
+    # Manufacturer code to connect SMBus through to I2C
+    ee_access_code = 0x606
+    # Time to wait after write to EEPROM "10ms"
+    ee_write_delay = 0.01
+    # Max time to wait for  'Monitor' change, units of about 10ms
+    cali_maxreads = 500
+    # Number of VFC 'Monitor' changes to use
+    cali_vfc_ticks = 30
+    # Deliberately corrupt the EEPROM Check Words after dumping
+    # 0 = No Action, 1 = Write check bytes, 2 = Write all bytes
+    zap_eeprom = 0
+    # True will dump EEPROM at 1st 'READVIT' command
+    dump_at_vit = False
+    # True will wipe EEPROM at 1st 'READVIT' command
+    wipe_at_vit = False
+    # True will do the EEPROM write at calibration
+    write_ee_at_cal = True
+    # Sanity check limits for Voltage Calibration
+    #   FSV nominal = 20000, VOFF nominal = 0
+    fsv_min = 19000         # +5%
+    fsv_max = 21000         # -5%
+    voff_min = -20
+    voff_max = 20
+    # Sanity check limits for Current Calibration
+    #   ADCSRG nominal = 31250
+    adc_min = 29687         # -5%
+    adc_max = 32813         # +5%
+    # Sanity check limits for VFC Calibration
+    #   VFCSRG nominal = 20480
+    vfc_min = 18432         # -10%
+    vfc_max = 22528         # +10%
+    # EV2200 Commands
+    cmd = {
+        'EchoBlock':         b'\x08',
+        'RdSMBusWord':       b'\x20',
+        'RdSMBusWordPEC':    b'\x22',
+        'SetSMBusSlave':     b'\x42',
+        'WrSMBusWord':       b'\x60',
+        'WrSMBusWordPEC':    b'\x61',
+        'BoardStatus':       b'\x80',
+        }
+    # EV2200 Sub-Commands
+    subcmd = {
+        'ManufAccess':       b'\x00',
+        'Temperature':       b'\x08',
+        'Voltage':           b'\x09',
+        'Current':           b'\x0A',
+        'RelCharge':         b'\x0D',
+        'AbsCharge':         b'\x0E',
+        'RemCapacity1':      b'\x0F',  # Name??
+        'FullCapacity':      b'\x10',
+        'CycleCount':        b'\x17',
+        'DesCapacity':       b'\x18',
+        'ManufDate':         b'\x1B',
+        'SerialNo':          b'\x1C',
+        'LightLoadEst[MSB]': b'\x25',
+        'RemCapacity':       b'\x26',
+        'TempOffset[MSB]':   b'\x40',
+        'AdcOffset[LSB]':    b'\x41',
+        'AdcVoltGain':       b'\x43',
+        'AdcResGain':        b'\x44',
+        'VfcResGain':        b'\x45',
+        'Reset1':            b'\x4F',
+        'Monitor':           b'\x5D',
+        'InvOffset[MSB]':    b'\x5F',
+        'Reset2':            b'\x7D',
+        'EE-Check1':         b'\x00',
+        'EE-Check2':         b'\x7E',
+        'EE-ManufDate':      b'\x16',
+        'EE-SerialNo':       b'\x18',
+        'EE-VfcOffset[LSB]': b'\x60',
+        'EE-AdcOffset[LSB]': b'\x62',
+        'EE-AdcVoltGain':    b'\x66',
+        'EE-AdcResGain':     b'\x68',
+        'EE-VfcResGain':     b'\x6A',
+        'Echo':              b'\xFF',   # Dummy for EchoBlock
+        'SetBQ':             b'\x16',   # Dummy values for SlaveSet
+        'SetEE':             b'\xA0',
+        }
 
     def __init__(self, serport):
         """Connect to the EV2200.
@@ -139,11 +135,11 @@ class EV2200():
 
         """
         self._board_status()
-        if _DUMP_AT_VIT:
+        if self.dump_at_vit:
             self._ee_dump()
-        if _WIPE_AT_VIT:
+        if self.wipe_at_vit:
             self._ee_wipe()
-        if _DUMP_AT_VIT or _WIPE_AT_VIT:
+        if self.dump_at_vit or self.wipe_at_vit:
             raise Ev2200Error('FORCED FAIL')
         # values to read and scale factors
         job = (('Voltage', 1000), ('Current', 1000), ('Temperature', 10))
@@ -189,12 +185,13 @@ class EV2200():
         readings['PreFSV'] = fsv
         self._logger.debug('fsv = %s', fsv)
         # Sanity check the calibration values
-        if ((fsv < _FSV_MIN) or
-                (fsv > _FSV_MAX) or
-                (adc_off_lsb < _VOFF_MIN) or
-                (adc_off_lsb > _VOFF_MAX)):
+        if ((fsv < self.fsv_min) or
+                (fsv > self.fsv_max) or
+                (adc_off_lsb < self.voff_min) or
+                (adc_off_lsb > self.voff_max)):
             raise Ev2200Error('Voltage calibration out of range')
-        # Read and average some samples, _ADC_DELAYs apart (Voltage, Offset)
+        # Read and average some samples,
+        #   self.adc_delays apart (Voltage, Offset)
         volt = inv_off = 0
         samples = 3
         for num in range(samples):
@@ -204,7 +201,7 @@ class EV2200():
             i = (self._ram_read('InvOffset[MSB]') & 0xFF00) >> 8
             inv_off += self._signed8bit(i)
             if num < (samples - 1):
-                time.sleep(_ADC_DELAY)
+                time.sleep(self.adc_delay)
         volt /= samples                                 # mVolt
         readings['PreVoltage'] = float(volt) / 1000     # Volt
         self._logger.debug('Voltage = %s', float(volt) / 1000)
@@ -227,17 +224,17 @@ class EV2200():
         # Write Calibration to RAM
         self._ram_write('AdcOffset[LSB]', new_off)
         self._ram_write('AdcVoltGain', new_fsv)
-        if _WRITE_EE_AT_CAL:
+        if self.write_ee_at_cal:
             # Write Calibration to EEPROM
             self._ee_write(
                 (('EE-AdcOffset[LSB]', new_off), ('EE-AdcVoltGain', new_fsv)))
         # Allow time for the new values to take effect
-        time.sleep(_ADC_DELAY)
+        time.sleep(self.adc_delay)
         # The BQ2060 seems to need about 1sec after the 1st read
         # for the read voltage to change
         # Here we do a dummy read...
         self._ram_read('Voltage')
-        time.sleep(_ADC_DELAY)
+        time.sleep(self.adc_delay)
         # Read Post-Calibration voltage reading
         readings['PostVoltage'] = (
             float(self._ram_read('Voltage')) / 1000)  # Volt
@@ -264,11 +261,11 @@ class EV2200():
         self._logger.debug('adc_srg = %s', adc_srg)
         vfc_srg = self._signed16bit(self._ram_read('VfcResGain'))
         self._logger.debug('vfc_srg = %s', vfc_srg)
-        # Read and average some samples, _ADC_DELAYs apart (Current)
+        # Read and average some samples, self.adc_delays apart (Current)
         curr = 0
         samples = 3
         for _ in range(samples):
-            time.sleep(_ADC_DELAY)
+            time.sleep(self.adc_delay)
             curr += self._ram_read('Current')
         curr /= samples                                 # mAmp
         curr = self._signed16bit(int(curr))
@@ -276,7 +273,7 @@ class EV2200():
         self._logger.debug('BQ Current = %s', readings['PreCurrent'])
         # SRG Init
         self._ram_write('VfcResGain', 1)
-        time.sleep(_ADC_DELAY)
+        time.sleep(self.adc_delay)
         # Read monitor value and wait for it to change
         mon = self._ram_read('Monitor')
         nextmon = mon
@@ -288,14 +285,14 @@ class EV2200():
         # Start timing changes now
         start_time = datetime.datetime.now()
         # Wait for required number of changes
-        changes = _CALI_VFC_TICKS
+        changes = self.cali_vfc_ticks
         self._logger.debug('Waiting for %s changes', changes)
         for _ in range(changes):
             reads = 0
             while mon != nextmon:
                 mon = self._ram_read('Monitor')
                 reads += 1
-                if reads > _CALI_MAXREADS:
+                if reads > self.cali_maxreads:
                     raise Ev2200Error('Monitor read timeout')
             nextmon = mon - 1
             if nextmon < 0:         # Handle unsigned int underflow
@@ -317,25 +314,25 @@ class EV2200():
         self._logger.debug('new_adc_srg = %s', new_adc_srg)
         self._logger.debug('new_vfc_srg = %s', new_vfc_srg)
         # Sanity check the calibration values
-        if ((new_adc_srg < _ADC_MIN) or
-                (new_adc_srg > _ADC_MAX) or
-                (new_vfc_srg < _VFC_MIN) or
-                (new_vfc_srg > _VFC_MAX)):
+        if ((new_adc_srg < self.adc_min) or
+                (new_adc_srg > self.adc_max) or
+                (new_vfc_srg < self.vfc_min) or
+                (new_vfc_srg > self.vfc_max)):
             raise Ev2200Error('Current/VFC calibration out of range')
         # Write Calibration to RAM
         self._ram_write('AdcResGain', new_adc_srg)
         self._ram_write('VfcResGain', new_vfc_srg)
-        if _WRITE_EE_AT_CAL:    # Write Calibration to EEPROM
+        if self.write_ee_at_cal:    # Write Calibration to EEPROM
             self._ee_write(
                 (('EE-AdcResGain', new_adc_srg),
                  ('EE-VfcResGain', new_vfc_srg))
                 )
         # Allow time for the new values to take effect
-        time.sleep(_ADC_DELAY)
+        time.sleep(self.adc_delay)
         # The BQ2060 seems to need about 1sec after the 1st read for the
         # read voltage to change. Here we do a dummy read...
         self._ram_read('Current')
-        time.sleep(_ADC_DELAY)
+        time.sleep(self.adc_delay)
         # Read Post-Calibration current reading
         curr = self._ram_read('Current')
         curr = self._signed16bit(curr)
@@ -391,8 +388,8 @@ class EV2200():
         self._board_status()
         # Select the EEPROM
         self._logger.debug('Dumping EEPROM')
-        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', _EE_CODE)
-        time.sleep(_EE_POWERUP)
+        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', self.ee_access_code)
+        time.sleep(self.ee_powerup_delay)
         self._ev_cmd('SetSMBusSlave', 'SetEE')
         # Read EEPROM value(s)
         vals = ()
@@ -426,9 +423,9 @@ class EV2200():
                     msg += ' '
             print(msg)
 #        _dumper(vals)
-        if _ZAP_EEPROM == 1:     # Erase Check bytes only
+        if self.zap_eeprom == 1:     # Erase Check bytes only
             self._ee_write((('EE-Check1', 0xFFFF), ('EE-Check2', 0xFFFF)))
-        elif _ZAP_EEPROM == 2:   # Erase ALL bytes
+        elif self.zap_eeprom == 2:   # Erase ALL bytes
             self._ee_wipe()
             raise Ev2200Error('Forced EE Wipe')
         return vals
@@ -436,15 +433,15 @@ class EV2200():
     def _ee_wipe(self):
         """Wipe the entire EEPROM by writing to 0xFF."""
         self._logger.debug('Erasing EEPROM')
-        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', _EE_CODE)
-        time.sleep(_EE_POWERUP)
+        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', self.ee_access_code)
+        time.sleep(self.ee_powerup_delay)
         self._ev_cmd('SetSMBusSlave', 'SetEE')
         for ptr in range(0, 128, 2):
             adr = bytes((ptr, ))
             self._ev_cmd('WrSMBusWord', adr, 0xFFFF)
             # Only delay at the end of each 8-byte page
             if (ptr > 0) and ((ptr + 2) % 8) == 0:
-                time.sleep(_EE_DELAY)
+                time.sleep(self.ee_write_delay)
             check = self._ev_cmd('RdSMBusWord', adr)
             check = (check[2] << 8) | check[1]
             if check != 0xFFFF:
@@ -486,8 +483,8 @@ class EV2200():
 
         """
         # Select the EEPROM
-        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', _EE_CODE)
-        time.sleep(_EE_POWERUP)
+        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', self.ee_access_code)
+        time.sleep(self.ee_powerup_delay)
         self._ev_cmd('SetSMBusSlave', 'SetEE')
         # Read EEPROM value(s)
         vals = ()
@@ -515,15 +512,15 @@ class EV2200():
 
         """
         # Select the EEPROM
-        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', _EE_CODE)
-        time.sleep(_EE_POWERUP)
+        self._ev_cmd('WrSMBusWordPEC', 'ManufAccess', self.ee_access_code)
+        time.sleep(self.ee_powerup_delay)
         self._ev_cmd('SetSMBusSlave', 'SetEE')
         # Write value(s) to EEPROM
         for ptr in wrparam:
             subcmd = ptr[0]
             val = ptr[1]
             self._ev_cmd('WrSMBusWord', subcmd, val)
-            time.sleep(_EE_DELAY)
+            time.sleep(self.ee_write_delay)
         # Select BQ2060
         self._ev_cmd('SetSMBusSlave', 'SetBQ')
 
@@ -539,10 +536,13 @@ class EV2200():
         """
         # Check the subcmd. If its not in the SubCmd dictionary,
         # treat it as an address number
-        scmd = _SUBCMD[subcmd] if subcmd in _SUBCMD else subcmd
+        scmd = self.subcmd[subcmd] if subcmd in self.subcmd else subcmd
         # Build the 5-byte command packet
         cmd_blk = (
-            b'\xAA' + _CMD[cmd] + scmd + bytes((val & 255, (val >> 8) & 255))
+            b'\xAA'
+            + self.cmd[cmd]
+            + scmd
+            + bytes((val & 255, (val >> 8) & 255))
             )
         self.port.flushInput()
         self.port.write(cmd_blk)
@@ -637,17 +637,17 @@ class EV2200():
 
 def _dumper(raw_data):
     """Data Validity Checker."""
-#programs.cmrsbp.ev2200.EV2200:MainThread:DEBUG:Dumping EEPROM
-#0000: 7F 3C 0A 00 14 05 00 00  00 00 80 3E 80 00 00 00   .<...... ...>....
-#0010: 00 00 E0 2E 31 00 00 00  00 00 A0 0F 8A 02 8A 02   ....1... ........
-#0020: 0A 20 53 45 54 45 43 20  50 2F 4C 00 00 00 C0 FE   . SETEC  P/L.....
-#0030: 07 43 4D 52 2D 53 42 50  D4 30 C8 32 60 D7 00 A0   .CMR-SBP .0.2`...
-#0040: 04 4E 69 4D 68 C0 40 1F  0A 20 00 9C A1 FF 07 07   .NiMh.@. . ......
-#0050: 07 35 2D BE 12 FF 00 00  00 00 00 00 00 00 00 00   .5-..... ........
-#0060: 00 00 00 20 A0 50 20 4E  12 7A 00 50 14 D3 2C CF   ... .P N .z.P..,.
-#0070: 44 CB 04 29 30 2A 00 00  F8 2A 00 00 00 00 5A A5   D..)0*.. .*....Z.
+# programs.cmrsbp.ev2200.EV2200:MainThread:DEBUG:Dumping EEPROM
+# 0000: 7F 3C 0A 00 14 05 00 00  00 00 80 3E 80 00 00 00   .<...... ...>....
+# 0010: 00 00 E0 2E 31 00 00 00  00 00 A0 0F 8A 02 8A 02   ....1... ........
+# 0020: 0A 20 53 45 54 45 43 20  50 2F 4C 00 00 00 C0 FE   . SETEC  P/L.....
+# 0030: 07 43 4D 52 2D 53 42 50  D4 30 C8 32 60 D7 00 A0   .CMR-SBP .0.2`...
+# 0040: 04 4E 69 4D 68 C0 40 1F  0A 20 00 9C A1 FF 07 07   .NiMh.@. . ......
+# 0050: 07 35 2D BE 12 FF 00 00  00 00 00 00 00 00 00 00   .5-..... ........
+# 0060: 00 00 00 20 A0 50 20 4E  12 7A 00 50 14 D3 2C CF   ... .P N .z.P..,.
+# 0070: 44 CB 04 29 30 2A 00 00  F8 2A 00 00 00 00 5A A5   D..)0*.. .*....Z.
 
-#SAMPLE_DATA = (
+# SAMPLE_DATA = (
 #    b'\x7F\x3C\x0A\x00\x14\x05\x00\x00\x00\x00\x80\x3E\x80\x00\x00\x00'
 #    b'\x00\x00\xE0\x2E\x31\x00\x00\x00\x00\x00\xA0\x0F\x8A\x02\x8A\x02'
 #    b'\x0A\x20\x53\x45\x54\x45\x43\x20\x50\x2F\x4C\x00\x00\x00\xC0\xFE'
@@ -759,3 +759,8 @@ def _dumper(raw_data):
             explain = '!!! NOT CHECKED !!!'
         if not explain.startswith('OK') or dump_ok:
             print('0x%02x = %s (%s) %s' % (i[0][1], i[1], i[0][2], explain))
+
+
+class Ev2200Error(Exception):
+
+    """EV2200 Exception class."""

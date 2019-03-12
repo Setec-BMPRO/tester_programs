@@ -107,38 +107,44 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_calv(self, dev, mes):
         """Calibrate vbat for BQ2060A."""
-        evdev = dev['ev']
-        evdev.open()
-        dev['dcs_vbat'].output(12.20)
-        dev['dcs_Vchg'].output(0.0)
-        dev['rla_Pic'].set_off()
-        dev['rla_PicReset'].set_on(delay=3)
-        dev['rla_EVM'].set_on()
-        dmm_vbat = mes['dmm_vbat'](timeout=5).reading1
-        ev_data = evdev.read_vit()
-        mes['bq_ErrVUncal'].sensor.store(dmm_vbat - ev_data['Voltage'])
-        mes['bq_Temp'].sensor.store(ev_data['Temperature'])
-        self.measure(('bq_ErrVUncal', 'bq_Temp'))
-        evdev.cal_v(dmm_vbat)
-        ev_data = evdev.read_vit()
-        mes['bq_ErrVCal'].sensor.store(dmm_vbat - ev_data['Voltage'])
-        mes['bq_ErrVCal']()
+        try:
+            evdev = dev['ev']
+            evdev.open()
+            dev['dcs_vbat'].output(12.20)
+            dev['dcs_Vchg'].output(0.0)
+            dev['rla_Pic'].set_off()
+            dev['rla_PicReset'].set_on(delay=3)
+            dev['rla_EVM'].set_on()
+            dmm_vbat = mes['dmm_vbat'](timeout=5).reading1
+            ev_data = evdev.read_vit()
+            mes['bq_ErrVUncal'].sensor.store(dmm_vbat - ev_data['Voltage'])
+            mes['bq_Temp'].sensor.store(ev_data['Temperature'])
+            self.measure(('bq_ErrVUncal', 'bq_Temp'))
+            evdev.cal_v(dmm_vbat)
+            ev_data = evdev.read_vit()
+            mes['bq_ErrVCal'].sensor.store(dmm_vbat - ev_data['Voltage'])
+            mes['bq_ErrVCal']()
+        except ev2200.Ev2200Error as err:
+            EvError(err)
 
     @share.teststep
     def _step_cali(self, dev, mes):
         """Calibrate ibat for BQ2060A."""
-        evdev = dev['ev']
-        dev['dcl_ibat'].output(2.0, True)
-        dmm_ibat = mes['dmm_ibat'](timeout=5).reading1
-        time.sleep(3)
-        ev_data = evdev.read_vit()
-        mes['bq_ErrIUncal'].sensor.store(dmm_ibat - ev_data['Current'])
-        mes['bq_ErrIUncal']()
-        evdev.cal_i(dmm_ibat)
-        ev_data = evdev.read_vit()
-        mes['bq_ErrICal'].sensor.store(dmm_ibat - ev_data['Current'])
-        mes['bq_ErrICal']()
-        dev['dcl_ibat'].output(0.0)
+        try:
+            evdev = dev['ev']
+            dev['dcl_ibat'].output(2.0, True)
+            dmm_ibat = mes['dmm_ibat'](timeout=5).reading1
+            time.sleep(3)
+            ev_data = evdev.read_vit()
+            mes['bq_ErrIUncal'].sensor.store(dmm_ibat - ev_data['Current'])
+            mes['bq_ErrIUncal']()
+            evdev.cal_i(dmm_ibat)
+            ev_data = evdev.read_vit()
+            mes['bq_ErrICal'].sensor.store(dmm_ibat - ev_data['Current'])
+            mes['bq_ErrICal']()
+            dev['dcl_ibat'].output(0.0)
+        except ev2200.Ev2200Error as err:
+            EvError(err)
 
 
 class SerialDate(share.TestSequence):
@@ -155,16 +161,19 @@ class SerialDate(share.TestSequence):
     @share.teststep
     def _step_sn_date(self, dev, mes):
         """Write SerialNo & Manufacturing Datecode into EEPROM of BQ2060A."""
-        evdev = dev['ev']
-        evdev.open()
-        mes['dmm_NoFinal'](timeout=5)
-        dev['rla_vbat'].set_on()
-        dev['dcs_vbat'].output(12.20, output=True)
-        dev['rla_PicReset'].set_on(delay=2)
-        dev['rla_EVM'].set_on()
-        sernum = mes['ui_SnEntry']().reading1[-4:]  # Last 4 digits only
-        current_date = datetime.date.today().isoformat()
-        evdev.sn_date(datecode=current_date, serialno=sernum)
+        try:
+            evdev = dev['ev']
+            evdev.open()
+            mes['dmm_NoFinal'](timeout=5)
+            dev['rla_vbat'].set_on()
+            dev['dcs_vbat'].output(12.20, output=True)
+            dev['rla_PicReset'].set_on(delay=2)
+            dev['rla_EVM'].set_on()
+            sernum = mes['ui_SnEntry']().reading1[-4:]  # Last 4 digits only
+            current_date = datetime.date.today().isoformat()
+            evdev.sn_date(datecode=current_date, serialno=sernum)
+        except ev2200.Ev2200Error as err:
+            EvError(err)
 
 
 class Final(share.TestSequence):
@@ -278,6 +287,23 @@ class Final(share.TestSequence):
         """
         mask = 1 << check_bit
         return True if num & mask else False
+
+
+class EvError():
+
+    """EV2200 error handler."""
+
+    def __init__(self, err):
+        """Generate a Measurement failure.
+
+        @param err ev2200.Ev2200Error instance
+
+        """
+        tmp = tester.Measurement(
+            tester.LimitRegExp('Ev2200', 'ok', doc='Command succeeded'),
+            tester.sensor.Mirror(rdgtype=tester.sensor.ReadingString))
+        tmp.sensor.store(str(err))
+        tmp.measure()   # Generates a test FAIL result
 
 
 class Devices(share.Devices):
