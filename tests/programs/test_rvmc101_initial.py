@@ -34,8 +34,8 @@ class RVMC101Initial(ProgramTestCase):
                 'PowerUp': (
                     (sen['SnEntry'], 'A1526040123'),
                     (sen['vin'], 12.0),
-                    (sen['o5v'], 5.0),
-                    (sen['o3v3'], 3.3),
+                    (sen['a_5v'], 5.0),
+                    (sen['a_3v3'], 3.3),
                     ),
                 'CanBus': (
                     (sen['MirCAN'], True),

@@ -39,7 +39,8 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['rla_reset'].set_on()   # Hold device in RESET
         dev['dcs_vin'].output(12.0, output=True)
-        self.measure(('dmm_vin', 'dmm_5v', 'dmm_3v3'), timeout=5)
+        self.measure(('dmm_vin', 'dmm_5va', 'dmm_3v3a'), timeout=5)
+        dev['rla_pos1'].set_on()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -98,6 +99,10 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS1'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
+                ('rla_pos1', tester.Relay, 'RLA3'),
+                ('rla_pos2', tester.Relay, 'RLA4'),
+                ('rla_pos3', tester.Relay, 'RLA5'),
+                ('rla_pos4', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
@@ -116,7 +121,9 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
-        for rla in ('rla_reset', 'rla_boot'):
+        for rla in (
+            'rla_reset', 'rla_boot', 'rla_pos1',
+            'rla_pos2', 'rla_pos3', 'rla_pos4'):
             self[rla].set_off()
 
     def close_can(self):
@@ -134,8 +141,14 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['o3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['o5v'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
+        self['a_3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['b_3v3'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
+        self['c_3v3'] = sensor.Vdc(dmm, high=4, low=1, rng=10, res=0.01)
+        self['d_3v3'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
+        self['a_5v'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
+        self['b_5v'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01)
+        self['c_5v'] = sensor.Vdc(dmm, high=8, low=1, rng=10, res=0.01)
+        self['d_5v'] = sensor.Vdc(dmm, high=9, low=1, rng=10, res=0.01)
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmc101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmc101_initial', 'capSnEntry'))
@@ -150,8 +163,14 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
-            ('dmm_5v', '5V', 'o5v', '5V rail voltage'),
-            ('dmm_3v3', '3V3', 'o3v3', '3V3 rail voltage'),
+            ('dmm_3v3a', '3V3', 'a_3v3', '3V3 rail voltage'),
+            ('dmm_3v3b', '3V3', 'b_3v3', '3V3 rail voltage'),
+            ('dmm_3v3c', '3V3', 'c_3v3', '3V3 rail voltage'),
+            ('dmm_3v3d', '3V3', 'd_3v3', '3V3 rail voltage'),
+            ('dmm_5va', '5V', 'a_5v', '5V rail voltage'),
+            ('dmm_5vb', '5V', 'b_5v', '5V rail voltage'),
+            ('dmm_5vc', '5V', 'c_5v', '5V rail voltage'),
+            ('dmm_5vd', '5V', 'd_5v', '5V rail voltage'),
             ('ui_serialnum', 'SerNum', 'SnEntry', 'Unit serial number'),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ))
