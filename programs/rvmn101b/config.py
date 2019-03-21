@@ -6,6 +6,6 @@
 
 # Firmware images for both micros
 ARM_IMAGE = 'rvmn101b_nxp_1.9.bin'
-NORDIC_IMAGE = 'rvmn101b_nordic_0.45.hex'
+NORDIC_IMAGE = 'rvmn101b_nordic_0.52.hex'   # per MA333
 # Product revision from ECO
-PRODUCT_REV = '03A'
+PRODUCT_REV = '03B'                         # per MA333
