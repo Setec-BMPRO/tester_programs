@@ -13,6 +13,7 @@ class RVMC101Initial(ProgramTestCase):
     """RVMC101 Initial program test suite."""
 
     prog_class = rvmc101.Initial
+    per_panel = 1
     parameter = None
     debug = False
 
@@ -32,18 +33,25 @@ class RVMC101Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['SnEntry'], 'A1526040123'),
                     (sen['vin'], 12.0),
                     (sen['a_5v'], 5.0),
                     (sen['a_3v3'], 3.3),
+                    (sen['b_5v'], 5.0),
+                    (sen['b_3v3'], 3.3),
+                    (sen['c_5v'], 5.0),
+                    (sen['c_3v3'], 3.3),
+                    (sen['d_5v'], 5.0),
+                    (sen['d_3v3'], 3.3),
                     ),
                 'CanBus': (
-                    (sen['MirCAN'], True),
+                    (sen['MirCAN'], (True, True, True, True, )),
                     ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(
+            tuple('UUT{0}'.format(uut)
+                for uut in range(1, self.per_panel + 1)))
         result = self.tester.ut_result
         self.assertEqual('P', result.code)
         self.assertEqual(5, len(result.readings))

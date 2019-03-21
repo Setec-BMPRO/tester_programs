@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 SETEC Pty Ltd
+# Copyright 2016 - 2019 SETEC Pty Ltd
 """Data feeder version of a Tester for Test programs during unittest.
 
 Subscribe to Tester signals.
@@ -9,13 +9,15 @@ Record the test result.
 
 """
 
+import logging
+import queue
 import unittest
 from unittest.mock import MagicMock, PropertyMock, patch
-import queue
-import logging
-from . import logging_setup
-from pydispatch import dispatcher
+
 import tester
+from pydispatch import dispatcher
+
+from . import logging_setup
 
 
 class UnitTester(tester.Tester):
@@ -26,12 +28,12 @@ class UnitTester(tester.Tester):
     key_sen = 'Sen'
     key_call = 'Call'
 
-    def __init__(self, prog_class, parameter):
+    def __init__(self, prog_class, per_panel, parameter):
         """Initalise the data feeder."""
         # Create a Tester instance
         super().__init__('MockATE', {repr(prog_class): prog_class})
         self.ut_program = tester.TestProgram(
-            repr(prog_class), per_panel=1, parameter=parameter)
+            repr(prog_class), per_panel=per_panel, parameter=parameter)
         self.ut_result = None
         self.ut_steps = []
         self.ut_data = None
@@ -146,6 +148,7 @@ class ProgramTestCase(unittest.TestCase):
     debug = False
     parameter = None
     _logger_names = ('tester', 'share', 'programs')
+    per_panel = 1
 
     @classmethod
     def setUpClass(cls):
@@ -163,7 +166,7 @@ class ProgramTestCase(unittest.TestCase):
             'tester.devphysical.PhysicalDevices', new=MockATE)
         cls.tst_patcher.start()
         # Create the tester instance
-        cls.tester = UnitTester(cls.prog_class, cls.parameter)
+        cls.tester = UnitTester(cls.prog_class, cls.per_panel, cls.parameter)
 
     def setUp(self):
         """Per-Test setup."""
