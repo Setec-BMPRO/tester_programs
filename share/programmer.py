@@ -2,73 +2,65 @@
 # -*- coding: utf-8 -*-
 """Programmer for devices."""
 
+import abc
 import os
 import subprocess
-import tester
+
 import isplpc
 import serial
+import tester
 
 
-class PIC():
+class _Base(abc.ABC):
 
-    """Microchip PIC programmer using a PicKit3."""
+    """Programmer base class."""
 
-    pic_binary = {          # Executable to use
-        'posix': 'pickit3',
-        'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
-        }[os.name]
     limitname = 'Program'   # Testlimit name to use
+    pass_value = 0
+    doc = 'Programming succeeded'
 
-    def __init__(self, hexfile, working_dir, device_type, relay):
-        """Create a programmer.
-
-        @param hexfile HEX filename
-        @param working_dir Working directory
-        @param device_type PIC device type
-        @param relay Relay device to connect programmer to target
-
-        """
-        self.hexfile = hexfile
-        self.working_dir = working_dir
-        self.device_type = device_type
-        self.relay = relay
+    def __init__(self):
+        """Create a programmer."""
         self.measurement = tester.Measurement(
-            tester.LimitInteger(
-                self.limitname, 0, doc='Programming succeeded'),
+            tester.LimitInteger(self.limitname, self.pass_value, self.doc),
             tester.sensor.Mirror()
             )
-        self.process = None
+
+    @property
+    def position(self):
+        """Position property of the internal mirror sensor.
+
+        @return Position information
+
+        """
+        return self.measurement.sensor.position
+
+    @position.setter
+    def position(self, value):
+        """Set internal mirror sensor position property.
+
+        @param value Position value or Tuple(values)
+
+        """
+        self.measurement.sensor.position = value
 
     def program(self):
         """Program a device and return when finished."""
         self.program_begin()
         self.program_wait()
 
+    @abc.abstractmethod
     def program_begin(self):
         """Begin device programming."""
-        command = [
-            self.pic_binary,
-            '/P{0}'.format(self.device_type),
-            '/F{0}'.format(self.hexfile),
-            '/E',
-            '/M',
-            '/Y'
-            ]
-        self.relay.set_on()
-        self.process = subprocess.Popen(command, cwd=self.working_dir)
 
+    @abc.abstractmethod
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.measurement.sensor.store(self.process.wait())
-        self.relay.set_off()
-        self.measurement()
 
 
-class ARM():
+class ARM(_Base):
 
     """ARM programmer using the isplpc package."""
-
-    limitname = 'Program'   # Testlimit name to use
 
     def __init__(self, port, filename,
         baudrate=115200,
@@ -87,6 +79,7 @@ class ARM():
         @param reset_relay Relay device to assert RESET to the ARM
 
         """
+        super().__init__()
         self._port = port
         self._baudrate = baudrate
         self._erase_only = erase_only
@@ -96,13 +89,8 @@ class ARM():
         self._reset_relay = reset_relay
         with open(filename, 'rb') as infile:
             self._bindata = bytearray(infile.read())
-        self.measurement = tester.Measurement(
-            tester.LimitInteger(
-                self.limitname, 0, doc='Programming succeeded'),
-            tester.sensor.Mirror()
-            )
 
-    def program(self):
+    def program_begin(self):
         """Program a device.
 
         If BOOT or RESET relay devices are available, use them to put the chip
@@ -123,25 +111,27 @@ class ARM():
                 crpmode=self._crpmode)
             try:
                 pgm.program()
-                self.measurement.sensor.store(0)
+                self.measurement.sensor.store(self.pass_value)
             except isplpc.ProgrammingError:
                 self.measurement.sensor.store(1)
         finally:
             ser.close()
             if self._boot_relay:
                 self._boot_relay.set_off()
+
+    def program_wait(self):
+        """Wait for device programming to finish."""
         self.measurement()
 
 
-class Nordic():
+class Nordic(_Base):
 
     """Nordic Semiconductors programmer using a NRF52."""
 
-    pic_binary = {          # Executable to use
+    binary = {      # Executable to use
         'posix': '/opt/nordic/nrfjprog/nrfjprog',
         'nt': r'C:\Program Files\Nordic Semiconductor\nrf5x\bin\nrfjprog.exe',
         }[os.name]
-    limitname = 'Program'   # Testlimit name to use
 
     def __init__(self, hexfile, working_dir):
         """Create a programmer.
@@ -150,35 +140,68 @@ class Nordic():
         @param working_dir Working directory
 
         """
+        super().__init__()
         self.hexfile = hexfile
         self.working_dir = working_dir
-        self.measurement = tester.Measurement(
-            tester.LimitInteger(
-                self.limitname, 0, doc='Programming succeeded'),
-            tester.sensor.Mirror()
-            )
         self.process = None
-
-    def program(self):
-        """Program a device and return when finished."""
-        self.program_begin()
-        self.program_wait()
 
     def program_begin(self):
         """Begin device programming."""
         command = [
-            self.pic_binary,
-            '-f',
-                'NRF52',
+            self.binary,
+            '-f', 'NRF52',
             '--chiperase',
-            '--program',
-                '{0}'.format(self.hexfile),
+            '--program', '{0}'.format(self.hexfile),
             '--verify',
-#            '--log',
             ]
         self.process = subprocess.Popen(command, cwd=self.working_dir)
 
     def program_wait(self):
         """Wait for device programming to finish."""
         self.measurement.sensor.store(self.process.wait())
+        self.measurement()
+
+
+class PIC(_Base):
+
+    """Microchip PIC programmer using a PicKit3."""
+
+    binary = {      # Executable to use
+        'posix': 'pickit3',
+        'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
+        }[os.name]
+
+    def __init__(self, hexfile, working_dir, device_type, relay):
+        """Create a programmer.
+
+        @param hexfile HEX filename
+        @param working_dir Working directory
+        @param device_type PIC device type
+        @param relay Relay device to connect programmer to target
+
+        """
+        super().__init__()
+        self.hexfile = hexfile
+        self.working_dir = working_dir
+        self.device_type = device_type
+        self.relay = relay
+        self.process = None
+
+    def program_begin(self):
+        """Begin device programming."""
+        command = [
+            self.binary,
+            '/P{0}'.format(self.device_type),
+            '/F{0}'.format(self.hexfile),
+            '/E',
+            '/M',
+            '/Y'
+            ]
+        self.relay.set_on()
+        self.process = subprocess.Popen(command, cwd=self.working_dir)
+
+    def program_wait(self):
+        """Wait for device programming to finish."""
+        self.measurement.sensor.store(self.process.wait())
+        self.relay.set_off()
         self.measurement()
