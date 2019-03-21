@@ -2,19 +2,17 @@
 # -*- coding: utf-8 -*-
 """Tester program loader."""
 
-import os
-import traceback
-import time
-import inspect
 import configparser
+import inspect
 import logging
-from pydispatch import dispatcher
-import tester
-import programs
+import os
+import time
+import traceback
 
-# Configuration of logger.
-_CONSOLE_LOG_LEVEL = logging.DEBUG
-_LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
+import tester
+from pydispatch import dispatcher
+
+import programs
 
 
 class UUT():
@@ -38,14 +36,17 @@ def _main():
     config = configparser.ConfigParser()
     config.read(config_file)
     tester_type = config['DEFAULT'].get('TesterType')
-    if tester_type is None:
+    if not tester_type:
         tester_type = 'ATE3'
     test_program = config['DEFAULT'].get('Program')
-    if test_program is None:
+    if not test_program:
         test_program = 'Dummy'
+    per_panel = config['DEFAULT'].get('PerPanel')
+    if not per_panel:
+        per_panel = 1
     parameter = config['DEFAULT'].get('Parameter')
     sernum = config['DEFAULT'].get('Sernum')
-    if sernum is None:
+    if not sernum:
         sernum = 'A0000000001'
     UUT.lot = sernum[:7]
     # Receive Test Result signals here
@@ -64,12 +65,12 @@ def _main():
     logger.info('Create Program "%s"', test_program)
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(
-        test_program, per_panel=1, parameter=parameter)
+        test_program, per_panel=per_panel, parameter=parameter)
     logger.info('Open Program "%s"', test_program)
     tst.open(pgm, UUT)
     logger.info('Running Test')
     try:
-        tst.test((UUT, ))
+        tst.test((UUT, ) * per_panel)
     except Exception:
         exc_str = traceback.format_exc()
         logger.error('Test Run Exception:\n%s', exc_str)
@@ -92,9 +93,10 @@ def _logging_setup():
     """
     # create console handler and set level
     hdlr = logging.StreamHandler()
-    hdlr.setLevel(_CONSOLE_LOG_LEVEL)
+    hdlr.setLevel(logging.DEBUG)
     # Log record formatter
-    fmtr = logging.Formatter(_LOG_FORMAT)
+    fmtr = logging.Formatter(
+        '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s')
     # Connect it all together
     hdlr.setFormatter(fmtr)
     logging.root.addHandler(hdlr)
