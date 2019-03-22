@@ -44,6 +44,7 @@ def _main():
     per_panel = config['DEFAULT'].get('PerPanel')
     if not per_panel:
         per_panel = 1
+    per_panel = int(per_panel)
     parameter = config['DEFAULT'].get('Parameter')
     sernum = config['DEFAULT'].get('Sernum')
     if not sernum:

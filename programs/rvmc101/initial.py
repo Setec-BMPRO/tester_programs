@@ -51,9 +51,11 @@ class Initial(share.TestSequence):
         pgm = dev['program_arm']
         sel = dev['selector']
         for pos in range(self.per_panel):
+            if pos + 1 in tester.Measurement.disabled_positions:
+                continue
             sel[pos].set_on()
             pgm.position = pos + 1
-            pgm.program
+            pgm.program()
             sel[pos].set_off()
 
     @share.teststep
@@ -63,7 +65,9 @@ class Initial(share.TestSequence):
         candev = dev['can']
         sel = dev['selector']
         for pos in range(self.per_panel):
-            sel[pos].set_on()
+            if pos + 1 in tester.Measurement.disabled_positions:
+                continue
+            sel[pos].set_on(delay=0.5)
             candev.flush_can()
             try:
                 candev.read_can()
