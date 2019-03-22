@@ -560,3 +560,8 @@ class Measurements(share.Measurements):
                 'ocp_step_dn', 'ocp_lock',
                 ):
             self[name].send_signal = False
+        # Suppress position failure on these measurements.
+        for name in (
+                'dmm_12V_inOCP', 'dmm_24V_inOCP',
+                ):
+            self[name].position_fail = False

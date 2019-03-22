@@ -41,7 +41,7 @@ class SX750Initial(ProgramTestCase):
                     (sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], (5.0,) * 2),
                     (sen['o3V3'], 3.21), (sen['o8V5Ard'], 8.5),
                     (sen['PriCtl'], 12.34), (sen['pgm5Vsb'], 'OK'),
-                    (sen['pgmPwrSw'], 'OK'), (sen['ocpMax'], 0),
+                    (sen['pgmPwrSw'], 'OK'), (sen['ocpMax'], 'OK'),
                     ),
                 'Initialise': ((sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], 5.0), ),
                 'PowerUp': (
@@ -68,8 +68,9 @@ class SX750Initial(ProgramTestCase):
                     (sen['o12VinOCP'],
                         ((0.123, ) * 32 + (4.444, )) +
                         ((0.123, ) * 37 + (4.444, ))),
-                    (sen['ocp12Unlock'], 0), (sen['ocpStepDn'], (0, ) * 35),
-                    (sen['ocpLock'], 0),
+                    (sen['ocp12Unlock'], 'OK'),
+                    (sen['ocpStepDn'], ('OK', ) * 35),
+                    (sen['ocpLock'], 'OK'),
                     ),
                 '24V': (
                     (sen['o24V'], (24.44, 24.33, 24.22, 24.11, 24.24)),
@@ -78,8 +79,9 @@ class SX750Initial(ProgramTestCase):
                     (sen['o24VinOCP'],
                         ((0.123, ) * 32 + (4.444, )) +
                         ((0.123, ) * 18 + (4.444, ))),
-                    (sen['ocp24Unlock'], 0), (sen['ocpStepDn'], (0, ) * 35),
-                    (sen['ocpLock'], 0),
+                    (sen['ocp24Unlock'], 'OK'),
+                    (sen['ocpStepDn'], ('OK', ) * 35),
+                    (sen['ocpLock'], 'OK'),
                     ),
                 'PeakPower': (
                     (sen['o5Vsb'], 5.15), (sen['o12V'], 12.22),
