@@ -25,16 +25,16 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        # This is a multi-unit parallel program so we can't stop on errors.
-        self.stop_on_failrdg = False
-        # This is a multi-unit parallel program so we can't raise exceptions.
-        tester.Tester.measurement_failure_exception = False
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program),
             tester.TestStep('CanBus', self._step_canbus),
             )
+        # This is a multi-unit parallel program so we can't stop on errors.
+        self.stop_on_failrdg = False
+        # This is a multi-unit parallel program so we can't raise exceptions.
+        tester.Tester.measurement_failure_exception = False
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -52,7 +52,7 @@ class Initial(share.TestSequence):
         sel = dev['selector']
         for pos in range(self.per_panel):
             sel[pos].set_on()
-            pgm.position = (pos + 1, )
+            pgm.position = pos + 1
             pgm.program
             sel[pos].set_off()
 
@@ -62,48 +62,18 @@ class Initial(share.TestSequence):
         dev['rla_reset'].pulse(0.1)
         candev = dev['can']
         sel = dev['selector']
-#        import time
-#        time.sleep(1)
-#        self.send_led_display(candev)
-#        time.sleep(1)
-
         for pos in range(self.per_panel):
             sel[pos].set_on()
-            candev.flush_can()      # Flush all waiting packets
+            candev.flush_can()
             try:
                 candev.read_can()
                 result = True
             except tester.devphysical.can.SerialToCanError:
                 result = False
-            mes['can_active'].sensor.position = (pos + 1, )
+            mes['can_active'].sensor.position = pos + 1
             mes['can_active'].sensor.store(result)
             mes['can_active']()
             sel[pos].set_off()
-
-#    @staticmethod
-#    def send_led_display(serial2can):
-#        """Send a LED_DISPLAY packet."""
-#        pkt = tester.devphysical.can.RVCPacket()
-#        msg = pkt.header.message
-#        msg.priority = 6
-#        msg.reserved = 0
-#        msg.DGN = tester.devphysical.can.RVCDGN.setec_led_display.value
-#        msg.SA = tester.devphysical.can.RVCDeviceID.rvmn101.value
-#        sequence = 1
-#        # Show "88" on the display (for about 100msec)
-#        # The 1st packet we send is ignored due to no previous sequence number
-#        pkt.data.extend(b'\x01\xff\xff\xff\xff\xff')
-#        pkt.data.extend(bytes([sequence & 0xff]))
-#        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
-#        serial2can.send('t{0}'.format(pkt))
-#        sequence += 1
-#        # The 2nd packet WILL be acted upon
-#        pkt.data.clear()
-#        pkt.data.extend(b'\x01\xFF\xFF\xFF\xFF\xFF')
-#        pkt.data.extend(bytes([sequence & 0xff]))
-#        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
-#        serial2can.send('t{0}'.format(pkt))
-#        sequence += 1
 
 
 class Devices(share.Devices):
@@ -138,7 +108,8 @@ class Devices(share.Devices):
             reset_relay=self['rla_reset'])
         self['selector'] = [
             self['rla_pos1'], self['rla_pos2'],
-            self['rla_pos3'], self['rla_pos4']]
+            self['rla_pos3'], self['rla_pos4'],
+            ]
 
     def reset(self):
         """Reset instruments."""
@@ -202,8 +173,6 @@ class Measurements(share.Measurements):
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ))
         self['dmm'] = (
-            ('dmm_3v3a', 'dmm_5va'),
-            ('dmm_3v3b', 'dmm_5vb'),
-            ('dmm_3v3c', 'dmm_5vc'),
-            ('dmm_3v3d', 'dmm_5vd'),
+            ('dmm_3v3a', 'dmm_5va'), ('dmm_3v3b', 'dmm_5vb'),
+            ('dmm_3v3c', 'dmm_5vc'), ('dmm_3v3d', 'dmm_5vd'),
             )
