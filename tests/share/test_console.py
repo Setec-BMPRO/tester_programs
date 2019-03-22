@@ -4,7 +4,9 @@
 
 import unittest
 from unittest.mock import patch
+
 import tester
+
 import share
 from .. import logging_setup
 
@@ -32,7 +34,7 @@ class BaseConsole(unittest.TestCase):
         self.mycon = share.console.Base(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
-        tester.Measurement.disabled_positions.clear()
+        tester.Measurement.reset()
 
     def test_response2(self):
         """Multiple responses."""
@@ -93,7 +95,7 @@ class BadUartConsole(unittest.TestCase):
         self.mycon = share.console.BadUart(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
-        tester.Measurement.disabled_positions.clear()
+        tester.Measurement.reset()
 
     def test_action2(self):
         self.mycon.port.puts('R1\r\nR2\r\n> ')
