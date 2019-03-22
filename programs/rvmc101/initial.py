@@ -25,41 +25,60 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        # This is a multi-unit parallel program so we can't stop on errors.
+        self.stop_on_failrdg = False
+        # This is a multi-unit parallel program so we can't raise exceptions.
+        tester.Tester.measurement_failure_exception = False
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self.devices['program_arm'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('CanBus', self._step_canbus),
             )
-        self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['rla_reset'].set_on()   # Hold device in RESET
         dev['dcs_vin'].output(12.0, output=True)
-        self.measure(('dmm_vin', 'dmm_5va', 'dmm_3v3a'), timeout=5)
-        dev['rla_pos1'].set_on()
+        mes['dmm_vin'](timeout=5)
+        for pos in range(self.per_panel):
+            self.measure(mes['dmm'][pos], timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the ARM."""
+        pgm = dev['program_arm']
+        sel = dev['selector']
+        for pos in range(self.per_panel):
+            sel[pos].set_on()
+            pgm.position = (pos + 1, )
+            pgm.program
+            sel[pos].set_off()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
         dev['rla_reset'].pulse(0.1)
         candev = dev['can']
+        sel = dev['selector']
 #        import time
 #        time.sleep(1)
 #        self.send_led_display(candev)
 #        time.sleep(1)
 
-        candev.flush_can()      # Flush all waiting packets
-        try:
-            candev.read_can()
-            result = True
-        except tester.devphysical.can.SerialToCanError:
-            result = False
-        mes['can_active'].sensor.store(result)
-        mes['can_active']()
+        for pos in range(self.per_panel):
+            sel[pos].set_on()
+            candev.flush_can()      # Flush all waiting packets
+            try:
+                candev.read_can()
+                result = True
+            except tester.devphysical.can.SerialToCanError:
+                result = False
+            mes['can_active'].sensor.position = (pos + 1, )
+            mes['can_active'].sensor.store(result)
+            mes['can_active']()
+            sel[pos].set_off()
 
 #    @staticmethod
 #    def send_led_display(serial2can):
@@ -117,6 +136,9 @@ class Devices(share.Devices):
             os.path.join(folder, config.SW_IMAGE),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
+        self['selector'] = [
+            self['rla_pos1'], self['rla_pos2'],
+            self['rla_pos3'], self['rla_pos4']]
 
     def reset(self):
         """Reset instruments."""
@@ -140,18 +162,24 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['a_3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['b_3v3'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
-        self['c_3v3'] = sensor.Vdc(dmm, high=4, low=1, rng=10, res=0.01)
-        self['d_3v3'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
-        self['a_5v'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
-        self['b_5v'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01)
-        self['c_5v'] = sensor.Vdc(dmm, high=8, low=1, rng=10, res=0.01)
-        self['d_5v'] = sensor.Vdc(dmm, high=9, low=1, rng=10, res=0.01)
-        self['SnEntry'] = sensor.DataEntry(
-            message=tester.translate('rvmc101_initial', 'msgSnEntry'),
-            caption=tester.translate('rvmc101_initial', 'capSnEntry'))
+        self['vin'] = sensor.Vdc(
+                dmm, high=1, low=1, rng=100, res=0.01, position=(1, 2, 3, 4))
+        self['a_3v3'] = sensor.Vdc(
+                dmm, high=2, low=1, rng=10, res=0.01, position=1)
+        self['b_3v3'] = sensor.Vdc(
+                dmm, high=3, low=1, rng=10, res=0.01, position=2)
+        self['c_3v3'] = sensor.Vdc(
+                dmm, high=4, low=1, rng=10, res=0.01, position=3)
+        self['d_3v3'] = sensor.Vdc(
+                dmm, high=5, low=1, rng=10, res=0.01, position=4)
+        self['a_5v'] = sensor.Vdc(
+                dmm, high=6, low=1, rng=10, res=0.01, position=1)
+        self['b_5v'] = sensor.Vdc(
+                dmm, high=7, low=1, rng=10, res=0.01, position=2)
+        self['c_5v'] = sensor.Vdc(
+                dmm, high=8, low=1, rng=10, res=0.01, position=3)
+        self['d_5v'] = sensor.Vdc(
+                dmm, high=9, low=1, rng=10, res=0.01, position=4)
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
 
 
@@ -171,6 +199,11 @@ class Measurements(share.Measurements):
             ('dmm_5vb', '5V', 'b_5v', '5V rail voltage'),
             ('dmm_5vc', '5V', 'c_5v', '5V rail voltage'),
             ('dmm_5vd', '5V', 'd_5v', '5V rail voltage'),
-            ('ui_serialnum', 'SerNum', 'SnEntry', 'Unit serial number'),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ))
+        self['dmm'] = (
+            ('dmm_3v3a', 'dmm_5va'),
+            ('dmm_3v3b', 'dmm_5vb'),
+            ('dmm_3v3c', 'dmm_5vc'),
+            ('dmm_3v3d', 'dmm_5vd'),
+            )
