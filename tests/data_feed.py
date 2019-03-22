@@ -34,7 +34,7 @@ class UnitTester(tester.Tester):
         super().__init__('MockATE', {repr(prog_class): prog_class})
         self.ut_program = tester.TestProgram(
             repr(prog_class), per_panel=per_panel, parameter=parameter)
-        self.ut_result = None
+        self.ut_result = []
         self.ut_steps = []
         self.ut_data = None
         self.ut_sensor_storer = None
@@ -74,7 +74,7 @@ class UnitTester(tester.Tester):
         self.ut_data = data
         self.ut_sensor_storer = sensor_storer
         self.ut_steps.clear()
-        self.ut_result = None
+        self.ut_result.clear()
 
     def _signal_step(self, **kwargs):
         """Signal receiver for TestStep signals."""
@@ -101,8 +101,7 @@ class UnitTester(tester.Tester):
 
     def _signal_result(self, **kwargs):
         """Signal receiver for TestResult signals."""
-        result = kwargs['result']
-        self.ut_result = result
+        self.ut_result.append(kwargs['result'])
 
 
 class MockATE(dict):

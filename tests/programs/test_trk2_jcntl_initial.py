@@ -48,7 +48,7 @@ class _CommonInitial(ProgramTestCase):
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
-        result = self.tester.ut_result
+        result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
         self.assertEqual(6, len(result.readings))
         self.assertEqual(
