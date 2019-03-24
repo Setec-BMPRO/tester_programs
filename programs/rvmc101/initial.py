@@ -51,12 +51,11 @@ class Initial(share.TestSequence):
         pgm = dev['program_arm']
         sel = dev['selector']
         for pos in range(self.per_panel):
-            if pos + 1 in tester.Measurement.disabled_positions:
-                continue
-            sel[pos].set_on()
-            pgm.position = pos + 1
-            pgm.program()
-            sel[pos].set_off()
+            if tester.Measurement.position_enabled(pos + 1):
+                sel[pos].set_on()
+                pgm.position = pos + 1
+                pgm.program()
+                sel[pos].set_off()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -65,19 +64,18 @@ class Initial(share.TestSequence):
         candev = dev['can']
         sel = dev['selector']
         for pos in range(self.per_panel):
-            if pos + 1 in tester.Measurement.disabled_positions:
-                continue
-            sel[pos].set_on(delay=0.5)
-            candev.flush_can()
-            try:
-                candev.read_can()
-                result = True
-            except tester.devphysical.can.SerialToCanError:
-                result = False
-            mes['can_active'].sensor.position = pos + 1
-            mes['can_active'].sensor.store(result)
-            mes['can_active']()
-            sel[pos].set_off()
+            if tester.Measurement.position_enabled(pos + 1):
+                sel[pos].set_on(delay=0.5)
+                candev.flush_can()
+                try:
+                    candev.read_can()
+                    result = True
+                except tester.devphysical.can.SerialToCanError:
+                    result = False
+                mes['can_active'].sensor.position = pos + 1
+                mes['can_active'].sensor.store(result)
+                mes['can_active']()
+                sel[pos].set_off()
 
 
 class Devices(share.Devices):
