@@ -16,6 +16,7 @@ class BP35Final(ProgramTestCase):
     parameter = None
     debug = False
     sernum = 'A1626010123'
+    vout = 12.7
 
     def setUp(self):
         """Per-Test setup."""
@@ -28,6 +29,12 @@ class BP35Final(ProgramTestCase):
             self.addCleanup(patcher.stop)
             patcher.start()
         super().setUp()
+
+    def _dmm_loads(self, value):
+        """Fill all DMM Load sensors with a value."""
+        sen = self.test_program.sensors
+        for sensor in sen['vloads']:
+            sensor.store(value)
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -42,13 +49,25 @@ class BP35Final(ProgramTestCase):
                 'CAN': (
                     (sen['can12v'], 12.0),
                     (sen['arm_swver'], bp35.config.BP35.arm_sw_version),
+                    (sen['photo'], (0.0, 12.0)),
                     (sen['notifycable'], True),
                     ),
+                'OCP': (
+                    (sen['vloads'][0], (self.vout, ) * 20 + (11.0, ), ),
+                    ),
+                },
+            UnitTester.key_call: {      # Callables
+                'PowerUp':
+                    (self._dmm_loads, self.vout),
+                'Load':
+                    (self._dmm_loads, self.vout),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(6, len(result.readings))
-        self.assertEqual(['PowerUp', 'CAN'], self.tester.ut_steps)
+        self.assertEqual(35, len(result.readings))
+        self.assertEqual(
+            ['PowerUp', 'CAN', 'Load', 'OCP'], self.tester.ut_steps)
+
