@@ -16,8 +16,15 @@ import programs
 
 
 class UUT():
+
     """Simplified Unit Under Test class."""
-    lot = None
+
+    def __init__(self, barcode):
+        self.barcode = barcode
+        self.lot = barcode[:7]
+
+    def __str__(self):
+        return self.barcode
 
 
 def _main():
@@ -49,7 +56,7 @@ def _main():
     sernum = config['DEFAULT'].get('Sernum')
     if not sernum:
         sernum = 'A0000000001'
-    UUT.lot = sernum[:7]
+    uut = UUT(sernum)
     # Receive Test Result signals here
     def test_result(result):
         logger.info('Test Result: "%s"', result.code)
@@ -68,10 +75,10 @@ def _main():
     pgm = tester.TestProgram(
         test_program, per_panel=per_panel, parameter=parameter)
     logger.info('Open Program "%s"', test_program)
-    tst.open(pgm, UUT)
+    tst.open(pgm, uut)
     logger.info('Running Test')
     try:
-        tst.test((UUT, ) * per_panel)
+        tst.test((uut, ) * per_panel)
     except Exception:
         exc_str = traceback.format_exc()
         logger.error('Test Run Exception:\n%s', exc_str)
