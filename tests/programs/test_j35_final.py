@@ -51,6 +51,7 @@ class _J35Final(ProgramTestCase):
                     ),
                 'CanCable': (
                     (sen['notifycable'], True),
+                    (sen['can12v'], 0.0),
                     ),
                 },
             UnitTester.key_call: {      # Callables
@@ -80,7 +81,7 @@ class J35_A_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the A program."""
-        super()._pass_run(21, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
+        super()._pass_run(22, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
 
 
 class J35_B_Final(_J35Final):
@@ -92,7 +93,7 @@ class J35_B_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the B program."""
-        super()._pass_run(35, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
+        super()._pass_run(36, ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'])
 
 
 class J35_C_Final(J35_B_Final):

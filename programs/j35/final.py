@@ -73,7 +73,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_can_cable(self, dev, mes):
         """Remove CAN cable."""
-        mes['ui_notifycable']()
+        self.measure(('ui_notifycable', 'dmm_can0v',), timeout=5)
 
 
 class Devices(share.Devices):
@@ -159,10 +159,11 @@ class Measurements(share.Measurements):
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('dmm_fanoff', 'FanOff', 'photo', 'Fan not running'),
             ('dmm_can12v', 'Can12V', 'can12v', 'CAN Bus 12V'),
+            ('dmm_can0v', 'Can0V', 'can12v', 'CAN Bus 0V'),
             ('dmm_fanon', 'FanOn', 'photo', 'Fan running'),
             ('ramp_ocp', 'OCP', 'ocp', 'Output OCP'),
             ('swver', 'SwVer', 'swver', 'Unit software version'),
-            ('ui_notifycable', 'Notify', 'notifycable', 'CAN cable removed'),
+            ('ui_notifycable', 'Notify', 'notifycable', 'Remove the CAN cable'),
             ))
         # Generate load measurements
         vouts = []

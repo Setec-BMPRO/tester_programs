@@ -121,6 +121,7 @@ class J35():
         LimitLow('FanOff', 1.0, doc='No airflow seen'),
         LimitHigh('FanOn', 10.0, doc='Airflow seen'),
         LimitDelta('Can12V', 12.5, delta=2.0, doc='CAN_POWER rail'),
+        LimitLow('Can0V', 0.5,  doc='CAN BUS removed'),
         LimitDelta('Vout', 12.8, delta=0.2, doc='No load output voltage'),
         LimitPercent('Vload', 12.8, percent=5,
             doc='Loaded output voltage'),
