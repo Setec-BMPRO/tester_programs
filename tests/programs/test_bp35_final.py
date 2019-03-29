@@ -43,17 +43,18 @@ class BP35Final(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
                     (sen['sernum'], self.sernum),
-                    (sen['vbat'], 12.8),
-                    (sen['yesnogreen'], True),
+                    (sen['photo'], (0.0, 12.0)),
                     ),
                 'CAN': (
                     (sen['can12v'], 12.0),
                     (sen['arm_swver'], bp35.config.BP35.arm_sw_version),
-                    (sen['photo'], (0.0, 12.0)),
-                    (sen['notifycable'], True),
                     ),
                 'OCP': (
                     (sen['vloads'][0], (self.vout, ) * 20 + (11.0, ), ),
+                    ),
+                'CanCable': (
+                    (sen['notifycable'], True),
+                    (sen['can12v'], 0.0),
                     ),
                 },
             UnitTester.key_call: {      # Callables
@@ -67,7 +68,7 @@ class BP35Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(35, len(result.readings))
+        self.assertEqual(36, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'CAN', 'Load', 'OCP'], self.tester.ut_steps)
+            ['PowerUp', 'CAN', 'Load', 'OCP', 'CanCable'], self.tester.ut_steps)
 
