@@ -313,11 +313,13 @@ class Initial(share.TestSequence):
         bp35 = dev['bp35']
         # All outputs OFF
         bp35.load_set(set_on=True, loads=())
+        mes['ui_yesnored'](timeout=5)
         # A little load on the output.
         dev['dcl_out'].output(1.0, True)
-        mes['dmm_vloadoff'](timeout=2)
+        mes['dmm_vloadoff'](timeout=5)
         # All outputs ON
         bp35.load_set(set_on=False, loads=())
+        mes['ui_yesnogreen'](timeout=5)
 
     @share.teststep
     def _step_remote_sw(self, dev, mes):
@@ -503,6 +505,14 @@ class Sensors(share.Sensors):
             message=tester.translate('bp35_initial', 'msgSnEntry'),
             caption=tester.translate('bp35_initial', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
+        self['yesnored'] = sensor.YesNo(
+            message=tester.translate('bp35_initial', 'IsOutputLedRed?'),
+            caption=tester.translate('bp35_initial', 'capOutputLed'))
+        self['yesnored'].doc = 'Tester operator'
+        self['yesnogreen'] = sensor.YesNo(
+            message=tester.translate('bp35_initial', 'IsOutputLedGreen?'),
+            caption=tester.translate('bp35_initial', 'capOutputLed'))
+        self['yesnogreen'].doc = 'Tester operator'
         # Console sensors
         bp35 = self.devices['bp35']
         bp35tunnel = self.devices['bp35tunnel']
@@ -590,6 +600,8 @@ class Measurements(share.Measurements):
             ('ramp_ocp_pre', 'OCP_pre', 'ocp', 'OCP point (pre-cal)'),
             ('ramp_ocp', 'OCP', 'ocp', 'OCP point (post-cal)'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('ui_yesnored', 'Notify', 'yesnored', 'LED Red'),
+            ('ui_yesnogreen', 'Notify', 'yesnogreen', 'LED Green'),
             ('arm_swver', 'ARM-SwVer', 'arm_swver', 'Unit software version'),
             ('arm_acv', 'ARM-AcV', 'arm_acv', 'AC voltage'),
             ('arm_acf', 'ARM-AcF', 'arm_acf', 'AC frequency'),
