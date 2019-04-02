@@ -82,11 +82,18 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_switch', tester.DCSource, 'DCS3'),
                 ('rla_pos1', tester.Relay, 'RLA1'),
-                ('rla_reset', tester.Relay, 'RLA21'),
+                ('rla_pos2', tester.Relay, 'RLA2'),
+                ('rla_pos3', tester.Relay, 'RLA3'),
+                ('rla_pos4', tester.Relay, 'RLA4'),
+                ('rla_pos5', tester.Relay, 'RLA5'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Fixture helper device
-        self['fixture'] = Fixture(self['dcs_switch'], [self['rla_pos1']])
+        self['fixture'] = Fixture(
+            self['dcs_switch'],
+            [self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
+            self['rla_pos4'], self['rla_pos5']]
+            )
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Nordic NRF52 device programmer
@@ -115,7 +122,8 @@ class Devices(share.Devices):
         """Reset instruments."""
         for dcs in ('dcs_vin', 'dcs_switch'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_pos1', 'rla_reset'):
+        for rla in (
+            'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4', 'rla_pos5'):
             self[rla].set_off()
 
 
