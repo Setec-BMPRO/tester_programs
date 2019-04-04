@@ -18,10 +18,10 @@ class Initial(share.TestSequence):
 
     limitdata = (
         tester.LimitDelta('Vin', 3.3, 0.3),
-        tester.LimitBoolean('ScanMac', True,
-            doc='MAC address detected'),
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
+        tester.LimitBoolean('ScanMac', True,
+            doc='MAC address detected'),
         )
 
     def open(self, uut):
@@ -33,6 +33,10 @@ class Initial(share.TestSequence):
             tester.TestStep('ProgramTest', self._step_program_test),
             )
         self.sernum = None
+        # This is a multi-unit parallel program so we can't stop on errors.
+        self.stop_on_failrdg = False
+        # This is a multi-unit parallel program so we can't raise exceptions.
+        tester.Tester.measurement_failure_exception = False
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -54,8 +58,12 @@ class Initial(share.TestSequence):
         for pos in range(self.per_panel):
             if tester.Measurement.position_enabled(pos + 1):
                 with tester.PathName('Brd{0}'.format(pos + 1)):
+                    # Set sensor positions
+                    for sen in (
+                            pgm, mes['ble_mac'].sensor, mes['scan_mac'].sensor
+                            ):
+                        sen.position = pos + 1
                     dev['fixture'].connect(pos)
-                    pgm.position = pos + 1
                     pgm.program()
                     # Get the MAC address from the console.
                     dev['dcs_vin'].output(0.0, delay=0.5)
