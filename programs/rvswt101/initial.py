@@ -43,6 +43,7 @@ class Initial(share.TestSequence):
         """Apply input 3V3dc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(3.3, output=True)
+        mes['dmm_vin'].sensor.position = tuple(range(1, self.per_panel + 1))
         mes['dmm_vin'](timeout=5)
 
     @share.teststep
@@ -56,30 +57,34 @@ class Initial(share.TestSequence):
         """
         pgm = dev['progNORDIC']
         for pos in range(self.per_panel):
-            if tester.Measurement.position_enabled(pos + 1):
-                with tester.PathName('Brd{0}'.format(pos + 1)):
-                    # Set sensor positions
-                    for sen in (
-                            pgm, mes['ble_mac'].sensor, mes['scan_mac'].sensor
-                            ):
-                        sen.position = pos + 1
-                    dev['fixture'].connect(pos)
-                    pgm.program()
-                    # Get the MAC address from the console.
-                    dev['dcs_vin'].output(0.0, delay=0.5)
-                    dev['rvswt101'].port.flushInput()
-                    dev['dcs_vin'].output(3.3, delay=0.1)
-                    self.mac = dev['rvswt101'].get_mac()
-                    mes['ble_mac'].sensor.store(self.mac)
-                    mes['ble_mac']()
-                    # Save SerialNumber & MAC on a remote server.
-                    dev['serialtomac'].blemac_set(self.sernum, self.mac)
-                    # Press Button2 to broadcast on bluetooth
-                    dev['fixture'].press(pos)
-                    reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
-                    dev['fixture'].release(pos)
-                    mes['scan_mac'].sensor.store(reply is not None)
-                    mes['scan_mac']()
+            mypos = pos + 1
+            if tester.Measurement.position_enabled(mypos):
+                # Set sensor positions
+                for sen in (
+                        pgm, mes['ble_mac'].sensor, mes['scan_mac'].sensor
+                        ):
+                    sen.position = mypos
+                dev['fixture'].connect(pos)
+                pgm.program()
+                if not tester.Measurement.position_enabled(mypos):
+                    continue
+                # Get the MAC address from the console.
+                dev['dcs_vin'].output(0.0, delay=0.5)
+                dev['rvswt101'].port.flushInput()
+                dev['dcs_vin'].output(3.3, delay=0.1)
+                self.mac = dev['rvswt101'].get_mac()
+                mes['ble_mac'].sensor.store(self.mac)
+                mes['ble_mac']()
+                if not tester.Measurement.position_enabled(mypos):
+                    continue
+                # Save SerialNumber & MAC on a remote server.
+                dev['serialtomac'].blemac_set(self.sernum, self.mac)
+                # Press Button2 to broadcast on bluetooth
+                dev['fixture'].press(pos)
+                reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
+                dev['fixture'].release(pos)
+                mes['scan_mac'].sensor.store(reply is not None)
+                mes['scan_mac']()
 
 
 class Devices(share.Devices):
