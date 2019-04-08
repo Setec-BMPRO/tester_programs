@@ -44,7 +44,7 @@ class RVMC101Initial(ProgramTestCase):
                     (sen['d_3v3'], 3.34),
                     ),
                 'Display': (
-                    (sen['notifydisplay'], True),
+                    (sen['yesnodisplay'], True),
                     ),
                 'CanBus': (
                     (sen['MirCAN'], (True, True, True, True, )),

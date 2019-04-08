@@ -61,8 +61,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Check all 7-segment displays."""
+        mes['ui_yesnodisplay']()
         dev['rla_reset'].pulse(0.1)
-        mes['ui_notifydisplay']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -160,11 +160,11 @@ class Sensors(share.Sensors):
         self['d_5v'] = sensor.Vdc(
                 dmm, high=9, low=1, rng=10, res=0.01, position=4)
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
-        self['notifydisplay'] = sensor.Notify(
-            message=tester.translate('rvmc101_initial', 'AllDisplaysOn?'),
+        self['yesnodisplay'] = sensor.YesNo(
+            message=tester.translate('rvmc101_initial', 'DisplaysOn?'),
             caption=tester.translate('rvmc101_initial', 'capDisplay'),
             position=(1, 2, 3, 4))
-        self['notifydisplay'].doc = 'Tester operator'
+        self['yesnodisplay'].doc = 'Tester operator'
 
 
 class Measurements(share.Measurements):
@@ -184,8 +184,7 @@ class Measurements(share.Measurements):
             ('dmm_5vc', '5V', 'c_5v', '5V rail voltage'),
             ('dmm_5vd', '5V', 'd_5v', '5V rail voltage'),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
-            ('ui_notifydisplay', 'Notify', 'notifydisplay',
-                'Check all displays'),
+            ('ui_yesnodisplay', 'Notify', 'yesnodisplay', 'Check all displays'),
             ))
         self['dmm'] = (
             ('dmm_3v3a', 'dmm_5va'), ('dmm_3v3b', 'dmm_5vb'),
