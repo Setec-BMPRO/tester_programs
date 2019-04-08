@@ -43,6 +43,9 @@ class RVMC101Initial(ProgramTestCase):
                     (sen['d_5v'], 5.04),
                     (sen['d_3v3'], 3.34),
                     ),
+                'Display': (
+                    (sen['notifydisplay'], True),
+                    ),
                 'CanBus': (
                     (sen['MirCAN'], (True, True, True, True, )),
                     ),
@@ -54,7 +57,7 @@ class RVMC101Initial(ProgramTestCase):
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
-            self.assertEqual(4, len(res.readings))
+            self.assertEqual(5, len(res.readings))
         self.assertEqual(
-            ['PowerUp', 'Program', 'CanBus'],
+            ['PowerUp', 'Program', 'Display', 'CanBus'],
             self.tester.ut_steps)

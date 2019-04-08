@@ -29,6 +29,7 @@ class Initial(share.TestSequence):
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program),
+            tester.TestStep('Display', self._step_display),
             tester.TestStep('CanBus', self._step_canbus),
             )
         # This is a multi-unit parallel program so we can't stop on errors.
@@ -58,9 +59,14 @@ class Initial(share.TestSequence):
                 sel[pos].set_off()
 
     @share.teststep
+    def _step_display(self, dev, mes):
+        """Check all 7-segment displays."""
+        dev['rla_reset'].pulse(0.1)
+        mes['ui_notifydisplay']()
+
+    @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        dev['rla_reset'].pulse(0.1)
         candev = dev['can']
         sel = dev['selector']
         for pos in range(self.per_panel):
@@ -154,6 +160,11 @@ class Sensors(share.Sensors):
         self['d_5v'] = sensor.Vdc(
                 dmm, high=9, low=1, rng=10, res=0.01, position=4)
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
+        self['notifydisplay'] = sensor.Notify(
+            message=tester.translate('rvmc101_initial', 'AllDisplaysOn?'),
+            caption=tester.translate('rvmc101_initial', 'capDisplay'),
+            position=(1, 2, 3, 4))
+        self['notifydisplay'].doc = 'Tester operator'
 
 
 class Measurements(share.Measurements):
@@ -173,6 +184,8 @@ class Measurements(share.Measurements):
             ('dmm_5vc', '5V', 'c_5v', '5V rail voltage'),
             ('dmm_5vd', '5V', 'd_5v', '5V rail voltage'),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
+            ('ui_notifydisplay', 'Notify', 'notifydisplay',
+                'Check all displays'),
             ))
         self['dmm'] = (
             ('dmm_3v3a', 'dmm_5va'), ('dmm_3v3b', 'dmm_5vb'),
