@@ -20,7 +20,7 @@ class CN102():
                 doc='ARM Software version'),
             LimitRegExp('SwNrfVer', '',            # Adjusted during open()
                 doc='Nordic Software version'),
-            LimitLow('Part', 20.0),
+            LimitLow('Part', 500.0),
             LimitDelta('Vin', 8.0, 0.5),
             LimitPercent('3V3', 3.30, 3.0),
             LimitInteger('CAN_BIND', 1 << 28),
