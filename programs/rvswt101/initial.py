@@ -41,6 +41,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
+        mes['ui_serialnum'].sensor.position = tuple(range(1, self.per_panel + 1))
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(3.3, output=True)
         mes['dmm_vin'].sensor.position = tuple(range(1, self.per_panel + 1))
@@ -65,6 +66,7 @@ class Initial(share.TestSequence):
                         ):
                     sen.position = mypos
                 dev['fixture'].connect(pos)
+                dev['rla_pos1'].opc()
                 pgm.program()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
@@ -106,6 +108,11 @@ class Devices(share.Devices):
                 ('rla_pos3', tester.Relay, 'RLA3'),
                 ('rla_pos4', tester.Relay, 'RLA4'),
                 ('rla_pos5', tester.Relay, 'RLA5'),
+                ('rla_pos6', tester.Relay, 'RLA6'),
+                ('rla_pos7', tester.Relay, 'RLA7'),
+                ('rla_pos8', tester.Relay, 'RLA8'),
+                ('rla_pos9', tester.Relay, 'RLA9'),
+                ('rla_pos10', tester.Relay, 'RLA10'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Fixture helper device
@@ -114,6 +121,13 @@ class Devices(share.Devices):
             [self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
             self['rla_pos4'], self['rla_pos5']]
             )
+#        self['fixture'] = Fixture(
+#            self['dcs_switch'],
+#            [self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
+#            self['rla_pos4'], self['rla_pos5'], self['rla_pos6'],
+#            self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
+#            self['rla_pos10']]
+#            )
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Nordic NRF52 device programmer
@@ -143,7 +157,8 @@ class Devices(share.Devices):
         for dcs in ('dcs_vin', 'dcs_switch'):
             self[dcs].output(0.0, False)
         for rla in (
-            'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4', 'rla_pos5'):
+            'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4', 'rla_pos5',
+            'rla_pos6', 'rla_pos7', 'rla_pos8', 'rla_pos9', 'rla_pos10'):
             self[rla].set_off()
 
 

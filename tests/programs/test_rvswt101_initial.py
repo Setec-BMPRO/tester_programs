@@ -13,6 +13,7 @@ class RVSWT101Initial(ProgramTestCase):
     """RVSWT101 Initial program test suite."""
 
     prog_class = rvswt101.Initial
+    per_panel = 10
     parameter = None
     debug = False
 
@@ -50,10 +51,12 @@ class RVSWT101Initial(ProgramTestCase):
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
-        result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
-        self.assertEqual(4, len(result.readings))
+        self.tester.test(
+            tuple('UUT{0}'.format(uut)
+                for uut in range(1, self.per_panel + 1)))
+        for res in self.tester.ut_result:
+            self.assertEqual('P', res.code)
+            self.assertEqual(4, len(res.readings))
         self.assertEqual(
             ['PowerUp', 'ProgramTest'],
             self.tester.ut_steps)
