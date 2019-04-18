@@ -66,7 +66,6 @@ class Initial(share.TestSequence):
                         ):
                     sen.position = mypos
                 dev['fixture'].connect(pos)
-                dev['rla_pos1'].opc()
                 pgm.program()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
@@ -119,15 +118,10 @@ class Devices(share.Devices):
         self['fixture'] = Fixture(
             self['dcs_switch'],
             [self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
-            self['rla_pos4'], self['rla_pos5']]
+            self['rla_pos4'], self['rla_pos5'], self['rla_pos6'],
+            self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
+            self['rla_pos10']]
             )
-#        self['fixture'] = Fixture(
-#            self['dcs_switch'],
-#            [self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
-#            self['rla_pos4'], self['rla_pos5'], self['rla_pos6'],
-#            self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
-#            self['rla_pos10']]
-#            )
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Nordic NRF52 device programmer
@@ -194,6 +188,7 @@ class Fixture():
         if self.is_button_mode:
             for rla in self.relays:
                 rla.set_off()
+            self.relays[9].opc()    # Wait until the last relay turns off
             self.mode_dcs.output(12, output=True, delay=0.1)
             self.is_button_mode = False
 
@@ -202,6 +197,7 @@ class Fixture():
         if not self.is_button_mode:
             for rla in self.relays:
                 rla.set_off()
+            self.relays[9].opc()    # Wait until the last relay turns off
             self.mode_dcs.output(0, output=True, delay=0.1)
             self.is_button_mode = True
 
