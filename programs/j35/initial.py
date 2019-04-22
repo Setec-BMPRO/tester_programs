@@ -309,7 +309,6 @@ class Sensors(share.Sensors):
         self['mircal'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         # Console sensors
         j35 = self.devices['j35']
-        j35tunnel = self.devices['j35tunnel']
         for name, cmdkey in (
                 ('arm_auxv', 'AUX_V'),
                 ('arm_auxi', 'AUX_I'),
