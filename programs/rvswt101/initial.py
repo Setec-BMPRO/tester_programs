@@ -26,7 +26,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.sw_image = config.SW_IMAGE.format(self.parameter)
+        Devices.sw_image = config.SW_IMAGE[self.parameter]
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),

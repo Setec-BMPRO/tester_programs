@@ -6,6 +6,7 @@
 
 # Firmware images for both micros
 ARM_IMAGE = 'rvmn101b_nxp_1.9.bin'
-NORDIC_IMAGE = 'rvmn101b_nordic_0.54.hex'   # per PC-5038
-# Product revision from ECO
-PRODUCT_REV = '04C'                         # per PC-5038
+# This image per PC-5052
+NORDIC_IMAGE = 'rvmn101_signed_0.74-0-g5d7a6d1_factory_mcuboot.hex'
+# Product revision per PC-5052
+PRODUCT_REV = '04E'

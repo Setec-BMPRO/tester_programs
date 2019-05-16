@@ -6,9 +6,12 @@
 import jsonrpclib
 
 
-SW_VER = '1.2'
-SW_IMAGE = 'rvswt101_{{0}}_{0}.hex'.format(SW_VER)
-#                      ^- This is the program parameter
+SW_IMAGE = {
+    '4gp1': 'rvswt101_4gp1_1.2.hex',
+    '6gp1': 'rvswt101_6gp1_1.2.hex',
+    '6gp2': 'rvswt101_6gp2_1.2.hex',
+    'series': 'rvswt101_series_1.5.hex',
+    }
 
 
 class SerialToMAC():
