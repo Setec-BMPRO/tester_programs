@@ -5,7 +5,9 @@
 import os
 import inspect
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitDelta, LimitInteger
+from tester import
+        LimitLow, LimitBetween, LimitDelta, LimitInteger, LimitPercent
+        )
 import share
 
 PIC_HEX = 'c45a-15.hex'
@@ -26,7 +28,9 @@ class Initial(share.TestSequence):
         LimitDelta('VoutPreExt', 12.0, 0.1),
         LimitDelta('VoutExt', 12.0, 0.1),
         LimitDelta('VoutPre', 12.0, 0.1),
-        LimitBetween('VoutLow', 8.55, 9.45),
+        # PS-5056: Change limit from 9.0V ± 5% to 8.75V ± 5%
+#        LimitBetween('VoutLow', 8.55, 9.45),
+        LimitPercent('VoutLow', 8.75, 5),
         LimitBetween('Vout', 15.2, 16.8),
         LimitBetween('VsenseLow', 8.2, 10.0),
         LimitBetween('VsenseOn', 11.8, 12.1),
@@ -49,13 +53,13 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('FixtureLock', self._step_fixture_lock),
-            TestStep('SecCheck', self._step_sec_check),
-            TestStep('Program', self.devices['program_pic'].program),
-            TestStep('OVP', self._step_ovp),
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Load', self._step_load),
-            TestStep('OCP', self._step_ocp),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('SecCheck', self._step_sec_check),
+            tester.TestStep('Program', self.devices['program_pic'].program),
+            tester.TestStep('OVP', self._step_ovp),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
             )
 
     @share.teststep
