@@ -5,7 +5,7 @@
 import os
 import inspect
 import tester
-from tester import
+from tester import (
         LimitLow, LimitBetween, LimitDelta, LimitInteger, LimitPercent
         )
 import share

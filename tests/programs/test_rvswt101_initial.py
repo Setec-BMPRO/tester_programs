@@ -14,7 +14,7 @@ class RVSWT101Initial(ProgramTestCase):
 
     prog_class = rvswt101.Initial
     per_panel = 10
-    parameter = None
+    parameter = '4gp1'
     debug = False
 
     def setUp(self):
