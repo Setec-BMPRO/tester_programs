@@ -36,7 +36,7 @@ class _BC15_25_Initial(ProgramTestCase):
                     (sen['3V3'], 3.3),
                     ),
                 'Initialise': (
-                    (sen['arm_swver'], self.test_program.config['BinVersion']),
+                    (sen['arm_swver'], self.test_program.cfg.sw_version),
                     ),
                 'PowerUp': (
                     (sen['ACin'], 240.0), (sen['Vbus'], 330.0),
@@ -58,7 +58,7 @@ class _BC15_25_Initial(ProgramTestCase):
                         ),
                     (sen['arm_vout'], 14400),
                     (sen['arm_iout'],
-                     round(1000 * 0.8 * self.test_program.config['OCP_Nominal'])),
+                     round(1000 * 0.8 * self.test_program.ocp_nominal)),
                     ),
                 },
             }

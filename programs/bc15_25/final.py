@@ -3,45 +3,20 @@
 """BC15/25 Final Test Program."""
 
 import tester
-from tester import LimitLow, LimitDelta, LimitPercent
 import share
+from . import config
 
 
 class Final(share.TestSequence):
 
     """BC15/25 Final Test Program."""
 
-    # Setpoints
-    ocp_nominal_15 = 11.0
-    ocp_nominal_25 = 20.0
-    # Common limits
-    _common = (
-        LimitDelta('VoutNL', 13.6, 0.3),
-        LimitDelta('Vout', 13.6, 0.7),
-        LimitLow('InOCP', 12.5),
-        )
-    # Variant specific configuration data. Indexed by test program parameter.
-    limitdata = {
-        '15': {
-            'OCP_Nominal': ocp_nominal_15,
-            'Limits': _common + (
-                LimitPercent('OCP', ocp_nominal_15, (4.0, 7.0)),
-                ),
-            },
-        '25': {
-            'OCP_Nominal': ocp_nominal_25,
-            'Limits': _common + (
-                LimitPercent('OCP', ocp_nominal_25, (4.0, 7.0)),
-                ),
-            },
-        }
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.config = self.limitdata[self.parameter]
-        Sensors.ocp_nominal = self.config['OCP_Nominal']
-        super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
+        self.cfg = config.BCx5.select(self.parameter, uut)
+        self.ocp_nominal, limits = self.cfg.limits_final()
+        Sensors.ocp_nominal = self.ocp_nominal
+        super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_loaded),
@@ -57,7 +32,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_loaded(self, dev, mes):
         """Load the Unit."""
-        dev['dcl'].output(self.config['OCP_Nominal'] - 1.0)
+        dev['dcl'].output(self.ocp_nominal - 1.0)
         self.measure(('vout', 'ocp', 'ui_yesnochmode', ), timeout=5)
 
 

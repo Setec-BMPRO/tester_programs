@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2019-03-04, 17:37:23 -->
+<!-- Saved: 2019-05-22, 14:29:07 -->
 <!-- Copyright (C) 2019 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -25,6 +25,7 @@
     <Source>programs/batterycheck/final.py</Source>
     <Source>programs/batterycheck/initial.py</Source>
     <Source>programs/bc15_25/__init__.py</Source>
+    <Source>programs/bc15_25/config.py</Source>
     <Source>programs/bc15_25/console.py</Source>
     <Source>programs/bc15_25/final.py</Source>
     <Source>programs/bc15_25/initial.py</Source>

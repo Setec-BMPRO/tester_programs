@@ -5,94 +5,25 @@
 import os
 import inspect
 import time
-import math
 import serial
 import tester
-from tester import (
-    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitPercent,
-    LimitInteger, LimitRegExp)
 import share
 from . import console
+from . import config
 
 
 class Initial(share.TestSequence):
 
     """BC15/25 Initial Test Program."""
 
-    bin_version_15 = '2.0.16258.2002'
-    bin_version_25 = '1.0.16489.137'
-    # Setpoints
-    vac = 240.0
-    vout_set = 14.40
-    ocp_nominal_15 = 15.0
-    ocp_nominal_25 = 25.0
-    ocp_load_factor = 0.8
-    # Common limits
-    _common = (
-        LimitLow('FixtureLock', 20),
-        LimitHigh('FanShort', 100),
-        LimitDelta('ACin', vac, 5.0),
-        LimitDelta('Vbus', math.sqrt(2) * vac, 10.0),
-        LimitDelta('14Vpri', 14.0, 1.0),
-        LimitBetween('12Vs', 11.7, 13.0),
-        LimitBetween('3V3', 3.20, 3.35),
-        LimitLow('FanOn', 0.5),
-        LimitHigh('FanOff', 11.0),
-        LimitDelta('15Vs', 15.5, 1.0),
-        LimitPercent('Vout', vout_set, 4.0),
-        LimitPercent('VoutCal', vout_set, 1.0),
-        LimitLow('VoutOff', 2.0),
-        LimitLow('InOCP', 13.5),
-        LimitPercent('ARM-Vout', vout_set, 5.0),
-        LimitPercent('ARM-2amp', 2.0, percent=1.7, delta=1.0),
-        LimitInteger('ARM-switch', 3),
-        )
-    # Variant specific configuration data. Indexed by test program parameter.
-    limitdata = {
-        '15': {
-            'ARMfile': 'bc15_{0}.bin'.format(bin_version_15),
-            'ARMport': share.fixture.port('028467', 'ARM'),
-            'BinVersion': bin_version_15,
-            'OCP_Nominal': ocp_nominal_15,
-            'Limits': _common + (
-                LimitLow('5Vs', 99.0),  # No test point
-                LimitRegExp('ARM-SwVer', '^{0}$'.format(
-                    bin_version_15.replace('.', r'\.'))),
-                LimitPercent('OCP_pre', ocp_nominal_15, 15),
-                LimitPercent('OCP_post', ocp_nominal_15, 2.0),
-                LimitPercent(
-                    'ARM-HIamp',
-                    ocp_nominal_15 * ocp_load_factor,
-                    percent=1.7, delta=1.0),
-                ),
-            },
-        '25': {
-            'ARMfile': 'bc25_{0}.bin'.format(bin_version_25),
-            'ARMport': share.fixture.port('031032', 'ARM'),
-            'BinVersion': bin_version_25,
-            'OCP_Nominal': ocp_nominal_25,
-            'Limits': _common + (
-                LimitDelta('5Vs', 4.95, 0.15),
-                LimitRegExp('ARM-SwVer', '^{0}$'.format(
-                    bin_version_25.replace('.', r'\.'))),
-                LimitPercent('OCP_pre', ocp_nominal_25, 15),
-                LimitPercent('OCP_post', ocp_nominal_25, 2.0),
-                LimitPercent(
-                    'ARM-HIamp',
-                    ocp_nominal_25 * ocp_load_factor,
-                    percent=1.7, delta=1.0),
-                ),
-            },
-        }
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.config = self.limitdata[self.parameter]
-        Devices.arm_file = self.config['ARMfile']
-        Devices.arm_port = self.config['ARMport']
-        Sensors.ocp_nominal = self.config['OCP_Nominal']
-        super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
+        self.cfg = config.BCx5.select(self.parameter, uut)
+        self.ocp_nominal, limits = self.cfg.limits_initial()
+        Sensors.ocp_nominal = self.ocp_nominal
+        Devices.arm_file = self.cfg.arm_file
+        Devices.arm_port = self.cfg.arm_port
+        super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
             tester.TestStep('Program', self._step_program),
@@ -127,14 +58,14 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Power up the Unit."""
-        dev['acsource'].output(voltage=self.vac, output=True)
+        dev['acsource'].output(voltage=self.cfg.vac, output=True)
         self.measure(
             ('dmm_acin', 'dmm_vbus', 'dmm_12Vs', 'dmm_5Vs', 'dmm_3V3',
              'dmm_15Vs', 'dmm_voutoff', ),
             timeout=5)
         arm = dev['arm']
         arm.banner()
-        arm.ps_mode(self.vout_set, self.config['OCP_Nominal'])
+        arm.ps_mode(self.cfg.vout_set, self.ocp_nominal)
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -152,19 +83,18 @@ class Initial(share.TestSequence):
         """Output current reading and OCP calibration."""
         arm = dev['arm']
         dcload = dev['dcl']
-        ocp_nominal = self.config['OCP_Nominal']
-        current = ocp_nominal * 0.8
+        current = self.ocp_nominal * 0.8
         # Measure actual OCP setting
         dcload.output(current, True, delay=0.5)
         ocp_actual = mes['ramp_ocp_pre']().reading1
-        ocp_factor = ocp_nominal / ocp_actual
+        ocp_factor = self.ocp_nominal / ocp_actual
         # Shutdown and startup
         dev['acsource'].output(voltage=0, delay=1)
         dev['discharge'].pulse(delay=5)
         dcload.output(0)
-        dev['acsource'].output(voltage=self.vac, delay=2)
+        dev['acsource'].output(voltage=self.cfg.vac, delay=2)
         arm.banner()
-        arm.ps_mode(self.vout_set, ocp_nominal)
+        arm.ps_mode(self.cfg.vout_set, self.ocp_nominal)
         # Set load for output current reading calibration
         mes['dmm_vout_cal'].stable(0.02)
         dcload.linear(2.0, current, step=5.0, delay=0.5)
