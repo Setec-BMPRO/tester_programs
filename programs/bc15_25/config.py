@@ -100,7 +100,7 @@ class BC15(BCx5):
     arm_file_pattern = 'bc15_{0}.bin'
     arm_port = share.fixture.port('028467', 'ARM')
     _lot_rev = share.lots.Revision((
-        (share.lots.Range('A100101', 'A190101'), 1),    # Rev 1 - 5
+        (share.lots.Range('A100101', 'A190101'), 0),    # Rev 1 - 5
         # Rev 6...
         ))
     _rev_data = {
