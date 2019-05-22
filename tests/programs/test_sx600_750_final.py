@@ -3,14 +3,14 @@
 """UnitTest for SX750 Final Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import sx750
+from programs import sx600_750
 
 
 class SX750Final(ProgramTestCase):
 
     """SX750 Final program test suite."""
 
-    prog_class = sx750.Final
+    prog_class = sx600_750.Final
     parameter = None
     debug = False
 

@@ -4,14 +4,14 @@
 
 from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import sx750
+from programs import sx600_750
 
 
 class SX750Initial(ProgramTestCase):
 
     """SX750 Initial program test suite."""
 
-    prog_class = sx750.Initial
+    prog_class = sx600_750.Initial
     parameter = None
     debug = False
 
@@ -19,8 +19,8 @@ class SX750Initial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'programs.sx750.console.Console',
-                'programs.sx750.arduino.Arduino',
+                'programs.sx600_750.console.Console',
+                'programs.sx600_750.arduino.Arduino',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -57,8 +57,8 @@ class SX750Initial(ProgramTestCase):
                         )),
                     (sen['ARM_AcFreq'], 50), (sen['ARM_AcVolt'], 240),
                     (sen['ARM_12V'], 12.180), (sen['ARM_24V'], 24.0),
-                    (sen['ARM_SwVer'], sx750.initial.Initial.bin_version[:3]),
-                    (sen['ARM_SwBld'], sx750.initial.Initial.bin_version[4:]),
+                    (sen['ARM_SwVer'], sx600_750.initial.Initial.bin_version[:3]),
+                    (sen['ARM_SwBld'], sx600_750.initial.Initial.bin_version[4:]),
                     ),
                 '5Vsb': ((sen['o5Vsb'], (5.20, 5.15, 5.14, 5.10, )), ),
                 '12V': (
