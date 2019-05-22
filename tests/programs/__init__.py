@@ -61,9 +61,9 @@ from . import test_rvswt101_initial
 from . import test_smu75070_final
 from . import test_smu75070_initial
 from . import test_st3_final
-from . import test_sx750_final
-from . import test_sx750_initial
-from . import test_sx750_safety
+from . import test_sx600_750_final
+from . import test_sx600_750_initial
+from . import test_sx600_750_safety
 from . import test_trk2_jcntl_final
 from . import test_trk2_jcntl_initial
 from . import test_trs2_initial
@@ -134,9 +134,9 @@ __all__ = [
     'test_smu75070_final',
     'test_smu75070_initial',
     'test_st3_final',
-    'test_sx750_final',
-    'test_sx750_initial',
-    'test_sx750_safety',
+    'test_sx600_750_final',
+    'test_sx600_750_initial',
+    'test_sx600_750_safety',
     'test_trk2_jcntl_final',
     'test_trk2_jcntl_initial',
     'test_trs2_initial',

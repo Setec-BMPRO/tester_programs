@@ -35,7 +35,7 @@ from . import rvswt101
 from . import rm50
 from . import smu75070
 from . import st3
-from . import sx750
+from . import sx600_750
 from . import trek2_jcontrol
 from . import trs2
 from . import trsrfm
@@ -50,7 +50,6 @@ from . import wtsi200
 #           Name of the program,
 #           Note that this name must match the entry in:
 #               The ATE4 storage system (No size limit)
-#               The ATE2 database (maximum of 50 characters)
 #       Value:
 #           The class to use to create a program instance
 
@@ -112,9 +111,9 @@ PROGRAMS = {
     'SMU750-70 Final': smu75070.Final,
     'SMU750-70 Initial': smu75070.Initial,
     'STxx-III Final': st3.Final,
-    'SX-750 Initial': sx750.Initial,
-    'SX-750 Final': sx750.Final,
-    'SX-750 Safety': sx750.Safety,
+    'SX-600_750 Initial': sx600_750.Initial,
+    'SX-600_750 Final': sx600_750.Final,
+    'SX-600_750 Safety': sx600_750.Safety,
     'Trek2JControl Initial': trek2_jcontrol.Initial,
     'Trek2JControl Final': trek2_jcontrol.Final,
     'TRS2 Initial': trs2.Initial,
