@@ -12,7 +12,7 @@ class SX750Initial(ProgramTestCase):
     """SX750 Initial program test suite."""
 
     prog_class = sx600_750.Initial
-    parameter = None
+    parameter = '750'
     debug = False
 
     def setUp(self):
@@ -57,8 +57,8 @@ class SX750Initial(ProgramTestCase):
                         )),
                     (sen['ARM_AcFreq'], 50), (sen['ARM_AcVolt'], 240),
                     (sen['ARM_12V'], 12.180), (sen['ARM_24V'], 24.0),
-                    (sen['ARM_SwVer'], sx600_750.initial.Initial.bin_version[:3]),
-                    (sen['ARM_SwBld'], sx600_750.initial.Initial.bin_version[4:]),
+                    (sen['ARM_SwVer'], self.test_program.cfg._bin_version[:3]),
+                    (sen['ARM_SwBld'], self.test_program.cfg._bin_version[4:]),
                     ),
                 '5Vsb': ((sen['o5Vsb'], (5.20, 5.15, 5.14, 5.10, )), ),
                 '12V': (

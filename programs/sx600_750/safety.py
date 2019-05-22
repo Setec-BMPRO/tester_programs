@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""SX-750 Safety Test Program."""
+# Copyright 2016 - 2019 SETEC Pty Ltd
+"""SX-600/750 Safety Test Program."""
 
 import tester
+
 import share
-from tester import TestStep, LimitBetween
 
 
 class Safety(share.TestSequence):
 
-    """SX-750 Safety Test Program."""
+    """SX-600/750 Safety Test Program."""
 
     limitdata = (
-        LimitBetween('gnd', 20, 100),
-        LimitBetween('arc', -0.001, 0),
-        LimitBetween('acw', 2.0, 4.0),
+        tester.LimitBetween('gnd', 20, 100),
+        tester.LimitBetween('arc', -0.001, 0),
+        tester.LimitBetween('acw', 2.0, 4.0),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Gnd1', self._step_gnd1),
-            TestStep('Gnd2', self._step_gnd2),
-            TestStep('Gnd3', self._step_gnd3),
-            TestStep('HiPot', self._step_hipot),
+            tester.TestStep('Gnd1', self._step_gnd1),
+            tester.TestStep('Gnd2', self._step_gnd2),
+            tester.TestStep('Gnd3', self._step_gnd3),
+            tester.TestStep('HiPot', self._step_hipot),
             )
 
     @share.teststep

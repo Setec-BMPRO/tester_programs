@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2019-05-22, 17:00:29 -->
+<!-- Saved: 2019-05-22, 18:06:45 -->
 <!-- Copyright (C) 2019 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -134,6 +134,7 @@
     <Source>programs/st3/final.py</Source>
     <Source>programs/sx600_750/__init__.py</Source>
     <Source>programs/sx600_750/arduino.py</Source>
+    <Source>programs/sx600_750/config.py</Source>
     <Source>programs/sx600_750/console.py</Source>
     <Source>programs/sx600_750/final.py</Source>
     <Source>programs/sx600_750/initial.py</Source>

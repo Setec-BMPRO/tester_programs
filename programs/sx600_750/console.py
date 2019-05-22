@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""SX-750 ARM processor console driver."""
+# Copyright 2016 - 2019 SETEC Pty Ltd
+"""SX-600/750 console driver."""
 
 import share
 
 
 class Console(share.console.Base):
 
-    """Communications to SX-750 console."""
+    """Communications to SX-600/750 console."""
 
     parameter = share.console.parameter
     cmd_data = {

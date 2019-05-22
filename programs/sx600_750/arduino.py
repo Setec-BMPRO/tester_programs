@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""SX-750 Arduino console driver."""
+# Copyright 2016 - 2019 SETEC Pty Ltd
+"""SX-600/750 Arduino console driver."""
 
 import share
 
 
 class Arduino(share.console.Base):
 
-    """Communications to SX-750 Arduino console."""
+    """Communications to SX-600/750 Arduino console."""
 
     cmd_data = {
         'VERSION': share.console.parameter.String(

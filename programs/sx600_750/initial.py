@@ -1,102 +1,38 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 SETEC Pty Ltd
-"""SX-750 Initial Test Program."""
+# Copyright 2016 - 2019 SETEC Pty Ltd
+"""SX-600/750 Initial Test Program."""
 
-import os
 import inspect
+import os
 import time
+
 import serial
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitPercent,
-    LimitInteger, LimitRegExp
-    )
+
 import share
-from . import arduino
-from . import console
+from . import arduino, config, console
 
 
 class Initial(share.TestSequence):
 
-    """SX-750 Initial Test Program."""
-
-    # Software version
-    bin_version = '3.1.2118'
-    # Software image filenames
-    arm_bin = 'sx750_arm_{0}.bin'.format(bin_version)
-    # Reading to reading difference for PFC voltage stability
-    pfc_stable = 0.05
-    # Fan ON threshold temperature (C)
-    fan_threshold = 55.0
-    # Injected voltages
-    _5vsb_ext = 6.3
-    prictl_ext = 13.0
-
-    limitdata = (
-        LimitDelta('8.5V Arduino', 8.5, 0.4),
-        LimitLow('5Voff', 0.5),
-        LimitDelta('5Vext', _5vsb_ext - 0.8, 1.0),
-        LimitDelta('5Vunsw', _5vsb_ext - 0.8 - 0.7, 1.0),
-        LimitPercent('5Vsb_set', 5.10, 1.5),
-        LimitPercent('5Vsb', 5.10, 5.5),
-        LimitLow('5Vsb_reg', 3.0),      # Load Reg < 3.0%
-        LimitLow('12Voff', 0.5),
-        LimitPercent('12V_set', 12.25, 2.0),
-        LimitPercent('12V', 12.25, 8.0),
-        LimitLow('12V_reg', 3.0),       # Load Reg < 3.0%
-        LimitBetween('12V_ocp', 4, 63), # Digital Pot setting - counts up from MIN
-        LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405 > 4V
-        LimitBetween('12V_OCPchk', 36.2, 37.0),
-        LimitLow('24Voff', 0.5),
-        LimitPercent('24V_set', 24.13, 2.0),
-        LimitPercent('24V', 24.13, 10.5),
-        LimitLow('24V_reg', 7.5),       # Load Reg < 7.5%
-        LimitBetween('24V_ocp', 4, 63), # Digital Pot setting - counts up from MIN
-        LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404 > 4V
-        LimitBetween('24V_OCPchk', 18.1, 18.5),
-        LimitBetween('PriCtl', 11.40, 17.0),
-        LimitLow('PGOOD', 0.5),
-        LimitDelta('ACFAIL', 5.0, 0.5),
-        LimitLow('ACOK', 0.5),
-        LimitDelta('3V3', 3.3, 0.1),
-        LimitDelta('ACin', 240, 10),
-        LimitDelta('PFCpre', 420, 20),
-        LimitDelta('PFCpost', 435, 1.0),
-        LimitDelta('OCP12pre', 36, 2),
-        LimitBetween('OCP12post', 35.7, 36.5),
-        LimitLow('OCP12step', 0.116),
-        LimitDelta('OCP24pre', 18, 1),
-        LimitDelta('OCP24post', 18.2, 0.1),
-        LimitLow('OCP24step', 0.058),
-        # Data reported by the ARM
-        LimitLow('ARM-AcFreq', 999),
-        LimitLow('ARM-AcVolt', 999),
-        LimitLow('ARM-12V', 999),
-        LimitLow('ARM-24V', 999),
-        LimitRegExp(
-            'ARM-SwVer', '^{0}$'.format(bin_version[:3].replace('.', r'\.'))),
-        LimitRegExp('ARM-SwBld', '^{0}$'.format(bin_version[4:])),
-        LimitLow('FixtureLock', 200),
-        LimitLow('PartCheck', 1.0),           # Photo sensor on D404
-        LimitBetween('Snubber', 1000, 3000),    # Snubbing resistors
-        LimitRegExp('Reply', '^OK$'),
-        LimitInteger('Program', 0)
-        )
+    """SX-600/750 Initial Test Program."""
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.SXxxx.configure(self.parameter)
+        Devices.sw_image = self.cfg.arm_bin
+        self.limits = self.cfg.limits_initial()
+        super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PartDetect', self._step_part_detect),
-            TestStep('Program', self._step_program_micros),
-            TestStep('Initialise', self._step_initialise_arm),
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('5Vsb', self._step_reg_5v),
-            TestStep('12V', self._step_reg_12v),
-            TestStep('24V', self._step_reg_24v),
-            TestStep('PeakPower', self._step_peak_power),
+            tester.TestStep('PartDetect', self._step_part_detect),
+            tester.TestStep('Program', self._step_program_micros),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('5Vsb', self._step_reg_5v),
+            tester.TestStep('12V', self._step_reg_12v),
+            tester.TestStep('24V', self._step_reg_24v),
+            tester.TestStep('PeakPower', self._step_peak_power),
             )
 
     @share.teststep
@@ -121,7 +57,7 @@ class Initial(share.TestSequence):
         # Set BOOT active before power-on so the ARM boot-loader runs
         dev['rla_boot'].set_on()
         # Apply and check injected 5Vsb
-        dev['dcs_5Vsb'].output(self._5vsb_ext, True)
+        dev['dcs_5Vsb'].output(self.cfg._5vsb_ext, True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
             timeout=5)
@@ -136,7 +72,7 @@ class Initial(share.TestSequence):
         dev['dcs_5Vsb'].output(0)
         self.dcload((('dcl_5Vsb', 0.1), ), output=True, delay=0.5)
         # Apply and check injected 12V PriCtl
-        dev['dcs_PriCtl'].output(self.prictl_ext, True)
+        dev['dcs_PriCtl'].output(self.cfg.prictl_ext, True)
         mes['dmm_PriCtl'](timeout=2)
         dev['rla_pic2'].set_on()
         dev['rla_pic2'].opc()
@@ -161,10 +97,10 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         arm.open()
-        dev['dcs_5Vsb'].output(self._5vsb_ext, True)
+        dev['dcs_5Vsb'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
         arm['UNLOCK'] = True
-        arm['FAN_SET'] = self.fan_threshold
+        arm['FAN_SET'] = self.cfg.fan_threshold
         arm['NVWRITE'] = True
         time.sleep(1)
         # Switch everything off
@@ -201,18 +137,18 @@ class Initial(share.TestSequence):
              'arm_SwVer', 'arm_SwBld'), )
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
-        pfc = mes['dmm_PFCpre'].stable(self.pfc_stable).reading1
+        pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
         arm.calpfc(pfc)
         # Prevent a fail from failing the unit
         mes['dmm_PFCpost'].position_fail = False
-        result = mes['dmm_PFCpost'].stable(self.pfc_stable).result
+        result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
         # Allow a fail to fail the unit
         mes['dmm_PFCpost'].position_fail = True
         if not result:
             self._logger.info('Retry PFC calibration')
-            pfc = mes['dmm_PFCpre'].stable(self.pfc_stable).reading1
+            pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
             arm.calpfc(pfc)
-            mes['dmm_PFCpost'].stable(self.pfc_stable)
+            mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
         # Leave the loads at zero
         dev['dcl_12V'].output(0)
         dev['dcl_24V'].output(0)
@@ -370,6 +306,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    sw_image = None     # ARM software image filename
+
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -396,7 +334,7 @@ class Devices(share.Devices):
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        file = os.path.join(folder, Initial.arm_bin)
+        file = os.path.join(folder, self.sw_image)
         self['programmer'] = share.programmer.ARM(
             arm_port, file, boot_relay=self['rla_boot'])
         # Serial connection to the ARM console
@@ -435,7 +373,7 @@ class Devices(share.Devices):
 
 class Sensors(share.Sensors):
 
-    """SX-750 Sensors."""
+    """Sensors."""
 
     def open(self):
         """Create all Sensor instances."""
@@ -504,7 +442,7 @@ class Sensors(share.Sensors):
 
 class Measurements(share.Measurements):
 
-    """SX-750 Measurements."""
+    """Measurements."""
 
     def open(self):
         """Create all Measurement instances."""

@@ -1,44 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""SX-750 Final Test Program."""
+# Copyright 2016 - 2019 SETEC Pty Ltd
+"""SX-600/750 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitDelta
+
 import share
+from . import config
 
 
 class Final(share.TestSequence):
 
-    """SX-750 Final Test Program."""
-
-    # Injected voltage at PS_ON via diode and 100R to prevent startup.
-    dsble_pwr = 5.5
-    # Test limits
-    limitdata = (
-        LimitDelta('InRes', 70000, 10000),
-        LimitLow('IECoff', 0.5),
-        LimitDelta('IEC', 240, 5),
-        LimitBetween('5V', 5.034, 5.177),
-        LimitLow('12Voff', 0.5),
-        LimitBetween('12Von', 12.005, 12.495),
-        LimitBetween('24Von', 23.647, 24.613),
-        LimitBetween('5Vfl', 4.820, 5.380),
-        LimitBetween('12Vfl', 11.270, 13.230),
-        LimitBetween('24Vfl', 21.596, 26.663),
-        LimitLow('PwrGood', 0.5),
-        LimitDelta('AcFail', 5.0, 0.5),
-        LimitBetween('Reg12V', 0.2, 5.0),
-        LimitBetween('Reg24V', 0.2, 5.0),
-        )
+    """SX-600/750 Final Test Program."""
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.SXxxx.configure(self.parameter)
+        limits = self.cfg.limits_final()
+        super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('InputRes', self._step_inres),
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('PowerOn', self._step_poweron),
-            TestStep('Load', self._step_load),
+            tester.TestStep('InputRes', self._step_inres),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('PowerOn', self._step_poweron),
+            tester.TestStep('Load', self._step_load),
             )
 
     @share.teststep
@@ -49,7 +33,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Switch on unit at 240Vac, light load, not enabled."""
-        dev['dcs_disable_pwr'].output(self.dsble_pwr, output=True)
+        dev['dcs_disable_pwr'].output(self.cfg.disable_pwr, output=True)
         self.dcload(
             (('dcl_5v', 0.0), ('dcl_12v', 0.1), ('dcl_24v', 0.1)),
             output=True)
