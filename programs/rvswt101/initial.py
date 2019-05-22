@@ -37,6 +37,10 @@ class Initial(share.TestSequence):
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
         tester.Tester.measurement_failure_exception = False
+        # Adjust for different console behaviour
+        self.devices['rvswt101'].banner_lines = (
+            2 if self.parameter == 'series' else 1
+            )
 
     @share.teststep
     def _step_power_up(self, dev, mes):
