@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2013 - 2018 SETEC Pty Ltd.
 """BC15/25 ARM processor console driver."""
 
 import re
@@ -12,6 +13,10 @@ class Console(share.console.Base):
 
     # Number of lines in startup banner
     banner_lines = 3
+    # Number of lines in a STAT response
+    stat_linecount = 46
+    # Number of lines in a CAL? response
+    cal_linecount = None
     parameter = share.console.parameter
     cmd_data = {
         'UNLOCK': parameter.Boolean(
@@ -30,8 +35,6 @@ class Console(share.console.Base):
     stat_regexp = re.compile('^([a-z\-]+)=([0-9]+).*$')
     cal_data = {}   # Calibration readings: Key=Name, Value=Setting
     cal_regexp = re.compile('^([a-z_0-9]+) +([\-0-9]+) $')
-    # Program parameter ('15' for BC15 or '25' for BC25)
-    parameter = None
 
     def initialise(self, reset_relay):
         """Initialise the unit."""
@@ -58,7 +61,7 @@ class Console(share.console.Base):
         """Use STAT command to read data values."""
         self._logger.debug('Stat')
         self.stat_data.clear()
-        response = self.action('STAT', expected=46)
+        response = self.action('STAT', expected=self.stat_linecount)
         for line in response:
             match = self.stat_regexp.match(line)
             if match:
@@ -70,8 +73,7 @@ class Console(share.console.Base):
         """Use CAL? command to read calibration values."""
         self._logger.debug('Cal')
         self.cal_data.clear()
-        expected = {'15': 39,  '25': 43}[self.parameter]
-        response = self.action('CAL?', expected=expected)
+        response = self.action('CAL?', expected=self.cal_linecount)
         for line in response:
             match = self.cal_regexp.match(line)
             if match:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2013 - 2018 SETEC Pty Ltd.
 """BC15/BC25 Configuration."""
 
 import collections
@@ -17,11 +18,12 @@ class BCx5():
 
     # Adjustable configuration data values
     values = collections.namedtuple(
-        'values', 'arm_file, arm_port, sw_version')
+        'values', 'arm_file, arm_port, sw_version, cal_linecount')
     # These values get set per Product type & revision
-    arm_file = None
-    arm_port = None
-    sw_version = None
+    arm_file = None         # Software image filename
+    arm_port = None         # ARM console serial port
+    sw_version = None       # Software version number
+    cal_linecount = None    # Number of lines to a CAL? command
     # General parameters used in testing the units
     #  AC voltage powering the unit
     vac = 240.0
@@ -88,7 +90,9 @@ class BCx5():
             except share.lots.LotError:
                 pass
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        cls.arm_file, cls.arm_port, cls.sw_version = cls._rev_data[rev]
+        (cls.arm_file, cls.arm_port,
+         cls.sw_version, cls.cal_linecount,
+         ) = cls._rev_data[rev]
 
 
 class BC15(BCx5):
@@ -108,11 +112,13 @@ class BC15(BCx5):
             arm_file=arm_file_pattern.format(sw_version_b),
             arm_port=arm_port,
             sw_version=sw_version_b,
+            cal_linecount=43,
             ),
         0: BCx5.values(
             arm_file=arm_file_pattern.format(sw_version_a),
             arm_port=arm_port,
             sw_version=sw_version_a,
+            cal_linecount=39,
             ),
         }
 
@@ -173,11 +179,13 @@ class BC25(BCx5):
             arm_file=arm_file_pattern.format(sw_version_b),
             arm_port=arm_port,
             sw_version=sw_version_b,
+            cal_linecount=43,
             ),
         0: BCx5.values(
             arm_file=arm_file_pattern.format(sw_version_a),
             arm_port=arm_port,
             sw_version=sw_version_a,
+            cal_linecount=43,   # Yes - this is different to the old BC15
             ),
         }
 

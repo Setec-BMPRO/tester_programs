@@ -120,7 +120,7 @@ powersupply_ma                        10000
         port = tester.devphysical.sim_serial.SimSerial()
         port.echo = True
         self.con = bc15_25.console.Console(port)
-        self.con.parameter = '15'
+        self.con.cal_linecount = 39     # Early BC15
 
     def test_nobanner(self):
         """Missing banner lines."""

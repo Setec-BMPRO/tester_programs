@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2013 - 2018 SETEC Pty Ltd.
 """BC15/25 Initial Test Program."""
 
 import os
@@ -23,6 +24,7 @@ class Initial(share.TestSequence):
         Sensors.ocp_nominal = self.ocp_nominal
         Devices.arm_file = self.cfg.arm_file
         Devices.arm_port = self.cfg.arm_port
+        console.Console.cal_linecount = self.cfg.cal_linecount
         super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
@@ -140,7 +142,6 @@ class Devices(share.Devices):
         arm_ser.port = self.arm_port
         # Console driver
         self['arm'] = console.Console(arm_ser)
-        self['arm'].parameter = self.parameter
 
     def reset(self):
         """Reset instruments."""

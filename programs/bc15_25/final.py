@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2013 - 2018 SETEC Pty Ltd.
 """BC15/25 Final Test Program."""
 
 import tester
