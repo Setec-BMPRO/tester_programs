@@ -5,13 +5,87 @@
 
 import jsonrpclib
 
+import tester
 
-SW_IMAGE = {
-    '4gp1': 'rvswt101_4gp1_1.2.hex',
-    '6gp1': 'rvswt101_6gp1_1.2.hex',
-    '6gp2': 'rvswt101_6gp2_1.2.hex',
-    'series': 'rvswt101_series_1.5.hex',
-    }
+
+class Config():
+
+    """RVSWT101 configuration."""
+
+    # Possible switch variants.
+    #   From "033325 RVSWT Series Product Specification -C"
+    _types = {
+        '4gp1': 1, '6gp1': 3, '6gp2': 4,
+        'j3-1': 16, 'j3-2': 17, 'j3-3': 18, 'j3-4': 29, 'j3-5': 30,
+            'j3-6': 31, 'j3-7': 5,
+        'j4-1': 19, 'j4-2': 20, 'j4-4': 21, 'j4-5': 32, 'j4-6': 6, 'j4-7': 7,
+        'j5-1': 22, 'j5-2': 23, 'j5-3': 33, 'j5-4': 34, 'j5-5': 24, 'j5-6': 8,
+            'j5-7': 9,
+        'j6-1': 25, 'j6-2': 35, 'j6-3': 10, 'j6-4': 11, 'j6-5': 12,
+            'j6-6': 26, 'j6-7': 36, 'j6-8': 27,
+        'j7-1': 38,
+        'j8-1': 37, 'j8-2': 28, 'j8-3': 39,
+        'j9-1': 40,
+        'j10-1': 13, 'j10-2': 41,
+        'j11-1': 14, 'j11-2': 15, 'j11-3': 42,
+        }
+    # Software images
+    _software = {
+        '4gp1': 'rvswt101_4gp1_1.2.hex',
+        '6gp1': 'rvswt101_6gp1_1.2.hex',
+        '6gp2': 'rvswt101_6gp2_1.2.hex',
+        'series': 'rvswt101_series_1.5.hex',
+        }
+    # Common Test limits
+    _common_limits = (
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address'),
+        tester.LimitBoolean('ScanMac', True,
+            doc='MAC address detected'),
+        )
+    # Initial Test limits
+    _initial_limits = (
+        tester.LimitDelta('Vin', 3.3, 0.3,
+            doc='Injected power'),
+        )
+    # Final Test limits
+    _final_limits = (
+        tester.LimitBoolean('ButtonOk', True,
+            doc='Ok entered'),
+        tester.LimitDelta('CellVoltage', 3.4, 0.2,
+            doc='Button cell charged'),
+        )
+
+    @classmethod
+    def get(cls, parameter):
+
+        """Get configuration.
+
+        @param parameter String to select the switch type
+        @return Dictionary of configuration data
+
+        """
+        if parameter == 'series':       # Initial builds of Rev 3
+            type_lim = tester.LimitBetween(
+                'SwitchType', 1, 42, doc='Switch type code')
+        else:                           # Later builds of Rev 3+
+            switch_type = cls._types[parameter]
+            type_lim = tester.LimitInteger(
+                'SwitchType', switch_type, doc='Switch type code')
+        if parameter in cls._software:  # Rev 2 hard coded switch types
+            image = cls._software[parameter]
+            banner_lines = 1
+        else:                           # Rev 3+ auto-coded switch types
+            image = cls._software['series']
+            banner_lines = 2
+        return {
+            'software': image,
+            'limits_ini': cls._common_limits + cls._initial_limits,
+            'limits_fin': (
+                cls._common_limits + cls._final_limits + (type_lim, )
+                ),
+            'banner_lines': banner_lines,
+            }
 
 
 class SerialToMAC():

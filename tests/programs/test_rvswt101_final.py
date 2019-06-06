@@ -13,7 +13,7 @@ class RVSWT101Final(ProgramTestCase):
     """RVSWT101 Final program test suite."""
 
     prog_class = rvswt101.Final
-    parameter = None
+    parameter = '4gp1'
     debug = False
 
     def setUp(self):
@@ -37,6 +37,8 @@ class RVSWT101Final(ProgramTestCase):
                     (sen['mirmac'], '001ec030c2be'),
                     (sen['ButtonPress'], True),
                     (sen['mirscan'], True),
+                    (sen['cell_voltage'], 3.31),
+                    (sen['switch_type'], 1),
                     ),
                 },
             }
@@ -44,5 +46,5 @@ class RVSWT101Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(6, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)

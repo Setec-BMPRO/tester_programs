@@ -3,25 +3,19 @@
 """RVSWT101 Final Test Program."""
 
 import tester
-from tester import LimitBoolean, LimitRegExp
 
 import share
-from . import config
+from . import config, device
 
 
 class Final(share.TestSequence):
 
     """RVSWT101 Final Test Program."""
 
-    limitdata = (
-        LimitRegExp('BleMac', '^[0-9a-f]{12}$', doc='Valid MAC address'),
-        LimitBoolean('ScanMac', True, doc='MAC address detected'),
-        LimitBoolean('ButtonOk', True, doc='Ok entered'),
-        )
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.Config.get(self.parameter)
+        super().open(self.cfg['limits_fin'], Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
@@ -38,11 +32,13 @@ class Final(share.TestSequence):
         # Tell user to push unit's button after clicking OK
         mes['ui_buttonpress']()
         # Scan for the RVSWT101 bluetooth transmission
-        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
-        # reply is like this:
+        packet = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
+        # packet is like this:
         #   [[255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']]
-        mes['scan_mac'].sensor.store(reply is not None)
+        mes['scan_mac'].sensor.store(packet is not None)
         mes['scan_mac']()
+        dev['decoder'].packet = packet
+        self.measure(('cell_voltage', 'switch_type', ))
 
 
 class Devices(share.Devices):
@@ -55,6 +51,8 @@ class Devices(share.Devices):
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
         self['serialtomac'] = config.SerialToMAC()
+        # BLE Packet decoder
+        self['decoder'] = device.RVSWT101()
 
 
 class Sensors(share.Sensors):
@@ -72,6 +70,9 @@ class Sensors(share.Sensors):
         self['ButtonPress'] = sensor.OkCan(
             message=tester.translate('rvswt101_final', 'msgPressButton'),
             caption=tester.translate('rvswt101_final', 'capPressButton'))
+        decoder = self.devices['decoder']
+        self['cell_voltage'] = device.Sensor(decoder, 'cell_voltage')
+        self['switch_type'] = device.Sensor(decoder, 'switch_type')
 
 
 class Measurements(share.Measurements):
@@ -86,4 +87,8 @@ class Measurements(share.Measurements):
             ('ui_buttonpress', 'ButtonOk', 'ButtonPress', ''),
             ('scan_mac', 'ScanMac', 'mirscan',
                 'Scan for MAC address over bluetooth'),
+            ('cell_voltage', 'CellVoltage', 'cell_voltage',
+                'Button cell charged'),
+            ('switch_type', 'SwitchType', 'switch_type',
+                'Switch type'),
             ))

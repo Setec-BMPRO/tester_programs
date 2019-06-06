@@ -16,18 +16,13 @@ class Initial(share.TestSequence):
 
     """RVSWT101 Initial Test Program."""
 
-    limitdata = (
-        tester.LimitDelta('Vin', 3.3, 0.3),
-        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
-            doc='Valid MAC address'),
-        tester.LimitBoolean('ScanMac', True,
-            doc='MAC address detected'),
-        )
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.sw_image = config.SW_IMAGE[self.parameter]
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.Config.get(self.parameter)
+        Devices.sw_image = self.cfg['software']
+        super().open(self.cfg['limits_ini'], Devices, Sensors, Measurements)
+        # Adjust for different console behaviour
+        self.devices['rvswt101'].banner_lines = self.cfg['banner_lines']
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('ProgramTest', self._step_program_test),
@@ -37,10 +32,6 @@ class Initial(share.TestSequence):
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
         tester.Tester.measurement_failure_exception = False
-        # Adjust for different console behaviour
-        self.devices['rvswt101'].banner_lines = (
-            2 if self.parameter == 'series' else 1
-            )
 
     @share.teststep
     def _step_power_up(self, dev, mes):
