@@ -37,7 +37,7 @@ class Final(share.TestSequence):
         #   [[255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']]
         mes['scan_mac'].sensor.store(packet is not None)
         mes['scan_mac']()
-        dev['decoder'].packet = packet
+        dev['decoder'].packet = device.Packet(packet)
         self.measure(('cell_voltage', 'switch_type', ))
 
 
