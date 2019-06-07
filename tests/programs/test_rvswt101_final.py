@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVSWT101 Final Test program."""
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvswt101
@@ -19,12 +19,18 @@ class RVSWT101Final(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.bluetooth.RaspberryBluetooth',
                 'programs.rvswt101.config.SerialToMAC',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
+        mypi = MagicMock(name='MyRasPi')
+        mypi.scan_advert_blemac.return_value = [
+            [255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']
+            ]
+        patcher = patch('share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
     def test_pass_run(self):

@@ -17,12 +17,13 @@ class TRSFinal(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.trs2.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch('share.bluetooth.RaspberryBluetooth')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'share.bluetooth.RaspberryBluetooth',
+                'programs.trs2.console.Console',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):
