@@ -15,11 +15,12 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.SXxxx.configure(self.parameter)
+        self.cfg = config.Config.get(self.parameter)
         limits = self.cfg.limits_final()
         super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('InputRes', self._step_inres),
+            tester.TestStep('InputRes', self._step_inres,
+                self.parameter == '750'),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_load),
@@ -57,7 +58,9 @@ class Final(share.TestSequence):
         """Measure loaded outputs and load regulation."""
         nl12v, nl24v = self.measure(('dmm_12von', 'dmm_24von', )).readings
         self.dcload(
-            (('dcl_5v', 2.0), ('dcl_12v', 32.0), ('dcl_24v', 15.0)),
+            (('dcl_5v', 2.0),
+             ('dcl_12v', self.cfg.ratings.v12.full * 0.95),
+             ('dcl_24v', self.cfg.ratings.v24.full * 0.95)),
             output=True)
         self.measure(('dmm_5vfl', 'dmm_PwrGood', 'dmm_AcFail', ), timeout=2)
         fl12v, fl24v = self.measure(('dmm_12vfl', 'dmm_24vfl', )).readings
@@ -132,12 +135,12 @@ class Measurements(share.Measurements):
             ('dmm_InpRes', 'InRes', 'oInpRes', ''),
             ('dmm_Iecoff', 'IECoff', 'oIec', ''),
             ('dmm_Iec', 'IEC', 'oIec', ''),
-            ('dmm_5v', '5V', 'o5v', ''),
+            ('dmm_5v', '5Vnl', 'o5v', ''),
             ('dmm_12voff', '12Voff', 'o12v', ''),
-            ('dmm_12von', '12Von', 'o12v', ''),
-            ('dmm_24von', '24Von', 'o24v', ''),
-            ('dmm_PwrGood', 'PwrGood', 'oPwrGood', ''),
-            ('dmm_AcFail', 'AcFail', 'oAcFail', ''),
+            ('dmm_12von', '12Vnl', 'o12v', ''),
+            ('dmm_24von', '24Vnl', 'o24v', ''),
+            ('dmm_PwrGood', 'PGOOD', 'oPwrGood', ''),
+            ('dmm_AcFail', 'ACFAIL', 'oAcFail', ''),
             ('dmm_5vfl', '5Vfl', 'o5v', ''),
             ('dmm_12vfl', '12Vfl', 'o12v', ''),
             ('dmm_24vfl', '24Vfl', 'o24v', ''),

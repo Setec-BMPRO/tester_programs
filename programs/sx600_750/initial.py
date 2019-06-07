@@ -20,8 +20,9 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.SXxxx.configure(self.parameter)
+        self.cfg = config.Config.get(self.parameter)
         Devices.sw_image = self.cfg.arm_bin
+        Sensors.ratings = self.cfg.ratings
         self.limits = self.cfg.limits_initial()
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
@@ -38,10 +39,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_part_detect(self, dev, mes):
         """Check that Fixture Lock is closed."""
-        self.measure(
-            ('dmm_Lock', 'dmm_Part', 'dmm_R601', 'dmm_R602',
-             'dmm_R609', 'dmm_R608'),
-            timeout=2)
+        mes['dmm_Lock'](timeout=2)
+        if self.parameter == '750':
+            self.measure(
+                ('dmm_Part', 'dmm_R601', 'dmm_R602', 'dmm_R609', 'dmm_R608'),
+                timeout=2)
 
     @share.teststep
     def _step_program_micros(self, dev, mes):
@@ -50,40 +52,44 @@ class Initial(share.TestSequence):
         5Vsb is injected to power the ARM and 5Vsb PIC. PriCtl is injected
         to power the PwrSw PIC and digital pots.
         The ARM is programmed.
-        The PIC's are programmed and the digital pots are set for maximum OCP.
+        The PIC's are programmed.
+        Digital pots are set for maximum OCP.
         Unit is left unpowered.
 
         """
         # Set BOOT active before power-on so the ARM boot-loader runs
         dev['rla_boot'].set_on()
         # Apply and check injected 5Vsb
-        dev['dcs_5Vsb'].output(self.cfg._5vsb_ext, True)
+        dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
             timeout=5)
         dev['programmer'].program()     # Program the ARM device
         dev['ard'].open()
-        dev['rla_pic1'].set_on(delay=2) # Wait for Arduino to start
-        dev['rla_pic1'].opc()
-        mes['dmm_5Vunsw'](timeout=2)
-        mes['pgm_5vsb']()               # Program the 5V Switch Board
-        dev['rla_pic1'].set_off()
-        # Switch off 5Vsb rail and discharge the 5Vsb to stop the ARM
-        dev['dcs_5Vsb'].output(0)
-        self.dcload((('dcl_5Vsb', 0.1), ), output=True, delay=0.5)
+        dev['rla_boot'].set_off(delay=2) # Wait for Arduino to start
+        if self.parameter == '750':
+            dev['rla_pic1'].set_on()
+            dev['rla_pic1'].opc()
+            mes['dmm_5Vunsw'](timeout=2)
+            mes['pgm_5vsb']()           # Program the 5V Switch Board
+            dev['rla_pic1'].set_off()
+        # Switch off 5V rail and discharge the 5V to stop the ARM
+        dev['dcs_5V'].output(0)
+        self.dcload((('dcl_5V', 0.1), ), output=True, delay=0.5)
         # Apply and check injected 12V PriCtl
         dev['dcs_PriCtl'].output(self.cfg.prictl_ext, True)
         mes['dmm_PriCtl'](timeout=2)
-        dev['rla_pic2'].set_on()
-        dev['rla_pic2'].opc()
-        mes['pgm_pwrsw']()              # Program the Power Switch Board
-        dev['rla_pic2'].set_off()
+        if self.parameter == '750':
+            dev['rla_pic2'].set_on()
+            dev['rla_pic2'].opc()
+            mes['pgm_pwrsw']()      # Program the Power Switch Board
+            dev['rla_pic2'].set_off()
         dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
         mes['ocp_max']()
         dev['dcs_PriCtl'].output(0.0)
         # This will also enable all loads on an ATE3/4 tester.
         self.dcload(
-            (('dcl_5Vsb', 0.0), ('dcl_12V', 0.0), ('dcl_24V', 0.0), ),
+            (('dcl_5V', 0.0), ('dcl_12V', 0.0), ('dcl_24V', 0.0), ),
             output=True)
 
     @share.teststep
@@ -97,16 +103,17 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         arm.open()
-        dev['dcs_5Vsb'].output(self.cfg._5vsb_ext, True)
+        dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
         arm['UNLOCK'] = True
-        arm['FAN_SET'] = self.cfg.fan_threshold
+        if self.parameter == '750':
+            arm['FAN_SET'] = self.cfg.fan_threshold
         arm['NVWRITE'] = True
         time.sleep(1)
         # Switch everything off
-        dev['dcs_5Vsb'].output(0, False)
-        dev['dcl_5Vsb'].output(0.1, delay=0.5)
-        dev['dcl_5Vsb'].output(0)
+        dev['dcs_5V'].output(0, False)
+        dev['dcl_5V'].output(0.1, delay=0.5)
+        dev['dcl_5V'].output(0)
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -123,7 +130,7 @@ class Initial(share.TestSequence):
         dev['dcl_12V'].output(1.0)
         dev['dcl_24V'].output(1.0)
         self.measure(
-            ('dmm_ACin', 'dmm_PriCtl', 'dmm_5Vsb_set', 'dmm_12Voff',
+            ('dmm_ACin', 'dmm_PriCtl', 'dmm_5Vnl', 'dmm_12Voff',
              'dmm_24Voff', 'dmm_ACFAIL'), timeout=2)
         # Switch all outputs ON
         dev['rla_pson'].set_on()
@@ -138,7 +145,11 @@ class Initial(share.TestSequence):
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
-        arm.calpfc(pfc)
+        if self.parameter == '750':
+            arm.calpfc(pfc)
+        else:
+# FIXME: Implement SX-600 PFC Cal.
+            raise NotImplementedError('SX-600 PFC calibration not done yet!')
         # Prevent a fail from failing the unit
         mes['dmm_PFCpost'].position_fail = False
         result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
@@ -147,7 +158,11 @@ class Initial(share.TestSequence):
         if not result:
             self._logger.info('Retry PFC calibration')
             pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
-            arm.calpfc(pfc)
+            if self.parameter == '750':
+                arm.calpfc(pfc)
+            else:
+# FIXME: Implement SX-600 PFC Cal.
+                raise NotImplementedError('SX-600 PFC calibration not done yet!')
             mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
         # Leave the loads at zero
         dev['dcl_12V'].output(0)
@@ -157,40 +172,39 @@ class Initial(share.TestSequence):
     def _step_reg_5v(self, dev, mes):
         """Check regulation of the 5Vsb.
 
-        Min = 0, Max = 2.0A, Peak = 2.5A
-        Load = 3%, Line = 0.5%, Temp = 1.0%
-        Load regulation measured from 0A to 95% of rated current
         Unit is left running at no load.
 
         """
         self.reg_check(
-            dmm_out=mes['dmm_5Vsb'], dcl_out=dev['dcl_5Vsb'],
-            reg_limit=self.limits['5Vsb_reg'], max_load=2.0, peak_load=2.5)
-        dev['dcl_5Vsb'].output(0)
+            dmm_out=mes['dmm_5V'],
+            dcl_out=dev['dcl_5V'],
+            reg_limit=self.limits['Reg5V'],
+            max_load=2.0,
+            peak_load=2.5)
+        dev['dcl_5V'].output(0)
 
     @share.teststep
     def _step_reg_12v(self, dev, mes):
         """Check regulation and OCP of the 12V.
 
-        Min = 0, Max = 32A, Peak = 36A
-        Load = 5%, Line = 0.5%, Temp = 1.0%
-        Load regulation measured from 0A to 95% of rated current
-
-        Pre Adjustment Range    34.0 - 38.0A
-        Post adjustment range   36.2 - 36.6A
-        Adjustment resolution   116mA/step
         Unit is left running at no load.
 
         """
         self.reg_check(
-            dmm_out=mes['dmm_12V'], dcl_out=dev['dcl_12V'],
-            reg_limit=self.limits['12V_reg'], max_load=32.0, peak_load=36.0)
+            dmm_out=mes['dmm_12V'],
+            dcl_out=dev['dcl_12V'],
+            reg_limit=self.limits['Reg12V'],
+            max_load=self.cfg.ratings.v12.full,
+            peak_load=self.cfg.ratings.v12.peak)
         self.ocp_set(
-            target=36.6, load=dev['dcl_12V'],
-            dmm=mes['dmm_12V'], detect=mes['dmm_12V_inOCP'],
-            enable=mes['ocp12_unlock'], olimit=self.limits['12V_ocp'])
+            target=self.cfg.ratings.v12.ocp,
+            load=dev['dcl_12V'],
+            dmm=mes['dmm_12V'],
+            detect=mes['dmm_12V_inOCP'],
+            enable=mes['ocp12_unlock'],
+            olimit=self.limits['12V_ocp'])
         with tester.PathName('OCPcheck'):
-            dev['dcl_12V'].binary(0.0, 36.6 * 0.9, 2.0)
+            dev['dcl_12V'].binary(0.0, self.cfg.ratings.v12.ocp * 0.9, 2.0)
             mes['rampOcp12V']()
             dev['dcl_12V'].output(1.0)
             dev['dcl_12V'].output(0.0)
@@ -199,25 +213,25 @@ class Initial(share.TestSequence):
     def _step_reg_24v(self, dev, mes):
         """Check regulation and OCP of the 24V.
 
-        Min = 0, Max = 15A, Peak = 18A
-        Load = 7.5%, Line = 0.5%, Temp = 1.0%
-        Load regulation measured from 0A to 95% of rated current
-
-        Pre Adjustment Range    17.0 - 19.0A
-        Post adjustment range   18.1 - 18.3A
-        Adjustment resolution   58mA/step
         Unit is left running at no load.
 
         """
         self.reg_check(
-            dmm_out=mes['dmm_24V'], dcl_out=dev['dcl_24V'],
-            reg_limit=self.limits['24V_reg'], max_load=15.0, peak_load=18.0)
-        self.ocp_set(
-            target=18.3, load=dev['dcl_24V'],
-            dmm=mes['dmm_24V'], detect=mes['dmm_24V_inOCP'],
-            enable=mes['ocp24_unlock'], olimit=self.limits['24V_ocp'])
+            dmm_out=mes['dmm_24V'],
+            dcl_out=dev['dcl_24V'],
+            reg_limit=self.limits['Reg24V'],
+            max_load=self.cfg.ratings.v24.full,
+            peak_load=self.cfg.ratings.v24.peak)
+        if self.parameter == '750':
+            self.ocp_set(
+                target=self.cfg.ratings.v24.ocp,
+                load=dev['dcl_24V'],
+                dmm=mes['dmm_24V'],
+                detect=mes['dmm_24V_inOCP'],
+                enable=mes['ocp24_unlock'],
+                olimit=self.limits['24V_ocp'])
         with tester.PathName('OCPcheck'):
-            dev['dcl_24V'].binary(0.0, 18.3 * 0.9, 2.0)
+            dev['dcl_24V'].binary(0.0, self.cfg.ratings.v24.ocp * 0.9, 2.0)
             mes['rampOcp24V']()
             dev['dcl_24V'].output(1.0)
             dev['dcl_24V'].output(0.0)
@@ -226,18 +240,19 @@ class Initial(share.TestSequence):
     def _step_peak_power(self, dev, mes):
         """Check operation at Peak load.
 
-        5Vsb @ 2.5A, 12V @ 36.0A, 24V @ 18.0A
         Unit is left running at no load.
 
         """
-        dev['dcl_5Vsb'].binary(start=0.0, end=2.5, step=1.0)
-        dev['dcl_12V'].binary(start=0.0, end=36.0, step=2.0)
-        dev['dcl_24V'].binary(start=0.0, end=18.0, step=2.0)
+        dev['dcl_5V'].binary(start=0.0, end=2.5, step=1.0)
+        dev['dcl_12V'].binary(
+            start=0.0, end=self.cfg.ratings.v12.peak, step=2.0)
+        dev['dcl_24V'].binary(
+            start=0.0, end=self.cfg.ratings.v24.peak, step=2.0)
         self.measure(
-            ('dmm_5Vsb', 'dmm_12V', 'dmm_24V', 'dmm_PGOOD'), timeout=2)
+            ('dmm_5V', 'dmm_12V', 'dmm_24V', 'dmm_PGOOD'), timeout=2)
         dev['dcl_24V'].output(0)
         dev['dcl_12V'].output(0)
-        dev['dcl_5Vsb'].output(0)
+        dev['dcl_5V'].output(0)
 
     def ocp_set(self, target, load, dmm, detect, enable, olimit):
         """Set OCP of an output.
@@ -315,12 +330,12 @@ class Devices(share.Devices):
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
                 ('dcs_PriCtl', tester.DCSource, 'DCS1'),
-                ('dcs_5Vsb', tester.DCSource, 'DCS2'),
+                ('dcs_5V', tester.DCSource, 'DCS2'),
                 ('dcs_Arduino', tester.DCSource, 'DCS3'),
                 ('dcs_Vcom', tester.DCSource, 'DCS4'),
                 ('dcs_DigPot', tester.DCSource, 'DCS5'),
                 ('dcl_12V', tester.DCLoad, 'DCL1'),
-                ('dcl_5Vsb', tester.DCLoad, 'DCL2'),
+                ('dcl_5V', tester.DCLoad, 'DCL2'),
                 ('dcl_24V', tester.DCLoad, 'DCL3'),
                 ('rla_pic1', tester.Relay, 'RLA1'),
                 ('rla_pic2', tester.Relay, 'RLA2'),
@@ -358,13 +373,13 @@ class Devices(share.Devices):
         self['arm'].close()
         self['ard'].close()
         self['acsource'].reset()
-        self['dcl_5Vsb'].output(1.0)
+        self['dcl_5V'].output(1.0)
         self['dcl_12V'].output(5.0)
         self['dcl_24V'].output(5.0, delay=1)
         self['discharge'].pulse()
-        for ld in ('dcl_5Vsb', 'dcl_12V', 'dcl_24V'):
+        for ld in ('dcl_5V', 'dcl_12V', 'dcl_24V'):
             self[ld].output(0.0)
-        for dcs in ('dcs_PriCtl', 'dcs_5Vsb'):
+        for dcs in ('dcs_PriCtl', 'dcs_5V'):
             self[dcs].output(0.0, False)
         for rla in ('rla_pic1', 'rla_pic2', 'rla_boot',
             'rla_pson', 'rla_0Vp'):
@@ -374,6 +389,8 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    ratings = None          # Product specific output load ratings
 
     def open(self):
         """Create all Sensor instances."""
@@ -402,14 +419,16 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_12V'],
             sensor=self['o12VinOCP'],
             detect_limit=(self.limits['12V_inOCP'], ),
-            start=36.6 * 0.9, stop=36.6 * 1.1, step=0.1, delay=0,
-            reset=True, use_opc=True)
+            start=self.ratings.v12.ocp * 0.9,
+            stop=self.ratings.v12.ocp * 1.1,
+            step=0.1, delay=0, reset=True, use_opc=True)
         self['OCP24V'] = sensor.Ramp(
             stimulus=self.devices['dcl_24V'],
             sensor=self['o24VinOCP'],
             detect_limit=(self.limits['24V_inOCP'], ),
-            start=18.3 * 0.9, stop=18.3 * 1.1, step=0.1, delay=0,
-            reset=True, use_opc=True)
+            start=self.ratings.v24.ocp * 0.9,
+            stop=self.ratings.v24.ocp * 1.1,
+            step=0.1, delay=0, reset=True, use_opc=True)
         # Arduino sensors
         ard = self.devices['ard']
         for name, cmdkey in (
@@ -450,14 +469,14 @@ class Measurements(share.Measurements):
             ('dmm_5Voff', '5Voff', 'o5Vsb', ''),
             ('dmm_5Vext', '5Vext', 'o5Vsb', ''),
             ('dmm_5Vunsw', '5Vunsw', 'o5Vsbunsw', ''),
-            ('dmm_5Vsb_set', '5Vsb_set', 'o5Vsb', ''),
-            ('dmm_5Vsb', '5Vsb', 'o5Vsb', ''),
-            ('dmm_12V_set', '12V_set', 'o12V', ''),
-            ('dmm_12V', '12V', 'o12V', ''),
+            ('dmm_5Vnl', '5Vnl', 'o5Vsb', ''),
+            ('dmm_5V', '5Vfl', 'o5Vsb', ''),
+            ('dmm_12V_set', '12Vnl', 'o12V', ''),
+            ('dmm_12V', '12Vfl', 'o12V', ''),
             ('dmm_12Voff', '12Voff', 'o12V', ''),
             ('dmm_12V_inOCP', '12V_inOCP', 'o12VinOCP', ''),
-            ('dmm_24V', '24V', 'o24V', ''),
-            ('dmm_24V_set', '24V_set', 'o24V', ''),
+            ('dmm_24V', '24Vfl', 'o24V', ''),
+            ('dmm_24V_set', '24Vnl', 'o24V', ''),
             ('dmm_24Voff', '24Voff', 'o24V', ''),
             ('dmm_24V_inOCP', '24V_inOCP', 'o24VinOCP', ''),
             ('dmm_PriCtl', 'PriCtl', 'PriCtl', ''),
