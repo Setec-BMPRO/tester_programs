@@ -58,8 +58,8 @@ class Config():
         tester.LimitBetween('PriCtl', 11.40, 17.0),
         tester.LimitDelta('PFCpre', 420, 20),
         tester.LimitDelta('PFCpost', 435, 1.0),
-        tester.LimitDelta('5Vext', cls._5vsb_ext - 0.8, 1.0),
-        tester.LimitDelta('5Vunsw', cls._5vsb_ext - 0.8 - 0.7, 1.0),
+        tester.LimitDelta('5Vext', _5vsb_ext - 0.8, 1.0),
+        tester.LimitDelta('5Vunsw', _5vsb_ext - 0.8 - 0.7, 1.0),
         )
     # Final Test limits common to both units
     _base_limits_final = _base_limits_common + (
