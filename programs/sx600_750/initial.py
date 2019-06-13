@@ -126,6 +126,8 @@ class Initial(share.TestSequence):
 
         """
         dev['acsource'].output(voltage=240.0, output=True)
+        # Switch 5V output ON (SX-600)
+        dev['rla_sw'].set_on()
         # A little load so PFC voltage falls faster
         dev['dcl_12V'].output(1.0)
         dev['dcl_24V'].output(1.0)
@@ -342,6 +344,7 @@ class Devices(share.Devices):
                 ('rla_pson', tester.Relay, 'RLA3'),
                 ('rla_boot', tester.Relay, 'RLA4'),
                 ('rla_0Vp', tester.Relay, 'RLA5'),
+                ('rla_sw', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial port for the ARM. Used by programmer and ARM comms module.
@@ -382,7 +385,7 @@ class Devices(share.Devices):
         for dcs in ('dcs_PriCtl', 'dcs_5V'):
             self[dcs].output(0.0, False)
         for rla in ('rla_pic1', 'rla_pic2', 'rla_boot',
-            'rla_pson', 'rla_0Vp'):
+            'rla_pson', 'rla_0Vp', 'rla_sw'):
             self[rla].set_off()
 
 
