@@ -82,8 +82,8 @@ class Devices(share.Devices):
                 ('acsource', tester.ACSource, 'ACS'),
                 ('dcs_disable_pwr', tester.DCSource, 'DCS2'),
                 ('dcl_12v', tester.DCLoad, 'DCL1'),
-                ('dcl_24v', tester.DCLoad, 'DCL2'),
-                ('dcl_5v', tester.DCLoad, 'DCL3'),
+                ('dcl_5v', tester.DCLoad, 'DCL2'),
+                ('dcl_24v', tester.DCLoad, 'DCL3'),
                 ('rla_pwron', tester.Relay, 'RLA1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -92,7 +92,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['acsource'].reset()
         self['dcl_12v'].output(10, delay=0.5)
-        for load in ('dcl_12v', 'dcl_24v', 'dcl_5v'):
+        for load in ('dcl_12v', 'dcl_5v', 'dcl_24v'):
             self[load].output(0.0, False)
         self['dcs_disable_pwr'].output(0.0, False)
         self['rla_pwron'].set_off()
