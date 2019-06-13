@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for RVMC101 Initial Test program."""
+"""UnitTest for RVMC101x Initial Test program."""
 
 from unittest.mock import patch
 
@@ -10,7 +10,7 @@ from programs import rvmc101
 
 class RVMC101Initial(ProgramTestCase):
 
-    """RVMC101 Initial program test suite."""
+    """RVMC101x Initial program test suite."""
 
     prog_class = rvmc101.Initial
     per_panel = 4

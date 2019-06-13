@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMC101 Initial Test Program."""
+"""RVMC101x Initial Test Program."""
 
 import inspect
 import os
@@ -14,7 +14,7 @@ from . import config
 
 class Initial(share.TestSequence):
 
-    """RVMC101 Initial Test Program."""
+    """RVMC101x Initial Test Program."""
 
     limitdata = (
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),

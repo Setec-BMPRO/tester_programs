@@ -103,6 +103,7 @@ PROGRAMS = {
     'MB2 Final': mb2.Final,
     'MK7-400-1 Final': mk7400.Final,
     'RvViewJDisplay Initial': rvview_jdisplay.Initial,
+    'RVMC101 Final': rvmc101.Final,
     'RVMC101 Initial': rvmc101.Initial,
     'RVMN101B Initial': rvmn101b.Initial,
     'RVSWT101 Final': rvswt101.Final,
