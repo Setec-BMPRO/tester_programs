@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Final Test Program."""
 
 import tester
@@ -52,7 +53,7 @@ class Devices(share.Devices):
         # Connection to Serial To MAC server
         self['serialtomac'] = config.SerialToMAC()
         # BLE Packet decoder
-        self['decoder'] = device.RVSWT101()
+        self['decoder'] = tester.CANPacket()
 
 
 class Sensors(share.Sensors):
@@ -71,8 +72,8 @@ class Sensors(share.Sensors):
             message=tester.translate('rvswt101_final', 'msgPressButton'),
             caption=tester.translate('rvswt101_final', 'capPressButton'))
         decoder = self.devices['decoder']
-        self['cell_voltage'] = device.Sensor(decoder, 'cell_voltage')
-        self['switch_type'] = device.Sensor(decoder, 'switch_type')
+        self['cell_voltage'] = tester.sensor.CANPacket(decoder, 'cell_voltage')
+        self['switch_type'] = tester.sensor.CANPacket(decoder, 'switch_type')
 
 
 class Measurements(share.Measurements):

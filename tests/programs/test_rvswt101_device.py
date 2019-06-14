@@ -5,6 +5,7 @@
 
 import unittest
 
+import tester
 from programs import rvswt101
 
 
@@ -18,7 +19,7 @@ class RVSWT101Device(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.pkt = rvswt101.device.Packet(self.advert)
-        self.rvswt = rvswt101.device.RVSWT101()
+        self.rvswt = tester.CANPacket()
         self.rvswt.packet = self.pkt
 
     def test_packet(self):
@@ -51,7 +52,7 @@ class RVSWT101Device(unittest.TestCase):
 
     def test_sensor(self):
         """Usage of sensors."""
-        sens = rvswt101.device.Sensor(self.rvswt, 'cell_voltage')
+        sens = tester.sensor.CANPacket(self.rvswt, 'cell_voltage')
         sens.doc = 'Button cell voltage'
         sens.units = 'Vdc'
         sens.configure()
