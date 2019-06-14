@@ -7,6 +7,8 @@ import tester
 
 import share
 
+from . import device
+
 
 class Final(share.TestSequence):
 
@@ -38,11 +40,12 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-# FIXME: Add button testing by reading the CAN packets
         candev = dev['can']
         candev.flush_can()
         try:
-            candev.read_can()
+            packet = candev.read_can()
+# FIXME: Add button testing by reading the CAN packets
+#            rvmc_packet = device.Packet(packet)
             result = True
         except tester.devphysical.can.SerialToCanError:
             result = False
