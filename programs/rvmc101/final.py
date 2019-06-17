@@ -15,7 +15,8 @@ class Final(share.TestSequence):
     """RVMC101x Final Test Program."""
 
     limitdata = (
-        tester.LimitBoolean('CANok', True, doc='CAN bus active'),
+        tester.LimitBoolean('ButtonOk', True, doc='Ok entered'),
+        tester.LimitBoolean('RetractPressed', True, doc='Button pressed'),
         )
 
     def open(self, uut):
@@ -23,34 +24,23 @@ class Final(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Display', self._step_display),
             tester.TestStep('CanBus', self._step_canbus),
             )
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        dev['dcs_vin'].output(12.0, output=True, delay=0.5)
-
-    @share.teststep
-    def _step_display(self, dev, mes):
-        """Check all 7-segment displays."""
-        mes['ui_yesnodisplay']()
+        dev['dcs_vin'].output(12.0, output=True, delay=1.0)
 
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        candev = dev['can']
-        candev.flush_can()
-        try:
-            packet = candev.read_can()
-# FIXME: Add button testing by reading the CAN packets
-#            rvmc_packet = device.Packet(packet)
-            result = True
-        except tester.devphysical.can.SerialToCanError:
-            result = False
-        mes['can_active'].sensor.store(result)
-        mes['can_active']()
+        dev['canreader'].enable = True
+        # Tell user to push unit's button after clicking OK
+        mes['ui_buttonpress']()
+        # Wait for the button press
+        mes['retract'](timeout=10)
+# FIXME: What about tester.devlogical.CANPacketError exceptions?
 
 
 class Devices(share.Devices):
@@ -67,14 +57,20 @@ class Devices(share.Devices):
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
         self['can'].verbose = True
+        self['decoder'] = tester.CANPacket()
+        self['canreader'] = device.CANReader(
+            self['can'], self['decoder'], name='CANThread')
+        self['canreader'].start()
         self.add_closer(self.close_can)
 
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
+        self['canreader'].enable = False
 
     def close_can(self):
-        """Restore CAN interface to default settings."""
+        """Reset CAN system."""
+        self['canreader'].stop()
         self['can'].rvc_mode = False
         self['can'].verbose = False
 
@@ -86,11 +82,15 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
-        self['yesnodisplay'] = sensor.YesNo(
-            message=tester.translate('rvmc101_initial', 'DisplaysOn?'),
-            caption=tester.translate('rvmc101_initial', 'capDisplay'))
-        self['yesnodisplay'].doc = 'Tester operator'
+        self['SnEntry'] = sensor.DataEntry(
+            message=tester.translate('rvmc101_final', 'msgSnEntry'),
+            caption=tester.translate('rvmc101_final', 'capSnEntry'))
+        self['ButtonPress'] = sensor.OkCan(     # Press the 'RET' button
+            message=tester.translate('rvmc101_final', 'msgPressButton'),
+            caption=tester.translate('rvmc101_final', 'capPressButton'))
+        decoder = self.devices['decoder']
+        self['retract'] = tester.sensor.CANPacket(
+            decoder, 'retract', rdgtype=tester.sensor.ReadingBoolean)
 
 
 class Measurements(share.Measurements):
@@ -100,6 +100,8 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
-            ('ui_yesnodisplay', 'Notify', 'yesnodisplay', 'Check display'),
+            ('ui_serialnum', 'SerNum', 'SnEntry', ''),
+            ('ui_buttonpress', 'ButtonOk', 'ButtonPress', ''),
+            ('retract', 'RetractPressed', 'retract',
+                'RET button pressed'),
             ))

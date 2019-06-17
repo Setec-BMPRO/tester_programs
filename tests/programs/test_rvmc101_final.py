@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2019 SETEC Pty Ltd.
 """UnitTest for RVMC101x Final Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase
@@ -19,11 +20,9 @@ class RVMC101Final(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'Display': (
-                    (sen['yesnodisplay'], True),
-                    ),
                 'CanBus': (
-                    (sen['MirCAN'], True),
+                    (sen['ButtonPress'], True),
+                    (sen['retract'], True),
                     ),
                 },
             }
@@ -35,5 +34,5 @@ class RVMC101Final(ProgramTestCase):
             self.assertEqual('P', res.code)
             self.assertEqual(2, len(res.readings))
         self.assertEqual(
-            ['PowerUp', 'Display', 'CanBus'],
+            ['PowerUp', 'CanBus'],
             self.tester.ut_steps)

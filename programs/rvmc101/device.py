@@ -5,6 +5,10 @@
 
 import ctypes
 import struct
+import threading
+import time
+
+import tester
 
 
 class PacketDecodeError(Exception):
@@ -84,3 +88,79 @@ class Packet():
         self.down = bool(zss.down)
         self.usb_pwr = bool(zss.usb_pwr)
         self.wake_up = bool(zss.wake_up)
+
+
+class CANReader(threading.Thread):
+
+    """Thread to put CAN packets to the CANPacket device.
+
+    This class is an asynchronous interface to the CAN packet stream sent
+    by the RVMC101 product.
+    Advertisment packets are received from the Serial2Can interface, decoded,
+    and loaded into the tester.CANPacket logical device.
+    That logical device is the data source for CAN based sensors.
+
+    """
+
+    # Time to wait between reading CAN packets
+    #  RVMC101 transmits 25 packets/sec.
+    # We ignore most of them to reduce to processing load.
+    wait_time = 0.2
+
+    def __init__(self, candev, packetdev, name=None):
+        """Create instance
+
+        @param candev CAN physical device (source of raw packets)
+        @param packetdev RVMC101 CAN packet device
+
+        """
+        super().__init__(name=name)
+        self.candev = candev
+        self.packetdev = packetdev
+        self._stop = threading.Event()
+        self._enable = threading.Event()
+        self.enable = False         # Default to be 'not enabled'
+
+    def run(self):
+        """Run the data processing thread."""
+        while not self._stop.is_set():
+            if self.enable:
+                self.candev.flush_can()
+                try:
+                    pkt = self.candev.read_can(timeout=0.1)
+                except tester.devphysical.can.SerialToCanError:
+                    self.packetdev.packet = None
+                    continue
+                try:
+                    self.packetdev.packet = Packet(pkt)
+                except PacketDecodeError:
+                    # Advertisment packets are mixed with the occasional other
+                    # packet type, which will cause a decode error
+                    pass
+            time.sleep(self.wait_time)
+
+    @property
+    def enable(self):
+        """Enable property getter.
+
+        @return True if enabled
+
+        """
+        return self._enable.is_set()
+
+    @enable.setter
+    def enable(self, value):
+        """Set enable property.
+
+        @param value True to enable packet processing
+
+        """
+        if value:
+            self._enable.set()
+        else:
+            self._enable.clear()
+
+    def stop(self):
+        """Stop the packet processing thread."""
+        self._stop.set()
+        self.join()
