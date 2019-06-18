@@ -4,6 +4,7 @@
 """RVMC101 Packet decoder."""
 
 import ctypes
+import logging
 import struct
 import threading
 import time
@@ -64,15 +65,19 @@ class Packet():
         @param packet CANPacket instance
 
         """
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
         payload = packet.data
         if len(payload) != 8 or payload[0] != self.switch_status:
+            self._logger.debug('PacketDecodeError')
             raise PacketDecodeError()
+        self._logger.debug('Packet: %s', payload)
         (   self.msgtype,
             switch_data,
             self.swver,
             self.counter,
             self.checksum,
-            ) = struct.Struct('<BLB3').unpack(payload)
+            ) = struct.Struct('<BL3B').unpack(payload)
         # Decode the switch data
         switch_raw = _SwitchRaw()
         switch_raw.uint = switch_data
@@ -88,6 +93,7 @@ class Packet():
         self.down = bool(zss.down)
         self.usb_pwr = bool(zss.usb_pwr)
         self.wake_up = bool(zss.wake_up)
+        self._logger.debug('Success decoding packet (%s)', self.zone4)
 
 
 class CANReader(threading.Thread):
@@ -106,6 +112,7 @@ class CANReader(threading.Thread):
     #  RVMC101 transmits 25 packets/sec.
     # We ignore most of them to reduce to processing load.
     wait_time = 0.2
+    read_timeout = 2 * wait_time
 
     def __init__(self, candev, packetdev, name=None):
         """Create instance
@@ -117,23 +124,27 @@ class CANReader(threading.Thread):
         super().__init__(name=name)
         self.candev = candev
         self.packetdev = packetdev
-        self._stop = threading.Event()
-        self._enable = threading.Event()
+        self._evt_stop = threading.Event()
+        self._evt_enable = threading.Event()
         self.enable = False         # Default to be 'not enabled'
+        self._logger = logging.getLogger(
+            '.'.join((__name__, self.__class__.__name__)))
 
     def run(self):
         """Run the data processing thread."""
-        while not self._stop.is_set():
+        while not self._evt_stop.is_set():
             if self.enable:
                 self.candev.flush_can()
                 try:
-                    pkt = self.candev.read_can(timeout=0.1)
+                    pkt = self.candev.read_can(timeout=self.read_timeout)
                 except tester.devphysical.can.SerialToCanError:
+                    self._logger.debug('SerialToCanError')
                     self.packetdev.packet = None
                     continue
                 try:
                     self.packetdev.packet = Packet(pkt)
                 except PacketDecodeError:
+                    self._logger.debug('PacketDecodeError')
                     # Advertisment packets are mixed with the occasional other
                     # packet type, which will cause a decode error
                     pass
@@ -146,7 +157,7 @@ class CANReader(threading.Thread):
         @return True if enabled
 
         """
-        return self._enable.is_set()
+        return self._evt_enable.is_set()
 
     @enable.setter
     def enable(self, value):
@@ -156,13 +167,13 @@ class CANReader(threading.Thread):
 
         """
         if value:
-            self._enable.set()
+            self._evt_enable.set()
         else:
-            self._enable.clear()
+            self._evt_enable.clear()
 
-    def stop(self):
+    def halt(self):
         """Stop the packet processing thread."""
-        self._stop.set()
+        self._evt_stop.set()
         self.join()
 
 # TODO: This is how to send Display Control packets

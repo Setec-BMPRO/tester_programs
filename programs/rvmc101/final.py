@@ -16,7 +16,7 @@ class Final(share.TestSequence):
 
     limitdata = (
         tester.LimitBoolean('ButtonOk', True, doc='Ok entered'),
-        tester.LimitBoolean('RetractPressed', True, doc='Button pressed'),
+        tester.LimitBoolean('Zone4Pressed', True, doc='Button pressed'),
         )
 
     def open(self, uut):
@@ -39,7 +39,7 @@ class Final(share.TestSequence):
         # Tell user to push unit's button after clicking OK
         mes['ui_buttonpress']()
         # Wait for the button press
-        mes['retract'](timeout=10)
+        mes['zone4'](timeout=10)
 # FIXME: What about tester.devlogical.CANPacketError exceptions?
 
 
@@ -56,7 +56,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
-        self['can'].verbose = True
+#        self['can'].verbose = True
         self['decoder'] = tester.CANPacket()
         self['canreader'] = device.CANReader(
             self['can'], self['decoder'], name='CANThread')
@@ -70,7 +70,7 @@ class Devices(share.Devices):
 
     def close_can(self):
         """Reset CAN system."""
-        self['canreader'].stop()
+        self['canreader'].halt()
         self['can'].rvc_mode = False
         self['can'].verbose = False
 
@@ -89,8 +89,8 @@ class Sensors(share.Sensors):
             message=tester.translate('rvmc101_final', 'msgPressButton'),
             caption=tester.translate('rvmc101_final', 'capPressButton'))
         decoder = self.devices['decoder']
-        self['retract'] = tester.sensor.CANPacket(
-            decoder, 'retract', rdgtype=tester.sensor.ReadingBoolean)
+        self['zone4'] = tester.sensor.CANPacket(
+            decoder, 'zone4', rdgtype=tester.sensor.ReadingBoolean)
 
 
 class Measurements(share.Measurements):
@@ -102,6 +102,6 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ui_buttonpress', 'ButtonOk', 'ButtonPress', ''),
-            ('retract', 'RetractPressed', 'retract',
-                'RET button pressed'),
+            ('zone4', 'Zone4Pressed', 'zone4',
+                '4 button pressed'),
             ))
