@@ -164,3 +164,28 @@ class CANReader(threading.Thread):
         """Stop the packet processing thread."""
         self._stop.set()
         self.join()
+
+# TODO: This is how to send Display Control packets
+#    def send_led_display(serial2can):
+#        """Send a LED_DISPLAY packet."""
+#        pkt = tester.devphysical.can.RVCPacket()
+#        msg = pkt.header.message
+#        msg.priority = 6
+#        msg.reserved = 0
+#        msg.DGN = tester.devphysical.can.RVCDGN.setec_led_display.value
+#        msg.SA = tester.devphysical.can.RVCDeviceID.rvmn101.value
+#        sequence = 1
+#        # Show "88" on the display (for about 100msec)
+#        # The 1st packet we send is ignored due to no previous sequence number
+#        pkt.data.extend(b'\x01\xff\xff\xff\xff\xff')
+#        pkt.data.extend(bytes([sequence & 0xff]))
+#        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
+#        serial2can.send('t{0}'.format(pkt))
+#        sequence += 1
+#        # The 2nd packet WILL be acted upon
+#        pkt.data.clear()
+#        pkt.data.extend(b'\x01\xFF\xFF\xFF\xFF\xFF')
+#        pkt.data.extend(bytes([sequence & 0xff]))
+#        pkt.data.extend(bytes([sum(pkt.data) & 0xff]))
+#        serial2can.send('t{0}'.format(pkt))
+#        sequence += 1
