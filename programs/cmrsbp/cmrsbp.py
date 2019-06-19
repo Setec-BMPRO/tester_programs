@@ -75,7 +75,7 @@ class CmrSbp():
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
-        self.ResultQ = queue.Queue()
+        self.resultq = queue.Queue()
         self._evt_read = threading.Event()
         self._evt_close = threading.Event()
         self._worker = threading.Thread(
@@ -156,11 +156,11 @@ class CmrSbp():
                 tmr.cancel()
                 state = 0
                 self._logger.debug('Data read completed')
-                self.ResultQ.put(tdata.data)    # this will be valid data
+                self.resultq.put(tdata.data)    # this will be valid data
             if state > 0 and timeup.is_set():
                 state = 0
                 self._logger.debug('Data read timeout')
-                self.ResultQ.put(tdata.data)    # this will be empty data
+                self.resultq.put(tdata.data)    # this will be empty data
         try:
             tdata.cancel()
         except Exception:
@@ -175,7 +175,9 @@ class CmrSbp():
         """
         self._logger.debug('Read')
         self._evt_read.set()
-        return self.ResultQ.get()
+        data = self.resultq.get()
+        self.resultq.task_done()
+        return data
 
     def close(self):
         """Signal the worker thread to shutdown.
