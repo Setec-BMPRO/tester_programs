@@ -22,7 +22,7 @@ class RVMC101Final(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'CanBus': (
                     (sen['ButtonPress'], True),
-                    (sen['retract'], True),
+                    (sen['zone4'], True),
                     ),
                 },
             }
