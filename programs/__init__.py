@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2013 - 2019 SETEC Pty Ltd.
 """Product Test Programs."""
 
 from . import selftest
@@ -27,6 +28,7 @@ from . import gsu360
 from . import ids500
 from . import j35
 from . import mb2
+from . import mb3
 from . import mk7400
 from . import rvview_jdisplay
 from . import rvmc101
@@ -101,6 +103,8 @@ PROGRAMS = {
     'J35 Initial': j35.Initial,
     'J35 Final': j35.Final,
     'MB2 Final': mb2.Final,
+    'MB3 Initial': mb3.Initial,
+    'MB3 Final': mb3.Final,
     'MK7-400-1 Final': mk7400.Final,
     'RvViewJDisplay Initial': rvview_jdisplay.Initial,
     'RVMC101 Final': rvmc101.Final,
