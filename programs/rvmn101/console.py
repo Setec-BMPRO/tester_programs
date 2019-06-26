@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101B Console driver."""
+"""RVMN101 Console driver."""
 
 import share
 
@@ -13,7 +13,7 @@ class InvalidOutputError(Exception):
 
 class Console(share.console.Base):
 
-    """Communications to RVMN101B console."""
+    """Communications to RVMN101 console."""
 
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\rrvmn> '

@@ -54,8 +54,8 @@ from . import test_mk7400_final
 from . import test_rm50_final
 from . import test_rvmc101_final
 from . import test_rvmc101_initial
-from . import test_rvmn101b_initial
-from . import test_rvmn101b_console
+from . import test_rvmn101_initial
+from . import test_rvmn101_console
 from . import test_rvw_jdisp_initial
 from . import test_rvswt101_final
 from . import test_rvswt101_initial
@@ -129,8 +129,8 @@ __all__ = [
     'test_rm50_final',
     'test_rvmc101_final',
     'test_rvmc101_initial',
-    'test_rvmn101b_initial',
-    'test_rvmn101b_console',
+    'test_rvmn101_initial',
+    'test_rvmn101_console',
     'test_rvw_jdisp_initial',
     'test_rvswt101_final',
     'test_rvswt101_initial',

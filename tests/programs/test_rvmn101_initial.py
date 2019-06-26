@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for RVMN101B Initial Test program."""
+"""UnitTest for RVMN101 Initial Test program."""
 
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import rvmn101b
+from programs import rvmn101
 
 
-class RVMN101BInitial(ProgramTestCase):
+class RVMN101Initial(ProgramTestCase):
 
-    """RVMN101B Initial program test suite."""
+    """RVMN101 Initial program test suite."""
 
-    prog_class = rvmn101b.Initial
+    prog_class = rvmn101.Initial
     parameter = None
     hs_outputs = [1, 2, 3]
     debug = True
@@ -22,7 +22,7 @@ class RVMN101BInitial(ProgramTestCase):
         mycon = MagicMock(name='MyCon')
         type(mycon).valid_outputs = PropertyMock(return_value=self.hs_outputs)
         patcher = patch(
-            'programs.rvmn101b.console.Console', return_value=mycon)
+            'programs.rvmn101.console.Console', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         mycan = MagicMock(name='MySerial2CAN')

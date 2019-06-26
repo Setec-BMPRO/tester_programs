@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for RVMN101B Console Test program."""
+"""UnitTest for RVMN101 Console Test program."""
 
 import unittest
 
 import tester
 
-from programs import rvmn101b
+from programs import rvmn101
 
 
 class RVMN101B_Console(unittest.TestCase):
 
-    """RVMN101B Console program test suite."""
+    """RVMN101 Console program test suite."""
 
     prompt = '\rrvmn> '
 
@@ -19,7 +19,7 @@ class RVMN101B_Console(unittest.TestCase):
         """Per-Test setup."""
         port = tester.devphysical.sim_serial.SimSerial()
         port.echo = True
-        self.con = rvmn101b.console.Console(port)
+        self.con = rvmn101.console.Console(port)
         # Allow exceptions from the console driver
         self.con.measurement_fail_on_error = False
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2019-06-24, 17:31:25 -->
+<!-- Saved: 2019-06-26, 20:09:30 -->
 <!-- Copyright (C) 2019 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -118,10 +118,10 @@
     <Source>programs/rvmc101/device.py</Source>
     <Source>programs/rvmc101/final.py</Source>
     <Source>programs/rvmc101/initial.py</Source>
-    <Source>programs/rvmn101b/__init__.py</Source>
-    <Source>programs/rvmn101b/config.py</Source>
-    <Source>programs/rvmn101b/console.py</Source>
-    <Source>programs/rvmn101b/initial.py</Source>
+    <Source>programs/rvmn101/__init__.py</Source>
+    <Source>programs/rvmn101/config.py</Source>
+    <Source>programs/rvmn101/console.py</Source>
+    <Source>programs/rvmn101/initial.py</Source>
     <Source>programs/rvswt101/__init__.py</Source>
     <Source>programs/rvswt101/config.py</Source>
     <Source>programs/rvswt101/console.py</Source>
@@ -242,8 +242,8 @@
     <Source>tests/programs/test_rm50_final.py</Source>
     <Source>tests/programs/test_rvmc101_final.py</Source>
     <Source>tests/programs/test_rvmc101_initial.py</Source>
-    <Source>tests/programs/test_rvmn101b_console.py</Source>
-    <Source>tests/programs/test_rvmn101b_initial.py</Source>
+    <Source>tests/programs/test_rvmn101_console.py</Source>
+    <Source>tests/programs/test_rvmn101_initial.py</Source>
     <Source>tests/programs/test_rvswt101_device.py</Source>
     <Source>tests/programs/test_rvswt101_final.py</Source>
     <Source>tests/programs/test_rvswt101_initial.py</Source>

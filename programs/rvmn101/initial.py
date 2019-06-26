@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101B Initial Test Program."""
+"""RVMN101 Initial Test Program."""
 
 import inspect
 import os
@@ -15,7 +15,7 @@ from . import console, config
 
 class Initial(share.TestSequence):
 
-    """RVMN101B Initial Test Program."""
+    """RVMN101 Initial Test Program."""
 
     vbatt_set = 12.5
     limitdata = (
@@ -55,34 +55,34 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
-        rvmn101b = dev['rvmn101b']
-        rvmn101b.flushInput()
+        rvmn101 = dev['rvmn101']
+        rvmn101.flushInput()
         # Cycle power to restart the unit
         dev['dcs_vbatt'].output(0.0, delay=0.5)
         dev['dcs_vbatt'].output(self.vbatt_set, delay=1.0)
-        rvmn101b.brand(self.sernum, config.PRODUCT_REV)
+        rvmn101.brand(self.sernum, config.PRODUCT_REV)
 
     @share.teststep
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
-        rvmn101b = dev['rvmn101b']
+        rvmn101 = dev['rvmn101']
         dev['dcs_vhbridge'].output(self.vbatt_set, output=True, delay=0.2)
         mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each HS output in turn
-        for idx in rvmn101b.valid_outputs:
+        for idx in rvmn101.valid_outputs:
             with tester.PathName('HS{0}'.format(idx)):
-                rvmn101b.hs_output(idx, True)
+                rvmn101.hs_output(idx, True)
                 mes['dmm_hs_on'](timeout=5)
-                rvmn101b.hs_output(idx, False)
+                rvmn101.hs_output(idx, False)
                 mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each LS output in turn
         for idx, dmm_channel in (
-                (rvmn101b.ls_0a5_out1, 'dmm_ls1'),
-                (rvmn101b.ls_0a5_out2, 'dmm_ls2'),
+                (rvmn101.ls_0a5_out1, 'dmm_ls1'),
+                (rvmn101.ls_0a5_out2, 'dmm_ls2'),
                 ):
-            rvmn101b.ls_output(idx, True)
+            rvmn101.ls_output(idx, True)
             mes[dmm_channel + '_on'](timeout=5)
-            rvmn101b.ls_output(idx, False)
+            rvmn101.ls_output(idx, False)
             mes[dmm_channel + '_off'](timeout=5)
 
     @share.teststep
@@ -143,7 +143,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         nordic_ser.port = share.fixture.port('032871', 'NORDIC')
         # Console driver
-        self['rvmn101b'] = console.Console(nordic_ser)
+        self['rvmn101'] = console.Console(nordic_ser)
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # CAN interface
@@ -154,8 +154,8 @@ class Devices(share.Devices):
         self['dcs_vcom'].output(9.0, output=True, delay=10)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
         # Open console serial connection
-        self['rvmn101b'].open()
-        self.add_closer(self['rvmn101b'].close)
+        self['rvmn101'].open()
+        self.add_closer(self['rvmn101'].close)
 
     def reset(self):
         """Reset instruments."""
@@ -190,13 +190,13 @@ class Sensors(share.Sensors):
             message=tester.translate('rvmn101b_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101b_initial', 'capSnEntry'))
         # Console sensors
-        rvmn101b = self.devices['rvmn101b']
+        rvmn101 = self.devices['rvmn101']
         for name, cmdkey in (
                 ('BleMac', 'MAC'),
                 ('SwRev', 'SW-REV'),
             ):
             self[name] = share.console.Sensor(
-                rvmn101b, cmdkey, rdgtype=sensor.ReadingString)
+                rvmn101, cmdkey, rdgtype=sensor.ReadingString)
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self['BleMac'].on_read = (
             lambda value: value.replace(':', '').replace(' (random)', '')
