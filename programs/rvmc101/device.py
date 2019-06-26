@@ -65,13 +65,13 @@ class Packet():
         @param packet CANPacket instance
 
         """
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
+#        self._logger = logging.getLogger(
+#            '.'.join((__name__, self.__class__.__name__)))
         payload = packet.data
         if len(payload) != 8 or payload[0] != self.switch_status:
             self._logger.debug('PacketDecodeError')
             raise PacketDecodeError()
-        self._logger.debug('Packet: %s', payload)
+#        self._logger.debug('Packet: %s', payload)
         (   self.msgtype,
             switch_data,
             self.swver,
@@ -93,7 +93,14 @@ class Packet():
         self.down = bool(zss.down)
         self.usb_pwr = bool(zss.usb_pwr)
         self.wake_up = bool(zss.wake_up)
-        self._logger.debug('Success decoding packet (%s)', self.zone4)
+#        self._logger.debug('Decoded packet (%s)', self.zone4)
+
+
+class NullPayload():
+
+    """A NULL packet payload."""
+
+    data = bytearray(8)
 
 
 class CANReader(threading.Thread):
@@ -111,8 +118,8 @@ class CANReader(threading.Thread):
     # Time to wait between reading CAN packets
     #  RVMC101 transmits 25 packets/sec.
     # We ignore most of them to reduce to processing load.
-    wait_time = 0.2
-    read_timeout = 2 * wait_time
+    wait_time = 0.5
+    read_timeout = 1.0
 
     def __init__(self, candev, packetdev, name=None):
         """Create instance
@@ -124,22 +131,24 @@ class CANReader(threading.Thread):
         super().__init__(name=name)
         self.candev = candev
         self.packetdev = packetdev
+        self.packetdev.packet = Packet(NullPayload)
         self._evt_stop = threading.Event()
         self._evt_enable = threading.Event()
         self.enable = False         # Default to be 'not enabled'
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
+        self._logger.debug('Start CANReader')
 
     def run(self):
         """Run the data processing thread."""
         while not self._evt_stop.is_set():
+            self.candev.flush_can()
             if self.enable:
-                self.candev.flush_can()
                 try:
                     pkt = self.candev.read_can(timeout=self.read_timeout)
                 except tester.devphysical.can.SerialToCanError:
                     self._logger.debug('SerialToCanError')
-                    self.packetdev.packet = None
+                    self.packetdev.packet = Packet(NullPayload)
                     continue
                 try:
                     self.packetdev.packet = Packet(pkt)
@@ -173,6 +182,7 @@ class CANReader(threading.Thread):
 
     def halt(self):
         """Stop the packet processing thread."""
+        self._logger.debug('Stop CANReader')
         self._evt_stop.set()
         self.join()
 

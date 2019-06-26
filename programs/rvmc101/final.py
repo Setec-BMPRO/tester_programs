@@ -35,9 +35,9 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        dev['canreader'].enable = True
         # Tell user to push unit's button after clicking OK
         mes['ui_buttonpress']()
+        dev['canreader'].enable = True
         # Wait for the button press
         mes['zone4'](timeout=10)
 # FIXME: What about tester.devlogical.CANPacketError exceptions?
