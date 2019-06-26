@@ -8,12 +8,12 @@ from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvmn101
 
 
-class RVMN101Initial(ProgramTestCase):
+class RVMN101BInitial(ProgramTestCase):
 
-    """RVMN101 Initial program test suite."""
+    """RVMN101B Initial program test suite."""
 
     prog_class = rvmn101.Initial
-    parameter = None
+    parameter = 'B'
     hs_outputs = [1, 2, 3]
     debug = True
 
@@ -22,7 +22,7 @@ class RVMN101Initial(ProgramTestCase):
         mycon = MagicMock(name='MyCon')
         type(mycon).valid_outputs = PropertyMock(return_value=self.hs_outputs)
         patcher = patch(
-            'programs.rvmn101.console.Console', return_value=mycon)
+            'programs.rvmn101.console.ConsoleB', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         mycan = MagicMock(name='MySerial2CAN')

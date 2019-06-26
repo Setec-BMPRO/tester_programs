@@ -17,23 +17,14 @@ class Initial(share.TestSequence):
 
     """RVMN101 Initial Test Program."""
 
-    vbatt_set = 12.5
-    limitdata = (
-        tester.LimitDelta('Vbatt', vbatt_set - 0.5, 0.5, doc='Battery input'),
-        tester.LimitPercent('3V3', 3.3, 6.0, doc='Internal 3V rail'),
-        tester.LimitLow('HSoff', 1.0, doc='All HS outputs off'),
-        tester.LimitHigh('HSon', 10.0, doc='HS output on'),
-        tester.LimitHigh('LSoff', 10.0, doc='LS output off'),
-        tester.LimitLow('LSon', 1.0, doc='LS output on'),
-        tester.LimitBoolean('CANok', True, doc='CAN bus active'),
-        tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
-        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
-            doc='Valid MAC address'),
-        )
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.Config.get(self.parameter)
+        Devices.fixture = self.cfg.fixture
+        Devices.arm_image = self.cfg.arm_image
+        Devices.nordic_image = self.cfg.nordic_image
+        self.limits = self.cfg.limits_initial()
+        super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),
@@ -49,7 +40,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        dev['dcs_vbatt'].output(self.vbatt_set, output=True)
+        dev['dcs_vbatt'].output(self.cfg.vbatt_set, output=True)
         self.measure(('dmm_vbatt', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
@@ -59,14 +50,14 @@ class Initial(share.TestSequence):
         rvmn101.flushInput()
         # Cycle power to restart the unit
         dev['dcs_vbatt'].output(0.0, delay=0.5)
-        dev['dcs_vbatt'].output(self.vbatt_set, delay=1.0)
-        rvmn101.brand(self.sernum, config.PRODUCT_REV)
+        dev['dcs_vbatt'].output(self.cfg.vbatt_set, delay=1.0)
+        rvmn101.brand(self.sernum, self.cfg.product_rev)
 
     @share.teststep
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
         rvmn101 = dev['rvmn101']
-        dev['dcs_vhbridge'].output(self.vbatt_set, output=True, delay=0.2)
+        dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
         mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101.valid_outputs:
@@ -113,6 +104,10 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    fixture = None          # Fixture number
+    arm_image = None        # ARM software image filename
+    nordic_image = None     # Nordic software image filename
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -130,20 +125,23 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # ARM device programmer
         self['progARM'] = share.programmer.ARM(
-            share.fixture.port('032871', 'ARM'),
-            os.path.join(folder, config.ARM_IMAGE),
+            share.fixture.port(self.fixture, 'ARM'),
+            os.path.join(folder, self.arm_image),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.Nordic(
-            os.path.join(folder, config.NORDIC_IMAGE),
+            os.path.join(folder, self.nordic_image),
             folder)
         # Serial connection to the console
         nordic_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        nordic_ser.port = share.fixture.port('032871', 'NORDIC')
+        nordic_ser.port = share.fixture.port(self.fixture, 'NORDIC')
         # Console driver
-        self['rvmn101'] = console.Console(nordic_ser)
+        self['rvmn101'] = {
+            'A': console.ConsoleA,
+            'B': console.ConsoleB,
+            }[self.parameter](nordic_ser)
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # CAN interface

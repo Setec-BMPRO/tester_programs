@@ -19,7 +19,7 @@ class RVMN101B_Console(unittest.TestCase):
         """Per-Test setup."""
         port = tester.devphysical.sim_serial.SimSerial()
         port.echo = True
-        self.con = rvmn101.console.Console(port)
+        self.con = rvmn101.console.ConsoleB(port)
         # Allow exceptions from the console driver
         self.con.measurement_fail_on_error = False
 
