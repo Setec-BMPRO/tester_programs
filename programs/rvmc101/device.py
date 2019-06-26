@@ -120,6 +120,8 @@ class CANReader(threading.Thread):
     # We ignore most of them to reduce to processing load.
     wait_time = 0.5
     read_timeout = 1.0
+    # A NULL Packet
+    null_packet = Packet(NullPayload)
 
     def __init__(self, candev, packetdev, name=None):
         """Create instance
@@ -148,7 +150,7 @@ class CANReader(threading.Thread):
                     pkt = self.candev.read_can(timeout=self.read_timeout)
                 except tester.devphysical.can.SerialToCanError:
                     self._logger.debug('SerialToCanError')
-                    self.packetdev.packet = Packet(NullPayload)
+                    self.packetdev.packet = self.null_packet
                     continue
                 try:
                     self.packetdev.packet = Packet(pkt)
@@ -176,6 +178,7 @@ class CANReader(threading.Thread):
 
         """
         if value:
+            self.packetdev.packet = self.null_packet
             self._evt_enable.set()
         else:
             self._evt_enable.clear()
