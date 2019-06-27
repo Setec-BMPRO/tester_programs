@@ -53,22 +53,8 @@ class ConsoleA(share.console.Base):
         """
         super().__init__(port)
         missing_outputs = {
-            'HBRIDGE3 EXTEND': 4,
-            'HBRIDGE3 RETRACT': 5,
-            'HBRIDGE4 EXTEND': 6,
-            'HBRIDGE4 RETRACT': 7,
-            'HBRIDGE5 EXTEND': 8,
-            'HBRIDGE5 RETRACT': 9,
-            'HS_0A5_OUT5': 20,
-            'HS_0A5_OUT13': 28,
-            'HS_0A5_OUT14': 29,
-            'HS_0A5_OUT15': 30,
-            'HS_0A5_OUT18': 33,
-            'LS_0A5_OUT1': 34,
-            'LS_0A5_OUT2': 35,
             'LS_0A5_OUT3': 36,
             'LS_0A5_OUT4': 37,
-            'OUT5A_13': 51,
             }
         missing_set = set()
         for key in missing_outputs:
