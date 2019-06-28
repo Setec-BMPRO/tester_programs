@@ -28,9 +28,9 @@ class Config():
         'j9-1': 40,
         'j10-1': 13, 'j10-2': 41,
         'j11-1': 14, 'j11-2': 15, 'j11-3': 42,
-        't001': 1, 't003': 3, 't004': 4,
         }
     # Software images
+# FIXME: This is hard-coded for Rev 2 'gp' units and Rev 3 'j' units.
     _software = {
         '4gp1': 'rvswt101_4gp1_1.2.hex',
         '6gp1': 'rvswt101_6gp1_1.2.hex',

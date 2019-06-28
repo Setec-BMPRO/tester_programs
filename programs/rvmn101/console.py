@@ -15,6 +15,7 @@ class _Console(share.console.Base):
 
     """Communications to RVMN101A/B console."""
 
+    banner_lines = 4            # Number of startup banner lines
     max_output_index = 56       # Output index is range(max_output_index)
     missing_outputs = {}        # Key: any text, Value: Output index
     valid_outputs = []          # List of implemented output index
@@ -78,14 +79,6 @@ class ConsoleA(_Console):
 
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
-    # Number of startup banner lines, eg:
-    #    ***** Booting Zephyr OS zephyr-v1.13.0-64-g7719dcb327 *****
-    #    ***** Booting Zephyr OS zephyr-v1.14.0-119-g3632437c99b9 *****
-    #    Reset reason:SREQ
-    #    ***** RVGenius 1.1.0-0-g34c2c3a *****
-    #
-    #    uart:~$
-    banner_lines = 4
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
@@ -125,13 +118,6 @@ class ConsoleB(_Console):
 
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\rrvmn> '
-    # Number of startup banner lines, eg:
-    #    ***** Booting Zephyr OS zephyr-v1.13.0-6-g04f6c719a *****
-    #    Zephyr Shell, Zephyr version: 1.13.0
-    #    Type 'help' for a list of available commands
-    #    shell>
-    #    rvmn>
-    banner_lines = 4
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
