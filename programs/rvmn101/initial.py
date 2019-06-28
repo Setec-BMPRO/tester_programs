@@ -59,6 +59,8 @@ class Initial(share.TestSequence):
         """Test the outputs of the unit."""
         rvmn101 = dev['rvmn101']
         dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
+        if self.parameter == 'A':
+            rvmn101.hs_output(41, False)
         mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101.valid_outputs:

@@ -77,7 +77,7 @@ class ConsoleA(_Console):
     """Communications to RVMN101A console."""
 
     # Console command prompt. Signals the end of response data.
-    cmd_prompt = b'\ruart:~$ '
+    cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
     # Number of startup banner lines, eg:
     #    ***** Booting Zephyr OS zephyr-v1.13.0-64-g7719dcb327 *****
     #    ***** Booting Zephyr OS zephyr-v1.14.0-119-g3632437c99b9 *****
@@ -85,7 +85,7 @@ class ConsoleA(_Console):
     #    ***** RVGenius 1.1.0-0-g34c2c3a *****
     #
     #    uart:~$
-    banner_lines = 5
+    banner_lines = 4
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
@@ -103,6 +103,20 @@ class ConsoleA(_Console):
             'rvmn output',
             readable=False, writeable=True, write_format='{1} {0}'),
         }
+
+    def __init__(self, port):
+        """Initialise communications.
+
+        @param port Serial instance to use
+
+        """
+        self.missing_outputs = {
+            'LS_0A5_EN1': 34,
+            'LS_0A5_EN2': 35,
+            'LS_0A5_EN3': 36,
+            'LS_0A5_EN4': 37,
+            }
+        super().__init__(port)
 
 
 class ConsoleB(_Console):
@@ -151,6 +165,10 @@ class ConsoleB(_Console):
             'HS_0A5_EN14': 29,
             'HS_0A5_EN15': 30,
             'HS_0A5_EN18': 33,
+            'LS_0A5_EN1': 34,
+            'LS_0A5_EN2': 35,
+            'LS_0A5_EN3': 36,
+            'LS_0A5_EN4': 37,
             'OUT5A_PWM_13': 51,
             }
         super().__init__(port)
