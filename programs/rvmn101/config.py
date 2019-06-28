@@ -10,6 +10,9 @@ class Config():
 
     """Base configuration for RVMN101A/B."""
 
+    #  Software version
+    arm_image = 'rvmn101_nxp_1.9.bin'
+    hardware_rev = None
     # General parameters used in testing the units
     #  Injected voltages
     vbatt_set = 12.5
@@ -54,11 +57,9 @@ class RVMN101A(Config):
     # Initial Test parameters
     fixture = '033550'
     #  Software version
-# FIXME: We need software images
-    arm_image = None
-    nordic_image = None
-    # Product revision per PC-5052
-    product_rev = None
+    nordic_image = 'jayco_rvmn101_signed_1.2.0-0-g6b58421_factory_mcuboot.hex'
+    product_rev = '06A'
+    hardware_rev = '05B'
 
 
 class RVMN101B(Config):
@@ -68,7 +69,5 @@ class RVMN101B(Config):
     # Initial Test parameters
     fixture = '032871'
     #  Software version
-    arm_image = 'rvmn101b_nxp_1.9.bin'
     nordic_image = 'rvmn101_signed_0.74-0-g5d7a6d1_factory_mcuboot.hex'
-    # Product revision per PC-5052
-    product_rev = '04E'
+    product_rev = '04E'     # per PC-5052

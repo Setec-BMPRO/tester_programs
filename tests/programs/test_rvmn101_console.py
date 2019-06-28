@@ -32,12 +32,12 @@ class RVMN101B_Console(unittest.TestCase):
             'shell>\r\n'
             'rvmn> '
             )
-        sernum, rev = 'A1926010001', '03A'
+        sernum, rev, hw_rev = 'A1926010001', '03A', None
         for aline in banner.split(sep='\n'):    # The banner lines
             self.con.port.puts(aline)
         for _ in range(2):                      # 2 response prompts
             self.con.port.puts(self.prompt, preflush=1)
-        self.con.brand(sernum, rev)
+        self.con.brand(sernum, rev, hw_rev)
         self.assertEqual(
             'serial {0}\rproduct-rev {1}\r'.format(sernum, rev).encode(),
             self.con.port.get())

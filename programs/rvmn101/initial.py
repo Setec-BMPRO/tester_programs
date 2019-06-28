@@ -51,7 +51,8 @@ class Initial(share.TestSequence):
         # Cycle power to restart the unit
         dev['dcs_vbatt'].output(0.0, delay=0.5)
         dev['dcs_vbatt'].output(self.cfg.vbatt_set, delay=1.0)
-        rvmn101.brand(self.sernum, self.cfg.product_rev)
+        rvmn101.brand(
+            self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
 
     @share.teststep
     def _step_output(self, dev, mes):
