@@ -69,7 +69,7 @@ class Packet():
 #            '.'.join((__name__, self.__class__.__name__)))
         payload = packet.data
         if len(payload) != 8 or payload[0] != self.switch_status:
-            self._logger.debug('PacketDecodeError')
+#            self._logger.debug('PacketDecodeError')
             raise PacketDecodeError()
 #        self._logger.debug('Packet: %s', payload)
         (   self.msgtype,
