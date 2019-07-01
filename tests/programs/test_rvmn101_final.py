@@ -26,9 +26,10 @@ class RVMN101Final(ProgramTestCase):
             self.addCleanup(patcher.stop)
             patcher.start()
         mypi = MagicMock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = [
-            [255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']
-            ]
+        mypi.scan_advert_blemac.return_value = {
+            'ad_data': {255: '1f050112022d624c3a00000300d1139e69'},
+            'rssi': -50,
+            }
         patcher = patch('share.bluetooth.RaspberryBluetooth', return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
@@ -43,6 +44,7 @@ class RVMN101Final(ProgramTestCase):
                     (sen['SnEntry'], 'A1526040123'),
                     (sen['mirmac'], '001ec030c2be'),
                     (sen['mirscan'], True),
+                    (sen['mirrssi'], -50),
                     ),
                 },
             }
@@ -50,5 +52,5 @@ class RVMN101Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(3, len(result.readings))
+        self.assertEqual(4, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)

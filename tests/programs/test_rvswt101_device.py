@@ -13,12 +13,12 @@ class RVSWT101Device(unittest.TestCase):
 
     """RVSWT101 device test suite."""
 
-    # A sample BLE packet
-    advert = [[255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']]
+    # A sample BLE payload
+    payload = '1f050112022d624c3a00000300d1139e69'
 
     def setUp(self):
         """Per-Test setup."""
-        self.pkt = rvswt101.device.Packet(self.advert)
+        self.pkt = rvswt101.device.Packet(self.payload)
         self.rvswt = tester.CANPacket()
         self.rvswt.packet = self.pkt
 

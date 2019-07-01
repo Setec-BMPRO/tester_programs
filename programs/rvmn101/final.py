@@ -31,12 +31,17 @@ class Final(share.TestSequence):
         mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
-        # Scan for the RVSWT101 bluetooth transmission
-        packet = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
-        # packet is like this:
-        #   [[255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']]
-        mes['scan_mac'].sensor.store(packet is not None)
+        # Scan for the bluetooth transmission
+        # Reply is like this: {
+        #   'ad_data': {255: '1f050112022d624c3a00000300d1139e69'},
+        #   'rssi': rssi,
+        #   }
+        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
+        mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()
+        rssi = reply['rssi']    # Received Signal Strength Indication
+        mes['scan_rssi'].sensor.store(rssi)
+        mes['scan_rssi']()
 
 
 class Devices(share.Devices):
@@ -58,11 +63,12 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
+        self['SnEntry'] = sensor.DataEntry(
+            message=tester.translate('rvmn101_final', 'msgSnEntry'),
+            caption=tester.translate('rvmn101_final', 'capSnEntry'))
         self['mirscan'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['mirmac'] = sensor.Mirror(rdgtype=sensor.ReadingString)
-        self['SnEntry'] = sensor.DataEntry(
-            message=tester.translate('rvswt101_final', 'msgSnEntry'),
-            caption=tester.translate('rvswt101_final', 'capSnEntry'))
+        self['mirrssi'] = sensor.Mirror()
 
 
 class Measurements(share.Measurements):
@@ -75,5 +81,6 @@ class Measurements(share.Measurements):
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from server'),
             ('scan_mac', 'ScanMac', 'mirscan',
-                'Scan for MAC address over bluetooth'),
+                'Scan for MAC address over Bluetooth'),
+            ('scan_rssi', 'ScanRSSI', 'mirrssi', 'Bluetooth signal strength'),
             ))

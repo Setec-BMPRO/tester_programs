@@ -19,6 +19,15 @@ class RVMN101BInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        for target in (
+                'share.programmer.ARM',
+                'share.programmer.Nordic',
+                'share.bluetooth.RaspberryBluetooth',
+                'share.bluetooth.SerialToMAC',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         mycon = MagicMock(name='MyCon')
         type(mycon).valid_outputs = PropertyMock(return_value=self.hs_outputs)
         patcher = patch(
@@ -31,14 +40,6 @@ class RVMN101BInitial(ProgramTestCase):
             'tester.devphysical.can.SerialToCan', return_value=mycan)
         self.addCleanup(patcher.stop)
         patcher.start()
-        for target in (
-                'share.programmer.ARM',
-                'share.programmer.Nordic',
-                'share.bluetooth.RaspberryBluetooth',
-                ):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
         super().setUp()
 
     def test_pass_run(self):

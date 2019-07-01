@@ -25,9 +25,10 @@ class RVSWT101Final(ProgramTestCase):
             self.addCleanup(patcher.stop)
             patcher.start()
         mypi = MagicMock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = [
-            [255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']
-            ]
+        mypi.scan_advert_blemac.return_value = {
+            'ad_data': {255: '1f050112022d624c3a00000300d1139e69'},
+            'rssi': -50,
+            }
         patcher = patch('share.bluetooth.RaspberryBluetooth', return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()

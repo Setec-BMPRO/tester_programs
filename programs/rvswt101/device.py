@@ -76,14 +76,13 @@ class Packet():
 
     """A RVSWT101 BLE broadcast packet."""
 
-    def __init__(self, packet):
+    def __init__(self, payload):
         """Create instance.
 
-        @param packet BLE broadcast packet
-            EG: [[255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']]
+        @param payload BLE broadcast packet payload
+            EG: '1f050112022d624c3a00000300d1139e69'
 
         """
-        payload = packet[0][2]
         payload_bytes = bytearray.fromhex(payload)
         (   self.company_id,
             self.equipment_type,

@@ -101,7 +101,8 @@ class RaspberryBluetooth(SerialIO):
 
         @param blemac Bluetooth MAC address to locate
         @param timeout Timeout in seconds
-        @return True if device was found
+        @return Scan result dictionary {'ad_data': ad_data, 'rssi': rssi}
+            or None is not found
 
         """
         return self.server.scan_advert_blemac(blemac, timeout)

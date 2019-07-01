@@ -13,6 +13,8 @@ class Final(share.TestSequence):
 
     """RVSWT101 Final Test Program."""
 
+    ble_adtype_manufacturer = 255
+
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter)
@@ -32,12 +34,15 @@ class Final(share.TestSequence):
         mes['ble_mac']()
         # Tell user to push unit's button after clicking OK
         mes['ui_buttonpress']()
-        # Scan for the RVSWT101 bluetooth transmission
-        packet = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
-        # packet is like this:
-        #   [[255, 'Manufacturer', '1f050112022d624c3a00000300d1139e69']]
-        mes['scan_mac'].sensor.store(packet is not None)
+        # Scan for the bluetooth transmission
+        # Reply is like this: {
+        #   'ad_data': {255: '1f050112022d624c3a00000300d1139e69'},
+        #   'rssi': -80,
+        #   }
+        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
+        mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()
+        packet = reply['ad_data'][self.ble_adtype_manufacturer]
         dev['decoder'].packet = device.Packet(packet)
         self.measure(('cell_voltage', 'switch_type', ))
 
