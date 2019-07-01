@@ -19,20 +19,20 @@ class RVSWT101Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        for target in (
+                'share.programmer.Nordic',
+                'share.bluetooth.RaspberryBluetooth',
+                'share.bluetooth.SerialToMAC',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         mycon = MagicMock(name='MyConsole')
         mycon.get_mac.return_value = '001ec030c2be'
         patcher = patch(
             'programs.rvswt101.console.Console', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
-        for target in (
-                'share.programmer.Nordic',
-                'share.bluetooth.RaspberryBluetooth',
-                'programs.rvswt101.config.SerialToMAC',
-                ):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
         super().setUp()
 
     def test_pass_run(self):

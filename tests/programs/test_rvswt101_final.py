@@ -19,7 +19,7 @@ class RVSWT101Final(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'programs.rvswt101.config.SerialToMAC',
+                'share.bluetooth.SerialToMAC',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)

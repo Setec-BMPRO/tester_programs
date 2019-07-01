@@ -51,7 +51,7 @@ class Devices(share.Devices):
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
-        self['serialtomac'] = config.SerialToMAC()
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
         # BLE Packet decoder
         self['decoder'] = tester.CANPacket()
 

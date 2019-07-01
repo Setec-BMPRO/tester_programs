@@ -134,7 +134,7 @@ class Devices(share.Devices):
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
-        self['serialtomac'] = config.SerialToMAC()
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Fixture USB hub power
         self['dcs_vcom'].output(9.0, output=True, delay=10)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
