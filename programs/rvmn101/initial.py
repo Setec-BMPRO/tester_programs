@@ -192,8 +192,8 @@ class Sensors(share.Sensors):
         self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.1)
         self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
         self['SnEntry'] = sensor.DataEntry(
-            message=tester.translate('rvmn101b_initial', 'msgSnEntry'),
-            caption=tester.translate('rvmn101b_initial', 'capSnEntry'))
+            message=tester.translate('rvmn101_initial', 'msgSnEntry'),
+            caption=tester.translate('rvmn101_initial', 'capSnEntry'))
         # Console sensors
         rvmn101 = self.devices['rvmn101']
         for name, cmdkey in (
