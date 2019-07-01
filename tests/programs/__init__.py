@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2017 - 2018 SETEC Pty Ltd.
+# Copyright 2017 - 2019 SETEC Pty Ltd.
 """Unittests for Program."""
 
 from . import test_selftest
@@ -54,6 +54,7 @@ from . import test_mk7400_final
 from . import test_rm50_final
 from . import test_rvmc101_final
 from . import test_rvmc101_initial
+from . import test_rvmn101_final
 from . import test_rvmn101_initial
 from . import test_rvmn101_console
 from . import test_rvw_jdisp_initial
@@ -129,6 +130,7 @@ __all__ = [
     'test_rm50_final',
     'test_rvmc101_final',
     'test_rvmc101_initial',
+    'test_rvmn101_final',
     'test_rvmn101_initial',
     'test_rvmn101_console',
     'test_rvw_jdisp_initial',

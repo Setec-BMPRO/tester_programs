@@ -3,7 +3,8 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101 Test Programs."""
 
+from .final import Final
 from .initial import Initial
 
 
-__all__ = ['Initial']
+__all__ = ['Final', 'Initial']

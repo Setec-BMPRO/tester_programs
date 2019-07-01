@@ -109,6 +109,7 @@ PROGRAMS = {
     'RvViewJDisplay Initial': rvview_jdisplay.Initial,
     'RVMC101 Final': rvmc101.Final,
     'RVMC101 Initial': rvmc101.Initial,
+    'RVMN101 Final': rvmn101.Final,
     'RVMN101 Initial': rvmn101.Initial,
     'RVSWT101 Final': rvswt101.Final,
     'RVSWT101 Initial': rvswt101.Initial,

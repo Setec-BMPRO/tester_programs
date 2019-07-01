@@ -29,6 +29,13 @@ class Config():
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
         )
+    # Final Test limits common to both units
+    _base_limits_final = (
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address'),
+        tester.LimitBoolean('ScanMac', True,
+            doc='MAC address detected'),
+        )
 
     @staticmethod
     def get(parameter):
@@ -48,6 +55,15 @@ class Config():
 
         """
         return cls._base_limits_initial
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        return cls._base_limits_final
 
 
 class RVMN101A(Config):
