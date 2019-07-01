@@ -27,6 +27,7 @@ class Final(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+        dev['dcs_vin'].output(self.cfg.vbatt_set, True, delay=2.0)
         # Lookup the MAC address from the server
         mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)
@@ -54,6 +55,11 @@ class Devices(share.Devices):
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
+        self['dcs_vin'] = tester.DCSource(self.physical_devices['DCS2'])
+
+    def reset(self):
+        """Reset instruments."""
+        self['dcs_vin'].output(0.0, False)
 
 
 class Sensors(share.Sensors):
