@@ -35,7 +35,7 @@ class Config():
             doc='Valid MAC address'),
         tester.LimitBoolean('ScanMac', True,
             doc='MAC address detected'),
-        tester.LimitHigh('ScanRSSI', -85,
+        tester.LimitHigh('ScanRSSI', -90,
             doc='Strong BLE signal'),
         )
 
