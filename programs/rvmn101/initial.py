@@ -53,6 +53,8 @@ class Initial(share.TestSequence):
         dev['dcs_vbatt'].output(self.cfg.vbatt_set, delay=1.0)
         rvmn101.brand(
             self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
+        # Save SerialNumber & MAC on a remote server.
+        dev['serialtomac'].blemac_set(self.sernum, rvmn101.get_mac())
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -147,6 +149,8 @@ class Devices(share.Devices):
             }[self.parameter](nordic_ser)
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
+        # Connection to Serial To MAC server
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
         # CAN interface
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True

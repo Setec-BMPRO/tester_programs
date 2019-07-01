@@ -3,6 +3,8 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101 Console driver."""
 
+import re
+
 import share
 
 
@@ -16,6 +18,7 @@ class _Console(share.console.Base):
     """Communications to RVMN101A/B console."""
 
     banner_lines = 4            # Number of startup banner lines
+    re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     max_output_index = 56       # Output index is range(max_output_index)
     missing_outputs = {}        # Key: any text, Value: Output index
     valid_outputs = []          # List of implemented output index
@@ -49,6 +52,19 @@ class _Console(share.console.Base):
         self['PRODUCT-REV'] = product_rev
         if hardware_rev:
             self['HARDWARE-REV'] = hardware_rev
+
+    def get_mac(self):
+        """Get the MAC address from the console
+
+        @return 12 hex digit Bluetooth MAC address
+
+        """
+        mac = self['MAC']
+        mac = mac.replace(':', '').lower()  # Remove ':' & force lowercase
+        match = self.re_blemac.search(mac)
+        if not match:
+            raise ValueError('Bluetooth MAC not found')
+        return mac
 
     def hs_output(self, index, state=False):
         """Set a HS output state.
