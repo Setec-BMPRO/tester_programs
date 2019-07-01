@@ -21,7 +21,6 @@ class _Console(share.console.Base):
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     max_output_index = 56       # Output index is range(max_output_index)
     missing_outputs = {}        # Key: any text, Value: Output index
-    valid_outputs = []          # List of implemented output index
     ls_0a5_out1 = 34
     ls_0a5_out2 = 35
 
@@ -35,6 +34,7 @@ class _Console(share.console.Base):
         missing_set = set()
         for key in self.missing_outputs:
             missing_set.add(self.missing_outputs[key])
+        self.valid_outputs = []          # List of implemented output index
         for idx in range(self.max_output_index):
             if idx not in missing_set:
                 self.valid_outputs.append(idx)
@@ -64,7 +64,7 @@ class _Console(share.console.Base):
         match = self.re_blemac.search(mac)
         if not match:
             raise ValueError('Bluetooth MAC not found')
-        return mac
+        return match.group(0)
 
     def hs_output(self, index, state=False):
         """Set a HS output state.
