@@ -29,7 +29,7 @@ class Final(share.TestSequence):
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
-        'STD': {
+        '100': {
             'Limits': _common + (
                 LimitPercent('ARM-ShuntRes', 800000, 5.0,
                     doc='Shunt resistance calibrated'),
@@ -37,7 +37,15 @@ class Final(share.TestSequence):
                     doc='Battery current calibrated'),
                 ),
             },
-        'H': {
+        '300': {
+            'Limits': _common + (
+                LimitPercent('ARM-ShuntRes', 90000, 30.0,
+                    doc='Shunt resistance calibrated'),
+                LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.3,
+                    doc='Battery current calibrated'),
+                ),
+            },
+        'PRO': {
             'Limits': _common + (
                 LimitPercent('ARM-ShuntRes', 90000, 30.0,
                     doc='Shunt resistance calibrated'),

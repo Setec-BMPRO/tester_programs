@@ -40,15 +40,22 @@ class Initial(share.TestSequence):
         )
     # Variant specific configuration data. Indexed by test program parameter.
     limitdata = {
-        'STD': {
+        '100': {
             'Model': 0,
             'Limits': _common + (
                 LimitDelta('ARM-IbattZero', 0.0, 0.031,
                     doc='Zero battery current calibrated'),
                 ),
             },
-        'H': {
+        '300': {
             'Model': 1,
+            'Limits': _common + (
+                LimitDelta('ARM-IbattZero', 0.0, 0.3,
+                    doc='Zero battery current calibrated'),
+                ),
+            },
+        'PRO': {
+            'Model': 2,
             'Limits': _common + (
                 LimitDelta('ARM-IbattZero', 0.0, 0.3,
                     doc='Zero battery current calibrated'),
