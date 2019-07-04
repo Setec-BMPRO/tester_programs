@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 - 2019 SETEC Pty Ltd.
 """BC2 Console driver."""
 
 import share
@@ -10,6 +11,8 @@ class Console(share.console.SamB11):
     """Communications to BC2 console."""
 
     parameter = share.console.parameter
+    # Shunt resistance value for BatteryCheck100
+    shunt_100 = 800000
     cmd_data = {
         share.console.Base.query_last_response: None,
         # X-Register values
@@ -43,6 +46,16 @@ class Console(share.console.SamB11):
         super().brand(hw_ver, sernum)
         self['PASSKEY'] = self.passkey(sernum)
         self['NVWRITE'] = True
+
+    def set_model(self, model):
+        """Brand the unit with Hardware ID & Serial Number.
+
+        @param model Model ID (0: '100', 1: '300', 2: 'PRO')
+
+        """
+        self['MODEL'] = model
+        if model == 0:      # BatteryCheck100 bug - Manual shunt setting
+            self['SHUNT_RES'] = self.shunt_100
 
     @staticmethod
     def passkey(sernum):

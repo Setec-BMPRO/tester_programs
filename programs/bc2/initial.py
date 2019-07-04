@@ -1,78 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 - 2019 SETEC Pty Ltd.
 """BC2 Initial Program."""
 
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitDelta, LimitBetween, LimitBoolean, LimitPercent, LimitRegExp
-    )
 import share
-from . import console
-from . import config
+
+from . import config, console
 
 
 class Initial(share.TestSequence):
 
     """BC2 Initial Test Program."""
 
-    # Injected values
-    vbatt = 15.0
-    # Common limits
-    _common = (
-        LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
-        LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
-            doc='Software version'),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
-            doc='Valid MAC address '),
-        LimitBoolean('DetectBT', True, doc='MAC address detected'),
-        LimitRegExp('ARM-CalOk', 'cal success:',
-            doc='Calibration success'),
-        LimitBetween('ARM-I_ADCOffset', -3, 3,
-            doc='Current ADC offset calibrated'),
-        LimitBetween('ARM-VbattLSB', 2391, 2489,
-            doc='LSB voltage calibrated'),
-        LimitPercent('ARM-Vbatt', vbatt, 0.5, delta=0.02,
-            doc='Battery voltage calibrated'),
-        )
-    # Variant specific configuration data. Indexed by test program parameter.
-    limitdata = {
-        '100': {
-            'Model': 0,
-            'Limits': _common + (
-                LimitDelta('ARM-IbattZero', 0.0, 0.031,
-                    doc='Zero battery current calibrated'),
-                ),
-            },
-        '300': {
-            'Model': 1,
-            'Limits': _common + (
-                LimitDelta('ARM-IbattZero', 0.0, 0.3,
-                    doc='Zero battery current calibrated'),
-                ),
-            },
-        'PRO': {
-            'Model': 2,
-            'Limits': _common + (
-                LimitDelta('ARM-IbattZero', 0.0, 0.3,
-                    doc='Zero battery current calibrated'),
-                ),
-            },
-        }
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.config = self.limitdata[self.parameter]
-        super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
+        self.cfg = config.Config.get(self.parameter)
+        self.limits = self.cfg.limits_initial()
+        super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('TestArm', self._step_test_arm),
-            TestStep('Calibrate', self._step_calibrate),
-            TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('Calibrate', self._step_calibrate),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 
@@ -80,7 +32,7 @@ class Initial(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        dev['dcs_vin'].output(self.vbatt, True)
+        dev['dcs_vin'].output(self.cfg.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
@@ -88,8 +40,8 @@ class Initial(share.TestSequence):
         """Test operation."""
         bc2 = dev['bc2']
         bc2.open()
-        bc2.brand(config.HW_VERSION, self.sernum)
-        bc2['MODEL'] = self.config['Model']
+        bc2.brand(self.cfg.hw_version, self.sernum)
+        bc2.set_model(self.cfg.model)
         mes['arm_swver']()
 
     @share.teststep

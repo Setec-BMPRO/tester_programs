@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 - 2019 SETEC Pty Ltd.
 """UnitTest for BC2 Initial Test program."""
 
 from unittest.mock import MagicMock, patch
@@ -36,7 +37,7 @@ class _BC2Initial(ProgramTestCase):
                     (sen['vin'], 15.0), (sen['3v3'], 3.30),
                     ),
                 'TestArm': (
-                    (sen['arm_SwVer'], bc2.config.SW_VERSION),
+                    (sen['arm_SwVer'], self.test_program.cfg.sw_version),
                     ),
                 'Calibrate': (
                     (sen['vin'], (14.9999, 15.0)),
@@ -63,7 +64,7 @@ class BC2_Initial(_BC2Initial):
 
     """BC2 Initial program test suite."""
 
-    parameter = 'STD'
+    parameter = '100'
     debug = False
 
     def test_pass_run(self):
@@ -75,7 +76,7 @@ class BC2H_Initial(_BC2Initial):
 
     """BC2H Initial program test suite."""
 
-    parameter = 'H'
+    parameter = '300'
     debug = False
 
     def test_pass_run(self):

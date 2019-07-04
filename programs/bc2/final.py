@@ -1,69 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 - 2019 SETEC Pty Ltd.
 """BC2 Final Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitDelta, LimitRegExp, LimitPercent
-    )
 import share
-from . import console
-from . import config
+
+from . import config, console
 
 
 class Final(share.TestSequence):
 
     """BC2 Final Test Program."""
-    # Injected values
-    vbatt = 15.0
-    ibatt = 10.0
-    # Common limits
-    _common = (
-        LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
-        LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
-            doc='Software version'),
-        LimitRegExp('ARM-QueryLast', 'cal success:',
-            doc='Calibration success'),
-        )
-    # Variant specific configuration data. Indexed by test program parameter.
-    limitdata = {
-        '100': {
-            'Limits': _common + (
-                LimitPercent('ARM-ShuntRes', 800000, 5.0,
-                    doc='Shunt resistance calibrated'),
-                LimitPercent('ARM-Ibatt', ibatt, 1, delta=0.031,
-                    doc='Battery current calibrated'),
-                ),
-            },
-        '300': {
-            'Limits': _common + (
-                LimitPercent('ARM-ShuntRes', 90000, 30.0,
-                    doc='Shunt resistance calibrated'),
-                LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.3,
-                    doc='Battery current calibrated'),
-                ),
-            },
-        'PRO': {
-            'Limits': _common + (
-                LimitPercent('ARM-ShuntRes', 90000, 30.0,
-                    doc='Shunt resistance calibrated'),
-                LimitPercent('ARM-Ibatt', ibatt, 3, delta=0.3,
-                    doc='Battery current calibrated'),
-                ),
-            },
-        }
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.config = self.limitdata[self.parameter]
-        super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
+        self.cfg = config.Config.get(self.parameter)
+        self.limits = self.cfg.limits_final()
+        super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('Bluetooth', self._step_bluetooth),
-            TestStep('Calibrate', self._step_cal),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('Calibrate', self._step_cal),
             )
         self.sernum = None
 
@@ -71,7 +29,7 @@ class Final(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        dev['dcs_vin'].output(self.vbatt, True)
+        dev['dcs_vin'].output(self.cfg.vbatt, True)
         mes['dmm_vin'](timeout=5)
 
     @share.teststep
@@ -89,8 +47,8 @@ class Final(share.TestSequence):
 
         """
         bc2 = dev['bc2']
-        dev['dcl'].output(current=self.ibatt, output=True, delay=0.5)
-        bc2['SHUNT_RES_CAL'] = self.ibatt
+        dev['dcl'].output(current=self.cfg.ibatt, output=True, delay=0.5)
+        bc2['SHUNT_RES_CAL'] = self.cfg.ibatt
         mes['arm_query_last']()
         bc2['NVWRITE'] = True
         self.measure(('arm_shuntres', 'arm_ibatt', ))

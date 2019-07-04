@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 - 2019 SETEC Pty Ltd.
 """UnitTest for BC2 Final Test program."""
 
 from unittest.mock import patch
@@ -33,7 +34,7 @@ class _BC2Final(ProgramTestCase):
                     (sen['vin'], 15.0),
                     ),
                 'Bluetooth': (
-                    (sen['arm_swver'], bc2.config.SW_VERSION),
+                    (sen['arm_swver'], self.test_program.cfg.sw_version),
                     ),
                 'Calibrate': (
                     (sen['vin'], (14.9999, 15.0)),
@@ -57,7 +58,7 @@ class BC2_Final(_BC2Final):
 
     """BC2 Final program test suite."""
 
-    parameter = 'STD'
+    parameter = '100'
     shunt_res = 800000
     debug = False
 
@@ -70,7 +71,7 @@ class BC2H_Final(_BC2Final):
 
     """BC2H Final program test suite."""
 
-    parameter = 'H'
+    parameter = '300'
     shunt_res = 90000
     debug = False
 
