@@ -98,11 +98,9 @@ class SX600(Config):
 
     # Initial Test parameters
     #  Software version
-# FIXME: We need software version
-    _bin_version = 'a.b.ccc'
+    _bin_version = '1.0.18961.1114'
     #  Software image filenames
-# FIXME: We need the software filename
-    arm_bin = 'sx600_arm_{0}.bin'.format(_bin_version)
+    arm_bin = 'sx600_{0}.bin'.format(_bin_version)
     # 12V & 24V output ratings (A)
     ratings = Ratings(
 # FIXME: We need 12V OCP set point defined
@@ -129,9 +127,10 @@ class SX600(Config):
 # FIXME: Add the rest of the SX-600 limits
             tester.LimitRegExp(
                 'ARM-SwVer',
-                '^{0}$'.format(cls._bin_version[:3].replace('.', r'\.'))),
+                '^{0}$'.format(r'\.'.join(cls._bin_version.split('.')[:2]))),
             tester.LimitRegExp(
-                'ARM-SwBld', '^{0}$'.format(cls._bin_version[4:])),
+                'ARM-SwBld',
+                '^{0}$'.format(cls._bin_version.split('.')[3])),
             )
 
 
@@ -170,9 +169,10 @@ class SX750(Config):
             tester.LimitDelta('OCP24pre', cls.ratings.v24.ocp, 1),
             tester.LimitRegExp(
                 'ARM-SwVer',
-                '^{0}$'.format(cls._bin_version[:3].replace('.', r'\.'))),
+                '^{0}$'.format(r'\.'.join(cls._bin_version.split('.')[:2]))),
             tester.LimitRegExp(
-                'ARM-SwBld', '^{0}$'.format(cls._bin_version[4:])),
+                'ARM-SwBld',
+                '^{0}$'.format(cls._bin_version.split('.')[2])),
             tester.LimitLow('PartCheck', 1.0),          # Photo sensor on D404
             tester.LimitBetween('Snubber', 1000, 3000), # Snubbing resistors
             )

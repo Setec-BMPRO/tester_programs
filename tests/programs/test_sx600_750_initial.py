@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for SX750 Initial Test program."""
+"""UnitTest for SX600/750 Initial Test program."""
 
 from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import sx600_750
+
+# FIXME: Add SX600Initial test class
 
 
 class SX750Initial(ProgramTestCase):
