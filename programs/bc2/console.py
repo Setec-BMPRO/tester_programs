@@ -18,7 +18,8 @@ class Console(share.console.SamB11):
         # X-Register values
         'MODEL': parameter.Float('BC2_MODEL', writeable=True),
         'I_ADC_OFFSET': parameter.Float('STC3100_CURRENT_OFFSET', ),
-        'SHUNT_RES': parameter.Float('SHUNT_R_NOHMS', ),
+        'SHUNT_RES': parameter.Float(
+            'SHUNT_R_NOHMS', maximum=1000000, writeable=True),
         'BATT_V_LSB': parameter.Float('STC3100_VOLTAGE_LSB_UV', ),
         'BATT_V': parameter.Float('VOLTAGE_MV', scale=1000),
         'BATT_I': parameter.Float('CURRENT_MA', scale=-1000),
