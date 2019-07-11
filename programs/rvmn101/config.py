@@ -76,8 +76,8 @@ class RVMN101A(Config):
     fixture = '033550'
     #  Software version
     nordic_image = 'jayco_rvmn101_signed_1.2.0-0-g6b58421_factory_mcuboot.hex'
-    product_rev = '06A'
-    hardware_rev = '05B'
+    product_rev = '06C'     # per PC-5070
+    hardware_rev = '05D'    # per PC-5070
 
 
 class RVMN101B(Config):
