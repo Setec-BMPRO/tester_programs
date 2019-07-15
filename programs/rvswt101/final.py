@@ -13,7 +13,7 @@ class Final(share.TestSequence):
 
     """RVSWT101 Final Test Program."""
 
-    ble_adtype_manufacturer ='255'
+    ble_adtype_manufacturer = 255
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
@@ -42,7 +42,7 @@ class Final(share.TestSequence):
         reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
         mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()
-        packet = reply['ad_data'][self.ble_adtype_manufacturer]
+        packet = reply['ad_data'][repr(self.ble_adtype_manufacturer)]
         dev['decoder'].packet = device.Packet(packet)
         self.measure(('cell_voltage', 'switch_type', ))
 
