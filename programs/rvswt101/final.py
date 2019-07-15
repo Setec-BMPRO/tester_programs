@@ -13,7 +13,7 @@ class Final(share.TestSequence):
 
     """RVSWT101 Final Test Program."""
 
-    ble_adtype_manufacturer = 255
+    ble_adtype_manufacturer ='255'
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
