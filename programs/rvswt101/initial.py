@@ -75,7 +75,7 @@ class Initial(share.TestSequence):
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Save SerialNumber & MAC on a remote server.
-                dev['serialtomac'].blemac_set(self.sernum, self.mac)
+                dev['serialtomac'].blemac_set(str(self.uuts[pos]), self.mac)
                 # Press Button2 to broadcast on bluetooth
                 dev['fixture'].press(pos)
                 reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
