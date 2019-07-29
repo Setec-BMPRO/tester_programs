@@ -95,7 +95,7 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS1'),
+                ('dcs_vcom', tester.DCSource, 'DCS4'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_switch', tester.DCSource, 'DCS3'),
                 ('rla_pos1', tester.Relay, 'RLA1'),
