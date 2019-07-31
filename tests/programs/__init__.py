@@ -50,6 +50,8 @@ from . import test_j35_config
 from . import test_j35_final
 from . import test_j35_initial
 from . import test_mb2_final
+from . import test_mb3_final
+from . import test_mb3_initial
 from . import test_mk7400_final
 from . import test_rm50_final
 from . import test_rvmc101_final
@@ -126,6 +128,8 @@ __all__ = [
     'test_j35_final',
     'test_j35_initial',
     'test_mb2_final',
+    'test_mb3_final',
+    'test_mb3_initial',
     'test_mk7400_final',
     'test_rm50_final',
     'test_rvmc101_final',

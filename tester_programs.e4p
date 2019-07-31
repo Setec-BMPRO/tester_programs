@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2019-07-01, 10:34:00 -->
+<!-- Saved: 2019-07-25, 17:27:24 -->
 <!-- Copyright (C) 2019 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -107,6 +107,7 @@
     <Source>programs/mb2/__init__.py</Source>
     <Source>programs/mb2/final.py</Source>
     <Source>programs/mb3/__init__.py</Source>
+    <Source>programs/mb3/config.py</Source>
     <Source>programs/mb3/final.py</Source>
     <Source>programs/mb3/initial.py</Source>
     <Source>programs/mk7400/__init__.py</Source>
