@@ -131,6 +131,7 @@ class Devices(share.Devices):
         rvswt101_ser.port = bl652_port
         # RVSWT101 Console driver
         self['rvswt101'] = console.Console(rvswt101_ser)
+        self['rvswt101'].measurement_fail_on_error = False
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server

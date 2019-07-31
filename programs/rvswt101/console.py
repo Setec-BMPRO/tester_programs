@@ -21,11 +21,15 @@ class Console(share.console.Base):
         @return 12 hex digit Bluetooth MAC address
 
         """
-        mac = self.action(None, delay=1.5, expected=self.banner_lines)
-        if self.banner_lines > 1:
-            mac = mac[0]
-        mac = mac.replace(':', '')
-        match = self.re_banner.match(mac)
-        if not match:
-            raise ValueError('Bluetooth MAC not found in startup banner')
-        return match.group(1)
+        result = ''
+        try:
+            mac = self.action(None, delay=1.5, expected=self.banner_lines)
+            if self.banner_lines > 1:
+                mac = mac[0]
+            mac = mac.replace(':', '')
+            match = self.re_banner.match(mac)
+            if match:
+                result = match.group(1)
+        except share.console.Error:
+            pass
+        return result
