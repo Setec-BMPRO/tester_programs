@@ -47,6 +47,8 @@ class Config():
     _base_limits_initial = _base_limits_common + (
         tester.LimitDelta('8.5V Arduino', 8.5, 0.4),
         tester.LimitLow('FixtureLock', 200),
+        tester.LimitLow('PartCheck', 1.0),          # Photo sensor on D404
+        tester.LimitBetween('Snubber', 1000, 3000), # Snubbing resistors
         tester.LimitRegExp('Reply', '^OK$'),
         tester.LimitInteger('Program', 0),
         tester.LimitDelta('3V3', 3.3, 0.1),
@@ -104,8 +106,10 @@ class SX600(Config):
     # 12V & 24V output ratings (A)
     ratings = Ratings(
 # FIXME: We need 12V OCP set point defined
-        v12=Rail(full=30.0, peak=32.0, ocp='value'),
-        v24=Rail(full=10.0, peak=12.0, ocp=None)
+#        v12=Rail(full=30.0, peak=32.0, ocp='value'),
+#        v24=Rail(full=10.0, peak=12.0, ocp=None)
+        v12=Rail(full=30.0, peak=32.0, ocp=32.0),
+        v24=Rail(full=10.0, peak=12.0, ocp=12.0)
         )
 
     @classmethod
@@ -173,6 +177,4 @@ class SX750(Config):
             tester.LimitRegExp(
                 'ARM-SwBld',
                 '^{0}$'.format(cls._bin_version.split('.')[2])),
-            tester.LimitLow('PartCheck', 1.0),          # Photo sensor on D404
-            tester.LimitBetween('Snubber', 1000, 3000), # Snubbing resistors
             )

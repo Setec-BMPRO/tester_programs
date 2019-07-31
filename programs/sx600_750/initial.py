@@ -356,7 +356,8 @@ class Devices(share.Devices):
         self['programmer'] = share.programmer.ARM(
             arm_port, file, boot_relay=self['rla_boot'])
         # Serial connection to the ARM console
-        arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
+        baudrate = 57600 if self.parameter == '750' else 115200
+        arm_ser = serial.Serial(baudrate=baudrate, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = arm_port
         self['arm'] = console.Console(arm_ser)
