@@ -22,10 +22,12 @@ class Console(share.console.Base):
 
         """
         mac = self.action(None, delay=1.5, expected=self.banner_lines)
+# FIXME: Why is banner_lines != 2 for the 'j' types?
 #        if self.banner_lines > 1:
 #            mac = mac[0]
 #        mac = mac.replace(':', '')
         mac = mac[0].replace(':', '')
+
         match = self.re_banner.match(mac)
         if not match:
             raise ValueError('Bluetooth MAC not found in startup banner')
