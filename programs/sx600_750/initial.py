@@ -102,6 +102,7 @@ class Initial(share.TestSequence):
 
         """
         arm = dev['arm']
+        arm.port.rtscts = True
         arm.open()
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
@@ -375,6 +376,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['arm'].close()
+        self['arm'].port.rtscts = False
         self['ard'].close()
         self['acsource'].reset()
         self['dcl_5V'].output(1.0)

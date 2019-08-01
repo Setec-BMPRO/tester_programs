@@ -105,11 +105,9 @@ class SX600(Config):
     arm_bin = 'sx600_{0}.bin'.format(_bin_version)
     # 12V & 24V output ratings (A)
     ratings = Ratings(
-# FIXME: We need 12V OCP set point defined
-#        v12=Rail(full=30.0, peak=32.0, ocp='value'),
-#        v24=Rail(full=10.0, peak=12.0, ocp=None)
-        v12=Rail(full=30.0, peak=32.0, ocp=32.0),
-        v24=Rail(full=10.0, peak=12.0, ocp=12.0)
+        v12=Rail(full=30.0, peak=32.0, ocp=33.0),
+# FIXME: Check 24V OCP point
+        v24=Rail(full=10.0, peak=12.0, ocp=13.0)
         )
 
     @classmethod
