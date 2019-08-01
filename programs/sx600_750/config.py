@@ -100,7 +100,7 @@ class SX600(Config):
 
     # Initial Test parameters
     #  Software version
-    _bin_version = '1.0.18961.1114'
+    _bin_version = '1.0.19229.1238'
     #  Software image filenames
     arm_bin = 'sx600_{0}.bin'.format(_bin_version)
     # 12V & 24V output ratings (A)

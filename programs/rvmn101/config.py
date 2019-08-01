@@ -75,12 +75,9 @@ class RVMN101A(Config):
     # Initial Test parameters
     fixture = '033550'
     #  Software version
-#    nordic_image = 'jayco_rvmn101_signed_1.2.0-0-g6b58421_factory_mcuboot.hex'
-#    product_rev = '06C'     # per PC-5070
-#    hardware_rev = '05D'    # per PC-5070
-    nordic_image = 'jayco_rvmn101_signed_1.2.2-0-g4ccc5d6_factory_mcuboot.hex'
-    product_rev = '06D'     # per PC-5076
-    hardware_rev = '05D'    # per PC-5076
+    nordic_image = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
+    product_rev = '06E'     # per PC-5077
+    hardware_rev = '05D'    # per PC-5077
 
 
 class RVMN101B(Config):
