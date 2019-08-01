@@ -32,8 +32,5 @@ ATMEL AtTiny
 AtTiny10                Done by Arduino 2016-11
     BatteryCheck        Product EOL 2018-06
 
-AtTiny406
-    MB3
-
 AtTiny1634
     WTSI200             Done by Arduino 2013-08

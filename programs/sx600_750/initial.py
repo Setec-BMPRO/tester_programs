@@ -151,8 +151,12 @@ class Initial(share.TestSequence):
         if self.parameter == '750':
             arm.calpfc(pfc)
         else:
-# FIXME: Implement SX-600 PFC Cal.
-            raise NotImplementedError('SX-600 PFC calibration not done yet!')
+            steps = round(
+                (self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
+            mes['ocp24_unlock']()
+            for _ in range(steps):
+                mes['ocp_step_dn']()
+            mes['ocp_lock']()
         # Prevent a fail from failing the unit
         mes['dmm_PFCpost'].position_fail = False
         result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
@@ -164,8 +168,13 @@ class Initial(share.TestSequence):
             if self.parameter == '750':
                 arm.calpfc(pfc)
             else:
-# FIXME: Implement SX-600 PFC Cal.
-                raise NotImplementedError('SX-600 PFC calibration not done yet!')
+# FIXME: Do we need to retry PFC cal on SX-600?
+                steps = round(
+                    (self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
+                mes['ocp24_unlock']()
+                for _ in range(steps):
+                    mes['ocp_step_dn']()
+                mes['ocp_lock']()
             mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
         # Leave the loads at zero
         dev['dcl_12V'].output(0)

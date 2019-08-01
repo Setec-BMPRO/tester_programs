@@ -15,6 +15,8 @@ class Config():
     #  Injected voltages
     _5vsb_ext = 6.3
     prictl_ext = 13.0
+    #  Post-adjustment PFC voltage
+    pfc_target = 435.0
     #  Reading to reading difference for PFC voltage stability
     pfc_stable = 0.05
     # Final Test parameters
@@ -58,8 +60,6 @@ class Config():
         tester.LimitLow('ARM-12V', 999),
         tester.LimitLow('ARM-24V', 999),
         tester.LimitBetween('PriCtl', 11.40, 17.0),
-        tester.LimitDelta('PFCpre', 420, 20),
-        tester.LimitDelta('PFCpost', 435, 1.0),
         tester.LimitDelta('5Vext', _5vsb_ext - 0.8, 1.0),
         tester.LimitDelta('5Vunsw', _5vsb_ext - 0.8 - 0.7, 1.0),
         )
@@ -103,6 +103,8 @@ class SX600(Config):
     _bin_version = '1.0.19229.1238'
     #  Software image filenames
     arm_bin = 'sx600_{0}.bin'.format(_bin_version)
+    # PFC digital pot sensitivity (V/step)
+    pfc_volt_per_step = 2.2
     # 12V & 24V output ratings (A)
     ratings = Ratings(
         v12=Rail(full=30.0, peak=32.0, ocp=33.0),
@@ -118,6 +120,8 @@ class SX600(Config):
 
         """
         return super()._base_limits_initial + (
+            tester.LimitDelta('PFCpre', cls.pfc_target, 30),
+            tester.LimitDelta('PFCpost', cls.pfc_target, 2.0),
             tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
             tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
             tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.4),
@@ -161,6 +165,8 @@ class SX750(Config):
 
         """
         return super()._base_limits_initial + (
+            tester.LimitDelta('PFCpre', 420, 20),
+            tester.LimitDelta('PFCpost', cls.pfc_target, 1.0),
             tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
             tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
             tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.4),
