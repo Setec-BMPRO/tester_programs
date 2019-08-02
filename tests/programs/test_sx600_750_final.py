@@ -5,8 +5,6 @@
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import sx600_750
 
-# FIXME: Add SX600Final test class
-
 
 class SX600Final(ProgramTestCase):
 
@@ -30,8 +28,8 @@ class SX600Final(ProgramTestCase):
                     (sen['oPwrGood'], 0.1), (sen['oAcFail'], 5.1),
                     ),
                 'Load': (
-                    (sen['o5v'], 5.1), (sen['o12v'], (12.2, 12.1)),
-                    (sen['o24v'], (24.2, 24.1)), (sen['oPwrGood'], 0.1),
+                    (sen['o5v'], 5.1), (sen['o12v'], (12.1, 12.0)),
+                    (sen['o24v'], (24.1, 24.0)), (sen['oPwrGood'], 0.1),
                     (sen['oAcFail'], 5.1),
                     ),
                 },

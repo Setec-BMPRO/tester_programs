@@ -103,9 +103,9 @@ class Initial(share.TestSequence):
         """
         arm = dev['arm']
         if self.parameter == '750':
-            arm.port.baudrate = 57600
+            arm.port.baudrate = 57600   # Slower baudrate on SX-750
         else:
-            arm.port.rtscts = True
+            arm.port.rtscts = True      # Hardware handshake on SX-600
         arm.open()
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
@@ -137,48 +137,51 @@ class Initial(share.TestSequence):
         dev['dcl_24V'].output(1.0)
         self.measure(
             ('dmm_ACin', 'dmm_PriCtl', 'dmm_5Vnl', 'dmm_12Voff',
-             'dmm_24Voff', 'dmm_ACFAIL'), timeout=2)
+             'dmm_24Voff', 'dmm_ACFAIL', ), timeout=2)
+        arm = dev['arm']
+        arm['UNLOCK'] = True
+        if self.parameter == '600':     # Prevent shutdown due to no fan
+            arm['FAN_CHECK_DISABLE'] = True
         # Switch all outputs ON
         dev['rla_pson'].set_on()
         self.measure(
             ('dmm_12V_set', 'dmm_24V_set', 'dmm_PGOOD'), timeout=2)
         # ARM data readings
-        arm = dev['arm']
-        arm['UNLOCK'] = True
         self.measure(
             ('arm_AcFreq', 'arm_AcVolt', 'arm_12V', 'arm_24V',
-             'arm_SwVer', 'arm_SwBld'), )
+             'arm_SwVer', 'arm_SwBld', ), )
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
         if self.parameter == '750':
             arm.calpfc(pfc)
+            # Prevent a fail from failing the unit
+            mes['dmm_PFCpost'].position_fail = False
+            result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
+            # Allow a fail to fail the unit
+            mes['dmm_PFCpost'].position_fail = True
+            if not result:
+                self._logger.info('Retry PFC calibration')
+                pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
+                arm.calpfc(pfc)
+                mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
         else:   # SX-600
             steps = round(
                 (self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
-            if steps > 0:   # Too low
-                steps -= 1  # Unlock/Lock cause 1 step down
+            if steps > 0:       # Too low
+                self._logger.debug('Step UP %s steps', steps)
                 mes['pfcUpUnlock']()
-                for _ in range(steps):
+                for _ in range(steps - 1):  # Unlock/Lock cause 1 step
                     mes['pfcStepUp']()
                 mes['pfcUpLock']()
             elif steps < 0:     # Too high
+                self._logger.debug('Step DOWN %s steps', -steps)
                 mes['pfcDnUnlock']()
                 for _ in range(-steps):
                     mes['pfcStepDn']()
                 mes['pfcDnLock']()
-        # Prevent a fail from failing the unit
-        mes['dmm_PFCpost'].position_fail = False
-        result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
-        # Allow a fail to fail the unit
-        mes['dmm_PFCpost'].position_fail = True
-        if not result:
-            self._logger.info('Retry PFC calibration')
-            pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
-            if self.parameter == '750':
-                arm.calpfc(pfc)
-# FIXME: Do we need to retry PFC cal on SX-600?
-            mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
+            if steps:   # Post-adjustment check
+                mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
         # Leave the loads at zero
         dev['dcl_12V'].output(0)
         dev['dcl_24V'].output(0)
@@ -264,7 +267,7 @@ class Initial(share.TestSequence):
         dev['dcl_24V'].binary(
             start=0.0, end=self.cfg.ratings.v24.peak, step=2.0)
         self.measure(
-            ('dmm_5V', 'dmm_12V', 'dmm_24V', 'dmm_PGOOD'), timeout=2)
+            ('dmm_5V', 'dmm_12V', 'dmm_24V', 'dmm_PGOOD', ), timeout=2)
         dev['dcl_24V'].output(0)
         dev['dcl_12V'].output(0)
         dev['dcl_5V'].output(0)

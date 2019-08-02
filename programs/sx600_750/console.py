@@ -28,6 +28,9 @@ class Console(share.console.Base):
             'X-TEMPERATURE-CONTROLLER-SETPOINT',
             writeable=True,
             write_format='{0} {1} X!'),
+        'FAN_CHECK_DISABLE': parameter.Boolean(
+            'X-SYSTEM-ENABLE', read_format='{0} X?',
+            writeable=True, write_format='{1} {0} X!'),
         'CAL_PFC': parameter.Float(
             'CAL-PFC-BUS-VOLTS',
             writeable=True, readable=False, scale=1000,

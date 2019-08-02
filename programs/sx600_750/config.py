@@ -31,7 +31,7 @@ class Config():
         # Full Load
         tester.LimitPercent('5Vfl', 5.0, 4.5),
         tester.LimitPercent('12Vfl', 12.0, 6.5),
-        tester.LimitPercent('24Vfl', 24.0, 9.5),
+        tester.LimitPercent('24Vfl', 24.0, 9.0),
         # Load regulation (values in %)
         tester.LimitLow('Reg5V', 3.0),
         tester.LimitBetween('Reg12V', 0.2, 5.0),
@@ -55,9 +55,12 @@ class Config():
         tester.LimitLow('ARM-AcVolt', 999),
         tester.LimitLow('ARM-12V', 999),
         tester.LimitLow('ARM-24V', 999),
-        tester.LimitBetween('PriCtl', 11.40, 17.0),
         tester.LimitDelta('5Vext', _5vsb_ext - 0.8, 1.0),
         tester.LimitDelta('5Vunsw', _5vsb_ext - 0.8 - 0.7, 1.0),
+        tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
+        tester.LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404>4V
+        tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
+        tester.LimitBetween('24V_ocp', 4, 63), # Digital Pot setting
         )
     # Final Test limits common to both units
     _base_limits_final = _base_limits_common + (
@@ -76,15 +79,6 @@ class Config():
         """
         return {'600': SX600, '750': SX750}[parameter]
 
-    @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple(limits)
-
-        """
-        return cls._base_limits_final
-
 
 Rail = collections.namedtuple('Rail', 'full, peak, ocp')
 Ratings = collections.namedtuple('Ratings', 'v12, v24')
@@ -102,10 +96,16 @@ class SX600(Config):
     # PFC digital pot sensitivity (V/step)
     pfc_volt_per_step = 2.2
     # 12V & 24V output ratings (A)
-    #  24V OCP spec is 12.1A to 16.2A = 14.15 ± 2.05A
+    #  24V OCP spec is 12.1A to 16.2A == 14.15 ± 2.05A
     ratings = Ratings(
         v12=Rail(full=30.0, peak=32.0, ocp=33.0),
         v24=Rail(full=10.0, peak=12.0, ocp=14.15)
+        )
+    # Test limits common to both test types
+    _limits_common = (
+        tester.LimitPercent('5Vnl', 5.08, 1.0),
+        tester.LimitPercent('12Vnl', 11.98, 1.3),
+        tester.LimitPercent('24Vnl', 24.03, 1.4),
         )
 
     @classmethod
@@ -115,18 +115,12 @@ class SX600(Config):
         @return Tuple(limits)
 
         """
-        return super()._base_limits_initial + (
-            tester.LimitPercent('5Vnl', 5.13, 1.0),
-            tester.LimitPercent('12Vnl', 11.98, 1.3),
-            tester.LimitPercent('24Vnl', 24.03, 1.4),
+        return super()._base_limits_initial + cls._limits_common + (
+            tester.LimitBetween('PriCtl', 12.0, 14.5),
             tester.LimitDelta('PFCpre', cls.pfc_target, 30),
             tester.LimitDelta('PFCpost', cls.pfc_target, 2.0),
-            tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
-            tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
             tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.5),
-            tester.LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404>4V
             tester.LimitDelta('24V_OCPchk', cls.ratings.v24.ocp, 2.05),
-# FIXME: Add the rest of the SX-600 limits
             tester.LimitRegExp(
                 'ARM-SwVer',
                 '^{0}$'.format(r'\.'.join(cls._bin_version.split('.')[:2]))),
@@ -134,6 +128,15 @@ class SX600(Config):
                 'ARM-SwBld',
                 '^{0}$'.format(cls._bin_version.split('.')[3])),
             )
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        return super()._base_limits_final + cls._limits_common
 
 
 class SX750(Config):
@@ -152,6 +155,12 @@ class SX750(Config):
         v12=Rail(full=32.0, peak=36.0, ocp=36.6),
         v24=Rail(full=15.0, peak=18.0, ocp=18.3)
         )
+    # Test limits common to both test types
+    _limits_common = (
+        tester.LimitPercent('5Vnl', 5.10, 1.5),
+        tester.LimitPercent('12Vnl', 12.25, 2.0),
+        tester.LimitPercent('24Vnl', 24.13, 2.0),
+        )
 
     @classmethod
     def limits_initial(cls):
@@ -160,17 +169,11 @@ class SX750(Config):
         @return Tuple(limits)
 
         """
-        return super()._base_limits_initial + (
-            tester.LimitPercent('5Vnl', 5.10, 1.5),
-            tester.LimitPercent('12Vnl', 12.25, 2.0),
-            tester.LimitPercent('24Vnl', 24.13, 2.0),
+        return super()._base_limits_initial + cls._limits_common + (
+            tester.LimitBetween('PriCtl', 11.40, 17.0),
             tester.LimitDelta('PFCpre', 420, 20),
             tester.LimitDelta('PFCpost', cls.pfc_target, 1.0),
-            tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
-            tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
             tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.4),
-            tester.LimitBetween('24V_ocp', 4, 63), # Digital Pot setting
-            tester.LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404>4V
             tester.LimitDelta('24V_OCPchk', cls.ratings.v24.ocp, 0.2),
             tester.LimitRegExp(
                 'ARM-SwVer',
@@ -179,3 +182,12 @@ class SX750(Config):
                 'ARM-SwBld',
                 '^{0}$'.format(cls._bin_version.split('.')[2])),
             )
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        return super()._base_limits_final + cls._limits_common
