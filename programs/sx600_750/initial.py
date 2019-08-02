@@ -102,7 +102,10 @@ class Initial(share.TestSequence):
 
         """
         arm = dev['arm']
-        arm.port.rtscts = True
+        if self.parameter == '750':
+            arm.port.baudrate = 57600
+        else:
+            arm.port.rtscts = True
         arm.open()
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
@@ -150,13 +153,20 @@ class Initial(share.TestSequence):
         pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
         if self.parameter == '750':
             arm.calpfc(pfc)
-        else:
+        else:   # SX-600
             steps = round(
                 (self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
-            mes['ocp24_unlock']()
-            for _ in range(steps):
-                mes['ocp_step_dn']()
-            mes['ocp_lock']()
+            if steps > 0:   # Too low
+                steps -= 1  # Unlock/Lock cause 1 step down
+                mes['pfcUpUnlock']()
+                for _ in range(steps):
+                    mes['pfcStepUp']()
+                mes['pfcUpLock']()
+            elif steps < 0:     # Too high
+                mes['pfcDnUnlock']()
+                for _ in range(-steps):
+                    mes['pfcStepDn']()
+                mes['pfcDnLock']()
         # Prevent a fail from failing the unit
         mes['dmm_PFCpost'].position_fail = False
         result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
@@ -167,14 +177,7 @@ class Initial(share.TestSequence):
             pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
             if self.parameter == '750':
                 arm.calpfc(pfc)
-            else:
 # FIXME: Do we need to retry PFC cal on SX-600?
-                steps = round(
-                    (self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
-                mes['ocp24_unlock']()
-                for _ in range(steps):
-                    mes['ocp_step_dn']()
-                mes['ocp_lock']()
             mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
         # Leave the loads at zero
         dev['dcl_12V'].output(0)
@@ -366,8 +369,7 @@ class Devices(share.Devices):
         self['programmer'] = share.programmer.ARM(
             arm_port, file, boot_relay=self['rla_boot'])
         # Serial connection to the ARM console
-        baudrate = 57600 if self.parameter == '750' else 115200
-        arm_ser = serial.Serial(baudrate=baudrate, timeout=2.0)
+        arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = arm_port
         self['arm'] = console.Console(arm_ser)
@@ -375,7 +377,11 @@ class Devices(share.Devices):
         ard_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.fixture.port('022837', 'ARDUINO')
-        self['ard'] = arduino.Arduino(ard_ser)
+        ard_class = {
+            '600': arduino.Arduino600,
+            '750': arduino.Arduino750,
+            }[self.parameter]
+        self['ard'] = ard_class(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
             self[dcs].output(12.0, output=True)
@@ -385,6 +391,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['arm'].close()
+        self['arm'].port.baudrate = 115200
         self['arm'].port.rtscts = False
         self['ard'].close()
         self['acsource'].reset()
@@ -454,6 +461,12 @@ class Sensors(share.Sensors):
                 ('ocp24Unlock', '24_OCP_UNLOCK'),
                 ('ocpStepDn', 'OCP_STEP_DN'),
                 ('ocpLock', 'OCP_LOCK'),
+                ('pfcDnUnlock', 'PFC_DN_UNLOCK'),
+                ('pfcUpUnlock', 'PFC_UP_UNLOCK'),
+                ('pfcStepDn', 'PFC_STEP_DN'),
+                ('pfcStepUp', 'PFC_STEP_UP'),
+                ('pfcDnLock', 'PFC_DN_LOCK'),
+                ('pfcUpLlock', 'PFC_UP_LOCK'),
             ):
             self[name] = share.console.Sensor(
                 ard, cmdkey, rdgtype=sensor.ReadingString)
@@ -518,6 +531,12 @@ class Measurements(share.Measurements):
             ('ocp24_unlock', 'Reply', 'ocp24Unlock', ''),
             ('ocp_step_dn', 'Reply', 'ocpStepDn', ''),
             ('ocp_lock', 'Reply', 'ocpLock', ''),
+            ('pfcDnUnlock', 'Reply', 'pfcDnUnlock', ''),
+            ('pfcUpUnlock', 'Reply', 'pfcUpUnlock', ''),
+            ('pfcStepDn', 'Reply', 'pfcStepDn', ''),
+            ('pfcStepUp', 'Reply', 'pfcStepUp', ''),
+            ('pfcDnLock', 'Reply', 'pfcDnLock', ''),
+            ('pfcUpLlock', 'Reply', 'pfcUpLlock', ''),
             ('arm_AcFreq', 'ARM-AcFreq', 'ARM_AcFreq', ''),
             ('arm_AcVolt', 'ARM-AcVolt', 'ARM_AcVolt', ''),
             ('arm_12V', 'ARM-12V', 'ARM_12V', ''),
@@ -530,6 +549,9 @@ class Measurements(share.Measurements):
                 'dmm_12V_inOCP', 'dmm_24V_inOCP',
                 'ocp_max', 'ocp12_unlock', 'ocp24_unlock',
                 'ocp_step_dn', 'ocp_lock',
+                'pfcDnUnlock', 'pfcUpUnlock',
+                'pfcStepDn', 'pfcStepUp',
+                'pfcDnLock', 'pfcUpLlock',
                 ):
             self[name].send_signal = False
         # Suppress position failure on these measurements.
