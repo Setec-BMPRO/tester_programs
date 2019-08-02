@@ -102,10 +102,10 @@ class SX600(Config):
     # PFC digital pot sensitivity (V/step)
     pfc_volt_per_step = 2.2
     # 12V & 24V output ratings (A)
+    #  24V OCP spec is 12.1A to 16.2A = 14.15 ± 2.05A
     ratings = Ratings(
         v12=Rail(full=30.0, peak=32.0, ocp=33.0),
-# FIXME: Check 24V OCP point
-        v24=Rail(full=10.0, peak=12.0, ocp=13.0)
+        v24=Rail(full=10.0, peak=12.0, ocp=14.15)
         )
 
     @classmethod
@@ -124,9 +124,8 @@ class SX600(Config):
             tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
             tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
             tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.5),
-# FIXME: Check operation of 24V OCP detect
             tester.LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404>4V
-            tester.LimitDelta('24V_OCPchk', cls.ratings.v24.ocp, 0.2),
+            tester.LimitDelta('24V_OCPchk', cls.ratings.v24.ocp, 2.05),
 # FIXME: Add the rest of the SX-600 limits
             tester.LimitRegExp(
                 'ARM-SwVer',
