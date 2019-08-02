@@ -28,10 +28,6 @@ class Config():
         tester.LimitLow('5Voff', 0.5),
         tester.LimitLow('12Voff', 0.5),
         tester.LimitLow('24Voff', 0.5),
-        # No Load set points
-        tester.LimitPercent('5Vnl', 5.10, 1.5),
-        tester.LimitPercent('12Vnl', 12.25, 2.0),
-        tester.LimitPercent('24Vnl', 24.13, 2.0),
         # Full Load
         tester.LimitPercent('5Vfl', 5.0, 4.5),
         tester.LimitPercent('12Vfl', 12.0, 6.5),
@@ -120,16 +116,17 @@ class SX600(Config):
 
         """
         return super()._base_limits_initial + (
+            tester.LimitPercent('5Vnl', 5.13, 1.0),
+            tester.LimitPercent('12Vnl', 11.98, 1.3),
+            tester.LimitPercent('24Vnl', 24.03, 1.4),
             tester.LimitDelta('PFCpre', cls.pfc_target, 30),
             tester.LimitDelta('PFCpost', cls.pfc_target, 2.0),
             tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
             tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
-            tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.4),
-            tester.LimitDelta('OCP12pre', cls.ratings.v12.ocp, 2),
+            tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.5),
 # FIXME: Check operation of 24V OCP detect
             tester.LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404>4V
             tester.LimitDelta('24V_OCPchk', cls.ratings.v24.ocp, 0.2),
-            tester.LimitDelta('OCP24pre', cls.ratings.v24.ocp, 1),
 # FIXME: Add the rest of the SX-600 limits
             tester.LimitRegExp(
                 'ARM-SwVer',
@@ -165,16 +162,17 @@ class SX750(Config):
 
         """
         return super()._base_limits_initial + (
+            tester.LimitPercent('5Vnl', 5.10, 1.5),
+            tester.LimitPercent('12Vnl', 12.25, 2.0),
+            tester.LimitPercent('24Vnl', 24.13, 2.0),
             tester.LimitDelta('PFCpre', 420, 20),
             tester.LimitDelta('PFCpost', cls.pfc_target, 1.0),
             tester.LimitBetween('12V_ocp', 4, 63), # Digital Pot setting
             tester.LimitHigh('12V_inOCP', 4.0),    # Detect OCP when TP405>4V
             tester.LimitDelta('12V_OCPchk', cls.ratings.v12.ocp, 0.4),
-            tester.LimitDelta('OCP12pre', cls.ratings.v12.ocp, 2),
             tester.LimitBetween('24V_ocp', 4, 63), # Digital Pot setting
             tester.LimitHigh('24V_inOCP', 4.0),    # Detect OCP when TP404>4V
             tester.LimitDelta('24V_OCPchk', cls.ratings.v24.ocp, 0.2),
-            tester.LimitDelta('OCP24pre', cls.ratings.v24.ocp, 1),
             tester.LimitRegExp(
                 'ARM-SwVer',
                 '^{0}$'.format(r'\.'.join(cls._bin_version.split('.')[:2]))),
