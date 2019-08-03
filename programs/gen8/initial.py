@@ -169,18 +169,15 @@ class Initial(share.TestSequence):
         # Calibrate the 12V set voltage
         v12 = mes['dmm_12vpre'].stable(self.v12_stable).reading1
         arm.cal12v(v12)
-        # Prevent a fail from failing the unit
-        mes['dmm_12vset'].position_fail = False
-        result = mes['dmm_12vset'].stable(self.v12_stable).result
-        # Allow a fail to fail the unit
-        mes['dmm_12vset'].position_fail = True
+        with mes['dmm_12vset'].position_fail_disabled():
+            result = mes['dmm_12vset'].stable(self.v12_stable).result
         if not result:
             v12 = mes['dmm_12vpre'].stable(self.v12_stable).reading1
             arm.cal12v(v12)
             mes['dmm_12vset'].stable(self.v12_stable)
         self.measure(
             ('arm_acfreq', 'arm_acvolt', 'arm_5v', 'arm_12v', 'arm_24v',
-             'arm_swver', 'arm_swbld'), )
+             'arm_swver', 'arm_swbld', ))
 
     @share.teststep
     def _step_reg_5v(self, dev, mes):

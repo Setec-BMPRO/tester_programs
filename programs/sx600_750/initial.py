@@ -149,17 +149,14 @@ class Initial(share.TestSequence):
         # ARM data readings
         self.measure(
             ('arm_AcFreq', 'arm_AcVolt', 'arm_12V', 'arm_24V',
-             'arm_SwVer', 'arm_SwBld', ), )
+             'arm_SwVer', 'arm_SwBld', ))
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
         if self.parameter == '750':
             arm.calpfc(pfc)
-            # Prevent a fail from failing the unit
-            mes['dmm_PFCpost'].position_fail = False
-            result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
-            # Allow a fail to fail the unit
-            mes['dmm_PFCpost'].position_fail = True
+            with mes['dmm_PFCpost'].position_fail_disabled():
+                result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
             if not result:
                 self._logger.info('Retry PFC calibration')
                 pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
