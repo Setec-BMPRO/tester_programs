@@ -59,12 +59,16 @@ class _Console(share.console.Base):
         @return 12 hex digit Bluetooth MAC address
 
         """
-        mac = self['MAC']
-        mac = mac.replace(':', '').lower()  # Remove ':' & force lowercase
-        match = self.re_blemac.search(mac)
-        if not match:
-            raise ValueError('Bluetooth MAC not found')
-        return match.group(0)
+        result = ''
+        try:
+            mac = self['MAC']
+            mac = mac.replace(':', '').lower()
+            match = self.re_blemac.search(mac)
+            if match:
+                result = match.group(1)
+        except share.console.Error:
+            pass
+        return result
 
     def hs_output(self, index, state=False):
         """Set a HS output state.
