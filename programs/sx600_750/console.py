@@ -24,11 +24,11 @@ class Console(share.console.Base):
             'X-SOFTWARE-VERSION', read_format='{0} X?'),
         'ARM_SwBld': parameter.String(
             'X-BUILD-NUMBER', read_format='{0} X?'),
-        'FAN_SET': parameter.Float(
+        'FAN_SET': parameter.Float(         # SX-750 only
             'X-TEMPERATURE-CONTROLLER-SETPOINT',
             writeable=True,
             write_format='{0} {1} X!'),
-        'FAN_CHECK_DISABLE': parameter.Boolean(
+        'FAN_CHECK_DISABLE': parameter.Boolean( # SX-600 only
             'X-SYSTEM-ENABLE', read_format='{0} X?',
             writeable=True, write_format='{1} {0} X!'),
         'CAL_PFC': parameter.Float(
@@ -37,6 +37,9 @@ class Console(share.console.Base):
             write_format='{0} {1}'),
         'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
+        'NVDEFAULT': parameter.Boolean(     # SX-600 only
+            'NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),

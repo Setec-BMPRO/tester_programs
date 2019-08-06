@@ -112,6 +112,8 @@ class Initial(share.TestSequence):
         arm['UNLOCK'] = True
         if self.parameter == '750':
             arm['FAN_SET'] = self.cfg.fan_threshold
+        else:
+            arm['NVDEFAULT'] = True
         arm['NVWRITE'] = True
         time.sleep(1)
         # Switch everything off
