@@ -65,7 +65,7 @@ class _Console(share.console.Base):
             mac = mac.replace(':', '').lower()
             match = self.re_blemac.search(mac)
             if match:
-                result = match.group(1)
+                result = match.group(0)
         except share.console.Error:
             pass
         return result
