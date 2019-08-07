@@ -29,8 +29,8 @@ class Console(share.console.Base):
             writeable=True,
             write_format='{0} {1} X!'),
         'FAN_CHECK_DISABLE': parameter.Boolean( # SX-600 only
-            'X-SYSTEM-ENABLE', read_format='{0} X?',
-            writeable=True, write_format='{1} {0} X!'),
+            'X-SYSTEM-ENABLE', read_format='{1} X?',
+            writeable=True, write_format='{0} {1} X!'),
         'CAL_PFC': parameter.Float(
             'CAL-PFC-BUS-VOLTS',
             writeable=True, readable=False, scale=1000,
