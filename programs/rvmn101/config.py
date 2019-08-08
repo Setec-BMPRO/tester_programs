@@ -87,5 +87,6 @@ class RVMN101B(Config):
     # Initial Test parameters
     fixture = '032871'
     #  Software version
-    nordic_image = 'rvmn101_signed_0.74-0-g5d7a6d1_factory_mcuboot.hex'
-    product_rev = '04E'     # per PC-5052
+    nordic_image = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot'
+    product_rev = '05B'     # per PC-5079
+    hardware_rev = '05B'    # per PC-5079
