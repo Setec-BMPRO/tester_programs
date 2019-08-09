@@ -137,10 +137,11 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         dev['dcl_12V'].output(1.0)
         dev['dcl_24V'].output(1.0)
+        arm = dev['arm']
+        arm.action()
         self.measure(
             ('dmm_ACin', 'dmm_PriCtl', 'dmm_5Vnl', 'dmm_12Voff',
              'dmm_24Voff', 'dmm_ACFAIL', ), timeout=2)
-        arm = dev['arm']
         arm['UNLOCK'] = True
         if self.parameter == '600':     # Prevent shutdown due to no fan
             arm['FAN_CHECK_DISABLE'] = True
@@ -388,7 +389,7 @@ class Devices(share.Devices):
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
             self[dcs].output(12.0, output=True)
             self.add_closer(lambda: self[dcs].output(0.0, output=False))
-        time.sleep(4)   # Allow OS to detect the new ports
+        time.sleep(5)   # Allow OS to detect the new ports
 
     def reset(self):
         """Reset instruments."""
@@ -468,7 +469,7 @@ class Sensors(share.Sensors):
                 ('pfcStepDn', 'PFC_STEP_DN'),
                 ('pfcStepUp', 'PFC_STEP_UP'),
                 ('pfcDnLock', 'PFC_DN_LOCK'),
-                ('pfcUpLlock', 'PFC_UP_LOCK'),
+                ('pfcUpLock', 'PFC_UP_LOCK'),
             ):
             self[name] = share.console.Sensor(
                 ard, cmdkey, rdgtype=sensor.ReadingString)
@@ -538,7 +539,7 @@ class Measurements(share.Measurements):
             ('pfcStepDn', 'Reply', 'pfcStepDn', ''),
             ('pfcStepUp', 'Reply', 'pfcStepUp', ''),
             ('pfcDnLock', 'Reply', 'pfcDnLock', ''),
-            ('pfcUpLlock', 'Reply', 'pfcUpLlock', ''),
+            ('pfcUpLock', 'Reply', 'pfcUpLock', ''),
             ('arm_AcFreq', 'ARM-AcFreq', 'ARM_AcFreq', ''),
             ('arm_AcVolt', 'ARM-AcVolt', 'ARM_AcVolt', ''),
             ('arm_12V', 'ARM-12V', 'ARM_12V', ''),
@@ -553,7 +554,7 @@ class Measurements(share.Measurements):
                 'ocp_step_dn', 'ocp_lock',
                 'pfcDnUnlock', 'pfcUpUnlock',
                 'pfcStepDn', 'pfcStepUp',
-                'pfcDnLock', 'pfcUpLlock',
+                'pfcDnLock', 'pfcUpLock',
                 ):
             self[name].send_signal = False
         # Suppress position failure on these measurements.
