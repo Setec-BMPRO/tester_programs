@@ -85,7 +85,6 @@ class Initial(share.TestSequence):
             mes['pgm_pwrsw']()      # Program the Power Switch Board
             dev['rla_pic2'].set_off()
         dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
-        mes['ocp_max']()
         dev['dcs_PriCtl'].output(0.0)
         # This will also enable all loads on an ATE3/4 tester.
         self.dcload(
@@ -153,6 +152,7 @@ class Initial(share.TestSequence):
         self.measure(
             ('arm_AcFreq', 'arm_AcVolt', 'arm_12V', 'arm_24V',
              'arm_SwVer', 'arm_SwBld', ))
+        mes['ocp_max']()
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
