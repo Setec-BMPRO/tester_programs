@@ -101,10 +101,6 @@ class Initial(share.TestSequence):
 
         """
         arm = dev['arm']
-        if self.parameter == '750':
-            arm.port.baudrate = 57600   # Slower baudrate on SX-750
-        else:
-            arm.port.rtscts = True      # Hardware handshake on SX-600
         arm.open()
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
@@ -375,7 +371,11 @@ class Devices(share.Devices):
         arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = arm_port
-        self['arm'] = console.Console(arm_ser)
+        con_class = {
+            '600': console.Console600,
+            '750': console.Console750,
+            }[self.parameter]
+        self['arm'] = con_class(arm_ser)
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
@@ -394,8 +394,6 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['arm'].close()
-        self['arm'].port.baudrate = 115200
-        self['arm'].port.rtscts = False
         self['ard'].close()
         self['acsource'].reset()
         self['dcl_5V'].output(1.0)

@@ -19,7 +19,7 @@ class SX600Initial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'programs.sx600_750.console.Console',
+                'programs.sx600_750.console.Console600',
                 'programs.sx600_750.arduino.Arduino600',
                 ):
             patcher = patch(target)
@@ -112,7 +112,7 @@ class SX750Initial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'programs.sx600_750.console.Console',
+                'programs.sx600_750.console.Console750',
                 'programs.sx600_750.arduino.Arduino750',
                 ):
             patcher = patch(target)

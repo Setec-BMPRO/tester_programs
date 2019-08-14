@@ -6,14 +6,15 @@
 import share
 
 
-class Console(share.console.Base):
+class _Console(share.console.Base):
 
     """Communications to SX-600/750 console."""
 
     # Number of lines in startup banner
     banner_lines = 4
     parameter = share.console.parameter
-    cmd_data = {
+    # Common commands
+    common_commands = {
         'ARM-AcFreq': parameter.Float(
             'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
         'ARM-AcVolt': parameter.Float(
@@ -26,28 +27,79 @@ class Console(share.console.Base):
             'X-SOFTWARE-VERSION', read_format='{0} X?'),
         'ARM_SwBld': parameter.String(
             'X-BUILD-NUMBER', read_format='{0} X?'),
-        'FAN_SET': parameter.Float(         # SX-750 only
-            'X-TEMPERATURE-CONTROLLER-SETPOINT',
-            writeable=True,
-            write_format='{0} {1} X!'),
-        'FAN_CHECK_DISABLE': parameter.Boolean( # SX-600 only
-            'X-SYSTEM-ENABLE', read_format='{1} X?',
-            writeable=True, write_format='{0} {1} X!'),
-        'CAL_PFC': parameter.Float(
-            'CAL-PFC-BUS-VOLTS',
-            writeable=True, readable=False, scale=1000,
-            write_format='{0} {1}'),
         'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': parameter.Boolean(     # SX-600 only
+        }
+    # Strings to ignore in responses
+    ignore = (' ', 'Hz', 'Vrms', 'mV')
+
+    def __init__(self, port):
+        """Add common commands into cmd_data.
+
+        @param port Serial instance to use
+
+        """
+        super().__init__(port)
+        for cmd in self.common_commands:
+            self.cmd_data[cmd] = self.common_commands[cmd]
+
+
+class Console600(_Console):
+
+    """Communications to SX-600 console."""
+
+    parameter = share.console.parameter
+    cmd_data = {
+        'FAN_CHECK_DISABLE': parameter.Boolean(
+            'X-SYSTEM-ENABLE', read_format='{1} X?',
+            writeable=True, write_format='{0} {1} X!'),
+        'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT',
             writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
         }
-    # Strings to ignore in responses
-    ignore = (' ', 'Hz', 'Vrms', 'mV')
+
+    def open(self):
+        """Open console."""
+        self.port.rtscts = True
+        super().open()
+
+    def close(self):
+        """Close console."""
+        self.port.rtscts = False
+        super().close()
+
+
+class Console750(_Console):
+
+    """Communications to SX-750 console."""
+
+    parameter = share.console.parameter
+    cmd_data = {
+        'CAL_PFC': parameter.Float(
+            'CAL-PFC-BUS-VOLTS',
+            writeable=True, readable=False, scale=1000,
+            write_format='{0} {1}'),
+        'FAN_SET': parameter.Float(
+            'X-TEMPERATURE-CONTROLLER-SETPOINT',
+            writeable=True,
+            write_format='{0} {1} X!'),
+        'NVWRITE': parameter.Boolean(
+            'NV-WRITE', writeable=True, readable=False, write_format='{1}',
+            write_expected=4),
+        }
+
+    def open(self):
+        """Open console."""
+        self.port.baudrate = 57600
+        super().open()
+
+    def close(self):
+        """Close console."""
+        self.port.baudrate = 115200
+        super().close()
 
     def calpfc(self, voltage):
         """Issue PFC calibration commands."""
