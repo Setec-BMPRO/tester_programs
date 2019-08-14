@@ -86,9 +86,10 @@ class Console750(_Console):
             'X-TEMPERATURE-CONTROLLER-SETPOINT',
             writeable=True,
             write_format='{0} {1} X!'),
+# FIXME: Why have we been seeing startup banners after the 1st NV-WRITE ?
         'NVWRITE': parameter.Boolean(
             'NV-WRITE', writeable=True, readable=False, write_format='{1}',
-            write_expected=4),
+            write_expected=0),
         }
 
     def open(self):
