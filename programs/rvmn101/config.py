@@ -78,6 +78,18 @@ class RVMN101A(Config):
     nordic_image = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
     product_rev = '06E'     # per PC-5077
     hardware_rev = '05D'    # per PC-5077
+    _limits_final = (
+        tester.LimitHigh('ScanRSSI', -80, doc='Strong BLE signal'),
+        )
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        return cls._base_limits_final + cls._limits_final
 
 
 class RVMN101B(Config):
@@ -90,3 +102,15 @@ class RVMN101B(Config):
     nordic_image = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
     product_rev = '05B'     # per PC-5079
     hardware_rev = '05B'    # per PC-5079
+    _limits_final = (
+        tester.LimitHigh('ScanRSSI', -90, doc='Strong BLE signal'),
+        )
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        return cls._base_limits_final + cls._limits_final
