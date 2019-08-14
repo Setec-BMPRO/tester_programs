@@ -10,6 +10,8 @@ class Console(share.console.Base):
 
     """Communications to SX-600/750 console."""
 
+    # Number of lines in startup banner
+    banner_lines = 4
     parameter = share.console.parameter
     cmd_data = {
         'ARM-AcFreq': parameter.Float(

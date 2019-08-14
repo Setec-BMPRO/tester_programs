@@ -94,7 +94,7 @@ class SX600(Config):
     #  Software image filenames
     arm_bin = 'sx600_{0}.bin'.format(_bin_version)
     # PFC digital pot sensitivity (V/step)
-    pfc_volt_per_step = 2.2
+    pfc_volt_per_step = 1.5
     # 12V & 24V output ratings (A)
     #  24V OCP spec is 12.1A to 16.2A == 14.15 ± 2.05A
     ratings = Ratings(

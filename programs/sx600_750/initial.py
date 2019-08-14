@@ -137,7 +137,7 @@ class Initial(share.TestSequence):
         dev['dcl_12V'].output(1.0)
         dev['dcl_24V'].output(1.0)
         arm = dev['arm']
-        arm.action()
+        arm.action(expected=arm.banner_lines)
         self.measure(
             ('dmm_ACin', 'dmm_PriCtl', 'dmm_5Vnl', 'dmm_12Voff',
              'dmm_24Voff', 'dmm_ACFAIL', ), timeout=2)
@@ -171,7 +171,7 @@ class Initial(share.TestSequence):
             if steps > 0:       # Too low
                 self._logger.debug('Step UP %s steps', steps)
                 mes['pfcUpUnlock']()
-                for _ in range(steps - 1):  # Unlock/Lock cause 1 step
+                for _ in range(steps):
                     mes['pfcStepUp']()
                 mes['pfcUpLock']()
             elif steps < 0:     # Too high
@@ -429,7 +429,7 @@ class Sensors(share.Sensors):
         self['o24V'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self['o24VinOCP'] = sensor.Vdc(dmm, high=11, low=2, rng=100, res=0.01)
         self['PriCtl'] = sensor.Vdc(dmm, high=8, low=2, rng=100, res=0.01)
-        self['PFC'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
+        self['PFC'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
         self['PGOOD'] = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.01)
         self['ACFAIL'] = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.01)
         self['o3V3'] = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
