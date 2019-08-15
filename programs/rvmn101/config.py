@@ -76,8 +76,8 @@ class RVMN101A(Config):
     fixture = '033550'
     #  Software version
     nordic_image = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
-    product_rev = '06E'     # per PC-5077
-    hardware_rev = '05D'    # per PC-5077
+    product_rev = '07A'
+    hardware_rev = '07A'
 
     @classmethod
     def limits_final(cls):
