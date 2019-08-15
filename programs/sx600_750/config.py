@@ -95,6 +95,8 @@ class SX600(Config):
     arm_bin = 'sx600_{0}.bin'.format(_bin_version)
     # PFC digital pot sensitivity (V/step)
     pfc_volt_per_step = 1.5
+    # Dummy Fan ON threshold
+    fan_threshold = None
     # 12V & 24V output ratings (A)
     #  24V OCP spec is 12.1A to 16.2A == 14.15 ± 2.05A
     ratings = Ratings(

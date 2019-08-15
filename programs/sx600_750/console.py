@@ -3,6 +3,8 @@
 # Copyright 2016 - 2019 SETEC Pty Ltd
 """SX-600/750 console driver."""
 
+import time
+
 import share
 
 
@@ -12,6 +14,9 @@ class _Console(share.console.Base):
 
     # Number of lines in startup banner
     banner_lines = 4
+    cmd_data = {}
+    # Time delay after NV-WRITE
+    nvwrite_delay = 1.0
     parameter = share.console.parameter
     # Common commands
     common_commands = {
@@ -30,6 +35,9 @@ class _Console(share.console.Base):
         'UNLOCK': parameter.Boolean(
             '$DEADBEA7 UNLOCK',
             writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': parameter.Boolean(
+            'NV-WRITE',
+            writeable=True, readable=False, write_format='{1}'),
         }
     # Strings to ignore in responses
     ignore = (' ', 'Hz', 'Vrms', 'mV')
@@ -41,8 +49,8 @@ class _Console(share.console.Base):
 
         """
         super().__init__(port)
-        for cmd in self.common_commands:
-            self.cmd_data[cmd] = self.common_commands[cmd]
+        for acmd in self.common_commands:
+            self.cmd_data[acmd] = self.common_commands[acmd]
 
 
 class Console600(_Console):
@@ -52,13 +60,13 @@ class Console600(_Console):
     parameter = share.console.parameter
     cmd_data = {
         'FAN_CHECK_DISABLE': parameter.Boolean(
-            'X-SYSTEM-ENABLE', read_format='{1} X?',
+            'X-SYSTEM-ENABLE',
+            read_format='{1} X?',
             writeable=True, write_format='{0} {1} X!'),
         'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': parameter.Boolean(
-            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
+            readable=False,
+            writeable=True, write_format='{1}'),
         }
 
     def open(self):
@@ -71,6 +79,14 @@ class Console600(_Console):
         self.port.rtscts = False
         super().close()
 
+    def initialise(self, fan_threshold=None):
+        """Initialise a device."""
+        self.action(expected=self.banner_lines)
+        self['UNLOCK'] = True
+        self['NVDEFAULT'] = True
+        self['NVWRITE'] = True
+        time.sleep(self.nvwrite_delay)
+
 
 class Console750(_Console):
 
@@ -80,16 +96,12 @@ class Console750(_Console):
     cmd_data = {
         'CAL_PFC': parameter.Float(
             'CAL-PFC-BUS-VOLTS',
-            writeable=True, readable=False, scale=1000,
-            write_format='{0} {1}'),
+            scale=1000,
+            readable=False,
+            writeable=True, write_format='{0} {1}'),
         'FAN_SET': parameter.Float(
             'X-TEMPERATURE-CONTROLLER-SETPOINT',
-            writeable=True,
-            write_format='{0} {1} X!'),
-# FIXME: Why have we been seeing startup banners after the 1st NV-WRITE ?
-        'NVWRITE': parameter.Boolean(
-            'NV-WRITE', writeable=True, readable=False, write_format='{1}',
-            write_expected=0),
+            writeable=True, write_format='{0} {1} X!'),
         }
 
     def open(self):
@@ -101,6 +113,14 @@ class Console750(_Console):
         """Close console."""
         self.port.baudrate = 115200
         super().close()
+
+    def initialise(self, fan_threshold):
+        """Initialise a device."""
+        self.action(expected=self.banner_lines)
+        self['UNLOCK'] = True
+        self['FAN_SET'] = fan_threshold
+        self['NVWRITE'] = True
+        time.sleep(self.nvwrite_delay)
 
     def calpfc(self, voltage):
         """Issue PFC calibration commands."""

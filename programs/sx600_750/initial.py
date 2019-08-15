@@ -103,14 +103,8 @@ class Initial(share.TestSequence):
         arm = dev['arm']
         arm.open()
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
-        self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2, delay=2)
-        arm['UNLOCK'] = True
-        if self.parameter == '750':
-            arm['FAN_SET'] = self.cfg.fan_threshold
-        else:
-            arm['NVDEFAULT'] = True
-        arm['NVWRITE'] = True
-        time.sleep(1)
+        self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
+        arm.initialise(self.cfg.fan_threshold)
         # Switch everything off
         dev['dcs_5V'].output(0, False)
         dev['dcl_5V'].output(0.1, delay=0.5)
@@ -367,23 +361,20 @@ class Devices(share.Devices):
         file = os.path.join(folder, self.sw_image)
         self['programmer'] = share.programmer.ARM(
             arm_port, file, boot_relay=self['rla_boot'])
+        # Console & Arduino class selection
+        con_class, ard_class = {
+            '600': (console.Console600, arduino.Arduino600),
+            '750': (console.Console750, arduino.Arduino750),
+            }[self.parameter]
         # Serial connection to the ARM console
-        arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
+        arm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = arm_port
-        con_class = {
-            '600': console.Console600,
-            '750': console.Console750,
-            }[self.parameter]
         self['arm'] = con_class(arm_ser)
         # Serial connection to the Arduino console
-        ard_ser = serial.Serial(baudrate=115200, timeout=2.0)
+        ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.fixture.port('022837', 'ARDUINO')
-        ard_class = {
-            '600': arduino.Arduino600,
-            '750': arduino.Arduino750,
-            }[self.parameter]
         self['ard'] = ard_class(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
