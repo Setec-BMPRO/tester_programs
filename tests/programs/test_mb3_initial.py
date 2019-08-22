@@ -18,7 +18,7 @@ class MB3Initial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.programmer.ARM',
+                'share.programmer.AVR',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -32,12 +32,12 @@ class MB3Initial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerOn': (
                     (sen['SnEntry'], 'A1926040123'),
-                    (sen['vaux'], 13.0),
+                    (sen['vaux'], 12.8),
                     (sen['5V'], 5.0),
-                    (sen['vbat'], 14.0),
+                    (sen['vbat'], 14.6),
                     ),
                 'Output': (
-                    (sen['vbat'], 14.0),
+                    (sen['vbat'], 14.6),
                     ),
                 },
             }
@@ -47,4 +47,4 @@ class MB3Initial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(5, len(result.readings))
         self.assertEqual(
-            ['PowerOn', 'PgmARM', 'Initialise', 'Output'], self.tester.ut_steps)
+            ['PowerOn', 'PgmAVR', 'Initialise', 'Output'], self.tester.ut_steps)

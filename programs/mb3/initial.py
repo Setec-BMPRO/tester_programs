@@ -37,7 +37,7 @@ import inspect
 import os
 
 import tester
-from tester import TestStep, LimitBetween, LimitDelta
+from tester import TestStep, LimitBetween, LimitDelta, LimitPercent
 import share
 from . import config
 
@@ -46,14 +46,14 @@ class Initial(share.TestSequence):
 
     """MB3 Initial Test Program."""
 
-    vaux = 13.0
-    vsolar = 13.0
+    vaux = 12.8
+    vsolar = 12.8
 
     limitdata = (
-        LimitBetween('Vaux', 8.0, 13.5),
-        LimitBetween('Vsolar', 8.0, 13.5),
-        LimitDelta('5V', 5.0, 0.2),
-        LimitBetween('Vbat', 12.5, 14.6),
+        LimitBetween('Vaux', 8.0, 13.6),
+        LimitBetween('Vsolar', 8.0, 13.6),
+        LimitPercent('5V', 5.0, 1.0),
+        LimitDelta('Vbat', 14.6, 0.3),
         )
 
     def open(self, uut):
@@ -61,7 +61,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerOn', self._step_power_on),
-            TestStep('PgmARM', self.devices['program_arm'].program),
+            TestStep('PgmAVR', self.devices['program_avr'].program),
             TestStep('Initialise', self._step_initialise),
             TestStep('Output', self._step_output),
             )
@@ -97,39 +97,27 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS2'),
-                ('dcs_vaux', tester.DCSource, 'DCS3'),
-                ('dcs_vsol', tester.DCSource, 'DCS4'),
-                ('dcl_vbat', tester.DCLoad, 'DCL1'),#        # Serial connection to the ARM console
-#        arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
-#        # Set port separately - don't open until after programming
-#        arm_ser.port = arm_port
-#        self['arm'] = console.Console(arm_ser)
-
+                ('dcs_vaux', tester.DCSource, 'DCS2'),
+                ('dcs_vsol', tester.DCSource, 'DCS3'),
+                ('dcl_vbat', tester.DCLoad, 'DCL1'),
                 ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_boot', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.fixture.port('999999', 'ARM')
-        # ARM device programmer
+        # Serial port for the ATtiny406. Used by programmer and comms module.
+        avr_port = share.fixture.port('033633', 'AVR')
+        # ATtiny406 device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_arm'] = share.programmer.ARM(
-            arm_port,
-            os.path.join(folder, config.sw_image),
-            boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
-        # Fixture USB hub power
-        self['dcs_vcom'].output(9.0, output=True, delay=10)
-        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
+        self['program_avr'] = share.programmer.AVR(
+            avr_port,
+            os.path.join(folder, config.sw_image))
 
     def reset(self):
         """Reset instruments."""
         for dcs in ('dcs_vaux', 'dcs_vsol'):
             self[dcs].output(0.0, False)
         self['dcl_vbat'].output(0.0, False)
-        for rla in ('rla_reset', 'rla_boot'):
+        for rla in ('rla_reset', ):
             self[rla].set_off()
 
 

@@ -80,8 +80,8 @@ DATA = {
     '032870': {     # RVMC101 Initial
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
-    '999999': {     # MB3 Initial
-        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
+    '033633': {     # MB3 Initial
+        'AVR': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
 
     # Fixtures with a USB Hub

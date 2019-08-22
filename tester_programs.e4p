@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2019-07-25, 17:27:24 -->
+<!-- Saved: 2019-08-22, 14:30:57 -->
 <!-- Copyright (C) 2019 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -241,6 +241,8 @@
     <Source>tests/programs/test_j35_final.py</Source>
     <Source>tests/programs/test_j35_initial.py</Source>
     <Source>tests/programs/test_mb2_final.py</Source>
+    <Source>tests/programs/test_mb3_final.py</Source>
+    <Source>tests/programs/test_mb3_initial.py</Source>
     <Source>tests/programs/test_mk7400_final.py</Source>
     <Source>tests/programs/test_rm50_final.py</Source>
     <Source>tests/programs/test_rvmc101_final.py</Source>
