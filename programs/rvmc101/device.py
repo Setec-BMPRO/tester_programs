@@ -62,16 +62,12 @@ class Packet():
     def __init__(self, packet):
         """Create instance.
 
-        @param packet CANPacket instance
+        @param packet RVCPacket instance
 
         """
-#        self._logger = logging.getLogger(
-#            '.'.join((__name__, self.__class__.__name__)))
         payload = packet.data
         if len(payload) != 8 or payload[0] != self.switch_status:
-#            self._logger.debug('PacketDecodeError')
             raise PacketDecodeError()
-#        self._logger.debug('Packet: %s', payload)
         (   self.msgtype,
             switch_data,
             self.swver,
@@ -93,7 +89,6 @@ class Packet():
         self.down = bool(zss.down)
         self.usb_pwr = bool(zss.usb_pwr)
         self.wake_up = bool(zss.wake_up)
-#        self._logger.debug('Decoded packet (%s)', self.zone4)
 
 
 class NullPayload():
@@ -112,13 +107,12 @@ class CANReader(threading.Thread):
     Advertisment packets are received from the Serial2Can interface, decoded,
     and loaded into the tester.CANPacket logical device.
     That logical device is the data source for CAN based sensors.
+    The RVMC101 transmits 25 packets/sec.
 
     """
 
-    # Time to wait between reading CAN packets
-    #  RVMC101 transmits 25 packets/sec.
-    # We ignore most of them to reduce to processing load.
-    wait_time = 0.5
+    # Time to wait when not reading CAN packets
+    wait_time = 0.1
     read_timeout = 1.0
     # A NULL Packet
     null_packet = Packet(NullPayload)
@@ -144,7 +138,6 @@ class CANReader(threading.Thread):
     def run(self):
         """Run the data processing thread."""
         while not self._evt_stop.is_set():
-            self.candev.flush_can()
             if self.enable:
                 try:
                     pkt = self.candev.read_can(timeout=self.read_timeout)
@@ -159,7 +152,9 @@ class CANReader(threading.Thread):
                     # Advertisment packets are mixed with the occasional other
                     # packet type, which will cause a decode error
                     pass
-            time.sleep(self.wait_time)
+            else:
+                self.candev.flush_can()
+                time.sleep(self.wait_time)
 
     @property
     def enable(self):

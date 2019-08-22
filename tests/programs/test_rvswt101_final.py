@@ -45,7 +45,7 @@ class RVSWT101Final(ProgramTestCase):
                     (sen['ButtonPress'], True),
                     (sen['mirscan'], True),
                     (sen['cell_voltage'], 3.31),
-                    (sen['switch_type'], 1),
+                    (sen['switch_type'], 0),
                     ),
                 },
             }
