@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 - 2019 SETEC Pty Ltd
 """Programmer for devices."""
 
 import abc
@@ -9,6 +10,7 @@ import subprocess
 import isplpc
 import serial
 import tester
+import updi
 
 
 class _Base(abc.ABC):
@@ -118,6 +120,52 @@ class ARM(_Base):
             ser.close()
             if self._boot_relay:
                 self._boot_relay.set_off()
+
+    def program_wait(self):
+        """Wait for device programming to finish."""
+        self.measurement()
+
+
+class AVR(_Base):
+
+    """AVR programmer using the updi package."""
+
+    def __init__(self, port, filename, baudrate=115200, device='tiny406'):
+        """Create a programmer.
+
+        @param port Serial port name to use
+        @param filename Software HEX filename
+        @param baudrate Serial baudrate
+        @param device Device type
+
+        """
+        super().__init__()
+        self._port = port
+        self._baudrate = baudrate
+        self._filename = filename
+        self._device = updi.Device(device)
+
+    def program_begin(self):
+        """Program a device."""
+        try:
+            nvm = updi.UpdiNvmProgrammer(
+                comport=self._port, baud=self._baudrate, device=self._device)
+            try:
+                nvm.enter_progmode()
+            except:
+                nvm.unlock_device()
+            nvm.get_device_info()
+            data, start_address = nvm.load_ihex(self._filename)
+            nvm.chip_erase()
+            nvm.write_flash(start_address, data)
+            readback = nvm.read_flash(nvm.device.flash_start, len(data))
+            for offset in range(len(data)):
+                if data[offset] != readback[offset]:
+                    raise Exception(
+                        'Verify error at 0x{0:04X}'.format(offset))
+            self.measurement.sensor.store(self.pass_value)
+        except:
+            self.measurement.sensor.store(1)
 
     def program_wait(self):
         """Wait for device programming to finish."""
