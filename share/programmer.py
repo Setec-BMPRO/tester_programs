@@ -172,8 +172,10 @@ class AVR(_Base):
                 fuse_num, fuse_val = self._fuses[fuse_name]
                 nvm.write_fuse(fuse_num, fuse_val)
             self.measurement.sensor.store(self.pass_value)
+            nvm.leave_progmode()
         except:
             self.measurement.sensor.store(1)
+
 
     def program_wait(self):
         """Wait for device programming to finish."""
