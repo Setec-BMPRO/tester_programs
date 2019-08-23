@@ -3,41 +3,10 @@
 # Copyright 2019 SETEC Pty Ltd.
 """MB3 Initial Program."""
 
-"""
-pyupdi is a Python utility for programming AVR devices with UPDI interface
-  using a standard TTL serial port.
-
-  Connect RX and TX together with a suitable resistor and connect this node
-  to the UPDI pin of the AVR device.
-
-  Be sure to connect a common ground, and use a TTL serial adapter running at
-   the same voltage as the AVR device.
-
-                        Vcc                     Vcc
-                        +-+                     +-+
-                         |                       |
- +---------------------+ |                       | +--------------------+
- | Serial port         +-+                       +-+  AVR device        |
- |                     |      +----------+         |                    |
- |                  TX +------+   4k7    +---------+ UPDI               |
- |                     |      +----------+    |    |                    |
- |                     |                      |    |                    |
- |                  RX +----------------------+    |                    |
- |                     |                           |                    |
- |                     +--+                     +--+                    |
- +---------------------+  |                     |  +--------------------+
-                         +-+                   +-+
-                         GND                   GND
-
- Available from: https://github.com/mraardvark/pyupdi.git
-
-"""
-
 import inspect
 import os
 
 import tester
-from tester import TestStep, LimitBetween, LimitDelta, LimitPercent
 import share
 from . import config
 
@@ -50,20 +19,20 @@ class Initial(share.TestSequence):
     vsolar = 12.8
 
     limitdata = (
-        LimitBetween('Vaux', 8.0, 13.6),
-        LimitBetween('Vsolar', 8.0, 13.6),
-        LimitPercent('5V', 5.0, 1.0),
-        LimitDelta('Vbat', 14.6, 0.3),
+        tester.LimitBetween('Vaux', 8.0, 13.6),
+        tester.LimitBetween('Vsolar', 8.0, 13.6),
+        tester.LimitPercent('5V', 5.0, 1.0),
+        tester.LimitDelta('Vbat', 14.6, 0.3),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerOn', self._step_power_on),
-            TestStep('PgmAVR', self.devices['program_avr'].program),
-            TestStep('Initialise', self._step_initialise),
-            TestStep('Output', self._step_output),
+            tester.TestStep('PowerOn', self._step_power_on),
+            tester.TestStep('PgmAVR', self.devices['program_avr'].program),
+            tester.TestStep('Initialise', self._step_initialise),
+            tester.TestStep('Output', self._step_output),
             )
         self.sernum = None
 
@@ -110,7 +79,9 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_avr'] = share.programmer.AVR(
             avr_port,
-            os.path.join(folder, config.sw_image))
+            os.path.join(folder, config.sw_image),
+            config.fuses
+            )
 
     def reset(self):
         """Reset instruments."""

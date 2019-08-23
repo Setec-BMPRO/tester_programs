@@ -130,13 +130,17 @@ class AVR(_Base):
 
     """AVR programmer using the updi package."""
 
-    def __init__(self, port, filename, baudrate=115200, device='tiny406'):
+    def __init__(self, port, filename,
+            baudrate=115200, device='tiny406',
+            fuses=None):
         """Create a programmer.
 
         @param port Serial port name to use
         @param filename Software HEX filename
         @param baudrate Serial baudrate
         @param device Device type
+        @param fuses Device fuse settings
+            Dictionary{FuseName: (FuseNumber, FuseValue)}
 
         """
         super().__init__()
@@ -144,6 +148,7 @@ class AVR(_Base):
         self._baudrate = baudrate
         self._filename = filename
         self._device = updi.Device(device)
+        self._fuses = fuses if fuses else {}
 
     def program_begin(self):
         """Program a device."""
@@ -163,6 +168,9 @@ class AVR(_Base):
                 if data[offset] != readback[offset]:
                     raise Exception(
                         'Verify error at 0x{0:04X}'.format(offset))
+            for fuse_name in self._fuses:
+                fuse_num, fuse_val = self._fuses[fuse_name]
+                nvm.write_fuse(fuse_num, fuse_val)
             self.measurement.sensor.store(self.pass_value)
         except:
             self.measurement.sensor.store(1)
