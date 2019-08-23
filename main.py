@@ -34,6 +34,10 @@ def _main():
     # Suppress lower level GPIB logging
     log = logging.getLogger('gpib')
     log.setLevel(logging.INFO)
+    # Suppress lower level updi logging when runninh MB3 Initial
+    for name in ('nvm', 'app', 'link', 'phy'):
+        log = logging.getLogger(name)
+        log.setLevel(logging.WARN)
     # Get the pathname of this module's configuration file
     head, tail = os.path.split(
         os.path.abspath(inspect.getfile(inspect.currentframe())))

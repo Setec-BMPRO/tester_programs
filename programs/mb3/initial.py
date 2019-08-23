@@ -31,7 +31,6 @@ class Initial(share.TestSequence):
         self.steps = (
             tester.TestStep('PowerOn', self._step_power_on),
             tester.TestStep('PgmAVR', self.devices['program_avr'].program),
-            tester.TestStep('Initialise', self._step_initialise),
             tester.TestStep('Output', self._step_output),
             )
         self.sernum = None
@@ -40,20 +39,13 @@ class Initial(share.TestSequence):
     def _step_power_on(self, dev, mes):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        dev['dcs_vaux'].output(self.vaux, output=True)
-        dev['dcl_vbat'].output(0.1, True)
-        self.measure(('dmm_vaux', 'dmm_5v', 'dmm_vbat'), timeout=5)
-
-    @share.teststep
-    def _step_initialise(self, dev, mes):
-        """Initialise the unit."""
-        # Cycle power to restart the unit
-        dev['dcs_vaux'].output(0.0, delay=0.5)
-        dev['dcs_vaux'].output(self.vaux, delay=1.0)
+        dev['dcs_vaux'].output(self.vaux, output=True, delay=1.0)
+        self.measure(('dmm_vaux', 'dmm_5v'), timeout=5)
 
     @share.teststep
     def _step_output(self, dev, mes):
         """Test the output of the unit."""
+        dev['dcl_vbat'].output(0.0, True)
         mes['dmm_vbat'](timeout=5)
 
 
@@ -80,7 +72,7 @@ class Devices(share.Devices):
         self['program_avr'] = share.programmer.AVR(
             avr_port,
             os.path.join(folder, config.sw_image),
-            config.fuses
+            fuses=config.fuses
             )
 
     def reset(self):
