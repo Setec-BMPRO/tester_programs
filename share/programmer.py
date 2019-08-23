@@ -171,8 +171,8 @@ class AVR(_Base):
             for fuse_name in self._fuses:
                 fuse_num, fuse_val = self._fuses[fuse_name]
                 nvm.write_fuse(fuse_num, fuse_val)
-            self.measurement.sensor.store(self.pass_value)
             nvm.leave_progmode()
+            self.measurement.sensor.store(self.pass_value)
         except:
             self.measurement.sensor.store(1)
 
