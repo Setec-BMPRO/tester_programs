@@ -31,7 +31,8 @@ class CN102():
     _lot_rev = share.lots.Revision((
         # Rev 1...
         ))
-    # Revision data dictionary
+    # Revision data dictionary:
+    #   (sw_arm_version, sw_nrf_version, hw_version, banner_lines)
     _rev_data = {
         None: ('1.2.18218.1627', '1.0.18106.1260', (1, 0, 'A'), 2),
         }
