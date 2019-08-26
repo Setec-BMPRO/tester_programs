@@ -35,6 +35,8 @@ class Initial(share.TestSequence):
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
+#        for mes in self.measurements:
+#            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_power_up(self, dev, mes):
