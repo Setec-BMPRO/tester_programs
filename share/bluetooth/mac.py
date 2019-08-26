@@ -28,9 +28,14 @@ class SerialToMAC():
 
         @param serial Unit serial number ('AYYWWLLNNNN')
         @return 12 hex digit Bluetooth MAC address
+            (which will be tested with a Measurement)
 
         """
-        return self.erp.blemac_get(serial)
+        try:
+            mac = self.erp.blemac_get(serial)
+        except jsonrpclib.jsonrpc.ProtocolError as exc:
+            mac = str(exc)
+        return mac
 
     def blemac_set(self, serial, blemac):
         """Save a Bluetooth MAC for a Serial Number.

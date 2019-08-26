@@ -16,8 +16,15 @@ class Config():
     # General parameters used in testing the units
     #  Injected voltages
     vbatt_set = 12.5
+    # Test limits common to both units and test types
+    _base_limits = (
+        tester.LimitBoolean('ScanMac', True,
+            doc='MAC address detected'),
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address'),
+        )
     # Initial Test limits common to both units
-    _base_limits_initial = (
+    _base_limits_initial = _base_limits + (
         tester.LimitDelta('Vbatt', vbatt_set - 0.5, 0.5, doc='Battery input'),
         tester.LimitPercent('3V3', 3.3, 6.0, doc='Internal 3V rail'),
         tester.LimitLow('HSoff', 1.0, doc='All HS outputs off'),
@@ -25,16 +32,9 @@ class Config():
         tester.LimitHigh('LSoff', 10.0, doc='LS output off'),
         tester.LimitLow('LSon', 1.0, doc='LS output on'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
-        tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
-        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
-            doc='Valid MAC address'),
         )
     # Final Test limits common to both units
-    _base_limits_final = (
-        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
-            doc='Valid MAC address'),
-        tester.LimitBoolean('ScanMac', True,
-            doc='MAC address detected'),
+    _base_limits_final = _base_limits + (
         tester.LimitHigh('ScanRSSI', -80,
             doc='Strong BLE signal'),
         )
