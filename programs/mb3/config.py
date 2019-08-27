@@ -8,7 +8,7 @@ vaux = 12.8
 
 # FIXME: We need a released filename with the version number
 # Software image filename
-sw_image = 'mb3.hex'
+sw_image = 'mb3_2.0.hex'
 
 # FIXME: We need a released document describing these
 # ATTiny406 fuse settings
