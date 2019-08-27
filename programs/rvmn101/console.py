@@ -149,8 +149,6 @@ class ConsoleB(_Console):
             'product-rev', writeable=True, write_format='{1} {0}'),
         'SW-REV': parameter.String(
             'sw-rev', read_format='{0}'),
-        'HARDWARE-REV': parameter.String(
-            'rvmn hw-rev', writeable=True, write_format='{1} {0}'),
         'OUTPUT': parameter.String(
             'output', readable=False, writeable=True, write_format='{1} {0}'),
         }

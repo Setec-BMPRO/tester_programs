@@ -111,7 +111,7 @@ class RVMN101B(Config):
     #  Software version
     nordic_image = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
     product_rev = '05B'     # per PC-5079
-    hardware_rev = '05B'    # per PC-5079
+    hardware_rev = None     # Firmware 0.88 does not support hardware_rev
 
     @classmethod
     def limits_final(cls):
