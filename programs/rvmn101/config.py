@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 Configuration."""
+"""RVMN101 Configuration.
+
+Bluetooth signal strength measurements:
+
+    RaspberryPi @ATE2a tester
+    Unit under Test:
+    @ATE4a      Ant     -72db to -78db
+                No-Ant  -100db to -95db
+    @ ATE2a     Ant     -45db to -55db
+                No-Ant  -85db - -92db
+
+"""
 
 import tester
 
