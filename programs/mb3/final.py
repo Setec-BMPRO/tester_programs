@@ -4,42 +4,36 @@
 """MB3 Final Program."""
 
 import tester
-from tester import TestStep, LimitBetween, LimitPercent
+from tester import TestStep, LimitDelta
 import share
-from . import config
 
 
 class Final(share.TestSequence):
 
     """MB3 Final Test Program."""
 
-    vstart = 13.1
-    vstop = 8.0
+    vaux = 12.8
 
     limitdata = (
-        LimitBetween('Vaux', 8.0, 13.5),
-        LimitPercent('Vbat', 14.4, 3.0),
+        LimitDelta('Vaux', 12.8, 0.5),
+        LimitDelta('Vbat', 14.6, 0.3),
+        LimitDelta('Vchem', 2.5, 0.5, doc='Voltage present on sense conn'),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.arm_image = config.sw_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerOn', self._step_power_on),
             )
-        self.sernum = None
 
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Apply input power and measure voltages."""
-        dev['dcs_vaux'].output(self.vstart, True, delay=0.5)
-        dev['dcl_vbat'].output(0.1, True)
+        dev['dcs_vaux'].output(self.vaux, True, delay=0.5)
+        dev['dcl_vbat'].output(0.01, output=True)
         self.measure(
-            ('dmm_vaux', 'ui_yesnolight', 'dmm_vbat'), timeout=5)
-        dev['dcs_vaux'].output(self.vstop)
-        self.measure(
-            ('dmm_vaux', 'ui_yesnooff',), timeout=5)
+            ('dmm_vaux', 'dmm_vbat', 'dmm_vchem'), timeout=5)
 
 
 class Devices(share.Devices):
@@ -70,14 +64,10 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['vaux'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['vbat'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
-        self['yesnolight'] = sensor.YesNo(
-            message=tester.translate('mb3_final', 'IsLightOn?'),
-            caption=tester.translate('mb3_final', 'capLight'))
-        self['yesnooff'] = sensor.YesNo(
-            message=tester.translate('mb3_final', 'IsLightOff?'),
-            caption=tester.translate('mb3_final', 'capLight'))
+        self['vaux'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
+        self['vbat'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
+        self['vchem'] = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.01)
+        self['vchem'].doc = 'X5, pin1'
 
 
 class Measurements(share.Measurements):
@@ -87,8 +77,7 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vaux', 'Vaux', 'vaux', 'Aux power ok'),
+            ('dmm_vaux', 'Vaux', 'vaux', 'Aux input ok'),
             ('dmm_vbat', 'Vbat', 'vbat', 'Battery output ok'),
-            ('ui_yesnolight', 'Notify', 'yesnolight', ''),
-            ('ui_yesnooff', 'Notify', 'yesnooff', ''),
+            ('dmm_vchem', 'Vchem', 'vchem', 'Sense connector plugged in'),
             ))

@@ -20,10 +20,9 @@ class MB3Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerOn': (
-                    (sen['vaux'], (13.0, 8.0)),
-                    (sen['yesnolight'], True),
-                    (sen['vbat'], 14.4),
-                    (sen['yesnooff'], True),
+                    (sen['vaux'], 12.8),
+                    (sen['vbat'], 14.6),
+                    (sen['vchem'], 2.5),
                     ),
                 },
             }
@@ -31,5 +30,5 @@ class MB3Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
+        self.assertEqual(3, len(result.readings))
         self.assertEqual(['PowerOn', ], self.tester.ut_steps)

@@ -16,11 +16,9 @@ class Initial(share.TestSequence):
     """MB3 Initial Test Program."""
 
     vaux = 12.8
-    vsolar = 12.8
 
     limitdata = (
-        tester.LimitBetween('Vaux', 8.0, 13.6),
-        tester.LimitBetween('Vsolar', 8.0, 13.6),
+        tester.LimitDelta('Vaux', 12.8, 0.5),
         tester.LimitPercent('5V', 5.0, 1.0),
         tester.LimitDelta('Vbat', 14.6, 0.3),
         )
@@ -39,13 +37,13 @@ class Initial(share.TestSequence):
     def _step_power_on(self, dev, mes):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        dev['dcs_vaux'].output(self.vaux, output=True, delay=1.0)
+        dev['dcs_vaux'].output(self.vaux, output=True, delay=0.5)
         self.measure(('dmm_vaux', 'dmm_5v'), timeout=5)
 
     @share.teststep
     def _step_output(self, dev, mes):
         """Test the output of the unit."""
-        dev['dcl_vbat'].output(0.0, True)
+        dev['dcl_vbat'].output(0.01, output=True)
         mes['dmm_vbat'](timeout=5)
 
 
@@ -61,7 +59,6 @@ class Devices(share.Devices):
                 ('dcs_vaux', tester.DCSource, 'DCS2'),
                 ('dcs_vsol', tester.DCSource, 'DCS3'),
                 ('dcl_vbat', tester.DCLoad, 'DCL1'),
-                ('rla_reset', tester.Relay, 'RLA1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial port for the ATtiny406. Used by programmer and comms module.
@@ -80,8 +77,6 @@ class Devices(share.Devices):
         for dcs in ('dcs_vaux', 'dcs_vsol'):
             self[dcs].output(0.0, False)
         self['dcl_vbat'].output(0.0, False)
-        for rla in ('rla_reset', ):
-            self[rla].set_off()
 
 
 class Sensors(share.Sensors):
@@ -108,9 +103,8 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vaux', 'Vaux', 'vaux', 'Aux power ok'),
-            ('dmm_vsolar', 'Vsolar', 'vsolar', 'Solar input ok'),
+            ('dmm_vaux', 'Vaux', 'vaux', 'Aux input ok'),
             ('dmm_5v', '5V', '5V', '5V ok'),
             ('dmm_vbat', 'Vbat', 'vbat', 'Battery output ok'),
-            ('ui_serialnum', 'SerNum', 'SnEntry', ''),
+            ('ui_serialnum', 'SerNum', 'SnEntry', 'Unit serial number'),
             ))
