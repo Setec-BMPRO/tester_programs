@@ -3,6 +3,9 @@
 # Copyright 2019 SETEC Pty Ltd.
 """MB3 Configuration."""
 
+# Injected AUX voltage
+vaux = 12.8
+
 # FIXME: We need a released filename with the version number
 # Software image filename
 sw_image = 'mb3.hex'

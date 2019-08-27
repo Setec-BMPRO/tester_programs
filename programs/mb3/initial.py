@@ -7,6 +7,7 @@ import inspect
 import os
 
 import tester
+
 import share
 from . import config
 
@@ -15,10 +16,8 @@ class Initial(share.TestSequence):
 
     """MB3 Initial Test Program."""
 
-    vaux = 12.8
-
     limitdata = (
-        tester.LimitDelta('Vaux', 12.8, 0.5),
+        tester.LimitDelta('Vaux', config.vaux, 0.5),
         tester.LimitPercent('5V', 5.0, 1.0),
         tester.LimitDelta('Vbat', 14.6, 0.3),
         )
@@ -37,7 +36,7 @@ class Initial(share.TestSequence):
     def _step_power_on(self, dev, mes):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        dev['dcs_vaux'].output(self.vaux, output=True, delay=0.5)
+        dev['dcs_vaux'].output(config.vaux, output=True, delay=0.5)
         self.measure(('dmm_vaux', 'dmm_5v'), timeout=5)
 
     @share.teststep
@@ -74,9 +73,8 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        for dcs in ('dcs_vaux', 'dcs_vsol'):
-            self[dcs].output(0.0, False)
-        self['dcl_vbat'].output(0.0, False)
+        for dev in ('dcs_vaux', 'dcs_vsol', 'dcl_vbat', ):
+            self[dev].output(0.0, False)
 
 
 class Sensors(share.Sensors):

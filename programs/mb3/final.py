@@ -4,33 +4,33 @@
 """MB3 Final Program."""
 
 import tester
-from tester import TestStep, LimitDelta
+
 import share
+from . import config
 
 
 class Final(share.TestSequence):
 
     """MB3 Final Test Program."""
 
-    vaux = 12.8
-
     limitdata = (
-        LimitDelta('Vaux', 12.8, 0.5),
-        LimitDelta('Vbat', 14.6, 0.3),
-        LimitDelta('Vchem', 2.5, 0.5, doc='Voltage present on sense conn'),
+        tester.LimitDelta('Vaux', config.vaux, 0.5),
+        tester.LimitDelta('Vbat', 14.6, 0.3),
+        tester.LimitDelta('Vchem', 2.5, 0.5,
+            doc='Voltage present on sense conn'),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerOn', self._step_power_on),
+            tester.TestStep('PowerOn', self._step_power_on),
             )
 
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Apply input power and measure voltages."""
-        dev['dcs_vaux'].output(self.vaux, True, delay=0.5)
+        dev['dcs_vaux'].output(config.vaux, True, delay=0.5)
         dev['dcl_vbat'].output(0.01, output=True)
         self.measure(
             ('dmm_vaux', 'dmm_vbat', 'dmm_vchem'), timeout=5)
@@ -52,8 +52,8 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        self['dcs_vaux'].output(0.0, False)
-        self['dcl_vbat'].output(0.0, False)
+        for dev in ('dcs_vaux', 'dcl_vbat', ):
+            self[dev].output(0.0, False)
 
 
 class Sensors(share.Sensors):
