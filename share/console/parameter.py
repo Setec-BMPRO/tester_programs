@@ -59,7 +59,6 @@ class _Parameter():
             raise ParameterError('Parameter is not writable')
         write_cmd = self._wr_fmt.format(value, self.command)
         response = func(write_cmd, expected=self.write_expected)
-# TODO: Validate response with a RegEx
         return response
 
     def read(self, func):
@@ -73,7 +72,6 @@ class _Parameter():
             raise ParameterError('Parameter is not readable')
         read_cmd = self._rd_fmt.format(self.command)
         response = func(read_cmd, expected=self.read_expected)
-# TODO: Validate response with a RegEx
         return response
 
 

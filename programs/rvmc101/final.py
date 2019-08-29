@@ -40,7 +40,6 @@ class Final(share.TestSequence):
         dev['canreader'].enable = True
         # Wait for the button press
         mes['zone4'](timeout=10)
-# FIXME: What about tester.devlogical.CANPacketError exceptions?
 
 
 class Devices(share.Devices):
@@ -56,7 +55,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
-#        self['can'].verbose = True
+        self['can'].verbose = False
         self['decoder'] = tester.CANPacket()
         self['canreader'] = device.CANReader(
             self['can'], self['decoder'], name='CANThread')

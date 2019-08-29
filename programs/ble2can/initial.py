@@ -102,7 +102,7 @@ class Initial(share.TestSequence):
         dev['rla_pair_btn'].release()
         self._reset_unit()
         mes['CANbind'](timeout=10)
-# FIXME: Present software release does not have CAN tunneling
+# The present software release does not have CAN tunneling
 #        ble2cantunnel = dev['ble2cantunnel']
 #        ble2cantunnel.open()
 #        mes['TunnelSwVer']()

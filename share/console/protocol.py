@@ -107,9 +107,6 @@ class Base():
     cmd_data = {}
     # True for verbose logging
     verbose = False
-# TODO: Remove this logger once we implement response_count != expected
-    # Last command sent (for debug message @ line 248)
-    last_cmd = None
     # Response of the last call to __setitem__
     last_setitem_response = ''
     # Magic command key to read last __setitem__ response
@@ -274,15 +271,9 @@ class Base():
         if response_count == 0:     # Reduce empty list to None
             response = None
         self._logger.debug('Response <-- %s', repr(response))
-# FIXME: Next line should be:   if response_count != expected:
-        if response_count < expected:
+        if response_count != expected:
             raise ResponseError(
                 'Expected {0}, actual {1}'.format(expected, response_count))
-# TODO: Remove this logger once we implement response_count != expected
-        if response_count > expected:
-            self._logger.error(
-                'Extra response to %s: Expected %s, actual %s',
-                repr(self.last_cmd), expected, repr(response))
         return response
 
 

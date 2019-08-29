@@ -140,7 +140,7 @@ class J35():
         @return configuration class
 
         """
-# TODO: 469 x J35C were converted to J35B via PC 4885
+# 469 x J35C were converted to J35B via PC 4885
 #   J35C Rev 4, Lots: A164211 (x135), A164309 (x265)
 #   ==> Should we change parameter from 'C' to 'B' ?...
         config = {

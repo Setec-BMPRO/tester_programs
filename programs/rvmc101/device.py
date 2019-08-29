@@ -184,7 +184,7 @@ class CANReader(threading.Thread):
         self._evt_stop.set()
         self.join()
 
-# TODO: This is how to send Display Control packets
+# This is how to send Display Control packets
 #    def send_led_display(serial2can):
 #        """Send a LED_DISPLAY packet."""
 #        pkt = tester.devphysical.can.RVCPacket()

@@ -85,19 +85,22 @@ class Final(share.TestSequence):
         unit = dev['armtunnel']
         unit['CONFIG'] = 0x7E00         # Enable all 4 tanks
         unit['TANK_SPEED'] = 0.1        # Change update interval
-        # TODO: Catch a failure here, and call self._measure_sensors()
-        # No sensors - Tanks empty
-        dev['rla_s1'].set_off(delay=1)
-        tester.MeasureGroup(mes['arm_level1'], timeout=12)
-        # 1 sensor
-        dev['rla_s1'].set_on(delay=1)
-        tester.MeasureGroup(mes['arm_level2'], timeout=12)
-        # 2 sensors
-        dev['rla_s2'].set_on(delay=1)
-        tester.MeasureGroup(mes['arm_level3'], timeout=12)
-        # 3 sensors
-        dev['rla_s3'].set_on(delay=1)
-        tester.MeasureGroup(mes['arm_level4'], timeout=12)
+        try:
+            # No sensors - Tanks empty
+            dev['rla_s1'].set_off(delay=1)
+            tester.MeasureGroup(mes['arm_level1'], timeout=12)
+            # 1 sensor
+            dev['rla_s1'].set_on(delay=1)
+            tester.MeasureGroup(mes['arm_level2'], timeout=12)
+            # 2 sensors
+            dev['rla_s2'].set_on(delay=1)
+            tester.MeasureGroup(mes['arm_level3'], timeout=12)
+            # 3 sensors
+            dev['rla_s3'].set_on(delay=1)
+            tester.MeasureGroup(mes['arm_level4'], timeout=12)
+        except tester.MeasurementFailedError:
+            self._measure_sensors()
+            raise
         unit.testmode(False)
 
     @share.teststep
