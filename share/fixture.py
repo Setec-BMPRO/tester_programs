@@ -25,19 +25,16 @@ DATA = {
     # Fixtures using Non-USB serial ports
 
     '029083': {     # Batterycheck Initial
-        'ARM_CON': {'posix': '/dev/ttyUSB1', 'nt': 'COM1'}[os.name],
-        'ARM_PGM': {'posix': '/dev/ttyUSB2', 'nt': 'COM2'}[os.name],
+        'ARM_CON': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
+        'ARM_PGM': {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name],
         # Hub port X: Panasonic eUniStone PAN1322 (FTDI with S/N)
-        'BT': {'posix': '/dev/ttyUSB2', 'nt': 'COM4'}[os.name],
+        'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM4'}[os.name],
         },
     '020827': {     # BCE282 Initial
         'MSP1': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name], # programming
         'MSP2': {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name], # comms
         },
     '021299': {     # Drifter Initial
-        'PIC': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
-        },
-    '017048': {     # IDS-500 Final
         'PIC': {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name],
         },
 
@@ -49,6 +46,9 @@ DATA = {
         },
     '025197': {     # GEN8 Initial (Prolific)
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
+        },
+    '017048': {     # IDS-500 Final (Prolific)
+        'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
         },
 
     # Fixtures with a single SETEC or non-SETEC FTDI (without any S/N)
