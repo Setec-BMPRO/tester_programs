@@ -44,9 +44,6 @@ DATA = {
         # Panasonic eUniStone PAN1322 (FTDI with S/N)
         'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM9'}[os.name],
         },
-    '025197': {     # GEN8 Initial (Prolific)
-        'ARM': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
-        },
     '017048': {     # IDS-500 Final (Prolific)
         'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
         },
@@ -72,6 +69,9 @@ DATA = {
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '027420': {     # Trek2 Initial/Final
+        'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
+        },
+    '025197': {     # GEN8 Initial
         'ARM': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI}[os.name],
         },
     '032715': {     # GEN9-540 Initial
