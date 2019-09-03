@@ -5,6 +5,7 @@
 
 # Injected AUX voltage
 vaux = 12.8
+vsol = 14.6
 
 # Software image filename
 sw_image = 'mb3_2.0.hex'
