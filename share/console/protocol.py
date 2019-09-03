@@ -125,6 +125,9 @@ class Base():
     def open(self):
         """Open connection to unit."""
         self.port.open()
+        # We need to wait just a little before flushing the port
+        time.sleep(0.01)
+        self.flushInput()
 
     def close(self):
         """Close connection to unit."""

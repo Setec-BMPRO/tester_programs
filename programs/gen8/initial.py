@@ -272,7 +272,6 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-                ('dcs_fixture', tester.DCSource, 'DCS1'),
                 ('dcs_5v', tester.DCSource, 'DCS2'),
                 ('dcl_24v', tester.DCLoad, 'DCL1'),
                 ('dcl_5v', tester.DCLoad, 'DCL4'),
@@ -298,9 +297,6 @@ class Devices(share.Devices):
         # Set port separately - don't open until after programming
         arm_ser.port = arm_port
         self['arm'] = console.Console(arm_ser)
-        # Switch on fixture power
-        self['dcs_fixture'].output(10.0, output=True)
-        self.add_closer(lambda: self['dcs_fixture'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
