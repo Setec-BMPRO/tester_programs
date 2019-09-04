@@ -29,8 +29,6 @@ class Config():
     vbatt_set = 12.5
     # Test limits common to both units and test types
     _base_limits = (
-        tester.LimitBoolean('ScanMac', True,
-            doc='MAC address detected'),
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
         )
@@ -46,8 +44,8 @@ class Config():
         )
     # Final Test limits common to both units
     _base_limits_final = _base_limits + (
-        tester.LimitHigh('ScanRSSI', -80,
-            doc='Strong BLE signal'),
+        tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
+        tester.LimitHigh('ScanRSSI', -80, doc='Strong BLE signal'),
         )
 
     @staticmethod

@@ -15,14 +15,13 @@ class RVMN101BInitial(ProgramTestCase):
     prog_class = rvmn101.Initial
     parameter = 'B'
     hs_outputs = [1, 2, 3]
-    debug = True
+    debug = False
 
     def setUp(self):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
                 'share.programmer.Nordic',
-                'share.bluetooth.RaspberryBluetooth',
                 'share.bluetooth.SerialToMAC',
                 ):
             patcher = patch(target)
@@ -63,18 +62,14 @@ class RVMN101BInitial(ProgramTestCase):
                 'CanBus': (
                     (sen['MirCAN'], True),
                     ),
-                'Bluetooth': (
-                    (sen['BleMac'], '112233445566'),
-                    (sen['MirScan'], True),
-                    ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(17, len(result.readings))
+        self.assertEqual(15, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise',
-             'Output', 'CanBus', 'Bluetooth'],
+             'Output', 'CanBus'],
             self.tester.ut_steps)

@@ -32,11 +32,8 @@ class Initial(share.TestSequence):
             tester.TestStep('Initialise', self._step_initialise),
             tester.TestStep('Output', self._step_output),
             tester.TestStep('CanBus', self._step_canbus),
-            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
-#        for mes in self.measurements:
-#            print(str(self.measurements[mes]) + '\n')
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -98,14 +95,6 @@ class Initial(share.TestSequence):
         mes['can_active'].sensor.store(result)
         mes['can_active']()
 
-    @share.teststep
-    def _step_bluetooth(self, dev, mes):
-        """Test the Bluetooth interface."""
-        self.mac = mes['ble_mac']().reading1
-        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
-        mes['scan_mac'].sensor.store(reply is not None)
-        mes['scan_mac']()
-
 
 class Devices(share.Devices):
 
@@ -149,8 +138,6 @@ class Devices(share.Devices):
             'A': console.ConsoleA,
             'B': console.ConsoleB,
             }[self.parameter](nordic_ser)
-        # Connection to RaspberryPi bluetooth server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # CAN interface
@@ -186,7 +173,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['MirScan'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
@@ -228,6 +214,4 @@ class Measurements(share.Measurements):
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ('ble_mac', 'BleMac', 'BleMac', 'MAC address from console'),
-            ('scan_mac', 'ScanMac', 'MirScan',
-                'MAC address seen over bluetooth'),
             ))
