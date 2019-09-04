@@ -37,6 +37,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
+        # Fixture USB hub power
+        dev['dcs_vcom'].output(9.0, output=True, delay=5)
         mes['ui_serialnum'].sensor.position = tuple(range(1, self.per_panel + 1))
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(3.3, output=True)
@@ -53,6 +55,8 @@ class Initial(share.TestSequence):
 
         """
         pgm = dev['progNORDIC']
+        # Open console serial connection
+        dev['rvswt101'].open()
         for pos in range(self.per_panel):
             mypos = pos + 1
             if tester.Measurement.position_enabled(mypos):
@@ -136,16 +140,17 @@ class Devices(share.Devices):
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
-        # Fixture USB hub power
-        self['dcs_vcom'].output(9.0, output=True, delay=10)
-        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
-        # Open console serial connection
-        self['rvswt101'].open()
-        self.add_closer(lambda: self['rvswt101'].close())
+#        # Fixture USB hub power
+#        self['dcs_vcom'].output(9.0, output=True, delay=5)
+#        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
+#        # Open console serial connection
+#        self['rvswt101'].open()
+#        self.add_closer(lambda: self['rvswt101'].close())
 
     def reset(self):
         """Reset instruments."""
-        for dcs in ('dcs_vin', 'dcs_switch'):
+        self['rvswt101'].close()
+        for dcs in ('dcs_vin', 'dcs_switch', 'dcs_vcom'):
             self[dcs].output(0.0, False)
         for rla in (
             'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4', 'rla_pos5',

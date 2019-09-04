@@ -110,7 +110,10 @@ DATA = {
         },
     '032869': {     # RVSWT101 Initial
         # Hub port 1: FTDI
-        'NORDIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM23'}[os.name],
+        'NORDIC': {'posix': '/dev/ttyUSB1', 'nt': SETEC_FTDI_HUB[1]}[os.name],
+        # Hub port 2: Nordic NRF52 device programmer
+        # Hub port 3: not used
+        # Hub port 4: not used
         },
     '033550': {     # RVMN101A Initial
         # Hub port 1: FTDI
