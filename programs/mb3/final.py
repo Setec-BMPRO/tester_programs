@@ -42,7 +42,7 @@ class Final(share.TestSequence):
     def _step_solar(self, dev, mes):
         """Remove Aux input, apply Solar input power and measure output."""
         dev['rla_select'].solar()
-        dev['dcs_vin'].output(config.vsol)
+        dev['dcs_vin'].output(config.vsol, delay=0.5)
         self.measure(
             ('dmm_vsol', 'dmm_vbatoff'), timeout=5)
         dev['rla_batt'].set_on()
