@@ -26,7 +26,7 @@ class MB3Final(ProgramTestCase):
                     ),
                 'Solar': (
                     (sen['vsol'], 14.6),
-                    (sen['vbat'], 14.6),
+                    (sen['vbat'], (0.0, 14.6)),
                     ),
                 },
             }
@@ -34,5 +34,5 @@ class MB3Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
+        self.assertEqual(6, len(result.readings))
         self.assertEqual(['PowerOn', 'Solar'], self.tester.ut_steps)

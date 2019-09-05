@@ -56,7 +56,6 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vaux', tester.DCSource, 'DCS2'),
-                ('dcs_vsol', tester.DCSource, 'DCS3'),
                 ('dcl_vbat', tester.DCLoad, 'DCL1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -73,7 +72,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        for dev in ('dcs_vaux', 'dcs_vsol', 'dcl_vbat', ):
+        for dev in ('dcs_vaux', 'dcl_vbat', ):
             self[dev].output(0.0, False)
 
 

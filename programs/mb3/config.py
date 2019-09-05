@@ -5,6 +5,7 @@
 
 # Injected AUX voltage
 vaux = 12.8
+# Injected SOLAR voltage
 vsol = 14.6
 
 # Software image filename

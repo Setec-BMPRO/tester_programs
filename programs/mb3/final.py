@@ -17,8 +17,8 @@ class Final(share.TestSequence):
         tester.LimitDelta('Vaux', config.vaux, 0.5),
         tester.LimitDelta('Vsolar', config.vsol, 0.5),
         tester.LimitDelta('Vbat', 14.6, 0.3),
-        tester.LimitDelta('Vchem', 2.5, 0.5,
-            doc='Voltage present on sense conn'),
+        tester.LimitLow('Vbatoff', 0.5),
+        tester.LimitHigh('Vchem', 2.0, doc='Voltage present on sense conn'),
         )
 
     def open(self, uut):
@@ -32,6 +32,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Apply Aux input power and measure output."""
+        dev['rla_select'].aux
         dev['dcs_vin'].output(config.vaux, True, delay=0.5)
         dev['dcl_vbat'].output(0.01, output=True)
         self.measure(
@@ -39,10 +40,11 @@ class Final(share.TestSequence):
 
     @share.teststep
     def _step_solar(self, dev, mes):
-        """Apply Solar input power and measure output."""
-        dev['rla_solar'].set_on()
+        """Remove Aux input, apply Solar input power and measure output."""
+        dev['rla_select'].solar()
         dev['dcs_vin'].output(config.vsol)
-        mes['dmm_vsol'](timeout=5)
+        self.measure(
+            ('dmm_vsol', 'dmm_vbatoff'), timeout=5)
         dev['rla_batt'].set_on()
         mes['dmm_vbat'](timeout=5)
 
@@ -58,16 +60,20 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcl_vbat', tester.DCLoad, 'DCL1'),
-                ('rla_solar', tester.Relay, 'RLA1'),
+                ('rla_select', tester.Relay, 'RLA1'),
                 ('rla_batt', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Some more obvious ways to use this relay
+        sel = self['rla_select']
+        sel.aux = sel.set_off
+        sel.solar = sel.set_on
 
     def reset(self):
         """Reset instruments."""
         for dev in ('dcs_vin', 'dcl_vbat', ):
             self[dev].output(0.0, False)
-        for rla in ('rla_solar', 'rla_batt', ):
+        for rla in ('rla_select', 'rla_batt', ):
             self[rla].set_off()
 
 
@@ -95,6 +101,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vaux', 'Vaux', 'vaux', 'Aux input ok'),
             ('dmm_vbat', 'Vbat', 'vbat', 'Battery output ok'),
+            ('dmm_vbatoff', 'Vbatoff', 'vbat', 'No output'),
             ('dmm_vchem', 'Vchem', 'vchem', 'Sense connector plugged in'),
             ('dmm_vsol', 'Vsolar', 'vsol', 'Solar input ok'),
             ))
