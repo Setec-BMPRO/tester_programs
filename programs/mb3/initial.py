@@ -42,7 +42,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_output(self, dev, mes):
         """Test the output of the unit."""
-        dev['dcl_vbat'].output(0.01, output=True)
         mes['dmm_vbat'](timeout=5)
 
 
@@ -56,7 +55,6 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vaux', tester.DCSource, 'DCS2'),
-                ('dcl_vbat', tester.DCLoad, 'DCL1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial port for the ATtiny406. Used by programmer and comms module.
@@ -72,8 +70,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        for dev in ('dcs_vaux', 'dcl_vbat', ):
-            self[dev].output(0.0, False)
+        self['dcs_vaux'].output(0.0, False)
 
 
 class Sensors(share.Sensors):
