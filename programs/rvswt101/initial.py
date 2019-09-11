@@ -28,7 +28,6 @@ class Initial(share.TestSequence):
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('ProgramTest', self._step_program_test),
             )
-        self.sernum = None
         # This is a multi-unit parallel program so we can't stop on errors.
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
@@ -38,9 +37,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
         # Fixture USB hub power
-        dev['dcs_vcom'].output(9.0, output=True, delay=5)
-        mes['ui_serialnum'].sensor.position = tuple(range(1, self.per_panel + 1))
-        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+        dev['dcs_vcom'].output(9.0, output=True, delay=10)
         dev['dcs_vin'].output(3.3, output=True)
         mes['dmm_vin'].sensor.position = tuple(range(1, self.per_panel + 1))
         mes['dmm_vin'](timeout=5)
@@ -140,12 +137,6 @@ class Devices(share.Devices):
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
-#        # Fixture USB hub power
-#        self['dcs_vcom'].output(9.0, output=True, delay=5)
-#        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
-#        # Open console serial connection
-#        self['rvswt101'].open()
-#        self.add_closer(lambda: self['rvswt101'].close())
 
     def reset(self):
         """Reset instruments."""
@@ -251,9 +242,6 @@ class Sensors(share.Sensors):
         self['mirmac'] = sensor.Mirror(rdgtype=sensor.ReadingString)
         self['mirscan'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
-        self['SnEntry'] = sensor.DataEntry(
-            message=tester.translate('rvswt101_initial', 'msgSnEntry'),
-            caption=tester.translate('rvswt101_initial', 'capSnEntry'))
         # Console sensors
         rvswt101 = self.devices['rvswt101']
         for device, name, cmdkey in (
@@ -271,7 +259,6 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', ''),
-            ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from console'),
             ('scan_mac', 'ScanMac', 'mirscan',
                 'Scan for MAC address over bluetooth'),
