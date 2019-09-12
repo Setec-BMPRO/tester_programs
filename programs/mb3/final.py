@@ -32,9 +32,8 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Apply Aux input power and measure output."""
-        dev['rla_select'].aux
+        dev['rla_select'].aux()
         dev['dcs_vin'].output(config.vaux, True, delay=0.5)
-        dev['dcl_vbat'].output(0.01, output=True)
         self.measure(
             ('dmm_vaux', 'dmm_vbat', 'dmm_vchem'), timeout=5)
 
@@ -59,7 +58,6 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('dcl_vbat', tester.DCLoad, 'DCL1'),
                 ('rla_select', tester.Relay, 'RLA1'),
                 ('rla_batt', tester.Relay, 'RLA2'),
             ):
@@ -71,8 +69,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        for dev in ('dcs_vin', 'dcl_vbat', ):
-            self[dev].output(0.0, False)
+        self['dcs_vin'].output(0.0, False)
         for rla in ('rla_select', 'rla_batt', ):
             self[rla].set_off()
 
