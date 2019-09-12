@@ -14,7 +14,24 @@ class System():
     # One of ('ATE2a', 'ATE2c', 'ATE3', 'ATE4')
     #  Must be set by the user of this project, since there is
     #  no way we can find it...
-    tester_type = None
+    tester_type = 'ATE4'    # A default value...
+
+    @classmethod
+    def ble_url(cls):
+        """Lookup the URL of the Bluetooth JSONRPC server.
+
+        @return URL of JSON-RPC server
+
+        """
+        if cls.tester_type == 'ATE4':
+            url = 'http://127.0.0.1:8888/'
+        else:   # Use a networked Raspberry PI
+            url = 'http://192.168.168.62:8888/'
+
+# TODO: Remove this when ATE4 has a local JSON-RPC server
+        url = 'http://192.168.168.62:8888/'
+
+        return url
 
 
 class Fixture():

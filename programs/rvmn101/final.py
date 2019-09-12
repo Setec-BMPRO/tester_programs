@@ -52,7 +52,8 @@ class Devices(share.Devices):
     def open(self):
         """Create all Instruments."""
         # Connection to RaspberryPi bluetooth server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
+            share.config.System.ble_url())
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         self['dcs_vin'] = tester.DCSource(self.physical_devices['DCS2'])

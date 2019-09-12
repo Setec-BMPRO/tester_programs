@@ -57,7 +57,7 @@ class RaspberryBluetooth(unittest.TestCase):
         patcher = patch('jsonrpclib.config.Config')
         self.addCleanup(patcher.stop)
         patcher.start()
-        self.pibt = share.bluetooth.RaspberryBluetooth()
+        self.pibt = share.bluetooth.RaspberryBluetooth('')
 
     def test_echo(self):
         """Echo method."""

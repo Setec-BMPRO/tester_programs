@@ -149,7 +149,8 @@ class Devices(share.Devices):
             tester.devphysical.can.SETECDeviceID.cn101)
         self['cn102tunnel'] = console.TunnelConsole(tunnel)
         # Bluetooth connection to server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
+            share.config.System.ble_url())
 
     def reset(self):
         """Reset instruments."""

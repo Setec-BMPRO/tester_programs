@@ -61,7 +61,8 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Bluetooth connection to server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
+            share.config.System.ble_url())
 
     def reset(self):
         """Reset instruments."""

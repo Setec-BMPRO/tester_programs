@@ -41,7 +41,6 @@ class RVSWT101Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['SnEntry'], 'A1526040123'),
                     (sen['vin'], 3.3),
                     ),
                 'ProgramTest': (
@@ -56,7 +55,7 @@ class RVSWT101Initial(ProgramTestCase):
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
-            self.assertEqual(4, len(res.readings))
+            self.assertEqual(3, len(res.readings))
         self.assertEqual(
             ['PowerUp', 'ProgramTest'],
             self.tester.ut_steps)

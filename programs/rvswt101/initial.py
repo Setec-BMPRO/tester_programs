@@ -134,7 +134,8 @@ class Devices(share.Devices):
         self['rvswt101'] = console.Console(rvswt101_ser)
         self['rvswt101'].measurement_fail_on_error = False
         # Connection to RaspberryPi bluetooth server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth()
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
+            share.config.System.ble_url())
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
 
