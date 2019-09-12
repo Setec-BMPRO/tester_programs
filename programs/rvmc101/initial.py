@@ -108,7 +108,7 @@ class Devices(share.Devices):
         self.add_closer(self.close_can)
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        arm_port = share.fixture.port('032870', 'ARM')
+        arm_port = share.config.Fixture.port('032870', 'ARM')
         self['program_arm'] = share.programmer.ARM(
             arm_port,
             os.path.join(folder, config.SW_IMAGE),

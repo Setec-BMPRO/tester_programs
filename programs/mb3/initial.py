@@ -58,7 +58,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial port for the ATtiny406. Used by programmer and comms module.
-        avr_port = share.fixture.port('033633', 'AVR')
+        avr_port = share.config.Fixture.port('033633', 'AVR')
         # ATtiny406 device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))

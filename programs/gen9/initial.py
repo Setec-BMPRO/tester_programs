@@ -239,7 +239,7 @@ class Devices(share.Devices):
         self['dcl_12v'] = tester.DCLoadParallel(
             ((self['dcl_12a'], 10), (self['dcl_12b'], 10)))
         # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.fixture.port('032715', 'ARM')
+        arm_port = share.config.Fixture.port('032715', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))

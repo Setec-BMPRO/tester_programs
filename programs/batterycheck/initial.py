@@ -195,16 +195,16 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe()))),
             Initial.arm_bin)
         self['programmer'] = share.programmer.ARM(
-            share.fixture.port('029083', 'ARM_PGM'), file,crpmode=False)
+            share.config.Fixture.port('029083', 'ARM_PGM'), file,crpmode=False)
         # Serial connection to the console
         arm_ser = serial.Serial(baudrate=9600, timeout=2)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = share.fixture.port('029083', 'ARM_CON')
+        arm_ser.port = share.config.Fixture.port('029083', 'ARM_CON')
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Bluetooth device
         btport = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        btport.port = share.fixture.port('029083', 'BT')
+        btport.port = share.config.Fixture.port('029083', 'BT')
         # BT Radio driver
         self['bt'] = share.bluetooth.BtRadio(btport)
 

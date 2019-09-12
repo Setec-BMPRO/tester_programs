@@ -95,13 +95,13 @@ class Devices(share.Devices):
         # Serial connection to the console
         bc2_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        bc2_ser.port = share.fixture.port('030451', 'ARM')
+        bc2_ser.port = share.config.Fixture.port('030451', 'ARM')
         # Console driver
         self['bc2'] = console.Console(bc2_ser)
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.fixture.port('030451', 'BLE')
+        ble_ser.port = share.config.Fixture.port('030451', 'BLE')
         self['ble'] = share.bluetooth.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)

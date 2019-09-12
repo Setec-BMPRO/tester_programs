@@ -124,7 +124,7 @@ class Devices(share.Devices):
                 ('rla_boot', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        arm_port = share.fixture.port('029687', 'ARM')
+        arm_port = share.config.Fixture.port('029687', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))

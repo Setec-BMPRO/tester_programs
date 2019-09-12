@@ -120,7 +120,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.fixture.port('028468', 'ARM')
+        arm_port = share.config.Fixture.port('028468', 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['progARM'] = share.programmer.ARM(

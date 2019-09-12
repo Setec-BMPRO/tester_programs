@@ -71,7 +71,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = share.fixture.port('017056', 'PIC')
+        pic_ser.port = share.config.Fixture.port('017056', 'PIC')
         self['pic'] = console.Console(pic_ser)
         self['rla_comm'].set_on()
         self.add_closer(lambda: self['rla_comm'].set_off())

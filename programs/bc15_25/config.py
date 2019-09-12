@@ -102,7 +102,7 @@ class BC15(BCx5):
     sw_version_a = '2.0.16258.2002'
     sw_version_b = '2.0.18498.2003'
     arm_file_pattern = 'bc15_{0}.bin'
-    arm_port = share.fixture.port('028467', 'ARM')
+    arm_port = share.config.Fixture.port('028467', 'ARM')
     _lot_rev = share.lots.Revision((
         (share.lots.Range('A100101', 'A190101'), 0),    # Rev 1 - 5
         # Rev 6...
@@ -169,7 +169,7 @@ class BC25(BCx5):
     sw_version_a = '1.0.16489.137'
     sw_version_b = '2.0.18498.2003'
     arm_file_pattern = 'bc25_{0}.bin'
-    arm_port = share.fixture.port('031032', 'ARM')
+    arm_port = share.config.Fixture.port('031032', 'ARM')
     _lot_rev = share.lots.Revision((
         (share.lots.Range('A100101', 'A190101'), 0),    # Rev 1 - 3
         # Rev 4...

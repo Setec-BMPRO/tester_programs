@@ -83,7 +83,7 @@ class Devices(share.Devices):
         # Serial connection to the Bluetooth device
         btport = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        btport.port = share.fixture.port('027013', 'BT')
+        btport.port = share.config.Fixture.port('027013', 'BT')
         # BT Radio driver
         self['bt'] = share.bluetooth.BtRadio(btport)
 

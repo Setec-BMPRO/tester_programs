@@ -74,6 +74,7 @@ def _main():
     logger.info('Creating "%s" Tester', tester_type)
     tst = tester.Tester(tester_type, programs.PROGRAMS)
     tst.start()
+    programs.config.System.tester_type = tester_type
     logger.info('Create Program "%s"', test_program)
     # Make a TEST PROGRAM descriptor
     pgm = tester.TestProgram(

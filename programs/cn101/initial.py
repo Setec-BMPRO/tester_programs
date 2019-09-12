@@ -115,7 +115,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.fixture.port('028468', 'ARM')
+        arm_port = share.config.Fixture.port('028468', 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
@@ -138,7 +138,7 @@ class Devices(share.Devices):
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
         # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.fixture.port('028468', 'BLE')
+        ble_ser.port = share.config.Fixture.port('028468', 'BLE')
         self['ble'] = share.bluetooth.BleRadio(ble_ser)
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)

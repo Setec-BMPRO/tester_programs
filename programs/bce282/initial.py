@@ -121,7 +121,7 @@ class Initial(share.TestSequence):
 
         """
         # Serial port for programming MSP430.
-        msp_port1 = share.fixture.port('020827', 'MSP1')
+        msp_port1 = share.config.Fixture.port('020827', 'MSP1')
         # Get any existing password & write to MSP_PASSWORD file
         msp = dev['msp']
         password = None
@@ -227,7 +227,7 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the MSP430
         self['msp_ser'] = serial.Serial(baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['msp_ser'].port = share.fixture.port('020827', 'MSP2')
+        self['msp_ser'].port = share.config.Fixture.port('020827', 'MSP2')
         # MSP430 Console driver
         self['msp'] = console.Console(self['msp_ser'])
         # Apply power to fixture circuits.

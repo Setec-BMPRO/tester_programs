@@ -121,7 +121,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         # ARM device programmer
         self['progARM'] = share.programmer.ARM(
-            share.fixture.port(self.fixture, 'ARM'),
+            share.config.Fixture.port(self.fixture, 'ARM'),
             os.path.join(folder, self.arm_image),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
@@ -132,7 +132,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         nordic_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        nordic_ser.port = share.fixture.port(self.fixture, 'NORDIC')
+        nordic_ser.port = share.config.Fixture.port(self.fixture, 'NORDIC')
         # Console driver
         self['rvmn101'] = {
             'A': console.ConsoleA,

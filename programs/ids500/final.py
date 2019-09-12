@@ -272,7 +272,7 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the PIC
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = share.fixture.port('017048', 'PIC')
+        pic_ser.port = share.config.Fixture.port('017048', 'PIC')
         self['pic'] = console.Console(pic_ser)
 
     def reset(self):

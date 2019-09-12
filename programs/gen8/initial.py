@@ -285,7 +285,7 @@ class Devices(share.Devices):
             ((tester.DCLoad(self.physical_devices['DCL2']), 12),
              (tester.DCLoad(self.physical_devices['DCL3']), 10)))
         # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.fixture.port('025197', 'ARM')
+        arm_port = share.config.Fixture.port('025197', 'ARM')
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
