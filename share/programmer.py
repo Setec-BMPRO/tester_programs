@@ -194,6 +194,8 @@ class Nordic(_Base):
         'posix': '/opt/nordic/nrfjprog/nrfjprog',
         'nt': r'C:\Program Files\Nordic Semiconductor\nrf5x\bin\nrfjprog.exe',
         }[os.name]
+    # HACK: Force coded RVSWT101 switch code if != 0
+    rvswt101_forced_switch_code = 0
 
     def __init__(self, hexfile, working_dir):
         """Create a programmer.
@@ -217,10 +219,20 @@ class Nordic(_Base):
             '--verify',
             ]
         self.process = subprocess.Popen(command, cwd=self.working_dir)
+        result = self.process.wait()
+        # HACK: Force code an RVSWT101 switch code
+        if result == self.pass_value and self.rvswt101_forced_switch_code:
+            command = [
+                self.binary,
+                '--memwr', '0x70000',
+                '--val', '{0}'.format(self.rvswt101_forced_switch_code),
+                ]
+            self.process = subprocess.Popen(command, cwd=self.working_dir)
+            result = self.process.wait()
+        self.measurement.sensor.store(result)
 
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.measurement.sensor.store(self.process.wait())
         self.measurement()
 
 

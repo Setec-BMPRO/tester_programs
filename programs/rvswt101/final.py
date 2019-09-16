@@ -17,7 +17,7 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.Config.get(self.parameter)
+        self.cfg = config.Config.get(self.parameter, uut)
         super().open(self.cfg['limits_fin'], Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Bluetooth', self._step_bluetooth),

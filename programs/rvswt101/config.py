@@ -57,11 +57,12 @@ class Config():
         )
 
     @classmethod
-    def get(cls, parameter):
+    def get(cls, parameter, uut):
 
         """Get configuration.
 
         @param parameter String to select the switch type
+        @param uut storage.UUT instance
         @return Dictionary of configuration data
 
         """
@@ -78,6 +79,16 @@ class Config():
         else:                           # Rev 3+ auto-coded switch types
             image = cls._software['series']
             banner_lines = 2
+        # Force code the RVSWT101 switch code as required
+        forced_code = 0
+        if uut:
+            lot = uut.lot
+            try:
+                forced_code = {
+                    'A193824': 42,  # PC-5092: Force J11-1 to be J11-3
+                    }[lot]
+            except KeyError:
+                pass
         return {
             'software': image,
             'limits_ini': cls._common_limits + cls._initial_limits,
@@ -85,4 +96,5 @@ class Config():
                 cls._common_limits + cls._final_limits + (type_lim, )
                 ),
             'banner_lines': banner_lines,
+            'forced_code': forced_code,
             }

@@ -19,9 +19,13 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.Config.get(self.parameter)
+        self.cfg = config.Config.get(self.parameter, uut)
         Devices.sw_image = self.cfg['software']
         super().open(self.cfg['limits_ini'], Devices, Sensors, Measurements)
+        # Force code the RVSWT101 switch code
+        self.devices['progNORDIC'].rvswt101_forced_switch_code = (
+            self.cfg['forced_code']
+            )
         # Adjust for different console behaviour
         self.devices['rvswt101'].banner_lines = self.cfg['banner_lines']
         self.steps = (
