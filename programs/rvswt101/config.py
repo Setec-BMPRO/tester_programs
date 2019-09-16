@@ -85,7 +85,8 @@ class Config():
             lot = uut.lot
             try:
                 forced_code = {
-                    'A193824': 42,  # PC-5092: Force J11-1 to be J11-3
+                    # PC-5092: Force J11-1 to be J11-3
+                    'A193824': cls._types['j11-3'],
                     }[lot]
             except KeyError:
                 pass
