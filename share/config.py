@@ -27,10 +27,6 @@ class System():
             url = 'http://127.0.0.1:8888/'
         else:   # Use a networked Raspberry PI
             url = 'http://192.168.168.62:8888/'
-
-# TODO: Remove this when ATE4 has a local JSON-RPC server
-        url = 'http://192.168.168.62:8888/'
-
         return url
 
 
