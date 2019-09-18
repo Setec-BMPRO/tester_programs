@@ -12,9 +12,9 @@ class Config():
     """Base configuration for BatteryCheck."""
 
     #  Software version
-    sw_version = '1.7.17895.1845'
+    sw_version = '2.0.0.2226'
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_version = (5, 0, 'A')
+    hw_version = (6, 0, 'A')
     #  Injected values
     vbatt = 15.0
     ibatt = 10.0
