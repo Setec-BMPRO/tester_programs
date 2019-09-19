@@ -32,6 +32,7 @@ class Initial(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        dev['bc2'].open()
         dev['dcs_vin'].output(self.cfg.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
@@ -39,7 +40,6 @@ class Initial(share.TestSequence):
     def _step_test_arm(self, dev, mes):
         """Test operation."""
         bc2 = dev['bc2']
-        bc2.open()
         bc2.brand(self.cfg.hw_version, self.sernum)
         bc2.set_model(self.cfg.model)
         mes['arm_swver']()
@@ -98,6 +98,7 @@ class Devices(share.Devices):
         bc2_ser.port = share.config.Fixture.port('030451', 'ARM')
         # Console driver
         self['bc2'] = console.Console(bc2_ser)
+        self['bc2'].verbose = False
         # Serial connection to the BLE module
         ble_ser = serial.Serial(baudrate=115200, timeout=5.0, rtscts=True)
         # Set port separately, as we don't want it opened yet
