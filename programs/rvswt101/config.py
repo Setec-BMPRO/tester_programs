@@ -52,7 +52,7 @@ class Config():
     _final_limits = (
         tester.LimitBoolean('ButtonOk', True,
             doc='Ok entered'),
-        tester.LimitDelta('CellVoltage', 3.25, 0.25,
+        tester.LimitDelta('CellVoltage', 3.3, 0.3,
             doc='Button cell charged'),
         )
 
