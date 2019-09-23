@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVSWT101 Initial Test program."""
 
+import unittest
 from unittest.mock import MagicMock, patch
 
 from ..data_feed import UnitTester, ProgramTestCase
@@ -59,3 +60,102 @@ class RVSWT101Initial(ProgramTestCase):
         self.assertEqual(
             ['PowerUp', 'ProgramTest'],
             self.tester.ut_steps)
+
+
+class Fixture(unittest.TestCase):
+
+    """RVSWT101 Initial Fixture test suite."""
+
+    relay_count = 2
+
+    def setUp(self):
+        """Per-Test setup."""
+        self.dcs = MagicMock(name='DCS')
+        self.rla = ['Dummy']    # Dummy [0] entry
+        for cnt in range(self.relay_count):
+            self.rla.append(MagicMock(name='RLA{0}'.format(cnt + 1)))
+        self.fxt = rvswt101.initial.Fixture(self.dcs, self.rla)
+
+    def _reset_mocks(self):
+        """Reset all my Mocks."""
+        self.dcs.reset_mock()
+        for cnt in range(self.relay_count):
+            self.rla[cnt + 1].reset_mock()
+
+    def test_program_mode(self):
+        """Program mode."""
+        self.dcs.output.assert_called_once_with(0.0, output=False)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.idle)
+        self._reset_mocks()
+        # Connect a position
+        mypos1 = 1
+        self.fxt.connect(mypos1)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.program)
+        self.dcs.output.assert_called_once_with(
+            rvswt101.initial.Fixture.dcs_program,
+            output=True,
+            delay=rvswt101.initial.Fixture.dcs_delay)
+        self.rla[mypos1].set_on.assert_called_once()
+        self._reset_mocks()
+        # Connect another position
+        mypos2 = 2
+        self.fxt.connect(mypos2)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.program)
+        self.dcs.output.assert_not_called()
+        self.rla[mypos1].set_off.assert_called_once()
+        self.rla[mypos2].set_on.assert_called_once()
+        self._reset_mocks()
+        # Release a button in program mode (not allowed)
+        with self.assertRaises(rvswt101.initial.FixtureError):
+            self.fxt.release()
+        # Swap to BUTTON mode
+        self.fxt.press(mypos1)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.button)
+        self.dcs.output.assert_called_once_with(
+            rvswt101.initial.Fixture.dcs_button,
+            output=True,
+            delay=rvswt101.initial.Fixture.dcs_delay)
+        self.rla[mypos2].set_off.assert_called_once()
+        self.rla[mypos1].set_on.assert_called_once()
+        self._reset_mocks()
+
+    def test_button_mode(self):
+        """Button mode."""
+        self.dcs.output.assert_called_once_with(0.0, output=False)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.idle)
+        self._reset_mocks()
+        # Press a position
+        mypos1 = 1
+        self.fxt.press(mypos1)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.button)
+        self.dcs.output.assert_called_once_with(
+            rvswt101.initial.Fixture.dcs_button,
+            output=True,
+            delay=rvswt101.initial.Fixture.dcs_delay)
+        self.rla[mypos1].set_on.assert_called_once()
+        self._reset_mocks()
+        # Press another position (not allowed)
+        mypos2 = 2
+        with self.assertRaises(rvswt101.initial.FixtureError):
+            self.fxt.press(mypos2)
+        # Release the position
+        self.fxt.release()
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.button)
+        self.rla[mypos1].set_off.assert_called_once()
+        self._reset_mocks()
+        # Press another position
+        mypos2 = 2
+        self.fxt.press(mypos2)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.button)
+        self.rla[mypos2].set_on.assert_called_once()
+        self._reset_mocks()
+        # Swap to PROGRAM mode
+        self.fxt.connect(mypos1)
+        self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.program)
+        self.dcs.output.assert_called_once_with(
+            rvswt101.initial.Fixture.dcs_program,
+            output=True,
+            delay=rvswt101.initial.Fixture.dcs_delay)
+        self.rla[mypos2].set_off.assert_called_once()
+        self.rla[mypos1].set_on.assert_called_once()
+        self._reset_mocks()

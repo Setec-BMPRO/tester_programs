@@ -3,6 +3,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Initial Test Program."""
 
+import enum
 import inspect
 import os
 
@@ -66,7 +67,7 @@ class Initial(share.TestSequence):
                         pgm, mes['ble_mac'].sensor, mes['scan_mac'].sensor
                         ):
                     sen.position = mypos
-                dev['fixture'].connect(pos)
+                dev['fixture'].connect(mypos)
                 pgm.program()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
@@ -82,9 +83,9 @@ class Initial(share.TestSequence):
                 # Save SerialNumber & MAC on a remote server.
                 dev['serialtomac'].blemac_set(str(self.uuts[pos]), self.mac)
                 # Press Button2 to broadcast on bluetooth
-                dev['fixture'].press(pos)
+                dev['fixture'].press(mypos)
                 reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
-                dev['fixture'].release(pos)
+                dev['fixture'].release()
                 mes['scan_mac'].sensor.store(reply is not None)
                 mes['scan_mac']()
 
@@ -118,10 +119,13 @@ class Devices(share.Devices):
         # Fixture helper device
         self['fixture'] = Fixture(
             self['dcs_switch'],
-            [self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
-            self['rla_pos4'], self['rla_pos5'], self['rla_pos6'],
-            self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
-            self['rla_pos10']]
+            [
+                'Dummy entry to give 1-based relay number indexing',
+                self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
+                self['rla_pos4'], self['rla_pos5'], self['rla_pos6'],
+                self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
+                self['rla_pos10'],
+            ]
             )
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -155,93 +159,114 @@ class Devices(share.Devices):
             self[rla].set_off()
 
 
+class FixtureError(Exception):
+
+    """Fixture operating sequence error."""
+
+
+class FixtureState(enum.IntEnum):
+
+    """State definitions for the Fixture class."""
+
+    idle = 0
+    program = 1
+    button = 2
+
+
 class Fixture():
 
     """Helper class for fixture circuit control.
 
-    DC Source 'mode_dcs' drives a relay that directs relay coil power to:
+    DC Source 'dcs' drives a relay that directs relay coil power to:
         - Button press relays (when DCS is off)
         - Programmer/Console connection relays (when DCS is 12V)
     The list of relays 'relays' controls each of the fixture positions.
-    Depending upon 'mode_dcs', it will either press that positions button, or
+    Depending upon 'dcs', it will either press that positions button, or
     connect the programmer & console to that position.
 
     This class deals with the settings and sequencing.
 
     """
 
-    def __init__(self, mode_dcs, relays):
+    # DC Source set voltages for each mode
+    dcs_program = 12.0
+    dcs_button = 0.0
+    # Delay after setting DC Source
+    dcs_delay = 0.1
+
+    def __init__(self, dcs, relays):
         """Create instance.
 
-        @param mode_dcs DC Source instance controlling Program / Button mode
-        @param relays List of position connection relays
+        @param dcs DC Source instance controlling Program / Button mode
+        @param relays List of position connection relays, with a leading
+                        [0] dummy entry
 
         """
-        self.mode_dcs = mode_dcs
-        self.relays = relays
-        self.position = None
-        self.is_button_mode = None
-        self._button_mode()
+        self._dcs = dcs
+        self._relays = relays
+        # _position is 1-based:
+        #   0 if nothing connected,
+        #   (1-N) for a connected position
+        self._position = 0
+        self.state = None
+        self.reset()
 
     def reset(self):
         """Reset operating state."""
-        self._button_mode()
-        self.mode_dcs.output(0, output=False)
+        self._disconnect()
+        self._dcs.output(0.0, output=False)
+        self.state = FixtureState.idle
 
-    def _program_mode(self):
-        """Set Program/Console mode."""
-        if self.is_button_mode:
-            if self.position is not None:
-                self.relays[self.position].set_off()
-                self.relays[self.position].opc()
-                self.position = None
-            self.mode_dcs.output(12, output=True, delay=0.1)
-            self.is_button_mode = False
+    def _connect(self, position):
+        """Connect a position.
 
-    def _button_mode(self):
-        """Set Button mode."""
-        if not self.is_button_mode:
-            if self.position is not None:
-                self.relays[self.position].set_off()
-                self.relays[self.position].opc()
-                self.position = None
-            self.mode_dcs.output(0, output=True, delay=0.1)
-            self.is_button_mode = True
+        @param position Position number (1-N)
+
+        """
+        if self._position:
+            raise FixtureError('Concurrent connections are not allowed')
+        self._relays[position].set_on()
+        self._relays[position].opc()
+        self._position = position
+
+    def _disconnect(self):
+        """Disconnect any connected position."""
+        if self._position:
+            self._relays[self._position].set_off()
+            self._relays[self._position].opc()
+            self._position = 0
 
     def connect(self, position):
         """Connect a position for programming.
 
-        @param position Position number
+        @param position Position number (1-N)
 
         """
-        self._program_mode()
-        if self.position is not None:
-            self.relays[self.position].set_off()
-            self.relays[self.position].opc()
-            self.position = None
-        self.relays[position].set_on()
-        self.relays[position].opc()
-        self.position = position
+        self._disconnect()
+        if self.state != FixtureState.program: # Swap to PROGRAM mode
+            self._dcs.output(
+                self.dcs_program, output=True, delay=self.dcs_delay)
+            self.state = FixtureState.program
+        self._connect(position)
 
     def press(self, position):
         """Press a button.
 
-        @param position Position number
+        @param position Position number (1-N)
 
         """
-        self._button_mode()
-        self.relays[position].set_on()
-        self.position = position
+        if self.state != FixtureState.button:  # Swap to BUTTON mode
+            self._disconnect()
+            self._dcs.output(
+                self.dcs_button, output=True, delay=self.dcs_delay)
+            self.state = FixtureState.button
+        self._connect(position)
 
-    def release(self, position):
-        """Release a button.
-
-        @param position Position number
-
-        """
-        self._button_mode()
-        self.relays[position].set_off()
-        self.position = None
+    def release(self):
+        """Release a button."""
+        if self.state != FixtureState.button:
+            raise FixtureError('Release called in program mode')
+        self._disconnect()
 
 
 class Sensors(share.Sensors):
