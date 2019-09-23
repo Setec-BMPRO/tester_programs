@@ -178,24 +178,27 @@ class Fixture():
         """
         self.mode_dcs = mode_dcs
         self.relays = relays
+        self.position = None
         self.is_button_mode = None
-        self.button_mode()
+        self._button_mode()
 
-    def program_mode(self):
+    def _program_mode(self):
         """Set Program/Console mode."""
         if self.is_button_mode:
-            for rla in self.relays:
-                rla.set_off()
-            self.relays[9].opc()    # Wait until the last relay turns off
+            if self.position is not None:
+                self.relays[self.position].set_off()
+                self.relays[self.position].opc()
+                self.position = None
             self.mode_dcs.output(12, output=True, delay=0.1)
             self.is_button_mode = False
 
-    def button_mode(self):
+    def _button_mode(self):
         """Set Button mode."""
         if not self.is_button_mode:
-            for rla in self.relays:
-                rla.set_off()
-            self.relays[9].opc()    # Wait until the last relay turns off
+            if self.position is not None:
+                self.relays[self.position].set_off()
+                self.relays[self.position].opc()
+                self.position = None
             self.mode_dcs.output(0, output=True, delay=0.1)
             self.is_button_mode = True
 
@@ -205,17 +208,10 @@ class Fixture():
         @param position Position number
 
         """
-        self.program_mode()
+        self._program_mode()
         self.relays[position].set_on()
-
-    def disconnect(self, position):
-        """Disconnect a position for programming.
-
-        @param position Position number
-
-        """
-        self.program_mode()
-        self.relays[position].set_off()
+        self.relays[position].opc()
+        self.position = position
 
     def press(self, position):
         """Press a button.
@@ -223,8 +219,9 @@ class Fixture():
         @param position Position number
 
         """
-        self.button_mode()
+        self._button_mode()
         self.relays[position].set_on()
+        self.position = position
 
     def release(self, position):
         """Release a button.
@@ -232,8 +229,9 @@ class Fixture():
         @param position Position number
 
         """
-        self.button_mode()
+        self._button_mode()
         self.relays[position].set_off()
+        self.position = None
 
 
 class Sensors(share.Sensors):
