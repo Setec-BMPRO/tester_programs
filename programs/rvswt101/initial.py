@@ -41,7 +41,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
         # Fixture USB hub power
-        dev['dcs_vcom'].output(9.0, output=True, delay=10)
+        dev['dcs_vcom'].output(9.0, output=True, delay=5)
         dev['dcs_vin'].output(3.3, output=True)
         mes['dmm_vin'].sensor.position = tuple(range(1, self.per_panel + 1))
         mes['dmm_vin'](timeout=5)
@@ -146,6 +146,7 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['rvswt101'].close()
+        self['fixture'].release(1)  # Causes BUTTON mode
         for dcs in ('dcs_vin', 'dcs_switch', 'dcs_vcom'):
             self[dcs].output(0.0, False)
         for rla in (
@@ -209,6 +210,10 @@ class Fixture():
 
         """
         self._program_mode()
+        if self.position is not None:
+            self.relays[self.position].set_off()
+            self.relays[self.position].opc()
+            self.position = None
         self.relays[position].set_on()
         self.relays[position].opc()
         self.position = position
