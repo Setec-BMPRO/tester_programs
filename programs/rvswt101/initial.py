@@ -146,8 +146,8 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['rvswt101'].close()
-        self['fixture'].release(1)  # Causes BUTTON mode
-        for dcs in ('dcs_vin', 'dcs_switch', 'dcs_vcom'):
+        self['fixture'].reset()
+        for dcs in ('dcs_vin', 'dcs_vcom'):
             self[dcs].output(0.0, False)
         for rla in (
             'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4', 'rla_pos5',
@@ -182,6 +182,11 @@ class Fixture():
         self.position = None
         self.is_button_mode = None
         self._button_mode()
+
+    def reset(self):
+        """Reset operating state."""
+        self._button_mode()
+        self.mode_dcs.output(0, output=False)
 
     def _program_mode(self):
         """Set Program/Console mode."""
