@@ -131,6 +131,8 @@ class CANReader(threading.Thread):
         self._evt_stop = threading.Event()
         self._evt_enable = threading.Event()
         self.enable = False         # Default to be 'not enabled'
+        self._evt_verbose = threading.Event()
+        self.verbose = False        # Default is no per-packet logging
         self._logger = logging.getLogger(
             '.'.join((__name__, self.__class__.__name__)))
         self._logger.debug('Start CANReader')
@@ -141,6 +143,8 @@ class CANReader(threading.Thread):
             if self.enable:
                 try:
                     pkt = self.candev.read_can(timeout=self.read_timeout)
+                    if self.verbose:
+                        self._logger.debug('Packet: %s', pkt)
                 except tester.devphysical.can.SerialToCanError:
                     self._logger.debug('SerialToCanError')
                     self.packetdev.packet = self.null_packet
@@ -177,6 +181,27 @@ class CANReader(threading.Thread):
             self._evt_enable.set()
         else:
             self._evt_enable.clear()
+
+    @property
+    def verbose(self):
+        """Verbose property getter.
+
+        @return True if enabled
+
+        """
+        return self._evt_verbose.is_set()
+
+    @verbose.setter
+    def verbose(self, value):
+        """Set verbose property.
+
+        @param value True for per-packet logging
+
+        """
+        if value:
+            self._evt_verbose.set()
+        else:
+            self._evt_verbose.clear()
 
     def halt(self):
         """Stop the packet processing thread."""

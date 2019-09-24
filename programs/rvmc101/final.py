@@ -59,6 +59,7 @@ class Devices(share.Devices):
         self['decoder'] = tester.CANPacket()
         self['canreader'] = device.CANReader(
             self['can'], self['decoder'], name='CANThread')
+        self['canreader'].verbose = False
         self['canreader'].start()
         self.add_closer(self.close_can)
 
