@@ -27,6 +27,10 @@ class System():
             url = 'http://127.0.0.1:8888/'
         else:   # Use a networked Raspberry PI
             url = 'http://192.168.168.62:8888/'
+
+# FIXME: Force network Pi until ATE4 bluetooth dongle is working
+        url = 'http://192.168.168.62:8888/'
+
         return url
 
 
