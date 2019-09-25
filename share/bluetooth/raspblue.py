@@ -113,7 +113,7 @@ class RaspberryBluetooth(SerialIO):
         """
         return self.server.scan_advert_sernum(sernum, timeout)
 
-    def scan_beacon_sernum(self, sernum, timeout=10):
+    def scan_beacon_sernum(self, sernum, timeout=20):
         """Scan beacon-mode packets for a device Serial Number.
 
         @param sernum Serial Number to locate
@@ -123,7 +123,7 @@ class RaspberryBluetooth(SerialIO):
         """
         return self.server.scan_beacon_sernum(sernum, timeout)
 
-    def open(self, device_id, timeout=10, passkey=None):
+    def open(self, device_id, timeout=20, passkey=None):
         """Open a connection to a device console.
 
         @param device_id Serial Number OR MAC address to connect to
