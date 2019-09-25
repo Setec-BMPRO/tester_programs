@@ -45,7 +45,6 @@ class Config():
     # Final Test limits common to both units
     _base_limits_final = _base_limits + (
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
-        tester.LimitHigh('ScanRSSI', -80, doc='Strong BLE signal'),
         )
 
     @staticmethod
@@ -96,7 +95,7 @@ class RVMN101A(Config):
 
         """
         return cls._base_limits_final + (
-            tester.LimitHigh('ScanRSSI', -80, doc='Strong BLE signal'),
+            tester.LimitHigh('ScanRSSI', -85, doc='Strong BLE signal'),
             )
 
 
