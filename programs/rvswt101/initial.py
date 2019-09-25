@@ -41,8 +41,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
-        # Fixture USB hub power
-        dev['dcs_vcom'].output(9.0, output=True, delay=5)
         dev['dcs_vin'].output(3.3, output=True)
         mes['dmm_vin'].sensor.position = tuple(range(1, self.per_panel + 1))
         mes['dmm_vin'](timeout=5)
@@ -101,7 +99,7 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS4'),
+                ('dcs_usb', tester.DCSource, 'DCS4'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_switch', tester.DCSource, 'DCS3'),
                 ('rla_pos1', tester.Relay, 'RLA1'),
@@ -116,6 +114,9 @@ class Devices(share.Devices):
                 ('rla_pos10', tester.Relay, 'RLA10'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Fixture USB hub power
+        self['dcs_usb'].output(9.0, output=True, delay=5)
+        self.add_closer(lambda: self['dcs_usb'].output(0.0, output=False))
         # Fixture helper device
         self['fixture'] = Fixture(
             self['dcs_switch'],
@@ -151,12 +152,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['rvswt101'].close()
         self['fixture'].reset()
-        for dcs in ('dcs_vin', 'dcs_vcom'):
-            self[dcs].output(0.0, False)
-        for rla in (
-            'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4', 'rla_pos5',
-            'rla_pos6', 'rla_pos7', 'rla_pos8', 'rla_pos9', 'rla_pos10'):
-            self[rla].set_off()
+        self['dcs_vin'].output(0.0, False)
 
 
 class FixtureError(Exception):
