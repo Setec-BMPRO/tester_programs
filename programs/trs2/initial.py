@@ -98,6 +98,7 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
+        dev['trs2'].open()
         mes['dmm_tstpincov'](timeout=5)
         dev['dcs_vin'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
@@ -112,7 +113,6 @@ class Initial(share.TestSequence):
     def _step_operation(self, dev, mes):
         """Test the operation of LEDs."""
         trs2 = dev['trs2']
-        trs2.open()
         trs2.brand(config.HW_VERSION, self.sernum)
         self.measure(
             ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
