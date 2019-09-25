@@ -126,8 +126,7 @@ class Fixture():
             },
         '032871': {     # RVMN101B Initial
             'ARM': _ftdi_hub_1,
-            # Hub port 2: FTDI with S/N
-            'NORDIC': {'posix': '/dev/ttyUSB2', 'nt': 'COM28'}[os.name],
+            'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
             # Hub port 4: not used
             },
