@@ -54,12 +54,12 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
+        cn102 = dev['cn102']
+        cn102.open()
         # Cycle power to get the Nordic running
         dev['dcs_vin'].output(0, output=True, delay=2)
         dev['dcs_vin'].output(8.6, output=True)
         mes['dmm_3v3'](timeout=5)
-        cn102 = dev['cn102']
-        cn102.open()
         cn102.brand(
             self.cfg.hw_version, self.sernum, dev['rla_reset'],
             self.cfg.banner_lines)
