@@ -90,7 +90,7 @@ class SX600(Config):
 
     # Initial Test parameters
     #  Software version
-    _bin_version = '1.0.19270.1261'
+    _bin_version = '1.0.19305.1365'
     #  Software image filenames
     arm_bin = 'sx600_{0}.bin'.format(_bin_version)
     # PFC digital pot sensitivity (V/step)
