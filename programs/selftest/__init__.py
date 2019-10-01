@@ -37,8 +37,9 @@ class Main(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        is_ate2 = share.config.System.tester_type.startswith('ATE2')
+        Devices.is_ate2 = is_ate2
         super().open(self.limitdata, Devices, Sensors, Measurements)
-        is_ate2 = self.devices.is_ate2
         self.steps = (
             tester.TestStep('ACSource', self._step_acsource),
             tester.TestStep('Checker', self._step_checker),
@@ -159,10 +160,12 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    # True if the tester is an ATE2
+    is_ate2 = False
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
-        self.is_ate2 = (self.physical_devices.tester_type[:4] == 'ATE2')
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dso', tester.DSO, 'DSO'),
