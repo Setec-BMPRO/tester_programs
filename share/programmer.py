@@ -19,15 +19,45 @@ class _Base(abc.ABC):
     """Programmer base class."""
 
     limitname = 'Program'   # Testlimit name to use
-    pass_value = 0
+    pass_value = 'ok'
     doc = 'Programming succeeded'
 
     def __init__(self):
         """Create a programmer."""
-        self.measurement = tester.Measurement(
-            tester.LimitInteger(self.limitname, self.pass_value, self.doc),
+        self._measurement = tester.Measurement(
+            tester.LimitRegExp(
+                self.limitname, r'^{0}$'.format(self.pass_value), self.doc),
             tester.sensor.Mirror()
             )
+        self._result = None
+
+    @property
+    def result(self):
+        """Programming result value.
+
+        @return Result value
+
+        """
+        return self._result
+
+    @result.setter
+    def result(self, value):
+        """Set programming result.
+
+        @param value Result
+
+        """
+        if not isinstance(value, str):  # A subprocess exit code
+            if value:
+                value = 'Error {0}'.format(value)
+            else:
+                value = self.pass_value
+        self._result = value
+        self._measurement.sensor.store(self._result)
+
+    def result_check(self):
+        """Check the programming result."""
+        self._measurement()
 
     @property
     def position(self):
@@ -36,7 +66,7 @@ class _Base(abc.ABC):
         @return Position information
 
         """
-        return self.measurement.sensor.position
+        return self._measurement.sensor.position
 
     @position.setter
     def position(self, value):
@@ -45,7 +75,7 @@ class _Base(abc.ABC):
         @param value Position value or Tuple(values)
 
         """
-        self.measurement.sensor.position = value
+        self._measurement.sensor.position = value
 
     def program(self):
         """Program a device and return when finished."""
@@ -117,9 +147,9 @@ class ARM(_Base):
                 crpmode=self._crpmode)
             try:
                 pgm.program()
-                self.measurement.sensor.store(self.pass_value)
-            except isplpc.ProgrammingError:
-                self.measurement.sensor.store(1)
+                self.result = self.pass_value
+            except isplpc.ProgrammingError as exc:
+                self.result = str(exc)
         finally:
             ser.close()
             if self._boot_relay:
@@ -127,7 +157,7 @@ class ARM(_Base):
 
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.measurement()
+        self.result_check()
 
 
 class AVR(_Base):
@@ -176,14 +206,13 @@ class AVR(_Base):
                 fuse_num, fuse_val = self._fuses[fuse_name]
                 nvm.write_fuse(fuse_num, fuse_val)
             nvm.leave_progmode()
-            self.measurement.sensor.store(self.pass_value)
-        except:
-            self.measurement.sensor.store(1)
-
+            self.result = self.pass_value
+        except Exception as exc:
+            self.result = str(exc)
 
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.measurement()
+        self.result_check()
 
 
 class Nordic(_Base):
@@ -221,7 +250,7 @@ class Nordic(_Base):
         self.process = subprocess.Popen(command, cwd=self.working_dir)
         result = self.process.wait()
         # HACK: Force code an RVSWT101 switch code
-        if result == self.pass_value and self.rvswt101_forced_switch_code:
+        if not result and self.rvswt101_forced_switch_code:
             command = [
                 self.binary,
                 '--memwr', '0x70000',
@@ -229,11 +258,11 @@ class Nordic(_Base):
                 ]
             self.process = subprocess.Popen(command, cwd=self.working_dir)
             result = self.process.wait()
-        self.measurement.sensor.store(result)
+        self.result = result
 
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.measurement()
+        self.result_check()
 
 
 class PIC(_Base):
@@ -276,6 +305,6 @@ class PIC(_Base):
 
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.measurement.sensor.store(self.process.wait())
+        self.result = self.process.wait()
         self.relay.set_off()
-        self.measurement()
+        self.result_check()
