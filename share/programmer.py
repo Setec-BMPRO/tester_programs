@@ -27,7 +27,7 @@ class _Base(abc.ABC):
         self._measurement = tester.Measurement(
             tester.LimitRegExp(
                 self.limitname, r'^{0}$'.format(self.pass_value), self.doc),
-            tester.sensor.Mirror()
+            tester.sensor.Mirror(rdgtype=tester.sensor.ReadingString)
             )
         self._result = None
 
