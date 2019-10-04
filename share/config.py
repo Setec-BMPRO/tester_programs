@@ -23,8 +23,7 @@ class System():
         @return URL of JSON-RPC server
 
         """
-#        if cls.tester_type in ('ATE4', 'ATE5'):
-        if cls.tester_type == 'ATE5':
+        if cls.tester_type in ('ATE4', 'ATE5'):
             url = 'http://127.0.0.1:8888/'
         else:   # Use a networked Raspberry PI
             url = 'http://192.168.168.62:8888/'
