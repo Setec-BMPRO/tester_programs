@@ -27,14 +27,15 @@ class Sensor(tester.sensor.Sensor):
     def read(self):
         """Take a reading.
 
-        @return Reading
+        @return Tuple of Reading
 
         """
-        value = super().read()
+        value = self.read_data()
         if self._rdgtype is tester.sensor.Reading:
             value = float(value) * self.scale
-        rdg = self._rdgtype(value, position=self.position)
-        return (rdg, )
+        return (
+            self._rdgtype(value, position=self.position),
+            )
 
     def __str__(self):
         """Sensor as a string.

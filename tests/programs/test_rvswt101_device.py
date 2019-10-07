@@ -52,7 +52,7 @@ class RVSWT101Device(unittest.TestCase):
 
     def test_sensor(self):
         """Usage of sensors."""
-        sens = tester.sensor.CANPacket(self.rvswt, 'cell_voltage')
+        sens = tester.sensor.CANPacketReading(self.rvswt, 'cell_voltage')
         sens.doc = 'Button cell voltage'
         sens.units = 'Vdc'
         sens.configure()

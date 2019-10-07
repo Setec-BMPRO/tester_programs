@@ -89,8 +89,7 @@ class Sensors(share.Sensors):
             message=tester.translate('rvmc101_final', 'msgPressButton'),
             caption=tester.translate('rvmc101_final', 'capPressButton'))
         decoder = self.devices['decoder']
-        self['zone4'] = tester.sensor.CANPacket(
-            decoder, 'zone4', rdgtype=tester.sensor.ReadingBoolean)
+        self['zone4'] = tester.sensor.CANPacketReadingBoolean(decoder, 'zone4')
 
 
 class Measurements(share.Measurements):
