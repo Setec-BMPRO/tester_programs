@@ -301,7 +301,7 @@ class EvError():
         """
         tmp = tester.Measurement(
             tester.LimitRegExp('Ev2200', 'ok', doc='Command succeeded'),
-            tester.sensor.Mirror(rdgtype=tester.sensor.ReadingString))
+            tester.sensor.MirrorReadingString())
         tmp.sensor.store(str(err))
         tmp.measure()   # Generates a test FAIL result
 
@@ -373,20 +373,20 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['oMirvbatIn'] = sensor.Mirror()
-        self['oMirCycleCnt'] = sensor.Mirror()
-        self['oMirRelrnFlg'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
-        self['oMirSenseRes'] = sensor.Mirror()
-        self['oMirCapacity'] = sensor.Mirror()
-        self['oMirRelStateCharge'] = sensor.Mirror()
-        self['oMirHalfCell'] = sensor.Mirror()
-        self['oMirVFCcalStatus'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
-        self['oMirVChge'] = sensor.Mirror()
-        self['oMirErrV'] = sensor.Mirror()
-        self['oMirErrI'] = sensor.Mirror()
-        self['oMirTemp'] = sensor.Mirror()
-        self['oMirSw'] = sensor.Mirror()
-        self['oMirSerNum'] = sensor.Mirror(rdgtype=sensor.ReadingString)
+        self['oMirvbatIn'] = sensor.MirrorReading()
+        self['oMirCycleCnt'] = sensor.MirrorReading()
+        self['oMirRelrnFlg'] = sensor.MirrorReadingBoolean()
+        self['oMirSenseRes'] = sensor.MirrorReading()
+        self['oMirCapacity'] = sensor.MirrorReading()
+        self['oMirRelStateCharge'] = sensor.MirrorReading()
+        self['oMirHalfCell'] = sensor.MirrorReading()
+        self['oMirVFCcalStatus'] = sensor.MirrorReadingBoolean()
+        self['oMirVChge'] = sensor.MirrorReading()
+        self['oMirErrV'] = sensor.MirrorReading()
+        self['oMirErrI'] = sensor.MirrorReading()
+        self['oMirTemp'] = sensor.MirrorReading()
+        self['oMirSw'] = sensor.MirrorReading()
+        self['oMirSerNum'] = sensor.MirrorReadingString()
         self['ovbatIn'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self['ovbat'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.0001)
         self['oVcc'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.001)

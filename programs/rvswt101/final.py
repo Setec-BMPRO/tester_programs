@@ -69,8 +69,8 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self['mirscan'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
-        self['mirmac'] = sensor.Mirror(rdgtype=sensor.ReadingString)
+        self['mirscan'] = sensor.MirrorReadingBoolean()
+        self['mirmac'] = sensor.MirrorReadingString()
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvswt101_final', 'msgSnEntry'),
             caption=tester.translate('rvswt101_final', 'capSnEntry'))

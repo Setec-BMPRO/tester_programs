@@ -307,9 +307,9 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['oMirTecErr'] = sensor.Mirror()
-        self['oMirTecVmonErr'] = sensor.Mirror()
-        self['oMirIsErr'] = sensor.Mirror()
+        self['oMirTecErr'] = sensor.MirrorReading()
+        self['oMirTecVmonErr'] = sensor.MirrorReading()
+        self['oMirIsErr'] = sensor.MirrorReading()
         self['lock'] = sensor.Res(dmm, high=18, low=3, rng=10000, res=1)
         self['tec'] = sensor.Vdc(
             dmm, high=1, low=4, rng=100, res=0.001, scale=-1.0)

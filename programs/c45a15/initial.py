@@ -171,7 +171,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['oMirReg'] = sensor.Mirror()
+        self['oMirReg'] = sensor.MirrorReading()
         self['oLock'] = sensor.Res(dmm, high=14, low=6, rng=10000, res=1)
         self['oVac'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self['oVbus'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)

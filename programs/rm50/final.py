@@ -169,9 +169,9 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         pwr = self.devices['pwr']
         sensor = tester.sensor
-        self['oMirVdcDrop'] = sensor.Mirror()
-        self['oMirPowNL'] = sensor.Mirror()
-        self['oMirEff'] = sensor.Mirror()
+        self['oMirVdcDrop'] = sensor.MirrorReading()
+        self['oMirPowNL'] = sensor.MirrorReading()
+        self['oMirEff'] = sensor.MirrorReading()
         self['Lock'] = sensor.Res(dmm, high=9, low=5, rng=10000, res=1)
         self['oRsense'] = sensor.Res(dmm, high=1, low=1, rng=10000, res=1)
         self['oVsense'] = sensor.Vdc(

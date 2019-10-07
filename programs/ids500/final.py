@@ -299,9 +299,9 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         pic = self.devices['pic']
         sensor = tester.sensor
-        self['oMirTecErr'] = sensor.Mirror()
-        self['oMirTecVmonErr'] = sensor.Mirror()
-        self['oMirIsErr'] = sensor.Mirror()
+        self['oMirTecErr'] = sensor.MirrorReading()
+        self['oMirTecVmonErr'] = sensor.MirrorReading()
+        self['oMirIsErr'] = sensor.MirrorReading()
         self['tec'] = sensor.Vdc(dmm, high=1, low=3, rng=100, res=0.001)
         self['tecvset'] = sensor.Vdc(dmm, high=3, low=6, rng=10, res=0.001)
         self['tecvmon'] = sensor.Vdc(dmm, high=4, low=6, rng=10, res=0.001)

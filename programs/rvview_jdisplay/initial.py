@@ -165,7 +165,7 @@ class Sensors(share.Sensors):
         arm = self.devices['arm']
         armtunnel = self.devices['armtunnel']
         sensor = tester.sensor
-        self['mir_can'] = sensor.Mirror(rdgtype=sensor.ReadingString)
+        self['mir_can'] = sensor.MirrorReadingString()
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['vin'].doc = 'X1'
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)

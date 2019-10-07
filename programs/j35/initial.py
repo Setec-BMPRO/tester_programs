@@ -306,7 +306,7 @@ class Sensors(share.Sensors):
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('j35_initial', 'msgSnEntry'),
             caption=tester.translate('j35_initial', 'capSnEntry'))
-        self['mircal'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
+        self['mircal'] = sensor.MirrorReadingBoolean()
         # Console sensors
         j35 = self.devices['j35']
         for name, cmdkey in (

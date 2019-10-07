@@ -206,8 +206,8 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         pic = self.devices['pic']
         sensor = tester.sensor
-        self['oMirErrorV'] = sensor.Mirror()
-        self['oMirErrorI'] = sensor.Mirror()
+        self['oMirErrorV'] = sensor.MirrorReading()
+        self['oMirErrorI'] = sensor.MirrorReading()
         self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self['oVsw'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.001)
         self['oVref'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.001)

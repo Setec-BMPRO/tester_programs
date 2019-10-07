@@ -159,7 +159,7 @@ class Sensors(share.Sensors):
                 dmm, high=8, low=1, rng=10, res=0.01, position=3)
         self['d_5v'] = sensor.Vdc(
                 dmm, high=9, low=1, rng=10, res=0.01, position=4)
-        self['MirCAN'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
+        self['MirCAN'] = sensor.MirrorReadingBoolean()
         self['yesnodisplay'] = sensor.YesNo(
             message=tester.translate('rvmc101_initial', 'DisplaysOn?'),
             caption=tester.translate('rvmc101_initial', 'capDisplay'),

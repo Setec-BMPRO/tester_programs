@@ -231,9 +231,9 @@ class Sensors(share.Sensors):
         self['ARMcurr'] = share.console.Sensor(arm, 'CURRENT')
         self['ARMsoft'] = share.console.Sensor(
             arm, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['oMirAVR'] = sensor.Mirror()
-        self['oMirBT'] = sensor.Mirror(rdgtype=sensor.ReadingBoolean)
-        self['oMirCurrErr'] = sensor.Mirror()
+        self['oMirAVR'] = sensor.MirrorReading()
+        self['oMirBT'] = sensor.MirrorReadingBoolean()
+        self['oMirCurrErr'] = sensor.MirrorReading()
         self['o3V3'] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.001)
         self['reg5V'] = sensor.Vdc(dmm, high=4, low=1, rng=10, res=0.001)
         self['reg12V'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.001)

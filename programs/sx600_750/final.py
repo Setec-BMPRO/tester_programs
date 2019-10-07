@@ -113,8 +113,8 @@ class Sensors(share.Sensors):
         self['o24v'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self['oPwrGood'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
         self['oAcFail'] = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.01)
-        self['oMir12v'] = sensor.Mirror()
-        self['oMir24v'] = sensor.Mirror()
+        self['oMir12v'] = sensor.MirrorReading()
+        self['oMir24v'] = sensor.MirrorReading()
         self['oYesNoGreen'] = sensor.YesNo(
             message=tester.translate('sx750_final', 'IsLedGreen?'),
             caption=tester.translate('sx750_final', 'capLedGreen'))
