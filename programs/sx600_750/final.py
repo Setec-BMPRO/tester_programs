@@ -19,8 +19,7 @@ class Final(share.TestSequence):
         limits = self.cfg.limits_final()
         super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('InputRes', self._step_inres,
-                self.parameter == '750'),
+            tester.TestStep('InputRes', self._step_inres),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_load),
@@ -28,8 +27,17 @@ class Final(share.TestSequence):
 
     @share.teststep
     def _step_inres(self, dev, mes):
-        """Verify that the hand loaded input discharge resistors are there."""
-        mes['dmm_InpRes'](timeout=5)
+        """Check for missing / incorrectly mounted parts.
+
+        SX-750: Verify that the hand loaded input discharge resistors are there.
+        SX-600: Verify that the fan is mounted and not reversed.
+                Verify that the side brackets are mounted.
+
+        """
+        if self.parameter == '750':
+            mes['dmm_InpRes'](timeout=5)
+        else:
+            self.measure(('dmm_FanDet', 'dmm_BracketDet'), timeout=5)
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -81,6 +89,7 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('dcs_disable_pwr', tester.DCSource, 'DCS2'),
+                ('dcs_bracket_det', tester.DCSource, 'DCS3'),
                 ('dcl_12v', tester.DCLoad, 'DCL1'),
                 ('dcl_5v', tester.DCLoad, 'DCL2'),
                 ('dcl_24v', tester.DCLoad, 'DCL3'),
@@ -94,7 +103,8 @@ class Devices(share.Devices):
         self['dcl_12v'].output(10, delay=0.5)
         for load in ('dcl_12v', 'dcl_5v', 'dcl_24v'):
             self[load].output(0.0, False)
-        self['dcs_disable_pwr'].output(0.0, False)
+        for dcs in ('dcs_disable_pwr', 'dcs_bracket_det'):
+            self[dcs].output(0.0, False)
         self['rla_pwron'].set_off()
 
 
@@ -113,6 +123,8 @@ class Sensors(share.Sensors):
         self['o24v'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self['oPwrGood'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
         self['oAcFail'] = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.01)
+        self['oFanDet'] = sensor.Vdc(dmm, high=8, low=2, rng=100, res=0.01)
+        self['oBracketDet'] = sensor.Vdc(dmm, high=9, low=2, rng=100, res=0.01)
         self['oMir12v'] = sensor.MirrorReading()
         self['oMir24v'] = sensor.MirrorReading()
         self['oYesNoGreen'] = sensor.YesNo(
@@ -133,6 +145,8 @@ class Measurements(share.Measurements):
             ('reg12v', 'Reg12V', 'oMir12v', ''),
             ('reg24v', 'Reg24V', 'oMir24v', ''),
             ('dmm_InpRes', 'InRes', 'oInpRes', ''),
+            ('dmm_FanDet', 'FanDetect', 'oFanDet', ''),
+            ('dmm_BracketDet', 'BracketDetect', 'oBracketDet', ''),
             ('dmm_Iecoff', 'IECoff', 'oIec', ''),
             ('dmm_Iec', 'IEC', 'oIec', ''),
             ('dmm_5v', '5Vnl', 'o5v', ''),
