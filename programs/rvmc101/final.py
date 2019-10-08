@@ -89,7 +89,7 @@ class Sensors(share.Sensors):
             message=tester.translate('rvmc101_final', 'msgPressButton'),
             caption=tester.translate('rvmc101_final', 'capPressButton'))
         decoder = self.devices['decoder']
-        self['zone4'] = tester.sensor.KeyedSensorReadingBoolean(decoder, 'zone4')
+        self['zone4'] = tester.sensor.KeyedReadingBoolean(decoder, 'zone4')
 
 
 class Measurements(share.Measurements):
