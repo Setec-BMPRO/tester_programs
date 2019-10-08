@@ -178,15 +178,14 @@ class Sensors(share.Sensors):
             for sens in range(1, 5):
                 name = 'tank{0}_s{1}'.format(tank, sens)
                 cmd = 'TANK{0}_S{1}'.format(tank, sens)
-                self[name] = share.console.Sensor(armtunnel, cmd)
+                self[name] = sensor.KeyedReading(armtunnel, cmd)
         self['tank1-4'] = (
-            share.console.Sensor(armtunnel, 'TANK1'),
-            share.console.Sensor(armtunnel, 'TANK2'),
-            share.console.Sensor(armtunnel, 'TANK3'),
-            share.console.Sensor(armtunnel, 'TANK4'),
+            sensor.KeyedReading(armtunnel, 'TANK1'),
+            sensor.KeyedReading(armtunnel, 'TANK2'),
+            sensor.KeyedReading(armtunnel, 'TANK3'),
+            sensor.KeyedReading(armtunnel, 'TANK4'),
             )
-        self['swver'] = share.console.Sensor(
-            armtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['swver'] = sensor.KeyedReadingString(armtunnel, 'SW_VER')
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('j35_final', 'msgSnEntry'),
             caption=tester.translate('j35_final', 'capSnEntry'))

@@ -155,11 +155,9 @@ class Sensors(share.Sensors):
             timeout=300)
         self['sernum'].doc = 'Barcode scanner'
         # Console sensors
-        self['canbind'] = share.console.Sensor(arm, 'CAN_BIND')
-        self['swver'] = share.console.Sensor(
-            arm, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['tunnelswver'] = share.console.Sensor(
-            armtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['canbind'] = sensor.KeyedReading(arm, 'CAN_BIND')
+        self['swver'] = sensor.KeyedReadingString(arm, 'SW_VER')
+        self['tunnelswver'] = sensor.KeyedReadingString(armtunnel, 'SW_VER')
 
 
 class Measurements(share.Measurements):

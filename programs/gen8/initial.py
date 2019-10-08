@@ -358,13 +358,12 @@ class Sensors(share.Sensors):
                 ('arm_12v', '12V'),
                 ('arm_24v', '24V'),
             ):
-            self[name] = share.console.Sensor(arm, cmdkey)
+            self[name] = sensor.KeyedReading(arm, cmdkey)
         for name, cmdkey in (
                 ('arm_swver', 'SwVer'),
                 ('arm_swbld', 'SwBld'),
             ):
-            self[name] = share.console.Sensor(
-                arm, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(arm, cmdkey)
 
 
 class Measurements(share.Measurements):

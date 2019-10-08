@@ -188,8 +188,7 @@ class Sensors(share.Sensors):
                 ('BleMac', 'MAC'),
                 ('SwRev', 'SW-REV'),
             ):
-            self[name] = share.console.Sensor(
-                rvmn101, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(rvmn101, cmdkey)
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self['BleMac'].on_read = (
             lambda value: value.replace(':', '').replace(' (random)', '')

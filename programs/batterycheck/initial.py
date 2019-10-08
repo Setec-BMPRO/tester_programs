@@ -227,10 +227,9 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         arm = self.devices['arm']
         sensor = tester.sensor
-        self['ARMvolt'] = share.console.Sensor(arm, 'VOLTAGE')
-        self['ARMcurr'] = share.console.Sensor(arm, 'CURRENT')
-        self['ARMsoft'] = share.console.Sensor(
-            arm, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['ARMvolt'] = sensor.KeyedReading(arm, 'VOLTAGE')
+        self['ARMcurr'] = sensor.KeyedReading(arm, 'CURRENT')
+        self['ARMsoft'] = sensor.KeyedReadingString(arm, 'SW_VER')
         self['oMirAVR'] = sensor.MirrorReading()
         self['oMirBT'] = sensor.MirrorReadingBoolean()
         self['oMirCurrErr'] = sensor.MirrorReading()

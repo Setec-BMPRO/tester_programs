@@ -540,17 +540,15 @@ class Sensors(share.Sensors):
                 ('arm_pm_iout', 'PM_IOUT', 'A'),
                 ('arm_pm_iout_rev', 'PM_IOUT_REV', '-A'),
             ):
-            self[name] = share.console.Sensor(bp35, cmdkey)
+            self[name] = sensor.KeyedReading(bp35, cmdkey)
             if units:
                 self[name].units = units
-        self['arm_swver'] = share.console.Sensor(
-            bp35, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['TunnelSwVer'] = share.console.Sensor(
-            bp35tunnel, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['arm_swver'] = sensor.KeyedReadingString(bp35, 'SW_VER')
+        self['TunnelSwVer'] = sensor.KeyedReadingString(bp35tunnel, 'SW_VER')
         # Generate load current sensors
         loads = []
         for i in range(1, Initial.outputs + 1):
-            loads.append(share.console.Sensor(bp35, 'LOAD_{0}'.format(i)))
+            loads.append(sensor.KeyedReading(bp35, 'LOAD_{0}'.format(i)))
         self['arm_loads'] = loads
         # Pre-adjust OCP
         low, high = self.limits['OCP_pre'].limit

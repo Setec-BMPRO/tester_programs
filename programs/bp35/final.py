@@ -51,7 +51,7 @@ class Final(share.TestSequence):
         for load in range(14):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['dmm_vouts'][load](timeout=5)
-            
+
     @share.teststep
     def _step_can(self, dev, mes):
         """Access the unit console using the CAN bus."""
@@ -122,8 +122,7 @@ class Sensors(share.Sensors):
         self['can12v'] = sensor.Vdc(dmm, high=16, low=3, rng=100, res=0.1)
         self['can12v'].doc = 'X303 CAN_POWER'
         bp35 = self.devices['bp35']
-        self['arm_swver'] = share.console.Sensor(
-            bp35, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['arm_swver'] = sensor.KeyedReadingString(bp35, 'SW_VER')
         self['notifycable'] = sensor.Notify(
             message=tester.translate('bp35_final', 'PullCableOut'),
             caption=tester.translate('bp35_final', 'capCableOut'))

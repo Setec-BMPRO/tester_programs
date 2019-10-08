@@ -199,15 +199,14 @@ class Sensors(share.Sensors):
         # Console sensors
         ble2can = self.devices['ble2can']
         ble2cantunnel = self.devices['ble2cantunnel']
-        self['CANbind'] = share.console.Sensor(ble2can, 'CAN_BIND')
+        self['CANbind'] = sensor.KeyedReading(ble2can, 'CAN_BIND')
         for name, cmdkey in (
                 ('BtMac', 'BT_MAC'),
                 ('SwVer', 'SW_VER'),
             ):
-            self[name] = share.console.Sensor(
-                ble2can, cmdkey, rdgtype=sensor.ReadingString)
-        self['TunnelSwVer'] = share.console.Sensor(
-            ble2cantunnel, 'SW_VER', rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(ble2can, cmdkey)
+        self['TunnelSwVer'] = sensor.KeyedReadingString(
+            ble2cantunnel, 'SW_VER')
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('ble2can_initial', 'msgSnEntry'),
             caption=tester.translate('ble2can_initial', 'capSnEntry'))

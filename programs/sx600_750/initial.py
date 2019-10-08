@@ -460,8 +460,7 @@ class Sensors(share.Sensors):
                 ('pfcDnLock', 'PFC_DN_LOCK'),
                 ('pfcUpLock', 'PFC_UP_LOCK'),
             ):
-            self[name] = share.console.Sensor(
-                ard, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(ard, cmdkey)
         # ARM sensors
         arm = self.devices['arm']
         for name, cmdkey in (
@@ -470,13 +469,12 @@ class Sensors(share.Sensors):
                 ('ARM_12V', 'ARM-12V'),
                 ('ARM_24V', 'ARM-24V'),
             ):
-            self[name] = share.console.Sensor(arm, cmdkey)
+            self[name] = sensor.KeyedReading(arm, cmdkey)
         for name, cmdkey in (
                 ('ARM_SwVer', 'ARM_SwVer'),
                 ('ARM_SwBld', 'ARM_SwBld'),
             ):
-            self[name] = share.console.Sensor(
-                arm, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(arm, cmdkey)
 
 
 class Measurements(share.Measurements):

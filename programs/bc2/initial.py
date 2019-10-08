@@ -136,15 +136,14 @@ class Sensors(share.Sensors):
                 ('arm_BtMAC', 'BT_MAC'),
                 ('arm_SwVer', 'SW_VER'),
             ):
-            self[name] = share.console.Sensor(
-                bc2, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(bc2, cmdkey)
         for name, cmdkey in (
                 ('arm_Ioffset', 'I_ADC_OFFSET'),
                 ('arm_VbattLSB', 'BATT_V_LSB'),
                 ('arm_Vbatt', 'BATT_V'),
                 ('arm_Ibatt', 'BATT_I'),
             ):
-            self[name] = share.console.Sensor(bc2, cmdkey)
+            self[name] = sensor.KeyedReading(bc2, cmdkey)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('bc2_initial', 'msgSnEntry'),
             caption=tester.translate('bc2_initial', 'capSnEntry'))

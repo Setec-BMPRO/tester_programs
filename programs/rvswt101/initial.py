@@ -281,8 +281,7 @@ class Sensors(share.Sensors):
         for device, name, cmdkey in (
                 (rvswt101, 'SwVer', 'SW_VER'),
             ):
-            self[name] = share.console.Sensor(
-                device, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(device, cmdkey)
 
 
 class Measurements(share.Measurements):

@@ -192,13 +192,12 @@ class Sensors(share.Sensors):
                 ('tank3', 'TANK3'),
                 ('tank4', 'TANK4'),
             ):
-            self[name] = share.console.Sensor(cn102, cmdkey)
+            self[name] = sensor.KeyedReading(cn102, cmdkey)
         for device, name, cmdkey in (
                 (cn102, 'SwVer', 'SW_VER'),
                 (cn102tunnel, 'TunnelSwVer', 'SW_VER'),
             ):
-            self[name] = share.console.Sensor(
-                device, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(device, cmdkey)
 
 
 class Measurements(share.Measurements):

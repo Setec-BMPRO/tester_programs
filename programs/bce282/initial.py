@@ -266,9 +266,9 @@ class Sensors(share.Sensors):
         self['vout'] = sensor.Vdc(dmm, high=6, low=4, rng=100, res=0.001)
         self['vbat'] = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.001)
         self['alarm'] = sensor.Res(dmm, high=9, low=5, rng=100000, res=1)
-        self['msp_stat'] = share.console.Sensor(msp, 'MSP-STATUS')
+        self['msp_stat'] = sensor.KeyedReading(msp, 'MSP-STATUS')
         self['msp_stat'].doc = 'MSP430 console'
-        self['msp_vo'] = share.console.Sensor(msp, 'MSP-VOUT')
+        self['msp_vo'] = sensor.KeyedReading(msp, 'MSP-VOUT')
         self['msp_vo'].doc = 'MSP430 console'
         low, high = self.limits['OutOCP'].limit
         self['ocp_out'] = sensor.Ramp(

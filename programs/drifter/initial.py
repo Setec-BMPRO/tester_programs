@@ -226,7 +226,7 @@ class Sensors(share.Sensors):
             ('pic_Ioffset', 'CAL_OFFSET_CURRENT'),
             ('pic_Ithreshold', 'ZERO-CURRENT-DISPLAY-THRESHOLD'),
             ):
-            self[sen] = share.console.Sensor(pic, cmd)
+            self[sen] = sensor.KeyedReading(pic, cmd)
 
 
 class Measurements(share.Measurements):

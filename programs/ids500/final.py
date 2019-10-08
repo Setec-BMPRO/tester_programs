@@ -338,10 +338,8 @@ class Sensors(share.Sensors):
             message=tester.translate('ids500_final', 'msgHwRev'),
             caption=tester.translate('ids500_final', 'capHwRev'))
         self['oHwRevEntry'].on_read = lambda value: value.upper().strip()
-        self['hwrev'] = share.console.Sensor(
-            pic, 'PIC-HwRev', rdgtype=sensor.ReadingString)
-        self['sernum'] = share.console.Sensor(
-            pic, 'PIC-SerNum', rdgtype=sensor.ReadingString)
+        self['hwrev'] = sensor.KeyedReadingString(pic, 'PIC-HwRev')
+        self['sernum'] = sensor.KeyedReadingString(pic, 'PIC-SerNum')
 
 
 class Measurements(share.Measurements):

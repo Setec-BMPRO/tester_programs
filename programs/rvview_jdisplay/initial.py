@@ -188,11 +188,9 @@ class Sensors(share.Sensors):
             caption=tester.translate('rvview_jdisplay_initial', 'capButtonOff'))
         self['oYesNoOff'].doc = 'Operator input'
         # Console sensors
-        self['canbind'] = share.console.Sensor(arm, 'CAN_BIND')
-        self['swver'] = share.console.Sensor(
-            arm, 'SW_VER', rdgtype=sensor.ReadingString)
-        self['tunnelswver'] = share.console.Sensor(
-            armtunnel, 'SW_VER', rdgtype=sensor.ReadingString)
+        self['canbind'] = sensor.KeyedReading(arm, 'CAN_BIND')
+        self['swver'] = sensor.KeyedReadingString(arm, 'SW_VER')
+        self['tunnelswver'] = sensor.KeyedReadingString(armtunnel, 'SW_VER')
 
 
 class Measurements(share.Measurements):

@@ -323,22 +323,20 @@ class Sensors(share.Sensors):
                 ('arm_loadset', 'LOAD_SET'),
                 ('arm_remote', 'BATT_SWITCH'),
             ):
-            self[name] = share.console.Sensor(j35, cmdkey)
+            self[name] = sensor.KeyedReading(j35, cmdkey)
         for name, cmdkey in (
                 ('arm_solar_status', 'SOLAR_STATUS'),
             ):
-            self[name] = share.console.Sensor(
-                j35, cmdkey, rdgtype=sensor.ReadingBoolean)
+            self[name] = sensor.KeyedReadingBoolean(j35, cmdkey)
         for name, cmdkey in (
                 ('arm_swver', 'SW_VER'),
                 ('TunnelSwVer', 'SW_VER'),
             ):
-            self[name] = share.console.Sensor(
-                j35, cmdkey, rdgtype=sensor.ReadingString)
+            self[name] = sensor.KeyedReadingString(j35, cmdkey)
         # Generate load current sensors
         self['arm_loads'] = []
         for i in range(self.output_count):
-            sen = share.console.Sensor(j35, 'LOAD_{0}'.format(i + 1))
+            sen = sensor.KeyedReading(j35, 'LOAD_{0}'.format(i + 1))
             self['arm_loads'].append(sen)
         load_current = self.output_count * self.load_per_output
         # Pre-adjust OCP
