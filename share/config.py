@@ -65,7 +65,7 @@ class Fixture():
             },
         '020827': {     # BCE282 Initial( MSP1: programming, MSP2: comms)
             'MSP1': _internal_1,
-            'MSP2': {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name],
+            'MSP2': _internal_2,
             },
         '021299': {'PIC': _internal_1, },   # Drifter Initial
 

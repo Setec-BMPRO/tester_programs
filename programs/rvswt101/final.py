@@ -78,9 +78,9 @@ class Sensors(share.Sensors):
             message=tester.translate('rvswt101_final', 'msgPressButton'),
             caption=tester.translate('rvswt101_final', 'capPressButton'))
         decoder = self.devices['decoder']
-        self['cell_voltage'] = tester.sensor.CANPacketReading(
+        self['cell_voltage'] = tester.sensor.KeyedSensorReading(
             decoder, 'cell_voltage')
-        self['switch_type'] = tester.sensor.CANPacketReading(
+        self['switch_type'] = tester.sensor.KeyedSensorReading(
             decoder, 'switch_type')
 
 
