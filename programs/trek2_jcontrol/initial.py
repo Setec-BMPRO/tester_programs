@@ -67,7 +67,6 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        dev['arm'].open()
         dev['dcs_vin'].output(self.vin_start, output=True)
         self.measure(('dmm_vin', 'dmm_3v3'), timeout=5)
         dev['dcs_vin'].output(self.vin_set)
@@ -75,6 +74,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
+        dev['arm'].open()
         dev['arm'].brand(
             self.config.hw_version, self.sernum, dev['rla_reset'])
         mes['sw_ver']()
