@@ -40,6 +40,8 @@ class Final(share.TestSequence):
             (('dcl_5v', 0.0), ('dcl_12v', 0.1), ('dcl_24v', 0.1)),
             output=True)
         mes['dmm_Iecoff'](timeout=5)
+        if self.parameter == '600':
+            mes['dmm_FanOff'](timeout=5)
         dev['acsource'].output(240.0, output=True, delay=0.5)
         self.measure(
             ('dmm_Iec', 'dmm_5v', 'dmm_12voff', 'ui_YesNoGreen'),
@@ -51,8 +53,8 @@ class Final(share.TestSequence):
         dev['dcs_disable_pwr'].output(0.0)
         dev['rla_pwron'].set_on()
         if self.parameter == '600':
-#            self.measure(('dmm_FanDet', 'dmm_BracketDet'), timeout=5)
-            self.measure(('dmm_FanDet',  ), timeout=10)
+#            self.measure(('dmm_FanOn', 'dmm_BracketDet'), timeout=5)
+            self.measure(('dmm_FanOn',  ), timeout=10)
         self.measure(
             ('ui_YesNoBlue', 'dmm_5v', 'dmm_PwrGood', 'dmm_AcFail', ),
             timeout=5)
@@ -141,7 +143,8 @@ class Measurements(share.Measurements):
             ('reg12v', 'Reg12V', 'oMir12v', ''),
             ('reg24v', 'Reg24V', 'oMir24v', ''),
             ('dmm_InpRes', 'InRes', 'oInpRes', ''),
-            ('dmm_FanDet', 'FanDetect', 'oFanDet', ''),
+            ('dmm_FanOff', 'FanOff', 'oFanDet', ''),
+            ('dmm_FanOn', 'FanOn', 'oFanDet', ''),
             ('dmm_BracketDet', 'BracketDetect', 'oBracketDet', ''),
             ('dmm_Iecoff', 'IECoff', 'oIec', ''),
             ('dmm_Iec', 'IEC', 'oIec', ''),

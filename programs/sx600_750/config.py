@@ -67,7 +67,8 @@ class Config():
         tester.LimitLow('IECoff', 0.5),
         tester.LimitDelta('IEC', 240, 5),
         tester.LimitDelta('InRes', 70000, 10000),
-        tester.LimitLow('FanDetect', 2.0),
+        tester.LimitHigh('FanOff', 3.0),
+        tester.LimitLow('FanOn', 2.0),
         tester.LimitBetween('BracketDetect', 0.0, 15.0),
         )
 

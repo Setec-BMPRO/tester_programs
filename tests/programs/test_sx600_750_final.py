@@ -19,16 +19,15 @@ class SX600Final(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'InputRes':(
-                    (sen['oFanDet'], 2.0), (sen['oBracketDet'], 12.0),
-                    ),
                 'PowerUp': (
-                    (sen['oIec'], (0.0, 240.0)), (sen['o5v'], 5.1),
-                    (sen['o12v'], 0.0), (sen['oYesNoGreen'], True),
+                    (sen['oIec'], (0.0, 240.0)), (sen['oFanDet'], 4.0),
+                    (sen['o5v'], 5.1), (sen['o12v'], 0.0),
+                    (sen['oYesNoGreen'], True),
                     ),
                 'PowerOn': (
-                    (sen['oYesNoBlue'], True), (sen['o5v'], 5.1),
-                    (sen['oPwrGood'], 0.1), (sen['oAcFail'], 5.1),
+                    (sen['oFanDet'], 2.0), (sen['oYesNoBlue'], True),
+                    (sen['o5v'], 5.1), (sen['oPwrGood'], 0.1),
+                    (sen['oAcFail'], 5.1),
                     ),
                 'Load': (
                     (sen['o5v'], 5.1), (sen['o12v'], (12.1, 12.0)),
@@ -43,7 +42,7 @@ class SX600Final(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(20, len(result.readings))
         self.assertEqual(
-            ['InputRes', 'PowerUp', 'PowerOn', 'Load'], self.tester.ut_steps)
+            ['PowerUp', 'PowerOn', 'Load'], self.tester.ut_steps)
 
 
 class SX750Final(ProgramTestCase):
