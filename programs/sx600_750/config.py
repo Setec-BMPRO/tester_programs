@@ -22,6 +22,8 @@ class Config():
     # Final Test parameters
     #  Injected voltage at PS_ON via diode and 100R to prevent startup.
     disable_pwr = 5.5
+    #  Injected voltage for fan and bracket detect circuits
+    fan_detect = 12.0
     # Common Test limits common to both test types & units
     _base_limits_common = (
         # Outputs off
@@ -32,10 +34,6 @@ class Config():
         tester.LimitPercent('5Vfl', 5.0, 4.5),
         tester.LimitPercent('12Vfl', 12.0, 6.5),
         tester.LimitPercent('24Vfl', 24.0, 9.0),
-        # Load regulation (values in %)
-        tester.LimitLow('Reg5V', 3.0),
-        tester.LimitBetween('Reg12V', 0.2, 5.0),
-        tester.LimitBetween('Reg24V', 0.2, 7.5),
         # Signals
         tester.LimitDelta('ACFAIL', 5.0, 0.5),
         tester.LimitLow('ACOK', 0.5),
@@ -43,6 +41,8 @@ class Config():
         )
     # Initial Test limits common to both units
     _base_limits_initial = _base_limits_common + (
+        # Load regulation (values in %)
+        tester.LimitLow('Reg5V', 3.0),
         tester.LimitDelta('8.5V Arduino', 8.5, 0.4),
         tester.LimitLow('FixtureLock', 200),
         tester.LimitLow('PartCheck', 1.0),          # Photo sensor on D404
@@ -67,7 +67,7 @@ class Config():
         tester.LimitLow('IECoff', 0.5),
         tester.LimitDelta('IEC', 240, 5),
         tester.LimitDelta('InRes', 70000, 10000),
-        tester.LimitBetween('FanDetect', 0.0, 5.0),
+        tester.LimitLow('FanDetect', 2.0),
         tester.LimitBetween('BracketDetect', 0.0, 15.0),
         )
 
@@ -110,6 +110,9 @@ class SX600(Config):
         tester.LimitPercent('5Vnl', 5.08, 1.0),
         tester.LimitPercent('12Vnl', 11.98, 1.3),
         tester.LimitPercent('24Vnl', 24.03, 1.4),
+        # Load regulation (values in %)
+        tester.LimitBetween('Reg12V', 0.0, 5.0),
+        tester.LimitBetween('Reg24V', 0.0, 7.5),
         )
 
     @classmethod
@@ -164,6 +167,9 @@ class SX750(Config):
         tester.LimitPercent('5Vnl', 5.10, 1.5),
         tester.LimitPercent('12Vnl', 12.25, 2.0),
         tester.LimitPercent('24Vnl', 24.13, 2.0),
+        # Load regulation (values in %)
+        tester.LimitBetween('Reg12V', 0.2, 5.0),
+        tester.LimitBetween('Reg24V', 0.2, 7.5),
         )
 
     @classmethod
