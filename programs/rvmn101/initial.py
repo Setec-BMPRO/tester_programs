@@ -19,7 +19,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.Config.get(self.parameter)
+        self.cfg = config.Config.get(self.parameter, uut)
         Devices.fixture = self.cfg.fixture
         Devices.arm_image = self.cfg.arm_image
         Devices.nordic_image = self.cfg.nordic_image
