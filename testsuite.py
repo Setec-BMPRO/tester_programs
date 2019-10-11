@@ -28,6 +28,21 @@ import unittest
 from tests import programs, share # for running individual tests
 
 
+def suite():
+    """Define the TestSuite for Eric unittest.
+
+    @return TestSuite
+
+    """
+    testnames = []
+    for name in share.__all__:
+        testnames.append('tests.share.' + name)
+    for name in programs.__all__:
+        testnames.append('tests.programs.' + name)
+    testsuite = unittest.defaultTestLoader.loadTestsFromNames(testnames)
+    return testsuite
+
+
 class Main():
 
     # Configuration of console logger.
@@ -61,26 +76,11 @@ class Main():
                 log.setLevel(logging.INFO)
 
     @classmethod
-    def suite(cls):
-        """Define the TestSuite for Eric unittest.
-
-        @return TestSuite
-
-        """
-        testnames = []
-        for name in share.__all__:
-            testnames.append('tests.share.' + name)
-        for name in programs.__all__:
-            testnames.append('tests.programs.' + name)
-        testsuite = unittest.defaultTestLoader.loadTestsFromNames(testnames)
-        return testsuite
-
-    @classmethod
     def run(cls):
         """Run the testsuite."""
         cls.setup()
         runner = unittest.TextTestRunner()
-        testsuite = cls.suite()
+        testsuite = suite()
         runner.run(testsuite)
 
 
