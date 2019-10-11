@@ -22,64 +22,67 @@ For "Rerun Failed" unittest, loadTestsFromName is called with parameters:
 
 """
 
-import unittest
 import logging
+import unittest
+
 from tests import programs, share # for running individual tests
 
 
-def suite():
-    """Define the TestSuite for Eric unittest.
+class Main():
 
-    @return TestSuite
+    # Configuration of console logger.
+    #   Log Levels are: CRITICAL,ERROR,WARNING,INFO,DEBUG
+    log_level = logging.CRITICAL
+    log_format = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
+    # Set these logger names to INFO level
+    logger_names = ('gpib', )
 
-    """
-    testnames = []
-    for name in share.__all__:
-        testnames.append('tests.share.' + name)
-    for name in programs.__all__:
-        testnames.append('tests.programs.' + name)
-    testsuite = unittest.defaultTestLoader.loadTestsFromNames(testnames)
-    return testsuite
+    @classmethod
+    def setup(cls):
+        """Setup the logging system.
 
+        Messages are sent to the stderr console.
 
-# Configuration of console logger when this script is run stand-alone.
-#   Log Levels are: CRITICAL,ERROR,WARNING,INFO,DEBUG
-_LOG_LEVEL = logging.CRITICAL
-_LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
-# Set these logger names to INFO level
-_LOGGER_NAMES = ('gpib', )
+        """
+        # create console handler and set level
+        hdlr = logging.StreamHandler()
+        hdlr.setLevel(cls.log_level)
+        # Log record formatter
+        fmtr = logging.Formatter(cls.log_format)
+        # Connect it all together
+        hdlr.setFormatter(fmtr)
+        if not logging.root.hasHandlers():
+            logging.root.addHandler(hdlr)
+        logging.root.setLevel(cls.log_level)
+        # Suppress lower level logging level
+        if cls.log_level < logging.INFO:
+            for name in cls.logger_names:
+                log = logging.getLogger(name)
+                log.setLevel(logging.INFO)
 
+    @classmethod
+    def suite(cls):
+        """Define the TestSuite for Eric unittest.
 
-def logging_setup():
-    """Setup the logging system.
+        @return TestSuite
 
-    Messages are sent to the stderr console.
+        """
+        testnames = []
+        for name in share.__all__:
+            testnames.append('tests.share.' + name)
+        for name in programs.__all__:
+            testnames.append('tests.programs.' + name)
+        testsuite = unittest.defaultTestLoader.loadTestsFromNames(testnames)
+        return testsuite
 
-    """
-    # create console handler and set level
-    hdlr = logging.StreamHandler()
-    hdlr.setLevel(_LOG_LEVEL)
-    # Log record formatter
-    fmtr = logging.Formatter(_LOG_FORMAT)
-    # Connect it all together
-    hdlr.setFormatter(fmtr)
-    if not logging.root.hasHandlers():
-        logging.root.addHandler(hdlr)
-    logging.root.setLevel(_LOG_LEVEL)
-    # Suppress lower level logging level
-    if _LOG_LEVEL < logging.INFO:
-        for name in _LOGGER_NAMES:
-            log = logging.getLogger(name)
-            log.setLevel(logging.INFO)
-
-
-def _main():
-    """Run the testsuite."""
-    logging_setup()
-    runner = unittest.TextTestRunner()
-    testsuite = suite()
-    runner.run(testsuite)
+    @classmethod
+    def run(cls):
+        """Run the testsuite."""
+        cls.setup()
+        runner = unittest.TextTestRunner()
+        testsuite = cls.suite()
+        runner.run(testsuite)
 
 
 if __name__ == '__main__':
-    _main()
+    Main.run()
