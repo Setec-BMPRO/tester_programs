@@ -102,11 +102,16 @@ class Final(share.TestSequence):
         except tester.MeasurementFailedError:
             #Measure the 16 tank sensor input voltages.
             logger = logging.getLogger(__name__)
+            logger.debug('Reading 16 tank sensor inputs')
+            results = []
             for tank in range(1, 5):
                 for sens in range(1, 5):
                     name = 'tank{0}_s{1}'.format(tank, sens)
-                    value = self.sensors[name].read_data()
-                    logger.debug('%s => %s', name, value)
+                    sens = self.sensors[name]
+                    sens.configure()
+                    value = sens.read_data()
+                    results.append((name, value))
+            logger.debug('Results => %s', results)
             raise
         unit.testmode(False)
 
@@ -174,8 +179,8 @@ class Sensors(share.Sensors):
         for tank in range(1, 5):
             for sens in range(1, 5):
                 name = 'tank{0}_s{1}'.format(tank, sens)
-                cmd = 'TANK{0}_S{1}'.format(tank, sens)
-                self[name] = sensor.KeyedReading(armtunnel, cmd)
+                key = 'TANK{0}_S{1}'.format(tank, sens)
+                self[name] = sensor.KeyedReading(armtunnel, key)
         self['tank1-4'] = (
             sensor.KeyedReading(armtunnel, 'TANK1'),
             sensor.KeyedReading(armtunnel, 'TANK2'),
