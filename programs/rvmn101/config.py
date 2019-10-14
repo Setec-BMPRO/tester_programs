@@ -110,7 +110,7 @@ class RVMN101A(Config):
     fixture = '033550'
     # Software versions
     _nordic_133 = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
-    _nordic_181 = 'XXXX_factory_mcuboot.hex'
+    _nordic_181 = 'jayco_rvmn101_signed_1.8.1-0-ge5395312_factory_mcuboot.hex'
     _arm_image = 'rvmn101_nxp_1.9.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
