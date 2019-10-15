@@ -25,6 +25,7 @@ class SX600Final(ProgramTestCase):
                     (sen['oYesNoGreen'], True),
                     ),
                 'PowerOn': (
+                    (sen['oBrktLeft'], 0.0), (sen['oBrktRight'], 0.0),
                     (sen['oFanDet'], 2.0), (sen['oYesNoBlue'], True),
                     (sen['o5v'], 5.1), (sen['oPwrGood'], 0.1),
                     (sen['oAcFail'], 5.1),
@@ -40,7 +41,7 @@ class SX600Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(20, len(result.readings))
+        self.assertEqual(22, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PowerOn', 'Load'], self.tester.ut_steps)
 

@@ -23,7 +23,7 @@ class Config():
     #  Injected voltage at PS_ON via diode and 100R to prevent startup.
     disable_pwr = 5.5
     #  Injected voltage for fan and bracket detect circuits
-    fan_detect = 12.0
+    part_detect = 12.0
     # Common Test limits common to both test types & units
     _base_limits_common = (
         # Outputs off
@@ -69,7 +69,7 @@ class Config():
         tester.LimitDelta('InRes', 70000, 10000),
         tester.LimitHigh('FanOff', 3.0),
         tester.LimitLow('FanOn', 2.0),
-        tester.LimitBetween('BracketDetect', 0.0, 15.0),
+        tester.LimitLow('BracketDetect', 1.0),
         )
 
     @staticmethod
