@@ -43,13 +43,13 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        dev['cn101'].open()
         dev['dcs_vin'].output(8.6, output=True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
+        dev['cn101'].open()
         dev['cn101'].brand(
             self.cfg.hw_version, self.sernum, dev['rla_reset'],
             self.cfg.banner_lines)
