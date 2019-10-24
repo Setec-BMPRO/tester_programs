@@ -190,13 +190,16 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-                ('dcl', tester.DCLoad, 'DCL1'),
+                ('dcl_a', tester.DCLoad, 'DCL1'),
+                ('dcl_b', tester.DCLoad, 'DCL3'),
                 ('dcs_SecCtl2', tester.DCSource, 'DCS2'),
                 ('dcs_Vout', tester.DCSource, 'DCS3'),
                 ('rla_Fuse', tester.Relay, 'RLA4'),
                 ('rla_Fan', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        self['dcl'] = tester.DCLoadParallel(
+            ((self['dcl_a'], 15.0), (self['dcl_b'], 15.0)))
 
     def reset(self):
         """Reset instruments."""
