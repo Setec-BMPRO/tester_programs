@@ -76,16 +76,16 @@ class Initial(share.TestSequence):
         # Switch off 5V rail and discharge the 5V to stop the ARM
         dev['dcs_5V'].output(0)
         self.dcload((('dcl_5V', 0.1), ), output=True, delay=0.5)
-        # Apply and check injected 12V PriCtl
-        dev['dcs_PriCtl'].output(self.cfg.prictl_ext, True)
-        mes['dmm_PriCtl'](timeout=2)
         if self.parameter == '750':
+            # Apply and check injected 12V PriCtl
+            dev['dcs_PriCtl'].output(self.cfg.prictl_ext, True)
+            mes['dmm_PriCtl'](timeout=2)
             dev['rla_pic2'].set_on()
             dev['rla_pic2'].opc()
             mes['pgm_pwrsw']()      # Program the Power Switch Board
             dev['rla_pic2'].set_off()
-        dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
-        dev['dcs_PriCtl'].output(0.0)
+            dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
+            dev['dcs_PriCtl'].output(0.0)
         # This will also enable all loads on an ATE3/4 tester.
         self.dcload(
             (('dcl_5V', 0.0), ('dcl_12V', 0.0), ('dcl_24V', 0.0), ),
