@@ -151,8 +151,9 @@ class RVMN101A(Config):
         @return Tuple(limits)
 
         """
+        rssi = -70 if share.config.System.tester_type == 'ATE4' else -85
         return cls._base_limits_final + (
-            tester.LimitHigh('ScanRSSI', -85, doc='Strong BLE signal'),
+            tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
             )
 
 
