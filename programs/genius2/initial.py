@@ -139,7 +139,7 @@ class Initial(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Ramp up load until OCP."""
         # Check for correct model (GENIUS-II/GENIUS-II-H)
-        dev['dcl_vbat'].binary(0.0, 18.0, 5.0)
+        dev['dcl_vbat'].binary(0.0, 18.0, 5.0, delay=1.0)
         mes['dmm_vbatocp'](timeout=2)
         dev['dcl_vbat'].output(0.0)
         mes['dmm_vbat'](timeout=10)
