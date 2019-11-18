@@ -62,9 +62,16 @@ class Initial(share.TestSequence):
         dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
         if self.parameter == 'A':
             rvmn101.hs_output(41, False)
+            # Turn LOW, then HIGH, HBridge outputs 1-3 in turn
+            for idx in rvmn101.special_outputs:
+                with tester.PathName('HS{0}'.format(idx)):
+                    rvmn101.hs_output(idx, True)
+                    mes['dmm_hb_low'](timeout=5)
+                    rvmn101.hs_output(idx, False)
+                    mes['dmm_hb_high'](timeout=5)
         mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each HS output in turn
-        for idx in rvmn101.valid_outputs:
+        for idx in rvmn101.normal_outputs:
             with tester.PathName('HS{0}'.format(idx)):
                 rvmn101.hs_output(idx, True)
                 mes['dmm_hs_on'](timeout=5)
@@ -177,6 +184,7 @@ class Sensors(share.Sensors):
         self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['HSout'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.1)
+        self['HBout'] = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.1)
         self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.1)
         self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
         self['SnEntry'] = sensor.DataEntry(
@@ -206,6 +214,8 @@ class Measurements(share.Measurements):
             ('dmm_vbatt', 'Vbatt', 'VBatt', 'Battery input ok'),
             ('dmm_hs_off', 'HSoff', 'HSout', 'All high-side drivers OFF'),
             ('dmm_hs_on', 'HSon', 'HSout', 'High-side driver ON'),
+            ('dmm_hb_low', 'HBlow', 'HBout', 'Test HBridge 1-3 low'),
+            ('dmm_hb_high', 'HBhigh', 'HBout', 'Test HBridge 1-3 high'),
             ('dmm_ls1_off', 'LSoff', 'LSout1', 'Low-side driver1 OFF'),
             ('dmm_ls1_on', 'LSon', 'LSout1', 'Low-side driver1 ON'),
             ('dmm_ls2_off', 'LSoff', 'LSout2', 'Low-side driver2 OFF'),

@@ -34,10 +34,16 @@ class _Console(share.console.Base):
         missing_set = set()
         for key in self.missing_outputs:
             missing_set.add(self.missing_outputs[key])
-        self.valid_outputs = []          # List of implemented output index
+        special_set = set()
+        for key in self._special_outputs:
+            special_set.add(self._special_outputs[key])
+        self.normal_outputs = []          # List of implemented output index
+        self.special_outputs = []       # List of reversed output index
         for idx in range(self.max_output_index):
-            if idx not in missing_set:
-                self.valid_outputs.append(idx)
+            if not (idx in missing_set or idx in special_set):
+                self.normal_outputs.append(idx)
+            if idx in special_set:
+                self.special_outputs.append(idx)
 
     def brand(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
@@ -77,7 +83,7 @@ class _Console(share.console.Base):
         @param state True for ON, False for OFF
 
         """
-        if index not in self.valid_outputs:
+        if not(index in self.normal_outputs or index in self.special_outputs):
             raise InvalidOutputError
         self['OUTPUT'] = '{0} {1}'.format(index, 1 if state else 0)
 
@@ -129,6 +135,15 @@ class ConsoleA(_Console):
             'LS_0A5_EN3': 36,
             'LS_0A5_EN4': 37,
             }
+        # Special outputs only for Rev8 boards
+        self._special_outputs = {
+            'HBRIDGE 1 EXTEND': 0,
+            'HBRIDGE 1 RETRACT': 1,
+            'HBRIDGE 2 EXTEND': 2,
+            'HBRIDGE 2 RETRACT': 3,
+            'HBRIDGE 3 EXTEND': 4,
+            'HBRIDGE 3 RETRACT': 5,
+            }
         super().__init__(port)
 
 
@@ -177,4 +192,6 @@ class ConsoleB(_Console):
             'LS_0A5_EN4': 37,
             'OUT5A_PWM_13': 51,
             }
+        # Special outputs only for Rev8 boards
+        self._special_outputs = {}
         super().__init__(port)
