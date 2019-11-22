@@ -1,159 +1,50 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2017 SETEC Pty Ltd
+# Copyright 2017 - 2019 SETEC Pty Ltd
 """BP35 Initial Test Program."""
 
-import os
 import inspect
+import os
 import time
+
 import serial
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitRegExp,
-    LimitBetween, LimitDelta, LimitPercent, LimitInteger
-    )
+
 import share
-from . import console
-from . import config
+from . import console, config
 
 
 class Initial(share.TestSequence):
 
     """BP35 Initial Test Program."""
 
-    # ARM software image file
-    arm_file = 'bp35_{0}.bin'.format(config.BP35.arm_sw_version)
-    # dsPIC software image file
-    pic_file = 'bp35sr_{0}.hex'.format(config.BP35.pic_sw_version)
-    # Injected Vbat & Vaux
-    vbat_in = 12.4
-    vaux_in = 13.5
-    # PFC settling level
-    pfc_stable = 0.05
-    # Converter loading
-    iload = 28.0
-    ibatt = 4.0
-    # Other settings
-    vac = 240.0
-    outputs = 14
-    vout_set = 12.8
-    ocp_set = 35.0
-    # Extra % error in OCP allowed before adjustment
-    ocp_adjust_percent = 10.0
-    # SR Solar Reg settings
-    sr_vset = 13.650
-    sr_vset_settle = 0.05
-    sr_iset = 30.0
-    sr_ical = 10.0
-    sr_vin = 20.0
-    sr_vin_pre_percent = 6.0
-    sr_vin_post_percent = 1.5
-    # PM Solar Reg settings
-    pm_zero_wait = 30     # Settling delay for zero calibration
-    # Common limits
-    _common = (
-        LimitLow('FixtureLock', 200, doc='Contacts closed'),
-        LimitDelta('HwVer8', 4400.0, 250.0, doc='Hardware Rev ≥8'),
-        LimitDelta('ACin', vac, 5.0, doc='Injected AC voltage present'),
-        LimitBetween('Vpfc', 401.0, 424.0, doc='PFC running'),
-        LimitBetween('12Vpri', 11.5, 13.0, doc='Control rail present'),
-        LimitBetween('15Vs', 11.5, 13.0, doc='Control rail present'),
-        LimitBetween('Vload', 12.0, 12.9, doc='Load output present'),
-        LimitLow('VloadOff', 0.5, doc='Load output off'),
-        LimitDelta('VbatIn', 12.0, 0.5, doc='Injected Vbatt present'),
-        LimitBetween('Vbat', 12.2, 13.0, doc='Vbatt present'),
-        LimitDelta('Vaux', 13.4, 0.4, doc='Vaux present'),
-        LimitDelta('3V3', 3.30, 0.05, doc='3V3 present'),
-        LimitDelta('FanOn', 12.5, 0.5, doc='Fans ON'),
-        LimitLow('FanOff', 0.5, doc='Fans OFF'),
-        LimitPercent('OCP_pre', ocp_set, 4.0 + ocp_adjust_percent,
-            doc='Before adjustment'),
-        LimitPercent('OCP', ocp_set, 4.0, doc='After adjustment'),
-        LimitLow('InOCP', 11.6, doc='Output voltage in OCP'),
-        LimitRegExp(
-            'ARM-SwVer', '^{0}$'.format(
-                config.BP35.arm_sw_version.replace('.', r'\.')),
-            doc='Software version'),
-        LimitDelta('ARM-AcV', vac, 10.0, doc='AC voltage'),
-        LimitDelta('ARM-AcF', 50.0, 1.0, doc='AC frequency'),
-        LimitBetween('ARM-SecT', 8.0, 70.0, doc='Reading ok'),
-        LimitDelta('ARM-Vout', 12.45, 0.45),
-        LimitBetween('ARM-Fan', 0, 100, doc='Fan running'),
-        LimitDelta('ARM-LoadI', 2.1, 0.9, doc='Load current flowing'),
-        LimitDelta('ARM-BattI', ibatt, 1.0, doc='Battery current flowing'),
-        LimitDelta('ARM-BusI', iload + ibatt, 3.0, doc='Bus current flowing'),
-        LimitPercent('ARM-AuxV', vaux_in, percent=2.0, delta=0.3,
-            doc='AUX present'),
-        LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current flowing'),
-        LimitInteger('ARM-RemoteClosed', 1, doc='REMOTE input connected'),
-        LimitDelta('CanPwr', vout_set, delta=1.8,
-            doc='CAN bus power present'),
-        LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
-        LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
-        LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
-        )
-    # SR Solar specific limits
-    _sr_solar = (
-        LimitDelta('SolarVcc', 3.3, 0.1, doc='Vcc present'),
-        LimitDelta('SolarVin', sr_vin, 0.5, doc='Input present'),
-        LimitPercent('VsetPre', sr_vset, 6.0, doc='Vout before calibration'),
-        LimitPercent('VsetPost', sr_vset, 1.5, doc='Vout after calibration'),
-        LimitPercent('ARM-IoutPre', sr_ical, (9.0, 20.0),
-            doc='Iout before calibration'),
-        LimitPercent('ARM-IoutPost', sr_ical, 3.0,
-            doc='Iout after calibration'),
-        LimitPercent('ARM-SolarVin-Pre', sr_vin, sr_vin_pre_percent,
-            doc='Vin before calibration'),
-        LimitPercent('ARM-SolarVin-Post', sr_vin, sr_vin_post_percent,
-            doc='Vin after calibration'),
-        LimitInteger('SR-Alive', 1, doc='Detected'),
-        LimitInteger('SR-Relay', 1, doc='Input relay ON'),
-        LimitInteger('SR-Error', 0, doc='No error'),
-        )
-    # PM Solar specific limits
-    _pm_solar = (
-        LimitInteger('PM-Alive', 1, doc='Detected'),
-        LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6, doc='Zero reading before cal'),
-        LimitDelta('ARM-PmSolarIz-Post', 0, 0.1, doc='Zero reading after cal'),
-        )
-    # Variant specific configuration data. Indexed by test program parameter.
-    #   'Limits': Test limits.
-    #   'HwVer': Hardware version data.
-    limitdata = {
-        'SR': {
-            'Limits': _common + _sr_solar,
-            'HwVer': config.BP35SR.arm_hw_version,
-            },
-        'PM': {
-            'Limits': _common + _pm_solar,
-            'HwVer': config.BP35PM.arm_hw_version,
-            },
-        'HA': {
-            'Limits': _common + _sr_solar,
-            'HwVer': config.BP35HA.arm_hw_version,
-            },
-        }
-
     def open(self, uut):
         """Prepare for testing."""
-        self.config = self.limitdata[self.parameter]
-        super().open(
-            self.config['Limits'], Devices, Sensors, Measurements)
-        self.pm = (self.parameter == 'PM')
+        self.cfg = config.BP35.get(self.parameter, uut)
+        limits = self.cfg.limits_initial()
+        Devices.arm_sw_version = self.cfg.arm_sw_version
+        Devices.pic_sw_version = self.cfg.pic_sw_version
+        Sensors.outputs = self.cfg.outputs
+        Sensors.iload = self.cfg.iload
+        super().open(limits, Devices, Sensors, Measurements)
+        self.limits['ARM-SwVer'].adjust(
+            '^{0}$'.format(self.cfg.arm_sw_version.replace('.', r'\.')))
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('ProgramPIC', self._step_program_pic, not self.pm),
-            TestStep('ProgramARM', self._step_program_arm),
-            TestStep('Initialise', self._step_initialise_arm),
-            TestStep('SrSolar', self._step_sr_solar, not self.pm),
-            TestStep('Aux', self._step_aux),
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('Output', self._step_output),
-            TestStep('RemoteSw', self._step_remote_sw),
-            TestStep('PmSolar', self._step_pm_solar, self.pm),
-            TestStep('OCP', self._step_ocp),
-            TestStep('CanBus', self._step_canbus),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('ProgramPIC', self._step_program_pic,
+                not self.cfg.is_pm),
+            tester.TestStep('ProgramARM', self._step_program_arm),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('SrSolar', self._step_sr_solar,
+                not self.cfg.is_pm),
+            tester.TestStep('Aux', self._step_aux),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('Output', self._step_output),
+            tester.TestStep('RemoteSw', self._step_remote_sw),
+            tester.TestStep('PmSolar', self._step_pm_solar,
+                self.cfg.is_pm),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
 
@@ -167,7 +58,7 @@ class Initial(share.TestSequence):
         """
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(('dmm_lock', 'hardware8', ), timeout=5)
-        dev['dcs_vbat'].output(self.vbat_in, True)
+        dev['dcs_vbat'].output(self.cfg.vbat_in, True)
         dev['rla_vbat'].set_on()
         self.measure(('dmm_vbatin', 'dmm_3v3'), timeout=5)
 
@@ -178,7 +69,7 @@ class Initial(share.TestSequence):
         Device is powered by Solar Reg input voltage.
 
         """
-        dev['SR_LowPower'].output(self.sr_vin, output=True)
+        dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
         mes['dmm_solarvcc'](timeout=5)
         # Start programming in the background
         dev['program_pic'].program_begin()
@@ -191,7 +82,7 @@ class Initial(share.TestSequence):
 
         """
         dev['program_arm'].program()
-        if not self.pm:
+        if not self.cfg.is_pm:
             with tester.PathName('PICcheck'):
                 # PIC programming should be finished by now
                 dev['program_pic'].program_wait()
@@ -202,7 +93,7 @@ class Initial(share.TestSequence):
         dcsource.output(0.0)
         load.output(1.0, delay=0.5)
         load.output(0.0)
-        dcsource.output(self.vbat_in)
+        dcsource.output(self.cfg.vbat_in)
 
     @share.teststep
     def _step_initialise_arm(self, dev, mes):
@@ -214,19 +105,19 @@ class Initial(share.TestSequence):
         Put device into manual control mode.
 
         """
-        if not self.pm:
-            dev['SR_LowPower'].output(self.sr_vin)
+        if not self.cfg.is_pm:
+            dev['SR_LowPower'].output(self.cfg.sr_vin)
         bp35 = dev['bp35']
         bp35.open()
         bp35.brand(
-            self.config['HwVer'], self.sernum, dev['rla_reset'],
-            self.pm, config.BP35.pic_hw_version)
+            self.cfg.arm_hw_version, self.sernum, dev['rla_reset'],
+            self.cfg.is_pm, self.cfg.pic_hw_version)
         mes['arm_swver']()
-        if self.pm:
+        if self.cfg.is_pm:
             bp35['PM_RELAY'] = False
             time.sleep(0.5)
             bp35['PM_RELAY'] = True
-            dev['PmTimer'].start(self.pm_zero_wait)
+            dev['PmTimer'].start(self.cfg.pm_zero_wait)
         bp35.manual_mode(start=True)    # Start the change to manual mode
         bp35['FAN'] = 0
 
@@ -240,32 +131,32 @@ class Initial(share.TestSequence):
         # The SR needs V & I set to zero after power up or it won't start.
         bp35.sr_set(0, 0)
         # Now set the actual output settings
-        bp35.sr_set(self.sr_vset, self.sr_iset, delay=2)
+        bp35.sr_set(self.cfg.sr_vset, self.cfg.sr_iset, delay=2)
         bp35['VOUT_OV'] = 2     # Reset OVP Latch because of Solar overshoot
         # Read solar input voltage and patch measurement limits
         sr_vin = mes['dmm_solarvin'](timeout=5).reading1
         mes['arm_sr_vin_pre'].testlimit = (
-            LimitPercent(
-                'ARM-SolarVin-Pre', sr_vin, self.sr_vin_pre_percent), )
+            tester.LimitPercent(
+                'ARM-SolarVin-Pre', sr_vin, self.cfg.sr_vin_pre_percent), )
         mes['arm_sr_vin_post'].testlimit = (
-            LimitPercent(
-                'ARM-SolarVin-Post', sr_vin, self.sr_vin_post_percent), )
+            tester.LimitPercent(
+                'ARM-SolarVin-Post', sr_vin, self.cfg.sr_vin_post_percent), )
         # Check that Solar Reg is error-free, the relay is ON, Vin reads ok
         self.measure(
             ('arm_sr_error', 'arm_sr_relay', 'arm_sr_vin_pre', ),
             timeout=5)
         # Wait for the voltage to settle
-        vmeasured = mes['dmm_vsetpre'].stable(self.sr_vset_settle).reading1
+        vmeasured = mes['dmm_vsetpre'].stable(self.cfg.sr_vset_settle).reading1
         bp35['SR_VCAL'] = vmeasured     # Calibrate output voltage setpoint
         bp35['SR_VIN_CAL'] = sr_vin     # Calibrate input voltage reading
         # Solar sw ver 182 will not change the setpoint until a DIFFERENT
         # voltage setpoint is given...
-        bp35.sr_set(self.sr_vset - 0.05, self.sr_iset, delay=0.2)
-        bp35.sr_set(self.sr_vset, self.sr_iset, delay=1)
+        bp35.sr_set(self.cfg.sr_vset - 0.05, self.cfg.sr_iset, delay=0.2)
+        bp35.sr_set(self.cfg.sr_vset, self.cfg.sr_iset, delay=1)
         self.measure(('arm_sr_vin_post', 'dmm_vsetpost', ))
-        dev['dcl_bat'].output(self.sr_ical, True)
+        dev['dcl_bat'].output(self.cfg.sr_ical, True)
         mes['arm_ioutpre'](timeout=5)
-        bp35['SR_ICAL'] = self.sr_ical       # Calibrate current setpoint
+        bp35['SR_ICAL'] = self.cfg.sr_ical      # Calibrate current setpoint
         time.sleep(1)
         mes['arm_ioutpost'](timeout=5)
         dev['dcl_bat'].output(0.0)
@@ -275,7 +166,7 @@ class Initial(share.TestSequence):
     def _step_aux(self, dev, mes):
         """Apply Auxiliary input."""
         bp35, source, load = dev['bp35'], dev['dcs_vaux'], dev['dcl_bat']
-        source.output(self.vaux_in, output=True)
+        source.output(self.cfg.vaux_in, output=True)
         load.output(0.5, delay=1.0)
         mes['dmm_vbatin'](timeout=1)
         bp35['AUX_RELAY'] = True
@@ -289,12 +180,12 @@ class Initial(share.TestSequence):
         """Power-Up the Unit with AC."""
         bp35 = dev['bp35']
         # Complete the change to manual mode
-        bp35.manual_mode(vout=self.vout_set, iout=self.ocp_set)
-        dev['acsource'].output(voltage=self.vac, output=True)
+        bp35.manual_mode(vout=self.cfg.vout_set, iout=self.cfg.ocp_set)
+        dev['acsource'].output(voltage=self.cfg.vac, output=True)
         self.measure(('dmm_acin', 'dmm_pri12v'), timeout=10)
         bp35.power_on()
         # Wait for PFC overshoot to settle
-        mes['dmm_vpfc'].stable(self.pfc_stable)
+        mes['dmm_vpfc'].stable(self.cfg.pfc_stable)
         mes['arm_vout_ov']()
         # Remove injected Battery voltage
         dev['rla_vbat'].set_off()
@@ -349,16 +240,16 @@ class Initial(share.TestSequence):
              'dmm_fanoff'), timeout=5)
         bp35['FAN'] = 100
         mes['dmm_fanon'](timeout=5)
-        dev['dcl_out'].binary(1.0, self.iload, 5.0)
-        dev['dcl_bat'].output(self.ibatt, output=True)
+        dev['dcl_out'].binary(1.0, self.cfg.iload, 5.0)
+        dev['dcl_bat'].output(self.cfg.ibatt, output=True)
         self.measure(('dmm_vbat', 'arm_ibat', 'arm_ibus', ), timeout=5)
-        bp35['BUS_ICAL'] = self.iload + self.ibatt  # Calibrate current reading
-        for load in range(self.outputs):
+        bp35['BUS_ICAL'] = self.cfg.iload + self.cfg.ibatt  # Calibrate current reading
+        for load in range(self.cfg.outputs):
             with tester.PathName('L{0}'.format(load + 1)):
                 mes['arm_loads'][load](timeout=5)
         ocp_actual = mes['ramp_ocp_pre']().reading1
         # Adjust current setpoint
-        bp35['OCP_CAL'] = round(bp35.ocp_cal() * ocp_actual / self.ocp_set)
+        bp35['OCP_CAL'] = round(bp35.ocp_cal() * ocp_actual / self.cfg.ocp_set)
         bp35['NVWRITE'] = True
         mes['ramp_ocp']()
         dev['dcl_out'].output(0.0)
@@ -402,6 +293,9 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    arm_sw_version = None   # ARM software version
+    pic_sw_version = None   # PIC software version
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -428,11 +322,13 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, Initial.arm_file), crpmode=False,
+            os.path.join(folder, 'bp35_{0}.bin'.format(self.arm_sw_version)),
+            crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # PIC device programmer
         self['program_pic'] = share.programmer.PIC(
-            Initial.pic_file, folder, '33FJ16GS402', self['rla_pic'])
+            'bp35sr_{0}.hex'.format(self.pic_sw_version),
+            folder, '33FJ16GS402', self['rla_pic'])
         # Serial connection to the BP35 console
         bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
@@ -468,6 +364,9 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    outputs = None      # Number of outputs
+    iload = None        # Load current
 
     def open(self):
         """Create all Sensors."""
@@ -547,7 +446,7 @@ class Sensors(share.Sensors):
         self['TunnelSwVer'] = sensor.KeyedReadingString(bp35tunnel, 'SW_VER')
         # Generate load current sensors
         loads = []
-        for i in range(1, Initial.outputs + 1):
+        for i in range(1, self.outputs + 1):
             loads.append(sensor.KeyedReading(bp35, 'LOAD_{0}'.format(i)))
         self['arm_loads'] = loads
         # Pre-adjust OCP
@@ -556,22 +455,22 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_bat'],
             sensor=self['vbat'],
             detect_limit=(self.limits['InOCP'], ),
-            start=low - Initial.iload - 1,
-            stop=high - Initial.iload + 1,
+            start=low - self.iload - 1,
+            stop=high - self.iload + 1,
             step=0.1)
         self['ocp_pre'].units = 'A'
-        self['ocp_pre'].on_read = lambda value: value + Initial.iload
+        self['ocp_pre'].on_read = lambda value: value + self.iload
         # Post-adjust OCP
         low, high = self.limits['OCP'].limit
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_bat'],
             sensor=self['vbat'],
             detect_limit=(self.limits['InOCP'], ),
-            start=low - Initial.iload - 1,
-            stop=high - Initial.iload + 1,
+            start=low - self.iload - 1,
+            stop=high - self.iload + 1,
             step=0.1)
         self['ocp'].units = 'A'
-        self['ocp'].on_read = lambda value: value + Initial.iload
+        self['ocp'].on_read = lambda value: value + self.iload
 
 
 class Measurements(share.Measurements):

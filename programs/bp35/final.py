@@ -1,37 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2017 SETEC Pty Ltd
+# Copyright 2017 - 2019 SETEC Pty Ltd
 """BP35 Final Test Program."""
 
 import tester
+
 import share
-from . import console
-from . import config
+from . import console, config
 
 
 class Final(share.TestSequence):
 
     """BP35 Final Test Program."""
 
-    # Test limits
-    limitdata = (
-        tester.LimitDelta('Can12V', 12.0, delta=1.0, doc='CAN_POWER rail'),
-        tester.LimitLow('Can0V', 0.5,  doc='CAN BUS removed'),
-        tester.LimitHigh('FanOn', 10.0, doc='Fan running'),
-        tester.LimitLow('FanOff', 1.0, doc='Fan not running'),
-        tester.LimitBetween('Vout', 12.0, 12.9, doc='No load output voltage'),
-        tester.LimitDelta('Vload', 12.45, 0.45, doc='Load output present'),
-        tester.LimitPercent('OCP', 35.0, 4.0, doc='After adjustment'),
-        tester.LimitLow('InOCP', 11.6, doc='Output voltage in OCP'),
-        tester.LimitRegExp(
-            'ARM-SwVer', '^{0}$'.format(
-                config.BP35.arm_sw_version.replace('.', r'\.')),
-            doc='Software version'),
-        )
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.BP35.get(self.parameter, uut)
+        limits = self.cfg.limits_final()
+        super().open(limits, Devices, Sensors, Measurements)
+        self.limits['ARM-SwVer'].adjust(
+            '^{0}$'.format(self.cfg.arm_sw_version.replace('.', r'\.')))
         self.steps = (
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('CAN', self._step_can),
@@ -46,7 +34,7 @@ class Final(share.TestSequence):
         """Power-Up the Unit and measure output voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         mes['dmm_fanoff'](timeout=5)
-        dev['acsource'].output(voltage=240.0, output=True)
+        dev['acsource'].output(voltage=self.cfg.vac, output=True)
         mes['dmm_fanon'](timeout=15)
         for load in range(14):
             with tester.PathName('L{0}'.format(load + 1)):

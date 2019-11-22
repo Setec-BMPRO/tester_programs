@@ -13,7 +13,7 @@ class BP35Final(ProgramTestCase):
     """BP35 Final program test suite."""
 
     prog_class = bp35.Final
-    parameter = None
+    parameter = 'SR'
     debug = False
     sernum = 'A1626010123'
     vout = 12.7
