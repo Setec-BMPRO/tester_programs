@@ -337,11 +337,11 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-                ('dcs_PriCtl', tester.DCSource, 'DCS1'),
+                ('dcs_PriCtl', tester.DCSource, 'DCS1'), # SX-750
                 ('dcs_5V', tester.DCSource, 'DCS2'),
                 ('dcs_Arduino', tester.DCSource, 'DCS3'),
                 ('dcs_Vcom', tester.DCSource, 'DCS4'),
-                ('dcs_DigPot', tester.DCSource, 'DCS5'),
+                ('dcs_DigPot', tester.DCSource, 'DCS5'), # SX-750
                 ('dcl_12V', tester.DCLoad, 'DCL1'),
                 ('dcl_5V', tester.DCLoad, 'DCL2'),
                 ('dcl_24V', tester.DCLoad, 'DCL3'),
