@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for CN102 Initial Test program."""
+"""UnitTest for CN102/3 Initial Test program."""
 
 from unittest.mock import MagicMock, patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import cn102
 
@@ -12,7 +13,7 @@ class CN102Initial(ProgramTestCase):
     """CN102 Initial program test suite."""
 
     prog_class = cn102.Initial
-    parameter = None
+    parameter = '102'
     debug = False
 
     def setUp(self):

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""CN102 Test Programs."""
+# Copyright 2017 - 2019 SETEC Pty Ltd
+"""CN102/3 Test Programs."""
 
 from .initial import Initial
 

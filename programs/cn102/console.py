@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""CN102 Console driver."""
+# Copyright 2017 - 2019 SETEC Pty Ltd
+"""CN102/3 Console driver."""
 
 import share
 

@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""CN102 Initial Test Program."""
+# Copyright 2017 - 2019 SETEC Pty Ltd
+"""CN102/3 Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import serial
 import tester
+
 import share
-from . import console
-from . import config
+from . import config, console
 
 
 class Initial(share.TestSequence):
 
-    """CN102 Initial Test Program."""
+    """CN102/3 Initial Test Program."""
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.CN102.select(uut)
+        self.cfg = config.CN10x.select(self.parameter, uut)
         limits = self.cfg.limits_initial
         Devices.sw_arm_version = self.cfg.sw_arm_version
         Devices.sw_nrf_version = self.cfg.sw_nrf_version

@@ -93,7 +93,7 @@ class SX600Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(43, len(result.readings))
+        self.assertEqual(42, len(result.readings))
         self.assertEqual(
             ['PartDetect', 'Program', 'Initialise', 'PowerUp',
              '5Vsb', '12V', '24V', 'PeakPower'],
