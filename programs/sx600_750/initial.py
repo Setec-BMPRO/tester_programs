@@ -65,7 +65,14 @@ class Initial(share.TestSequence):
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
             timeout=5)
         dev['programmer'].program()     # Program the ARM device
-        dev['ard'].open()
+        # On xubuntu, a device detector opens the serial port for a while
+        # after it is attached. Wait for the process to release the port.
+        for _ in range(10):
+            try:
+                dev['ard'].open()
+                break
+            except:
+                time.sleep(1)
         dev['rla_boot'].set_off(delay=2) # Wait for Arduino to start
         if self.parameter == '750':
             dev['rla_pic1'].set_on()
