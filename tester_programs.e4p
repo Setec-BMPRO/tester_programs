@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2019-12-09, 11:48:00 -->
+<!-- Saved: 2019-12-10, 14:25:49 -->
 <!-- Copyright (C) 2019 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -157,11 +157,11 @@
     <Source>programs/trs2/console.py</Source>
     <Source>programs/trs2/final.py</Source>
     <Source>programs/trs2/initial.py</Source>
-    <Source>programs/trs2bts/__init__.py</Source>
-    <Source>programs/trs2bts/config.py</Source>
-    <Source>programs/trs2bts/console.py</Source>
-    <Source>programs/trs2bts/final.py</Source>
-    <Source>programs/trs2bts/initial.py</Source>
+    <Source>programs/trsbts/__init__.py</Source>
+    <Source>programs/trsbts/config.py</Source>
+    <Source>programs/trsbts/console.py</Source>
+    <Source>programs/trsbts/final.py</Source>
+    <Source>programs/trsbts/initial.py</Source>
     <Source>programs/trsrfm/__init__.py</Source>
     <Source>programs/trsrfm/config.py</Source>
     <Source>programs/trsrfm/console.py</Source>
@@ -270,8 +270,8 @@
     <Source>tests/programs/test_trk2_jcntl_initial.py</Source>
     <Source>tests/programs/test_trs2_final.py</Source>
     <Source>tests/programs/test_trs2_initial.py</Source>
-    <Source>tests/programs/test_trs2bts_final.py</Source>
-    <Source>tests/programs/test_trs2bts_initial.py</Source>
+    <Source>tests/programs/test_trsbts_final.py</Source>
+    <Source>tests/programs/test_trsbts_initial.py</Source>
     <Source>tests/programs/test_trsrfm_initial.py</Source>
     <Source>tests/programs/test_ts3020h_final.py</Source>
     <Source>tests/programs/test_ts3020h_initial.py</Source>

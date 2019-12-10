@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TRS2-BTS Final Program."""
+"""TRS-BTS Final Program."""
 
 import tester
 from tester import (
@@ -12,7 +12,7 @@ import share
 
 class Final(share.TestSequence):
 
-    """TRS2-BTS Final Test Program."""
+    """TRS-BTS Final Test Program."""
 
     # Injected Vbatt
     vbatt = 12.0

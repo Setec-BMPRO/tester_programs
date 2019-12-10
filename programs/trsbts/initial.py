@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TRS2-BTS Initial Program."""
+"""TRS-BTS Initial Program."""
 
 import serial
 import tester
@@ -15,7 +15,7 @@ from . import config
 
 class Initial(share.TestSequence):
 
-    """TRS2-BTS Initial Test Program."""
+    """TRS-BTS Initial Test Program."""
 
     # Injected Vbatt
     vbatt = 12.0

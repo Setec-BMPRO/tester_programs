@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TRS2-BTS Console driver."""
+"""TRS-BTS Console driver."""
 
 import share
 
 
 class Console(share.console.Base):
 
-    """Communications to TRS2-BTS console."""
+    """Communications to TRS-BTS console."""
 
     parameter = share.console.parameter
     cmd_data = {

@@ -74,8 +74,8 @@ from . import test_trk2_jcntl_final
 from . import test_trk2_jcntl_initial
 from . import test_trs2_initial
 from . import test_trs2_final
-from . import test_trs2bts_initial
-from . import test_trs2bts_final
+from . import test_trsbts_initial
+from . import test_trsbts_final
 from . import test_trsrfm_initial
 from . import test_ts3020h_initial
 from . import test_ts3020h_final
@@ -155,8 +155,8 @@ __all__ = [
     'test_trk2_jcntl_initial',
     'test_trs2_initial',
     'test_trs2_final',
-    'test_trs2bts_initial',
-    'test_trs2bts_final',
+    'test_trsbts_initial',
+    'test_trsbts_final',
     'test_trsrfm_initial',
     'test_ts3020h_initial',
     'test_ts3020h_final',

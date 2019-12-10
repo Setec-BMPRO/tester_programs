@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for TRS2-BTS Initial Test program."""
+"""UnitTest for TRS-BTS Initial Test program."""
 
 from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import trs2bts
+from programs import trsbts
 
 
-class TRS2BTS_Initial(ProgramTestCase):
+class TRSBTS_Initial(ProgramTestCase):
 
-    """TRS2-BTS Initial program test suite."""
+    """TRS-BTS Initial program test suite."""
 
-    prog_class = trs2bts.Initial
+    prog_class = trsbts.Initial
     parameter = None
     debug = False
     btmac = '001EC030BC15'
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.trs2bts.console.Console')
+        patcher = patch('programs.trsbts.console.Console')
         self.addCleanup(patcher.stop)
         patcher.start()
         mybt = MagicMock(name='MyBleRadio')
@@ -46,7 +46,7 @@ class TRS2BTS_Initial(ProgramTestCase):
                     (sen['red'], (0.0, 1.8, 0.0)),
                     (sen['green'], (0.0, 2.5, 0.0)),
                     (sen['blue'], (0.0, 2.8, 0.0)),
-                    (sen['arm_SwVer'], trs2bts.config.SW_VERSION),
+                    (sen['arm_SwVer'], trsbts.config.SW_VERSION),
                     (sen['arm_Fault'], 0),
                     ),
                 'Calibrate': (
