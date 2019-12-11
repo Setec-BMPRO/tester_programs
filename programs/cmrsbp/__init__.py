@@ -10,7 +10,8 @@ import serial
 import tester
 from tester import (
     TestStep,
-    LimitLow, LimitBetween, LimitDelta, LimitBoolean, LimitRegExp, LimitInteger
+    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitBoolean,
+    LimitRegExp, LimitInteger
     )
 import share
 from . import ev2200
@@ -183,7 +184,7 @@ class Final(share.TestSequence):
     # Common test limits
     _common = (
         LimitDelta('ErrV', 0.0, 0.03),
-        LimitBetween('CycleCnt', 0.5, 20.5),
+        LimitHigh('CycleCnt', 1.0),
         LimitBoolean('RelrnFlg', False),
         LimitInteger('RotarySw', 256),
         LimitDelta('Halfcell', 400, 50),
