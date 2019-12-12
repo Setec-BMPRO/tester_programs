@@ -18,12 +18,19 @@ class TRSBTS_Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.trsbts.console.Console')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
+
+        for target in (
+                'share.programmer.Nordic',
+                'share.bluetooth.RaspberryBluetooth',
+                'share.bluetooth.SerialToMAC',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
+        mycon = MagicMock(name='MyConsole')
+        mycon.get_mac.return_value = '001ec030c2be'
+        patcher = patch(
+            'programs.trsbts.console.Console', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -35,9 +42,12 @@ class TRSBTS_Initial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], 'A1526040123'),
-                    (sen['tstpin_cover'], 0.0),
                     (sen['vin'], 12.0),
                     (sen['3v3'], 3.30),
+                    (sen['chem'], 3.0),
+                    (sen['sway-'], 2.0),
+                    (sen['sway+'], 1.0),
+                    (sen['light'], (0.0, 12.0)),
                     (sen['brake'], (0.0, 12.0)),
                     ),
                 'Operation': (
@@ -47,7 +57,6 @@ class TRSBTS_Initial(ProgramTestCase):
                     (sen['green'], (0.0, 2.5, 0.0)),
                     (sen['blue'], (0.0, 2.8, 0.0)),
                     (sen['arm_SwVer'], trsbts.config.SW_VERSION),
-                    (sen['arm_Fault'], 0),
                     ),
                 'Calibrate': (
                     (sen['brake'], (0.2999, 0.3, 11.999, 12.0)),
@@ -65,7 +74,7 @@ class TRSBTS_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(30, len(result.readings))
+        self.assertEqual(31, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'Operation', 'Calibrate', 'Bluetooth'],
+            ['Prepare', 'PgmNordic', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)

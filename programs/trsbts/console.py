@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """TRS-BTS Console driver."""
 
+import re
+
 import share
 
 
@@ -9,22 +11,34 @@ class Console(share.console.Base):
 
     """Communications to TRS-BTS console."""
 
+    re_banner = re.compile('^ble addr ([0-9a-f]{12})$')
+    # Number of lines in startup banner
+    banner_lines = 3
     parameter = share.console.parameter
     cmd_data = {
+        'NVDEFAULT': parameter.Boolean(
+            'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
+        'NVWRITE': parameter.Boolean(
+            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
+        'SER_ID': parameter.String(
+            'SET-SERIAL-ID', writeable=True, readable=False,
+            write_format='"{0} {1}'),
+        'HW_VER': parameter.String(
+            'SET-HW-VER', writeable=True, readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
+        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         # X-Register values
-        'VBATT': parameter.Hex('TRS2_BATT_MV', scale=1000),
+        'VBATT': parameter.Hex('TRS_BTS_BATT_MV', scale=1000),
         'VBRAKE': parameter.Hex('TRS2_BRAKE_MV', scale=1000),
         'IBRAKE': parameter.Hex('TRS2_BRAKE_MA', scale=1000),
-        'VPIN': parameter.Hex('TRS2_DROP_ACROSS_PIN_MV', scale=1000),
-        'FAULT_CODE': parameter.Hex(
-            'TRS2_FAULT_CODE_BITS', minimum=0, maximum=0x3),
+        'VPIN': parameter.Hex('TRS_BTS_PIN_MV', scale=1000),
         # Calibration commands
         'VBRAKE_OFFSET': parameter.Calibration(
             'BRAKEV_OFF_SET', write_expected=2),
         'VBRAKE_GAIN': parameter.Calibration(
             'BRAKEV_GAIN_SET', write_expected=2),
         # OverrideTo commands
-        'BR_LIGHT': parameter.Override('TRS2_BRAKE_LIGHT_EN_OVERRIDE'),
         'MONITOR': parameter.Override('TRS2_MONITOR_EN_OVERRIDE'),
         'RED_LED': parameter.Override('TRS2_RED_LED_OVERRIDE'),
         'GREEN_LED': parameter.Override('TRS2_GREEN_LED_OVERRIDE'),
@@ -32,4 +46,44 @@ class Console(share.console.Base):
         'BLUETOOTH': parameter.Override('TRS2_BLUETOOTH_EN_OVERRIDE'),
         }
     override_commands = (
-        'BR_LIGHT', 'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED')
+        'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED')
+
+    def brand(self, hw_ver, sernum):
+        """Brand the unit with Hardware ID & Serial Number."""
+        self.banner()
+        self['HW_VER'] = hw_ver
+        self['SER_ID'] = sernum
+        self['NVDEFAULT'] = True
+        self['NVWRITE'] = True
+
+    def banner(self):
+        """Flush the startup banner lines."""
+        self.action(None, expected=self.banner_lines)
+
+    def override(self, state=parameter.OverrideTo.normal):
+        """Manually override functions of the unit.
+
+        @param state OverrideTo enumeration
+
+        """
+        for func in self.override_commands:
+            self[func] = state
+
+    def get_mac(self):
+        """Get the MAC address from the console
+
+        @return 12 hex digit Bluetooth MAC address
+
+        """
+        result = ''
+        try:
+            mac = self.action(None, delay=1.5, expected=self.banner_lines)
+            if self.banner_lines > 1:
+                mac = mac[0]
+            mac = mac.replace(':', '')
+            match = self.re_banner.match(mac)
+            if match:
+                result = match.group(1)
+        except share.console.Error:
+            pass
+        return result

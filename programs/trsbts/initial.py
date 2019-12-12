@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """TRS-BTS Initial Program."""
 
+import inspect
+import os
+
 import serial
 import tester
 from tester import (
@@ -26,7 +29,7 @@ class Initial(share.TestSequence):
 
     limitdata = (
         LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
+        LimitPercent('3V3', 3.3, 1.8, doc='3V3 present'),
         LimitLow('BrakeOff', 0.5, doc='Brakes off'),
         LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
         LimitDelta('BrakeOffset', vbrake_offset, 0.1,
@@ -42,7 +45,9 @@ class Initial(share.TestSequence):
         LimitDelta('GreenLedOn', 2.5, 0.4, doc='Led on'),
         LimitLow('BlueLedOff', 1.0, doc='Led off'),
         LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
-        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
+        LimitDelta('Chem wire', 3.0, 0.4, doc='Voltage present'),
+        LimitDelta('Sway- wire', 2.0, 0.4, doc='Voltage present'),
+        LimitDelta('Sway+ wire', 1.0, 0.4, doc='Voltage present'),
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
@@ -58,16 +63,19 @@ class Initial(share.TestSequence):
         LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82,
             doc='Brake current flowing'),
         LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
-            doc='Valid MAC address '),
-        LimitBoolean('DetectBT', True, doc='MAC address detected'),
+        LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address'),
+        LimitBoolean('ScanMac', True,
+            doc='MAC address detected'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
+        Devices.sw_image = config.SW_VERSION
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
+            TestStep('PgmNordic', self.devices['progNordic'].program),
             TestStep('Operation', self._step_operation),
             TestStep('Calibrate', self._step_calibrate),
             TestStep('Bluetooth', self._step_bluetooth),
@@ -81,34 +89,37 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
-        dev['trs2'].open()
-        mes['dmm_tstpincov'](timeout=5)
+        dev['trsbts'].open()
         dev['dcs_vin'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
+        self.measure(
+            ('dmm_vin', 'dmm_3v3', 'dmm_chem', 'dmm_sway-', 'dmm_sway+'),
+            timeout=5)
         dev['dcl_brake'].output(0.1, output=True)
         self.measure(
-            ('dmm_vin', 'dmm_3v3', 'dmm_BrakeOff'), timeout=5)
+            ('dmm_BrakeOff', 'dmm_lightoff'), timeout=5)
         dev['rla_pin'].remove()
-        mes['dmm_BrakeOn'](timeout=5)
+        self.measure(
+            ('dmm_BrakeOn', 'dmm_lighton'), timeout=5)
         dev['rla_pin'].insert()
 
     @share.teststep
     def _step_operation(self, dev, mes):
         """Test the operation of LEDs."""
-        trs2 = dev['trs2']
-        trs2.brand(config.HW_VERSION, self.sernum)
+        trsbts = dev['trsbts']
+        trsbts.brand(config.HW_VERSION, self.sernum)
         self.measure(
-            ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
+            ('arm_swver', 'dmm_redoff', 'dmm_greenoff'),
             timeout=5)
-        trs2.override(share.console.parameter.OverrideTo.force_on)
+        trsbts.override(share.console.parameter.OverrideTo.force_on)
         self.measure(
-            ('dmm_lighton', 'dmm_remoteon', 'dmm_redon', 'dmm_greenon',
-             'dmm_blueon'), timeout=5)
-        trs2.override(share.console.parameter.OverrideTo.force_off)
+            ('dmm_remoteon', 'dmm_redon', 'dmm_greenon', 'dmm_blueon'),
+            timeout=5)
+        trsbts.override(share.console.parameter.OverrideTo.force_off)
         self.measure(
-            ('dmm_lightoff', 'dmm_remoteoff', 'dmm_redoff', 'dmm_greenoff',
-             'dmm_blueoff'), timeout=5)
-        trs2.override(share.console.parameter.OverrideTo.normal)
+            ('dmm_remoteoff', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
+            timeout=5)
+        trsbts.override(share.console.parameter.OverrideTo.normal)
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
@@ -117,7 +128,7 @@ class Initial(share.TestSequence):
         Vbatt is at 12V, console is open.
 
         """
-        trs2 = dev['trs2']
+        trsbts = dev['trsbts']
         brakes = dev['dcs_brakes']
         dev['rla_pin'].remove()
         self.measure(
@@ -126,13 +137,13 @@ class Initial(share.TestSequence):
         # Offset calibration at low voltage
         brakes.output(self.vbrake_offset, output=True)
         dmm_V = mes['dmm_BrakeOffset'].stable(delta=0.001).reading1
-        trs2['VBRAKE_OFFSET'] = dmm_V
+        trsbts['VBRAKE_OFFSET'] = dmm_V
         # Gain calibration at nominal voltage
         brakes.output(self.vbatt, output=True)
         dmm_V = mes['dmm_BrakeGain'].stable(delta=0.001).reading1
-        trs2['VBRAKE_GAIN'] = dmm_V
+        trsbts['VBRAKE_GAIN'] = dmm_V
         # Save new calibration settings
-        trs2['NVWRITE'] = True
+        trsbts['NVWRITE'] = True
         self.measure(
             ('arm_Vbatt_cal', 'arm_Vbrake_cal', ), timeout=5)
         dev['rla_pin'].remove()
@@ -145,20 +156,23 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = share.bluetooth.MAC(mes['arm_btmac']().reading1)
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
-        ble = dev['ble']
-        ble.open()
-        reply = ble.scan(btmac)
-        ble.close()
-        self._logger.debug('Bluetooth MAC detected: %s', reply)
-        mes['detectBT'].sensor.store(reply)
-        mes['detectBT']()
+        dev['dcs_vin'].output(0.0, delay=0.5)
+        dev['trsbts'].port.flushInput()
+        dev['dcs_vin'].output(self.vbatt, delay=0.1)
+        # Get the MAC address from the console.
+        self.mac = dev['trsbts'].get_mac()
+        mes['ble_mac'].sensor.store(self.mac)
+        mes['ble_mac']()
+        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
+        mes['scan_mac'].sensor.store(reply is not None)
+        mes['scan_mac']()
 
 
 class Devices(share.Devices):
 
     """Devices."""
+
+    sw_image = None
 
     def open(self):
         """Create all Instruments."""
@@ -168,10 +182,7 @@ class Devices(share.Devices):
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_brakes', tester.DCSource, 'DCS3'),
-                ('dcs_cover', tester.DCSource, 'DCS5'),
                 ('dcl_brake', tester.DCLoad, 'DCL5'),
-                ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_wdg', tester.Relay, 'RLA2'),  #Normally closed
                 ('rla_pin', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -179,33 +190,36 @@ class Devices(share.Devices):
         pin = self['rla_pin']
         pin.insert = pin.set_off
         pin.remove = pin.set_on
+        folder = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        # Nordic NRF52 device programmer
+        self['progNordic'] = share.programmer.Nordic(
+            os.path.join(folder, self.sw_image),
+            folder)
         # Serial connection to the console
-        trs2_ser = serial.Serial(baudrate=115200, timeout=15.0)
+        trsbts_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        trs2_ser.port = share.config.Fixture.port('030451', 'ARM')
-        # Console driver
-        self['trs2'] = console.Console(trs2_ser)
-        # Serial connection to the BLE module
-        ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
-        # Set port separately, as we don't want it opened yet
-        ble_ser.port = share.config.Fixture.port('030451', 'BLE')
-        self['ble'] = share.bluetooth.BleRadio(ble_ser)
-        # Enable the watchdog
-        self['rla_wdg'].set_on()
-        self.add_closer(self['rla_wdg'].set_off)
+        bl652_port = share.config.Fixture.port('034352', 'NORDIC')
+        trsbts_ser.port = bl652_port
+        # trsbts Console driver
+        self['trsbts'] = console.Console(trsbts_ser)
+        self['trsbts'].measurement_fail_on_error = False
+        # Connection to RaspberryPi bluetooth server
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
+            share.config.System.ble_url())
+        # Connection to Serial To MAC server
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Apply power to fixture circuits.
         self['dcs_vfix'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
-        self['dcs_cover'].output(9.0, output=True)
-        self.add_closer(lambda: self['dcs_cover'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
-        self['trs2'].close()
-        for dev in ('dcs_vin', 'dcs_brakes', ):
+        self['trsbts'].close()
+        for dev in ('dcs_vin', 'dcs_brakes'):
             self[dev].output(0.0, False)
         self['dcl_brake'].output(0.0, False)
-        for rla in ('rla_reset', 'rla_pin', ):
+        for rla in ('rla_pin', ):
             self[rla].set_off()
 
 
@@ -227,35 +241,38 @@ class Sensors(share.Sensors):
         self['green'].doc = 'Across led'
         self['blue'] = sensor.Vdc(dmm, high=2, low=4, rng=10, res=0.01)
         self['blue'].doc = 'Across led'
+        self['chem'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
+        self['chem'].doc = 'TP11'
+        self['sway-'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
+        self['sway-'].doc = 'TP12'
+        self['sway+'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01)
+        self['sway+'].doc = 'TP13'
         self['brake'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.01)
         self['brake'].doc = 'Brakes output'
         self['light'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.01)
         self['light'].doc = 'Lights output'
         self['remote'] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
         self['remote'].doc = 'Remote output'
-        self['tstpin_cover'] = sensor.Vdc(
-            dmm, high=16, low=1, rng=100, res=0.01)
-        self['tstpin_cover'].doc = 'Photo sensor'
-        self['mirbt'] = sensor.MirrorReadingBoolean()
+        self['mirmac'] = sensor.MirrorReadingString()
+        self['mirscan'] = sensor.MirrorReadingBoolean()
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trs2_initial', 'msgSnEntry'),
             caption=tester.translate('trs2_initial', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
         # Console sensors
-        trs2 = self.devices['trs2']
+        trsbts = self.devices['trsbts']
         for name, cmdkey in (
                 ('arm_BtMAC', 'BT_MAC'),
                 ('arm_SwVer', 'SW_VER'),
             ):
-            self[name] = sensor.KeyedReadingString(trs2, cmdkey)
+            self[name] = sensor.KeyedReadingString(trsbts, cmdkey)
         for name, cmdkey, units in (
-                ('arm_Fault', 'FAULT_CODE', '0/1'),
                 ('arm_Vbatt', 'VBATT', 'V'),
                 ('arm_Vbrake', 'VBRAKE', 'V'),
                 ('arm_Ibrake', 'IBRAKE', 'A'),
                 ('arm_Vpin', 'VPIN', 'V'),
             ):
-            self[name] = sensor.KeyedReading(trs2, cmdkey)
+            self[name] = sensor.KeyedReading(trsbts, cmdkey)
             if units:
                 self[name].units = units
 
@@ -285,12 +302,13 @@ class Measurements(share.Measurements):
             ('dmm_greenon', 'GreenLedOn', 'green', 'Green led on'),
             ('dmm_blueoff', 'BlueLedOff', 'blue', 'Blue led off'),
             ('dmm_blueon', 'BlueLedOn', 'blue', 'Blue led on'),
-            ('dmm_tstpincov', 'TestPinCover', 'tstpin_cover',
-                'Cover over BC2 test pins'),
-            ('arm_btmac', 'BtMac', 'arm_BtMAC', 'MAC address'),
-            ('detectBT', 'DetectBT', 'mirbt', 'Scanned MAC address'),
+            ('dmm_chem', 'Chem wire', 'chem', 'Check Chem Select wire'),
+            ('dmm_sway-', 'Sway- wire', 'sway-', 'Check Sway- wire'),
+            ('dmm_sway+', 'Sway+ wire', 'sway+', 'Check Sway+ wire'),
+            ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from console'),
+            ('scan_mac', 'ScanMac', 'mirscan',
+                'Scan for MAC address over bluetooth'),
             ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
-            ('arm_fltcode', 'ARM-FaultCode', 'arm_Fault', 'Fault code'),
             ('arm_Vbatt', 'ARM-Vbatt', 'arm_Vbatt',
                 'Vbatt before cal'),
             ('arm_Vbrake', 'ARM-Vbrake', 'arm_Vbrake',
