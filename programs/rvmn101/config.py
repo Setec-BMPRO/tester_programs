@@ -113,35 +113,37 @@ class RVMN101A(Config):
     # Software versions
     _nordic_133 = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
     _nordic_181 = 'jayco_rvmn101_signed_1.8.1-0-ge5395312_factory_mcuboot.hex'
-    _arm_image = 'rvmn101_nxp_1.9.bin'
+    _nordic_XXX = 'dunno'
+    _arm_image_19 = 'rvmn101_nxp_1.9.bin'
+    _arm_image_XX = 'dunno'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
         # Rev 1-4 were Engineering protoype builds
         (share.lots.Range('A191913', 'A192407'), 5),    # 033363
         (share.lots.Range('A192709', 'A192904'), 6),    # 033620
         (share.lots.Range('A192815', 'A194129'), 7),    # 033489
-        (share.lots.Range('A194210', 'A999999'), 8),    # 033585
+        (share.lots.Range('A194210', 'A195015'), 8),    # 033585
         # Rev 9...                                      # 034079
         ))
     _rev_data = {
         None: Config.values(
-            nordic_image='dunno', arm_image=_arm_image,
+            nordic_image=_nordic_XXX, arm_image=_arm_image_XX,
             product_rev='09A', hardware_rev='09A',
             ),
         8: Config.values(
-            nordic_image=_nordic_181, arm_image=_arm_image,
+            nordic_image=_nordic_181, arm_image=_arm_image_19,
             product_rev='08A', hardware_rev='08A',
             ),
         7: Config.values(
-            nordic_image=_nordic_133, arm_image=_arm_image,
+            nordic_image=_nordic_133, arm_image=_arm_image_19,
             product_rev='07A', hardware_rev='07A',
             ),
         6: Config.values(
-            nordic_image='dunno', arm_image=_arm_image,
+            nordic_image='dunno', arm_image=_arm_image_19,
             product_rev='06A', hardware_rev='06A',
             ),
         5: Config.values(
-            nordic_image='dunno', arm_image=_arm_image,
+            nordic_image='dunno', arm_image=_arm_image_19,
             product_rev='05A', hardware_rev='05A',
             ),
         }
@@ -167,14 +169,14 @@ class RVMN101B(Config):
     fixture = '032871'
     # Software versions
     _nordic_088 = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
-    _arm_image = 'rvmn101_nxp_1.9.bin'
+    _arm_image_19 = 'rvmn101_nxp_1.9.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
         # Rev 5...                                      # 033280
         ))
     _rev_data = {
         None: Config.values(
-            nordic_image=_nordic_088, arm_image=_arm_image,
+            nordic_image=_nordic_088, arm_image=_arm_image_19,
             # Firmware 0.88 does not support hardware_rev
             product_rev='05B', hardware_rev=None,
             ),
