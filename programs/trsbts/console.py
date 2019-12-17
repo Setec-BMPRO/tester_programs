@@ -16,6 +16,9 @@ class Console(share.console.Base):
     banner_lines = 3
     parameter = share.console.parameter
     cmd_data = {
+        'UNLOCK': parameter.Boolean(
+            '$DEADBEA7 UNLOCK',
+            writeable=True, readable=False, write_format='{1}'),
         'NVDEFAULT': parameter.Boolean(
             'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
         'NVWRITE': parameter.Boolean(
@@ -27,17 +30,12 @@ class Console(share.console.Base):
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
-        'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         # X-Register values
-        'VBATT': parameter.Hex('TRS_BTS_BATT_MV', scale=1000),
-        'VBRAKE': parameter.Hex('TRS2_BRAKE_MV', scale=1000),
-        'IBRAKE': parameter.Hex('TRS2_BRAKE_MA', scale=1000),
+        'VBATT': parameter.Hex('TRS_BTS_AVG_BATT_MV', scale=1000),
         'VPIN': parameter.Hex('TRS_BTS_PIN_MV', scale=1000),
         # Calibration commands
-        'VBRAKE_OFFSET': parameter.Calibration(
-            'BRAKEV_OFF_SET', write_expected=2),
-        'VBRAKE_GAIN': parameter.Calibration(
-            'BRAKEV_GAIN_SET', write_expected=2),
+        'VBATT_CAL': parameter.Calibration(
+            'BATTV CAL', write_expected=2),
         # OverrideTo commands
         'MONITOR': parameter.Override('TRS2_MONITOR_EN_OVERRIDE'),
         'RED_LED': parameter.Override('TRS2_RED_LED_OVERRIDE'),
@@ -51,6 +49,7 @@ class Console(share.console.Base):
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
         self.banner()
+        self['UNLOCK'] = True
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True

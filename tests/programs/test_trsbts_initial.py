@@ -42,7 +42,7 @@ class TRSBTS_Initial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], 'A1526040123'),
-                    (sen['vin'], 12.0),
+                    (sen['vin'], 8.0),
                     (sen['3v3'], 3.30),
                     (sen['chem'], 3.0),
                     (sen['sway-'], 2.0),
@@ -51,22 +51,18 @@ class TRSBTS_Initial(ProgramTestCase):
                     (sen['brake'], (0.0, 12.0)),
                     ),
                 'Operation': (
-                    (sen['light'], (11.9, 0.0)),
                     (sen['remote'], (11.9, 0.0)),
                     (sen['red'], (0.0, 1.8, 0.0)),
                     (sen['green'], (0.0, 2.5, 0.0)),
                     (sen['blue'], (0.0, 2.8, 0.0)),
-                    (sen['arm_SwVer'], trsbts.config.SW_VERSION),
+                    (sen['arm_swver'], trsbts.config.SW_VERSION),
                     ),
                 'Calibrate': (
-                    (sen['brake'], (0.2999, 0.3, 11.999, 12.0)),
-                    (sen['arm_Vbatt'], (12.1, 12.001)),
-                    (sen['arm_Vbrake'], (12.2, 12.002)),
-                    (sen['arm_Ibrake'], 1.5),
-                    (sen['arm_Vpin'], 0.1),
+                    (sen['arm_vbatt'], (12.4, 12.1)),
+                    (sen['vbat'], (12.0, 12.0)),
+                    (sen['arm_vpin'], 0.1),
                     ),
                 'Bluetooth': (
-                    (sen['arm_BtMAC'], (self.btmac, )),
                     ),
                 },
             }
@@ -74,7 +70,7 @@ class TRSBTS_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(31, len(result.readings))
+        self.assertEqual(27, len(result.readings))
         self.assertEqual(
             ['Prepare', 'PgmNordic', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)

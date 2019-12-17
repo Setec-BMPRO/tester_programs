@@ -22,19 +22,13 @@ class Initial(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
-    # Injected Vbrake for offset calibration
-    vbrake_offset = 0.3
-    # Brake current
-    ibrake = 1.0
 
     limitdata = (
-        LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 1.8, doc='3V3 present'),
+        LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
+        LimitDelta('Vin', 8.0, 0.5, doc='Input voltage present'),
+        LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
         LimitLow('BrakeOff', 0.5, doc='Brakes off'),
         LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
-        LimitDelta('BrakeOffset', vbrake_offset, 0.1,
-            doc='Input voltage present'),
-        LimitDelta('BrakeGain', vbatt, 0.1, doc='Input voltage present'),
         LimitLow('LightOff', 0.5, doc='Lights off'),
         LimitDelta('LightOn', vbatt, (0.25, 0), doc='Lights on'),
         LimitLow('RemoteOff', 0.5, doc='Remote off'),
@@ -51,17 +45,10 @@ class Initial(share.TestSequence):
         LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitLow('ARM-FaultCode', 0, doc='No error'),
-        LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088,
+        LimitPercent('ARM-Vbatt', vbatt, 4.8, delta=0.088,
             doc='Voltage present'),
-        LimitPercent('ARM-Vbrake', vbatt, 4.6, delta=0.088,
+        LimitPercent('ARM-Vbatt-Cal', vbatt, 1.8, delta=0.088,
             doc='Voltage present'),
-        LimitPercent('ARM-Vbatt-Cal', vbatt, 0.6, delta=0.033,
-            doc='Voltage present'),
-        LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033,
-            doc='Voltage present'),
-        LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82,
-            doc='Brake current flowing'),
         LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
         LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
@@ -86,21 +73,21 @@ class Initial(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test.
 
-        Set the Input DC voltage to 12V.
+        Set the input battery voltage to 12V.
 
         """
         dev['trsbts'].open()
-        dev['dcs_vin'].output(self.vbatt, True)
+        dev['dcs_vbat'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(
             ('dmm_vin', 'dmm_3v3', 'dmm_chem', 'dmm_sway-', 'dmm_sway+'),
             timeout=5)
         dev['dcl_brake'].output(0.1, output=True)
         self.measure(
-            ('dmm_BrakeOff', 'dmm_lightoff'), timeout=5)
+            ('dmm_brakeoff', 'dmm_lightoff'), timeout=5)
         dev['rla_pin'].remove()
         self.measure(
-            ('dmm_BrakeOn', 'dmm_lighton'), timeout=5)
+            ('dmm_brakeon', 'dmm_lighton'), timeout=5)
         dev['rla_pin'].insert()
 
     @share.teststep
@@ -125,40 +112,27 @@ class Initial(share.TestSequence):
     def _step_calibrate(self, dev, mes):
         """Calibrate BRAKE input voltage.
 
-        Vbatt is at 12V, console is open.
+        Input battery voltage is at 12V, console is open.
 
         """
         trsbts = dev['trsbts']
-        brakes = dev['dcs_brakes']
-        dev['rla_pin'].remove()
-        self.measure(
-            ('arm_Vbatt', 'arm_Vbrake', ), timeout=5)
         dev['rla_pin'].insert()     # Pin IN for calibration
-        # Offset calibration at low voltage
-        brakes.output(self.vbrake_offset, output=True)
-        dmm_V = mes['dmm_BrakeOffset'].stable(delta=0.001).reading1
-        trsbts['VBRAKE_OFFSET'] = dmm_V
-        # Gain calibration at nominal voltage
-        brakes.output(self.vbatt, output=True)
-        dmm_V = mes['dmm_BrakeGain'].stable(delta=0.001).reading1
-        trsbts['VBRAKE_GAIN'] = dmm_V
+        mes['arm_vbatt'](timeout=5)
+        # Battery calibration at nominal voltage
+        dmm_v = mes['dmm_vbat'].stable(delta=0.001).reading1
+        trsbts['VBATT_CAL'] = dmm_v
         # Save new calibration settings
         trsbts['NVWRITE'] = True
-        self.measure(
-            ('arm_Vbatt_cal', 'arm_Vbrake_cal', ), timeout=5)
+        mes['arm_vbatt_cal'](timeout=5)
         dev['rla_pin'].remove()
-        dev['dcl_brake'].output(self.ibrake)
-        self.measure(
-            ('arm_Ibrake', 'arm_Vpin', ),
-            timeout=5)
-        dev['dcl_brake'].output(0.0)
+        mes['arm_vpin'](timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev['dcs_vin'].output(0.0, delay=0.5)
+        dev['dcs_vbat'].output(0.0, delay=0.5)
         dev['trsbts'].port.flushInput()
-        dev['dcs_vin'].output(self.vbatt, delay=0.1)
+        dev['dcs_vbat'].output(self.vbatt, delay=0.1)
         # Get the MAC address from the console.
         self.mac = dev['trsbts'].get_mac()
         mes['ble_mac'].sensor.store(self.mac)
@@ -180,8 +154,7 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
-                ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('dcs_brakes', tester.DCSource, 'DCS3'),
+                ('dcs_vbat', tester.DCSource, 'DCS2'),
                 ('dcl_brake', tester.DCLoad, 'DCL5'),
                 ('rla_pin', tester.Relay, 'RLA3'),
             ):
@@ -216,11 +189,9 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['trsbts'].close()
-        for dev in ('dcs_vin', 'dcs_brakes'):
-            self[dev].output(0.0, False)
+        self['dcs_vbat'].output(0.0, False)
         self['dcl_brake'].output(0.0, False)
-        for rla in ('rla_pin', ):
-            self[rla].set_off()
+        self['rla_pin'].set_off()
 
 
 class Sensors(share.Sensors):
@@ -231,16 +202,18 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['vin'].doc = 'Across X1-X3'
-        self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['3v3'].doc = 'U1 output'
-        self['red'] = sensor.Vdc(dmm, high=2, low=2, rng=10, res=0.01)
-        self['red'].doc = 'Across led'
-        self['green'] = sensor.Vdc(dmm, high=2, low=3, rng=10, res=0.01)
-        self['green'].doc = 'Across led'
-        self['blue'] = sensor.Vdc(dmm, high=2, low=4, rng=10, res=0.01)
-        self['blue'].doc = 'Across led'
+        self['vbat'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
+        self['vbat'].doc = 'Across X1 and X2'
+        self['vin'] = sensor.Vdc(dmm, high=2, low=1, rng=100, res=0.01)
+        self['vin'].doc = 'TP17'
+        self['3v3'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
+        self['3v3'].doc = 'TP1'
+        self['red'] = sensor.Vdc(dmm, high=3, low=2, rng=10, res=0.01)
+        self['red'].doc = 'Across red led'
+        self['green'] = sensor.Vdc(dmm, high=3, low=3, rng=10, res=0.01)
+        self['green'].doc = 'Across green led'
+        self['blue'] = sensor.Vdc(dmm, high=3, low=4, rng=10, res=0.01)
+        self['blue'].doc = 'Across blue led'
         self['chem'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
         self['chem'].doc = 'TP11'
         self['sway-'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
@@ -256,21 +229,18 @@ class Sensors(share.Sensors):
         self['mirmac'] = sensor.MirrorReadingString()
         self['mirscan'] = sensor.MirrorReadingBoolean()
         self['sernum'] = sensor.DataEntry(
-            message=tester.translate('trs2_initial', 'msgSnEntry'),
-            caption=tester.translate('trs2_initial', 'capSnEntry'))
+            message=tester.translate('trsbts_initial', 'msgSnEntry'),
+            caption=tester.translate('trsbts_initial', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
         # Console sensors
         trsbts = self.devices['trsbts']
         for name, cmdkey in (
-                ('arm_BtMAC', 'BT_MAC'),
-                ('arm_SwVer', 'SW_VER'),
+                ('arm_swver', 'SW_VER'),
             ):
             self[name] = sensor.KeyedReadingString(trsbts, cmdkey)
         for name, cmdkey, units in (
-                ('arm_Vbatt', 'VBATT', 'V'),
-                ('arm_Vbrake', 'VBRAKE', 'V'),
-                ('arm_Ibrake', 'IBRAKE', 'A'),
-                ('arm_Vpin', 'VPIN', 'V'),
+                ('arm_vbatt', 'VBATT', 'V'),
+                ('arm_vpin', 'VPIN', 'V'),
             ):
             self[name] = sensor.KeyedReading(trsbts, cmdkey)
             if units:
@@ -284,14 +254,11 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_vbat', 'Vbat', 'vbat', 'Battery input voltage'),
+            ('dmm_vin', 'Vin', 'vin', 'Input to 3V3 regulator'),
             ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
-            ('dmm_BrakeOff', 'BrakeOff', 'brake', 'Brakes output off'),
-            ('dmm_BrakeOn', 'BrakeOn', 'brake', 'Brakes output on'),
-            ('dmm_BrakeOffset', 'BrakeOffset', 'brake',
-                'Calibration input voltage (Offset)'),
-            ('dmm_BrakeGain', 'BrakeGain', 'brake',
-                'Calibration input voltage (Gain)'),
+            ('dmm_brakeoff', 'BrakeOff', 'brake', 'Brakes output off'),
+            ('dmm_brakeon', 'BrakeOn', 'brake', 'Brakes output on'),
             ('dmm_lightoff', 'LightOff', 'light', 'Lights output off'),
             ('dmm_lighton', 'LightOn', 'light', 'Lights output on'),
             ('dmm_remoteoff', 'RemoteOff', 'remote', 'Remote output off'),
@@ -302,23 +269,21 @@ class Measurements(share.Measurements):
             ('dmm_greenon', 'GreenLedOn', 'green', 'Green led on'),
             ('dmm_blueoff', 'BlueLedOff', 'blue', 'Blue led off'),
             ('dmm_blueon', 'BlueLedOn', 'blue', 'Blue led on'),
-            ('dmm_chem', 'Chem wire', 'chem', 'Check Chem Select wire'),
-            ('dmm_sway-', 'Sway- wire', 'sway-', 'Check Sway- wire'),
-            ('dmm_sway+', 'Sway+ wire', 'sway+', 'Check Sway+ wire'),
+            ('dmm_chem', 'Chem wire', 'chem',
+                'Check for correct mounting of Chem Select wire'),
+            ('dmm_sway-', 'Sway- wire', 'sway-',
+                'Check for correct mounting of Sway- wire'),
+            ('dmm_sway+', 'Sway+ wire', 'sway+',
+                'Check for correct mounting of Sway+ wire'),
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from console'),
             ('scan_mac', 'ScanMac', 'mirscan',
                 'Scan for MAC address over bluetooth'),
-            ('arm_swver', 'ARM-SwVer', 'arm_SwVer', 'Unit software version'),
-            ('arm_Vbatt', 'ARM-Vbatt', 'arm_Vbatt',
+            ('arm_swver', 'ARM-SwVer', 'arm_swver', 'Unit software version'),
+            ('arm_vbatt', 'ARM-Vbatt', 'arm_vbatt',
                 'Vbatt before cal'),
-            ('arm_Vbrake', 'ARM-Vbrake', 'arm_Vbrake',
-                'Brakes voltage before cal'),
-            ('arm_Vbatt_cal', 'ARM-Vbatt-Cal', 'arm_Vbatt',
+            ('arm_vbatt_cal', 'ARM-Vbatt-Cal', 'arm_vbatt',
                 'Vbatt after cal'),
-            ('arm_Vbrake_cal', 'ARM-Vbrake-Cal', 'arm_Vbrake',
-                'Brakes voltage after cal'),
-            ('arm_Ibrake', 'ARM-Ibrake', 'arm_Ibrake', 'Brakes current'),
-            ('arm_Vpin', 'ARM-Vpin', 'arm_Vpin',
+            ('arm_vpin', 'ARM-Vpin', 'arm_vpin',
                 'Voltage across breakaway switch with pin OUT'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ))
