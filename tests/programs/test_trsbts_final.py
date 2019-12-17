@@ -19,7 +19,6 @@ class TRSBTSFinal(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.bluetooth.RaspberryBluetooth',
-                'programs.trsbts.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -33,7 +32,7 @@ class TRSBTSFinal(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], 'A1526040123'),
-                    (sen['vin'], 12.0),
+                    (sen['vbat'], 12.0),
                     ),
                 'Bluetooth': (
                     (sen['mirscan'], True),

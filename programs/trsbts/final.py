@@ -16,9 +16,9 @@ class Final(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
-    # Test limits
+
     limitdata = (
-        LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
+        LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
         LimitBoolean('ScanSer', True, doc='Serial number detected'),
         )
 
@@ -35,8 +35,8 @@ class Final(share.TestSequence):
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        dev['dcs_vin'].output(self.vbatt, True)
-        mes['dmm_vin'](timeout=5)
+        dev['dcs_vbat'].output(self.vbatt, True)
+        mes['dmm_vbat'](timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -57,7 +57,7 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vin', tester.DCSource, 'DCS2'),
+                ('dcs_vbat', tester.DCSource, 'DCS2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Bluetooth connection to server
@@ -66,7 +66,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        self['dcs_vin'].output(0.0, False)
+        self['dcs_vbat'].output(0.0, False)
 
 
 class Sensors(share.Sensors):
@@ -77,11 +77,11 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['vin'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
-        self['vin'].doc = 'Within Fixture'
+        self['vbat'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
+        self['vbat'].doc = 'DC input of fixture'
         self['sernum'] = sensor.DataEntry(
-            message=tester.translate('trs2_final', 'msgSnEntry'),
-            caption=tester.translate('trs2_final', 'capSnEntry'))
+            message=tester.translate('trsbts_final', 'msgSnEntry'),
+            caption=tester.translate('trsbts_final', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
         self['mirscan'] = sensor.MirrorReadingBoolean()
 
@@ -93,7 +93,7 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
+            ('dmm_vbat', 'Vbat', 'vbat', 'Battery input voltage'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('scan_ser', 'ScanSer', 'mirscan',
                 'Scan for serial number over bluetooth'),
