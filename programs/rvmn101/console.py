@@ -17,7 +17,7 @@ class _Console(share.console.Base):
 
     """Communications to RVMN101A/B console."""
 
-    banner_lines = 4            # Number of startup banner lines
+    banner_lines = None         # Number of startup banner lines
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     max_output_index = 56       # Output index is range(max_output_index)
     missing_outputs = {}        # Key: any text, Value: Output index

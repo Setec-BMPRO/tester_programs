@@ -25,6 +25,8 @@ class Initial(share.TestSequence):
         Devices.nordic_image = self.cfg.nordic_image
         self.limits = self.cfg.limits_initial()
         super().open(self.limits, Devices, Sensors, Measurements)
+        # Adjust for different console behaviour
+        self.devices['rvmn101'].banner_lines = self.cfg.banner_lines
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),

@@ -20,6 +20,7 @@ class RVMN101B_Console(unittest.TestCase):
         port = tester.devphysical.sim_serial.SimSerial()
         port.echo = True
         self.con = rvmn101.console.ConsoleB(port)
+        self.con.banner_lines = 4
         # Allow exceptions from the console driver
         self.con.measurement_fail_on_error = False
 

@@ -18,13 +18,16 @@ class Config():
     # Adjustable configuration data values
     values = collections.namedtuple(
         'values',
-        ['nordic_image', 'arm_image', 'product_rev', 'hardware_rev', ]
+        ['nordic_image', 'arm_image',
+         'product_rev', 'hardware_rev',
+         'banner_lines', ]
         )
     # These values get set per Product type & revision
     nordic_image = None
     arm_image = None
     product_rev = None
     hardware_rev = None
+    banner_lines = None
     # General parameters used in testing the units
     #  Injected voltages
     vbatt_set = 12.5
@@ -83,6 +86,7 @@ class Config():
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         (cls.nordic_image, cls.arm_image,
          cls.product_rev, cls.hardware_rev,
+         cls.banner_lines,
          ) = cls._rev_data[rev]
 
     @classmethod
@@ -128,23 +132,23 @@ class RVMN101A(Config):
     _rev_data = {
         None: Config.values(
             nordic_image=_nordic_XXX, arm_image=_arm_image_XX,
-            product_rev='09A', hardware_rev='09A',
+            product_rev='09A', hardware_rev='09A', banner_lines=6,
             ),
         8: Config.values(
             nordic_image=_nordic_181, arm_image=_arm_image_19,
-            product_rev='08A', hardware_rev='08A',
+            product_rev='08A', hardware_rev='08A', banner_lines=4,
             ),
         7: Config.values(
             nordic_image=_nordic_133, arm_image=_arm_image_19,
-            product_rev='07A', hardware_rev='07A',
+            product_rev='07A', hardware_rev='07A', banner_lines=4,
             ),
         6: Config.values(
             nordic_image='dunno', arm_image=_arm_image_19,
-            product_rev='06A', hardware_rev='06A',
+            product_rev='06A', hardware_rev='06A', banner_lines=4,
             ),
         5: Config.values(
             nordic_image='dunno', arm_image=_arm_image_19,
-            product_rev='05A', hardware_rev='05A',
+            product_rev='05A', hardware_rev='05A', banner_lines=4,
             ),
         }
 
@@ -179,6 +183,7 @@ class RVMN101B(Config):
             nordic_image=_nordic_088, arm_image=_arm_image_19,
             # Firmware 0.88 does not support hardware_rev
             product_rev='05B', hardware_rev=None,
+            banner_lines=4,
             ),
         }
 
