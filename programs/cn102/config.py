@@ -91,7 +91,7 @@ class CN10x():
                 rev = cls._lot_rev.find(lot)
             except share.lots.LotError:
                 pass
-        logging.getLogger(__name__).debug('Revision detected as', rev)
+        logging.getLogger(__name__).debug('Revision detected as %s', rev)
         cls.parameters = cls._rev_data[rev]
 
 

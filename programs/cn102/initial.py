@@ -96,10 +96,12 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes['cn102_can_bind'](timeout=10)
-        cn102tunnel = dev['cn102tunnel']
-        cn102tunnel.open()
-        mes['TunnelSwVer']()
-        cn102tunnel.close()
+        # CN103 had CAN console tunnel removed.
+        if self.parameter == '102':
+            cn102tunnel = dev['cn102tunnel']
+            cn102tunnel.open()
+            mes['TunnelSwVer']()
+            cn102tunnel.close()
 
 
 class Devices(share.Devices):
