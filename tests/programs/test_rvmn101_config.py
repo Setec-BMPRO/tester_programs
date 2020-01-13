@@ -30,7 +30,7 @@ class RVMN101A_Config(unittest.TestCase):
             ('A195000',
                 cfg._nordic_181, cfg._arm_image_19, '08A', '08A', 4, ),
             ('A200100',
-                cfg._nordic_XXX, cfg._arm_image_XX, '09A', '09A', 6, ),
+                cfg._nordic_1105, cfg._arm_image_113, '09A', '09A', 6, ),
             )
         for (
                 uut, nordic_image, arm_image,

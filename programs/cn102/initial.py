@@ -19,10 +19,10 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.CN10x.select(self.parameter, uut)
+        self.cfg = config.CN10x.get(self.parameter, uut)
         limits = self.cfg.limits_initial
-        Devices.sw_arm_version = self.cfg.sw_arm_version
-        Devices.sw_nrf_version = self.cfg.sw_nrf_version
+        Devices.sw_arm_image = self.cfg.sw_arm_image
+        Devices.sw_nrf_image = self.cfg.sw_nrf_image
         super().open(limits, Devices, Sensors, Measurements)
         self.limits['SwArmVer'].adjust(
             '^{0}$'.format(self.cfg.sw_arm_version.replace('.', r'\.')))
@@ -63,8 +63,11 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(8.6, output=True)
         mes['dmm_3v3'](timeout=5)
         cn102.brand(
-            self.cfg.hw_version, self.sernum, dev['rla_reset'],
-            self.cfg.banner_lines)
+            self.cfg.hw_version,
+            self.sernum,
+            dev['rla_reset'],
+            self.cfg.banner_lines
+            )
         mes['cn102_swver']()
 
     @share.teststep
@@ -103,8 +106,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_arm_version = None   # ARM software version
-    sw_nrf_version = None   # Nordic software version
+    sw_arm_image = None     # ARM software image
+    sw_nrf_image = None     # Nordic software image
 
     def open(self):
         """Create all Instruments."""
@@ -127,17 +130,13 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['progARM'] = share.programmer.ARM(
             arm_port,
-            os.path.join(
-                folder,
-                'cn102_arm_{0}.bin'.format(self.sw_arm_version)),
+            os.path.join(folder, self.sw_arm_image),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # NRF52 device programmer
         self['progNRF'] = share.programmer.Nordic(
-            os.path.join(
-                folder,
-                'cn102_nrf_{0}.hex'.format(self.sw_nrf_version)),
+            os.path.join(folder, self.sw_nrf_image),
             folder)
         # Serial connection to the console
         cn102_ser = serial.Serial(baudrate=115200, timeout=5.0)

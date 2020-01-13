@@ -50,7 +50,8 @@ class CN102Initial(ProgramTestCase):
                     ),
                 'TestArm': (
                     (sen['o3V3'], 3.3),
-                    (sen['SwVer'], cn102.config.CN102.sw_arm_version),
+                    (sen['SwVer'],
+                        cn102.config.CN102.parameters.sw_arm_version),
                     ),
                 'TankSense': (
                     (sen['tank1'], 5),
@@ -63,7 +64,8 @@ class CN102Initial(ProgramTestCase):
                     ),
                 'CanBus': (
                     (sen['CANBIND'], 1 << 28),
-                    (sen['TunnelSwVer'], cn102.config.CN102.sw_arm_version),
+                    (sen['TunnelSwVer'],
+                        cn102.config.CN102.parameters.sw_arm_version),
                     ),
                 },
             }
