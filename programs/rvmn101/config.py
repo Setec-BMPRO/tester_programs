@@ -117,7 +117,7 @@ class RVMN101A(Config):
     # Software versions
     _nordic_133 = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
     _nordic_181 = 'jayco_rvmn101_signed_1.8.1-0-ge5395312_factory_mcuboot.hex'
-    _nordic_1105 = 'jayco_rvmn101_signed_1.10.5-0-g664b048f_factory_mcuboot.hex'
+    _nordic_1106 = 'jayco_rvmn101_signed_1.10.6-0-g2d00e43c_factory_mcuboot.hex'
     _arm_image_19 = 'rvmn101_nxp_1.9.bin'
     _arm_image_113 = 'rvmn101_nxp_1.13.bin'
     # Lot number mapping
@@ -131,7 +131,7 @@ class RVMN101A(Config):
         ))
     _rev_data = {
         None: Config.values(
-            nordic_image=_nordic_1105, arm_image=_arm_image_113,
+            nordic_image=_nordic_1106, arm_image=_arm_image_113,
             product_rev='09A', hardware_rev='09A', banner_lines=6,
             ),
         8: Config.values(
