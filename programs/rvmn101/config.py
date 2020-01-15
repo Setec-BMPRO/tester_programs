@@ -132,7 +132,7 @@ class RVMN101A(Config):
     _rev_data = {
         None: Config.values(
             nordic_image=_nordic_1106, arm_image=_arm_image_113,
-            product_rev='09A', hardware_rev='09A', banner_lines=6,
+            product_rev='09A', hardware_rev='08A', banner_lines=6,
             ),
         8: Config.values(
             nordic_image=_nordic_181, arm_image=_arm_image_19,
