@@ -137,6 +137,8 @@ class Initial(share.TestSequence):
         self.mac = dev['trsbts'].get_mac()
         mes['ble_mac'].sensor.store(self.mac)
         mes['ble_mac']()
+        # Save SerialNumber & MAC on a remote server.
+        dev['serialtomac'].blemac_set(self.sernum, self.mac)
         reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
         mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()

@@ -5,7 +5,7 @@
 import tester
 from tester import (
     TestStep,
-    LimitDelta, LimitBoolean
+    LimitDelta, LimitBoolean, LimitHigh, LimitRegExp
     )
 import share
 
@@ -16,36 +16,44 @@ class Final(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
+    rssi = -70 if share.config.System.tester_type == 'ATE4' else -85
 
     limitdata = (
         LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
-        LimitBoolean('ScanSer', True, doc='Serial number detected'),
+        LimitRegExp('BleMac', '^[0-9a-f]{12}$', doc='Valid MAC address'),
+        LimitBoolean('ScanMac', True, doc='MAC address detected'),
+        LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
             TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 
     @share.teststep
-    def _step_prepare(self, dev, mes):
-        """Prepare to run a test."""
+    def _step_bluetooth(self, dev, mes):
+        """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vbat'].output(self.vbatt, True)
         mes['dmm_vbat'](timeout=5)
-
-    @share.teststep
-    def _step_bluetooth(self, dev, mes):
-        """Test the Bluetooth interface."""
-        self._logger.debug(
-                'Scan for serial number via bluetooth: "%s"', self.sernum)
-        reply = dev['pi_bt'].scan_beacon_sernum(self.sernum)
-        mes['scan_ser'].sensor.store(reply)
-        mes['scan_ser']()
+        # Lookup the MAC address from the server
+        mac = dev['serialtomac'].blemac_get(self.sernum)
+        mes['ble_mac'].sensor.store(mac)
+        mes['ble_mac']()
+        # Scan for the bluetooth transmission
+        # Reply is like this: {
+        #   'ad_data': {255: '1f050112022d624c3a00000300d1139e69'},
+        #   'rssi': rssi,
+        #   }
+        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
+        mes['scan_mac'].sensor.store(reply is not None)
+        mes['scan_mac']()
+        rssi = reply['rssi']    # Received Signal Strength Indication
+        mes['scan_rssi'].sensor.store(rssi)
+        mes['scan_rssi']()
 
 
 class Devices(share.Devices):
@@ -60,9 +68,11 @@ class Devices(share.Devices):
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Bluetooth connection to server
+        # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
+        # Connection to Serial To MAC server
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
 
     def reset(self):
         """Reset instruments."""
@@ -84,6 +94,8 @@ class Sensors(share.Sensors):
             caption=tester.translate('trsbts_final', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
         self['mirscan'] = sensor.MirrorReadingBoolean()
+        self['mirmac'] = sensor.MirrorReadingString()
+        self['mirrssi'] = sensor.MirrorReading()
 
 
 class Measurements(share.Measurements):
@@ -95,6 +107,8 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vbat', 'Vbat', 'vbat', 'Battery input voltage'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
-            ('scan_ser', 'ScanSer', 'mirscan',
-                'Scan for serial number over bluetooth'),
+            ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from server'),
+            ('scan_mac', 'ScanMac', 'mirscan',
+                'Scan for MAC address over Bluetooth'),
+            ('scan_rssi', 'ScanRSSI', 'mirrssi', 'Bluetooth signal strength'),
             ))
