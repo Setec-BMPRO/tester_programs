@@ -12,6 +12,7 @@ class Console(share.console.Base):
     """Communications to TRS-BTS console."""
 
     re_banner = re.compile('^ble addr ([0-9a-f]{12})$')
+    re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     # Number of lines in startup banner
     banner_lines = 3
     parameter = share.console.parameter
@@ -30,6 +31,7 @@ class Console(share.console.Base):
             'SET-HW-VER', writeable=True, readable=False,
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
+        'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         # X-Register values
         'VBATT': parameter.Hex('TRS_BTS_AVG_BATT_MV', scale=1000),
         'VPIN': parameter.Hex('TRS_BTS_PIN_MV', scale=1000),
@@ -37,11 +39,11 @@ class Console(share.console.Base):
         'VBATT_CAL': parameter.Calibration(
             'BATTV CAL', write_expected=2),
         # OverrideTo commands
-        'MONITOR': parameter.Override('TRS2_MONITOR_EN_OVERRIDE'),
-        'RED_LED': parameter.Override('TRS2_RED_LED_OVERRIDE'),
-        'GREEN_LED': parameter.Override('TRS2_GREEN_LED_OVERRIDE'),
-        'BLUE_LED': parameter.Override('TRS2_BLUE_LED_OVERRIDE'),
-        'BLUETOOTH': parameter.Override('TRS2_BLUETOOTH_EN_OVERRIDE'),
+        'MONITOR': parameter.Override('TRS_BTS_MONITOR_EN_OVERRIDE'),
+        'RED_LED': parameter.Override('TRS_BTS_RED_LED_OVERRIDE'),
+        'GREEN_LED': parameter.Override('TRS_BTS_GREEN_LED_OVERRIDE'),
+        'BLUE_LED': parameter.Override('TRS_BTS_BLUE_LED_OVERRIDE'),
+        'BLUETOOTH': parameter.Override('TRS_BTS_BLUETOOTH_EN_OVERRIDE'),
         }
     override_commands = (
         'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED')
@@ -76,13 +78,11 @@ class Console(share.console.Base):
         """
         result = ''
         try:
-            mac = self.action(None, delay=1.5, expected=self.banner_lines)
-            if self.banner_lines > 1:
-                mac = mac[0]
-            mac = mac.replace(':', '')
-            match = self.re_banner.match(mac)
+            mac = self['BT_MAC']
+            mac = mac.replace(':', '').lower()
+            match = self.re_blemac.search(mac)
             if match:
-                result = match.group(1)
+                result = match.group(0)
         except share.console.Error:
             pass
         return result
