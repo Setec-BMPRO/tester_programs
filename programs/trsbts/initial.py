@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
 
     limitdata = (
         LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
-        LimitDelta('Vin', 8.0, 0.5, doc='Input voltage present'),
+        LimitDelta('Vin', 6.5, 1.0, doc='Input voltage present'),
         LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
         LimitLow('BrakeOff', 0.5, doc='Brakes off'),
         LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
@@ -49,7 +49,7 @@ class Initial(share.TestSequence):
             doc='Voltage present'),
         LimitPercent('ARM-Vbatt-Cal', vbatt, 1.8, delta=0.088,
             doc='Voltage present'),
-        LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
+        LimitDelta('ARM-Vpin', 0.0, 1.0, doc='Micro switch voltage ok'),
         LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
         LimitBoolean('ScanMac', True,
@@ -58,7 +58,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        Devices.sw_image = config.SW_VERSION
+        Devices.sw_image = config.SW_IMAGE
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             TestStep('Prepare', self._step_prepare),
@@ -76,27 +76,28 @@ class Initial(share.TestSequence):
         Set the input battery voltage to 12V.
 
         """
-        dev['trsbts'].open()
         dev['dcs_vbat'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        self.measure(
-            ('dmm_vin', 'dmm_3v3', 'dmm_chem', 'dmm_sway-', 'dmm_sway+'),
-            timeout=5)
+        self.measure(('dmm_vin', 'dmm_3v3', 'dmm_chem'), timeout=5)
+        if self.parameter == 'BTS':
+            self.measure(('dmm_sway-', 'dmm_sway+'), timeout=5)
         dev['dcl_brake'].output(0.1, output=True)
-        self.measure(
-            ('dmm_brakeoff', 'dmm_lightoff'), timeout=5)
+        mes['dmm_brakeoff'](timeout=5)
         dev['rla_pin'].remove()
-        self.measure(
-            ('dmm_brakeon', 'dmm_lighton'), timeout=5)
+        self.measure(('dmm_brakeon', 'dmm_lighton'), timeout=5)
         dev['rla_pin'].insert()
 
     @share.teststep
     def _step_operation(self, dev, mes):
         """Test the operation of LEDs."""
         trsbts = dev['trsbts']
+        dev['trsbts'].open()
+        # Power cycle after programming
+        dev['dcs_vbat'].output(0.0, delay=0.5)
+        dev['dcs_vbat'].output(self.vbatt)
         trsbts.brand(config.HW_VERSION, self.sernum)
         self.measure(
-            ('arm_swver', 'dmm_redoff', 'dmm_greenoff'),
+            ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_lightoff'),
             timeout=5)
         trsbts.override(share.console.parameter.OverrideTo.force_on)
         self.measure(
@@ -119,7 +120,7 @@ class Initial(share.TestSequence):
         dev['rla_pin'].insert()     # Pin IN for calibration
         mes['arm_vbatt'](timeout=5)
         # Battery calibration at nominal voltage
-        dmm_v = mes['dmm_vbat'].stable(delta=0.001).reading1
+        dmm_v = mes['dmm_vbat'].stable(delta=0.002).reading1
         trsbts['VBATT_CAL'] = dmm_v
         # Save new calibration settings
         trsbts['NVWRITE'] = True
@@ -130,11 +131,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev['dcs_vbat'].output(0.0, delay=0.5)
-        dev['trsbts'].port.flushInput()
-        dev['dcs_vbat'].output(self.vbatt, delay=0.1)
+        trsbts = dev['trsbts']
         # Get the MAC address from the console.
-        self.mac = dev['trsbts'].get_mac()
+        self.mac = trsbts.get_mac()
         mes['ble_mac'].sensor.store(self.mac)
         mes['ble_mac']()
         # Save SerialNumber & MAC on a remote server.
@@ -210,11 +209,11 @@ class Sensors(share.Sensors):
         self['vin'].doc = 'TP17'
         self['3v3'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
         self['3v3'].doc = 'TP1'
-        self['red'] = sensor.Vdc(dmm, high=3, low=2, rng=10, res=0.01)
+        self['red'] = sensor.Vdc(dmm, high=2, low=2, rng=10, res=0.01)
         self['red'].doc = 'Across red led'
-        self['green'] = sensor.Vdc(dmm, high=3, low=3, rng=10, res=0.01)
+        self['green'] = sensor.Vdc(dmm, high=2, low=3, rng=10, res=0.01)
         self['green'].doc = 'Across green led'
-        self['blue'] = sensor.Vdc(dmm, high=3, low=4, rng=10, res=0.01)
+        self['blue'] = sensor.Vdc(dmm, high=2, low=4, rng=10, res=0.01)
         self['blue'].doc = 'Across blue led'
         self['chem'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
         self['chem'].doc = 'TP11'
@@ -287,6 +286,6 @@ class Measurements(share.Measurements):
             ('arm_vbatt_cal', 'ARM-Vbatt-Cal', 'arm_vbatt',
                 'Vbatt after cal'),
             ('arm_vpin', 'ARM-Vpin', 'arm_vpin',
-                'Voltage across breakaway switch with pin OUT'),
+                'Voltage on the pin microswitch'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ))

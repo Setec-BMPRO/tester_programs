@@ -33,11 +33,10 @@ class Console(share.console.Base):
         'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
         'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         # X-Register values
-        'VBATT': parameter.Hex('TRS_BTS_AVG_BATT_MV', scale=1000),
-        'VPIN': parameter.Hex('TRS_BTS_PIN_MV', scale=1000),
+        'VBATT': parameter.Float('TRS_BTS_AVG_BATT_MV'), # Returns V not mV...
+        'VPIN': parameter.Float('TRS_BTS_PIN_MV'),       # Returns V not mV...
         # Calibration commands
-        'VBATT_CAL': parameter.Calibration(
-            'BATTV CAL', write_expected=2),
+        'VBATT_CAL': parameter.Calibration('BATTV', write_expected=1),
         # OverrideTo commands
         'MONITOR': parameter.Override('TRS_BTS_MONITOR_EN_OVERRIDE'),
         'RED_LED': parameter.Override('TRS_BTS_RED_LED_OVERRIDE'),
@@ -46,7 +45,10 @@ class Console(share.console.Base):
         'BLUETOOTH': parameter.Override('TRS_BTS_BLUETOOTH_EN_OVERRIDE'),
         }
     override_commands = (
-        'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED')
+        'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED',
+        )
+    # Strings to ignore in responses
+    ignore = ('V', )
 
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""

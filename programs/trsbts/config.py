@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """TRS-BTS Configuration."""
 
-SW_VERSION = 'trs-bts_factory_1.0.19783.2129.hex'
+SW_VERSION = '1.0.19798.2130'
 # Hardware version (Major [1-255], Minor [1-255], Mod [character])
 HW_VERSION = (3, 0, 'A')
+
+SW_IMAGE = 'trs-bts_factory_{0}.hex'.format(SW_VERSION)
