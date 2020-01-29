@@ -3,6 +3,7 @@
 """UnitTest for TRS-BTS Initial Test program."""
 
 from unittest.mock import MagicMock, patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trsbts
 
@@ -12,7 +13,7 @@ class TRSBTS_Initial(ProgramTestCase):
     """TRS-BTS Initial program test suite."""
 
     prog_class = trsbts.Initial
-    parameter = None
+    parameter = 'BTS'
     debug = False
     btmac = '001ec030bc15'
 
@@ -26,18 +27,18 @@ class TRSBTS_Initial(ProgramTestCase):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
+        # Console
         mycon = MagicMock(name='MyConsole')
         mycon.get_mac.return_value = self.btmac
         patcher = patch(
             'programs.trsbts.console.Console', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
+        # BLE scanner
         mypi = MagicMock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = {
-            'ad_data': {'255': '12345678'},
-            'rssi': -50,
-            }
-        patcher = patch('share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
+        patcher = patch(
+            'share.bluetooth.RaspberryBluetooth', return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -78,7 +79,7 @@ class TRSBTS_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(25, len(result.readings))
+        self.assertEqual(27, len(result.readings))
         self.assertEqual(
             ['Prepare', 'PgmNordic', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)
