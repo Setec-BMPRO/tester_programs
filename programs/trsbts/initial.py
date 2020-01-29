@@ -4,14 +4,11 @@
 
 import inspect
 import os
-
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
-    )
 import share
+
 from . import console
 from . import config
 
@@ -24,35 +21,35 @@ class Initial(share.TestSequence):
     vbatt = 12.0
 
     limitdata = (
-        LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
-        LimitDelta('Vin', 6.5, 1.0, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
-        LimitLow('BrakeOff', 0.5, doc='Brakes off'),
-        LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
-        LimitLow('LightOff', 0.5, doc='Lights off'),
-        LimitDelta('LightOn', vbatt, (0.25, 0), doc='Lights on'),
-        LimitLow('RemoteOff', 0.5, doc='Remote off'),
-        LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
-        LimitLow('RedLedOff', 1.0, doc='Led off'),
-        LimitDelta('RedLedOn', 1.8, 0.14, doc='Led on'),
-        LimitLow('GreenLedOff', 1.0, doc='Led off'),
-        LimitDelta('GreenLedOn', 2.5, 0.4, doc='Led on'),
-        LimitLow('BlueLedOff', 1.0, doc='Led off'),
-        LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
-        LimitDelta('Chem wire', 3.0, 0.4, doc='Voltage present'),
-        LimitDelta('Sway- wire', 2.0, 0.4, doc='Voltage present'),
-        LimitDelta('Sway+ wire', 1.0, 0.4, doc='Voltage present'),
-        LimitRegExp('ARM-SwVer',
+        tester.LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
+        tester.LimitDelta('Vin', 6.5, 1.0, doc='Input voltage present'),
+        tester.LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
+        tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
+        tester.LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
+        tester.LimitLow('LightOff', 0.5, doc='Lights off'),
+        tester.LimitDelta('LightOn', vbatt, (0.25, 0), doc='Lights on'),
+        tester.LimitLow('RemoteOff', 0.5, doc='Remote off'),
+        tester.LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
+        tester.LimitLow('RedLedOff', 1.0, doc='Led off'),
+        tester.LimitDelta('RedLedOn', 1.8, 0.14, doc='Led on'),
+        tester.LimitLow('GreenLedOff', 1.0, doc='Led off'),
+        tester.LimitDelta('GreenLedOn', 2.5, 0.4, doc='Led on'),
+        tester.LimitLow('BlueLedOff', 1.0, doc='Led off'),
+        tester.LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
+        tester.LimitDelta('Chem wire', 3.0, 0.5, doc='Voltage present'),
+        tester.LimitDelta('Sway- wire', 2.0, 0.5, doc='Voltage present'),
+        tester.LimitDelta('Sway+ wire', 1.0, 0.5, doc='Voltage present'),
+        tester.LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitPercent('ARM-Vbatt', vbatt, 4.8, delta=0.088,
+        tester.LimitPercent('ARM-Vbatt', vbatt, 4.8, delta=0.088,
             doc='Voltage present'),
-        LimitPercent('ARM-Vbatt-Cal', vbatt, 1.8, delta=0.088,
+        tester.LimitPercent('ARM-Vbatt-Cal', vbatt, 1.8, delta=0.088,
             doc='Voltage present'),
-        LimitDelta('ARM-Vpin', 0.0, 1.0, doc='Micro switch voltage ok'),
-        LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+        tester.LimitDelta('ARM-Vpin', 0.0, 1.0, doc='Micro switch voltage ok'),
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
-        LimitBoolean('ScanMac', True,
+        tester.LimitBoolean('ScanMac', True,
             doc='MAC address detected'),
         )
 
@@ -61,27 +58,23 @@ class Initial(share.TestSequence):
         Devices.sw_image = config.SW_IMAGE
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('PgmNordic', self.devices['progNordic'].program),
-            TestStep('Operation', self._step_operation),
-            TestStep('Calibrate', self._step_calibrate),
-            TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('Prepare', self._step_prepare),
+# FIXME: Re-enable programming
+#            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('Operation', self._step_operation),
+            tester.TestStep('Calibrate', self._step_calibrate),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
-        """Prepare to run a test.
-
-        Set the input battery voltage to 12V.
-
-        """
+        """Prepare to run a test."""
         dev['dcs_vbat'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_chem'), timeout=5)
         if self.parameter == 'BTS':
             self.measure(('dmm_sway-', 'dmm_sway+'), timeout=5)
-        dev['dcl_brake'].output(0.1, output=True)
         mes['dmm_brakeoff'](timeout=5)
         dev['rla_pin'].remove()
         self.measure(('dmm_brakeon', 'dmm_lighton'), timeout=5)
@@ -111,13 +104,12 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
-        """Calibrate BRAKE input voltage.
+        """Calibrate VBATT input voltage.
 
-        Input battery voltage is at 12V, console is open.
+        Input voltage is at 12V, pin is IN, console is open.
 
         """
         trsbts = dev['trsbts']
-        dev['rla_pin'].insert()     # Pin IN for calibration
         mes['arm_vbatt'](timeout=5)
         # Battery calibration at nominal voltage
         dmm_v = mes['dmm_vbat'].stable(delta=0.002).reading1
@@ -127,18 +119,20 @@ class Initial(share.TestSequence):
         mes['arm_vbatt_cal'](timeout=5)
         dev['rla_pin'].remove()
         mes['arm_vpin'](timeout=5)
+        dev['rla_pin'].insert()
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         trsbts = dev['trsbts']
         # Get the MAC address from the console.
-        self.mac = trsbts.get_mac()
-        mes['ble_mac'].sensor.store(self.mac)
+        mac = trsbts.get_mac()
+        mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
         # Save SerialNumber & MAC on a remote server.
-        dev['serialtomac'].blemac_set(self.sernum, self.mac)
-        reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
+        dev['serialtomac'].blemac_set(self.sernum, mac)
+        # Scan for the unit
+        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
         mes['scan_mac'].sensor.store(reply is not None)
         mes['scan_mac']()
 
@@ -156,7 +150,6 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
-                ('dcl_brake', tester.DCLoad, 'DCL5'),
                 ('rla_pin', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -191,8 +184,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['trsbts'].close()
         self['dcs_vbat'].output(0.0, False)
-        self['dcl_brake'].output(0.0, False)
-        self['rla_pin'].set_off()
+        self['rla_pin'].insert()
 
 
 class Sensors(share.Sensors):
