@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2020 SETEC Pty Ltd.
 """TRS-BTS Initial Program."""
 
 import inspect
@@ -59,8 +60,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
-# FIXME: Re-enable programming
-#            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
             tester.TestStep('Operation', self._step_operation),
             tester.TestStep('Calibrate', self._step_calibrate),
             tester.TestStep('Bluetooth', self._step_bluetooth),

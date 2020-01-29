@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2020 SETEC Pty Ltd.
 """TRS-BTS Final Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitDelta, LimitBoolean, LimitHigh, LimitRegExp
-    )
 import share
 
 
@@ -19,17 +16,18 @@ class Final(share.TestSequence):
     rssi = -70 if share.config.System.tester_type == 'ATE4' else -85
 
     limitdata = (
-        LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
-        LimitRegExp('BleMac', '^[0-9a-f]{12}$', doc='Valid MAC address'),
-        LimitBoolean('ScanMac', True, doc='MAC address detected'),
-        LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
+        tester.LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address'),
+        tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
+        tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 

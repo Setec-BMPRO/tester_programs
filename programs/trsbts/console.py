@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2020 SETEC Pty Ltd.
 """TRS-BTS Console driver."""
 
 import re
@@ -11,7 +12,6 @@ class Console(share.console.Base):
 
     """Communications to TRS-BTS console."""
 
-    re_banner = re.compile('^ble addr ([0-9a-f]{12})$')
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     # Number of lines in startup banner
     banner_lines = 3
@@ -33,8 +33,8 @@ class Console(share.console.Base):
         'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
         'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         # X-Register values
-        'VBATT': parameter.Float('TRS_BTS_AVG_BATT_MV'), # Returns V not mV...
-        'VPIN': parameter.Float('TRS_BTS_PIN_MV'),       # Returns V not mV...
+        'VBATT': parameter.Float('TRS_BTS_AVG_BATT_MV', scale=1000),
+        'VPIN': parameter.Float('TRS_BTS_PIN_MV', scale=1000),
         # Calibration commands
         'VBATT_CAL': parameter.Calibration('BATTV', write_expected=1),
         # OverrideTo commands
@@ -47,8 +47,6 @@ class Console(share.console.Base):
     override_commands = (
         'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED',
         )
-    # Strings to ignore in responses
-    ignore = ('V', )
 
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
