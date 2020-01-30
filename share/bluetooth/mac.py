@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2019 SETEC Pty Ltd.
+# Copyright 2019 - 2020 SETEC Pty Ltd.
 """Bluetooth SerialNumber to MAC Storage."""
 
 import jsonrpclib
@@ -13,12 +13,12 @@ class SerialToMAC():
     # jsonrpclib uses non-standard 'application/json-rpc' by default
     #   Set the standard content_type here
     content_type = 'application/json'
-    # The ERP server location
-    server_url = 'http://erputil2.mel.setec.com.au:8888/'
+    # The RPC server location
+    server_url = 'http://webapp.mel.setec.com.au/ate/rpc/'
 
     def __init__(self):
         """Create the instance."""
-        self.erp = jsonrpclib.ServerProxy(
+        self.server = jsonrpclib.ServerProxy(
             self.server_url,
             config=jsonrpclib.config.Config(content_type=self.content_type)
             )
@@ -32,7 +32,7 @@ class SerialToMAC():
 
         """
         try:
-            mac = self.erp.blemac_get(serial)
+            mac = self.server.blemac_get(serial)
         except jsonrpclib.jsonrpc.ProtocolError as exc:
             mac = str(exc)
         return mac
@@ -44,4 +44,4 @@ class SerialToMAC():
         @param blemac Bluetooth MAC address (12 hex digits)
 
         """
-        self.erp.blemac_set(serial, blemac)
+        self.server.blemac_set(serial, blemac)
