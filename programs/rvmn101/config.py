@@ -172,16 +172,22 @@ class RVMN101B(Config):
     # Initial Test parameters
     fixture = '032871'
     # Software versions
+    #   Firmware 0.88 does not support hardware_rev
     _nordic_088 = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
     _arm_image_19 = 'rvmn101_nxp_1.9.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
-        # Rev 5...                                      # 033280
+        (share.lots.Range('A191809', 'A200510'), 5),    # 033280
+        # Rev 6...                                      # 034229
         ))
     _rev_data = {
         None: Config.values(
             nordic_image=_nordic_088, arm_image=_arm_image_19,
-            # Firmware 0.88 does not support hardware_rev
+            product_rev='06A', hardware_rev=None,
+            banner_lines=4,
+            ),
+        5: Config.values(
+            nordic_image=_nordic_088, arm_image=_arm_image_19,
             product_rev='05B', hardware_rev=None,
             banner_lines=4,
             ),
