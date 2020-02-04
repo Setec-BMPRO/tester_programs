@@ -28,6 +28,14 @@ class CN10xParameters():
         tester.LimitInteger('Tank', 5),
         )
 
+    # Final test limits
+    limits_final = (
+        tester.LimitHigh(
+            'ScanRSSI',
+            -70 if share.config.System.tester_type == 'ATE4' else -85,
+            doc='Strong BLE signal'),
+        )
+
     def __init__(self,
             prefix,
             sw_arm_version, sw_nrf_version,
@@ -99,6 +107,10 @@ class CN102(CN10x):
 
     """Configuration for CN102."""
 
+    _prefix = 'cn102'
+    # Software versions
+    _arm_12 = '1.2.18218.1627'
+    _nordic_10 = '1.0.18106.1260'
     # Lot Number to Revision data
     _lot_rev = share.lots.Revision((
         # Default to None == Rev 1
@@ -106,9 +118,9 @@ class CN102(CN10x):
     # Revision data dictionary:
     _rev_data = {
         None: CN10xParameters(
-            prefix='cn102',
-            sw_arm_version='1.2.18218.1627',
-            sw_nrf_version='1.0.18106.1260',
+            prefix=_prefix,
+            sw_arm_version=_arm_12,
+            sw_nrf_version=_nordic_10,
             hw_version=(1, 0, 'A'),
             banner_lines=2
             ),
@@ -119,16 +131,29 @@ class CN103(CN10x):
 
     """Configuration for CN103."""
 
+    _prefix = 'cn103'
+    # Software versions
+    _arm_12 = '1.2.111.2008'
+    _nordic_10 = '1.0.19700.1352'
     # Lot Number to Revision data
     _lot_rev = share.lots.Revision((
-        # Default to None == Rev 1
+        # Rev 1
+        (share.lots.Range('A195014', 'A200419'), 1),
+        # Rev 2...
         ))
     # Revision data dictionary:
     _rev_data = {
         None: CN10xParameters(
-            prefix='cn103',
-            sw_arm_version='1.2.111.2008',
-            sw_nrf_version='1.0.19700.1352',
+            prefix=_prefix,
+            sw_arm_version=_arm_12,
+            sw_nrf_version=_nordic_10,
+            hw_version=(2, 0, 'A'),
+            banner_lines=2
+            ),
+        1: CN10xParameters(
+            prefix=_prefix,
+            sw_arm_version=_arm_12,
+            sw_nrf_version=_nordic_10,
             hw_version=(1, 0, 'A'),
             banner_lines=2
             ),

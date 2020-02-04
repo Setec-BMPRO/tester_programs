@@ -29,6 +29,7 @@ from . import test_c45a15_final
 from . import test_cmrsbp
 from . import test_cn101_initial
 from . import test_cn102_initial
+from . import test_cn102_final
 from . import test_drifter_final
 from . import test_drifter_initial
 from . import test_etrac_initial
@@ -110,6 +111,7 @@ __all__ = [
     'test_cmrsbp',
     'test_cn101_initial',
     'test_cn102_initial',
+    'test_cn102_final',
     'test_drifter_final',
     'test_drifter_initial',
     'test_etrac_initial',

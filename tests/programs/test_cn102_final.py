@@ -1,31 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for TRS-BTS Final Test program."""
+"""UnitTest for CN102/3 Final Test program."""
 
 from unittest.mock import patch, MagicMock
 
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import trsbts
+from programs import cn102
 
 
-class TRSBTSFinal(ProgramTestCase):
+class CN102Final(ProgramTestCase):
 
-    """TRS-BTS Final program test suite."""
+    """CN102/3 Final program test suite."""
 
-    prog_class = trsbts.Final
-    parameter = 'BTS'
+    prog_class = cn102.Final
+    parameter = '103'
     debug = False
-    btmac = '001ec030bc15'
 
     def setUp(self):
         """Per-Test setup."""
-        # Serial number to BLE MAC lookup
-        mysm = MagicMock(name='MySerMac')
-        mysm.blemac_get.return_value = self.btmac
-        patcher = patch(
-            'share.bluetooth.SerialToMAC', return_value=mysm)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         # BLE scanner
         mypi = MagicMock(name='MyRasPi')
         mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
@@ -42,7 +34,6 @@ class TRSBTSFinal(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Bluetooth': (
                     (sen['sernum'], 'A2026040123'),
-                    (sen['vbat'], 12.0),
                     ),
                 },
             }
@@ -50,5 +41,5 @@ class TRSBTSFinal(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
+        self.assertEqual(2, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)

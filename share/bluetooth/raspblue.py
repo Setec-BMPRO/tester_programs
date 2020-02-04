@@ -108,7 +108,8 @@ class RaspberryBluetooth(SerialIO):
 
         @param sernum Serial Number to locate
         @param timeout Timeout in seconds
-        @return True if device was found
+        @return Scan result dictionary {'ad_data': ad_data, 'rssi': rssi}
+            or None is not found
 
         """
         return self.server.scan_advert_sernum(sernum, timeout)
