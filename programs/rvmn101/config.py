@@ -200,6 +200,8 @@ class RVMN101B(Config):
         @return Tuple(limits)
 
         """
+        # 3dB below the -A version
+        rssi = -73 if share.config.System.tester_type == 'ATE4' else -88
         return cls._base_limits_final + (
-            tester.LimitHigh('ScanRSSI', -100, doc='Strong BLE signal'),
+            tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
             )
