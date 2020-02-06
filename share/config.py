@@ -63,10 +63,6 @@ class Fixture():
             # Hub port X: Panasonic eUniStone PAN1322 (FTDI with S/N)
             'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM4'}[os.name],
             },
-        '020827': {     # BCE282 Initial( MSP1: programming, MSP2: comms)
-            'MSP1': _internal_1,
-            'MSP2': _internal_2,
-            },
         '021299': {'PIC': _internal_1, },   # Drifter Initial
 
         # Fixtures with a single USB Serial (inc. FTDI with S/N)
@@ -95,6 +91,10 @@ class Fixture():
 
         # Fixtures with a USB Hub
 
+        '020827': {     # BCE282 Initial( MSP1: programming, MSP2: comms)
+            'MSP1': _ftdi_hub_1,
+            'MSP2': _ftdi_hub_2,
+            },
         '017789': {     # CMR-SBP Initial (Prolific)
             'EV': {'posix': '/dev/ttyUSB1', 'nt': 'COM21'}[os.name],
             'CMR': {'posix': '/dev/ttyUSB2', 'nt': 'COM22'}[os.name],
