@@ -84,7 +84,7 @@ PROGRAMS = {
     'CMR-FIN': cmrsbp.Final,
     'CN101 Initial': cn101.Initial,
     'CN102 Initial': cn102.Initial,
-    'CN102 Finial': cn102.Final,
+    'CN102 Final': cn102.Final,
     'Drifter Initial': drifter.Initial,
     'Drifter Final': drifter.Final,
     'Etrac-II Initial': etrac.Initial,
