@@ -27,7 +27,7 @@ class Final(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        reply = dev['pi_bt'].scan_advert_blemac(self.sernum, timeout=20)
+        reply = dev['pi_bt'].scan_advert_sernum(self.sernum, timeout=20)
         mes['scan_rssi'].sensor.store(reply['rssi'])
         mes['scan_rssi']()
 
@@ -45,7 +45,7 @@ class Devices(share.Devices):
             share.config.System.ble_url())
         # Power to the units
         self['dcs_vbat'] = tester.DCSource(self.physical_devices['DCS3'])
-        self['dcs_vbat'].output(self.vbatt, output=True)
+        self['dcs_vbat'].output(self.vbatt, output=True, delay=5.0)
         self.add_closer(lambda: self['dcs_vbat'].output(0.0, output=False))
 
 
