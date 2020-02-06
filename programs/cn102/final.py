@@ -28,7 +28,11 @@ class Final(share.TestSequence):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         reply = dev['pi_bt'].scan_advert_sernum(self.sernum, timeout=20)
-        mes['scan_rssi'].sensor.store(reply['rssi'])
+        if reply:
+            rssi = reply['rssi']
+        else:
+            rssi = float('NaN')
+        mes['scan_rssi'].sensor.store(rssi)
         mes['scan_rssi']()
 
 
