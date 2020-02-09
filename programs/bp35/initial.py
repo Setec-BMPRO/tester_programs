@@ -59,7 +59,6 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         self.measure(('dmm_lock', 'hardware8', ), timeout=5)
         dev['dcs_vbat'].output(self.cfg.vbat_in, True)
-        dev['rla_vbat'].set_on()
         self.measure(('dmm_vbatin', 'dmm_3v3'), timeout=5)
 
     @share.teststep
@@ -188,7 +187,6 @@ class Initial(share.TestSequence):
         mes['dmm_vpfc'].stable(self.cfg.pfc_stable)
         mes['arm_vout_ov']()
         # Remove injected Battery voltage
-        dev['rla_vbat'].set_off()
         dev['dcs_vbat'].output(0.0, output=False)
         mes['arm_vout_ov']()
         # Is it now running on it's own?
@@ -312,7 +310,6 @@ class Devices(share.Devices):
                 ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_pic', tester.Relay, 'RLA3'),
                 ('rla_loadsw', tester.Relay, 'RLA4'),
-                ('rla_vbat', tester.Relay, 'RLA5'),
                 ('rla_acsw', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -357,7 +354,7 @@ class Devices(share.Devices):
                 'dcs_vbat', 'dcs_vaux', 'SR_LowPower', 'dcl_out', 'dcl_bat'):
             self[dev].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot', 'rla_pic',
-                    'rla_loadsw', 'rla_vbat', 'rla_acsw'):
+                    'rla_loadsw', 'rla_acsw'):
             self[rla].set_off()
 
 
