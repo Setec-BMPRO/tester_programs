@@ -20,7 +20,7 @@ class CN102Final(ProgramTestCase):
         """Per-Test setup."""
         # BLE scanner
         mypi = MagicMock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
+        mypi.scan_advert_sernum.return_value = {'ad_data': '', 'rssi': -50}
         patcher = patch(
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)
         self.addCleanup(patcher.stop)
