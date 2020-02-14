@@ -61,7 +61,6 @@ PROGRAMS = {
     '2040 Final': _2040.Final,
     '2040 Initial': _2040.Initial,
     'ATXG-450-2V Final': atxg450.Final2V,
-    'BatteryCheck Initial': batterycheck.Initial,
     'BatteryCheck Final': batterycheck.Final,
     'BC2 Initial': bc2.Initial,
     'BC2 Final': bc2.Final,

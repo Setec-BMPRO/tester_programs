@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2017 - 2019 SETEC Pty Ltd
+# Copyright 2017 - 2020 SETEC Pty Ltd
 """Configuration classes."""
 
 import os
@@ -57,12 +57,6 @@ class Fixture():
 
         # Fixtures using Non-USB serial ports
 
-        '029083': {     # Batterycheck Initial
-            'ARM_CON': _internal_1,
-            'ARM_PGM': _internal_2,
-            # Hub port X: Panasonic eUniStone PAN1322 (FTDI with S/N)
-            'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM4'}[os.name],
-            },
         '021299': {'PIC': _internal_1, },   # Drifter Initial
 
         # Fixtures with a single USB Serial (inc. FTDI with S/N)

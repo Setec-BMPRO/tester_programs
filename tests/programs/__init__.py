@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2017 - 2019 SETEC Pty Ltd.
+# Copyright 2017 - 2020 SETEC Pty Ltd.
 """Unittests for Program."""
 
 from . import test_selftest
@@ -8,7 +8,6 @@ from . import test_2040_final
 from . import test_2040_initial
 from . import test_atxg4502v_final
 from . import test_batterycheck_final
-from . import test_batterycheck_initial
 from . import test_bc2_initial
 from . import test_bc2_final
 from . import test_bc15_25_console
@@ -90,7 +89,6 @@ __all__ = [
     'test_2040_initial',
     'test_atxg4502v_final',
     'test_batterycheck_final',
-    'test_batterycheck_initial',
     'test_bc2_initial',
     'test_bc2_final',
     'test_bc15_25_console',

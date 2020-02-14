@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-02-04, 16:07:47 -->
+<!-- Saved: 2020-02-14, 13:30:59 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -21,9 +21,7 @@
     <Source>programs/atxg450/__init__.py</Source>
     <Source>programs/atxg450/final_2v.py</Source>
     <Source>programs/batterycheck/__init__.py</Source>
-    <Source>programs/batterycheck/console.py</Source>
     <Source>programs/batterycheck/final.py</Source>
-    <Source>programs/batterycheck/initial.py</Source>
     <Source>programs/bc15_25/__init__.py</Source>
     <Source>programs/bc15_25/config.py</Source>
     <Source>programs/bc15_25/console.py</Source>
@@ -199,7 +197,6 @@
     <Source>tests/programs/test_2040_initial.py</Source>
     <Source>tests/programs/test_atxg4502v_final.py</Source>
     <Source>tests/programs/test_batterycheck_final.py</Source>
-    <Source>tests/programs/test_batterycheck_initial.py</Source>
     <Source>tests/programs/test_bc15_25_console.py</Source>
     <Source>tests/programs/test_bc15_25_final.py</Source>
     <Source>tests/programs/test_bc15_25_initial.py</Source>
