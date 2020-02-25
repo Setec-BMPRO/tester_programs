@@ -4,21 +4,21 @@
 
 from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import trsrfm
+from programs import trsrfm_samb11
 
 
 class TRSRFMInitial(ProgramTestCase):
 
     """TRSRFM Initial program test suite."""
 
-    prog_class = trsrfm.Initial
+    prog_class = trsrfm_samb11.Initial
     parameter = None
     debug = False
     btmac = '001EC030BC15'
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.trsrfm.console.Console')
+        patcher = patch('programs.trsrfm_samb11.console.Console')
         self.addCleanup(patcher.stop)
         patcher.start()
         mybt = MagicMock(name='MyBleRadio')
@@ -42,7 +42,7 @@ class TRSRFMInitial(ProgramTestCase):
                     (sen['red'], (3.1, 0.5, 3.1, )),
                     (sen['green'], (3.1, 0.0, 3.1, )),
                     (sen['blue'], (3.1, 0.25, 3.1, )),
-                    (sen['arm_SwVer'], trsrfm.config.SW_VERSION),
+                    (sen['arm_SwVer'], trsrfm_samb11.config.SW_VERSION),
                     ),
                 'Bluetooth': (
                     (sen['arm_BtMAC'], self.btmac),
