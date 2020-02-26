@@ -34,9 +34,7 @@ class Console(share.console.Base):
         'GREEN_LED': parameter.Override('TRS_RFM_GREEN_LED_OVERRIDE'),
         'BLUE_LED': parameter.Override('TRS_RFM_BLUE_LED_OVERRIDE'),
         }
-    override_commands = (
-        'MONITOR', 'RED_LED', 'GREEN_LED', 'BLUE_LED',
-        )
+    override_commands = ('RED_LED', 'GREEN_LED', 'BLUE_LED', )
 
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
