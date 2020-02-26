@@ -24,12 +24,8 @@ class Initial(share.TestSequence):
     limitdata = (
         tester.LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
         tester.LimitPercent('3V3', 3.3, 1.5, doc='3V3 present'),
-        tester.LimitHigh('RedLedOff', 3.1, doc='Led off'),
-        tester.LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
-        tester.LimitHigh('GreenLedOff', 3.1, doc='Led off'),
-        tester.LimitLow('GreenLedOn', 0.2, doc='Led on'),
-        tester.LimitHigh('BlueLedOff', 3.1, doc='Led off'),
-        tester.LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
+        tester.LimitHigh('LedOff', 3.1, doc='Led off'),
+        tester.LimitLow('LedOn', 0.5, doc='Led on'),
         tester.LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
@@ -63,10 +59,11 @@ class Initial(share.TestSequence):
         """Test the operation of TRSRFM."""
         trsrfm = dev['trsrfm']
         trsrfm.open()
+        # Power cycle after programming
+        dev['dcs_vin'].output(0.0, delay=0.5)
+        dev['dcs_vin'].output(self.vbatt)
         trsrfm.brand(config.HW_VERSION, self.sernum)
-        self.measure(
-            ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
-            timeout=5)
+        mes['arm_swver']()
         trsrfm.override(share.console.parameter.OverrideTo.force_on)
         self.measure(
             ('dmm_redon', 'dmm_greenon', 'dmm_blueon'), timeout=5)
@@ -83,10 +80,7 @@ class Initial(share.TestSequence):
         mac = trsrfm.get_mac()
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
-        # Switch on with button pressed
-        dev['dcs_vin'].output(0.0, True, delay=1.0)
-        dev['rla_pair_btn'].set_on(delay=0.2)
-        dev['dcs_vin'].output(self.vbatt, True)
+        dev['rla_pair_btn'].set_on()
         # Scan for the unit
         reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
         mes['scan_mac'].sensor.store(reply is not None)
@@ -178,12 +172,12 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
             ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
-            ('dmm_redoff', 'RedLedOff', 'red', 'Red led off'),
-            ('dmm_redon', 'RedLedOn', 'red', 'Red led on'),
-            ('dmm_greenoff', 'GreenLedOff', 'green', 'Green led off'),
-            ('dmm_greenon', 'GreenLedOn', 'green', 'Green led on'),
-            ('dmm_blueoff', 'BlueLedOff', 'blue', 'Blue led off'),
-            ('dmm_blueon', 'BlueLedOn', 'blue', 'Blue led on'),
+            ('dmm_redoff', 'LedOff', 'red', 'Red led off'),
+            ('dmm_redon', 'LedOn', 'red', 'Red led on'),
+            ('dmm_greenoff', 'LedOff', 'green', 'Green led off'),
+            ('dmm_greenon', 'LedOn', 'green', 'Green led on'),
+            ('dmm_blueoff', 'LedOff', 'blue', 'Blue led off'),
+            ('dmm_blueon', 'LedOn', 'blue', 'Blue led on'),
             ('ble_mac', 'BleMac', 'mirmac',
                 'Validate MAC address from console'),
             ('scan_mac', 'ScanMac', 'mirscan',
