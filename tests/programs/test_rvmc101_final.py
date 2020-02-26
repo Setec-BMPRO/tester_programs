@@ -20,6 +20,9 @@ class RVMC101Final(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
+                'PowerUp': (
+                    (sen['TabletScreen'], True),
+                    ),
                 'CanBus': (
                     (sen['ButtonPress'], True),
                     (sen['zone4'], True),
@@ -32,7 +35,7 @@ class RVMC101Final(ProgramTestCase):
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
-            self.assertEqual(2, len(res.readings))
+            self.assertEqual(3, len(res.readings))
         self.assertEqual(
             ['PowerUp', 'CanBus'],
             self.tester.ut_steps)

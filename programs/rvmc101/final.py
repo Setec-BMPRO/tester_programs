@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2019 SETEC Pty Ltd.
+# Copyright 2019 - 2020 SETEC Pty Ltd.
 """RVMC101x Final Test Program."""
 
 import tester
@@ -31,6 +31,7 @@ class Final(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         dev['dcs_vin'].output(12.0, output=True, delay=1.0)
+        mes['ui_tabletscreen']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -88,6 +89,9 @@ class Sensors(share.Sensors):
         self['ButtonPress'] = sensor.OkCan(     # Press the 'RET' button
             message=tester.translate('rvmc101_final', 'msgPressButton'),
             caption=tester.translate('rvmc101_final', 'capPressButton'))
+        self['TabletScreen'] = sensor.YesNo(    # Is the screen on
+            message=tester.translate('rvmc101_final', 'msgTabletScreen'),
+            caption=tester.translate('rvmc101_final', 'capTabletScreen'))
         decoder = self.devices['decoder']
         self['zone4'] = sensor.KeyedReadingBoolean(decoder, 'zone4')
 
@@ -101,6 +105,7 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ui_buttonpress', 'ButtonOk', 'ButtonPress', ''),
+            ('ui_tabletscreen', 'Notify', 'TabletScreen', ''),
             ('zone4', 'Zone4Pressed', 'zone4',
                 '4 button pressed'),
             ))
