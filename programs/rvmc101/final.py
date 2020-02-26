@@ -90,7 +90,7 @@ class Sensors(share.Sensors):
             message=tester.translate('rvmc101_final', 'msgPressButton'),
             caption=tester.translate('rvmc101_final', 'capPressButton'))
         self['TabletScreen'] = sensor.YesNo(    # Is the screen on
-            message=tester.translate('rvmc101_final', 'msgTabletScreen'),
+            message=tester.translate('rvmc101_final', 'msgTabletScreen?'),
             caption=tester.translate('rvmc101_final', 'capTabletScreen'))
         decoder = self.devices['decoder']
         self['zone4'] = sensor.KeyedReadingBoolean(decoder, 'zone4')
