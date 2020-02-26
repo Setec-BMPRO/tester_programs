@@ -76,6 +76,7 @@ from . import test_trs2_initial
 from . import test_trs2_final
 from . import test_trsbts_initial
 from . import test_trsbts_final
+from . import test_trsrfm_initial
 from . import test_trsrfm_initial_samb11
 from . import test_ts3020h_initial
 from . import test_ts3020h_final
@@ -157,6 +158,7 @@ __all__ = [
     'test_trs2_final',
     'test_trsbts_initial',
     'test_trsbts_final',
+    'test_trsrfm_initial',
     'test_trsrfm_initial_samb11',
     'test_ts3020h_initial',
     'test_ts3020h_final',

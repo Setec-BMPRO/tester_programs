@@ -124,6 +124,11 @@ class Fixture():
             # Hub port 2: Nordic NRF52 device programmer
             # Hub port 3,4: not used
             },
+        '034882': {     # TRSRFM Initial
+            'NORDIC': _ftdi_hub_1,
+            # Hub port 2: Nordic NRF52 device programmer
+            # Hub port 3,4: not used
+            },
         }
 
     _data_per_tester = {

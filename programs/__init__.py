@@ -41,6 +41,7 @@ from . import sx600_750
 from . import trek2_jcontrol
 from . import trs2
 from . import trsbts
+from . import trsrfm
 from . import trsrfm_samb11
 from . import ts3020h
 from . import ts3520
@@ -127,6 +128,7 @@ PROGRAMS = {
     'TRS2 Final': trs2.Final,
     'TRSBTS Initial': trsbts.Initial,
     'TRSBTS Final': trsbts.Final,
+    'TRSRFM Initial': trsrfm.Initial,
     'TRSRFM Initial (SamB11)': trsrfm_samb11.Initial,
     'TS3020-H Initial': ts3020h.Initial,
     'TS3020-H Final': ts3020h.Final,
