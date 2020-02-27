@@ -61,6 +61,7 @@ class Initial(share.TestSequence):
         trsrfm.open()
         # Power cycle after programming
         dev['dcs_vin'].output(0.0, delay=0.5)
+        trsrfm.flushInput()
         dev['dcs_vin'].output(self.vbatt)
         trsrfm.brand(config.HW_VERSION, self.sernum)
         mes['arm_swver']()
