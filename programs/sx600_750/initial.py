@@ -295,8 +295,8 @@ class Initial(share.TestSequence):
                 self.measurements['ocp_step_dn']()
                 if detect.measure().result:
                     break
-            self.measurements['ocp_lock']()
             load.output(0.0)
+            self.measurements['ocp_lock']()
             olimit.check(setting)
 
     @staticmethod
