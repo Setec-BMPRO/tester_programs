@@ -421,9 +421,9 @@ class Sensors(share.Sensors):
         self['o5Vsbunsw'] = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
         self['o8V5Ard'] = sensor.Vdc(dmm, high=19, low=8, rng=100, res=0.001)
         self['o12V'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        self['o12VinOCP'] = sensor.Vdc(dmm, high=10, low=2, rng=100, res=0.01)
+        self['o12VinOCP'] = sensor.Vdc(dmm, high=10, low=2, rng=100, res=0.1)
         self['o24V'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
-        self['o24VinOCP'] = sensor.Vdc(dmm, high=11, low=2, rng=100, res=0.01)
+        self['o24VinOCP'] = sensor.Vdc(dmm, high=11, low=2, rng=100, res=0.1)
         self['PriCtl'] = sensor.Vdc(dmm, high=8, low=2, rng=100, res=0.01)
         self['PFC'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
         self['PGOOD'] = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.01)
@@ -556,3 +556,4 @@ class Measurements(share.Measurements):
                 'dmm_12V_inOCP', 'dmm_24V_inOCP',
                 ):
             self[name].position_fail = False
+            self[name].autoconfig = False
