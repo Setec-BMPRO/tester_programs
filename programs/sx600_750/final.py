@@ -71,11 +71,10 @@ class Final(share.TestSequence):
             output=True)
         self.measure(('dmm_5vfl', 'dmm_PwrGood', 'dmm_AcFail', ), timeout=2)
         fl12v, fl24v = self.measure(('dmm_12vfl', 'dmm_24vfl', )).readings
-        if self.running:
-            # Load regulation values in %
-            mes['reg12v'].sensor.store(100 * (nl12v - fl12v) / nl12v)
-            mes['reg24v'].sensor.store(100 * (nl24v - fl24v) / nl24v)
-            self.measure(('reg12v', 'reg24v', ))
+        # Load regulation values in %
+        mes['reg12v'].sensor.store(100 * (nl12v - fl12v) / nl12v)
+        mes['reg24v'].sensor.store(100 * (nl24v - fl24v) / nl24v)
+        self.measure(('reg12v', 'reg24v', ))
 
 
 class Devices(share.Devices):
