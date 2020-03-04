@@ -23,7 +23,7 @@ class Initial(share.TestSequence):
 
     limitdata = (
         tester.LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
-        tester.LimitDelta('Vin', 6.5, 1.0, doc='Input voltage present'),
+        tester.LimitDelta('Vin', 7.0, 2.0, doc='Input to regulator present'),
         tester.LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
         tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
         tester.LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
@@ -72,7 +72,7 @@ class Initial(share.TestSequence):
         """Prepare to run a test."""
         dev['dcs_vbat'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        self.measure(('dmm_vin', 'dmm_3v3', 'dmm_chem'), timeout=5)
+        self.measure(('dmm_vbat', 'dmm_vin', 'dmm_3v3', 'dmm_chem'), timeout=5)
         if self.parameter == 'BTS':
             self.measure(('dmm_sway-', 'dmm_sway+'), timeout=5)
         mes['dmm_brakeoff'](timeout=5)
