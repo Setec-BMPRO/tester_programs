@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2017 - 2020 SETEC Pty Ltd.
 """UnitTest for J35 Config module."""
 
 import unittest
-import collections
+
+import attr
+
 from programs import j35
 
 
-#Simple simulation of tester_storage.UUT class
-UUT = collections.namedtuple('UUT', 'lot')
+@attr.s
+class UUT():
+    """Simple simulation of tester_storage.UUT class."""
+    lot = attr.ib()
 
 
 class J35A_Config(unittest.TestCase):

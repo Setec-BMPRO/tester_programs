@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2019 SETEC Pty Ltd.
+# Copyright 2019 - 2020 SETEC Pty Ltd.
 """UnitTest for RVMN101 Config module."""
 
-import collections
 import unittest
+
+import attr
 
 from programs import rvmn101
 
 
-# Simple simulation of tester_storage.UUT class
-UUT = collections.namedtuple('UUT', 'lot')
+@attr.s
+class UUT():
+    """Simple simulation of tester_storage.UUT class."""
+    lot = attr.ib()
 
 
 class RVMN101A_Config(unittest.TestCase):

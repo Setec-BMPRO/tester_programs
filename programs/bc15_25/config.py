@@ -1,24 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2013 - 2018 SETEC Pty Ltd.
+# Copyright 2013 - 2020 SETEC Pty Ltd.
 """BC15/BC25 Configuration."""
 
-import collections
 import logging
 import math
 
+import attr
 import tester
 
 import share
+
+
+@attr.s
+class _Values():
+
+    """Adjustable configuration data values."""
+
+    arm_file = attr.ib(validator=attr.validators.instance_of(str))
+    arm_port = attr.ib(validator=attr.validators.instance_of(str))
+    sw_version = attr.ib(validator=attr.validators.instance_of(str))
+    cal_linecount = attr.ib(validator=attr.validators.instance_of(int))
 
 
 class BCx5():
 
     """Base configuration for BC15/25."""
 
-    # Adjustable configuration data values
-    values = collections.namedtuple(
-        'values', 'arm_file, arm_port, sw_version, cal_linecount')
     # These values get set per Product type & revision
     arm_file = None         # Software image filename
     arm_port = None         # ARM console serial port
@@ -90,9 +98,11 @@ class BCx5():
             except share.lots.LotError:
                 pass
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        (cls.arm_file, cls.arm_port,
-         cls.sw_version, cls.cal_linecount,
-         ) = cls._rev_data[rev]
+        values = cls._rev_data[rev]
+        cls.arm_file = values.arm_file
+        cls.arm_port = values.arm_port
+        cls.sw_version = values.sw_version
+        cls.cal_linecount = values.cal_linecount
 
 
 class BC15(BCx5):
@@ -108,13 +118,13 @@ class BC15(BCx5):
         # Rev 6...
         ))
     _rev_data = {
-        None: BCx5.values(
+        None: _Values(
             arm_file=arm_file_pattern.format(sw_version_b),
             arm_port=arm_port,
             sw_version=sw_version_b,
             cal_linecount=43,
             ),
-        0: BCx5.values(
+        0: _Values(
             arm_file=arm_file_pattern.format(sw_version_a),
             arm_port=arm_port,
             sw_version=sw_version_a,
@@ -175,13 +185,13 @@ class BC25(BCx5):
         # Rev 4...
         ))
     _rev_data = {
-        None: BCx5.values(
+        None: _Values(
             arm_file=arm_file_pattern.format(sw_version_b),
             arm_port=arm_port,
             sw_version=sw_version_b,
             cal_linecount=43,
             ),
-        0: BCx5.values(
+        0: _Values(
             arm_file=arm_file_pattern.format(sw_version_a),
             arm_port=arm_port,
             sw_version=sw_version_a,

@@ -64,7 +64,7 @@ class TRSRFMInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(15, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
             ['Prepare', 'PgmNordic', 'Operation', 'Bluetooth'],
             self.tester.ut_steps)

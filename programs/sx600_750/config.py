@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """SX-600/750 Configuration."""
 
-import collections
+import attr
 
 import tester
 
@@ -83,8 +83,19 @@ class Config():
         return {'600': SX600, '750': SX750}[parameter]
 
 
-Rail = collections.namedtuple('Rail', 'full, peak, ocp')
-Ratings = collections.namedtuple('Ratings', 'v12, v24')
+@attr.s
+class Rail():
+    """Rail data values."""
+    full = attr.ib(validator=attr.validators.instance_of(float))
+    peak = attr.ib(validator=attr.validators.instance_of(float))
+    ocp = attr.ib(validator=attr.validators.instance_of(float))
+
+
+@attr.s
+class Ratings():
+    """Ratings data values."""
+    v12 = attr.ib(validator=attr.validators.instance_of(Rail))
+    v24 = attr.ib(validator=attr.validators.instance_of(Rail))
 
 
 class SX600(Config):

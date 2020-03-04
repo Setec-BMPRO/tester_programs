@@ -1,27 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2019 SETEC Pty Ltd.
+# Copyright 2019 - 2020 SETEC Pty Ltd.
 """RVMN101 Configuration."""
 
-import collections
 import logging
 
+import attr
 import tester
 
 import share
+
+
+@attr.s
+class _Values():
+
+    """Adjustable configuration data values."""
+
+    nordic_image = attr.ib(validator=attr.validators.instance_of(str))
+    arm_image = attr.ib(validator=attr.validators.instance_of(str))
+    product_rev = attr.ib(validator=attr.validators.instance_of(str))
+    hardware_rev = attr.ib()
+    banner_lines = attr.ib(validator=attr.validators.instance_of(int))
 
 
 class Config():
 
     """Base configuration for RVMN101A/B."""
 
-    # Adjustable configuration data values
-    values = collections.namedtuple(
-        'values',
-        ['nordic_image', 'arm_image',
-         'product_rev', 'hardware_rev',
-         'banner_lines', ]
-        )
     # These values get set per Product type & revision
     nordic_image = None
     arm_image = None
@@ -84,10 +89,12 @@ class Config():
             except share.lots.LotError:
                 pass
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        (cls.nordic_image, cls.arm_image,
-         cls.product_rev, cls.hardware_rev,
-         cls.banner_lines,
-         ) = cls._rev_data[rev]
+        values = cls._rev_data[rev]
+        cls.nordic_image = values.nordic_image
+        cls.arm_image = values.arm_image
+        cls.product_rev = values.product_rev
+        cls.hardware_rev = values.hardware_rev
+        cls.banner_lines = values.banner_lines
 
     @classmethod
     def limits_initial(cls):
@@ -130,23 +137,23 @@ class RVMN101A(Config):
         # Rev 9...                                      # 034079
         ))
     _rev_data = {
-        None: Config.values(
+        None: _Values(
             nordic_image=_nordic_1106, arm_image=_arm_image_113,
             product_rev='09A', hardware_rev='08A', banner_lines=6,
             ),
-        8: Config.values(
+        8: _Values(
             nordic_image=_nordic_181, arm_image=_arm_image_19,
             product_rev='08A', hardware_rev='08A', banner_lines=4,
             ),
-        7: Config.values(
+        7: _Values(
             nordic_image=_nordic_133, arm_image=_arm_image_19,
             product_rev='07A', hardware_rev='07A', banner_lines=4,
             ),
-        6: Config.values(
+        6: _Values(
             nordic_image='dunno', arm_image=_arm_image_19,
             product_rev='06A', hardware_rev='06A', banner_lines=4,
             ),
-        5: Config.values(
+        5: _Values(
             nordic_image='dunno', arm_image=_arm_image_19,
             product_rev='05A', hardware_rev='05A', banner_lines=4,
             ),
@@ -181,15 +188,13 @@ class RVMN101B(Config):
         # Rev 6...                                      # 034229
         ))
     _rev_data = {
-        None: Config.values(
+        None: _Values(
             nordic_image=_nordic_088, arm_image=_arm_image_19,
-            product_rev='06A', hardware_rev=None,
-            banner_lines=4,
+            product_rev='06A', hardware_rev=None, banner_lines=4,
             ),
-        5: Config.values(
+        5: _Values(
             nordic_image=_nordic_088, arm_image=_arm_image_19,
-            product_rev='05B', hardware_rev=None,
-            banner_lines=4,
+            product_rev='05B', hardware_rev=None, banner_lines=4,
             ),
         }
 
