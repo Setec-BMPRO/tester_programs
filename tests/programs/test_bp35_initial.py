@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for BP35 Initial Test program."""
+"""UnitTest for BP35 / BP35-II Initial Test program."""
 
 from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
@@ -9,7 +9,7 @@ from programs import bp35
 
 class _BP35Initial(ProgramTestCase):
 
-    """BP35 Initial program test suite."""
+    """BP35 / BP-II Initial program test suite."""
 
     prog_class = bp35.Initial
     sernum = 'A1626010123'
@@ -54,7 +54,7 @@ class _BP35Initial(ProgramTestCase):
                     ),
                 'Initialise': (
                     (sen['sernum'], self.sernum),
-                    (sen['arm_swver'], bp35.config.BP35.arm_sw_version),
+                    (sen['arm_swver'], self.test_program.cfg.arm_sw_version),
                     ),
                 'SrSolar': (
                     (sen['vset'], (13.0, 13.0, 13.5)),
@@ -104,7 +104,7 @@ class _BP35Initial(ProgramTestCase):
                 'CanBus': (
                     (sen['canpwr'], 12.5),
                     (sen['arm_canbind'], 1 << 28),
-                    (sen['TunnelSwVer'], bp35.config.BP35.arm_sw_version),
+                    (sen['TunnelSwVer'], self.test_program.cfg.arm_sw_version),
                     ),
                 },
             UnitTester.key_call: {      # Callables
@@ -121,7 +121,7 @@ class _BP35Initial(ProgramTestCase):
 
 class BP35_SR_Initial(_BP35Initial):
 
-    """BP35xxxSR Initial program test suite."""
+    """BP35SR Initial program test suite."""
 
     parameter = 'SR'
     debug = False
@@ -135,9 +135,17 @@ class BP35_SR_Initial(_BP35Initial):
             )
 
 
+class BP35II_SR_Initial(BP35_SR_Initial):
+
+    """BP35-IISR Initial program test suite."""
+
+    parameter = 'SR2'
+    debug = False
+
+
 class BP35_HA_Initial(_BP35Initial):
 
-    """BP35xxxHA Initial program test suite."""
+    """BP35HA Initial program test suite."""
 
     parameter = 'HA'
     debug = False
@@ -151,9 +159,17 @@ class BP35_HA_Initial(_BP35Initial):
             )
 
 
+class BP35II_HA_Initial(BP35_HA_Initial):
+
+    """BP35-IIHA Initial program test suite."""
+
+    parameter = 'HA2'
+    debug = False
+
+
 class BP35_PM_Initial(_BP35Initial):
 
-    """BP35xxxPM Initial program test suite."""
+    """BP35PM Initial program test suite."""
 
     parameter = 'PM'
     debug = False
@@ -165,3 +181,11 @@ class BP35_PM_Initial(_BP35Initial):
             ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],
             )
+
+
+class BP35II_SI_Initial(BP35_PM_Initial):
+
+    """BP35-IISI Initial program test suite."""
+
+    parameter = 'SI2'
+    debug = False

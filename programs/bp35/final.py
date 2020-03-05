@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2017 - 2019 SETEC Pty Ltd
-"""BP35 Final Test Program."""
+"""BP35 / BP35-II Final Test Program."""
 
 import tester
 
@@ -11,11 +11,11 @@ from . import console, config
 
 class Final(share.TestSequence):
 
-    """BP35 Final Test Program."""
+    """BP35 / BP35-II Final Test Program."""
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.BP35.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_final()
         super().open(limits, Devices, Sensors, Measurements)
         self.limits['ARM-SwVer'].adjust(
