@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2017 - 2019 SETEC Pty Ltd
-"""BP35 Initial Test Program."""
+"""BP35 / BP35-II Initial Test Programs."""
 
 import inspect
 import os
@@ -16,16 +16,18 @@ from . import console, config
 
 class Initial(share.TestSequence):
 
-    """BP35 Initial Test Program."""
+    """BP35 / BP35-II Initial Test Programs."""
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.BP35.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_initial()
+        Devices.is_2 = self.cfg.is_2
         Devices.arm_sw_version = self.cfg.arm_sw_version
         Devices.pic_sw_version = self.cfg.pic_sw_version
         Sensors.outputs = self.cfg.outputs
         Sensors.iload = self.cfg.iload
+        Measurements.is_pm = self.cfg.is_pm
         super().open(limits, Devices, Sensors, Measurements)
         self.limits['ARM-SwVer'].adjust(
             '^{0}$'.format(self.cfg.arm_sw_version.replace('.', r'\.')))
@@ -256,6 +258,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
+        dev['bp35']['CAN_PWR_EN'] = True
         self.measure(('dmm_canpwr', 'arm_can_bind', ), timeout=10)
         bp35tunnel = dev['bp35tunnel']
         bp35tunnel.open()
@@ -267,8 +270,9 @@ class SrHighPower():
 
     """High power source to power the SR Solar Regulator.
 
-    It is a BCE282 inside the fixture which is powered by the AC Source.
-    A relay feeds the AC Source to either the BCE282 (ON) or to the BP35 (OFF).
+    It is a BCE282-24 (modified for 20V output) inside the fixture which is
+    powered by the AC Source. A relay feeds the AC Source to either the
+    BCE282 (ON) or to the BP35 (OFF).
 
     """
 
@@ -291,6 +295,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    is_2 = None
     arm_sw_version = None   # ARM software version
     pic_sw_version = None   # PIC software version
 
@@ -317,9 +322,13 @@ class Devices(share.Devices):
         arm_port = share.config.Fixture.port('027176', 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
+        if self.is_2:
+            sw_ver = 'bp35II_{0}.bin'.format(self.arm_sw_version)
+        else:
+            sw_ver = 'bp35_{0}.bin'.format(self.arm_sw_version)
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, 'bp35_{0}.bin'.format(self.arm_sw_version)),
+            os.path.join(folder, sw_ver),
             crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
         # PIC device programmer
@@ -474,6 +483,8 @@ class Measurements(share.Measurements):
 
     """Measurements."""
 
+    is_pm = None
+
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
@@ -512,7 +523,7 @@ class Measurements(share.Measurements):
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', 'Remote input'),
             ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
             ))
-        if self.parameter == 'PM':      # PM Solar Regulator
+        if self.is_pm:      # PM Solar Regulator
             self.create_from_names((
                 ('arm_pm_alive', 'PM-Alive', 'arm_pm_alive',
                     'Solar alive'),

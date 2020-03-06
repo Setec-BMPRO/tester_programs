@@ -1,22 +1,62 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2017 - 2019 SETEC Pty Ltd
-"""BP35 Configuration."""
+"""BP35 / BP35-II Configurations."""
 
 import logging
+import enum
 
 import tester
 import share
 
 
+def get(parameter, uut):
+    """Get a configuration based on the parameter and lot.
+
+    @param parameter Type of unit (A/B/C)
+    @param uut UUT to get Lot Number from
+    @return configuration class
+
+    """
+    config = {
+        'SR': BP35SR,
+        'HA': BP35HA,
+        'PM': BP35PM,
+        'SR2': BP35IISR,
+        'HA2': BP35IIHA,
+        'SI2': BP35IISI,
+        }[parameter]
+    config._configure(uut)    # Adjust for the Lot Number
+    return config
+
+
+class Type(enum.IntEnum):
+
+    """Product type numbers for hardware revisions."""
+
+    SR = 1
+    PM = 2
+    SI = 2
+    HA = 3
+
+
 class BP35():
 
-    """Base configuration for BP35."""
+    """Base configuration. """
 
+    is_2 = False
     # Software versions
     arm_sw_version = '2.0.17344.4603'       # Software Rev 14
     pic_sw_version = '1.5.19286.288'        # Software Rev 10
     pic_hw_version = 4
+    # SR Solar Reg settings
+    sr_vset = 13.650
+    sr_vset_settle = 0.05
+    sr_iset = 30.0
+    sr_ical = 10.0
+    sr_vin = 20.0
+    sr_vin_pre_percent = 6.0
+    sr_vin_post_percent = 1.5
     # This value is set per Product type & revision
     arm_hw_version = None
     # Injected Vbat & Vaux
@@ -92,23 +132,6 @@ class BP35():
     _lot_rev = None         # Lot Number to Revision data
     _rev_data = None        # Revision data dictionary
 
-    @staticmethod
-    def get(parameter, uut):
-        """Get a configuration based on the parameter and lot.
-
-        @param parameter Type of unit (A/B/C)
-        @param uut UUT to get Lot Number from
-        @return configuration class
-
-        """
-        config = {
-            'HA': BP35HA,
-            'PM': BP35PM,
-            'SR': BP35SR,
-            }[parameter]
-        config._configure(uut)    # Adjust for the Lot Number
-        return config
-
     @classmethod
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
@@ -127,69 +150,14 @@ class BP35():
         cls.arm_hw_version = cls._rev_data[rev]
 
     @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple of limits
-
-        """
-        return cls._base_limits_final
-
-
-class BP35SR(BP35):
-
-    """BP35SR configuration."""
-
-    is_pm = False
-    # SR Solar Reg settings
-    sr_vset = 13.650
-    sr_vset_settle = 0.05
-    sr_iset = 30.0
-    sr_ical = 10.0
-    sr_vin = 20.0
-    sr_vin_pre_percent = 6.0
-    sr_vin_post_percent = 1.5
-    _lot_rev = share.lots.Revision((
-        # Rev 1-5
-        (share.lots.Range('A000000', 'A162007'), 'Scrap'),
-        # Rev 6
-        (share.lots.Range('A162008', 'A163007'), 6),
-        # Rev 7
-        (share.lots.Range('A163308', 'A163308'), 7),
-        # Rev 8
-        (share.lots.Range('A164401', 'A170809'), 8),
-        # Rev 9
-        (share.lots.Range('A171101', 'A172712'), 9),
-        # Rev 10
-        (share.lots.Range('A173011', 'A173603'), 10),
-        # No Rev 11 created
-        # Rev 12
-        (share.lots.Range('A174403', 'A182506'), 12),
-        # Rev 13...
-        (share.lots.Range('A182906', 'A194809'), 13),
-        # Rev 14...
-        ))
-    sr_type = 1         # SR type number
-    _rev_data = {
-        None: (14, sr_type, 'A'),
-        13: (13, sr_type, 'B'),
-        12: (12, sr_type, 'C'),
-        10: (10, sr_type, 'E'),
-        9: (9, sr_type, 'E'),
-        8: (8, sr_type, 'G'),
-        7: (7, sr_type, 'B'),
-        6: (6, sr_type, 'C'),
-        'Scrap': None,      # This will cause a runtime error
-        }
-
-    @classmethod
     def limits_initial(cls):
-        """BP35SR initial test limits.
+        """Initial test limits.
 
         @return Tuple of limits
 
         """
-        return super()._base_limits_initial + (
+        return cls._base_limits_initial + (
+            # SR limits
             tester.LimitDelta('SolarVcc', 3.3, 0.1,
                 doc='Vcc present'),
             tester.LimitDelta('SolarVin', cls.sr_vin, 0.5,
@@ -211,7 +179,60 @@ class BP35SR(BP35):
             tester.LimitInteger('SR-Alive', 1, doc='Detected'),
             tester.LimitInteger('SR-Relay', 1, doc='Input relay ON'),
             tester.LimitInteger('SR-Error', 0, doc='No error'),
+            # PM limits
+            tester.LimitInteger('PM-Alive', 1, doc='Detected'),
+            tester.LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6,
+                doc='Zero reading before cal'),
+            tester.LimitDelta('ARM-PmSolarIz-Post', 0, 0.1,
+                doc='Zero reading after cal'),
             )
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple of limits
+
+        """
+        return cls._base_limits_final
+
+
+class BP35SR(BP35):
+
+    """BP35SR configuration."""
+
+    is_pm = False
+    _lot_rev = share.lots.Revision((
+        # Rev 1-5
+        (share.lots.Range('A000000', 'A162007'), 'Scrap'),
+        # Rev 6
+        (share.lots.Range('A162008', 'A163007'), 6),
+        # Rev 7
+        (share.lots.Range('A163308', 'A163308'), 7),
+        # Rev 8
+        (share.lots.Range('A164401', 'A170809'), 8),
+        # Rev 9
+        (share.lots.Range('A171101', 'A172712'), 9),
+        # Rev 10
+        (share.lots.Range('A173011', 'A173603'), 10),
+        # No Rev 11 created
+        # Rev 12
+        (share.lots.Range('A174403', 'A182506'), 12),
+        # Rev 13...
+        (share.lots.Range('A182906', 'A194809'), 13),
+        # Rev 14...
+        ))
+    _rev_data = {
+        None: (14, Type.SR.value, 'A'),
+        13: (13, Type.SR.value, 'B'),
+        12: (12, Type.SR.value, 'C'),
+        10: (10, Type.SR.value, 'E'),
+        9: (9, Type.SR.value, 'E'),
+        8: (8, Type.SR.value, 'G'),
+        7: (7, Type.SR.value, 'B'),
+        6: (6, Type.SR.value, 'C'),
+        'Scrap': None,       # This will cause a runtime error
+        }
 
 
 class BP35HA(BP35SR):
@@ -229,12 +250,11 @@ class BP35HA(BP35SR):
         (share.lots.Range('A182906', 'A194810'), 13),
         # Rev 14...
         ))
-    ha_type = 3         # HA type number
     _rev_data = {
-        None: (14, ha_type, 'A'),
-        13: (13, ha_type, 'B'),
-        12: (12, ha_type, 'C'),
-        10: (10, ha_type, 'E'),
+        None: (14, Type.HA.value, 'A'),
+        13: (13, Type.HA.value, 'B'),
+        12: (12, Type.HA.value, 'C'),
+        10: (10, Type.HA.value, 'E'),
         }
 
 
@@ -243,6 +263,7 @@ class BP35PM(BP35):
     """BP35PM configuration."""
 
     is_pm = True
+
     # PM Solar Reg settings
     pm_zero_wait = 30   # Settling delay for zero calibration
     _lot_rev = share.lots.Revision((
@@ -256,25 +277,55 @@ class BP35PM(BP35):
         (share.lots.Range('A183109', 'A194512'), 13),
         # Rev 14...
         ))
-    pm_type = 2         # PM type number
     _rev_data = {
-        None: (14, pm_type, 'A'),
-        13: (13, pm_type, 'B'),
-        12: (12, pm_type, 'C'),
-        10: (10, pm_type, 'E'),
+        None: (14, Type.PM.value, 'A'),
+        13: (13, Type.PM.value, 'B'),
+        12: (12, Type.PM.value, 'C'),
+        10: (10, Type.PM.value, 'E'),
         }
 
-    @classmethod
-    def limits_initial(cls):
-        """Initial test limits.
 
-        @return Tuple of limits
+class BP35II(BP35):
 
-        """
-        return super()._base_limits_initial + (
-            tester.LimitInteger('PM-Alive', 1, doc='Detected'),
-            tester.LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6,
-                doc='Zero reading before cal'),
-            tester.LimitDelta('ARM-PmSolarIz-Post', 0, 0.1,
-                doc='Zero reading after cal'),
-            )
+    """Base configuration for BP35-II."""
+
+    is_2 = True
+    # Software versions
+    arm_sw_version = '2.0.19867.5003'
+
+
+class BP35IISR(BP35II):
+
+    """BP35-IISR configuration."""
+
+    is_pm = False
+    _lot_rev = share.lots.Revision((
+        ))
+    _rev_data = {
+        None: (3, Type.SR.value, 'A'),
+        }
+
+
+class BP35IIHA(BP35IISR):
+
+    """BP35-IIHA configuration."""
+
+    _lot_rev = share.lots.Revision((
+        ))
+    _rev_data = {
+        None: (1, Type.HA.value, 'A'),
+        }
+
+
+class BP35IISI(BP35II):
+
+    """BP35-IISI configuration."""
+
+    is_pm = True
+    # PM Solar Reg settings
+    pm_zero_wait = 30   # Settling delay for zero calibration
+    _lot_rev = share.lots.Revision((
+        ))
+    _rev_data = {
+        None: (1, Type.SI.value, 'A'),
+        }

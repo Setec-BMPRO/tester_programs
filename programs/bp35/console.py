@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""BP35 ARM processor console driver."""
+"""BP35 / BP35-II ARM processor console driver."""
 
 import time
 import share
@@ -8,7 +8,7 @@ import share
 
 class _Console():
 
-    """Base class for a BP35 console."""
+    """Base class for a BP35 / BP35-II console."""
 
     # Number of lines in startup banner
     banner_lines = 3

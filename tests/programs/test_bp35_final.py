@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2017 SETEC Pty Ltd
-"""UnitTest for BP35 Final Test program."""
+"""UnitTest for BP35 / BP35-II Final Test program."""
 
 from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
@@ -10,7 +10,7 @@ from programs import bp35
 
 class BP35Final(ProgramTestCase):
 
-    """BP35 Final program test suite."""
+    """BP35 / BP35-II Final program test suite."""
 
     prog_class = bp35.Final
     parameter = 'SR'
@@ -47,7 +47,7 @@ class BP35Final(ProgramTestCase):
                     ),
                 'CAN': (
                     (sen['can12v'], 12.0),
-                    (sen['arm_swver'], bp35.config.BP35.arm_sw_version),
+                    (sen['arm_swver'], self.test_program.cfg.arm_sw_version),
                     ),
                 'OCP': (
                     (sen['vloads'][0], (self.vout, ) * 20 + (11.0, ), ),
