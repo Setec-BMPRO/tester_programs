@@ -11,14 +11,14 @@ class Config():
     """RVSWT101 configuration."""
 
     # Possible switch variants.
-    #   From "033325 RVSWT Series Product Specification -D"
+    #   From "034800 RVSWT Series Product Specification -F"
     _types = {
         # For the 3 TMC types: BLE Code is Label Code - 1 ...
         '4gp1': 0, '6gp1': 2, '6gp2': 3,
         'j3-1': 16, 'j3-2': 17, 'j3-3': 18, 'j3-4': 29, 'j3-5': 30,
-            'j3-6': 31, 'j3-7': 5, 'j3-8': 47,
+            'j3-6': 31, 'j3-7': 5, 'j3-8': 47, 'j3-9': 52,
         'j4-1': 19, 'j4-2': 20, 'j4-4': 21, 'j4-5': 32, 'j4-6': 6, 'j4-7': 7,
-            'j4-8': 48,
+            'j4-8': 48, 'j4-9': 53,
         'j5-1': 22, 'j5-2': 23, 'j5-3': 33, 'j5-4': 34, 'j5-5': 49, 'j5-6': 8,
             'j5-7': 9, 'j5-8': 45,
         'j6-1': 25, 'j6-2': 35, 'j6-3': 10, 'j6-4': 11, 'j6-5': 12,
