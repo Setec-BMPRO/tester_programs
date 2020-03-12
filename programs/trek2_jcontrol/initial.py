@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2017 - 2020 SETEC Pty Ltd
 """Trek2/JControl Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import serial
 import tester
-from tester import (
-    TestStep,
-    LimitRegExp, LimitDelta, LimitPercent, LimitInteger
-    )
+
 import share
-from . import console
-from . import config
+from . import config, console
 
 
 class Initial(share.TestSequence):
@@ -25,24 +23,25 @@ class Initial(share.TestSequence):
     vin_set = 12.0
     # Common limits
     _common = (
-        LimitDelta('Vin', vin_start - 0.75, 0.5, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
+        tester.LimitDelta('Vin', vin_start - 0.75, 0.5,
+            doc='Input voltage present'),
+        tester.LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
         # CAN Bus is operational if status bit 28 is set
-        LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
+        tester.LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
         'TK2': {
             'Config': config.Trek2,
             'Limits': _common + (
-                LimitRegExp('SwVer', '^{0}$'.format(
+                tester.LimitRegExp('SwVer', '^{0}$'.format(
                     config.Trek2.sw_version.replace('.', r'\.'))),
                 ),
             },
         'JC': {
             'Config': config.JControl,
             'Limits': _common + (
-                LimitRegExp('SwVer', '^{0}$'.format(
+                tester.LimitRegExp('SwVer', '^{0}$'.format(
                     config.JControl.sw_version.replace('.', r'\.'))),
                 ),
             },
@@ -51,15 +50,15 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]['Config']
-        Devices.sw_file = self.config.sw_file
+        Devices.sw_image = self.config.sw_image
         super().open(
             self.config_data[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self.devices['programmer'].program),
-            TestStep('TestArm', self._step_test_arm),
-            TestStep('CanBus', self._step_canbus),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self.devices['programmer'].program),
+            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
 
@@ -93,7 +92,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_file = None
+    sw_image = None
 
     def open(self):
         """Create all Instruments."""
@@ -111,7 +110,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, self.sw_file),
+            os.path.join(folder, self.sw_image),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
