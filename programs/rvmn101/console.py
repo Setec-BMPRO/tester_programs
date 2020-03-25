@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 Console driver."""
+"""RVMN101A/B Console driver."""
 
 import re
 
@@ -20,7 +20,8 @@ class _Console(share.console.Base):
     banner_lines = None         # Number of startup banner lines
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     max_output_index = 56       # Output index is range(max_output_index)
-    missing_outputs = {}        # Key: any text, Value: Output index
+    missing_output_dict = {}    # Key: any text, Value: Output index
+    reversed_output_dict = {}   # Key: any text, Value: Output index
     ls_0a5_out1 = 34
     ls_0a5_out2 = 35
 
@@ -32,18 +33,18 @@ class _Console(share.console.Base):
         """
         super().__init__(port)
         missing_set = set()
-        for key in self.missing_outputs:
-            missing_set.add(self.missing_outputs[key])
-        special_set = set()
-        for key in self._special_outputs:
-            special_set.add(self._special_outputs[key])
-        self.normal_outputs = []          # List of implemented output index
-        self.special_outputs = []       # List of reversed output index
+        for key in self.missing_output_dict:
+            missing_set.add(self.missing_output_dict[key])
+        reversed_set = set()
+        for key in self.reversed_output_dict:
+            reversed_set.add(self.reversed_output_dict[key])
+        self.normal_outputs = []        # List of normal output index
+        self.reversed_outputs = []      # List of reversed output index
         for idx in range(self.max_output_index):
-            if not (idx in missing_set or idx in special_set):
+            if not (idx in missing_set or idx in reversed_set):
                 self.normal_outputs.append(idx)
-            if idx in special_set:
-                self.special_outputs.append(idx)
+            if idx in reversed_set:
+                self.reversed_outputs.append(idx)
 
     def brand(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
@@ -83,7 +84,7 @@ class _Console(share.console.Base):
         @param state True for ON, False for OFF
 
         """
-        if not(index in self.normal_outputs or index in self.special_outputs):
+        if not(index in self.normal_outputs or index in self.reversed_outputs):
             raise InvalidOutputError
         self['OUTPUT'] = '{0} {1}'.format(index, 1 if state else 0)
 
@@ -129,20 +130,11 @@ class ConsoleA(_Console):
         @param port Serial instance to use
 
         """
-        self.missing_outputs = {
+        self.missing_output_dict = {
             'LS_0A5_EN1': 34,
             'LS_0A5_EN2': 35,
             'LS_0A5_EN3': 36,
             'LS_0A5_EN4': 37,
-            }
-        # Special outputs only for Rev8 boards
-        self._special_outputs = {
-            'HBRIDGE 1 EXTEND': 0,
-            'HBRIDGE 1 RETRACT': 1,
-            'HBRIDGE 2 EXTEND': 2,
-            'HBRIDGE 2 RETRACT': 3,
-            'HBRIDGE 3 EXTEND': 4,
-            'HBRIDGE 3 RETRACT': 5,
             }
         super().__init__(port)
 
@@ -174,7 +166,7 @@ class ConsoleB(_Console):
         @param port Serial instance to use
 
         """
-        self.missing_outputs = {
+        self.missing_output_dict = {
             'HBRIDGE 3 EXTEND': 4,
             'HBRIDGE 3 RETRACT': 5,
             'HBRIDGE 4 EXTEND': 6,
@@ -192,6 +184,4 @@ class ConsoleB(_Console):
             'LS_0A5_EN4': 37,
             'OUT5A_PWM_13': 51,
             }
-        # Special outputs only for Rev8 boards
-        self._special_outputs = {}
         super().__init__(port)

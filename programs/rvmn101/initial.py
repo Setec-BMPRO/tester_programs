@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 Initial Test Program."""
+"""RVMN101A/B Initial Test Program."""
 
 import inspect
 import os
@@ -23,6 +23,7 @@ class Initial(share.TestSequence):
         Devices.fixture = self.cfg.fixture
         Devices.arm_image = self.cfg.arm_image
         Devices.nordic_image = self.cfg.nordic_image
+        Devices.reversed_output_dict = self.cfg.reversed_output_dict
         self.limits = self.cfg.limits_initial()
         super().open(self.limits, Devices, Sensors, Measurements)
         # Adjust for different console behaviour
@@ -64,8 +65,8 @@ class Initial(share.TestSequence):
         dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
         if self.parameter == 'A':
             rvmn101.hs_output(41, False)
-            # Turn LOW, then HIGH, HBridge outputs 1-3 in turn
-            for idx in rvmn101.special_outputs:
+            # Turn LOW, then HIGH, reversed HBridge outputs in turn
+            for idx in rvmn101.reversed_outputs:
                 with tester.PathName('HS{0}'.format(idx)):
                     rvmn101.hs_output(idx, True)
                     mes['dmm_hb_low'](timeout=5)
@@ -112,6 +113,7 @@ class Devices(share.Devices):
     fixture = None          # Fixture number
     arm_image = None        # ARM software image filename
     nordic_image = None     # Nordic software image filename
+    reversed_output_dict = None     # Outputs with reversed operation
 
     def open(self):
         """Create all Instruments."""
@@ -143,10 +145,12 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         nordic_ser.port = share.config.Fixture.port(self.fixture, 'NORDIC')
         # Console driver
-        self['rvmn101'] = {
+        console_class = {
             'A': console.ConsoleA,
             'B': console.ConsoleB,
-            }[self.parameter](nordic_ser)
+            }[self.parameter]
+        console_class.reversed_output_dict = self.reversed_output_dict
+        self['rvmn101'] = console_class(nordic_ser)
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # CAN interface

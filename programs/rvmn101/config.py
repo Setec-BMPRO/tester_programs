@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2019 - 2020 SETEC Pty Ltd.
-"""RVMN101 Configuration."""
+# Copyright 2019 SETEC Pty Ltd.
+"""RVMN101A/B Configuration."""
 
 import logging
 
@@ -21,6 +21,7 @@ class _Values():
     product_rev = attr.ib(validator=attr.validators.instance_of(str))
     hardware_rev = attr.ib()
     banner_lines = attr.ib(validator=attr.validators.instance_of(int))
+    reversed_output_dict = attr.ib(validator=attr.validators.instance_of(dict))
 
 
 class Config():
@@ -33,6 +34,7 @@ class Config():
     product_rev = None
     hardware_rev = None
     banner_lines = None
+    reversed_output_dict = None
     # General parameters used in testing the units
     #  Injected voltages
     vbatt_set = 12.5
@@ -95,6 +97,7 @@ class Config():
         cls.product_rev = values.product_rev
         cls.hardware_rev = values.hardware_rev
         cls.banner_lines = values.banner_lines
+        cls.reversed_output_dict = values.reversed_output_dict
 
     @classmethod
     def limits_initial(cls):
@@ -121,6 +124,15 @@ class RVMN101A(Config):
 
     # Initial Test parameters
     fixture = '033550'
+    # Reversed outputs exist on Rev 7,8,9 units
+    _reversed7to9 = {       # Key: any text, Value: Output index
+            'HBRIDGE 1 EXTEND': 0,
+            'HBRIDGE 1 RETRACT': 1,
+            'HBRIDGE 2 EXTEND': 2,
+            'HBRIDGE 2 RETRACT': 3,
+            'HBRIDGE 3 EXTEND': 4,
+            'HBRIDGE 3 RETRACT': 5,
+            }
     # Software versions
     _nordic_133 = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
     _nordic_181 = 'jayco_rvmn101_signed_1.8.1-0-ge5395312_factory_mcuboot.hex'
@@ -142,26 +154,32 @@ class RVMN101A(Config):
         None: _Values(
             nordic_image=_nordic_1108, arm_image=_arm_image_113,
             product_rev='10A', hardware_rev='10A', banner_lines=6,
+            reversed_output_dict={},
             ),
         9: _Values(
             nordic_image=_nordic_1106, arm_image=_arm_image_113,
             product_rev='09A', hardware_rev='08A', banner_lines=6,
+            reversed_output_dict=_reversed7to9,
             ),
         8: _Values(
             nordic_image=_nordic_181, arm_image=_arm_image_19,
             product_rev='08A', hardware_rev='08A', banner_lines=4,
+            reversed_output_dict=_reversed7to9,
             ),
         7: _Values(
             nordic_image=_nordic_133, arm_image=_arm_image_19,
             product_rev='07A', hardware_rev='07A', banner_lines=4,
+            reversed_output_dict=_reversed7to9,
             ),
         6: _Values(
             nordic_image='dunno', arm_image=_arm_image_19,
             product_rev='06A', hardware_rev='06A', banner_lines=4,
+            reversed_output_dict={},
             ),
         5: _Values(
             nordic_image='dunno', arm_image=_arm_image_19,
             product_rev='05A', hardware_rev='05A', banner_lines=4,
+            reversed_output_dict={},
             ),
         }
 
@@ -197,10 +215,12 @@ class RVMN101B(Config):
         None: _Values(
             nordic_image=_nordic_088, arm_image=_arm_image_19,
             product_rev='06A', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
             ),
         5: _Values(
             nordic_image=_nordic_088, arm_image=_arm_image_19,
             product_rev='05B', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
             ),
         }
 
