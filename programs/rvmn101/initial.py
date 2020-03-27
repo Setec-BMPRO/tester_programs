@@ -66,12 +66,14 @@ class Initial(share.TestSequence):
         if self.parameter == 'A':
             rvmn101.hs_output(41, False)
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
+            dev['rla_pullup'].set_on()
             for idx in rvmn101.reversed_outputs:
-                with tester.PathName('HS{0}'.format(idx)):
+                with tester.PathName('REV{0}'.format(idx)):
                     rvmn101.hs_output(idx, True)
-                    mes['dmm_hb_low'](timeout=5)
+                    mes['dmm_hb_on'](timeout=5)
                     rvmn101.hs_output(idx, False)
-                    mes['dmm_hb_high'](timeout=5)
+                    mes['dmm_hb_off'](timeout=5)
+            dev['rla_pullup'].set_off()
         mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101.normal_outputs:
@@ -125,6 +127,7 @@ class Devices(share.Devices):
                 ('dcs_vhbridge', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
+                ('rla_pullup', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Working folder
@@ -168,7 +171,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_reset', 'rla_boot'):
+        for rla in ('rla_reset', 'rla_boot', 'rla_pullup'):
             self[rla].set_off()
 
     def close_can(self):
@@ -190,7 +193,7 @@ class Sensors(share.Sensors):
         self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['HSout'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.1)
-        self['HBout'] = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.1)
+        self['ReverseHB'] = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.1)
         self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.1)
         self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
         self['SnEntry'] = sensor.DataEntry(
@@ -218,14 +221,14 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('dmm_3v3', '3V3', '3V3', 'Micro power ok'),
             ('dmm_vbatt', 'Vbatt', 'VBatt', 'Battery input ok'),
-            ('dmm_hs_off', 'HSoff', 'HSout', 'All high-side drivers OFF'),
             ('dmm_hs_on', 'HSon', 'HSout', 'High-side driver ON'),
-            ('dmm_hb_low', 'HBlow', 'HBout', 'Test HBridge 1-3 low'),
-            ('dmm_hb_high', 'HBhigh', 'HBout', 'Test HBridge 1-3 high'),
-            ('dmm_ls1_off', 'LSoff', 'LSout1', 'Low-side driver1 OFF'),
+            ('dmm_hs_off', 'HSoff', 'HSout', 'All high-side drivers OFF'),
+            ('dmm_hb_on', 'HBon', 'ReverseHB', 'Test reversed HBridge 1-3 ON'),
+            ('dmm_hb_off', 'HBoff', 'ReverseHB', 'Test reversed HBridge 1-3 OFF'),
             ('dmm_ls1_on', 'LSon', 'LSout1', 'Low-side driver1 ON'),
-            ('dmm_ls2_off', 'LSoff', 'LSout2', 'Low-side driver2 OFF'),
+            ('dmm_ls1_off', 'LSoff', 'LSout1', 'Low-side driver1 OFF'),
             ('dmm_ls2_on', 'LSon', 'LSout2', 'Low-side driver2 ON'),
+            ('dmm_ls2_off', 'LSoff', 'LSout2', 'Low-side driver2 OFF'),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ('ble_mac', 'BleMac', 'BleMac', 'MAC address from console'),
