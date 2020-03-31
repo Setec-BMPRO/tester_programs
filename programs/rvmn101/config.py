@@ -258,10 +258,12 @@ class RVMN5x(Config):
         None: _Values(
             nordic_image=_nordic_088, arm_image=_arm_image_19,
             product_rev='06A', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
             ),
         5: _Values(
             nordic_image=_nordic_088, arm_image=_arm_image_19,
             product_rev='05B', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
             ),
         }
 
