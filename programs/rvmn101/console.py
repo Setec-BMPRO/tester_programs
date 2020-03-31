@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101A/B Console driver."""
+"""RVMN101 and RVMN5x Console driver."""
 
 import re
 
@@ -15,7 +15,7 @@ class InvalidOutputError(Exception):
 
 class _Console(share.console.Base):
 
-    """Communications to RVMN101A/B console."""
+    """Communications to RVMN101 and RVMN5x console."""
 
     banner_lines = None         # Number of startup banner lines
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
@@ -184,4 +184,68 @@ class ConsoleB(_Console):
             'LS_0A5_EN4': 37,
             'OUT5A_PWM_13': 51,
             }
+        super().__init__(port)
+
+
+class Console5x(_Console):
+
+    """Communications to RVMN5x console."""
+
+    # Console command prompt. Signals the end of response data.
+    cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
+    # Console commands
+    parameter = share.console.parameter
+    cmd_data = {
+        'MAC': parameter.String(
+            'rvmn mac', read_format='{0}'),
+        'SERIAL': parameter.String(
+            'rvmn serial', writeable=True, write_format='{1} {0}'),
+        'PRODUCT-REV': parameter.String(
+            'rvmn product-rev', writeable=True, write_format='{1} {0}'),
+        'SW-REV': parameter.String(
+            'rvmn sw-rev', read_format='{0}'),
+        'HARDWARE-REV': parameter.String(
+            'rvmn hw-rev', writeable=True, write_format='{1} {0}'),
+        'OUTPUT': parameter.String(
+            'rvmn output',
+            readable=False, writeable=True, write_format='{1} {0}'),
+        }
+
+    def __init__(self, port):
+        """Initialise communications.
+
+        @param port Serial instance to use
+
+        """
+        self.missing_outputs = {
+            'HBRIDGE 3 EXTEND': 4,
+            'HBRIDGE 3 RETRACT': 5,
+            'HBRIDGE 8 EXTEND': 14,
+            'HBRIDGE 8 RETRACT': 15,
+            'HS_0A5_EN7': 22,
+            'HS_0A5_EN13': 28,
+            'HS_0A5_EN14': 29,
+            'HS_0A5_EN15': 30,
+            'HS_0A5_EN16': 31,
+            'HS_0A5_EN17': 32,
+            'HS_0A5_EN18': 33,
+            'LS_0A5_EN1': 34,
+            'LS_0A5_EN2': 35,
+            'LS_0A5_EN3': 36,
+            'LS_0A5_EN4': 37,
+            'OUT5A_EN0': 38,
+            'OUT5A_EN1': 39,
+            'OUT5A_EN2': 40,
+            'OUT5A_EN3': 41,
+            'OUT5A_EN4': 42,
+            'OUT5A_EN5': 43,
+            'OUT5A_PWM_EN6': 44,
+            'OUT5A_PWM_EN7': 45,
+            'OUT5A_PWM_EN8': 46,
+            'OUT10A_2': 53,
+            'OUT10A_3': 54,
+            'OUT10A_4': 55,
+            }
+        # Special outputs only for Rev8 boards
+        self._special_outputs = {}
         super().__init__(port)

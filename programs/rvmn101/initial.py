@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101A/B Initial Test Program."""
+"""RVMN101 and RVMN5x Initial Test Program."""
 
 import inspect
 import os
@@ -15,7 +15,7 @@ from . import console, config
 
 class Initial(share.TestSequence):
 
-    """RVMN101 Initial Test Program."""
+    """RVMN101 and RVMN5x Initial Test Program."""
 
     def open(self, uut):
         """Create the test program as a linear sequence."""

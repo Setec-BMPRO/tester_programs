@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 Test Programs."""
+"""RVMN101 and RVMN5x Test Programs."""
 
 from .final import Final
 from .initial import Initial

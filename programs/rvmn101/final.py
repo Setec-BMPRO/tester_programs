@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 Final Test Program."""
+"""RVMN101 and RVMN5x Final Test Program."""
 
 import tester
 
@@ -11,7 +11,7 @@ from . import config
 
 class Final(share.TestSequence):
 
-    """RVMN101 Final Test Program."""
+    """RVMN101 and RVMN5x Final Test Program."""
 
     def open(self, uut):
         """Create the test program as a linear sequence."""

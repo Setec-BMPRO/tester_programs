@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101A/B Configuration."""
+"""RVMN101 and RVMN5x Configuration."""
 
 import logging
 
@@ -26,7 +26,7 @@ class _Values():
 
 class Config():
 
-    """Base configuration for RVMN101A/B."""
+    """Base configuration for RVMN101 and RVMN5x."""
 
     # These values get set per Product type & revision
     nordic_image = None
@@ -72,6 +72,7 @@ class Config():
         config = {
             'A': RVMN101A,
             'B': RVMN101B,
+            '5': RVMN5x,
             }[parameter]
         config._configure(uut)    # Adjust for the Lot Number
         return config
@@ -221,6 +222,46 @@ class RVMN101B(Config):
             nordic_image=_nordic_088, arm_image=_arm_image_19,
             product_rev='05B', hardware_rev=None, banner_lines=4,
             reversed_output_dict={},
+            ),
+        }
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        # 3dB below the -A version
+        rssi = -73 if share.config.System.tester_type == 'ATE4' else -88
+        return cls._base_limits_final + (
+            tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
+            )
+
+
+class RVMN5x(Config):
+
+    """RVMN5x configuration."""
+
+    # Initial Test parameters
+    fixture = '034861'
+    # Software versions
+    #   Firmware 0.88 does not support hardware_rev
+    _nordic_088 = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
+    _arm_image_19 = 'rvmn101_nxp_1.9.bin'
+    # Lot number mapping
+    _lot_rev = share.lots.Revision((
+        (share.lots.Range('A191809', 'A200510'), 5),    # 033280
+        # Rev 6...                                      # 034229
+        ))
+    _rev_data = {
+        None: _Values(
+            nordic_image=_nordic_088, arm_image=_arm_image_19,
+            product_rev='06A', hardware_rev=None, banner_lines=4,
+            ),
+        5: _Values(
+            nordic_image=_nordic_088, arm_image=_arm_image_19,
+            product_rev='05B', hardware_rev=None, banner_lines=4,
             ),
         }
 
