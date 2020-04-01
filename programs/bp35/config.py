@@ -290,8 +290,8 @@ class BP35II(BP35):
     """Base configuration for BP35-II."""
 
     is_2 = True
-    # Software versions
-    arm_sw_version = '2.0.19867.5003'
+    # ARM software version
+    arm_sw_version = '2.0.19924.5009'
 
 
 class BP35IISR(BP35II):
@@ -302,7 +302,7 @@ class BP35IISR(BP35II):
     _lot_rev = share.lots.Revision((
         ))
     _rev_data = {
-        None: (3, Type.SR.value, 'A'),
+        None: (15, Type.SR.value, 'A'),
         }
 
 
@@ -313,7 +313,7 @@ class BP35IIHA(BP35IISR):
     _lot_rev = share.lots.Revision((
         ))
     _rev_data = {
-        None: (1, Type.HA.value, 'A'),
+        None: (15, Type.HA.value, 'A'),
         }
 
 
@@ -327,5 +327,5 @@ class BP35IISI(BP35II):
     _lot_rev = share.lots.Revision((
         ))
     _rev_data = {
-        None: (1, Type.SI.value, 'A'),
+        None: (15, Type.SI.value, 'A'),
         }
