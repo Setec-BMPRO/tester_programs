@@ -18,7 +18,7 @@ class CN101():
     limits_initial = (
             LimitRegExp('SwVer', '',            # Adjusted during open()
                 doc='Software version'),
-            LimitLow('Part', 20.0),
+            LimitLow('Part', 100.0),
             LimitDelta('Vin', 8.0, 0.5),
             LimitPercent('3V3', 3.30, 3.0),
             LimitInteger('CAN_BIND', 1 << 28),
