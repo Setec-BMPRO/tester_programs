@@ -84,3 +84,15 @@ class JDisplayInitial(_CommonInitial):
     def test_pass_run(self):
         """PASS run of the JDisplay program."""
         super()._pass_run()
+
+
+class RVMD50Initial(_CommonInitial):
+
+    """RVMD50 Initial program test suite."""
+
+    parameter = 'D50'
+    debug = False
+
+    def test_pass_run(self):
+        """PASS run of the RVMD50 program."""
+        super()._pass_run()

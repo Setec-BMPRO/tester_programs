@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2017 SETEC Pty Ltd
-"""RvView/JDisplay Initial Test Program."""
+"""RvView/JDisplay/RVMD50 Initial Test Program."""
 
 import os
 import inspect
@@ -47,6 +47,13 @@ class Initial(share.TestSequence):
                     config.JDisplay.sw_version.replace('.', r'\.'))),
                 ),
             },
+        'D50': {
+            'Config': config.RVMD50,
+            'Limits': _common + (
+                LimitRegExp('SwVer', '^{0}$'.format(
+                    config.RVMD50.sw_version.replace('.', r'\.'))),
+                ),
+            },
         }
 
     def open(self, uut):
@@ -58,7 +65,7 @@ class Initial(share.TestSequence):
             Devices, Sensors, Measurements)
         self.steps = (
             TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self.devices['programmer'].program),
+            TestStep('Program', self._step_program),
             TestStep('Initialise', self._step_initialise),
             TestStep('Display', self._step_display),
             TestStep('CanBus', self._step_canbus),
@@ -71,6 +78,13 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(self.vin_set, True)
         self.measure(('dmm_vin', 'dmm_3v3'), timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the ARM."""
+        if self.parameter == 'D50':
+            dev['rla_wd'].set_on()
+        dev['programmer'].program
 
     @share.teststep
     def _step_initialise(self, dev, mes):
@@ -122,6 +136,7 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
+                ('rla_wd', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         arm_port = share.config.Fixture.port('029687', 'ARM')
@@ -151,7 +166,7 @@ class Devices(share.Devices):
         self['arm'].close()
         self['armtunnel'].close()
         self['dcs_vin'].output(0.0, False)
-        for rla in ('rla_reset', 'rla_boot'):
+        for rla in ('rla_reset', 'rla_boot', 'rla_wd'):
             self[rla].set_off()
 
 

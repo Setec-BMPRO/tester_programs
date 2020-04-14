@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""RvView/JDisplay ARM processor console driver."""
+"""RvView/JDisplay/RVMD50 ARM processor console driver."""
 
 import share
 
