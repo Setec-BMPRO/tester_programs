@@ -57,8 +57,7 @@ class Initial(share.TestSequence):
                 ),
             'LoadRatio': (20, 14),      # Iout:Ibat
             'ScaleFactor': 1000,
-            'HexFile': 'bce282_12_3a.txt' # TI Text format
-
+            'HexFile': 'bce282_4a.txt'  # TI Text format
             },
         '24': {
             'Limits': _common + (
@@ -71,7 +70,7 @@ class Initial(share.TestSequence):
                 ),
             'LoadRatio': (10, 6),       # Iout:Ibat
             'ScaleFactor': 500,
-            'HexFile': 'bce282_3a.txt' # TI Text format
+            'HexFile': 'bce282_4a.txt'  # TI Text format
             },
         }
 
