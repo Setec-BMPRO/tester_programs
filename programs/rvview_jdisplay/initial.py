@@ -84,7 +84,7 @@ class Initial(share.TestSequence):
         """Program the ARM."""
         if self.parameter == 'D50':
             dev['rla_wd'].set_on()
-        dev['programmer'].program
+        dev['programmer'].program()
 
     @share.teststep
     def _step_initialise(self, dev, mes):
