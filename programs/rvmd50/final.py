@@ -7,6 +7,8 @@ import tester
 
 import share
 
+from . import device
+
 
 class Final(share.TestSequence):
 
@@ -47,10 +49,27 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        self['can'] = self.physical_devices['_CAN']
+        self['can'].rvc_mode = True
+        self['can'].verbose = False
+        self['decoder'] = tester.CANPacketDevice()
+        self['canreader'] = tester.CANReader(
+            self['can'], self['decoder'], device.RVMD50Packet,
+            name='CANThread')
+        self['canreader'].verbose = False
+        self['canreader'].start()
+        self.add_closer(self.close_can)
 
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, output=False)
+        self['canreader'].enable = False
+
+    def close_can(self):
+        """Reset CAN system."""
+        self['canreader'].halt()
+        self['can'].rvc_mode = False
+        self['can'].verbose = False
 
 
 class Sensors(share.Sensors):
@@ -61,12 +80,12 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         sensor = tester.sensor
         self['yesnoseg'] = sensor.YesNo(
-            message=tester.translate('rvview_jdisplay_final', 'AreSegmentsOn?'),
-            caption=tester.translate('rvview_jdisplay_final', 'capSegments'))
+            message=tester.translate('rvmd50_final', 'AreSegmentsOn?'),
+            caption=tester.translate('rvmd50_final', 'capSegments'))
         self['yesnoseg'].doc = 'Operator input'
         self['yesnobklght'] = sensor.YesNo(
-            message=tester.translate('rvview_jdisplay_final', 'IsBacklightOk?'),
-            caption=tester.translate('rvview_jdisplay_final', 'capBacklight'))
+            message=tester.translate('rvmd50_final', 'IsBacklightOk?'),
+            caption=tester.translate('rvmd50_final', 'capBacklight'))
         self['yesnobklght'].doc = 'Operator input'
 
 

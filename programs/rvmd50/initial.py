@@ -10,6 +10,8 @@ import tester
 
 import share
 
+from . import device
+
 
 class Initial(share.TestSequence):
 
@@ -67,6 +69,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
+        dev['canreader'].enable = True
 
 
 class Devices(share.Devices):
@@ -95,12 +98,29 @@ class Devices(share.Devices):
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
+        self['can'] = self.physical_devices['_CAN']
+        self['can'].rvc_mode = True
+        self['can'].verbose = False
+        self['decoder'] = tester.CANPacketDevice()
+        self['canreader'] = tester.CANReader(
+            self['can'], self['decoder'], device.RVMD50Packet,
+            name='CANThread')
+        self['canreader'].verbose = False
+        self['canreader'].start()
+        self.add_closer(self.close_can)
 
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot', 'rla_wd'):
             self[rla].set_off()
+        self['canreader'].enable = False
+
+    def close_can(self):
+        """Reset CAN system."""
+        self['canreader'].halt()
+        self['can'].rvc_mode = False
+        self['can'].verbose = False
 
 
 class Sensors(share.Sensors):
@@ -120,13 +140,13 @@ class Sensors(share.Sensors):
         self['bklght'].doc = 'Across backlight'
         self['oYesNoOn'] = sensor.YesNo(
             message=tester.translate(
-            'rvview_jdisplay_initial', 'PushButtonOn?'),
-            caption=tester.translate('rvview_jdisplay_initial', 'capButtonOn'))
+            'rvmd50_initial', 'PushButtonOn?'),
+            caption=tester.translate('rvmd50_initial', 'capButtonOn'))
         self['oYesNoOn'].doc = 'Operator input'
         self['oYesNoOff'] = sensor.YesNo(
             message=tester.translate(
-            'rvview_jdisplay_initial', 'PushButtonOff?'),
-            caption=tester.translate('rvview_jdisplay_initial', 'capButtonOff'))
+            'rvmd50_initial', 'PushButtonOff?'),
+            caption=tester.translate('rvmd50_initial', 'capButtonOff'))
         self['oYesNoOff'].doc = 'Operator input'
 
 

@@ -54,7 +54,7 @@ class RVMC101Packet():
     def __init__(self, packet):
         """Create instance.
 
-        @param packet RVCPacket instance
+        @param packet CAN payload of 8 bytes
 
         """
         payload = packet.data
