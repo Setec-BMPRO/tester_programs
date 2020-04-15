@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""RvView/JDisplay/RVMD50 Test Programs."""
+# Copyright 2017 SETEC Pty Ltd
+"""RvView/JDisplay Test Programs."""
 
-from .final import Final
 from .initial import Initial
 
 
-__all__ = ['Final', 'Initial']
+__all__ = ['Initial']

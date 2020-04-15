@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-04-15, 10:20:41 -->
+<!-- Saved: 2020-04-15, 13:06:31 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -118,6 +118,9 @@
     <Source>programs/rvmc101/device.py</Source>
     <Source>programs/rvmc101/final.py</Source>
     <Source>programs/rvmc101/initial.py</Source>
+    <Source>programs/rvmd50/__init__.py</Source>
+    <Source>programs/rvmd50/final.py</Source>
+    <Source>programs/rvmd50/initial.py</Source>
     <Source>programs/rvmn101/__init__.py</Source>
     <Source>programs/rvmn101/config.py</Source>
     <Source>programs/rvmn101/console.py</Source>
@@ -132,7 +135,6 @@
     <Source>programs/rvview_jdisplay/__init__.py</Source>
     <Source>programs/rvview_jdisplay/config.py</Source>
     <Source>programs/rvview_jdisplay/console.py</Source>
-    <Source>programs/rvview_jdisplay/final.py</Source>
     <Source>programs/rvview_jdisplay/initial.py</Source>
     <Source>programs/selftest/__init__.py</Source>
     <Source>programs/smu75070/__init__.py</Source>
@@ -250,6 +252,8 @@
     <Source>tests/programs/test_rm50_final.py</Source>
     <Source>tests/programs/test_rvmc101_final.py</Source>
     <Source>tests/programs/test_rvmc101_initial.py</Source>
+    <Source>tests/programs/test_rvmd50_final.py</Source>
+    <Source>tests/programs/test_rvmd50_initial.py</Source>
     <Source>tests/programs/test_rvmn101_config.py</Source>
     <Source>tests/programs/test_rvmn101_console.py</Source>
     <Source>tests/programs/test_rvmn101_final.py</Source>

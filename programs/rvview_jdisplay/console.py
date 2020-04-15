@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""RvView/JDisplay/RVMD50 ARM processor console driver."""
+# Copyright 2017 SETEC Pty Ltd
+"""RvView/JDisplay ARM processor console driver."""
 
 import share
 
