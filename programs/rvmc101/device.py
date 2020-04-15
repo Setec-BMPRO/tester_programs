@@ -4,17 +4,9 @@
 """RVMC101 Packet decoder."""
 
 import ctypes
-import logging
 import struct
-import threading
-import time
 
 import tester
-
-
-class PacketDecodeError(Exception):
-
-    """Error decoding RVMC101 status packet."""
 
 
 class _SwitchField(ctypes.Structure):
@@ -53,7 +45,7 @@ class _SwitchRaw(ctypes.Union):
         ]
 
 
-class Packet():
+class RVMC101Packet():
 
     """A RVMC101 broadcast packet."""
 
@@ -67,7 +59,7 @@ class Packet():
         """
         payload = packet.data
         if len(payload) != 8 or payload[0] != self.switch_status:
-            raise PacketDecodeError()
+            raise tester.CANPacketDecodeError()
         (   self.msgtype,
             switch_data,
             self.swver,
@@ -90,99 +82,6 @@ class Packet():
         self.usb_pwr = bool(zss.usb_pwr)
         self.wake_up = bool(zss.wake_up)
 
-
-class NullPayload():
-
-    """A NULL packet payload."""
-
-    data = bytearray(8)
-
-
-class CANReader(threading.Thread):
-
-    """Thread to put CAN packets to the CANPacket device.
-
-    This class is an asynchronous interface to the CAN packet stream sent
-    by the RVMC101 product.
-    Advertisment packets are received from the Serial2Can interface, decoded,
-    and loaded into the tester.CANPacket logical device.
-    That logical device is the data source for CAN based sensors.
-    The RVMC101 transmits 25 packets/sec.
-
-    """
-
-    # Time to wait when not reading CAN packets
-    wait_time = 0.1
-    read_timeout = 1.0
-    # A NULL Packet
-    null_packet = Packet(NullPayload)
-
-    def __init__(self, candev, packetdev, name=None):
-        """Create instance
-
-        @param candev CAN physical device (source of raw packets)
-        @param packetdev RVMC101 CAN packet device
-
-        """
-        super().__init__(name=name)
-        self.candev = candev
-        self.packetdev = packetdev
-        self.packetdev.packet = Packet(NullPayload)
-        self._evt_stop = threading.Event()
-        self._evt_enable = threading.Event()
-        self.enable = False         # Default to be 'not enabled'
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-        self._logger.debug('Start CANReader')
-
-    def run(self):
-        """Run the data processing thread."""
-        while not self._evt_stop.is_set():
-            if self.enable:
-                try:
-                    pkt = self.candev.read_can(timeout=self.read_timeout)
-                except tester.devphysical.can.SerialToCanError:
-                    self._logger.debug('SerialToCanError')
-                    self.packetdev.packet = self.null_packet
-                    continue
-                try:
-                    self.packetdev.packet = Packet(pkt)
-                except PacketDecodeError:
-                    self._logger.debug('PacketDecodeError')
-                    # Advertisment packets are mixed with the occasional other
-                    # packet type, which will cause a decode error
-                    pass
-            else:
-                self.candev.flush_can()
-                time.sleep(self.wait_time)
-
-    @property
-    def enable(self):
-        """Enable property getter.
-
-        @return True if enabled
-
-        """
-        return self._evt_enable.is_set()
-
-    @enable.setter
-    def enable(self, value):
-        """Set enable property.
-
-        @param value True to enable packet processing
-
-        """
-        if value:
-            self.packetdev.packet = self.null_packet
-            self._evt_enable.set()
-        else:
-            self._evt_enable.clear()
-
-    def halt(self):
-        """Stop the packet processing thread."""
-        self._logger.debug('Stop CANReader')
-        self._evt_stop.set()
-        self.join()
 
 # This is how to send Display Control packets
 #    def send_led_display(serial2can):

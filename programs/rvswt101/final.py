@@ -59,7 +59,7 @@ class Devices(share.Devices):
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # BLE Packet decoder
-        self['decoder'] = tester.CANPacket()
+        self['decoder'] = tester.CANPacketDevice()
 
 
 class Sensors(share.Sensors):

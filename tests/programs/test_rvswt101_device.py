@@ -19,7 +19,7 @@ class RVSWT101Device(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.pkt = rvswt101.device.Packet(self.payload)
-        self.rvswt = tester.CANPacket()
+        self.rvswt = tester.CANPacketDevice()
         self.rvswt.packet = self.pkt
 
     def test_packet(self):

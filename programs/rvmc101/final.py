@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2019 - 2020 SETEC Pty Ltd.
+# Copyright 2019 SETEC Pty Ltd.
 """RVMC101x Final Test Program."""
 
 import tester
@@ -57,9 +57,10 @@ class Devices(share.Devices):
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
         self['can'].verbose = False
-        self['decoder'] = tester.CANPacket()
-        self['canreader'] = device.CANReader(
-            self['can'], self['decoder'], name='CANThread')
+        self['decoder'] = tester.CANPacketDevice()
+        self['canreader'] = tester.CANReader(
+            self['can'], self['decoder'], device.RVMC101Packet,
+            name='CANThread')
         self['canreader'].verbose = False
         self['canreader'].start()
         self.add_closer(self.close_can)
