@@ -20,8 +20,7 @@ class Initial(share.TestSequence):
     # Input voltage to power the unit
     vin_set = 8.1
     # Device software
-    sw_version = '0.0.00000.00'
-    sw_file = 'rvmd50_{0}.bin'.format(sw_version)
+    sw_file = 'rvmd50_1.3.bin'
     # Test limits
     testlimits = (
         tester.LimitBetween('Vin', 7.0, 8.0, doc='Input voltage present'),

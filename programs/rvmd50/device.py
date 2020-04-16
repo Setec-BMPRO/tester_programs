@@ -81,17 +81,146 @@ class RVMD50Packet():
         self.backlight = bool(zss.backlight)
 
 
-def display_test_pattern(serial2can, pattern):
-    """Send a RVMD50 test pattern control packet."""
-    if pattern not in range(4):
-        raise ValueError('Test pattern must be 0-3')
-    pkt = tester.devphysical.can.RVCPacket()
-    msg = pkt.header.message
-    msg.priority = 6
-    msg.reserved = 0
-    msg.DGN = tester.devphysical.can.RVCDGN.setec_rvmd50.value
-    msg.SA = tester.devphysical.can.RVCDeviceID.rvmn5x.value
-    pkt.data.extend(b'\x10\x00')                # Cmd 16, Cmd ID 0
-    pkt.data.extend(bytes([pattern & 0xff]))    # Pattern number
-    pkt.data.extend(b'\xff\xff\xff\xff\xff')    # Padding
-    serial2can.send('t{0}'.format(pkt))
+class RVMD50CommandPacket():
+
+    """A RVMD50 command packet."""
+
+    _status_id = 16         # Status ID: 16 = Command
+    _status_id_index = 0    # Index of Status ID value
+    _cmd_id_index = 1       # Index of Cmd ID value
+
+    def __init__(self, serial2can, cmd_id):
+        """Create instance.
+
+        @param serial2can Serial2CAN device
+        @param cmd_id Cmd ID value
+
+        """
+        self._serial2can = serial2can
+        if cmd_id not in range(3):
+            raise ValueError('Cmd ID must be 0-2')
+        self.pkt = tester.devphysical.can.RVCPacket()
+        msg = self.pkt.header.message
+        msg.priority = 6
+        msg.reserved = 0
+        msg.DGN = tester.devphysical.can.RVCDGN.setec_rvmd50.value
+        msg.SA = tester.devphysical.can.RVCDeviceID.rvmn5x.value
+        self.pkt.data = bytearray(8)
+        self.pkt.data[self._status_id_index] = self._status_id
+        self.pkt.data[self._cmd_id_index] = cmd_id
+
+    def send(self):
+        """Send the packet to the Serial2CAN device."""
+        self._serial2can.send('t{0}'.format(self.pkt))
+
+
+class RVMD50ControlLCDPacket(RVMD50CommandPacket):
+
+    """A RVMD50 Control LCD packet."""
+
+    _cmd_id = 0             # Cmd ID: 0 = Control LCD
+    _pattern_index = 2      # Index of test pattern value
+
+    def __init__(self, serial2can):
+        """Create instance.
+
+        @param serial2can Serial2CAN device
+
+        """
+        super().__init__(serial2can, self._cmd_id)
+        self.pattern = 0
+
+    @property
+    def pattern(self):
+        """pattern property getter.
+
+        @return Test pattern value (0-3)
+
+        """
+        return self.pkt.data[self._pattern_index]
+
+    @pattern.setter
+    def pattern(self, value):
+        """Set pattern property.
+
+        @param value Test pattern (0-3)
+
+        """
+        if value not in range(4):
+            raise ValueError('Test pattern must be 0-3')
+        self.pkt.data[self._pattern_index] = value
+
+
+class RVMD50ResetPacket(RVMD50CommandPacket):
+
+    """A RVMD50 Reset packet."""
+
+    _cmd_id = 1             # Cmd ID: 1 = Reset
+
+    def __init__(self, serial2can):
+        """Create instance.
+
+        @param serial2can Serial2CAN device
+
+        """
+        super().__init__(serial2can, self._cmd_id)
+
+
+class RVMD50ControlButtonPacket(RVMD50CommandPacket):
+
+    """A RVMD50 Control Button packet."""
+
+    _cmd_id = 2             # Cmd ID: 2 = Control Button
+    _group_id = 1           # Group ID: 0 = Off, 1 = On
+    _group_id_index = 2     # Index of Group ID value
+    _button_index = 3       # Index of button value
+
+    def __init__(self, serial2can):
+        """Create instance.
+
+        @param serial2can Serial2CAN device
+
+        """
+        super().__init__(serial2can, self._cmd_id)
+        self.enable = False
+        self.button = False
+
+    @property
+    def enable(self):
+        """Enable property getter.
+
+        @return Test button value (0-3)
+
+        """
+        return bool(self.pkt.data[self._group_id_index])
+
+    @enable.setter
+    def enable(self, value):
+        """Set enable property.
+
+        @param value Enable True/False
+
+        """
+        if not isinstance(value, bool):
+            raise ValueError('Enable must be boolean')
+        self.pkt.data[self._group_id_index] = int(value)
+
+    @property
+    def button(self):
+        """button property getter.
+
+        @return Button value boolean
+
+        """
+        return bool(self.pkt.data[self._button_index])
+
+    @button.setter
+    def button(self, value):
+        """Set button property. (Pushes the 'Page' button: 0x01)
+
+        @param value Button True/False
+
+        """
+        if not isinstance(value, bool):
+            raise ValueError('Button must be boolean')
+        self.pkt.data[self._button_index] = int(value)
