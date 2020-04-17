@@ -1,35 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2015 SETEC Pty Ltd
 """ETrac-II Initial Test Program."""
 
-import os
 import inspect
-import tester
-from tester import TestStep, LimitBetween
-import share
+import os
 
-PIC_HEX = 'etracII-2A.hex'
+import tester
+
+import share
 
 
 class Initial(share.TestSequence):
 
     """ETrac-II Initial Test Program."""
 
+    hex_file = 'etracII-2A.hex'
     limitdata = (
-        LimitBetween('Vin', 12.9, 13.1),
-        LimitBetween('Vin2', 10.8, 12.8),
-        LimitBetween('5V', 4.95, 5.05),
-        LimitBetween('5Vusb', 4.75, 5.25),
-        LimitBetween('Vbat', 8.316, 8.484),
+        tester.LimitBetween('Vin', 12.9, 13.1),
+        tester.LimitBetween('Vin2', 10.8, 12.8),
+        tester.LimitBetween('5V', 4.95, 5.05),
+        tester.LimitBetween('5Vusb', 4.75, 5.25),
+        tester.LimitBetween('Vbat', 8.316, 8.484),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        Devices.hex_file = self.hex_file
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self.devices['program_pic'].program),
-            TestStep('Load', self._step_load),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self.devices['program_pic'].program),
+            tester.TestStep('Load', self._step_load),
             )
 
     @share.teststep
@@ -52,6 +54,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    hex_file = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -67,7 +71,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.programmer.PIC(
-            PIC_HEX, folder, '16F1828', self['rla_Prog'])
+            self.hex_file, folder, '16F1828', self['rla_Prog'])
 
     def reset(self):
         """Reset instruments."""
