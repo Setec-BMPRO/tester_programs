@@ -9,7 +9,7 @@ import struct
 import tester
 
 
-class _ButtonField(ctypes.Structure):
+class _RVMD50ButtonField(ctypes.Structure):
 
     """RVMD50 button field definition.
 
@@ -34,17 +34,17 @@ class _ButtonField(ctypes.Structure):
         ]
 
 
-class _ButtonRaw(ctypes.Union):
+class _RVMD50ButtonRaw(ctypes.Union):
 
     """Union of the button with unsigned integer."""
 
     _fields_ = [
         ('uint', ctypes.c_uint, 16),
-        ('button', _ButtonField),
+        ('button', _RVMD50ButtonField),
         ]
 
 
-class RVMD50Packet():
+class RVMD50StatusPacket():
 
     """A RVMD50 device status packet."""
 
@@ -65,7 +65,7 @@ class RVMD50Packet():
             _,                  # D4-7
             ) = struct.Struct('<BHBL').unpack(payload)
         # Decode the button data
-        button_raw = _ButtonRaw()
+        button_raw = _RVMD50ButtonRaw()
         button_raw.uint = button_data
         zss = button_raw.button
         # Assign button data to my properties
@@ -216,7 +216,7 @@ class RVMD50ControlButtonPacket(RVMD50CommandPacket):
 
     @button.setter
     def button(self, value):
-        """Set button property. (Pushes the 'Page' button: 0x01)
+        """Set button property. Pushes the 'Page' button: 0x01.
 
         @param value Button True/False
 

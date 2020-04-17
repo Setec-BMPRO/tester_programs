@@ -50,7 +50,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the ARM."""
-        dev['rla_wd'].set_on()
+        dev['rla_wd'].disable()
         dev['programmer'].program()
 
     @share.teststep
@@ -87,12 +87,15 @@ class Devices(share.Devices):
                 ('rla_wd', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        arm_port = share.config.Fixture.port('029687', 'ARM')
+        # Some more obvious ways to use this relay
+        watchdog = self['rla_wd']
+        watchdog.enable = watchdog.set_off
+        watchdog.disable = watchdog.set_on
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
-            arm_port,
+            share.config.Fixture.port('029687', 'ARM'),
             os.path.join(folder, self.sw_file),
             crpmode=False,
             boot_relay=self['rla_boot'],
