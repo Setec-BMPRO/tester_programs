@@ -82,17 +82,14 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self['SnEntry'] = sensor.DataEntry(
-            message=tester.translate('rvmc101_final', 'msgSnEntry'),
-            caption=tester.translate('rvmc101_final', 'capSnEntry'))
         self['ButtonPress'] = sensor.OkCan(     # Press the 'RET' button
             message=tester.translate('rvmc101_final', 'msgPressButton'),
             caption=tester.translate('rvmc101_final', 'capPressButton'))
         self['TabletScreen'] = sensor.YesNo(    # Is the screen on
             message=tester.translate('rvmc101_final', 'msgTabletScreen?'),
             caption=tester.translate('rvmc101_final', 'capTabletScreen'))
-        decoder = self.devices['decoder']
-        self['zone4'] = sensor.KeyedReadingBoolean(decoder, 'zone4')
+        self['zone4'] = sensor.KeyedReadingBoolean(
+            self.devices['decoder'], 'zone4')
 
 
 class Measurements(share.Measurements):
@@ -102,9 +99,7 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ui_buttonpress', 'ButtonOk', 'ButtonPress', ''),
             ('ui_tabletscreen', 'Notify', 'TabletScreen', ''),
-            ('zone4', 'Zone4Pressed', 'zone4',
-                '4 button pressed'),
+            ('zone4', 'Zone4Pressed', 'zone4', '4 button pressed'),
             ))
