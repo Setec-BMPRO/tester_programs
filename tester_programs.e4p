@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-04-15, 17:48:46 -->
+<!-- Saved: 2020-04-17, 11:45:42 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -115,11 +115,9 @@
     <Source>programs/rm50/final.py</Source>
     <Source>programs/rvmc101/__init__.py</Source>
     <Source>programs/rvmc101/config.py</Source>
-    <Source>programs/rvmc101/device.py</Source>
     <Source>programs/rvmc101/final.py</Source>
     <Source>programs/rvmc101/initial.py</Source>
     <Source>programs/rvmd50/__init__.py</Source>
-    <Source>programs/rvmd50/device.py</Source>
     <Source>programs/rvmd50/final.py</Source>
     <Source>programs/rvmd50/initial.py</Source>
     <Source>programs/rvmn101/__init__.py</Source>
@@ -189,6 +187,8 @@
     <Source>share/bluetooth/mac.py</Source>
     <Source>share/bluetooth/raspblue.py</Source>
     <Source>share/bluetooth/rn4020.py</Source>
+    <Source>share/can/__init__.py</Source>
+    <Source>share/can/setec_rvc.py</Source>
     <Source>share/config.py</Source>
     <Source>share/console/__init__.py</Source>
     <Source>share/console/parameter.py</Source>

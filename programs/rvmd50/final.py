@@ -7,8 +7,6 @@ import tester
 
 import share
 
-from . import device
-
 
 class Final(share.TestSequence):
 
@@ -54,7 +52,7 @@ class Devices(share.Devices):
         self['can'].verbose = False
         self['decoder'] = tester.CANPacketDevice()
         self['canreader'] = tester.CANReader(
-            self['can'], self['decoder'], device.RVMD50Packet,
+            self['can'], self['decoder'], share.can.DeviceStatusPacket,
             name='CANThread')
         self['canreader'].verbose = False
         self['canreader'].start()
