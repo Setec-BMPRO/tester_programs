@@ -7,8 +7,8 @@ import inspect
 import os
 
 import tester
-import share
 
+import share
 from . import display
 
 
@@ -35,7 +35,6 @@ class Initial(share.TestSequence):
             tester.TestStep('Program', self.devices['programmer'].program),
             tester.TestStep('Display', self._step_display),
             )
-        self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
@@ -110,9 +109,8 @@ class Sensors(share.Sensors):
         self['bklght'] = sensor.Vdc(dmm, high=1, low=2, rng=10, res=0.01)
         self['bklght'].doc = 'Across backlight'
         self['YesNoDisplay'] = sensor.YesNo(
-            message=tester.translate(
-            'rvmd50_initial', 'DisplayCheck?'),
-            caption=tester.translate('rvmd50_initial', 'capDisplayCheck'))
+            message=tester.translate('rvmd50', 'DisplayCheck?'),
+            caption=tester.translate('rvmd50', 'capDisplayCheck'))
         self['YesNoDisplay'].doc = 'Operator input'
 
 

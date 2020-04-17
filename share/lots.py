@@ -55,7 +55,7 @@ class Range():
         if not self.lot_re.match(end):
             raise LotError('Invalid end Lot "{0}"'.format(end))
         if end < start:
-            raise LotError('End Lot "{0}" before start Lot "{0}"'.format(
+            raise LotError('End Lot "{0}" before start Lot "{1}"'.format(
                     end, start))
         self.start = start
         self.end = end

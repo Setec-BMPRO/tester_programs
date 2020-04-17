@@ -91,9 +91,8 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         sensor = tester.sensor
         self['YesNoDisplay'] = sensor.YesNo(
-            message=tester.translate(
-            'rvmd50_initial', 'DisplayCheck?'),
-            caption=tester.translate('rvmd50_initial', 'capDisplayCheck'))
+            message=tester.translate('rvmd50', 'DisplayCheck?'),
+            caption=tester.translate('rvmd50', 'capDisplayCheck'))
         self['YesNoDisplay'].doc = 'Operator input'
         self['OkCanButtonPress'] = sensor.OkCan(     # Press the 'Page' button
             message=tester.translate('rvmd50_final', 'msgPressButton'),

@@ -76,7 +76,7 @@ class Fixture():
         '027176': {'ARM': _ftdi, },     # BP35 Initial
         '017056': {'PIC': _ftdi, },     # IDS-500 SubBoard Initial
         '029242': {'ARM': _ftdi, },     # J35 Initial
-        '029687': {'ARM': _ftdi, },     # RvView Initial
+        '029687': {'ARM': _ftdi, },     # RvView/JDisplay/RVMD50 Initial
         '027420': {'ARM': _ftdi, },     # Trek2 Initial/Final
         '025197': {'ARM': _ftdi, },     # GEN8 Initial
         '032715': {'ARM': _ftdi, },     # GEN9-540 Initial
