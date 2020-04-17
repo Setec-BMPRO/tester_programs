@@ -30,12 +30,10 @@ class Initial(share.TestSequence):
             tester.TestStep('PgmAVR', self.devices['program_avr'].program),
             tester.TestStep('Output', self._step_output),
             )
-        self.sernum = None
 
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Apply input power and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vaux'].output(config.vaux, output=True, delay=0.5)
         self.measure(('dmm_vaux', 'dmm_5v'), timeout=5)
 
@@ -85,9 +83,6 @@ class Sensors(share.Sensors):
         self['vsolar'] = sensor.Vdc(dmm, high=2, low=1, rng=100, res=0.01)
         self['5V'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
         self['vbat'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
-        self['SnEntry'] = sensor.DataEntry(
-            message=tester.translate('mb3_initial', 'msgSnEntry'),
-            caption=tester.translate('mb3_initial', 'capSnEntry'))
 
 
 class Measurements(share.Measurements):
@@ -100,5 +95,4 @@ class Measurements(share.Measurements):
             ('dmm_vaux', 'Vaux', 'vaux', 'Aux input ok'),
             ('dmm_5v', '5V', '5V', '5V ok'),
             ('dmm_vbat', 'Vbat', 'vbat', 'Battery output ok'),
-            ('ui_serialnum', 'SerNum', 'SnEntry', 'Unit serial number'),
             ))

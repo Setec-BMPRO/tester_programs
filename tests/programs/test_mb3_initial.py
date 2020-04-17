@@ -3,6 +3,7 @@
 """UnitTest for MB3 Initial Test program."""
 
 from unittest.mock import patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import mb3
 
@@ -31,7 +32,6 @@ class MB3Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerOn': (
-                    (sen['SnEntry'], 'A1926040123'),
                     (sen['vaux'], 12.8),
                     (sen['5V'], 5.0),
                     ),
@@ -44,6 +44,6 @@ class MB3Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(3, len(result.readings))
         self.assertEqual(
             ['PowerOn', 'PgmAVR', 'Output'], self.tester.ut_steps)
