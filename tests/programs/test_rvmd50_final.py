@@ -23,8 +23,11 @@ class RVMD50Final(ProgramTestCase):
                 'PowerUp': (
                     ),
                 'Display': (
-                    (sen['yesnoseg'], True),
-                    (sen['yesnobklght'], True),
+                    (sen['YesNoDisplay'], True),
+                    ),
+                'Buttons': (
+                    (sen['OkCanButtonPress'], True),
+                    (sen['PageButton'], True),
                     ),
                 },
             }
@@ -32,7 +35,7 @@ class RVMD50Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(2, len(result.readings))
+        self.assertEqual(3, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'Display'],
+            ['PowerUp', 'Display', 'Buttons'],
             self.tester.ut_steps)

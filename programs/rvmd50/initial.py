@@ -7,20 +7,19 @@ import inspect
 import os
 
 import tester
-
 import share
+
+from . import display
 
 
 class Initial(share.TestSequence):
 
     """RVMD50 Initial Test Program."""
 
-    # Input voltage to power the unit
-    vin_set = 8.1
-    # Device software
-    sw_file = 'rvmd50_1.3.bin'
-    # Test limits
-    testlimits = (
+
+    vin_set = 8.1               # Input voltage to power the unit
+    sw_file = 'rvmd50_1.3.bin'  # Device software
+    testlimits = (              # Test limits
         tester.LimitBetween('Vin', 7.0, 8.0, doc='Input voltage present'),
         tester.LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
         tester.LimitLow('BkLghtOff', 0.5, doc='Backlight off'),
@@ -33,40 +32,24 @@ class Initial(share.TestSequence):
         super().open(self.testlimits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Program', self.devices['programmer'].program),
             tester.TestStep('Display', self._step_display),
-            tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input voltage and measure voltages."""
-        dev['dcs_vin'].output(self.vin_set, True)
+        dev['rla_watchdog_disable'].set_on()
+        dev['dcs_vin'].output(self.vin_set, output=True)
         self.measure(('dmm_vin', 'dmm_3v3'), timeout=5)
 
     @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the ARM."""
-        dev['rla_wd'].disable()
-        dev['programmer'].program()
-
-    @share.teststep
     def _step_display(self, dev, mes):
-        """Test the LCD.
-
-        Put device into test mode.
-        Check all segments and backlight.
-
-        """
-        self.measure(
-            ('ui_yesnoon', 'dmm_bklghton', 'ui_yesnooff', 'dmm_bklghtoff'),
-            timeout=5)
-
-    @share.teststep
-    def _step_canbus(self, dev, mes):
-        """Test the Can Bus."""
-        dev['canreader'].enable = True
+        """Test the LCD and Backlight."""
+        mes['dmm_bklghtoff'](timeout=5)
+        with dev['display']:
+            self.measure(('YesNoDisplayOk', 'dmm_bklghton'), timeout=5)
 
 
 class Devices(share.Devices):
@@ -82,13 +65,9 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
-                ('rla_wd', tester.Relay, 'RLA3'),
+                ('rla_watchdog_disable', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Some more obvious ways to use this relay
-        watchdog = self['rla_wd']
-        watchdog.enable = watchdog.set_off
-        watchdog.disable = watchdog.set_on
         # ARM device programmer
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -101,24 +80,17 @@ class Devices(share.Devices):
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
         self['can'].verbose = False
-        self['decoder'] = tester.CANPacketDevice()
-        self['canreader'] = tester.CANReader(
-            self['can'], self['decoder'], share.can.DeviceStatusPacket,
-            name='CANThread')
-        self['canreader'].verbose = False
-        self['canreader'].start()
+        self['display'] = display.DisplayControl(self['can'])
         self.add_closer(self.close_can)
 
     def reset(self):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
-        for rla in ('rla_reset', 'rla_boot', 'rla_wd'):
+        for rla in ('rla_reset', 'rla_boot', 'rla_watchdog_disable'):
             self[rla].set_off()
-        self['canreader'].enable = False
 
     def close_can(self):
         """Reset CAN system."""
-        self['canreader'].halt()
         self['can'].rvc_mode = False
         self['can'].verbose = False
 
@@ -131,23 +103,17 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['mir_can'] = sensor.MirrorReadingString()
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['vin'].doc = 'X1'
         self['3v3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['3v3'].doc = 'U1 output'
         self['bklght'] = sensor.Vdc(dmm, high=1, low=2, rng=10, res=0.01)
         self['bklght'].doc = 'Across backlight'
-        self['oYesNoOn'] = sensor.YesNo(
+        self['YesNoDisplay'] = sensor.YesNo(
             message=tester.translate(
-            'rvmd50_initial', 'PushButtonOn?'),
-            caption=tester.translate('rvmd50_initial', 'capButtonOn'))
-        self['oYesNoOn'].doc = 'Operator input'
-        self['oYesNoOff'] = sensor.YesNo(
-            message=tester.translate(
-            'rvmd50_initial', 'PushButtonOff?'),
-            caption=tester.translate('rvmd50_initial', 'capButtonOff'))
-        self['oYesNoOff'].doc = 'Operator input'
+            'rvmd50_initial', 'DisplayCheck?'),
+            caption=tester.translate('rvmd50_initial', 'capDisplayCheck'))
+        self['YesNoDisplay'].doc = 'Operator input'
 
 
 class Measurements(share.Measurements):
@@ -161,6 +127,5 @@ class Measurements(share.Measurements):
             ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
             ('dmm_bklghtoff', 'BkLghtOff', 'bklght', 'Test backlight'),
             ('dmm_bklghton', 'BkLghtOn', 'bklght', 'Test backlight'),
-            ('ui_yesnoon', 'Notify', 'oYesNoOn', 'Button on'),
-            ('ui_yesnooff', 'Notify', 'oYesNoOff', 'Button off'),
+            ('YesNoDisplayOk', 'Notify', 'YesNoDisplay', 'Button on'),
             ))

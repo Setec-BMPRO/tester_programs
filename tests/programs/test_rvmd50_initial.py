@@ -36,12 +36,8 @@ class RVMD50Initial(ProgramTestCase):
                     (sen['3v3'], 3.3),
                     ),
                 'Display': (
-                    (sen['oYesNoOn'], True),
-                    (sen['bklght'], 3.0),
-                    (sen['oYesNoOff'], True),
-                    (sen['bklght'], 0.0),
-                    ),
-                'CanBus': (
+                    (sen['bklght'], (0.0, 3.0)),
+                    (sen['YesNoDisplay'], True),
                     ),
                 },
             }
@@ -49,7 +45,7 @@ class RVMD50Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(6, len(result.readings))
+        self.assertEqual(5, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'Program', 'Display', 'CanBus'],
+            ['PowerUp', 'Program', 'Display'],
             self.tester.ut_steps)

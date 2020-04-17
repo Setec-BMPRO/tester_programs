@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-04-17, 11:45:42 -->
+<!-- Saved: 2020-04-17, 16:10:11 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -118,6 +118,7 @@
     <Source>programs/rvmc101/final.py</Source>
     <Source>programs/rvmc101/initial.py</Source>
     <Source>programs/rvmd50/__init__.py</Source>
+    <Source>programs/rvmd50/display.py</Source>
     <Source>programs/rvmd50/final.py</Source>
     <Source>programs/rvmd50/initial.py</Source>
     <Source>programs/rvmn101/__init__.py</Source>
