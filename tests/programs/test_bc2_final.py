@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 - 2019 SETEC Pty Ltd.
+# Copyright 2016 SETEC Pty Ltd.
 """UnitTest for BC2 Final Test program."""
 
 from unittest.mock import patch

@@ -1,4 +1,6 @@
-#!/usr/bin/e nv python3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright 2014 SETEC Pty Ltd.
 """WTSI200 Final Test Program."""
 
 from pydispatch import dispatcher

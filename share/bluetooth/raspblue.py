@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2014 SETEC Pty Ltd.
 """JSONRPC Client for the Raspberry Pi Bluetooth helper."""
 
 import abc

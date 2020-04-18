@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2018 SETEC Pty Ltd
+# Copyright 2016 SETEC Pty Ltd.
 """J35 Initial Test Program."""
 
 import os

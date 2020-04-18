@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2019 - 2020 SETEC Pty Ltd.
+# Copyright 2019 SETEC Pty Ltd.
 """Bluetooth SerialNumber to MAC Storage."""
 
 import jsonrpclib

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 - 2019 SETEC Pty Ltd.
+# Copyright 2017 SETEC Pty Ltd
 """BC2 Configuration."""
 
 import tester

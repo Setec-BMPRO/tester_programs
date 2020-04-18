@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2014 - 2019 SETEC Pty Ltd.
+# Copyright 2015 SETEC Pty Ltd.
 """Texas Instruments EV220x Controller.
 
 Uses the TI EV2200 RS232 to SMBus unit to communicate with the

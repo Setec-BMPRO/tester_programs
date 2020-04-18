@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd.
 """C15D-15 Initial Test Program."""
 
 import tester

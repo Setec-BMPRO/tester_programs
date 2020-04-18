@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2014 SETEC Pty Ltd.
 """MicroChip RN4020 driver.
 
 A Bluetooth 4.1 Low Energy (BLE) module.

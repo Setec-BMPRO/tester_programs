@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2013 - 2020 SETEC Pty Ltd.
+# Copyright 2015 SETEC Pty Ltd.
 """BC15/BC25 Configuration."""
 
 import logging

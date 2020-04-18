@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 - 2019 SETEC Pty Ltd
+# Copyright 2016 SETEC Pty Ltd
 """Data feeder version of a Tester for Test programs during unittest.
 
 Subscribe to Tester signals.

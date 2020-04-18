@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2014 SETEC Pty Ltd.
 """STxx-III Final Test Program."""
 
 import time

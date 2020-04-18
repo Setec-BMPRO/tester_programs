@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2014 SETEC Pty Ltd.
 """GSU360-1TA Final Test Program."""
 
 import tester
 from tester import TestStep, LimitLow, LimitBetween
+
 import share
 
 

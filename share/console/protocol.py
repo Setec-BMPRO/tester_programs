@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 SETEC Pty Ltd.
 """Console driver Command-Response protocol processor.
 
 Filter layer between the Serial port that implements the Command/Response

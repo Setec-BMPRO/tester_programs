@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2020 SETEC Pty Ltd.
+# Copyright 2020 SETEC Pty Ltd
 """CN102/3 Final Test Program."""
 
 import tester

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2017 - 2019 SETEC Pty Ltd
+# Copyright 2015 SETEC Pty Ltd.
 """BP35 / BP35-II Configurations."""
 
 import logging

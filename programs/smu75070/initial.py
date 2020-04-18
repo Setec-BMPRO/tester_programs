@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 SETEC Pty Ltd
+# Copyright 2017 SETEC Pty Ltd
 """SMU750-70 Initial Test Program."""
 
 import tester

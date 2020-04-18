@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2017 SETEC Pty Ltd
 """TRS2 Console driver."""
 
 import share

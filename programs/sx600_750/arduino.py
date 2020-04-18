@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 - 2019 SETEC Pty Ltd
+# Copyright 2016 SETEC Pty Ltd
 """SX-600/750 Arduino console driver."""
 
 import share

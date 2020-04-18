@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2013 SETEC Pty Ltd.
 """ATXG-450-2V Final Test Program."""
+
 import tester
+
 import share
 from tester import TestStep, LimitLow, LimitHigh, LimitBetween
 

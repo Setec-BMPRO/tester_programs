@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2016 SETEC Pty Ltd.
+# Copyright 2015 SETEC Pty Ltd.
 """Test suite loader for Eric Unittest.
 
 In Eric, this module is imported by unittest using a call to:

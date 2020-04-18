@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2014 SETEC Pty Ltd.
 """RM-50-24 Final Test Program."""
 
 import tester
