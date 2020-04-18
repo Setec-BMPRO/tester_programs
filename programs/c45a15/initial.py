@@ -5,10 +5,9 @@
 
 import os
 import inspect
+
 import tester
-from tester import (
-        LimitLow, LimitBetween, LimitDelta, LimitInteger, LimitPercent
-        )
+
 import share
 
 PIC_HEX = 'c45a-15.hex'
@@ -19,35 +18,35 @@ class Initial(share.TestSequence):
     """C45A-15 Initial Test Program."""
 
     limitdata = (
-        LimitDelta('VacStart', 95.0, 3.0),
-        LimitDelta('Vac', 240.0, 5.0),
-        LimitDelta('Vbus', 340.0, 10.0),
-        LimitBetween('Vcc', 9.5, 15.0),
-        LimitDelta('SecBiasIn', 12.0, 0.1),
-        LimitDelta('Vref', 5.0, 0.1),
-        LimitLow('VrefOff', 1.0),
-        LimitDelta('VoutPreExt', 12.0, 0.1),
-        LimitDelta('VoutExt', 12.0, 0.1),
-        LimitDelta('VoutPre', 12.0, 0.1),
+        tester.LimitDelta('VacStart', 95.0, 3.0),
+        tester.LimitDelta('Vac', 240.0, 5.0),
+        tester.LimitDelta('Vbus', 340.0, 10.0),
+        tester.LimitBetween('Vcc', 9.5, 15.0),
+        tester.LimitDelta('SecBiasIn', 12.0, 0.1),
+        tester.LimitDelta('Vref', 5.0, 0.1),
+        tester.LimitLow('VrefOff', 1.0),
+        tester.LimitDelta('VoutPreExt', 12.0, 0.1),
+        tester.LimitDelta('VoutExt', 12.0, 0.1),
+        tester.LimitDelta('VoutPre', 12.0, 0.1),
         # PS-5056: Change limit from 9.0V ± 5% to 8.75V ± 5%
-#        LimitBetween('VoutLow', 8.55, 9.45),
-        LimitPercent('VoutLow', 8.75, 5),
-        LimitBetween('Vout', 15.2, 16.8),
-        LimitBetween('VsenseLow', 8.2, 10.0),
-        LimitBetween('VsenseOn', 11.8, 12.1),
-        LimitLow('VsenseOff', 1.0),
-        LimitBetween('GreenOn', 1.8, 2.2),
-        LimitBetween('YellowOn', 1.6, 2.2),
-        LimitBetween('RedOn', 4.0, 5.5),
-        LimitBetween('RedFlash', 2.0, 2.75),
-        LimitLow('LedOff', 0.2),
-        LimitLow('inOVP', 6.5),
-        LimitBetween('OVP', 18.0, 21.0),
-        LimitBetween('Reg', -1.5, 0),
-        LimitLow('inOCP', 1e6),
-        LimitBetween('OCP', 2.85, 3.15),
-        LimitLow('FixtureLock', 20),
-        LimitInteger('Program', 0),
+#        tester.LimitBetween('VoutLow', 8.55, 9.45),
+        tester.LimitPercent('VoutLow', 8.75, 5),
+        tester.LimitBetween('Vout', 15.2, 16.8),
+        tester.LimitBetween('VsenseLow', 8.2, 10.0),
+        tester.LimitBetween('VsenseOn', 11.8, 12.1),
+        tester.LimitLow('VsenseOff', 1.0),
+        tester.LimitBetween('GreenOn', 1.8, 2.2),
+        tester.LimitBetween('YellowOn', 1.6, 2.2),
+        tester.LimitBetween('RedOn', 4.0, 5.5),
+        tester.LimitBetween('RedFlash', 2.0, 2.75),
+        tester.LimitLow('LedOff', 0.2),
+        tester.LimitLow('inOVP', 6.5),
+        tester.LimitBetween('OVP', 18.0, 21.0),
+        tester.LimitBetween('Reg', -1.5, 0),
+        tester.LimitLow('inOCP', 1e6),
+        tester.LimitBetween('OCP', 2.85, 3.15),
+        tester.LimitLow('FixtureLock', 20),
+        tester.LimitInteger('Program', 0),
         )
 
     def open(self, uut):

@@ -4,10 +4,7 @@
 """SMU750-70 Initial Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitBetween, LimitPercent, LimitDelta
-    )
+
 import share
 
 
@@ -19,30 +16,30 @@ class Initial(share.TestSequence):
     vout_load_reg = 0.4
 
     limitdata = (
-        LimitLow('FixtureLock', 200,
+        tester.LimitLow('FixtureLock', 200,
             doc='Closed micro switch'),
-        LimitBetween('InrushOff', 120, 180,
+        tester.LimitBetween('InrushOff', 120, 180,
             doc='Inrush resistors with K1 off'),
-        LimitBetween('VacMin', 95.0, 105.0,
+        tester.LimitBetween('VacMin', 95.0, 105.0,
             doc='Min AC input voltage'),
-        LimitBetween('Vac', 237.0, 242.0,
+        tester.LimitBetween('Vac', 237.0, 242.0,
             doc='AC input voltage'),
-        LimitDelta('Vbus', 399.0, 11.0,
+        tester.LimitDelta('Vbus', 399.0, 11.0,
             doc='PFC voltage'),
-        LimitLow('VbusOff', 50.0,
+        tester.LimitLow('VbusOff', 50.0,
             doc='PFC voltage off'),
-        LimitBetween('Vdd', 12.0, 14.0,
+        tester.LimitBetween('Vdd', 12.0, 14.0,
             doc='Driver_vdd internal rail'),
-        LimitBetween('VsecCtl', 11.0, 15.0,
+        tester.LimitBetween('VsecCtl', 11.0, 15.0,
             doc='VsecCtl internal rail'),
-        LimitBetween('VoutPre', 61.3, 78.5,
+        tester.LimitBetween('VoutPre', 61.3, 78.5,
             doc='Output voltage before adjust'),
-        LimitPercent('Vout', 70.0, 1.0,
+        tester.LimitPercent('Vout', 70.0, 1.0,
             doc='Output voltage after adjust'),
-        LimitLow('VoutOff', 5.0, doc='Output voltage off'),
-        LimitBetween('OCP', 9.3, 13.3,
+        tester.LimitLow('VoutOff', 5.0, doc='Output voltage off'),
+        tester.LimitBetween('OCP', 9.3, 13.3,
             doc='OCP trip limits before fine tuning'),
-        LimitLow('InOCP', 9999.0,
+        tester.LimitLow('InOCP', 9999.0,
             doc='Calculated trip voltage [Vout - (Vout * %Load Reg) / 100]'),
         )
 
@@ -50,11 +47,11 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PartDetect', self._step_part_detect),
-            TestStep('PowerOn', self._step_pwron),
-            TestStep('AdjOutput', self._step_adj_output),
-            TestStep('FullLoad', self._step_fullload),
-            TestStep('OCP', self._step_ocp),
+            tester.TestStep('PartDetect', self._step_part_detect),
+            tester.TestStep('PowerOn', self._step_pwron),
+            tester.TestStep('AdjOutput', self._step_adj_output),
+            tester.TestStep('FullLoad', self._step_fullload),
+            tester.TestStep('OCP', self._step_ocp),
             )
 
     @share.teststep

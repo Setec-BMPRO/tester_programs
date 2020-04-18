@@ -3,18 +3,14 @@
 # Copyright 2018 SETEC Pty Ltd
 """GEN9-540 Initial Test Program."""
 
-import os
 import inspect
+import os
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitRegExp,
-    LimitBetween, LimitDelta, LimitPercent
-    )
+
 import share
-from . import console
-from . import config
+from . import config, console
 
 
 class Initial(share.TestSequence):
@@ -25,47 +21,47 @@ class Initial(share.TestSequence):
     pfc_stable = 0.05
 
     limitdata = (
-        LimitHigh('FanShort', 500),
-        LimitLow('FixtureLock', 200),
-        LimitPercent('3V3', 3.30, 10.0),
-        LimitLow('5Voff', 0.5),
-        LimitPercent('5Vset', 5.10, 1.0),
-        LimitPercent('5V', 5.10, 2.0),
-        LimitLow('12Voff', 0.5),
-        LimitPercent('12V', 12.0, 2.5),
-        LimitLow('24Voff', 0.5),
-        LimitPercent('24V', 24.0, 2.5),
-        LimitLow('PwrFail', 0.4),
-        LimitDelta('ACin', 240, 10),
-        LimitDelta('15Vccpri', 15.0, 1.0),
-        LimitBetween('12Vpri', 11.4, 17.0),
-        LimitBetween('PFCpre', 408, 450),
-        LimitDelta('PFCpost1', 426.0, 2.9),
-        LimitDelta('PFCpost2', 426.0, 2.9),
-        LimitDelta('PFCpost3', 426.0, 2.9),
-        LimitDelta('PFCpost4', 426.0, 2.9),
-        LimitDelta('PFCpost', 426.0, 3.0),
-        LimitDelta('ARM-AcFreq', 50, 10),
-        LimitDelta('ARM-AcVolt', 240, 20),
-        LimitDelta('ARM-5V', 5.0, 1.0),
-        LimitDelta('ARM-12V', 12.0, 1.0),
-        LimitDelta('ARM-24V', 24.0, 2.0),
-        LimitRegExp('SwVer', '^{0}$'.format(
+        tester.LimitHigh('FanShort', 500),
+        tester.LimitLow('FixtureLock', 200),
+        tester.LimitPercent('3V3', 3.30, 10.0),
+        tester.LimitLow('5Voff', 0.5),
+        tester.LimitPercent('5Vset', 5.10, 1.0),
+        tester.LimitPercent('5V', 5.10, 2.0),
+        tester.LimitLow('12Voff', 0.5),
+        tester.LimitPercent('12V', 12.0, 2.5),
+        tester.LimitLow('24Voff', 0.5),
+        tester.LimitPercent('24V', 24.0, 2.5),
+        tester.LimitLow('PwrFail', 0.4),
+        tester.LimitDelta('ACin', 240, 10),
+        tester.LimitDelta('15Vccpri', 15.0, 1.0),
+        tester.LimitBetween('12Vpri', 11.4, 17.0),
+        tester.LimitBetween('PFCpre', 408, 450),
+        tester.LimitDelta('PFCpost1', 426.0, 2.9),
+        tester.LimitDelta('PFCpost2', 426.0, 2.9),
+        tester.LimitDelta('PFCpost3', 426.0, 2.9),
+        tester.LimitDelta('PFCpost4', 426.0, 2.9),
+        tester.LimitDelta('PFCpost', 426.0, 3.0),
+        tester.LimitDelta('ARM-AcFreq', 50, 10),
+        tester.LimitDelta('ARM-AcVolt', 240, 20),
+        tester.LimitDelta('ARM-5V', 5.0, 1.0),
+        tester.LimitDelta('ARM-12V', 12.0, 1.0),
+        tester.LimitDelta('ARM-24V', 24.0, 2.0),
+        tester.LimitRegExp('SwVer', '^{0}$'.format(
             config.SW_VER.replace('.', r'\.'))),
-        LimitRegExp('SwBld', '^{0}$'.format(config.SW_BUILD)),
+        tester.LimitRegExp('SwBld', '^{0}$'.format(config.SW_BUILD)),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PartDetect', self._step_part_detect),
-            TestStep('Program', self._step_program),
-            TestStep('Initialise', self._step_initialise_arm),
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('5V', self._step_reg_5v),
-            TestStep('12V', self._step_reg_12v),
-            TestStep('24V', self._step_reg_24v),
+            tester.TestStep('PartDetect', self._step_part_detect),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('5V', self._step_reg_5v),
+            tester.TestStep('12V', self._step_reg_12v),
+            tester.TestStep('24V', self._step_reg_24v),
             )
 
     @share.teststep

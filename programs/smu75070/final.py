@@ -4,7 +4,7 @@
 """SMU750-70 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitDelta
+
 import share
 
 
@@ -13,20 +13,20 @@ class Final(share.TestSequence):
     """SMU750-70 Final Test Program."""
 
     limitdata = (
-        LimitDelta('70VOn', 70.0,  0.7),
-        LimitLow('70VOff', 69.2),
-        LimitDelta('OCP', 11.5, 0.1),
-        LimitLow('inOCP', 69.3),
+        tester.LimitDelta('70VOn', 70.0,  0.7),
+        tester.LimitLow('70VOff', 69.2),
+        tester.LimitDelta('OCP', 11.5, 0.1),
+        tester.LimitLow('inOCP', 69.3),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('FullLoad', self._step_full_load),
-            TestStep('OCP', self._step_ocp),
-            TestStep('Shutdown', self._step_shutdown),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('FullLoad', self._step_full_load),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('Shutdown', self._step_shutdown),
             )
 
     @share.teststep

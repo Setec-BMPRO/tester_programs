@@ -3,11 +3,12 @@
 # Copyright 2016 SETEC Pty Ltd
 """Initial Test Program for GENIUS-II and GENIUS-II-H."""
 
-import os
 import inspect
+import os
 import time
+
 import tester
-from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
+
 import share
 
 
@@ -22,38 +23,38 @@ class Initial(share.TestSequence):
     _ocp_high = 43.0
     # Test limits common to both versions
     _common = (
-        LimitLow('DetectDiode', 0.3),
-        LimitDelta('FlyLead', 30.0, 10.0),
-        LimitDelta('AcIn', 240.0, 5.0),
-        LimitDelta('Vbus', 330.0, 20.0),
-        LimitBetween('Vcc', 13.8, 22.5),
-        LimitLow('VccOff', 5.0),
-        LimitDelta('Vdd', 5.00, 0.1),
-        LimitBetween('VbatCtl', 12.7, 13.5),
-        LimitDelta('Vctl', 12.0, 0.5),
-        LimitBetween('VoutPre', 12.5, 15.0),
-        LimitDelta('Vout', 13.65, 0.05),
-        LimitLow('VoutOff', 1.0),
-        LimitBetween('VbatPre', 12.5, 15.0),
-        LimitDelta('Vbat', 13.65, 0.05),
-        LimitDelta('Vaux', 13.70, 0.5),
-        LimitLow('FanOff', 0.5),
-        LimitBetween('FanOn', 12.0, 14.1),
-        LimitLow('InOCP', 13.24),
-        LimitBetween('OCP', _ocp_low, _ocp_high),
-        LimitLow('FixtureLock', 200),
+        tester.LimitLow('DetectDiode', 0.3),
+        tester.LimitDelta('FlyLead', 30.0, 10.0),
+        tester.LimitDelta('AcIn', 240.0, 5.0),
+        tester.LimitDelta('Vbus', 330.0, 20.0),
+        tester.LimitBetween('Vcc', 13.8, 22.5),
+        tester.LimitLow('VccOff', 5.0),
+        tester.LimitDelta('Vdd', 5.00, 0.1),
+        tester.LimitBetween('VbatCtl', 12.7, 13.5),
+        tester.LimitDelta('Vctl', 12.0, 0.5),
+        tester.LimitBetween('VoutPre', 12.5, 15.0),
+        tester.LimitDelta('Vout', 13.65, 0.05),
+        tester.LimitLow('VoutOff', 1.0),
+        tester.LimitBetween('VbatPre', 12.5, 15.0),
+        tester.LimitDelta('Vbat', 13.65, 0.05),
+        tester.LimitDelta('Vaux', 13.70, 0.5),
+        tester.LimitLow('FanOff', 0.5),
+        tester.LimitBetween('FanOn', 12.0, 14.1),
+        tester.LimitLow('InOCP', 13.24),
+        tester.LimitBetween('OCP', _ocp_low, _ocp_high),
+        tester.LimitLow('FixtureLock', 200),
         )
     # Test limit selection keyed by program parameter
     limitdata = {
         'STD': {
             'Limits': _common + (
-                LimitLow('VbatOCP', 10.0),
+                tester.LimitLow('VbatOCP', 10.0),
                 ),
             'LoadRatio': (29, 14),      # Iout:Ibat
             },
         'H': {
             'Limits': _common + (
-                LimitHigh('VbatOCP', 13.0),
+                tester.LimitHigh('VbatOCP', 13.0),
                 ),
             'LoadRatio': (5, 30),       # Iout:Ibat
             },
@@ -65,13 +66,13 @@ class Initial(share.TestSequence):
             self.limitdata[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('Program', self._step_program),
-            TestStep('Aux', self._step_aux),
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('VoutAdj', self._step_vout_adj),
-            TestStep('ShutDown', self._step_shutdown),
-            TestStep('OCP', self._step_ocp),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Aux', self._step_aux),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('VoutAdj', self._step_vout_adj),
+            tester.TestStep('ShutDown', self._step_shutdown),
+            tester.TestStep('OCP', self._step_ocp),
             )
 
     @share.teststep

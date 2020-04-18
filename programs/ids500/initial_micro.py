@@ -3,11 +3,12 @@
 # Copyright 2015 SETEC Pty Ltd.
 """IDS-500 Micro Initial Test Program."""
 
-import os
 import inspect
+import os
 import serial
+
 import tester
-from tester import TestStep, LimitRegExp, LimitBetween
+
 import share
 from . import console
 
@@ -20,17 +21,17 @@ class InitialMicro(share.TestSequence):
     pic_hex_mic = 'ids_picMic_2.hex'
     # test limits
     limitdata = (
-        LimitBetween('5V', 4.95, 5.05),
-        LimitRegExp('SwRev', 'I,  1, 2,Software Revision'),
-        LimitRegExp('MicroTemp', 'D, 16,    [0-9]{2},MICRO Temp\.\(C\)'),
+        tester.LimitBetween('5V', 4.95, 5.05),
+        tester.LimitRegExp('SwRev', 'I,  1, 2,Software Revision'),
+        tester.LimitRegExp('MicroTemp', 'D, 16,    [0-9]{2},MICRO Temp\.\(C\)'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Program', self._step_program),
-            TestStep('Comms', self._step_comms),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Comms', self._step_comms),
             )
 
     @share.teststep

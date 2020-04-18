@@ -4,7 +4,7 @@
 """MB2 Final Program."""
 
 import tester
-from tester import TestStep, LimitBetween, LimitPercent
+
 import share
 
 
@@ -16,15 +16,15 @@ class Final(share.TestSequence):
     vstop = 9.1
 
     limitdata = (
-        LimitBetween('Vin', 9.0, 13.0),
-        LimitPercent('Vout', 14.4, 3.0),
+        tester.LimitBetween('Vin', 9.0, 13.0),
+        tester.LimitPercent('Vout', 14.4, 3.0),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerOn', self._step_power_on),
+            tester.TestStep('PowerOn', self._step_power_on),
             )
 
     @share.teststep

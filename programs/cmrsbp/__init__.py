@@ -3,17 +3,14 @@
 # Copyright 2014 SETEC Pty Ltd.
 """CMR-SBP ALL Test Program."""
 
-import os
 import datetime
-import time
 import inspect
+import os
+import time
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitBoolean,
-    LimitRegExp, LimitInteger
-    )
+
 import share
 from . import ev2200
 from . import cmrsbp
@@ -27,38 +24,38 @@ class Initial(share.TestSequence):
     pic_hex = 'CMR-SBP-9.hex'
     # Test limits
     limitdata = (
-        LimitDelta('Vbat', 12.0, 0.10),
-        LimitBetween('VbatCharge', 11.8, 12.5),
-        LimitDelta('Vcc', 3.3, 0.2),
-        LimitBetween('VErase', 4.8, 5.05),
-        LimitLow('IStart', 0.02),
-        LimitBetween('Vchge', 12.8, 15.0),
+        tester.LimitDelta('Vbat', 12.0, 0.10),
+        tester.LimitBetween('VbatCharge', 11.8, 12.5),
+        tester.LimitDelta('Vcc', 3.3, 0.2),
+        tester.LimitBetween('VErase', 4.8, 5.05),
+        tester.LimitLow('IStart', 0.02),
+        tester.LimitBetween('Vchge', 12.8, 15.0),
         # 2.0A +/- 10mA
-        LimitDelta('Ibat', -2.00, 0.01),
-        LimitLow('Final Not Connected', 1.0),
-        LimitDelta('SenseRes', 250, 30),
-        LimitDelta('Halfcell', 110, 10),
-        LimitDelta('VChgeOn', 350, 50),
-        LimitDelta('ErrVUncal', 0.0, 0.5),
-        LimitDelta('ErrVCal', 0.0, 0.03),
-        LimitDelta('ErrIUncal', 0.0, 0.060),
-        LimitDelta('ErrICal', 0.0, 0.015),
+        tester.LimitDelta('Ibat', -2.00, 0.01),
+        tester.LimitLow('Final Not Connected', 1.0),
+        tester.LimitDelta('SenseRes', 250, 30),
+        tester.LimitDelta('Halfcell', 110, 10),
+        tester.LimitDelta('VChgeOn', 350, 50),
+        tester.LimitDelta('ErrVUncal', 0.0, 0.5),
+        tester.LimitDelta('ErrVCal', 0.0, 0.03),
+        tester.LimitDelta('ErrIUncal', 0.0, 0.060),
+        tester.LimitDelta('ErrICal', 0.0, 0.015),
         # 298K nominal +/- 2.5K in Kelvin (25C +/- 2.5C in Celsius).
-        LimitDelta('BQ-Temp', 300, 4.5),
+        tester.LimitDelta('BQ-Temp', 300, 4.5),
         # SerialDate
-        LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
+        tester.LimitRegExp('CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, MeasureIni)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self._step_program),
-            TestStep('CheckPicValues', self._step_check_pic_vals),
-            TestStep('CheckVcharge', self._step_check_vchge),
-            TestStep('CalBQvolts', self._step_calv),
-            TestStep('CalBQcurrent', self._step_cali),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('CheckPicValues', self._step_check_pic_vals),
+            tester.TestStep('CheckVcharge', self._step_check_vchge),
+            tester.TestStep('CalBQvolts', self._step_calv),
+            tester.TestStep('CalBQcurrent', self._step_cali),
             )
 
     @share.teststep
@@ -157,7 +154,7 @@ class SerialDate(share.TestSequence):
         """Prepare for testing."""
         super().open(Initial.limitdata, Devices, Sensors, MeasureIni)
         self.steps = (
-            TestStep('SerialDate', self._step_sn_date),
+            tester.TestStep('SerialDate', self._step_sn_date),
             )
 
     @share.teststep
@@ -184,57 +181,57 @@ class Final(share.TestSequence):
 
     # Common test limits
     _common = (
-        LimitDelta('ErrV', 0.0, 0.03),
-        LimitHigh('CycleCnt', 1.0),
-        LimitBoolean('RelrnFlg', False),
-        LimitInteger('RotarySw', 256),
-        LimitDelta('Halfcell', 400, 50),
-        LimitBoolean('VFCcalStatus', True),
-        LimitRegExp('SerNumChk', ''),
+        tester.LimitDelta('ErrV', 0.0, 0.03),
+        tester.LimitHigh('CycleCnt', 1.0),
+        tester.LimitBoolean('RelrnFlg', False),
+        tester.LimitInteger('RotarySw', 256),
+        tester.LimitDelta('Halfcell', 400, 50),
+        tester.LimitBoolean('VFCcalStatus', True),
+        tester.LimitRegExp('SerNumChk', ''),
         )
     # Common to both sets of 8Ah
     _common8 = _common + (
-            LimitBetween('VbatIn', 12.8, 15.0),
-            LimitBetween('SenseRes', 39.0, 91.0),
-            LimitDelta('StateOfCharge', 100.0, 10.5),
-            LimitRegExp(
+            tester.LimitBetween('VbatIn', 12.8, 15.0),
+            tester.LimitBetween('SenseRes', 39.0, 91.0),
+            tester.LimitDelta('StateOfCharge', 100.0, 10.5),
+            tester.LimitRegExp(
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$'),
             )
     # Common to both sets of 13Ah
     _common13 = _common + (
-            LimitBetween('VbatIn', 12.8, 15.0),
-            LimitBetween('SenseRes', 221.0, 280.0),
-            LimitDelta('StateOfCharge', 100.0, 10.5),
-            LimitRegExp(
+            tester.LimitBetween('VbatIn', 12.8, 15.0),
+            tester.LimitBetween('SenseRes', 221.0, 280.0),
+            tester.LimitDelta('StateOfCharge', 100.0, 10.5),
+            tester.LimitRegExp(
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$'),
             )
     # Common to both sets of 17Ah
     _common17 = _common + (
-            LimitBetween('VbatIn', 11.8, 15.0),     # Due to <30% charge
-            LimitBetween('SenseRes', 400.0, 460.0),
-            LimitLow('StateOfCharge', 30.0),
-            LimitRegExp(
+            tester.LimitBetween('VbatIn', 11.8, 15.0),     # Due to <30% charge
+            tester.LimitBetween('SenseRes', 400.0, 460.0),
+            tester.LimitLow('StateOfCharge', 30.0),
+            tester.LimitRegExp(
                 'CmrSerNum', r'^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$'),
             )
     # Test limit selection keyed by program parameter
     limitdata = {
         '8': _common8 + (
-            LimitBetween('Capacity', 7000, 11000),
+            tester.LimitBetween('Capacity', 7000, 11000),
             ),
         '8_RMA': _common8 + (
-            LimitBetween('Capacity', 6400, 11000),
+            tester.LimitBetween('Capacity', 6400, 11000),
             ),
         '13': _common13 + (
-            LimitBetween('Capacity', 11000, 15000),
+            tester.LimitBetween('Capacity', 11000, 15000),
             ),
         '13_RMA': _common13 + (
-            LimitBetween('Capacity', 10700, 15000),
+            tester.LimitBetween('Capacity', 10700, 15000),
             ),
         '17': _common17 + (
-            LimitBetween('Capacity', 15500, 20000),
+            tester.LimitBetween('Capacity', 15500, 20000),
             ),
         '17_RMA': _common17 + (
-            LimitBetween('Capacity', 13900, 20000),
+            tester.LimitBetween('Capacity', 13900, 20000),
             ),
         }
 
@@ -244,8 +241,8 @@ class Final(share.TestSequence):
             self.limitdata[self.parameter],
             Devices, Sensors, MeasureFin)
         self.steps = (
-            TestStep('Startup', self._step_startup),
-            TestStep('Verify', self._step_verify),
+            tester.TestStep('Startup', self._step_startup),
+            tester.TestStep('Verify', self._step_verify),
             )
 
     @share.teststep

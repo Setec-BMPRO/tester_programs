@@ -4,7 +4,7 @@
 """C15D-15 Initial Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitDelta,  LimitBetween, LimitPercent
+
 import share
 
 VIN_SET = 30.0      # Input voltage setting
@@ -22,24 +22,24 @@ class Initial(share.TestSequence):
     """C15D-15 Initial Test Program."""
 
     limitdata = (
-        LimitDelta('Vin', VIN_SET, 2.0),
-        LimitBetween('Vcc', 11.0, 14.0),
-        LimitPercent('VoutNL', VOUT, 2.0),
-        LimitPercent('VoutFL', VOUT, (2.0 + 1.5, 2.0)),
-        LimitBetween('VoutOCP', 12.5, VOUT_MIN),
-        LimitLow('LedOff', 0.5),
-        LimitBetween('LedOn', 7.0, 13.5),
-        LimitLow('inOCP', VOUT_MIN),
-        LimitBetween('OCP', 1.0, 1.4),
+        tester.LimitDelta('Vin', VIN_SET, 2.0),
+        tester.LimitBetween('Vcc', 11.0, 14.0),
+        tester.LimitPercent('VoutNL', VOUT, 2.0),
+        tester.LimitPercent('VoutFL', VOUT, (2.0 + 1.5, 2.0)),
+        tester.LimitBetween('VoutOCP', 12.5, VOUT_MIN),
+        tester.LimitLow('LedOff', 0.5),
+        tester.LimitBetween('LedOn', 7.0, 13.5),
+        tester.LimitLow('inOCP', VOUT_MIN),
+        tester.LimitBetween('OCP', 1.0, 1.4),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('OCP', self._step_ocp),
-            TestStep('Charging', self._step_charging),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('Charging', self._step_charging),
             )
 
     @share.teststep

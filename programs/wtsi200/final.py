@@ -4,8 +4,9 @@
 """WTSI200 Final Test Program."""
 
 from pydispatch import dispatcher
+
 import tester
-from tester import TestStep, LimitBetween
+
 import share
 
 
@@ -14,23 +15,23 @@ class Final(share.TestSequence):
     """WTSI200 Final Test Program."""
 
     limitdata = (
-        LimitBetween('T1level1', 3.0, 3.5),
-        LimitBetween('T2level1', 3.0, 3.5),
-        LimitBetween('T3level1', 3.0, 3.5),
-        LimitBetween('level1', 3.0, 3.5),
-        LimitBetween('level2', 2.33, 2.58),
-        LimitBetween('level3', 1.62, 1.79),
-        LimitBetween('level4', 0.0, 0.5),
+        tester.LimitBetween('T1level1', 3.0, 3.5),
+        tester.LimitBetween('T2level1', 3.0, 3.5),
+        tester.LimitBetween('T3level1', 3.0, 3.5),
+        tester.LimitBetween('level1', 3.0, 3.5),
+        tester.LimitBetween('level2', 2.33, 2.58),
+        tester.LimitBetween('level3', 1.62, 1.79),
+        tester.LimitBetween('level4', 0.0, 0.5),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerOn', self._step_power_on),
-            TestStep('Tank1', self._step_tank1),
-            TestStep('Tank2', self._step_tank2),
-            TestStep('Tank3', self._step_tank3),
+            tester.TestStep('PowerOn', self._step_power_on),
+            tester.TestStep('Tank1', self._step_tank1),
+            tester.TestStep('Tank2', self._step_tank2),
+            tester.TestStep('Tank3', self._step_tank3),
             )
 
     @share.teststep

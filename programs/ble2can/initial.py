@@ -4,11 +4,9 @@
 """BLE2CAN Initial Program."""
 
 import serial
+
 import tester
-from tester import (
-    LimitLow, LimitHigh, LimitDelta, LimitPercent,
-    LimitBoolean, LimitRegExp, LimitInteger
-    )
+
 import share
 from . import console
 from . import config
@@ -22,23 +20,23 @@ class Initial(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
-        LimitPercent('5V', 5.0, 0.5, doc='5V present'),
-        LimitHigh('RedLedOff', 3.1, doc='Led off'),
-        LimitDelta('RedLedOn', 0.45, 0.05, doc='Led on'),
-        LimitHigh('BlueLedOff', 3.1, doc='Led off'),
-        LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
-        LimitHigh('GreenLedOff', 3.1, doc='Led off'),
-        LimitLow('GreenLedOn', 0.2, doc='Led on'),
-        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
-        LimitRegExp('SwVer',
+        tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
+        tester.LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
+        tester.LimitPercent('5V', 5.0, 0.5, doc='5V present'),
+        tester.LimitHigh('RedLedOff', 3.1, doc='Led off'),
+        tester.LimitDelta('RedLedOn', 0.45, 0.05, doc='Led on'),
+        tester.LimitHigh('BlueLedOff', 3.1, doc='Led off'),
+        tester.LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
+        tester.LimitHigh('GreenLedOff', 3.1, doc='Led off'),
+        tester.LimitLow('GreenLedOn', 0.2, doc='Led on'),
+        tester.LimitLow('TestPinCover', 0.5, doc='Cover in place'),
+        tester.LimitRegExp('SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address'),
-        LimitBoolean('DetectBT', True, doc='MAC address detected'),
-        LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
+        tester.LimitBoolean('DetectBT', True, doc='MAC address detected'),
+        tester.LimitInteger('CAN_BIND', 1 << 28, doc='CAN bus bound'),
         )
 
     def open(self, uut):

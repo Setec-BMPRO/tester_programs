@@ -4,8 +4,9 @@
 """STxx-III Final Test Program."""
 
 import time
+
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitRegExp
+
 import share
 
 
@@ -15,22 +16,22 @@ class Final(share.TestSequence):
 
     # Test limits common to both versions
     _common = (
-        LimitLow('Voff', 2.0),
-        LimitBetween('Vout', 13.60, 13.70),
-        LimitBetween('Vbat', 13.40, 13.70),
-        LimitBetween('Vtrickle', 3.90, 5.70),
-        LimitBetween('Vboost', 13.80, 14.10),
-        LimitLow('inOCP', 11.6),
-        LimitLow('FuseOut', 0.5),
-        LimitBetween('FuseIn', 13.60, 13.70),
+        tester.LimitLow('Voff', 2.0),
+        tester.LimitBetween('Vout', 13.60, 13.70),
+        tester.LimitBetween('Vbat', 13.40, 13.70),
+        tester.LimitBetween('Vtrickle', 3.90, 5.70),
+        tester.LimitBetween('Vboost', 13.80, 14.10),
+        tester.LimitLow('inOCP', 11.6),
+        tester.LimitLow('FuseOut', 0.5),
+        tester.LimitBetween('FuseIn', 13.60, 13.70),
         )
     # Test limit selection keyed by program parameter
     limitdata = {
         '20': {
             'Limits': _common + (
-                LimitBetween('LoadOCP', 20.5, 26.0),
-                LimitBetween('BattOCP', 9.0, 11.5),
-                LimitRegExp('FuseLabel', '^ST20\-III$'),
+                tester.LimitBetween('LoadOCP', 20.5, 26.0),
+                tester.LimitBetween('BattOCP', 9.0, 11.5),
+                tester.LimitRegExp('FuseLabel', '^ST20\-III$'),
                 ),
             'FullLoad': 20.1,
             'LoadOCPramp': (19.5, 28.0),
@@ -38,9 +39,9 @@ class Final(share.TestSequence):
             },
         '35': {
             'Limits': _common + (
-                LimitBetween('LoadOCP', 35.1, 42.5),
-                LimitBetween('BattOCP', 14.0, 17.0),
-                LimitRegExp('FuseLabel', '^ST35\-III$'),
+                tester.LimitBetween('LoadOCP', 35.1, 42.5),
+                tester.LimitBetween('BattOCP', 14.0, 17.0),
+                tester.LimitRegExp('FuseLabel', '^ST35\-III$'),
                 ),
             'FullLoad': 35.1,
             'LoadOCPramp': (34.1, 43.5),
@@ -54,11 +55,11 @@ class Final(share.TestSequence):
             self.limitdata[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('FuseLabel', self._step_label),
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Battery', self._step_battery),
-            TestStep('LoadOCP', self._step_load_ocp),
-            TestStep('BattOCP', self._step_batt_ocp),
+            tester.TestStep('FuseLabel', self._step_label),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Battery', self._step_battery),
+            tester.TestStep('LoadOCP', self._step_load_ocp),
+            tester.TestStep('BattOCP', self._step_batt_ocp),
             )
 
     @share.teststep

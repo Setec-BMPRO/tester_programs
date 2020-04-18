@@ -4,7 +4,7 @@
 """IDS-500 Bias Initial Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitDelta, LimitBetween
+
 import share
 
 
@@ -14,20 +14,20 @@ class InitialBias(share.TestSequence):
 
     # Test limits
     limitdata = (
-        LimitDelta('400V', 390, 410),
-        LimitBetween('PVcc', 12.8, 14.5),
-        LimitBetween('12VsbRaw', 12.7, 13.49),
-        LimitLow('InOCP', 12.6),
-        LimitBetween('OCP', 1.2, 2.1),
-        LimitLow('FixtureLock', 20),
+        tester.LimitDelta('400V', 390, 410),
+        tester.LimitBetween('PVcc', 12.8, 14.5),
+        tester.LimitBetween('12VsbRaw', 12.7, 13.49),
+        tester.LimitLow('InOCP', 12.6),
+        tester.LimitBetween('OCP', 1.2, 2.1),
+        tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_pwrup),
-            TestStep('OCP', self._step_ocp),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('OCP', self._step_ocp),
             )
 
     @share.teststep

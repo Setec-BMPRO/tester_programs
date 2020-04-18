@@ -3,12 +3,13 @@
 # Copyright 2014 SETEC Pty Ltd.
 """Drifter(BM) Initial Test Program."""
 
-import os
 import inspect
+import os
 import time
 import serial
+
 import tester
-from tester import TestStep, LimitBetween, LimitDelta, LimitInteger
+
 import share
 from . import console
 
@@ -22,37 +23,37 @@ class Initial(share.TestSequence):
     force_threshold = 160
     # Limits common to both versions
     _common = (
-        LimitDelta('Vin', 12.0, 0.1),
-        LimitDelta('Vsw', 0, 100),
-        LimitDelta('Vref', 0, 100),
-        LimitDelta('Vcc', 3.30, 0.07),
-        LimitDelta('Isense', -90, 5),
-        LimitBetween('3V3', -2.8, -2.5),
-        LimitDelta('%ErrorV', 0, 2.24),
-        LimitDelta('%CalV', 0, 0.36),
-        LimitDelta('%ErrorI', 0, 2.15),
-        LimitDelta('%CalI', 0, 0.50),
+        tester.LimitDelta('Vin', 12.0, 0.1),
+        tester.LimitDelta('Vsw', 0, 100),
+        tester.LimitDelta('Vref', 0, 100),
+        tester.LimitDelta('Vcc', 3.30, 0.07),
+        tester.LimitDelta('Isense', -90, 5),
+        tester.LimitBetween('3V3', -2.8, -2.5),
+        tester.LimitDelta('%ErrorV', 0, 2.24),
+        tester.LimitDelta('%CalV', 0, 0.36),
+        tester.LimitDelta('%ErrorI', 0, 2.15),
+        tester.LimitDelta('%CalI', 0, 0.50),
         # Data reported by the PIC
-        LimitInteger('PicStatus 0', 0),
-        LimitDelta('PicZeroChk', 0, 65.0),
-        LimitDelta('PicVin', 12.0, 0.5),
-        LimitDelta('PicIsense', -90, 5),
-        LimitDelta('PicVfactor', 20000, 1000),
-        LimitDelta('PicIfactor', 15000, 1000),
-        LimitBetween('PicIoffset', -8.01, -8),
-        LimitBetween('PicIthreshold', 160, 160.01),
+        tester.LimitInteger('PicStatus 0', 0),
+        tester.LimitDelta('PicZeroChk', 0, 65.0),
+        tester.LimitDelta('PicVin', 12.0, 0.5),
+        tester.LimitDelta('PicIsense', -90, 5),
+        tester.LimitDelta('PicVfactor', 20000, 1000),
+        tester.LimitDelta('PicIfactor', 15000, 1000),
+        tester.LimitBetween('PicIoffset', -8.01, -8),
+        tester.LimitBetween('PicIthreshold', 160, 160.01),
         )
     # Test limit selection keyed by program parameter
     limitdata = {
         'STD': {
             'Limits': _common + (
-                LimitBetween('0V8', -1.2, -0.4),
+                tester.LimitBetween('0V8', -1.2, -0.4),
                 ),
             'Software': 'Drifter-5.hex',
             },
         'BM': {
             'Limits': _common + (
-                LimitBetween('0V8', -1.4, -0.6),
+                tester.LimitBetween('0V8', -1.4, -0.6),
                 ),
             'Software': 'DrifterBM-2.hex',
             },
@@ -64,10 +65,10 @@ class Initial(share.TestSequence):
             self.limitdata[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Program', self.devices['program_pic'].program),
-            TestStep('CalPre', self._step_cal_pre),
-            TestStep('Calibrate', self._step_calibrate),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Program', self.devices['program_pic'].program),
+            tester.TestStep('CalPre', self._step_cal_pre),
+            tester.TestStep('Calibrate', self._step_calibrate),
             )
 
     @share.teststep

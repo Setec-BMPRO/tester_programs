@@ -4,7 +4,7 @@
 """BCE4/5 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitDelta
+
 import share
 
 
@@ -14,32 +14,32 @@ class Final(share.TestSequence):
 
     # Limits common to both versions
     _common = (
-        LimitDelta('AlarmOpen', 10.0, 1.0, doc='Contacts open'),
-        LimitLow('AlarmClosed', 1.0, doc='Contacts closed'),
-        LimitBetween('Dropout', 150.0, 180.0, doc='AC dropout voltage'),
+        tester.LimitDelta('AlarmOpen', 10.0, 1.0, doc='Contacts open'),
+        tester.LimitLow('AlarmClosed', 1.0, doc='Contacts closed'),
+        tester.LimitBetween('Dropout', 150.0, 180.0, doc='AC dropout voltage'),
         )
     # Test limit selection keyed by program parameter
     limitdata = {
         '4': {
             'Limits': _common + (
-                LimitBetween('VoutNL', 13.50, 13.80),
-                LimitBetween('Vout', 13.28, 13.80),
-                LimitBetween('Vbat', 13.28, 13.92),
-                LimitLow('inOCP', 13.28),
-                LimitBetween('OCP', 10.2, 13.0),
-                LimitLow('InDropout', 13.28),
+                tester.LimitBetween('VoutNL', 13.50, 13.80),
+                tester.LimitBetween('Vout', 13.28, 13.80),
+                tester.LimitBetween('Vbat', 13.28, 13.92),
+                tester.LimitLow('inOCP', 13.28),
+                tester.LimitBetween('OCP', 10.2, 13.0),
+                tester.LimitLow('InDropout', 13.28),
                 ),
             'FullLoad': 10.1,
             'OCPramp': (10.0, 13.5),
             },
         '5': {
             'Limits': _common + (
-                LimitBetween('VoutNL', 27.00, 27.60),
-                LimitBetween('Vout', 26.56, 27.84),
-                LimitBetween('Vbat', 26.56, 27.84),
-                LimitLow('inOCP', 26.56),
-                LimitBetween('OCP', 5.1, 6.3),
-                LimitLow('InDropout', 26.56),
+                tester.LimitBetween('VoutNL', 27.00, 27.60),
+                tester.LimitBetween('Vout', 26.56, 27.84),
+                tester.LimitBetween('Vbat', 26.56, 27.84),
+                tester.LimitLow('inOCP', 26.56),
+                tester.LimitBetween('OCP', 5.1, 6.3),
+                tester.LimitLow('InDropout', 26.56),
                 ),
             'FullLoad': 5.1,
             'OCPramp': (5.0, 7.0),
@@ -52,10 +52,10 @@ class Final(share.TestSequence):
             self.limitdata[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('FullLoad', self._step_full_load),
-            TestStep('OCP', self._step_ocp),
-            TestStep('LowMains', self._step_low_mains),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('FullLoad', self._step_full_load),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('LowMains', self._step_low_mains),
             )
 
     @share.teststep

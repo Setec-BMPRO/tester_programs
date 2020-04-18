@@ -3,14 +3,14 @@
 # Copyright 2016 SETEC Pty Ltd.
 """J35 Initial Test Program."""
 
-import os
 import inspect
+import os
 import serial
+
 import tester
-from tester import TestStep
+
 import share
-from . import console
-from . import config
+from . import config, console
 
 
 class Initial(share.TestSequence):
@@ -29,19 +29,19 @@ class Initial(share.TestSequence):
         self.limits['SwVer'].adjust(
             '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('ProgramARM', self.devices['program_arm'].program),
-            TestStep('Initialise', self._step_initialise_arm),
-            TestStep('Aux', self._step_aux),
-            TestStep('Solar', self._step_solar, self.cfg.solar),
-            TestStep('ManualMode', self._step_manualmode),
-            TestStep('SolarComp', self._step_solarcomp, self.cfg.solar),
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('Output', self._step_output),
-            TestStep('RemoteSw', self._step_remote_sw),
-            TestStep('Load', self._step_load),
-            TestStep('OCP', self._step_ocp),
-            TestStep('CanBus', self._step_canbus, self.cfg.canbus),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('ProgramARM', self.devices['program_arm'].program),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('Aux', self._step_aux),
+            tester.TestStep('Solar', self._step_solar, self.cfg.solar),
+            tester.TestStep('ManualMode', self._step_manualmode),
+            tester.TestStep('SolarComp', self._step_solarcomp, self.cfg.solar),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('Output', self._step_output),
+            tester.TestStep('RemoteSw', self._step_remote_sw),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('CanBus', self._step_canbus, self.cfg.canbus),
             )
         self.sernum = None
         self.derate = ((self.parameter == 'A') and (self.cfg.canbus == False))

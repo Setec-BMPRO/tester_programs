@@ -3,10 +3,11 @@
 # Copyright 2016 SETEC Pty Ltd.
 """IDS-500 SynBuck Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import tester
-from tester import TestStep, LimitLow, LimitBetween
+
 import share
 
 
@@ -18,46 +19,46 @@ class InitialSyn(share.TestSequence):
     pic_hex_syn = 'ids_picSyn_2.hex'
     # Test limits
     limitdata = (
-        LimitBetween('20VT', 18.5, 22.0),
-        LimitBetween('-20V', -22.0, -18.0),
-        LimitBetween('9V', 8.0, 11.5),
-        LimitBetween('TecOff', -0.5, 0.5),
-        LimitBetween('Tec0V', -0.5, 1.0),
-        LimitBetween('Tec2V5', 7.3, 7.8),
-        LimitBetween('Tec5V', 14.75, 15.5),
-        LimitBetween('Tec5V_Rev', -15.5, -14.5),
-        LimitBetween('LddOff', -0.5, 0.5),
-        LimitBetween('Ldd0V', -0.5, 0.5),
-        LimitBetween('Ldd0V6', 0.6, 1.8),
-        LimitBetween('Ldd5V', 1.0, 2.5),
-        LimitBetween('LddVmonOff', -0.5, 0.5),
-        LimitBetween('LddImonOff', -0.5, 0.5),
-        LimitBetween('LddImon0V', -0.05, 0.05),
-        LimitBetween('LddImon0V6', 0.55, 0.65),
-        LimitBetween('LddImon5V', 4.9, 5.1),
-        LimitBetween('ISIout0A', -1.0, 1.0),
-        LimitBetween('ISIout6A', 5.0, 7.0),
-        LimitBetween('ISIout50A', 49.0, 51.0),
-        LimitBetween('ISIset5V', 4.95, 5.05),
-        LimitBetween('AdjLimits', 49.9, 50.1),
-        LimitBetween('TecVmonOff', -0.5, 0.5),
-        LimitBetween('TecVmon0V', -0.5, 0.8),
-        LimitBetween('TecVmon2V5', 2.4375, 2.5625),
-        LimitBetween('TecVmon5V', 4.925, 5.075),
-        LimitBetween('TecVsetOff', -0.5, 0.5),
-        LimitLow('FixtureLock', 20),
+        tester.LimitBetween('20VT', 18.5, 22.0),
+        tester.LimitBetween('-20V', -22.0, -18.0),
+        tester.LimitBetween('9V', 8.0, 11.5),
+        tester.LimitBetween('TecOff', -0.5, 0.5),
+        tester.LimitBetween('Tec0V', -0.5, 1.0),
+        tester.LimitBetween('Tec2V5', 7.3, 7.8),
+        tester.LimitBetween('Tec5V', 14.75, 15.5),
+        tester.LimitBetween('Tec5V_Rev', -15.5, -14.5),
+        tester.LimitBetween('LddOff', -0.5, 0.5),
+        tester.LimitBetween('Ldd0V', -0.5, 0.5),
+        tester.LimitBetween('Ldd0V6', 0.6, 1.8),
+        tester.LimitBetween('Ldd5V', 1.0, 2.5),
+        tester.LimitBetween('LddVmonOff', -0.5, 0.5),
+        tester.LimitBetween('LddImonOff', -0.5, 0.5),
+        tester.LimitBetween('LddImon0V', -0.05, 0.05),
+        tester.LimitBetween('LddImon0V6', 0.55, 0.65),
+        tester.LimitBetween('LddImon5V', 4.9, 5.1),
+        tester.LimitBetween('ISIout0A', -1.0, 1.0),
+        tester.LimitBetween('ISIout6A', 5.0, 7.0),
+        tester.LimitBetween('ISIout50A', 49.0, 51.0),
+        tester.LimitBetween('ISIset5V', 4.95, 5.05),
+        tester.LimitBetween('AdjLimits', 49.9, 50.1),
+        tester.LimitBetween('TecVmonOff', -0.5, 0.5),
+        tester.LimitBetween('TecVmon0V', -0.5, 0.8),
+        tester.LimitBetween('TecVmon2V5', 2.4375, 2.5625),
+        tester.LimitBetween('TecVmon5V', 4.925, 5.075),
+        tester.LimitBetween('TecVsetOff', -0.5, 0.5),
+        tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Program', self._step_program),
-            TestStep('PowerUp', self._step_pwrup),
-            TestStep('TecEnable', self._step_tec_enable),
-            TestStep('TecReverse', self._step_tec_rev),
-            TestStep('LddEnable', self._step_ldd_enable),
-            TestStep('ISSetAdj', self._step_ISset_adj),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('TecEnable', self._step_tec_enable),
+            tester.TestStep('TecReverse', self._step_tec_rev),
+            tester.TestStep('LddEnable', self._step_ldd_enable),
+            tester.TestStep('ISSetAdj', self._step_ISset_adj),
             )
 
     @share.teststep

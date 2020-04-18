@@ -4,7 +4,7 @@
 """IDS-500 Aux Initial Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween
+
 import share
 
 
@@ -14,37 +14,37 @@ class InitialAux(share.TestSequence):
 
     # Test limits
     limitdata = (
-        LimitBetween('5V', 4.90, 5.10),
-        LimitLow('5VOff', 0.5),
-        LimitLow('15VpOff', 0.5),
-        LimitBetween('15Vp', 14.25, 15.75),
-        LimitLow('15VpSwOff', 0.5),
-        LimitBetween('15VpSw', 14.25, 15.75),
-        LimitBetween('20VL', 18.0, 25.0),
-        LimitBetween('-20V', -25.0, -18.0),
-        LimitBetween('15V', 14.25, 15.75),
-        LimitBetween('-15V', -15.75, -14.25),
-        LimitLow('PwrGoodOff', 0.5),
-        LimitBetween('PwrGood', 4.8, 5.1),
-        LimitBetween('ACurr_5V_1', -0.1, 0.1),
-        LimitBetween('ACurr_5V_2', 1.76, 2.15),
-        LimitBetween('ACurr_15V_1', -0.1, 0.13),
-        LimitBetween('ACurr_15V_2', 1.16, 1.42),
-        LimitBetween('AuxTemp', 2.1, 4.3),
-        LimitLow('InOCP5V', 4.8),
-        LimitLow('InOCP15Vp', 14.2),
-        LimitBetween('OCP', 7.0, 10.0),
-        LimitLow('FixtureLock', 20),
+        tester.LimitBetween('5V', 4.90, 5.10),
+        tester.LimitLow('5VOff', 0.5),
+        tester.LimitLow('15VpOff', 0.5),
+        tester.LimitBetween('15Vp', 14.25, 15.75),
+        tester.LimitLow('15VpSwOff', 0.5),
+        tester.LimitBetween('15VpSw', 14.25, 15.75),
+        tester.LimitBetween('20VL', 18.0, 25.0),
+        tester.LimitBetween('-20V', -25.0, -18.0),
+        tester.LimitBetween('15V', 14.25, 15.75),
+        tester.LimitBetween('-15V', -15.75, -14.25),
+        tester.LimitLow('PwrGoodOff', 0.5),
+        tester.LimitBetween('PwrGood', 4.8, 5.1),
+        tester.LimitBetween('ACurr_5V_1', -0.1, 0.1),
+        tester.LimitBetween('ACurr_5V_2', 1.76, 2.15),
+        tester.LimitBetween('ACurr_15V_1', -0.1, 0.13),
+        tester.LimitBetween('ACurr_15V_2', 1.16, 1.42),
+        tester.LimitBetween('AuxTemp', 2.1, 4.3),
+        tester.LimitLow('InOCP5V', 4.8),
+        tester.LimitLow('InOCP15Vp', 14.2),
+        tester.LimitBetween('OCP', 7.0, 10.0),
+        tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_pwrup),
-            TestStep('KeySwitch', self._step_key_switch),
-            TestStep('ACurrent', self._step_acurrent),
-            TestStep('OCP', self._step_ocp),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('KeySwitch', self._step_key_switch),
+            tester.TestStep('ACurrent', self._step_acurrent),
+            tester.TestStep('OCP', self._step_ocp),
             )
 
     @share.teststep

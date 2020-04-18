@@ -3,13 +3,14 @@
 # Copyright 2017 SETEC Pty Ltd
 """BCE282-12/24 Initial Test Program."""
 
-import sys
-import os
 import inspect
+import os
+import sys
 import time
 import serial
+
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitDelta, LimitPercent
+
 import share
 from . import console
 from . import tosbsl
@@ -33,28 +34,28 @@ class Initial(share.TestSequence):
     _cal_factor = 0.5
     # Limits common to both versions
     _common = (
-        LimitLow('FixtureLock', 200),
-        LimitDelta('VccBiasExt', 15.0, 1.0),
-        LimitDelta('Vac', 240.0, 5.0),
-        LimitBetween('Vbus', 330.0, 350.0),
-        LimitPercent('VccPri', 15.6, 5.0),
-        LimitPercent('VccBias', 15.0, 13.0),
-        LimitLow('VbatOff', 0.5),
-        LimitBetween('AlarmClosed', 1000, 3000),
-        LimitBetween('AlarmOpen', 11000, 13000),
-        LimitBetween('Status 0', -0.1, 0.1),
+        tester.LimitLow('FixtureLock', 200),
+        tester.LimitDelta('VccBiasExt', 15.0, 1.0),
+        tester.LimitDelta('Vac', 240.0, 5.0),
+        tester.LimitBetween('Vbus', 330.0, 350.0),
+        tester.LimitPercent('VccPri', 15.6, 5.0),
+        tester.LimitPercent('VccBias', 15.0, 13.0),
+        tester.LimitLow('VbatOff', 0.5),
+        tester.LimitBetween('AlarmClosed', 1000, 3000),
+        tester.LimitBetween('AlarmOpen', 11000, 13000),
+        tester.LimitBetween('Status 0', -0.1, 0.1),
         )
     # ScaleFactor: 24V model responds with 12V output to measurement "msp_vout"
     # and is designed to be calibrated with half its measured output voltage.
     limitdata = {      # Test limit selection keyed by program parameter
         '12': {
             'Limits': _common + (
-                LimitBetween('OutOCP', 20.05, 24.00),
-                LimitBetween('BattOCP', 14.175, 15.825),
-                LimitLow('InOCP', 13.0),
-                LimitPercent('VoutPreCal', 13.8, 2.6),
-                LimitDelta('VoutPostCal', 13.8, _cal_factor * 0.15),
-                LimitBetween('MspVout', 13.0, 14.6),
+                tester.LimitBetween('OutOCP', 20.05, 24.00),
+                tester.LimitBetween('BattOCP', 14.175, 15.825),
+                tester.LimitLow('InOCP', 13.0),
+                tester.LimitPercent('VoutPreCal', 13.8, 2.6),
+                tester.LimitDelta('VoutPostCal', 13.8, _cal_factor * 0.15),
+                tester.LimitBetween('MspVout', 13.0, 14.6),
                 ),
             'LoadRatio': (20, 14),      # Iout:Ibat
             'ScaleFactor': 1000,
@@ -62,12 +63,12 @@ class Initial(share.TestSequence):
             },
         '24': {
             'Limits': _common + (
-                LimitBetween('OutOCP', 10.0, 12.0),
-                LimitBetween('BattOCP', 6.0, 9.0),
-                LimitLow('InOCP', 26.0),
-                LimitPercent('VoutPreCal', 27.6, 2.6),
-                LimitDelta('VoutPostCal', 27.6, _cal_factor * 0.25),
-                LimitBetween('MspVout', 26.0, 29.2),
+                tester.LimitBetween('OutOCP', 10.0, 12.0),
+                tester.LimitBetween('BattOCP', 6.0, 9.0),
+                tester.LimitLow('InOCP', 26.0),
+                tester.LimitPercent('VoutPreCal', 27.6, 2.6),
+                tester.LimitDelta('VoutPostCal', 27.6, _cal_factor * 0.25),
+                tester.LimitBetween('MspVout', 26.0, 29.2),
                 ),
             'LoadRatio': (10, 6),       # Iout:Ibat
             'ScaleFactor': 500,
@@ -81,11 +82,11 @@ class Initial(share.TestSequence):
             self.limitdata[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('Program', self._step_program),
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('Calibration', self._step_cal),
-            TestStep('OCP', self._step_ocp),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('Calibration', self._step_cal),
+            tester.TestStep('OCP', self._step_ocp),
             )
         self.devices['msp'].scaling(
             self.limitdata[self.parameter]['ScaleFactor'])

@@ -4,10 +4,7 @@
 """TRS2 Final Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitDelta, LimitBoolean
-    )
+
 import share
 
 
@@ -19,16 +16,16 @@ class Final(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
-        LimitBoolean('ScanSer', True, doc='Serial number detected'),
+        tester.LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
+        tester.LimitBoolean('ScanSer', True, doc='Serial number detected'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 

@@ -4,7 +4,7 @@
 """TS3020H Initial Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitDelta, LimitBetween
+
 import share
 
 
@@ -13,55 +13,55 @@ class Initial(share.TestSequence):
     """TS3020H Initial Test Program."""
 
     limitdata = (
-        LimitBetween('FanConn', 100, 200),
-        LimitBetween('InrushOff', 120, 180),
-        LimitLow('InrushOn', 10),
-        LimitBetween('SecCtlExt', 12.8, 14.0),
-        LimitBetween('SecCtl2Ext', 13.6, 14.0),
-        LimitBetween('SecCtl', 9.6, 15.0),
-        LimitBetween('SecCtl2', 7.0, 15.0),
-        LimitBetween('LedOn', 1.5, 2.2),
-        LimitBetween('LedOff', -0.1, 0.1),
-        LimitBetween('FanOff', 13.4, 14.0),
-        LimitBetween('FanOn', -0.5, 1.0),
-        LimitLow('inVP', 12.5),
-        LimitBetween('OVP', 14.95, 16.45),
-        LimitBetween('UVP', 9.96, 10.96),
-        LimitDelta('VbusExt', 120.0, 2.0),
-        LimitLow('VbusOff', 70.0),
-        LimitBetween('Vbus', 380.0, 410.0),
-        LimitBetween('Vbias', 11.2, 12.8),
-        LimitBetween('AcDetOff', -0.1, 6.0),
-        LimitBetween('AcDetOn', 8.0, 14.0),
-        LimitDelta('VacMin', 100.0, 5.0),
-        LimitDelta('Vac', 240.0, 5.0),
-        LimitBetween('VoutExt', 13.6, 14.0),
-        LimitBetween('VoutPre', 12.6, 15.0),
-        LimitBetween('VoutSet', 13.775, 13.825),
-        LimitBetween('Vout', 13.5, 13.825),
-        LimitLow('VoutOff', 5.0),
-        LimitLow('Reg', 2.0),
-        LimitBetween('SecShdnOff', 12.5, 13.5),
-        LimitBetween('PwmShdnOn', 9.0, 15.0),
-        LimitLow('PwmShdnOff', 1.0),
-        LimitBetween('VacShdnOn', 9.0, 15.0),
-        LimitLow('VacShdnOff', 1.0),
-        LimitLow('FixtureLock', 20),
+        tester.LimitBetween('FanConn', 100, 200),
+        tester.LimitBetween('InrushOff', 120, 180),
+        tester.LimitLow('InrushOn', 10),
+        tester.LimitBetween('SecCtlExt', 12.8, 14.0),
+        tester.LimitBetween('SecCtl2Ext', 13.6, 14.0),
+        tester.LimitBetween('SecCtl', 9.6, 15.0),
+        tester.LimitBetween('SecCtl2', 7.0, 15.0),
+        tester.LimitBetween('LedOn', 1.5, 2.2),
+        tester.LimitBetween('LedOff', -0.1, 0.1),
+        tester.LimitBetween('FanOff', 13.4, 14.0),
+        tester.LimitBetween('FanOn', -0.5, 1.0),
+        tester.LimitLow('inVP', 12.5),
+        tester.LimitBetween('OVP', 14.95, 16.45),
+        tester.LimitBetween('UVP', 9.96, 10.96),
+        tester.LimitDelta('VbusExt', 120.0, 2.0),
+        tester.LimitLow('VbusOff', 70.0),
+        tester.LimitBetween('Vbus', 380.0, 410.0),
+        tester.LimitBetween('Vbias', 11.2, 12.8),
+        tester.LimitBetween('AcDetOff', -0.1, 6.0),
+        tester.LimitBetween('AcDetOn', 8.0, 14.0),
+        tester.LimitDelta('VacMin', 100.0, 5.0),
+        tester.LimitDelta('Vac', 240.0, 5.0),
+        tester.LimitBetween('VoutExt', 13.6, 14.0),
+        tester.LimitBetween('VoutPre', 12.6, 15.0),
+        tester.LimitBetween('VoutSet', 13.775, 13.825),
+        tester.LimitBetween('Vout', 13.5, 13.825),
+        tester.LimitLow('VoutOff', 5.0),
+        tester.LimitLow('Reg', 2.0),
+        tester.LimitBetween('SecShdnOff', 12.5, 13.5),
+        tester.LimitBetween('PwmShdnOn', 9.0, 15.0),
+        tester.LimitLow('PwmShdnOff', 1.0),
+        tester.LimitBetween('VacShdnOn', 9.0, 15.0),
+        tester.LimitLow('VacShdnOff', 1.0),
+        tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('FixtureLock', self._step_fixture_lock),
-            TestStep('FuseCheck', self._step_fuse_check),
-            TestStep('FanCheck', self._step_fan_check),
-            TestStep('OutputOV_UV', self._step_ov_uv),
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('MainsCheck', self._step_mains_check),
-            TestStep('AdjOutput', self._step_adj_output),
-            TestStep('Load', self._step_load),
-            TestStep('InputOV', self._step_input_ov),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('FuseCheck', self._step_fuse_check),
+            tester.TestStep('FanCheck', self._step_fan_check),
+            tester.TestStep('OutputOV_UV', self._step_ov_uv),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('MainsCheck', self._step_mains_check),
+            tester.TestStep('AdjOutput', self._step_adj_output),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('InputOV', self._step_input_ov),
             )
 
     @share.teststep

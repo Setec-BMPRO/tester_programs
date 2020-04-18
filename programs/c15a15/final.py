@@ -4,7 +4,7 @@
 """C15A-15 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitDelta
+
 import share
 
 # Resistive loading during OCP
@@ -16,20 +16,20 @@ class Final(share.TestSequence):
     """C15A-15 Final Test Program."""
 
     limitdata = (
-        LimitDelta('Vout', 15.5, 0.3),
-        LimitLow('Voutfl', 5.0),
-        LimitBetween('OCP', 1.0, 1.4),
-        LimitLow('inOCP', 13.6),
+        tester.LimitDelta('Vout', 15.5, 0.3),
+        tester.LimitLow('Voutfl', 5.0),
+        tester.LimitBetween('OCP', 1.0, 1.4),
+        tester.LimitLow('inOCP', 13.6),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('OCP', self._step_ocp),
-            TestStep('FullLoad', self._step_full_load),
-            TestStep('PowerOff', self._step_power_off),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('FullLoad', self._step_full_load),
+            tester.TestStep('PowerOff', self._step_power_off),
             )
 
     @share.teststep

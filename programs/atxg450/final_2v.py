@@ -6,7 +6,6 @@
 import tester
 
 import share
-from tester import TestStep, LimitLow, LimitHigh, LimitBetween
 
 
 class Final2V(share.TestSequence):
@@ -14,46 +13,46 @@ class Final2V(share.TestSequence):
     """ATXG-450-2V Final Test Program."""
 
     limitdata = (
-        LimitBetween('5Vsb', 4.845, 5.202),
-        LimitLow('5Vsbinocp', 4.70),
-        LimitBetween('5Vsbocp', 2.6, 4.0),
-        LimitLow('24Voff', 0.5),
-        LimitBetween('24Von', 23.75, 26.25),
-        LimitLow('24Vinocp', 22.8),
-        LimitBetween('24Vocp', 18.0, 24.0),
-        LimitLow('12Voff', 0.5),
-        LimitBetween('12Von', 11.685, 12.669),
-        LimitLow('12Vinocp', 10.0),
-        LimitBetween('12Vocp', 20.5, 26.0),
-        LimitLow('5Voff', 0.5),
-        LimitBetween('5Von', 4.725, 5.4075),
-        LimitLow('5Vinocp', 4.75),
-        LimitBetween('5Vocp', 20.5, 26.0),
-        LimitLow('3V3off', 0.5),
-        LimitBetween('3V3on', 3.1825, 3.4505),
-        LimitLow('3V3inocp', 3.20),
-        LimitBetween('3V3ocp', 17.0, 26.0),
-        LimitHigh('-12Voff', -0.5),
-        LimitBetween('-12Von', -12.48, -11.52),
-        LimitLow('PwrGoodOff', 0.5),
-        LimitHigh('PwrGoodOn', 4.5),
-        LimitHigh('PwrFailOff', 4.5),
-        LimitLow('PwrFailOn', 0.5),
+        tester.LimitBetween('5Vsb', 4.845, 5.202),
+        tester.LimitLow('5Vsbinocp', 4.70),
+        tester.LimitBetween('5Vsbocp', 2.6, 4.0),
+        tester.LimitLow('24Voff', 0.5),
+        tester.LimitBetween('24Von', 23.75, 26.25),
+        tester.LimitLow('24Vinocp', 22.8),
+        tester.LimitBetween('24Vocp', 18.0, 24.0),
+        tester.LimitLow('12Voff', 0.5),
+        tester.LimitBetween('12Von', 11.685, 12.669),
+        tester.LimitLow('12Vinocp', 10.0),
+        tester.LimitBetween('12Vocp', 20.5, 26.0),
+        tester.LimitLow('5Voff', 0.5),
+        tester.LimitBetween('5Von', 4.725, 5.4075),
+        tester.LimitLow('5Vinocp', 4.75),
+        tester.LimitBetween('5Vocp', 20.5, 26.0),
+        tester.LimitLow('3V3off', 0.5),
+        tester.LimitBetween('3V3on', 3.1825, 3.4505),
+        tester.LimitLow('3V3inocp', 3.20),
+        tester.LimitBetween('3V3ocp', 17.0, 26.0),
+        tester.LimitHigh('-12Voff', -0.5),
+        tester.LimitBetween('-12Von', -12.48, -11.52),
+        tester.LimitLow('PwrGoodOff', 0.5),
+        tester.LimitHigh('PwrGoodOn', 4.5),
+        tester.LimitHigh('PwrFailOff', 4.5),
+        tester.LimitLow('PwrFailOn', 0.5),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('SwitchOn', self._step_switch_on),
-            TestStep('FullLoad', self._step_full_load),
-            TestStep('OCP24', self._step_ocp24),
-            TestStep('OCP12', self._step_ocp12),
-            TestStep('OCP5', self._step_ocp5),
-            TestStep('OCP3', self._step_ocp3),
-            TestStep('OCP5sb', self._step_ocp5sb),
-            TestStep('PowerFail', self._step_power_fail),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('SwitchOn', self._step_switch_on),
+            tester.TestStep('FullLoad', self._step_full_load),
+            tester.TestStep('OCP24', self._step_ocp24),
+            tester.TestStep('OCP12', self._step_ocp12),
+            tester.TestStep('OCP5', self._step_ocp5),
+            tester.TestStep('OCP3', self._step_ocp3),
+            tester.TestStep('OCP5sb', self._step_ocp5sb),
+            tester.TestStep('PowerFail', self._step_power_fail),
             )
 
     @share.teststep

@@ -4,14 +4,11 @@
 """TRS2 Initial Program."""
 
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
-    )
+
 import share
-from . import console
-from . import config
+from . import config, console
 
 
 class Initial(share.TestSequence):
@@ -26,55 +23,55 @@ class Initial(share.TestSequence):
     ibrake = 1.0
     # Common limits
     _common = (
-        LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
-        LimitLow('BrakeOff', 0.5, doc='Brakes off'),
-        LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
-        LimitDelta('BrakeOffset', vbrake_offset, 0.1,
+        tester.LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
+        tester.LimitPercent('3V3', 3.3, 0.5, doc='3V3 present'),
+        tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
+        tester.LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
+        tester.LimitDelta('BrakeOffset', vbrake_offset, 0.1,
             doc='Input voltage present'),
-        LimitDelta('BrakeGain', vbatt, 0.1, doc='Input voltage present'),
-        LimitLow('LightOff', 0.5, doc='Lights off'),
-        LimitDelta('LightOn', vbatt, (0.25, 0), doc='Lights on'),
-        LimitLow('RemoteOff', 0.5, doc='Remote off'),
-        LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
-        LimitLow('RedLedOff', 1.0, doc='Led off'),
-        LimitDelta('RedLedOn', 1.8, 0.14, doc='Led on'),
-        LimitLow('GreenLedOff', 1.0, doc='Led off'),
-        LimitDelta('GreenLedOn', 2.5, 0.4, doc='Led on'),
-        LimitLow('BlueLedOff', 1.0, doc='Led off'),
-        LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
-        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
-        LimitRegExp('ARM-SwVer',
+        tester.LimitDelta('BrakeGain', vbatt, 0.1, doc='Input voltage present'),
+        tester.LimitLow('LightOff', 0.5, doc='Lights off'),
+        tester.LimitDelta('LightOn', vbatt, (0.25, 0), doc='Lights on'),
+        tester.LimitLow('RemoteOff', 0.5, doc='Remote off'),
+        tester.LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
+        tester.LimitLow('RedLedOff', 1.0, doc='Led off'),
+        tester.LimitDelta('RedLedOn', 1.8, 0.14, doc='Led on'),
+        tester.LimitLow('GreenLedOff', 1.0, doc='Led off'),
+        tester.LimitDelta('GreenLedOn', 2.5, 0.4, doc='Led on'),
+        tester.LimitLow('BlueLedOff', 1.0, doc='Led off'),
+        tester.LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
+        tester.LimitLow('TestPinCover', 0.5, doc='Cover in place'),
+        tester.LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitLow('ARM-FaultCode', 0, doc='No error'),
-        LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088,
+        tester.LimitLow('ARM-FaultCode', 0, doc='No error'),
+        tester.LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088,
             doc='Voltage present'),
-        LimitPercent('ARM-Vbrake', vbatt, 4.6, delta=0.088,
+        tester.LimitPercent('ARM-Vbrake', vbatt, 4.6, delta=0.088,
             doc='Voltage present'),
-        LimitPercent('ARM-Vbatt-Cal', vbatt, 0.6, delta=0.033,
+        tester.LimitPercent('ARM-Vbatt-Cal', vbatt, 0.6, delta=0.033,
             doc='Voltage present'),
-        LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033,
+        tester.LimitPercent('ARM-Vbrake-Cal', vbatt, 0.6, delta=0.033,
             doc='Voltage present'),
-        LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82,
+        tester.LimitPercent('ARM-Ibrake', ibrake, 4.0, delta=0.82,
             doc='Brake current flowing'),
-        LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+        tester.LimitDelta('ARM-Vpin', 0.0, 0.2, doc='No voltage drop'),
+        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address '),
-        LimitBoolean('DetectBT', True, doc='MAC address detected'),
+        tester.LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
         'STD': {
             'Limits': _common + (
-                LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
-                LimitLow('RemoteOff', 0.5, doc='Remote off'),
+                tester.LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
+                tester.LimitLow('RemoteOff', 0.5, doc='Remote off'),
                 ),
             },
         'AS': {
             'Limits': _common + (
-                LimitLow('RemoteOn', 0.5, doc='Not applicable'),
-                LimitLow('RemoteOff', 0.5, doc='Not applicable'),
+                tester.LimitLow('RemoteOn', 0.5, doc='Not applicable'),
+                tester.LimitLow('RemoteOff', 0.5, doc='Not applicable'),
                 ),
             },
         }
@@ -85,10 +82,10 @@ class Initial(share.TestSequence):
             self.config_data[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('Operation', self._step_operation),
-            TestStep('Calibrate', self._step_calibrate),
-            TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('Operation', self._step_operation),
+            tester.TestStep('Calibrate', self._step_calibrate),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 

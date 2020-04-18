@@ -4,7 +4,7 @@
 """TS3520 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween
+
 import share
 
 
@@ -13,22 +13,22 @@ class Final(share.TestSequence):
     """TS3520 Final Test Program."""
 
     limitdata = (
-        LimitLow('12Voff', 0.5),
-        LimitBetween('12V', 13.7, 13.9),
-        LimitBetween('12Vfl', 13.43, 13.9),
-        LimitBetween('OCP', 25.0, 30.3),
-        LimitLow('inOCP', 13.3),
+        tester.LimitLow('12Voff', 0.5),
+        tester.LimitBetween('12V', 13.7, 13.9),
+        tester.LimitBetween('12Vfl', 13.43, 13.9),
+        tester.LimitBetween('OCP', 25.0, 30.3),
+        tester.LimitLow('inOCP', 13.3),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('FuseCheck', self._step_fuse_check),
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('FullLoad', self._step_full_load),
-            TestStep('OCP', self._step_ocp),
-            TestStep('Poweroff', self._step_power_off),
+            tester.TestStep('FuseCheck', self._step_fuse_check),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('FullLoad', self._step_full_load),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('Poweroff', self._step_power_off),
             )
 
     @share.teststep

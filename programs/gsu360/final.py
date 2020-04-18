@@ -4,7 +4,6 @@
 """GSU360-1TA Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween
 
 import share
 
@@ -14,21 +13,21 @@ class Final(share.TestSequence):
     """GSU360-1TA Final Test Program."""
 
     limitdata = (
-        LimitBetween('24V', 23.40, 24.60),
-        LimitLow('24Vinocp', 23.4),
-        LimitBetween('24Vocp', 15.5, 20.0),
-        LimitLow('24Voff', 5.0),
+        tester.LimitBetween('24V', 23.40, 24.60),
+        tester.LimitLow('24Vinocp', 23.4),
+        tester.LimitBetween('24Vocp', 15.5, 20.0),
+        tester.LimitLow('24Voff', 5.0),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('FullLoad', self._step_full_load),
-            TestStep('OCP', self._step_ocp),
-            TestStep('Shutdown', self._step_shutdown),
-            TestStep('Restart', self._step_restart),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('FullLoad', self._step_full_load),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('Shutdown', self._step_shutdown),
+            tester.TestStep('Restart', self._step_restart),
             )
 
     @share.teststep

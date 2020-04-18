@@ -4,14 +4,11 @@
 """TRSRFM Initial Program."""
 
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitDelta, LimitPercent, LimitBoolean, LimitRegExp
-    )
+
 import share
-from . import console
-from . import config
+from . import config, console
 
 
 class Initial(share.TestSequence):
@@ -22,30 +19,30 @@ class Initial(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
-        LimitPercent('3V3', 3.3, 1.5, doc='3V3 present'),
-        LimitHigh('RedLedOff', 3.1, doc='Led off'),
-        LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
-        LimitHigh('GreenLedOff', 3.1, doc='Led off'),
-        LimitLow('GreenLedOn', 0.2, doc='Led on'),
-        LimitHigh('BlueLedOff', 3.1, doc='Led off'),
-        LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
-        LimitLow('TestPinCover', 0.5, doc='Cover in place'),
-        LimitRegExp('ARM-SwVer',
+        tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
+        tester.LimitPercent('3V3', 3.3, 1.5, doc='3V3 present'),
+        tester.LimitHigh('RedLedOff', 3.1, doc='Led off'),
+        tester.LimitDelta('RedLedOn', 0.5, 0.1, doc='Led on'),
+        tester.LimitHigh('GreenLedOff', 3.1, doc='Led off'),
+        tester.LimitLow('GreenLedOn', 0.2, doc='Led on'),
+        tester.LimitHigh('BlueLedOff', 3.1, doc='Led off'),
+        tester.LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
+        tester.LimitLow('TestPinCover', 0.5, doc='Cover in place'),
+        tester.LimitRegExp('ARM-SwVer',
             '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
             doc='Software version'),
-        LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address'),
-        LimitBoolean('DetectBT', True, doc='MAC address detected'),
+        tester.LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Prepare', self._step_prepare),
-            TestStep('TestArm', self._step_test_arm),
-            TestStep('Bluetooth', self._step_bluetooth),
+            tester.TestStep('Prepare', self._step_prepare),
+            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 

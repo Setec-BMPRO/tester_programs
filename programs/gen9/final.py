@@ -4,10 +4,7 @@
 """GEN9-540 Final Test Program."""
 
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitPercent, LimitDelta,
-    )
+
 import share
 
 
@@ -16,26 +13,26 @@ class Final(share.TestSequence):
     """GEN9-540 Final Test Program."""
 
     limitdata = (
-        LimitLow('FanOff', 9.0, doc='Airflow not present'),
-        LimitHigh('FanOn', 11.0, doc='Airflow present'),
-        LimitDelta('GPO1out', 240, 10, doc='Voltage present'),
-        LimitDelta('GPO2out', 240, 10, doc='Voltage present'),
-        LimitPercent('5V', 5.10, 2.0, doc='5V output ok'),
-        LimitLow('12Voff', 0.5, doc='12V output off'),
-        LimitPercent('12V', 12.0, 2.5, doc='12V output ok'),
-        LimitLow('24Voff', 0.5, doc='24V output off'),
-        LimitPercent('24V', 24.0, 2.5, doc='24V output ok'),
-        LimitLow('PwrFail', 0.4, doc='PFAIL asserted'),
-        LimitHigh('PwrFailOff', 11.0, doc='PFAIL not asserted'),
+        tester.LimitLow('FanOff', 9.0, doc='Airflow not present'),
+        tester.LimitHigh('FanOn', 11.0, doc='Airflow present'),
+        tester.LimitDelta('GPO1out', 240, 10, doc='Voltage present'),
+        tester.LimitDelta('GPO2out', 240, 10, doc='Voltage present'),
+        tester.LimitPercent('5V', 5.10, 2.0, doc='5V output ok'),
+        tester.LimitLow('12Voff', 0.5, doc='12V output off'),
+        tester.LimitPercent('12V', 12.0, 2.5, doc='12V output ok'),
+        tester.LimitLow('24Voff', 0.5, doc='24V output off'),
+        tester.LimitPercent('24V', 24.0, 2.5, doc='24V output ok'),
+        tester.LimitLow('PwrFail', 0.4, doc='PFAIL asserted'),
+        tester.LimitHigh('PwrFailOff', 11.0, doc='PFAIL not asserted'),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_pwrup),
-            TestStep('PowerOn', self._step_pwron),
-            TestStep('FullLoad', self._step_fullload),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('PowerOn', self._step_pwron),
+            tester.TestStep('FullLoad', self._step_fullload),
             )
 
     @share.teststep

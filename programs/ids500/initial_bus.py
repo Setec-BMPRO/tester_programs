@@ -4,7 +4,7 @@
 """IDS-500 Bus Initial Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween
+
 import share
 
 
@@ -14,32 +14,32 @@ class InitialBus(share.TestSequence):
 
     # Test limits
     limitdata = (
-        LimitBetween('400V', 390, 410),
-        LimitBetween('20VT_load0_out', 22.0, 24.0),
-        LimitBetween('9V_load0_out', 10.8, 12.0),
-        LimitBetween('20VL_load0_out', 22.0, 24.0),
-        LimitBetween('-20V_load0_out', -25.0, -22.0),
-        LimitBetween('20VT_load1_out', 22.0, 25.0),
-        LimitBetween('9V_load1_out', 9.0, 11.0),
-        LimitBetween('20VL_load1_out', 22.0, 25.0),
-        LimitBetween('-20V_load1_out', -26.0, -22.0),
-        LimitBetween('20VT_load2_out', 19.0, 24.0),
-        LimitBetween('9V_load2_out', 9.0, 11.0),
-        LimitBetween('20VL_load2_out', 19.0, 21.5),
-        LimitBetween('-20V_load2_out', -22.2, -20.0),
-        LimitBetween('20VT_load3_out', 17.5, 20.0),
-        LimitBetween('9V_load3_out', 9.0, 12.0),
-        LimitBetween('20VL_load3_out', 22.0, 24.0),
-        LimitBetween('-20V_load3_out', -26.0, -22.0),
-        LimitLow('FixtureLock', 20),
+        tester.LimitBetween('400V', 390, 410),
+        tester.LimitBetween('20VT_load0_out', 22.0, 24.0),
+        tester.LimitBetween('9V_load0_out', 10.8, 12.0),
+        tester.LimitBetween('20VL_load0_out', 22.0, 24.0),
+        tester.LimitBetween('-20V_load0_out', -25.0, -22.0),
+        tester.LimitBetween('20VT_load1_out', 22.0, 25.0),
+        tester.LimitBetween('9V_load1_out', 9.0, 11.0),
+        tester.LimitBetween('20VL_load1_out', 22.0, 25.0),
+        tester.LimitBetween('-20V_load1_out', -26.0, -22.0),
+        tester.LimitBetween('20VT_load2_out', 19.0, 24.0),
+        tester.LimitBetween('9V_load2_out', 9.0, 11.0),
+        tester.LimitBetween('20VL_load2_out', 19.0, 21.5),
+        tester.LimitBetween('-20V_load2_out', -22.2, -20.0),
+        tester.LimitBetween('20VT_load3_out', 17.5, 20.0),
+        tester.LimitBetween('9V_load3_out', 9.0, 12.0),
+        tester.LimitBetween('20VL_load3_out', 22.0, 24.0),
+        tester.LimitBetween('-20V_load3_out', -26.0, -22.0),
+        tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_pwrup),
-            TestStep('TecLddStartup', self._step_tec_ldd),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('TecLddStartup', self._step_tec_ldd),
             )
 
     @share.teststep

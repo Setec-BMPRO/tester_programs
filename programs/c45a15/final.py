@@ -4,7 +4,7 @@
 """C45A-15 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween
+
 import share
 
 
@@ -13,21 +13,21 @@ class Final(share.TestSequence):
     """C45A-15 Final Test Program."""
 
     limitdata = (
-        LimitBetween('Vstart', 8.55, 9.45),
-        LimitBetween('Vout', 15.6, 16.4),
-        LimitLow('Vshdn', 8.0),
-        LimitLow('Voff', 1.0),
+        tester.LimitBetween('Vstart', 8.55, 9.45),
+        tester.LimitBetween('Vout', 15.6, 16.4),
+        tester.LimitLow('Vshdn', 8.0),
+        tester.LimitLow('Voff', 1.0),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('ConnectCMR', self._step_connect_cmr),
-            TestStep('Load', self._step_load),
-            TestStep('Restart', self._step_restart),
-            TestStep('Poweroff', self._step_power_off),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('ConnectCMR', self._step_connect_cmr),
+            tester.TestStep('Load', self._step_load),
+            tester.TestStep('Restart', self._step_restart),
+            tester.TestStep('Poweroff', self._step_power_off),
             )
 
     @share.teststep

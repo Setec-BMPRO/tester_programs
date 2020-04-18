@@ -4,9 +4,7 @@
 """2040 Final Test Program."""
 
 import tester
-from tester import (
-    LimitLow, LimitBetween, LimitDelta
-    )
+
 import share
 
 
@@ -15,10 +13,10 @@ class Final(share.TestSequence):
     """2040 Final Test Program."""
 
     limitdata = (
-        LimitDelta('20V', 20.0, 0.4),
-        LimitBetween('20Vload', 19.4, 20.4),
-        LimitLow('20Voff', 1.0),
-        LimitDelta('OCP', 14.0, 2.0),
+        tester.LimitDelta('20V', 20.0, 0.4),
+        tester.LimitBetween('20Vload', 19.4, 20.4),
+        tester.LimitLow('20Voff', 1.0),
+        tester.LimitDelta('OCP', 14.0, 2.0),
         )
 
     def open(self, uut):

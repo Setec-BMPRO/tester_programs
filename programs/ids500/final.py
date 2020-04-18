@@ -5,11 +5,9 @@
 
 import time
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitBetween, LimitDelta, LimitRegExp
-    )
+
 import share
 from . import console
 
@@ -23,55 +21,55 @@ class Final(share.TestSequence):
     _ldd_50_error_limits = 0.7
     # Test limits
     limitdata = (
-        LimitLow('TecOff', 1.5),
-        LimitLow('TecVmonOff', 1.5),
-        LimitLow('LddOff', 1.5),
-        LimitLow('IsVmonOff', 0.5),
-        LimitLow('15VOff', 1.5),
-        LimitHigh('-15VOff', -1.5),
-        LimitLow('15VpOff', 1.5),
-        LimitLow('15VpSwOff', 1.5),
-        LimitLow('5VOff', 1.5),
-        LimitDelta('15V', 15.00, 0.75),
-        LimitDelta('-15V', -15.00, 0.75),
-        LimitDelta('15Vp', 15.00, 0.75),
-        LimitDelta('15VpSw', 15.00, 0.75),
-        LimitDelta('5V', 4.95, 0.15),
-        LimitDelta('Tec', 15.00, 0.30),
-        LimitDelta('TecPhase', -15.00, 0.30),
-        LimitBetween('TecVset', 4.95, 5.05),
-        LimitLow('TecVmon0V', 0.5),
-        LimitDelta('TecVmon', 5.00, 0.10),
-        LimitDelta('TecErr', 0.000, 0.275),
-        LimitDelta('TecVmonErr', 0.000, 0.030),
-        LimitBetween('Ldd', -0.4, 2.5),
-        LimitBetween('IsVmon', -0.4, 2.5),
-        LimitDelta('IsOut0V', 0.000, 0.001),
-        LimitDelta('IsOut06V', 0.006, 0.001),
-        LimitDelta('IsOut5V', 0.050, 0.002),
-        LimitDelta('IsIout0V', 0.00, 0.05),
-        LimitDelta('IsIout06V', 0.60, 0.02),
-        LimitDelta('IsIout5V', 5.00, 0.10),
-        LimitDelta('IsSet06V', 0.60, 0.05),
-        LimitDelta('IsSet5V', 5.00, 0.05),
+        tester.LimitLow('TecOff', 1.5),
+        tester.LimitLow('TecVmonOff', 1.5),
+        tester.LimitLow('LddOff', 1.5),
+        tester.LimitLow('IsVmonOff', 0.5),
+        tester.LimitLow('15VOff', 1.5),
+        tester.LimitHigh('-15VOff', -1.5),
+        tester.LimitLow('15VpOff', 1.5),
+        tester.LimitLow('15VpSwOff', 1.5),
+        tester.LimitLow('5VOff', 1.5),
+        tester.LimitDelta('15V', 15.00, 0.75),
+        tester.LimitDelta('-15V', -15.00, 0.75),
+        tester.LimitDelta('15Vp', 15.00, 0.75),
+        tester.LimitDelta('15VpSw', 15.00, 0.75),
+        tester.LimitDelta('5V', 4.95, 0.15),
+        tester.LimitDelta('Tec', 15.00, 0.30),
+        tester.LimitDelta('TecPhase', -15.00, 0.30),
+        tester.LimitBetween('TecVset', 4.95, 5.05),
+        tester.LimitLow('TecVmon0V', 0.5),
+        tester.LimitDelta('TecVmon', 5.00, 0.10),
+        tester.LimitDelta('TecErr', 0.000, 0.275),
+        tester.LimitDelta('TecVmonErr', 0.000, 0.030),
+        tester.LimitBetween('Ldd', -0.4, 2.5),
+        tester.LimitBetween('IsVmon', -0.4, 2.5),
+        tester.LimitDelta('IsOut0V', 0.000, 0.001),
+        tester.LimitDelta('IsOut06V', 0.006, 0.001),
+        tester.LimitDelta('IsOut5V', 0.050, 0.002),
+        tester.LimitDelta('IsIout0V', 0.00, 0.05),
+        tester.LimitDelta('IsIout06V', 0.60, 0.02),
+        tester.LimitDelta('IsIout5V', 5.00, 0.10),
+        tester.LimitDelta('IsSet06V', 0.60, 0.05),
+        tester.LimitDelta('IsSet5V', 5.00, 0.05),
         # these 3 are patched and then restored during the LDD accuracy test
-        LimitDelta('SetMonErr', 0, _ldd_6_error_limits),
-        LimitDelta('SetOutErr', 0, _ldd_6_error_limits),
-        LimitDelta('MonOutErr', 0, _ldd_6_error_limits),
-        LimitRegExp('HwRev', r'^[0-9]{2}[A-D]$'),
+        tester.LimitDelta('SetMonErr', 0, _ldd_6_error_limits),
+        tester.LimitDelta('SetOutErr', 0, _ldd_6_error_limits),
+        tester.LimitDelta('MonOutErr', 0, _ldd_6_error_limits),
+        tester.LimitRegExp('HwRev', r'^[0-9]{2}[A-D]$'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_pwr_up),
-            TestStep('KeySw1', self._step_key_sw1),
-            TestStep('KeySw12', self._step_key_sw12),
-            TestStep('TEC', self._step_tec),
-            TestStep('LDD', self._step_ldd),
-            TestStep('Comms', self._step_comms),
-            TestStep('EmergStop', self._step_emg_stop),
+            tester.TestStep('PowerUp', self._step_pwr_up),
+            tester.TestStep('KeySw1', self._step_key_sw1),
+            tester.TestStep('KeySw12', self._step_key_sw12),
+            tester.TestStep('TEC', self._step_tec),
+            tester.TestStep('LDD', self._step_ldd),
+            tester.TestStep('Comms', self._step_comms),
+            tester.TestStep('EmergStop', self._step_emg_stop),
             )
 
     @share.teststep
@@ -392,6 +390,6 @@ class Measurements(share.Measurements):
             ))
         # Create limits locally for these dynamic measurements.
         self['pic_hwrev'] = tester.Measurement(
-            LimitRegExp('HwRev-PIC', ''), self.sensors['hwrev'])
+            tester.LimitRegExp('HwRev-PIC', ''), self.sensors['hwrev'])
         self['pic_sernum'] = tester.Measurement(
-            LimitRegExp('SerNum-PIC', ''), self.sensors['sernum'])
+            tester.LimitRegExp('SerNum-PIC', ''), self.sensors['sernum'])

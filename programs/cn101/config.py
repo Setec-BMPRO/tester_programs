@@ -4,10 +4,9 @@
 """CN101 Configuration."""
 
 import logging
-from tester import (
-    LimitLow, LimitDelta, LimitPercent, LimitInteger,
-    LimitRegExp, LimitBoolean,
-    )
+
+import tester
+
 import share
 
 
@@ -17,15 +16,15 @@ class CN101():
 
     # Initial test limits
     limits_initial = (
-            LimitRegExp('SwVer', '',            # Adjusted during open()
+            tester.LimitRegExp('SwVer', '',            # Adjusted during open()
                 doc='Software version'),
-            LimitLow('Part', 100.0),
-            LimitDelta('Vin', 8.0, 0.5),
-            LimitPercent('3V3', 3.30, 3.0),
-            LimitInteger('CAN_BIND', 1 << 28),
-            LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
-            LimitBoolean('DetectBT', True),
-            LimitInteger('Tank', 5),
+            tester.LimitLow('Part', 100.0),
+            tester.LimitDelta('Vin', 8.0, 0.5),
+            tester.LimitPercent('3V3', 3.30, 3.0),
+            tester.LimitInteger('CAN_BIND', 1 << 28),
+            tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
+            tester.LimitBoolean('DetectBT', True),
+            tester.LimitInteger('Tank', 5),
             )
     # Lot Number to Revision data
     _lot_rev = share.lots.Revision((

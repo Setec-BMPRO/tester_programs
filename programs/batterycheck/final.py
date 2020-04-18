@@ -4,11 +4,9 @@
 """BatteryCheck Final Test Program."""
 
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitDelta, LimitBoolean, LimitRegExp
-    )
+
 import share
 
 
@@ -19,11 +17,11 @@ class Final(share.TestSequence):
     # Software binary version
     arm_version = '1.7.4080'
     limitdata = (
-        LimitDelta('12V', 12.0, 0.1),
-        LimitBoolean('BTscan', True),
-        LimitBoolean('BTpair', True),
-        LimitBoolean('ARMSerNum', True),
-        LimitRegExp(
+        tester.LimitDelta('12V', 12.0, 0.1),
+        tester.LimitBoolean('BTscan', True),
+        tester.LimitBoolean('BTpair', True),
+        tester.LimitBoolean('ARMSerNum', True),
+        tester.LimitRegExp(
             'ARMSwVer', '^{0}$'.format(arm_version.replace('.', r'\.'))),
         )
 
@@ -31,8 +29,8 @@ class Final(share.TestSequence):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_power_up),
-            TestStep('TestBlueTooth', self._step_test_bluetooth),
+            tester.TestStep('PowerUp', self._step_power_up),
+            tester.TestStep('TestBlueTooth', self._step_test_bluetooth),
             )
         self.sernum = None
 

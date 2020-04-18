@@ -3,16 +3,13 @@
 # Copyright 2014 SETEC Pty Ltd.
 """GEN8 Initial Test Program."""
 
-import os
 import inspect
+import os
 import time
 import serial
+
 import tester
-from tester import (
-    TestStep,
-    LimitLow, LimitHigh, LimitRegExp,
-    LimitBetween, LimitDelta, LimitPercent
-    )
+
 import share
 from . import console
 
@@ -31,54 +28,54 @@ class Initial(share.TestSequence):
     arm_bin = 'gen8_{0}.bin'.format(bin_version)
 
     limitdata = (
-        LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
-        LimitHigh('FanShort', 20),     # Short on fan connector
-        LimitLow('FixtureLock', 200),
-        LimitLow('5Voff', 0.5),
-        LimitPercent('5Vset', 5.10, 1.0),
-        LimitPercent('5V', 5.10, 2.0),
-        LimitLow('12Voff', 0.5),
-        LimitDelta('12Vpre', 12.1, 1.0),
-        LimitDelta('12Vset', 12.18, 0.01),
-        LimitPercent('12V', 12.18, 2.5),
-        LimitLow('12V2off', 0.5),
-        LimitDelta('12V2pre', 12.0, 1.0),
-        LimitBetween('12V2', 11.8146, 12.4845),   # 12.18 +2.5% -3.0%
-        LimitLow('24Voff', 0.5),
-        LimitDelta('24Vpre', 24.0, 2.0),   # TestEng estimate
-        LimitBetween('24V', 22.80, 25.68),        # 24.0 +7% -5%
-        LimitLow('VdsQ103', 0.30),
-        LimitPercent('3V3', 3.30, 10.0),   # TestEng estimate
-        LimitLow('PwrFail', 0.5),
-        LimitDelta('InputFuse', 240, 10),
-        LimitBetween('12Vpri', 11.4, 17.0),
-        LimitDelta('PFCpre', 435, 15),
-        LimitDelta('PFCpost1', 440.0, 0.8),
-        LimitDelta('PFCpost2', 440.0, 0.8),
-        LimitDelta('PFCpost3', 440.0, 0.8),
-        LimitDelta('PFCpost4', 440.0, 0.8),
-        LimitDelta('PFCpost', 440.0, 0.9),
-        LimitDelta('ARM-AcFreq', 50, 10),
-        LimitLow('ARM-AcVolt', 300),
-        LimitDelta('ARM-5V', 5.0, 1.0),
-        LimitDelta('ARM-12V', 12.0, 1.0),
-        LimitDelta('ARM-24V', 24.0, 2.0),
-        LimitRegExp('SwVer', '^{0}$'.format(
+        tester.LimitLow('PartCheck', 100),   # uSwitches on C106, C107, D2
+        tester.LimitHigh('FanShort', 20),     # Short on fan connector
+        tester.LimitLow('FixtureLock', 200),
+        tester.LimitLow('5Voff', 0.5),
+        tester.LimitPercent('5Vset', 5.10, 1.0),
+        tester.LimitPercent('5V', 5.10, 2.0),
+        tester.LimitLow('12Voff', 0.5),
+        tester.LimitDelta('12Vpre', 12.1, 1.0),
+        tester.LimitDelta('12Vset', 12.18, 0.01),
+        tester.LimitPercent('12V', 12.18, 2.5),
+        tester.LimitLow('12V2off', 0.5),
+        tester.LimitDelta('12V2pre', 12.0, 1.0),
+        tester.LimitBetween('12V2', 11.8146, 12.4845),   # 12.18 +2.5% -3.0%
+        tester.LimitLow('24Voff', 0.5),
+        tester.LimitDelta('24Vpre', 24.0, 2.0),   # TestEng estimate
+        tester.LimitBetween('24V', 22.80, 25.68),        # 24.0 +7% -5%
+        tester.LimitLow('VdsQ103', 0.30),
+        tester.LimitPercent('3V3', 3.30, 10.0),   # TestEng estimate
+        tester.LimitLow('PwrFail', 0.5),
+        tester.LimitDelta('InputFuse', 240, 10),
+        tester.LimitBetween('12Vpri', 11.4, 17.0),
+        tester.LimitDelta('PFCpre', 435, 15),
+        tester.LimitDelta('PFCpost1', 440.0, 0.8),
+        tester.LimitDelta('PFCpost2', 440.0, 0.8),
+        tester.LimitDelta('PFCpost3', 440.0, 0.8),
+        tester.LimitDelta('PFCpost4', 440.0, 0.8),
+        tester.LimitDelta('PFCpost', 440.0, 0.9),
+        tester.LimitDelta('ARM-AcFreq', 50, 10),
+        tester.LimitLow('ARM-AcVolt', 300),
+        tester.LimitDelta('ARM-5V', 5.0, 1.0),
+        tester.LimitDelta('ARM-12V', 12.0, 1.0),
+        tester.LimitDelta('ARM-24V', 24.0, 2.0),
+        tester.LimitRegExp('SwVer', '^{0}$'.format(
             bin_version[:3].replace('.', r'\.'))),
-        LimitRegExp('SwBld', '^{0}$'.format(bin_version[4:])),
+        tester.LimitRegExp('SwBld', '^{0}$'.format(bin_version[4:])),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PartDetect', self._step_part_detect),
-            TestStep('Program', self._step_program),
-            TestStep('Initialise', self._step_initialise_arm),
-            TestStep('PowerUp', self._step_powerup),
-            TestStep('5V', self._step_reg_5v),
-            TestStep('12V', self._step_reg_12v),
-            TestStep('24V', self._step_reg_24v),
+            tester.TestStep('PartDetect', self._step_part_detect),
+            tester.TestStep('Program', self._step_program),
+            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('PowerUp', self._step_powerup),
+            tester.TestStep('5V', self._step_reg_5v),
+            tester.TestStep('12V', self._step_reg_12v),
+            tester.TestStep('24V', self._step_reg_24v),
             )
 
     @share.teststep

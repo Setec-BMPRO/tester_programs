@@ -4,7 +4,7 @@
 """GEN8 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
+
 import share
 
 
@@ -13,27 +13,27 @@ class Final(share.TestSequence):
     """GEN8 Final Test Program."""
 
     limitdata = (
-        LimitDelta('Iecon', 240, 10),
-        LimitLow('Iecoff', 10),
-        LimitBetween('5V', 4.998, 5.202),
-        LimitLow('24Voff', 0.5),
-        LimitLow('12Voff', 0.5),
-        LimitLow('12V2off', 0.5),
-        LimitBetween('24Von', 22.80, 25.44),
-        LimitBetween('12Von', 11.8755, 12.4845),
-        LimitBetween('12V2on', 11.8146, 12.4845),
-        LimitHigh('PwrFailOff', 11.0),
+        tester.LimitDelta('Iecon', 240, 10),
+        tester.LimitLow('Iecoff', 10),
+        tester.LimitBetween('5V', 4.998, 5.202),
+        tester.LimitLow('24Voff', 0.5),
+        tester.LimitLow('12Voff', 0.5),
+        tester.LimitLow('12V2off', 0.5),
+        tester.LimitBetween('24Von', 22.80, 25.44),
+        tester.LimitBetween('12Von', 11.8755, 12.4845),
+        tester.LimitBetween('12V2on', 11.8146, 12.4845),
+        tester.LimitHigh('PwrFailOff', 11.0),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PowerUp', self._step_pwrup),
-            TestStep('PowerOn', self._step_pwron),
-            TestStep('FullLoad', self._step_fullload),
-            TestStep('115V', self._step_fullload115),
-            TestStep('Poweroff', self._step_pwroff),
+            tester.TestStep('PowerUp', self._step_pwrup),
+            tester.TestStep('PowerOn', self._step_pwron),
+            tester.TestStep('FullLoad', self._step_fullload),
+            tester.TestStep('115V', self._step_fullload115),
+            tester.TestStep('Poweroff', self._step_pwroff),
             )
 
     @share.teststep

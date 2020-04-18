@@ -4,7 +4,7 @@
 """C15A-15 Initial Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitHigh,  LimitBetween, LimitPercent
+
 import share
 
 
@@ -13,29 +13,29 @@ class Initial(share.TestSequence):
     """C15A-15 Initial Test Program."""
 
     limitdata = (
-        LimitBetween('AcMin', 85, 95),
-        LimitBetween('VbusMin', 120, 135),
-        LimitBetween('VccMin', 7, 14),
-        LimitBetween('Ac', 230, 245),
-        LimitBetween('Vbus', 330, 350),
-        LimitBetween('Vcc', 10, 14),
-        LimitHigh('LedOn', 6.5),
-        LimitLow('LedOff', 0.5),
-        LimitPercent('Vout', 15.5, 2.0),
-        LimitBetween('OCP_Range', 0.9, 1.4),
-        LimitLow('inOCP', 15.2),
-        LimitBetween('OCP', 1.05, 1.35),
-        LimitBetween('VoutOcp', 5, 16),
+        tester.LimitBetween('AcMin', 85, 95),
+        tester.LimitBetween('VbusMin', 120, 135),
+        tester.LimitBetween('VccMin', 7, 14),
+        tester.LimitBetween('Ac', 230, 245),
+        tester.LimitBetween('Vbus', 330, 350),
+        tester.LimitBetween('Vcc', 10, 14),
+        tester.LimitHigh('LedOn', 6.5),
+        tester.LimitLow('LedOff', 0.5),
+        tester.LimitPercent('Vout', 15.5, 2.0),
+        tester.LimitBetween('OCP_Range', 0.9, 1.4),
+        tester.LimitLow('inOCP', 15.2),
+        tester.LimitBetween('OCP', 1.05, 1.35),
+        tester.LimitBetween('VoutOcp', 5, 16),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('Power90', self._step_power_90),
-            TestStep('Power240', self._step_power_240),
-            TestStep('OCP', self._step_ocp),
-            TestStep('PowerOff', self._step_power_off),
+            tester.TestStep('Power90', self._step_power_90),
+            tester.TestStep('Power240', self._step_power_240),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('PowerOff', self._step_power_off),
             )
 
     @share.teststep

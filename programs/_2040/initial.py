@@ -4,7 +4,7 @@
 """2040 Initial Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitBetween, LimitDelta
+
 import share
 
 
@@ -13,36 +13,36 @@ class Initial(share.TestSequence):
     """2040 Initial Test Program."""
 
     limitdata = (
-        LimitBetween('VccAC', 9.0, 16.5),
-        LimitBetween('VccDC', 7.8, 14.0),
-        LimitDelta('VbusMin', 130.0, 10.0),
-        LimitDelta('SDOff', 20.0, 1.0),
-        LimitLow('SDOn', 5.0),
-        LimitDelta('ACmin', 90.0, 2.0),
-        LimitDelta('ACtyp', 240.0, 2.0),
-        LimitDelta('ACmax', 265.0, 2.0),
-        LimitDelta('VoutExt', 20.0, 0.2),
-        LimitDelta('Vout', 20.0, 0.4),
-        LimitBetween('GreenOn', 15.0, 20.0),
-        LimitBetween('RedDCOff', 9.0, 15.0),
-        LimitBetween('RedDCOn', 1.8, 3.5),
-        LimitBetween('RedACOff', 9.0, 50.0),
-        LimitDelta('DCmin', 10.0, 1.0),
-        LimitDelta('DCtyp', 24.5, 1.5),
-        LimitDelta('DCmax', 40.0, 2.0),
-        LimitBetween('OCP', 3.5, 4.1),
-        LimitLow('inOCP', 19.0),
-        LimitLow('FixtureLock', 20),
+        tester.LimitBetween('VccAC', 9.0, 16.5),
+        tester.LimitBetween('VccDC', 7.8, 14.0),
+        tester.LimitDelta('VbusMin', 130.0, 10.0),
+        tester.LimitDelta('SDOff', 20.0, 1.0),
+        tester.LimitLow('SDOn', 5.0),
+        tester.LimitDelta('ACmin', 90.0, 2.0),
+        tester.LimitDelta('ACtyp', 240.0, 2.0),
+        tester.LimitDelta('ACmax', 265.0, 2.0),
+        tester.LimitDelta('VoutExt', 20.0, 0.2),
+        tester.LimitDelta('Vout', 20.0, 0.4),
+        tester.LimitBetween('GreenOn', 15.0, 20.0),
+        tester.LimitBetween('RedDCOff', 9.0, 15.0),
+        tester.LimitBetween('RedDCOn', 1.8, 3.5),
+        tester.LimitBetween('RedACOff', 9.0, 50.0),
+        tester.LimitDelta('DCmin', 10.0, 1.0),
+        tester.LimitDelta('DCtyp', 24.5, 1.5),
+        tester.LimitDelta('DCmax', 40.0, 2.0),
+        tester.LimitBetween('OCP', 3.5, 4.1),
+        tester.LimitLow('inOCP', 19.0),
+        tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('FixtureLock', self._step_fixture_lock),
-            TestStep('SecCheck', self._step_sec_check),
-            TestStep('DCPowerOn', self._step_dcpower_on),
-            TestStep('ACPowerOn', self._step_acpower_on),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('SecCheck', self._step_sec_check),
+            tester.TestStep('DCPowerOn', self._step_dcpower_on),
+            tester.TestStep('ACPowerOn', self._step_acpower_on),
             )
 
     @share.teststep

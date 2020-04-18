@@ -4,7 +4,7 @@
 """Final Test Program for GENIUS-II and GENIUS-II-H."""
 
 import tester
-from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
+
 import share
 
 
@@ -14,16 +14,16 @@ class Final(share.TestSequence):
 
     # Common test limits
     _common = (
-        LimitBetween('InRes', 80e3, 170e3),
-        LimitHigh('DCinShort', 10),
-        LimitDelta('Vout', 13.675, 0.1),
-        LimitLow('VoutOff', 2.0),
-        LimitBetween('VoutStartup', 13.60, 14.10),
-        LimitDelta('Vbat', 13.675, 0.1),
-        LimitLow('VbatOff', 1.0),
-        LimitBetween('ExtBatt', 11.5, 12.8),
-        LimitLow('InOCP', 13.24),
-        LimitBetween('OCP', 34.0, 43.0),
+        tester.LimitBetween('InRes', 80e3, 170e3),
+        tester.LimitHigh('DCinShort', 10),
+        tester.LimitDelta('Vout', 13.675, 0.1),
+        tester.LimitLow('VoutOff', 2.0),
+        tester.LimitBetween('VoutStartup', 13.60, 14.10),
+        tester.LimitDelta('Vbat', 13.675, 0.1),
+        tester.LimitLow('VbatOff', 1.0),
+        tester.LimitBetween('ExtBatt', 11.5, 12.8),
+        tester.LimitLow('InOCP', 13.24),
+        tester.LimitBetween('OCP', 34.0, 43.0),
         )
     # Test limit selection keyed by program parameter
     limitdata = {
@@ -45,11 +45,11 @@ class Final(share.TestSequence):
             self.limitdata[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('PartDetect', self._step_part_detect),
-            TestStep('PowerOn', self._step_poweron),
-            TestStep('BattFuse', self._step_battfuse),
-            TestStep('OCP', self._step_ocp),
-            TestStep('RemoteSw', self._step_remote_sw),
+            tester.TestStep('PartDetect', self._step_part_detect),
+            tester.TestStep('PowerOn', self._step_poweron),
+            tester.TestStep('BattFuse', self._step_battfuse),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('RemoteSw', self._step_remote_sw),
             )
 
     @share.teststep

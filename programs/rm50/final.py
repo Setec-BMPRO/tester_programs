@@ -4,7 +4,7 @@
 """RM-50-24 Final Test Program."""
 
 import tester
-from tester import TestStep, LimitLow, LimitHigh, LimitBetween, LimitDelta
+
 import share
 
 
@@ -13,37 +13,37 @@ class Final(share.TestSequence):
     """RM-50-24 Final Test Program."""
 
     limitdata = (
-        LimitDelta('Rsense', 1000, 20),
-        LimitLow('Vsense', 0.0001),
-        LimitLow('uSwitch', 100),
-        LimitLow('Vdrop', 0.4),
-        LimitBetween('24Vdcin', 23.0, 24.4),
-        LimitBetween('24Vdcout', 23.6, 24.4),
-        LimitLow('24Voff', 1.0),
-        LimitBetween('24Vnl', 23.6, 24.4),
-        LimitBetween('24Vfl', 23.4, 24.1),
-        LimitBetween('24Vpl', 23.0, 24.1),
-        LimitBetween('OCP', 3.2, 4.3),
-        LimitLow('inOCP', 23.0),
-        LimitLow('CurrShunt', 2.5),
-        LimitBetween('PowNL', 1.0, 5.0),
-        LimitBetween('PowFL', 40.0, 70.0),
-        LimitHigh('Eff', 84.0),
+        tester.LimitDelta('Rsense', 1000, 20),
+        tester.LimitLow('Vsense', 0.0001),
+        tester.LimitLow('uSwitch', 100),
+        tester.LimitLow('Vdrop', 0.4),
+        tester.LimitBetween('24Vdcin', 23.0, 24.4),
+        tester.LimitBetween('24Vdcout', 23.6, 24.4),
+        tester.LimitLow('24Voff', 1.0),
+        tester.LimitBetween('24Vnl', 23.6, 24.4),
+        tester.LimitBetween('24Vfl', 23.4, 24.1),
+        tester.LimitBetween('24Vpl', 23.0, 24.1),
+        tester.LimitBetween('OCP', 3.2, 4.3),
+        tester.LimitLow('inOCP', 23.0),
+        tester.LimitLow('CurrShunt', 2.5),
+        tester.LimitBetween('PowNL', 1.0, 5.0),
+        tester.LimitBetween('PowFL', 40.0, 70.0),
+        tester.LimitHigh('Eff', 84.0),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
-            TestStep('FixtureLock', self._step_fixture_lock),
-            TestStep('DCInputLeakage', self._step_dcinput_leakage),
-            TestStep('DCInputTrack', self._step_dcinput_track),
-            TestStep('ACInput240V', self._step_acinput240v),
-            TestStep('ACInput110V', self._step_acinput110v),
-            TestStep('ACInput90V', self._step_acinput90v),
-            TestStep('OCP', self._step_ocp),
-            TestStep('PowerNoLoad', self._step_power_noload),
-            TestStep('Efficiency', self._step_efficiency),
+            tester.TestStep('FixtureLock', self._step_fixture_lock),
+            tester.TestStep('DCInputLeakage', self._step_dcinput_leakage),
+            tester.TestStep('DCInputTrack', self._step_dcinput_track),
+            tester.TestStep('ACInput240V', self._step_acinput240v),
+            tester.TestStep('ACInput110V', self._step_acinput110v),
+            tester.TestStep('ACInput90V', self._step_acinput90v),
+            tester.TestStep('OCP', self._step_ocp),
+            tester.TestStep('PowerNoLoad', self._step_power_noload),
+            tester.TestStep('Efficiency', self._step_efficiency),
             )
 
     @share.teststep
