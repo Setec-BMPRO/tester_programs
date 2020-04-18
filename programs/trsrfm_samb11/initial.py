@@ -8,7 +8,7 @@ import serial
 import tester
 
 import share
-from . import config, console
+from . import console
 
 
 class Initial(share.TestSequence):
@@ -17,6 +17,9 @@ class Initial(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
+    sw_version = '1.1.16903.2199'
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    hw_version = (4, 0, 'A')
     # Test limits
     limitdata = (
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
@@ -29,7 +32,7 @@ class Initial(share.TestSequence):
         tester.LimitDelta('BlueLedOn', 0.3, 0.09, doc='Led on'),
         tester.LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         tester.LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            '^{0}$'.format(sw_version.replace('.', r'\.')),
             doc='Software version'),
         tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address'),
@@ -63,7 +66,7 @@ class Initial(share.TestSequence):
         """Test the operation of TRSRFM."""
         trsrfm = dev['trsrfm']
         trsrfm.open()
-        trsrfm.brand(config.HW_VERSION, self.sernum)
+        trsrfm.brand(self.hw_version, self.sernum)
         self.measure(
             ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_blueoff'),
             timeout=5)

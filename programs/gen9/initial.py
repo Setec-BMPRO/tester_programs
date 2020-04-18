@@ -10,7 +10,7 @@ import serial
 import tester
 
 import share
-from . import config, console
+from . import console
 
 
 class Initial(share.TestSequence):
@@ -19,7 +19,11 @@ class Initial(share.TestSequence):
 
     # Reading to reading difference for PFC voltage stability
     pfc_stable = 0.05
-
+    sw_ver = '1.0'
+    sw_svn = '18392'
+    sw_build = '2512'
+    # Software image filename
+    sw_image = 'gen9_{0}.{1}.{2}.bin'.format(sw_ver, sw_svn, sw_build)
     limitdata = (
         tester.LimitHigh('FanShort', 500),
         tester.LimitLow('FixtureLock', 200),
@@ -47,12 +51,13 @@ class Initial(share.TestSequence):
         tester.LimitDelta('ARM-12V', 12.0, 1.0),
         tester.LimitDelta('ARM-24V', 24.0, 2.0),
         tester.LimitRegExp('SwVer', '^{0}$'.format(
-            config.SW_VER.replace('.', r'\.'))),
-        tester.LimitRegExp('SwBld', '^{0}$'.format(config.SW_BUILD)),
+            sw_ver.replace('.', r'\.'))),
+        tester.LimitRegExp('SwBld', '^{0}$'.format(sw_build)),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        Devices.sw_image = self.sw_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
@@ -214,6 +219,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    sw_image = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -241,7 +248,7 @@ class Devices(share.Devices):
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, config.SW_IMAGE),
+            os.path.join(folder, self.sw_image),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # Serial connection to the ARM console

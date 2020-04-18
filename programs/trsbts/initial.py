@@ -8,10 +8,10 @@ import os
 import serial
 
 import tester
+
 import share
 
 from . import console
-from . import config
 
 
 class Initial(share.TestSequence):
@@ -20,7 +20,10 @@ class Initial(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
-
+    sw_version = '1.0.19839.2135'
+    sw_image = 'trs-bts_factory_{0}.hex'.format(sw_version)
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    hw_version = (3, 0, 'A')
     limitdata = (
         tester.LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
         tester.LimitDelta('Vin', 7.0, 2.0, doc='Input to regulator present'),
@@ -41,7 +44,7 @@ class Initial(share.TestSequence):
         tester.LimitDelta('Sway- wire', 2.0, 0.5, doc='Voltage present'),
         tester.LimitDelta('Sway+ wire', 1.0, 0.5, doc='Voltage present'),
         tester.LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            '^{0}$'.format(sw_version.replace('.', r'\.')),
             doc='Software version'),
         tester.LimitPercent('ARM-Vbatt', vbatt, 4.8, delta=0.088,
             doc='Voltage present'),
@@ -56,7 +59,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        Devices.sw_image = config.SW_IMAGE
+        Devices.sw_image = self.sw_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
@@ -88,7 +91,7 @@ class Initial(share.TestSequence):
         # Power cycle after programming
         dev['dcs_vbat'].output(0.0, delay=0.5)
         dev['dcs_vbat'].output(self.vbatt)
-        trsbts.brand(config.HW_VERSION, self.sernum)
+        trsbts.brand(self.hw_version, self.sernum)
         self.measure(
             ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_lightoff'),
             timeout=5)

@@ -3,38 +3,46 @@
 # Copyright 2016 SETEC Pty Ltd.
 """C15D-15 Initial Test Program."""
 
+import attr
+
 import tester
 
 import share
 
-VIN_SET = 30.0      # Input voltage setting
-VOUT = 15.5
-VOUT_MIN = VOUT * (1.0 - ((2.0 + 1.5) / 100))   # Vout - 2% - 1.5%
-IOUT_FL = 1.0       # Max output current
-OCP_START = 0.9     # OCP measurement parameters
-OCP_STOP = 1.5
-OCP_STEP = 0.02
-OCP_DELAY = 0.05
+
+@attr.s
+class OCPSetting():
+    """OCP measurement values."""
+    start = attr.ib(validator=attr.validators.instance_of(float))
+    stop = attr.ib(validator=attr.validators.instance_of(float))
+    step = attr.ib(validator=attr.validators.instance_of(float))
+    delay = attr.ib(validator=attr.validators.instance_of(float))
 
 
 class Initial(share.TestSequence):
 
     """C15D-15 Initial Test Program."""
 
+    vin_set = 30.0      # Input voltage setting
+    vout = 15.5
+    vout_min = vout * (1.0 - ((2.0 + 1.5) / 100))   # Vout - 2% - 1.5%
     limitdata = (
-        tester.LimitDelta('Vin', VIN_SET, 2.0),
+        tester.LimitDelta('Vin', vin_set, 2.0),
         tester.LimitBetween('Vcc', 11.0, 14.0),
-        tester.LimitPercent('VoutNL', VOUT, 2.0),
-        tester.LimitPercent('VoutFL', VOUT, (2.0 + 1.5, 2.0)),
-        tester.LimitBetween('VoutOCP', 12.5, VOUT_MIN),
+        tester.LimitPercent('VoutNL', vout, 2.0),
+        tester.LimitPercent('VoutFL', vout, (2.0 + 1.5, 2.0)),
+        tester.LimitBetween('VoutOCP', 12.5, vout_min),
         tester.LimitLow('LedOff', 0.5),
         tester.LimitBetween('LedOn', 7.0, 13.5),
-        tester.LimitLow('inOCP', VOUT_MIN),
+        tester.LimitLow('inOCP', vout_min),
         tester.LimitBetween('OCP', 1.0, 1.4),
         )
+    ocp_settings = OCPSetting(
+        start=0.9, stop=1.5, step=0.02, delay=0.05)
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        Sensors.ocp_settings = self.ocp_settings
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -46,7 +54,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Power up."""
         dev['dcl'].output(0.0, output=True)
-        dev['dcs_input'].output(VIN_SET, output=True)
+        dev['dcs_input'].output(self.vin_set, output=True)
         self.measure(
             ('dmm_vin', 'dmm_vcc', 'dmm_vout_nl', 'dmm_green_on',
              'dmm_yellow_off', ), timeout=5)
@@ -94,6 +102,8 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    ocp_settings = None
+
     def open(self):
         """Create all Sensors."""
         dmm = self.devices['dmm']
@@ -107,7 +117,10 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['vout'],
             detect_limit=(self.limits['inOCP'], ),
-            start=OCP_START, stop=OCP_STOP, step=OCP_STEP, delay=OCP_DELAY)
+            start=self.ocp_settings.start,
+            stop=self.ocp_settings.stop,
+            step=self.ocp_settings.step,
+            delay=self.ocp_settings.delay)
 
 
 class Measurements(share.Measurements):

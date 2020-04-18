@@ -10,13 +10,12 @@ import tester
 
 import share
 
-PIC_HEX = 'c45a-15.hex'
-
 
 class Initial(share.TestSequence):
 
     """C45A-15 Initial Test Program."""
 
+    pic_hex = 'c45a-15.hex'
     limitdata = (
         tester.LimitDelta('VacStart', 95.0, 3.0),
         tester.LimitDelta('Vac', 240.0, 5.0),
@@ -51,6 +50,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        Devices.pic_hex = self.pic_hex
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
@@ -131,6 +131,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    pic_hex = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -150,7 +152,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.programmer.PIC(
-            PIC_HEX, folder, '16F684', self['rla_Prog'])
+            self.pic_hex, folder, '16F684', self['rla_Prog'])
 
     def reset(self):
         """Reset instruments."""

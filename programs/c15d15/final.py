@@ -7,14 +7,13 @@ import tester
 
 import share
 
-# Resistive loading during OCP
-ILOAD = 1.0
-
 
 class Final(share.TestSequence):
 
     """C15D-15 Final Test Program."""
 
+    # Resistive loading during OCP
+    iload = 1.0
     limitdata = (
         tester.LimitPercent('Vout', 15.5, 2.0),
         tester.LimitLow('VoutOverLoad', 5.0),
@@ -24,6 +23,7 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        Sensors.iload = self.iload
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -97,6 +97,9 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    # Resistive loading during OCP
+    iload = 0.0
+
     def open(self):
         """Create all Sensors."""
         dmm = self.devices['dmm']
@@ -119,7 +122,7 @@ class Sensors(share.Sensors):
             sensor=self['oVout'],
             detect_limit=(self.limits['inOCP'], ),
             start=0.0, stop=0.5, step=0.05, delay=0.2)
-        self['oOCP'].on_read = lambda value: value + ILOAD
+        self['oOCP'].on_read = lambda value: value + self.iload
 
 
 class Measurements(share.Measurements):

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-04-17, 16:10:11 -->
+<!-- Saved: 2020-04-18, 14:06:00 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -40,7 +40,6 @@
     <Source>programs/bce4/__init__.py</Source>
     <Source>programs/bce4/final.py</Source>
     <Source>programs/ble2can/__init__.py</Source>
-    <Source>programs/ble2can/config.py</Source>
     <Source>programs/ble2can/console.py</Source>
     <Source>programs/ble2can/initial.py</Source>
     <Source>programs/bp35/__init__.py</Source>
@@ -80,7 +79,6 @@
     <Source>programs/gen8/final.py</Source>
     <Source>programs/gen8/initial.py</Source>
     <Source>programs/gen9/__init__.py</Source>
-    <Source>programs/gen9/config.py</Source>
     <Source>programs/gen9/console.py</Source>
     <Source>programs/gen9/final.py</Source>
     <Source>programs/gen9/initial.py</Source>
@@ -114,7 +112,6 @@
     <Source>programs/rm50/__init__.py</Source>
     <Source>programs/rm50/final.py</Source>
     <Source>programs/rvmc101/__init__.py</Source>
-    <Source>programs/rvmc101/config.py</Source>
     <Source>programs/rvmc101/final.py</Source>
     <Source>programs/rvmc101/initial.py</Source>
     <Source>programs/rvmd50/__init__.py</Source>
@@ -155,21 +152,17 @@
     <Source>programs/trek2_jcontrol/final.py</Source>
     <Source>programs/trek2_jcontrol/initial.py</Source>
     <Source>programs/trs2/__init__.py</Source>
-    <Source>programs/trs2/config.py</Source>
     <Source>programs/trs2/console.py</Source>
     <Source>programs/trs2/final.py</Source>
     <Source>programs/trs2/initial.py</Source>
     <Source>programs/trsbts/__init__.py</Source>
-    <Source>programs/trsbts/config.py</Source>
     <Source>programs/trsbts/console.py</Source>
     <Source>programs/trsbts/final.py</Source>
     <Source>programs/trsbts/initial.py</Source>
     <Source>programs/trsrfm/__init__.py</Source>
-    <Source>programs/trsrfm/config.py</Source>
     <Source>programs/trsrfm/console.py</Source>
     <Source>programs/trsrfm/initial.py</Source>
     <Source>programs/trsrfm_samb11/__init__.py</Source>
-    <Source>programs/trsrfm_samb11/config.py</Source>
     <Source>programs/trsrfm_samb11/console.py</Source>
     <Source>programs/trsrfm_samb11/initial.py</Source>
     <Source>programs/ts3020h/__init__.py</Source>

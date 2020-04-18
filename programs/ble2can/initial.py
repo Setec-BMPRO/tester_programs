@@ -9,7 +9,6 @@ import tester
 
 import share
 from . import console
-from . import config
 
 
 class Initial(share.TestSequence):
@@ -18,6 +17,10 @@ class Initial(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
+    # Software binary version
+    sw_version = '1.2.16964.2723'
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    hw_version = (5, 0, 'A')
     # Test limits
     limitdata = (
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
@@ -31,7 +34,7 @@ class Initial(share.TestSequence):
         tester.LimitLow('GreenLedOn', 0.2, doc='Led on'),
         tester.LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         tester.LimitRegExp('SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            '^{0}$'.format(sw_version.replace('.', r'\.')),
             doc='Software version'),
         tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
             doc='Valid MAC address'),
@@ -68,7 +71,7 @@ class Initial(share.TestSequence):
         dev['rla_wdog'].disable()
         ble2can = dev['ble2can']
         ble2can.open()
-        ble2can.brand(config.HW_VERSION, self.sernum)
+        ble2can.brand(self.hw_version, self.sernum)
         self.measure(
             ('SwVer', 'dmm_redoff', 'dmm_blueoff', 'dmm_greenoff'),
             timeout=5)

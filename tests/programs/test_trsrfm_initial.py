@@ -54,7 +54,7 @@ class TRSRFMInitial(ProgramTestCase):
                     (sen['red'], (3.1, 0.5, 3.1, )),
                     (sen['green'], (3.1, 0.0, 3.1, )),
                     (sen['blue'], (3.1, 0.25, 3.1, )),
-                    (sen['arm_SwVer'], trsrfm.config.SW_VERSION),
+                    (sen['arm_SwVer'], self.test_program.sw_version),
                     ),
                 'Bluetooth': (
                     ),

@@ -46,7 +46,7 @@ class _CommonInitial(ProgramTestCase):
                     (sen['red'], (0.0, 1.8, 0.0)),
                     (sen['green'], (0.0, 2.5, 0.0)),
                     (sen['blue'], (0.0, 2.8, 0.0)),
-                    (sen['arm_SwVer'], trs2.config.SW_VERSION),
+                    (sen['arm_SwVer'], self.test_program.sw_version),
                     (sen['arm_Fault'], 0),
                     ),
                 'Calibrate': (

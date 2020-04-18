@@ -9,13 +9,13 @@ import os
 import tester
 
 import share
-from . import config
 
 
 class Initial(share.TestSequence):
 
     """RVMC101x Initial Test Program."""
 
+    sw_image = 'rvmc101_0.4.bin'
     limitdata = (
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
         tester.LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
@@ -25,6 +25,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        Devices.sw_image = self.sw_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -88,6 +89,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    sw_image = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -111,7 +114,7 @@ class Devices(share.Devices):
         arm_port = share.config.Fixture.port('032870', 'ARM')
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, config.SW_IMAGE),
+            os.path.join(folder, self.sw_image),
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         self['selector'] = [

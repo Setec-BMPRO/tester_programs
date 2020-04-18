@@ -42,14 +42,14 @@ class BLE2CANInitial(ProgramTestCase):
                     (sen['red'], (3.1, 0.5, 3.1, )),
                     (sen['green'], (3.1, 0.0, 3.1, )),
                     (sen['blue'], (3.1, 0.25, 3.1, )),
-                    (sen['SwVer'], ble2can.config.SW_VERSION),
+                    (sen['SwVer'], self.test_program.sw_version),
                     ),
                 'Bluetooth': (
                     (sen['BtMac'], self.btmac),
                     ),
                 'CanBus': (
                     (sen['CANbind'], 1 << 28),
-                    (sen['TunnelSwVer'], ble2can.config.SW_VERSION),
+                    (sen['TunnelSwVer'], self.test_program.sw_version),
                     ),
                 },
             }

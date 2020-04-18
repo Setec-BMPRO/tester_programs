@@ -11,7 +11,6 @@ import tester
 import share
 
 from . import console
-from . import config
 
 
 class Initial(share.TestSequence):
@@ -20,6 +19,10 @@ class Initial(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
+    sw_version = '1.0.19844.2444'
+    sw_image = 'trs-rfm_factory_{0}.hex'.format(sw_version)
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    hw_version = (5, 0, 'A')
     # Test limits
     limitdata = (
         tester.LimitDelta('Vin', vbatt, 0.5, doc='Input voltage present'),
@@ -27,7 +30,7 @@ class Initial(share.TestSequence):
         tester.LimitHigh('LedOff', 3.1, doc='Led off'),
         tester.LimitLow('LedOn', 0.5, doc='Led on'),
         tester.LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            '^{0}$'.format(sw_version.replace('.', r'\.')),
             doc='Software version'),
         tester.LimitRegExp('BleMac', r'^[0-9a-f]{12}$',
             doc='Valid MAC address'),
@@ -37,7 +40,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        Devices.sw_image = config.SW_IMAGE
+        Devices.sw_image = self.sw_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
@@ -63,7 +66,7 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(0.0, delay=0.5)
         trsrfm.flushInput()
         dev['dcs_vin'].output(self.vbatt)
-        trsrfm.brand(config.HW_VERSION, self.sernum)
+        trsrfm.brand(self.hw_version, self.sernum)
         mes['arm_swver']()
         trsrfm.override(share.console.parameter.OverrideTo.force_on)
         self.measure(

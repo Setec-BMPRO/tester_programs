@@ -8,7 +8,7 @@ import serial
 import tester
 
 import share
-from . import config, console
+from . import console
 
 
 class Initial(share.TestSequence):
@@ -21,6 +21,10 @@ class Initial(share.TestSequence):
     vbrake_offset = 0.3
     # Brake current
     ibrake = 1.0
+    # Software version
+    sw_version = '1.0.16487.472'
+    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
+    hw_version = (4, 0, 'A')
     # Common limits
     _common = (
         tester.LimitDelta('Vin', vbatt, 0.2, doc='Input voltage present'),
@@ -42,7 +46,7 @@ class Initial(share.TestSequence):
         tester.LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
         tester.LimitLow('TestPinCover', 0.5, doc='Cover in place'),
         tester.LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(config.SW_VERSION.replace('.', r'\.')),
+            '^{0}$'.format(sw_version.replace('.', r'\.')),
             doc='Software version'),
         tester.LimitLow('ARM-FaultCode', 0, doc='No error'),
         tester.LimitPercent('ARM-Vbatt', vbatt, 4.6, delta=0.088,
@@ -111,7 +115,7 @@ class Initial(share.TestSequence):
     def _step_operation(self, dev, mes):
         """Test the operation of LEDs."""
         trs2 = dev['trs2']
-        trs2.brand(config.HW_VERSION, self.sernum)
+        trs2.brand(self.hw_version, self.sernum)
         self.measure(
             ('arm_swver', 'arm_fltcode', 'dmm_redoff', 'dmm_greenoff'),
             timeout=5)
