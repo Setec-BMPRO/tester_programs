@@ -217,7 +217,7 @@ class Console5x(_Console):
         @param port Serial instance to use
 
         """
-        self.missing_outputs = {
+        self.missing_output_dict = {
             'HBRIDGE 3 EXTEND': 4,
             'HBRIDGE 3 RETRACT': 5,
             'HBRIDGE 8 EXTEND': 14,

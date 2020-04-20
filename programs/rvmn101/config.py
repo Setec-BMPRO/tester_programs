@@ -255,7 +255,7 @@ class RVMN5x(Config):
     _rev_data = {
         None: _Values(
             nordic_image=_nordic_203, arm_image=_arm_image_23,
-            product_rev='03A', hardware_rev='03A', banner_lines=4,
+            product_rev='03A', hardware_rev='03A', banner_lines=5,
             reversed_output_dict={},
             ),
         }
