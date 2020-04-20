@@ -138,7 +138,8 @@ class Sensors(share.Sensors):
             stimulus=self.devices['acsource'],
             sensor=self['oVout'],
             detect_limit=(self.limits['InDropout'], ),
-            start=185.0, stop=150.0, step=-0.5, delay=0.1, reset=False)
+            start=185.0, stop=150.0, step=-0.5, delay=0.1)
+        self['oDropout'].reset = False
 
 
 class Measurements(share.Measurements):

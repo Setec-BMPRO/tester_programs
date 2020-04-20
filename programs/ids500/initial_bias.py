@@ -84,8 +84,8 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_12Vsbraw'],
             sensor=self['o12Vsbraw'],
             detect_limit=(self.limits['InOCP'], ),
-            start=1.5, stop=2.3, step=0.1, delay=0.1,
-            reset=False)
+            start=1.5, stop=2.3, step=0.1, delay=0.1)
+        self['oOCP'].reset = False
 
 
 class Measurements(share.Measurements):
