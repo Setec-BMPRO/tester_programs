@@ -133,12 +133,16 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_Vout'],
             sensor=self['oVout'],
             detect_limit=(self.limits['inOCP'], ),
-            start=ocp_start, stop=ocp_stop, step=0.05, delay=0.1)
+            ramp_range=sensor.RampRange(
+                start=ocp_start, stop=ocp_stop, step=0.05),
+            delay=0.1)
         self['oDropout'] = sensor.Ramp(
             stimulus=self.devices['acsource'],
             sensor=self['oVout'],
             detect_limit=(self.limits['InDropout'], ),
-            start=185.0, stop=150.0, step=-0.5, delay=0.1)
+            ramp_range=sensor.RampRange(
+                start=185.0, stop=150.0, step=-0.5),
+            delay=0.1)
         self['oDropout'].reset = False
 
 

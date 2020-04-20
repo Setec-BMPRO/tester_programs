@@ -341,19 +341,25 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_5v'],
             sensor=self['o5v'],
             detect_limit=(self.limits['inOCP5V'], ),
-            start=low - 1, stop=high + 1, step=0.1, delay=0.2)
+            ramp_range=sensor.RampRange(
+                start=low - 1, stop=high + 1, step=0.1),
+            delay=0.2)
         low, high = self.limits['OCP15Vp'].limit
         self['ocp15vp'] = sensor.Ramp(
             stimulus=self.devices['dcl_15vp'],
             sensor=self['o15vp'],
             detect_limit=(self.limits['inOCP15Vp'], ),
-            start=low - 1, stop=high + 1, step=0.1, delay=0.2)
+            ramp_range=sensor.RampRange(
+                start=low - 1, stop=high + 1, step=0.1),
+            delay=0.2)
         low, high = self.limits['OCPTec'].limit
         self['ocptec'] = sensor.Ramp(
             stimulus=self.devices['dcl_tec'],
             sensor=self['tec'],
             detect_limit=(self.limits['inOCPTec'], ),
-            start=low - 1, stop=high + 1, step=0.1, delay=0.2)
+            ramp_range=sensor.RampRange(
+                start=low - 1, stop=high + 1, step=0.1),
+            delay=0.2)
         self['oYesNoPsu'] = sensor.YesNo(
             message=tester.translate('ids500_ini_main', 'IsPSULedGreen?'),
             caption=tester.translate('ids500_ini_main', 'capPsuLed'))

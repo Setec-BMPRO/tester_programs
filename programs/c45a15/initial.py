@@ -190,12 +190,14 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcs_Vout'],
             sensor=self['oVcc'],
             detect_limit=(self.limits['inOVP'], ),
-            start=18.0, stop=22.0, step=0.1, delay=0.05)
+            ramp_range=sensor.RampRange(start=18.0, stop=22.0, step=0.1),
+            delay=0.05)
         self['oOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl'],
             sensor=self['oVout'],
             detect_limit=(self.limits['inOCP'], ),
-            start=1.0, stop=3.2, step=0.03, delay=0.1)
+            ramp_range=sensor.RampRange(start=1.0, stop=3.2, step=0.03),
+            delay=0.1)
 
 
 class Measurements(share.Measurements):

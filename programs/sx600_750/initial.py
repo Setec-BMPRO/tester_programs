@@ -440,16 +440,20 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_12V'],
             sensor=self['o12VinOCP'],
             detect_limit=(self.limits['12V_inOCP'], ),
-            start=self.ratings.v12.ocp * 0.9,
-            stop=self.ratings.v12.ocp * 1.1,
-            step=0.1, delay=0)
+            ramp_range=sensor.RampRange(
+                start=self.ratings.v12.ocp * 0.9,
+                stop=self.ratings.v12.ocp * 1.1,
+                step=0.1),
+            delay=0)
         self['OCP24V'] = sensor.Ramp(
             stimulus=self.devices['dcl_24V'],
             sensor=self['o24VinOCP'],
             detect_limit=(self.limits['24V_inOCP'], ),
-            start=self.ratings.v24.ocp * 0.9,
-            stop=self.ratings.v24.ocp * 1.1,
-            step=0.1, delay=0)
+            ramp_range=sensor.RampRange(
+                start=self.ratings.v24.ocp * 0.9,
+                stop=self.ratings.v24.ocp * 1.1,
+                step=0.1),
+            delay=0)
         # Arduino sensors
         ard = self.devices['ard']
         for name, cmdkey in (

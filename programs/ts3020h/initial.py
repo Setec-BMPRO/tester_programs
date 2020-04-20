@@ -249,12 +249,14 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcs_Vout'],
             sensor=self['oSecShdn'],
             detect_limit=(self.limits['inVP'], ),
-            start=14.5, stop=17.0, step=0.05, delay=0.1)
+            ramp_range=sensor.RampRange(start=14.5, stop=17.0, step=0.05),
+            delay=0.1)
         self['oUVP'] = sensor.Ramp(
             stimulus=self.devices['dcs_Vout'],
             sensor=self['oSecShdn'],
             detect_limit=(self.limits['inVP'], ),
-            start=11.5, stop=8.0, step=-0.1, delay=0.3)
+            ramp_range=sensor.RampRange(start=11.5, stop=8.0, step=-0.1),
+            delay=0.3)
 
 
 class Measurements(share.Measurements):

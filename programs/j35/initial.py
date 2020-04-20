@@ -345,9 +345,11 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_bat'],
             sensor=self['ovbat'],
             detect_limit=(self.limits['InOCP'], ),
-            start=low - load_current - 1,
-            stop=high - load_current + 1,
-            step=0.1)
+            ramp_range=sensor.RampRange(
+                start=low - load_current - 1,
+                stop=high - load_current + 1,
+                step=0.1)
+            )
         self['ocp_pre'].on_read = lambda value: value + load_current
         # Post-adjust OCP
         low, high = self.limits['OCP'].limit
@@ -355,9 +357,11 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_bat'],
             sensor=self['ovbat'],
             detect_limit=(self.limits['InOCP'], ),
-            start=low - load_current - 1,
-            stop=high - load_current + 1,
-            step=0.1)
+            ramp_range=sensor.RampRange(
+                start=low - load_current - 1,
+                stop=high - load_current + 1,
+                step=0.1)
+            )
         self['ocp'].on_read = lambda value: value + load_current
         # Solar comparator calibration
         low, high = self.limits['SolarCutoffPre'].limit
@@ -365,9 +369,11 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcs_solar'],
             sensor=self['arm_solar_status'],
             detect_limit=(self.limits['Solar-Status'], ),
-            start=low - 0.1,
-            stop=high + 0.1,
-            step=0.05)
+            ramp_range=sensor.RampRange(
+                start=low - 0.1,
+                stop=high + 0.1,
+                step=0.05)
+            )
 
 
 class Measurements(share.Measurements):

@@ -3,20 +3,9 @@
 # Copyright 2016 SETEC Pty Ltd.
 """C15D-15 Initial Test Program."""
 
-import attr
-
 import tester
 
 import share
-
-
-@attr.s
-class OCPSetting():
-    """OCP measurement values."""
-    start = attr.ib(validator=attr.validators.instance_of(float))
-    stop = attr.ib(validator=attr.validators.instance_of(float))
-    step = attr.ib(validator=attr.validators.instance_of(float))
-    delay = attr.ib(validator=attr.validators.instance_of(float))
 
 
 class Initial(share.TestSequence):
@@ -37,12 +26,9 @@ class Initial(share.TestSequence):
         tester.LimitLow('inOCP', vout_min),
         tester.LimitBetween('OCP', 1.0, 1.4),
         )
-    ocp_settings = OCPSetting(
-        start=0.9, stop=1.5, step=0.02, delay=0.05)
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Sensors.ocp_settings = self.ocp_settings
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -102,8 +88,6 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    ocp_settings = None
-
     def open(self):
         """Create all Sensors."""
         dmm = self.devices['dmm']
@@ -117,10 +101,8 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['vout'],
             detect_limit=(self.limits['inOCP'], ),
-            start=self.ocp_settings.start,
-            stop=self.ocp_settings.stop,
-            step=self.ocp_settings.step,
-            delay=self.ocp_settings.delay)
+            ramp_range=sensor.RampRange(start=0.9, stop=1.5, step=0.02),
+            delay=0.05)
 
 
 class Measurements(share.Measurements):

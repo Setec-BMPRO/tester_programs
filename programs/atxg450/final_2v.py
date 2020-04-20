@@ -198,27 +198,32 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_24V'],
             sensor=self['o24V'],
             detect_limit=(self.limits['24Vinocp'], ),
-            start=17.5, stop=24.5, step=0.1, delay=0.1)
+            ramp_range=sensor.RampRange(start=17.5, stop=24.5, step=0.1),
+            delay=0.1)
         self['o12Vocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_12V'],
             sensor=self['o12V'],
             detect_limit=(self.limits['12Vinocp'], ),
-            start=19.5, stop=26.5, step=0.1, delay=0.1)
+            ramp_range=sensor.RampRange(start=19.5, stop=26.5, step=0.1),
+            delay=0.1)
         self['o5Vocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_5V'],
             sensor=self['o5V'],
             detect_limit=(self.limits['5Vinocp'], ),
-            start=19.5, stop=26.5, step=0.1, delay=0.1)
+            ramp_range=sensor.RampRange(start=19.5, stop=26.5, step=0.1),
+            delay=0.1)
         self['o3V3ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_3V3'],
             sensor=self['o3V3'],
             detect_limit=(self.limits['3V3inocp'], ),
-            start=16.5, stop=26.5, step=0.1, delay=0.1)
+            ramp_range=sensor.RampRange(start=16.5, stop=26.5, step=0.1),
+            delay=0.1)
         self['o5Vsbocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_5Vsb'],
             sensor=self['o5Vsb'],
             detect_limit=(self.limits['5Vsbinocp'], ),
-            start=2.1, stop=4.7, step=0.1, delay=0.1)
+            ramp_range=sensor.RampRange(start=2.1, stop=4.7, step=0.1),
+            delay=0.1)
 
 
 class Measurements(share.Measurements):

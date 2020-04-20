@@ -147,7 +147,8 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['vout'],
             detect_limit=(self.limits['InOCP'], ),
-            start=32.0, stop=48.0, step=0.2, delay=0.1)
+            ramp_range=sensor.RampRange(start=32.0, stop=48.0, step=0.2),
+            delay=0.1)
         self['yesnofuseout'] = sensor.YesNo(
             message=tester.translate(
                 'geniusII_final', 'RemoveBattFuseIsLedRedFlashing?'),

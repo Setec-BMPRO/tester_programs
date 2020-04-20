@@ -461,9 +461,11 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_bat'],
             sensor=self['vbat'],
             detect_limit=(self.limits['InOCP'], ),
-            start=low - self.iload - 1,
-            stop=high - self.iload + 1,
-            step=0.1)
+            ramp_range=sensor.RampRange(
+                start=low - self.iload - 1,
+                stop=high - self.iload + 1,
+                step=0.1)
+            )
         self['ocp_pre'].units = 'A'
         self['ocp_pre'].on_read = lambda value: value + self.iload
         # Post-adjust OCP
@@ -472,9 +474,11 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_bat'],
             sensor=self['vbat'],
             detect_limit=(self.limits['InOCP'], ),
-            start=low - self.iload - 1,
-            stop=high - self.iload + 1,
-            step=0.1)
+            ramp_range=sensor.RampRange(
+                start=low - self.iload - 1,
+                stop=high - self.iload + 1,
+                step=0.1)
+            )
         self['ocp'].units = 'A'
         self['ocp'].on_read = lambda value: value + self.iload
 

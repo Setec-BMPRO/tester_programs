@@ -180,9 +180,10 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['Vout'],
             detect_limit=(self.limits['InOCP'], ),
-            start=self.ocp_nominal * 0.85,  # ±15% ramping range
-            stop=self.ocp_nominal * 1.15,
-            step=0.1,
+            ramp_range=sensor.RampRange(
+                start=self.ocp_nominal * 0.85,  # ±15% ramping range
+                stop=self.ocp_nominal * 1.15,
+                step=0.1),
             delay=0.2)
         # Console sensors
         arm = self.devices['arm']

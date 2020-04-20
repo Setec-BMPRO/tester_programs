@@ -149,14 +149,18 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_Vout'],
             sensor=self['Vout'],
             detect_limit=(self.limits['inOCP'], ),
-            start=ocp_start, stop=ocp_stop, step=0.05, delay=0.1)
+            ramp_range=sensor.RampRange(
+                start=ocp_start, stop=ocp_stop, step=0.05),
+            delay=0.1)
         self['OCPLoad'].doc = 'Load OCP point'
         ocp_start, ocp_stop = Final.limitdata[self.parameter]['OCPrampBatt']
         self['OCPBatt'] = sensor.Ramp(
             stimulus=self.devices['dcl_Vbat'],
             sensor=self['Vbat'],
             detect_limit=(self.limits['inOCP'], ),
-            start=ocp_start, stop=ocp_stop, step=0.05, delay=0.1)
+            ramp_range=sensor.RampRange(
+                start=ocp_start, stop=ocp_stop, step=0.05),
+            delay=0.1)
         self['OCPBatt'].doc = 'Battery OCP point'
 
 
