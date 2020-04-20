@@ -246,23 +246,16 @@ class RVMN5x(Config):
     # Initial Test parameters
     fixture = '034861'
     # Software versions
-    #   Firmware 0.88 does not support hardware_rev
-    _nordic_088 = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
-    _arm_image_19 = 'rvmn101_nxp_1.9.bin'
+    _nordic_203 = 'jayco_rvmn5x_signed_2.0.3-0-g7ddcdfbe_factory_mcuboot.hex'
+    _arm_image_23 = 'rvmn5x_nxp_2.3.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
-        (share.lots.Range('A191809', 'A200510'), 5),    # 033280
-        # Rev 6...                                      # 034229
+        # Rev 3...
         ))
     _rev_data = {
         None: _Values(
-            nordic_image=_nordic_088, arm_image=_arm_image_19,
-            product_rev='06A', hardware_rev=None, banner_lines=4,
-            reversed_output_dict={},
-            ),
-        5: _Values(
-            nordic_image=_nordic_088, arm_image=_arm_image_19,
-            product_rev='05B', hardware_rev=None, banner_lines=4,
+            nordic_image=_nordic_203, arm_image=_arm_image_23,
+            product_rev='03A', hardware_rev='03A', banner_lines=4,
             reversed_output_dict={},
             ),
         }
@@ -274,8 +267,7 @@ class RVMN5x(Config):
         @return Tuple(limits)
 
         """
-        # 3dB below the -A version
-        rssi = -73 if share.config.System.tester_type == 'ATE4' else -88
+        rssi = -70 if share.config.System.tester_type == 'ATE4' else -88
         return cls._base_limits_final + (
             tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
             )
