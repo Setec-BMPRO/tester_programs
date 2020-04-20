@@ -119,6 +119,12 @@ class Fixture():
             # Hub port 3: Nordic NRF52 device programmer
             # Hub port 4: not used
             },
+        '034861': {     # RVMN5x Initial
+            'ARM': _ftdi_hub_1,
+            'NORDIC': _ftdi_hub_2,
+            # Hub port 3: Nordic NRF52 device programmer
+            # Hub port 4: not used
+            },
         '034352': {     # TRSBTS Initial
             'NORDIC': _ftdi_hub_1,
             # Hub port 2: Nordic NRF52 device programmer

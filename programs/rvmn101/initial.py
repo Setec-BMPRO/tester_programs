@@ -151,6 +151,7 @@ class Devices(share.Devices):
         console_class = {
             'A': console.ConsoleA,
             'B': console.ConsoleB,
+            '5': console.Console5x,
             }[self.parameter]
         console_class.reversed_output_dict = self.reversed_output_dict
         self['rvmn101'] = console_class(nordic_ser)
