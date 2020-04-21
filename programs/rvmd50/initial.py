@@ -46,6 +46,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Test the LCD and Backlight."""
+        dev['rla_reset'].pulse(0.1, delay=5)
         mes['dmm_bklghtoff'](timeout=5)
         with dev['display']:
             self.measure(('YesNoDisplayOk', 'dmm_bklghton'), timeout=5)
@@ -73,7 +74,7 @@ class Devices(share.Devices):
         self['programmer'] = share.programmer.ARM(
             share.config.Fixture.port('029687', 'ARM'),
             os.path.join(folder, self.sw_file),
-            crpmode=False,
+            crpmode=None,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         self['can'] = self.physical_devices['_CAN']
