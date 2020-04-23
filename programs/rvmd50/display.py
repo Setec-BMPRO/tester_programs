@@ -3,6 +3,8 @@
 # Copyright 2020 SETEC Pty Ltd
 """RVMD50 LCD & Backlight Helper."""
 
+import time
+
 import share
 
 
@@ -11,6 +13,7 @@ class DisplayControl():
     """Control of the LCD & Backlight via CAN."""
 
     test_pattern = 1        # LCD test pattern to use
+    inter_packet_gap = 0.1  # Wait between CAN packets
 
     def __init__(self, can_dev):
         """Create instance.
@@ -29,6 +32,7 @@ class DisplayControl():
         """
         self.pkt_pattern.pattern = self.test_pattern
         self.pkt_pattern.send()
+        time.sleep(self.inter_packet_gap)
         self.pkt_button.enable = self.pkt_button.button = True
         self.pkt_button.send()
         return self
@@ -37,5 +41,6 @@ class DisplayControl():
         """Context Manager exit handler - Release overrides."""
         self.pkt_button.enable = self.pkt_pattern.button = False
         self.pkt_button.send()
+        time.sleep(self.inter_packet_gap)
         self.pkt_pattern.pattern = 0
         self.pkt_pattern.send()
