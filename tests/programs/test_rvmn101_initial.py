@@ -13,7 +13,7 @@ class RVMN101BInitial(ProgramTestCase):
     """RVMN101B Initial program test suite."""
 
     prog_class = rvmn101.Initial
-    parameter = 'B'
+    parameter = '101B'
     hs_outputs = [1, 2, 3]
     debug = False
 
@@ -30,7 +30,7 @@ class RVMN101BInitial(ProgramTestCase):
         mycon = MagicMock(name='MyCon')
         type(mycon).valid_outputs = PropertyMock(return_value=self.hs_outputs)
         patcher = patch(
-            'programs.rvmn101.console.ConsoleB', return_value=mycon)
+            'programs.rvmn101.console.Console101B', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         mycan = MagicMock(name='MySerial2CAN')

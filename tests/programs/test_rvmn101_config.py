@@ -39,7 +39,7 @@ class RVMN101A_Config(unittest.TestCase):
                 uut, nordic_image, arm_image,
                 product_rev, hardware_rev, banner_lines,
                 ) in checks:
-            cfg.get('A', UUT(uut))
+            cfg.get('101A', UUT(uut))
             self.assertEqual(nordic_image, cfg.nordic_image)
             self.assertEqual(arm_image, cfg.arm_image)
             self.assertEqual(product_rev, cfg.product_rev)
@@ -61,7 +61,7 @@ class RVMN101B_Config(unittest.TestCase):
                 uut, nordic_image, arm_image,
                 product_rev, hardware_rev, banner_lines,
                 ) in checks:
-            cfg.get('B', UUT(uut))
+            cfg.get('101B', UUT(uut))
             self.assertEqual(nordic_image, cfg.nordic_image)
             self.assertEqual(arm_image, cfg.arm_image)
             self.assertEqual(product_rev, cfg.product_rev)

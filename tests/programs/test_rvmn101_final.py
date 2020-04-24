@@ -14,7 +14,7 @@ class RVMN101Final(ProgramTestCase):
     """RVMN101 Final program test suite."""
 
     prog_class = rvmn101.Final
-    parameter = 'A'
+    parameter = '101A'
     debug = False
 
     def setUp(self):

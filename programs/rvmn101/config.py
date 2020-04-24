@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 and RVMN5x Configuration."""
+"""RVMN101x and RVMN5x Configuration."""
 
 import logging
 
@@ -70,9 +70,10 @@ class Config():
 
         """
         config = {
-            'A': RVMN101A,
-            'B': RVMN101B,
-            '5': RVMN5x,
+            '101A': RVMN101A,
+            '101B': RVMN101B,
+            '50': RVMN5x,
+            '55': RVMN5x,
             }[parameter]
         config._configure(uut)    # Adjust for the Lot Number
         return config

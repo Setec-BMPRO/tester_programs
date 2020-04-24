@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 and RVMN5x Console driver."""
+"""RVMN101x and RVMN5x Console driver."""
 
 import re
 
@@ -15,9 +15,33 @@ class InvalidOutputError(Exception):
 
 class _Console(share.console.Base):
 
-    """Communications to RVMN101 and RVMN5x console."""
+    """Communications to RVMN101x and RVMN5x console.
 
-    banner_lines = None         # Number of startup banner lines
+    This class contains the present command syntax.
+    See RVMN101B for the older version syntax.
+
+    """
+
+    # Console command prompt. Signals the end of response data.
+    cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
+    # Console commands
+    parameter = share.console.parameter
+    cmd_data = {
+        'MAC': parameter.String(
+            'rvmn mac', read_format='{0}'),
+        'SERIAL': parameter.String(
+            'rvmn serial', writeable=True, write_format='{1} {0}'),
+        'PRODUCT-REV': parameter.String(
+            'rvmn product-rev', writeable=True, write_format='{1} {0}'),
+        'SW-REV': parameter.String(
+            'rvmn sw-rev', read_format='{0}'),
+        'HARDWARE-REV': parameter.String(
+            'rvmn hw-rev', writeable=True, write_format='{1} {0}'),
+        'OUTPUT': parameter.String(
+            'rvmn output',
+            readable=False, writeable=True, write_format='{1} {0}'),
+        }
+    banner_lines = None         # Startup banner lines (set from config)
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     max_output_index = 56       # Output index is range(max_output_index)
     missing_output_dict = {}    # Key: any text, Value: Output index
@@ -100,29 +124,9 @@ class _Console(share.console.Base):
         self['OUTPUT'] = '{0} {1}'.format(index, 1 if state else 0)
 
 
-class ConsoleA(_Console):
+class Console101A(_Console):
 
     """Communications to RVMN101A console."""
-
-    # Console command prompt. Signals the end of response data.
-    cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
-    # Console commands
-    parameter = share.console.parameter
-    cmd_data = {
-        'MAC': parameter.String(
-            'rvmn mac', read_format='{0}'),
-        'SERIAL': parameter.String(
-            'rvmn serial', writeable=True, write_format='{1} {0}'),
-        'PRODUCT-REV': parameter.String(
-            'rvmn product-rev', writeable=True, write_format='{1} {0}'),
-        'SW-REV': parameter.String(
-            'rvmn sw-rev', read_format='{0}'),
-        'HARDWARE-REV': parameter.String(
-            'rvmn hw-rev', writeable=True, write_format='{1} {0}'),
-        'OUTPUT': parameter.String(
-            'rvmn output',
-            readable=False, writeable=True, write_format='{1} {0}'),
-        }
 
     def __init__(self, port):
         """Initialise communications.
@@ -139,9 +143,17 @@ class ConsoleA(_Console):
         super().__init__(port)
 
 
-class ConsoleB(_Console):
+class Console101B(_Console):
 
-    """Communications to RVMN101B console."""
+    """Communications to RVMN101B console.
+
+    The RVMN101B uses quite old firmware, with outdated command syntax.
+    EG:
+        - Command prompt is different.
+        - Commands are not prefixed with 'rvmn'.
+        - 'HARDWARE-REV' is not implemented.
+
+    """
 
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\rrvmn> '
@@ -187,29 +199,55 @@ class ConsoleB(_Console):
         super().__init__(port)
 
 
-class Console5x(_Console):
+class Console50(_Console):
 
     """Communications to RVMN5x console."""
 
-    # Console command prompt. Signals the end of response data.
-    cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
-    # Console commands
-    parameter = share.console.parameter
-    cmd_data = {
-        'MAC': parameter.String(
-            'rvmn mac', read_format='{0}'),
-        'SERIAL': parameter.String(
-            'rvmn serial', writeable=True, write_format='{1} {0}'),
-        'PRODUCT-REV': parameter.String(
-            'rvmn product-rev', writeable=True, write_format='{1} {0}'),
-        'SW-REV': parameter.String(
-            'rvmn sw-rev', read_format='{0}'),
-        'HARDWARE-REV': parameter.String(
-            'rvmn hw-rev', writeable=True, write_format='{1} {0}'),
-        'OUTPUT': parameter.String(
-            'rvmn output',
-            readable=False, writeable=True, write_format='{1} {0}'),
-        }
+    def __init__(self, port):
+        """Initialise communications.
+
+        @param port Serial instance to use
+
+        """
+        self.missing_output_dict = {
+            'HBRIDGE 2 EXTEND': 2,
+            'HBRIDGE 2 RETRACT': 3,
+            'HBRIDGE 3 EXTEND': 4,
+            'HBRIDGE 3 RETRACT': 5,
+            'HBRIDGE 7 EXTEND': 12,
+            'HBRIDGE 7 RETRACT': 13,
+            'HBRIDGE 8 EXTEND': 14,
+            'HBRIDGE 8 RETRACT': 15,
+            'HS_0A5_EN7': 22,
+            'HS_0A5_EN13': 28,
+            'HS_0A5_EN14': 29,
+            'HS_0A5_EN15': 30,
+            'HS_0A5_EN16': 31,
+            'HS_0A5_EN17': 32,
+            'HS_0A5_EN18': 33,
+            'LS_0A5_EN1': 34,
+            'LS_0A5_EN2': 35,
+            'LS_0A5_EN3': 36,
+            'LS_0A5_EN4': 37,
+            'OUT5A_EN0': 38,
+            'OUT5A_EN1': 39,
+            'OUT5A_EN2': 40,
+            'OUT5A_EN3': 41,
+            'OUT5A_EN4': 42,
+            'OUT5A_EN5': 43,
+            'OUT5A_PWM_EN6': 44,
+            'OUT5A_PWM_EN7': 45,
+            'OUT5A_PWM_EN8': 46,
+            'OUT10A_2': 53,
+            'OUT10A_3': 54,
+            'OUT10A_4': 55,
+            }
+        super().__init__(port)
+
+
+class Console55(_Console):
+
+    """Communications to RVMN55 console."""
 
     def __init__(self, port):
         """Initialise communications.
@@ -246,6 +284,4 @@ class Console5x(_Console):
             'OUT10A_3': 54,
             'OUT10A_4': 55,
             }
-        # Special outputs only for Rev8 boards
-        self._special_outputs = {}
         super().__init__(port)

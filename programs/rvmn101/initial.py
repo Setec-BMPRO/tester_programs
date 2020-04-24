@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101 and RVMN5x Initial Test Program."""
+"""RVMN101x and RVMN5x Initial Test Program."""
 
 import inspect
 import os
@@ -63,7 +63,7 @@ class Initial(share.TestSequence):
         """Test the outputs of the unit."""
         rvmn101 = dev['rvmn101']
         dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
-        if self.parameter == 'A':
+        if self.parameter == '101A':
             rvmn101.hs_output(41, False)
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
             dev['rla_pullup'].set_on()
@@ -149,9 +149,10 @@ class Devices(share.Devices):
         nordic_ser.port = share.config.Fixture.port(self.fixture, 'NORDIC')
         # Console driver
         console_class = {
-            'A': console.ConsoleA,
-            'B': console.ConsoleB,
-            '5': console.Console5x,
+            '101A': console.Console101A,
+            '101B': console.Console101B,
+            '50': console.Console50,
+            '55': console.Console55,
             }[self.parameter]
         console_class.reversed_output_dict = self.reversed_output_dict
         self['rvmn101'] = console_class(nordic_ser)
