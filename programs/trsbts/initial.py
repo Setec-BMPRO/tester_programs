@@ -26,7 +26,6 @@ class Initial(share.TestSequence):
     hw_version = (3, 0, 'A')
     limitdata = (
         tester.LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
-        tester.LimitDelta('Vin', 7.0, 2.0, doc='Input to regulator present'),
         tester.LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
         tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
         tester.LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
@@ -75,7 +74,7 @@ class Initial(share.TestSequence):
         """Prepare to run a test."""
         dev['dcs_vbat'].output(self.vbatt, True)
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        self.measure(('dmm_vbat', 'dmm_vin', 'dmm_3v3', 'dmm_chem'), timeout=5)
+        self.measure(('dmm_vbat', 'dmm_3v3', 'dmm_chem'), timeout=5)
         if self.parameter == 'BTS':
             self.measure(('dmm_sway-', 'dmm_sway+'), timeout=5)
         mes['dmm_brakeoff'](timeout=5)
@@ -200,8 +199,6 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vbat'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['vbat'].doc = 'Across X1 and X2'
-        self['vin'] = sensor.Vdc(dmm, high=2, low=1, rng=100, res=0.01)
-        self['vin'].doc = 'TP17'
         self['3v3'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
         self['3v3'].doc = 'TP1'
         self['red'] = sensor.Vdc(dmm, high=2, low=2, rng=10, res=0.01)
@@ -251,7 +248,6 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vbat', 'Vbat', 'vbat', 'Battery input voltage'),
-            ('dmm_vin', 'Vin', 'vin', 'Input to 3V3 regulator'),
             ('dmm_3v3', '3V3', '3v3', '3V3 rail voltage'),
             ('dmm_brakeoff', 'BrakeOff', 'brake', 'Brakes output off'),
             ('dmm_brakeon', 'BrakeOn', 'brake', 'Brakes output on'),
