@@ -11,7 +11,6 @@ from . import console
 from . import config
 from . import lots
 from . import programmer
-from . import timers
 
 
 __all__ = [
@@ -22,5 +21,4 @@ __all__ = [
     'config',
     'lots',
     'programmer',
-    'timers',
     ]

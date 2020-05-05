@@ -23,7 +23,7 @@ class _J35Initial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-                'share.timers.BackgroundTimer',
+                'setec.BackgroundTimer',
                 'share.programmer.ARM',
                 ):
             patcher = patch(target)

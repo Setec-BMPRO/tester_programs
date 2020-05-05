@@ -34,7 +34,8 @@ import re
 import threading
 import queue
 import logging
-import share
+
+import setec
 
 
 class CmrSbp():
@@ -109,7 +110,7 @@ class CmrSbp():
             data_template = {}
             for parameter in iter(self._datamap):
                 data_template[parameter] = self._datamap[parameter][0]
-            tdata = share.timers.TimedStore(data_template, data_timeout)
+            tdata = setec.TimedStore(data_template, data_timeout)
             run = True
         except Exception:
             err = ' '.join(

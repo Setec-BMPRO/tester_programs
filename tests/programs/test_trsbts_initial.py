@@ -51,7 +51,6 @@ class TRSBTS_Initial(ProgramTestCase):
                 'Prepare': (
                     (sen['sernum'], 'A2026040123'),
                     (sen['vbat'], 12.5),
-                    (sen['vin'], 6.5),
                     (sen['3v3'], 3.30),
                     (sen['chem'], 3.0),
                     (sen['sway-'], 2.0),
@@ -80,7 +79,7 @@ class TRSBTS_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(28, len(result.readings))
+        self.assertEqual(27, len(result.readings))
         self.assertEqual(
             ['Prepare', 'PgmNordic', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)

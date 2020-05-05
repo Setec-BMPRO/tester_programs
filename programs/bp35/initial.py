@@ -8,6 +8,7 @@ import os
 import time
 
 import serial
+import setec
 import tester
 
 import share
@@ -348,7 +349,7 @@ class Devices(share.Devices):
         self['bp35tunnel'] = console.TunnelConsole(tunnel)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
-        self['PmTimer'] = share.timers.BackgroundTimer()
+        self['PmTimer'] = setec.BackgroundTimer()
 
     def reset(self):
         """Reset instruments."""

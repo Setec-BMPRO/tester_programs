@@ -4,6 +4,9 @@
 """J35 ARM processor console driver."""
 
 import time
+
+import setec
+
 import share
 
 
@@ -112,7 +115,7 @@ class _Console():
                 share.console.parameter.Float(
                     'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
                 )
-        self._timer = share.timers.BackgroundTimer()
+        self._timer = setec.BackgroundTimer()
 
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
