@@ -48,7 +48,7 @@ class Config():
         tester.LimitDelta('Vbatt', vbatt_set - 0.5, 0.5, doc='Battery input'),
         tester.LimitPercent('3V3', 3.3, 6.0, doc='Internal 3V rail'),
         tester.LimitHigh('HSon', 10.0, doc='HS output on (high)'),
-        tester.LimitLow('HSoff', 1.0, doc='All HS outputs off (low)'),
+        tester.LimitLow('HSoff', 3.0, doc='All HS outputs off (low)'),
         tester.LimitLow('HBon', 2.0, doc='Reversed HBridge on (low)'),
         tester.LimitHigh('HBoff', 8.0, doc='Reversed HBridge off (high)'),
         tester.LimitLow('LSon', 1.0, doc='LS output on (low)'),
