@@ -19,7 +19,7 @@ PIC18F4520
     IDS-500 Micro
 
 PIC18F87J93
-    DRIFTER             Product EOL 2018-06
+    DRIFTER             (Product EOL 2018-06)
 
 PIC18LF252
     CMR-SBP
@@ -29,8 +29,11 @@ dsPIC33FJ16GS402
 
 ATMEL AtTiny
 ============
-AtTiny10                Done by Arduino 2016-11
-    BatteryCheck        Product EOL 2018-06
+AtTiny10
+    BatteryCheck        Done by Arduino 2016-11     (Product EOL 2018-06)
+
+AtTiny406
+    MB3                 Done by Arduino 2019-08
 
 AtTiny1634
     WTSI200             Done by Arduino 2013-08

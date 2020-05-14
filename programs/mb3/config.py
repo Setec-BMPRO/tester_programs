@@ -9,7 +9,7 @@ vaux = 12.8
 vsol = 14.6
 
 # Software image filename
-sw_image = 'mb3_2.0.hex'
+sw_image = 'mb3_2.0.20075.hex'
 
 # ATTiny406 fuse settings
 #   FuseName: (FuseNumber, FuseValue)
