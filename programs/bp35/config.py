@@ -291,7 +291,7 @@ class BP35II(BP35):
 
     is_2 = True
     # ARM software version
-    arm_sw_version = '2.0.19924.5009'
+    arm_sw_version = '2.0.20102.5010'
 
 
 class BP35IISR(BP35II):
