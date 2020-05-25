@@ -246,7 +246,12 @@ class Nordic(_Base):
             '--program', '{0}'.format(self.hexfile),
             '--verify',
             ]
-        self.process = subprocess.Popen(command, cwd=self.working_dir)
+        self.process = subprocess.Popen(
+                command,
+                cwd=self.working_dir,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT
+                )
         result = self.process.wait()
         # HACK: Force code an RVSWT101 switch code
         if not result and self.rvswt101_forced_switch_code:
@@ -255,7 +260,12 @@ class Nordic(_Base):
                 '--memwr', '0x70000',
                 '--val', '{0}'.format(self.rvswt101_forced_switch_code),
                 ]
-            self.process = subprocess.Popen(command, cwd=self.working_dir)
+            self.process = subprocess.Popen(
+                command,
+                cwd=self.working_dir,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT
+                )
             result = self.process.wait()
         self.result = result
 
@@ -300,7 +310,12 @@ class PIC(_Base):
             '/Y'
             ]
         self.relay.set_on()
-        self.process = subprocess.Popen(command, cwd=self.working_dir)
+        self.process = subprocess.Popen(
+            command,
+            cwd=self.working_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT
+            )
 
     def program_wait(self):
         """Wait for device programming to finish."""
