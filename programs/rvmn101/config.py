@@ -207,6 +207,7 @@ class RVMN101B(Config):
     # Software versions
     #   Firmware 0.88 does not support hardware_rev
     _nordic_088 = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
+    _nordic_089 = 'tmc_rvmn101_signed_0.89-0-g9fc6374f_factory_mcuboot.hex'
     _arm_image_19 = 'rvmn101_nxp_1.9.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
@@ -215,8 +216,8 @@ class RVMN101B(Config):
         ))
     _rev_data = {
         None: _Values(
-            nordic_image=_nordic_088, arm_image=_arm_image_19,
-            product_rev='06A', hardware_rev=None, banner_lines=4,
+            nordic_image=_nordic_089, arm_image=_arm_image_19,
+            product_rev='06B', hardware_rev=None, banner_lines=4,
             reversed_output_dict={},
             ),
         5: _Values(
@@ -256,7 +257,7 @@ class RVMN5x(Config):
     _rev_data = {
         None: _Values(
             nordic_image=_nordic_206, arm_image=_arm_image_23,
-            product_rev='03A', hardware_rev='03A', banner_lines=5,
+            product_rev='03C', hardware_rev='03A', banner_lines=5,
             reversed_output_dict={},
             ),
         }
