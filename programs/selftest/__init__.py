@@ -14,8 +14,8 @@ class Main(share.TestSequence):
     limitdata = (
         tester.LimitDelta('12V', 12.0, 0.5),
         tester.LimitDelta('5V', 5.0, 0.5),
-        tester.LimitDelta('ShieldOFF', 6.0, 0.5),
-        tester.LimitDelta('ShieldON', 0.0, 0.5),
+        tester.LimitBetween('ShieldOFF', -0.5, 7.0),
+        tester.LimitBetween('ShieldON', -0.5, 7.0),
         tester.LimitDelta('Dso8', 8.0, 0.5),
         tester.LimitDelta('Dso6', 6.0, 0.5),
         tester.LimitDelta('Dso4', 4.0, 0.5),
