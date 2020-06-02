@@ -139,7 +139,7 @@ class RVMN101A(Config):
     _nordic_133 = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
     _nordic_181 = 'jayco_rvmn101_signed_1.8.1-0-ge5395312_factory_mcuboot.hex'
     _nordic_1106 = 'jayco_rvmn101_signed_1.10.6-0-g2d00e43c_factory_mcuboot.hex'
-    _nordic_1108 = 'jayco_rvmn101_signed_1.10.8-0-gaba59925_factory_mcuboot.hex'
+    _nordic_1114 = 'jayco_rvmn101_signed_1.11.4-0-g9d4939df_factory_mcuboot.hex'
     _arm_image_19 = 'rvmn101_nxp_1.9.bin'
     _arm_image_113 = 'rvmn101_nxp_1.13.bin'
     # Lot number mapping
@@ -154,7 +154,7 @@ class RVMN101A(Config):
         ))
     _rev_data = {
         None: _Values(
-            nordic_image=_nordic_1108, arm_image=_arm_image_113,
+            nordic_image=_nordic_1114, arm_image=_arm_image_113,
             product_rev='10A', hardware_rev='10A', banner_lines=6,
             reversed_output_dict={},
             ),
