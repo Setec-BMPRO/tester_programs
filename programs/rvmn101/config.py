@@ -252,10 +252,17 @@ class RVMN5x(Config):
     _arm_image_23 = 'rvmn5x_nxp_2.3.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
-        # Rev 3...
+        # Rev 1-2 were Engineering protoype builds
+        (share.lots.Range('A201801', 'A202213'), 3),
+        # Rev 4...
         ))
     _rev_data = {
         None: _Values(
+            nordic_image=_nordic_206, arm_image=_arm_image_23,
+            product_rev='04A', hardware_rev='04A', banner_lines=5,
+            reversed_output_dict={},
+            ),
+        3: _Values(
             nordic_image=_nordic_206, arm_image=_arm_image_23,
             product_rev='03C', hardware_rev='03A', banner_lines=5,
             reversed_output_dict={},
