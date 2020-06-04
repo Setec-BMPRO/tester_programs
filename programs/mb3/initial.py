@@ -53,6 +53,7 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vaux', tester.DCSource, 'DCS2'),
+                ('dcs_vfix', tester.DCSource, 'DCS3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial port for the ATtiny406. Used by programmer and comms module.
@@ -65,6 +66,9 @@ class Devices(share.Devices):
             os.path.join(folder, config.sw_image),
             fuses=config.fuses
             )
+        # Apply power to fixture circuits.
+        self['dcs_vfix'].output(12.0, output=True)
+        self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -80,7 +84,6 @@ class Sensors(share.Sensors):
         dmm = self.devices['dmm']
         sensor = tester.sensor
         self['vaux'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self['vsolar'] = sensor.Vdc(dmm, high=2, low=1, rng=100, res=0.01)
         self['5V'] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.01)
         self['vbat'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
 
