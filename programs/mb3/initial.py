@@ -36,9 +36,9 @@ class Initial(share.TestSequence):
         """Apply input power and measure voltages."""
         dev['dcs_vaux'].output(config.vaux, output=True, delay=0.5)
         self.measure(('dmm_vaux', 'dmm_5v'), timeout=5)
-#        dev['rla_switch'].monostable(delay=0.5)
-#        dev['rla_trigger'].pulse(0.1)
-#        dev['rla_switch'].ftdi()
+        dev['rla_switch'].monostable(delay=0.5)
+        dev['rla_trigger'].pulse(0.1)
+        dev['rla_switch'].ftdi()
 
     @share.teststep
     def _step_output(self, dev, mes):
