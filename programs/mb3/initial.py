@@ -36,6 +36,9 @@ class Initial(share.TestSequence):
         """Apply input power and measure voltages."""
         dev['dcs_vaux'].output(config.vaux, output=True, delay=0.5)
         self.measure(('dmm_vaux', 'dmm_5v'), timeout=5)
+#        dev['rla_switch'].monostable(delay=0.5)
+#        dev['rla_trigger'].pulse(0.1)
+#        dev['rla_switch'].ftdi()
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -54,8 +57,14 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vaux', tester.DCSource, 'DCS2'),
                 ('dcs_vfix', tester.DCSource, 'DCS3'),
+                ('rla_switch', tester.Relay, 'RLA1'),
+                ('rla_trigger', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Some more obvious ways to use this relay
+        sw = self['rla_switch']
+        sw.monostable = sw.set_on
+        sw.ftdi = sw.set_off
         # Serial port for the ATtiny406. Used by programmer and comms module.
         avr_port = share.config.Fixture.port('033633', 'AVR')
         # ATtiny406 device programmer
@@ -73,6 +82,8 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['dcs_vaux'].output(0.0, False)
+        for rla in ('rla_switch', 'rla_trigger', ):
+            self[rla].set_off()
 
 
 class Sensors(share.Sensors):
