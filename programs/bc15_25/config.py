@@ -177,7 +177,7 @@ class BC25(BCx5):
     """BC25 configuration."""
 
     sw_version_a = '1.0.16489.137'
-    sw_version_b = '2.0.18498.2003'
+    sw_version_b = '2.0.20136.2004'     # PC-22674
     arm_file_pattern = 'bc25_{0}.bin'
     arm_port = share.config.Fixture.port('031032', 'ARM')
     _lot_rev = share.lots.Revision((
