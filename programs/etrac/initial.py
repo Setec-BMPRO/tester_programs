@@ -6,10 +6,11 @@
 import inspect
 import os
 
+import serial
 import tester
 
 import share
-
+from . import arduino
 
 class Initial(share.TestSequence):
 
@@ -22,6 +23,7 @@ class Initial(share.TestSequence):
         tester.LimitBetween('5V', 4.95, 5.05),
         tester.LimitBetween('5Vusb', 4.75, 5.25),
         tester.LimitBetween('Vbat', 8.316, 8.484),
+        tester.LimitRegExp('Reply', '^OK$'),
         )
 
     def open(self, uut):
@@ -30,7 +32,8 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self.devices['program_pic'].program),
+#            tester.TestStep('Program', self.devices['program_pic'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('Load', self._step_load),
             )
 
@@ -41,6 +44,14 @@ class Initial(share.TestSequence):
         dev['dcs_Vin'].output(13.0, output=True)
         self.measure(
             ('dmm_Vin', 'dmm_Vin2', 'dmm_5V', ), timeout=10)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the PIC device."""
+        dev['rla_Prog'].set_on()
+        dev['rla_Prog'].opc()
+        mes['pgm_etrac2']()
+        dev['rla_Prog'].set_off()
 
     @share.teststep
     def _step_load(self, dev, mes):
@@ -62,16 +73,25 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_Vin', tester.DCSource, 'DCS1'),
+                ('dcs_Vcom', tester.DCSource, 'DCS2'),
                 ('rla_SS', tester.Relay, 'RLA1'),
                 ('rla_Prog', tester.Relay, 'RLA2'),
                 ('rla_BattLoad', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_pic'] = share.programmer.PIC(
-            self.hex_file, folder, '16F1828', self['rla_Prog'])
+#        # PIC device programmer
+#        folder = os.path.dirname(
+#            os.path.abspath(inspect.getfile(inspect.currentframe())))
+#        self['program_pic'] = share.programmer.PIC(
+#            self.hex_file, folder, '16F1828', self['rla_Prog'])
+        # Serial connection to the Arduino console
+        ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        # Set port separately, as we don't want it opened yet
+        ard_ser.port = share.config.Fixture.port('019883', 'ARDUINO')
+        self['ard'] = arduino.Arduino(ard_ser)
+        # Switch on power to fixture circuits
+        self['dcs_Vcom'].output(12.0, output=True, delay=2.0)
+        self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -93,6 +113,9 @@ class Sensors(share.Sensors):
         self['o5V'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
         self['o5Vusb'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.001)
         self['oVbat'] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.001)
+        # Arduino sensor
+        ard = self.devices['ard']
+        self['pgmEtrac2'] = sensor.KeyedReadingString(ard, 'PGM_ETRAC2')
 
 
 class Measurements(share.Measurements):
@@ -107,4 +130,5 @@ class Measurements(share.Measurements):
             ('dmm_5V', '5V', 'o5V', ''),
             ('dmm_5Vusb', '5Vusb', 'o5Vusb', ''),
             ('dmm_Vbat', 'Vbat', 'oVbat', ''),
+            ('pgm_etrac2', 'Reply', 'pgmEtrac2', ''),
             ))

@@ -68,6 +68,9 @@ class Fixture():
         '017048': {     # IDS-500 Final (Prolific)
             'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
             },
+        '019883': {     # ETrac-II Initial (Arduino)
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
+            },
 
         # Fixtures with a single FTDI without any S/N
 

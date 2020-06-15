@@ -17,9 +17,12 @@ class ETracInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.programmer.PIC')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'programs.etrac.arduino.Arduino',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):
@@ -31,6 +34,9 @@ class ETracInitial(ProgramTestCase):
                     ((sen['oVin'], 13.0), (sen['oVin2'], 12.0),
                      (sen['o5V'], 5.0), )
                     ),
+                'Program': (
+                    ((sen['pgmEtrac2'], 'OK'), )
+                    ),
                 'Load': (
                     ((sen['o5Vusb'], 5.1), (sen['oVbat'], (8.45, 8.4)), )
                     ),
@@ -40,5 +46,5 @@ class ETracInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(6, len(result.readings))
+        self.assertEqual(7, len(result.readings))
         self.assertEqual(['PowerUp', 'Program', 'Load'], self.tester.ut_steps)
