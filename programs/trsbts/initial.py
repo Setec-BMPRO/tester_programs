@@ -78,7 +78,7 @@ class Initial(share.TestSequence):
         if self.parameter == 'BTS':
             self.measure(('dmm_sway-', 'dmm_sway+'), timeout=5)
         mes['dmm_brakeoff'](timeout=5)
-        dev['rla_pin'].remove()
+        dev['rla_pin'].remove()     # Relay contacts shorted
         self.measure(('dmm_brakeon', 'dmm_lighton'), timeout=5)
         dev['rla_pin'].insert()
 
@@ -157,7 +157,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         # Some more obvious ways to use this relay
         pin = self['rla_pin']
-        pin.insert = pin.set_off
+        pin.insert = pin.set_off    # N/O contacts
         pin.remove = pin.set_on
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
