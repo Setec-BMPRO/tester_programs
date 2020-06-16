@@ -79,10 +79,7 @@ class RaspberryBluetooth(SerialIO):
 
         """
         super().__init__()
-        self.server = jsonrpclib.ServerProxy(
-            server,
-            config=jsonrpclib.config.Config(content_type='application/json')
-            )
+        self.server = jsonrpclib.ServerProxy(server)
 
     def echo(self, value):
         """Echo function for diagnostic purposes.

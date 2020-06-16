@@ -54,9 +54,6 @@ class RaspberryBluetooth(unittest.TestCase):
         patcher = patch('jsonrpclib.ServerProxy', return_value=self.server)
         self.addCleanup(patcher.stop)
         patcher.start()
-        patcher = patch('jsonrpclib.config.Config')
-        self.addCleanup(patcher.stop)
-        patcher.start()
         self.pibt = share.bluetooth.RaspberryBluetooth('')
 
     def test_echo(self):

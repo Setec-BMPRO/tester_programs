@@ -10,18 +10,12 @@ class SerialToMAC():
 
     """Save/Read the blutooth MAC address for a Serial Number."""
 
-    # jsonrpclib uses non-standard 'application/json-rpc' by default
-    #   Set the standard content_type here
-    content_type = 'application/json'
     # The RPC server location
     server_url = 'http://webapp.mel.setec.com.au/ate/rpc/'
 
     def __init__(self):
         """Create the instance."""
-        self.server = jsonrpclib.ServerProxy(
-            self.server_url,
-            config=jsonrpclib.config.Config(content_type=self.content_type)
-            )
+        self.server = jsonrpclib.ServerProxy(self.server_url)
 
     def blemac_get(self, serial):
         """Retrieve a Bluetooth MAC for a Serial Number.
