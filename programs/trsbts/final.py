@@ -17,7 +17,9 @@ class Final(share.TestSequence):
     rssi = -70 if share.config.System.tester_type == 'ATE4' else -85
 
     limitdata = (
-        tester.LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
+        tester.LimitDelta('Vbat', vbatt, 0.5, doc='Battery input present'),
+        tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
+        tester.LimitDelta('BrakeOn', vbatt, 0.5, doc='Brakes on'),
         tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
             doc='Valid MAC address'),
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
@@ -28,16 +30,26 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
+            tester.TestStep('Pin', self._step_pin),
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
 
     @share.teststep
-    def _step_bluetooth(self, dev, mes):
-        """Test the Bluetooth interface."""
+    def _step_pin(self, dev, mes):
+        """Test the Pull-Pin operation."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vbat'].output(self.vbatt, True)
-        mes['dmm_vbat'](timeout=5)
+        self.measure((
+            'dmm_vbat',
+            'dmm_brakeon',     # Pin OUT: Brakes ON
+            'ui_pin',          # Operator puts the pin IN
+            'dmm_brakeoff',    # Pin IN: Brakes OFF
+            ), timeout=5)
+
+    @share.teststep
+    def _step_bluetooth(self, dev, mes):
+        """Test the Bluetooth interface."""
         # Lookup the MAC address from the server
         mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)
@@ -88,9 +100,14 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self['vbat'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
         self['vbat'].doc = 'DC input of fixture'
+        self['pin_in'] = sensor.Notify(
+            message=tester.translate('trsbtx_final', 'msgPinIn'),
+            caption=tester.translate('trsbtx_final', 'capPinIn'))
+        self['brake'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
+        self['brake'].doc = 'Brake output'
         self['sernum'] = sensor.DataEntry(
-            message=tester.translate('trsbts_final', 'msgSnEntry'),
-            caption=tester.translate('trsbts_final', 'capSnEntry'))
+            message=tester.translate('trsbtx_final', 'msgSnEntry'),
+            caption=tester.translate('trsbtx_final', 'capSnEntry'))
         self['sernum'].doc = 'Barcode scanner'
         self['mirscan'] = sensor.MirrorReadingBoolean()
         self['mirmac'] = sensor.MirrorReadingString()
@@ -105,6 +122,9 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vbat', 'Vbat', 'vbat', 'Battery input voltage'),
+            ('ui_pin', 'Notify', 'pin_in', 'Operator inserts pin'),
+            ('dmm_brakeoff', 'BrakeOff', 'brake', 'Brakes output off'),
+            ('dmm_brakeon', 'BrakeOn', 'brake', 'Brakes output on'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from server'),
             ('scan_mac', 'ScanMac', 'mirscan',

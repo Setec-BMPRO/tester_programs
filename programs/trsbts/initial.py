@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
     # Hardware version (Major [1-255], Minor [1-255], Mod [character])
     hw_version = (3, 0, 'A')
     limitdata = (
-        tester.LimitDelta('Vbat', 12.0, 0.5, doc='Battery input present'),
+        tester.LimitDelta('Vbat', vbatt, 0.5, doc='Battery input present'),
         tester.LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
         tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
         tester.LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
