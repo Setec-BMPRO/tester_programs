@@ -103,7 +103,7 @@ class Sensors(share.Sensors):
         self['pin_in'] = sensor.Notify(
             message=tester.translate('trsbtx_final', 'msgPinIn'),
             caption=tester.translate('trsbtx_final', 'capPinIn'))
-        self['brake'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
+        self['brake'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
         self['brake'].doc = 'Brake output'
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('trsbtx_final', 'msgSnEntry'),
