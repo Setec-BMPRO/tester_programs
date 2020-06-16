@@ -50,6 +50,9 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
+        # Power cycle or BLE won't Tx after pin was out...
+        dev['dcs_vbat'].output(0.0, delay=1.0)
+        dev['dcs_vbat'].output(self.vbatt)
         # Lookup the MAC address from the server
         mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)
