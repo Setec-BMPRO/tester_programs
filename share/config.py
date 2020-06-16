@@ -69,7 +69,7 @@ class Fixture():
             'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
             },
         '019883': {     # ETrac-II Initial (Arduino)
-            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM36'}[os.name],
             },
 
         # Fixtures with a single FTDI without any S/N

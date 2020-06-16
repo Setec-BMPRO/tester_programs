@@ -3,8 +3,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """ETrac-II Initial Test Program."""
 
-import inspect
-import os
+import time
 
 import serial
 import tester
@@ -32,7 +31,6 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-#            tester.TestStep('Program', self.devices['program_pic'].program),
             tester.TestStep('Program', self._step_program),
             tester.TestStep('Load', self._step_load),
             )
@@ -48,6 +46,15 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the PIC device."""
+        # On xubuntu, a device detector opens the serial port for a while
+        # after it is attached. Wait for the process to release the port.
+        for _ in range(10):
+            try:
+                dev['ard'].open()
+                break
+            except:
+                time.sleep(1)
+        time.sleep(2)
         dev['rla_Prog'].set_on()
         dev['rla_Prog'].opc()
         mes['pgm_etrac2']()
@@ -79,11 +86,6 @@ class Devices(share.Devices):
                 ('rla_BattLoad', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-#        # PIC device programmer
-#        folder = os.path.dirname(
-#            os.path.abspath(inspect.getfile(inspect.currentframe())))
-#        self['program_pic'] = share.programmer.PIC(
-#            self.hex_file, folder, '16F1828', self['rla_Prog'])
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
