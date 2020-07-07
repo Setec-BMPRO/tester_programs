@@ -72,7 +72,7 @@ class Fixture():
             'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM36'}[os.name],
             },
         '017823': {     # C45A-15 Initial (Arduino)
-            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM36'}[os.name],
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM37'}[os.name],
             },
 
         # Fixtures with a single FTDI without any S/N

@@ -20,7 +20,6 @@ class Initial(share.TestSequence):
         tester.LimitDelta('Vac', 240.0, 5.0),
         tester.LimitDelta('Vbus', 340.0, 10.0),
         tester.LimitBetween('Vcc', 9.5, 15.0),
-        tester.LimitDelta('SecBiasIn', 12.0, 0.1),
         tester.LimitDelta('Vref', 5.0, 0.1),
         tester.LimitLow('VrefOff', 1.0),
         tester.LimitDelta('VoutPreExt', 12.0, 0.1),
@@ -196,7 +195,6 @@ class Sensors(share.Sensors):
         self['oVac'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self['oVbus'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
         self['oVcc'] = sensor.Vdc(dmm, high=6, low=2, rng=100, res=0.01)
-        self['oVsecBiasIn'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
         self['oVref'] = sensor.Vdc(dmm, high=8, low=3, rng=10, res=0.01)
         self['oVoutPre'] = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.01)
         self['oVout'] = sensor.Vdc(dmm, high=7, low=4, rng=100, res=0.01)
@@ -234,7 +232,6 @@ class Measurements(share.Measurements):
             ('dmm_Vac', 'Vac', 'oVac', ''),
             ('dmm_Vbus', 'Vbus', 'oVbus', ''),
             ('dmm_Vcc', 'Vcc', 'oVcc', ''),
-            ('dmm_VsecBiasIn', 'SecBiasIn', 'oVsecBiasIn', ''),
             ('dmm_Vref', 'Vref', 'oVref', ''),
             ('dmm_VrefOff', 'VrefOff', 'oVref', ''),
             ('dmm_VoutPreExt', 'VoutPreExt', 'oVoutPre', ''),
