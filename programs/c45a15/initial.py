@@ -3,19 +3,18 @@
 # Copyright 2014 SETEC Pty Ltd.
 """C45A-15 Initial Test Program."""
 
-import os
-import inspect
+import time
+import serial
 
 import tester
 
 import share
-
+from . import arduino
 
 class Initial(share.TestSequence):
 
     """C45A-15 Initial Test Program."""
 
-    pic_hex = 'c45a-15.hex'
     limitdata = (
         tester.LimitDelta('VacStart', 95.0, 3.0),
         tester.LimitDelta('Vac', 240.0, 5.0),
@@ -46,16 +45,16 @@ class Initial(share.TestSequence):
         tester.LimitBetween('OCP', 2.85, 3.15),
         tester.LimitLow('FixtureLock', 20),
         tester.LimitInteger('Program', 0),
+        tester.LimitRegExp('Reply', '^OK$'),
         )
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.pic_hex = self.pic_hex
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('FixtureLock', self._step_fixture_lock),
             tester.TestStep('SecCheck', self._step_sec_check),
-            tester.TestStep('Program', self.devices['program_pic'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('OVP', self._step_ovp),
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Load', self._step_load),
@@ -76,6 +75,23 @@ class Initial(share.TestSequence):
         dev['dcs_VsecBias'].output(12.0, output=True, delay=1)
         self.measure(
             ('dmm_Vref', 'dmm_VsenseOn', 'dmm_VoutExt',), timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the PIC device."""
+        # On xubuntu, a device detector opens the serial port for a while
+        # after it is attached. Wait for the process to release the port.
+        for _ in range(10):
+            try:
+                dev['ard'].open()
+                break
+            except:
+                time.sleep(1)
+        time.sleep(2)
+        dev['rla_Prog'].set_on()
+        dev['rla_Prog'].opc()
+        mes['pgm_c45a15']()
+        dev['rla_Prog'].set_off()
 
     @share.teststep
     def _step_ovp(self, dev, mes):
@@ -131,8 +147,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    pic_hex = None
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -142,17 +156,21 @@ class Devices(share.Devices):
                 ('dcs_Vout', tester.DCSource, 'DCS1'),
                 ('dcs_Vbias', tester.DCSource, 'DCS2'),
                 ('dcs_VsecBias', tester.DCSource, 'DCS3'),
+                ('dcs_Vcom', tester.DCSource, 'DCS4'),
                 ('dcl', tester.DCLoad, 'DCL1'),
                 ('rla_Load', tester.Relay, 'RLA1'),
                 ('rla_CMR', tester.Relay, 'RLA2'),
                 ('rla_Prog', tester.Relay, 'RLA4'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        self['program_pic'] = share.programmer.PIC(
-            self.pic_hex, folder, '16F684', self['rla_Prog'])
+        # Serial connection to the Arduino console
+        ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        # Set port separately, as we don't want it opened yet
+        ard_ser.port = share.config.Fixture.port('017823', 'ARDUINO')
+        self['ard'] = arduino.Arduino(ard_ser)
+        # Switch on power to fixture circuits
+        self['dcs_Vcom'].output(12.0, output=True, delay=0.5)
+        self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
@@ -198,6 +216,9 @@ class Sensors(share.Sensors):
             detect_limit=(self.limits['inOCP'], ),
             ramp_range=sensor.RampRange(start=1.0, stop=3.2, step=0.03),
             delay=0.1)
+        # Arduino sensor
+        ard = self.devices['ard']
+        self['pgmC45A15'] = sensor.KeyedReadingString(ard, 'PGM_C45A15')
 
 
 class Measurements(share.Measurements):
@@ -232,4 +253,5 @@ class Measurements(share.Measurements):
             ('dmm_RedOff', 'LedOff', 'oRed', ''),
             ('ramp_OVP', 'OVP', 'oOVP', ''),
             ('ramp_OCP', 'OCP', 'oOCP', ''),
+            ('pgm_c45a15', 'Reply', 'pgmC45A15', ''),
             ))
