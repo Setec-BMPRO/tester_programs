@@ -212,10 +212,16 @@ class RVMN101B(Config):
     # Lot number mapping
     _lot_rev = share.lots.Revision((
         (share.lots.Range('A191809', 'A200510'), 5),    # 033280
-        # Rev 6...                                      # 034229
+        (share.lots.Range('A200820', 'A202704'), 6),    # 034229
+        # Rev 7...                                      # 034940
         ))
     _rev_data = {
         None: _Values(
+            nordic_image=_nordic_089, arm_image=_arm_image_19,
+            product_rev='07A', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
+            ),
+        6: _Values(
             nordic_image=_nordic_089, arm_image=_arm_image_19,
             product_rev='06B', hardware_rev=None, banner_lines=4,
             reversed_output_dict={},
