@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-05-05, 16:54:56 -->
+<!-- Saved: 2020-07-07, 15:24:59 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -54,6 +54,7 @@
     <Source>programs/c15d15/final.py</Source>
     <Source>programs/c15d15/initial.py</Source>
     <Source>programs/c45a15/__init__.py</Source>
+    <Source>programs/c45a15/arduino.py</Source>
     <Source>programs/c45a15/final.py</Source>
     <Source>programs/c45a15/initial.py</Source>
     <Source>programs/cmrsbp/__init__.py</Source>
@@ -73,6 +74,7 @@
     <Source>programs/drifter/final.py</Source>
     <Source>programs/drifter/initial.py</Source>
     <Source>programs/etrac/__init__.py</Source>
+    <Source>programs/etrac/arduino.py</Source>
     <Source>programs/etrac/initial.py</Source>
     <Source>programs/gen8/__init__.py</Source>
     <Source>programs/gen8/console.py</Source>

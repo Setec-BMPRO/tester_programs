@@ -4,8 +4,8 @@
 """ETrac-II Initial Test Program."""
 
 import time
-
 import serial
+
 import tester
 
 import share
@@ -15,7 +15,6 @@ class Initial(share.TestSequence):
 
     """ETrac-II Initial Test Program."""
 
-    hex_file = 'etracII-2A.hex'
     limitdata = (
         tester.LimitBetween('Vin', 12.9, 13.1),
         tester.LimitBetween('Vin2', 10.8, 12.8),
@@ -27,7 +26,6 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.hex_file = self.hex_file
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -71,8 +69,6 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
 
     """Devices."""
-
-    hex_file = None
 
     def open(self):
         """Create all Instruments."""
