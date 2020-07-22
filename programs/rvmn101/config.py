@@ -268,15 +268,22 @@ class RVMN5x(Config):
     fixture = '034861'
     # Software versions
     _nordic_206 = 'jayco_rvmn5x_signed_2.0.6-0-g85ac8960_factory_mcuboot.hex'
+    _nordic_207 = 'jayco_rvmn5x_signed_2.0.7-0-g7436a97d_factory_mcuboot.hex'
     _arm_image_23 = 'rvmn5x_nxp_2.3.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
         # Rev 1-2 were Engineering protoype builds
-        (share.lots.Range('A201801', 'A202213'), 3),
-        # Rev 4...
+        (share.lots.Range('A201801', 'A202412'), 3),    # 034789, 035009
+        (share.lots.Range('A202507', 'A203003'), 4),    # 035090, 035091
+        # Rev 5...
         ))
     _rev_data = {
         None: _Values(
+            nordic_image=_nordic_207, arm_image=_arm_image_23,
+            product_rev='05A', hardware_rev='05A', banner_lines=5,
+            reversed_output_dict={},
+            ),
+        4: _Values(
             nordic_image=_nordic_206, arm_image=_arm_image_23,
             product_rev='04A', hardware_rev='04A', banner_lines=5,
             reversed_output_dict={},
