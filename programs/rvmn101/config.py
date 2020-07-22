@@ -214,11 +214,17 @@ class RVMN101B(Config):
     _lot_rev = share.lots.Revision((
         (share.lots.Range('A191809', 'A200510'), 5),    # 033280
         (share.lots.Range('A200820', 'A202704'), 6),    # 034229
-        (share.lots.Range('A202722', 'A203113'), 7),    # 034940
+        (share.lots.Range('A202722', 'A202809'), 7),    # 034940
+        (share.lots.Range('A202907', 'A203113'), 8),    # 034940 PC-22885
         # Rev 8...                                      # 035120
         ))
     _rev_data = {
         None: _Values(
+            nordic_image=_nordic_092, arm_image=_arm_image_19,
+            product_rev='08A', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
+            ),
+        8: _Values(
             nordic_image=_nordic_092, arm_image=_arm_image_19,
             product_rev='08A', hardware_rev=None, banner_lines=4,
             reversed_output_dict={},
