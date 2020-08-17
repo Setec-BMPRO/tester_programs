@@ -216,9 +216,10 @@ class RVMN101B(Config):
         (share.lots.Range('A191809', 'A200510'), 5),    # 033280
         (share.lots.Range('A200820', 'A202704'), 6),    # 034229
         (share.lots.Range('A202722', 'A202809'), 7),    # 034940
-        (share.lots.Range('A202907', 'A203113'), 8),    # 034940 PC-22885
-        (share.lots.Range('A203303', 'A203303'), 8),    # 035120
-        # Rev 9...                                      # 035231
+        (share.lots.Range('A202907', 'A203113'), 7.1),  # 034940 PC-22885
+        (share.lots.Range('A203303', 'A203303'), 8.1),  # 035120 PC-23228
+        # Rev 9...  A203508 -                           # 035231
+        # Rev 10...                                     # 035280
         ))
     _rev_data = {
         None: _Values(
@@ -226,7 +227,12 @@ class RVMN101B(Config):
             product_rev='09A', hardware_rev=None, banner_lines=4,
             reversed_output_dict={},
             ),
-        8: _Values(
+        8.1: _Values(
+            nordic_image=_nordic_093, arm_image=_arm_image_19,
+            product_rev='08B', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
+            ),
+        7.1: _Values(
             nordic_image=_nordic_092, arm_image=_arm_image_19,
             product_rev='08A', hardware_rev=None, banner_lines=4,
             reversed_output_dict={},
