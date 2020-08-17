@@ -136,51 +136,54 @@ class RVMN101A(Config):
             'HBRIDGE 3 RETRACT': 5,
             }
     # Software versions
-    _nordic_133 = 'jayco_rvmn101_signed_1.3.3-0-g123e32e_factory_mcuboot.hex'
-    _nordic_181 = 'jayco_rvmn101_signed_1.8.1-0-ge5395312_factory_mcuboot.hex'
-    _nordic_1106 = 'jayco_rvmn101_signed_1.10.6-0-g2d00e43c_factory_mcuboot.hex'
-    _nordic_1114 = 'jayco_rvmn101_signed_1.11.4-0-g9d4939df_factory_mcuboot.hex'
-    _arm_image_19 = 'rvmn101_nxp_1.9.bin'
+    _nordic_1122 = 'jayco_rvmn101_signed_1.12.2-0-g67680768_factory_mcuboot.hex'
     _arm_image_113 = 'rvmn101_nxp_1.13.bin'
+    _arm_image_25 = 'rvmn101_nxp_2.5.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
-        # Rev 1-4 were Engineering protoype builds
-        (share.lots.Range('A191913', 'A192407'), 5),    # 033363
-        (share.lots.Range('A192709', 'A192904'), 6),    # 033620
-        (share.lots.Range('A192815', 'A194129'), 7),    # 033489
-        (share.lots.Range('A194210', 'A195015'), 8),    # 033585
-        (share.lots.Range('A195129', 'A201109'), 9),    # 034079
-        # Rev 10... A201218...                          # 034447
+        # Rev 1-5 were Engineering protoype builds
+        (share.lots.Range('A192709', 'A192904'), 6),    # 033620 MA358
+        (share.lots.Range('A192815', 'A194129'), 7),    # 033489 MA358
+        (share.lots.Range('A194210', 'A195015'), 8),    # 033585 MA358
+        (share.lots.Range('A195129', 'A201109'), 9),    # 034079 MA358
+        (share.lots.Range('A201218', 'A203304'), 10),   # 034447 MA358/PC23237
+        # Rev 11 No production                          # 035079
+        # Rev 12...                                     # 034879
         ))
     _rev_data = {
-        None: _Values(
-            nordic_image=_nordic_1114, arm_image=_arm_image_113,
-            product_rev='10A', hardware_rev='10A', banner_lines=6,
+#        None: _Values(  # For Rev 12
+#            nordic_image=_nordic_1122, arm_image=_arm_image_25,
+#            product_rev='12A', hardware_rev='12A', banner_lines=6,
+#            reversed_output_dict={},
+#            ),
+        None: _Values(  # Same as 10 - waiting for Rev 12...
+            nordic_image=_nordic_1122, arm_image=_arm_image_113,
+            product_rev='10B', hardware_rev='10A', banner_lines=6,
+            reversed_output_dict={},
+            ),
+        10: _Values(
+            nordic_image=_nordic_1122, arm_image=_arm_image_113,
+            product_rev='10B', hardware_rev='10A', banner_lines=6,
             reversed_output_dict={},
             ),
         9: _Values(
-            nordic_image=_nordic_1106, arm_image=_arm_image_113,
-            product_rev='09A', hardware_rev='08A', banner_lines=6,
+            nordic_image=_nordic_1122, arm_image=_arm_image_113,
+            product_rev='09C', hardware_rev='08A', banner_lines=6,
             reversed_output_dict=_reversed7to9,
             ),
         8: _Values(
-            nordic_image=_nordic_181, arm_image=_arm_image_19,
-            product_rev='08A', hardware_rev='08A', banner_lines=4,
+            nordic_image=_nordic_1122, arm_image=_arm_image_113,
+            product_rev='08C', hardware_rev='08A', banner_lines=4,
             reversed_output_dict=_reversed7to9,
             ),
         7: _Values(
-            nordic_image=_nordic_133, arm_image=_arm_image_19,
-            product_rev='07A', hardware_rev='07A', banner_lines=4,
+            nordic_image=_nordic_1122, arm_image=_arm_image_113,
+            product_rev='07C', hardware_rev='07A', banner_lines=4,
             reversed_output_dict=_reversed7to9,
             ),
         6: _Values(
-            nordic_image='dunno', arm_image=_arm_image_19,
-            product_rev='06A', hardware_rev='06A', banner_lines=4,
-            reversed_output_dict={},
-            ),
-        5: _Values(
-            nordic_image='dunno', arm_image=_arm_image_19,
-            product_rev='05A', hardware_rev='05A', banner_lines=4,
+            nordic_image=_nordic_1122, arm_image=_arm_image_113,
+            product_rev='06G', hardware_rev='06A', banner_lines=4,
             reversed_output_dict={},
             ),
         }
