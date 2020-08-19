@@ -158,7 +158,7 @@ class RVMN101A(Config):
             ),
         10: _Values(
             nordic_image=_nordic_11202, arm_image=_arm_image_113,
-            product_rev='10B', hardware_rev='10A', banner_lines=6,
+            product_rev='10C', hardware_rev='10A', banner_lines=6,
             reversed_output_dict={},
             ),
         9: _Values(
