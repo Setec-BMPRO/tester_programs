@@ -47,7 +47,7 @@ class BP35():
     is_2 = False
     # Software versions
     arm_sw_version = '2.0.17344.4603'       # Software Rev 14
-    pic_sw_version = '1.5.19286.288'        # Software Rev 10
+    pic_sw_version = '1.6.20227.735'        # Software Rev 11
     pic_hw_version = 4
     # SR Solar Reg settings
     sr_vset = 13.650
