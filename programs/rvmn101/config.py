@@ -203,11 +203,12 @@ class RVMN101B(Config):
     # Initial Test parameters
     fixture = '032871'
     # Software versions
-    #   Firmware 0.88 does not support hardware_rev
+    #   Firmware 0.88 - 0.94 do not support hardware_rev
     _nordic_088 = 'tmc_rvmn101_signed_0.88-0-g5f64a82_factory_mcuboot.hex'
     _nordic_089 = 'tmc_rvmn101_signed_0.89-0-g9fc6374f_factory_mcuboot.hex'
     _nordic_092 = 'tmc_rvmn101_signed_0.92-0-g015c3552_factory_mcuboot.hex'
     _nordic_093 = 'tmc_rvmn101_signed_0.93-0-g58b51527_factory_mcuboot.hex'
+    _nordic_094 = 'tmc_rvmn101_signed_0.94-0-gd087181a_factory_mcuboot.hex'
     _arm_image_19 = 'rvmn101_nxp_1.9.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
@@ -216,11 +217,17 @@ class RVMN101B(Config):
         (share.lots.Range('A202722', 'A202809'), 7),    # 034940
         (share.lots.Range('A202907', 'A203113'), 7.1),  # 034940 PC-22885
         (share.lots.Range('A203303', 'A203303'), 8.1),  # 035120 PC-23228
-        # Rev 9...  A203508 -                           # 035231
+        (share.lots.Range('A203508', 'A203717'), 9),    # 035231
         # Rev 10...                                     # 035280
+        # Rev 11...                                     # 035213 uses 0.94
         ))
     _rev_data = {
         None: _Values(
+            nordic_image=_nordic_094, arm_image=_arm_image_19,
+            product_rev='10A', hardware_rev=None, banner_lines=4,
+            reversed_output_dict={},
+            ),
+        9: _Values(
             nordic_image=_nordic_093, arm_image=_arm_image_19,
             product_rev='09A', hardware_rev=None, banner_lines=4,
             reversed_output_dict={},
