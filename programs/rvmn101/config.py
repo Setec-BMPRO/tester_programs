@@ -137,6 +137,7 @@ class RVMN101A(Config):
             }
     # Software versions
     _nordic_11202 = 'jayco_rvmn101_signed_1.12.2-0-g67680768_factory_mcuboot.hex'
+    _nordic_11203 = 'jayco_rvmn101_signed_1.12.3-0-ge43edcda_factory_mcuboot.hex'
     _arm_image_113 = 'rvmn101_nxp_1.13.bin'
     _arm_image_205 = 'rvmn101_nxp_2.5.bin'
     # Lot number mapping
@@ -148,10 +149,16 @@ class RVMN101A(Config):
         (share.lots.Range('A195129', 'A201109'), 9),    # 034079 MA358
         (share.lots.Range('A201218', 'A203611'), 10),   # 034447 MA358/PC23237
         # Rev 11 No production                          # 035079
-        # Rev 12...                                     # 034879
+        (share.lots.Range('A203612', 'A204008'), 12),   # 034879
+        # Rev 13...                                     # 035323
         ))
     _rev_data = {
         None: _Values(
+            nordic_image=_nordic_11203, arm_image=_arm_image_205,
+            product_rev='13A', hardware_rev='11A', banner_lines=6,
+            reversed_output_dict={},
+            ),
+        12: _Values(
             nordic_image=_nordic_11202, arm_image=_arm_image_205,
             product_rev='12A', hardware_rev='11A', banner_lines=6,
             reversed_output_dict={},
