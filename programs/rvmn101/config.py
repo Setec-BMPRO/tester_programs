@@ -149,7 +149,7 @@ class RVMN101A(Config):
         (share.lots.Range('A195129', 'A201109'), 9),    # 034079 MA358
         (share.lots.Range('A201218', 'A203611'), 10),   # 034447 MA358/PC23237
         # Rev 11 No production                          # 035079
-        (share.lots.Range('A203612', 'A204008'), 12),   # 034879
+        (share.lots.Range('A203612', 'A204008'), 12.1), # 034879 PC23652
         # Rev 13...                                     # 035323
         ))
     _rev_data = {
@@ -158,9 +158,9 @@ class RVMN101A(Config):
             product_rev='13A', hardware_rev='11A', banner_lines=6,
             reversed_output_dict={},
             ),
-        12: _Values(
-            nordic_image=_nordic_11202, arm_image=_arm_image_205,
-            product_rev='12A', hardware_rev='11A', banner_lines=6,
+        12.1: _Values(
+            nordic_image=_nordic_11203, arm_image=_arm_image_205,
+            product_rev='12B', hardware_rev='11A', banner_lines=6,
             reversed_output_dict={},
             ),
         10: _Values(
