@@ -56,7 +56,7 @@ class Devices(share.Devices):
             share.config.System.ble_url())
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
-        self['dcs_vin'] = tester.DCSource(self.physical_devices['DCS2'])
+        self['dcs_vin'] = tester.DCSource(self.physical_devices['DCS1'])
 
     def reset(self):
         """Reset instruments."""
