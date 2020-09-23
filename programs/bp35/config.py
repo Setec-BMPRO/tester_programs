@@ -204,7 +204,7 @@ class BP35SR(BP35):
     is_pm = False
     _lot_rev = share.lots.Revision((
         # Rev 1-5
-        (share.lots.Range('A000000', 'A162007'), 'Scrap'),
+        (share.lots.Range('A000001', 'A162007'), 'Scrap'),
         # Rev 6
         (share.lots.Range('A162008', 'A163007'), 6),
         # Rev 7
