@@ -127,7 +127,7 @@ class InitialSyn(share.TestSequence):
          Measure LDD output current with calculated limits.
 
          """
-        dev['dcs_lddiset'].output(5.0, True)
+        dev['dcs_lddiset'].output(5.0, True, delay=0.5)
         setI = mes['dmm_ISIset5V'](timeout=5).reading1 * 10
         lo_lim = setI - (setI * 0.2/100)
         hi_lim = setI + (setI * 0.2/100)
@@ -193,14 +193,14 @@ class Sensors(share.Sensors):
         self['oTecVmon'] = sensor.Vdc(dmm, high=24, low=1, rng=10, res=0.001)
         self['oTecVset'] = sensor.Vdc(dmm, high=14, low=1, rng=10, res=0.001)
         self['oLdd'] = sensor.Vdc(dmm, high=21, low=1, rng=10, res=0.001)
-        self['oLddVmon'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
-        self['oLddImon'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
+        self['oLddVmon'] = sensor.Vdc(dmm, high=5, low=6, rng=10, res=0.001)
+        self['oLddImon'] = sensor.Vdc(dmm, high=6, low=6, rng=10, res=0.001)
         self['oLddShunt'] = sensor.Vdc(
             dmm, high=8, low=4, rng=0.1, res=0.0001, scale=1000, nplc=10)
         self['o20VT'] = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
         self['o9V'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.001)
         self['o_20V'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.001)
-        self['oLddIset'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.001)
+        self['oLddIset'] = sensor.Vdc(dmm, high=7, low=6, rng=10, res=0.001)
         lo_lim, hi_lim = self.limits['AdjLimits'].limit
         self['oAdjLdd'] = sensor.AdjustAnalog(
             sensor=self['oLddShunt'],
