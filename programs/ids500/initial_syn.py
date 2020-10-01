@@ -40,7 +40,7 @@ class InitialSyn(share.TestSequence):
         tester.LimitBetween('ISIout6A', 5.0, 7.0),
         tester.LimitBetween('ISIout50A', 49.0, 51.0),
         tester.LimitBetween('ISIset5V', 4.95, 5.05),
-        tester.LimitBetween('AdjLimits', 49.9, 50.1),
+        tester.LimitPercent('AdjLimits', nominal=50.0, percent=0.2),
         tester.LimitBetween('TecVmonOff', -0.5, 0.5),
         tester.LimitBetween('TecVmon0V', -0.5, 0.8),
         tester.LimitBetween('TecVmon2V5', 2.4375, 2.5625),
@@ -128,10 +128,9 @@ class InitialSyn(share.TestSequence):
 
          """
         dev['dcs_lddiset'].output(5.0, True, delay=0.5)
-        setI = mes['dmm_ISIset5V'](timeout=5).reading1 * 10
-        lo_lim = setI - (setI * 0.2/100)
-        hi_lim = setI + (setI * 0.2/100)
-        self.limits['AdjLimits'].adjust(lo_lim, hi_lim)
+        setI = mes['dmm_ISIset5V'](timeout=5).reading1 * 10     # 5V == 50A
+        self.limits['AdjLimits'].adjust(nominal=setI)
+        lo_lim, hi_lim = self.limits['AdjLimits'].limit
         mes['ui_AdjLdd'].sensor.low = lo_lim
         mes['ui_AdjLdd'].sensor.high = hi_lim
         self.measure(('ui_AdjLdd', 'dmm_ISIoutPost', ), timeout=2)
