@@ -6,17 +6,16 @@
 import tester
 
 import share
+from . import config
 
 
 class InitialMain(share.TestSequence):
 
     """IDS-500 Initial Main Test Program."""
 
-    # LDD limit values
-    _ldd_6_error_limits = 0.07
-    _ldd_50_error_limits = 0.7
     # Test limits
     limitdata = (
+        tester.LimitLow('FixtureLock', 20),
         tester.LimitDelta('PfcOff', 340.0, 10.0),
         tester.LimitBetween('PfcOn', 395.0, 410.0),
         tester.LimitLow('TecOff', 1.5),
@@ -40,27 +39,24 @@ class InitialMain(share.TestSequence):
         tester.LimitDelta('TecVmon', 5.00, 0.10),
         tester.LimitDelta('TecErr', 0.000, 0.275),
         tester.LimitDelta('TecVmonErr', 0.000, 0.030),
-        tester.LimitBetween('Ldd', -0.4, 2.5),
-        tester.LimitBetween('IsVmon', -0.4, 2.5),
-        tester.LimitDelta('IsOut0V', 0.000, 0.001),
-        tester.LimitDelta('IsOut06V', 0.006, 0.001),
-        tester.LimitDelta('IsOut5V', 0.050, 0.002),
+        tester.LimitBetween('LddOn', -0.4, 2.5),
+        tester.LimitLow('IsOut0A', 1.0),
+        tester.LimitDelta('IsOut6A', nominal=6.0, delta=1.0),
+        tester.LimitDelta('IsOut50A', nominal=50.0, delta=2.0),
         tester.LimitDelta('IsIout0V', 0.00, 0.05),
         tester.LimitDelta('IsIout06V', 0.60, 0.02),
         tester.LimitDelta('IsIout5V', 5.00, 0.10),
         tester.LimitDelta('IsSet06V', 0.60, 0.05),
         tester.LimitDelta('IsSet5V', 5.00, 0.05),
-        # these 3 are patched and then restored during the LDD accuracy test
-        tester.LimitDelta('SetMonErr', 0, _ldd_6_error_limits),
-        tester.LimitDelta('SetOutErr', 0, _ldd_6_error_limits),
-        tester.LimitDelta('MonOutErr', 0, _ldd_6_error_limits),
         tester.LimitBetween('OCP5V', 7.0, 10.0),
         tester.LimitLow('inOCP5V', 4.0),
         tester.LimitBetween('OCP15Vp', 7.0, 10.0),
         tester.LimitLow('inOCP15Vp', 12.0),
         tester.LimitBetween('OCPTec', 20.0, 23.0),
         tester.LimitLow('inOCPTec', 12.0),
-        tester.LimitLow('FixtureLock', 20),
+        # These 2 are patched and then restored during the LDD accuracy test
+        tester.LimitDelta('SetOutErr', 0, config.ldd_set_out_error_6),
+        tester.LimitDelta('MonOutErr', 0, config.ldd_out_mon_error_6),
         )
 
     def open(self, uut):
@@ -86,7 +82,7 @@ class InitialMain(share.TestSequence):
              output=True)
         dev['acsource'].output(240.0, output=True, delay=1)
         self.measure(
-            ('dmm_PFC_off', 'dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff',
+            ('dmm_PFC_off', 'dmm_tecoff', 'dmm_tecvmonoff', 'LDD_off',
              'dmm_isvmonoff', 'dmm_15voff', 'dmm__15voff', 'dmm_15vpoff',
              'dmm_15vpswoff', 'dmm_5voff', ),
             timeout=5)
@@ -96,7 +92,7 @@ class InitialMain(share.TestSequence):
         """KeySwitch 1. Outputs must switch on."""
         dev['rla_keysw1'].set_on()
         self.measure(
-            ('dmm_PFC_on', 'dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff',
+            ('dmm_PFC_on', 'dmm_tecoff', 'dmm_tecvmonoff', 'LDD_off',
              'dmm_isvmonoff', 'dmm_15v', 'dmm__15v', 'dmm_15vp',
              'dmm_15vpswoff', 'dmm_5v', ),
             timeout=5)
@@ -106,7 +102,7 @@ class InitialMain(share.TestSequence):
         """KeySwitch 1 & 2. 15Vp must also switch on."""
         dev['rla_keysw2'].set_on()
         self.measure(
-            ('dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff', 'dmm_isvmonoff',
+            ('dmm_tecoff', 'dmm_tecvmonoff', 'LDD_off', 'dmm_isvmonoff',
              'dmm_15v', 'dmm__15v', 'dmm_15vp', 'dmm_15vpsw', 'dmm_5v', ),
             timeout=5)
 
@@ -142,68 +138,66 @@ class InitialMain(share.TestSequence):
         """Laser diode output setting and accuracy tests.
 
            Enable, measure set vs actual and monitor.
-           Error calculations at 0A, 6A & 50A loading.
+           Error calculations at 6A & 50A loading.
            Check LED status at 6A (green) and 50A (red).
 
         """
-        dev['dcs_isset'].output(0.0, True)
-        for rla in ('rla_crowbar', 'rla_interlock', 'rla_enableis'):
+        relays = ('rla_crowbar', 'rla_interlock', 'rla_enableis')
+        dev['LDD_Vset'].output(0.0, True)
+        for rla in relays:
             dev[rla].set_on()
         with tester.PathName('0A'):
             self.measure(
-                ('dmm_isvmon', 'dmm_isout0v', 'dmm_isiout0v', 'dmm_isldd', ),
+                ('IS_Vmon', 'Iout0A', 'IS_Iout0A', 'LDD_on', ),
                 timeout=5)
         with tester.PathName('6A'):
-            dev['dcs_isset'].output(0.6, delay=1)
-            mes['dmm_isvmon'](timeout=5)
+            dev['LDD_Vset'].output(0.6, delay=1)
+            mes['IS_Vmon'](timeout=5)
             Iset, Iout, Imon = self.measure(
-                ('dmm_isset06v', 'dmm_isout06v', 'dmm_isiout06v', ),
+                ('IS_Iset6A', 'Iout6A', 'IS_Iout6A', ),
                 timeout=5).readings
-            mes['dmm_isldd'](timeout=5)
-            self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
+            mes['LDD_on'](timeout=5)
             self._ldd_err(mes, Iset, Iout, Imon)
             mes['ui_YesNoLddGreen']()
         with tester.PathName('50A'):
-            dev['dcs_isset'].output(5.0, delay=1)
-            mes['dmm_isvmon'](timeout=5)
+            dev['LDD_Vset'].output(5.0, delay=1)
+            mes['IS_Vmon'](timeout=5)
             Iset, Iout, Imon = self.measure(
-                ('dmm_isset5v', 'dmm_isout5v', 'dmm_isiout5v', ),
+                ('IS_Iset50A', 'Iout50A', 'IS_Iout50A', ),
                 timeout=5).readings
-            mes['dmm_isldd'](timeout=5)
-            self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
-            try:
-                # Set limits for 50A checks
-                patch_limits = ('SetMonErr', 'SetOutErr', 'MonOutErr', )
-                for name in patch_limits:
-                    self.limits[name].adjust(0, self._ldd_50_error_limits)
+            mes['LDD_on'](timeout=5)
+            try:        # Adjust limits for 50A checks
+                self.limits['SetOutErr'].adjust(
+                    delta=config.ldd_set_out_error_50)
+                self.limits['MonOutErr'].adjust(
+                    delta=config.ldd_out_mon_error_50)
                 self._ldd_err(mes, Iset, Iout, Imon)
             finally:    # Restore the limits for 6A checks
-                for name in patch_limits:
-                    self.limits[name].adjust(0, self._ldd_6_error_limits)
+                self.limits['SetOutErr'].adjust(
+                    delta=config.ldd_set_out_error_6)
+                self.limits['MonOutErr'].adjust(
+                    delta=config.ldd_out_mon_error_6)
             mes['ui_YesNoLddRed']()
         # LDD off
-        dev['dcs_isset'].output(0.0, False)
-        for rla in ('rla_crowbar', 'rla_interlock', 'rla_enableis'):
+        dev['LDD_Vset'].output(0.0, False)
+        for rla in relays:
             dev[rla].set_off()
 
-    @staticmethod
-    def _ldd_err(mes, Iset, Iout, Imon):
+    def _ldd_err(self, mes, Iset, Iout, Imon):
         """Accuracy check between set and measured values for LDD.
 
         @param mes Measurements instance
-        @param Iset LDD Set value of control voltage
-        @param Iout LDD Output current
-        @param Imon LDD Monitor output voltage
+        @param Iset LDD Set value of control voltage (0-5V)
+        @param Iout LDD Output current (0-50A)
+        @param Imon LDD Monitor output voltage (0-5V)
 
         """
-        # Compare Set value to Mon
-        mes['setmonerr'].sensor.store((Iset * 10) - (Imon * 10))
-        mes['setmonerr']()
-        # Compare Set value to Out
-        mes['setouterr'].sensor.store((Iset * 10) - (Iout * 1000))
+        self._logger.debug('Iset:%s, Iout:%s, Imon:%s', Iset, Iout, Imon)
+        # Compare Set to Out
+        mes['setouterr'].sensor.store((Iset * 10) - Iout)
         mes['setouterr']()
         # Compare Mon to Out
-        mes['monouterr'].sensor.store((Imon * 10) - (Iout * 1000))
+        mes['monouterr'].sensor.store((Imon * 10) - Iout)
         mes['monouterr']()
 
     @share.teststep
@@ -230,7 +224,7 @@ class InitialMain(share.TestSequence):
              ('dcl_5v', 5.0), ))
         dev['rla_emergency'].set_on(delay=1)
         self.measure(
-            ('dmm_tecoff', 'dmm_tecvmonoff', 'dmm_lddoff', 'dmm_isvmonoff',
+            ('dmm_tecoff', 'dmm_tecvmonoff', 'LDD_off', 'dmm_isvmonoff',
              'dmm_15voff', 'dmm__15voff', 'dmm_15vpoff', 'dmm_15vpswoff',
              'dmm_5voff', ),
              timeout=5)
@@ -259,7 +253,7 @@ class Devices(share.Devices):
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
                 ('dcs_tecvset', tester.DCSource, 'DCS1'),
-                ('dcs_isset', tester.DCSource, 'DCS2'),
+                ('LDD_Vset', tester.DCSource, 'DCS2'),
                 ('dcs_5v', tester.DCSource, 'DCS3'),
                 ('dcl_tec', tester.DCLoad, 'DCL1'),
                 ('dcl_15vp', tester.DCLoad, 'DCL2'),
@@ -288,7 +282,7 @@ class Devices(share.Devices):
         self['dcl_5v'].output(5.0, delay=1)
         self['discharge'].pulse()
         for dev in (
-                'dcs_tecvset', 'dcs_isset', 'dcs_5v',
+                'dcs_tecvset', 'LDD_Vset', 'dcs_5v',
                 'dcl_tec', 'dcl_15vp', 'dcl_15vpsw', 'dcl_5v', ):
             self[dev].output(0.0, False)
         for rla in (
@@ -317,9 +311,10 @@ class Sensors(share.Sensors):
         self['tecvset'] = sensor.Vdc(dmm, high=3, low=7, rng=10, res=0.001)
         self['tecvmon'] = sensor.Vdc(dmm, high=4, low=7, rng=10, res=0.001)
         self['isset'] = sensor.Vdc(dmm, high=5, low=7, rng=10, res=0.0001)
-        self['isout'] = sensor.Vdc(dmm, high=14, low=6, rng=10, res=0.00001)
-        self['isiout'] = sensor.Vdc(dmm, high=6, low=7, rng=10, res=0.0001)
-        self['isvmon'] = sensor.Vdc(dmm, high=7, low=7, rng=10, res=0.001)
+        self['LDD_Iout'] = sensor.Vdc(
+            dmm, high=14, low=6, rng=10, res=0.00001, scale=1000, nplc=10)
+        self['IS_Iout'] = sensor.Vdc(dmm, high=6, low=7, rng=10, res=0.0001)
+        self['IS_Vmon'] = sensor.Vdc(dmm, high=7, low=7, rng=10, res=0.001)
         self['o15v'] = sensor.Vdc(dmm, high=8, low=3, rng=100, res=0.001)
         self['o_15v'] = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.001)
         self['o15vp'] = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.001)
@@ -386,7 +381,6 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('tecerr', 'TecErr', 'oMirTecErr', ''),
             ('tecvmonerr', 'TecVmonErr', 'oMirTecVmonErr', ''),
-            ('setmonerr', 'SetMonErr', 'oMirIsErr', ''),
             ('setouterr', 'SetOutErr', 'oMirIsErr', ''),
             ('monouterr', 'MonOutErr', 'oMirIsErr', ''),
             ('dmm_lock', 'FixtureLock', 'lock', ''),
@@ -399,18 +393,18 @@ class Measurements(share.Measurements):
             ('dmm_tecvmonoff', 'TecVmonOff', 'tecvmon', ''),
             ('dmm_tecvmon0v', 'TecVmon0V', 'tecvmon', ''),
             ('dmm_tecvmon', 'TecVmon', 'tecvmon', ''),
-            ('dmm_lddoff', 'LddOff', 'ldd', ''),
-            ('dmm_isldd', 'Ldd', 'ldd', ''),
-            ('dmm_isvmonoff', 'IsVmonOff', 'isvmon', ''),
-            ('dmm_isvmon', 'IsVmon', 'isvmon', ''),
-            ('dmm_isout0v', 'IsOut0V', 'isout', ''),
-            ('dmm_isout06v', 'IsOut06V', 'isout', ''),
-            ('dmm_isout5v', 'IsOut5V', 'isout', ''),
-            ('dmm_isiout0v', 'IsIout0V', 'isiout', ''),
-            ('dmm_isiout06v', 'IsIout06V', 'isiout', ''),
-            ('dmm_isiout5v', 'IsIout5V', 'isiout', ''),
-            ('dmm_isset06v', 'IsSet06V', 'isset', ''),
-            ('dmm_isset5v', 'IsSet5V', 'isset', ''),
+            ('LDD_off', 'LddOff', 'ldd', ''),
+            ('LDD_on', 'LddOn', 'ldd', ''),
+            ('dmm_isvmonoff', 'IsVmonOff', 'IS_Vmon', ''),
+            ('IS_Vmon', 'LddOn', 'IS_Vmon', ''),
+            ('Iout0A', 'IsOut0A', 'LDD_Iout', ''),
+            ('Iout6A', 'IsOut6A', 'LDD_Iout', ''),
+            ('Iout50A', 'IsOut50A', 'LDD_Iout', ''),
+            ('IS_Iout0A', 'IsIout0V', 'IS_Iout', ''),
+            ('IS_Iout6A', 'IsIout06V', 'IS_Iout', ''),
+            ('IS_Iout50A', 'IsIout5V', 'IS_Iout', ''),
+            ('IS_Iset6A', 'IsSet06V', 'isset', ''),
+            ('IS_Iset50A', 'IsSet5V', 'isset', ''),
             ('dmm_15voff', '15VOff', 'o15v', ''),
             ('dmm_15v', '15V', 'o15v', ''),
             ('dmm__15voff', '-15VOff', 'o_15v', ''),

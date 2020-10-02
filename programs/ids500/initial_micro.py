@@ -10,24 +10,23 @@ import serial
 import tester
 
 import share
-from . import console
+from . import config, console
 
 
 class InitialMicro(share.TestSequence):
 
     """IDS-500 Initial Micro Test Program."""
 
-    # Firmware image
-    pic_hex_mic = 'ids_picMic_2.hex'
     # test limits
     limitdata = (
-        tester.LimitBetween('5V', 4.95, 5.05),
+        tester.LimitDelta('5V', nominal=5.0, delta=0.05),
         tester.LimitRegExp('SwRev', 'I,  1, 2,Software Revision'),
         tester.LimitRegExp('MicroTemp', 'D, 16,    [0-9]{2},MICRO Temp\.\(C\)'),
         )
 
     def open(self, uut):
         """Prepare for testing."""
+        Devices.pic_hex_mic = config.pic_hex_mic
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Program', self._step_program),
@@ -55,6 +54,9 @@ class Devices(share.Devices):
 
     """Micro Devices."""
 
+    # Firmware image
+    pic_hex_mic = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -69,7 +71,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_picMic'] = share.programmer.PIC(
-            InitialMicro.pic_hex_mic, folder, '18F4520', self['rla_mic'])
+            self.pic_hex_mic, folder, '18F4520', self['rla_mic'])
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet

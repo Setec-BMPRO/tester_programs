@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-07-07, 15:24:59 -->
+<!-- Saved: 2020-10-02, 18:09:57 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -90,6 +90,7 @@
     <Source>programs/gsu360/__init__.py</Source>
     <Source>programs/gsu360/final.py</Source>
     <Source>programs/ids500/__init__.py</Source>
+    <Source>programs/ids500/config.py</Source>
     <Source>programs/ids500/console.py</Source>
     <Source>programs/ids500/final.py</Source>
     <Source>programs/ids500/initial_aux.py</Source>

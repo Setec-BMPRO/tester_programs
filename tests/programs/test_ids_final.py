@@ -30,21 +30,21 @@ class Ids500Final(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
                     (sen['tec'], 0.0), (sen['tecvmon'], 0.0),
-                    (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                    (sen['ldd'], 0.0), (sen['IS_Vmon'], 0.0),
                     (sen['o15v'], 0.0), (sen['o_15v'], 0.0),
                     (sen['o15vp'], 0.0), (sen['o15vpsw'], 0.0),
                     (sen['o5v'], 0.0),
                     ),
                 'KeySw1': (
                     (sen['tec'], 0.0), (sen['tecvmon'], 0.0),
-                    (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                    (sen['ldd'], 0.0), (sen['IS_Vmon'], 0.0),
                     (sen['o15v'], 15.0), (sen['o_15v'], -15.0),
                     (sen['o15vp'], 15.0), (sen['o15vpsw'], 0.0),
                     (sen['o5v'], 5.0),
                     ),
                 'KeySw12': (
                     (sen['tec'], 0.0), (sen['tecvmon'], 240.0),
-                    (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                    (sen['ldd'], 0.0), (sen['IS_Vmon'], 0.0),
                     (sen['o15v'], 15.0), (sen['o_15v'], -15.0),
                     (sen['o15vp'], 15.0), (sen['o15vpsw'], 15.0),
                     (sen['o5v'], 5.0),
@@ -57,9 +57,9 @@ class Ids500Final(ProgramTestCase):
                     (sen['oYesNoTecRed'], True),
                     ),
                 'LDD': (
-                    (sen['isvmon'], (2.0,) * 3), (sen['isset'], (0.6, 5.0)),
-                    (sen['isiout'], (0.0, 0.601, 5.01)),
-                    (sen['isout'], (0.0, 0.00602, 0.0502)),
+                    (sen['IS_Vmon'], (2.0,) * 3), (sen['isset'], (0.6, 5.0)),
+                    (sen['IS_Iout'], (0.0, 0.601, 5.01)),
+                    (sen['LDD_Iout'], (0.0, 0.00602, 0.0502)),
                     (sen['oYesNoLddGreen'], True),
                     (sen['oYesNoLddRed'], True),
                     ),
@@ -72,7 +72,7 @@ class Ids500Final(ProgramTestCase):
                     ),
                 'EmergStop': (
                     (sen['tec'], 0.0), (sen['tecvmon'], 0.0),
-                    (sen['ldd'], 0.0), (sen['isvmon'], 0.0),
+                    (sen['ldd'], 0.0), (sen['IS_Vmon'], 0.0),
                     (sen['o15v'], 0.0), (sen['o_15v'], 0.0),
                     (sen['o15vp'], 0.0), (sen['o15vpsw'], 0.0),
                     (sen['o5v'], 0.0)
@@ -83,7 +83,7 @@ class Ids500Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(70, len(result.readings))
+        self.assertEqual(68, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'KeySw1', 'KeySw12', 'TEC', 'LDD',
              'Comms', 'EmergStop'],
