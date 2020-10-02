@@ -19,38 +19,39 @@ class InitialSyn(share.TestSequence):
     pic_hex_syn = 'ids_picSyn_2.hex'
     # Test limits
     limitdata = (
-        tester.LimitBetween('20VT', 18.5, 22.0),
-        tester.LimitBetween('-20V', -22.0, -18.0),
-        tester.LimitBetween('9V', 8.0, 11.5),
-        tester.LimitBetween('TecOff', -0.5, 0.5),
-        tester.LimitBetween('Tec0V', -0.5, 1.0),
-        tester.LimitBetween('Tec2V5', 7.3, 7.8),
-        tester.LimitBetween('Tec5V', 14.75, 15.5),
-        tester.LimitBetween('Tec5V_Rev', -15.5, -14.5),
-        tester.LimitBetween('LddOff', -0.5, 0.5),
-        tester.LimitBetween('Ldd0V', -0.5, 0.5),
-        tester.LimitBetween('Ldd0V6', 0.6, 1.8),
-        tester.LimitBetween('Ldd5V', 1.0, 2.5),
-        tester.LimitBetween('LddVmonOff', -0.5, 0.5),
-        tester.LimitBetween('LddImonOff', -0.5, 0.5),
-        tester.LimitBetween('LddImon0V', -0.05, 0.05),
-        tester.LimitBetween('LddImon0V6', 0.55, 0.65),
-        tester.LimitBetween('LddImon5V', 4.9, 5.1),
-        tester.LimitBetween('ISIout0A', -1.0, 1.0),
-        tester.LimitBetween('ISIout6A', 5.0, 7.0),
-        tester.LimitBetween('ISIout50A', 49.0, 51.0),
-        tester.LimitBetween('ISIset5V', 4.95, 5.05),
+        tester.LimitDelta('20VT', nominal=20.0, delta=(1.5, 2.0)),
+        tester.LimitDelta('-20V', nominal=-20.0, delta=2.0),
+        tester.LimitDelta('9V', nominal=9.0, delta=(1.0, 2.5)),
+        tester.LimitDelta('TecOff', nominal=0, delta=0.5),
+        tester.LimitLow('Tec0V', 1.0),
+        tester.LimitDelta('Tec2V5', nominal=7.5, delta=0.3),
+        tester.LimitDelta('Tec5V', nominal=15.0, delta=0.5),
+        tester.LimitDelta('Tec5V_Rev', nominal=-15.0, delta=0.5),
+        tester.LimitLow('TecVmonOff', 0.5),
+        tester.LimitLow('TecVmon0V', 0.8),
+        tester.LimitPercent('TecVmon2V5', nominal=2.5, percent=2.5),
+        tester.LimitPercent('TecVmon5V', nominal=5.0, percent=1.5),
+        tester.LimitLow('TecVsetOff', 0.5),
+        tester.LimitLow('LddOff', 0.5),
+        tester.LimitLow('Ldd0V', 0.5),
+        tester.LimitBetween('Ldd0V6', 0.6, 1.8, doc='Vout @ 6A'),
+        tester.LimitBetween('Ldd5V', 1.0, 2.5, doc='Vout @ 50A'),
+        tester.LimitLow('LddVmonOff', 0.5),
+        tester.LimitLow('LddImonOff', 0.5),
+        tester.LimitLow('LddImon0V', 0.05),
+        tester.LimitDelta('LddImon0V6', nominal=0.60, delta=0.05),
+        tester.LimitDelta('LddImon5V', nominal=5.0, delta=0.1),
+        tester.LimitLow('ISIout0A', 1.0),
+        tester.LimitDelta('ISIout6A', nominal=6.0, delta=1.0),
+        tester.LimitDelta('ISIout50A', nominal=50.0, delta=1.0),
+        tester.LimitDelta('ISIset5V', nominal=5.0, delta=0.05),
         tester.LimitPercent('AdjLimits', nominal=50.0, percent=0.2),
-        tester.LimitBetween('TecVmonOff', -0.5, 0.5),
-        tester.LimitBetween('TecVmon0V', -0.5, 0.8),
-        tester.LimitBetween('TecVmon2V5', 2.4375, 2.5625),
-        tester.LimitBetween('TecVmon5V', 4.925, 5.075),
-        tester.LimitBetween('TecVsetOff', -0.5, 0.5),
         tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Prepare for testing."""
+        Devices.pic_hex_syn = self.pic_hex_syn
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Program', self._step_program),
@@ -140,6 +141,9 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    # Firmware image
+    pic_hex_syn = None
+
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -164,7 +168,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_picSyn'] = share.programmer.PIC(
-            InitialSyn.pic_hex_syn, folder, '18F4321', self['rla_syn'])
+            self.pic_hex_syn, folder, '18F4321', self['rla_syn'])
 
     def reset(self):
         """Reset instruments."""
