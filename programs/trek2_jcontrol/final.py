@@ -136,7 +136,7 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 # Power unit under test.
-                ('dcs_vin', tester.DCSource, 'DCS3'),
+                ('dcs_vin', tester.DCSource, 'DCS1'),
                 # As the water level rises the "switches" close.
                 # The order of switch closure does not matter, just the number
                 # closed. The lowest bar always flashes.

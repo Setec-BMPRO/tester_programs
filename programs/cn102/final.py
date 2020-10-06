@@ -48,7 +48,7 @@ class Devices(share.Devices):
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
         # Power to the units
-        self['dcs_vbat'] = tester.DCSource(self.physical_devices['DCS3'])
+        self['dcs_vbat'] = tester.DCSource(self.physical_devices['DCS1'])
         self['dcs_vbat'].output(self.vbatt, output=True, delay=5.0)
         self.add_closer(lambda: self['dcs_vbat'].output(0.0, output=False))
 
