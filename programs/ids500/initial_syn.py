@@ -43,7 +43,7 @@ class InitialSyn(share.TestSequence):
         tester.LimitLow('ISIout0A', 1.0),
         tester.LimitDelta('ISIout6A', nominal=6.0, delta=1.0),
         tester.LimitDelta('ISIout50A', nominal=50.0, delta=1.0),
-        tester.LimitDelta('ISIset5V', nominal=5.0, delta=0.05),
+        tester.LimitDelta('ISIset5V', nominal=5.0, delta=0.1),
         tester.LimitPercent('AdjLimits', nominal=50.0, percent=0.2),
         tester.LimitLow('FixtureLock', 20),
         )
