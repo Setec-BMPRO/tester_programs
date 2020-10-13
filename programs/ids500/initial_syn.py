@@ -133,7 +133,9 @@ class InitialSyn(share.TestSequence):
         lo_lim, hi_lim = self.limits['AdjLimits'].limit
         mes['ui_AdjLdd'].sensor.low = lo_lim
         mes['ui_AdjLdd'].sensor.high = hi_lim
-        self.measure(('ui_AdjLdd', 'dmm_ISIoutPost', ), timeout=2)
+        self.measure(
+            ('ui_AdjLdd', 'dmm_ISIoutPost', 'dmm_lddImon5V', ),
+            timeout=2)
 
 
 class Devices(share.Devices):
