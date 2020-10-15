@@ -48,6 +48,7 @@ class BP35():
     # Software versions
     arm_sw_version = '2.0.17344.4603'       # Software Rev 14
     pic_sw_version = '1.6.20227.735'        # Software Rev 11
+    fixture_num = '027176'                  # BP35 Fixture
     pic_hw_version = 4
     # SR Solar Reg settings
     sr_vset = 13.650
@@ -292,6 +293,7 @@ class BP35II(BP35):
     is_2 = True
     # ARM software version
     arm_sw_version = '2.0.20102.5010'
+    fixture_num = '034400'                  # BP35-II Fixture
 
 
 class BP35IISR(BP35II):

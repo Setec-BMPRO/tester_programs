@@ -26,6 +26,7 @@ class Initial(share.TestSequence):
         Devices.is_2 = self.cfg.is_2
         Devices.arm_sw_version = self.cfg.arm_sw_version
         Devices.pic_sw_version = self.cfg.pic_sw_version
+        Devices.fixture_num = self.cfg.fixture_num
         Sensors.outputs = self.cfg.outputs
         Sensors.iload = self.cfg.iload
         Measurements.is_pm = self.cfg.is_pm
@@ -299,6 +300,7 @@ class Devices(share.Devices):
     is_2 = None
     arm_sw_version = None   # ARM software version
     pic_sw_version = None   # PIC software version
+    fixture_num = None      # Fixture number (BP35 / BP35-II)
 
     def open(self):
         """Create all Instruments."""
@@ -307,6 +309,7 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
+                ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
                 ('dcs_vaux', tester.DCSource, 'DCS3'),
                 ('SR_LowPower', tester.DCSource, 'DCS4'),
@@ -320,7 +323,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port('027176', 'ARM')
+        arm_port = share.config.Fixture.port(self.fixture_num, 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         if self.is_2:
@@ -350,6 +353,9 @@ class Devices(share.Devices):
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = setec.BackgroundTimer()
+        # Switch on power to fixture circuits
+        self['dcs_vcom'].output(9.0, output=True, delay=2.0)
+        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
