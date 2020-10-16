@@ -51,8 +51,9 @@ class Ids500InitialSyn(ProgramTestCase):
                     (sen['IS_Iout'], (0.0, 0.6, 5.0)),
                     ),
                 'ISSetAdj': (
-                    (sen['IS_Iset'], 5.01), (sen['oAdjLdd'], True),
+                    (sen['IS_Iset'], (5.01, 5.01)), (sen['oAdjLdd'], True),
                     (sen['LDDshunt'], (0.0495, 0.0495, 0.05005)),
+                    (sen['IS_Iout'], 5.0),
                     ),
                 },
             }
@@ -60,7 +61,7 @@ class Ids500InitialSyn(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(32, len(result.readings))
+        self.assertEqual(33, len(result.readings))
         self.assertEqual(
             ['Program', 'PowerUp', 'TecEnable', 'TecReverse',
              'LddEnable', 'ISSetAdj'],
