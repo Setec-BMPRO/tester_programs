@@ -157,7 +157,7 @@ class Initial(share.TestSequence):
         bp35.sr_set(self.cfg.sr_vset - 0.05, self.cfg.sr_iset, delay=0.2)
         bp35.sr_set(self.cfg.sr_vset, self.cfg.sr_iset, delay=1)
         self.measure(('arm_sr_vin_post', 'dmm_vsetpost', ))
-        dev['dcl_bat'].output(self.cfg.sr_ical, True)
+        dev['dcl_bat'].output(self.cfg.sr_ical, output=True, delay=0.5)
         mes['arm_ioutpre'](timeout=5)
         bp35['SR_ICAL'] = self.cfg.sr_ical      # Calibrate current setpoint
         time.sleep(1)
