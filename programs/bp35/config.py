@@ -120,6 +120,7 @@ class BP35():
         tester.LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
         tester.LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
         tester.LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
+        tester.LimitRegExp('Reply', '^OK$'),
         )
     # Final Test limits common to all versions
     _base_limits_final = _base_limits_all + (

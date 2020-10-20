@@ -12,7 +12,7 @@ import setec
 import tester
 
 import share
-from . import console, config
+from . import arduino, console, config
 
 
 class Initial(share.TestSequence):
@@ -76,6 +76,21 @@ class Initial(share.TestSequence):
         mes['dmm_solarvcc'](timeout=5)
         # Start programming in the background
         dev['program_pic'].program_begin()
+
+    @share.teststep
+    def _step_program_pic2(self, dev, mes):
+        """Program the dsPIC device.
+
+        Device is powered by Solar Reg input voltage.
+
+        """
+        dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
+        mes['dmm_solarvcc'](timeout=5)
+        dev['rla_pic'].set_on()
+        dev['rla_pic'].opc()
+        mes['pgm_bp35sr']()
+        dev['rla_pic'].set_off()
+        dev['SR_LowPower'].output(0.0)
 
     @share.teststep
     def _step_program_arm(self, dev, mes):
@@ -353,6 +368,11 @@ class Devices(share.Devices):
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = setec.BackgroundTimer()
+        # Serial connection to the Arduino console
+        ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        # Set port separately, as we don't want it opened yet
+        ard_ser.port = share.config.Fixture.port('034400', 'ARDUINO')
+        self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         self['dcs_vcom'].output(9.0, output=True, delay=2.0)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
@@ -425,6 +445,9 @@ class Sensors(share.Sensors):
             message=tester.translate('bp35_initial', 'IsOutputLedGreen?'),
             caption=tester.translate('bp35_initial', 'capOutputLed'))
         self['yesnogreen'].doc = 'Tester operator'
+        # Arduino sensor
+        ard = self.devices['ard']
+        self['pgmbp35sr'] = sensor.KeyedReadingString(ard, 'PGM_BP35SR')
         # Console sensors
         bp35 = self.devices['bp35']
         bp35tunnel = self.devices['bp35tunnel']
@@ -533,6 +556,7 @@ class Measurements(share.Measurements):
             ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov', 'Vout OVP'),
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', 'Remote input'),
             ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
+            ('pgm_bp35sr', 'Reply', 'pgmbp35sr', ''),
             ))
         if self.is_pm:      # PM Solar Regulator
             self.create_from_names((

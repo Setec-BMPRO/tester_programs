@@ -97,6 +97,7 @@ class Fixture():
             },
         '034400': {     # BP35-II Initial
             'ARM': _ftdi_hub_1,
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM40'}[os.name],
             },
         '017789': {     # CMR-SBP Initial (Prolific)
             'EV': {'posix': '/dev/ttyUSB1', 'nt': 'COM21'}[os.name],
