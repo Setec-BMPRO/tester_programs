@@ -74,23 +74,24 @@ class Initial(share.TestSequence):
         """
         dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
         mes['dmm_solarvcc'](timeout=5)
-        # Start programming in the background
-        dev['program_pic'].program_begin()
-
-    @share.teststep
-    def _step_program_pic2(self, dev, mes):
-        """Program the dsPIC device.
-
-        Device is powered by Solar Reg input voltage.
-
-        """
-        dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
-        mes['dmm_solarvcc'](timeout=5)
-        dev['rla_pic'].set_on()
-        dev['rla_pic'].opc()
-        mes['pgm_bp35sr']()
-        dev['rla_pic'].set_off()
-        dev['SR_LowPower'].output(0.0)
+        if self.cfg.is_2:
+            # On xubuntu, a device detector opens the serial port for a while
+            # after it is attached. Wait for the process to release the port.
+            for _ in range(10):
+                try:
+                    dev['ard'].open()
+                    break
+                except:
+                    time.sleep(1)
+            time.sleep(2)
+            dev['rla_pic'].set_on()
+            dev['rla_pic'].opc()
+            mes['pgm_bp35sr']()
+            dev['rla_pic'].set_off()
+            dev['SR_LowPower'].output(0.0)
+        else:
+            # Start programming in the background
+            dev['program_pic'].program_begin()
 
     @share.teststep
     def _step_program_arm(self, dev, mes):
@@ -100,11 +101,12 @@ class Initial(share.TestSequence):
 
         """
         dev['program_arm'].program()
-        if not self.cfg.is_pm:
-            with tester.PathName('PICcheck'):
-                # PIC programming should be finished by now
-                dev['program_pic'].program_wait()
-                dev['SR_LowPower'].output(0.0)
+        if not self.cfg.is_2:
+            if not self.cfg.is_pm:
+                with tester.PathName('PICcheck'):
+                    # PIC programming should be finished by now
+                    dev['program_pic'].program_wait()
+                    dev['SR_LowPower'].output(0.0)
         # Cold Reset microprocessor for units that were already programmed
         # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
@@ -369,7 +371,7 @@ class Devices(share.Devices):
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = setec.BackgroundTimer()
         # Serial connection to the Arduino console
-        ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        ard_ser = serial.Serial(baudrate=115200, timeout=8.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port('034400', 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
