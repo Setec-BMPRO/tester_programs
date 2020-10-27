@@ -373,7 +373,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=8.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port('034400', 'ARDUINO')
+        ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         self['dcs_vcom'].output(9.0, output=True, delay=2.0)

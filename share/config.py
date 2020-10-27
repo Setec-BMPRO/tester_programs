@@ -79,7 +79,6 @@ class Fixture():
 
         '028467': {'ARM': _ftdi, },     # BC15 Initial
         '031032': {'ARM': _ftdi, },     # BC25 Initial
-        '027176': {'ARM': _ftdi, },     # BP35 Initial
         '017056': {'PIC': _ftdi, },     # IDS-500 SubBoard Initial
         '029242': {'ARM': _ftdi, },     # J35 Initial
         '029687': {'ARM': _ftdi, },     # RvView/JDisplay/RVMD50 Initial
@@ -94,6 +93,10 @@ class Fixture():
         '020827': {     # BCE282 Initial( MSP1: programming, MSP2: comms)
             'MSP1': _ftdi_hub_1,
             'MSP2': _ftdi_hub_2,
+            },
+        '027176': {     # BP35 Initial
+            'ARM': _ftdi_hub_1,
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
             },
         '034400': {     # BP35-II Initial
             'ARM': _ftdi_hub_1,
