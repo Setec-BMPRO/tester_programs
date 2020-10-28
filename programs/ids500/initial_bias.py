@@ -40,6 +40,7 @@ class InitialBias(share.TestSequence):
     @share.teststep
     def _step_ocp(self, dev, mes):
         """Measure OCP."""
+        dev['dcl_12Vsbraw'].output(0.0, True)
         self.measure(
             ('dmm_12Vsbraw', 'ramp_OCP', 'dmm_12Vsbraw2',), timeout=1)
 
@@ -84,7 +85,7 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_12Vsbraw'],
             sensor=self['o12Vsbraw'],
             detect_limit=(self.limits['InOCP'], ),
-            ramp_range=sensor.RampRange(start=1.5, stop=2.3, step=0.1),
+            ramp_range=sensor.RampRange(start=1.2, stop=2.3, step=0.1),
             delay=0.1)
         self['oOCP'].reset = False
 
