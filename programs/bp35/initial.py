@@ -25,7 +25,6 @@ class Initial(share.TestSequence):
         limits = self.cfg.limits_initial()
         Devices.is_2 = self.cfg.is_2
         Devices.arm_sw_version = self.cfg.arm_sw_version
-        Devices.pic_sw_version = self.cfg.pic_sw_version
         Devices.fixture_num = self.cfg.fixture_num
         Sensors.outputs = self.cfg.outputs
         Sensors.iload = self.cfg.iload
@@ -74,24 +73,20 @@ class Initial(share.TestSequence):
         """
         dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
         mes['dmm_solarvcc'](timeout=5)
-        if self.cfg.is_2:
-            # On xubuntu, a device detector opens the serial port for a while
-            # after it is attached. Wait for the process to release the port.
-            for _ in range(10):
-                try:
-                    dev['ard'].open()
-                    break
-                except:
-                    time.sleep(1)
-            time.sleep(2)
-            dev['rla_pic'].set_on()
-            dev['rla_pic'].opc()
-            mes['pgm_bp35sr']()
-            dev['rla_pic'].set_off()
-            dev['SR_LowPower'].output(0.0)
-        else:
-            # Start programming in the background
-            dev['program_pic'].program_begin()
+        # On xubuntu, a device detector opens the serial port for a while
+        # after it is attached. Wait for the process to release the port.
+        for _ in range(10):
+            try:
+                dev['ard'].open()
+                break
+            except:
+                time.sleep(1)
+        time.sleep(2)
+        dev['rla_pic'].set_on()
+        dev['rla_pic'].opc()
+        mes['pgm_bp35sr']()
+        dev['rla_pic'].set_off()
+        dev['SR_LowPower'].output(0.0)
 
     @share.teststep
     def _step_program_arm(self, dev, mes):
@@ -101,12 +96,6 @@ class Initial(share.TestSequence):
 
         """
         dev['program_arm'].program()
-        if not self.cfg.is_2:
-            if not self.cfg.is_pm:
-                with tester.PathName('PICcheck'):
-                    # PIC programming should be finished by now
-                    dev['program_pic'].program_wait()
-                    dev['SR_LowPower'].output(0.0)
         # Cold Reset microprocessor for units that were already programmed
         # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
@@ -316,7 +305,6 @@ class Devices(share.Devices):
 
     is_2 = None
     arm_sw_version = None   # ARM software version
-    pic_sw_version = None   # PIC software version
     fixture_num = None      # Fixture number (BP35 / BP35-II)
 
     def open(self):
@@ -352,10 +340,6 @@ class Devices(share.Devices):
             os.path.join(folder, sw_ver),
             crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
-        # PIC device programmer
-        self['program_pic'] = share.programmer.PIC(
-            'bp35sr_{0}.hex'.format(self.pic_sw_version),
-            folder, '33FJ16GS402', self['rla_pic'])
         # Serial connection to the BP35 console
         bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
@@ -373,7 +357,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=8.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port('034400', 'ARDUINO')
+        ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         self['dcs_vcom'].output(9.0, output=True, delay=2.0)
