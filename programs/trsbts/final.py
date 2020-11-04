@@ -14,7 +14,8 @@ class Final(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
-    rssi = -70 if share.config.System.tester_type == 'ATE4' else -85
+    rssi = -70 if share.config.System.tester_type in (
+        'ATE4', 'ATE5') else -85
 
     limitdata = (
         tester.LimitDelta('Vbat', vbatt, 0.5, doc='Battery input present'),

@@ -197,7 +197,8 @@ class RVMN101A(Config):
         @return Tuple(limits)
 
         """
-        rssi = -70 if share.config.System.tester_type == 'ATE4' else -85
+        rssi = -70 if share.config.System.tester_type in (
+            'ATE4', 'ATE5') else -85
         return cls._base_limits_final + (
             tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
             )
@@ -282,7 +283,8 @@ class RVMN101B(Config):
 
         """
         # 3dB below the -A version
-        rssi = -73 if share.config.System.tester_type == 'ATE4' else -88
+        rssi = -73 if share.config.System.tester_type in (
+            'ATE4', 'ATE5') else -88
         return cls._base_limits_final + (
             tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
             )
@@ -330,7 +332,8 @@ class RVMN5x(Config):
         @return Tuple(limits)
 
         """
-        rssi = -70 if share.config.System.tester_type == 'ATE4' else -88
+        rssi = -70 if share.config.System.tester_type in (
+            'ATE4', 'ATE5') else -85
         return cls._base_limits_final + (
             tester.LimitHigh('ScanRSSI', rssi, doc='Strong BLE signal'),
             )
