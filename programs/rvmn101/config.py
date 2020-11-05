@@ -136,8 +136,7 @@ class RVMN101A(Config):
             'HBRIDGE 3 RETRACT': 5,
             }
     # Software versions
-    _nordic_11202 = 'jayco_rvmn101_signed_1.12.2-0-g67680768_factory_mcuboot.hex'
-    _nordic_11203 = 'jayco_rvmn101_signed_1.12.3-0-ge43edcda_factory_mcuboot.hex'
+    _nordic_11206 = 'jayco_rvmn101_signed_1.12.6-0-g86952881_factory_mcuboot.hex'
     _arm_image_113 = 'rvmn101_nxp_1.13.bin'
     _arm_image_205 = 'rvmn101_nxp_2.5.bin'
     # Lot number mapping
@@ -150,42 +149,48 @@ class RVMN101A(Config):
         (share.lots.Range('A201218', 'A203611'), 10),   # 034447 MA358/PC23237
         # Rev 11 No production                          # 035079
         (share.lots.Range('A203612', 'A204008'), 12.1), # 034879 PC23652
-        # Rev 13...                                     # 035323
+        (share.lots.Range('A204017', 'A204607'), 13),   # 035323
+        # Rev 14...                                     # 035461
         ))
     _rev_data = {
         None: _Values(
-            nordic_image=_nordic_11203, arm_image=_arm_image_205,
-            product_rev='13A', hardware_rev='11A', banner_lines=6,
+            nordic_image=_nordic_11206, arm_image=_arm_image_205,
+            product_rev='14A', hardware_rev='11A', banner_lines=6,
+            reversed_output_dict={},
+            ),
+        13: _Values(
+            nordic_image=_nordic_11206, arm_image=_arm_image_205,
+            product_rev='13B', hardware_rev='11A', banner_lines=6,
             reversed_output_dict={},
             ),
         12.1: _Values(
-            nordic_image=_nordic_11203, arm_image=_arm_image_205,
-            product_rev='12B', hardware_rev='11A', banner_lines=6,
+            nordic_image=_nordic_11206, arm_image=_arm_image_205,
+            product_rev='12C', hardware_rev='11A', banner_lines=6,
             reversed_output_dict={},
             ),
         10: _Values(
-            nordic_image=_nordic_11202, arm_image=_arm_image_113,
-            product_rev='10C', hardware_rev='10A', banner_lines=6,
+            nordic_image=_nordic_11206, arm_image=_arm_image_113,
+            product_rev='10D', hardware_rev='10A', banner_lines=6,
             reversed_output_dict={},
             ),
         9: _Values(
-            nordic_image=_nordic_11202, arm_image=_arm_image_113,
-            product_rev='09C', hardware_rev='08A', banner_lines=6,
+            nordic_image=_nordic_11206, arm_image=_arm_image_113,
+            product_rev='09D', hardware_rev='08A', banner_lines=6,
             reversed_output_dict=_reversed7to9,
             ),
         8: _Values(
-            nordic_image=_nordic_11202, arm_image=_arm_image_113,
-            product_rev='08C', hardware_rev='08A', banner_lines=4,
+            nordic_image=_nordic_11206, arm_image=_arm_image_113,
+            product_rev='08D', hardware_rev='08A', banner_lines=4,
             reversed_output_dict=_reversed7to9,
             ),
         7: _Values(
-            nordic_image=_nordic_11202, arm_image=_arm_image_113,
-            product_rev='07C', hardware_rev='07A', banner_lines=4,
+            nordic_image=_nordic_11206, arm_image=_arm_image_113,
+            product_rev='07D', hardware_rev='07A', banner_lines=4,
             reversed_output_dict=_reversed7to9,
             ),
         6: _Values(
-            nordic_image=_nordic_11202, arm_image=_arm_image_113,
-            product_rev='06G', hardware_rev='06A', banner_lines=4,
+            nordic_image=_nordic_11206, arm_image=_arm_image_113,
+            product_rev='06H', hardware_rev='06A', banner_lines=4,
             reversed_output_dict={},
             ),
         }
