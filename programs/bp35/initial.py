@@ -355,7 +355,7 @@ class Devices(share.Devices):
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = setec.BackgroundTimer()
         # Serial connection to the Arduino console
-        ard_ser = serial.Serial(baudrate=115200, timeout=8.0)
+        ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
