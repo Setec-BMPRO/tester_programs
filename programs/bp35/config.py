@@ -293,7 +293,8 @@ class BP35II(BP35):
 
     is_2 = True
     # ARM software version
-    arm_sw_version = '2.0.20102.5010'
+#    arm_sw_version = '2.0.20102.5010'
+    arm_sw_version = '2.0.20330.5015'       # PC-24332
     fixture_num = '034400'                  # BP35-II Fixture
 
 
@@ -305,7 +306,7 @@ class BP35IISR(BP35II):
     _lot_rev = share.lots.Revision((
         ))
     _rev_data = {
-        None: (15, Type.SR.value, 'A'),
+        None: (15, Type.SR.value, 'E'),
         }
 
 
@@ -316,7 +317,7 @@ class BP35IIHA(BP35IISR):
     _lot_rev = share.lots.Revision((
         ))
     _rev_data = {
-        None: (15, Type.HA.value, 'A'),
+        None: (15, Type.HA.value, 'E'),
         }
 
 
@@ -330,5 +331,5 @@ class BP35IISI(BP35II):
     _lot_rev = share.lots.Revision((
         ))
     _rev_data = {
-        None: (15, Type.SI.value, 'A'),
+        None: (15, Type.SI.value, 'E'),
         }
