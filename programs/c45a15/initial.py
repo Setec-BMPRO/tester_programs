@@ -78,15 +78,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the PIC device."""
-        # On xubuntu, a device detector opens the serial port for a while
-        # after it is attached. Wait for the process to release the port.
-        for _ in range(10):
-            try:
-                dev['ard'].open()
-                break
-            except:
-                time.sleep(1)
-        time.sleep(2)
         dev['rla_Prog'].set_on()
         dev['rla_Prog'].opc()
         mes['pgm_c45a15']()
@@ -170,6 +161,20 @@ class Devices(share.Devices):
         # Switch on power to fixture circuits
         self['dcs_Vcom'].output(12.0, output=True, delay=0.5)
         self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
+        # On Linux, the ModemManager service opens the serial port
+        # for a while after it appears. Wait for it to release the port.
+        retry_max = 10
+        for retry in range(retry_max + 1):
+            try:
+                self['ard'].open()
+                break
+            except:
+                if retry == retry_max:
+                    raise
+                self._logger.debug('Port open error - wait 1sec...')
+                time.sleep(1)
+        self.add_closer(lambda: self['ard'].close())
+        time.sleep(2)
 
     def reset(self):
         """Reset instruments."""
