@@ -351,7 +351,7 @@ class Devices(share.Devices):
         ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
-        self['dcs_vcom'].output(9.0, output=True, delay=2.0)
+        self['dcs_vcom'].output(9.0, output=True, delay=5.0)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
         # On Linux, the ModemManager service opens the serial port
         # for a while after it appears. Wait for it to release the port.
@@ -363,7 +363,6 @@ class Devices(share.Devices):
             except:
                 if retry == retry_max:
                     raise
-                self._logger.debug('Port open error - wait 1sec...')
                 time.sleep(1)
         self.add_closer(lambda: self['ard'].close())
         time.sleep(2)
