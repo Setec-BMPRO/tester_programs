@@ -235,12 +235,12 @@ class RVMN101B(Config):
     _rev_data = {
         None: _Values(
             nordic_image=_nordic_20206, arm_image=_arm_image_19,
-            product_rev='13A', hardware_rev='8A', banner_lines=6,
+            product_rev='13A', hardware_rev='8A', banner_lines=5,
             reversed_output_dict={},
             ),
         12: _Values(
             nordic_image=_nordic_20206, arm_image=_arm_image_19,
-            product_rev='12C', hardware_rev='6A', banner_lines=6,
+            product_rev='12C', hardware_rev='6A', banner_lines=5,
             reversed_output_dict={},
             ),
         11: _Values(
