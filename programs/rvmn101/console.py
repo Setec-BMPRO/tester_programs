@@ -155,8 +155,6 @@ class Console101B(_Console):
 
     """
 
-    # Console command prompt. Signals the end of response data.
-    cmd_prompt = b'\rrvmn> '
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
