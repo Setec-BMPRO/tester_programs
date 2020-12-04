@@ -159,15 +159,17 @@ class Console101B(_Console):
     parameter = share.console.parameter
     cmd_data = {
         'MAC': parameter.String(
-            'mac', read_format='{0}'),
+            'rvmn mac', read_format='{0}'),
         'SERIAL': parameter.String(
-            'serial', writeable=True, write_format='{1} {0}'),
+            'rvmn serial', writeable=True, write_format='{1} {0}'),
         'PRODUCT-REV': parameter.String(
-            'product-rev', writeable=True, write_format='{1} {0}'),
+            'rvmn product-rev', writeable=True, write_format='{1} {0}'),
         'SW-REV': parameter.String(
-            'sw-rev', read_format='{0}'),
+            'rvmn sw-rev', read_format='{0}'),
+        'HARDWARE-REV': parameter.String(
+            'rvmn hw-rev', writeable=True, write_format='{1} {0}'),
         'OUTPUT': parameter.String(
-            'output', readable=False, writeable=True, write_format='{1} {0}'),
+            'rvmn output', readable=False, writeable=True, write_format='{1} {0}'),
         }
 
     def __init__(self, port):
