@@ -145,30 +145,7 @@ class Console101A(_Console):
 
 class Console101B(_Console):
 
-    """Communications to RVMN101B console.
-
-    The RVMN101B uses quite old firmware, with outdated command syntax.
-    EG:
-        - Command prompt is different.
-        - Commands are not prefixed with 'rvmn'.
-        - 'HARDWARE-REV' is not implemented.
-
-    """
-
-    # Console commands
-    parameter = share.console.parameter
-    cmd_data = {
-        'MAC': parameter.String(
-            'mac', read_format='{0}'),
-        'SERIAL': parameter.String(
-            'serial', writeable=True, write_format='{1} {0}'),
-        'PRODUCT-REV': parameter.String(
-            'product-rev', writeable=True, write_format='{1} {0}'),
-        'SW-REV': parameter.String(
-            'sw-rev', read_format='{0}'),
-        'OUTPUT': parameter.String(
-            'output', readable=False, writeable=True, write_format='{1} {0}'),
-        }
+    """Communications to RVMN101B console."""
 
     def __init__(self, port):
         """Initialise communications.
