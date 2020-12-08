@@ -49,7 +49,7 @@ class Initial(share.TestSequence):
             'Config': config.RvView2,
             'Limits': _common + (
                 tester.LimitRegExp('SwVer', '^{0}$'.format(
-                    config.RvView.sw_version.replace('.', r'\.'))),
+                    config.RvView2.sw_version.replace('.', r'\.'))),
                 ),
             },
         }
