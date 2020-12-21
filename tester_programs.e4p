@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-10-22, 17:22:00 -->
+<!-- Saved: 2020-12-21, 16:07:49 -->
 <!-- Copyright (C) 2020 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -160,6 +160,7 @@
     <Source>programs/trs2/final.py</Source>
     <Source>programs/trs2/initial.py</Source>
     <Source>programs/trsbts/__init__.py</Source>
+    <Source>programs/trsbts/config.py</Source>
     <Source>programs/trsbts/console.py</Source>
     <Source>programs/trsbts/final.py</Source>
     <Source>programs/trsbts/initial.py</Source>

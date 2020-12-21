@@ -59,7 +59,7 @@ class TRSBTS_Initial(ProgramTestCase):
                     (sen['brake'], (0.0, 12.0)),
                     ),
                 'Operation': (
-                    (sen['arm_swver'], self.test_program.sw_version),
+                    (sen['arm_swver'], self.test_program.config.sw_version),
                     (sen['red'], (0.0, 1.8, 0.0)),
                     (sen['green'], (0.0, 2.5, 0.0)),
                     (sen['blue'], (0.0, 2.8, 0.0)),

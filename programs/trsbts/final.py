@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2020 SETEC Pty Ltd.
-"""TRS-BTS Final Program."""
+"""TRS-BTx Final Program."""
 
 import tester
 
