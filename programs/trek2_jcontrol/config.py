@@ -4,29 +4,27 @@
 """JControl/Trek2/Trek3 Configuration."""
 
 
-class _Base():
-
-    """Common configuration."""
-
-    sw_version = '1.6.18204.326'
-    sw_image = 'trek2_{0}.bin'.format(sw_version)
-
-
-class JControl(_Base):
+class JControl():
 
     """JControl configuration."""
 
+    sw_version = '1.6.18204.326'
+#    sw_version = '1.7.20320.327'    # PC-24868
+    sw_image = 'trek2_{0}.bin'.format(sw_version)
     hw_version = (4, 2, 'A')
+#    hw_version = (4, 2, 'B')
 
 
-class Trek2(_Base):
+class Trek2():
 
     """Trek2 configuration."""
 
-    hw_version = (7, 0, 'A')
+    sw_version = '1.7.20320.327'    # PC-24869 / MA-376
+    sw_image = 'trek3_{0}.bin'.format(sw_version)
+    hw_version = (7, 0, 'B')
 
 
-class Trek3(_Base):
+class Trek3():
 
     """Trek3 configuration."""
 
