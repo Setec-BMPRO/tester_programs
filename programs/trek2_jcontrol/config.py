@@ -8,18 +8,16 @@ class JControl():
 
     """JControl configuration."""
 
-    sw_version = '1.6.18204.326'
-#    sw_version = '1.7.20320.327'    # PC-24868
-    sw_image = 'trek2_{0}.bin'.format(sw_version)
-    hw_version = (4, 2, 'A')
-#    hw_version = (4, 2, 'B')
+    sw_version = '1.7.20388.329'    # 035826 Rev 2      PC-24868
+    sw_image = 'jcontrol_{0}.bin'.format(sw_version)
+    hw_version = (4, 2, 'B')
 
 
 class Trek2():
 
     """Trek2 configuration."""
 
-    sw_version = '1.7.20320.327'    # PC-24869 / MA-376
+    sw_version = '1.7.20320.327'    # 035279 Rev 1      PC-24869 / MA-376
     sw_image = 'trek3_{0}.bin'.format(sw_version)
     hw_version = (7, 0, 'B')
 
@@ -28,6 +26,6 @@ class Trek3():
 
     """Trek3 configuration."""
 
-    sw_version = '1.7.20320.327'
+    sw_version = '1.7.20320.327'    # 035279 Rev 1
     sw_image = 'trek3_{0}.bin'.format(sw_version)
     hw_version = (1, 0, 'A')
