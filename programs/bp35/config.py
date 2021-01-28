@@ -220,7 +220,7 @@ class BP35SR(BP35):
     is_pm = False
     _lot_rev = share.lots.Revision((
         # Rev 1-5
-        (share.lots.Range('A000001', 'A162007'), 'Scrap'),
+        (share.lots.Range('A000001', 'A162007'), 6),    # Main PCB swaps
         # Rev 6
         (share.lots.Range('A162008', 'A163007'), 6),
         # Rev 7
@@ -244,34 +244,33 @@ class BP35SR(BP35):
             arm_sw_version=BP35.arm_sw_version
             ),
         13: _Values(
-            hw_version=(13, Type.SR.value, 'B'),
+            hw_version=(13, Type.SR.value, 'D'),
             arm_sw_version=BP35.arm_sw_version
             ),
         12: _Values(
-            hw_version=(12, Type.SR.value, 'C'),
+            hw_version=(12, Type.SR.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
         10: _Values(
-            hw_version=(10, Type.SR.value, 'E'),
+            hw_version=(10, Type.SR.value, 'G'),
             arm_sw_version=BP35.arm_sw_version
             ),
         9: _Values(
-            hw_version=(9, Type.SR.value, 'E'),
+            hw_version=(9, Type.SR.value, 'G'),
             arm_sw_version=BP35.arm_sw_version
             ),
         8: _Values(
-            hw_version=(8, Type.SR.value, 'G'),
+            hw_version=(8, Type.SR.value, 'I'),
             arm_sw_version=BP35.arm_sw_version
             ),
         7: _Values(
-            hw_version=(7, Type.SR.value, 'B'),
+            hw_version=(7, Type.SR.value, 'D'),
             arm_sw_version=BP35.arm_sw_version
             ),
         6: _Values(
-            hw_version=(6, Type.SR.value, 'C'),
+            hw_version=(6, Type.SR.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        'Scrap': None,       # This will cause a runtime error
         }
 
 
