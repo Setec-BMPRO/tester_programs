@@ -4,6 +4,7 @@
 """TRS-BTx Console driver."""
 
 import re
+import time
 
 import share
 
@@ -69,6 +70,7 @@ class Console(share.console.Base):
         """
         for func in self.override_commands:
             self[func] = state
+            time.sleep(0.1)
 
     def get_mac(self):
         """Get the MAC address from the console
