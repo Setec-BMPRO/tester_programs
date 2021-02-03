@@ -141,6 +141,7 @@ class Initial(share.TestSequence):
         arm['UNLOCK'] = True
         if self.parameter == '600':     # Prevent shutdown due to no fan
             arm['FAN_CHECK_DISABLE'] = True
+            dev['dcs_PriCtl'].output(self.cfg.fixture_fan, True)  # Turn fan on
         # Switch all outputs ON
         dev['rla_pson'].set_on()
         self.measure(

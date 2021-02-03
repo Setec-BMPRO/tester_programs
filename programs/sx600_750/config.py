@@ -25,6 +25,7 @@ class Config():
     disable_pwr = 5.5
     #  Injected voltage for fan and bracket detect circuits
     part_detect = 12.0
+    fixture_fan = 12.0
     # Common Test limits common to both test types & units
     _base_limits_common = (
         # Outputs off
