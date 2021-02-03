@@ -17,9 +17,9 @@ class Trek2():
 
     """Trek2 configuration."""
 
-    sw_version = '1.7.20320.327'    # 035279 Rev 1      PC-24869 / MA-376
+    sw_version = '1.7.20512.331'    # 035862 Rev 2      MA-378
     sw_image = 'trek3_{0}.bin'.format(sw_version)
-    hw_version = (7, 0, 'B')
+    hw_version = (7, 0, 'C')
 
 
 class Trek3():
