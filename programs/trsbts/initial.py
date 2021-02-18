@@ -102,7 +102,7 @@ class Initial(share.TestSequence):
     def _step_operation(self, dev, mes):
         """Test the operation of LEDs."""
         trsbts = dev['trsbts']
-        dev['trsbts'].open()
+        trsbts.open()
         # Power cycle after programming
         dev['dcs_vbat'].output(0.0, delay=0.5)
         dev['dcs_vbat'].output(self.vbatt)
