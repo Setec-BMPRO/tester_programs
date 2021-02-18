@@ -34,8 +34,7 @@ class Console(share.console.Base):
         'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
         'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
         'DEBUG': parameter.Boolean(
-            'TRS-DBG', writeable=True, readable=False,
-            write_format='{1}', write_expected=1),
+            'TRS-DBG', writeable=True, readable=False, write_format='{1}'),
         # X-Register values
         'VBATT': parameter.Float('TRS_BTS_AVG_BATT_MV', scale=1000),
         'VPIN': parameter.Float('TRS_BTS_PIN_MV', scale=1000),
@@ -56,7 +55,10 @@ class Console(share.console.Base):
         """Brand the unit with Hardware ID & Serial Number."""
         self.banner()
         self['UNLOCK'] = True
-        self['DEBUG'] = False       # Suppress debug messages
+        try:
+            self['DEBUG'] = False       # Suppress debug messages
+        except share.console.protocol.ResponseError:
+            self['DEBUG'] = False       # Retry upon debug data interference
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True
