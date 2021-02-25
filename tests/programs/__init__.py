@@ -66,6 +66,8 @@ from . import test_rvw_jdisp_initial
 from . import test_rvswt101_final
 from . import test_rvswt101_initial
 from . import test_rvswt101_device
+from . import test_smartlink201_final
+from . import test_smartlink201_initial
 from . import test_smu75070_final
 from . import test_smu75070_initial
 from . import test_st3_final
@@ -150,6 +152,8 @@ __all__ = [
     'test_rvswt101_final',
     'test_rvswt101_initial',
     'test_rvswt101_device',
+    'test_smartlink201_final',
+    'test_smartlink201_initial',
     'test_smu75070_final',
     'test_smu75070_initial',
     'test_st3_final',

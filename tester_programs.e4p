@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2020-12-21, 16:07:49 -->
-<!-- Copyright (C) 2020 ,  -->
+<!-- Saved: 2021-02-12, 10:48:13 -->
+<!-- Copyright (C) 2021 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
@@ -138,6 +138,11 @@
     <Source>programs/rvview_jdisplay/console.py</Source>
     <Source>programs/rvview_jdisplay/initial.py</Source>
     <Source>programs/selftest/__init__.py</Source>
+    <Source>programs/smartlink201/__init__.py</Source>
+    <Source>programs/smartlink201/config.py</Source>
+    <Source>programs/smartlink201/console.py</Source>
+    <Source>programs/smartlink201/final.py</Source>
+    <Source>programs/smartlink201/initial.py</Source>
     <Source>programs/smu75070/__init__.py</Source>
     <Source>programs/smu75070/final.py</Source>
     <Source>programs/smu75070/initial.py</Source>
@@ -262,6 +267,8 @@
     <Source>tests/programs/test_rvswt101_initial.py</Source>
     <Source>tests/programs/test_rvw_jdisp_initial.py</Source>
     <Source>tests/programs/test_selftest.py</Source>
+    <Source>tests/programs/test_smartlink201_final.py</Source>
+    <Source>tests/programs/test_smartlink201_initial.py</Source>
     <Source>tests/programs/test_smu75070_final.py</Source>
     <Source>tests/programs/test_smu75070_initial.py</Source>
     <Source>tests/programs/test_st3_final.py</Source>
