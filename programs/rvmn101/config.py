@@ -316,8 +316,7 @@ class RVMN5x(Config):
     # Initial Test parameters
     fixture = '034861'
     # Software versions
-    _nordic_2_0_6 = 'jayco_rvmn5x_signed_2.0.6-0-g85ac8960_factory_mcuboot.hex'
-    _nordic_2_0_7 = 'jayco_rvmn5x_signed_2.0.7-0-g7436a97d_factory_mcuboot.hex'
+    _nordic_2_3_9 = 'jayco_rvmn5x_signed_2.3.9-0-gfab9e63a_factory_mcuboot.hex'
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
@@ -328,18 +327,18 @@ class RVMN5x(Config):
         ))
     _rev_data = {
         None: _Values(
-            nordic_image=_nordic_2_0_7, arm_image=_arm_image_2_3,
-            product_rev='05A', hardware_rev='05A', banner_lines=5,
+            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            product_rev='05C', hardware_rev='05A', banner_lines=5,
             reversed_output_dict={},
             ),
         4: _Values(
-            nordic_image=_nordic_2_0_6, arm_image=_arm_image_2_3,
-            product_rev='04A', hardware_rev='04A', banner_lines=5,
+            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            product_rev='04B', hardware_rev='04A', banner_lines=5,
             reversed_output_dict={},
             ),
         3: _Values(
-            nordic_image=_nordic_2_0_6, arm_image=_arm_image_2_3,
-            product_rev='03C', hardware_rev='03A', banner_lines=5,
+            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            product_rev='03E', hardware_rev='03A', banner_lines=5,
             reversed_output_dict={},
             ),
         }
