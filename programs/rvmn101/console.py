@@ -162,8 +162,8 @@ class Console101B(_Console):
             'HBRIDGE 5 RETRACT': 9,
             'HS_0A5_EN5': 20,
             'HS_0A5_EN13': 28,
-            'HS_0A5_EN14': 29,
-            'HS_0A5_EN15': 30,
+            'HS_0A5_EN14': 29,      # Implemented in Rev 14
+            'HS_0A5_EN15': 30,      # Implemented in Rev 14
             'HS_0A5_EN18': 33,
             'LS_0A5_EN1': 34,
             'LS_0A5_EN2': 35,
