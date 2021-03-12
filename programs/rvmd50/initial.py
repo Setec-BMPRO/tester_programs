@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
     """RVMD50 Initial Test Program."""
 
     vin_set = 8.1               # Input voltage to power the unit
-    sw_file = 'rvmd50_1.4.bin'  # Device software
+    sw_file = 'rvmd50_1.5.bin'  # Device software
     testlimits = (              # Test limits
         tester.LimitBetween('Vin', 7.0, 8.0, doc='Input voltage present'),
         tester.LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
