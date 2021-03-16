@@ -77,7 +77,7 @@ class Initial(share.TestSequence):
         mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101.normal_outputs:
-            with tester.PathName('HS{0}'.format(idx)):
+            with tester.PathName(rvmn101.pin_name(idx)):
                 rvmn101.hs_output(idx, True)
                 mes['dmm_hs_on'](timeout=5)
                 rvmn101.hs_output(idx, False)
