@@ -28,7 +28,7 @@ class Initial(share.TestSequence):
         tester.LimitDelta('Vref', 0, 100),
         tester.LimitDelta('Vcc', 3.30, 0.07),
         tester.LimitDelta('Isense', -90, 5),
-        tester.LimitBetween('3V3', -2.8, -2.5),
+        tester.LimitBetween('3V3', -3.3, -2.5),
         tester.LimitDelta('%ErrorV', 0, 2.24),
         tester.LimitDelta('%CalV', 0, 0.36),
         tester.LimitDelta('%ErrorI', 0, 2.15),
