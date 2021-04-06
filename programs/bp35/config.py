@@ -355,7 +355,7 @@ class BP35II(BP35):
     is_2 = True
     # ARM software version
     arm_5015 = '2.0.20330.5015'             # PC-24332 & MA-368 (All Rev 3)
-    arm_5072 = '2.0.35955.5072'             # Rev 4 @ ECO-23109 & MA395
+    arm_5073 = '2.0.64652.5073'             # Rev 4 @ ECO-23109 & MA395
     fixture_num = '034400'                  # BP35-II Fixture
 
 
@@ -372,7 +372,7 @@ class BP35IISR(BP35II):
     _rev_data = {
         None: _Values(
             hw_version=(16, Type.SR.value, 'B'),
-            arm_sw_version=BP35II.arm_5072
+            arm_sw_version=BP35II.arm_5073
             ),
         3: _Values(
             hw_version=(15, Type.SR.value, 'E'),
@@ -393,7 +393,7 @@ class BP35IIHA(BP35IISR):
     _rev_data = {
         None: _Values(
             hw_version=(16, Type.HA.value, 'B'),
-            arm_sw_version=BP35II.arm_5072
+            arm_sw_version=BP35II.arm_5073
             ),
         3: _Values(
             hw_version=(15, Type.HA.value, 'E'),
@@ -417,7 +417,7 @@ class BP35IISI(BP35II):
     _rev_data = {
         None: _Values(
             hw_version=(16, Type.SI.value, 'B'),
-            arm_sw_version=BP35II.arm_5072
+            arm_sw_version=BP35II.arm_5073
             ),
         3: _Values(
             hw_version=(15, Type.SI.value, 'E'),
