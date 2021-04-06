@@ -355,7 +355,7 @@ class BP35II(BP35):
     is_2 = True
     # ARM software version
     arm_5015 = '2.0.20330.5015'             # PC-24332 & MA-368 (All Rev 3)
-    arm_5072 = '2.0.20446.5072'             # Rev 4 @ ECO-23109 & MA395
+    arm_5072 = '2.0.35955.5072'             # Rev 4 @ ECO-23109 & MA395
     fixture_num = '034400'                  # BP35-II Fixture
 
 
