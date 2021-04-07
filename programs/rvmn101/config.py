@@ -328,10 +328,17 @@ class RVMN5x(Config):
         # Rev 1-2 were Engineering protoype builds
         (share.lots.Range('A201801', 'A202412'), 3),    # 034789, 035009
         (share.lots.Range('A202507', 'A203003'), 4),    # 035090, 035091
-        # Rev 5...
+        (share.lots.Range('A203118', 'A211611'), 5),    # 035224, 035225
+#        (share.lots.Range('A211612', 'Axxxxxx'), 6),    # 035818, 035819
+        # Rev 6...
         ))
     _rev_data = {
         None: _Values(
+            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            product_rev='06A', hardware_rev='05A', banner_lines=5,
+            reversed_output_dict={},
+            ),
+        5: _Values(
             nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
             product_rev='05C', hardware_rev='05A', banner_lines=5,
             reversed_output_dict={},
