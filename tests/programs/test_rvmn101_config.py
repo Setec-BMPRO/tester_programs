@@ -53,7 +53,7 @@ class RVMN101B_Config(unittest.TestCase):
         cfg = rvmn101.config.RVMN101B()
         checks = (
             ('A193000',
-                cfg._nordic_2_4_1, cfg._arm_image_3_0, '05F', '6A', 5, ),
+                cfg._nordic_2_4_2, cfg._arm_image_3_0, '05G', '6A', 5, ),
             )
         for (
                 uut, nordic_image, arm_image,
