@@ -27,7 +27,7 @@ class Console(share.console.Base):
             'smartlink hw-rev', writeable=True, write_format='{1} {0}'),
         # Calibration commands
         'BATT_CAL': parameter.Calibration(
-            'smartlink battery calibrate', scale=1000, write_expected=2),
+            'smartlink battery calibrate', scale=1000),
         # Action commands
         'REBOOT': parameter.String(
             'kernel reboot cold', writeable=True, write_format='{1}'),
@@ -37,7 +37,7 @@ class Console(share.console.Base):
         'MAC': parameter.String(
             'smartlink mac', read_format='{0}'),
         'BATT': parameter.String(
-            'smartlink battery read', scale=1000, read_format='{0}'),
+            'smartlink battery read', read_format='{0}'),
         'TANK1-1': parameter.Float(
             'smartlink analog 1', read_format='{0}'),
         'TANK2-1': parameter.Float(

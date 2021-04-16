@@ -23,8 +23,8 @@ class Initial(share.TestSequence):
             '^{0}$'.format(config.sw_nrf_version.replace('.', r'\.')),
             doc='Nordic Software version'),
         tester.LimitLow('PartCheck', 2.0),
-        tester.LimitDelta('Vin', vin_set, 0.5),
-        tester.LimitPercent('3V3', 3.30, 3.0),
+        tester.LimitDelta('Vin', vin_set - 2.0, 0.5),
+        tester.LimitPercent('3V3', 3.33, 3.0),
         tester.LimitInteger('Tank', 5),
         )
     sernum = None
@@ -36,7 +36,7 @@ class Initial(share.TestSequence):
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),
             tester.TestStep('PgmNordic', self.devices['progNRF'].program),
-            tester.TestStep('TestArm', self._step_test_arm),
+            tester.TestStep('TestNordic', self._step_test_nordic),
             tester.TestStep('TankSense', self._step_tank_sense),
             )
 
@@ -45,20 +45,20 @@ class Initial(share.TestSequence):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         mes['dmm_partcheck'](timeout=5)
-        dev['dcs_vin'].output(self.vin_set, output=True)
+        dev['dcs_vbatt'].output(self.vin_set, output=True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
 
     @share.teststep
-    def _step_test_arm(self, dev, mes):
-        """Test the ARM device."""
+    def _step_test_nordic(self, dev, mes):
+        """Test the Nordic device."""
         smartlink201 = dev['smartlink201']
         smartlink201.open()
         # Cycle power to get the Nordic running
-        dev['dcs_vin'].output(0, output=True, delay=2)
-        dev['dcs_vin'].output(self.vin_set,  output=True)
+        dev['dcs_vbatt'].output(0, output=True, delay=2)
+        dev['dcs_vbatt'].output(self.vin_set,  output=True)
         mes['dmm_3v3'](timeout=5)
         smartlink201.brand(
-            self.sernum, self.config.product_rev, self.config.hardware_rev)
+            self.sernum, config.product_rev, config.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
         dev['serialtomac'].blemac_set(self.sernum, smartlink201.get_mac())
         mes['smartlink201_swver']()
@@ -85,8 +85,8 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vin', tester.DCSource, 'DCS1'),
-                ('dcs_usb', tester.DCSource, 'DCS2'),
+                ('dcs_vbatt', tester.DCSource, 'DCS2'),
+                ('dcs_usb', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_s1', tester.Relay, 'RLA4'),
@@ -119,13 +119,13 @@ class Devices(share.Devices):
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Fixture USB power
-        self['dcs_usb'].output(9.0, output=True, delay=10)
+        self['dcs_usb'].output(8.0, output=True, delay=10)
         self.add_closer(lambda: self['dcs_usb'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
         self['smartlink201'].close()
-        self['dcs_vin'].output(0.0, False)
+        self['dcs_vbatt'].output(0.0, False)
         for rla in (
                 'rla_reset', 'rla_boot',
 #                'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4',
@@ -144,7 +144,7 @@ class Sensors(share.Sensors):
         self['mirscan'] = sensor.MirrorReadingBoolean()
         self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['o3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['photosense'] = sensor.Res(dmm, high=3, low=2, rng=100, res=0.1)
+        self['photosense'] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.1)
         self['oSnEntry'] = sensor.DataEntry(
             message=tester.translate('smartlink201_initial', 'msgSnEntry'),
             caption=tester.translate('smartlink201_initial', 'capSnEntry'))
