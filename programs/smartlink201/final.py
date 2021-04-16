@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2020 SETEC Pty Ltd
+# Copyright 2021 SETEC Pty Ltd
 """SmartLink201 Test Programs."""
 
 import tester
@@ -16,9 +16,10 @@ class Final(share.TestSequence):
         tester.LimitHigh(
             'ScanRSSI',
             -70 if share.config.System.tester_type in (
-                'ATE4', 'ATE5') else -85,
+                'ATE4', 'ATE5', ) else -85,
             doc='Strong BLE signal'),
         )
+    sernum = None
 
     def open(self, uut):
         """Prepare for testing."""
@@ -26,13 +27,14 @@ class Final(share.TestSequence):
         self.steps = (
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
-        self.sernum = None
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
-        reply = dev['pi_bt'].scan_advert_sernum(self.sernum, timeout=20)
+        # Lookup the MAC address from the server
+        mac = dev['serialtomac'].blemac_get(self.sernum)
+        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
         if reply:
             rssi = reply['rssi']
         else:
@@ -45,17 +47,19 @@ class Devices(share.Devices):
 
     """Devices. Uses SmartLink201 fixture."""
 
-    vbatt = 12.0        # Injected Vbatt
+    vin_set = 12.0      # Injected Vin (V)
 
     def open(self):
         """Create all Instruments."""
+        # Connection to Serial To MAC server
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
-        # Power to the units
-        self['dcs_vbat'] = tester.DCSource(self.physical_devices['DCS1'])
-        self['dcs_vbat'].output(self.vbatt, output=True, delay=5.0)
-        self.add_closer(lambda: self['dcs_vbat'].output(0.0, output=False))
+        # Power to the unit
+        self['dcs_vin'] = tester.DCSource(self.physical_devices['DCS1'])
+        self['dcs_vin'].output(self.vin_set, output=True, delay=5.0)
+        self.add_closer(lambda: self['dcs_vin'].output(0.0, output=False))
 
 
 class Sensors(share.Sensors):

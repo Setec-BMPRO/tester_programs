@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2018 SETEC Pty Ltd
+# Copyright 2021 SETEC Pty Ltd
 """SmartLink201 Test Programs."""
 
+product_rev = '02A'
+hardware_rev = '02B'
 
-# Software versions
-sw_arm_version = '1.2.111.2008'
-sw_nrf_version = '1.0.19700.1352'
-hw_version = (2, 0, 'A')
-banner_lines = 2
+sw_arm_image = 'nxp_v0.1.0.bin'
+
+sw_nrf_version = '1.0.0'
+sw_nrf_image = 'smartlink_signed_{0}-0-gacbb530_factory_mcuboot.hex'.format(sw_nrf_version)

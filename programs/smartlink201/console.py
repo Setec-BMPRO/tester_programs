@@ -1,62 +1,80 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2018 SETEC Pty Ltd
+# Copyright 2021 SETEC Pty Ltd
 """SmartLink201 Test Programs."""
+
+import re
 
 import share
 
 
-class _Console():
+class Console(share.console.Base):
 
-    """Base class for a SmartLink201 console."""
+    """SmartLink201 console."""
 
+    banner_lines = 5            # Startup banner lines
+    # Console command prompt. Signals the end of response data.
+    cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
+    # Console commands
     parameter = share.console.parameter
     cmd_data = {
-        'UNLOCK': parameter.Boolean(
-            '$DEADBEA7 UNLOCK',
-            writeable=True, readable=False, write_format='{1}'),
-        'NVDEFAULT': parameter.Boolean(
-            'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': parameter.Boolean(
-            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': parameter.String(
-            'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{0} {1}'),
-        'HW_VER': parameter.String(
-            'SET-HW-VER', writeable=True, readable=False,
-            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
-        'STATUS': parameter.Hex(
-            'STATUS', writeable=True,
-            minimum=0, maximum=0xF0000000),
-        'CAN_BIND': parameter.Hex(
-            'STATUS', writeable=True,
-            minimum=0, maximum=0xF0000000, mask=(1 << 28)),
-        'CAN': parameter.String('CAN',
-            writeable=True, write_format='"{0} {1}'),
-        'TANK1': parameter.Float('TANK_1_LEVEL'),
-        'TANK2': parameter.Float('TANK_2_LEVEL'),
-        'TANK3': parameter.Float('TANK_3_LEVEL'),
-        'TANK4': parameter.Float('TANK_4_LEVEL'),
-        'ADC_SCAN': parameter.Float('ADC_SCAN_INTERVAL_MSEC', writeable=True),
+        # Writable values
+        'SERIAL': parameter.String(
+            'smartlink serial', writeable=True, write_format='{1} {0}'),
+        'PRODUCT-REV': parameter.String(
+            'smartlink product-rev', writeable=True, write_format='{1} {0}'),
+        'HARDWARE-REV': parameter.String(
+            'smartlink hw-rev', writeable=True, write_format='{1} {0}'),
+        # Calibration commands
+        'BATT_CAL': parameter.Calibration(
+            'smartlink battery calibrate', scale=1000, write_expected=2),
+        # Action commands
+        'REBOOT': parameter.String(
+            'kernel reboot cold', writeable=True, write_format='{1}'),
+        # Readable values
+        'SW-REV': parameter.String(
+            'smartlink sw-rev', read_format='{0}'),
+        'MAC': parameter.String(
+            'smartlink mac', read_format='{0}'),
+        'BATT': parameter.String(
+            'smartlink battery read', scale=1000, read_format='{0}'),
+        'TANK1-1': parameter.Float(
+            'smartlink analog 1', read_format='{0}'),
+        'TANK2-1': parameter.Float(
+            'smartlink analog 5', read_format='{0}'),
+        'TANK3-1': parameter.Float(
+            'smartlink analog 9', read_format='{0}'),
+        'TANK4-1': parameter.Float(
+            'smartlink analog 13', read_format='{0}'),
         }
+    re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
 
-    def brand(self, hw_ver, sernum, reset_relay, banner_lines):
-        """Brand the unit with Hardware ID & Serial Number."""
-        reset_relay.pulse(0.1)
-        self.action(None, delay=1.5, expected=banner_lines)
-        self['UNLOCK'] = True
-        self['HW_VER'] = hw_ver
-        self['SER_ID'] = sernum
-        self['NVDEFAULT'] = True
-        self['NVWRITE'] = True
+    def brand(self, sernum, product_rev, hardware_rev):
+        """Brand the unit with Serial Number.
 
+        @param sernum SETEC Serial Number 'AYYWWLLNNNN'
+        @param product_rev Product revision from ECO eg: '02A'
+        @param hardware_rev Hardware revision from ECO eg: '02A'
 
-class DirectConsole(_Console, share.console.BadUart):
+        """
+        self.action(None, expected=self.banner_lines)
+        self['SERIAL'] = sernum
+        self['PRODUCT-REV'] = product_rev
+        self['HARDWARE-REV'] = hardware_rev
 
-    """Console for a direct connection."""
+    def get_mac(self):
+        """Get the MAC address from the console
 
+        @return 12 hex digit Bluetooth MAC address
 
-class TunnelConsole(_Console, share.console.CANTunnel):
-
-    """Console for a CAN tunneled connection."""
+        """
+        result = ''
+        try:
+            mac = self['MAC']
+            mac = mac.replace(':', '').lower()
+            match = self.re_blemac.search(mac)
+            if match:
+                result = match.group(0)
+        except share.console.Error:
+            pass
+        return result
