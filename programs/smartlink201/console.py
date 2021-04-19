@@ -12,7 +12,7 @@ class Console(share.console.Base):
 
     """SmartLink201 console."""
 
-    banner_lines = 5            # Startup banner lines
+    banner_lines = 12           # Startup banner lines
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
     # Console commands
@@ -36,8 +36,8 @@ class Console(share.console.Base):
             'smartlink sw-rev', read_format='{0}'),
         'MAC': parameter.String(
             'smartlink mac', read_format='{0}'),
-        'BATT': parameter.String(
-            'smartlink battery read', read_format='{0}'),
+        'BATT': parameter.Float(
+            'smartlink battery read', scale=1000, read_format='{0}'),
         'TANK1-1': parameter.Float(
             'smartlink analog 1', read_format='{0}'),
         'TANK2-1': parameter.Float(
@@ -78,3 +78,13 @@ class Console(share.console.Base):
         except share.console.Error:
             pass
         return result
+
+    def vbatt_cal(self, vbatt):
+        """Calibrate Vbatt reading.
+
+        @param vbatt Vbatt actual input value in mV
+
+        """
+        self['BATT_CAL'] = vbatt
+        self['REBOOT'] = None
+        self.action(None, delay=5, expected=self.banner_lines)
