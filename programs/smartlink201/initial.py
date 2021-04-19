@@ -5,6 +5,7 @@
 
 import inspect
 import os
+import time
 
 import serial
 import tester
@@ -22,6 +23,8 @@ class Initial(share.TestSequence):
         tester.LimitRegExp('SwVer',
             '^{0}$'.format(config.sw_nrf_version.replace('.', r'\.')),
             doc='Correct Software version'),
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address '),
         tester.LimitLow('PartCheck', 2.0, doc='All parts present'),
         tester.LimitDelta('Vbatt', vin_set, 0.5, doc='At nominal'),
         tester.LimitDelta('Vin', vin_set - 2.0, 0.5, doc='At nominal'),
@@ -40,7 +43,7 @@ class Initial(share.TestSequence):
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),
             tester.TestStep('PgmNordic', self.devices['progNordic'].program),
-            tester.TestStep('TestNordic', self._step_test_nordic),
+            tester.TestStep('Nordic', self._step_test_nordic),
             tester.TestStep('Calibrate', self._step_calibrate),
             tester.TestStep('TankSense', self._step_tank_sense),
             )
@@ -65,19 +68,22 @@ class Initial(share.TestSequence):
         smartlink201.brand(
             self.sernum, config.product_rev, config.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
-        dev['serialtomac'].blemac_set(self.sernum, smartlink201.get_mac())
+        mac = mes['SL_MAC']().reading1
+        dev['serialtomac'].blemac_set(self.sernum, mac)
         mes['SL_SwVer']()
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
         """Calibrate Vbatt."""
         smartlink201 = dev['smartlink201']
+        time.sleep(5)
         vbatt = mes['dmm_Vbatt'](timeout=5).reading1
         # Adjust Pre & Post reading dependant limits
         self.limits['SL_VbattPre'].adjust(nominal=vbatt)
         self.limits['SL_Vbatt'].adjust(nominal=vbatt)
         mes['SL_VbattPre']()
         smartlink201.vbatt_cal(vbatt)
+        time.sleep(7)
         mes['SL_Vbatt']()
 
     @share.teststep
@@ -178,6 +184,12 @@ class Sensors(share.Sensors):
         smartlink201 = self.devices['smartlink201']
         self['SL_SwVer'] = sensor.KeyedReadingString(smartlink201, 'SW_VER')
         self['SL_SwVer'].doc = 'Nordic software version'
+        self['SL_MAC'] = sensor.KeyedReadingString(smartlink201, 'MAC')
+        self['SL_MAC'].doc = 'Nordic BLE MAC'
+        # Convert "xx:xx:xx:xx:xx:xx(random)" to "xxxxxxxxxxxx"
+        self['SL_MAC'].on_read = (
+            lambda value: value.replace(':', '').replace(' (random)', '')
+            )
         self['SL_Vbatt'] = sensor.KeyedReading(smartlink201, 'BATT')
         self['SL_Vbatt'].doc = 'Nordic Vbatt reading'
         for tank in range(16):      # 16 analog tank inputs
@@ -203,8 +215,9 @@ class Measurements(share.Measurements):
                 'Nordic Vbatt before adjustment'),
             ('SL_Vbatt', 'SL_Vbatt', 'SL_Vbatt',
                 'Nordic Vbatt after adjustment'),
-            ('tank1_1_level', 'Tank', 'tank1', ''),
-            ('tank2_1_level', 'Tank', 'tank2', ''),
-            ('tank3_1_level', 'Tank', 'tank3', ''),
-            ('tank4_1_level', 'Tank', 'tank4', ''),
+            ('SL_MAC', 'BleMac', 'SL_MAC', 'Nordic MAC address valid'),
+#            ('tank1_1_level', 'Tank', 'tank1', ''),
+#            ('tank2_1_level', 'Tank', 'tank2', ''),
+#            ('tank3_1_level', 'Tank', 'tank3', ''),
+#            ('tank4_1_level', 'Tank', 'tank4', ''),
             ))

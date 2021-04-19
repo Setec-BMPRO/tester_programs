@@ -15,6 +15,8 @@ class Console(share.console.Base):
     banner_lines = 12           # Startup banner lines
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
+    # Strings to ignore in responses
+    ignore = ('Current Battery Voltage: ', ' mV', )
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
@@ -25,14 +27,15 @@ class Console(share.console.Base):
             'smartlink product-rev', writeable=True, write_format='{1} {0}'),
         'HARDWARE-REV': parameter.String(
             'smartlink hw-rev', writeable=True, write_format='{1} {0}'),
-        # Calibration commands
-        'BATT_CAL': parameter.Calibration(
-            'smartlink battery calibrate', scale=1000),
+        'BATT_CAL': parameter.Float(
+            'smartlink battery calibrate', scale=1000,
+            writeable=True, write_format='{1} {0}'),
         # Action commands
         'REBOOT': parameter.String(
-            'kernel reboot cold', writeable=True, write_format='{1}'),
+            'kernel reboot cold', writeable=True, write_format='{1}',
+            write_expected=banner_lines),
         # Readable values
-        'SW-REV': parameter.String(
+        'SW_VER': parameter.String(
             'smartlink sw-rev', read_format='{0}'),
         'MAC': parameter.String(
             'smartlink mac', read_format='{0}'),
@@ -64,23 +67,6 @@ class Console(share.console.Base):
         self['PRODUCT-REV'] = product_rev
         self['HARDWARE-REV'] = hardware_rev
 
-    def get_mac(self):
-        """Get the MAC address from the console
-
-        @return 12 hex digit Bluetooth MAC address
-
-        """
-        result = ''
-        try:
-            mac = self['MAC']
-            mac = mac.replace(':', '').lower()
-            match = self.re_blemac.search(mac)
-            if match:
-                result = match.group(0)
-        except share.console.Error:
-            pass
-        return result
-
     def vbatt_cal(self, vbatt):
         """Calibrate Vbatt reading.
 
@@ -89,7 +75,6 @@ class Console(share.console.Base):
         """
         self['BATT_CAL'] = vbatt
         self['REBOOT'] = None
-        self.action(None, delay=5, expected=self.banner_lines)
 
     def analog_read(self):
         """Read analog input raw values."""
