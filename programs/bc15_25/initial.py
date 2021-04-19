@@ -188,9 +188,9 @@ class Sensors(share.Sensors):
         # Console sensors
         arm = self.devices['arm']
         self['arm_vout'] = sensor.KeyedReading(arm, 'not-pulsing-volts')
-        self['arm_vout'].scale = 0.001
+        self['arm_vout'].scale = 1000
         self['arm_iout'] = sensor.KeyedReading(arm, 'not-pulsing-current')
-        self['arm_iout'].scale = 0.001
+        self['arm_iout'].scale = 1000
         self['arm_switch'] = sensor.KeyedReading(arm, 'SWITCH')
         self['arm_swver'] = sensor.KeyedReadingString(arm, 'SW_VER')
 
