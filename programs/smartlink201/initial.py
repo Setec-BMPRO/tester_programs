@@ -30,6 +30,7 @@ class Initial(share.TestSequence):
         tester.LimitDelta('SL_Vbatt', vin_set, 0.05, doc='After cal'),
         tester.LimitInteger('Tank', 5),
         )
+    analog_read_wait = 0.5      # Analog read settling time
     sernum = None
 
     def open(self, uut):
@@ -82,10 +83,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_tank_sense(self, dev, mes):
         """Activate tank sensors and read."""
+        smartlink201 = dev['smartlink201']
         self.relay(
-            (('rla_s1', True), ('rla_s2', True),
-             ('rla_s3', True), ('rla_s4', True), ),
-            delay=0.2)
+            (('rla_s1', True), ('rla_s3', True), ),
+            delay=self.analog_read_wait)
+        smartlink201.analog_read()      # Read all tank sensor inputs
 #        self.measure(
 #            ('tank1_1_level', 'tank2_1_level',
 #             'tank3_1_level', 'tank4_1_level'),
@@ -178,13 +180,9 @@ class Sensors(share.Sensors):
         self['SL_SwVer'].doc = 'Nordic software version'
         self['SL_Vbatt'] = sensor.KeyedReading(smartlink201, 'BATT')
         self['SL_Vbatt'].doc = 'Nordic Vbatt reading'
-        for name, cmdkey in (   # Numerical readings
-                ('tank1', 'TANK1-1'),
-                ('tank2', 'TANK2-1'),
-                ('tank3', 'TANK3-1'),
-                ('tank4', 'TANK4-1'),
-            ):
-            self[name] = sensor.KeyedReading(smartlink201, cmdkey)
+        for tank in range(16):      # 16 analog tank inputs
+            name = 'TANK{0}-{1}'.format((tank // 4) + 1, (tank % 4) + 1)
+            self[name] = sensor.KeyedReading(smartlink201, name)
 
 
 class Measurements(share.Measurements):

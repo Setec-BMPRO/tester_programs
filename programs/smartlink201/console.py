@@ -38,16 +38,18 @@ class Console(share.console.Base):
             'smartlink mac', read_format='{0}'),
         'BATT': parameter.Float(
             'smartlink battery read', scale=1000, read_format='{0}'),
-        'TANK1-1': parameter.Float(
-            'smartlink analog 1', read_format='{0}'),
-        'TANK2-1': parameter.Float(
-            'smartlink analog 5', read_format='{0}'),
-        'TANK3-1': parameter.Float(
-            'smartlink analog 9', read_format='{0}'),
-        'TANK4-1': parameter.Float(
-            'smartlink analog 13', read_format='{0}'),
         }
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
+    # Storage of response to analog query command
+    analog_linecount = 18
+    analog_regexp = re.compile('^([0-9]{1-2}):(0x0[0-9A-F]{3})$')
+    analog_data = []    # Analog readings
+
+    def __getitem__(self, key):
+        """Read a value."""
+        if key in self.analog_data:         # Try a analog value
+            return self.analog_data[key]
+        return super().__getitem__(key)     # Last, try the command table
 
     def brand(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
@@ -88,3 +90,17 @@ class Console(share.console.Base):
         self['BATT_CAL'] = vbatt
         self['REBOOT'] = None
         self.action(None, delay=5, expected=self.banner_lines)
+
+    def analog_read(self):
+        """Read analog input raw values."""
+        self.analog_data.clear()
+        response = self.action(
+            'smartlink analog', expected=self.analog_linecount)
+        # Response lines are <DecimalIndex>:<HexValue> eg "9:0x0FFF"
+        for line in response:
+            match = self.analog_regexp.match(line)
+            if match:
+                index, hex = match.groups()
+                index = int(index)
+                name = 'TANK{0}-{1}'.format((index // 4) + 1, (index % 4) + 1)
+                self.analog_data[name] = int(hex, 16)
