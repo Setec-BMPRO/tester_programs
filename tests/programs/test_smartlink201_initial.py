@@ -26,8 +26,8 @@ class SmartLink201Initial(ProgramTestCase):
                 'share.programmer.ARM',
                 'share.programmer.Nordic',
                 'share.bluetooth.RaspberryBluetooth',
-                'programs.smartlink201.console.DirectConsole',
-                'programs.smartlink201.console.TunnelConsole',
+                'share.bluetooth.SerialToMAC',
+                'programs.smartlink201.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -40,28 +40,22 @@ class SmartLink201Initial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['oSnEntry'], 'A1526040123'),
+                    (sen['SnEntry'], 'A2126010123'),
                     (sen['photosense'], 0.0),
-                    (sen['oVin'], 8.0), (sen['o3V3'], 3.3),
+                    (sen['Vbatt'], 12.0),
+                    (sen['Vin'], 10.0),
+                    (sen['3V3'], 3.3),
                     ),
-                'TestArm': (
-                    (sen['o3V3'], 3.3),
-                    (sen['SwVer'],
-                     smartlink201.config.sw_arm_version),
+                'Nordic': (
+                    (sen['3V3'], 3.3),
+                    (sen['SL_MAC'], 'aabbccddeeff'),
+                    (sen['SL_SwVer'], smartlink201.config.sw_nrf_version),
+                    ),
+                'Calibrate': (
+                    (sen['Vbatt'], 12.01),
+                    (sen['SL_Vbatt'], (12.12, 12.02, )),
                     ),
                 'TankSense': (
-                    (sen['tank1'], 5),
-                    (sen['tank2'], 5),
-                    (sen['tank3'], 5),
-                    (sen['tank4'], 5),
-                    ),
-                'Bluetooth': (
-                    (sen['mirscan'], True),
-                    ),
-                'CanBus': (
-                    (sen['CANBIND'], 1 << 28),
-                    (sen['TunnelSwVer'],
-                     smartlink201.config.sw_arm_version),
                     ),
                 },
             }
@@ -69,8 +63,8 @@ class SmartLink201Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(13, len(result.readings))
+        self.assertEqual(11, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmARM', 'PgmNordic', 'TestArm',
-             'TankSense', 'Bluetooth', 'CanBus'],
+            ['PowerUp', 'PgmARM', 'PgmNordic',
+             'Nordic', 'Calibrate', 'TankSense', ],
             self.tester.ut_steps)

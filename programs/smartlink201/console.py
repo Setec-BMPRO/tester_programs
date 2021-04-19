@@ -15,8 +15,6 @@ class Console(share.console.Base):
     banner_lines = 12           # Startup banner lines
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
-    # Strings to ignore in responses
-    ignore = ('Current Battery Voltage: ', ' mV', )
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
@@ -39,8 +37,8 @@ class Console(share.console.Base):
             'smartlink sw-rev', read_format='{0}'),
         'MAC': parameter.String(
             'smartlink mac', read_format='{0}'),
-        'BATT': parameter.Float(
-            'smartlink battery read', scale=1000, read_format='{0}'),
+        'BATT': parameter.String(
+            'smartlink battery read', read_format='{0}'),
         }
     re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     # Storage of response to analog query command

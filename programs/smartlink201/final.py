@@ -69,11 +69,11 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self['sernum'] = sensor.DataEntry(
+        self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('smartlink201_final', 'msgSnEntry'),
             caption=tester.translate('smartlink201_final', 'capSnEntry'))
-        self['sernum'].doc = 'Barcode scanner'
-        self['mirrssi'] = sensor.MirrorReading()
+        self['SnEntry'].doc = 'Barcode scanner'
+        self['mir_RSSI'] = sensor.MirrorReading()
 
 
 class Measurements(share.Measurements):
@@ -83,6 +83,6 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
-            ('scan_rssi', 'ScanRSSI', 'mirrssi', 'Bluetooth signal strength'),
+            ('ui_sernum', 'SerNum', 'SnEntry', 'Unit serial number'),
+            ('scan_rssi', 'ScanRSSI', 'mir_RSSI', 'Bluetooth signal strength'),
             ))

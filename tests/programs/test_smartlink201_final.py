@@ -19,11 +19,17 @@ class SmartLink201Final(ProgramTestCase):
         """Per-Test setup."""
         # BLE scanner
         mypi = MagicMock(name='MyRasPi')
-        mypi.scan_advert_sernum.return_value = {'ad_data': '', 'rssi': -50}
+        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
         patcher = patch(
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
+        for target in (
+                'share.bluetooth.SerialToMAC',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):
@@ -32,7 +38,7 @@ class SmartLink201Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Bluetooth': (
-                    (sen['sernum'], 'A2026040123'),
+                    (sen['SnEntry'], 'A2126010123'),
                     ),
                 },
             }

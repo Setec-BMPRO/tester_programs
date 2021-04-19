@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
         tester.LimitPercent('3V3', 3.33, 3.0, doc='At nominal'),
         tester.LimitDelta('SL_VbattPre', vin_set, 0.25, doc='Before cal'),
         tester.LimitDelta('SL_Vbatt', vin_set, 0.05, doc='After cal'),
-        tester.LimitInteger('Tank', 5),
+#        tester.LimitInteger('Tank', 5),
         )
     analog_read_wait = 0.5      # Analog read settling time
     sernum = None
@@ -178,8 +178,6 @@ class Sensors(share.Sensors):
             message=tester.translate('smartlink201_initial', 'msgSnEntry'),
             caption=tester.translate('smartlink201_initial', 'capSnEntry'))
         self['SnEntry'].doc = 'Entered S/N'
-        self['mirscan'] = sensor.MirrorReadingBoolean()
-        self['mirscan'].doc = 'BLE scan result'
         # Console sensors
         smartlink201 = self.devices['smartlink201']
         self['SL_SwVer'] = sensor.KeyedReadingString(smartlink201, 'SW_VER')
@@ -192,6 +190,12 @@ class Sensors(share.Sensors):
             )
         self['SL_Vbatt'] = sensor.KeyedReading(smartlink201, 'BATT')
         self['SL_Vbatt'].doc = 'Nordic Vbatt reading'
+        self['SL_Vbatt'].scale = 1000
+        # Convert "Current Battery Voltage: xxxxx mV" to "xxxxx"
+        self['SL_MAC'].on_read = (
+            lambda value: value.replace(
+                'Current Battery Voltage: ', '').replace(' mV', '')
+            )
         for tank in range(16):      # 16 analog tank inputs
             name = 'TANK{0}-{1}'.format((tank // 4) + 1, (tank % 4) + 1)
             self[name] = sensor.KeyedReading(smartlink201, name)
