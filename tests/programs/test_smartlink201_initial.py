@@ -53,7 +53,7 @@ class SmartLink201Initial(ProgramTestCase):
                     ),
                 'Calibrate': (
                     (sen['Vbatt'], 12.01),
-                    (sen['SL_Vbatt'], (12.12, 12.02, )),
+                    (sen['SL_Vbatt'], ('12120', '12020', )),
                     ),
                 'TankSense': (
                     ),
