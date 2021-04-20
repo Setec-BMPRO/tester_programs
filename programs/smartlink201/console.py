@@ -40,17 +40,16 @@ class Console(share.console.Base):
         'BATT': parameter.String(
             'smartlink battery read', read_format='{0}'),
         }
-    re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     # Storage of response to analog query command
     analog_linecount = 18
     analog_regexp = re.compile('^([0-9]{1-2}):(0x0[0-9A-F]{3})$')
-    analog_data = []    # Analog readings
+    analog_data = []        # Analog readings
 
     def __getitem__(self, key):
         """Read a value."""
-        if key in self.analog_data:         # Try a analog value
+        if key in self.analog_data:         # Try an analog value
             return self.analog_data[key]
-        return super().__getitem__(key)     # Last, try the command table
+        return super().__getitem__(key)     # Try the command table
 
     def brand(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
@@ -85,5 +84,14 @@ class Console(share.console.Base):
             if match:
                 index, hex = match.groups()
                 index = int(index)
-                name = 'TANK{0}-{1}'.format((index // 4) + 1, (index % 4) + 1)
+                name = self.tank_name(index)
                 self.analog_data[name] = int(hex, 16)
+
+    def tank_name(self, index):
+        """Generate a Tank input name.
+
+        @parm index Tank input index (0-15)
+        @return Tank name string eg: "TANK1-1" to "TANK4-4"
+
+        """
+        return 'TANK{0}-{1}'.format((index // 4) + 1, (index % 4) + 1)

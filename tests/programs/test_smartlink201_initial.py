@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for SmartLink201 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import smartlink201
@@ -17,15 +17,10 @@ class SmartLink201Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         for target in (
+                'setec.BackgroundTimer',
                 'share.programmer.ARM',
                 'share.programmer.Nordic',
-                'share.bluetooth.RaspberryBluetooth',
                 'share.bluetooth.SerialToMAC',
                 'programs.smartlink201.console.Console',
                 ):

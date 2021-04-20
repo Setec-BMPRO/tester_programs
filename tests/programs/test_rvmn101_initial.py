@@ -47,11 +47,12 @@ class RVMN101BInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['SnEntry'], 'A1926040123'),
+                    (sen['SnEntry'], 'A2126010123'),
                     (sen['VBatt'], 12.0),
                     (sen['3V3'], 3.3),
                     ),
                 'Initialise': (
+                    (sen['BleMac'], 'aabbccddeeff'),
                     ),
                 'Output': (
                     (sen['HSout'],
@@ -68,8 +69,8 @@ class RVMN101BInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(9, len(result.readings))
+        self.assertEqual(10, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmARM', 'PgmNordic', 'Initialise',
-             'Output', 'CanBus'],
+            ['PowerUp', 'PgmARM', 'PgmNordic',
+             'Initialise', 'Output', 'CanBus'],
             self.tester.ut_steps)

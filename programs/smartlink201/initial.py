@@ -5,9 +5,9 @@
 
 import inspect
 import os
-import time
 
 import serial
+import setec
 import tester
 
 import share
@@ -23,17 +23,21 @@ class Initial(share.TestSequence):
         tester.LimitRegExp('SwVer',
             '^{0}$'.format(config.sw_nrf_version.replace('.', r'\.')),
             doc='Correct Software version'),
-        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+        tester.LimitRegExp('BleMac', r'^[0-9a-f]{12}$',
             doc='Valid MAC address '),
-        tester.LimitLow('PartCheck', 2.0, doc='All parts present'),
+        tester.LimitLow('PartOk', 2.0, doc='All parts present'),
         tester.LimitDelta('Vbatt', vin_set, 0.5, doc='At nominal'),
         tester.LimitDelta('Vin', vin_set - 2.0, 0.5, doc='At nominal'),
         tester.LimitPercent('3V3', 3.33, 3.0, doc='At nominal'),
         tester.LimitDelta('SL_VbattPre', vin_set, 0.25, doc='Before cal'),
         tester.LimitDelta('SL_Vbatt', vin_set, 0.05, doc='After cal'),
+        # Analog tank inputs
+        #   Open: approx. > 0xFF0
+        #   Short:  Sense 1: 170-200    Sense 2-4: 60-80
 #        tester.LimitInteger('Tank', 5),
         )
-    analog_read_wait = 0.5      # Analog read settling time
+    analog_read_wait = 0.5      # Analog read response time
+    vbatt_read_wait = 6.0       # Delay until Vbatt reading is valid
     sernum = None
 
     def open(self, uut):
@@ -67,6 +71,7 @@ class Initial(share.TestSequence):
         mes['dmm_3V3'](timeout=5)
         smartlink201.brand(
             self.sernum, config.product_rev, config.hardware_rev)
+        dev['VbattTimer'].start(self.vbatt_read_wait)
         # Save SerialNumber & MAC on a remote server.
         mac = mes['SL_MAC']().reading1
         dev['serialtomac'].blemac_set(self.sernum, mac)
@@ -76,14 +81,15 @@ class Initial(share.TestSequence):
     def _step_calibrate(self, dev, mes):
         """Calibrate Vbatt."""
         smartlink201 = dev['smartlink201']
-        time.sleep(5)
+        dev['VbattTimer'].wait()
         vbatt = mes['dmm_Vbatt'](timeout=5).reading1
         # Adjust Pre & Post reading dependant limits
         self.limits['SL_VbattPre'].adjust(nominal=vbatt)
         self.limits['SL_Vbatt'].adjust(nominal=vbatt)
         mes['SL_VbattPre']()
         smartlink201.vbatt_cal(vbatt)
-        time.sleep(7)
+        dev['VbattTimer'].start(self.vbatt_read_wait)
+        dev['VbattTimer'].wait()
         mes['SL_Vbatt']()
 
     @share.teststep
@@ -141,6 +147,8 @@ class Devices(share.Devices):
         #   Set port separately, as we don't want it opened yet
         smartlink201_ser.port = share.config.Fixture.port(fixture, 'NORDIC')
         self['smartlink201'] = console.Console(smartlink201_ser)
+        # Background timer for console waits
+        self['VbattTimer'] = setec.BackgroundTimer()
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Fixture USB power
@@ -196,8 +204,8 @@ class Sensors(share.Sensors):
             lambda value: value.replace(
                 'Current Battery Voltage: ', '').replace(' mV', '')
             )
-        for tank in range(16):      # 16 analog tank inputs
-            name = 'TANK{0}-{1}'.format((tank // 4) + 1, (tank % 4) + 1)
+        for index in range(16):     # 16 analog tank inputs
+            name = smartlink201.tank_name(index)
             self[name] = sensor.KeyedReading(smartlink201, name)
 
 
@@ -208,7 +216,7 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_Parts', 'PartCheck', 'photosense',
+            ('dmm_Parts', 'PartOk', 'photosense',
                 'All hand loaded parts fitted'),
             ('dmm_Vin', 'Vin', 'Vin', 'Vin rail ok'),
             ('dmm_3V3', '3V3', '3V3', '3V3 rail ok'),

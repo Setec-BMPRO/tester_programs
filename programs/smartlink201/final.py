@@ -17,7 +17,7 @@ class Final(share.TestSequence):
             'ScanRSSI',
             -70 if share.config.System.tester_type in (
                 'ATE4', 'ATE5', ) else -85,
-            doc='Strong BLE signal'),
+            doc='Strong signal'),
         )
     sernum = None
 
@@ -30,17 +30,14 @@ class Final(share.TestSequence):
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
-        """Test the Bluetooth interface."""
+        """Test Bluetooth signal strength."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Lookup the MAC address from the server
         mac = dev['serialtomac'].blemac_get(self.sernum)
         reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
-        if reply:
-            rssi = reply['rssi']
-        else:
-            rssi = float('NaN')
-        mes['scan_rssi'].sensor.store(rssi)
-        mes['scan_rssi']()
+        rssi = reply['rssi'] if reply else float('NaN')
+        mes['scan_RSSI'].sensor.store(rssi)
+        mes['scan_RSSI']()
 
 
 class Devices(share.Devices):
@@ -72,8 +69,9 @@ class Sensors(share.Sensors):
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('smartlink201_final', 'msgSnEntry'),
             caption=tester.translate('smartlink201_final', 'capSnEntry'))
-        self['SnEntry'].doc = 'Barcode scanner'
+        self['SnEntry'].doc = 'Entered S/N'
         self['mir_RSSI'] = sensor.MirrorReading()
+        self['mir_RSSI'].doc = 'Measured RSSI'
 
 
 class Measurements(share.Measurements):
@@ -83,6 +81,6 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('ui_sernum', 'SerNum', 'SnEntry', 'Unit serial number'),
-            ('scan_rssi', 'ScanRSSI', 'mir_RSSI', 'Bluetooth signal strength'),
+            ('ui_sernum', 'SerNum', 'SnEntry', 'S/N valid'),
+            ('scan_RSSI', 'ScanRSSI', 'mir_RSSI', 'Bluetooth signal strength'),
             ))
