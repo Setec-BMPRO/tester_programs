@@ -3,8 +3,6 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101x and RVMN5x Console driver."""
 
-import re
-
 import share
 
 
@@ -42,7 +40,6 @@ class _Console(share.console.Base):
             readable=False, writeable=True, write_format='{1} {0}'),
         }
     banner_lines = None         # Startup banner lines (set from config)
-    re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     max_output_index = 56       # Output index is range(max_output_index)
     missing_output_dict = {}    # Key: any text, Value: Output index
     reversed_output_dict = {}   # Key: any text, Value: Output index
@@ -141,23 +138,6 @@ class _Console(share.console.Base):
         self['PRODUCT-REV'] = product_rev
         if hardware_rev:
             self['HARDWARE-REV'] = hardware_rev
-
-    def get_mac(self):
-        """Get the MAC address from the console
-
-        @return 12 hex digit Bluetooth MAC address
-
-        """
-        result = ''
-        try:
-            mac = self['MAC']
-            mac = mac.replace(':', '').lower()
-            match = self.re_blemac.search(mac)
-            if match:
-                result = match.group(0)
-        except share.console.Error:
-            pass
-        return result
 
     def hs_output(self, index, state=False):
         """Set a HS output state.
