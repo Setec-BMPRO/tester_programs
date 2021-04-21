@@ -45,13 +45,17 @@ class Console(share.console.Base):
         }
     # Storage of response to analog query command
     analog_linecount = 18
-    analog_regexp = re.compile('^([0-9]{1-2}):(0x0[0-9A-F]{3})$')
-    analog_data = []        # Analog readings
+    analog_regexp = re.compile(r'^([0-9]{1,2})\:(0x0[0-9A-F]{3})$')
+    analog_data = {}            # Analog readings
     vbatt_read_wait = 6.0       # Delay until Vbatt reading is valid
 
-    def __init__(self):
-        """Create instance."""
-        super().__init__()
+    def __init__(self, port):
+        """Initialise communications.
+
+        @param port Serial instance to use
+
+        """
+        super().__init__(port)
         # Background timer for Vbatt reading readiness
         self.vbatttimer = setec.BackgroundTimer()
 
@@ -97,8 +101,7 @@ class Console(share.console.Base):
             match = self.analog_regexp.match(line)
             if match:
                 index, hex = match.groups()
-                index = int(index)
-                name = self.tank_name(index)
+                name = self.tank_name(int(index))
                 self.analog_data[name] = int(hex, 16)
 
     @staticmethod

@@ -33,10 +33,11 @@ class Initial(share.TestSequence):
         # Analog tank inputs
         #   Open: approx. > 0xFF0
         #   Short:  Sense 1: 170-200    Sense 2-4: 60-80
-        tester.LimitHigh('TankHi', 0xFF0),
-        tester.LimitLow('TankLo', 0x100),
+        tester.LimitHigh('TankHi', 0xF00),
+        tester.LimitLow('TankLo', 0x200),
         )
-    analog_read_wait = 0.5      # Analog read response time
+# FIXME: Prod. Notes say this is 0.5s Need to use >1.5s
+    analog_read_wait = 2        # Analog read response time
     sernum = None
 
     def open(self, uut):
@@ -120,7 +121,7 @@ class Devices(share.Devices):
                 ('dcs_USB', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
-                ('rla_s1', tester.Relay, 'RLA4'),
+                ('rla_s1', tester.Relay, 'RLA4'),   # 4k7 pull-down on tanks
                 ('rla_s2', tester.Relay, 'RLA5'),
                 ('rla_s3', tester.Relay, 'RLA6'),
                 ('rla_s4', tester.Relay, 'RLA7'),
@@ -198,7 +199,7 @@ class Sensors(share.Sensors):
         self['SL_Vbatt'].doc = 'Nordic Vbatt reading'
         self['SL_Vbatt'].scale = 1000
         # Convert "Current Battery Voltage: xxxxx mV" to "xxxxx"
-        self['SL_MAC'].on_read = (
+        self['SL_Vbatt'].on_read = (
             lambda value: value.replace(
                 'Current Battery Voltage: ', '').replace(' mV', '')
             )
