@@ -7,7 +7,6 @@ import inspect
 import os
 
 import serial
-import setec
 import tester
 
 import share
@@ -37,7 +36,6 @@ class Initial(share.TestSequence):
 #        tester.LimitInteger('Tank', 5),
         )
     analog_read_wait = 0.5      # Analog read response time
-    vbatt_read_wait = 6.0       # Delay until Vbatt reading is valid
     sernum = None
 
     def open(self, uut):
@@ -71,7 +69,6 @@ class Initial(share.TestSequence):
         mes['dmm_3V3'](timeout=5)
         smartlink201.brand(
             self.sernum, config.product_rev, config.hardware_rev)
-        dev['VbattTimer'].start(self.vbatt_read_wait)
         # Save SerialNumber & MAC on a remote server.
         mac = mes['SL_MAC']().reading1
         dev['serialtomac'].blemac_set(self.sernum, mac)
@@ -81,15 +78,12 @@ class Initial(share.TestSequence):
     def _step_calibrate(self, dev, mes):
         """Calibrate Vbatt."""
         smartlink201 = dev['smartlink201']
-        dev['VbattTimer'].wait()
         vbatt = mes['dmm_Vbatt'](timeout=5).reading1
         # Adjust Pre & Post reading dependant limits
         self.limits['SL_VbattPre'].adjust(nominal=vbatt)
         self.limits['SL_Vbatt'].adjust(nominal=vbatt)
         mes['SL_VbattPre']()
         smartlink201.vbatt_cal(vbatt)
-        dev['VbattTimer'].start(self.vbatt_read_wait)
-        dev['VbattTimer'].wait()
         mes['SL_Vbatt']()
 
     @share.teststep
@@ -147,8 +141,6 @@ class Devices(share.Devices):
         #   Set port separately, as we don't want it opened yet
         smartlink201_ser.port = share.config.Fixture.port(fixture, 'NORDIC')
         self['smartlink201'] = console.Console(smartlink201_ser)
-        # Background timer for console waits
-        self['VbattTimer'] = setec.BackgroundTimer()
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Fixture USB power

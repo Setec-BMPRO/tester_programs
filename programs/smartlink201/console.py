@@ -5,6 +5,8 @@
 
 import re
 
+import setec
+
 import share
 
 
@@ -17,6 +19,7 @@ class Console(share.console.Base):
     cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
     # Console commands
     parameter = share.console.parameter
+    vbatt_key = 'BATT'          # Key to read Vbatt
     cmd_data = {
         # Writable values
         'SERIAL': parameter.String(
@@ -37,18 +40,27 @@ class Console(share.console.Base):
             'smartlink sw-rev', read_format='{0}'),
         'MAC': parameter.String(
             'smartlink mac', read_format='{0}'),
-        'BATT': parameter.String(
+        vbatt_key: parameter.String(
             'smartlink battery read', read_format='{0}'),
         }
     # Storage of response to analog query command
     analog_linecount = 18
     analog_regexp = re.compile('^([0-9]{1-2}):(0x0[0-9A-F]{3})$')
     analog_data = []        # Analog readings
+    vbatt_read_wait = 6.0       # Delay until Vbatt reading is valid
+
+    def __init__(self):
+        """Create instance."""
+        super().__init__()
+        # Background timer for Vbatt reading readiness
+        self.vbatttimer = setec.BackgroundTimer()
 
     def __getitem__(self, key):
         """Read a value."""
         if key in self.analog_data:         # Try an analog value
             return self.analog_data[key]
+        if key == self.vbatt_key:           # Wait for Vbatt reading
+            self.vbatttimer.wait()
         return super().__getitem__(key)     # Try the command table
 
     def brand(self, sernum, product_rev, hardware_rev):
@@ -60,6 +72,7 @@ class Console(share.console.Base):
 
         """
         self.action(None, expected=self.banner_lines)
+        self.vbatttimer.start(self.vbatt_read_wait)
         self['SERIAL'] = sernum
         self['PRODUCT-REV'] = product_rev
         self['HARDWARE-REV'] = hardware_rev
@@ -72,6 +85,7 @@ class Console(share.console.Base):
         """
         self['BATT_CAL'] = vbatt
         self['REBOOT'] = None
+        self.vbatttimer.start(self.vbatt_read_wait)
 
     def analog_read(self):
         """Read analog input raw values."""
