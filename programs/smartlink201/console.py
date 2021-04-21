@@ -101,7 +101,8 @@ class Console(share.console.Base):
                 name = self.tank_name(index)
                 self.analog_data[name] = int(hex, 16)
 
-    def tank_name(self, index):
+    @staticmethod
+    def tank_name(index):
         """Generate a Tank input name.
 
         @parm index Tank input index (0-15)

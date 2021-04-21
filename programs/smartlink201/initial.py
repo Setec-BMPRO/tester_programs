@@ -33,7 +33,8 @@ class Initial(share.TestSequence):
         # Analog tank inputs
         #   Open: approx. > 0xFF0
         #   Short:  Sense 1: 170-200    Sense 2-4: 60-80
-#        tester.LimitInteger('Tank', 5),
+        tester.LimitHigh('TankHi', 0xFF0),
+        tester.LimitLow('TankLo', 0x100),
         )
     analog_read_wait = 0.5      # Analog read response time
     sernum = None
@@ -88,16 +89,21 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
-        """Activate tank sensors and read."""
+        """Tank sensors."""
         smartlink201 = dev['smartlink201']
-        self.relay(
+        smartlink201.analog_read()      # Read all tank sensor inputs
+        for index in range(16):         # All analog tank inputs
+            name = smartlink201.tank_name(index)
+            mes[name]()
+        self.relay(                     # Pull down alternate inputs
             (('rla_s1', True), ('rla_s3', True), ),
             delay=self.analog_read_wait)
         smartlink201.analog_read()      # Read all tank sensor inputs
-#        self.measure(
-#            ('tank1_1_level', 'tank2_1_level',
-#             'tank3_1_level', 'tank4_1_level'),
-#            timeout=5)
+        for index in range(16):         # All analog tank inputs
+            name = smartlink201.tank_name(index)
+            if not index % 2:           # Every 2nd input is now low
+                name += '_L'
+            mes[name]()
 
 
 class Devices(share.Devices):
@@ -220,8 +226,15 @@ class Measurements(share.Measurements):
             ('SL_Vbatt', 'SL_Vbatt', 'SL_Vbatt',
                 'Nordic Vbatt after adjustment'),
             ('SL_MAC', 'BleMac', 'SL_MAC', 'Nordic MAC address valid'),
-#            ('tank1_1_level', 'Tank', 'tank1', ''),
-#            ('tank2_1_level', 'Tank', 'tank2', ''),
-#            ('tank3_1_level', 'Tank', 'tank3', ''),
-#            ('tank4_1_level', 'Tank', 'tank4', ''),
             ))
+        for index in range(16):         # All tank inputs High
+            name = console.Console.tank_name(index)
+            self[name] = tester.Measurement(
+                self.limits['TankHi'],
+                self.sensors[name],
+                doc='Input open circuit')
+            if not index % 2:           # S1,S3 tank inputs Low
+                self[name + '_L'] = tester.Measurement(
+                    self.limits['TankLo'],
+                    self.sensors[name],
+                    doc='Input pulled down')
