@@ -36,7 +36,6 @@ class Initial(share.TestSequence):
         tester.LimitHigh('TankHi', 0xF00),
         tester.LimitLow('TankLo', 0x200),
         )
-# FIXME: Prod. Notes say this is 0.5s Need to use >1.5s
     analog_read_wait = 2        # Analog read response time
     sernum = None
 
