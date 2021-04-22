@@ -45,7 +45,7 @@ class Console(share.console.Base):
         }
     # Storage of response to analog query command
     analog_linecount = 18
-    analog_regexp = re.compile(r'^([0-9]{1,2})\:(0x0[0-9A-F]{3})$')
+    analog_regexp = re.compile(r'^([0-9]{1,2})\:(0x[0-9A-F]{4})$')
     analog_data = {}            # Analog readings
     vbatt_read_wait = 6.0       # Delay until Vbatt reading is valid
 
