@@ -24,16 +24,14 @@ class RVMN101A_Config(unittest.TestCase):
         """Rev of units."""
         cfg = rvmn101.config.RVMN101A()
         checks = (
-            ('A192000',
-                'dunno', cfg._arm_image_19, '05A', '05A', 4, ),
             ('A192800',
-                'dunno', cfg._arm_image_19, '06A', '06A', 4, ),
+                cfg._nordic_2_3_7, cfg._arm_image_1_13, '06H', '06A', 5, ),
             ('A193000',
-                cfg._nordic_133, cfg._arm_image_19, '07A', '07A', 4, ),
+                cfg._nordic_2_3_7, cfg._arm_image_1_13, '07D', '07A', 5, ),
             ('A195000',
-                cfg._nordic_181, cfg._arm_image_19, '08A', '08A', 4, ),
+                cfg._nordic_2_3_7, cfg._arm_image_1_13, '08D', '08A', 5, ),
             ('A200100',
-                cfg._nordic_1106, cfg._arm_image_113, '09A', '08A', 6, ),
+                cfg._nordic_2_3_7, cfg._arm_image_1_13, '09D', '08A', 5, ),
             )
         for (
                 uut, nordic_image, arm_image,
@@ -55,7 +53,7 @@ class RVMN101B_Config(unittest.TestCase):
         cfg = rvmn101.config.RVMN101B()
         checks = (
             ('A193000',
-                cfg._nordic_088, cfg._arm_image_19, '05B', None, 4, ),
+                cfg._nordic_2_4_2, cfg._arm_image_3_0, '05G', '6A', 5, ),
             )
         for (
                 uut, nordic_image, arm_image,

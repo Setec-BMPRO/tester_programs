@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2020 SETEC Pty Ltd.
-"""TRS-BTS Console driver."""
+"""TRS-BTx Console driver."""
 
 import re
+import time
 
 import share
 
@@ -32,6 +33,8 @@ class Console(share.console.Base):
             write_format='{0[0]} {0[1]} "{0[2]} {1}'),
         'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
         'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
+        'DEBUG': parameter.Boolean(
+            'TRS-DBG', writeable=True, readable=False, write_format='{0} {1}'),
         # X-Register values
         'VBATT': parameter.Float('TRS_BTS_AVG_BATT_MV', scale=1000),
         'VPIN': parameter.Float('TRS_BTS_PIN_MV', scale=1000),
@@ -56,6 +59,7 @@ class Console(share.console.Base):
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
+        self['DEBUG'] = False       # Suppress debug messages
 
     def banner(self):
         """Flush the startup banner lines."""
@@ -69,6 +73,7 @@ class Console(share.console.Base):
         """
         for func in self.override_commands:
             self[func] = state
+            time.sleep(0.1)
 
     def get_mac(self):
         """Get the MAC address from the console

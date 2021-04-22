@@ -3,8 +3,6 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101x and RVMN5x Console driver."""
 
-import re
-
 import share
 
 
@@ -42,12 +40,69 @@ class _Console(share.console.Base):
             readable=False, writeable=True, write_format='{1} {0}'),
         }
     banner_lines = None         # Startup banner lines (set from config)
-    re_blemac = re.compile('[0-9a-f]{12}')  # 'mac' response parser
     max_output_index = 56       # Output index is range(max_output_index)
     missing_output_dict = {}    # Key: any text, Value: Output index
     reversed_output_dict = {}   # Key: any text, Value: Output index
     ls_0a5_out1 = 34
     ls_0a5_out2 = 35
+    output_pin_name = {         # Key: Output index, Value: Schematic pin name
+        0: 'HBRIDGE_1_extend',
+        1: 'HBRIDGE_1_retract',
+        2: 'HBRIDGE_2_extend',
+        3: 'HBRIDGE_2_retract',
+        4: 'HBRIDGE_3_extend',
+        5: 'HBRIDGE_3_retract',
+        6: 'HBRIDGE_4_extend',
+        7: 'HBRIDGE_4_retract',
+        8: 'HBRIDGE_5_extend',
+        9: 'HBRIDGE_5_retract',
+        10: 'HBRIDGE_6_extend',
+        11: 'HBRIDGE_6_retract',
+        12: 'HBRIDGE_7_extend',
+        13: 'HBRIDGE_7_retract',
+        14: 'HBRIDGE_8_extend',
+        15: 'HBRIDGE_8_retract',
+        16: 'HS_0A5_EN1',
+        17: 'HS_0A5_EN2',
+        18: 'HS_0A5_EN3',
+        19: 'HS_0A5_EN4',
+        20: 'HS_0A5_EN5',
+        21: 'HS_0A5_EN6',
+        22: 'HS_0A5_EN7',
+        23: 'HS_0A5_EN8',
+        24: 'HS_0A5_EN9',
+        25: 'HS_0A5_EN10',
+        26: 'HS_0A5_EN11',
+        27: 'HS_0A5_EN12',
+        28: 'HS_0A5_EN13',
+        29: 'HS_0A5_EN14',
+        30: 'HS_0A5_EN15',
+        31: 'HS_0A5_EN16',
+        32: 'HS_0A5_EN17',
+        33: 'HS_0A5_EN18',
+        34: 'LS_0A5_EN1',
+        35: 'LS_0A5_EN2',
+        36: 'Unused',
+        37: 'Unused',
+        38: 'OUT5A_EN0',
+        39: 'OUT5A_EN1',
+        40: 'OUT5A_EN2',
+        41: 'OUT5A_EN3',
+        42: 'OUT5A_EN4',
+        43: 'OUT5A_EN5',
+        44: 'OUT5A_PWM_EN6',
+        45: 'OUT5A_PWM_EN7',
+        46: 'OUT5A_PWM_EN8',
+        47: 'OUT5A_PWM_EN9',
+        48: 'OUT5A_PWM_EN10',
+        49: 'OUT5A_PWM_EN11',
+        50: 'OUT5A_PWM_EN12',
+        51: 'OUT5A_PWM_EN13',
+        52: 'OUT10A_1',
+        53: 'OUT10A_2',
+        54: 'OUT10A_3',
+        55: 'OUT10A_4',
+        }
 
     def __init__(self, port):
         """Initialise communications.
@@ -84,23 +139,6 @@ class _Console(share.console.Base):
         if hardware_rev:
             self['HARDWARE-REV'] = hardware_rev
 
-    def get_mac(self):
-        """Get the MAC address from the console
-
-        @return 12 hex digit Bluetooth MAC address
-
-        """
-        result = ''
-        try:
-            mac = self['MAC']
-            mac = mac.replace(':', '').lower()
-            match = self.re_blemac.search(mac)
-            if match:
-                result = match.group(0)
-        except share.console.Error:
-            pass
-        return result
-
     def hs_output(self, index, state=False):
         """Set a HS output state.
 
@@ -122,6 +160,14 @@ class _Console(share.console.Base):
         if index not in (self.ls_0a5_out1, self.ls_0a5_out2):
             raise InvalidOutputError
         self['OUTPUT'] = '{0} {1}'.format(index, 1 if state else 0)
+
+    def pin_name(self, index):
+        """Get the schematic name of an output pin.
+
+        @param index Index number of the output
+
+        """
+        return self.output_pin_name[index]
 
 
 class Console101A(_Console):
@@ -145,32 +191,7 @@ class Console101A(_Console):
 
 class Console101B(_Console):
 
-    """Communications to RVMN101B console.
-
-    The RVMN101B uses quite old firmware, with outdated command syntax.
-    EG:
-        - Command prompt is different.
-        - Commands are not prefixed with 'rvmn'.
-        - 'HARDWARE-REV' is not implemented.
-
-    """
-
-    # Console command prompt. Signals the end of response data.
-    cmd_prompt = b'\rrvmn> '
-    # Console commands
-    parameter = share.console.parameter
-    cmd_data = {
-        'MAC': parameter.String(
-            'mac', read_format='{0}'),
-        'SERIAL': parameter.String(
-            'serial', writeable=True, write_format='{1} {0}'),
-        'PRODUCT-REV': parameter.String(
-            'product-rev', writeable=True, write_format='{1} {0}'),
-        'SW-REV': parameter.String(
-            'sw-rev', read_format='{0}'),
-        'OUTPUT': parameter.String(
-            'output', readable=False, writeable=True, write_format='{1} {0}'),
-        }
+    """Communications to RVMN101B console."""
 
     def __init__(self, port):
         """Initialise communications.
@@ -187,8 +208,8 @@ class Console101B(_Console):
             'HBRIDGE 5 RETRACT': 9,
             'HS_0A5_EN5': 20,
             'HS_0A5_EN13': 28,
-            'HS_0A5_EN14': 29,
-            'HS_0A5_EN15': 30,
+            'HS_0A5_EN14': 29,      # Implemented in Rev 14
+            'HS_0A5_EN15': 30,      # Implemented in Rev 14
             'HS_0A5_EN18': 33,
             'LS_0A5_EN1': 34,
             'LS_0A5_EN2': 35,
@@ -197,6 +218,15 @@ class Console101B(_Console):
             'OUT5A_PWM_13': 51,
             }
         super().__init__(port)
+
+    def pin_name(self, index):
+        """Get the schematic name of an output pin.
+
+        @param index Index number of the output
+
+        """
+        # RVMN101B uses different names...
+        return self.output_pin_name[index].replace('OUT10A_', 'OUT10AMP_')
 
 
 class Console50(_Console):

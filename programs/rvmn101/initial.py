@@ -56,7 +56,8 @@ class Initial(share.TestSequence):
         rvmn101.brand(
             self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
-        dev['serialtomac'].blemac_set(self.sernum, rvmn101.get_mac())
+        mac = mes['ble_mac']().reading1
+        dev['serialtomac'].blemac_set(self.sernum, mac)
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -77,7 +78,7 @@ class Initial(share.TestSequence):
         mes['dmm_hs_off'](timeout=5)
         # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101.normal_outputs:
-            with tester.PathName('HS{0}'.format(idx)):
+            with tester.PathName(rvmn101.pin_name(idx)):
                 rvmn101.hs_output(idx, True)
                 mes['dmm_hs_on'](timeout=5)
                 rvmn101.hs_output(idx, False)
@@ -203,11 +204,10 @@ class Sensors(share.Sensors):
             caption=tester.translate('rvmn101_initial', 'capSnEntry'))
         # Console sensors
         rvmn101 = self.devices['rvmn101']
-        for name, cmdkey in (
-                ('BleMac', 'MAC'),
-                ('SwRev', 'SW-REV'),
-            ):
-            self[name] = sensor.KeyedReadingString(rvmn101, cmdkey)
+        self['SwRev'] = sensor.KeyedReadingString(rvmn101, 'SW-REV')
+        self['SwRev'].doc = 'Nordic software version'
+        self['BleMac'] = sensor.KeyedReadingString(rvmn101, 'MAC')
+        self['BleMac'].doc = 'Nordic BLE MAC'
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self['BleMac'].on_read = (
             lambda value: value.replace(':', '').replace(' (random)', '')
@@ -233,5 +233,5 @@ class Measurements(share.Measurements):
             ('dmm_ls2_off', 'LSoff', 'LSout2', 'Low-side driver2 OFF'),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
-            ('ble_mac', 'BleMac', 'BleMac', 'MAC address from console'),
+            ('ble_mac', 'BleMac', 'BleMac', 'MAC address'),
             ))

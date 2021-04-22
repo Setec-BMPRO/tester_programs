@@ -17,9 +17,12 @@ class C45A15Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.programmer.PIC')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        for target in (
+                'programs.c45a15.arduino.Arduino',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
     def test_pass_run(self):
@@ -33,6 +36,9 @@ class C45A15Initial(ProgramTestCase):
                 'SecCheck': (
                     (sen['oVoutPre'], 12.0), (sen['oVsense'], (0.5, 12.0)),
                     (sen['oVout'], (12.0, 12.0)), (sen['oVref'], 5.0),
+                    ),
+                'Program': (
+                    (sen['pgmC45A15'], 'OK'),
                     ),
                 'OVP': (
                     (sen['oVref'], 0.5), (sen['oGreen'], 2.0),
@@ -57,7 +63,7 @@ class C45A15Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(28, len(result.readings))
+        self.assertEqual(29, len(result.readings))
         self.assertEqual(
             ['FixtureLock', 'SecCheck', 'Program',
              'OVP', 'PowerUp', 'Load', 'OCP'],

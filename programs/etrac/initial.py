@@ -3,10 +3,9 @@
 # Copyright 2014 SETEC Pty Ltd.
 """ETrac-II Initial Test Program."""
 
-import inspect
-import os
-
+import time
 import serial
+
 import tester
 
 import share
@@ -16,7 +15,6 @@ class Initial(share.TestSequence):
 
     """ETrac-II Initial Test Program."""
 
-    hex_file = 'etracII-2A.hex'
     limitdata = (
         tester.LimitBetween('Vin', 12.9, 13.1),
         tester.LimitBetween('Vin2', 10.8, 12.8),
@@ -28,11 +26,9 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.hex_file = self.hex_file
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-#            tester.TestStep('Program', self.devices['program_pic'].program),
             tester.TestStep('Program', self._step_program),
             tester.TestStep('Load', self._step_load),
             )
@@ -65,8 +61,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    hex_file = None
-
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -79,19 +73,27 @@ class Devices(share.Devices):
                 ('rla_BattLoad', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-#        # PIC device programmer
-#        folder = os.path.dirname(
-#            os.path.abspath(inspect.getfile(inspect.currentframe())))
-#        self['program_pic'] = share.programmer.PIC(
-#            self.hex_file, folder, '16F1828', self['rla_Prog'])
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port('019883', 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
-        self['dcs_Vcom'].output(12.0, output=True, delay=2.0)
+        self['dcs_Vcom'].output(12.0, output=True, delay=2)
         self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
+        # On Linux, the ModemManager service opens the serial port
+        # for a while after it appears. Wait for it to release the port.
+        retry_max = 10
+        for retry in range(retry_max + 1):
+            try:
+                self['ard'].open()
+                break
+            except:
+                if retry == retry_max:
+                    raise
+                time.sleep(1)
+        self.add_closer(lambda: self['ard'].close())
+        time.sleep(2)
 
     def reset(self):
         """Reset instruments."""

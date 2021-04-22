@@ -30,8 +30,9 @@ class J35():
     """Base configuration for J35."""
 
     # Available software versions
-    sw_15 = '1.5.17467.1373'    # Current release
     sw_13 = '1.3.15775.997'     # For 'A' & 'B' < Rev 8
+    sw_15 = '1.5.17467.1373'    # Rev 12 release
+    sw_bl = '1.5.20386.1374'    # Rev 13 J35-B-L release
     # These values get set per Product type & revision
     sw_version = None
     hw_version = None
@@ -157,6 +158,7 @@ class J35():
         config = {
             'A': J35A,
             'B': J35B,
+            'BL': J35BL,
             'C': J35C,
             'D': J35D,
             }[parameter]
@@ -347,6 +349,22 @@ class J35B(J35):
             tester.LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
                     doc='OCP trip current'),
             )
+
+
+class J35BL(J35B):
+
+    """J35BL configuration."""
+
+    _lot_rev = share.lots.Revision((
+        # Rev 13...                                     # 035685
+        ))
+    _rev_data = {
+        None: _Values(
+            sw_version=J35.sw_bl, hw_version=(13, 5, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, canbus=True,
+            ),
+        }
 
 
 class J35C(J35B):

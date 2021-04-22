@@ -12,7 +12,7 @@ import setec
 import tester
 
 import share
-from . import console, config
+from . import arduino, console, config
 
 
 class Initial(share.TestSequence):
@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
         limits = self.cfg.limits_initial()
         Devices.is_2 = self.cfg.is_2
         Devices.arm_sw_version = self.cfg.arm_sw_version
-        Devices.pic_sw_version = self.cfg.pic_sw_version
+        Devices.fixture_num = self.cfg.fixture_num
         Sensors.outputs = self.cfg.outputs
         Sensors.iload = self.cfg.iload
         Measurements.is_pm = self.cfg.is_pm
@@ -73,8 +73,11 @@ class Initial(share.TestSequence):
         """
         dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
         mes['dmm_solarvcc'](timeout=5)
-        # Start programming in the background
-        dev['program_pic'].program_begin()
+        dev['rla_pic'].set_on()
+        dev['rla_pic'].opc()
+        mes['pgm_bp35sr']()
+        dev['rla_pic'].set_off()
+        dev['SR_LowPower'].output(0.0)
 
     @share.teststep
     def _step_program_arm(self, dev, mes):
@@ -84,11 +87,6 @@ class Initial(share.TestSequence):
 
         """
         dev['program_arm'].program()
-        if not self.cfg.is_pm:
-            with tester.PathName('PICcheck'):
-                # PIC programming should be finished by now
-                dev['program_pic'].program_wait()
-                dev['SR_LowPower'].output(0.0)
         # Cold Reset microprocessor for units that were already programmed
         # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
@@ -156,7 +154,7 @@ class Initial(share.TestSequence):
         bp35.sr_set(self.cfg.sr_vset - 0.05, self.cfg.sr_iset, delay=0.2)
         bp35.sr_set(self.cfg.sr_vset, self.cfg.sr_iset, delay=1)
         self.measure(('arm_sr_vin_post', 'dmm_vsetpost', ))
-        dev['dcl_bat'].output(self.cfg.sr_ical, True)
+        dev['dcl_bat'].output(self.cfg.sr_ical, output=True, delay=0.5)
         mes['arm_ioutpre'](timeout=5)
         bp35['SR_ICAL'] = self.cfg.sr_ical      # Calibrate current setpoint
         time.sleep(1)
@@ -298,7 +296,7 @@ class Devices(share.Devices):
 
     is_2 = None
     arm_sw_version = None   # ARM software version
-    pic_sw_version = None   # PIC software version
+    fixture_num = None      # Fixture number (BP35 / BP35-II)
 
     def open(self):
         """Create all Instruments."""
@@ -307,6 +305,7 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
+                ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
                 ('dcs_vaux', tester.DCSource, 'DCS3'),
                 ('SR_LowPower', tester.DCSource, 'DCS4'),
@@ -320,7 +319,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port('027176', 'ARM')
+        arm_port = share.config.Fixture.port(self.fixture_num, 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         if self.is_2:
@@ -332,10 +331,6 @@ class Devices(share.Devices):
             os.path.join(folder, sw_ver),
             crpmode=False,
             boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
-        # PIC device programmer
-        self['program_pic'] = share.programmer.PIC(
-            'bp35sr_{0}.hex'.format(self.pic_sw_version),
-            folder, '33FJ16GS402', self['rla_pic'])
         # Serial connection to the BP35 console
         bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
@@ -350,6 +345,28 @@ class Devices(share.Devices):
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
         self['PmTimer'] = setec.BackgroundTimer()
+        # Serial connection to the Arduino console
+        ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
+        # Set port separately, as we don't want it opened yet
+        ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
+        self['ard'] = arduino.Arduino(ard_ser)
+        self['ard'].verbose = True
+        # Switch on power to fixture circuits
+        self['dcs_vcom'].output(9.0, output=True, delay=5.0)
+        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
+        # On Linux, the ModemManager service opens the serial port
+        # for a while after it appears. Wait for it to release the port.
+        retry_max = 10
+        for retry in range(retry_max + 1):
+            try:
+                self['ard'].open()
+                break
+            except:
+                if retry == retry_max:
+                    raise
+                time.sleep(1)
+        self.add_closer(lambda: self['ard'].close())
+        time.sleep(2)
 
     def reset(self):
         """Reset instruments."""
@@ -419,6 +436,9 @@ class Sensors(share.Sensors):
             message=tester.translate('bp35_initial', 'IsOutputLedGreen?'),
             caption=tester.translate('bp35_initial', 'capOutputLed'))
         self['yesnogreen'].doc = 'Tester operator'
+        # Arduino sensor
+        ard = self.devices['ard']
+        self['pgmbp35sr'] = sensor.KeyedReadingString(ard, 'PGM_BP35SR')
         # Console sensors
         bp35 = self.devices['bp35']
         bp35tunnel = self.devices['bp35tunnel']
@@ -527,6 +547,7 @@ class Measurements(share.Measurements):
             ('arm_vout_ov', 'Vout_OV', 'arm_vout_ov', 'Vout OVP'),
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', 'Remote input'),
             ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
+            ('pgm_bp35sr', 'Reply', 'pgmbp35sr', ''),
             ))
         if self.is_pm:      # PM Solar Regulator
             self.create_from_names((

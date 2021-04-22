@@ -26,6 +26,7 @@ class _BP35Initial(ProgramTestCase):
                 'setec.BackgroundTimer',
                 'share.programmer.ARM',
                 'share.programmer.PIC',
+                'programs.bp35.arduino.Arduino',
                 'programs.bp35.console.TunnelConsole',
                 ):
             patcher = patch(target)
@@ -51,6 +52,7 @@ class _BP35Initial(ProgramTestCase):
                     ),
                 'ProgramPIC': (
                     (sen['solarvcc'], 3.3),
+                    (sen['pgmbp35sr'], 'OK'),
                     ),
                 'Initialise': (
                     (sen['sernum'], self.sernum),
@@ -129,7 +131,7 @@ class BP35_SR_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the SR program."""
         super()._pass_run(
-            64,
+            65,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
@@ -153,7 +155,7 @@ class BP35_HA_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the HA program."""
         super()._pass_run(
-            64,
+            65,
             ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )

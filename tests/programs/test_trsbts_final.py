@@ -40,9 +40,11 @@ class TRSBTSFinal(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'Bluetooth': (
+                'Pin': (
                     (sen['sernum'], 'A2026040123'),
                     (sen['vbat'], 12.0),
+                    (sen['brake'], (12.0, 0.1)),
+                    (sen['pin_in'], True),
                     ),
                 },
             }
@@ -50,5 +52,5 @@ class TRSBTSFinal(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(5, len(result.readings))
-        self.assertEqual(['Bluetooth'], self.tester.ut_steps)
+        self.assertEqual(8, len(result.readings))
+        self.assertEqual(['Pin', 'Bluetooth'], self.tester.ut_steps)

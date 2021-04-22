@@ -6,10 +6,10 @@ PIC10F320
     SX-750              Done by Arduino 2016-06
 
 PIC16F684
-    C45A-15
+    C45A-15             Done by Arduino 2020-07
 
 PIC16F1828
-    ETrac-II
+    ETrac-II            Done by Arduino 2020-06
     GENIUS-II
 
 PIC18F4321
@@ -19,12 +19,12 @@ PIC18F4520
     IDS-500 Micro
 
 PIC18F87J93
-    DRIFTER             (Product EOL 2018-06)
+    DRIFTER                                         (Product EOL 2018-06)
 
 PIC18LF252
     CMR-SBP
 
-dsPIC33FJ16GS402
+dsPIC33FJ16GS402        Done by Arduino 2020-10
     BP35SR
 
 ATMEL AtTiny

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2020 SETEC Pty Ltd.
-"""TRS-BTS Initial Program."""
+"""TRS-BTx Initial Program."""
 
 import inspect
 import os
@@ -11,6 +11,7 @@ import tester
 
 import share
 
+from . import config
 from . import console
 
 
@@ -20,19 +21,15 @@ class Initial(share.TestSequence):
 
     # Injected Vbatt
     vbatt = 12.0
-    sw_version = '1.0.19839.2135'
-    sw_image = 'trs-bts_factory_{0}.hex'.format(sw_version)
-    # Hardware version (Major [1-255], Minor [1-255], Mod [character])
-    hw_version = (3, 0, 'A')
-    limitdata = (
+    _common = (
         tester.LimitDelta('Vbat', vbatt, 0.5, doc='Battery input present'),
         tester.LimitPercent('3V3', 3.3, 1.7, doc='3V3 present'),
         tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
-        tester.LimitDelta('BrakeOn', vbatt, (0.5, 0), doc='Brakes on'),
+        tester.LimitDelta('BrakeOn', vbatt, 0.5, doc='Brakes on'),
         tester.LimitLow('LightOff', 0.5, doc='Lights off'),
-        tester.LimitDelta('LightOn', vbatt, (0.25, 0), doc='Lights on'),
+        tester.LimitDelta('LightOn', vbatt, 0.25, doc='Lights on'),
         tester.LimitLow('RemoteOff', 0.5, doc='Remote off'),
-        tester.LimitDelta('RemoteOn', vbatt, (0.25, 0), doc='Remote on'),
+        tester.LimitDelta('RemoteOn', vbatt, 0.25, doc='Remote on'),
         tester.LimitLow('RedLedOff', 1.0, doc='Led off'),
         tester.LimitDelta('RedLedOn', 1.8, 0.14, doc='Led on'),
         tester.LimitLow('GreenLedOff', 1.0, doc='Led off'),
@@ -42,9 +39,6 @@ class Initial(share.TestSequence):
         tester.LimitDelta('Chem wire', 3.0, 0.5, doc='Voltage present'),
         tester.LimitDelta('Sway- wire', 2.0, 0.5, doc='Voltage present'),
         tester.LimitDelta('Sway+ wire', 1.0, 0.5, doc='Voltage present'),
-        tester.LimitRegExp('ARM-SwVer',
-            '^{0}$'.format(sw_version.replace('.', r'\.')),
-            doc='Software version'),
         tester.LimitPercent('ARM-Vbatt', vbatt, 4.8, delta=0.088,
             doc='Voltage present'),
         tester.LimitPercent('ARM-Vbatt-Cal', vbatt, 1.8, delta=0.088,
@@ -55,11 +49,33 @@ class Initial(share.TestSequence):
         tester.LimitBoolean('ScanMac', True,
             doc='MAC address detected'),
         )
+    # Variant specific configuration data. Indexed by test program parameter.
+    config_data = {
+        'BT2': {
+            'Config': config.TrsBt2,
+            'Limits': _common + (
+                tester.LimitRegExp('ARM-SwVer', '^{0}$'.format(
+                        config.TrsBt2.sw_version.replace('.', r'\.')),
+                    doc='Software version'),
+                ),
+            },
+        'BTS': {
+            'Config': config.TrsBts,
+            'Limits': _common + (
+                tester.LimitRegExp('ARM-SwVer', '^{0}$'.format(
+                        config.TrsBts.sw_version.replace('.', r'\.')),
+                    doc='Software version'),
+                ),
+            },
+        }
 
     def open(self, uut):
         """Prepare for testing."""
-        Devices.sw_image = self.sw_image
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.config = self.config_data[self.parameter]['Config']
+        Devices.sw_image = self.config.sw_image
+        super().open(
+            self.config_data[self.parameter]['Limits'],
+            Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
             tester.TestStep('PgmNordic', self.devices['progNordic'].program),
@@ -86,11 +102,11 @@ class Initial(share.TestSequence):
     def _step_operation(self, dev, mes):
         """Test the operation of LEDs."""
         trsbts = dev['trsbts']
-        dev['trsbts'].open()
+        trsbts.open()
         # Power cycle after programming
         dev['dcs_vbat'].output(0.0, delay=0.5)
         dev['dcs_vbat'].output(self.vbatt)
-        trsbts.brand(self.hw_version, self.sernum)
+        trsbts.brand(self.config.hw_version, self.sernum)
         self.measure(
             ('arm_swver', 'dmm_redoff', 'dmm_greenoff', 'dmm_lightoff'),
             timeout=5)

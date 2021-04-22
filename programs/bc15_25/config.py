@@ -109,26 +109,21 @@ class BC15(BCx5):
 
     """BC15 configuration."""
 
-    sw_version_a = '2.0.16258.2002'
-    sw_version_b = '2.0.18498.2003'
+    sw_version = '2.0.18498.2003'
     arm_file_pattern = 'bc15_{0}.bin'
     arm_port = share.config.Fixture.port('028467', 'ARM')
     _lot_rev = share.lots.Revision((
-        (share.lots.Range('A100101', 'A190101'), 0),    # Rev 1 - 5
-        # Rev 6...
+        (share.lots.Range('A151905', 'A170811'), 0),    # Rev 1-3: Scrap
+        # Rev 4     A171810
+        # Rev 5     A173907 - A182605
+        # Rev 6     A192309 ...
         ))
     _rev_data = {
         None: _Values(
-            arm_file=arm_file_pattern.format(sw_version_b),
+            arm_file=arm_file_pattern.format(sw_version),
             arm_port=arm_port,
-            sw_version=sw_version_b,
+            sw_version=sw_version,
             cal_linecount=43,
-            ),
-        0: _Values(
-            arm_file=arm_file_pattern.format(sw_version_a),
-            arm_port=arm_port,
-            sw_version=sw_version_a,
-            cal_linecount=39,
             ),
         }
 
@@ -176,26 +171,20 @@ class BC25(BCx5):
 
     """BC25 configuration."""
 
-    sw_version_a = '1.0.16489.137'
-    sw_version_b = '2.0.20136.2004'     # PC-22674
+    sw_version = '2.0.20136.2004'
     arm_file_pattern = 'bc25_{0}.bin'
     arm_port = share.config.Fixture.port('031032', 'ARM')
     _lot_rev = share.lots.Revision((
-        (share.lots.Range('A100101', 'A190101'), 0),    # Rev 1 - 3
-        # Rev 4...
+        (share.lots.Range('A170603', 'A172713'), 0),    # Rev 1,2: Scrap
+        # Rev 3     A173908 - A183804
+        # Rev 4     A202308 ...
         ))
     _rev_data = {
         None: _Values(
-            arm_file=arm_file_pattern.format(sw_version_b),
+            arm_file=arm_file_pattern.format(sw_version),
             arm_port=arm_port,
-            sw_version=sw_version_b,
+            sw_version=sw_version,
             cal_linecount=43,
-            ),
-        0: _Values(
-            arm_file=arm_file_pattern.format(sw_version_a),
-            arm_port=arm_port,
-            sw_version=sw_version_a,
-            cal_linecount=43,   # Yes - this is different to the old BC15
             ),
         }
 

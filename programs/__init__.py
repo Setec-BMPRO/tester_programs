@@ -36,6 +36,7 @@ from . import rvmd50
 from . import rvmn101
 from . import rvswt101
 from . import rm50
+from . import smartlink201
 from . import smu75070
 from . import st3
 from . import sx600_750
@@ -119,6 +120,8 @@ PROGRAMS = {
     'RVSWT101 Final': rvswt101.Final,
     'RVSWT101 Initial': rvswt101.Initial,
     'RM-50-24 Final': rm50.Final,
+    'SmartLink201 Initial': smartlink201.Initial,
+    'SmartLink201 Final': smartlink201.Final,
     'SMU750-70 Final': smu75070.Final,
     'SMU750-70 Initial': smu75070.Initial,
     'STxx-III Final': st3.Final,

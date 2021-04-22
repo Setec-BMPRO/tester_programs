@@ -6,6 +6,8 @@
 import logging
 import enum
 
+import attr
+
 import tester
 import share
 
@@ -40,6 +42,15 @@ class Type(enum.IntEnum):
     HA = 3
 
 
+@attr.s
+class _Values():
+
+    """Adjustable configuration data values."""
+
+    hw_version = attr.ib(validator=attr.validators.instance_of(tuple))
+    arm_sw_version = attr.ib(validator=attr.validators.instance_of(str))
+
+
 class BP35():
 
     """Base configuration. """
@@ -47,7 +58,8 @@ class BP35():
     is_2 = False
     # Software versions
     arm_sw_version = '2.0.17344.4603'       # Software Rev 14
-    pic_sw_version = '1.5.19286.288'        # Software Rev 10
+#    pic_sw_version = '1.6.20227.735'       # Software Rev 11 (inside Arduino)
+    fixture_num = '027176'                  # BP35 Fixture
     pic_hw_version = 4
     # SR Solar Reg settings
     sr_vset = 13.650
@@ -119,6 +131,7 @@ class BP35():
         tester.LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
         tester.LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
         tester.LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
+        tester.LimitRegExp('Reply', '^OK$'),
         )
     # Final Test limits common to all versions
     _base_limits_final = _base_limits_all + (
@@ -147,7 +160,10 @@ class BP35():
             except share.lots.LotError:
                 pass
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        cls.arm_hw_version = cls._rev_data[rev]
+        values = cls._rev_data[rev]
+        cls.arm_hw_version = values.hw_version
+        cls.arm_sw_version = values.arm_sw_version
+
 
     @classmethod
     def limits_initial(cls):
@@ -204,7 +220,7 @@ class BP35SR(BP35):
     is_pm = False
     _lot_rev = share.lots.Revision((
         # Rev 1-5
-        (share.lots.Range('A000000', 'A162007'), 'Scrap'),
+        (share.lots.Range('A000001', 'A162007'), 6),    # Main PCB swaps
         # Rev 6
         (share.lots.Range('A162008', 'A163007'), 6),
         # Rev 7
@@ -218,20 +234,43 @@ class BP35SR(BP35):
         # No Rev 11 created
         # Rev 12
         (share.lots.Range('A174403', 'A182506'), 12),
-        # Rev 13...
+        # Rev 13
         (share.lots.Range('A182906', 'A194809'), 13),
         # Rev 14...
         ))
     _rev_data = {
-        None: (14, Type.SR.value, 'A'),
-        13: (13, Type.SR.value, 'B'),
-        12: (12, Type.SR.value, 'C'),
-        10: (10, Type.SR.value, 'E'),
-        9: (9, Type.SR.value, 'E'),
-        8: (8, Type.SR.value, 'G'),
-        7: (7, Type.SR.value, 'B'),
-        6: (6, Type.SR.value, 'C'),
-        'Scrap': None,       # This will cause a runtime error
+        None: _Values(
+            hw_version=(14, Type.SR.value, 'A'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        13: _Values(
+            hw_version=(13, Type.SR.value, 'D'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        12: _Values(
+            hw_version=(12, Type.SR.value, 'E'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        10: _Values(
+            hw_version=(10, Type.SR.value, 'G'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        9: _Values(
+            hw_version=(9, Type.SR.value, 'G'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        8: _Values(
+            hw_version=(8, Type.SR.value, 'I'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        7: _Values(
+            hw_version=(7, Type.SR.value, 'D'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        6: _Values(
+            hw_version=(6, Type.SR.value, 'E'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
         }
 
 
@@ -246,15 +285,27 @@ class BP35HA(BP35SR):
         # No Rev 11 created
         # Rev 12
         (share.lots.Range('A174403', 'A182506'), 12),
-        # Rev 13...
+        # Rev 13
         (share.lots.Range('A182906', 'A194810'), 13),
         # Rev 14...
         ))
     _rev_data = {
-        None: (14, Type.HA.value, 'A'),
-        13: (13, Type.HA.value, 'B'),
-        12: (12, Type.HA.value, 'C'),
-        10: (10, Type.HA.value, 'E'),
+        None: _Values(
+            hw_version=(14, Type.HA.value, 'A'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        13: _Values(
+            hw_version=(13, Type.HA.value, 'B'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        12: _Values(
+            hw_version=(12, Type.HA.value, 'C'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        10: _Values(
+            hw_version=(10, Type.HA.value, 'E'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
         }
 
 
@@ -273,15 +324,27 @@ class BP35PM(BP35):
         # No Rev 11 created
         # Rev 12
         (share.lots.Range('A174210', 'A182609'), 12),
-        # Rev 13...
+        # Rev 13
         (share.lots.Range('A183109', 'A194512'), 13),
         # Rev 14...
         ))
     _rev_data = {
-        None: (14, Type.PM.value, 'A'),
-        13: (13, Type.PM.value, 'B'),
-        12: (12, Type.PM.value, 'C'),
-        10: (10, Type.PM.value, 'E'),
+        None: _Values(
+            hw_version=(14, Type.PM.value, 'A'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        13: _Values(
+            hw_version=(13, Type.PM.value, 'B'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        12: _Values(
+            hw_version=(12, Type.PM.value, 'C'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
+        10: _Values(
+            hw_version=(10, Type.PM.value, 'E'),
+            arm_sw_version=BP35.arm_sw_version
+            ),
         }
 
 
@@ -291,7 +354,9 @@ class BP35II(BP35):
 
     is_2 = True
     # ARM software version
-    arm_sw_version = '2.0.20102.5010'
+    arm_5015 = '2.0.20330.5015'             # PC-24332 & MA-368 (All Rev 3)
+    arm_5073 = '2.0.64652.5073'             # Rev 4 @ ECO-23109 & MA395
+    fixture_num = '034400'                  # BP35-II Fixture
 
 
 class BP35IISR(BP35II):
@@ -300,9 +365,19 @@ class BP35IISR(BP35II):
 
     is_pm = False
     _lot_rev = share.lots.Revision((
+        # Rev 3
+        (share.lots.Range('A200911', 'A204908'), 3),
+        # Rev 4...
         ))
     _rev_data = {
-        None: (15, Type.SR.value, 'A'),
+        None: _Values(
+            hw_version=(16, Type.SR.value, 'B'),
+            arm_sw_version=BP35II.arm_5073
+            ),
+        3: _Values(
+            hw_version=(15, Type.SR.value, 'E'),
+            arm_sw_version=BP35II.arm_5015
+            ),
         }
 
 
@@ -311,9 +386,19 @@ class BP35IIHA(BP35IISR):
     """BP35-IIHA configuration."""
 
     _lot_rev = share.lots.Revision((
+        # Rev 3
+        (share.lots.Range('A201509', 'A205126'), 3),
+        # Rev 4...
         ))
     _rev_data = {
-        None: (15, Type.HA.value, 'A'),
+        None: _Values(
+            hw_version=(16, Type.HA.value, 'B'),
+            arm_sw_version=BP35II.arm_5073
+            ),
+        3: _Values(
+            hw_version=(15, Type.HA.value, 'E'),
+            arm_sw_version=BP35II.arm_5015
+            ),
         }
 
 
@@ -325,7 +410,17 @@ class BP35IISI(BP35II):
     # PM Solar Reg settings
     pm_zero_wait = 30   # Settling delay for zero calibration
     _lot_rev = share.lots.Revision((
+        # Rev 3
+        (share.lots.Range('A201511', 'A204703'), 3),
+        # Rev 4...
         ))
     _rev_data = {
-        None: (15, Type.SI.value, 'A'),
+        None: _Values(
+            hw_version=(16, Type.SI.value, 'B'),
+            arm_sw_version=BP35II.arm_5073
+            ),
+        3: _Values(
+            hw_version=(15, Type.SI.value, 'E'),
+            arm_sw_version=BP35II.arm_5015
+            ),
         }

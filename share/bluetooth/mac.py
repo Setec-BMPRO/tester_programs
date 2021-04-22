@@ -11,7 +11,7 @@ class SerialToMAC():
     """Save/Read the blutooth MAC address for a Serial Number."""
 
     # The RPC server location
-    server_url = 'http://webapp.mel.setec.com.au/ate/rpc/'
+    server_url = 'https://webapp.mel.setec.com.au/ate/rpc/'
 
     def __init__(self):
         """Create the instance."""

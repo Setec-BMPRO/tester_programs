@@ -28,31 +28,32 @@ class Ids500InitialSyn(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
-                    (sen['o20VT'], 20.0), (sen['o_20V'], -20.0),
-                    (sen['o9V'], 11.0), (sen['oTec'], 0.0),
-                    (sen['oLdd'], 0.0), (sen['oLddVmon'], 0.0),
-                    (sen['oLddImon'], 0.0), (sen['oTecVmon'], 0.0),
-                    (sen['oTecVset'], 0.0),
+                    (sen['20VT'], 20.0), (sen['Minus20V'], -20.0),
+                    (sen['9V'], 11.0), (sen['TECoutput'], 0.0),
+                    (sen['LDDoutput'], 0.0), (sen['IS_Vmon'], 0.0),
+                    (sen['IS_Iout'], 0.0), (sen['TEC_Vmon'], 0.0),
+                    (sen['TEC_Vset'], 0.0),
                     ),
                 'Program': (
-                    (sen['olock'], 10.0),
+                    (sen['Lock'], 10.0),
                     ),
                 'TecEnable': (
-                    (sen['oTecVmon'], (0.5, 2.5, 5.0)),
-                    (sen['oTec'], (0.5, 7.5, 15.0)),
+                    (sen['TEC_Vmon'], (0.5, 2.5, 5.0)),
+                    (sen['TECoutput'], (0.5, 7.5, 15.0)),
                     ),
                 'TecReverse': (
-                    (sen['oTecVmon'], (5.0,) * 2),
-                    (sen['oTec'], (-15.0, 15.0)),
+                    (sen['TEC_Vmon'], (5.0,) * 2),
+                    (sen['TECoutput'], (-15.0, 15.0)),
                     ),
                 'LddEnable': (
-                    (sen['oLdd'], (0.0, 0.65, 1.3)),
-                    (sen['oLddShunt'], (0.0, 0.006, 0.05)),
-                    (sen['oLddImon'], (0.0, 0.6, 5.0)),
+                    (sen['LDDoutput'], (0.0, 0.65, 1.3)),
+                    (sen['LDDshunt'], (0.0, 0.006, 0.05)),
+                    (sen['IS_Iout'], (0.0, 0.6, 5.0)),
                     ),
                 'ISSetAdj': (
-                    (sen['oLddIset'], 5.01), (sen['oAdjLdd'], True),
-                    (sen['oLddShunt'], (0.0495, 0.0495, 0.05005)),
+                    (sen['IS_Iset'], (5.01, 5.01)), (sen['oAdjLdd'], True),
+                    (sen['LDDshunt'], (0.0495, 0.0495, 0.05005)),
+                    (sen['IS_Iout'], 5.0),
                     ),
                 },
             }
@@ -60,7 +61,7 @@ class Ids500InitialSyn(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(32, len(result.readings))
+        self.assertEqual(33, len(result.readings))
         self.assertEqual(
             ['Program', 'PowerUp', 'TecEnable', 'TecReverse',
              'LddEnable', 'ISSetAdj'],

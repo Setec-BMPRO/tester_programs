@@ -69,14 +69,16 @@ class Fixture():
             'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
             },
         '019883': {     # ETrac-II Initial (Arduino)
-            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM36'}[os.name],
+            },
+        '017823': {     # C45A-15 Initial (Arduino)
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM37'}[os.name],
             },
 
         # Fixtures with a single FTDI without any S/N
 
         '028467': {'ARM': _ftdi, },     # BC15 Initial
         '031032': {'ARM': _ftdi, },     # BC25 Initial
-        '027176': {'ARM': _ftdi, },     # BP35 Initial
         '017056': {'PIC': _ftdi, },     # IDS-500 SubBoard Initial
         '029242': {'ARM': _ftdi, },     # J35 Initial
         '029687': {'ARM': _ftdi, },     # RvView/JDisplay/RVMD50 Initial
@@ -91,6 +93,14 @@ class Fixture():
         '020827': {     # BCE282 Initial( MSP1: programming, MSP2: comms)
             'MSP1': _ftdi_hub_1,
             'MSP2': _ftdi_hub_2,
+            },
+        '027176': {     # BP35 Initial
+            'ARM': _ftdi_hub_1,
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
+            },
+        '034400': {     # BP35-II Initial
+            'ARM': _ftdi_hub_1,
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM38'}[os.name],
             },
         '017789': {     # CMR-SBP Initial (Prolific)
             'EV': {'posix': '/dev/ttyUSB1', 'nt': 'COM21'}[os.name],
@@ -123,6 +133,12 @@ class Fixture():
             # Hub port 4: not used
             },
         '034861': {     # RVMN5x Initial
+            'ARM': _ftdi_hub_1,
+            'NORDIC': _ftdi_hub_2,
+            # Hub port 3: Nordic NRF52 device programmer
+            # Hub port 4: not used
+            },
+        '035827': {     # SmartLink201 Initial
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer

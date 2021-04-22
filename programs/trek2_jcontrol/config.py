@@ -1,26 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2015 SETEC Pty Ltd.
-"""Trek2/JControl Configuration."""
+"""JControl/Trek2/Trek3 Configuration."""
 
 
-class _Base():
-
-    """Common configuration."""
-
-    sw_version = '1.6.18204.326'
-    sw_image = 'trek2_{0}.bin'.format(sw_version)
-
-
-class Trek2(_Base):
-
-    """Trek2 configuration."""
-
-    hw_version = (7, 0, 'A')
-
-
-class JControl(_Base):
+class JControl():
 
     """JControl configuration."""
 
-    hw_version = (4, 2, 'A')
+    sw_version = '1.7.20388.329'    # 035826 Rev 2      PC-24868
+    sw_image = 'jcontrol_{0}.bin'.format(sw_version)
+    hw_version = (4, 2, 'B')
+
+
+class Trek2():
+
+    """Trek2 configuration."""
+
+    sw_version = '1.7.20512.331'    # 035862 Rev 2      MA-378
+    sw_image = 'trek3_{0}.bin'.format(sw_version)
+    hw_version = (7, 0, 'C')
+
+
+class Trek3():
+
+    """Trek3 configuration."""
+
+    sw_version = '1.7.20512.331'    # 035862 Rev 2      PC-25163
+    sw_image = 'trek3_{0}.bin'.format(sw_version)
+    hw_version = (1, 0, 'B')

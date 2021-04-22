@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2015 SETEC Pty Ltd.
-"""Trek2/JControl Initial Test Program."""
+"""JControl/Trek2/Trek3 Initial Test Program."""
 
 import inspect
 import os
@@ -31,6 +31,13 @@ class Initial(share.TestSequence):
         )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
+        'JC': {
+            'Config': config.JControl,
+            'Limits': _common + (
+                tester.LimitRegExp('SwVer', '^{0}$'.format(
+                    config.JControl.sw_version.replace('.', r'\.'))),
+                ),
+            },
         'TK2': {
             'Config': config.Trek2,
             'Limits': _common + (
@@ -38,11 +45,11 @@ class Initial(share.TestSequence):
                     config.Trek2.sw_version.replace('.', r'\.'))),
                 ),
             },
-        'JC': {
-            'Config': config.JControl,
+        'TK3': {
+            'Config': config.Trek3,
             'Limits': _common + (
                 tester.LimitRegExp('SwVer', '^{0}$'.format(
-                    config.JControl.sw_version.replace('.', r'\.'))),
+                    config.Trek3.sw_version.replace('.', r'\.'))),
                 ),
             },
         }

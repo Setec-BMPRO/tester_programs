@@ -8,8 +8,8 @@ vaux = 12.8
 # Injected SOLAR voltage
 vsol = 14.6
 
-# Software image filename
-sw_image = 'mb3_2.0.20075.hex'
+# Software image filename (PC-25885)
+sw_image = 'mb3_2.5.a847dc.hex'
 
 # ATTiny406 fuse settings
 #   FuseName: (FuseNumber, FuseValue)
@@ -18,7 +18,7 @@ fuses = {
     'BODCFG': (0x01, 0x00),
     'BOOTEND': (0x08, 0x00),
     'OSCCFG': (0x02, 0x02),
-    'SYSCFG0': (0x05, 0xf7),
+    'SYSCFG0': (0x05, 0xfb),
     'SYSCFG1': (0x06, 0x07),
     'WDTCFG': (0x00, 0x00),
     }

@@ -31,6 +31,13 @@ class Initial(share.TestSequence):
         )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
+        'JD': {
+            'Config': config.JDisplay,
+            'Limits': _common + (
+                tester.LimitRegExp('SwVer', '^{0}$'.format(
+                    config.JDisplay.sw_version.replace('.', r'\.'))),
+                ),
+            },
         'RV': {
             'Config': config.RvView,
             'Limits': _common + (
@@ -38,11 +45,11 @@ class Initial(share.TestSequence):
                     config.RvView.sw_version.replace('.', r'\.'))),
                 ),
             },
-        'JD': {
-            'Config': config.JDisplay,
+        'RV2': {
+            'Config': config.RvView2,
             'Limits': _common + (
                 tester.LimitRegExp('SwVer', '^{0}$'.format(
-                    config.JDisplay.sw_version.replace('.', r'\.'))),
+                    config.RvView2.sw_version.replace('.', r'\.'))),
                 ),
             },
         }

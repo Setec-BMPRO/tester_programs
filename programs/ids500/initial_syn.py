@@ -9,48 +9,48 @@ import os
 import tester
 
 import share
+from . import config
 
 
 class InitialSyn(share.TestSequence):
 
     """IDS-500 Initial SynBuck Test Program."""
 
-    # Firmware image
-    pic_hex_syn = 'ids_picSyn_2.hex'
     # Test limits
     limitdata = (
-        tester.LimitBetween('20VT', 18.5, 22.0),
-        tester.LimitBetween('-20V', -22.0, -18.0),
-        tester.LimitBetween('9V', 8.0, 11.5),
-        tester.LimitBetween('TecOff', -0.5, 0.5),
-        tester.LimitBetween('Tec0V', -0.5, 1.0),
-        tester.LimitBetween('Tec2V5', 7.3, 7.8),
-        tester.LimitBetween('Tec5V', 14.75, 15.5),
-        tester.LimitBetween('Tec5V_Rev', -15.5, -14.5),
-        tester.LimitBetween('LddOff', -0.5, 0.5),
-        tester.LimitBetween('Ldd0V', -0.5, 0.5),
-        tester.LimitBetween('Ldd0V6', 0.6, 1.8),
-        tester.LimitBetween('Ldd5V', 1.0, 2.5),
-        tester.LimitBetween('LddVmonOff', -0.5, 0.5),
-        tester.LimitBetween('LddImonOff', -0.5, 0.5),
-        tester.LimitBetween('LddImon0V', -0.05, 0.05),
-        tester.LimitBetween('LddImon0V6', 0.55, 0.65),
-        tester.LimitBetween('LddImon5V', 4.9, 5.1),
-        tester.LimitBetween('ISIout0A', -1.0, 1.0),
-        tester.LimitBetween('ISIout6A', 5.0, 7.0),
-        tester.LimitBetween('ISIout50A', 49.0, 51.0),
-        tester.LimitBetween('ISIset5V', 4.95, 5.05),
-        tester.LimitBetween('AdjLimits', 49.9, 50.1),
-        tester.LimitBetween('TecVmonOff', -0.5, 0.5),
-        tester.LimitBetween('TecVmon0V', -0.5, 0.8),
-        tester.LimitBetween('TecVmon2V5', 2.4375, 2.5625),
-        tester.LimitBetween('TecVmon5V', 4.925, 5.075),
-        tester.LimitBetween('TecVsetOff', -0.5, 0.5),
+        tester.LimitDelta('20VT', nominal=20.0, delta=(1.5, 2.0)),
+        tester.LimitDelta('-20V', nominal=-20.0, delta=2.0),
+        tester.LimitDelta('9V', nominal=9.0, delta=(1.0, 2.5)),
+        tester.LimitDelta('TecOff', nominal=0, delta=0.5),
+        tester.LimitLow('Tec0V', 1.0),
+        tester.LimitDelta('Tec2V5', nominal=7.5, delta=0.3),
+        tester.LimitDelta('Tec5V', nominal=15.0, delta=0.5),
+        tester.LimitDelta('Tec5V_Rev', nominal=-15.0, delta=0.5),
+        tester.LimitLow('TecVmonOff', 0.5),
+        tester.LimitLow('TecVmon0V', 0.8),
+        tester.LimitPercent('TecVmon2V5', nominal=2.5, percent=2.5),
+        tester.LimitPercent('TecVmon5V', nominal=5.0, percent=1.5),
+        tester.LimitLow('TecVsetOff', 0.5),
+        tester.LimitLow('LddOff', 0.5),
+        tester.LimitLow('Ldd0A', 0.5),
+        tester.LimitBetween('Ldd6A', 0.6, 1.8, doc='Vout @ 6A'),
+        tester.LimitBetween('Ldd50A', 1.0, 2.5, doc='Vout @ 50A'),
+        tester.LimitLow('LddVmonOff', 0.5),
+        tester.LimitLow('LddImonOff', 0.5),
+        tester.LimitLow('LddImon0V', 0.05),
+        tester.LimitDelta('LddImon0V6', nominal=0.60, delta=0.05),
+        tester.LimitDelta('LddImon5V', nominal=5.0, delta=0.2),
+        tester.LimitLow('ISIout0A', 1.0),
+        tester.LimitDelta('ISIout6A', nominal=6.0, delta=1.0),
+        tester.LimitDelta('ISIout50A', nominal=50.0, delta=2.0),
+        tester.LimitDelta('ISIset5V', nominal=5.0, delta=0.2),
+        tester.LimitPercent('AdjLimits', nominal=50.0, percent=0.2),
         tester.LimitLow('FixtureLock', 20),
         )
 
     def open(self, uut):
         """Prepare for testing."""
+        Devices.pic_hex_syn = config.pic_hex_syn
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Program', self._step_program),
@@ -127,19 +127,23 @@ class InitialSyn(share.TestSequence):
          Measure LDD output current with calculated limits.
 
          """
-        dev['dcs_lddiset'].output(5.0, True)
-        setI = mes['dmm_ISIset5V'](timeout=5).reading1 * 10
-        lo_lim = setI - (setI * 0.2/100)
-        hi_lim = setI + (setI * 0.2/100)
-        self.limits['AdjLimits'].adjust(lo_lim, hi_lim)
+        dev['dcs_lddiset'].output(5.0, True, delay=0.5)
+        setI = mes['dmm_ISIset5V'](timeout=5).reading1 * 10     # 5V == 50A
+        self.limits['AdjLimits'].adjust(nominal=setI)
+        lo_lim, hi_lim = self.limits['AdjLimits'].limit
         mes['ui_AdjLdd'].sensor.low = lo_lim
         mes['ui_AdjLdd'].sensor.high = hi_lim
-        self.measure(('ui_AdjLdd', 'dmm_ISIoutPost', ), timeout=2)
+        self.measure(
+            ('ui_AdjLdd', 'dmm_ISIoutPost', 'dmm_lddImon5V', ),
+            timeout=2)
 
 
 class Devices(share.Devices):
 
     """Devices."""
+
+    # Firmware image
+    pic_hex_syn = None
 
     def open(self):
         """Create all Instruments."""
@@ -165,7 +169,7 @@ class Devices(share.Devices):
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_picSyn'] = share.programmer.PIC(
-            InitialSyn.pic_hex_syn, folder, '18F4321', self['rla_syn'])
+            self.pic_hex_syn, folder, '18F4321', self['rla_syn'])
 
     def reset(self):
         """Reset instruments."""
@@ -188,22 +192,22 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['olock'] = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
-        self['oTec'] = sensor.Vdc(dmm, high=15, low=3, rng=100, res=0.001)
-        self['oTecVmon'] = sensor.Vdc(dmm, high=24, low=1, rng=10, res=0.001)
-        self['oTecVset'] = sensor.Vdc(dmm, high=14, low=1, rng=10, res=0.001)
-        self['oLdd'] = sensor.Vdc(dmm, high=21, low=1, rng=10, res=0.001)
-        self['oLddVmon'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.001)
-        self['oLddImon'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
-        self['oLddShunt'] = sensor.Vdc(
+        self['IS_Vmon'] = sensor.Vdc(dmm, high=5, low=6, rng=10, res=0.001)
+        self['IS_Iout'] = sensor.Vdc(dmm, high=6, low=6, rng=10, res=0.001)
+        self['IS_Iset'] = sensor.Vdc(dmm, high=7, low=6, rng=10, res=0.001)
+        self['LDDshunt'] = sensor.Vdc(
             dmm, high=8, low=4, rng=0.1, res=0.0001, scale=1000, nplc=10)
-        self['o20VT'] = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
-        self['o9V'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.001)
-        self['o_20V'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.001)
-        self['oLddIset'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.001)
+        self['20VT'] = sensor.Vdc(dmm, high=10, low=1, rng=100, res=0.001)
+        self['9V'] = sensor.Vdc(dmm, high=12, low=1, rng=100, res=0.001)
+        self['Minus20V'] = sensor.Vdc(dmm, high=13, low=1, rng=100, res=0.001)
+        self['Lock'] = sensor.Res(dmm, high=18, low=5, rng=10000, res=0.1)
+        self['TEC_Vset'] = sensor.Vdc(dmm, high=14, low=1, rng=10, res=0.001)
+        self['TECoutput'] = sensor.Vdc(dmm, high=15, low=3, rng=100, res=0.001)
+        self['TEC_Vmon'] = sensor.Vdc(dmm, high=24, low=1, rng=10, res=0.001)
+        self['LDDoutput'] = sensor.Vdc(dmm, high=21, low=1, rng=10, res=0.001)
         lo_lim, hi_lim = self.limits['AdjLimits'].limit
         self['oAdjLdd'] = sensor.AdjustAnalog(
-            sensor=self['oLddShunt'],
+            sensor=self['LDDshunt'],
             low=lo_lim, high=hi_lim,
             message=tester.translate('IDS500 Initial Syn', 'AdjR489'),
             caption=tester.translate('IDS500 Initial Syn', 'capAdjLdd'))
@@ -216,33 +220,33 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurement instances."""
         self.create_from_names((
-            ('dmm_lock', 'FixtureLock', 'olock', ''),
-            ('dmm_20VT', '20VT', 'o20VT', ''),
-            ('dmm__20V', '-20V', 'o_20V', ''),
-            ('dmm_9V', '9V', 'o9V', ''),
-            ('dmm_tecOff', 'TecOff', 'oTec', ''),
-            ('dmm_tec0V', 'Tec0V', 'oTec', ''),
-            ('dmm_tec2V5', 'Tec2V5', 'oTec', ''),
-            ('dmm_tec5V', 'Tec5V', 'oTec', ''),
-            ('dmm_tec5Vrev', 'Tec5V_Rev', 'oTec', ''),
-            ('dmm_tecVmonOff', 'TecVmonOff', 'oTecVmon', ''),
-            ('dmm_tecVmon0V', 'TecVmon0V', 'oTecVmon', ''),
-            ('dmm_tecVmon2V5', 'TecVmon2V5', 'oTecVmon', ''),
-            ('dmm_tecVmon5V', 'TecVmon5V', 'oTecVmon', ''),
-            ('dmm_tecVsetOff', 'TecVsetOff', 'oTecVset', ''),
-            ('dmm_lddOff', 'LddOff', 'oLdd', ''),
-            ('dmm_ldd0V', 'Ldd0V', 'oLdd', ''),
-            ('dmm_ldd0V6', 'Ldd0V6', 'oLdd', ''),
-            ('dmm_ldd5V', 'Ldd5V', 'oLdd', ''),
-            ('dmm_lddVmonOff', 'LddVmonOff', 'oLddVmon', ''),
-            ('dmm_lddImonOff', 'LddImonOff', 'oLddImon', ''),
-            ('dmm_lddImon0V', 'LddImon0V', 'oLddImon', ''),
-            ('dmm_lddImon0V6', 'LddImon0V6', 'oLddImon', ''),
-            ('dmm_lddImon5V', 'LddImon5V', 'oLddImon', ''),
-            ('dmm_ISIout0A', 'ISIout0A', 'oLddShunt', ''),
-            ('dmm_ISIout6A', 'ISIout6A', 'oLddShunt', ''),
-            ('dmm_ISIout50A', 'ISIout50A', 'oLddShunt', ''),
-            ('dmm_ISIset5V', 'ISIset5V', 'oLddIset', ''),
+            ('dmm_lock', 'FixtureLock', 'Lock', ''),
+            ('dmm_20VT', '20VT', '20VT', ''),
+            ('dmm__20V', '-20V', 'Minus20V', ''),
+            ('dmm_9V', '9V', '9V', ''),
+            ('dmm_tecOff', 'TecOff', 'TECoutput', ''),
+            ('dmm_tec0V', 'Tec0V', 'TECoutput', ''),
+            ('dmm_tec2V5', 'Tec2V5', 'TECoutput', ''),
+            ('dmm_tec5V', 'Tec5V', 'TECoutput', ''),
+            ('dmm_tec5Vrev', 'Tec5V_Rev', 'TECoutput', ''),
+            ('dmm_tecVmonOff', 'TecVmonOff', 'TEC_Vmon', ''),
+            ('dmm_tecVmon0V', 'TecVmon0V', 'TEC_Vmon', ''),
+            ('dmm_tecVmon2V5', 'TecVmon2V5', 'TEC_Vmon', ''),
+            ('dmm_tecVmon5V', 'TecVmon5V', 'TEC_Vmon', ''),
+            ('dmm_tecVsetOff', 'TecVsetOff', 'TEC_Vset', ''),
+            ('dmm_lddOff', 'LddOff', 'LDDoutput', ''),
+            ('dmm_ldd0V', 'Ldd0A', 'LDDoutput', ''),
+            ('dmm_ldd0V6', 'Ldd6A', 'LDDoutput', ''),
+            ('dmm_ldd5V', 'Ldd50A', 'LDDoutput', ''),
+            ('dmm_lddVmonOff', 'LddVmonOff', 'IS_Vmon', ''),
+            ('dmm_lddImonOff', 'LddImonOff', 'IS_Iout', ''),
+            ('dmm_lddImon0V', 'LddImon0V', 'IS_Iout', ''),
+            ('dmm_lddImon0V6', 'LddImon0V6', 'IS_Iout', ''),
+            ('dmm_lddImon5V', 'LddImon5V', 'IS_Iout', ''),
+            ('dmm_ISIout0A', 'ISIout0A', 'LDDshunt', ''),
+            ('dmm_ISIout6A', 'ISIout6A', 'LDDshunt', ''),
+            ('dmm_ISIout50A', 'ISIout50A', 'LDDshunt', ''),
+            ('dmm_ISIset5V', 'ISIset5V', 'IS_Iset', ''),
             ('ui_AdjLdd', 'Notify', 'oAdjLdd', ''),
-            ('dmm_ISIoutPost', 'AdjLimits', 'oLddShunt', ''),
+            ('dmm_ISIoutPost', 'AdjLimits', 'LDDshunt', ''),
             ))
