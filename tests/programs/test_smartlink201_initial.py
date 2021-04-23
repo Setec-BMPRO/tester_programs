@@ -37,6 +37,8 @@ class SmartLink201Initial(ProgramTestCase):
                 'PowerUp': (
                     (sen['SnEntry'], 'A2126010123'),
                     (sen['photosense'], 0.0),
+                    (sen['S5can'], 3000),
+                    (sen['S5tank'], 1.5),
                     (sen['Vbatt'], 12.0),
                     (sen['Vin'], 10.0),
                     (sen['3V3'], 3.3),
@@ -58,7 +60,7 @@ class SmartLink201Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(11, len(result.readings))
+        self.assertEqual(13, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmARM', 'PgmNordic',
              'Nordic', 'Calibrate', 'TankSense', ],
