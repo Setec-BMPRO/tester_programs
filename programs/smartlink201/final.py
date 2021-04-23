@@ -15,8 +15,8 @@ class Final(share.TestSequence):
     limitdata = (
         tester.LimitHigh(
             'ScanRSSI',
-            -50 if share.config.System.tester_type in (
-                'ATE4', 'ATE5', ) else -75,
+            -70 if share.config.System.tester_type in (
+                'ATE4', 'ATE5', ) else -85,
             doc='Strong signal'),
         )
     sernum = None
