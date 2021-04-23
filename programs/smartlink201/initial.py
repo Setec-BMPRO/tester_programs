@@ -25,7 +25,8 @@ class Initial(share.TestSequence):
         tester.LimitRegExp('BleMac', r'^[0-9a-f]{12}$',
             doc='Valid MAC address '),
         tester.LimitLow('PartOk', 2.0, doc='All parts present'),
-        tester.LimitLow('S5can', 4e3, doc='S5 CAN ON'),
+        # CAN data line voltage: Off 1.1V On 2.2V
+        tester.LimitHigh('S5can', 2.0, doc='S5 CAN ON'),
         tester.LimitLow('S5tank', 2.0, doc='S5 tank ON'),
         tester.LimitDelta('Vbatt', vin_set, 0.5, doc='At nominal'),
         tester.LimitDelta('Vin', vin_set - 2.0, 0.5, doc='At nominal'),
@@ -57,9 +58,10 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply Vbatt and check voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        self.measure(('dmm_Parts', 'dmm_S5can', 'dmm_S5tank', ), timeout=5)
+        self.measure(('dmm_Parts', 'dmm_S5can', ), timeout=5)
         dev['dcs_Vbatt'].output(self.vin_set, output=True)
-        self.measure(('dmm_Vbatt', 'dmm_Vin', 'dmm_3V3', ), timeout=5)
+        self.measure(
+            ('dmm_Vbatt', 'dmm_S5tank', 'dmm_Vin', 'dmm_3V3', ), timeout=5)
 
     @share.teststep
     def _step_test_nordic(self, dev, mes):
@@ -182,9 +184,9 @@ class Sensors(share.Sensors):
         self['photosense'].doc = 'Part detector output'
         self['Vbatt'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         self['Vbatt'].doc = 'X13 pin 1'
-        self['S5can'] = sensor.Res(dmm, high=5, low=3, rng=11e3, res=1)
+        self['S5can'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
         self['S5can'].doc = 'S5 CAN lines'
-        self['S5tank'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
+        self['S5tank'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
         self['S5tank'].doc = 'S5 Tank Type'
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('smartlink201_initial', 'msgSnEntry'),
