@@ -58,7 +58,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply Vbatt and check voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        self.measure(('dmm_Parts', 'dmm_S5can', ), timeout=5)
+        self.measure(('dmm_Parts1', 'dmm_Parts2', 'dmm_S5can', ), timeout=5)
         dev['dcs_Vbatt'].output(self.vin_set, output=True)
         self.measure(
             ('dmm_Vbatt', 'dmm_S5tank', 'dmm_Vin', 'dmm_3V3', ), timeout=5)
@@ -180,8 +180,10 @@ class Sensors(share.Sensors):
         self['Vin'].doc = 'Vin rail'
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['3V3'].doc = '3V3 rail'
-        self['photosense'] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.1)
-        self['photosense'].doc = 'Part detector output'
+        self['photosense1'] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.1)
+        self['photosense1'].doc = 'Part detector output'
+        self['photosense2'] = sensor.Vdc(dmm, high=7, low=2, rng=100, res=0.1)
+        self['photosense2'].doc = 'Part detector output'
         self['Vbatt'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         self['Vbatt'].doc = 'X13 pin 1'
         self['S5can'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
@@ -222,8 +224,10 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
-            ('dmm_Parts', 'PartOk', 'photosense',
-                'All hand loaded parts fitted'),
+            ('dmm_Parts1', 'PartOk', 'photosense1',
+                'Tank and RJ parts fitted'),
+            ('dmm_Parts2', 'PartOk', 'photosense2',
+                'Connector and switch parts fitted'),
             ('dmm_S5can', 'S5can', 'S5can',
                 'S5 CAN switch ON'),
             ('dmm_S5tank', 'S5tank', 'S5tank',
