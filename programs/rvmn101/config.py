@@ -321,7 +321,7 @@ class RVMN5x(Config):
     # Initial Test parameters
     fixture = '034861'
     # Software versions
-    _nordic_2_3_9 = 'jayco_rvmn5x_signed_2.3.9-0-gfab9e63a_factory_mcuboot.hex'
+    _nordic_2_5_3 = 'jayco_rvmn5x_signed_2.5.3-0-ga721738c_factory_mcuboot.hex'
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     # Lot number mapping
     _lot_rev = share.lots.Revision((
@@ -329,27 +329,33 @@ class RVMN5x(Config):
         (share.lots.Range('A201801', 'A202412'), 3),    # 034789, 035009
         (share.lots.Range('A202507', 'A203003'), 4),    # 035090, 035091
         (share.lots.Range('A203118', 'A211611'), 5),    # 035224, 035225
-#        (share.lots.Range('A211612', 'Axxxxxx'), 6),    # 035818, 035819
-        # Rev 6...
+        (share.lots.Range('A211612', 'A211903'), 6),    # 035818, 035819
+#        (share.lots.Range('A211904', 'Axxxxxx'), 7),    # 036075, 036076
+        # Rev 7...
         ))
     _rev_data = {
         None: _Values(
-            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
+            product_rev='07A', hardware_rev='05A', banner_lines=5,
+            reversed_output_dict={},
+            ),
+        6: _Values(
+            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
             product_rev='06A', hardware_rev='05A', banner_lines=5,
             reversed_output_dict={},
             ),
         5: _Values(
-            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
             product_rev='05C', hardware_rev='05A', banner_lines=5,
             reversed_output_dict={},
             ),
         4: _Values(
-            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
             product_rev='04B', hardware_rev='04A', banner_lines=5,
             reversed_output_dict={},
             ),
         3: _Values(
-            nordic_image=_nordic_2_3_9, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
             product_rev='03E', hardware_rev='03A', banner_lines=5,
             reversed_output_dict={},
             ),
