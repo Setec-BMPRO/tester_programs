@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2021 SETEC Pty Ltd
-"""SmartLink201 Test Programs."""
+"""BLExtender/SmartLink201 Test Program."""
 
 import tester
 

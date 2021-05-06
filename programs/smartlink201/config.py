@@ -1,12 +1,55 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2021 SETEC Pty Ltd
-"""SmartLink201 Test Programs."""
+"""BLExtender/SmartLink201 Test Program."""
 
-product_rev = '02A'
-hardware_rev = '02B'
+import attr
 
-sw_arm_image = 'nxp_v0.1.0.bin'
 
-sw_nrf_version = '1.0.0-0-gacbb530'
-sw_nrf_image = 'smartlink_signed_{0}_factory_mcuboot.hex'.format(sw_nrf_version)
+@attr.s
+class _Values():
+
+    """Configuration data values."""
+
+    product_rev = attr.ib(validator=attr.validators.instance_of(str))
+    hardware_rev = attr.ib(validator=attr.validators.instance_of(str))
+    sw_arm_image = attr.ib(validator=attr.validators.instance_of(str))
+    sw_nrf_image = attr.ib(validator=attr.validators.instance_of(str))
+    is_smartlink = attr.ib(validator=attr.validators.instance_of(bool))
+
+
+class Config():
+
+    """Configuration options."""
+
+    _hw_rev = '02B'
+    _arm_image = 'nxp_v0.1.0.bin'
+    _options = {
+        'B': _Values(           # BLExtender
+            product_rev = '01A',
+            hardware_rev = _hw_rev,
+            sw_arm_image = _arm_image,  # no NXP in this product
+            sw_nrf_image = (
+                'blextender_v1.3.0-0-g6c6b4fa-signed-mcuboot-factory.hex'),
+            is_smartlink = False
+            ),
+        'S': _Values(           # Smartlink201
+            product_rev = '02A',
+            hardware_rev = _hw_rev,
+            sw_arm_image = _arm_image,
+            sw_nrf_image = (
+                'smartlink_signed_1.0.0-0-gacbb530_factory_mcuboot.hex'),
+            is_smartlink = True
+            ),
+        }
+
+    @classmethod
+    def get(cls, parameter, uut):
+        """Retrieve product config data.
+
+        @param parameter Product type selector
+        @param uut Unit under test instance_of
+        @return _Values instance
+
+        """
+        return cls._options[parameter]

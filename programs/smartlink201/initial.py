@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2021 SETEC Pty Ltd
-"""SmartLink201 Test Programs."""
+"""BLExtender/SmartLink201 Test Program."""
 
 import inspect
 import os
@@ -15,13 +15,10 @@ from . import config, console
 
 class Initial(share.TestSequence):
 
-    """SmartLink201 Initial Test Program."""
+    """BLExtender/SmartLink201 Initial Test Program."""
 
     vin_set = 12.0      # Input voltage (V)
     limitdata = (
-        tester.LimitRegExp('SwVer',
-            '^{0}$'.format(config.sw_nrf_version.replace('.', r'\.')),
-            doc='Correct Software version'),
         tester.LimitRegExp('BleMac', r'^[0-9a-f]{12}$',
             doc='Valid MAC address '),
         tester.LimitLow('PartOk', 2.0, doc='All parts present'),
@@ -44,24 +41,37 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        self.cfg = config.Config.get(self.parameter, uut)
+        Devices.sw_arm_image = self.cfg.sw_arm_image
+        Devices.sw_nrf_image = self.cfg.sw_nrf_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('PgmARM', self.devices['progARM'].program),
+            tester.TestStep(
+                'PgmARM',
+                self.devices['progARM'].program, self.cfg.is_smartlink),
             tester.TestStep('PgmNordic', self.devices['progNordic'].program),
             tester.TestStep('Nordic', self._step_test_nordic),
-            tester.TestStep('Calibrate', self._step_calibrate),
-            tester.TestStep('TankSense', self._step_tank_sense),
+            tester.TestStep(
+                'Calibrate', self._step_calibrate, self.cfg.is_smartlink),
+            tester.TestStep(
+                'TankSense', self._step_tank_sense, self.cfg.is_smartlink),
             )
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply Vbatt and check voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
-        self.measure(('dmm_Parts1', 'dmm_Parts2', 'dmm_S5can', ), timeout=5)
+        # Product specific measurements
+        meas1 = ('dmm_Parts2', )
+        meas2 = ('dmm_Vbatt', 'dmm_Vin', 'dmm_3V3', )
+        if self.cfg.is_smartlink:
+            meas1 += ('dmm_Parts1', 'dmm_S5can', )
+            meas2 += ('dmm_S5tank', )
+        # Do the test
+        self.measure(meas1, timeout=5)
         dev['dcs_Vbatt'].output(self.vin_set, output=True)
-        self.measure(
-            ('dmm_Vbatt', 'dmm_S5tank', 'dmm_Vin', 'dmm_3V3', ), timeout=5)
+        self.measure(meas2, timeout=5)
 
     @share.teststep
     def _step_test_nordic(self, dev, mes):
@@ -73,11 +83,10 @@ class Initial(share.TestSequence):
         dev['dcs_Vbatt'].output(self.vin_set,  output=True)
         mes['dmm_3V3'](timeout=5)
         smartlink201.brand(
-            self.sernum, config.product_rev, config.hardware_rev)
+            self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
         mac = mes['SL_MAC']().reading1
         dev['serialtomac'].blemac_set(self.sernum, mac)
-        mes['SL_SwVer']()
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
@@ -114,6 +123,9 @@ class Devices(share.Devices):
 
     """Devices."""
 
+    sw_arm_image = None
+    sw_nrf_image = None
+
     def open(self):
         """Create all Instruments."""
         fixture = '035827'
@@ -134,17 +146,15 @@ class Devices(share.Devices):
         arm_port = share.config.Fixture.port(fixture, 'ARM')
         folder = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
-        sw_arm_image = config.sw_arm_image
         self['progARM'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, sw_arm_image),
+            os.path.join(folder, self.sw_arm_image),
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset'])
         # Nordic NRF52 device programmer
-        sw_nrf_image = config.sw_nrf_image
         self['progNordic'] = share.programmer.Nordic(
-            os.path.join(folder, sw_nrf_image),
+            os.path.join(folder, self.sw_nrf_image),
             folder)
         # Serial connection to the Nordic console
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
@@ -196,8 +206,6 @@ class Sensors(share.Sensors):
         self['SnEntry'].doc = 'Entered S/N'
         # Console sensors
         smartlink201 = self.devices['smartlink201']
-        self['SL_SwVer'] = sensor.KeyedReadingString(smartlink201, 'SW_VER')
-        self['SL_SwVer'].doc = 'Nordic software version'
         self['SL_MAC'] = sensor.KeyedReadingString(smartlink201, 'MAC')
         self['SL_MAC'].doc = 'Nordic BLE MAC'
         # Convert "xx:xx:xx:xx:xx:xx(random)" to "xxxxxxxxxxxx"
@@ -236,7 +244,6 @@ class Measurements(share.Measurements):
             ('dmm_3V3', '3V3', '3V3', '3V3 rail ok'),
             ('dmm_Vbatt', 'Vbatt', 'Vbatt', 'Actual Vbatt rail'),
             ('ui_serialnum', 'SerNum', 'SnEntry', 'S/N valid'),
-            ('SL_SwVer', 'SwVer', 'SL_SwVer', 'Software version correct'),
             ('SL_VbattPre', 'SL_VbattPre', 'SL_Vbatt',
                 'Nordic Vbatt before adjustment'),
             ('SL_Vbatt', 'SL_Vbatt', 'SL_Vbatt',
