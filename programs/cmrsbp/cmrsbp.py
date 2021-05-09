@@ -111,6 +111,7 @@ class CmrSbp():
             for parameter in iter(self._datamap):
                 data_template[parameter] = self._datamap[parameter][0]
             tdata = setec.TimedStore(data_template, data_timeout)
+            tdata.start()
             run = True
         except Exception:
             err = ' '.join(
