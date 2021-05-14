@@ -148,7 +148,7 @@ class J35():
         """Select a configuration based on the parameter and lot.
 
         @param parameter Type of unit (A/B/C)
-        @param uut UUT to get Lot Number from
+        @param uut setec.UUT instance
         @return configuration class
 
         """
@@ -169,14 +169,13 @@ class J35():
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut storage.UUT instance
+        @param uut setec.UUT instance
 
         """
         rev = None
         if uut:
-            lot = uut.lot
             try:
-                rev = cls._lot_rev.find(lot)
+                rev = cls._lot_rev.find(uut.lot.number)
             except share.lots.LotError:
                 pass
         logging.getLogger(__name__).debug('Revision detected as %s', rev)

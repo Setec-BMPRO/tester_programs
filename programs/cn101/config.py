@@ -48,15 +48,14 @@ class CN101():
     def select(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut storage.UUT instance
+        @param uut setec.UUT instance
         @return configuration class
 
         """
         rev = None
         if uut:
-            lot = uut.lot
             try:
-                rev = cls._lot_rev.find(lot)
+                rev = cls._lot_rev.find(uut.lot.number)
             except share.lots.LotError:
                 pass
         logging.getLogger(__name__).debug('Revision detected as %s', rev)

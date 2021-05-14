@@ -63,7 +63,7 @@ class Config():
         """Get configuration.
 
         @param parameter String to select the switch type
-        @param uut storage.UUT instance
+        @param uut setec.UUT instance
         @return Dictionary of configuration data
 
         """
@@ -83,12 +83,11 @@ class Config():
         # Force code the RVSWT101 switch code as required
         forced_code = 0
         if uut:
-            lot = uut.lot
             try:
                 forced_code = {
                     # PC-5092: Force J11-1 to be J11-3
                     'A193824': cls._types['j11-3'],
-                    }[lot]
+                    }[uut.lot.number]
             except KeyError:
                 pass
         return {

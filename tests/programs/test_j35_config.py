@@ -5,15 +5,9 @@
 
 import unittest
 
-import attr
+import setec
 
 from programs import j35
-
-
-@attr.s
-class UUT():
-    """Simple simulation of tester_storage.UUT class."""
-    lot = attr.ib()
 
 
 class J35A_Config(unittest.TestCase):
@@ -30,8 +24,8 @@ class J35A_Config(unittest.TestCase):
             ('A181500', (9, 1, 'B'), cfg.sw_15, True, ),
             ('A999999', (11, 1, 'A'), cfg.sw_15, True, ),
             )
-        for uut, hw_version, sw_version, canbus in checks:
-            uut = UUT(uut)
+        for lotnum, hw_version, sw_version, canbus in checks:
+            uut = setec.UUT.from_sernum(lotnum + '0001')
             cfg.select('A', uut)
             self.assertEqual(hw_version, cfg.hw_version)
             self.assertEqual(sw_version, cfg.sw_version)
@@ -52,8 +46,8 @@ class J35B_Config(unittest.TestCase):
             ('A181500', (9, 2, 'B'), cfg.sw_15, True, ),
             ('A999999', (11, 2, 'A'), cfg.sw_15, True, ),
             )
-        for uut, hw_version, sw_version, canbus in checks:
-            uut = UUT(uut)
+        for lotnum, hw_version, sw_version, canbus in checks:
+            uut = setec.UUT.from_sernum(lotnum + '0001')
             cfg.select('B', uut)
             self.assertEqual(hw_version, cfg.hw_version)
             self.assertEqual(sw_version, cfg.sw_version)
@@ -75,8 +69,8 @@ class J35C_Config(unittest.TestCase):
             ('A181500', (9, 3, 'B'), cfg.sw_15, ),
             ('A999999', (11, 3, 'A'), cfg.sw_15, ),
             )
-        for uut, hw_version, sw_version in checks:
-            uut = UUT(uut)
+        for lotnum, hw_version, sw_version in checks:
+            uut = setec.UUT.from_sernum(lotnum + '0001')
             cfg.select('C', uut)
             self.assertEqual(hw_version, cfg.hw_version)
             self.assertEqual(sw_version, cfg.sw_version)
@@ -89,8 +83,8 @@ class J35C_Config(unittest.TestCase):
             ('A160306', (2, 3, 'A'), cfg.sw_15, ),
             ('A161211', (3, 3, 'A'), cfg.sw_15, ),
             )
-        for uut, hw_version, sw_version in checks:
-            uut = UUT(uut)
+        for lotnum, hw_version, sw_version in checks:
+            uut = setec.UUT.from_sernum(lotnum + '0001')
             with self.assertRaises(KeyError):
                 cfg.select('C', uut)
 
@@ -106,8 +100,8 @@ class J35D_Config(unittest.TestCase):
             ('A181500', (9, 4, 'B'), cfg.sw_15, ),
             ('A999999', (11, 4, 'A'), cfg.sw_15, ),
             )
-        for uut, hw_version, sw_version in checks:
-            uut = UUT(uut)
+        for lotnum, hw_version, sw_version in checks:
+            uut = setec.UUT.from_sernum(lotnum + '0001')
             cfg.select('D', uut)
             self.assertEqual(hw_version, cfg.hw_version)
             self.assertEqual(sw_version, cfg.sw_version)

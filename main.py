@@ -10,23 +10,12 @@ import os
 import time
 import traceback
 
+import setec
 import tester
 from pydispatch import dispatcher
 
 import programs
 import share
-
-
-class UUT():
-
-    """Simplified Unit Under Test class."""
-
-    def __init__(self, barcode):
-        self.barcode = barcode
-        self.lot = barcode[:7]
-
-    def __str__(self):
-        return self.barcode
 
 
 def _main():
@@ -62,7 +51,7 @@ def _main():
     sernum = config['DEFAULT'].get('Sernum')
     if not sernum:
         sernum = 'A0000000001'
-    uut = UUT(sernum)
+    uut = setec.UUT.from_sernum(sernum)
     # Receive Test Result signals here
     def test_result(result):
         logger.info('Test Result: "%s"', result.code)
