@@ -5,6 +5,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+import setec
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvswt101
 
@@ -52,7 +54,7 @@ class RVSWT101Initial(ProgramTestCase):
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(
-            tuple('UUT{0}'.format(uut)
+            tuple(setec.UUT.from_sernum('A000000{0:04}'.format(uut))
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
