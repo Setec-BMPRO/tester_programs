@@ -44,6 +44,7 @@ class Initial(share.TestSequence):
         self.cfg = config.Config.get(self.parameter, uut)
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Devices.sw_nrf_image = self.cfg.sw_nrf_image
+        Devices.banner_lines = self.cfg.banner_lines
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -125,6 +126,7 @@ class Devices(share.Devices):
 
     sw_arm_image = None
     sw_nrf_image = None
+    banner_lines = None
 
     def open(self):
         """Create all Instruments."""
@@ -161,6 +163,7 @@ class Devices(share.Devices):
         #   Set port separately, as we don't want it opened yet
         smartlink201_ser.port = share.config.Fixture.port(fixture, 'NORDIC')
         self['smartlink201'] = console.Console(smartlink201_ser)
+        self['smartlink201'].banner_lines = self.banner_lines
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Fixture USB power

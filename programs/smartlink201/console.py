@@ -14,7 +14,7 @@ class Console(share.console.Base):
 
     """SmartLink201 console."""
 
-    banner_lines = 12           # Startup banner lines
+    banner_lines = None         # Startup banner lines
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'\r\x1b[1;32muart:~$ \x1b[m'
     # Console commands
