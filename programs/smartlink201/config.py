@@ -16,7 +16,6 @@ class _Values():
     sw_arm_image = attr.ib(validator=attr.validators.instance_of(str))
     sw_nrf_image = attr.ib(validator=attr.validators.instance_of(str))
     is_smartlink = attr.ib(validator=attr.validators.instance_of(bool))
-    banner_lines = attr.ib(validator=attr.validators.instance_of(int))
 
 
 class Config():
@@ -32,8 +31,7 @@ class Config():
             sw_arm_image = _arm_image,  # no NXP in this product
             sw_nrf_image = (
                 'blextender_v1.3.0-0-g6c6b4fa-signed-mcuboot-factory.hex'),
-            is_smartlink = False,
-            banner_lines = 11
+            is_smartlink = False
             ),
         'S': _Values(           # Smartlink201
             product_rev = '02A',
@@ -41,8 +39,7 @@ class Config():
             sw_arm_image = _arm_image,
             sw_nrf_image = (
                 'smartlink_signed_1.0.0-0-gacbb530_factory_mcuboot.hex'),
-            is_smartlink = True,
-            banner_lines = 12
+            is_smartlink = True
             ),
         }
 

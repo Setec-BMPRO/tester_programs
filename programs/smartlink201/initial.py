@@ -44,7 +44,6 @@ class Initial(share.TestSequence):
         self.cfg = config.Config.get(self.parameter, uut)
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Devices.sw_nrf_image = self.cfg.sw_nrf_image
-        Devices.banner_lines = self.cfg.banner_lines
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -107,14 +106,14 @@ class Initial(share.TestSequence):
         smartlink201 = dev['smartlink201']
         smartlink201.analog_read()      # Read all tank sensor inputs
         for index in range(16):         # All analog tank inputs
-            name = smartlink201.tank_name(index)
+            name = console.tank_name(index)
             mes[name]()
         self.relay(                     # Pull down alternate inputs
             (('rla_s1', True), ('rla_s3', True), ),
             delay=self.analog_read_wait)
         smartlink201.analog_read()      # Read all tank sensor inputs
         for index in range(16):         # All analog tank inputs
-            name = smartlink201.tank_name(index)
+            name = console.tank_name(index)
             if not index % 2:           # Every 2nd input is now low
                 name += '_L'
             mes[name]()
@@ -126,7 +125,6 @@ class Devices(share.Devices):
 
     sw_arm_image = None
     sw_nrf_image = None
-    banner_lines = None
 
     def open(self):
         """Create all Instruments."""
@@ -162,8 +160,11 @@ class Devices(share.Devices):
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
         #   Set port separately, as we don't want it opened yet
         smartlink201_ser.port = share.config.Fixture.port(fixture, 'NORDIC')
-        self['smartlink201'] = console.Console(smartlink201_ser)
-        self['smartlink201'].banner_lines = self.banner_lines
+        con_class = {
+            'B': console.BLExtenderConsole,
+            'S': console.SmartLink201Console,
+            }[self.parameter]
+        self['smartlink201'] = con_class(smartlink201_ser)
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # Fixture USB power
@@ -224,7 +225,7 @@ class Sensors(share.Sensors):
                 'Current Battery Voltage: ', '').replace(' mV', '')
             )
         for index in range(16):     # 16 analog tank inputs
-            name = smartlink201.tank_name(index)
+            name = console.tank_name(index)
             self[name] = sensor.KeyedReading(smartlink201, name)
 
 
@@ -254,7 +255,7 @@ class Measurements(share.Measurements):
             ('SL_MAC', 'BleMac', 'SL_MAC', 'Nordic MAC address valid'),
             ))
         for index in range(16):         # All tank inputs High
-            name = console.Console.tank_name(index)
+            name = console.tank_name(index)
             self[name] = tester.Measurement(
                 self.limits['TankHi'],
                 self.sensors[name],
