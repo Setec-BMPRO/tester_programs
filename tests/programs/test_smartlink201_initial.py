@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BLExtender/SmartLink201 Initial Test program."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import smartlink201
@@ -21,21 +21,18 @@ class _Initial(ProgramTestCase):
                 'share.programmer.ARM',
                 'share.programmer.Nordic',
                 'share.bluetooth.SerialToMAC',
+                'programs.smartlink201.console.BLExtenderConsole',
+                'programs.smartlink201.console.SmartLink201Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        mycon = MagicMock(name='MyCon')
-        mycon.tank_name.return_value = 'tank'
-        patcher = patch(
-            'programs.smartlink201.console.Console', return_value=mycon)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch(
-            'programs.smartlink201.console.Console.tank_name',
-            return_value='tank')
-        self.addCleanup(patcher.stop)
-        patcher.start()
+            patcher = patch(
+                'programs.smartlink201.console.tank_name',
+                return_value='tank'
+                )
+            self.addCleanup(patcher.stop)
+            patcher.start()
         super().setUp()
 
 
