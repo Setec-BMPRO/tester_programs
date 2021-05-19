@@ -20,14 +20,32 @@ def tank_name(index):
     return 'TANK{0}-{1}'.format((index // 4) + 1, (index % 4) + 1)
 
 
-class BLExtenderConsole(share.console.Base):
+class _Console(share.console.Base):
+
+    """BLExtender/SmartLink201 base console."""
+
+    # Console command prompt. Signals the end of response data.
+    cmd_prompt = b'uart:~$ \x1b[m'
+    ignore = ('\x1b[m', '\x1b[1;31m', '\x1b[1;32m')
+
+    def brand(self, sernum, product_rev, hardware_rev):
+        """Brand the unit with Serial Number.
+
+        @param sernum SETEC Serial Number 'AYYWWLLNNNN'
+        @param product_rev Product revision from ECO eg: '02A'
+        @param hardware_rev Hardware revision from ECO eg: '02A'
+
+        """
+        self['SERIAL'] = sernum
+        self['PRODUCT-REV'] = product_rev
+        self['HARDWARE-REV'] = hardware_rev
+
+
+class BLExtenderConsole(_Console):
 
     """BLExtender console."""
 
     banner_lines = 11           # Startup banner lines
-    # Console command prompt. Signals the end of response data.
-    cmd_prompt = b'uart:~$ \x1b[m'
-    ignore = ('\x1b[m', '\x1b[1;31m', '\x1b[1;32m')
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
@@ -58,19 +76,14 @@ class BLExtenderConsole(share.console.Base):
 
         """
         self.action(None, expected=self.banner_lines)
-        self['SERIAL'] = sernum
-        self['PRODUCT-REV'] = product_rev
-        self['HARDWARE-REV'] = hardware_rev
+        super().brand(sernum, product_rev, hardware_rev)
 
 
-class SmartLink201Console(share.console.Base):
+class SmartLink201Console(_Console):
 
     """SmartLink201 console."""
 
     banner_lines = 12           # Startup banner lines
-    # Console command prompt. Signals the end of response data.
-    cmd_prompt = b'uart:~$ \x1b[m'
-    ignore = ('\x1b[m', '\x1b[1;31m', '\x1b[1;32m')
     # Console commands
     parameter = share.console.parameter
     vbatt_key = 'BATT'          # Key to read Vbatt
@@ -131,9 +144,7 @@ class SmartLink201Console(share.console.Base):
         """
         self.action(None, expected=self.banner_lines)
         self.vbatttimer.start(self.vbatt_read_wait)
-        self['SERIAL'] = sernum
-        self['PRODUCT-REV'] = product_rev
-        self['HARDWARE-REV'] = hardware_rev
+        super().brand(sernum, product_rev, hardware_rev)
 
     def vbatt_cal(self, vbatt):
         """Calibrate Vbatt reading.
