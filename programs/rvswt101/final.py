@@ -3,10 +3,11 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Final Test Program."""
 
+import serial
 import tester
 
 import share
-from . import config, device
+from . import config, device,  arduino
 
 
 class Final(share.TestSequence):
@@ -32,19 +33,35 @@ class Final(share.TestSequence):
         mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
+
         # Tell user to push unit's button after clicking OK
-        mes['ui_buttonpress']()
-        # Scan for the bluetooth transmission
-        # Reply is like this: {
-        #   'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'},
-        #   'rssi': -80,
-        #   }
-        reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
-        mes['scan_mac'].sensor.store(reply is not None)
-        mes['scan_mac']()
-        packet = reply['ad_data'][self.ble_adtype_manufacturer]
-        dev['decoder'].packet = device.Packet(packet)
-        self.measure(('cell_voltage', 'switch_type', ))
+        #mes['ui_buttonpress']()
+
+        # Push either 4 or 6 bottons depending on the UUT hardware configuration
+        buttons = 4
+        
+        #TODO
+        #if hwType == 'button': buttons = 6
+        
+        for button, buttonPress in enumerate(['buttonPress_{0}'.format(n+1) for n in range(buttons)]):
+            button +=1
+
+            # Trigger a buttonpress (buttonpress_n action is defined in the Sensors class below)
+            mes[buttonPress]()
+
+            # Scan for the bluetooth transmission
+            # Reply is like this: {
+            #   'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'},
+            #   'rssi': -80,
+            #   }
+
+            reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
+            mes['scan_mac'].sensor.store(reply is not None)
+            mes['scan_mac']()
+
+            packet = reply['ad_data'][self.ble_adtype_manufacturer]
+            dev['decoder'].packet = device.Packet(packet)
+            self.measure(('cell_voltage', 'switch_type', ))
 
 
 class Devices(share.Devices):
@@ -60,6 +77,13 @@ class Devices(share.Devices):
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # BLE Packet decoder
         self['decoder'] = tester.CANPacketDevice()
+
+        # Serial connection to the Arduino console
+        ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
+        # Set port separately, as we don't want it opened yet
+        ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
+        self['ard'] = arduino.Arduino(ard_ser)
+        self['ard'].verbose = True
 
 
 class Sensors(share.Sensors):
@@ -81,6 +105,24 @@ class Sensors(share.Sensors):
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
 
+        # Arduino sensors
+        ard = self.devices['ard']
+        for name, cmdkey in (
+                ('debugOn', 'DEBUG'),
+                ('debugOff', 'QUIET'),
+                ('PRESS_BUTTON_1', 'buttonPress_1'),
+                ('PRESS_BUTTON_2', 'buttonPress_2'),
+                ('PRESS_BUTTON_3', 'buttonPress_3'),
+                ('PRESS_BUTTON_4', 'buttonPress_4'),
+                ('PRESS_BUTTON_5', 'buttonPress_5'),
+                ('PRESS_BUTTON_6', 'buttonPress_6'),
+                ('RETRACT_ACTUATORS', 'retractAll'),
+                ('EJECT_DUT','ejectDut'),
+                ('4BUTTON_MODEL', '4ButtonModel'),
+                ('6BUTTON_MODEL', '6ButtonModel'),
+            ):
+            self[name] = sensor.KeyedReadingString(ard, cmdkey)
+
 
 class Measurements(share.Measurements):
 
@@ -92,6 +134,16 @@ class Measurements(share.Measurements):
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from server'),
             ('ui_buttonpress', 'ButtonOk', 'ButtonPress', ''),
+            ('buttonPress_1', 'Reply', 'PRESS_BUTTON_1', ''),
+            ('buttonPress_2', 'Reply', 'PRESS_BUTTON_2', ''),
+            ('buttonPress_3', 'Reply', 'PRESS_BUTTON_3', ''),
+            ('buttonPress_4', 'Reply', 'PRESS_BUTTON_4', ''),
+            ('buttonPress_5', 'Reply', 'PRESS_BUTTON_5', ''),
+            ('buttonPress_6', 'Reply', 'PRESS_BUTTON_6', ''),
+            ('retractAll', 'Reply', 'RETRACT_ACTUATORS', ''),
+            ('ejectDut', 'Reply', 'EJECT_DUT', ''),
+            ('4ButtonModel', 'Reply', '4BUTTON_MODEL', ''),
+            ('6ButtonModel', 'Reply', '6BUTTON_MODEL', ''),
             ('scan_mac', 'ScanMac', 'mirscan',
                 'Scan for MAC address over bluetooth'),
             ('cell_voltage', 'CellVoltage', 'cell_voltage',

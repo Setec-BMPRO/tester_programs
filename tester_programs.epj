@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-03-24, 12:32:43"
+    "saved": "2021-05-19, 11:13:19"
   },
   "project": {
     "AUTHOR": "",
@@ -70,9 +70,7 @@
       "MakeTestOnly": true
     },
     "MIXEDLANGUAGE": 0,
-    "OTHERS": [
-      "main.py.ini"
-    ],
+    "OTHERS": [],
     "OTHERTOOLSPARMS": {},
     "PACKAGERSPARMS": {},
     "PROGLANGUAGE": "Python3",
