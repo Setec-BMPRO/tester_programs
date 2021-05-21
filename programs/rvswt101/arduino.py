@@ -16,7 +16,7 @@ class Arduino(share.console.Base):
         'QUIET': share.console.parameter.String(
             'DEBUG_OFF', read_format='{0}'),
         # Actuator commands
-        'PRESS_BUTTON_!': share.console.parameter.String(
+        'PRESS_BUTTON_1': share.console.parameter.String(
             'ACTU1', read_format='{0}'),
         'PRESS_BUTTON_2': share.console.parameter.String(
             'ACTU2', read_format='{0}'),

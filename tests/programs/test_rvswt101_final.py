@@ -20,6 +20,8 @@ class RVSWT101Final(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.bluetooth.SerialToMAC',
+                'programs.rvswt101.arduino.Arduino',
+                'programs.rvswt101.console.DirectConsole',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -39,13 +41,25 @@ class RVSWT101Final(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'Bluetooth': (
+                'Bluetooth': (          # Bluetooth TestStep
                     (sen['SnEntry'], 'A1526040123'),
                     (sen['mirmac'], '001ec030c2be'),
                     (sen['ButtonPress'], True),
-                    (sen['mirscan'], True),
-                    (sen['cell_voltage'], 3.31),
-                    (sen['switch_type'], 0),
+                    (sen['mirscan'], (True, ) * 6),
+                    (sen['cell_voltage'], (3.31, ) * 6),
+                    (sen['switch_type'], (0, ) * 6),
+                    (sen['debugOn'], 'OK'),
+                    (sen['debugOff'], 'OK'),
+                    (sen['buttonPress_1'], 'OK'),
+                    (sen['buttonPress_2'], 'OK'),
+                    (sen['buttonPress_3'], 'OK'),
+                    (sen['buttonPress_4'], 'OK'),
+                    (sen['buttonPress_5'], 'OK'),
+                    (sen['buttonPress_6'], 'OK'),
+                    (sen['retractAll'], 'OK'),
+                    (sen['ejectDut'], 'OK'),
+                    (sen['4ButtonModel'], 'OK'),
+                    (sen['6ButtonModel'], 'OK'),
                     ),
                 },
             }
@@ -53,5 +67,5 @@ class RVSWT101Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(6, len(result.readings))
+        self.assertEqual(10, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)

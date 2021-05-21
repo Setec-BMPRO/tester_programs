@@ -83,6 +83,7 @@ class Config():
             banner_lines = 2
         # Force code the RVSWT101 switch code as required
         forced_code = 0
+        fixture_num = '033030'          # RVSWT101 Final Fixture
         if uut:
             try:
                 forced_code = {
@@ -99,4 +100,5 @@ class Config():
                 ),
             'banner_lines': banner_lines,
             'forced_code': forced_code,
+            'fixture_num': fixture_num,
             }
