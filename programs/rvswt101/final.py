@@ -15,6 +15,7 @@ class Final(share.TestSequence):
     """RVSWT101 Final Test Program."""
 
     ble_adtype_manufacturer = '255'
+    additional_params = {}
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
@@ -31,6 +32,7 @@ class Final(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+
         # Lookup the MAC address from the server
         mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)
@@ -41,12 +43,20 @@ class Final(share.TestSequence):
 
         # Push either 4 or 6 bottons depending on the UUT hardware configuration
         buttons = 4
-        
+        model = '4ButtonModel'
+
         #TODO
-        #if hwType == 'button': buttons = 6
-        
-        for buttonNum, buttonPress in enumerate(['buttonPress_{0}'.format(n+1) for n in range(buttons)]):
-            buttonNum +=1
+        #if hwType == '6_button':
+        #    buttons = 6
+        #    model = '6ButtonModel'
+
+        # Ensure all actuators are retracted before starting and configure test fixture to 4 or 6 button configuration.
+        mes['retractAll']
+        mes[model]
+
+        #for buttonNum, buttonPress in enumerate(['buttonPress_{0}'.format(n+1) for n in range(buttons)]):
+        for buttonNum, buttonPress in ((n+1, 'buttonPress_{0}'.format(n+1)) for n in range(buttons)):
+            #print(buttonNum, buttonPress)
 
             # Trigger a buttonpress (buttonpress_n action is defined in the Sensors class below)
             mes[buttonPress]()
@@ -57,13 +67,20 @@ class Final(share.TestSequence):
             #   'rssi': -80,
             #   }
 
+            # Perform 4 measurments: scan_mac, cell_voltage, switch_type and correct_switch_pressed
             reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
             mes['scan_mac'].sensor.store(reply is not None)
             mes['scan_mac']()
 
             packet = reply['ad_data'][self.ble_adtype_manufacturer]
-            dev['decoder'].packet = device.Packet(packet)
-            self.measure(('cell_voltage', 'switch_type', ))
+            dev['decoder'].packet = device.Packet(packet, buttonNum)
+            self.measure(('cell_voltage', 'switch_type', 'correct_switch_pressed'))
+
+        # Make buttons available to the unittest.
+        self.additional_params['buttons'] = buttons
+
+        # Eject the UUT
+        mes['ejectDut']
 
 
 class Devices(share.Devices):
@@ -122,6 +139,8 @@ class Sensors(share.Sensors):
         decoder = self.devices['decoder']
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
+        self['correctSwitchPressed'] = sensor.KeyedReadingBoolean(decoder, 'correctSwitchPressed')
+        #self['bcount'] = '6'
 
         # Arduino sensors - sensor_name, key
         ard = self.devices['ard']
@@ -171,4 +190,6 @@ class Measurements(share.Measurements):
                 'Button cell charged'),
             ('switch_type', 'SwitchType', 'switch_type',
                 'Switch type'),
+            ('correct_switch_pressed', 'CorrectSwitchPressed', 'correctSwitchPressed',
+                'Correct switch pressed'),
             ))

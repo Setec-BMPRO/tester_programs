@@ -72,11 +72,33 @@ class _SwitchRaw(ctypes.Union):
         ]
 
 
+class _SwitchPressed(list):
+
+    def __init__(self, switches, buttonNum):
+        """
+        switches is a list of tuples, [(S0state, S0count), (S1state, S1count), ...]
+        buttonNum is a 0 indexed int of the button number pressed
+        Appends booleen values to self, of which all are expected to be True.
+        """
+        switchStates = [s.state for s in switches]
+
+        # All of the states for the switches that were not pressed
+        notPressed = [state for idx, state in enumerate(switchStates) if idx != buttonNum]
+
+        if buttonNum is not None:
+            res1 = switchStates[buttonNum]          # The button pressed was True
+            res2 = not(any(notPressed))             # All buttons not pressed were False
+            self.append(res1)
+            self.append(res2)
+        else:
+            self.append(False)
+
+
 class Packet():
 
     """A RVSWT101 BLE broadcast packet."""
 
-    def __init__(self, payload):
+    def __init__(self, payload, buttonNum=None):
         """Create instance.
 
         @param payload BLE broadcast packet payload
@@ -103,3 +125,4 @@ class Packet():
             (zss.S4state, zss.S4count), (zss.S5state, zss.S5count),
             (zss.S6state, zss.S6count), (zss.S7state, zss.S7count),
             ))
+        self.correctSwitchPressed = all(_SwitchPressed(self.switches, buttonNum))

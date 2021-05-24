@@ -60,12 +60,22 @@ class RVSWT101Final(ProgramTestCase):
                     (sen['ejectDut'], 'OK'),
                     (sen['4ButtonModel'], 'OK'),
                     (sen['6ButtonModel'], 'OK'),
+                    (sen['correctSwitchPressed'], (True, ) * 6),
                     ),
                 },
             }
+
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(10, len(result.readings))
+
+        buttons = rvswt101.Final.additional_params['buttons']
+        expected_pass_count = ( 1                 # sernum
+                              + 1                 # ble_mac
+                              + (1 * buttons)     # buttonPress x buttons
+                              + (1 * buttons)     # scan_mac x buttons
+                              + (3 * buttons))    # cell_voltage, switch_type, correct_switch_pressed (each x buttons)
+
+        self.assertEqual(expected_pass_count, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)

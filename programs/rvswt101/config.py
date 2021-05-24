@@ -56,6 +56,8 @@ class Config():
         tester.LimitDelta('CellVoltage', 3.3, 0.3,
             doc='Button cell charged'),
         tester.LimitRegExp('Reply', '^OK$'),
+        tester.LimitBoolean('CorrectSwitchPressed', True,
+            doc='Correct switch pressed'),
         )
 
     @classmethod
