@@ -139,6 +139,9 @@ class MockATE(dict):
             storage[dev_name] = (gen, i)
         super().__init__(storage)
 
+    def open(self):
+        """Open tester."""
+
 
 class ProgramTestCase(unittest.TestCase):
 
@@ -166,6 +169,7 @@ class ProgramTestCase(unittest.TestCase):
         cls.tst_patcher.start()
         # Create the tester instance
         cls.tester = UnitTester(cls.prog_class, cls.per_panel, cls.parameter)
+        cls.tester.start()
 
     def setUp(self):
         """Per-Test setup."""
