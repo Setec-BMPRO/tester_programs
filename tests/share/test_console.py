@@ -20,6 +20,7 @@ class BaseConsole(unittest.TestCase):
         logging_setup()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester('MockATE', {})
+        cls.tester.start()
 
     @classmethod
     def tearDownClass(cls):
@@ -34,7 +35,7 @@ class BaseConsole(unittest.TestCase):
         self.mycon = share.console.Base(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
-        tester.Measurement.reset()
+        tester.measure.Signals._reset()
 
     def test_response2(self):
         """Multiple responses."""
@@ -81,6 +82,7 @@ class BadUartConsole(unittest.TestCase):
         logging_setup()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester('MockATE', {})
+        cls.tester.start()
 
     @classmethod
     def tearDownClass(cls):
@@ -95,7 +97,7 @@ class BadUartConsole(unittest.TestCase):
         self.mycon = share.console.BadUart(port)
         self.addCleanup(self.mycon.close)
         self.mycon.open()
-        tester.Measurement.reset()
+        tester.measure.Signals._reset()
 
     def test_action2(self):
         self.mycon.port.puts('R1\r\nR2\r\n> ')

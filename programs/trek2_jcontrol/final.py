@@ -116,7 +116,7 @@ class Final(share.TestSequence):
                     name = 'tank{0}_s{1}'.format(tank, sens)
                     sens = self.sensors[name]
                     sens.configure()
-                    value = sens.read_data()
+                    value = sens.read()
                     results.append((name, value))
             logger.debug('Results => %s', results)
             raise
