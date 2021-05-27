@@ -9,17 +9,14 @@ import tester
 import share
 from . import config, device,  arduino
 
-
 class Final(share.TestSequence):
 
     """RVSWT101 Final Test Program."""
 
-    ble_adtype_manufacturer = '255'
-    additional_params = {}
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
+        self.button_count = self.cfg['button_count']
         Devices.fixture_num = self.cfg['fixture_num']
         super().open(self.cfg['limits_fin'], Devices, Sensors, Measurements)
         self.steps = (
@@ -34,53 +31,55 @@ class Final(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
 
         # Lookup the MAC address from the server
+        dev['pi_bt'].reset()
         mac = dev['serialtomac'].blemac_get(self.sernum)
+        dev['pi_bt'].mac = mac
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
 
-        # Tell user to push unit's button after clicking OK
-        #mes['ui_buttonpress']()
-
-        # Push either 4 or 6 bottons depending on the UUT hardware configuration
-        buttons = 4
-        model = '4ButtonModel'
-
-        #TODO
-        #if hwType == '6_button':
-        #    buttons = 6
-        #    model = '6ButtonModel'
-
         # Ensure all actuators are retracted before starting and configure test fixture to 4 or 6 button configuration.
-        mes['retractAll']
-        mes[model]
+#        mes['retractAll']()
+#        if self.button_count == 4: mes[model]('4ButtonModel')
+#        if self.button_count == 6: model = mes[model]('6ButtonModel')
+#        else: raise
 
-        #for buttonNum, buttonPress in enumerate(['buttonPress_{0}'.format(n+1) for n in range(buttons)]):
-        for buttonNum, buttonPress in ((n+1, 'buttonPress_{0}'.format(n+1)) for n in range(buttons)):
-            #print(buttonNum, buttonPress)
+        # Scan for the bluetooth transmission
+        # Reply is like this: {
+        #   'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'},
+        #   'rssi': -80,
+        #   }
 
-            # Trigger a buttonpress (buttonpress_n action is defined in the Sensors class below)
-            mes[buttonPress]()
+        button_presses = tuple(['buttonPress_{0}'.format(n+1) for n in range(self.button_count)])
+        button_measurments = tuple(['buttonMeasure_{0}'.format(n+1) for n in range(self.button_count)])
+        button_releases = tuple(['buttonRelease_{0}'.format(n+1) for n in range(self.button_count)])
 
-            # Scan for the bluetooth transmission
-            # Reply is like this: {
-            #   'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'},
-            #   'rssi': -80,
-            #   }
+        initial_measurements_completed = False
+        for button_press, button_test, button_release in zip(button_presses, button_measurments, button_releases):
+            
+            # Press a button
+#            mes[button_press]()
+            mes['ui_buttonpress']()
+            
+            # Read from RaspberryBluetooth server
+            reply = dev['pi_bt'].read()
+            
+            if not(initial_measurements_completed):
+                # Perform initial measurements
+                dev['pi_bt'].configure('switch_code')
+                mes['scan_mac'].sensor.store(reply is not None)
+                mes['scan_mac']()
+                self.measure(('cell_voltage', 'switch_type',))
+                initial_measurements_completed = True
+            
+            # Test the switch_code from the bluetooth payload and release the button.
+            #self.measure((button_test, button_release))
+            mes[button_test]()
+#            mes[button_release]()
 
-            # Perform 4 measurments: scan_mac, cell_voltage, switch_type and correct_switch_pressed
-            reply = dev['pi_bt'].scan_advert_blemac(mac, timeout=20)
-            mes['scan_mac'].sensor.store(reply is not None)
-            mes['scan_mac']()
-
-            packet = reply['ad_data'][self.ble_adtype_manufacturer]
-            dev['decoder'].packet = device.Packet(packet, buttonNum)
-            self.measure(('cell_voltage', 'switch_type', 'correct_switch_pressed'))
-
-        # Make buttons available to the unittest.
-        self.additional_params['buttons'] = buttons
-
+        # Perhaps move this to somewhere else?
         # Eject the UUT
-        mes['ejectDut']
+#        mes['retractAll']()
+#        mes['ejectDut']()
 
 
 class Devices(share.Devices):
@@ -92,8 +91,7 @@ class Devices(share.Devices):
     def open(self):
         """Create all Instruments."""
         # Connection to RaspberryPi bluetooth server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url())
+        self['pi_bt'] = device.RVSWT101(share.config.System.ble_url())
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         # BLE Packet decoder
@@ -136,10 +134,16 @@ class Sensors(share.Sensors):
         self['ButtonPress'] = sensor.OkCan(
             message=tester.translate('rvswt101_final', 'msgPressButton'),
             caption=tester.translate('rvswt101_final', 'capPressButton'))
-        decoder = self.devices['decoder']
+        decoder = self.devices['pi_bt']
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
-        self['correctSwitchPressed'] = sensor.KeyedReadingBoolean(decoder, 'correctSwitchPressed')
+        self['no_button_pressed'] = sensor.KeyedReading(decoder, 'no_button_pressed')
+        self['switch_1_measure'] = sensor.KeyedReading(decoder, 'switch_1_measure')
+        self['switch_2_measure'] = sensor.KeyedReading(decoder, 'switch_2_measure')
+        self['switch_3_measure'] = sensor.KeyedReading(decoder, 'switch_3_measure')
+        self['switch_4_measure'] = sensor.KeyedReading(decoder, 'switch_4_measure')
+        self['switch_5_measure'] = sensor.KeyedReading(decoder, 'switch_5_measure')
+        self['switch_6_measure'] = sensor.KeyedReading(decoder, 'switch_6_measure')
         #self['bcount'] = '6'
 
         # Arduino sensors - sensor_name, key
@@ -147,18 +151,31 @@ class Sensors(share.Sensors):
         for name, cmdkey in (
                 ('debugOn', 'DEBUG'),
                 ('debugOff', 'QUIET'),
-                ('buttonPress_1', 'PRESS_BUTTON_1'),
-                ('buttonPress_2', 'PRESS_BUTTON_2'),
-                ('buttonPress_3', 'PRESS_BUTTON_3'),
-                ('buttonPress_4', 'PRESS_BUTTON_4'),
-                ('buttonPress_5', 'PRESS_BUTTON_5'),
-                ('buttonPress_6', 'PRESS_BUTTON_6'),
+                #('buttonPress_1', 'PRESS_BUTTON_1'),
+                #('buttonPress_2', 'PRESS_BUTTON_2'),
+                #('buttonPress_3', 'PRESS_BUTTON_3'),
+                #('buttonPress_4', 'PRESS_BUTTON_4'),
+                #('buttonPress_5', 'PRESS_BUTTON_5'),
+                #('buttonPress_6', 'PRESS_BUTTON_6'),
+                #('buttonRelease_1', 'RELEASE_BUTTON_1'),
+                #('buttonRelease_2', 'RELEASE_BUTTON_2'),
+                #('buttonRelease_3', 'RELEASE_BUTTON_3'),
+                #('buttonRelease_4', 'RELEASE_BUTTON_4'),
+                #('buttonRelease_5', 'RELEASE_BUTTON_5'),
+                #('buttonRelease_6', 'RELEASE_BUTTON_6'),
                 ('retractAll', 'RETRACT_ACTUATORS'),
                 ('ejectDut', 'EJECT_DUT'),
                 ('4ButtonModel', '4BUTTON_MODEL'),
                 ('6ButtonModel', '6BUTTON_MODEL'),
             ):
             self[name] = sensor.KeyedReadingString(ard, cmdkey)
+
+        # Create additional arduino sensors for buttonPress and buttonRelease
+        for n in range(6):
+            _data = (('buttonPress_{}'.format(n+1), 'PRESS_BUTTON_{}'.format(n+1)), 
+                     ('buttonRelease_{}'.format(n+1), 'RELEASE_BUTTON_{}'.format(n+1)))
+            for name, cmdkey in (_data):
+                self[name] = sensor.KeyedReadingString(ard, cmdkey)
 
 
 class Measurements(share.Measurements):
@@ -180,6 +197,12 @@ class Measurements(share.Measurements):
             ('buttonPress_4', 'Reply', 'buttonPress_4', ''),
             ('buttonPress_5', 'Reply', 'buttonPress_5', ''),
             ('buttonPress_6', 'Reply', 'buttonPress_6', ''),
+            ('buttonRelease_1', 'Reply', 'buttonRelease_1', ''),
+            ('buttonRelease_2', 'Reply', 'buttonRelease_2', ''),
+            ('buttonRelease_3', 'Reply', 'buttonRelease_3', ''),
+            ('buttonRelease_4', 'Reply', 'buttonRelease_4', ''),
+            ('buttonRelease_5', 'Reply', 'buttonRelease_5', ''),
+            ('buttonRelease_6', 'Reply', 'buttonRelease_6', ''),
             ('retractAll', 'Reply', 'retractAll', ''),
             ('ejectDut', 'Reply', 'ejectDut', ''),
             ('4ButtonModel', 'Reply', '4ButtonModel', ''),
@@ -190,6 +213,29 @@ class Measurements(share.Measurements):
                 'Button cell charged'),
             ('switch_type', 'SwitchType', 'switch_type',
                 'Switch type'),
-            ('correct_switch_pressed', 'CorrectSwitchPressed', 'correctSwitchPressed',
-                'Correct switch pressed'),
+            ('buttonMeasure_1', 'switch_1_expected', 'switch_1_measure',
+                'Button 1 tested'),
+            ('buttonMeasure_2', 'switch_2_expected', 'switch_2_measure',
+                'Button 2 tested'),
+            ('buttonMeasure_3', 'switch_3_expected', 'switch_3_measure',
+                'Button 3 tested'),
+            ('buttonMeasure_4', 'switch_4_expected', 'switch_4_measure',
+                'Button 4 tested'),
+            ('buttonMeasure_5', 'switch_5_expected', 'switch_5_measure',
+                'Button 5 tested'),
+            ('buttonMeasure_6', 'switch_6_expected', 'switch_6_measure',
+                'Button 6 tested'),
+            ('no_button_pressed', 'no_button_expected', 'no_button_pressed',
+                'no_button_pressed'),
             ))
+        # Suppress signals on these measurements.
+        for name in (
+                'buttonPress_1', 'buttonPress_2', 'buttonPress_3',
+                'buttonPress_4', 'buttonPress_5', 'buttonPress_6',
+                'buttonRelease_1', 'buttonRelease_2', 'buttonRelease_3',
+                'buttonRelease_4', 'buttonRelease_5', 'buttonRelease_6',
+                'retractAll', 'debugOn', 'debugOff', 'retractAll', 
+                'ejectDut', '4ButtonModel', '6ButtonModel', 'ui_buttonpress', 
+                ):
+            self[name].send_signal = False
+            pass

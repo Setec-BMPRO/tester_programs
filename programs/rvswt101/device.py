@@ -3,20 +3,25 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Advertisment decoder."""
 
-import ctypes
+import ctypes, collections
 import struct
 
+import share, tester
 
-class _SwitchState(list):
+
+class _SwitchState(collections.abc.Iterable):
 
     """All RVSWT switch states."""
 
     def __init__(self, states):
-        super().__init__()
+        self._data = []
         if len(states) != 8:
             raise ValueError('8 (state, count) values are required')
         for state, count in states:
-            self.append(_ASwitchState(state, count))
+            self._data.append(_ASwitchState(state, count))
+
+    def __iter__(self):
+        return iter(self._data)
 
 
 class _ASwitchState():
@@ -72,33 +77,12 @@ class _SwitchRaw(ctypes.Union):
         ]
 
 
-class _SwitchPressed(list):
-
-    def __init__(self, switches, buttonNum):
-        """
-        switches is a list of tuples, [(S0state, S0count), (S1state, S1count), ...]
-        buttonNum is a 0 indexed int of the button number pressed
-        Appends booleen values to self, of which all are expected to be True.
-        """
-        switchStates = [s.state for s in switches]
-
-        # All of the states for the switches that were not pressed
-        notPressed = [state for idx, state in enumerate(switchStates) if idx != buttonNum]
-
-        if buttonNum is not None:
-            res1 = switchStates[buttonNum]          # The button pressed was True
-            res2 = not(any(notPressed))             # All buttons not pressed were False
-            self.append(res1)
-            self.append(res2)
-        else:
-            self.append(False)
-
 
 class Packet():
 
     """A RVSWT101 BLE broadcast packet."""
 
-    def __init__(self, payload, buttonNum=None):
+    def __init__(self, payload):
         """Create instance.
 
         @param payload BLE broadcast packet payload
@@ -125,4 +109,60 @@ class Packet():
             (zss.S4state, zss.S4count), (zss.S5state, zss.S5count),
             (zss.S6state, zss.S6count), (zss.S7state, zss.S7count),
             ))
-        self.correctSwitchPressed = all(_SwitchPressed(self.switches, buttonNum))
+        all_switches = ''.join([str(int(v.state)) for v in self.switches])
+        self.switch_code = int(all_switches, 2)     #int value between 0-255
+        # switch_code expected values:
+        # Button1:128  Button2:64  Button3:32
+        # Button4:16   Button5:8   Button6:4
+
+
+
+class RVSWT101():
+    
+    def __init__(self, server):
+        """Create instance.
+
+        @param server URL of the server
+
+        """
+        self._pi_bt = share.bluetooth.RaspberryBluetooth(server)
+        self._read_key = None
+        self.mac = None
+        self.read_scan = False
+        self.ble_adtype_manufacturer = '255'
+        # BLE Packet decoder
+        self._decoder = tester.CANPacketDevice()
+        
+    def configure(self, key):
+        """Sensor: Configure for next reading."""
+        self._read_key = key
+
+    def opc(self):
+        """Sensor: Dummy OPC.
+
+        @return None
+
+        """
+        return None
+
+    def read(self,):
+        """Sensor: Read bluetooth payload data using the last defined key.
+
+        @param callerid Identity of caller
+        @return Value
+
+        """
+        if not self._decoder.packet or self.read_scan:
+            #reply = self._pi_bt.scan_advert_blemac(self.mac, timeout=20)
+            reply = {'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'}, 'rssi': -50}
+            
+            packet = reply['ad_data'][self.ble_adtype_manufacturer]
+            self._decoder.packet = Packet(packet)
+
+        self._decoder.configure(self._read_key)
+        return self._decoder.read(None)
+        
+    def reset(self):
+        self.read_scan = False
+        self._decoder.packet = None
+    

@@ -26,12 +26,12 @@ class RVSWT101Final(ProgramTestCase):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        mypi = MagicMock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = {
+        mypi = MagicMock(name='pi_bt')
+        mypi.read.return_value = {
             'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'},
             'rssi': -50,
             }
-        patcher = patch('share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        patcher = patch('programs.rvswt101.device.RVSWT101', return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -56,11 +56,23 @@ class RVSWT101Final(ProgramTestCase):
                     (sen['buttonPress_4'], 'OK'),
                     (sen['buttonPress_5'], 'OK'),
                     (sen['buttonPress_6'], 'OK'),
+                    (sen['buttonRelease_1'], 'OK'),
+                    (sen['buttonRelease_2'], 'OK'),
+                    (sen['buttonRelease_3'], 'OK'),
+                    (sen['buttonRelease_4'], 'OK'),
+                    (sen['buttonRelease_5'], 'OK'),
+                    (sen['buttonRelease_6'], 'OK'),
                     (sen['retractAll'], 'OK'),
                     (sen['ejectDut'], 'OK'),
                     (sen['4ButtonModel'], 'OK'),
                     (sen['6ButtonModel'], 'OK'),
-                    (sen['correctSwitchPressed'], (True, ) * 6),
+                    (sen['no_button_pressed'], 0),
+                    (sen['switch_1_measure'], 128),
+                    (sen['switch_2_measure'], 64),
+                    (sen['switch_3_measure'], 32),
+                    (sen['switch_4_measure'], 16),
+                    (sen['switch_5_measure'], 8),
+                    (sen['switch_6_measure'], 4),
                     ),
                 },
             }
@@ -69,13 +81,5 @@ class RVSWT101Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-
-        buttons = rvswt101.Final.additional_params['buttons']
-        expected_pass_count = ( 1                 # sernum
-                              + 1                 # ble_mac
-                              + (1 * buttons)     # buttonPress x buttons
-                              + (1 * buttons)     # scan_mac x buttons
-                              + (3 * buttons))    # cell_voltage, switch_type, correct_switch_pressed (each x buttons)
-
-        self.assertEqual(expected_pass_count, len(result.readings))
+        self.assertEqual(9, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)
