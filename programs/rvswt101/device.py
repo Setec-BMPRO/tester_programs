@@ -3,34 +3,46 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Advertisment decoder."""
 
-import ctypes, collections
+import ctypes
 import struct
 
-import share, tester
+import attr
 
 
-class _SwitchState(collections.abc.Iterable):
-
-    """All RVSWT switch states."""
-
-    def __init__(self, states):
-        self._data = []
-        if len(states) != 8:
-            raise ValueError('8 (state, count) values are required')
-        for state, count in states:
-            self._data.append(_ASwitchState(state, count))
-
-    def __iter__(self):
-        return iter(self._data)
-
-
+@attr.s
 class _ASwitchState():
 
     """A single RVSWT switch state."""
 
-    def __init__(self, state, count):
-        self.state = True if state else False
-        self.count = count
+    state = attr.ib(converter=bool)
+    count = attr.ib(converter=int)
+
+
+@attr.s
+class _SwitchState():
+
+    """All RVSWT switch states."""
+
+    _states = attr.ib()
+    @_states.validator
+    def _states_len(self, attribute, value):
+        """Validate states."""
+        if len(self._states) != 8:
+            raise ValueError('8 (state, count) values are required')
+    _data = attr.ib(init=False, factory=list)
+
+    def __attrs_post_init__(self):
+        """Populate _data with _ASwitchState instances."""
+        for state, count in self._states:
+            self._data.append(_ASwitchState(state, count))
+
+    def __iter__(self):
+        """Return iterator of _data."""
+        return iter(self._data)
+
+    def __len__(self):
+        """Return len of _data."""
+        return len(self._data)
 
 
 class _SwitchField(ctypes.Structure):
@@ -77,7 +89,6 @@ class _SwitchRaw(ctypes.Union):
         ]
 
 
-
 class Packet():
 
     """A RVSWT101 BLE broadcast packet."""
@@ -109,60 +120,44 @@ class Packet():
             (zss.S4state, zss.S4count), (zss.S5state, zss.S5count),
             (zss.S6state, zss.S6count), (zss.S7state, zss.S7count),
             ))
-        all_switches = ''.join([str(int(v.state)) for v in self.switches])
+        all_switches = ''.join([str(int(val.state)) for val in self.switches])
         self.switch_code = int(all_switches, 2)     #int value between 0-255
         # switch_code expected values:
         # Button1:128  Button2:64  Button3:32
         # Button4:16   Button5:8   Button6:4
 
 
-
+@attr.s
 class RVSWT101():
-    
-    def __init__(self, server):
-        """Create instance.
 
-        @param server URL of the server
+    """Custom logical instrument to read packet properties."""
 
-        """
-        self._pi_bt = share.bluetooth.RaspberryBluetooth(server)
-        self._read_key = None
-        self.mac = None
-        self.read_scan = False
-        self.ble_adtype_manufacturer = '255'
-        # BLE Packet decoder
-        self._decoder = tester.CANPacketDevice()
-        
+    bleserver = attr.ib()       # tester.BLE instance
+    always_scan = attr.ib(init=False, default=False)
+    _read_key = attr.ib(init=False, default=None)
+    _packet = attr.ib(init=False, default=None)
+
     def configure(self, key):
         """Sensor: Configure for next reading."""
         self._read_key = key
 
     def opc(self):
-        """Sensor: Dummy OPC.
+        """Sensor: OPC."""
+        self.bleserver.opc()
 
-        @return None
-
-        """
-        return None
-
-    def read(self,):
-        """Sensor: Read bluetooth payload data using the last defined key.
+    def read(self, callerid):
+        """Sensor: Read payload data using the last configured key.
 
         @param callerid Identity of caller
-        @return Value
+        @return Packet property value
 
         """
-        if not self._decoder.packet or self.read_scan:
-            #reply = self._pi_bt.scan_advert_blemac(self.mac, timeout=20)
-            reply = {'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'}, 'rssi': -50}
-            
-            packet = reply['ad_data'][self.ble_adtype_manufacturer]
-            self._decoder.packet = Packet(packet)
+        if not self._packet or self.always_scan:
+            rssi, ad_data = self.bleserver.read(callerid)
+            self._packet = Packet(ad_data)
+        return getattr(self._packet, self._read_key)
 
-        self._decoder.configure(self._read_key)
-        return self._decoder.read(None)
-        
     def reset(self):
-        self.read_scan = False
-        self._decoder.packet = None
-    
+        self.bleserver.uut = None
+        self.always_scan = False
+        self._packet = None

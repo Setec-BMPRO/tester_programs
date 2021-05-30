@@ -19,18 +19,16 @@ class RVSWT101Final(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.bluetooth.SerialToMAC',
+                'tester.BLE',
                 'programs.rvswt101.arduino.Arduino',
-                'programs.rvswt101.console.DirectConsole',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        mypi = MagicMock(name='pi_bt')
-        mypi.read.return_value = {
-            'ad_data': {'255': '1f050112022d624c3a00000300d1139e69'},
-            'rssi': -50,
-            }
+        mypi = MagicMock(name='decoder')
+        mypi.read.return_value = (
+            -50, '1f050112022d624c3a00000300d1139e69',
+            )
         patcher = patch('programs.rvswt101.device.RVSWT101', return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
@@ -44,8 +42,7 @@ class RVSWT101Final(ProgramTestCase):
                 'Bluetooth': (          # Bluetooth TestStep
                     (sen['SnEntry'], 'A1526040123'),
                     (sen['mirmac'], '001ec030c2be'),
-                    (sen['ButtonPress'], True),
-                    (sen['mirscan'], (True, ) * 6),
+                    (sen['ButtonPress'], (True, ) * 4),
                     (sen['cell_voltage'], (3.31, ) * 6),
                     (sen['switch_type'], (0, ) * 6),
                     (sen['debugOn'], 'OK'),
@@ -76,10 +73,9 @@ class RVSWT101Final(ProgramTestCase):
                     ),
                 },
             }
-
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(9, len(result.readings))
+        self.assertEqual(8, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)
