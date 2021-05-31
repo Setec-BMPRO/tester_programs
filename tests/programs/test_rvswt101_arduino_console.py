@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""UnitTest for RVMN101 Console Test program."""
+"""UnitTest for RVMN101 Arduino Console Test program."""
 
 import unittest
 
