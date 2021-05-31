@@ -140,12 +140,9 @@ class Sensors(share.Sensors):
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
         self['no_button_pressed'] = sensor.KeyedReading(decoder, 'no_button_pressed')
-        self['switch_1_measure'] = sensor.KeyedReading(decoder, 'switch_1_measure')
-        self['switch_2_measure'] = sensor.KeyedReading(decoder, 'switch_2_measure')
-        self['switch_3_measure'] = sensor.KeyedReading(decoder, 'switch_3_measure')
-        self['switch_4_measure'] = sensor.KeyedReading(decoder, 'switch_4_measure')
-        self['switch_5_measure'] = sensor.KeyedReading(decoder, 'switch_5_measure')
-        self['switch_6_measure'] = sensor.KeyedReading(decoder, 'switch_6_measure')
+        for n in range(1, 7):
+            k = 'switch_{0}_measure'.format(n)
+            self[k] = sensor.KeyedReading(decoder, k)
         #self['bcount'] = '6'
 
         # Arduino sensors - sensor_name, key
@@ -153,18 +150,6 @@ class Sensors(share.Sensors):
         for name, cmdkey in (
                 ('debugOn', 'DEBUG'),
                 ('debugOff', 'QUIET'),
-                #('buttonPress_1', 'PRESS_BUTTON_1'),
-                #('buttonPress_2', 'PRESS_BUTTON_2'),
-                #('buttonPress_3', 'PRESS_BUTTON_3'),
-                #('buttonPress_4', 'PRESS_BUTTON_4'),
-                #('buttonPress_5', 'PRESS_BUTTON_5'),
-                #('buttonPress_6', 'PRESS_BUTTON_6'),
-                #('buttonRelease_1', 'RELEASE_BUTTON_1'),
-                #('buttonRelease_2', 'RELEASE_BUTTON_2'),
-                #('buttonRelease_3', 'RELEASE_BUTTON_3'),
-                #('buttonRelease_4', 'RELEASE_BUTTON_4'),
-                #('buttonRelease_5', 'RELEASE_BUTTON_5'),
-                #('buttonRelease_6', 'RELEASE_BUTTON_6'),
                 ('retractAll', 'RETRACT_ACTUATORS'),
                 ('ejectDut', 'EJECT_DUT'),
                 ('4ButtonModel', '4BUTTON_MODEL'),
@@ -173,9 +158,9 @@ class Sensors(share.Sensors):
             self[name] = sensor.KeyedReadingString(ard, cmdkey)
 
         # Create additional arduino sensors for buttonPress and buttonRelease
-        for n in range(6):
-            _data = (('buttonPress_{}'.format(n+1), 'PRESS_BUTTON_{}'.format(n+1)),
-                     ('buttonRelease_{}'.format(n+1), 'RELEASE_BUTTON_{}'.format(n+1)))
+        for n in range(1, 7):
+            _data = (('buttonPress_{}'.format(n), 'PRESS_BUTTON_{}'.format(n)),
+                     ('buttonRelease_{}'.format(n), 'RELEASE_BUTTON_{}'.format(n)))
             for name, cmdkey in (_data):
                 self[name] = sensor.KeyedReadingString(ard, cmdkey)
 

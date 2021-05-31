@@ -63,7 +63,7 @@ from . import test_rvmn101_final
 from . import test_rvmn101_initial
 from . import test_rvmn101_console
 from . import test_rvw_jdisp_initial
-from . import test_rvswt101_arduino_console
+from . import test_rvswt101_arduino
 from . import test_rvswt101_final
 from . import test_rvswt101_initial
 from . import test_rvswt101_device
@@ -150,7 +150,7 @@ __all__ = [
     'test_rvmn101_initial',
     'test_rvmn101_console',
     'test_rvw_jdisp_initial',
-    'test_rvswt101_arduino_console',
+    'test_rvswt101_arduino',
     'test_rvswt101_final',
     'test_rvswt101_initial',
     'test_rvswt101_device',
