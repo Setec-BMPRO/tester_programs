@@ -28,8 +28,16 @@ class Final(share.TestSequence):
             )
         self.sernum = None
         self.buttons = ()       # Tuple of 12 or 18 measurement strings
-# FIXME: Populate self.buttons here
-
+        button_presses = tuple(
+            ['buttonPress_{0}'.format(n) for n in range(1,  self.button_count+1)])
+        button_measurements = tuple(
+            ['buttonMeasure_{0}'.format(n) for n in range(1,  self.button_count+1)])
+        button_releases = tuple(
+            ['buttonRelease_{0}'.format(n) for n in range(1,  self.button_count+1)])
+        for button_press, button_test, button_release in zip(
+                button_presses, button_measurements, button_releases):
+            #self.buttons = self.buttons + (button_press, button_test, button_release) 
+            self.buttons = self.buttons + ('ui_buttonpress', button_test)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -43,32 +51,7 @@ class Final(share.TestSequence):
         self.measure(('cell_voltage', 'switch_type',))
         # Scan on every measurement from here on
         dev['decoder'].always_scan = True
-#        self.measure(self.buttons)
-
-
-# FIXME: Move all this once-off setup code into open()
-#       self.buttons = Tuple of 12 or 18 measurement strings.
-#       Then just call      self.measure(self.buttons)
-        button_presses = tuple(
-            ['buttonPress_{0}'.format(n+1) for n in range(self.button_count)])
-        button_measurements = tuple(
-            ['buttonMeasure_{0}'.format(n+1) for n in range(self.button_count)])
-        button_releases = tuple(
-            ['buttonRelease_{0}'.format(n+1) for n in range(self.button_count)])
-        for button_press, button_test, button_release in zip(
-                button_presses, button_measurements, button_releases):
-            # Press a button
-#            mes[button_press]()
-            mes['ui_buttonpress']()
-            # Test the switch_code from the bluetooth payload
-#            self.measure((button_test, button_release))
-            mes[button_test]()
-            # Release the button.
-#            mes[button_release]()
-        # Perhaps move this to somewhere else?  Yes, see Devices.reset()
-        # Eject the UUT
-#        mes['retractAll']()
-#        mes['ejectDut']()
+        self.measure(self.buttons)
 
 
 class Devices(share.Devices):
@@ -141,9 +124,8 @@ class Sensors(share.Sensors):
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
         self['no_button_pressed'] = sensor.KeyedReading(decoder, 'no_button_pressed')
         for n in range(1, 7):
-            k = 'switch_{0}_measure'.format(n)
-            self[k] = sensor.KeyedReading(decoder, k)
-        #self['bcount'] = '6'
+            name = 'switch_{0}_measure'.format(n)
+            self[name] = sensor.KeyedReading(decoder, name)
 
         # Arduino sensors - sensor_name, key
         ard = self.devices['ard']
