@@ -22,6 +22,9 @@ class Final(share.TestSequence):
         tester.LimitPercent('12V', 12.0, 2.5, doc='12V output ok'),
         tester.LimitLow('24Voff', 0.5, doc='24V output off'),
         tester.LimitPercent('24V', 24.0, 2.5, doc='24V output ok'),
+        tester.LimitBetween('24Von', 22.80, 25.44),
+        tester.LimitBetween('12Von', 11.8755, 12.4845),
+        tester.LimitBetween('12V2on', 11.8146, 12.4845),
         tester.LimitLow('PwrFail', 0.4, doc='PFAIL asserted'),
         tester.LimitHigh('PwrFailOff', 11.0, doc='PFAIL not asserted'),
         )
@@ -33,6 +36,7 @@ class Final(share.TestSequence):
             tester.TestStep('PowerUp', self._step_pwrup),
             tester.TestStep('PowerOn', self._step_pwron),
             tester.TestStep('FullLoad', self._step_fullload),
+            tester.TestStep('115V', self._step_fullload115),
             )
 
     @share.teststep
@@ -63,6 +67,13 @@ class Final(share.TestSequence):
             (('dcl_5v', 2.0), ('dcl_24v', 10.0), ('dcl_12v', 24.0)),
              delay=0.5)
         self.measure(('dmm_5v', 'dmm_24v', 'dmm_12v'), timeout=5)
+
+    @share.teststep
+    def _step_fullload115(self, dev, mes):
+        """115Vac step."""
+        dev['acsource'].output(voltage=115.0, delay=0.5)
+        self.measure(
+            ('dmm_5v', 'dmm_24von', 'dmm_12von', 'dmm_12v2on', ), timeout=5)
 
 
 class Devices(share.Devices):
@@ -118,6 +129,7 @@ class Sensors(share.Sensors):
         # The LED output pin. 5V - 100R - Diode.
         self['o5v'] = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.0001)
         self['o12v'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
+        self['o12v2'] = sensor.Vdc(dmm, high=7, low=3, rng=100, res=0.001)
         self['o24v'] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self['pwrfail'] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
 
@@ -137,6 +149,9 @@ class Measurements(share.Measurements):
             ('dmm_12voff', '12Voff', 'o12v', '12V output off'),
             ('dmm_12v', '12V', 'o12v', '12V output ok'),
             ('dmm_24voff', '24Voff', 'o24v', '24V output off'),
+            ('dmm_24von', '24Von', 'o24v', ''),
+            ('dmm_12von', '12Von', 'o12v', ''),
+            ('dmm_12v2on', '12V2on', 'o12v2', ''),
             ('dmm_24v', '24V', 'o24v', '24V output ok'),
             ('dmm_pwrfail', 'PwrFail', 'pwrfail', 'PFAIL asserted'),
             ('dmm_pwrfailoff', 'PwrFailOff', 'pwrfail', 'PFAIL not asserted'),
