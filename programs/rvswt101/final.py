@@ -27,17 +27,23 @@ class Final(share.TestSequence):
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
+
         self.buttons = ()       # Tuple of 12 or 18 measurement strings
         button_presses = tuple(
-            ['buttonPress_{0}'.format(n) for n in range(1,  self.button_count+1)])
+            ['buttonPress_{0}'.format(n) for n in range(1, self.button_count+1)])
         button_measurements = tuple(
-            ['buttonMeasure_{0}'.format(n) for n in range(1,  self.button_count+1)])
+            ['buttonMeasure_{0}'.format(n) for n in range(1, self.button_count+1)])
         button_releases = tuple(
-            ['buttonRelease_{0}'.format(n) for n in range(1,  self.button_count+1)])
+            ['buttonRelease_{0}'.format(n) for n in range(1, self.button_count+1)])
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
-            #self.buttons = self.buttons + (button_press, button_test, button_release) 
+
             self.buttons = self.buttons + ('ui_buttonpress', button_test)
+
+        # TODO: perhaps replace the above with this:
+        #for n in range(1, self.button_count+1):
+        #    self.buttons += tuple(
+        #        'buttonPress_{0},buttonMeasure_{0},buttonRelease_{0}'.format(n).split(','))
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -52,7 +58,6 @@ class Final(share.TestSequence):
         # Scan on every measurement from here on
         dev['decoder'].always_scan = True
         self.measure(self.buttons)
-
 
 class Devices(share.Devices):
 
