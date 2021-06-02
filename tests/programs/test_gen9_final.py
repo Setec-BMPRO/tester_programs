@@ -36,7 +36,7 @@ class GEN9Final(ProgramTestCase):
                     ),
                 '115V': (
                     (sen['o5v'], 5.1), (sen['o24v'], 24.1),
-                    (sen['o12v'], 12.1), (sen['o12v2'], 12.2),
+                    (sen['o12v'], 12.1),
                     ),
                 },
             }
@@ -44,7 +44,7 @@ class GEN9Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(18, len(result.readings))
+        self.assertEqual(17, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PowerOn', 'FullLoad', '115V'],
             self.tester.ut_steps)
