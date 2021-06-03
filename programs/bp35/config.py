@@ -126,7 +126,7 @@ class BP35():
         tester.LimitBetween('ARM-AuxI', 0.0, 1.5, doc='AUX current flowing'),
         tester.LimitInteger('ARM-RemoteClosed', 1,
             doc='REMOTE input connected'),
-        tester.LimitDelta('CanPwr', vout_set, delta=1.8,
+        tester.LimitDelta('CanPwr', vout_set, delta=3.0,
             doc='CAN bus power present'),
         tester.LimitRegExp('CAN_RX', r'^RRQ,32,0', doc='Expected CAN message'),
         tester.LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
@@ -135,7 +135,7 @@ class BP35():
         )
     # Final Test limits common to all versions
     _base_limits_final = _base_limits_all + (
-        tester.LimitDelta('Can12V', 12.0, delta=1.0, doc='CAN_POWER rail'),
+        tester.LimitDelta('Can12V', 12.0, delta=3.0, doc='CAN_POWER rail'),
         tester.LimitLow('Can0V', 0.5,  doc='CAN BUS removed'),
         tester.LimitHigh('FanOn', 10.0, doc='Fan running'),
         tester.LimitLow('FanOff', 1.0, doc='Fan not running'),
