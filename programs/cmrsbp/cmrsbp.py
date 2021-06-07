@@ -165,7 +165,7 @@ class CmrSbp():
                 self._logger.debug('Data read timeout')
                 self.resultq.put(tdata.data)    # this will be empty data
         try:
-            tdata.cancel()
+            tdata.stop()
         except Exception:
             pass
         self._logger.info('Finished!')
