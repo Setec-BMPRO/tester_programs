@@ -19,7 +19,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.J35.select(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_initial()
         Sensors.output_count = self.cfg.output_count
         Sensors.load_per_output = self.cfg.load_per_output

@@ -3,13 +3,43 @@
 # Copyright 2016 SETEC Pty Ltd.
 """J35 Configuration."""
 
-import math
+import enum
 import logging
+import math
 
 import attr
 
 import tester
-import share
+
+
+def get(parameter, uut):
+    """Get a configuration based on the parameter and lot.
+
+    @param parameter Type of unit
+    @param uut setec.UUT instance
+    @return configuration class
+
+    """
+    config = {
+        'A': J35A,
+        'B': J35B,
+        'BL': J35BL,
+        'C': J35C,
+        'D': J35D,
+        }[parameter]
+    config._configure(uut)    # Adjust for the revision
+    return config
+
+
+class Type(enum.IntEnum):
+
+    """Product type numbers for hardware revisions."""
+
+    A = 1
+    B = 2
+    C = 3
+    D = 4
+    BL = 5
 
 
 @attr.s
@@ -143,28 +173,6 @@ class J35():
     _lot_rev = None         # Lot Number to Revision data
     _rev_data = None        # Revision data dictionary
 
-    @staticmethod
-    def select(parameter, uut):
-        """Select a configuration based on the parameter and lot.
-
-        @param parameter Type of unit (A/B/C)
-        @param uut setec.UUT instance
-        @return configuration class
-
-        """
-# 469 x J35C were converted to J35B via PC 4885
-#   J35C Rev 4, Lots: A164211 (x135), A164309 (x265)
-#   ==> Should we change parameter from 'C' to 'B' ?...
-        config = {
-            'A': J35A,
-            'B': J35B,
-            'BL': J35BL,
-            'C': J35C,
-            'D': J35D,
-            }[parameter]
-        config._configure(uut)    # Adjust for the Lot Number
-        return config
-
     @classmethod
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
@@ -172,12 +180,10 @@ class J35():
         @param uut setec.UUT instance
 
         """
-        rev = None
-        if uut:
-            try:
-                rev = cls._lot_rev.find(uut.lot.number)
-            except share.lots.LotError:
-                pass
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
         cls.sw_version = values.sw_version
@@ -194,48 +200,45 @@ class J35A(J35):
 
     # Output set points when running in manual mode
     ocp_man_set = 20.0
-    _lot_rev = share.lots.Revision((
-        (share.lots.Range('A164809', 'A170404'), 1),    # 029622
-        (share.lots.Range('A171704', 'A174711'), 2),    # 030061
-        # No Rev 3 production                           # 031137
-        # No Rev 4,5,6 created
-        (share.lots.Range('A174510', 'A180408'), 8),    # 031190
-        # Rev 8 Built as Rev 9
-        (share.lots.Range('A181105', 'A182206'), 9),    # 031190
-        # No Rev 9 production
-        # Rev 10
-        (share.lots.Range('A183703', 'A184502'), 10),   # 031924
-        # Rev 11...                                     # 032434
-        ))
+    _rev12_values = _Values(
+            sw_version=J35.sw_15, hw_version=(12, Type.A.value, 'A'),
+            output_count=7, ocp_set=20.0,
+            solar=False, canbus=True,
+            )
     _rev_data = {
-        None: _Values(
-            sw_version=J35.sw_15, hw_version=(11, 1, 'A'),
+        None: _rev12_values,
+        # Rev 13 never built
+        12: _rev12_values,
+        11: _Values(
+            sw_version=J35.sw_15, hw_version=(11, Type.A.value, 'A'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
             ),
         10: _Values(
-            sw_version=J35.sw_15, hw_version=(10, 1, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, Type.A.value, 'A'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
             ),
         9: _Values(
-            sw_version=J35.sw_15, hw_version=(9, 1, 'B'),
+            sw_version=J35.sw_15, hw_version=(9, Type.A.value, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
             ),
         8: _Values(
-            sw_version=J35.sw_15, hw_version=(8, 1, 'C'),
+            sw_version=J35.sw_15, hw_version=(8, Type.A.value, 'C'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
             ),
         # Rev <8 uses an older software version
+        # No Rev 4,5,6 created
+        # No Rev 3 production
         2: _Values(
-            sw_version=J35.sw_13, hw_version=(2, 1, 'B'),
+            sw_version=J35.sw_13, hw_version=(2, Type.A.value, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=False,
             ),
         1: _Values(
-            sw_version=J35.sw_13, hw_version=(1, 1, 'B'),
+            sw_version=J35.sw_13, hw_version=(1, Type.A.value, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=False,
             ),
@@ -274,48 +277,45 @@ class J35B(J35):
 
     """J35B configuration."""
 
-    _lot_rev = share.lots.Revision((
-        (share.lots.Range('A164808'), 1),               # 029630
-        (share.lots.Range('A170307', 'A174607'), 2),    # 029804
-        # No Rev 3,4 production                         # 031051, 031133
-        # No Rev 5,6 created
-        (share.lots.Range('A174511', 'A180309'), 8),    # 031191
-        # Rev 8 Built as Rev 9
-        (share.lots.Range('A181011', 'A182405'), 9),    # 031191
-        # No Rev 9 production
-        # Rev 10
-        (share.lots.Range('A183717', 'A184412'), 10),   # 031925
-        # Rev 11...                                     # 032435
-        ))
+    _rev12_values = _Values(
+            sw_version=J35.sw_15, hw_version=(12, Type.B.value, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, canbus=True,
+            )
     _rev_data = {
-        None: _Values(
-            sw_version=J35.sw_15, hw_version=(11, 2, 'A'),
+        None: _rev12_values,
+        # Rev 13 never built
+        12: _rev12_values,
+        11: _Values(
+            sw_version=J35.sw_15, hw_version=(11, Type.B.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         10: _Values(
-            sw_version=J35.sw_15, hw_version=(10, 2, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, Type.B.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         9: _Values(
-            sw_version=J35.sw_15, hw_version=(9, 2, 'B'),
+            sw_version=J35.sw_15, hw_version=(9, Type.B.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         8: _Values(
-            sw_version=J35.sw_15, hw_version=(8, 2, 'C'),
+            sw_version=J35.sw_15, hw_version=(8, Type.B.value, 'C'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         # Rev <8 uses an older software version
+        # No Rev 5,6 created
+        # No Rev 3,4 production
         2: _Values(
-            sw_version=J35.sw_13, hw_version=(2, 2, 'D'),
+            sw_version=J35.sw_13, hw_version=(2, Type.B.value, 'D'),
             output_count=14, ocp_set=35.0,
             solar=False, canbus=False,
             ),
         1: _Values(
-            sw_version=J35.sw_13, hw_version=(1, 2, 'B'),
+            sw_version=J35.sw_13, hw_version=(1, Type.B.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=False, canbus=False,
             ),
@@ -354,15 +354,14 @@ class J35BL(J35B):
 
     """J35BL configuration."""
 
-    _lot_rev = share.lots.Revision((
-        # Rev 13...                                     # 035685
-        ))
-    _rev_data = {
-        None: _Values(
-            sw_version=J35.sw_bl, hw_version=(13, 5, 'A'),
+    _rev13_values = _Values(
+            sw_version=J35.sw_bl, hw_version=(13, Type.BL.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
-            ),
+            )
+    _rev_data = {
+        None: _rev13_values,
+        13: _rev13_values,
         }
 
 
@@ -370,61 +369,57 @@ class J35C(J35B):
 
     """J35C configuration."""
 
-    _lot_rev = share.lots.Revision((
-        # Rev 1-3 must be scrapped per MA-328
-        #  There are no entries for Rev1-3 in _rev_data, so there will be
-        #  a runtime error, producing a SystemError test result
-        (share.lots.Range('A154411'), 1),               # 027745
-        (share.lots.Range('A160306'), 2),               # 028388
-        (share.lots.Range('A161211'), 3),               # 028861
-        (share.lots.Range('A163710', 'A164309'), 4),    # 029129
-        # No Rev 5 production                           # 029570
-        (share.lots.Range('A164911', 'A171603'), 6),    # 029916
-        (share.lots.Range('A171907', 'A173608'), 7),    # 030200
-        (share.lots.Range('A174909', 'A180809'), 8),    # 031192
-        # Rev 8 Built as Rev 9
-        (share.lots.Range('A181409', 'A182207'), 9),    # 031192
-        # No Rev 9 production
-        # Rev 10
-        (share.lots.Range('A184110', 'A184110'), 10),   # 031926
-        # Rev 11...                                     # 032436
-        ))
+    _rev12_values = _Values(
+            sw_version=J35.sw_15, hw_version=(12, Type.C.value, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, canbus=True,
+            )
     _rev_data = {
-        None: _Values(
-            sw_version=J35.sw_15, hw_version=(11, 3, 'A'),
+        None: _rev12_values,
+        # Rev 13 never built
+        12: _rev12_values,
+        11: _Values(
+            sw_version=J35.sw_15, hw_version=(11, Type.C.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         10: _Values(
-            sw_version=J35.sw_15, hw_version=(10, 3, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, Type.C.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         9: _Values(
-            sw_version=J35.sw_15, hw_version=(9, 3, 'B'),
+            sw_version=J35.sw_15, hw_version=(9, Type.C.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         8: _Values(
-            sw_version=J35.sw_15, hw_version=(8, 3, 'C'),
+            sw_version=J35.sw_15, hw_version=(8, Type.C.value, 'C'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         7: _Values(
-            sw_version=J35.sw_15, hw_version=(7, 3, 'C'),
+            sw_version=J35.sw_15, hw_version=(7, Type.C.value, 'C'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         6: _Values(
-            sw_version=J35.sw_15, hw_version=(6, 3, 'E'),
+            sw_version=J35.sw_15, hw_version=(6, Type.C.value, 'E'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
+        # No Rev 5 production
+        # 469 x J35C were converted to J35B via PC 4885
+        #   J35C Rev 4, Lots: A164211 (x135), A164309 (x265)
         4: _Values(
-            sw_version=J35.sw_15, hw_version=(4, 3, 'B'),
+            sw_version=J35.sw_15, hw_version=(4, Type.C.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
+        # Rev 1-3 must be scrapped per MA-328
+        3: None,
+        2: None,
+        1: None,
         }
 
 
@@ -432,27 +427,27 @@ class J35D(J35C):
 
     """J35D configuration."""
 
-    _lot_rev = share.lots.Revision((
-        # Rev 8 Built as Rev 9
-        (share.lots.Range('A181410', 'A181917'), 9),    # 031193
-        # No Rev 9 production
-        # Rev 10
-        (share.lots.Range('A184113', 'A184113'), 10),   # 031927
-        # Rev 11...                                     # 032437
-        ))
+    _rev12_values = _Values(
+            sw_version=J35.sw_15, hw_version=(12, Type.D.value, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, canbus=True,
+            )
     _rev_data = {
-        None: _Values(
-            sw_version=J35.sw_15, hw_version=(11, 4, 'A'),
+        None: _rev12_values,
+        # Rev 13 never built
+        12: _rev12_values,
+        11: _Values(
+            sw_version=J35.sw_15, hw_version=(11, Type.D.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         10: _Values(
-            sw_version=J35.sw_15, hw_version=(10, 4, 'A'),
+            sw_version=J35.sw_15, hw_version=(10, Type.D.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         9: _Values(
-            sw_version=J35.sw_15, hw_version=(9, 4, 'B'),
+            sw_version=J35.sw_15, hw_version=(9, Type.D.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),

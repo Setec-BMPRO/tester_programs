@@ -14,7 +14,7 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.BCx5.select(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         self.ocp_nominal, limits = self.cfg.limits_final()
         Sensors.ocp_nominal = self.ocp_nominal
         super().open(limits, Devices, Sensors, Measurements)

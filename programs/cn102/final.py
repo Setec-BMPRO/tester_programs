@@ -15,7 +15,7 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.CN10x.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_final
         super().open(limits, Devices, Sensors, Measurements)
         self.steps = (

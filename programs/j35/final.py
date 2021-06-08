@@ -15,7 +15,7 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.J35.select(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_final()
         Sensors.output_count = self.cfg.output_count
         self.duplicate_limit_error = False

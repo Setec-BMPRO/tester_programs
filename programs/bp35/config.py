@@ -3,19 +3,18 @@
 # Copyright 2015 SETEC Pty Ltd.
 """BP35 / BP35-II Configurations."""
 
-import logging
 import enum
+import logging
 
 import attr
 
 import tester
-import share
 
 
 def get(parameter, uut):
     """Get a configuration based on the parameter and lot.
 
-    @param parameter Type of unit (A/B/C)
+    @param parameter Type of unit
     @param uut setec.UUT instance
     @return configuration class
 
@@ -28,7 +27,7 @@ def get(parameter, uut):
         'HA2': BP35IIHA,
         'SI2': BP35IISI,
         }[parameter]
-    config._configure(uut)    # Adjust for the Lot Number
+    config._configure(uut)    # Adjust for the revision
     return config
 
 
@@ -142,7 +141,6 @@ class BP35():
         tester.LimitBetween('Vout', 12.0, 12.9, doc='No load output voltage'),
         )
     # Internal data storage
-    _lot_rev = None         # Lot Number to Revision data
     _rev_data = None        # Revision data dictionary
 
     @classmethod
@@ -152,12 +150,10 @@ class BP35():
         @param uut setec.UUT instance
 
         """
-        rev = None
-        if uut:
-            try:
-                rev = cls._lot_rev.find(uut.lot.number)
-            except share.lots.LotError:
-                pass
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
         cls.arm_hw_version = values.hw_version
@@ -217,31 +213,17 @@ class BP35SR(BP35):
     """BP35SR configuration."""
 
     is_pm = False
-    _lot_rev = share.lots.Revision((
-        # Rev 1-5
-        (share.lots.Range('A000001', 'A162007'), 6),    # Main PCB swaps
-        # Rev 6
-        (share.lots.Range('A162008', 'A163007'), 6),
-        # Rev 7
-        (share.lots.Range('A163308', 'A163308'), 7),
-        # Rev 8
-        (share.lots.Range('A164401', 'A170809'), 8),
-        # Rev 9
-        (share.lots.Range('A171101', 'A172712'), 9),
-        # Rev 10
-        (share.lots.Range('A173011', 'A173603'), 10),
-        # No Rev 11 created
-        # Rev 12
-        (share.lots.Range('A174403', 'A182506'), 12),
-        # Rev 13
-        (share.lots.Range('A182906', 'A194809'), 13),
-        # Rev 14...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev14_values = _Values(
             hw_version=(14, Type.SR.value, 'A'),
             arm_sw_version=BP35.arm_sw_version
-            ),
+            )
+    _rev6_values = _Values(
+            hw_version=(6, Type.SR.value, 'E'),
+            arm_sw_version=BP35.arm_sw_version
+            )
+    _rev_data = {
+        None: _rev14_values,
+        14: _rev14_values,
         13: _Values(
             hw_version=(13, Type.SR.value, 'D'),
             arm_sw_version=BP35.arm_sw_version
@@ -250,6 +232,7 @@ class BP35SR(BP35):
             hw_version=(12, Type.SR.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
+        # No Rev 11 created
         10: _Values(
             hw_version=(10, Type.SR.value, 'G'),
             arm_sw_version=BP35.arm_sw_version
@@ -266,10 +249,13 @@ class BP35SR(BP35):
             hw_version=(7, Type.SR.value, 'D'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        6: _Values(
-            hw_version=(6, Type.SR.value, 'E'),
-            arm_sw_version=BP35.arm_sw_version
-            ),
+        6: _rev6_values,
+        # Rev 1-5 are Main PCB swaps
+        5: _rev6_values,
+        4: _rev6_values,
+        3: _rev6_values,
+        2: _rev6_values,
+        1: _rev6_values,
         }
 
 
@@ -277,22 +263,13 @@ class BP35HA(BP35SR):
 
     """BP35HA configuration."""
 
-    _lot_rev = share.lots.Revision((
-        # No Rev 1-9 created
-        # Rev 10
-        (share.lots.Range('A173303', 'A173805'), 10),
-        # No Rev 11 created
-        # Rev 12
-        (share.lots.Range('A174403', 'A182506'), 12),
-        # Rev 13
-        (share.lots.Range('A182906', 'A194810'), 13),
-        # Rev 14...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev14_values = _Values(
             hw_version=(14, Type.HA.value, 'A'),
             arm_sw_version=BP35.arm_sw_version
-            ),
+            )
+    _rev_data = {
+        None: _rev14_values,
+        14: _rev14_values,
         13: _Values(
             hw_version=(13, Type.HA.value, 'B'),
             arm_sw_version=BP35.arm_sw_version
@@ -301,10 +278,12 @@ class BP35HA(BP35SR):
             hw_version=(12, Type.HA.value, 'C'),
             arm_sw_version=BP35.arm_sw_version
             ),
+        # No Rev 11 created
         10: _Values(
             hw_version=(10, Type.HA.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
+        # No Rev 1-9 created
         }
 
 
@@ -313,25 +292,15 @@ class BP35PM(BP35):
     """BP35PM configuration."""
 
     is_pm = True
-
     # PM Solar Reg settings
     pm_zero_wait = 30   # Settling delay for zero calibration
-    _lot_rev = share.lots.Revision((
-        # No Rev 1-9 created
-        # Rev 10
-        (share.lots.Range('A173205', 'A173206'), 10),
-        # No Rev 11 created
-        # Rev 12
-        (share.lots.Range('A174210', 'A182609'), 12),
-        # Rev 13
-        (share.lots.Range('A183109', 'A194512'), 13),
-        # Rev 14...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev14_values = _Values(
             hw_version=(14, Type.PM.value, 'A'),
             arm_sw_version=BP35.arm_sw_version
-            ),
+            )
+    _rev_data = {
+        None: _rev14_values,
+        14: _rev14_values,
         13: _Values(
             hw_version=(13, Type.PM.value, 'B'),
             arm_sw_version=BP35.arm_sw_version
@@ -340,10 +309,12 @@ class BP35PM(BP35):
             hw_version=(12, Type.PM.value, 'C'),
             arm_sw_version=BP35.arm_sw_version
             ),
+        # No Rev 11 created
         10: _Values(
             hw_version=(10, Type.PM.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
+        # No Rev 1-9 created
         }
 
 
@@ -363,20 +334,18 @@ class BP35IISR(BP35II):
     """BP35-IISR configuration."""
 
     is_pm = False
-    _lot_rev = share.lots.Revision((
-        # Rev 3
-        (share.lots.Range('A200911', 'A204908'), 3),
-        # Rev 4...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev4_values = _Values(
             hw_version=(16, Type.SR.value, 'B'),
             arm_sw_version=BP35II.arm_5073
-            ),
+            )
+    _rev_data = {
+        None: _rev4_values,
+        4: _rev4_values,
         3: _Values(
             hw_version=(15, Type.SR.value, 'E'),
             arm_sw_version=BP35II.arm_5015
             ),
+        # No Rev 1 or 2
         }
 
 
@@ -384,20 +353,18 @@ class BP35IIHA(BP35IISR):
 
     """BP35-IIHA configuration."""
 
-    _lot_rev = share.lots.Revision((
-        # Rev 3
-        (share.lots.Range('A201509', 'A205126'), 3),
-        # Rev 4...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev4_values = _Values(
             hw_version=(16, Type.HA.value, 'B'),
             arm_sw_version=BP35II.arm_5073
-            ),
+            )
+    _rev_data = {
+        None: _rev4_values,
+        4: _rev4_values,
         3: _Values(
             hw_version=(15, Type.HA.value, 'E'),
             arm_sw_version=BP35II.arm_5015
             ),
+        # No Rev 1 or 2
         }
 
 
@@ -408,18 +375,16 @@ class BP35IISI(BP35II):
     is_pm = True
     # PM Solar Reg settings
     pm_zero_wait = 30   # Settling delay for zero calibration
-    _lot_rev = share.lots.Revision((
-        # Rev 3
-        (share.lots.Range('A201511', 'A204703'), 3),
-        # Rev 4...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev4_values = _Values(
             hw_version=(16, Type.SI.value, 'B'),
             arm_sw_version=BP35II.arm_5073
-            ),
+            )
+    _rev_data = {
+        None: _rev4_values,
+        4: _rev4_values,
         3: _Values(
             hw_version=(15, Type.SI.value, 'E'),
             arm_sw_version=BP35II.arm_5015
             ),
+        # No Rev 1 or 2
         }

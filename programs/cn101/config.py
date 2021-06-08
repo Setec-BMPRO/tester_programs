@@ -26,18 +26,17 @@ class CN101():
             tester.LimitBoolean('DetectBT', True),
             tester.LimitInteger('Tank', 5),
             )
-    # Lot Number to Revision data
-    _lot_rev = share.lots.Revision((
-        # Rev 1-4: No Production
-# MA-239: Upgrade all units to CN101T, so treat them as Rev 6
-#        (share.lots.Range('A164207', 'A182702'), 5),    # 029431
-        # Rev 6... Rev 5 units built as Rev 6 under PC
-        ))
+    # MA-239: Upgrade all units to CN101T, so treat them as Rev 6
+    _rev6_values = ('1.2.17835.298', (6, 0, 'A'), 2)     # CN101T (Rev 6)
     # Revision data dictionary
     _rev_data = {
-        None: ('1.2.17835.298', (6, 0, 'A'), 2),         # CN101T (Rev 6)
-# MA-239: Upgrade all units to CN101T, so treat them as Rev 6
-#        5: ('1.1.13665.176', (5, 0, 'A'), 0),            # CN101 (Rev 1-5)
+        None: _rev6_values,
+        6: _rev6_values,
+        5: _rev6_values,
+        4: _rev6_values,
+        3: _rev6_values,
+        2: _rev6_values,
+        1: _rev6_values,
         }
     # These values get set per revision by select()
     sw_version = None
@@ -45,19 +44,17 @@ class CN101():
     banner_lines = None
 
     @classmethod
-    def select(cls, uut):
-        """Adjust configuration based on UUT Lot Number.
+    def get(cls, uut):
+        """Get configuration based on UUT Lot Number.
 
         @param uut setec.UUT instance
         @return configuration class
 
         """
-        rev = None
-        if uut:
-            try:
-                rev = cls._lot_rev.find(uut.lot.number)
-            except share.lots.LotError:
-                pass
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         cls.sw_version, cls.hw_version, cls.banner_lines = cls._rev_data[rev]
         return cls

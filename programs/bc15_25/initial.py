@@ -19,7 +19,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.BCx5.select(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         self.ocp_nominal, limits = self.cfg.limits_initial()
         Sensors.ocp_nominal = self.ocp_nominal
         Devices.arm_file = self.cfg.arm_file

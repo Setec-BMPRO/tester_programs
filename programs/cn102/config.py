@@ -9,6 +9,22 @@ import tester
 import share
 
 
+def get(parameter, uut):
+    """Get configuration based on UUT Lot Number.
+
+    @param parameter Type of unit
+    @param uut setec.UUT instance
+    @return configuration class
+
+    """
+    config = {
+        '102': CN102,
+        '103': CN103,
+        }[parameter]
+    config._configure(uut)    # Adjust for the revision
+    return config.parameters
+
+
 class CN10xParameters():
 
     """CN10x model specific parameters."""
@@ -65,26 +81,9 @@ class CN10x():
     """Configuration for CN10x."""
 
     # These values get overriden by child classes
-    _lot_rev = None
     _rev_data = None
     # Instance of CN10xParameters
     parameters = None
-
-    @classmethod
-    def get(cls, parameter, uut):
-        """Adjust configuration based on UUT Lot Number.
-
-        @param parameter Type of unit (A/B/C)
-        @param uut setec.UUT instance
-        @return configuration class
-
-        """
-        config = {
-            '102': CN102,
-            '103': CN103,
-            }[parameter]
-        config._configure(uut)    # Adjust for the Lot Number
-        return config.parameters
 
     @classmethod
     def _configure(cls, uut):
@@ -93,12 +92,10 @@ class CN10x():
         @param uut setec.UUT instance
 
         """
-        rev = None
-        if uut:
-            try:
-                rev = cls._lot_rev.find(uut.lot.number)
-            except share.lots.LotError:
-                pass
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         cls.parameters = cls._rev_data[rev]
 
@@ -111,19 +108,17 @@ class CN102(CN10x):
     # Software versions
     _arm_12 = '1.2.18218.1627'
     _nordic_10 = '1.0.18106.1260'
-    # Lot Number to Revision data
-    _lot_rev = share.lots.Revision((
-        # Default to None == Rev 1
-        ))
-    # Revision data dictionary:
-    _rev_data = {
-        None: CN10xParameters(
+    _rev1_values = CN10xParameters(
             prefix=_prefix,
             sw_arm_version=_arm_12,
             sw_nrf_version=_nordic_10,
             hw_version=(1, 0, 'A'),
             banner_lines=2
-            ),
+            )
+    # Revision data dictionary:
+    _rev_data = {
+        None: _rev1_values,
+        1: _rev1_values,
         }
 
 
@@ -135,21 +130,17 @@ class CN103(CN10x):
     # Software versions
     _arm_12 = '1.2.111.2008'
     _nordic_10 = '1.0.19700.1352'
-    # Lot Number to Revision data
-    _lot_rev = share.lots.Revision((
-        # Rev 1
-        (share.lots.Range('A195014', 'A200419'), 1),
-        # Rev 2...
-        ))
-    # Revision data dictionary:
-    _rev_data = {
-        None: CN10xParameters(
+    _rev2_values = CN10xParameters(
             prefix=_prefix,
             sw_arm_version=_arm_12,
             sw_nrf_version=_nordic_10,
             hw_version=(2, 0, 'A'),
             banner_lines=2
-            ),
+            )
+    # Revision data dictionary:
+    _rev_data = {
+        None: _rev2_values,
+        2: _rev2_values,
         1: CN10xParameters(
             prefix=_prefix,
             sw_arm_version=_arm_12,

@@ -18,7 +18,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.CN101.select(uut)
+        self.cfg = config.CN101.get(uut)
         limits = self.cfg.limits_initial
         Devices.sw_version = self.cfg.sw_version
         super().open(limits, Devices, Sensors, Measurements)
