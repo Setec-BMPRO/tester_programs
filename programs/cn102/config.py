@@ -118,7 +118,7 @@ class CN102(CN10x):
     # Revision data dictionary:
     _rev_data = {
         None: _rev1_values,
-        1: _rev1_values,
+        '1': _rev1_values,
         }
 
 
@@ -140,8 +140,8 @@ class CN103(CN10x):
     # Revision data dictionary:
     _rev_data = {
         None: _rev2_values,
-        2: _rev2_values,
-        1: CN10xParameters(
+        '2': _rev2_values,
+        '1': CN10xParameters(
             prefix=_prefix,
             sw_arm_version=_arm_12,
             sw_nrf_version=_nordic_10,

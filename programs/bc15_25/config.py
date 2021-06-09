@@ -116,9 +116,9 @@ class BC15(BCx5):
         )
     _rev_data = {
         None: _rev6_values,
-        6: _rev6_values,
-        5: _rev6_values,
-        4: _rev6_values,
+        '6': _rev6_values,
+        '5': _rev6_values,
+        '4': _rev6_values,
         # Rev 1-3 Scrap
         }
 
@@ -177,8 +177,8 @@ class BC25(BCx5):
             )
     _rev_data = {
         None: _rev4_values,
-        4: _rev4_values,
-        3: _rev4_values,
+        '4': _rev4_values,
+        '3': _rev4_values,
         # Rev 1,2 Scrap
         }
 

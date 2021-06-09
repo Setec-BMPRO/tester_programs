@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-06-08, 21:12:13"
+    "saved": "2021-06-09, 10:08:23"
   },
   "project": {
     "AUTHOR": "",
@@ -272,7 +272,6 @@
       "share/console/parameter.py",
       "share/console/protocol.py",
       "share/console/samb11.py",
-      "share/lots.py",
       "share/programmer.py",
       "share/testsequence.py",
       "tests/__init__.py",
@@ -363,7 +362,6 @@
       "tests/share/__init__.py",
       "tests/share/test_bluetooth.py",
       "tests/share/test_console.py",
-      "tests/share/test_lots.py",
       "tests/share/test_parameter.py",
       "testsuite.py"
     ],

@@ -3,8 +3,6 @@
 # Copyright 2015 SETEC Pty Ltd.
 """CN101 Configuration."""
 
-import logging
-
 import tester
 
 import share
@@ -27,34 +25,6 @@ class CN101():
             tester.LimitInteger('Tank', 5),
             )
     # MA-239: Upgrade all units to CN101T, so treat them as Rev 6
-    _rev6_values = ('1.2.17835.298', (6, 0, 'A'), 2)     # CN101T (Rev 6)
-    # Revision data dictionary
-    _rev_data = {
-        None: _rev6_values,
-        6: _rev6_values,
-        5: _rev6_values,
-        4: _rev6_values,
-        3: _rev6_values,
-        2: _rev6_values,
-        1: _rev6_values,
-        }
-    # These values get set per revision by select()
-    sw_version = None
-    hw_version = None
-    banner_lines = None
-
-    @classmethod
-    def get(cls, uut):
-        """Get configuration based on UUT Lot Number.
-
-        @param uut setec.UUT instance
-        @return configuration class
-
-        """
-        try:
-            rev = uut.lot.item.revision
-        except AttributeError:
-            rev = None
-        logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        cls.sw_version, cls.hw_version, cls.banner_lines = cls._rev_data[rev]
-        return cls
+    sw_version = '1.2.17835.298'
+    hw_version = (6, 0, 'A')
+    banner_lines = 2
