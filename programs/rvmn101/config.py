@@ -11,6 +11,24 @@ import tester
 import share
 
 
+def get(parameter, uut):
+    """Select a configuration based on the parameter.
+
+    @param parameter Type of unit
+    @param uut setec.UUT instance
+    @return configuration class
+
+    """
+    config = {
+        '101A': RVMN101A,
+        '101B': RVMN101B,
+        '50': RVMN5x,
+        '55': RVMN5x,
+        }[parameter]
+    config._configure(uut)    # Adjust for the revision
+    return config
+
+
 @attr.s
 class _Values():
 
@@ -60,24 +78,6 @@ class Config():
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
         )
 
-    @staticmethod
-    def get(parameter, uut):
-        """Select a configuration based on the parameter.
-
-        @param parameter Type of unit (A/B)
-        @param uut setec.UUT instance
-        @return configuration class
-
-        """
-        config = {
-            '101A': RVMN101A,
-            '101B': RVMN101B,
-            '50': RVMN5x,
-            '55': RVMN5x,
-            }[parameter]
-        config._configure(uut)    # Adjust for the Lot Number
-        return config
-
     @classmethod
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
@@ -85,12 +85,10 @@ class Config():
         @param uut setec.UUT instance
 
         """
-        rev = None
-        if uut:
-            try:
-                rev = cls._lot_rev.find(uut.lot.number)
-            except share.lots.LotError:
-                pass
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
         cls.nordic_image = values.nordic_image
@@ -138,36 +136,21 @@ class RVMN101A(Config):
     _nordic_2_5_3 = 'jayco_rvmn101_signed_2.5.3-0-ga721738c_factory_mcuboot.hex'
     _arm_image_1_13 = 'rvmn101_nxp_1.13.bin'
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
-    # Lot number mapping
-    _lot_rev = share.lots.Revision((
-        # Rev 1-5 were Engineering protoype builds
-        (share.lots.Range('A192709', 'A192904'), 6),    # 033620 MA358
-        (share.lots.Range('A192815', 'A194129'), 7),    # 033489 MA358
-        (share.lots.Range('A194210', 'A195015'), 8),    # 033585 MA358
-        (share.lots.Range('A195129', 'A201109'), 9),    # 034079 MA358
-        (share.lots.Range('A201218', 'A203611'), 10),   # 034447 MA358/PC23237
-        # Rev 11 No production                          # 035079
-        (share.lots.Range('A203612', 'A204008'), 12.1), # 034879 PC23652
-        (share.lots.Range('A204017', 'A204607'), 13),   # 035323
-        (share.lots.Range('A204724', 'A210637'), 14),   # 035461
-        # Rev 15 No production                          # 035611
-        (share.lots.Range('A210735', 'A210903'), 16),   # 035639
-        (share.lots.Range('A211027', 'A211411'), 14),   # 035461
-        (share.lots.Range('A211718', 'A211718'), 16),   # 035639
-        # Rev 17 No production                          # 035611
-        # Rev 18...                                     # 036061
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev18_values = _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_5,
             product_rev='18A', hardware_rev='13A', banner_lines=5,
             reversed_output_dict={},
-            ),
-        16: _Values(    # Note: ECO had wrong HW rev (15A)
+            )
+    _rev_data = {
+        None: _rev18_values,
+        18: _rev18_values,
+        # Rev 17 No production
+        16: _Values(    # Note: ECO had wrong HW rev (15A instead of 12A)
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_5,
             product_rev='16C', hardware_rev='15A', banner_lines=5,
             reversed_output_dict={},
             ),
+        # Rev 15 No production
         14: _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_5,
             product_rev='14D', hardware_rev='11A', banner_lines=5,
@@ -178,11 +161,12 @@ class RVMN101A(Config):
             product_rev='13B', hardware_rev='11A', banner_lines=5,
             reversed_output_dict={},
             ),
-        12.1: _Values(
+        12: _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_5,
             product_rev='12C', hardware_rev='11A', banner_lines=5,
             reversed_output_dict={},
             ),
+        # Rev 11 No production
         10: _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_1_13,
             product_rev='10D', hardware_rev='10A', banner_lines=5,
@@ -208,6 +192,7 @@ class RVMN101A(Config):
             product_rev='06H', hardware_rev='06A', banner_lines=5,
             reversed_output_dict={},
             ),
+        # Rev 1-5 were Engineering protoype builds
         }
 
     @classmethod
@@ -233,26 +218,14 @@ class RVMN101B(Config):
     # Software versions
     _nordic_2_4_2 = 'tmc_rvmn101_signed_2.4.2-0-g72f2a9c7_factory_mcuboot.hex'
     _arm_image_3_0 = 'rvmn101_nxp_3.0.bin'
-    # Lot number mapping
-    _lot_rev = share.lots.Revision((
-        (share.lots.Range('A191809', 'A200510'), 5),    # 033280
-        (share.lots.Range('A200820', 'A202704'), 6),    # 034229
-        (share.lots.Range('A202722', 'A202809'), 7),    # 034940
-        (share.lots.Range('A202907', 'A203113'), 7.1),  # 034940 PC-22885
-        (share.lots.Range('A203303', 'A203303'), 8.1),  # 035120 PC-23228
-        (share.lots.Range('A203508', 'A203717'), 9),    # 035231
-        (share.lots.Range('A204007', 'A204106'), 10),   # 035280
-        (share.lots.Range('A204116', 'A204307'), 11),   # 035332
-        (share.lots.Range('A204722', 'A204722'), 12),   # 035416
-        (share.lots.Range('A204931', 'A211012'), 13),   # 035213 PC-25789 MA???
-        # 035814 PC-25789
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev14_values = _Values(
             nordic_image=_nordic_2_4_2, arm_image=_arm_image_3_0,
             product_rev='14B', hardware_rev='8A', banner_lines=5,
             reversed_output_dict={},
-            ),
+            )
+    _rev_data = {
+        None: _rev14_values,
+        14: _rev14_values,
         13: _Values(
             nordic_image=_nordic_2_4_2, arm_image=_arm_image_3_0,
             product_rev='13D', hardware_rev='8A', banner_lines=5,
@@ -278,12 +251,7 @@ class RVMN101B(Config):
             product_rev='09F', hardware_rev='6A', banner_lines=5,
             reversed_output_dict={},
             ),
-        8.1: _Values(
-            nordic_image=_nordic_2_4_2, arm_image=_arm_image_3_0,
-            product_rev='08H', hardware_rev='6A', banner_lines=5,
-            reversed_output_dict={},
-            ),
-        7.1: _Values(
+        8: _Values(
             nordic_image=_nordic_2_4_2, arm_image=_arm_image_3_0,
             product_rev='08H', hardware_rev='6A', banner_lines=5,
             reversed_output_dict={},
@@ -303,6 +271,7 @@ class RVMN101B(Config):
             product_rev='05G', hardware_rev='6A', banner_lines=5,
             reversed_output_dict={},
             ),
+        # Rev 1-4 were Engineering protoype builds
         }
 
     @classmethod
@@ -329,22 +298,14 @@ class RVMN5x(Config):
     # Software versions
     _nordic_2_5_3 = 'jayco_rvmn5x_signed_2.5.3-0-ga721738c_factory_mcuboot.hex'
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
-    # Lot number mapping
-    _lot_rev = share.lots.Revision((
-        # Rev 1-2 were Engineering protoype builds
-        (share.lots.Range('A201801', 'A202412'), 3),    # 034789, 035009
-        (share.lots.Range('A202507', 'A203003'), 4),    # 035090, 035091
-        (share.lots.Range('A203118', 'A211611'), 5),    # 035224, 035225
-        (share.lots.Range('A211612', 'A211903'), 6),    # 035818, 035819
-#        (share.lots.Range('A211904', 'Axxxxxx'), 7),    # 036075, 036076
-        # Rev 7...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev7_values = _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
             product_rev='07A', hardware_rev='05A', banner_lines=5,
             reversed_output_dict={},
-            ),
+            )
+    _rev_data = {
+        None: _rev7_values,
+        7: _rev7_values,
         6: _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
             product_rev='06A', hardware_rev='05A', banner_lines=5,
@@ -365,6 +326,7 @@ class RVMN5x(Config):
             product_rev='03E', hardware_rev='03A', banner_lines=5,
             reversed_output_dict={},
             ),
+        # Rev 1-2 were Engineering protoype builds
         }
 
     @classmethod

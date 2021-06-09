@@ -19,7 +19,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.CN10x.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_initial
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Devices.sw_nrf_image = self.cfg.sw_nrf_image

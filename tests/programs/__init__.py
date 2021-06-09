@@ -46,7 +46,6 @@ from . import test_ids_ini_bus
 from . import test_ids_ini_main
 from . import test_ids_ini_micro
 from . import test_ids_ini_syn
-from . import test_j35_config
 from . import test_j35_final
 from . import test_j35_initial
 from . import test_mb2_final
@@ -58,7 +57,6 @@ from . import test_rvmc101_final
 from . import test_rvmc101_initial
 from . import test_rvmd50_final
 from . import test_rvmd50_initial
-from . import test_rvmn101_config
 from . import test_rvmn101_final
 from . import test_rvmn101_initial
 from . import test_rvmn101_console
@@ -133,7 +131,6 @@ __all__ = [
     'test_ids_ini_main',
     'test_ids_ini_micro',
     'test_ids_ini_syn',
-    'test_j35_config',
     'test_j35_final',
     'test_j35_initial',
     'test_mb2_final',
@@ -145,7 +142,6 @@ __all__ = [
     'test_rvmc101_initial',
     'test_rvmd50_final',
     'test_rvmd50_initial',
-    'test_rvmn101_config',
     'test_rvmn101_final',
     'test_rvmn101_initial',
     'test_rvmn101_console',

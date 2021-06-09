@@ -12,6 +12,22 @@ import tester
 import share
 
 
+def get(parameter, uut):
+    """Get a configuration based on the parameter and lot.
+
+    @param parameter Type of unit
+    @param uut setec.UUT instance
+    @return configuration class
+
+    """
+    config = {
+        '15': BC15,
+        '25': BC25,
+        }[parameter]
+    config._configure(uut)    # Adjust for the Lot Number
+    return config
+
+
 @attr.s
 class _Values():
 
@@ -64,24 +80,7 @@ class BCx5():
         tester.LimitLow('InOCP', 12.5),
         )
     # Internal data storage
-    _lot_rev = None         # Lot Number to Revision data
     _rev_data = None        # Revision data dictionary
-
-    @staticmethod
-    def select(parameter, uut):
-        """Select a configuration based on the parameter and lot.
-
-        @param parameter Type of unit (15/25)
-        @param uut setec.UUT instance
-        @return configuration class
-
-        """
-        config = {
-            '15': BC15,
-            '25': BC25,
-            }[parameter]
-        config._configure(uut)    # Adjust for the Lot Number
-        return config
 
     @classmethod
     def _configure(cls, uut):
@@ -90,12 +89,10 @@ class BCx5():
         @param uut setec.UUT instance
 
         """
-        rev = None
-        if uut:
-            try:
-                rev = cls._lot_rev.find(uut.lot.number)
-            except share.lots.LotError:
-                pass
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
         cls.arm_file = values.arm_file
@@ -111,19 +108,18 @@ class BC15(BCx5):
     sw_version = '2.0.18498.2003'
     arm_file_pattern = 'bc15_{0}.bin'
     arm_port = share.config.Fixture.port('028467', 'ARM')
-    _lot_rev = share.lots.Revision((
-        (share.lots.Range('A151905', 'A170811'), 0),    # Rev 1-3: Scrap
-        # Rev 4     A171810
-        # Rev 5     A173907 - A182605
-        # Rev 6     A192309 ...
-        ))
+    _rev6_values = _Values(
+        arm_file=arm_file_pattern.format(sw_version),
+        arm_port=arm_port,
+        sw_version=sw_version,
+        cal_linecount=43,
+        )
     _rev_data = {
-        None: _Values(
-            arm_file=arm_file_pattern.format(sw_version),
-            arm_port=arm_port,
-            sw_version=sw_version,
-            cal_linecount=43,
-            ),
+        None: _rev6_values,
+        6: _rev6_values,
+        5: _rev6_values,
+        4: _rev6_values,
+        # Rev 1-3 Scrap
         }
 
     @classmethod
@@ -173,19 +169,19 @@ class BC25(BCx5):
     sw_version = '2.0.20136.2004'
     arm_file_pattern = 'bc25_{0}.bin'
     arm_port = share.config.Fixture.port('031032', 'ARM')
-    _lot_rev = share.lots.Revision((
-        (share.lots.Range('A170603', 'A172713'), 0),    # Rev 1,2: Scrap
-        # Rev 3     A173908 - A183804
-        # Rev 4     A202308 ...
-        ))
-    _rev_data = {
-        None: _Values(
+    _rev4_values = _Values(
             arm_file=arm_file_pattern.format(sw_version),
             arm_port=arm_port,
             sw_version=sw_version,
             cal_linecount=43,
-            ),
+            )
+    _rev_data = {
+        None: _rev4_values,
+        4: _rev4_values,
+        3: _rev4_values,
+        # Rev 1,2 Scrap
         }
+
 
     @classmethod
     def limits_initial(cls):

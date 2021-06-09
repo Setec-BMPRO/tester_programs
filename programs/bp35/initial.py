@@ -372,7 +372,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['bp35'].close()
         self['bp35tunnel'].close()
-        self['PmTimer'].cancel()
+        self['PmTimer'].stop()
         # Switch off AC Source & discharge the unit
         self['acsource'].reset()
         self['dcl_bat'].output(2.0, delay=1)

@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-05-31, 14:34:53"
+    "saved": "2021-06-08, 21:12:13"
   },
   "project": {
     "AUTHOR": "",
@@ -70,7 +70,9 @@
       "MakeTestOnly": true
     },
     "MIXEDLANGUAGE": 0,
-    "OTHERS": [],
+    "OTHERS": [
+      "main.py.ini"
+    ],
     "OTHERTOOLSPARMS": {},
     "PACKAGERSPARMS": {},
     "PROGLANGUAGE": "Python3",
@@ -318,7 +320,6 @@
       "tests/programs/test_ids_ini_main.py",
       "tests/programs/test_ids_ini_micro.py",
       "tests/programs/test_ids_ini_syn.py",
-      "tests/programs/test_j35_config.py",
       "tests/programs/test_j35_final.py",
       "tests/programs/test_j35_initial.py",
       "tests/programs/test_mb2_final.py",
@@ -330,7 +331,6 @@
       "tests/programs/test_rvmc101_initial.py",
       "tests/programs/test_rvmd50_final.py",
       "tests/programs/test_rvmd50_initial.py",
-      "tests/programs/test_rvmn101_config.py",
       "tests/programs/test_rvmn101_console.py",
       "tests/programs/test_rvmn101_final.py",
       "tests/programs/test_rvmn101_initial.py",
@@ -365,9 +365,7 @@
       "tests/share/test_console.py",
       "tests/share/test_lots.py",
       "tests/share/test_parameter.py",
-      "testsuite.py",
-      "programs/rvswt101/arduino.py",
-      "tests/programs/test_rvswt101_arduino.py"
+      "testsuite.py"
     ],
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",
