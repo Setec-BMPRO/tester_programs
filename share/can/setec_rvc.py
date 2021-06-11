@@ -11,6 +11,7 @@ import ctypes
 import enum
 import struct
 
+import attr
 import tester
 
 
@@ -389,3 +390,35 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
         if not isinstance(value, bool):
             raise ValueError('Button must be boolean')
         self.pkt.data[self._button_index] = int(value)
+
+
+@attr.s
+class PacketPropertyReader():
+
+    """Custom logical instrument to read CAN packet properties."""
+
+    canreader = attr.ib()       # tester.CANReader instance
+    packettype = attr.ib()      # CAN packet class
+    _read_key = attr.ib(init=False, default=None)
+    _packet = attr.ib(init=False, default=None)
+
+    def configure(self, key):
+        """Sensor: Configure for next reading."""
+        self._read_key = key
+
+    def opc(self):
+        """Sensor: OPC."""
+        self.canreader.opc()
+
+    def read(self, callerid):
+        """Sensor: Read payload data using the last configured key.
+
+        @param callerid Identity of caller
+        @return Packet property value
+
+        """
+        can_data = self.canreader.read(callerid)
+        return getattr(self.packettype(can_data), self._read_key)
+
+    def reset(self):
+        self._packet = None
