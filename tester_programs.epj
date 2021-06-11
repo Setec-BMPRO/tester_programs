@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-06-09, 10:08:23"
+    "saved": "2021-06-11, 10:23:35"
   },
   "project": {
     "AUTHOR": "",
@@ -136,7 +136,6 @@
       "programs/cmrsbp/cmrsbp.py",
       "programs/cmrsbp/ev2200.py",
       "programs/cn101/__init__.py",
-      "programs/cn101/config.py",
       "programs/cn101/console.py",
       "programs/cn101/initial.py",
       "programs/cn102/__init__.py",
