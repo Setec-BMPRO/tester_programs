@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-06-11, 10:23:35"
+    "saved": "2021-06-13, 20:18:27"
   },
   "project": {
     "AUTHOR": "",
@@ -259,7 +259,6 @@
       "programs/wtsi200/final.py",
       "share/__init__.py",
       "share/bluetooth/__init__.py",
-      "share/bluetooth/_base.py",
       "share/bluetooth/eunistone_pan1322.py",
       "share/bluetooth/mac.py",
       "share/bluetooth/raspblue.py",
