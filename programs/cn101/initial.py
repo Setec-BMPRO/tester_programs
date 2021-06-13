@@ -3,11 +3,15 @@
 # Copyright 2015 SETEC Pty Ltd.
 """CN101 Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import serial
-import tester
+
+import setec
 import share
+import tester
+
 from . import console
 
 
@@ -84,10 +88,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
+# TODO: Use share.bluetooth.RaspberryBluetooth.scan_advert_blemac()
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(12.0, delay=15.0)
-        btmac = share.bluetooth.MAC(mes['cn101_btmac']().reading1)
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
+        btmac = setec.MAC.loads(mes['cn101_btmac']().reading1)
+        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
         ble = dev['ble']
         ble.open()
         reply = ble.scan(btmac)
