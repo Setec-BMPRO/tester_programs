@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-06-13, 20:18:27"
+    "saved": "2021-06-18, 09:32:23"
   },
   "project": {
     "AUTHOR": "",
@@ -361,7 +361,8 @@
       "tests/share/test_bluetooth.py",
       "tests/share/test_console.py",
       "tests/share/test_parameter.py",
-      "testsuite.py"
+      "testsuite.py",
+      "share/bluetooth/_base.py"
     ],
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",
