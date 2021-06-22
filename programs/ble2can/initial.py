@@ -5,9 +5,10 @@
 
 import serial
 
+import setec
+import share
 import tester
 
-import share
 from . import console
 
 
@@ -86,10 +87,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = share.bluetooth.MAC(mes['BtMac']().reading1)
+# TODO: Use share.bluetooth.RaspberryBluetooth.scan_advert_blemac()
+        btmac = setec.MAC.loads(mes['BtMac']().reading1)
         dev['rla_pair_btn'].press()
         self._reset_unit()
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
+        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
         ble = dev['ble']
         ble.open()
         reply = ble.scan(btmac)

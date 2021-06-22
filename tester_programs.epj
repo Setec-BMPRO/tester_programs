@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-06-08, 21:12:13"
+    "saved": "2021-06-18, 09:32:23"
   },
   "project": {
     "AUTHOR": "",
@@ -136,7 +136,6 @@
       "programs/cmrsbp/cmrsbp.py",
       "programs/cmrsbp/ev2200.py",
       "programs/cn101/__init__.py",
-      "programs/cn101/config.py",
       "programs/cn101/console.py",
       "programs/cn101/initial.py",
       "programs/cn102/__init__.py",
@@ -260,7 +259,6 @@
       "programs/wtsi200/final.py",
       "share/__init__.py",
       "share/bluetooth/__init__.py",
-      "share/bluetooth/_base.py",
       "share/bluetooth/eunistone_pan1322.py",
       "share/bluetooth/mac.py",
       "share/bluetooth/raspblue.py",
@@ -272,7 +270,6 @@
       "share/console/parameter.py",
       "share/console/protocol.py",
       "share/console/samb11.py",
-      "share/lots.py",
       "share/programmer.py",
       "share/testsequence.py",
       "tests/__init__.py",
@@ -363,9 +360,9 @@
       "tests/share/__init__.py",
       "tests/share/test_bluetooth.py",
       "tests/share/test_console.py",
-      "tests/share/test_lots.py",
       "tests/share/test_parameter.py",
-      "testsuite.py"
+      "testsuite.py",
+      "share/bluetooth/_base.py"
     ],
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",

@@ -4,6 +4,7 @@
 """CAN Bus Shared modules for Tester programs."""
 
 from .setec_rvc import (
+    PacketPropertyReader,
     SwitchStatusPacket,
     DeviceStatusPacket,
     RVMD50ControlButtonPacket,
@@ -13,6 +14,7 @@ from .setec_rvc import (
 
 
 __all__ = [
+    'PacketPropertyReader',
     'SwitchStatusPacket',
     'DeviceStatusPacket',
     'RVMD50ControlButtonPacket',

@@ -170,7 +170,6 @@ class J35():
         tester.LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
         )
     # Internal data storage
-    _lot_rev = None         # Lot Number to Revision data
     _rev_data = None        # Revision data dictionary
 
     @classmethod
@@ -208,23 +207,23 @@ class J35A(J35):
     _rev_data = {
         None: _rev12_values,
         # Rev 13 never built
-        12: _rev12_values,
-        11: _Values(
+        '12': _rev12_values,
+        '11': _Values(
             sw_version=J35.sw_15, hw_version=(11, Type.A.value, 'A'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
             ),
-        10: _Values(
+        '10': _Values(
             sw_version=J35.sw_15, hw_version=(10, Type.A.value, 'A'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
             ),
-        9: _Values(
+        '9': _Values(
             sw_version=J35.sw_15, hw_version=(9, Type.A.value, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
             ),
-        8: _Values(
+        '8': _Values(
             sw_version=J35.sw_15, hw_version=(8, Type.A.value, 'C'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=True,
@@ -232,12 +231,12 @@ class J35A(J35):
         # Rev <8 uses an older software version
         # No Rev 4,5,6 created
         # No Rev 3 production
-        2: _Values(
+        '2': _Values(
             sw_version=J35.sw_13, hw_version=(2, Type.A.value, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=False,
             ),
-        1: _Values(
+        '1': _Values(
             sw_version=J35.sw_13, hw_version=(1, Type.A.value, 'B'),
             output_count=7, ocp_set=20.0,
             solar=False, canbus=False,
@@ -285,23 +284,23 @@ class J35B(J35):
     _rev_data = {
         None: _rev12_values,
         # Rev 13 never built
-        12: _rev12_values,
-        11: _Values(
+        '12': _rev12_values,
+        '11': _Values(
             sw_version=J35.sw_15, hw_version=(11, Type.B.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        10: _Values(
+        '10': _Values(
             sw_version=J35.sw_15, hw_version=(10, Type.B.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        9: _Values(
+        '9': _Values(
             sw_version=J35.sw_15, hw_version=(9, Type.B.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        8: _Values(
+        '8': _Values(
             sw_version=J35.sw_15, hw_version=(8, Type.B.value, 'C'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
@@ -309,12 +308,12 @@ class J35B(J35):
         # Rev <8 uses an older software version
         # No Rev 5,6 created
         # No Rev 3,4 production
-        2: _Values(
+        '2': _Values(
             sw_version=J35.sw_13, hw_version=(2, Type.B.value, 'D'),
             output_count=14, ocp_set=35.0,
             solar=False, canbus=False,
             ),
-        1: _Values(
+        '1': _Values(
             sw_version=J35.sw_13, hw_version=(1, Type.B.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=False, canbus=False,
@@ -361,7 +360,7 @@ class J35BL(J35B):
             )
     _rev_data = {
         None: _rev13_values,
-        13: _rev13_values,
+        '13': _rev13_values,
         }
 
 
@@ -377,33 +376,33 @@ class J35C(J35B):
     _rev_data = {
         None: _rev12_values,
         # Rev 13 never built
-        12: _rev12_values,
-        11: _Values(
+        '12': _rev12_values,
+        '11': _Values(
             sw_version=J35.sw_15, hw_version=(11, Type.C.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        10: _Values(
+        '10': _Values(
             sw_version=J35.sw_15, hw_version=(10, Type.C.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        9: _Values(
+        '9': _Values(
             sw_version=J35.sw_15, hw_version=(9, Type.C.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        8: _Values(
+        '8': _Values(
             sw_version=J35.sw_15, hw_version=(8, Type.C.value, 'C'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        7: _Values(
+        '7': _Values(
             sw_version=J35.sw_15, hw_version=(7, Type.C.value, 'C'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        6: _Values(
+        '6': _Values(
             sw_version=J35.sw_15, hw_version=(6, Type.C.value, 'E'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
@@ -411,15 +410,15 @@ class J35C(J35B):
         # No Rev 5 production
         # 469 x J35C were converted to J35B via PC 4885
         #   J35C Rev 4, Lots: A164211 (x135), A164309 (x265)
-        4: _Values(
+        '4': _Values(
             sw_version=J35.sw_15, hw_version=(4, Type.C.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
         # Rev 1-3 must be scrapped per MA-328
-        3: None,
-        2: None,
-        1: None,
+        '3': None,
+        '2': None,
+        '1': None,
         }
 
 
@@ -435,18 +434,18 @@ class J35D(J35C):
     _rev_data = {
         None: _rev12_values,
         # Rev 13 never built
-        12: _rev12_values,
-        11: _Values(
+        '12': _rev12_values,
+        '11': _Values(
             sw_version=J35.sw_15, hw_version=(11, Type.D.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        10: _Values(
+        '10': _Values(
             sw_version=J35.sw_15, hw_version=(10, Type.D.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             ),
-        9: _Values(
+        '9': _Values(
             sw_version=J35.sw_15, hw_version=(9, Type.D.value, 'B'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,

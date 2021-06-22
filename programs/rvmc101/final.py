@@ -7,6 +7,9 @@ import tester
 
 import share
 
+# TODO: Swap over to new tester.CANReader logical device
+_USE_NEW_TESTER_CANREADER = False
+
 
 class Final(share.TestSequence):
 
@@ -47,19 +50,26 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dcs_vin', tester.DCSource, 'DCS1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+
+# TODO: Merge 'can', 'canreader', 'decoder' into a single 'canreader'
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
-        self['can'].verbose = False
-        self['decoder'] = tester.CANPacketDevice()
-        self['canreader'] = tester.CANReader(
-            self['can'], self['decoder'], share.can.SwitchStatusPacket,
-            name='CANThread')
-        self['canreader'].verbose = False
+
+# TODO: Swap over to new tester.CANReader logical device
+        if _USE_NEW_TESTER_CANREADER:
+            self['canreader'] = tester.CANReader(self['can'])
+            self['decoder'] = share.can.PacketPropertyReader(
+                self['canreader'], share.can.SwitchStatusPacket)
+        else:
+            self['decoder'] = tester.CANPacketDevice()
+            self['canreader'] = tester.CANReader(
+                self['can'], self['decoder'], share.can.SwitchStatusPacket,
+                name='CANThread')
+
         self['canreader'].start()
         self.add_closer(self.close_can)
 
@@ -70,9 +80,12 @@ class Devices(share.Devices):
 
     def close_can(self):
         """Reset CAN system."""
-        self['canreader'].halt()
+# TODO: Swap over to new tester.CANReader logical device
+        if _USE_NEW_TESTER_CANREADER:
+            self['canreader'].stop()
+        else:
+            self['canreader'].halt()
         self['can'].rvc_mode = False
-        self['can'].verbose = False
 
 
 class Sensors(share.Sensors):

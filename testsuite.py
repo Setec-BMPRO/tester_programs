@@ -48,7 +48,7 @@ class Main():
     # Configuration of console logger.
     #   Log Levels are: CRITICAL,ERROR,WARNING,INFO,DEBUG
     log_level = logging.CRITICAL
-    log_format = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
+    log_format = '{asctime}:{name}:{threadName}:{levelname}:{message}'
     # Set these logger names to INFO level
     logger_names = ('gpib', )
 
@@ -59,11 +59,11 @@ class Main():
         Messages are sent to the stderr console.
 
         """
-        # create console handler and set level
+        # Create console handler and set level
         hdlr = logging.StreamHandler()
         hdlr.setLevel(cls.log_level)
         # Log record formatter
-        fmtr = logging.Formatter(cls.log_format)
+        fmtr = logging.Formatter(cls.log_format, style='{')
         # Connect it all together
         hdlr.setFormatter(fmtr)
         if not logging.root.hasHandlers():

@@ -223,39 +223,39 @@ class BP35SR(BP35):
             )
     _rev_data = {
         None: _rev14_values,
-        14: _rev14_values,
-        13: _Values(
+        '14': _rev14_values,
+        '13': _Values(
             hw_version=(13, Type.SR.value, 'D'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        12: _Values(
+        '12': _Values(
             hw_version=(12, Type.SR.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
         # No Rev 11 created
-        10: _Values(
+        '10': _Values(
             hw_version=(10, Type.SR.value, 'G'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        9: _Values(
+        '9': _Values(
             hw_version=(9, Type.SR.value, 'G'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        8: _Values(
+        '8': _Values(
             hw_version=(8, Type.SR.value, 'I'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        7: _Values(
+        '7': _Values(
             hw_version=(7, Type.SR.value, 'D'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        6: _rev6_values,
+        '6': _rev6_values,
         # Rev 1-5 are Main PCB swaps
-        5: _rev6_values,
-        4: _rev6_values,
-        3: _rev6_values,
-        2: _rev6_values,
-        1: _rev6_values,
+        '5': _rev6_values,
+        '4': _rev6_values,
+        '3': _rev6_values,
+        '2': _rev6_values,
+        '1': _rev6_values,
         }
 
 
@@ -269,17 +269,17 @@ class BP35HA(BP35SR):
             )
     _rev_data = {
         None: _rev14_values,
-        14: _rev14_values,
-        13: _Values(
+        '14': _rev14_values,
+        '13': _Values(
             hw_version=(13, Type.HA.value, 'B'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        12: _Values(
+        '12': _Values(
             hw_version=(12, Type.HA.value, 'C'),
             arm_sw_version=BP35.arm_sw_version
             ),
         # No Rev 11 created
-        10: _Values(
+        '10': _Values(
             hw_version=(10, Type.HA.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
@@ -300,17 +300,17 @@ class BP35PM(BP35):
             )
     _rev_data = {
         None: _rev14_values,
-        14: _rev14_values,
-        13: _Values(
+        '14': _rev14_values,
+        '13': _Values(
             hw_version=(13, Type.PM.value, 'B'),
             arm_sw_version=BP35.arm_sw_version
             ),
-        12: _Values(
+        '12': _Values(
             hw_version=(12, Type.PM.value, 'C'),
             arm_sw_version=BP35.arm_sw_version
             ),
         # No Rev 11 created
-        10: _Values(
+        '10': _Values(
             hw_version=(10, Type.PM.value, 'E'),
             arm_sw_version=BP35.arm_sw_version
             ),
@@ -340,8 +340,8 @@ class BP35IISR(BP35II):
             )
     _rev_data = {
         None: _rev4_values,
-        4: _rev4_values,
-        3: _Values(
+        '4': _rev4_values,
+        '3': _Values(
             hw_version=(15, Type.SR.value, 'E'),
             arm_sw_version=BP35II.arm_5015
             ),
@@ -359,8 +359,8 @@ class BP35IIHA(BP35IISR):
             )
     _rev_data = {
         None: _rev4_values,
-        4: _rev4_values,
-        3: _Values(
+        '4': _rev4_values,
+        '3': _Values(
             hw_version=(15, Type.HA.value, 'E'),
             arm_sw_version=BP35II.arm_5015
             ),
@@ -381,8 +381,8 @@ class BP35IISI(BP35II):
             )
     _rev_data = {
         None: _rev4_values,
-        4: _rev4_values,
-        3: _Values(
+        '4': _rev4_values,
+        '3': _Values(
             hw_version=(15, Type.SI.value, 'E'),
             arm_sw_version=BP35II.arm_5015
             ),

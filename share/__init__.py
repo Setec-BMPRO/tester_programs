@@ -9,7 +9,6 @@ from . import bluetooth
 from . import can
 from . import console
 from . import config
-from . import lots
 from . import programmer
 
 
@@ -19,6 +18,5 @@ __all__ = [
     'can',
     'console',
     'config',
-    'lots',
     'programmer',
     ]

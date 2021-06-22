@@ -3,27 +3,45 @@
 # Copyright 2015 SETEC Pty Ltd.
 """CN101 Initial Test Program."""
 
-import os
 import inspect
+import os
+
 import serial
-import tester
+
+import setec
 import share
+import tester
+
 from . import console
-from . import config
 
 
 class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
 
+    # Initial test limits
+    limits_initial = (
+        tester.LimitRegExp('SwVer', '',            # Adjusted during open()
+            doc='Software version'),
+        tester.LimitLow('Part', 100.0),
+        tester.LimitDelta('Vin', 8.0, 0.5),
+        tester.LimitPercent('3V3', 3.30, 3.0),
+        tester.LimitInteger('CAN_BIND', 1 << 28),
+        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
+        tester.LimitBoolean('DetectBT', True),
+        tester.LimitInteger('Tank', 5),
+        )
+    # MA-239: Upgrade all units to CN101T, so treat them as Rev 6
+    sw_version = '1.2.17835.298'
+    hw_version = (6, 0, 'A')
+    banner_lines = 2
+
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.CN101.get(uut)
-        limits = self.cfg.limits_initial
-        Devices.sw_version = self.cfg.sw_version
-        super().open(limits, Devices, Sensors, Measurements)
+        Devices.sw_version = self.sw_version
+        super().open(self.limits_initial, Devices, Sensors, Measurements)
         self.limits['SwVer'].adjust(
-            '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
+            '^{0}$'.format(self.sw_version.replace('.', r'\.')))
         self.steps = (
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
@@ -52,8 +70,7 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         dev['cn101'].open()
         dev['cn101'].brand(
-            self.cfg.hw_version, self.sernum, dev['rla_reset'],
-            self.cfg.banner_lines)
+            self.hw_version, self.sernum, dev['rla_reset'], self.banner_lines)
         mes['cn101_swver']()
 
     @share.teststep
@@ -71,10 +88,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
+# TODO: Use share.bluetooth.RaspberryBluetooth.scan_advert_blemac()
         dev['dcs_vin'].output(0.0, delay=1.0)
         dev['dcs_vin'].output(12.0, delay=15.0)
-        btmac = share.bluetooth.MAC(mes['cn101_btmac']().reading1)
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac)
+        btmac = setec.MAC.loads(mes['cn101_btmac']().reading1)
+        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
         ble = dev['ble']
         ble.open()
         reply = ble.scan(btmac)

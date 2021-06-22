@@ -25,6 +25,8 @@ The module will now remember these settings in NV Memory.
 
 """
 
+# TODO: Replace with share.bluetooth.RaspberryBluetooth.scan_advert_blemac()
+
 import threading
 import logging
 from ._base import BluetoothError
@@ -73,12 +75,12 @@ class BleRadio():
     def scan(self, btmac, timeout=30):
         """Scan for bluetooth device with 'btmac' MAC address.
 
-        @param btmac share.bluetooth.MAC instance to find
+        @param btmac setec.MAC instance to find
         @param timeout Timeout in sec for the scan
         @returns True if found, else False
 
         """
-        mac_str = btmac.dumps()
+        mac_str = btmac.dumps(separator='')
         self._log('Scanning for MAC {0}'.format(btmac))
         timeup = threading.Event()
         timer = threading.Timer(timeout, timeup.set)
