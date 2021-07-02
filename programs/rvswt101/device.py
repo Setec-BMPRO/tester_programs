@@ -133,12 +133,19 @@ class RVSWT101():
     """Custom logical instrument to read packet properties."""
 
     bleserver = attr.ib()       # tester.BLE instance
-    always_scan = attr.ib(init=False, default=False)
+    always_scan = attr.ib(init=False, default=True)
     _read_key = attr.ib(init=False, default=None)
     _packet = attr.ib(init=False, default=None)
+    scan_count = attr.ib(init=True, default=0)
 
     def configure(self, key):
-        """Sensor: Configure for next reading."""
+        """Sensor: Configure for next reading.
+        
+        key must be one of: 'cell_voltage', 'company_id',
+                            'equipment_type', 'protocol_ver',
+                            'sequence', 'signature', 'switch_code',
+                            'switch_type', 'switches'
+        """
         self._read_key = key
 
     def opc(self):
@@ -152,7 +159,8 @@ class RVSWT101():
         @return Packet property value
 
         """
-        if not self._packet or self.always_scan:
+        if self.always_scan:
+            self.scan_count +=1
             rssi, ad_data = self.bleserver.read(callerid)
             self._packet = Packet(ad_data)
         return getattr(self._packet, self._read_key)

@@ -20,6 +20,10 @@ class Final(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
         self.button_count = self.cfg['button_count']
+
+        buttons_in_use = [1, 2, 3, 4, 5, 6]   # Default to 6 button model
+        if self.button_count == 4: buttons_in_use = [1, 2, 5, 6]
+
         Devices.fixture_num = self.cfg['fixture_num']
         Devices.button_count = self.button_count
         super().open(self.cfg['limits_fin'], Devices, Sensors, Measurements)
@@ -28,36 +32,52 @@ class Final(share.TestSequence):
             )
         self.sernum = None
 
-        self.buttons = ()       # Tuple of 12 or 18 measurement strings
+        self.buttons = ()                 # Tuple of 12 or 18 measurement strings
+        self.test_measurements = ()       # Tuple of test measurement strings
         button_presses = tuple(
-            ['buttonPress_{0}'.format(n) for n in range(1, self.button_count+1)])
+            ['buttonPress_{0}'.format(n) for n in buttons_in_use])
         button_measurements = tuple(
-            ['buttonMeasure_{0}'.format(n) for n in range(1, self.button_count+1)])
+            ['buttonMeasure_{0}'.format(n) for n in buttons_in_use])
         button_releases = tuple(
-            ['buttonRelease_{0}'.format(n) for n in range(1, self.button_count+1)])
+            ['buttonRelease_{0}'.format(n) for n in buttons_in_use])
+
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
 
-            self.buttons = self.buttons + ('ui_buttonpress', button_test)
+            #self.buttons = self.buttons + ('ui_buttonpress', button_test)
+            self.buttons = self.buttons + ('ui_buttonpress', button_press, button_test, button_release)
+
+        # Add cell_voltage and switch_type measurments after the first button press
+        #self.buttons = (self.buttons[0], 'cell_voltage', 'switch_type', *self.buttons[1:])
 
         # TODO: perhaps replace the above with this:
-        #for n in range(1, self.button_count+1):
+        #for n in buttons_in_use:
         #    self.buttons += tuple(
         #        'buttonPress_{0},buttonMeasure_{0},buttonRelease_{0}'.format(n).split(','))
+
+        self.test_measurements += self.buttons + ('cell_voltage', 'switch_type')
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['ble'].uut = self.uuts[0]
+
         # Measure the MAC to save it in test result data
-        mes['ble_mac'].sensor.store(dev['ble'].mac)
+        mac = dev['ble'].mac
+        mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
-        # Perform initial measurements
-        self.measure(('cell_voltage', 'switch_type',))
+
         # Scan on every measurement from here on
-        dev['decoder'].always_scan = True
+        #dev['decoder'].always_scan = True
         self.measure(self.buttons)
+
+        # Don't scan for any measurement from here on
+        dev['decoder'].always_scan = False
+        self.measure(('cell_voltage', 'switch_type',))
+        assert(dev['decoder'].scan_count == self.button_count), \
+            "unexpected bt scan_count: {}".format(dev['decoder'].scan_count)
+        dev['decoder'].reset()
 
 class Devices(share.Devices):
 
@@ -69,9 +89,13 @@ class Devices(share.Devices):
     def open(self):
         """Create all Instruments."""
         # BLE MAC & Scanning server
-        self['ble'] = tester.BLE(self.physical_devices['BLE'])
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
+        self.physical_devices['BLE'].open()
+        self['ble'] = tester.BLE((self.physical_devices['BLE'], self['serialtomac']))
+
         # BLE Packet decoder
         self['decoder'] = device.RVSWT101(self['ble'])
+
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet
@@ -124,10 +148,11 @@ class Sensors(share.Sensors):
             message=tester.translate('rvswt101_final', 'msgPressButton'),
             caption=tester.translate('rvswt101_final', 'capPressButton'))
 
-        decoder = self.devices['decoder']
+        decoder = self.devices['decoder']   #tester.BLE device
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
         self['no_button_pressed'] = sensor.KeyedReading(decoder, 'no_button_pressed')
+
         for n in range(1, 7):
             name = 'switch_{0}_measure'.format(n)
             self[name] = sensor.KeyedReading(decoder, name)
@@ -200,6 +225,7 @@ class Measurements(share.Measurements):
             ('no_button_pressed', 'no_button_expected', 'no_button_pressed',
                 'no_button_pressed'),
             ))
+
         # Suppress signals on these measurements.
         for name in (
                 'buttonPress_1', 'buttonPress_2', 'buttonPress_3',
