@@ -21,8 +21,17 @@ class Final(share.TestSequence):
         self.cfg = config.Config.get(self.parameter, uut)
         self.button_count = self.cfg['button_count']
 
-        buttons_in_use = [1, 2, 3, 4, 5, 6]   # Default to 6 button model
+        # A list of the button press order, default to 6 button model
+        buttons_in_use = [1, 2, 3, 4, 5, 6]
         if self.button_count == 4: buttons_in_use = [1, 2, 5, 6]
+
+        # Table to transpose unit button number to actuator position
+        actuator_order_transpose = {6: {1:4, 2:5, 3:6, 4:3, 5:2, 6:1}, 
+                                    4: {1:5, 2:6, 5:3, 6:2}}
+
+        # Generate a list of what order the actuators will move
+        actuator_order = [actuator_order_transpose[self.button_count][n]
+                          for n in buttons_in_use]
 
         Devices.fixture_num = self.cfg['fixture_num']
         Devices.button_count = self.button_count
@@ -35,11 +44,11 @@ class Final(share.TestSequence):
         self.buttons = ()                 # Tuple of 12 or 18 measurement strings
         self.test_measurements = ()       # Tuple of test measurement strings
         button_presses = tuple(
-            ['buttonPress_{0}'.format(n) for n in buttons_in_use])
+            ['buttonPress_{0}'.format(n) for n in actuator_order])
         button_measurements = tuple(
             ['buttonMeasure_{0}'.format(n) for n in buttons_in_use])
         button_releases = tuple(
-            ['buttonRelease_{0}'.format(n) for n in buttons_in_use])
+            ['buttonRelease_{0}'.format(n) for n in actuator_order])
 
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
@@ -155,7 +164,7 @@ class Sensors(share.Sensors):
 
         for n in range(1, 7):
             name = 'switch_{0}_measure'.format(n)
-            self[name] = sensor.KeyedReading(decoder, name)
+            self[name] = sensor.KeyedReading(decoder, 'switch_code')
 
         # Arduino sensors - sensor_name, key
         ard = self.devices['ard']
