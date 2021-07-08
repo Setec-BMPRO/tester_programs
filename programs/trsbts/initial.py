@@ -35,7 +35,7 @@ class Initial(share.TestSequence):
         tester.LimitLow('GreenLedOff', 1.0, doc='Led off'),
         tester.LimitDelta('GreenLedOn', 2.5, 0.4, doc='Led on'),
         tester.LimitLow('BlueLedOff', 1.0, doc='Led off'),
-        tester.LimitDelta('BlueLedOn', 2.8, 0.14, doc='Led on'),
+        tester.LimitDelta('BlueLedOn', 2.8, 0.2, doc='Led on'),
         tester.LimitDelta('Chem wire', 3.0, 0.5, doc='Voltage present'),
         tester.LimitDelta('Sway- wire', 2.0, 0.5, doc='Voltage present'),
         tester.LimitDelta('Sway+ wire', 1.0, 0.5, doc='Voltage present'),
