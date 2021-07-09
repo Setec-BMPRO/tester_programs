@@ -20,51 +20,35 @@ class Final(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
         self.button_count = self.cfg['button_count']
-
-        # A list of the button press order, default to 6 button model
-        buttons_in_use = [1, 2, 3, 4, 5, 6]
-        if self.button_count == 4: buttons_in_use = [1, 2, 5, 6]
-
-        # Table to transpose unit button number to actuator position
-        actuator_order_transpose = {6: {1:4, 2:5, 3:6, 4:3, 5:2, 6:1}, 
-                                    4: {1:5, 2:6, 5:3, 6:2}}
-
-        # Generate a list of what order the actuators will move
-        actuator_order = [actuator_order_transpose[self.button_count][n]
-                          for n in buttons_in_use]
-
+        buttons_in_use = range(1,  self.button_count+1)
         Devices.fixture_num = self.cfg['fixture_num']
         Devices.button_count = self.button_count
-        super().open(self.cfg['limits_fin'], Devices, Sensors, Measurements)
+
+        limits_fin = 'limits_fin_6_button'
+        if Devices.button_count == 4:
+            limits_fin = 'limits_fin_4_button'
+        super().open(self.cfg[limits_fin], Devices, Sensors, Measurements)
+
         self.steps = (
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
-
         self.buttons = ()                 # Tuple of 12 or 18 measurement strings
-        self.test_measurements = ()       # Tuple of test measurement strings
         button_presses = tuple(
-            ['buttonPress_{0}'.format(n) for n in actuator_order])
+            ['buttonPress_{0}'.format(n) for n in buttons_in_use])
         button_measurements = tuple(
             ['buttonMeasure_{0}'.format(n) for n in buttons_in_use])
         button_releases = tuple(
-            ['buttonRelease_{0}'.format(n) for n in actuator_order])
+            ['buttonRelease_{0}'.format(n) for n in buttons_in_use])
 
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
-
-            #self.buttons = self.buttons + ('ui_buttonpress', button_test)
             self.buttons = self.buttons + ('ui_buttonpress', button_press, button_test, button_release)
-
-        # Add cell_voltage and switch_type measurments after the first button press
-        #self.buttons = (self.buttons[0], 'cell_voltage', 'switch_type', *self.buttons[1:])
 
         # TODO: perhaps replace the above with this:
         #for n in buttons_in_use:
         #    self.buttons += tuple(
         #        'buttonPress_{0},buttonMeasure_{0},buttonRelease_{0}'.format(n).split(','))
-
-        self.test_measurements += self.buttons + ('cell_voltage', 'switch_type')
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -77,8 +61,6 @@ class Final(share.TestSequence):
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
 
-        # Scan on every measurement from here on
-        #dev['decoder'].always_scan = True
         self.measure(self.buttons)
 
         # Don't scan for any measurement from here on
@@ -111,7 +93,7 @@ class Devices(share.Devices):
         ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
 # FIXME: Switch off verbose mode
-        self['ard'].verbose = True
+        self['ard'].verbose = False
         # On Linux, the ModemManager service opens the serial port
         # for a while after it appears. Wait for it to release the port.
         retry_max = 10

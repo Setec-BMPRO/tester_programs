@@ -62,17 +62,35 @@ class Config():
         tester.LimitRegExp('Reply', '^OK$'),
         tester.LimitInteger('no_button_expected', 0,
             doc='No button pressed'),
-        tester.LimitInteger('switch_1_expected', 128,
+        )
+
+    _limits_4_button = (
+        tester.LimitInteger('switch_1_expected', 8,
             doc='Correct switch pressed'),
         tester.LimitInteger('switch_2_expected', 64,
             doc='Correct switch pressed'),
-        tester.LimitInteger('switch_3_expected', 32,
+        tester.LimitInteger('switch_3_expected', 4,
             doc='Correct switch pressed'),
-        tester.LimitInteger('switch_4_expected', 16,
+        tester.LimitInteger('switch_4_expected', 128,
             doc='Correct switch pressed'),
-        tester.LimitInteger('switch_5_expected', 8,
+        tester.LimitInteger('switch_5_expected', -1,
             doc='Correct switch pressed'),
-        tester.LimitInteger('switch_6_expected', 4,
+        tester.LimitInteger('switch_6_expected', -1,
+            doc='Correct switch pressed'),
+        )
+
+    _limits_6_button = (
+        tester.LimitInteger('switch_1_expected', 16,
+            doc='Correct switch pressed'),
+        tester.LimitInteger('switch_2_expected', 32,
+            doc='Correct switch pressed'),
+        tester.LimitInteger('switch_3_expected', 8,
+            doc='Correct switch pressed'),
+        tester.LimitInteger('switch_4_expected', 64,
+            doc='Correct switch pressed'),
+        tester.LimitInteger('switch_5_expected', 4,
+            doc='Correct switch pressed'),
+        tester.LimitInteger('switch_6_expected', 128,
             doc='Correct switch pressed'),
         )
 
@@ -116,6 +134,12 @@ class Config():
             'limits_fin': (
                 cls._common_limits + cls._final_limits + (type_lim, )
                 ),
+            'limits_fin_4_button': (
+                cls._common_limits + cls._final_limits + cls._limits_4_button + (type_lim, )
+                ),
+            'limits_fin_6_button': (
+                cls._common_limits + cls._final_limits + cls._limits_6_button + (type_lim, )
+                ),    
             'banner_lines': banner_lines,
             'forced_code': forced_code,
             'fixture_num': fixture_num,
