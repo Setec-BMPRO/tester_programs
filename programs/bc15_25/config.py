@@ -108,17 +108,18 @@ class BC15(BCx5):
     sw_version = '2.0.18498.2003'
     arm_file_pattern = 'bc15_{0}.bin'
     arm_port = share.config.Fixture.port('028467', 'ARM')
-    _rev6_values = _Values(
+    _rev7_values = _Values(
         arm_file=arm_file_pattern.format(sw_version),
         arm_port=arm_port,
         sw_version=sw_version,
         cal_linecount=43,
         )
     _rev_data = {
-        None: _rev6_values,
-        '6': _rev6_values,
-        '5': _rev6_values,
-        '4': _rev6_values,
+        None: _rev7_values,
+        '7': _rev7_values,
+        '6': _rev7_values,
+        '5': _rev7_values,
+        '4': _rev7_values,
         # Rev 1-3 Scrap
         }
 
@@ -169,16 +170,17 @@ class BC25(BCx5):
     sw_version = '2.0.20136.2004'
     arm_file_pattern = 'bc25_{0}.bin'
     arm_port = share.config.Fixture.port('031032', 'ARM')
-    _rev4_values = _Values(
+    _rev5_values = _Values(
             arm_file=arm_file_pattern.format(sw_version),
             arm_port=arm_port,
             sw_version=sw_version,
             cal_linecount=43,
             )
     _rev_data = {
-        None: _rev4_values,
-        '4': _rev4_values,
-        '3': _rev4_values,
+        None: _rev5_values,
+        '5': _rev5_values,
+        '4': _rev5_values,
+        '3': _rev5_values,
         # Rev 1,2 Scrap
         }
 
