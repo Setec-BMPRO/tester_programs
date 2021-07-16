@@ -8,6 +8,7 @@ import struct
 
 import attr
 
+import tester
 
 @attr.s
 class _ASwitchState():
@@ -100,16 +101,29 @@ class Packet():
             EG: '1f050112022d624c3a00000300d1139e69'
 
         """
-        payload_bytes = bytearray.fromhex(payload)
-        (   self.company_id,
-            self.equipment_type,
-            self.protocol_ver,
-            self.switch_type,
-            self.sequence,
-            voltage_data,
-            switch_data,
-            self.signature,
-            ) = struct.Struct('<H3B2HLL').unpack(payload_bytes)
+        try:
+            payload_bytes = bytearray.fromhex(payload)
+            (   self.company_id,
+                self.equipment_type,
+                self.protocol_ver,
+                self.switch_type,
+                self.sequence,
+                voltage_data,
+                switch_data,
+                self.signature,
+                ) = struct.Struct('<H3B2HLL').unpack(payload_bytes)
+        except struct.error:
+            """
+            Handle struct.error when unpacking the payload:
+            Add a new measurment called 'valid_packet' with a fail result.
+            """
+            mes = tester.Measurement(
+                tester.LimitBoolean('valid_packet', True, 'Non-empty packet'),
+                tester.sensor.MirrorReadingBoolean()
+                )
+            mes.sensor.store(False)
+            mes()
+
         self.cell_voltage = voltage_data * 3.6 / (2^14 - 1) / 1000
         switch_raw = _SwitchRaw()
         switch_raw.uint = switch_data
@@ -125,7 +139,6 @@ class Packet():
         # switch_code expected values:
         # Button1:128  Button2:64  Button3:32
         # Button4:16   Button5:8   Button6:4
-
 
 @attr.s
 class RVSWT101():
@@ -163,9 +176,11 @@ class RVSWT101():
             self.scan_count +=1
             rssi, ad_data = self.bleserver.read(callerid)
             self._packet = Packet(ad_data)
+
         return getattr(self._packet, self._read_key)
 
     def reset(self):
         self.bleserver.uut = None
-        self.always_scan = False
         self._packet = None
+        self.always_scan = True
+        self.scan_count = 0

@@ -60,38 +60,47 @@ class Config():
         tester.LimitDelta('CellVoltage', 3.3, 0.3,
             doc='Button cell charged'),
         tester.LimitRegExp('Reply', '^OK$'),
-        tester.LimitInteger('no_button_expected', 0,
-            doc='No button pressed'),
         )
 
+    """
+    Add expected results for 6 and 4 button models.
+    The switch code within the payload for buttons 1-6 is:
+    128, 64, 32, 16, 8, 4
+
+    Button testing order each model:
+    6 button   4 button   switch code
+    1-2        ---        4-3
+    3-4        1-2        5-2
+    4-6        3-4        6-1
+    """
     _limits_4_button = (
         tester.LimitInteger('switch_1_expected', 8,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 1'),
         tester.LimitInteger('switch_2_expected', 64,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 2'),
         tester.LimitInteger('switch_3_expected', 4,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 3'),
         tester.LimitInteger('switch_4_expected', 128,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 4'),
         tester.LimitInteger('switch_5_expected', -1,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 5'),
         tester.LimitInteger('switch_6_expected', -1,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 6'),
         )
 
     _limits_6_button = (
         tester.LimitInteger('switch_1_expected', 16,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 1'),
         tester.LimitInteger('switch_2_expected', 32,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 2'),
         tester.LimitInteger('switch_3_expected', 8,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 3'),
         tester.LimitInteger('switch_4_expected', 64,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 4'),
         tester.LimitInteger('switch_5_expected', 4,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 5'),
         tester.LimitInteger('switch_6_expected', 128,
-            doc='Correct switch pressed'),
+            doc='Expected switch code for button 6'),
         )
 
     @classmethod

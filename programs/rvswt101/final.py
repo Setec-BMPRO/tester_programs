@@ -23,10 +23,8 @@ class Final(share.TestSequence):
         buttons_in_use = range(1,  self.button_count+1)
         Devices.fixture_num = self.cfg['fixture_num']
         Devices.button_count = self.button_count
-
-        limits_fin = 'limits_fin_6_button'
-        if Devices.button_count == 4:
-            limits_fin = 'limits_fin_4_button'
+        limits_fin = {4: 'limits_fin_4_button',
+                      6: 'limits_fin_6_button'}[Devices.button_count]
         super().open(self.cfg[limits_fin], Devices, Sensors, Measurements)
 
         self.steps = (
@@ -40,15 +38,27 @@ class Final(share.TestSequence):
             ['buttonMeasure_{0}'.format(n) for n in buttons_in_use])
         button_releases = tuple(
             ['buttonRelease_{0}'.format(n) for n in buttons_in_use])
-
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
-            self.buttons = self.buttons + ('ui_buttonpress', button_press, button_test, button_release)
+            self.buttons = self.buttons + (button_press, button_test, button_release)
 
         # TODO: perhaps replace the above with this:
         #for n in buttons_in_use:
         #    self.buttons += tuple(
         #        'buttonPress_{0},buttonMeasure_{0},buttonRelease_{0}'.format(n).split(','))
+
+        # TODO: Fix this, if cancel or timeout occurs on the ok_can message, the test
+        #  gets stuck in the while loop when the test is re-opened, because the ok_can
+        #  message box is never shown again for some reason.
+        self.devices.check_uut_in_place()
+        while self.devices.uut_in_place:
+            self.measure(('ui_remove_uut',))
+            self.devices.check_uut_in_place()
+        self.devices.exercise_actuators()
+        self.devices.set_state()
+        while not(self.devices.uut_in_place):
+            self.measure(('ui_add_uut',))
+            self.devices.check_uut_in_place()
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -61,14 +71,21 @@ class Final(share.TestSequence):
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
 
+        # Perform button press measurements
         self.measure(self.buttons)
 
-        # Don't scan for any measurement from here on
+        # Don't bt scan for any measurement from here on
         dev['decoder'].always_scan = False
         self.measure(('cell_voltage', 'switch_type',))
-        assert(dev['decoder'].scan_count == self.button_count), \
-            "unexpected bt scan_count: {}".format(dev['decoder'].scan_count)
-        dev['decoder'].reset()
+
+        if (dev['decoder'].scan_count != self.button_count):
+            mes_scan_count = tester.Measurement(
+                                 tester.LimitBoolean('scan_count', True, 'scan_count matches button count'),
+                                 tester.sensor.MirrorReadingBoolean()
+                             )
+            mes_scan_count.sensor.store(False)
+            mes_scan_count()
+
 
 class Devices(share.Devices):
 
@@ -80,9 +97,8 @@ class Devices(share.Devices):
     def open(self):
         """Create all Instruments."""
         # BLE MAC & Scanning server
-        self['serialtomac'] = share.bluetooth.SerialToMAC()
-        self.physical_devices['BLE'].open()
-        self['ble'] = tester.BLE((self.physical_devices['BLE'], self['serialtomac']))
+        self['ble'] = tester.BLE((self.physical_devices['BLE'],
+                                  self.physical_devices['MAC']))
 
         # BLE Packet decoder
         self['decoder'] = device.RVSWT101(self['ble'])
@@ -108,6 +124,16 @@ class Devices(share.Devices):
         self.add_closer(lambda: self['ard'].close())
         time.sleep(2)
         self._retract_all()
+
+    def exercise_actuators(self):
+        self['ard']['EXERCISE']
+
+    def check_uut_in_place(self):
+        """Ask arduino if a UUT is in place"""
+        self.uut_in_place = int(self['ard']['UUT'])
+
+    def set_state(self):
+        """Set to 4 or 6 button mode"""
         command = {
             4: '4BUTTON_MODEL',
             6: '6BUTTON_MODEL',
@@ -118,6 +144,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['decoder'].reset()
         self._retract_all()
+        self['ard']['EJECT_DUT']
 
     def _retract_all(self):
         """Retract all button actuators."""
@@ -138,11 +165,16 @@ class Sensors(share.Sensors):
         self['ButtonPress'] = sensor.OkCan(
             message=tester.translate('rvswt101_final', 'msgPressButton'),
             caption=tester.translate('rvswt101_final', 'capPressButton'))
+        self['RemoveUUT'] = sensor.OkCan(
+            message=tester.translate('rvswt101_final', 'msgRemoveUUT'),
+            caption=tester.translate('rvswt101_final', 'capRemoveUUT'))
+        self['AddUUT'] = sensor.OkCan(
+            message=tester.translate('rvswt101_final', 'msgAddUUT'),
+            caption=tester.translate('rvswt101_final', 'capAddUUT'))
 
         decoder = self.devices['decoder']   #tester.BLE device
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
-        self['no_button_pressed'] = sensor.KeyedReading(decoder, 'no_button_pressed')
 
         for n in range(1, 7):
             name = 'switch_{0}_measure'.format(n)
@@ -157,6 +189,7 @@ class Sensors(share.Sensors):
                 ('ejectDut', 'EJECT_DUT'),
                 ('4ButtonModel', '4BUTTON_MODEL'),
                 ('6ButtonModel', '6BUTTON_MODEL'),
+                ('exercise_actuators', 'EXERCISE'),
             ):
             self[name] = sensor.KeyedReadingString(ard, cmdkey)
 
@@ -178,7 +211,8 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from server'),
-            ('ui_buttonpress', 'ButtonOk', 'ButtonPress', ''),
+            ('ui_remove_uut', 'ButtonOk', 'RemoveUUT', ''),
+            ('ui_add_uut', 'ButtonOk', 'AddUUT', ''),
             ('debugOn', 'Reply', 'debugOn', ''),
             ('debugOff', 'Reply', 'debugOff', ''),
             ('buttonPress_1', 'Reply', 'buttonPress_1', ''),
@@ -213,17 +247,14 @@ class Measurements(share.Measurements):
                 'Button 5 tested'),
             ('buttonMeasure_6', 'switch_6_expected', 'switch_6_measure',
                 'Button 6 tested'),
-            ('no_button_pressed', 'no_button_expected', 'no_button_pressed',
-                'no_button_pressed'),
+            ('exercise_actuators', 'Reply', 'exercise_actuators', ''),
             ))
 
         # Suppress signals on these measurements.
         for name in (
-                'buttonPress_1', 'buttonPress_2', 'buttonPress_3',
-                'buttonPress_4', 'buttonPress_5', 'buttonPress_6',
                 'buttonRelease_1', 'buttonRelease_2', 'buttonRelease_3',
                 'buttonRelease_4', 'buttonRelease_5', 'buttonRelease_6',
                 'retractAll', 'debugOn', 'debugOff', 'retractAll',
-                'ejectDut', '4ButtonModel', '6ButtonModel', 'ui_buttonpress',
+                'ejectDut', '4ButtonModel', '6ButtonModel',
                 ):
             self[name].send_signal = False
