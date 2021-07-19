@@ -47,19 +47,6 @@ class Final(share.TestSequence):
         #    self.buttons += tuple(
         #        'buttonPress_{0},buttonMeasure_{0},buttonRelease_{0}'.format(n).split(','))
 
-        # TODO: Fix this, if cancel or timeout occurs on the ok_can message, the test
-        #  gets stuck in the while loop when the test is re-opened, because the ok_can
-        #  message box is never shown again for some reason.
-        self.devices.check_uut_in_place()
-        while self.devices.uut_in_place:
-            self.measure(('ui_remove_uut',))
-            self.devices.check_uut_in_place()
-        self.devices.exercise_actuators()
-        self.devices.set_state()
-        while not(self.devices.uut_in_place):
-            self.measure(('ui_add_uut',))
-            self.devices.check_uut_in_place()
-
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
@@ -70,6 +57,12 @@ class Final(share.TestSequence):
         mac = dev['ble'].mac
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
+
+        self.devices.check_uut_in_place()
+        if not(self.devices.uut_in_place):
+            self.measure(('ui_add_uut',))
+        self.devices.check_uut_in_place()
+        if not(self.devices.uut_in_place): self.no_uut()
 
         # Perform button press measurements
         self.measure(self.buttons)
@@ -85,6 +78,18 @@ class Final(share.TestSequence):
                              )
             mes_scan_count.sensor.store(False)
             mes_scan_count()
+
+        # Eject the UUT if we make it to the end of the test
+        self.devices.eject_uut()
+
+    def no_uut(self):
+        """ Create a measurment failure if no UUT is detected in the fixture """
+        uut_check = tester.Measurement(
+                        tester.LimitBoolean('Detect UUT is in fixture', True, 'No UUT was detected in the fixture'),
+                        tester.sensor.MirrorReadingBoolean()
+                        )
+        uut_check.sensor.store(False)
+        uut_check()
 
 
 class Devices(share.Devices):
@@ -125,7 +130,14 @@ class Devices(share.Devices):
         time.sleep(2)
         self._retract_all()
 
+        self.check_uut_in_place()
+        if not(self.uut_in_place):
+            self.exercise_actuators()
+        self.set_state()
+
     def exercise_actuators(self):
+        """Exercise routine all actuators
+           If UUT is in place, routine will be cancelled"""
         self['ard']['EXERCISE']
 
     def check_uut_in_place(self):
@@ -140,11 +152,13 @@ class Devices(share.Devices):
             }[self.button_count]
         self['ard'][command]
 
+    def eject_uut(self):
+        self['ard']['EJECT_DUT']
+
     def reset(self):
         """Reset instruments."""
         self['decoder'].reset()
         self._retract_all()
-        self['ard']['EJECT_DUT']
 
     def _retract_all(self):
         """Retract all button actuators."""
