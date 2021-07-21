@@ -62,7 +62,7 @@ class J35():
     # Available software versions
     sw_13 = '1.3.15775.997'     # For 'A' & 'B' < Rev 8
     sw_15 = '1.5.17467.1373'    # Rev 12 release
-    sw_bl = '1.5.20386.1374'    # Rev 13 J35-B-L release
+    sw_bld = '1.5.20386.1374'   # Rev 13 release
     # These values get set per Product type & revision
     sw_version = None
     hw_version = None
@@ -354,7 +354,7 @@ class J35BL(J35B):
     """J35BL configuration."""
 
     _rev13_values = _Values(
-            sw_version=J35.sw_bl, hw_version=(13, Type.BL.value, 'A'),
+            sw_version=J35.sw_bld, hw_version=(13, Type.BL.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             )
@@ -426,15 +426,19 @@ class J35D(J35C):
 
     """J35D configuration."""
 
-    _rev12_values = _Values(
-            sw_version=J35.sw_15, hw_version=(12, Type.D.value, 'A'),
+    _rev13_values = _Values(
+            sw_version=J35.sw_bld, hw_version=(13, Type.D.value, 'A'),
             output_count=14, ocp_set=35.0,
             solar=True, canbus=True,
             )
     _rev_data = {
-        None: _rev12_values,
-        # Rev 13 never built
-        '12': _rev12_values,
+        None: _rev13_values,
+        '13': _rev13_values,
+        '12': _Values(
+            sw_version=J35.sw_15, hw_version=(12, Type.D.value, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, canbus=True,
+            ),
         '11': _Values(
             sw_version=J35.sw_15, hw_version=(11, Type.D.value, 'A'),
             output_count=14, ocp_set=35.0,
