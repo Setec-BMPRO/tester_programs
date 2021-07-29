@@ -136,16 +136,13 @@ class Packet():
             ))
         all_switches = ''.join([str(int(val.state)) for val in self.switches])
         self.switch_code = int(all_switches, 2)     #int value between 0-255
-        # switch_code expected values:
-        # Button1:128  Button2:64  Button3:32
-        # Button4:16   Button5:8   Button6:4
 
 @attr.s
 class RVSWT101():
 
     """Custom logical instrument to read packet properties."""
 
-    bleserver = attr.ib()       # tester.BLE instance
+    bleserver = attr.ib()
     always_scan = attr.ib(init=False, default=True)
     _read_key = attr.ib(init=False, default=None)
     _packet = attr.ib(init=False, default=None)

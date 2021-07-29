@@ -74,32 +74,32 @@ class Config():
     4-6        3-4        6-1
     """
     _limits_4_button = (
-        tester.LimitInteger('switch_1_expected', 8,
+        tester.LimitInteger('switch_1_pressed', 8,
             doc='Expected switch code for button 1'),
-        tester.LimitInteger('switch_2_expected', 64,
+        tester.LimitInteger('switch_2_pressed', 64,
             doc='Expected switch code for button 2'),
-        tester.LimitInteger('switch_3_expected', 4,
+        tester.LimitInteger('switch_3_pressed', 4,
             doc='Expected switch code for button 3'),
-        tester.LimitInteger('switch_4_expected', 128,
+        tester.LimitInteger('switch_4_pressed', 128,
             doc='Expected switch code for button 4'),
-        tester.LimitInteger('switch_5_expected', -1,
+        tester.LimitInteger('switch_5_pressed', -1,
             doc='Expected switch code for button 5'),
-        tester.LimitInteger('switch_6_expected', -1,
+        tester.LimitInteger('switch_6_pressed', -1,
             doc='Expected switch code for button 6'),
         )
 
     _limits_6_button = (
-        tester.LimitInteger('switch_1_expected', 16,
+        tester.LimitInteger('switch_1_pressed', 16,
             doc='Expected switch code for button 1'),
-        tester.LimitInteger('switch_2_expected', 32,
+        tester.LimitInteger('switch_2_pressed', 32,
             doc='Expected switch code for button 2'),
-        tester.LimitInteger('switch_3_expected', 8,
+        tester.LimitInteger('switch_3_pressed', 8,
             doc='Expected switch code for button 3'),
-        tester.LimitInteger('switch_4_expected', 64,
+        tester.LimitInteger('switch_4_pressed', 64,
             doc='Expected switch code for button 4'),
-        tester.LimitInteger('switch_5_expected', 4,
+        tester.LimitInteger('switch_5_pressed', 4,
             doc='Expected switch code for button 5'),
-        tester.LimitInteger('switch_6_expected', 128,
+        tester.LimitInteger('switch_6_pressed', 128,
             doc='Expected switch code for button 6'),
         )
 

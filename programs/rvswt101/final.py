@@ -42,11 +42,6 @@ class Final(share.TestSequence):
                 button_presses, button_measurements, button_releases):
             self.buttons = self.buttons + (button_press, button_test, button_release)
 
-        # TODO: perhaps replace the above with this:
-        #for n in buttons_in_use:
-        #    self.buttons += tuple(
-        #        'buttonPress_{0},buttonMeasure_{0},buttonRelease_{0}'.format(n).split(','))
-
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
@@ -113,7 +108,6 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
-# FIXME: Switch off verbose mode
         self['ard'].verbose = False
         # On Linux, the ModemManager service opens the serial port
         # for a while after it appears. Wait for it to release the port.
@@ -179,9 +173,6 @@ class Sensors(share.Sensors):
         self['ButtonPress'] = sensor.OkCan(
             message=tester.translate('rvswt101_final', 'msgPressButton'),
             caption=tester.translate('rvswt101_final', 'capPressButton'))
-        self['RemoveUUT'] = sensor.OkCan(
-            message=tester.translate('rvswt101_final', 'msgRemoveUUT'),
-            caption=tester.translate('rvswt101_final', 'capRemoveUUT'))
         self['AddUUT'] = sensor.OkCan(
             message=tester.translate('rvswt101_final', 'msgAddUUT'),
             caption=tester.translate('rvswt101_final', 'capAddUUT'))
@@ -225,7 +216,6 @@ class Measurements(share.Measurements):
         self.create_from_names((
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from server'),
-            ('ui_remove_uut', 'ButtonOk', 'RemoveUUT', ''),
             ('ui_add_uut', 'ButtonOk', 'AddUUT', ''),
             ('debugOn', 'Reply', 'debugOn', ''),
             ('debugOff', 'Reply', 'debugOff', ''),
@@ -249,23 +239,25 @@ class Measurements(share.Measurements):
                 'Button cell charged'),
             ('switch_type', 'SwitchType', 'switch_type',
                 'Switch type'),
-            ('buttonMeasure_1', 'switch_1_expected', 'switch_1_measure',
+            ('buttonMeasure_1', 'switch_1_pressed', 'switch_1_measure',
                 'Button 1 tested'),
-            ('buttonMeasure_2', 'switch_2_expected', 'switch_2_measure',
+            ('buttonMeasure_2', 'switch_2_pressed', 'switch_2_measure',
                 'Button 2 tested'),
-            ('buttonMeasure_3', 'switch_3_expected', 'switch_3_measure',
+            ('buttonMeasure_3', 'switch_3_pressed', 'switch_3_measure',
                 'Button 3 tested'),
-            ('buttonMeasure_4', 'switch_4_expected', 'switch_4_measure',
+            ('buttonMeasure_4', 'switch_4_pressed', 'switch_4_measure',
                 'Button 4 tested'),
-            ('buttonMeasure_5', 'switch_5_expected', 'switch_5_measure',
+            ('buttonMeasure_5', 'switch_5_pressed', 'switch_5_measure',
                 'Button 5 tested'),
-            ('buttonMeasure_6', 'switch_6_expected', 'switch_6_measure',
+            ('buttonMeasure_6', 'switch_6_pressed', 'switch_6_measure',
                 'Button 6 tested'),
             ('exercise_actuators', 'Reply', 'exercise_actuators', ''),
             ))
 
         # Suppress signals on these measurements.
         for name in (
+                'buttonPress_1', 'buttonPress_2', 'buttonPress_3',
+                'buttonPress_4', 'buttonPress_5', 'buttonPress_6',
                 'buttonRelease_1', 'buttonRelease_2', 'buttonRelease_3',
                 'buttonRelease_4', 'buttonRelease_5', 'buttonRelease_6',
                 'retractAll', 'debugOn', 'debugOff', 'retractAll',
