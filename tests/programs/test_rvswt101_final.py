@@ -13,7 +13,7 @@ class RVSWT101Final(ProgramTestCase):
     """RVSWT101 Final program test suite."""
 
     prog_class = rvswt101.Final
-    parameter = '4gp1'
+    parameter = '6gp1'
     debug = False
 
     def setUp(self):
@@ -26,6 +26,7 @@ class RVSWT101Final(ProgramTestCase):
             self.addCleanup(patcher.stop)
             patcher.start()
         mypi = MagicMock(name='decoder')
+        mypi.scan_count = 6
         mypi.read.return_value = (
             -50, '1f050112022d624c3a00000300d1139e69',
             )
@@ -42,11 +43,8 @@ class RVSWT101Final(ProgramTestCase):
                 'Bluetooth': (          # Bluetooth TestStep
                     (sen['SnEntry'], 'A1526040123'),
                     (sen['mirmac'], '001ec030c2be'),
-                    (sen['ButtonPress'], (True, ) * 4),
                     (sen['cell_voltage'], (3.31, ) * 6),
-                    (sen['switch_type'], (0, ) * 6),
-                    (sen['debugOn'], 'OK'),
-                    (sen['debugOff'], 'OK'),
+                    (sen['switch_type'], (2, ) * 6),
                     (sen['buttonPress_1'], 'OK'),
                     (sen['buttonPress_2'], 'OK'),
                     (sen['buttonPress_3'], 'OK'),
@@ -59,17 +57,12 @@ class RVSWT101Final(ProgramTestCase):
                     (sen['buttonRelease_4'], 'OK'),
                     (sen['buttonRelease_5'], 'OK'),
                     (sen['buttonRelease_6'], 'OK'),
-                    (sen['retractAll'], 'OK'),
-                    (sen['ejectDut'], 'OK'),
-                    (sen['4ButtonModel'], 'OK'),
-                    (sen['6ButtonModel'], 'OK'),
-                    (sen['no_button_pressed'], 0),
-                    (sen['switch_1_measure'], 128),
-                    (sen['switch_2_measure'], 64),
-                    (sen['switch_3_measure'], 32),
-                    (sen['switch_4_measure'], 16),
-                    (sen['switch_5_measure'], 8),
-                    (sen['switch_6_measure'], 4),
+                    (sen['switch_1_measure'], 16),
+                    (sen['switch_2_measure'], 32),
+                    (sen['switch_3_measure'], 8),
+                    (sen['switch_4_measure'], 64),
+                    (sen['switch_5_measure'], 4),
+                    (sen['switch_6_measure'], 128),
                     ),
                 },
             }
@@ -77,5 +70,5 @@ class RVSWT101Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(8, len(result.readings))
+        self.assertEqual(10, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)

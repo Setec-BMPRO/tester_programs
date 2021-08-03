@@ -68,7 +68,8 @@ class Final(share.TestSequence):
 
         if (dev['decoder'].scan_count != self.button_count):
             mes_scan_count = tester.Measurement(
-                                 tester.LimitBoolean('scan_count', True, 'scan_count matches button count'),
+                                 tester.LimitBoolean('scan_count', True,
+                                 'scan_count matches button count'),
                                  tester.sensor.MirrorReadingBoolean()
                              )
             mes_scan_count.sensor.store(False)
@@ -80,7 +81,8 @@ class Final(share.TestSequence):
     def no_uut(self):
         """ Create a measurment failure if no UUT is detected in the fixture """
         uut_check = tester.Measurement(
-                        tester.LimitBoolean('Detect UUT is in fixture', True, 'No UUT was detected in the fixture'),
+                        tester.LimitBoolean('Detect UUT is in fixture', True,
+                        'No UUT was detected in the fixture'),
                         tester.sensor.MirrorReadingBoolean()
                         )
         uut_check.sensor.store(False)
@@ -122,8 +124,8 @@ class Devices(share.Devices):
                 time.sleep(1)
         self.add_closer(lambda: self['ard'].close())
         time.sleep(2)
-        self._retract_all()
 
+        self._retract_all()
         self.check_uut_in_place()
         if not(self.uut_in_place):
             self.exercise_actuators()
