@@ -325,7 +325,8 @@ class BP35II(BP35):
     is_2 = True
     # ARM software version
     arm_5015 = '2.0.20330.5015'             # PC-24332 & MA-368 (All Rev 3)
-    arm_5073 = '2.0.64652.5073'             # Rev 4 @ ECO-23109 & MA395
+    arm_5073 = '2.0.64652.5073'             # Rev 4 @ ECO-23109 & MA395, Rev 5
+    arm_5090 = '2.0.1072.5090'              # Rev 6
     fixture_num = '034400'                  # BP35-II Fixture
 
 
@@ -339,6 +340,7 @@ class BP35IISR(BP35II):
             arm_sw_version=BP35II.arm_5073
             )
     _rev_data = {
+        # No Rev >4
         None: _rev4_values,
         '4': _rev4_values,
         '3': _Values(
@@ -353,13 +355,21 @@ class BP35IIHA(BP35IISR):
 
     """BP35-IIHA configuration."""
 
-    _rev4_values = _Values(
-            hw_version=(16, Type.HA.value, 'B'),
-            arm_sw_version=BP35II.arm_5073
+    _rev6_values = _Values(
+            hw_version=(18, Type.HA.value, 'A'),
+            arm_sw_version=BP35II.arm_5090
             )
     _rev_data = {
-        None: _rev4_values,
-        '4': _rev4_values,
+        None: _rev6_values,
+        '6': _rev6_values,
+        '5': _Values(
+            hw_version=(17, Type.HA.value, 'A'),
+            arm_sw_version=BP35II.arm_5073
+            ),
+        '4': _Values(
+            hw_version=(16, Type.HA.value, 'B'),
+            arm_sw_version=BP35II.arm_5073
+            ),
         '3': _Values(
             hw_version=(15, Type.HA.value, 'E'),
             arm_sw_version=BP35II.arm_5015
@@ -375,13 +385,20 @@ class BP35IISI(BP35II):
     is_pm = True
     # PM Solar Reg settings
     pm_zero_wait = 30   # Settling delay for zero calibration
-    _rev4_values = _Values(
-            hw_version=(16, Type.SI.value, 'B'),
-            arm_sw_version=BP35II.arm_5073
+    _rev6_values = _Values(
+            hw_version=(18, Type.SI.value, 'A'),
+            arm_sw_version=BP35II.arm_5090
             )
     _rev_data = {
-        None: _rev4_values,
-        '4': _rev4_values,
+        None: _rev6_values,
+        '5': _Values(
+            hw_version=(17, Type.SI.value, 'A'),
+            arm_sw_version=BP35II.arm_5073
+            ),
+        '4': _Values(
+            hw_version=(16, Type.SI.value, 'B'),
+            arm_sw_version=BP35II.arm_5073
+            ),
         '3': _Values(
             hw_version=(15, Type.SI.value, 'E'),
             arm_sw_version=BP35II.arm_5015
