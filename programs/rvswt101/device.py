@@ -6,44 +6,26 @@
 import ctypes
 import struct
 
-import attr
 
-import tester
+class _SwitchState(list):
 
-@attr.s
+    """All RVSWT switch states."""
+
+    def __init__(self, states):
+        super().__init__()
+        if len(states) != 8:
+            raise ValueError('8 (state, count) values are required')
+        for state, count in states:
+            self.append(_ASwitchState(state, count))
+
+
 class _ASwitchState():
 
     """A single RVSWT switch state."""
 
-    state = attr.ib(converter=bool)
-    count = attr.ib(converter=int)
-
-
-@attr.s
-class _SwitchState():
-
-    """All RVSWT switch states."""
-
-    _states = attr.ib()
-    @_states.validator
-    def _states_len(self, attribute, value):
-        """Validate states."""
-        if len(self._states) != 8:
-            raise ValueError('8 (state, count) values are required')
-    _data = attr.ib(init=False, factory=list)
-
-    def __attrs_post_init__(self):
-        """Populate _data with _ASwitchState instances."""
-        for state, count in self._states:
-            self._data.append(_ASwitchState(state, count))
-
-    def __iter__(self):
-        """Return iterator of _data."""
-        return iter(self._data)
-
-    def __len__(self):
-        """Return len of _data."""
-        return len(self._data)
+    def __init__(self, state, count):
+        self.state = True if state else False
+        self.count = count
 
 
 class _SwitchField(ctypes.Structure):
@@ -101,29 +83,16 @@ class Packet():
             EG: '1f050112022d624c3a00000300d1139e69'
 
         """
-        try:
-            payload_bytes = bytearray.fromhex(payload)
-            (   self.company_id,
-                self.equipment_type,
-                self.protocol_ver,
-                self.switch_type,
-                self.sequence,
-                voltage_data,
-                switch_data,
-                self.signature,
-                ) = struct.Struct('<H3B2HLL').unpack(payload_bytes)
-        except struct.error:
-            """
-            Handle struct.error when unpacking the payload:
-            Add a new measurment called 'valid_packet' with a fail result.
-            """
-            mes = tester.Measurement(
-                tester.LimitBoolean('valid_packet', True, 'Non-empty packet'),
-                tester.sensor.MirrorReadingBoolean()
-                )
-            mes.sensor.store(False)
-            mes()
-
+        payload_bytes = bytearray.fromhex(payload)
+        (   self.company_id,
+            self.equipment_type,
+            self.protocol_ver,
+            self.switch_type,
+            self.sequence,
+            voltage_data,
+            switch_data,
+            self.signature,
+            ) = struct.Struct('<H3B2HLL').unpack(payload_bytes)
         self.cell_voltage = voltage_data * 3.6 / (2^14 - 1) / 1000
         switch_raw = _SwitchRaw()
         switch_raw.uint = switch_data
@@ -134,50 +103,3 @@ class Packet():
             (zss.S4state, zss.S4count), (zss.S5state, zss.S5count),
             (zss.S6state, zss.S6count), (zss.S7state, zss.S7count),
             ))
-        all_switches = ''.join([str(int(val.state)) for val in self.switches])
-        self.switch_code = int(all_switches, 2)     #int value between 0-255
-
-@attr.s
-class RVSWT101():
-
-    """Custom logical instrument to read packet properties."""
-
-    bleserver = attr.ib()
-    always_scan = attr.ib(init=False, default=True)
-    _read_key = attr.ib(init=False, default=None)
-    _packet = attr.ib(init=False, default=None)
-    scan_count = attr.ib(init=True, default=0)
-
-    def configure(self, key):
-        """Sensor: Configure for next reading.
-        
-        key must be one of: 'cell_voltage', 'company_id',
-                            'equipment_type', 'protocol_ver',
-                            'sequence', 'signature', 'switch_code',
-                            'switch_type', 'switches'
-        """
-        self._read_key = key
-
-    def opc(self):
-        """Sensor: OPC."""
-        self.bleserver.opc()
-
-    def read(self, callerid):
-        """Sensor: Read payload data using the last configured key.
-
-        @param callerid Identity of caller
-        @return Packet property value
-
-        """
-        if self.always_scan:
-            self.scan_count +=1
-            rssi, ad_data = self.bleserver.read(callerid)
-            self._packet = Packet(ad_data)
-
-        return getattr(self._packet, self._read_key)
-
-    def reset(self):
-        self.bleserver.uut = None
-        self._packet = None
-        self.always_scan = True
-        self.scan_count = 0

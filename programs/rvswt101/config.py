@@ -10,30 +10,26 @@ class Config():
 
     """RVSWT101 configuration."""
 
-    # Possible switch variants tuple(switch_type,  button_count)
-    #   switch_type from "034800 RVSWT Series Product Specification -F"
-    #   button_count from "035557 RVSWT Series Production Notes -G.pdf"
+    # Possible switch variants.
+    #   From "034800 RVSWT Series Product Specification -F"
     _types = {
         # For the 3 TMC types: BLE Code is Label Code - 1 ...
-        '4gp1': (0, 4), '6gp1': (2, 6), '6gp2': (3, 6),
-         'j3-1': (16, 6), 'j3-2': (17, 6), 'j3-3': (18, 6),
-         'j3-4': (29, 6), 'j3-5': (30, 6),
-         'j3-6': (31, 6), 'j3-7': (5, 4), 'j3-8': (47, 4), 'j3-9': (52, 4),
-         'j4-1': (19, 6), 'j4-2': (20, 6), 'j4-4': (21, 6), 'j4-5': (32, 6),
-         'j4-6': (6, 4), 'j4-7': (7, 4),
-         'j4-8': (48, 4), 'j4-9': (53, 4),
-         'j5-1': (22, 6), 'j5-2': (23, 6), 'j5-3': (33, 6), 'j5-4': (34, 6),
-         'j5-5': (49, 4), 'j5-6': (8, 4),
-         'j5-7': (9, 4), 'j5-8': (45, 6), 'j5-9': (56, 6),
-         'j6-1': (25, 6), 'j6-2': (35, 6), 'j6-3': (10, 4), 'j6-4': (11, 4),
-         'j6-5': (12, 4),
-         'j6-6': (50, 4), 'j6-7': (36, 6), 'j6-8': (27, 6), 'j6-9': (46, 6),
-         'j7-1': (38, 4),
-         'j8-1': (37, 6), 'j8-2': (28, 6), 'j8-3': (39, 4), 'j8-4': (57, 6),
-         'j9-1': (40, 4),
-         'j10-1': (13, 4), 'j10-2': (41, 4),
-         'j11-1': (14, 4), 'j11-2': (15, 4), 'j11-3': (42, 4), 'j11-4': (51, 4),
-         'j11-5': (54, 4), 'j11-6': (55, 4)}
+        '4gp1': 0, '6gp1': 2, '6gp2': 3,
+        'j3-1': 16, 'j3-2': 17, 'j3-3': 18, 'j3-4': 29, 'j3-5': 30,
+            'j3-6': 31, 'j3-7': 5, 'j3-8': 47, 'j3-9': 52,
+        'j4-1': 19, 'j4-2': 20, 'j4-4': 21, 'j4-5': 32, 'j4-6': 6, 'j4-7': 7,
+            'j4-8': 48, 'j4-9': 53,
+        'j5-1': 22, 'j5-2': 23, 'j5-3': 33, 'j5-4': 34, 'j5-5': 49, 'j5-6': 8,
+            'j5-7': 9, 'j5-8': 45, 'j5-9': 56,
+        'j6-1': 25, 'j6-2': 35, 'j6-3': 10, 'j6-4': 11, 'j6-5': 12,
+            'j6-6': 50, 'j6-7': 36, 'j6-8': 27, 'j6-9': 46,
+        'j7-1': 38,
+        'j8-1': 37, 'j8-2': 28, 'j8-3': 39, 'j8-4': 57,
+        'j9-1': 40,
+        'j10-1': 13, 'j10-2': 41,
+        'j11-1': 14, 'j11-2': 15, 'j11-3': 42, 'j11-4': 51, 'j11-5': 54,
+        'j11-6': 55,
+        }
     # Software images
     _software = {   # Rev 2 'gp' units, Rev 3/4 'j' units
         '4gp1': 'rvswt101_4gp1_1.2.hex',
@@ -59,48 +55,6 @@ class Config():
             doc='Ok entered'),
         tester.LimitDelta('CellVoltage', 3.3, 0.3,
             doc='Button cell charged'),
-        tester.LimitRegExp('Reply', '^OK$'),
-        )
-
-    """
-    Add expected results for 6 and 4 button models.
-    The switch code within the payload for buttons 1-6 is:
-    128, 64, 32, 16, 8, 4
-
-    Button testing order each model:
-    6 button   4 button   switch code
-    1-2        ---        4-3
-    3-4        1-2        5-2
-    4-6        3-4        6-1
-    """
-    _limits_4_button = (
-        tester.LimitInteger('switch_1_pressed', 8,
-            doc='Expected switch code for button 1'),
-        tester.LimitInteger('switch_2_pressed', 64,
-            doc='Expected switch code for button 2'),
-        tester.LimitInteger('switch_3_pressed', 4,
-            doc='Expected switch code for button 3'),
-        tester.LimitInteger('switch_4_pressed', 128,
-            doc='Expected switch code for button 4'),
-        tester.LimitInteger('switch_5_pressed', -1,
-            doc='Expected switch code for button 5'),
-        tester.LimitInteger('switch_6_pressed', -1,
-            doc='Expected switch code for button 6'),
-        )
-
-    _limits_6_button = (
-        tester.LimitInteger('switch_1_pressed', 16,
-            doc='Expected switch code for button 1'),
-        tester.LimitInteger('switch_2_pressed', 32,
-            doc='Expected switch code for button 2'),
-        tester.LimitInteger('switch_3_pressed', 8,
-            doc='Expected switch code for button 3'),
-        tester.LimitInteger('switch_4_pressed', 64,
-            doc='Expected switch code for button 4'),
-        tester.LimitInteger('switch_5_pressed', 4,
-            doc='Expected switch code for button 5'),
-        tester.LimitInteger('switch_6_pressed', 128,
-            doc='Expected switch code for button 6'),
         )
 
     @classmethod
@@ -117,7 +71,7 @@ class Config():
             type_lim = tester.LimitBetween(
                 'SwitchType', 1, 42, doc='Switch type code')
         else:                           # Later builds of Rev 3+
-            switch_type,  button_count = cls._types[parameter]
+            switch_type = cls._types[parameter]
             type_lim = tester.LimitInteger(
                 'SwitchType', switch_type, doc='Switch type code')
         if parameter in cls._software:  # Rev 2 hard coded switch types
@@ -128,7 +82,6 @@ class Config():
             banner_lines = 2
         # Force code the RVSWT101 switch code as required
         forced_code = 0
-        fixture_num = '033030'          # RVSWT101 Final Fixture
         if uut:
             try:
                 forced_code = {
@@ -143,14 +96,6 @@ class Config():
             'limits_fin': (
                 cls._common_limits + cls._final_limits + (type_lim, )
                 ),
-            'limits_fin_4_button': (
-                cls._common_limits + cls._final_limits + cls._limits_4_button + (type_lim, )
-                ),
-            'limits_fin_6_button': (
-                cls._common_limits + cls._final_limits + cls._limits_6_button + (type_lim, )
-                ),    
             'banner_lines': banner_lines,
             'forced_code': forced_code,
-            'fixture_num': fixture_num,
-            'button_count': button_count, 
             }

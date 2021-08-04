@@ -33,7 +33,3 @@ class Console(share.console.Base):
         except share.console.Error:
             pass
         return result
-
-class DirectConsole(Console, share.console.BadUart):
-
-    """Console for a direct connection."""
