@@ -154,6 +154,9 @@ class Fixture():
             # Hub port 2: Nordic NRF52 device programmer
             # Hub port 3,4: not used
             },
+        '033030': {     # RVSWT101 Final
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
+            },
         }
 
     _data_per_tester = {
