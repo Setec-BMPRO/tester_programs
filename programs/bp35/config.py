@@ -391,6 +391,7 @@ class BP35IISI(BP35II):
             )
     _rev_data = {
         None: _rev6_values,
+        '6': _rev6_values,
         '5': _Values(
             hw_version=(17, Type.SI.value, 'A'),
             arm_sw_version=BP35II.arm_5073
