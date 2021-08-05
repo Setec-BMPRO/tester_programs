@@ -98,8 +98,6 @@ class BP35():
         tester.LimitDelta('HwVer8', 4400.0, 250.0, doc='Hardware Rev ≥8'),
         tester.LimitDelta('ACin', vac, 5.0, doc='Injected AC voltage present'),
         tester.LimitBetween('Vpfc', 401.0, 424.0, doc='PFC running'),
-        tester.LimitBetween('12Vpri', 11.5, 13.0, doc='Control rail present'),
-        tester.LimitBetween('15Vs', 11.5, 13.0, doc='Control rail present'),
         tester.LimitBetween('Vload', 12.0, 12.9, doc='Load output present'),
         tester.LimitLow('VloadOff', 0.5, doc='Load output off'),
         tester.LimitDelta('VbatIn', 12.0, 0.5, doc='Injected Vbatt present'),
@@ -131,6 +129,44 @@ class BP35():
         tester.LimitInteger('CAN_BIND', 1 << 28, doc='CAN comms established'),
         tester.LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
         tester.LimitRegExp('Reply', '^OK$'),
+        # SR limits
+        tester.LimitDelta('SolarVcc', 3.3, 0.1,
+            doc='Vcc present'),
+        tester.LimitDelta('SolarVin', sr_vin, 0.5,
+            doc='Input present'),
+        tester.LimitPercent('VsetPre', sr_vset, 6.0,
+            doc='Vout before calibration'),
+        tester.LimitPercent('VsetPost', sr_vset, 1.5,
+            doc='Vout after calibration'),
+        tester.LimitPercent('ARM-IoutPre', sr_ical, (9.0, 20.0),
+            doc='Iout before calibration'),
+        tester.LimitPercent('ARM-IoutPost', sr_ical, 3.0,
+            doc='Iout after calibration'),
+        tester.LimitPercent(
+            'ARM-SolarVin-Pre', sr_vin, sr_vin_pre_percent,
+            doc='Vin before calibration'),
+        tester.LimitPercent(
+            'ARM-SolarVin-Post', sr_vin, sr_vin_post_percent,
+            doc='Vin after calibration'),
+        tester.LimitInteger('SR-Alive', 1, doc='Detected'),
+        tester.LimitInteger('SR-Relay', 1, doc='Input relay ON'),
+        tester.LimitInteger('SR-Error', 0, doc='No error'),
+        # PM limits
+        tester.LimitInteger('PM-Alive', 1, doc='Detected'),
+        tester.LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6,
+            doc='Zero reading before cal'),
+        tester.LimitDelta('ARM-PmSolarIz-Post', 0, 0.1,
+            doc='Zero reading after cal'),
+        )
+    # BP35xx Rev 3-5 control rails
+    _crail_3_5 = (
+        tester.LimitBetween('12Vpri', 11.5, 13.0, doc='Control rail present'),
+        tester.LimitBetween('15Vs', 11.5, 13.0, doc='Control rail present'),
+        )
+    # BP35-II Rev 6 control rails
+    _crail_6 = (
+        tester.LimitBetween('12Vpri', 13.6, 15.0, doc='Control rail present'),
+        tester.LimitBetween('15Vs', 14.3, 14.9, doc='Control rail present'),
         )
     # Final Test limits common to all versions
     _base_limits_final = _base_limits_all + (
@@ -141,6 +177,7 @@ class BP35():
         tester.LimitBetween('Vout', 12.0, 12.9, doc='No load output voltage'),
         )
     # Internal data storage
+    _rev = None             # Selected revision
     _rev_data = None        # Revision data dictionary
 
     @classmethod
@@ -151,52 +188,13 @@ class BP35():
 
         """
         try:
-            rev = uut.lot.item.revision
+            cls._rev = uut.lot.item.revision
         except AttributeError:
-            rev = None
-        logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        values = cls._rev_data[rev]
+            cls._rev = None
+        logging.getLogger(__name__).debug('Revision detected as %s', cls._rev)
+        values = cls._rev_data[cls._rev]
         cls.arm_hw_version = values.hw_version
         cls.arm_sw_version = values.arm_sw_version
-
-
-    @classmethod
-    def limits_initial(cls):
-        """Initial test limits.
-
-        @return Tuple of limits
-
-        """
-        return cls._base_limits_initial + (
-            # SR limits
-            tester.LimitDelta('SolarVcc', 3.3, 0.1,
-                doc='Vcc present'),
-            tester.LimitDelta('SolarVin', cls.sr_vin, 0.5,
-                doc='Input present'),
-            tester.LimitPercent('VsetPre', cls.sr_vset, 6.0,
-                doc='Vout before calibration'),
-            tester.LimitPercent('VsetPost', cls.sr_vset, 1.5,
-                doc='Vout after calibration'),
-            tester.LimitPercent('ARM-IoutPre', cls.sr_ical, (9.0, 20.0),
-                doc='Iout before calibration'),
-            tester.LimitPercent('ARM-IoutPost', cls.sr_ical, 3.0,
-                doc='Iout after calibration'),
-            tester.LimitPercent(
-                'ARM-SolarVin-Pre', cls.sr_vin, cls.sr_vin_pre_percent,
-                doc='Vin before calibration'),
-            tester.LimitPercent(
-                'ARM-SolarVin-Post', cls.sr_vin, cls.sr_vin_post_percent,
-                doc='Vin after calibration'),
-            tester.LimitInteger('SR-Alive', 1, doc='Detected'),
-            tester.LimitInteger('SR-Relay', 1, doc='Input relay ON'),
-            tester.LimitInteger('SR-Error', 0, doc='No error'),
-            # PM limits
-            tester.LimitInteger('PM-Alive', 1, doc='Detected'),
-            tester.LimitDelta('ARM-PmSolarIz-Pre', 0, 0.6,
-                doc='Zero reading before cal'),
-            tester.LimitDelta('ARM-PmSolarIz-Post', 0, 0.1,
-                doc='Zero reading after cal'),
-            )
 
     @classmethod
     def limits_final(cls):
@@ -208,46 +206,60 @@ class BP35():
         return cls._base_limits_final
 
 
-class BP35SR(BP35):
+class BP35_I(BP35):
+
+    """BP35 series base configuration."""
+
+    @classmethod
+    def limits_initial(cls):
+        """Initial test limits.
+
+        @return Tuple of limits
+
+        """
+        return cls._base_limits_initial + cls._crail_3_5
+
+
+class BP35SR(BP35_I):
 
     """BP35SR configuration."""
 
     is_pm = False
     _rev14_values = _Values(
             hw_version=(14, Type.SR.value, 'A'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             )
     _rev6_values = _Values(
             hw_version=(6, Type.SR.value, 'E'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             )
     _rev_data = {
         None: _rev14_values,
         '14': _rev14_values,
         '13': _Values(
             hw_version=(13, Type.SR.value, 'D'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         '12': _Values(
             hw_version=(12, Type.SR.value, 'E'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         # No Rev 11 created
         '10': _Values(
             hw_version=(10, Type.SR.value, 'G'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         '9': _Values(
             hw_version=(9, Type.SR.value, 'G'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         '8': _Values(
             hw_version=(8, Type.SR.value, 'I'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         '7': _Values(
             hw_version=(7, Type.SR.value, 'D'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         '6': _rev6_values,
         # Rev 1-5 are Main PCB swaps
@@ -265,29 +277,29 @@ class BP35HA(BP35SR):
 
     _rev14_values = _Values(
             hw_version=(14, Type.HA.value, 'A'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             )
     _rev_data = {
         None: _rev14_values,
         '14': _rev14_values,
         '13': _Values(
             hw_version=(13, Type.HA.value, 'B'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         '12': _Values(
             hw_version=(12, Type.HA.value, 'C'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         # No Rev 11 created
         '10': _Values(
             hw_version=(10, Type.HA.value, 'E'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         # No Rev 1-9 created
         }
 
 
-class BP35PM(BP35):
+class BP35PM(BP35_I):
 
     """BP35PM configuration."""
 
@@ -296,29 +308,29 @@ class BP35PM(BP35):
     pm_zero_wait = 30   # Settling delay for zero calibration
     _rev14_values = _Values(
             hw_version=(14, Type.PM.value, 'A'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             )
     _rev_data = {
         None: _rev14_values,
         '14': _rev14_values,
         '13': _Values(
             hw_version=(13, Type.PM.value, 'B'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         '12': _Values(
             hw_version=(12, Type.PM.value, 'C'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         # No Rev 11 created
         '10': _Values(
             hw_version=(10, Type.PM.value, 'E'),
-            arm_sw_version=BP35.arm_sw_version
+            arm_sw_version=BP35_I.arm_sw_version
             ),
         # No Rev 1-9 created
         }
 
 
-class BP35II(BP35):
+class BP35_II(BP35):
 
     """Base configuration for BP35-II."""
 
@@ -329,15 +341,31 @@ class BP35II(BP35):
     arm_5090 = '2.0.1072.5090'              # Rev 6
     fixture_num = '034400'                  # BP35-II Fixture
 
+    @classmethod
+    def limits_initial(cls):
+        """Initial test limits.
 
-class BP35IISR(BP35II):
+        @return Tuple of limits
+
+        """
+        crails = {
+            None: cls._crail_6,
+            '6': cls._crail_6,
+            '5': cls._crail_3_5,
+            '4': cls._crail_3_5,
+            '3': cls._crail_3_5,
+            }[cls._rev]
+        return cls._base_limits_initial + crails
+
+
+class BP35IISR(BP35_II):
 
     """BP35-IISR configuration."""
 
     is_pm = False
     _rev4_values = _Values(
             hw_version=(16, Type.SR.value, 'B'),
-            arm_sw_version=BP35II.arm_5073
+            arm_sw_version=BP35_II.arm_5073
             )
     _rev_data = {
         # No Rev >4
@@ -345,7 +373,7 @@ class BP35IISR(BP35II):
         '4': _rev4_values,
         '3': _Values(
             hw_version=(15, Type.SR.value, 'E'),
-            arm_sw_version=BP35II.arm_5015
+            arm_sw_version=BP35_II.arm_5015
             ),
         # No Rev 1 or 2
         }
@@ -357,28 +385,28 @@ class BP35IIHA(BP35IISR):
 
     _rev6_values = _Values(
             hw_version=(18, Type.HA.value, 'A'),
-            arm_sw_version=BP35II.arm_5090
+            arm_sw_version=BP35_II.arm_5090
             )
     _rev_data = {
         None: _rev6_values,
         '6': _rev6_values,
         '5': _Values(
             hw_version=(17, Type.HA.value, 'A'),
-            arm_sw_version=BP35II.arm_5073
+            arm_sw_version=BP35_II.arm_5073
             ),
         '4': _Values(
             hw_version=(16, Type.HA.value, 'B'),
-            arm_sw_version=BP35II.arm_5073
+            arm_sw_version=BP35_II.arm_5073
             ),
         '3': _Values(
             hw_version=(15, Type.HA.value, 'E'),
-            arm_sw_version=BP35II.arm_5015
+            arm_sw_version=BP35_II.arm_5015
             ),
         # No Rev 1 or 2
         }
 
 
-class BP35IISI(BP35II):
+class BP35IISI(BP35_II):
 
     """BP35-IISI configuration."""
 
@@ -387,22 +415,22 @@ class BP35IISI(BP35II):
     pm_zero_wait = 30   # Settling delay for zero calibration
     _rev6_values = _Values(
             hw_version=(18, Type.SI.value, 'A'),
-            arm_sw_version=BP35II.arm_5090
+            arm_sw_version=BP35_II.arm_5090
             )
     _rev_data = {
         None: _rev6_values,
         '6': _rev6_values,
         '5': _Values(
             hw_version=(17, Type.SI.value, 'A'),
-            arm_sw_version=BP35II.arm_5073
+            arm_sw_version=BP35_II.arm_5073
             ),
         '4': _Values(
             hw_version=(16, Type.SI.value, 'B'),
-            arm_sw_version=BP35II.arm_5073
+            arm_sw_version=BP35_II.arm_5073
             ),
         '3': _Values(
             hw_version=(15, Type.SI.value, 'E'),
-            arm_sw_version=BP35II.arm_5015
+            arm_sw_version=BP35_II.arm_5015
             ),
         # No Rev 1 or 2
         }

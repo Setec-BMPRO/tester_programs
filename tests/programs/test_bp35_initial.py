@@ -74,8 +74,8 @@ class _BP35Initial(ProgramTestCase):
                     (sen['arm_iaux'], 1.1),
                     ),
                 'PowerUp': (
-                    (sen['acin'], 240.0), (sen['pri12v'], 12.5),
-                    (sen['o3v3'], 3.3), (sen['o15vs'], 12.5),
+                    (sen['acin'], 240.0), (sen['pri12v'], (12.5, 14.0), ),
+                    (sen['o3v3'], 3.3), (sen['o15vs'], (12.5, 14.5), ),
                     (sen['vbat'], 12.8), (sen['vpfc'], (415.0, 415.0), ),
                     (sen['arm_vout_ov'], (0, 0, )),
                     ),
