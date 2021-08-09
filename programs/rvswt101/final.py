@@ -41,6 +41,7 @@ class Final(share.TestSequence):
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
             self.buttons = self.buttons + (button_press, button_test, button_release)
+            #break
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
@@ -64,7 +65,7 @@ class Final(share.TestSequence):
 
         # Don't bt scan for any measurement from here on
         dev['decoder'].always_scan = False
-        self.measure(('cell_voltage', 'switch_type',))
+        self.measure(('cell_voltage', 'switch_type', 'rssi'))
 
         if (dev['decoder'].scan_count != self.button_count):
             mes_scan_count = tester.Measurement(
@@ -182,6 +183,7 @@ class Sensors(share.Sensors):
         decoder = self.devices['decoder']   #tester.BLE device
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
+        self['RSSI'] = sensor.KeyedReading(decoder, 'rssi')
 
         for n in range(1, 7):
             name = 'switch_{0}_measure'.format(n)
@@ -241,6 +243,7 @@ class Measurements(share.Measurements):
                 'Button cell charged'),
             ('switch_type', 'SwitchType', 'switch_type',
                 'Switch type'),
+            ('rssi', 'RSSI Level', 'RSSI', 'Bluetooth RSSI Level'),
             ('buttonMeasure_1', 'switch_1_pressed', 'switch_1_measure',
                 'Button 1 tested'),
             ('buttonMeasure_2', 'switch_2_pressed', 'switch_2_measure',

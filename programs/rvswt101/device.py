@@ -168,13 +168,16 @@ class RVSWT101():
         @param callerid Identity of caller
         @return Packet property value
 
+        Now that the button jig is used, the UUT is always the same distance
+         from the bleserver and rssi levels can be tested.
         """
         if self.always_scan:
             self.scan_count +=1
             rssi, ad_data = self.bleserver.read(callerid)
+            self._rssi = rssi
             self._packet = Packet(ad_data)
 
-        return getattr(self._packet, self._read_key)
+        return getattr(self._packet, self._read_key, self._rssi)
 
     def reset(self):
         self.bleserver.uut = None
