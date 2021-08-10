@@ -43,8 +43,9 @@ class RVSWT101Final(ProgramTestCase):
                 'Bluetooth': (          # Bluetooth TestStep
                     (sen['SnEntry'], 'A1526040123'),
                     (sen['mirmac'], '001ec030c2be'),
-                    (sen['cell_voltage'], (3.31, ) * 6),
-                    (sen['switch_type'], (2, ) * 6),
+                    (sen['cell_voltage'], (3.31, )),
+                    (sen['switch_type'], (2, )),
+                    (sen['RSSI'], (-40, )),
                     (sen['buttonPress_1'], 'OK'),
                     (sen['buttonPress_2'], 'OK'),
                     (sen['buttonPress_3'], 'OK'),
@@ -70,5 +71,5 @@ class RVSWT101Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(10, len(result.readings))
+        self.assertEqual(11, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)
