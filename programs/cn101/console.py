@@ -41,11 +41,12 @@ class _Console():
         'TANK4': parameter.Float('TANK_4_LEVEL'),
         'ADC_SCAN': parameter.Float('ADC_SCAN_INTERVAL_MSEC', writeable=True),
         }
+    banner_lines = 2
 
-    def brand(self, hw_ver, sernum, reset_relay, banner_lines):
+    def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
         reset_relay.pulse(0.1)
-        self.action(None, delay=1.5, expected=banner_lines)
+        self.action(None, delay=1.5, expected=self.banner_lines)
         self['UNLOCK'] = True
         self['HW_VER'] = hw_ver
         self['SER_ID'] = sernum

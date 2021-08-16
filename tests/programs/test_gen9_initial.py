@@ -38,7 +38,7 @@ class Gen9Initial(ProgramTestCase):
                     (sen['o3v3'], 3.3),
                     ),
                 'PowerUp': (
-                    (sen['acin'], 240.0), (sen['o5v'], (5.05, 5.11, )),
+                    (sen['acin'], 240.0), (sen['o5v'], (5.14, 5.11, )),
                     (sen['o15vccpri'], 15.0), (sen['o12vpri'], 12.0),
                     (sen['o12v'], (0.0, 12.0, )), (sen['o24v'], (0.0, 24.0, )),
                     (sen['pwrfail'], 0.0),

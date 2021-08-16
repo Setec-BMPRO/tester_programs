@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright 2021 SETEC Pty Ltd
+"""CN101 Configuration."""
+
+import logging
+
+import tester
+import share
+
+
+def get(parameter, uut):
+    """Get configuration based on UUT Lot Number.
+
+    @param parameter Type of unit
+    @param uut setec.UUT instance
+    @return configuration class
+
+    """
+    CN101._configure(uut)    # Adjust for the revision
+    return CN101
+
+
+class CN101():
+
+    """CN101 parameters."""
+
+    # Initial test limits
+    limits_initial = (
+        tester.LimitRegExp('SwVer', '',        # Adjusted during _configure()
+            doc='Software version'),
+        tester.LimitLow('Part', 100.0),
+        tester.LimitDelta('Vin', 8.0, 0.5),
+        tester.LimitPercent('3V3', 3.30, 3.0),
+        tester.LimitInteger('CAN_BIND', 1 << 28),
+        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
+        tester.LimitBoolean('DetectBT', True),
+        tester.LimitInteger('Tank', 5),
+        )
+    # These values get set per revision
+    sw_version = None
+    hw_version = None
+    # Revision data dictionary:
+    _rev6_values = ('1.2.17835.298', (6, 0, 'A'), )
+    _rev_data = {
+        None: _rev6_values,
+        '6': _rev6_values,
+        '5': ('1.1.13665.176', (5, 0, 'A'), ),
+        }
+
+    @classmethod
+    def _configure(cls, uut):
+        """Adjust configuration based on UUT Lot Number.
+
+        @param uut setec.UUT instance
+
+        """
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
+        logging.getLogger(__name__).debug('Revision detected as %s', rev)
+        cls.sw_version, cls.hw_version = cls._rev_data[rev]

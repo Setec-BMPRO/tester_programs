@@ -12,36 +12,20 @@ import setec
 import share
 import tester
 
-from . import console
+from . import config, console
 
 
 class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
 
-    # Initial test limits
-    limits_initial = (
-        tester.LimitRegExp('SwVer', '',            # Adjusted during open()
-            doc='Software version'),
-        tester.LimitLow('Part', 100.0),
-        tester.LimitDelta('Vin', 8.0, 0.5),
-        tester.LimitPercent('3V3', 3.30, 3.0),
-        tester.LimitInteger('CAN_BIND', 1 << 28),
-        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
-        tester.LimitBoolean('DetectBT', True),
-        tester.LimitInteger('Tank', 5),
-        )
-    # MA-239: Upgrade all units to CN101T, so treat them as Rev 6
-    sw_version = '1.2.17835.298'
-    hw_version = (6, 0, 'A')
-    banner_lines = 2
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.sw_version = self.sw_version
-        super().open(self.limits_initial, Devices, Sensors, Measurements)
+        self.cfg = config.get(self.parameter, uut)
+        Devices.sw_version = self.cfg.sw_version
+        super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
         self.limits['SwVer'].adjust(
-            '^{0}$'.format(self.sw_version.replace('.', r'\.')))
+            '^{0}$'.format(self.cfg.sw_version.replace('.', r'\.')))
         self.steps = (
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
@@ -70,7 +54,9 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         dev['cn101'].open()
         dev['cn101'].brand(
-            self.hw_version, self.sernum, dev['rla_reset'], self.banner_lines)
+            self.cfg.hw_version,
+            self.sernum,
+            dev['rla_reset'])
         mes['cn101_swver']()
 
     @share.teststep
