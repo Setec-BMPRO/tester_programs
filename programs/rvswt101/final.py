@@ -41,7 +41,6 @@ class Final(share.TestSequence):
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
             self.buttons = self.buttons + (button_press, button_test, button_release)
-            #break
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
