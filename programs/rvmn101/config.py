@@ -136,14 +136,19 @@ class RVMN101A(Config):
     _nordic_2_5_3 = 'jayco_rvmn101_signed_2.5.3-0-ga721738c_factory_mcuboot.hex'
     _arm_image_1_13 = 'rvmn101_nxp_1.13.bin'
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
-    _rev18_values = _Values(
+    _rev19_values = _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_5,
-            product_rev='18A', hardware_rev='13A', banner_lines=5,
+            product_rev='19A', hardware_rev='13A', banner_lines=5,
             reversed_output_dict={},
             )
     _rev_data = {
-        None: _rev18_values,
-        '18': _rev18_values,
+        None: _rev19_values,
+        '19': _rev19_values,
+        '18': _Values(
+            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_5,
+            product_rev='18A', hardware_rev='13A', banner_lines=5,
+            reversed_output_dict={},
+            ),
         # Rev 17 No production
         '16': _Values(    # Note: ECO had wrong HW rev (15A instead of 12A)
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_5,
@@ -308,14 +313,19 @@ class RVMN5x(Config):
     # Software versions
     _nordic_2_5_3 = 'jayco_rvmn5x_signed_2.5.3-0-ga721738c_factory_mcuboot.hex'
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
-    _rev7_values = _Values(
+    _rev8_values = _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
-            product_rev='07A', hardware_rev='05A', banner_lines=5,
+            product_rev='08A', hardware_rev='05A', banner_lines=5,
             reversed_output_dict={},
             )
     _rev_data = {
-        None: _rev7_values,
-        '7': _rev7_values,
+        None: _rev8_values,
+        '8': _rev8_values,
+        '7': _Values(
+            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
+            product_rev='07A', hardware_rev='05A', banner_lines=5,
+            reversed_output_dict={},
+            ),
         '6': _Values(
             nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
             product_rev='06A', hardware_rev='05A', banner_lines=5,

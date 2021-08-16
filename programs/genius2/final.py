@@ -35,7 +35,7 @@ class Final(share.TestSequence):
         'H': {
             'Limits': _common,
             'MaxBattLoad': 30.0,
-            'LoadRatio': (5, 30),       # Vout:Vbat load ratio
+            'LoadRatio': (3, 2),        # Vout:Vbat load ratio
             },
         }
 
