@@ -60,7 +60,7 @@ class Final(share.TestSequence):
         if not(self.devices.uut_in_place): self.no_uut()
 
         # Perform button press measurements
-        self.measure(self.buttons)
+        self.measure(self.buttons, timeout=10)
 
         # Don't bt scan for any measurement from here on
         dev['decoder'].always_scan = False

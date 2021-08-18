@@ -58,7 +58,7 @@ class RVSWT101Final(ProgramTestCase):
                     (sen['buttonRelease_4'], 'OK'),
                     (sen['buttonRelease_5'], 'OK'),
                     (sen['buttonRelease_6'], 'OK'),
-                    (sen['switch_1_measure'], 16),
+                    (sen['switch_1_measure'], (1, 1, 1, 16)),
                     (sen['switch_2_measure'], 32),
                     (sen['switch_3_measure'], 8),
                     (sen['switch_4_measure'], 64),
