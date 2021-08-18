@@ -66,15 +66,6 @@ class Final(share.TestSequence):
         dev['decoder'].always_scan = False
         self.measure(('cell_voltage', 'switch_type', 'rssi'))
 
-        if (dev['decoder'].scan_count != self.button_count):
-            mes_scan_count = tester.Measurement(
-                                 tester.LimitBoolean('scan_count', True,
-                                 'scan_count matches button count'),
-                                 tester.sensor.MirrorReadingBoolean()
-                             )
-            mes_scan_count.sensor.store(False)
-            mes_scan_count()
-
         # Eject the UUT if we make it to the end of the test
         self.devices.eject_uut()
 

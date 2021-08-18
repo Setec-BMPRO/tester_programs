@@ -146,7 +146,6 @@ class RVSWT101():
     always_scan = attr.ib(init=False, default=True)
     _read_key = attr.ib(init=False, default=None)
     _packet = attr.ib(init=False, default=None)
-    scan_count = attr.ib(init=True, default=0)
 
     def configure(self, key):
         """Sensor: Configure for next reading.
@@ -172,7 +171,6 @@ class RVSWT101():
          from the bleserver and rssi levels can be tested.
         """
         if self.always_scan:
-            self.scan_count +=1
             rssi, ad_data = self.bleserver.read(callerid)
             self._rssi = rssi
             self._packet = Packet(ad_data)
@@ -183,4 +181,3 @@ class RVSWT101():
         self.bleserver.uut = None
         self._packet = None
         self.always_scan = True
-        self.scan_count = 0
