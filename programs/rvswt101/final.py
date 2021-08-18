@@ -187,6 +187,7 @@ class Sensors(share.Sensors):
         for n in range(1, 7):
             name = 'switch_{0}_measure'.format(n)
             self[name] = sensor.KeyedReading(decoder, 'switch_code')
+            self[name].rereadable = True
 
         # Arduino sensors - sensor_name, key
         ard = self.devices['ard']
