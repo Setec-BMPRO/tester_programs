@@ -56,8 +56,8 @@ class Final(share.TestSequence):
         self.devices.check_uut_in_place()
         if not(self.devices.uut_in_place):
             self.measure(('ui_add_uut',))
-        self.devices.check_uut_in_place()
-        if not(self.devices.uut_in_place): self.no_uut()
+            self.devices.check_uut_in_place()
+            if not(self.devices.uut_in_place): self.no_uut()
 
         # Perform button press measurements
         self.measure(self.buttons, timeout=10)
@@ -252,8 +252,6 @@ class Measurements(share.Measurements):
 
         # Suppress signals on these measurements.
         for name in (
-                'buttonPress_1', 'buttonPress_2', 'buttonPress_3',
-                'buttonPress_4', 'buttonPress_5', 'buttonPress_6',
                 'buttonRelease_1', 'buttonRelease_2', 'buttonRelease_3',
                 'buttonRelease_4', 'buttonRelease_5', 'buttonRelease_6',
                 'retractAll', 'debugOn', 'debugOff', 'retractAll',
