@@ -60,7 +60,7 @@ class Config():
         tester.LimitDelta('CellVoltage', 3.3, 0.3,
             doc='Button cell charged'),
         tester.LimitRegExp('Reply', '^OK$'),
-        tester.LimitHigh('RSSI Level',-60,
+        tester.LimitHigh('RSSI Level',-55,
             doc='Bluetooth RSSI Level'),
         )
 
