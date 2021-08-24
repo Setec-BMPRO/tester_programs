@@ -42,6 +42,11 @@ class Final(share.TestSequence):
                 button_presses, button_measurements, button_releases):
             self.buttons = self.buttons + (button_press, button_test, button_release)
 
+        # Do rssi measurement when button 1 is held down
+        buttons_list = list(self.buttons)
+        buttons_list.insert(1,  'rssi')
+        self.buttons = tuple(buttons_list)
+
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
@@ -52,7 +57,6 @@ class Final(share.TestSequence):
         mac = dev['ble'].mac
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
-
         self.devices.check_uut_in_place()
         if not(self.devices.uut_in_place):
             self.measure(('ui_add_uut',))
@@ -64,7 +68,7 @@ class Final(share.TestSequence):
 
         # Don't bt scan for any measurement from here on
         dev['decoder'].always_scan = False
-        self.measure(('cell_voltage', 'switch_type', 'rssi'))
+        self.measure(('cell_voltage', 'switch_type'))
 
         # Eject the UUT if we make it to the end of the test
         self.devices.eject_uut()
@@ -174,6 +178,7 @@ class Sensors(share.Sensors):
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
         self['RSSI'] = sensor.KeyedReading(decoder, 'rssi')
+        self['RSSI'].rereadable = True
 
         for n in range(1, 7):
             name = 'switch_{0}_measure'.format(n)
