@@ -6,7 +6,7 @@
 import share
 
 
-class Arduino(share.console.Base):
+class Arduino(share.console.Arduino):
 
     """Communications to C45A-15 Arduino console."""
 

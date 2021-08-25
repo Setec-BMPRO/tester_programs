@@ -3,9 +3,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """ETrac-II Initial Test Program."""
 
-import time
 import serial
-
 import tester
 
 import share
@@ -81,19 +79,8 @@ class Devices(share.Devices):
         # Switch on power to fixture circuits
         self['dcs_Vcom'].output(12.0, output=True, delay=2)
         self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
-        # On Linux, the ModemManager service opens the serial port
-        # for a while after it appears. Wait for it to release the port.
-        retry_max = 10
-        for retry in range(retry_max + 1):
-            try:
-                self['ard'].open()
-                break
-            except:
-                if retry == retry_max:
-                    raise
-                time.sleep(1)
+        self['ard'].open()
         self.add_closer(lambda: self['ard'].close())
-        time.sleep(2)
 
     def reset(self):
         """Reset instruments."""

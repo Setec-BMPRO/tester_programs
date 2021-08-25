@@ -3,8 +3,6 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Final Test Program."""
 
-import time
-
 import serial
 import tester
 
@@ -94,20 +92,8 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
-        self['ard'].verbose = False
-        # On Linux, the ModemManager service opens the serial port
-        # for a while after it appears. Wait for it to release the port.
-        retry_max = 10
-        for retry in range(retry_max + 1):
-            try:
-                self['ard'].open()
-                break
-            except:
-                if retry == retry_max:
-                    raise
-                time.sleep(1)
+        self['ard'].open()
         self.add_closer(lambda: self['ard'].close())
-        time.sleep(2)
         self['ard'].retract_all()
         self['ard'].exercise_actuators()
         self['ard'].set_state(self.button_count)

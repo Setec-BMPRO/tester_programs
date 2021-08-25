@@ -350,23 +350,11 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port(self.fixture_num, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
-        self['ard'].verbose = True
         # Switch on power to fixture circuits
         self['dcs_vcom'].output(9.0, output=True, delay=5.0)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
-        # On Linux, the ModemManager service opens the serial port
-        # for a while after it appears. Wait for it to release the port.
-        retry_max = 20
-        for retry in range(retry_max + 1):
-            try:
-                self['ard'].open()
-                break
-            except:
-                if retry == retry_max:
-                    raise
-                time.sleep(1)
+        self['ard'].open()
         self.add_closer(lambda: self['ard'].close())
-        time.sleep(2)
 
     def reset(self):
         """Reset instruments."""

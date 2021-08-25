@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-08-16, 21:10:21"
+    "saved": "2021-08-25, 21:18:10"
   },
   "project": {
     "AUTHOR": "",
@@ -365,7 +365,8 @@
       "share/bluetooth/_base.py",
       "programs/rvswt101/arduino.py",
       "tests/programs/test_rvswt101_arduino.py",
-      "programs/cn101/config.py"
+      "programs/cn101/config.py",
+      "share/console/arduino.py"
     ],
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",

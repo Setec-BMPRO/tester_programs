@@ -5,7 +5,7 @@
 
 import share
 
-class Arduino(share.console.Base):
+class Arduino(share.console.Arduino):
 
     """Communications to RVSWT101 Arduino console."""
     cmd_data = {
