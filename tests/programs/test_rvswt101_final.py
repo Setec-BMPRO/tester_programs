@@ -71,5 +71,5 @@ class RVSWT101Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(11, len(result.readings))
+        self.assertEqual(17, len(result.readings))
         self.assertEqual(['Bluetooth'], self.tester.ut_steps)

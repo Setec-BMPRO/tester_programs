@@ -146,13 +146,15 @@ class Config():
                 cls._common_limits + cls._final_limits + (type_lim, )
                 ),
             'limits_fin_4_button': (
-                cls._common_limits + cls._final_limits + cls._limits_4_button + (type_lim, )
+                cls._common_limits + cls._final_limits +
+                cls._limits_4_button + (type_lim, )
                 ),
             'limits_fin_6_button': (
-                cls._common_limits + cls._final_limits + cls._limits_6_button + (type_lim, )
-                ),    
+                cls._common_limits + cls._final_limits +
+                cls._limits_6_button + (type_lim, )
+                ),
             'banner_lines': banner_lines,
             'forced_code': forced_code,
             'fixture_num': fixture_num,
-            'button_count': button_count, 
+            'button_count': button_count,
             }

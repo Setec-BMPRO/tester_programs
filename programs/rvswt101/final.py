@@ -19,69 +19,60 @@ class Final(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
-        self.button_count = self.cfg['button_count']
-        buttons_in_use = range(1,  self.button_count+1)
+        button_count = self.cfg['button_count']
         Devices.fixture_num = self.cfg['fixture_num']
-        Devices.button_count = self.button_count
-        limits_fin = {4: 'limits_fin_4_button',
-                      6: 'limits_fin_6_button'}[Devices.button_count]
+        Devices.button_count = button_count
+        limits_fin = {
+            4: 'limits_fin_4_button',
+            6: 'limits_fin_6_button',
+            }[button_count]
         super().open(self.cfg[limits_fin], Devices, Sensors, Measurements)
-
         self.steps = (
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
-        self.buttons = ()                 # Tuple of 12 or 18 measurement strings
-        button_presses = tuple(
-            ['buttonPress_{0}'.format(n) for n in buttons_in_use])
-        button_measurements = tuple(
-            ['buttonMeasure_{0}'.format(n) for n in buttons_in_use])
-        button_releases = tuple(
-            ['buttonRelease_{0}'.format(n) for n in buttons_in_use])
+        self.buttons = []       # 12 or 18 measurement name strings
+        buttons_in_use = range(1, button_count + 1)
+        button_presses = [
+            'buttonPress_{0}'.format(button) for button in buttons_in_use]
+        button_measurements = [
+            'buttonMeasure_{0}'.format(button) for button in buttons_in_use]
+        button_releases = [
+            'buttonRelease_{0}'.format(button) for button in buttons_in_use]
         for button_press, button_test, button_release in zip(
                 button_presses, button_measurements, button_releases):
-            self.buttons = self.buttons + (button_press, button_test, button_release)
-
-        # Do rssi measurement when button 1 is held down
-        buttons_list = list(self.buttons)
-        buttons_list.insert(1,  'rssi')
-        self.buttons = tuple(buttons_list)
+            self.buttons.extend([button_press, button_test, button_release])
+        # Do RSSI measurement when button 1 is held down
+        self.buttons.insert(1, 'rssi')
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['ble'].uut = self.uuts[0]
-
         # Measure the MAC to save it in test result data
         mac = dev['ble'].mac
         mes['ble_mac'].sensor.store(mac)
         mes['ble_mac']()
-        self.devices.check_uut_in_place()
-        if not(self.devices.uut_in_place):
-            self.measure(('ui_add_uut',))
-            self.devices.check_uut_in_place()
-            if not(self.devices.uut_in_place): self.no_uut()
-
+        if not dev['ard'].check_uut_in_place():
+            mes['ui_add_uut']()
+            if not dev['ard'].check_uut_in_place():
+                uut_check = tester.Measurement(
+                    tester.LimitBoolean(
+                        'Detect UUT is in fixture',
+                        True,
+                        'No UUT was detected in the fixture'),
+                    tester.sensor.MirrorReadingBoolean()
+                    )
+                uut_check.sensor.store(False)
+                uut_check()
         # Perform button press measurements
         self.measure(self.buttons, timeout=10)
-
-        # Don't bt scan for any measurement from here on
+        # Don't bluetooth scan for any measurement from here on
         dev['decoder'].always_scan = False
-        self.measure(('cell_voltage', 'switch_type'))
-
+        self.measure(('cell_voltage', 'switch_type', ))
         # Eject the UUT if we make it to the end of the test
-        self.devices.eject_uut()
-
-    def no_uut(self):
-        """ Create a measurment failure if no UUT is detected in the fixture """
-        uut_check = tester.Measurement(
-                        tester.LimitBoolean('Detect UUT is in fixture', True,
-                        'No UUT was detected in the fixture'),
-                        tester.sensor.MirrorReadingBoolean()
-                        )
-        uut_check.sensor.store(False)
-        uut_check()
+        dev['ard'].eject_uut()
 
 
 class Devices(share.Devices):
@@ -94,12 +85,10 @@ class Devices(share.Devices):
     def open(self):
         """Create all Instruments."""
         # BLE MAC & Scanning server
-        self['ble'] = tester.BLE((self.physical_devices['BLE'],
-                                  self.physical_devices['MAC']))
-
+        self['ble'] = tester.BLE(
+            (self.physical_devices['BLE'], self.physical_devices['MAC']))
         # BLE Packet decoder
         self['decoder'] = device.RVSWT101(self['ble'])
-
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet
@@ -119,41 +108,14 @@ class Devices(share.Devices):
                 time.sleep(1)
         self.add_closer(lambda: self['ard'].close())
         time.sleep(2)
-
-        self._retract_all()
-        self.check_uut_in_place()
-        if not(self.uut_in_place):
-            self.exercise_actuators()
-        self.set_state()
-
-    def exercise_actuators(self):
-        """Exercise routine all actuators
-           If UUT is in place, routine will be cancelled"""
-        self['ard']['EXERCISE']
-
-    def check_uut_in_place(self):
-        """Ask arduino if a UUT is in place"""
-        self.uut_in_place = int(self['ard']['UUT'])
-
-    def set_state(self):
-        """Set to 4 or 6 button mode"""
-        command = {
-            4: '4BUTTON_MODEL',
-            6: '6BUTTON_MODEL',
-            }[self.button_count]
-        self['ard'][command]
-
-    def eject_uut(self):
-        self['ard']['EJECT_DUT']
+        self['ard'].retract_all()
+        self['ard'].exercise_actuators()
+        self['ard'].set_state(self.button_count)
 
     def reset(self):
         """Reset instruments."""
         self['decoder'].reset()
-        self._retract_all()
-
-    def _retract_all(self):
-        """Retract all button actuators."""
-        self['ard']['RETRACT_ACTUATORS']
+        self['ard'].retract_all()
 
 
 class Sensors(share.Sensors):
@@ -173,18 +135,15 @@ class Sensors(share.Sensors):
         self['AddUUT'] = sensor.OkCan(
             message=tester.translate('rvswt101_final', 'msgAddUUT'),
             caption=tester.translate('rvswt101_final', 'capAddUUT'))
-
         decoder = self.devices['decoder']   #tester.BLE device
         self['cell_voltage'] = sensor.KeyedReading(decoder, 'cell_voltage')
         self['switch_type'] = sensor.KeyedReading(decoder, 'switch_type')
         self['RSSI'] = sensor.KeyedReading(decoder, 'rssi')
         self['RSSI'].rereadable = True
-
-        for n in range(1, 7):
-            name = 'switch_{0}_measure'.format(n)
+        for button in range(1, 7):
+            name = 'switch_{0}_measure'.format(button)
             self[name] = sensor.KeyedReading(decoder, 'switch_code')
             self[name].rereadable = True
-
         # Arduino sensors - sensor_name, key
         ard = self.devices['ard']
         for name, cmdkey in (
@@ -197,11 +156,13 @@ class Sensors(share.Sensors):
                 ('exercise_actuators', 'EXERCISE'),
             ):
             self[name] = sensor.KeyedReadingString(ard, cmdkey)
-
         # Create additional arduino sensors for buttonPress and buttonRelease
-        for n in range(1, 7):
-            _data = (('buttonPress_{}'.format(n), 'PRESS_BUTTON_{}'.format(n)),
-                     ('buttonRelease_{}'.format(n), 'RELEASE_BUTTON_{}'.format(n)))
+        for button in range(1, 7):
+            _data = (
+                ('buttonPress_{0}'.format(button),
+                    'PRESS_BUTTON_{0}'.format(button)),
+                ('buttonRelease_{0}'.format(button),
+                    'RELEASE_BUTTON_{0}'.format(button)))
             for name, cmdkey in (_data):
                 self[name] = sensor.KeyedReadingString(ard, cmdkey)
 
@@ -254,7 +215,6 @@ class Measurements(share.Measurements):
                 'Button 6 tested'),
             ('exercise_actuators', 'Reply', 'exercise_actuators', ''),
             ))
-
         # Suppress signals on these measurements.
         for name in (
                 'buttonRelease_1', 'buttonRelease_2', 'buttonRelease_3',
