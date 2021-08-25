@@ -131,7 +131,7 @@ class ARM(_Base):
         """
         ser = serial.Serial(port=self._port, baudrate=self._baudrate)
         # We need to wait just a little before flushing the port
-        time.sleep(0.01)
+        time.sleep(0.1)
         ser.flushInput()
         try:
             if self._boot_relay:

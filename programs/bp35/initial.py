@@ -356,7 +356,7 @@ class Devices(share.Devices):
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
         # On Linux, the ModemManager service opens the serial port
         # for a while after it appears. Wait for it to release the port.
-        retry_max = 10
+        retry_max = 20
         for retry in range(retry_max + 1):
             try:
                 self['ard'].open()
