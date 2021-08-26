@@ -40,12 +40,13 @@ class CN101():
     # These values get set per revision
     sw_version = None
     hw_version = None
+    banner_lines = None
     # Revision data dictionary:
-    _rev6_values = ('1.2.17835.298', (6, 0, 'A'), )
+    _rev6_values = ('1.2.17835.298', (6, 0, 'A'), 2, )
     _rev_data = {
         None: _rev6_values,
         '6': _rev6_values,
-        '5': ('1.1.13665.176', (5, 0, 'A'), ),
+        '5': ('1.1.13665.176', (5, 0, 'A'), 0, ),
         }
 
     @classmethod
@@ -60,4 +61,4 @@ class CN101():
         except AttributeError:
             rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
-        cls.sw_version, cls.hw_version = cls._rev_data[rev]
+        cls.sw_version, cls.hw_version, cls.banner_lines = cls._rev_data[rev]
