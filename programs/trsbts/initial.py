@@ -5,8 +5,9 @@
 
 import inspect
 import os
-import serial
+import time
 
+import serial
 import tester
 
 import share
@@ -134,6 +135,7 @@ class Initial(share.TestSequence):
         trsbts['VBATT_CAL'] = dmm_v
         # Save new calibration settings
         trsbts['NVWRITE'] = True
+        time.sleep(1)   # We seem to get a startup banner here sometimes
         mes['arm_vbatt_cal'](timeout=5)
         dev['rla_pin'].remove()
         mes['arm_vpin'](timeout=5)
