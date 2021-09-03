@@ -19,7 +19,6 @@ class TRSFinal(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.bluetooth.RaspberryBluetooth',
-                'programs.trs2.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)

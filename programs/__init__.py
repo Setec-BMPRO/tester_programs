@@ -130,7 +130,6 @@ PROGRAMS = {
     'SX-600_750 Safety': sx600_750.Safety,
     'Trek2JControl Initial': trek2_jcontrol.Initial,
     'Trek2JControl Final': trek2_jcontrol.Final,
-    'TRS2 Initial': trs2.Initial,
     'TRS2 Final': trs2.Final,
     'TRSBTS Initial': trsbts.Initial,
     'TRSBTS Final': trsbts.Final,

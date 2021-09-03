@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-08-25, 21:18:10"
+    "saved": "2021-09-03, 16:41:57"
   },
   "project": {
     "AUTHOR": "",
@@ -234,9 +234,7 @@
       "programs/trek2_jcontrol/final.py",
       "programs/trek2_jcontrol/initial.py",
       "programs/trs2/__init__.py",
-      "programs/trs2/console.py",
       "programs/trs2/final.py",
-      "programs/trs2/initial.py",
       "programs/trsbts/__init__.py",
       "programs/trsbts/config.py",
       "programs/trsbts/console.py",
@@ -347,7 +345,6 @@
       "tests/programs/test_trk2_jcntl_final.py",
       "tests/programs/test_trk2_jcntl_initial.py",
       "tests/programs/test_trs2_final.py",
-      "tests/programs/test_trs2_initial.py",
       "tests/programs/test_trsbts_final.py",
       "tests/programs/test_trsbts_initial.py",
       "tests/programs/test_trsrfm_initial.py",

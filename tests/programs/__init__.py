@@ -75,7 +75,6 @@ from . import test_sx600_750_initial
 from . import test_sx600_750_safety
 from . import test_trk2_jcntl_final
 from . import test_trk2_jcntl_initial
-from . import test_trs2_initial
 from . import test_trs2_final
 from . import test_trsbts_initial
 from . import test_trsbts_final
@@ -160,7 +159,6 @@ __all__ = [
     'test_sx600_750_safety',
     'test_trk2_jcntl_final',
     'test_trk2_jcntl_initial',
-    'test_trs2_initial',
     'test_trs2_final',
     'test_trsbts_initial',
     'test_trsbts_final',
