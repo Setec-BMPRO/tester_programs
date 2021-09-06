@@ -56,8 +56,6 @@ class Devices(share.Devices):
                 ('dcs_vin', tester.DCSource, 'DCS1'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-
-# TODO: Merge 'can', 'canreader', 'decoder' into a single 'canreader'
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
 
@@ -82,11 +80,7 @@ class Devices(share.Devices):
 
     def close_can(self):
         """Reset CAN system."""
-# TODO: Swap over to new tester.CANReader logical device
-        if _USE_NEW_TESTER_CANREADER:
-            self['canreader'].stop()
-        else:
-            self['canreader'].halt()
+        self['canreader'].stop()
         self['can'].rvc_mode = False
 
 

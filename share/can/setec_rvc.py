@@ -400,7 +400,6 @@ class PacketPropertyReader():
     canreader = attr.ib()       # tester.CANReader instance
     packettype = attr.ib()      # CAN packet class
     _read_key = attr.ib(init=False, default=None)
-    _packet = attr.ib(init=False, default=None)
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -419,6 +418,3 @@ class PacketPropertyReader():
         """
         can_data = self.canreader.read(callerid)
         return getattr(self.packettype(can_data), self._read_key)
-
-    def reset(self):
-        self._packet = None
