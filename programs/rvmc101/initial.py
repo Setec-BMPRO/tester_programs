@@ -22,7 +22,7 @@ class Initial(share.TestSequence):
         tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
-    is_full = None      # False if 'Lite' version (no uC)
+    is_full = None      # False if 'Lite' version (no micro fitted)
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
@@ -46,8 +46,9 @@ class Initial(share.TestSequence):
         dev['rla_reset'].set_on()   # Hold device in RESET
         dev['dcs_vin'].output(12.0, output=True)
         mes['dmm_vin'](timeout=5)
+        name = 'dmm' if self.is_full else 'dmm_lite'
         for pos in range(self.per_panel):
-            self.measure(mes['dmm'][pos], timeout=5)
+            self.measure(mes[name][pos], timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -194,4 +195,7 @@ class Measurements(share.Measurements):
         self['dmm'] = (
             ('dmm_3v3a', 'dmm_5va'), ('dmm_3v3b', 'dmm_5vb'),
             ('dmm_3v3c', 'dmm_5vc'), ('dmm_3v3d', 'dmm_5vd'),
+            )
+        self['dmm_lite'] = (
+            ('dmm_5va', ), ('dmm_5vb', ), ('dmm_5vc', ), ('dmm_5vd', ),
             )

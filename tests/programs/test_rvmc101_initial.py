@@ -80,13 +80,9 @@ class RVMC101InitialLite(ProgramTestCase):
                 'PowerUp': (
                     (sen['vin'], 12.0),
                     (sen['a_5v'], 5.01),
-                    (sen['a_3v3'], 3.31),
                     (sen['b_5v'], 5.02),
-                    (sen['b_3v3'], 3.32),
                     (sen['c_5v'], 5.03),
-                    (sen['c_3v3'], 3.33),
                     (sen['d_5v'], 5.04),
-                    (sen['d_3v3'], 3.34),
                     ),
                 },
             }
@@ -96,5 +92,5 @@ class RVMC101InitialLite(ProgramTestCase):
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
-            self.assertEqual(3, len(res.readings))
+            self.assertEqual(2, len(res.readings))
         self.assertEqual(['PowerUp'], self.tester.ut_steps)
