@@ -22,16 +22,18 @@ class Initial(share.TestSequence):
         tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
+    is_full = None      # False if 'Lite' version (no uC)
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         Devices.sw_image = self.sw_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.is_full = self.parameter != 'LITE'
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self._step_program),
-            tester.TestStep('Display', self._step_display),
-            tester.TestStep('CanBus', self._step_canbus),
+            tester.TestStep('Program', self._step_program, self.is_full),
+            tester.TestStep('Display', self._step_display, self.is_full),
+            tester.TestStep('CanBus', self._step_canbus, self.is_full),
             )
         # This is a multi-unit parallel program so we can't stop on errors.
         self.stop_on_failrdg = False

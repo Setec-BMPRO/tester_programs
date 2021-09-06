@@ -19,13 +19,15 @@ class Final(share.TestSequence):
         tester.LimitBoolean('ButtonOk', True, doc='Ok entered'),
         tester.LimitBoolean('Zone4Pressed', True, doc='Button pressed'),
         )
+    is_full = None      # False if 'Lite' version (no uC)
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.is_full = self.parameter != 'LITE'
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('CanBus', self._step_canbus),
+            tester.TestStep('CanBus', self._step_canbus, self.is_full),
             )
 
     @share.teststep
