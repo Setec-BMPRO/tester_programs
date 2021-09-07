@@ -103,6 +103,11 @@ class MessageID(enum.IntEnum):
     general_config = 34
 
 
+class CANPacketDecodeError(Exception):
+
+    """Error decoding a CAN packet."""
+
+
 class _SwitchStatusField(ctypes.Structure):
 
     """RVMC switch field definition.
@@ -153,7 +158,7 @@ class SwitchStatusPacket():
         if (len(payload) != SetecRVC.data_len.value
                 or payload[SetecRVC.command_id_index.value]
                     != CommandID.switch_status.value):
-            raise tester.CANPacketDecodeError()
+            raise CANPacketDecodeError()
         (   self.msgtype,
             switch_data,
             self.swver,
@@ -226,7 +231,7 @@ class DeviceStatusPacket():
         if (len(payload) != SetecRVC.data_len.value
                 or payload[SetecRVC.command_id_index.value]
                     not in (0, CommandID.device_status.value)):
-            raise tester.CANPacketDecodeError()
+            raise CANPacketDecodeError()
         (   self.msgtype,       # D0
             button_data,        # D1,2
             self.menu_state,    # D3
