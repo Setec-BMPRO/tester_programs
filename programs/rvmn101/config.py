@@ -313,10 +313,11 @@ class RVMN5x(Config):
     fixture = '034861'
     # Software versions
     _nordic_2_5_3 = 'jayco_rvmn5x_signed_2.5.3-0-ga721738c_factory_mcuboot.hex'
+    _nordic_2_6_4 = 'jayco_rvmn5x_signed_2.6.4-0-gd1f9eb78_factory_mcuboot.hex'
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
-    _rev8_values = _Values(
-            nordic_image=_nordic_2_5_3, arm_image=_arm_image_2_3,
-            product_rev='08A', hardware_rev='05A', banner_lines=5,
+    _rev8_values = _Values(     # PC-27478
+            nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
+            product_rev='08B', hardware_rev='05A', banner_lines=5,
             reversed_output_dict={},
             )
     _rev_data = {
