@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2021-08-25, 21:19:13 -->
+<!-- Saved: 2021-09-14, 13:49:14 -->
 <!-- Copyright (C) 2021 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -160,9 +160,7 @@
     <Source>programs/trek2_jcontrol/final.py</Source>
     <Source>programs/trek2_jcontrol/initial.py</Source>
     <Source>programs/trs2/__init__.py</Source>
-    <Source>programs/trs2/console.py</Source>
     <Source>programs/trs2/final.py</Source>
-    <Source>programs/trs2/initial.py</Source>
     <Source>programs/trsbts/__init__.py</Source>
     <Source>programs/trsbts/config.py</Source>
     <Source>programs/trsbts/console.py</Source>
@@ -275,7 +273,6 @@
     <Source>tests/programs/test_trk2_jcntl_final.py</Source>
     <Source>tests/programs/test_trk2_jcntl_initial.py</Source>
     <Source>tests/programs/test_trs2_final.py</Source>
-    <Source>tests/programs/test_trs2_initial.py</Source>
     <Source>tests/programs/test_trsbts_final.py</Source>
     <Source>tests/programs/test_trsbts_initial.py</Source>
     <Source>tests/programs/test_trsrfm_initial.py</Source>
