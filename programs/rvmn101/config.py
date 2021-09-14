@@ -223,10 +223,11 @@ class RVMN101B(Config):
     fixture = '032871'
     # Software versions
     _nordic_2_4_3 = 'tmc_rvmn101_signed_2.4.3-0-g6aa500f5_factory_mcuboot.hex'
+    _nordic_2_4_4 = 'tmc_rvmn101_signed_2.4.4-0-g62755a87_factory_mcuboot.hex'
     _arm_image_3_0 = 'rvmn101_nxp_3.0.bin'
     _rev16_values = _Values(
-            nordic_image=_nordic_2_4_3, arm_image=_arm_image_3_0,
-            product_rev='16A', hardware_rev='08B', banner_lines=5,
+            nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
+            product_rev='16B', hardware_rev='08B', banner_lines=5,
             reversed_output_dict={},
             )
     _rev_data = {
