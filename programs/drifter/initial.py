@@ -3,11 +3,10 @@
 # Copyright 2014 SETEC Pty Ltd.
 """Drifter(BM) Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 import time
-import serial
 
+import serial
 import tester
 
 import share
@@ -179,11 +178,12 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        sw_file = Initial.limitdata[self.parameter]['Software']
         self['program_pic'] = share.programmer.PIC(
-            Initial.limitdata[self.parameter]['Software'],
-            folder, '18F87J93', self['rla_Prog'])
+            pathlib.Path(__file__).parent / sw_file,
+            '18F87J93',
+            self['rla_Prog']
+            )
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet

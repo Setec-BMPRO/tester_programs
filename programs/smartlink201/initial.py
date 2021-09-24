@@ -3,8 +3,7 @@
 # Copyright 2021 SETEC Pty Ltd
 """BLExtender/SmartLink201 Test Program."""
 
-import inspect
-import os
+import pathlib
 
 import serial
 import tester
@@ -144,18 +143,16 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
         arm_port = share.config.Fixture.port(fixture, 'ARM')
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['progARM'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, self.sw_arm_image),
+            pathlib.Path(__file__).parent / self.sw_arm_image,
             crpmode=False,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.Nordic(
-            os.path.join(folder, self.sw_nrf_image),
-            folder)
+            pathlib.Path(__file__).parent / self.sw_nrf_image)
         # Serial connection to the Nordic console
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
         #   Set port separately, as we don't want it opened yet

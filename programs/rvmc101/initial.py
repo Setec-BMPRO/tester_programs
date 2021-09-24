@@ -3,8 +3,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMC101x Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 
 import tester
 
@@ -112,14 +111,13 @@ class Devices(share.Devices):
         self['can'].rvc_mode = True
         self['can'].verbose = True
         self.add_closer(self.close_can)
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         arm_port = share.config.Fixture.port('032870', 'ARM')
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, self.sw_image),
+            pathlib.Path(__file__).parent / self.sw_image,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         self['selector'] = [
             self['rla_pos1'], self['rla_pos2'],
             self['rla_pos3'], self['rla_pos4'],

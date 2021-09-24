@@ -4,8 +4,7 @@
 """CMR-SBP ALL Test Program."""
 
 import datetime
-import inspect
-import os
+import pathlib
 import time
 import serial
 
@@ -347,10 +346,11 @@ class Devices(share.Devices):
         ev_ser.port = share.config.Fixture.port('017789', 'EV')
         self['ev'] = ev2200.EV2200(ev_ser)
         # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.programmer.PIC(
-            Initial.pic_hex, folder, '18F252', self['rla_Prog'])
+            pathlib.Path(__file__).parent / Initial.pic_hex,
+            '18F252',
+            self['rla_Prog']
+            )
 
     def reset(self):
         """Reset instruments."""

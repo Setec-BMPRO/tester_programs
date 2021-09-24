@@ -3,8 +3,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101x and RVMN5x Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 
 import serial
 import tester
@@ -131,19 +130,16 @@ class Devices(share.Devices):
                 ('rla_pullup', tester.Relay, 'RLA3'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Working folder
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         # ARM device programmer
         self['progARM'] = share.programmer.ARM(
             share.config.Fixture.port(self.fixture, 'ARM'),
-            os.path.join(folder, self.arm_image),
+            pathlib.Path(__file__).parent / self.arm_image,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.Nordic(
-            os.path.join(folder, self.nordic_image),
-            folder)
+            pathlib.Path(__file__).parent / self.nordic_image)
         # Serial connection to the console
         nordic_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

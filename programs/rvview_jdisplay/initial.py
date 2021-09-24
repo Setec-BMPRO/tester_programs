@@ -3,12 +3,11 @@
 # Copyright 2017 SETEC Pty Ltd
 """RvView/JDisplay Initial Test Program."""
 
-import os
-import inspect
+import pathlib
 
 import serial
-
 import tester
+
 import share
 from . import console
 from . import config
@@ -137,14 +136,13 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         arm_port = share.config.Fixture.port('029687', 'ARM')
         # ARM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, self.sw_file),
+            pathlib.Path(__file__).parent / self.sw_file,
             crpmode=False,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         # Direct Console driver
         arm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

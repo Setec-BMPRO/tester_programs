@@ -4,8 +4,7 @@
 """RVSWT101 Initial Test Program."""
 
 import enum
-import inspect
-import os
+import pathlib
 
 import serial
 import tester
@@ -128,12 +127,9 @@ class Devices(share.Devices):
                 self['rla_pos10'],
             ]
             )
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Nordic NRF52 device programmer
         self['progNORDIC'] = share.programmer.Nordic(
-            os.path.join(folder, self.sw_image),
-            folder)
+            pathlib.Path(__file__).parent / self.sw_image)
         # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

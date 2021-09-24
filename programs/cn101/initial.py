@@ -3,8 +3,7 @@
 # Copyright 2015 SETEC Pty Ltd.
 """CN101 Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 
 import serial
 
@@ -122,14 +121,14 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
         arm_port = share.config.Fixture.port('028468', 'ARM')
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        sw_file = 'cn101_{0}.bin'.format(self.sw_version)
         self['programmer'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, 'cn101_{0}.bin'.format(self.sw_version)),
+            pathlib.Path(__file__).parent / sw_file,
             crpmode=False,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         # Serial connection to the console
         cn101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

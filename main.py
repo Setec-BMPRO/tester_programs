@@ -4,9 +4,8 @@
 """Tester program loader."""
 
 import configparser
-import inspect
 import logging
-import os
+import pathlib
 import time
 import traceback
 
@@ -29,12 +28,9 @@ def _main():
     for name in ('nvm', 'app', 'link', 'phy'):
         log = logging.getLogger(name)
         log.setLevel(logging.WARN)
-    # Get the pathname of this module's configuration file
-    head, tail = os.path.split(
-        os.path.abspath(inspect.getfile(inspect.currentframe())))
-    config_file = os.path.join(head, tail + '.ini')
-    logger.debug('Configuration file: %s', config_file)
     # Read settings from the configuration file
+    config_file = str(pathlib.Path(__file__).with_suffix('.ini'))
+    logger.debug('Configuration file: %s', config_file)
     config = configparser.ConfigParser()
     config.read(config_file)
     tester_type = config['DEFAULT'].get('TesterType')

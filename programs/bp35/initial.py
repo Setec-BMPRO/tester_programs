@@ -3,8 +3,7 @@
 # Copyright 2015 SETEC Pty Ltd.
 """BP35 / BP35-II Initial Test Programs."""
 
-import inspect
-import os
+import pathlib
 import time
 
 import serial
@@ -320,17 +319,17 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
         arm_port = share.config.Fixture.port(self.fixture_num, 'ARM')
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         if self.is_2:
-            sw_ver = 'bp35II_{0}.bin'.format(self.arm_sw_version)
+            sw_file = 'bp35II_{0}.bin'.format(self.arm_sw_version)
         else:
-            sw_ver = 'bp35_{0}.bin'.format(self.arm_sw_version)
+            sw_file = 'bp35_{0}.bin'.format(self.arm_sw_version)
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, sw_ver),
+            pathlib.Path(__file__).parent / sw_file,
             crpmode=False,
-            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset']
+            )
         # Serial connection to the BP35 console
         bp35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

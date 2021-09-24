@@ -4,6 +4,7 @@
 """Programmer for devices."""
 
 import abc
+import pathlib
 import os
 import subprocess
 import time
@@ -18,14 +19,15 @@ class _Base(abc.ABC):
 
     """Programmer base class."""
 
-    limitname = 'Program'   # Testlimit name to use
-    pass_value = 'ok'
-    doc = 'Programming succeeded'
+    pass_result = 'ok'
 
     def __init__(self):
         """Create a programmer."""
         self._measurement = tester.Measurement(
-            tester.LimitRegExp(self.limitname, self.pass_value, self.doc),
+            tester.LimitRegExp(
+                name='Program',
+                testlimit=self.pass_result,
+                doc='Programming succeeded'),
             tester.sensor.MirrorReadingString()
             )
         self._result = None
@@ -50,7 +52,7 @@ class _Base(abc.ABC):
             if value:
                 value = 'Error {0}'.format(value)
             else:
-                value = self.pass_value
+                value = self.pass_result
         self._result = value
         self._measurement.sensor.store(self._result)
 
@@ -90,18 +92,29 @@ class _Base(abc.ABC):
         """Wait for device programming to finish."""
 
 
+class VerificationError(Exception):
+
+    """Verification error."""
+
+
 class ARM(_Base):
 
     """ARM programmer using the isplpc package."""
 
-    def __init__(self, port, filename,
-        baudrate=115200,
-        erase_only=False, verify=False, crpmode=None,
-        boot_relay=None, reset_relay=None):
+    def __init__(
+            self,
+            port,
+            file,
+            baudrate=115200,
+            erase_only=False,
+            verify=False,
+            crpmode=None,
+            boot_relay=None,
+            reset_relay=None):
         """Create a programmer.
 
         @param port Serial port to use
-        @param filename Software image filename
+        @param file pathlib.Path instance
         @param baudrate Serial baudrate
         @param erase_only True: Device should be erased only
         @param verify True: Verify the programmed device
@@ -119,8 +132,7 @@ class ARM(_Base):
         self._crpmode = crpmode
         self._boot_relay = boot_relay
         self._reset_relay = reset_relay
-        with open(filename, 'rb') as infile:
-            self._bindata = bytearray(infile.read())
+        self._bindata = bytearray(file.read_bytes())
 
     def program_begin(self):
         """Program a device.
@@ -146,7 +158,7 @@ class ARM(_Base):
                 crpmode=self._crpmode)
             try:
                 pgm.program()
-                self.result = self.pass_value
+                self.result = self.pass_result
             except isplpc.ProgrammingError as exc:
                 self.result = str(exc)
         finally:
@@ -163,13 +175,17 @@ class AVR(_Base):
 
     """AVR programmer using the updi package."""
 
-    def __init__(self, port, filename,
-            baudrate=115200, device='tiny406',
+    def __init__(
+            self,
+            port,
+            file,
+            baudrate=115200,
+            device='tiny406',
             fuses=None):
         """Create a programmer.
 
         @param port Serial port name to use
-        @param filename Software HEX filename
+        @param file pathlib.Path instance
         @param baudrate Serial baudrate
         @param device Device type
         @param fuses Device fuse settings
@@ -179,7 +195,7 @@ class AVR(_Base):
         super().__init__()
         self._port = port
         self._baudrate = baudrate
-        self._filename = filename
+        self._file = file
         self._device = updi.Device(device)
         self._fuses = fuses if fuses else {}
 
@@ -190,22 +206,21 @@ class AVR(_Base):
                 comport=self._port, baud=self._baudrate, device=self._device)
             try:
                 nvm.enter_progmode()
-            except:
+            except Exception:
                 nvm.unlock_device()
             nvm.get_device_info()
-            data, start_address = nvm.load_ihex(self._filename)
+            data, start_address = nvm.load_ihex(str(self._file))
             nvm.chip_erase()
             nvm.write_flash(start_address, data)
             readback = nvm.read_flash(nvm.device.flash_start, len(data))
             for offset in range(len(data)):
                 if data[offset] != readback[offset]:
-                    raise Exception(
+                    raise VerificationError(
                         'Verify error at 0x{0:04X}'.format(offset))
-            for fuse_name in self._fuses:
-                fuse_num, fuse_val = self._fuses[fuse_name]
+            for fuse_num, fuse_val in self._fuses.items():
                 nvm.write_fuse(fuse_num, fuse_val)
             nvm.leave_progmode()
-            self.result = self.pass_value
+            self.result = self.pass_result
         except Exception as exc:
             self.result = str(exc)
 
@@ -218,55 +233,48 @@ class Nordic(_Base):
 
     """Nordic Semiconductors programmer using a NRF52."""
 
-    binary = {      # Executable to use
-        'posix': '/opt/nordic/nrfjprog/nrfjprog',
-        'nt': r'C:\Program Files\Nordic Semiconductor\nrf5x\bin\nrfjprog.exe',
-        }[os.name]
+    bin_nt = pathlib.PureWindowsPath(
+        'C:/Program Files/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe')
+    bin_posix = pathlib.PurePosixPath(
+        '/opt/nordic/nrfjprog/nrfjprog')
     # HACK: Force coded RVSWT101 switch code if != 0
     rvswt101_forced_switch_code = 0
 
-    def __init__(self, hexfile, working_dir):
+    def __init__(self, file):
         """Create a programmer.
 
-        @param hexfile HEX filename
-        @param working_dir Working directory
+        @param file pathlib.Path instance
 
         """
         super().__init__()
-        self.hexfile = hexfile
-        self.working_dir = working_dir
-        self.process = None
+        self.file = file
 
     def program_begin(self):
         """Begin device programming."""
+        binary = {
+            'nt': self.bin_nt,
+            'posix': self.bin_posix,
+            }[os.name]
         command = [
-            self.binary,
+            str(binary),
             '-f', 'NRF52',
             '--chiperase',
-            '--program', '{0}'.format(self.hexfile),
+            '--program', str(self.file),
             '--verify',
             ]
-        self.process = subprocess.Popen(
-                command,
-                cwd=self.working_dir,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT
-                )
-        result = self.process.wait()
+        process = subprocess.Popen(
+            command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        result = process.wait()
         # HACK: Force code an RVSWT101 switch code
         if not result and self.rvswt101_forced_switch_code:
             command = [
                 self.binary,
                 '--memwr', '0x70000',
-                '--val', '{0}'.format(self.rvswt101_forced_switch_code),
+                '--val', str(self.rvswt101_forced_switch_code),
                 ]
-            self.process = subprocess.Popen(
-                command,
-                cwd=self.working_dir,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT
-                )
-            result = self.process.wait()
+            process = subprocess.Popen(
+                command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            result = process.wait()
         self.result = result
 
     def program_wait(self):
@@ -278,47 +286,47 @@ class PIC(_Base):
 
     """Microchip PIC programmer using a PicKit3."""
 
-    binary = {      # Executable to use
-        'posix': 'pickit3',
-        'nt': r'C:\Program Files\Microchip-PK3\PK3CMD.exe',
-        }[os.name]
+    bin_nt = pathlib.PureWindowsPath(
+        'C:/Program Files/Microchip-PK3/PK3CMD.exe')
+    bin_posix = None
 
-    def __init__(self, hexfile, working_dir, device_type, relay):
+    def __init__(self, file, device_type, relay):
         """Create a programmer.
 
-        @param hexfile HEX filename
-        @param working_dir Working directory
+        @param file pathlib.Path instance
         @param device_type PIC device type
         @param relay Relay device to connect programmer to target
 
         """
         super().__init__()
-        self.hexfile = hexfile
-        self.working_dir = working_dir
+        self.file = file
         self.device_type = device_type
         self.relay = relay
-        self.process = None
+        self._process = None
 
     def program_begin(self):
         """Begin device programming."""
-        command = [
-            self.binary,
-            '/P{0}'.format(self.device_type),
-            '/F{0}'.format(self.hexfile),
-            '/E',
-            '/M',
-            '/Y'
-            ]
+        command = []
+        binary = {
+            'nt': self.bin_nt,
+            'posix': self.bin_posix,
+            }[os.name]
+        command.append(str(binary))
+        option_prefix = '/'
+        for option, value in (
+                ('P', self.device_type),
+                ('F', self.file),
+                ('E', ''),
+                ('M', ''),
+                ('Y', ''),
+                ):
+            command.append('{0}{1}{2}'.format(option_prefix, option, value))
         self.relay.set_on()
-        self.process = subprocess.Popen(
-            command,
-            cwd=self.working_dir,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT
-            )
+        self._process = subprocess.Popen(
+            command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.result = self.process.wait()
+        self.result = self._process.wait()
         self.relay.set_off()
         self.result_check()

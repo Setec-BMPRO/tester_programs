@@ -3,11 +3,10 @@
 # Copyright 2014 SETEC Pty Ltd.
 """GEN8 Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 import time
-import serial
 
+import serial
 import tester
 
 import share
@@ -284,11 +283,12 @@ class Devices(share.Devices):
         # Serial port for the ARM. Used by programmer and ARM comms module.
         arm_port = share.config.Fixture.port('025197', 'ARM')
         # ARM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
-            arm_port, os.path.join(folder, Initial.arm_bin),
-            boot_relay=self['rla_boot'], reset_relay=self['rla_reset'])
+            arm_port,
+            pathlib.Path(__file__).parent / Initial.arm_bin,
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset']
+            )
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=57600, timeout=2.0)
         # Set port separately - don't open until after programming
