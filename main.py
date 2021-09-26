@@ -5,7 +5,6 @@
 
 import configparser
 import logging
-import pathlib
 import time
 import traceback
 
@@ -29,7 +28,7 @@ def _main():
         log = logging.getLogger(name)
         log.setLevel(logging.WARN)
     # Read settings from the configuration file
-    config_file = str(pathlib.Path(__file__).with_suffix('.ini'))
+    config_file = __file__ + '.ini'
     logger.debug('Configuration file: %s', config_file)
     config = configparser.ConfigParser()
     config.read(config_file)
