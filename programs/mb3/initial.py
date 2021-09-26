@@ -3,8 +3,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """MB3 Initial Program."""
 
-import inspect
-import os
+import pathlib
 
 import tester
 
@@ -68,11 +67,9 @@ class Devices(share.Devices):
         # Serial port for the ATtiny406. Used by programmer and comms module.
         avr_port = share.config.Fixture.port('033633', 'AVR')
         # ATtiny406 device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_avr'] = share.programmer.AVR(
             avr_port,
-            os.path.join(folder, config.sw_image),
+            pathlib.Path(__file__).parent / config.sw_image,
             fuses=config.fuses
             )
         # Apply power to fixture circuits.

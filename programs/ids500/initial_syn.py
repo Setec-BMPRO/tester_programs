@@ -3,8 +3,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """IDS-500 SynBuck Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 
 import tester
 
@@ -166,10 +165,11 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_picSyn'] = share.programmer.PIC(
-            self.pic_hex_syn, folder, '18F4321', self['rla_syn'])
+            pathlib.Path(__file__).parent / self.pic_hex_syn,
+            '18F4321',
+            self['rla_syn']
+            )
 
     def reset(self):
         """Reset instruments."""

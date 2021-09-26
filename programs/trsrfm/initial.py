@@ -3,11 +3,11 @@
 # Copyright 2020 SETEC Pty Ltd.
 """TRS-RFM Initial Program."""
 
-import inspect
-import os
-import serial
+import pathlib
 
+import serial
 import tester
+
 import share
 
 from . import console
@@ -108,12 +108,9 @@ class Devices(share.Devices):
                 ('rla_pair_btn', tester.Relay, 'RLA8'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.Nordic(
-            os.path.join(folder, self.sw_image),
-            folder)
+            pathlib.Path(__file__).parent / self.sw_image)
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet

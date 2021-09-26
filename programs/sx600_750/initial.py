@@ -3,8 +3,7 @@
 # Copyright 2013 SETEC Pty Ltd
 """SX-600/750 Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 import time
 
 import serial
@@ -364,11 +363,11 @@ class Devices(share.Devices):
         # Serial port for the ARM. Used by programmer and ARM comms module.
         arm_port = share.config.Fixture.port('022837', 'ARM')
         # ARM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        file = os.path.join(folder, self.sw_image)
         self['programmer'] = share.programmer.ARM(
-            arm_port, file, boot_relay=self['rla_boot'])
+            arm_port,
+            pathlib.Path(__file__).parent / self.sw_image,
+            boot_relay=self['rla_boot']
+            )
         # Console & Arduino class selection
         con_class, ard_class = {
             '600': (console.Console600, arduino.Arduino600),

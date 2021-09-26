@@ -3,12 +3,12 @@
 # Copyright 2017 SETEC Pty Ltd
 """BCE282-12/24 Initial Test Program."""
 
-import inspect
 import os
+import pathlib
 import sys
 import time
-import serial
 
+import serial
 import tester
 
 import share
@@ -21,15 +21,15 @@ class Initial(share.TestSequence):
     """BCE282-12/24 Initial Test Program."""
 
     # Calibration data save file (TI Text format)
-    msp_savefile = {    # Needs to be writable by the tester login
+    msp_savefile = pathlib.Path({   # Must be writable by the tester login
         'posix': '/home/setec/testdata/bslsavedata.txt',
-        'nt': r'C:\TestGear\TestData\bslsavedata.txt',
-        }[os.name]
+        'nt': 'C:/TestGear/TestData/bslsavedata.txt',
+        }[os.name])
     # Password data save file
-    msp_password = {    # Needs to be writable by the tester login
+    msp_password = pathlib.Path({   # Must be writable by the tester login
         'posix': '/home/setec/testdata/bslpassword.txt',
-        'nt': r'C:\TestGear\TestData\bslpassword.txt',
-        }[os.name]
+        'nt': 'C:/TestGear/TestData/bslpassword.txt',
+        }[os.name])
     # Factor to tighten the calibration check
     _cal_factor = 0.5
     # Limits common to both versions
@@ -130,8 +130,7 @@ class Initial(share.TestSequence):
             msp.open()
             msp.measurement_fail_on_error = False
             password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
-            with open(self.msp_password, 'w') as fout:
-                fout.write(password)
+            self.msp_password.write_text(password)
         except share.console.Error:
             pass
         finally:
@@ -142,12 +141,12 @@ class Initial(share.TestSequence):
             # STEP 1 - SAVE INTERNAL CALIBRATION
             sys.argv = (['',
                 '--comport={0}'.format(msp_port1), ] +
-                (['-P', self.msp_password, ] if password else []) +
+                (['-P', str(self.msp_password), ] if password else []) +
                 ['--upload=0x10C0', '--size=64', '--ti', ]
                 )
             tosbsl.main()
             # Write TI Text format calibration data to a file for use later
-            with open(self.msp_savefile, 'w') as fout:
+            with self.msp_savefile.open('w') as fout:
                 for aline in tosbsl.SAVEDATA:
                     fout.write(aline)
                     fout.write('\n')
@@ -155,16 +154,14 @@ class Initial(share.TestSequence):
             sys.argv = ['',
                 '--comport={0}'.format(msp_port1),
                 '--masserase',
-                '--program', self.msp_savefile,
+                '--program', str(self.msp_savefile),
                 ]
             tosbsl.main()
             # STEP 3 - PROGRAM
-            folder = os.path.dirname(
-                os.path.abspath(inspect.getfile(inspect.currentframe())))
+            hexfile = self.limitdata[self.parameter]['HexFile']
             sys.argv = ['',
                 '--comport={0}'.format(msp_port1),
-                '--program', os.path.join(folder,
-                    self.limitdata[self.parameter]['HexFile']),
+                '--program', str(pathlib.Path(__file__).parent / hexfile),
                 ]
             tosbsl.main()
         finally:

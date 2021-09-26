@@ -3,8 +3,7 @@
 # Copyright 2016 SETEC Pty Ltd
 """Initial Test Program for GENIUS-II and GENIUS-II-H."""
 
-import inspect
-import os
+import pathlib
 import time
 
 import tester
@@ -178,10 +177,11 @@ class Devices(share.Devices):
         self['dcl'] = tester.DCLoadParallel(
             ((self['dcl_vout'], r_out), (self['dcl_vbat'], r_bat)))
         # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_pic'] = share.programmer.PIC(
-            Initial.pic_hex, folder, '16F1828', self['rla_prog'])
+            pathlib.Path(__file__).parent / Initial.pic_hex,
+            '16F1828',
+            self['rla_prog']
+            )
 
     def reset(self):
         """Reset instruments."""

@@ -3,12 +3,14 @@
 # Copyright 2015 SETEC Pty Ltd.
 """BC15/25 Initial Test Program."""
 
-import os
-import inspect
+import pathlib
 import time
+
 import serial
+
 import tester
 import share
+
 from . import console
 from . import config
 
@@ -128,14 +130,13 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
             self.arm_port,
-            os.path.join(folder, self.arm_file),
+            pathlib.Path(__file__).parent / self.arm_file,
             crpmode=False,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         # Serial connection to the console
         arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet

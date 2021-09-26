@@ -3,8 +3,7 @@
 # Copyright 2020 SETEC Pty Ltd
 """RVMD50 Initial Test Program."""
 
-import inspect
-import os
+import pathlib
 
 import tester
 
@@ -68,14 +67,12 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['programmer'] = share.programmer.ARM(
             share.config.Fixture.port('029687', 'ARM'),
-            os.path.join(folder, self.sw_file),
-            crpmode=None,
+            pathlib.Path(__file__).parent / self.sw_file,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
         self['can'].verbose = False

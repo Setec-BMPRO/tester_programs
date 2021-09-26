@@ -3,10 +3,9 @@
 # Copyright 2018 SETEC Pty Ltd
 """GEN9-540 Initial Test Program."""
 
-import inspect
-import os
-import serial
+import pathlib
 
+import serial
 import tester
 
 import share
@@ -244,13 +243,12 @@ class Devices(share.Devices):
         # Serial port for the ARM. Used by programmer and ARM comms module.
         arm_port = share.config.Fixture.port('032715', 'ARM')
         # ARM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, self.sw_image),
+            pathlib.Path(__file__).parent / self.sw_image,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately - don't open until after programming

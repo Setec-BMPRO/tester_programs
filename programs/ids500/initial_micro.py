@@ -3,10 +3,9 @@
 # Copyright 2015 SETEC Pty Ltd.
 """IDS-500 Micro Initial Test Program."""
 
-import inspect
-import os
-import serial
+import pathlib
 
+import serial
 import tester
 
 import share
@@ -68,10 +67,11 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # PIC device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         self['program_picMic'] = share.programmer.PIC(
-            self.pic_hex_mic, folder, '18F4520', self['rla_mic'])
+            pathlib.Path(__file__).parent / self.pic_hex_mic,
+            '18F4520',
+            self['rla_mic']
+            )
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet

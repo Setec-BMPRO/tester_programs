@@ -3,10 +3,9 @@
 # Copyright 2016 SETEC Pty Ltd.
 """J35 Initial Test Program."""
 
-import inspect
-import os
-import serial
+import pathlib
 
+import serial
 import tester
 
 import share
@@ -242,14 +241,14 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         arm_port = share.config.Fixture.port('029242', 'ARM')
         # ARM device programmer
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        sw_file = 'j35_{0}.bin'.format(self.sw_version)
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            os.path.join(folder, 'j35_{0}.bin'.format(self.sw_version)),
+            pathlib.Path(__file__).parent / sw_file,
             crpmode=False,
             boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset'])
+            reset_relay=self['rla_reset']
+            )
         # Serial connection to the console
         j35_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

@@ -3,8 +3,7 @@
 # Copyright 2020 SETEC Pty Ltd.
 """TRS-BTx Initial Program."""
 
-import inspect
-import os
+import pathlib
 import time
 
 import serial
@@ -177,12 +176,9 @@ class Devices(share.Devices):
         pin = self['rla_pin']
         pin.insert = pin.set_off    # N/O contacts
         pin.remove = pin.set_on
-        folder = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.Nordic(
-            os.path.join(folder, self.sw_image),
-            folder)
+            pathlib.Path(__file__).parent / self.sw_image)
         # Serial connection to the console
         trsbts_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
