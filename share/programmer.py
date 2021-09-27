@@ -132,7 +132,8 @@ class ARM(_Base):
         self._crpmode = crpmode
         self._boot_relay = boot_relay
         self._reset_relay = reset_relay
-        self._bindata = bytearray(file.read_bytes())
+        with file.open('rb') as infile:
+            self._bindata = bytearray(infile.read())
 
     def program_begin(self):
         """Program a device.
