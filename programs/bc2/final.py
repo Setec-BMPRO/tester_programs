@@ -15,7 +15,7 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.Config.get(self.parameter)
+        self.cfg = config.get(self.parameter, uut)
         self.limits = self.cfg.limits_final()
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
