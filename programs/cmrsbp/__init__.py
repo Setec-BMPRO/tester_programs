@@ -346,7 +346,7 @@ class Devices(share.Devices):
         ev_ser.port = share.config.Fixture.port('017789', 'EV')
         self['ev'] = ev2200.EV2200(ev_ser)
         # PIC device programmer
-        self['program_pic'] = share.programmer.PIC(
+        self['program_pic'] = share.programmer.PIC3(
             pathlib.Path(__file__).parent / Initial.pic_hex,
             '18F252',
             self['rla_Prog']

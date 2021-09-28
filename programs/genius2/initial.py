@@ -177,7 +177,7 @@ class Devices(share.Devices):
         self['dcl'] = tester.DCLoadParallel(
             ((self['dcl_vout'], r_out), (self['dcl_vbat'], r_bat)))
         # PIC device programmer
-        self['program_pic'] = share.programmer.PIC(
+        self['program_pic'] = share.programmer.PIC3(
             pathlib.Path(__file__).parent / Initial.pic_hex,
             '16F1828',
             self['rla_prog']

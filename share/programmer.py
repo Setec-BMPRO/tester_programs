@@ -283,37 +283,28 @@ class Nordic(_Base):
         self.result_check()
 
 
-class PIC(_Base):
+class _PIC(_Base):
 
-    """Microchip PIC programmer using a PicKit3."""
+    """Microchip PIC programmer base class."""
 
-    bin_nt = pathlib.PureWindowsPath(
-        'C:/Program Files/Microchip-PK3/PK3CMD.exe')
-    bin_posix = None
-
-    def __init__(self, file, device_type, relay):
+    def __init__(self, file, device_type, relay, binary, option_prefix):
         """Create a programmer.
 
-        @param file pathlib.Path instance
-        @param device_type PIC device type
-        @param relay Relay device to connect programmer to target
-
+        @param binary, pathlib.Path instance of the binary
+        @param option_prefix, str
         """
+
         super().__init__()
         self.file = file
         self.device_type = device_type
         self.relay = relay
-        self._process = None
+        self.binary = binary
+        self.option_prefix = option_prefix
 
     def program_begin(self):
         """Begin device programming."""
-        command = []
-        binary = {
-            'nt': self.bin_nt,
-            'posix': self.bin_posix,
-            }[os.name]
-        command.append(str(binary))
-        option_prefix = '/'
+        command = self.binary
+
         for option, value in (
                 ('P', self.device_type),
                 ('F', self.file),
@@ -321,13 +312,72 @@ class PIC(_Base):
                 ('M', ''),
                 ('Y', ''),
                 ):
-            command.append('{0}{1}{2}'.format(option_prefix, option, value))
+            command.append('{0}{1}{2}'.format(self.option_prefix, option, value))
         self.relay.set_on()
-        self._process = subprocess.Popen(
-            command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        try:
+            self._process = subprocess.Popen(
+                command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        except Exception as exc:
+            self.result = str(exc)
+            self._process = None
 
     def program_wait(self):
         """Wait for device programming to finish."""
-        self.result = self._process.wait()
+        if self._process:
+            self.result = self._process.wait()
         self.relay.set_off()
         self.result_check()
+
+
+class PIC3(_PIC):
+
+    """Microchip PIC programmer using a PicKit3 on Windows testers."""
+
+    def __init__(self, file, device_type, relay):
+        """
+        @param file pathlib.Path instance
+        @param device_type PIC device type
+        @param relay Relay device to connect programmer to target
+        """
+
+        binary = [
+            str(pathlib.PureWindowsPath(
+                'C:/Program Files/Microchip-PK3/PK3CMD.exe'))
+            ]
+        option_prefix = '/'
+        super().__init__(file, device_type, relay, binary, option_prefix)
+
+
+class PIC4(_PIC):
+
+    """Microchip PIC programmer using a PicKit4 on Linux testers."""
+
+    def __init__(self, file, device_type, relay):
+        """
+        @param file pathlib.Path instance
+        @param device_type PIC device type
+        @param relay Relay device to connect programmer to target
+        """
+
+        binary = [
+            str(pathlib.Path('java')),
+            '--illegal-access=deny',
+            '-jar',
+            '/opt/microchip/mplabx/v5.50/mplab_platform/mplab_ipe/ipecmd.jar',
+            '-TPPK4',
+            ]
+        option_prefix = '-'
+        super().__init__(file, device_type, relay, binary, option_prefix)
+
+    def program_begin(self):
+        """Begin device programming."""
+        # Add mplabcomm libs to java.library.path, but remember original_setting.
+        self.original_setting = os.environ['LD_LIBRARY_PATH']
+        lib_path = "/opt/microchip/mplabcomm/3.47.00/lib"
+        os.environ['LD_LIBRARY_PATH'] += os.pathsep + lib_path
+        super().program_begin()
+
+    def program_wait(self):
+        """Wait for device programming to finish."""
+        super().program_wait()
+        os.environ['LD_LIBRARY_PATH'] = self.original_setting

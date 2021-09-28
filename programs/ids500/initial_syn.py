@@ -165,7 +165,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # PIC device programmer
-        self['program_picSyn'] = share.programmer.PIC(
+        self['program_picSyn'] = share.programmer.PIC3(
             pathlib.Path(__file__).parent / self.pic_hex_syn,
             '18F4321',
             self['rla_syn']

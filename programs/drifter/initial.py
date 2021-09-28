@@ -179,7 +179,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         # PIC device programmer
         sw_file = Initial.limitdata[self.parameter]['Software']
-        self['program_pic'] = share.programmer.PIC(
+        self['program_pic'] = share.programmer.PIC3(
             pathlib.Path(__file__).parent / sw_file,
             '18F87J93',
             self['rla_Prog']
