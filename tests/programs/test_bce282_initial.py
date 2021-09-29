@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BCE282-12/24 Initial Test program."""
 
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bce282
 
@@ -22,10 +22,9 @@ class _BCE282Initial(ProgramTestCase):
         patcher = patch('programs.bce282.tosbsl.main', new=self.mybsl)
         self.addCleanup(patcher.stop)
         patcher.start()
-        patcher = patch('builtins.open', mock_open())
-        self.addCleanup(patcher.stop)
-        patcher.start()
         super().setUp()
+        self.test_program.msp_password = MagicMock(name='msp_password')
+        self.test_program.msp_savefile = MagicMock(name='msp_savefile')
 
     def _pass_run(self):
         """PASS run of the program."""

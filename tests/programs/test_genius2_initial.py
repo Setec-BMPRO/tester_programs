@@ -15,7 +15,7 @@ class _Genius2Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('share.programmer.PIC')
+        patcher = patch('share.programmer.PIC3')
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

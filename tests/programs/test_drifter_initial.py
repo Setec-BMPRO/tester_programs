@@ -16,7 +16,7 @@ class _DrifterInitial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.programmer.PIC',
+                'share.programmer.PIC3',
                 'programs.drifter.console.Console',
                 ):
             patcher = patch(target)

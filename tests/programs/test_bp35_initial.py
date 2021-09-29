@@ -25,7 +25,6 @@ class _BP35Initial(ProgramTestCase):
         for target in (
                 'setec.BackgroundTimer',
                 'share.programmer.ARM',
-                'share.programmer.PIC',
                 'programs.bp35.arduino.Arduino',
                 'programs.bp35.console.TunnelConsole',
                 ):
