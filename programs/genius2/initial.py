@@ -3,6 +3,7 @@
 # Copyright 2016 SETEC Pty Ltd
 """Initial Test Program for GENIUS-II and GENIUS-II-H."""
 
+import os
 import pathlib
 import time
 
@@ -177,7 +178,11 @@ class Devices(share.Devices):
         self['dcl'] = tester.DCLoadParallel(
             ((self['dcl_vout'], r_out), (self['dcl_vbat'], r_bat)))
         # PIC device programmer
-        self['program_pic'] = share.programmer.PIC3(
+        pic_class = {
+            'nt': share.programmer.PIC3,
+            'posix': share.programmer.PIC4,
+            }[os.name]
+        self['program_pic'] = pic_class(
             pathlib.Path(__file__).parent / Initial.pic_hex,
             '16F1828',
             self['rla_prog']
