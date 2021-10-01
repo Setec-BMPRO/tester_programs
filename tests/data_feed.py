@@ -137,6 +137,7 @@ class MockATE(dict):
         for i in range(1, 23):          # Relays 1 - 22
             dev_name = 'RLA{0}'.format(i)
             storage[dev_name] = (gen, i)
+        storage['PICKIT'] = MagicMock(name='PicKit')
         super().__init__(storage)
 
     def open(self):

@@ -3,7 +3,6 @@
 # Copyright 2016 SETEC Pty Ltd
 """Initial Test Program for GENIUS-II and GENIUS-II-H."""
 
-import os
 import pathlib
 import time
 
@@ -43,6 +42,7 @@ class Initial(share.TestSequence):
         tester.LimitLow('InOCP', 13.24),
         tester.LimitBetween('OCP', _ocp_low, _ocp_high),
         tester.LimitLow('FixtureLock', 200),
+        tester.LimitInteger('ProgramOk', 0),
         )
     # Test limit selection keyed by program parameter
     limitdata = {
@@ -84,13 +84,12 @@ class Initial(share.TestSequence):
         self.dcload((('dcl_vbat', 0.0), ))
         self.dcsource(
             (('dcs_vaux', 0.0), ('dcs_vbatctl', 13.0), ), output=True)
-        dev['rla_prog'].set_on()
         self.measure(('dmm_lock', 'dmm_vbatctl', 'dmm_vdd', ), timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the board."""
-        dev['program_pic'].program()
+        mes['ProgramPIC']()
         dev['dcs_vbatctl'].output(0.0, False)
 
     @share.teststep
@@ -177,16 +176,8 @@ class Devices(share.Devices):
         r_out, r_bat = Initial.limitdata[self.parameter]['LoadRatio']
         self['dcl'] = tester.DCLoadParallel(
             ((self['dcl_vout'], r_out), (self['dcl_vbat'], r_bat)))
-        # PIC device programmer
-        pic_class = {
-            'nt': share.programmer.PIC3,
-            'posix': share.programmer.PIC4,
-            }[os.name]
-        self['program_pic'] = pic_class(
-            pathlib.Path(__file__).parent / Initial.pic_hex,
-            '16F1828',
-            self['rla_prog']
-            )
+        self['PicKit'] = tester.PicKit(
+            (self.physical_devices['PICKIT'], self['rla_prog']))
 
     def reset(self):
         """Reset instruments."""
@@ -241,6 +232,11 @@ class Sensors(share.Sensors):
                 stop=Initial._ocp_high + 1.0,
                 step=0.2)
             )
+        self['PicKit'] = sensor.PicKit(
+            self.devices['PicKit'],
+            pathlib.Path(__file__).parent / Initial.pic_hex,
+            '16F1828'
+            )
 
 
 class Measurements(share.Measurements):
@@ -271,4 +267,5 @@ class Measurements(share.Measurements):
             ('dmm_fanon', 'FanOn', 'ofan', ''),
             ('ui_AdjVout', 'Notify', 'oAdjVout', ''),
             ('ramp_OCP', 'OCP', 'oOCP', ''),
+            ('ProgramPIC', 'ProgramOk', 'PicKit', ''),
             ))
