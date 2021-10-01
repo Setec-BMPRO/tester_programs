@@ -361,7 +361,6 @@ class PIC4(_PIC):
 
         binary = [
             str(pathlib.Path('java')),
-            '--illegal-access=deny',
             '-jar',
             '/opt/microchip/mplabx/v5.50/mplab_platform/mplab_ipe/ipecmd.jar',
             '-TPPK4',
