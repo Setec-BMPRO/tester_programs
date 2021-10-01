@@ -361,7 +361,6 @@ class PIC4(_PIC):
 
         binary = [
             str(pathlib.Path('java')),
-            '--illegal-access=deny',
             '-jar',
             '/opt/microchip/mplabx/v5.50/mplab_platform/mplab_ipe/ipecmd.jar',
             '-TPPK4',
@@ -372,12 +371,18 @@ class PIC4(_PIC):
     def program_begin(self):
         """Begin device programming."""
         # Add mplabcomm libs to java.library.path, but remember original_setting.
-        self.original_setting = os.environ['LD_LIBRARY_PATH']
+        try:
+            self.original_setting = os.environ['LD_LIBRARY_PATH']
+        except:
+            self.original_setting = None
         lib_path = "/opt/microchip/mplabcomm/3.47.00/lib"
-        os.environ['LD_LIBRARY_PATH'] += os.pathsep + lib_path
+        os.environ['LD_LIBRARY_PATH'] = lib_path
         super().program_begin()
 
     def program_wait(self):
         """Wait for device programming to finish."""
         super().program_wait()
-        os.environ['LD_LIBRARY_PATH'] = self.original_setting
+        if self.original_setting is None:
+            del os.environ['LD_LIBRARY_PATH']
+        else:
+            os.environ['LD_LIBRARY_PATH'] = self.original_setting
