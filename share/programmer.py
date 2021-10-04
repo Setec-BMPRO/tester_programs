@@ -207,7 +207,7 @@ class AVR(_Base):
                 comport=self._port, baud=self._baudrate, device=self._device)
             try:
                 nvm.enter_progmode()
-            except Exception:
+            except updi.UpdiError:
                 nvm.unlock_device()
             nvm.get_device_info()
             data, start_address = nvm.load_ihex(str(self._file))
@@ -222,7 +222,7 @@ class AVR(_Base):
                 nvm.write_fuse(fuse_num, fuse_val)
             nvm.leave_progmode()
             self.result = self.pass_result
-        except Exception as exc:
+        except updi.UpdiError as exc:
             self.result = str(exc)
 
     def program_wait(self):
