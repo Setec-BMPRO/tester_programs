@@ -82,6 +82,7 @@ class Initial(share.TestSequence):
         self.dcload((('dcl_vbat', 0.4), ), output=True, delay=1.0)
         mes['dmm_diode'](timeout=5)
         self.dcload((('dcl_vbat', 0.0), ))
+        dev['rla_prog'].set_on()
         self.dcsource(
             (('dcs_vaux', 0.0), ('dcs_vbatctl', 13.0), ), output=True)
         self.measure(('dmm_lock', 'dmm_vbatctl', 'dmm_vdd', ), timeout=5)
