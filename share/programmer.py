@@ -207,7 +207,7 @@ class AVR(_Base):
                 comport=self._port, baud=self._baudrate, device=self._device)
             try:
                 nvm.enter_progmode()
-            except Exception:
+            except updi.UpdiError:
                 nvm.unlock_device()
             nvm.get_device_info()
             data, start_address = nvm.load_ihex(str(self._file))
@@ -222,7 +222,7 @@ class AVR(_Base):
                 nvm.write_fuse(fuse_num, fuse_val)
             nvm.leave_progmode()
             self.result = self.pass_result
-        except Exception as exc:
+        except updi.UpdiError as exc:
             self.result = str(exc)
 
     def program_wait(self):
@@ -371,12 +371,18 @@ class PIC4(_PIC):
     def program_begin(self):
         """Begin device programming."""
         # Add mplabcomm libs to java.library.path, but remember original_setting.
-        self.original_setting = os.environ['LD_LIBRARY_PATH']
+        try:
+            self.original_setting = os.environ['LD_LIBRARY_PATH']
+        except:
+            self.original_setting = None
         lib_path = "/opt/microchip/mplabcomm/3.47.00/lib"
-        os.environ['LD_LIBRARY_PATH'] += os.pathsep + lib_path
+        os.environ['LD_LIBRARY_PATH'] = lib_path
         super().program_begin()
 
     def program_wait(self):
         """Wait for device programming to finish."""
         super().program_wait()
-        os.environ['LD_LIBRARY_PATH'] = self.original_setting
+        if self.original_setting is None:
+            del os.environ['LD_LIBRARY_PATH']
+        else:
+            os.environ['LD_LIBRARY_PATH'] = self.original_setting
