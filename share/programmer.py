@@ -218,7 +218,7 @@ class AVR(_Base):
                 if data[offset] != readback[offset]:
                     raise VerificationError(
                         'Verify error at 0x{0:04X}'.format(offset))
-            for fuse_num, fuse_val in self._fuses.items():
+            for fuse_num, fuse_val in self._fuses.values():
                 nvm.write_fuse(fuse_num, fuse_val)
             nvm.leave_progmode()
             self.result = self.pass_result
