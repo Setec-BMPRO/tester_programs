@@ -44,9 +44,6 @@ class Fixture():
 
     """
 
-    # Traditional motherboard serial ports
-    _internal_1 = {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name]
-    _internal_2 = {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name]
     # A single direct connected FTDI, ID: 0403:6001, without S/N
     _ftdi = {'posix': '/dev/ttyUSB1', 'nt': 'COM16'}[os.name]
     # FTDI without S/N connected via a USB Hub
@@ -54,10 +51,6 @@ class Fixture():
     _ftdi_hub_2 = {'posix': '/dev/ttyUSB2', 'nt': 'COM15'}[os.name]
 
     _data = {
-
-        # Fixtures using Non-USB serial ports
-
-        '021299': {'PIC': _internal_1, },   # Drifter Initial
 
         # Fixtures with a single USB Serial (inc. FTDI with S/N)
 
@@ -80,6 +73,7 @@ class Fixture():
 
         # Fixtures with a single FTDI without any S/N
 
+        '021299': {'PIC': _ftdi, },     # Drifter Initial
         '028467': {'ARM': _ftdi, },     # BC15 Initial
         '031032': {'ARM': _ftdi, },     # BC25 Initial
         '017056': {'PIC': _ftdi, },     # IDS-500 SubBoard Initial
