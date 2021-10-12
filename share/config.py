@@ -44,9 +44,6 @@ class Fixture():
 
     """
 
-    # Traditional motherboard serial ports
-    _internal_1 = {'posix': '/dev/ttyS0', 'nt': 'COM1'}[os.name]
-    _internal_2 = {'posix': '/dev/ttyS1', 'nt': 'COM2'}[os.name]
     # A single direct connected FTDI, ID: 0403:6001, without S/N
     _ftdi = {'posix': '/dev/ttyUSB1', 'nt': 'COM16'}[os.name]
     # FTDI without S/N connected via a USB Hub
@@ -55,10 +52,6 @@ class Fixture():
 
     _data = {
 
-        # Fixtures using Non-USB serial ports
-
-        '021299': {'PIC': _internal_1, },   # Drifter Initial
-
         # Fixtures with a single USB Serial (inc. FTDI with S/N)
 
         '027013': {     # BatteryCheck Final
@@ -66,6 +59,9 @@ class Fixture():
             'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM9'}[os.name],
             },
         '017048': {     # IDS-500 Final (Prolific)
+            'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
+            },
+        '017054': {     # IDS-500 Main Initial (Prolific) [ Unused ]
             'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
             },
         '019883': {     # ETrac-II Initial (Arduino)
@@ -77,6 +73,7 @@ class Fixture():
 
         # Fixtures with a single FTDI without any S/N
 
+        '021299': {'PIC': _ftdi, },     # Drifter Initial
         '028467': {'ARM': _ftdi, },     # BC15 Initial
         '031032': {'ARM': _ftdi, },     # BC25 Initial
         '017056': {'PIC': _ftdi, },     # IDS-500 SubBoard Initial
