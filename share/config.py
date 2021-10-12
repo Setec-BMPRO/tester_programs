@@ -68,6 +68,9 @@ class Fixture():
         '017048': {     # IDS-500 Final (Prolific)
             'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
             },
+        '017054': {     # IDS-500 Main Initial (Prolific) [ Unused ]
+            'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
+            },
         '019883': {     # ETrac-II Initial (Arduino)
             'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM36'}[os.name],
             },
