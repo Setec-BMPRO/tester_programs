@@ -79,7 +79,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_cal_pre(self, dev, mes):
         """Calibrate the PIC."""
-        #dev['dcs_RS232'].output(12.0, output=True, delay=4)
+        # Wait for console to be ready after programming.
+        time.sleep(4)
         pic = dev['pic']
         pic.open()
         pic['UNLOCK'] = True
@@ -170,7 +171,6 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                #('dcs_RS232', tester.DCSource, 'DCS1'),
                 ('dcs_SlopeCal', tester.DCSource, 'DCS2'),
                 ('dcs_Vin', tester.DCSource, 'DCS3'),
                 ('rla_Prog', tester.Relay, 'RLA1'),
