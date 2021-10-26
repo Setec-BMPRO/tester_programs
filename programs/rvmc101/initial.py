@@ -15,7 +15,7 @@ class Initial(share.TestSequence):
     """RVMC101x Initial Test Program."""
 
     sw_image = {
-        'ATMEL': 'dunno.hex',
+        'ATMEL': 'rvmc101_sam_1.0.0-0-g384c862.bin',
         'LITE': 'None',
         'NXP': 'rvmc101_0.4.bin',
         }
