@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-10-26, 11:05:20"
+    "saved": "2021-10-27, 16:26:51"
   },
   "project": {
     "AUTHOR": "",
@@ -364,7 +364,8 @@
       "programs/rvswt101/arduino.py",
       "tests/programs/test_rvswt101_arduino.py",
       "programs/cn101/config.py",
-      "share/console/arduino.py"
+      "share/console/arduino.py",
+      "programs/rvmc101/display.py"
     ],
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",
