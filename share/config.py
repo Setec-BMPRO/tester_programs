@@ -34,13 +34,13 @@ class Fixture():
 
     """Fixture specific data, such as serial port assignment.
 
-        Windows testers:
-           COM port mapping must be manually set on each tester.
-           COM30 is used for the Serial2Can interface device.
-
         Linux testers:
            Use /dev/ttyACM0 for the GEN4 (Arduino) device.
            /dev/ttyUSB0 is used for the Serial2Can interface device.
+
+        Windows testers:
+           COM port mapping must be manually set on each tester.
+           COM30 is used for the Serial2Can interface device.
 
     """
 
@@ -54,54 +54,59 @@ class Fixture():
 
         # Fixtures with a single USB Serial (inc. FTDI with S/N)
 
-        '027013': {     # BatteryCheck Final
-            # Panasonic eUniStone PAN1322 (FTDI with S/N)
-            'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM9'}[os.name],
-            },
         '017048': {     # IDS-500 Final (Prolific)
             'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
             },
         '017054': {     # IDS-500 Main Initial (Prolific) [ Unused ]
             'PIC': {'posix': '/dev/ttyUSB1', 'nt': 'COM6'}[os.name],
             },
-        '019883': {     # ETrac-II Initial (Arduino)
+        '017823': {     # C45A-15 Initial
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM37'}[os.name],
+            },
+        '019883': {     # ETrac-II Initial
             'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM36'}[os.name],
             },
-        '017823': {     # C45A-15 Initial (Arduino)
-            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM37'}[os.name],
+        '027013': {     # BatteryCheck Final
+            # Panasonic eUniStone PAN1322 (FTDI with S/N)
+            'BT': {'posix': '/dev/ttyUSB1', 'nt': 'COM9'}[os.name],
             },
 
         # Fixtures with a single FTDI without any S/N
 
-        '021299': {'PIC': _ftdi, },     # Drifter Initial
-        '028467': {'ARM': _ftdi, },     # BC15 Initial
-        '031032': {'ARM': _ftdi, },     # BC25 Initial
         '017056': {'PIC': _ftdi, },     # IDS-500 SubBoard Initial
+        '021299': {'PIC': _ftdi, },     # Drifter Initial
+        '025197': {'ARM': _ftdi, },     # GEN8 Initial
+        '027420': {'ARM': _ftdi, },     # Trek2 Initial/Final
+        '028467': {'ARM': _ftdi, },     # BC15 Initial
         '029242': {'ARM': _ftdi, },     # J35 Initial
         '029687': {'ARM': _ftdi, },     # RvView/JDisplay/RVMD50 Initial
-        '027420': {'ARM': _ftdi, },     # Trek2 Initial/Final
-        '025197': {'ARM': _ftdi, },     # GEN8 Initial
+        '031032': {'ARM': _ftdi, },     # BC25 Initial
         '032715': {'ARM': _ftdi, },     # GEN9-540 Initial
         '032870': {'ARM': _ftdi, },     # RVMC101 Initial
         '033633': {'AVR': _ftdi, },     # MB3 Initial
+        '036746': {'ARM': _ftdi, },     # ASDisplay Initial
 
         # Fixtures with a USB Hub
 
-        '020827': {     # BCE282 Initial( MSP1: programming, MSP2: comms)
-            'MSP1': _ftdi_hub_1,
-            'MSP2': _ftdi_hub_2,
+        '017789': {     # CMR-SBP Initial (Prolific)
+            # Hub port 1:
+            'EV': {'posix': '/dev/ttyUSB1', 'nt': 'COM21'}[os.name],
+            # Hub port 2:
+            'CMR': {'posix': '/dev/ttyUSB2', 'nt': 'COM22'}[os.name],
+            },
+        '020827': {     # BCE282 Initial
+            'MSP1': _ftdi_hub_1,    # Programming
+            'MSP2': _ftdi_hub_2,    # Console
+            },
+        '022837': {     # SX-600/SX-750 Initial
+            'ARM': _ftdi_hub_1,
+            # Hub port 2:
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
             },
         '027176': {     # BP35 Initial
             'ARM': _ftdi_hub_1,
+            # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
-            },
-        '034400': {     # BP35-II Initial
-            'ARM': _ftdi_hub_1,
-            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM38'}[os.name],
-            },
-        '017789': {     # CMR-SBP Initial (Prolific)
-            'EV': {'posix': '/dev/ttyUSB1', 'nt': 'COM21'}[os.name],
-            'CMR': {'posix': '/dev/ttyUSB2', 'nt': 'COM22'}[os.name],
             },
         '028468': {     # CN101 Initial
             'BLE': _ftdi_hub_1,
@@ -115,72 +120,43 @@ class Fixture():
         '032869': {     # RVSWT101 Initial
             'NORDIC': _ftdi_hub_1,
             # Hub port 2: Nordic NRF52 device programmer
-            # Hub port 3,4: not used
-            },
-        '033550': {     # RVMN101A Initial
-            'ARM': _ftdi_hub_1,
-            'NORDIC': _ftdi_hub_2,
-            # Hub port 3: Nordic NRF52 device programmer
-            # Hub port 4: not used
             },
         '032871': {     # RVMN101B Initial
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
-            # Hub port 4: not used
+            },
+        '033030': {     # RVSWT101 Final
+            # Hub port 1:
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
+            },
+        '033550': {     # RVMN101A Initial
+            'ARM': _ftdi_hub_1,
+            'NORDIC': _ftdi_hub_2,
+            # Hub port 3: Nordic NRF52 device programmer
+            },
+        '034352': {     # TRSBTS Initial
+            'NORDIC': _ftdi_hub_1,
+            # Hub port 2: Nordic NRF52 device programmer
+            },
+        '034400': {     # BP35-II Initial
+            'ARM': _ftdi_hub_1,
+            # Hub port 2:
+            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM38'}[os.name],
             },
         '034861': {     # RVMN5x Initial
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
-            # Hub port 4: not used
+            },
+        '034882': {     # TRSRFM Initial
+            'NORDIC': _ftdi_hub_1,
+            # Hub port 2: Nordic NRF52 device programmer
             },
         '035827': {     # SmartLink201 Initial
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
-            # Hub port 4: not used
-            },
-        '034352': {     # TRSBTS Initial
-            'NORDIC': _ftdi_hub_1,
-            # Hub port 2: Nordic NRF52 device programmer
-            # Hub port 3,4: not used
-            },
-        '034882': {     # TRSRFM Initial
-            'NORDIC': _ftdi_hub_1,
-            # Hub port 2: Nordic NRF52 device programmer
-            # Hub port 3,4: not used
-            },
-        '033030': {     # RVSWT101 Final
-            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
-            },
-        }
-
-    _data_per_tester = {
-
-        # Fixtures with a USB Hub
-
-        '022837': {     # SX-600/SX-750 Initial
-            'ATE2a': {
-                'ARM': _ftdi_hub_1,
-                # Hub port 2: Arduino
-                'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
-                },
-            'ATE2c': {
-                'ARM': _ftdi_hub_1,
-                # Hub port 2: Arduino
-                'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
-                },
-            'ATE3': {
-                'ARM': _ftdi_hub_1,
-                # Hub port 2: Arduino
-                'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM5'}[os.name],
-                },
-            'ATE4': {
-                'ARM': _ftdi_hub_1,
-                # Hub port 2: Arduino
-                'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM5'}[os.name],
-                },
             },
         }
 
@@ -193,8 +169,8 @@ class Fixture():
         @return Serial port name
 
         """
-        if fixture in cls._data_per_tester:
-            result = cls._data_per_tester[fixture][System.tester_type][name]
-        else:
-            result = cls._data[fixture][name]
+        result = cls._data[fixture][name]
+        # ATE4 has the GEN4 Arduino as ttyACM0
+        if System.tester_type == 'ATE4' and result == '/dev/ttyACM0':
+            result = '/dev/ttyACM1'
         return result

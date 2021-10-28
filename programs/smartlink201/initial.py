@@ -79,7 +79,7 @@ class Initial(share.TestSequence):
         smartlink201.open()
         # Cycle power to get the Nordic running
         dev['dcs_Vbatt'].output(0, output=True, delay=2)
-        dev['dcs_Vbatt'].output(self.vin_set,  output=True)
+        dev['dcs_Vbatt'].output(self.vin_set, output=True, delay=1)
         mes['dmm_3V3'](timeout=5)
         smartlink201.brand(
             self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
