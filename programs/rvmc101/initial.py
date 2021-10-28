@@ -8,6 +8,7 @@ import pathlib
 import tester
 
 import share
+from . import display
 
 
 class Initial(share.TestSequence):
@@ -73,9 +74,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Check all 7-segment displays."""
-        dev['rla_reset'].set_on()
-        mes['ui_yesnodisplay']()
-        dev['rla_reset'].set_off()
+        with display.DisplayControl(dev['can']):
+            mes['ui_yesnodisplay']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
