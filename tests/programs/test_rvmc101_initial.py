@@ -8,24 +8,31 @@ from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvmc101
 
 
-class RVMC101Initial(ProgramTestCase):
+class _RVMC101Initial(ProgramTestCase):
 
     """RVMC101x Initial program test suite."""
 
     prog_class = rvmc101.Initial
     per_panel = 4
-    parameter = 'FULL'
-    debug = False
 
     def setUp(self):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
+                'share.programmer.JLink',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
         super().setUp()
+
+
+class RVMC101Initial(_RVMC101Initial):
+
+    """RVMC101x Initial program test suite."""
+
+    parameter = 'NXP'
+    debug = False
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -63,12 +70,10 @@ class RVMC101Initial(ProgramTestCase):
             self.tester.ut_steps)
 
 
-class RVMC101InitialLite(ProgramTestCase):
+class RVMC101InitialLite(_RVMC101Initial):
 
     """RVMC101x Lite Initial program test suite."""
 
-    prog_class = rvmc101.Initial
-    per_panel = 4
     parameter = 'LITE'
     debug = False
 

@@ -230,6 +230,47 @@ class AVR(_Base):
         self.result_check()
 
 
+class JLink(_Base):
+
+    """SEGGER J-Link programmer."""
+
+    bin_nt = pathlib.PureWindowsPath('C:/')
+    bin_posix = pathlib.PurePosixPath('JFlash')
+
+    def __init__(self, projectfile, file):
+        """Create a programmer.
+
+        @param projectfile pathlib.Path instance (Project file)
+        @param file pathlib.Path instance (Program image file)
+
+        """
+        super().__init__()
+        self.projectfile = projectfile
+        self.file = file
+
+    def program_begin(self):
+        """Begin device programming."""
+        binary = {
+            'nt': self.bin_nt,
+            'posix': self.bin_posix,
+            }[os.name]
+        command = [
+            str(binary),
+            '-openprj{0}'.format(self.projectfile),
+            '-open{0}'.format(self.file),
+            '-auto',
+            '-hide',
+            '-exit',
+            ]
+        process = subprocess.Popen(
+            command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        self.result = process.wait()
+
+    def program_wait(self):
+        """Wait for device programming to finish."""
+        self.result_check()
+
+
 class Nordic(_Base):
 
     """Nordic Semiconductors programmer using a NRF52."""

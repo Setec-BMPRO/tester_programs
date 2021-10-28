@@ -8,13 +8,18 @@ import pathlib
 import tester
 
 import share
+from . import display
 
 
 class Initial(share.TestSequence):
 
     """RVMC101x Initial Test Program."""
 
-    sw_image = 'rvmc101_0.4.bin'
+    sw_image = {
+        'ATMEL': 'rvmc101_sam_1.0.0-0-g384c862.bin',
+        'LITE': 'None',
+        'NXP': 'rvmc101_0.4.bin',
+        }
     limitdata = (
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
         tester.LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
@@ -25,7 +30,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.sw_image = self.sw_image
+        Devices.sw_image = self.sw_image[self.parameter]
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.is_full = self.parameter != 'LITE'
         self.steps = (
@@ -42,21 +47,26 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        dev['rla_reset'].set_on()   # Hold device in RESET
-        dev['dcs_vin'].output(12.0, output=True)
+        dev['rla_reset'].set_on()
+        dev['dcs_vin'].output(12.0, output=True, delay=1)
         mes['dmm_vin'](timeout=5)
         name = 'dmm' if self.is_full else 'dmm_lite'
         for pos in range(self.per_panel):
             self.measure(mes[name][pos], timeout=5)
+        dev['rla_reset'].set_off()
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the ARM."""
-        pgm = dev['program_arm']
+        """Program the micro."""
+        pgm = {
+            'ATMEL': dev['program_atmel'],
+            'NXP': dev['program_arm'],
+            }[self.parameter]
         sel = dev['selector']
         for pos in range(self.per_panel):
             if tester.Measurement.position_enabled(pos + 1):
                 sel[pos].set_on()
+                sel[pos].opc()
                 pgm.position = pos + 1
                 pgm.program()
                 sel[pos].set_off()
@@ -64,8 +74,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Check all 7-segment displays."""
-        mes['ui_yesnodisplay']()
-        dev['rla_reset'].pulse(0.1)
+        with display.DisplayControl(dev['can']):
+            mes['ui_yesnodisplay']()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -92,6 +102,7 @@ class Devices(share.Devices):
     """Devices."""
 
     sw_image = None
+    projectfile = 'rvmc101_atmel.jflash'
 
     def open(self):
         """Create all Instruments."""
@@ -117,6 +128,10 @@ class Devices(share.Devices):
             pathlib.Path(__file__).parent / self.sw_image,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset']
+            )
+        self['program_atmel'] = share.programmer.JLink(
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_image,
             )
         self['selector'] = [
             self['rla_pos1'], self['rla_pos2'],
