@@ -51,7 +51,7 @@ class RVMC101Initial(_RVMC101Initial):
                     (sen['d_3v3'], 3.34),
                     ),
                 'Display': (
-                    (sen['yesnodisplay'], True),
+                    (sen['yesnodisplay'], (True, True, True, True, )),
                     ),
                 'CanBus': (
                     (sen['MirCAN'], (True, True, True, True, )),
@@ -64,7 +64,7 @@ class RVMC101Initial(_RVMC101Initial):
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
-            self.assertEqual(5, len(res.readings))
+            self.assertEqual(8, len(res.readings))
         self.assertEqual(
             ['PowerUp', 'Program', 'Display', 'CanBus'],
             self.tester.ut_steps)
