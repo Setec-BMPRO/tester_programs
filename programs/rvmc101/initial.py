@@ -23,7 +23,8 @@ class Initial(share.TestSequence):
     limitdata = (
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
         tester.LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
-        tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
+#        tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
+        tester.LimitDelta('5V', 5.0, 5.2, doc='5V present'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
     is_full = None      # False if 'Lite' version (no micro fitted)
@@ -74,8 +75,15 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Check all 7-segment displays."""
-        with dev['display']:
-            mes['ui_yesnodisplay']()
+        dev['rla_reset'].pulse(0.1)
+        sel = dev['selector']
+        for pos in range(self.per_panel):
+            if tester.Measurement.position_enabled(pos + 1):
+                sel[pos].set_on()
+                sel[pos].opc()
+                with dev['display']:
+                    mes['ui_yesnodisplay']()
+                sel[pos].set_off()
 
     @share.teststep
     def _step_canbus(self, dev, mes):

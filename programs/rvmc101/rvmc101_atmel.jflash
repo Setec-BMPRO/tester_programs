@@ -15,13 +15,13 @@
   IRLen = 0
   MultipleTargets = 0
   NumDevices = 0
-  Speed0 = 100
-  Speed1 = 100
+  Speed0 = 1000
+  Speed1 = 1000
   TAP_Number = 0
   UseAdaptive0 = 0
   UseAdaptive1 = 0
-  UseMaxSpeed0 = 1
-  UseMaxSpeed1 = 1
+  UseMaxSpeed0 = 0
+  UseMaxSpeed1 = 0
 [CPU]
   NumInitSteps = 1
   InitStep0_Action = "Reset"
@@ -59,7 +59,7 @@
   BankSelMode = 1
   BaseAddr = 0x00804000
 [PRODUCTION]
-  AutoPerformsDisconnect = 1
+  AutoPerformsDisconnect = 0
   AutoPerformsErase = 1
   AutoPerformsProgram = 1
   AutoPerformsSecure = 0
@@ -82,7 +82,7 @@
   SNListFile = ""
   SNValue = 0x00000001
   StartAppType = 1
-  TargetPowerDelay = 0x000000C8
+  TargetPowerDelay = 0x00000014
   TimeoutErase = 0x00003A98
   TimeoutProgram = 0x00002710
   TimeoutVerify = 0x00002710
