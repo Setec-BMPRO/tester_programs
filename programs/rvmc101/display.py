@@ -4,12 +4,12 @@
 """RVMC101 LED Helper."""
 
 import threading
-import time
 
 import tester
+import share
 
 
-class DisplayControl():
+class LEDControl():
 
     """Control of the LEDs via CAN."""
 
@@ -21,17 +21,16 @@ class DisplayControl():
         @param can_dev Serial2CAN interface device
 
         """
-        self.serial2can = None
+        self.serial2can = can_dev
         self._worker = None
         self._evt = threading.Event()
 
-    def __enter__(self, serial2can):
+    def __enter__(self):
         """Context Manager entry handler - Override LCD & Backlight.
 
         @return self
 
         """
-        self.serial2can = serial2can
         self._worker = threading.Thread(target=self.worker, name='LEDThread')
         self._worker.start()
         return self
@@ -46,11 +45,10 @@ class DisplayControl():
         """Thread to send a stream of LED_DISPLAY CAN packets."""
         pkt = tester.devphysical.can.RVCPacket()
         msg = pkt.header.message
-        msg.priority = 6
-        msg.reserved = 0
-        msg.DGN = tester.devphysical.can.RVCDGN.setec_led_display.value
-        msg.SA = tester.devphysical.can.RVCDeviceID.rvmn101.value
-        pkt.data.extend(b'\x01\x7f\x7f\xff\xff\xff\x00\x00')
+        msg.DGN = share.DGN.rvmc101.value       #  to the RVMC101
+        msg.SA = share.DeviceID.rvmn101.value   #  from a RVMN101
+        pkt.data.extend(share.MessageID.led_display)
+        pkt.data.extend(b'\x7f\x7f\xff\xff\xff\x00\x00')
         # [0]: LED Display = 0x01
         # [1]: LED 7 segment DIGIT0 (LSB, right)
         # [2]: LED 7 segment DIGIT1 (MSB, left)
@@ -60,11 +58,10 @@ class DisplayControl():
         # [4-5]: Unused: 0xFF
         # [6]: Sequence number
         # [7]: Checksum
-        while not self._evt.is_set():
+        while not self._evt.wait(self.inter_packet_gap):
             # Show "88" on the display (for about 100msec)
             # The 1st packet we send is ignored due to no previous sequence
             # number. The 2nd+ packets WILL be acted upon.
             pkt.data[6] = (pkt.data[6] + 1) & 0xff  # Sequence number
             pkt.data[7] = sum(pkt.data[:7]) & 0xff  # Checksum
             self.serial2can.send('t{0}'.format(pkt))
-            time.sleep(self.inter_packet_gap)
