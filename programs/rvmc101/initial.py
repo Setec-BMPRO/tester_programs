@@ -74,7 +74,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Check all 7-segment displays."""
-        with display.DisplayControl(dev['can']):
+        with dev['display']:
             mes['ui_yesnodisplay']()
 
     @share.teststep
@@ -122,6 +122,7 @@ class Devices(share.Devices):
         self['can'].rvc_mode = True
         self['can'].verbose = True
         self.add_closer(self.close_can)
+        self['display'] = display.LEDControl(self['can'])
         arm_port = share.config.Fixture.port('032870', 'ARM')
         self['program_arm'] = share.programmer.ARM(
             arm_port,

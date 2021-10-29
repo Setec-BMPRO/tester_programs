@@ -4,6 +4,10 @@
 """CAN Bus Shared modules for Tester programs."""
 
 from .setec_rvc import (
+    CommandID,
+    DeviceID,
+    DGN,
+    MessageID,
     PacketPropertyReader,
     SwitchStatusPacket,
     DeviceStatusPacket,
@@ -14,6 +18,10 @@ from .setec_rvc import (
 
 
 __all__ = [
+    'CommandID',
+    'DeviceID',
+    'DGN',
+    'MessageID',
     'PacketPropertyReader',
     'SwitchStatusPacket',
     'DeviceStatusPacket',
