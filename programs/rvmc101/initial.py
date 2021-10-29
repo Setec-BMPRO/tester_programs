@@ -47,13 +47,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        dev['rla_reset'].set_on()
         dev['dcs_vin'].output(12.0, output=True, delay=1)
         mes['dmm_vin'](timeout=5)
         name = 'dmm' if self.is_full else 'dmm_lite'
         for pos in range(self.per_panel):
-            self.measure(mes[name][pos], timeout=5)
-        dev['rla_reset'].set_off()
+            self.measure(mes[name][pos], timeout=10)
 
     @share.teststep
     def _step_program(self, dev, mes):
