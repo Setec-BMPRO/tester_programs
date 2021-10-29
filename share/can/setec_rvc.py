@@ -103,7 +103,7 @@ class MessageID(enum.IntEnum):
     general_config = 34
 
 
-class CANPacketDecodeError(Exception):
+class PacketDecodeError(Exception):
 
     """Error decoding a CAN packet."""
 
@@ -158,7 +158,7 @@ class SwitchStatusPacket():
         if (len(payload) != SetecRVC.data_len.value
                 or payload[SetecRVC.command_id_index.value]
                     != CommandID.switch_status.value):
-            raise CANPacketDecodeError()
+            raise PacketDecodeError()
         (   self.msgtype,
             switch_data,
             self.swver,
@@ -231,7 +231,7 @@ class DeviceStatusPacket():
         if (len(payload) != SetecRVC.data_len.value
                 or payload[SetecRVC.command_id_index.value]
                     not in (0, CommandID.device_status.value)):
-            raise CANPacketDecodeError()
+            raise PacketDecodeError()
         (   self.msgtype,       # D0
             button_data,        # D1,2
             self.menu_state,    # D3
@@ -412,7 +412,6 @@ class PacketPropertyReader():
 
     def opc(self):
         """Sensor: OPC."""
-        self.canreader.opc()
 
     def read(self, callerid):
         """Sensor: Read payload data using the last configured key.
@@ -421,5 +420,9 @@ class PacketPropertyReader():
         @return Packet property value
 
         """
-        can_data = self.canreader.read(callerid)
-        return getattr(self.packettype(can_data), self._read_key)
+        try:
+            can_data = self.canreader.read()
+            packet = self.packettype(can_data)
+        except PacketDecodeError:       # Probably another packet type
+            return False
+        return getattr(packet, self._read_key)

@@ -23,8 +23,7 @@ class Initial(share.TestSequence):
     limitdata = (
         tester.LimitDelta('Vin', 12.0, 0.5, doc='Input voltage present'),
         tester.LimitDelta('3V3', 3.3, 0.1, doc='3V3 present'),
-#        tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
-        tester.LimitDelta('5V', 5.0, 5.2, doc='5V present'),
+        tester.LimitDelta('5V', 5.0, 0.2, doc='5V present'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
     is_full = None      # False if 'Lite' version (no micro fitted)
@@ -128,7 +127,6 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
-        self['can'].verbose = True
         self.add_closer(self.close_can)
         self['display'] = display.LEDControl(self['can'])
         arm_port = share.config.Fixture.port('032870', 'ARM')
