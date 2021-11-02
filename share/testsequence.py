@@ -26,6 +26,10 @@ class TestSequence(tester.TestSequence):
             'Notify',
             True,
             doc='YES response'),
+        tester.LimitInteger(
+            'ProgramOk',
+            0,
+            doc='Exit code 0'),
         )
     duplicate_limit_error = False
 

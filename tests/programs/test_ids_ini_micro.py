@@ -18,7 +18,6 @@ class Ids500MicroInitial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.programmer.PIC3',
                 'programs.ids500.console.Console',
                 ):
             patcher = patch(target)
@@ -33,6 +32,7 @@ class Ids500MicroInitial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Program': (
                     (sen['Vsec5VuP'], 5.0),
+                    (sen['PicKit'], 0),
                     ),
                 'Comms': (
                     (sen['SwRev'], ('I,  1, 2,Software Revision', )),
@@ -44,5 +44,5 @@ class Ids500MicroInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(3, len(result.readings))
+        self.assertEqual(4, len(result.readings))
         self.assertEqual(['Program', 'Comms'], self.tester.ut_steps)

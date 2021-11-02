@@ -138,6 +138,7 @@ class MockATE(dict):
             dev_name = 'RLA{0}'.format(i)
             storage[dev_name] = (gen, i)
         storage['PICKIT'] = MagicMock(name='PicKit')
+        storage['JLINK'] = MagicMock(name='JLink')
         super().__init__(storage)
 
     def open(self):

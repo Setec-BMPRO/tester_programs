@@ -25,7 +25,7 @@ class CN102Initial(ProgramTestCase):
         patcher.start()
         for target in (
                 'share.programmer.ARM',
-                'share.programmer.Nordic',
+                'share.programmer.NRF52',
                 'share.bluetooth.RaspberryBluetooth',
                 'programs.cn102.console.DirectConsole',
                 'programs.cn102.console.TunnelConsole',

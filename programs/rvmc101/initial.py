@@ -31,6 +31,7 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         Devices.sw_image = self.sw_image[self.parameter]
+        Sensors.sw_image = self.sw_image[self.parameter]
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.is_full = self.parameter != 'LITE'
         self.steps = (
@@ -44,38 +45,48 @@ class Initial(share.TestSequence):
         # This is a multi-unit parallel program so we can't raise exceptions.
         tester.Tester.measurement_failure_exception = False
 
+    def _positions(self):
+        """Range of my active PCB positions.
+
+        @return range instance of PCB position numbers (1-N)
+
+        """
+        return range(1, self.per_panel + 1)
+
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         dev['dcs_vin'].output(12.0, output=True, delay=1)
         mes['dmm_vin'](timeout=5)
         name = 'dmm' if self.is_full else 'dmm_lite'
-        for pos in range(self.per_panel):
+        for pos in self._positions():
             self.measure(mes[name][pos], timeout=10)
 
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the micro."""
-        pgm = {
-            'ATMEL': dev['program_atmel'],
-            'NXP': dev['program_arm'],
-            }[self.parameter]
         sel = dev['selector']
-        for pos in range(self.per_panel):
-            if tester.Measurement.position_enabled(pos + 1):
+        for pos in self._positions():
+            if tester.Measurement.position_enabled(pos):
                 sel[pos].set_on()
                 sel[pos].opc()
-                pgm.position = pos + 1
-                pgm.program()
+                if self.parameter == 'NXP':
+                    pgm = dev['program_arm']
+                    pgm.position = pos
+                    pgm.program()   # A device
+                else:
+                    pgm = mes['JLink']
+                    pgm.position = pos
+                    pgm()           # A measurement
                 sel[pos].set_off()
 
     @share.teststep
     def _step_display(self, dev, mes):
         """Check all 7-segment displays."""
-        dev['rla_reset'].pulse(0.1)
+        dev['rla_reset'].pulse(0.01)    # Opto, not a relay
         sel = dev['selector']
-        for pos in range(self.per_panel):
-            if tester.Measurement.position_enabled(pos + 1):
+        for pos in self._positions():
+            if tester.Measurement.position_enabled(pos):
                 sel[pos].set_on()
                 sel[pos].opc()
                 with dev['display']:
@@ -87,8 +98,10 @@ class Initial(share.TestSequence):
         """Test the CAN Bus."""
         candev = dev['can']
         sel = dev['selector']
-        for pos in range(self.per_panel):
-            if tester.Measurement.position_enabled(pos + 1):
+        mes_can = mes['can_active']
+        for pos in self._positions():
+            if tester.Measurement.position_enabled(pos):
+                mes_can.sensor.position = pos
                 sel[pos].set_on(delay=0.5)
                 candev.flush_can()
                 try:
@@ -96,9 +109,8 @@ class Initial(share.TestSequence):
                     result = True
                 except tester.devphysical.can.SerialToCanError:
                     result = False
-                mes['can_active'].sensor.position = pos + 1
-                mes['can_active'].sensor.store(result)
-                mes['can_active']()
+                mes_can.sensor.store(result)
+                mes_can()
                 sel[pos].set_off()
 
 
@@ -107,7 +119,6 @@ class Devices(share.Devices):
     """Devices."""
 
     sw_image = None
-    projectfile = 'rvmc101_atmel.jflash'
 
     def open(self):
         """Create all Instruments."""
@@ -121,6 +132,7 @@ class Devices(share.Devices):
                 ('rla_pos2', tester.Relay, 'RLA4'),
                 ('rla_pos3', tester.Relay, 'RLA5'),
                 ('rla_pos4', tester.Relay, 'RLA6'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
@@ -134,11 +146,8 @@ class Devices(share.Devices):
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset']
             )
-        self['program_atmel'] = share.programmer.JLink(
-            pathlib.Path(__file__).parent / self.projectfile,
-            pathlib.Path(__file__).parent / self.sw_image,
-            )
-        self['selector'] = [
+        self['selector'] = [    # This is indexed using position (1-N)
+            None,
             self['rla_pos1'], self['rla_pos2'],
             self['rla_pos3'], self['rla_pos4'],
             ]
@@ -147,8 +156,8 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['dcs_vin'].output(0.0, False)
         for rla in (
-            'rla_reset', 'rla_boot', 'rla_pos1',
-            'rla_pos2', 'rla_pos3', 'rla_pos4'):
+            'rla_reset', 'rla_boot',
+            'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4'):
             self[rla].set_off()
 
     def close_can(self):
@@ -160,6 +169,9 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    projectfile = 'rvmc101_atmel.jflash'
+    sw_image = None
 
     def open(self):
         """Create all Sensors."""
@@ -184,6 +196,8 @@ class Sensors(share.Sensors):
         self['d_5v'] = sensor.Vdc(
                 dmm, high=9, low=1, rng=10, res=0.01, position=4)
         self['MirCAN'] = sensor.MirrorReadingBoolean()
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'], self.projectfile, self.sw_image)
         self['yesnodisplay'] = sensor.YesNo(
             message=tester.translate('rvmc101_initial', 'DisplaysOn?'),
             caption=tester.translate('rvmc101_initial', 'capDisplay'),
@@ -199,21 +213,24 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names((
             ('dmm_vin', 'Vin', 'vin', 'Input voltage'),
-            ('dmm_3v3a', '3V3', 'a_3v3', '3V3 rail voltage'),
-            ('dmm_3v3b', '3V3', 'b_3v3', '3V3 rail voltage'),
-            ('dmm_3v3c', '3V3', 'c_3v3', '3V3 rail voltage'),
-            ('dmm_3v3d', '3V3', 'd_3v3', '3V3 rail voltage'),
-            ('dmm_5va', '5V', 'a_5v', '5V rail voltage'),
-            ('dmm_5vb', '5V', 'b_5v', '5V rail voltage'),
-            ('dmm_5vc', '5V', 'c_5v', '5V rail voltage'),
-            ('dmm_5vd', '5V', 'd_5v', '5V rail voltage'),
+            ('dmm_3v3a', '3V3', 'a_3v3', '3V3 ok'),
+            ('dmm_3v3b', '3V3', 'b_3v3', '3V3 ok'),
+            ('dmm_3v3c', '3V3', 'c_3v3', '3V3 ok'),
+            ('dmm_3v3d', '3V3', 'd_3v3', '3V3 ok'),
+            ('dmm_5va', '5V', 'a_5v', '5V ok'),
+            ('dmm_5vb', '5V', 'b_5v', '5V ok'),
+            ('dmm_5vc', '5V', 'c_5v', '5V ok'),
+            ('dmm_5vd', '5V', 'd_5v', '5V ok'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ('ui_yesnodisplay', 'Notify', 'yesnodisplay', 'Check all displays'),
             ))
-        self['dmm'] = (
+        self['dmm'] = (         # This is indexed using position (1-N)
+            None,
             ('dmm_3v3a', 'dmm_5va'), ('dmm_3v3b', 'dmm_5vb'),
             ('dmm_3v3c', 'dmm_5vc'), ('dmm_3v3d', 'dmm_5vd'),
             )
-        self['dmm_lite'] = (
+        self['dmm_lite'] = (    # This is indexed using position (1-N)
+            None,
             ('dmm_5va', ), ('dmm_5vb', ), ('dmm_5vc', ), ('dmm_5vd', ),
             )

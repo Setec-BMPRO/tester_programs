@@ -21,7 +21,7 @@ class RVMN101BInitial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'share.programmer.Nordic',
+                'share.programmer.NRF52',
                 'share.bluetooth.SerialToMAC',
                 ):
             patcher = patch(target)

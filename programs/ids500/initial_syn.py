@@ -49,7 +49,7 @@ class InitialSyn(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        Devices.pic_hex_syn = config.pic_hex_syn
+        Sensors.pic_hex_syn = config.pic_hex_syn
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Program', self._step_program),
@@ -65,7 +65,7 @@ class InitialSyn(share.TestSequence):
         """Check Fixture Lock, apply Vcc and program the board."""
         mes['dmm_lock'](timeout=5)
         dev['dcs_vsec5Vlddtec'].output(5.0, True)
-        dev['program_picSyn'].program()
+        mes['ProgramPIC']()
 
     @share.teststep
     def _step_pwrup(self, dev, mes):
@@ -141,9 +141,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    # Firmware image
-    pic_hex_syn = None
-
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -164,12 +161,8 @@ class Devices(share.Devices):
                 ('rla_syn', tester.Relay, 'RLA7'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # PIC device programmer
-        self['program_picSyn'] = share.programmer.PIC3(
-            pathlib.Path(__file__).parent / self.pic_hex_syn,
-            '18F4321',
-            self['rla_syn']
-            )
+        self['PicKit'] = tester.PicKit(
+            (self.physical_devices['PICKIT'], self['rla_syn']))
 
     def reset(self):
         """Reset instruments."""
@@ -187,6 +180,9 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """ Sensors."""
+
+    # Firmware image
+    pic_hex_syn = None
 
     def open(self):
         """Create all Sensor instances."""
@@ -211,6 +207,11 @@ class Sensors(share.Sensors):
             low=lo_lim, high=hi_lim,
             message=tester.translate('IDS500 Initial Syn', 'AdjR489'),
             caption=tester.translate('IDS500 Initial Syn', 'capAdjLdd'))
+        self['PicKit'] = sensor.PicKit(
+            self.devices['PicKit'],
+            pathlib.Path(__file__).parent / self.pic_hex_syn,
+            '18F4321'
+            )
 
 
 class Measurements(share.Measurements):
@@ -249,4 +250,5 @@ class Measurements(share.Measurements):
             ('dmm_ISIset5V', 'ISIset5V', 'IS_Iset', ''),
             ('ui_AdjLdd', 'Notify', 'oAdjLdd', ''),
             ('dmm_ISIoutPost', 'AdjLimits', 'LDDshunt', ''),
+            ('ProgramPIC', 'ProgramOk', 'PicKit', ''),
             ))

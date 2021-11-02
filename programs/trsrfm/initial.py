@@ -109,7 +109,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Nordic NRF52 device programmer
-        self['progNordic'] = share.programmer.Nordic(
+        self['progNordic'] = share.programmer.NRF52(
             pathlib.Path(__file__).parent / self.sw_image)
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)

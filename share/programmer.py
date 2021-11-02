@@ -230,48 +230,7 @@ class AVR(_Base):
         self.result_check()
 
 
-class JLink(_Base):
-
-    """SEGGER J-Link programmer."""
-
-    bin_nt = pathlib.PureWindowsPath('C:/')
-    bin_posix = pathlib.PurePosixPath('JFlash')
-
-    def __init__(self, projectfile, file):
-        """Create a programmer.
-
-        @param projectfile pathlib.Path instance (Project file)
-        @param file pathlib.Path instance (Program image file)
-
-        """
-        super().__init__()
-        self.projectfile = projectfile
-        self.file = file
-
-    def program_begin(self):
-        """Begin device programming."""
-        binary = {
-            'nt': self.bin_nt,
-            'posix': self.bin_posix,
-            }[os.name]
-        command = [
-            str(binary),
-            '-openprj{0}'.format(self.projectfile),
-            '-open{0}'.format(self.file),
-            '-auto',
-            '-hide',
-            '-exit',
-            ]
-        process = subprocess.Popen(
-            command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        self.result = process.wait()
-
-    def program_wait(self):
-        """Wait for device programming to finish."""
-        self.result_check()
-
-
-class Nordic(_Base):
+class NRF52(_Base):
 
     """Nordic Semiconductors programmer using a NRF52."""
 
@@ -306,7 +265,7 @@ class Nordic(_Base):
             ]
         process = subprocess.Popen(
             command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        result = process.wait()
+        result = process.wait(timeout=60)
         # HACK: Force code an RVSWT101 switch code
         if not result and self.rvswt101_forced_switch_code:
             command = [
@@ -316,114 +275,9 @@ class Nordic(_Base):
                 ]
             process = subprocess.Popen(
                 command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-            result = process.wait()
+            result = process.wait(timeout=60)
         self.result = result
 
     def program_wait(self):
         """Wait for device programming to finish."""
         self.result_check()
-
-
-class _PIC(_Base):
-
-    """Microchip PIC programmer base class."""
-
-    def __init__(self, file, device_type, relay, binary, option_prefix):
-        """Create a programmer.
-
-        @param binary, pathlib.Path instance of the binary
-        @param option_prefix, str
-        """
-
-        super().__init__()
-        self.file = file
-        self.device_type = device_type
-        self.relay = relay
-        self.binary = binary
-        self.option_prefix = option_prefix
-
-    def program_begin(self):
-        """Begin device programming."""
-        command = self.binary
-
-        for option, value in (
-                ('P', self.device_type),
-                ('F', self.file),
-                ('E', ''),
-                ('M', ''),
-                ('Y', ''),
-                ):
-            command.append('{0}{1}{2}'.format(self.option_prefix, option, value))
-        self.relay.set_on()
-        try:
-            self._process = subprocess.Popen(
-                command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        except Exception as exc:
-            self.result = str(exc)
-            self._process = None
-
-    def program_wait(self):
-        """Wait for device programming to finish."""
-        if self._process:
-            self.result = self._process.wait()
-        self.relay.set_off()
-        self.result_check()
-
-
-class PIC3(_PIC):
-
-    """Microchip PIC programmer using a PicKit3 on Windows testers."""
-
-    def __init__(self, file, device_type, relay):
-        """
-        @param file pathlib.Path instance
-        @param device_type PIC device type
-        @param relay Relay device to connect programmer to target
-        """
-
-        binary = [
-            str(pathlib.PureWindowsPath(
-                'C:/Program Files/Microchip-PK3/PK3CMD.exe'))
-            ]
-        option_prefix = '/'
-        super().__init__(file, device_type, relay, binary, option_prefix)
-
-
-class PIC4(_PIC):
-
-    """Microchip PIC programmer using a PicKit4 on Linux testers."""
-
-    def __init__(self, file, device_type, relay):
-        """
-        @param file pathlib.Path instance
-        @param device_type PIC device type
-        @param relay Relay device to connect programmer to target
-        """
-
-        binary = [
-            str(pathlib.Path('java')),
-            '-jar',
-            '/opt/microchip/mplabx/v5.50/mplab_platform/mplab_ipe/ipecmd.jar',
-            '-TPPK4',
-            ]
-        option_prefix = '-'
-        super().__init__(file, device_type, relay, binary, option_prefix)
-
-    def program_begin(self):
-        """Begin device programming."""
-        # Add mplabcomm libs to java.library.path, but remember original_setting.
-        try:
-            self.original_setting = os.environ['LD_LIBRARY_PATH']
-        except:
-            self.original_setting = None
-        lib_path = "/opt/microchip/mplabcomm/3.47.00/lib"
-        os.environ['LD_LIBRARY_PATH'] = lib_path
-        super().program_begin()
-
-    def program_wait(self):
-        """Wait for device programming to finish."""
-        super().program_wait()
-        if self.original_setting is None:
-            del os.environ['LD_LIBRARY_PATH']
-        else:
-            os.environ['LD_LIBRARY_PATH'] = self.original_setting

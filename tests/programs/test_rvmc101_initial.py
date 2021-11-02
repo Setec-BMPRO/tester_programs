@@ -19,7 +19,6 @@ class _RVMC101Initial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'share.programmer.JLink',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)

@@ -128,7 +128,7 @@ class Devices(share.Devices):
             ]
             )
         # Nordic NRF52 device programmer
-        self['progNORDIC'] = share.programmer.Nordic(
+        self['progNORDIC'] = share.programmer.NRF52(
             pathlib.Path(__file__).parent / self.sw_image)
         # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)

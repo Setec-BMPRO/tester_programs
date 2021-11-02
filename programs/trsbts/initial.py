@@ -177,7 +177,7 @@ class Devices(share.Devices):
         pin.insert = pin.set_off    # N/O contacts
         pin.remove = pin.set_on
         # Nordic NRF52 device programmer
-        self['progNordic'] = share.programmer.Nordic(
+        self['progNordic'] = share.programmer.NRF52(
             pathlib.Path(__file__).parent / self.sw_image)
         # Serial connection to the console
         trsbts_ser = serial.Serial(baudrate=115200, timeout=5.0)

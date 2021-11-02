@@ -135,7 +135,7 @@ class Devices(share.Devices):
             reset_relay=self['rla_reset']
             )
         # NRF52 device programmer
-        self['progNRF'] = share.programmer.Nordic(
+        self['progNRF'] = share.programmer.NRF52(
             pathlib.Path(__file__).parent / self.sw_nrf_image)
         # Serial connection to the console
         cn102_ser = serial.Serial(baudrate=115200, timeout=5.0)

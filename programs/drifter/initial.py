@@ -65,7 +65,7 @@ class Initial(share.TestSequence):
             Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self.devices['program_pic'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('CalPre', self._step_cal_pre),
             tester.TestStep('Calibrate', self._step_calibrate),
             )
@@ -75,6 +75,11 @@ class Initial(share.TestSequence):
         """Apply input DC and measure voltages."""
         dev['dcs_Vin'].output(12.0, output=True, delay=2)
         self.measure(('dmm_vin', 'dmm_Vcc'), timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the board."""
+        mes['ProgramPIC']()
 
     @share.teststep
     def _step_cal_pre(self, dev, mes):
@@ -177,13 +182,8 @@ class Devices(share.Devices):
                 ('rla_ZeroCal', tester.Relay, 'RLA2'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # PIC device programmer
-        sw_file = Initial.limitdata[self.parameter]['Software']
-        self['program_pic'] = share.programmer.PIC3(
-            pathlib.Path(__file__).parent / sw_file,
-            '18F87J93',
-            self['rla_Prog']
-            )
+        self['PicKit'] = tester.PicKit(
+            (self.physical_devices['PICKIT'], self['rla_Prog']))
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=9600, timeout=5)
         # Set port separately, as we don't want it opened yet
@@ -218,6 +218,12 @@ class Sensors(share.Sensors):
             dmm, high=5, low=1, rng=10, res=0.00001, scale=-1000.0)
         self['o3V3'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.001)
         self['o0V8'] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.001)
+        sw_file = Initial.limitdata[self.parameter]['Software']
+        self['PicKit'] = sensor.PicKit(
+            self.devices['PicKit'],
+            pathlib.Path(__file__).parent / sw_file,
+            '18F87J93'
+            )
         for sen, cmd in (
             ('pic_Status', 'NVSTATUS'),
             ('pic_ZeroChk', 'ZERO_CURRENT'),
@@ -249,6 +255,7 @@ class Measurements(share.Measurements):
             ('dmm_isense', 'Isense', 'oIsense', ''),
             ('dmm_3V3', '3V3', 'o3V3', ''),
             ('dmm_0V8', '0V8', 'o0V8', ''),
+            ('ProgramPIC', 'ProgramOk', 'PicKit', ''),
             ('pic_Status', 'PicStatus 0', 'pic_Status', ''),
             ('pic_ZeroChk', 'PicZeroChk', 'pic_ZeroChk', ''),
             ('pic_vin', 'PicVin', 'pic_Vin', ''),

@@ -74,8 +74,7 @@ class Initial(share.TestSequence):
     def _step_program(self, dev, mes):
         """Program the PIC micro."""
         dev['rla_Erase'].set_on()
-        mes['dmm_VErase'](timeout=5)
-        dev['program_pic'].program()
+        self.measure(('dmm_VErase', 'ProgramPIC', ), timeout=5)
         dev['rla_Erase'].set_off()
 
     @share.teststep
@@ -345,12 +344,8 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         ev_ser.port = share.config.Fixture.port('017789', 'EV')
         self['ev'] = ev2200.EV2200(ev_ser)
-        # PIC device programmer
-        self['program_pic'] = share.programmer.PIC3(
-            pathlib.Path(__file__).parent / Initial.pic_hex,
-            '18F252',
-            self['rla_Prog']
-            )
+        self['PicKit'] = tester.PicKit(
+            (self.physical_devices['PICKIT'], self['rla_Prog']))
 
     def reset(self):
         """Reset instruments."""
@@ -392,6 +387,11 @@ class Sensors(share.Sensors):
         self['oVchge'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.001)
         self['oibat'] = sensor.Vdc(
             dmm, high=4, low=2, rng=0.1, res=0.000001, scale=100.0)
+        self['PicKit'] = sensor.PicKit(
+            self.devices['PicKit'],
+            pathlib.Path(__file__).parent / Initial.pic_hex,
+            '18F252'
+            )
         self['sn_entry_ini'] = sensor.DataEntry(
             message=tester.translate('cmrsbp_sn', 'msgSnEntryIni'),
             caption=tester.translate('cmrsbp_sn', 'capSnEntry'))
@@ -423,6 +423,7 @@ class MeasureIni(share.Measurements):
             ('dmm_Vchge', 'Vchge', 'oVchge', ''),
             ('dmm_ibat', 'Ibat', 'oibat', ''),
             ('ui_SnEntry', 'CmrSerNum', 'sn_entry_ini', ''),
+            ('ProgramPIC', 'ProgramOk', 'PicKit', ''),
             ))
 
 

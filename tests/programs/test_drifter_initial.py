@@ -16,7 +16,6 @@ class _DrifterInitial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.programmer.PIC3',
                 'programs.drifter.console.Console',
                 ):
             patcher = patch(target)
@@ -31,6 +30,9 @@ class _DrifterInitial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'PowerUp': (
                     (sen['oVin'], 12.0), (sen['oVcc'], 3.3),
+                    ),
+                'Program': (
+                    (sen['PicKit'], 0),
                     ),
                 'CalPre': (
                     (sen['oVsw'], 3.3), (sen['oVref'], 3.3),
@@ -54,7 +56,7 @@ class _DrifterInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(22, len(result.readings))
+        self.assertEqual(23, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'Program', 'CalPre','Calibrate'], self.tester.ut_steps)
 

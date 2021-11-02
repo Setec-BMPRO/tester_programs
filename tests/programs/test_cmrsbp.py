@@ -62,7 +62,6 @@ class CMRSBPInitial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-                'share.programmer.PIC3',
                 'serial.Serial',
                 ):
             patcher = patch(target)
@@ -84,6 +83,7 @@ class CMRSBPInitial(ProgramTestCase):
                     ),
                 'Program': (
                     (sen['oVcc'], 5.0),
+                    (sen['PicKit'], 0),
                     ),
                 'CheckPicValues': (
                     ),
@@ -102,7 +102,7 @@ class CMRSBPInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(16, len(result.readings))
+        self.assertEqual(17, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'Program', 'CheckPicValues', 'CheckVcharge',
              'CalBQvolts', 'CalBQcurrent'],

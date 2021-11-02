@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """UnitTest for IDS500 SynBuck Initial Test program."""
 
-from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import ids500
 
@@ -14,13 +13,6 @@ class Ids500InitialSyn(ProgramTestCase):
     prog_class = ids500.InitialSyn
     parameter = None
     debug = False
-
-    def setUp(self):
-        """Per-Test setup."""
-        patcher = patch('share.programmer.PIC3')
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""
@@ -36,6 +28,7 @@ class Ids500InitialSyn(ProgramTestCase):
                     ),
                 'Program': (
                     (sen['Lock'], 10.0),
+                    (sen['PicKit'], 0),
                     ),
                 'TecEnable': (
                     (sen['TEC_Vmon'], (0.5, 2.5, 5.0)),
@@ -61,7 +54,7 @@ class Ids500InitialSyn(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(33, len(result.readings))
+        self.assertEqual(34, len(result.readings))
         self.assertEqual(
             ['Program', 'PowerUp', 'TecEnable', 'TecReverse',
              'LddEnable', 'ISSetAdj'],

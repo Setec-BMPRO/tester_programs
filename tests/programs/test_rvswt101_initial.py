@@ -23,7 +23,7 @@ class RVSWT101Initial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.programmer.Nordic',
+                'share.programmer.NRF52',
                 'share.bluetooth.RaspberryBluetooth',
                 'share.bluetooth.SerialToMAC',
                 ):

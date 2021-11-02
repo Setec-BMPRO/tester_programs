@@ -42,7 +42,6 @@ class Initial(share.TestSequence):
         tester.LimitLow('InOCP', 13.24),
         tester.LimitBetween('OCP', _ocp_low, _ocp_high),
         tester.LimitLow('FixtureLock', 200),
-        tester.LimitInteger('ProgramOk', 0),
         )
     # Test limit selection keyed by program parameter
     limitdata = {
