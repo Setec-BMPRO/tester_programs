@@ -125,7 +125,7 @@ class SX600(Config):
         tester.LimitPercent('12Vnl', 11.98, 1.3),
         tester.LimitPercent('24Vnl', 24.03, 1.4),
         # Load regulation (values in %)
-        tester.LimitBetween('Reg12V', 0.0, 5.0),
+        tester.LimitBetween('Reg12V', -0.05, 5.0),
         tester.LimitBetween('Reg24V', -0.05, 7.5),
         )
 
