@@ -139,14 +139,13 @@ class Devices(share.Devices):
         self['can'].rvc_mode = True
         self.add_closer(self.close_can)
         self['display'] = display.LEDControl(self['can'])
-        if self.parameter == 'NXP':
-            arm_port = share.config.Fixture.port('032870', 'ARM')
-            self['program_arm'] = share.programmer.ARM(
-                arm_port,
-                pathlib.Path(__file__).parent / self.sw_image,
-                boot_relay=self['rla_boot'],
-                reset_relay=self['rla_reset']
-                )
+        arm_port = share.config.Fixture.port('032870', 'ARM')
+        self['program_arm'] = share.programmer.ARM(
+            arm_port,
+            pathlib.Path(__file__).parent / self.sw_image,
+            boot_relay=self['rla_boot'],
+            reset_relay=self['rla_reset']
+            )
         self['selector'] = [    # This is indexed using position (1-N)
             None,
             self['rla_pos1'], self['rla_pos2'],

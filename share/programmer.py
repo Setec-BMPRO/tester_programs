@@ -126,14 +126,14 @@ class ARM(_Base):
         """
         super().__init__()
         self._port = port
+        self._file = file
         self._baudrate = baudrate
         self._erase_only = erase_only
         self._verify = verify
         self._crpmode = crpmode
         self._boot_relay = boot_relay
         self._reset_relay = reset_relay
-        with file.open('rb') as infile:
-            self._bindata = bytearray(infile.read())
+        self._bindata = None
 
     def program_begin(self):
         """Program a device.
@@ -142,6 +142,9 @@ class ARM(_Base):
         into bootloader mode (Assert BOOT, pulse RESET).
 
         """
+        if not self._bindata:
+            with self._file.open('rb') as infile:
+                self._bindata = bytearray(infile.read())
         ser = serial.Serial(port=self._port, baudrate=self._baudrate)
         # We need to wait just a little before flushing the port
         time.sleep(0.5)
@@ -241,14 +244,16 @@ class NRF52(_Base):
     # HACK: Force coded RVSWT101 switch code if != 0
     rvswt101_forced_switch_code = 0
 
-    def __init__(self, file):
+    def __init__(self, file, sernum=None):
         """Create a programmer.
 
         @param file pathlib.Path instance
+        @param sernum nRF52 serial number
 
         """
         super().__init__()
-        self.file = file
+        self._file = file
+        self._sernum = sernum
 
     def program_begin(self):
         """Begin device programming."""
@@ -260,9 +265,11 @@ class NRF52(_Base):
             str(binary),
             '-f', 'NRF52',
             '--chiperase',
-            '--program', str(self.file),
+            '--program', str(self._file),
             '--verify',
             ]
+        if self._sernum:
+            command.extend(['--snr', self._sernum])
         process = subprocess.Popen(
             command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
         result = process.wait(timeout=60)
