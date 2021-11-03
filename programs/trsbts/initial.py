@@ -164,6 +164,7 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
+        fixture = '034352'
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -178,11 +179,13 @@ class Devices(share.Devices):
         pin.remove = pin.set_on
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_image)
+            pathlib.Path(__file__).parent / self.sw_image,
+            share.config.Fixture.nrf52_sernum(fixture)
+            )
         # Serial connection to the console
         trsbts_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bl652_port = share.config.Fixture.port('034352', 'NORDIC')
+        bl652_port = share.config.Fixture.port(fixture, 'NORDIC')
         trsbts_ser.port = bl652_port
         # trsbts Console driver
         self['trsbts'] = console.Console(trsbts_ser)

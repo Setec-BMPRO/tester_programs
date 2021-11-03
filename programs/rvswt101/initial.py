@@ -23,7 +23,7 @@ class Initial(share.TestSequence):
         Devices.sw_image = self.cfg['software']
         super().open(self.cfg['limits_ini'], Devices, Sensors, Measurements)
         # Force code the RVSWT101 switch code
-        self.devices['progNORDIC'].rvswt101_forced_switch_code = (
+        self.devices['progNordic'].rvswt101_forced_switch_code = (
             self.cfg['forced_code']
             )
         # Adjust for different console behaviour
@@ -53,7 +53,7 @@ class Initial(share.TestSequence):
         Test the Bluetooth interface.
 
         """
-        pgm = dev['progNORDIC']
+        pgm = dev['progNordic']
         # Open console serial connection
         dev['rvswt101'].open()
         for pos in range(self.per_panel):
@@ -95,6 +95,7 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
+        fixture = '032869'
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -120,7 +121,7 @@ class Devices(share.Devices):
         self['fixture'] = Fixture(
             self['dcs_switch'],
             [
-                'Dummy entry to give 1-based relay number indexing',
+                None,   # Dummy entry to give 1-based relay number indexing
                 self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
                 self['rla_pos4'], self['rla_pos5'], self['rla_pos6'],
                 self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
@@ -128,8 +129,10 @@ class Devices(share.Devices):
             ]
             )
         # Nordic NRF52 device programmer
-        self['progNORDIC'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_image)
+        self['progNordic'] = share.programmer.NRF52(
+            pathlib.Path(__file__).parent / self.sw_image,
+            share.config.Fixture.nrf52_sernum(fixture)
+            )
         # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

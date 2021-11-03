@@ -108,9 +108,10 @@ class Fixture():
             # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
             },
-        '028468': {     # CN101 Initial
+        '028468': {     # CN101,2,3 Initial
             'BLE': _ftdi_hub_1,
             'ARM': _ftdi_hub_2,
+            'nRF52': None,
             },
         '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
             'ARM': _ftdi_hub_1,
@@ -120,11 +121,13 @@ class Fixture():
         '032869': {     # RVSWT101 Initial
             'NORDIC': _ftdi_hub_1,
             # Hub port 2: Nordic NRF52 device programmer
+            'nRF52': None,
             },
         '032871': {     # RVMN101B Initial
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
+            'nRF52': None,
             },
         '033030': {     # RVSWT101 Final
             # Hub port 1:
@@ -134,10 +137,12 @@ class Fixture():
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
+            'nRF52': None,
             },
         '034352': {     # TRSBTS Initial
             'NORDIC': _ftdi_hub_1,
             # Hub port 2: Nordic NRF52 device programmer
+            'nRF52': None,
             },
         '034400': {     # BP35-II Initial
             'ARM': _ftdi_hub_1,
@@ -148,15 +153,18 @@ class Fixture():
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
+            'nRF52': None,
             },
         '034882': {     # TRSRFM Initial
             'NORDIC': _ftdi_hub_1,
             # Hub port 2: Nordic NRF52 device programmer
+            'nRF52': None,
             },
         '035827': {     # SmartLink201 Initial
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
+            'nRF52': None,
             },
         }
 
@@ -174,3 +182,13 @@ class Fixture():
         if System.tester_type == 'ATE4' and result == '/dev/ttyACM0':
             result = '/dev/ttyACM1'
         return result
+
+    @classmethod
+    def nrf52_sernum(cls, fixture):
+        """Lookup the nRF52 serial number in a fixture.
+
+        @param fixture Fixture ID
+        @return Serial number string
+
+        """
+        return cls._data[fixture]['nRF52']

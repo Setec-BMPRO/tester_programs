@@ -99,6 +99,7 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
+        fixture = '034882'
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -110,11 +111,13 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_image)
+            pathlib.Path(__file__).parent / self.sw_image,
+            share.config.Fixture.nrf52_sernum(fixture)
+            )
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        trsrfm_ser.port = share.config.Fixture.port('034882', 'NORDIC')
+        trsrfm_ser.port = share.config.Fixture.port(fixture, 'NORDIC')
         # Console driver
         self['trsrfm'] = console.Console(trsrfm_ser)
         # Connection to RaspberryPi bluetooth server

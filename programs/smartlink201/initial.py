@@ -152,7 +152,9 @@ class Devices(share.Devices):
             )
         # Nordic NRF52 device programmer
         self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_nrf_image)
+            pathlib.Path(__file__).parent / self.sw_nrf_image,
+            share.config.Fixture.nrf52_sernum(fixture)
+            )
         # Serial connection to the Nordic console
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
         #   Set port separately, as we don't want it opened yet

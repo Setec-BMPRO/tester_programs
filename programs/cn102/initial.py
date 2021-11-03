@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),
-            tester.TestStep('PgmNordic', self.devices['progNRF'].program),
+            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
             tester.TestStep('TestArm', self._step_test_arm),
             tester.TestStep('TankSense', self._step_tank_sense),
             tester.TestStep('Bluetooth', self._step_bluetooth),
@@ -112,6 +112,7 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
+        fixture = '028468'
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
@@ -126,7 +127,7 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port('028468', 'ARM')
+        arm_port = share.config.Fixture.port(fixture, 'ARM')
         self['progARM'] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_arm_image,
@@ -135,8 +136,10 @@ class Devices(share.Devices):
             reset_relay=self['rla_reset']
             )
         # NRF52 device programmer
-        self['progNRF'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_nrf_image)
+        self['progNordic'] = share.programmer.NRF52(
+            pathlib.Path(__file__).parent / self.sw_nrf_image,
+            share.config.Fixture.nrf52_sernum(fixture)
+            )
         # Serial connection to the console
         cn102_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
