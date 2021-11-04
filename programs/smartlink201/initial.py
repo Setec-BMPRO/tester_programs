@@ -69,7 +69,7 @@ class Initial(share.TestSequence):
             meas2 += ('dmm_S5tank', )
         # Do the test
         self.measure(meas1, timeout=5)
-        dev['dcs_Vbatt'].output(self.vin_set, output=True)
+        dev['dcs_Vbatt'].output(self.vin_set, output=True, delay=1)
         self.measure(meas2, timeout=5)
 
     @share.teststep
