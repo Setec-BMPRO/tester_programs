@@ -197,7 +197,9 @@ class Sensors(share.Sensors):
                 dmm, high=9, low=1, rng=10, res=0.01, position=4)
         self['MirCAN'] = sensor.MirrorReadingBoolean()
         self['JLink'] = sensor.JLink(
-            self.devices['JLink'], self.projectfile, self.sw_image)
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_image)
         self['yesnodisplay'] = sensor.YesNo(
             message=tester.translate('rvmc101_initial', 'DisplaysOn?'),
             caption=tester.translate('rvmc101_initial', 'capDisplay'),
