@@ -76,7 +76,7 @@ class Initial(share.TestSequence):
                     pgm.program()   # A device
                 else:
                     pgm = mes['JLink']
-                    pgm.position = pos
+                    pgm.sensor.position = pos
                     pgm()           # A measurement
                 sel[pos].set_off()
 
@@ -85,12 +85,14 @@ class Initial(share.TestSequence):
         """Check all 7-segment displays."""
         dev['rla_reset'].pulse(0.01)    # Opto, not a relay
         sel = dev['selector']
+        mes_dis = mes['ui_yesnodisplay']
         for pos in self._positions():
             if tester.Measurement.position_enabled(pos):
+                mes_dis.sensor.position = pos
                 sel[pos].set_on()
                 sel[pos].opc()
                 with dev['display']:
-                    mes['ui_yesnodisplay']()
+                    mes_dis()
                 sel[pos].set_off()
 
     @share.teststep
