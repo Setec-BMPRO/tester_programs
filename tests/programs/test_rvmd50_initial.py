@@ -13,7 +13,7 @@ class RVMD50Initial(ProgramTestCase):
     """RVMD50 Initial program test suite."""
 
     prog_class = rvmd50.Initial
-    parameter = None
+    parameter = 'NXP'
     debug = False
 
     def setUp(self):
@@ -34,6 +34,9 @@ class RVMD50Initial(ProgramTestCase):
                 'PowerUp': (
                     (sen['vin'], 7.5),
                     (sen['3v3'], 3.3),
+                    ),
+                'Program': (
+                    (sen['JLink'], 0),
                     ),
                 'Display': (
                     (sen['bklght'], (0.0, 3.0)),

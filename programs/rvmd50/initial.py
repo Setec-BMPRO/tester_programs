@@ -15,8 +15,11 @@ class Initial(share.TestSequence):
 
     """RVMD50 Initial Test Program."""
 
+    sw_image = {
+        'ATMEL': 'rvmd_sam_1.8.0-0-g7ecca2c.bin',
+        'NXP': 'rvmd50_1.6.bin',
+        }
     vin_set = 8.1               # Input voltage to power the unit
-    sw_file = 'rvmd50_1.6.bin'  # Device software
     testlimits = (              # Test limits
         tester.LimitBetween('Vin', 7.0, 8.0, doc='Input voltage present'),
         tester.LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
@@ -26,11 +29,11 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        Devices.sw_file = self.sw_file
+        Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
         super().open(self.testlimits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('Program', self.devices['programmer'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('Display', self._step_display),
             )
 
@@ -40,6 +43,14 @@ class Initial(share.TestSequence):
         dev['rla_watchdog_disable'].set_on()
         dev['dcs_vin'].output(self.vin_set, output=True)
         self.measure(('dmm_vin', 'dmm_3v3'), timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the micro."""
+        if self.parameter == 'NXP':
+            dev['program_arm'].program()    # A device
+        else:
+            mes['JLink']()                  # A measurement
 
     @share.teststep
     def _step_display(self, dev, mes):
@@ -54,7 +65,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_file = None
+    sw_image = None
 
     def open(self):
         """Create all Instruments."""
@@ -64,18 +75,18 @@ class Devices(share.Devices):
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_watchdog_disable', tester.Relay, 'RLA3'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        self['programmer'] = share.programmer.ARM(
+        self['program_arm'] = share.programmer.ARM(
             share.config.Fixture.port('029687', 'ARM'),
-            pathlib.Path(__file__).parent / self.sw_file,
+            pathlib.Path(__file__).parent / self.sw_image,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset']
             )
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
-        self['can'].verbose = False
         self['display'] = display.DisplayControl(self['can'])
         self.add_closer(self.close_can)
 
@@ -95,6 +106,9 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    projectfile = 'rvmd50_atmel.jflash'
+    sw_image = None
+
     def open(self):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
@@ -105,6 +119,10 @@ class Sensors(share.Sensors):
         self['3v3'].doc = 'U1 output'
         self['bklght'] = sensor.Vdc(dmm, high=1, low=2, rng=10, res=0.01)
         self['bklght'].doc = 'Across backlight'
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_image)
         self['YesNoDisplay'] = sensor.YesNo(
             message=tester.translate('rvmd50', 'DisplayCheck?'),
             caption=tester.translate('rvmd50', 'capDisplayCheck'))
@@ -123,4 +141,5 @@ class Measurements(share.Measurements):
             ('dmm_bklghtoff', 'BkLghtOff', 'bklght', 'Test backlight'),
             ('dmm_bklghton', 'BkLghtOn', 'bklght', 'Test backlight'),
             ('YesNoDisplayOk', 'Notify', 'YesNoDisplay', 'Button on'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))
