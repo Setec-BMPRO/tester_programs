@@ -60,7 +60,7 @@ class Initial(share.TestSequence):
         mes['dmm_vin'](timeout=5)
         name = 'dmm' if self.is_full else 'dmm_lite'
         for pos in self._positions():
-            self.measure(mes[name][pos], timeout=10)
+            self.measure(mes[name][pos], timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):

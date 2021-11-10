@@ -63,7 +63,7 @@ class RVMC101Initial(_RVMC101Initial):
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
-            self.assertEqual(8, len(res.readings))
+            self.assertEqual(5, len(res.readings))
         self.assertEqual(
             ['PowerUp', 'Program', 'Display', 'CanBus'],
             self.tester.ut_steps)
