@@ -7,6 +7,8 @@ A Bluetooth v2.1 development board with a USB serial interface.
 
 """
 
+# TODO: Replace with share.bluetooth.RaspberryBluetooth.scan_advert_blemac()
+
 import logging
 import time
 import re
