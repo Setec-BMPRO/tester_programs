@@ -7,10 +7,10 @@ A Bluetooth v2.1 development board with a USB serial interface.
 
 """
 
-import logging
-import time
-import re
 import json
+import logging
+import re
+import time
 
 
 class BtRadioError(Exception):
