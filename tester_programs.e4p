@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2021-10-27, 16:49:14 -->
+<!-- Saved: 2021-11-12, 14:52:33 -->
 <!-- Copyright (C) 2021 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -188,7 +188,6 @@
     <Source>share/bluetooth/eunistone_pan1322.py</Source>
     <Source>share/bluetooth/mac.py</Source>
     <Source>share/bluetooth/raspblue.py</Source>
-    <Source>share/bluetooth/rn4020.py</Source>
     <Source>share/can/__init__.py</Source>
     <Source>share/can/setec_rvc.py</Source>
     <Source>share/config.py</Source>

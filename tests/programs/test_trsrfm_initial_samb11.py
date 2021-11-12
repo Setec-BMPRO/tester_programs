@@ -27,12 +27,6 @@ class TRSRFMInitial(ProgramTestCase):
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
-# TODO: Remove when using share.bluetooth.RaspberryBluetooth
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         super().setUp()
 
     def test_pass_run(self):

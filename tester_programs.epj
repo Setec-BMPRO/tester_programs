@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-10-27, 16:26:51"
+    "saved": "2021-11-12, 14:26:51"
   },
   "project": {
     "AUTHOR": "",
@@ -261,7 +261,6 @@
       "share/bluetooth/eunistone_pan1322.py",
       "share/bluetooth/mac.py",
       "share/bluetooth/raspblue.py",
-      "share/bluetooth/rn4020.py",
       "share/can/__init__.py",
       "share/can/setec_rvc.py",
       "share/config.py",
