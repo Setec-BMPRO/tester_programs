@@ -14,9 +14,6 @@ import tester
 from . import config, console
 
 
-_USE_PIBLE = False
-
-
 class Initial(share.TestSequence):
 
     """CN101 Initial Test Program."""
@@ -82,16 +79,9 @@ class Initial(share.TestSequence):
         dev['dcs_vin'].output(12.0, delay=15.0)
         btmac = setec.MAC.loads(mes['cn101_btmac']().reading1)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
-# TODO: Use share.bluetooth.RaspberryBluetooth.scan_advert_blemac()
-        if _USE_PIBLE:
-            reply = dev['pi_bt'].scan_advert_blemac(
-                btmac.dumps(separator=''), timeout=20)
-            reply = reply is not None   # To boolean
-        else:
-            ble = dev['ble']
-            ble.open()
-            reply = ble.scan(btmac)
-            ble.close()
+        reply = dev['pi_bt'].scan_advert_blemac(
+            btmac.dumps(separator=''), timeout=20)
+        reply = reply is not None   # To boolean
         self._logger.debug('Bluetooth MAC detected: %s', reply)
         mes['detectBT'].sensor.store(reply)
         mes['detectBT']()
@@ -148,16 +138,9 @@ class Devices(share.Devices):
             self.physical_devices['CAN'],
             tester.devphysical.can.SETECDeviceID.cn101)
         self['cn101tunnel'] = console.TunnelConsole(tunnel)
-        if _USE_PIBLE:
-            # Connection to RaspberryPi bluetooth server
-            self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
-                share.config.System.ble_url())
-        else:
-            # Serial connection to the BLE module
-            ble_ser = serial.Serial(baudrate=115200, timeout=0.1, rtscts=True)
-            # Set port separately, as we don't want it opened yet
-            ble_ser.port = share.config.Fixture.port('028468', 'BLE')
-            self['ble'] = share.bluetooth.BleRadio(ble_ser)
+        # Connection to RaspberryPi bluetooth server
+        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
+            share.config.System.ble_url())
         # Apply power to fixture circuits.
         self['dcs_vcom'].output(12.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))

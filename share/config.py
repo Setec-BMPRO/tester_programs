@@ -109,8 +109,8 @@ class Fixture():
             'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
             },
         '028468': {     # CN101,2,3 Initial
-            'BLE': _ftdi_hub_1,
-            'ARM': _ftdi_hub_2,
+            'ARM': _ftdi_hub_1,
+            # Hub port 2:
             'nRF52': '682195648',
             },
         '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
