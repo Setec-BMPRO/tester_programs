@@ -5,6 +5,7 @@
 
 import pathlib
 
+import attr
 import tester
 
 import share
@@ -40,6 +41,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input voltage and measure voltages."""
+        dev['rla_reset'].set_on()
         dev['rla_watchdog_disable'].set_on()
         dev['dcs_vin'].output(self.vin_set, output=True)
         self.measure(('dmm_vin', 'dmm_3v3'), timeout=5)
@@ -61,6 +63,29 @@ class Initial(share.TestSequence):
             self.measure(('YesNoDisplayOk', 'dmm_bklghton'), timeout=5)
 
 
+@attr.s
+class LatchingRelay():
+
+    """A latching relay, with 'on' and 'off' drive lines."""
+
+    rla_on = attr.ib()
+    rla_off = attr.ib()
+    _pulse_time = attr.ib(init=False, default=0.01)
+
+    def set_on(self):
+        """Set ON."""
+        self.rla_on.pulse(self._pulse_time)
+
+    def set_off(self):
+        """Set OFF."""
+        self.rla_off.pulse(self._pulse_time)
+
+    def pulse(self, duration=2.0, delay=0):
+        """Pulse output ON for a time."""
+        self.rla_on.pulse(self._pulse_time, delay=duration)
+        self.rla_off.pulse(self._pulse_time, delay=delay)
+
+
 class Devices(share.Devices):
 
     """Devices."""
@@ -72,12 +97,15 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_boot', tester.Relay, 'RLA2'),
-                ('rla_watchdog_disable', tester.Relay, 'RLA3'),
+                ('rla_rst_on', tester.Relay, 'RLA1'),
+                ('rla_rst_off', tester.Relay, 'RLA2'),
+                ('rla_boot', tester.Relay, 'RLA3'),
+                ('rla_watchdog_disable', tester.Relay, 'RLA4'),
                 ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        self['rla_reset'] = LatchingRelay(
+            self['rla_rst_on'], self['rla_rst_off'])
         # ARM device programmer
         self['program_arm'] = share.programmer.ARM(
             share.config.Fixture.port('029687', 'ARM'),
