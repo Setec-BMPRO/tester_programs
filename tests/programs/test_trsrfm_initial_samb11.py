@@ -21,6 +21,13 @@ class TRSRFMInitial(ProgramTestCase):
         patcher = patch('programs.trsrfm_samb11.console.Console')
         self.addCleanup(patcher.stop)
         patcher.start()
+        mypi = MagicMock(name='MyRasPi')
+        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
+        patcher = patch(
+            'share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+# TODO: Remove when using share.bluetooth.RaspberryBluetooth
         mybt = MagicMock(name='MyBleRadio')
         mybt.scan.return_value = True
         patcher = patch('share.bluetooth.BleRadio', return_value=mybt)

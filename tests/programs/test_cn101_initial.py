@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for CN101 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import cn101
 
@@ -18,13 +18,9 @@ class CN101Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        mybt = MagicMock(name='MyBleRadio')
-        mybt.scan.return_value = True
-        patcher = patch('share.bluetooth.BleRadio', return_value=mybt)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         for target in (
                 'share.programmer.ARM',
+                'share.bluetooth.RaspberryBluetooth',
                 'programs.cn101.console.DirectConsole',
                 'programs.cn101.console.TunnelConsole',
                 ):

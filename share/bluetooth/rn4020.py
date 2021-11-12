@@ -25,7 +25,7 @@ The module will now remember these settings in NV Memory.
 
 """
 
-# TODO: Replace with share.bluetooth.RaspberryBluetooth.scan_advert_blemac()
+# TODO: Remove this deprecated file once rn4020 is no longer used
 
 import threading
 import logging

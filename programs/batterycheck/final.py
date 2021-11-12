@@ -44,6 +44,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_test_bluetooth(self, dev, mes):
         """Scan for BT devices and match against serial number."""
+# TODO: Can we use share.bluetooth.RaspberryBluetooth for this?
         blue = dev['bt']
         blue.open()
         mac, pin = blue.scan(self.sernum)
