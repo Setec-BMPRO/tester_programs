@@ -24,7 +24,10 @@ class BatteryCheckFinal(ProgramTestCase):
             'SoftwareVersion': batterycheck.Final.arm_version,
             'SerialID': self.serial,
             }
-        patcher = patch('share.bluetooth.BtRadio', return_value=mybt)
+        patcher = patch(
+            'programs.batterycheck.eunistone_pan1322.BtRadio',
+            return_value=mybt
+            )
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

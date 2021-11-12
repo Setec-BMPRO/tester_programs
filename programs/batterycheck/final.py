@@ -9,6 +9,8 @@ import tester
 
 import share
 
+from . import eunistone_pan1322
+
 
 class Final(share.TestSequence):
 
@@ -44,7 +46,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_test_bluetooth(self, dev, mes):
         """Scan for BT devices and match against serial number."""
-# TODO: Can we use share.bluetooth.RaspberryBluetooth for this?
         blue = dev['bt']
         blue.open()
         mac, pin = blue.scan(self.sernum)
@@ -54,7 +55,7 @@ class Final(share.TestSequence):
             blue.reset()
             blue.pair(mac, pin)
             _paired = True
-        except share.bluetooth.BtRadioError:
+        except eunistone_pan1322.BtRadioError:
             _paired = False
         mes['BTpair'].sensor.store(_paired)
         mes['BTpair']()
@@ -85,7 +86,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         btport.port = share.config.Fixture.port('027013', 'BT')
         # BT Radio driver
-        self['bt'] = share.bluetooth.BtRadio(btport)
+        self['bt'] = eunistone_pan1322.BtRadio(btport)
 
     def reset(self):
         """Reset instruments."""

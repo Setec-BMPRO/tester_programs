@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2021-11-12, 14:52:33 -->
+<!-- Saved: 2021-11-12, 15:55:33 -->
 <!-- Copyright (C) 2021 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -21,6 +21,7 @@
     <Source>programs/atxg450/__init__.py</Source>
     <Source>programs/atxg450/final_2v.py</Source>
     <Source>programs/batterycheck/__init__.py</Source>
+    <Source>programs/batterycheck/eunistone_pan1322.py</Source>
     <Source>programs/batterycheck/final.py</Source>
     <Source>programs/bc15_25/__init__.py</Source>
     <Source>programs/bc15_25/config.py</Source>
@@ -184,8 +185,6 @@
     <Source>programs/wtsi200/final.py</Source>
     <Source>share/__init__.py</Source>
     <Source>share/bluetooth/__init__.py</Source>
-    <Source>share/bluetooth/_base.py</Source>
-    <Source>share/bluetooth/eunistone_pan1322.py</Source>
     <Source>share/bluetooth/mac.py</Source>
     <Source>share/bluetooth/raspblue.py</Source>
     <Source>share/can/__init__.py</Source>

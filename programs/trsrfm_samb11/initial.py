@@ -35,7 +35,7 @@ class Initial(share.TestSequence):
         tester.LimitRegExp('ARM-SwVer',
             '^{0}$'.format(sw_version.replace('.', r'\.')),
             doc='Software version'),
-        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+        tester.LimitRegExp('BtMac', '(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}',
             doc='Valid MAC address'),
         tester.LimitBoolean('DetectBT', True, doc='MAC address detected'),
         )

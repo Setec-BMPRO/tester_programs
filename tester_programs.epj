@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-11-12, 14:26:51"
+    "saved": "2021-11-12, 15:54:56"
   },
   "project": {
     "AUTHOR": "",
@@ -96,6 +96,7 @@
       "programs/atxg450/__init__.py",
       "programs/atxg450/final_2v.py",
       "programs/batterycheck/__init__.py",
+      "programs/batterycheck/eunistone_pan1322.py",
       "programs/batterycheck/final.py",
       "programs/bc15_25/__init__.py",
       "programs/bc15_25/config.py",
@@ -258,7 +259,6 @@
       "programs/wtsi200/final.py",
       "share/__init__.py",
       "share/bluetooth/__init__.py",
-      "share/bluetooth/eunistone_pan1322.py",
       "share/bluetooth/mac.py",
       "share/bluetooth/raspblue.py",
       "share/can/__init__.py",
@@ -359,7 +359,6 @@
       "tests/share/test_console.py",
       "tests/share/test_parameter.py",
       "testsuite.py",
-      "share/bluetooth/_base.py",
       "programs/rvswt101/arduino.py",
       "tests/programs/test_rvswt101_arduino.py",
       "programs/cn101/config.py",

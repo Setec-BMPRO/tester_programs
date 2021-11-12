@@ -8,7 +8,6 @@ import logging
 import attr
 
 import tester
-import share
 
 
 def get(parameter, uut):
@@ -57,7 +56,7 @@ class Config():
     _base_limits_initial = _base_limits + (
         tester.LimitPercent('3V3', 3.3, 3.0,
             doc='3V3 present'),
-        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex,
+        tester.LimitRegExp('BtMac', '(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}',
             doc='Valid MAC address '),
         tester.LimitBoolean('DetectBT', True,
             doc='MAC address detected'),

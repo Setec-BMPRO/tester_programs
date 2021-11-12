@@ -6,7 +6,6 @@
 import logging
 
 import tester
-import share
 
 
 def get(parameter, uut):
@@ -33,7 +32,7 @@ class CN101():
         tester.LimitDelta('Vin', 8.0, 0.5),
         tester.LimitPercent('3V3', 3.30, 3.0),
         tester.LimitInteger('CAN_BIND', 1 << 28),
-        tester.LimitRegExp('BtMac', share.bluetooth.MAC.line_regex),
+        tester.LimitRegExp('BtMac', '(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}'),
         tester.LimitBoolean('DetectBT', True),
         tester.LimitInteger('Tank', 5),
         )
