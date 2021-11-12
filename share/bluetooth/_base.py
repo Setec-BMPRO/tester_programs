@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2014 SETEC Pty Ltd.
 """Base classes for Bluetooth."""
-# TODO: Remove this deprecated file once eunistone_pan1322 & rn4020 are gone
+# TODO: Remove this deprecated file once eunistone_pan1322 is gone
 
 import re
 

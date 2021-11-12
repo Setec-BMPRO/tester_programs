@@ -113,6 +113,7 @@ class Fixture():
             # Hub port 2:
             'nRF52': '682195648',
             },
+# TODO: Remove the USB Hub & RN4020 on port 2
         '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
             'ARM': _ftdi_hub_1,
             # Hub port 2: FTDI
