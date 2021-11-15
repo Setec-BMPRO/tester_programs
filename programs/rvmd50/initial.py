@@ -96,6 +96,7 @@ class Devices(share.Devices):
         """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
+                ('dcs_rst', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_rst_on', tester.Relay, 'RLA1'),
                 ('rla_rst_off', tester.Relay, 'RLA2'),
@@ -115,8 +116,10 @@ class Devices(share.Devices):
             )
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
-        self['display'] = display.DisplayControl(self['can'])
         self.add_closer(self.close_can)
+        self['display'] = display.DisplayControl(self['can'])
+        self['dcs_rst'].output(8.0, True)   # Fixture RESET circuit
+        self.add_closer(lambda: self['dcs_rst'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
