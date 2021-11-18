@@ -5,6 +5,7 @@
 
 import pathlib
 
+import attr
 import serial
 import tester
 
@@ -118,6 +119,29 @@ class Initial(share.TestSequence):
         armtunnel.close()
 
 
+@attr.s
+class LatchingRelay():
+
+    """A latching relay, with 'on' and 'off' drive lines."""
+
+    rla_on = attr.ib()
+    rla_off = attr.ib()
+    _pulse_time = attr.ib(init=False, default=0.01)
+
+    def set_on(self):
+        """Set ON."""
+        self.rla_on.pulse(self._pulse_time)
+
+    def set_off(self):
+        """Set OFF."""
+        self.rla_off.pulse(self._pulse_time)
+
+    def pulse(self, duration=2.0, delay=0):
+        """Pulse output ON for a time."""
+        self.rla_on.pulse(self._pulse_time, delay=duration)
+        self.rla_off.pulse(self._pulse_time, delay=delay)
+
+
 class Devices(share.Devices):
 
     """Devices."""
@@ -128,12 +152,16 @@ class Devices(share.Devices):
         """Create all Instruments."""
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
+                ('dcs_rst', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_boot', tester.Relay, 'RLA2'),
-                ('rla_wd', tester.Relay, 'RLA3'),
+                ('rla_rst_on', tester.Relay, 'RLA1'),
+                ('rla_rst_off', tester.Relay, 'RLA2'),
+                ('rla_boot', tester.Relay, 'RLA3'),
+                ('rla_wd', tester.Relay, 'RLA4'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        self['rla_reset'] = LatchingRelay(
+            self['rla_rst_on'], self['rla_rst_off'])
         arm_port = share.config.Fixture.port('029687', 'ARM')
         # ARM device programmer
         self['programmer'] = share.programmer.ARM(
@@ -154,6 +182,8 @@ class Devices(share.Devices):
             self.physical_devices['CAN'],
             tester.devphysical.can.SETECDeviceID.rvview)
         self['armtunnel'] = console.TunnelConsole(tunnel)
+        self['dcs_rst'].output(8.0, True)   # Fixture RESET circuit
+        self.add_closer(lambda: self['dcs_rst'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
