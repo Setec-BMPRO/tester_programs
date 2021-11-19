@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
     """RVMD50 Initial Test Program."""
 
     sw_image = {
-        'ATMEL': 'rvmd_sam_1.8.0-0-g7ecca2c.bin',
+        'ATMEL': 'rvmd_sam_1.9.0-0-gd59e853.bin',
         'NXP': 'rvmd50_1.6.bin',
         }
     vin_set = 8.1               # Input voltage to power the unit
