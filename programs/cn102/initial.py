@@ -20,13 +20,9 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_initial
-        Devices.sw_arm_image = self.cfg.sw_arm_image
-        Devices.sw_nrf_image = self.cfg.sw_nrf_image
+        Devices.sw_nxp_image = self.cfg.sw_nxp_image
+        Devices.sw_nordic_image = self.cfg.sw_nordic_image
         super().open(limits, Devices, Sensors, Measurements)
-        self.limits['SwArmVer'].adjust(
-            '^{0}$'.format(self.cfg.sw_arm_version.replace('.', r'\.')))
-        self.limits['SwNrfVer'].adjust(
-            '^{0}$'.format(self.cfg.sw_nrf_version.replace('.', r'\.')))
         self.steps = (
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
@@ -67,7 +63,6 @@ class Initial(share.TestSequence):
             dev['rla_reset'],
             self.cfg.banner_lines
             )
-        mes['cn102_swver']()
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
@@ -95,20 +90,14 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes['cn102_can_bind'](timeout=10)
-        # CN103 had CAN console tunnel removed.
-        if self.parameter == '102':
-            cn102tunnel = dev['cn102tunnel']
-            cn102tunnel.open()
-            mes['TunnelSwVer']()
-            cn102tunnel.close()
 
 
 class Devices(share.Devices):
 
     """Devices."""
 
-    sw_arm_image = None     # ARM software image
-    sw_nrf_image = None     # Nordic software image
+    sw_nxp_image = None     # ARM software image
+    sw_nordic_image = None     # Nordic software image
 
     def open(self):
         """Create all Instruments."""
@@ -130,14 +119,14 @@ class Devices(share.Devices):
         arm_port = share.config.Fixture.port(fixture, 'ARM')
         self['progARM'] = share.programmer.ARM(
             arm_port,
-            pathlib.Path(__file__).parent / self.sw_arm_image,
+            pathlib.Path(__file__).parent / self.sw_nxp_image,
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset']
             )
         # NRF52 device programmer
         self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_nrf_image,
+            pathlib.Path(__file__).parent / self.sw_nordic_image,
             share.config.Fixture.nrf52_sernum(fixture)
             )
         # Serial connection to the console
@@ -146,11 +135,6 @@ class Devices(share.Devices):
         cn102_ser.port = arm_port
         # CN102 Console driver
         self['cn102'] = console.DirectConsole(cn102_ser)
-        # Tunneled Console driver
-        tunnel = tester.CANTunnel(
-            self.physical_devices['CAN'],
-            tester.devphysical.can.SETECDeviceID.cn101)
-        self['cn102tunnel'] = console.TunnelConsole(tunnel)
         # Bluetooth connection to server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
@@ -158,7 +142,6 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['cn102'].close()
-        self['cn102tunnel'].close()
         for dcs in ('dcs_vin', 'dcs_vcom'):
             self[dcs].output(0.0, False)
         for rla in (
@@ -187,7 +170,6 @@ class Sensors(share.Sensors):
             caption=tester.translate('cn102_initial', 'capSnEntry'))
         # Console sensors
         cn102 = self.devices['cn102']
-        cn102tunnel = self.devices['cn102tunnel']
         for name, cmdkey in (
                 ('CANBIND', 'CAN_BIND'),
                 ('tank1', 'TANK1'),
@@ -196,11 +178,6 @@ class Sensors(share.Sensors):
                 ('tank4', 'TANK4'),
             ):
             self[name] = sensor.KeyedReading(cn102, cmdkey)
-        for device, name, cmdkey in (
-                (cn102, 'SwVer', 'SW_VER'),
-                (cn102tunnel, 'TunnelSwVer', 'SW_VER'),
-            ):
-            self[name] = sensor.KeyedReadingString(device, cmdkey)
 
 
 class Measurements(share.Measurements):
@@ -216,13 +193,11 @@ class Measurements(share.Measurements):
             ('dmm_vin', 'Vin', 'oVin', ''),
             ('dmm_3v3', '3V3', 'o3V3', ''),
             ('ui_serialnum', 'SerNum', 'oSnEntry', ''),
-            ('cn102_swver', 'SwArmVer', 'SwVer', ''),
             ('tank1_level', 'Tank', 'tank1', ''),
             ('tank2_level', 'Tank', 'tank2', ''),
             ('tank3_level', 'Tank', 'tank3', ''),
             ('tank4_level', 'Tank', 'tank4', ''),
             ('cn102_can_bind', 'CAN_BIND', 'CANBIND', ''),
-            ('TunnelSwVer', 'SwArmVer', 'TunnelSwVer', ''),
             ('scan_ser', 'ScanSer', 'mirscan',
                 'Scan for serial number over bluetooth'),
             ))

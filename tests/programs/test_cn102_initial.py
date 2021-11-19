@@ -23,7 +23,6 @@ class CN102Initial(ProgramTestCase):
                 'share.programmer.NRF52',
                 'share.bluetooth.RaspberryBluetooth',
                 'programs.cn102.console.DirectConsole',
-                'programs.cn102.console.TunnelConsole',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -45,8 +44,6 @@ class CN102Initial(ProgramTestCase):
                     ),
                 'TestArm': (
                     (sen['o3V3'], 3.3),
-                    (sen['SwVer'],
-                        cn102.config.CN102.parameters.sw_arm_version),
                     ),
                 'TankSense': (
                     (sen['tank1'], 5),
@@ -59,8 +56,6 @@ class CN102Initial(ProgramTestCase):
                     ),
                 'CanBus': (
                     (sen['CANBIND'], 1 << 28),
-                    (sen['TunnelSwVer'],
-                        cn102.config.CN102.parameters.sw_arm_version),
                     ),
                 },
             }
@@ -68,7 +63,7 @@ class CN102Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(15, len(result.readings))
+        self.assertEqual(13, len(result.readings))
         self.assertEqual(
             ['PartCheck', 'PowerUp', 'PgmARM', 'PgmNordic', 'TestArm',
              'TankSense', 'Bluetooth', 'CanBus'],

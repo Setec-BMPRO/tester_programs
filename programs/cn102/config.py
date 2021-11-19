@@ -55,23 +55,21 @@ class CN10xParameters():
 
     def __init__(self,
             prefix,
-            sw_arm_version, sw_nrf_version,
+            sw_nxp_version, sw_nordic_version,
             hw_version, banner_lines):
         """Create instance.
 
         @param prefix Filename prefix ('cn102' or 'cn103')
-        @param sw_arm_version ARM (NXP) version
-        @param sw_nrf_version Nordic version
+        @param sw_nxp_version NXP version
+        @param sw_nordic_version Nordic version
         @param hw_version Hardware version
         @param banner_lines Number of startup banner lines
 
         """
-        self.sw_arm_version = sw_arm_version
-        self.sw_arm_image = '{0}_arm_{1}.bin'.format(
-            prefix, sw_arm_version)
-        self.sw_nrf_version = sw_nrf_version
-        self.sw_nrf_image = '{0}_nrf_{1}.hex'.format(
-            prefix, sw_nrf_version)
+        self.sw_nxp_image = '{0}_nxp_{1}.bin'.format(
+            prefix, sw_nxp_version)
+        self.sw_nordic_image = '{0}_nordic_{1}.hex'.format(
+            prefix, sw_nordic_version)
         self.hw_version = hw_version
         self.banner_lines = banner_lines
 
@@ -106,19 +104,17 @@ class CN102(CN10x):
 
     _prefix = 'cn102'
     # Software versions
-    _arm_12 = '1.2.18218.1627'
-    _nordic_10 = '1.0.18106.1260'
-    _rev1_values = CN10xParameters(
+    _values = CN10xParameters(
             prefix=_prefix,
-            sw_arm_version=_arm_12,
-            sw_nrf_version=_nordic_10,
+            sw_nxp_version='1.2.18218.1627',
+            sw_nordic_version='1.0.18106.1260',
             hw_version=(1, 0, 'A'),
             banner_lines=2
             )
     # Revision data dictionary:
     _rev_data = {
-        None: _rev1_values,
-        '1': _rev1_values,
+        None: _values,
+        '1': _values,
         }
 
 
@@ -128,23 +124,30 @@ class CN103(CN10x):
 
     _prefix = 'cn103'
     # Software versions
-    _arm_12 = '1.2.111.2008'
-    _nordic_10 = '1.0.19700.1352'
-    _rev2_values = CN10xParameters(
+    _nxp_1_2 = '1.2.111.2008'
+    _nxp_3 = '1.3.111.2013'
+    _nordic = '1.0.19700.1352'
+    _rev3_values = CN10xParameters(
             prefix=_prefix,
-            sw_arm_version=_arm_12,
-            sw_nrf_version=_nordic_10,
-            hw_version=(2, 0, 'A'),
+            sw_nxp_version=_nxp_3,
+            sw_nordic_version=_nordic,
+            hw_version=(3, 0, 'A'),
             banner_lines=2
             )
     # Revision data dictionary:
     _rev_data = {
-        None: _rev2_values,
-        '2': _rev2_values,
+        None: _rev3_values,
+        '2': CN10xParameters(
+            prefix=_prefix,
+            sw_nxp_version=_nxp_1_2,
+            sw_nordic_version=_nordic,
+            hw_version=(2, 0, 'A'),
+            banner_lines=2
+            ),
         '1': CN10xParameters(
             prefix=_prefix,
-            sw_arm_version=_arm_12,
-            sw_nrf_version=_nordic_10,
+            sw_nxp_version=_nxp_1_2,
+            sw_nordic_version=_nordic,
             hw_version=(1, 0, 'A'),
             banner_lines=2
             ),
