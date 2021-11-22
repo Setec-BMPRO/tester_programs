@@ -137,6 +137,7 @@ class CN103(CN10x):
     # Revision data dictionary:
     _rev_data = {
         None: _rev3_values,
+        '3': _rev3_values,
         '2': CN10xParameters(
             prefix=_prefix,
             sw_nxp_version=_nxp_1_2,
