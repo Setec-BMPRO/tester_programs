@@ -239,8 +239,7 @@ class NRF52(_Base):
 
     bin_nt = pathlib.PureWindowsPath(
         'C:/Program Files/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe')
-    bin_posix = pathlib.PurePosixPath(
-        '/opt/nordic/nrfjprog/nrfjprog')
+    bin_posix = pathlib.PurePosixPath('nrfjprog')
     # HACK: Force coded RVSWT101 switch code if != 0
     rvswt101_forced_switch_code = 0
 
