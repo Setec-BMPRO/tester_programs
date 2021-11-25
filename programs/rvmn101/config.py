@@ -136,14 +136,19 @@ class RVMN101A(Config):
     _nordic_2_6_4 = 'jayco_rvmn101_signed_2.6.4-0-gd1f9eb78_factory_mcuboot.hex'
     _arm_image_1_13 = 'rvmn101_nxp_1.13.bin'
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
-    _rev20_values = _Values(
+    _rev21_values = _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='20A', hardware_rev='14A', banner_lines=5,
+            product_rev='20A', hardware_rev='20', banner_lines=5,
             reversed_output_dict={},
             )
     _rev_data = {
-        None: _rev20_values,
-        '20': _rev20_values,
+        None: _rev21_values,
+        '21': _rev21_values,
+        '20': _Values(
+            nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
+            product_rev='20A', hardware_rev='14A', banner_lines=5,
+            reversed_output_dict={},
+            ),
         '19': _Values(    # PC-27477
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
             product_rev='19C', hardware_rev='13A', banner_lines=5,
