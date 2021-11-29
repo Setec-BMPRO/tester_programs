@@ -40,7 +40,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        self.cfg = config.Config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, uut)
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Devices.sw_nrf_image = self.cfg.sw_nrf_image
         super().open(self.limitdata, Devices, Sensors, Measurements)
