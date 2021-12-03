@@ -6,7 +6,7 @@
 import os
 
 
-class System():
+class System():     # pylint: disable=too-few-public-methods
 
     """System data."""
 

@@ -23,7 +23,7 @@ class SerialIO(abc.ABC):
         self.write_data = bytearray()           # write data buffer
         self.read_data = bytearray()            # read data buffer
 
-    def flushInput(self):
+    def reset_input_buffer(self):
         """Flush input data"""
         self.read_data.clear()
 

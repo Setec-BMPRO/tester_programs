@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
                     continue
                 # Get the MAC address from the console.
                 dev['dcs_vin'].output(0.0, delay=0.5)
-                dev['rvswt101'].port.flushInput()
+                dev['rvswt101'].port.reset_input_buffer()
                 dev['dcs_vin'].output(3.3, delay=0.1)
                 self.mac = dev['rvswt101'].get_mac()
                 mes['ble_mac'].sensor.store(self.mac)

@@ -343,8 +343,8 @@ class LowLevel:
         if not self.z1:
             self.SetRSTpin()                        #enable power
             self.SetTESTpin()                       #enable power
-        self.serialport.flushInput()
-        self.serialport.flushOutput()
+        self.serialport.reset_input_buffer()
+        self.serialport.reset_output_buffer()
 
     def comDone(self):
         """Closes the used serial port.
@@ -472,7 +472,7 @@ class LowLevel:
         if self.BSLMemAccessWarning and accessAddr < self.BSL_CRITICAL_ADDR:
             sys.stderr.write("Warning: This command might change data at address %04x or %04x!\n" % (accessAddr, accessAddr + 1))
 
-        self.serialport.flushInput()                #clear receiving queue
+        self.serialport.reset_input_buffer()                #clear receiving queue
         #TO DO: Check after each transmitted character,
         #TO DO: if microcontroller did send a character (probably a NAK!).
         for c in txFrame:
@@ -695,7 +695,7 @@ class LowLevel:
             self.telosI2CWriteCmd(0,2)
         self.telosI2CWriteCmd(0,0)
         time.sleep(0.250)       #give MSP430's oscillator time to stabilize
-        self.serialport.flushInput()  #clear buffers
+        self.serialport.reset_input_buffer()  #clear buffers
 
     def bslReset(self, invokeBSL=0):
         """Applies BSL entry sequence on RST/NMI and TEST/VPP pins
@@ -739,7 +739,7 @@ class LowLevel:
             self.SetRSTpin(1)   #RST  pin: Vcc
         time.sleep(0.250)       #give MSP430's oscillator time to stabilize
 
-        self.serialport.flushInput()    #clear buffers
+        self.serialport.reset_input_buffer()    #clear buffers
 
     def bslSync(self,wait=0):
         """Transmits Synchronization character and expects to receive Acknowledge character
@@ -752,7 +752,7 @@ class LowLevel:
             sys.stderr.write("* bslSync(wait=%d)\n" % wait)
         while wait or loopcnt:
             loopcnt = loopcnt - 1                   #count down tries
-            self.serialport.flushInput()            #clear input, in case a prog is running
+            self.serialport.reset_input_buffer()            #clear input, in case a prog is running
 
             self.serialport.write(bytearray([self.BSL_SYNC]))   #Send synchronization byte
             c = self.serialport.read(1)             #read answer

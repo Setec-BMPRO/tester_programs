@@ -106,7 +106,7 @@ class CmrSbp():
         err = ''
         run = False
         try:
-            self.port.flushInput()
+            self.port.reset_input_buffer()
             data_template = {}
             for parameter in iter(self._datamap):
                 data_template[parameter] = self._datamap[parameter][0]

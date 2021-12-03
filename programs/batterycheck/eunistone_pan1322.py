@@ -105,7 +105,7 @@ class BtRadio():
     def reset(self):
         """Reset the module."""
         self._logger.debug('Reset')
-        self.port.flushInput()
+        self.port.reset_input_buffer()
         for _ in range(self.reset_retries):
             try:
                 self._cmdresp('AT+JRES')                    # Reset
@@ -135,7 +135,7 @@ class BtRadio():
         @raises BtRadioError upon error.
 
         """
-        self.port.flushInput()
+        self.port.reset_input_buffer()
         if cmd == self.cmd_escape:
             time.sleep(1)       # need long guard time before first letter
             for char in cmd:
@@ -304,7 +304,7 @@ class BtRadio():
             }
         cmd = json.dumps(request)
         self._log('JSONRPC request: {0!r}'.format(cmd))
-        self.port.flushInput()
+        self.port.reset_input_buffer()
         self._write(cmd + '\r')
         response = self._readline()
         return json.loads(response)['result']

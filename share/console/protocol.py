@@ -129,15 +129,15 @@ class Base():
         self.port.open()
         # We need to wait just a little before flushing the port
         time.sleep(0.1)
-        self.flushInput()
+        self.reset_input_buffer()
 
     def close(self):
         """Close connection to unit."""
         self.port.close()
 
-    def flushInput(self):
+    def reset_input_buffer(self):
         """Flush any waiting input."""
-        self.port.flushInput()
+        self.port.reset_input_buffer()
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -196,7 +196,7 @@ class Base():
         try:
             if command:
                 self.last_cmd = command
-                self.port.flushInput()
+                self.port.reset_input_buffer()
                 self._write_command(command)
             if delay:
                 time.sleep(delay)

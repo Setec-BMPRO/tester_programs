@@ -544,7 +544,7 @@ class EV2200():
             + scmd
             + bytes((val & 255, (val >> 8) & 255))
             )
-        self.port.flushInput()
+        self.port.reset_input_buffer()
         self.port.write(cmd_blk)
         res_blk = self.port.read(5)   # this has a timeout
         # We should have got 5 bytes back

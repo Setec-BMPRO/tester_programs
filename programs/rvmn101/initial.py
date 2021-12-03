@@ -48,7 +48,7 @@ class Initial(share.TestSequence):
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
         rvmn101 = dev['rvmn101']
-        rvmn101.flushInput()
+        rvmn101.reset_input_buffer()
         # Cycle power to restart the unit
         dev['dcs_vbatt'].output(0.0, delay=0.5)
         dev['dcs_vbatt'].output(self.cfg.vbatt_set, delay=2.0)

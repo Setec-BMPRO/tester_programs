@@ -38,7 +38,7 @@ class Console(share.console.Base):
 
     def initialise(self, reset_relay):
         """Initialise the unit."""
-        self.port.flushInput()
+        self.port.reset_input_buffer()
         reset_relay.pulse(0.1)
         self.banner()
         self['UNLOCK'] = True
