@@ -96,14 +96,12 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
         candev = dev['can']
-        candev.verbose = True
-        candev.flush_can()
+        candev.flush()
         try:
-            candev.read_can()
+            candev.read()
             result = True
-        except tester.devphysical.can.SerialToCanError:
+        except tester.devphysical.CANError:
             result = False
-        candev.verbose = False
         mes['can_active'].sensor.store(result)
         mes['can_active']()
 
@@ -179,7 +177,6 @@ class Devices(share.Devices):
         """Restore CAN interface to default settings."""
         candev = self['can']
         candev.rvc_mode = False
-        candev.verbose = False
 
 
 class Sensors(share.Sensors):

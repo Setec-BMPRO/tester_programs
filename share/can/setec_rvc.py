@@ -23,30 +23,30 @@ class DeviceID(enum.IntEnum):
 
     """
 
-    rvmc101 = 0x44
-    rvmn101 = 0x54
-    rvmd50 = rvmc101
-    rvmn5x = rvmn101
+    RVMC101 = 0X44
+    RVMN101 = 0X54
+    RVMD50 = RVMC101
+    RVMN5X = RVMN101
 
 
 class DGN(enum.IntEnum):
 
     """RV-C Data Group Number (DGN) values for message destinations."""
 
-    proprietary_message = 0xEF00
-    rvmc101 = proprietary_message + DeviceID.rvmc101.value
-    rvmn101 = proprietary_message + DeviceID.rvmn101.value
-    rvmd50 = proprietary_message + DeviceID.rvmd50.value
-    rvmn5x = proprietary_message + DeviceID.rvmn5x.value
+    PROPRIETARY_MESSAGE = 0xEF00
+    RVMC101 = PROPRIETARY_MESSAGE + DeviceID.RVMC101.value
+    RVMN101 = PROPRIETARY_MESSAGE + DeviceID.RVMN101.value
+    RVMD50 = PROPRIETARY_MESSAGE + DeviceID.RVMD50.value
+    RVMN5X = PROPRIETARY_MESSAGE + DeviceID.RVMN5X.value
 
 
 class SetecRVC(enum.IntEnum):
 
     """Generic SETEC RV-C CAN parameters."""
 
-    data_len = 8            # Packets always have 8 bytes of data
-    command_id_index = 0    # Command ID is 1st data byte
-    message_id_index = 0    # Message ID is 1st data byte
+    DATA_LEN = 8            # Packets always have 8 bytes of data
+    COMMAND_ID_INDEX = 0    # Command ID is 1st data byte
+    MESSAGE_ID_INDEX = 0    # Message ID is 1st data byte
 
 
 @enum.unique
@@ -58,17 +58,17 @@ class CommandID(enum.IntEnum):
 
     """
 
-    switch_status = 0
-    motor_control = 1
-    output_control = 2
-    dimming_control = 3
-    special_command = 4
-    object_control = 5
-    read_request = 6
-    write_parameter = 7
-    pair_forget = 8
-    device_info = 9
-    device_status = 10
+    SWITCH_STATUS = 0
+    MOTOR_CONTROL = 1
+    OUTPUT_CONTROL = 2
+    DIMMING_CONTROL = 3
+    SPECIAL_COMMAND = 4
+    OBJECT_CONTROL = 5
+    READ_REQUEST = 6
+    WRITE_PARAMETER = 7
+    PAIR_FORGET = 8
+    DEVICE_INFO = 9
+    DEVICE_STATUS = 10
 
 
 @enum.unique
@@ -80,27 +80,27 @@ class MessageID(enum.IntEnum):
 
     """
 
-    _reserved = 0
-    led_display = 1
-    dimming_values = 2
-    output_states = 3
-    bridge_outputs_enabled = 4
-    switch_inputs = 5
-    system_status = 6
-    analogue_inputs = 7
-    output_error_states = 8
-    serial_number = 9
-    hvac_state = 10
-    hvac_error = 11
-    generator_type1_state = 12
-    generator_type2_state = 13
-    pairing_status = 14
-    read_request = 15
-    command = 16
-    read_parameter = 17
-    motor_config = 32
-    tank_config = 33
-    general_config = 34
+    _RESERVED = 0
+    LED_DISPLAY = 1
+    DIMMING_VALUES = 2
+    OUTPUT_STATES = 3
+    BRIDGE_OUTPUTS_ENABLED = 4
+    SWITCH_INPUTS = 5
+    SYSTEM_STATUS = 6
+    ANALOGUE_INPUTS = 7
+    OUTPUT_ERROR_STATES = 8
+    SERIAL_NUMBER = 9
+    HVAC_STATE = 10
+    HVAC_ERROR = 11
+    GENERATOR_TYPE1_STATE = 12
+    GENERATOR_TYPE2_STATE = 13
+    PAIRING_STATUS = 14
+    READ_REQUEST = 15
+    COMMAND = 16
+    READ_PARAMETER = 17
+    MOTOR_CONFIG = 32
+    TANK_CONFIG = 33
+    GENERAL_CONFIG = 34
 
 
 class PacketDecodeError(Exception):
@@ -116,6 +116,7 @@ class _SwitchStatusField(ctypes.Structure):
 
     """
 
+    # pylint: disable=too-few-public-methods
     _fields_ = [
         ('_pairing', ctypes.c_uint, 2),
         ('retract', ctypes.c_uint, 2),
@@ -138,16 +139,18 @@ class _SwitchStatusRaw(ctypes.Union):
 
     """Union of the RVMC switch type with unsigned integer."""
 
+    # pylint: disable=too-few-public-methods
     _fields_ = [
         ('uint', ctypes.c_uint),
         ('switch', _SwitchStatusField),
         ]
 
 
-class SwitchStatusPacket():
+class SwitchStatusPacket():         # pylint: disable=too-few-public-methods
 
     """A Switch Status packet."""
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, packet):
         """Create instance.
 
@@ -155,9 +158,9 @@ class SwitchStatusPacket():
 
         """
         payload = packet.data
-        if (len(payload) != SetecRVC.data_len.value
-                or payload[SetecRVC.command_id_index.value]
-                    != CommandID.switch_status.value):
+        if (len(payload) != SetecRVC.DATA_LEN.value
+                or payload[SetecRVC.COMMAND_ID_INDEX.value]
+                    != CommandID.SWITCH_STATUS.value):
             raise PacketDecodeError()
         (   self.msgtype,
             switch_data,
@@ -176,8 +179,8 @@ class SwitchStatusPacket():
         self.zone2 = bool(zss.zone2)
         self.zone3 = bool(zss.zone3)
         self.zone4 = bool(zss.zone4)
-        self.up = bool(zss.up)
-        self.down = bool(zss.down)
+        self.btnup = bool(zss.up)
+        self.btndown = bool(zss.down)
         self.usb_pwr = bool(zss.usb_pwr)
         self.wake_up = bool(zss.wake_up)
 
@@ -190,6 +193,7 @@ class _DeviceStatusField(ctypes.Structure):
 
     """
 
+    # pylint: disable=too-few-public-methods
     _fields_ = [
         # Byte D1
         ('page', ctypes.c_uint, 1),
@@ -211,16 +215,18 @@ class _DeviceStatusRaw(ctypes.Union):
 
     """Union of the button with unsigned integer."""
 
+    # pylint: disable=too-few-public-methods
     _fields_ = [
         ('uint', ctypes.c_uint, 16),
         ('button', _DeviceStatusField),
         ]
 
 
-class DeviceStatusPacket():
+class DeviceStatusPacket():         # pylint: disable=too-few-public-methods
 
     """A Device Status packet."""
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, packet):
         """Create instance.
 
@@ -228,9 +234,9 @@ class DeviceStatusPacket():
 
         """
         payload = packet.data
-        if (len(payload) != SetecRVC.data_len.value
-                or payload[SetecRVC.command_id_index.value]
-                    not in (0, CommandID.device_status.value)):
+        if (len(payload) != SetecRVC.DATA_LEN.value
+                or payload[SetecRVC.COMMAND_ID_INDEX.value]
+                    not in (0, CommandID.DEVICE_STATUS.value)):
             raise PacketDecodeError()
         (   self.msgtype,       # D0
             button_data,        # D1,2
@@ -254,35 +260,35 @@ class DeviceStatusPacket():
         self.backlight = bool(zss.backlight)
 
 
-class _RVMD50MessagePacket():
+class _RVMD50MessagePacket():       # pylint: disable=too-few-public-methods
 
     """A RVMD50 message packet."""
 
     _cmd_id_index = 1           # Index of Cmd ID value
     _cmd_id_range = range(3)    # Valid range of Cmd ID values
 
-    def __init__(self, serial2can, cmd_id):
+    def __init__(self, candev, cmd_id):
         """Create instance.
 
-        @param serial2can Serial2CAN device
+        @param candev CAN device
         @param cmd_id Cmd ID value
 
         """
-        self._serial2can = serial2can
+        self._candev = candev
         if cmd_id not in self._cmd_id_range:
             raise ValueError('Cmd ID out of range')
         self.pkt = tester.devphysical.can.RVCPacket()
         msg = self.pkt.header.message       # Packet...
-        msg.DGN = DGN.rvmd50.value          #  to the RVMD50
-        msg.SA = DeviceID.rvmn5x.value      #  from a RVMN5x
-        self.pkt.data = bytearray(SetecRVC.data_len.value)
-        self.pkt.data[SetecRVC.message_id_index.value] = (
-            MessageID.command.value)
+        msg.DGN = DGN.RVMD50.value          #  to the RVMD50
+        msg.SA = DeviceID.RVMN5X.value      #  from a RVMN5x
+        self.pkt.data = bytearray(SetecRVC.DATA_LEN.value)
+        self.pkt.data[SetecRVC.MESSAGE_ID_INDEX.value] = (
+            MessageID.COMMAND.value)
         self.pkt.data[self._cmd_id_index] = cmd_id
 
     def send(self):
-        """Send the packet to the Serial2CAN device."""
-        self._serial2can.send('t{0}'.format(self.pkt))
+        """Send the packet to the CAN bus."""
+        self._candev.send(self.pkt)
 
 
 class RVMD50ControlLCDPacket(_RVMD50MessagePacket):
@@ -292,13 +298,13 @@ class RVMD50ControlLCDPacket(_RVMD50MessagePacket):
     _cmd_id = 0             # Cmd ID: 0 = Control LCD
     _pattern_index = 2      # Index of test pattern value
 
-    def __init__(self, serial2can):
+    def __init__(self, candev):
         """Create instance.
 
-        @param serial2can Serial2CAN device
+        @param candev 2CAN device
 
         """
-        super().__init__(serial2can, self._cmd_id)
+        super().__init__(candev, self._cmd_id)
         self.pattern = 0
 
     @property
@@ -326,15 +332,16 @@ class RVMD50ResetPacket(_RVMD50MessagePacket):
 
     """A RVMD50 Reset packet."""
 
+    # pylint: disable=too-few-public-methods
     _cmd_id = 1             # Cmd ID: 1 = Reset
 
-    def __init__(self, serial2can):
+    def __init__(self, candev):
         """Create instance.
 
-        @param serial2can Serial2CAN device
+        @param candev CAN device
 
         """
-        super().__init__(serial2can, self._cmd_id)
+        super().__init__(candev, self._cmd_id)
 
 
 class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
@@ -346,13 +353,13 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
     _group_id_index = 2     # Index of Group ID value
     _button_index = 3       # Index of button value
 
-    def __init__(self, serial2can):
+    def __init__(self, candev):
         """Create instance.
 
-        @param serial2can Serial2CAN device
+        @param candev CAN device
 
         """
-        super().__init__(serial2can, self._cmd_id)
+        super().__init__(candev, self._cmd_id)
         self.enable = False
         self.button = False
 
@@ -413,7 +420,7 @@ class PacketPropertyReader():
     def opc(self):
         """Sensor: OPC."""
 
-    def read(self, callerid):
+    def read(self, callerid):       # pylint: disable=unused-argument
         """Sensor: Read payload data using the last configured key.
 
         @param callerid Identity of caller

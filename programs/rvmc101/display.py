@@ -15,13 +15,13 @@ class LEDControl():
 
     inter_packet_gap = 0.1  # Wait between CAN packets
 
-    def __init__(self, can_dev):
+    def __init__(self, candev):
         """Create instance.
 
-        @param can_dev Serial2CAN interface device
+        @param candev CAN interface device
 
         """
-        self.serial2can = can_dev
+        self.candev = candev
         self._worker = None
         self._evt = threading.Event()
 
@@ -45,9 +45,9 @@ class LEDControl():
         """Thread to send a stream of LED_DISPLAY CAN packets."""
         pkt = tester.devphysical.can.RVCPacket()
         msg = pkt.header.message
-        msg.DGN = share.can.DGN.rvmc101.value           #  to the RVMC101
-        msg.SA = share.can.DeviceID.rvmn101.value       #  from a RVMN101
-        pkt.data.extend([share.can.MessageID.led_display.value])
+        msg.DGN = share.can.DGN.RVMC101.value           #  to the RVMC101
+        msg.SA = share.can.DeviceID.RVMN101.value       #  from a RVMN101
+        pkt.data.extend([share.can.MessageID.LED_DISPLAY.value])
         pkt.data.extend(b'\x00\x00\xff\xff\xff\x00\x00')
         # [0]: LED Display = 0x01
         # [1]: LED 7 segment DIGIT0 (LSB, right)
@@ -67,4 +67,4 @@ class LEDControl():
             pattern = 0x01 if pattern == 0x40 else pattern << 1
             pkt.data[6] = (pkt.data[6] + 1) & 0xff  # Sequence number
             pkt.data[7] = sum(pkt.data[:7]) & 0xff  # Checksum
-            self.serial2can.send('t{0}'.format(pkt))
+            self.candev.send(pkt)

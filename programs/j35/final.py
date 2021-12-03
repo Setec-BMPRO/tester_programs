@@ -95,7 +95,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname], doc)
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.SETECDeviceID.j35)
+            share.can.SETECDeviceID.J35.value)
         self['j35'] = console.TunnelConsole(tunnel)
         self['dcs_photo'].output(12.0, True)
         self.add_closer(lambda: self['dcs_photo'].output(0.0, False))

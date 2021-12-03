@@ -130,7 +130,6 @@ class Devices(share.Devices):
     def close_can(self):
         """Reset CAN system."""
         self['can'].rvc_mode = False
-        self['can'].verbose = False
 
 
 class Sensors(share.Sensors):

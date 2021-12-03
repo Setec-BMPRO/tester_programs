@@ -180,7 +180,7 @@ class Devices(share.Devices):
         # Tunneled Console driver
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.SETECDeviceID.rvview)
+            share.can.SETECDeviceID.RVVIEW.value)
         self['armtunnel'] = console.TunnelConsole(tunnel)
         self['dcs_rst'].output(8.0, True)   # Fixture RESET circuit
         self.add_closer(lambda: self['dcs_rst'].output(0.0, output=False))

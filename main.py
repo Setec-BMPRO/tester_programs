@@ -21,7 +21,13 @@ def _main():
     logger = logging.getLogger(__name__)
     logger.info('Starting')
     # Suppress lower level logging
-    for name in ('gpib', 'tester.devphysical', 'tester.sensor.ui.Base'):
+    for name in (
+            'gpib',
+            'tester.devphysical',
+            'tester.devphysical.can.SerialToCan',
+            'tester.devphysical.canable.CANable'
+            'tester.sensor.ui.Base',
+            ):
         log = logging.getLogger(name)
         log.setLevel(logging.INFO)
     # Suppress lower level updi logging when running MB3 Initial

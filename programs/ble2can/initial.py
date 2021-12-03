@@ -104,11 +104,6 @@ class Initial(share.TestSequence):
         dev['rla_pair_btn'].release()
         self._reset_unit()
         mes['CANbind'](timeout=10)
-# The present software release does not have CAN tunneling
-#        ble2cantunnel = dev['ble2cantunnel']
-#        ble2cantunnel.open()
-#        mes['TunnelSwVer']()
-#        ble2cantunnel.close()
 
     def _reset_unit(self):
         """Reset the unit."""
@@ -149,11 +144,6 @@ class Devices(share.Devices):
         ble2can_ser.port = share.config.Fixture.port('030451', 'ARM')
         # Console driver
         self['ble2can'] = console.Console(ble2can_ser)
-        # Tunneled Console driver
-        tunnel = tester.CANTunnel(
-            self.physical_devices['CAN'],
-            tester.devphysical.can.SETECDeviceID.ble2can)
-        self['ble2cantunnel'] = console.Console(tunnel)
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
@@ -166,7 +156,6 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['ble2can'].close()
-        self['ble2cantunnel'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_wdog', 'rla_pair_btn'):
             self[rla].set_off()
@@ -198,15 +187,12 @@ class Sensors(share.Sensors):
         self['mirbt'] = sensor.MirrorReadingBoolean()
         # Console sensors
         ble2can = self.devices['ble2can']
-        ble2cantunnel = self.devices['ble2cantunnel']
         self['CANbind'] = sensor.KeyedReading(ble2can, 'CAN_BIND')
         for name, cmdkey in (
                 ('BtMac', 'BT_MAC'),
                 ('SwVer', 'SW_VER'),
             ):
             self[name] = sensor.KeyedReadingString(ble2can, cmdkey)
-        self['TunnelSwVer'] = sensor.KeyedReadingString(
-            ble2cantunnel, 'SW_VER')
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('ble2can_initial', 'msgSnEntry'),
             caption=tester.translate('ble2can_initial', 'capSnEntry'))
@@ -236,6 +222,4 @@ class Measurements(share.Measurements):
             ('SwVer', 'SwVer', 'SwVer', 'Unit software version'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('CANbind', 'CAN_BIND', 'CANbind', 'CAN bound'),
-            ('TunnelSwVer', 'SwVer', 'TunnelSwVer',
-                'Unit software version'),
             ))

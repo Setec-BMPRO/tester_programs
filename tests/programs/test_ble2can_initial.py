@@ -50,7 +50,6 @@ class BLE2CANInitial(ProgramTestCase):
                     ),
                 'CanBus': (
                     (sen['CANbind'], 1 << 28),
-                    (sen['TunnelSwVer'], self.test_program.sw_version),
                     ),
                 },
             }

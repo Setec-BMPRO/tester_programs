@@ -105,11 +105,11 @@ class Initial(share.TestSequence):
             if tester.Measurement.position_enabled(pos):
                 mes_can.sensor.position = pos
                 sel[pos].set_on(delay=0.5)
-                candev.flush_can()
+                candev.flush()
                 try:
-                    candev.read_can()
+                    candev.read()
                     result = True
-                except tester.devphysical.can.SerialToCanError:
+                except tester.devphysical.CANError:
                     result = False
                 mes_can.sensor.store(result)
                 mes_can()
@@ -165,7 +165,6 @@ class Devices(share.Devices):
     def close_can(self):
         """Restore CAN interface to default settings."""
         self['can'].rvc_mode = False
-        self['can'].verbose = False
 
 
 class Sensors(share.Sensors):

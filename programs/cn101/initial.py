@@ -136,7 +136,7 @@ class Devices(share.Devices):
         # Tunneled Console driver
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
-            tester.devphysical.can.SETECDeviceID.cn101)
+            share.can.SETECDeviceID.CN101.value)
         self['cn101tunnel'] = console.TunnelConsole(tunnel)
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
