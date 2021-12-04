@@ -125,13 +125,13 @@ class Final(share.TestSequence):
     @staticmethod
     def send_preconditions(candev):
         """Send a Preconditions packet (for Trek2)."""
-        pkt = tester.devphysical.can.SETECPacket()
-        msg = pkt.header.message
+        header = tester.devphysical.can.SETECHeader()
+        msg = header.message
         msg.device_id = share.can.SETECDeviceID.BP35.value
         msg.msg_type = tester.devphysical.can.SETECMessageType.ANNOUNCE.value
         msg.data_id = tester.devphysical.can.SETECDataID.PRECONDITIONS.value
-        pkt.data.extend(b'\x00\x00')    # Dummy data
-        candev.send(pkt)
+        data = b'\x00\x00'      # Dummy data
+        candev.send(tester.devphysical.can.CANPacket(header, data))
 
 
 class Devices(share.Devices):

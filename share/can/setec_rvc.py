@@ -277,14 +277,14 @@ class _RVMD50MessagePacket():       # pylint: disable=too-few-public-methods
         self._candev = candev
         if cmd_id not in self._cmd_id_range:
             raise ValueError('Cmd ID out of range')
-        self.pkt = tester.devphysical.can.RVCPacket()
-        msg = self.pkt.header.message       # Packet...
+        header = tester.devphysical.can.RVCHeader()
+        msg = header.message                # Packet...
         msg.DGN = DGN.RVMD50.value          #  to the RVMD50
         msg.SA = DeviceID.RVMN5X.value      #  from a RVMN5x
-        self.pkt.data = bytearray(SetecRVC.DATA_LEN.value)
-        self.pkt.data[SetecRVC.MESSAGE_ID_INDEX.value] = (
-            MessageID.COMMAND.value)
-        self.pkt.data[self._cmd_id_index] = cmd_id
+        data = bytearray(SetecRVC.DATA_LEN.value)
+        data[SetecRVC.MESSAGE_ID_INDEX.value] = MessageID.COMMAND.value
+        data[self._cmd_id_index] = cmd_id
+        self.pkt = tester.devphysical.can.CANPacket(header, data)
 
     def send(self):
         """Send the packet to the CAN bus."""

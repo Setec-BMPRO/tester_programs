@@ -43,12 +43,13 @@ class LEDControl():
 
     def worker(self):
         """Thread to send a stream of LED_DISPLAY CAN packets."""
-        pkt = tester.devphysical.can.RVCPacket()
-        msg = pkt.header.message
+        header = tester.devphysical.can.RVCHeader()
+        msg = header.message
         msg.DGN = share.can.DGN.RVMC101.value           #  to the RVMC101
         msg.SA = share.can.DeviceID.RVMN101.value       #  from a RVMN101
-        pkt.data.extend([share.can.MessageID.LED_DISPLAY.value])
-        pkt.data.extend(b'\x00\x00\xff\xff\xff\x00\x00')
+        data = bytearray([share.can.MessageID.LED_DISPLAY.value])
+        data.extend(b'\x00\x00\xff\xff\xff\x00\x00')
+        pkt = tester.devphysical.can.CANPacket(header, data)
         # [0]: LED Display = 0x01
         # [1]: LED 7 segment DIGIT0 (LSB, right)
         # [2]: LED 7 segment DIGIT1 (MSB, left)
