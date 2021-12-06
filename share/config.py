@@ -140,10 +140,10 @@ class Fixture():
             # Hub port 3: Nordic NRF52 device programmer
             'nRF52': '682553964',
             },
-        '034352': {     # TRSBTS Initial
+        '034352': {     # TRS-BTx Initial
             'NORDIC': _ftdi_hub_1,
             # Hub port 2: Nordic NRF52 device programmer
-            'nRF52': '682483211',
+            'nRF52': '682709534',
             },
         '034400': {     # BP35-II Initial
             'ARM': _ftdi_hub_1,
