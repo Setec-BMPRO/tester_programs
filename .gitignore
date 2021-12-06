@@ -1,7 +1,12 @@
 .eric6project/
 _eric6project/
-.directory/
+.eric7project/
+_eric7project/
+.jedi/
+_jedi/
 .ropeproject/
+_ropeproject/
+.directory/
 *.pyc
 *.pyo
 *.orig
