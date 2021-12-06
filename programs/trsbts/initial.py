@@ -105,6 +105,7 @@ class Initial(share.TestSequence):
         trsbts.open()
         # Power cycle after programming
         dev['dcs_vbat'].output(0.0, delay=0.5)
+        trsbts.reset_input_buffer()
         dev['dcs_vbat'].output(self.vbatt)
         trsbts.brand(self.config.hw_version, self.sernum)
         self.measure(
