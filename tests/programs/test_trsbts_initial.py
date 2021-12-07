@@ -14,14 +14,13 @@ class TRSBTS_Initial(ProgramTestCase):
 
     prog_class = trsbts.Initial
     parameter = 'BTS'
-    debug = False
+    debug = True
     btmac = '001ec030bc15'
 
     def setUp(self):
         """Per-Test setup."""
 
         for target in (
-                'share.programmer.NRF52',
                 'share.bluetooth.SerialToMAC',
                 ):
             patcher = patch(target)
@@ -58,6 +57,9 @@ class TRSBTS_Initial(ProgramTestCase):
                     (sen['light'], (0.0, 12.0)),
                     (sen['brake'], (0.0, 12.0)),
                     ),
+                'PgmNordic': (
+                    (sen['JLink'], 0),
+                    ),
                 'Operation': (
                     (sen['arm_swver'], self.test_program.config.sw_version),
                     (sen['red'], (0.0, 1.8, 0.0)),
@@ -79,7 +81,7 @@ class TRSBTS_Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(27, len(result.readings))
+        self.assertEqual(28, len(result.readings))
         self.assertEqual(
             ['Prepare', 'PgmNordic', 'Operation', 'Calibrate', 'Bluetooth'],
             self.tester.ut_steps)
