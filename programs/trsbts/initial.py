@@ -72,13 +72,13 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         self.config = self.config_data[self.parameter]['Config']
-        Devices.sw_image = self.config.sw_image
+        Sensors.sw_image = self.config.sw_image
         super().open(
             self.config_data[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
-            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('PgmNordic', self._step_program),
             tester.TestStep('Operation', self._step_operation),
             tester.TestStep('Calibrate', self._step_calibrate),
             tester.TestStep('Bluetooth', self._step_bluetooth),
@@ -97,6 +97,11 @@ class Initial(share.TestSequence):
         dev['rla_pin'].remove()     # Relay contacts shorted
         self.measure(('dmm_brakeon', 'dmm_lighton'), timeout=5)
         dev['rla_pin'].insert()
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the micro."""
+        mes['JLink']()
 
     @share.teststep
     def _step_operation(self, dev, mes):
@@ -161,8 +166,6 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_image = None
-
     def open(self):
         """Create all Instruments."""
         fixture = '034352'
@@ -172,22 +175,18 @@ class Devices(share.Devices):
                 ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
                 ('rla_pin', tester.Relay, 'RLA3'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Some more obvious ways to use this relay
         pin = self['rla_pin']
         pin.insert = pin.set_off    # N/O contacts
         pin.remove = pin.set_on
-        # Nordic NRF52 device programmer
-        self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_image,
-            share.config.Fixture.nrf52_sernum(fixture)
-            )
         # Serial connection to the console
         trsbts_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bl652_port = share.config.Fixture.port(fixture, 'NORDIC')
-        trsbts_ser.port = bl652_port
+        nordic_port = share.config.Fixture.port(fixture, 'NORDIC')
+        trsbts_ser.port = nordic_port
         # trsbts Console driver
         self['trsbts'] = console.Console(trsbts_ser)
         self['trsbts'].measurement_fail_on_error = False
@@ -210,6 +209,9 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    projectfile = 'trsbts.jflash'
+    sw_image = None
 
     def open(self):
         """Create all Sensors."""
@@ -256,6 +258,10 @@ class Sensors(share.Sensors):
             self[name] = sensor.KeyedReading(trsbts, cmdkey)
             if units:
                 self[name].units = units
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_image)
 
 
 class Measurements(share.Measurements):
@@ -297,4 +303,5 @@ class Measurements(share.Measurements):
             ('arm_vpin', 'ARM-Vpin', 'arm_vpin',
                 'Voltage on the pin microswitch'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))

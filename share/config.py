@@ -84,6 +84,7 @@ class Fixture():
         '032715': {'ARM': _ftdi, },     # GEN9-540 Initial
         '032870': {'ARM': _ftdi, },     # RVMC101 Initial
         '033633': {'AVR': _ftdi, },     # MB3 Initial
+        '034352': {'NORDIC': _ftdi, },  # TRS-BTx Initial
         '036746': {'ARM': _ftdi, },     # ASDisplay Initial
 
         # Fixtures with a USB Hub
@@ -139,11 +140,6 @@ class Fixture():
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
             'nRF52': '682553964',
-            },
-        '034352': {     # TRSBTS Initial
-            'NORDIC': _ftdi_hub_1,
-            # Hub port 2: Nordic NRF52 device programmer
-            'nRF52': '682483211',
             },
         '034400': {     # BP35-II Initial
             'ARM': _ftdi_hub_1,
