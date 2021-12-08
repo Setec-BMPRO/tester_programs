@@ -1,4 +1,4 @@
-  AppVersion = 75602
+  AppVersion = 75802
   FileVersion = 2
 [GENERAL]
   aATEModuleSel[24] = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -56,12 +56,12 @@
   AutoPerformsUnsecure = 0
   AutoPerformsVerify = 1
   EnableFixedVTref = 0
-  EnableTargetPower = 0
+  EnableTargetPower = 3
   EraseType = 1
   FixedVTref = 0x00000CE4
-  MonitorVTref = 0
+  MonitorVTref = 1
   MonitorVTrefMax = 0x0000157C
-  MonitorVTrefMin = 0x000003E8
+  MonitorVTrefMin = 0x00000FA0
   OverrideTimeouts = 0
   ProgramSN = 0
   SerialFile = ""
