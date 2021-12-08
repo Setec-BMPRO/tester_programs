@@ -24,8 +24,6 @@ def _main():
     for name in (
             'gpib',
             'tester.devphysical',
-            'tester.devphysical.can.SerialToCan',
-            'tester.devphysical.canable.CANable'
             'tester.sensor.ui.Base',
             ):
         log = logging.getLogger(name)
