@@ -172,7 +172,6 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vfix', tester.DCSource, 'DCS1'),
                 ('dcs_vbat', tester.DCSource, 'DCS2'),
                 ('rla_pin', tester.Relay, 'RLA3'),
                 ('JLink', tester.JLink, 'JLINK'),
@@ -195,9 +194,6 @@ class Devices(share.Devices):
             share.config.System.ble_url())
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
-        # Apply power to fixture circuits.
-        self['dcs_vfix'].output(9.0, output=True, delay=5)
-        self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
