@@ -139,6 +139,10 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
+
+# HACK: Work around broken rvc_mode
+        self['can']._send('B')
+
         self.add_closer(self.close_can)
         self['display'] = display.LEDControl(self['can'])
         arm_port = share.config.Fixture.port('032870', 'ARM')
