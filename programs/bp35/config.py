@@ -109,7 +109,7 @@ class BP35():
         tester.LimitPercent('OCP_pre', ocp_set, 4.0 + ocp_adjust_percent,
             doc='Before adjustment'),
         tester.LimitDelta('ARM-AcV', vac, 10.0, doc='AC voltage'),
-        tester.LimitDelta('ARM-AcF', 50.0, 1.0, doc='AC frequency'),
+        tester.LimitDelta('ARM-AcF', 50.0, 3.0, doc='AC frequency'),
         tester.LimitBetween('ARM-SecT', 8.0, 70.0, doc='Reading ok'),
         tester.LimitDelta('ARM-Vout', 12.45, 0.45),
         tester.LimitBetween('ARM-Fan', 0, 100, doc='Fan running'),
