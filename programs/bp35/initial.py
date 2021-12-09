@@ -514,7 +514,7 @@ class Measurements(share.Measurements):
             ('dmm_3v3', '3V3', 'o3v3', '3V3 rail voltage'),
             ('dmm_fanon', 'FanOn', 'fan', 'Fans running'),
             ('dmm_fanoff', 'FanOff', 'fan', 'Fans off'),
-            ('ramp_ocp_pre', 'OCP_pre', 'ocp', 'OCP point (pre-cal)'),
+            ('ramp_ocp_pre', 'OCP_pre', 'ocp_pre', 'OCP point (pre-cal)'),
             ('ramp_ocp', 'OCP', 'ocp', 'OCP point (post-cal)'),
             ('ui_sernum', 'SerNum', 'sernum', 'Unit serial number'),
             ('ui_yesnored', 'Notify', 'yesnored', 'LED Red'),
