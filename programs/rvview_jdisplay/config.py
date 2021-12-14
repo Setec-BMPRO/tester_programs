@@ -24,8 +24,15 @@ class RvView():
 
 class RvView2():
 
-    """RvView2 configuration."""
+    """RvView2 NXP micro configuration."""
 
     sw_version = '1.2.20314.1010'
     sw_file = 'RvView2_{0}.bin'.format(sw_version)
     hw_version = (1, 0, 'A')
+
+
+class RvView2a():
+
+    """RvView2 ATSAMC21 micro configuration."""
+
+    sw_file = 'RvView2a_1.4.0-0-gae44ae2'

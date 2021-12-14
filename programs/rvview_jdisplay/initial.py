@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2017 SETEC Pty Ltd
-"""RvView/JDisplay Initial Test Program."""
+"""RvView/JDisplay Initial Test Program.
+
+The ATSAMC21 version does not do:
+- Serial console.
+- Console tunnel over CAN.
+It's testmode is controlled using CAN packets.
+
+"""
 
 import pathlib
 
@@ -22,7 +29,8 @@ class Initial(share.TestSequence):
     vin_set = 8.1
     # Common limits
     _common = (
-        tester.LimitBetween('Vin', 7.0, 8.0, doc='Input voltage present'),
+        tester.LimitBetween(
+            'Vin', vin_set - 1.1, vin_set - 0.1, doc='Input voltage present'),
         tester.LimitPercent('3V3', 3.3, 3.0, doc='3V3 present'),
         tester.LimitLow('BkLghtOff', 0.5, doc='Backlight off'),
         tester.LimitBetween('BkLghtOn', 2.5, 3.5, doc='Backlight on'),
@@ -31,42 +39,48 @@ class Initial(share.TestSequence):
         )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
-        'JD': {
+        'JD': {        # LPC1519 micro
             'Config': config.JDisplay,
             'Limits': _common + (
                 tester.LimitRegExp('SwVer', '^{0}$'.format(
                     config.JDisplay.sw_version.replace('.', r'\.'))),
                 ),
             },
-        'RV': {
+        'RV': {        # LPC1519 micro
             'Config': config.RvView,
             'Limits': _common + (
                 tester.LimitRegExp('SwVer', '^{0}$'.format(
                     config.RvView.sw_version.replace('.', r'\.'))),
                 ),
             },
-        'RV2': {
+        'RV2': {        # LPC1519 micro
             'Config': config.RvView2,
             'Limits': _common + (
                 tester.LimitRegExp('SwVer', '^{0}$'.format(
                     config.RvView2.sw_version.replace('.', r'\.'))),
                 ),
             },
+        'RV2A': {       # ATSAMC21 micro
+            'Config': config.RvView2a,
+            'Limits': _common,
+            },
         }
 
     def open(self, uut):
         """Prepare for testing."""
         self.config = self.config_data[self.parameter]['Config']
-        Devices.sw_file = self.config.sw_file
+        Devices.sw_file = Sensors.sw_file = self.config.sw_file
         super().open(
             self.config_data[self.parameter]['Limits'],
             Devices, Sensors, Measurements)
+        self.is_atsam = self.parameter == 'RV2A'
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program),
-            tester.TestStep('Initialise', self._step_initialise),
+            tester.TestStep(
+                'Initialise', self._step_initialise, not self.is_atsam),
             tester.TestStep('Display', self._step_display),
-            tester.TestStep('CanBus', self._step_canbus),
+            tester.TestStep('CanBus', self._step_canbus, not self.is_atsam),
             )
         self.sernum = None
 
@@ -79,14 +93,17 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the ARM."""
-        dev['programmer'].program()
+        """Program the micro."""
+        if self.is_atsam:
+            mes['JLink']()                  # A measurement
+        else:
+            dev['programmer'].program()     # A device
 
     @share.teststep
     def _step_initialise(self, dev, mes):
-        """Initialise the ARM device.
+        """Initialise the LPC1519 micro.
 
-        Reset the device, set HW version & Serial number.
+        Set HW version & Serial number.
 
         """
         arm = dev['arm']
@@ -96,27 +113,44 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_display(self, dev, mes):
-        """Test the LCD.
+        """Test the LCD and button.
 
         Put device into test mode.
         Check all segments and backlight.
 
         """
-        arm = dev['arm']
-        arm.testmode(True)
+        self._testmode(True)
         self.measure(
             ('ui_yesnoon', 'dmm_bklghton', 'ui_yesnooff', 'dmm_bklghtoff'),
             timeout=5)
-        arm.testmode(False)
+        self._testmode(False)
 
     @share.teststep
     def _step_canbus(self, dev, mes):
-        """Test the Can Bus."""
+        """Test the CAN Bus."""
         mes['can_bind'](timeout=10)
         armtunnel = dev['armtunnel']
         armtunnel.open()
         mes['tunnel_swver']()
         armtunnel.close()
+
+    def _testmode(self, state):
+        """Control of product testmode.
+
+        @param state True for testmode ON
+
+        """
+        if self.is_atsam:
+            header = tester.devphysical.can.SETECHeader()
+            msg = header.message
+            msg.device_id = share.can.SETECDeviceID.RVVIEW.value
+            msg.msg_type = tester.devphysical.can.SETECMessageType.COMMAND.value
+            msg.data_id = tester.devphysical.can.SETECDataID.XREG.value
+            data = b'\xC5'      # XReg 0xC5 toggles testmode
+            candev = self.physical_devices['CAN'][0]    # The CAN device
+            candev.send(tester.devphysical.can.CANPacket(header, data))
+        else:
+            self.devices['arm'].testmode(state)
 
 
 @attr.s
@@ -158,12 +192,13 @@ class Devices(share.Devices):
                 ('rla_rst_off', tester.Relay, 'RLA2'),
                 ('rla_boot', tester.Relay, 'RLA3'),
                 ('rla_wd', tester.Relay, 'RLA4'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['rla_reset'] = LatchingRelay(
             self['rla_rst_on'], self['rla_rst_off'])
         arm_port = share.config.Fixture.port('029687', 'ARM')
-        # ARM device programmer
+        # LPC1519 device programmer
         self['programmer'] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_file,
@@ -198,6 +233,9 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    projectfile = 'rvview2_atmel.jflash'
+    sw_file = None
+
     def open(self):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
@@ -211,6 +249,10 @@ class Sensors(share.Sensors):
         self['3v3'].doc = 'U1 output'
         self['bklght'] = sensor.Vdc(dmm, high=1, low=2, rng=10, res=0.01)
         self['bklght'].doc = 'Across backlight'
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_file)
         self['sernum'] = sensor.DataEntry(
             message=tester.translate('rvview_jdisplay_initial', 'msgSnEntry'),
             caption=tester.translate('rvview_jdisplay_initial', 'capSnEntry'),
@@ -249,4 +291,5 @@ class Measurements(share.Measurements):
             ('ui_yesnooff', 'Notify', 'oYesNoOff', 'Button off'),
             ('can_bind', 'CAN_BIND', 'canbind', 'CAN bound'),
             ('tunnel_swver', 'SwVer', 'tunnelswver', 'Unit software version'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))
