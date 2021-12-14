@@ -62,7 +62,9 @@ class Initial(share.TestSequence):
             },
         'RV2A': {       # ATSAMC21 micro
             'Config': config.RvView2a,
-            'Limits': _common,
+            'Limits': _common + (
+                tester.LimitRegExp('SwVer', 'Dummy'),
+                ),
             },
         }
 
@@ -119,6 +121,7 @@ class Initial(share.TestSequence):
         Check all segments and backlight.
 
         """
+        dev['rla_reset'].pulse(0.1, delay=2)
         self._testmode(True)
         self.measure(
             ('ui_yesnoon', 'dmm_bklghton', 'ui_yesnooff', 'dmm_bklghtoff'),
@@ -147,7 +150,7 @@ class Initial(share.TestSequence):
             msg.msg_type = tester.devphysical.can.SETECMessageType.COMMAND.value
             msg.data_id = tester.devphysical.can.SETECDataID.XREG.value
             data = b'\xC5'      # XReg 0xC5 toggles testmode
-            candev = self.physical_devices['CAN'][0]    # The CAN device
+            candev = self.physical_devices['_CAN']
             candev.send(tester.devphysical.can.CANPacket(header, data))
         else:
             self.devices['arm'].testmode(state)
@@ -212,6 +215,8 @@ class Devices(share.Devices):
         arm_ser.port = arm_port
         # Console driver
         self['arm'] = console.DirectConsole(arm_ser)
+        self['can'] = self.physical_devices['_CAN']
+        self['can'].rvc_mode = False
         # Tunneled Console driver
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],

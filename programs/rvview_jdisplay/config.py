@@ -35,4 +35,4 @@ class RvView2a():
 
     """RvView2 ATSAMC21 micro configuration."""
 
-    sw_file = 'RvView2a_1.4.0-0-gae44ae2'
+    sw_file = 'RvView2a_1.4.0-0-gae44ae2.bin'
