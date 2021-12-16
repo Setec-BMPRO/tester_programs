@@ -105,34 +105,29 @@ class ARM(_Base):
             self,
             port,
             file,
-            baudrate=115200,
-            erase_only=False,
-            verify=False,
             crpmode=None,
             boot_relay=None,
-            reset_relay=None):
+            reset_relay=None,
+            bda4_signals=False):
         """Create a programmer.
 
         @param port Serial port to use
         @param file pathlib.Path instance
-        @param baudrate Serial baudrate
-        @param erase_only True: Device should be erased only
-        @param verify True: Verify the programmed device
         @param crpmode Code Protection:
                         True: ON, False: OFF, None: per 'bindata'
         @param boot_relay Relay device to assert BOOT to the ARM
         @param reset_relay Relay device to assert RESET to the ARM
+        @param bda4_signals True: Use BDA4 serial lines for RESET & BOOT
 
         """
         super().__init__()
-        self._port = port
-        self._file = file
-        self._baudrate = baudrate
-        self._erase_only = erase_only
-        self._verify = verify
-        self._crpmode = crpmode
-        self._boot_relay = boot_relay
-        self._reset_relay = reset_relay
+        self.port = port
+        self.file = file
+        self.boot_relay = boot_relay
+        self.reset_relay = reset_relay
+        self.bda4_signals = bda4_signals
+        self.baudrate = 115200
+        self.crpmode = crpmode
         self._bindata = None
 
     def program_begin(self):
@@ -140,26 +135,30 @@ class ARM(_Base):
 
         If BOOT or RESET relay devices are available, use them to put the chip
         into bootloader mode (Assert BOOT, pulse RESET).
+        BDA4 serial signals: RTS = BOOT, DTR = RESET.
 
         """
         if not self._bindata:
-            with self._file.open('rb') as infile:
+            with self.file.open('rb') as infile:
                 self._bindata = bytearray(infile.read())
-        ser = serial.Serial(port=self._port, baudrate=self._baudrate)
+        ser = serial.Serial(port=self.port, baudrate=self.baudrate)
         # We need to wait just a little before flushing the port
         time.sleep(0.5)
         ser.reset_input_buffer()
         try:
-            if self._boot_relay:
-                self._boot_relay.set_on()
-            if self._reset_relay:
-                self._reset_relay.pulse(0.1)
+            if self.bda4_signals:
+                ser.rts = ser.dtr = True
+                ser.dtr = False
+            if self.boot_relay:
+                self.boot_relay.set_on()
+            if self.reset_relay:
+                self.reset_relay.pulse(0.1)
             pgm = isplpc.Programmer(
                 ser,
                 self._bindata,
-                erase_only=self._erase_only,
-                verify=self._verify,
-                crpmode=self._crpmode)
+                erase_only=False,
+                verify=False,
+                crpmode=self.crpmode)
             try:
                 pgm.program()
                 self.result = self.pass_result
@@ -167,8 +166,10 @@ class ARM(_Base):
                 self.result = str(exc)
         finally:
             ser.close()
-            if self._boot_relay:
-                self._boot_relay.set_off()
+            if self.bda4_signals:
+                ser.rts = False
+            if self.boot_relay:
+                self.boot_relay.set_off()
 
     def program_wait(self):
         """Wait for device programming to finish."""
