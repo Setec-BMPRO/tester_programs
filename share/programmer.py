@@ -165,9 +165,9 @@ class ARM(_Base):
             except isplpc.ProgrammingError as exc:
                 self.result = str(exc)
         finally:
-            ser.close()
             if self.bda4_signals:
                 ser.rts = False
+            ser.close()
             if self.boot_relay:
                 self.boot_relay.set_off()
 
