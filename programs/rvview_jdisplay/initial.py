@@ -121,7 +121,7 @@ class Initial(share.TestSequence):
         Check all segments and backlight.
 
         """
-        dev['rla_reset'].pulse(0.1, delay=2)
+        dev['rla_reset'].pulse(0.1, delay=4)
         self._testmode(True)
         self.measure(
             ('ui_yesnoon', 'dmm_bklghton', 'ui_yesnooff', 'dmm_bklghtoff'),
