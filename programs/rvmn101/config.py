@@ -136,14 +136,19 @@ class RVMN101A(Config):
     _nordic_2_6_4 = 'jayco_rvmn101_signed_2.6.4-0-gd1f9eb78_factory_mcuboot.hex'
     _arm_image_1_13 = 'rvmn101_nxp_1.13.bin'
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
-    _rev21_values = _Values(
+    _rev22_values = _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='20A', hardware_rev='20', banner_lines=5,
+            product_rev='22A', hardware_rev='20', banner_lines=5,
             reversed_output_dict={},
             )
     _rev_data = {
-        None: _rev21_values,
-        '21': _rev21_values,
+        None: _rev22_values,
+        '22': _rev22_values,
+        '21': _Values(
+            nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
+            product_rev='21A', hardware_rev='20', banner_lines=5,
+            reversed_output_dict={},
+            ),
         '20': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
             product_rev='20A', hardware_rev='14A', banner_lines=5,
@@ -329,14 +334,20 @@ class RVMN5x(Config):
     # Software versions
     _nordic_2_6_4 = 'jayco_rvmn5x_signed_2.6.4-0-gd1f9eb78_factory_mcuboot.hex'
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
-    _rev10_values = _Values(
+    _rev12_values = _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='10A', hardware_rev='08A', banner_lines=5,
+            product_rev='12A', hardware_rev='08A', banner_lines=5,
             reversed_output_dict={},
             )
     _rev_data = {
-        None: _rev10_values,
-        '10': _rev10_values,
+        None: _rev12_values,
+        '12': _rev12_values,
+        # '11': The pilot Renesas micro version
+        '10': _Values(
+            nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
+            product_rev='10A', hardware_rev='08A', banner_lines=5,
+            reversed_output_dict={},
+            ),
         '9': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
             product_rev='09A', hardware_rev='07A', banner_lines=5,
