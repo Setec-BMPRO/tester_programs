@@ -132,8 +132,8 @@ class Fixture():
             'nRF52': '682329023',
             },
         '033030': {     # RVSWT101 Final
-            # Hub port 1:
-            'ARDUINO': {'posix': '/dev/ttyACM0', 'nt': 'COM39'}[os.name],
+            # Hub port 2:
+            'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM39'}[os.name],
             },
         '033550': {     # RVMN101A Initial
             'ARM': _ftdi_hub_1,
