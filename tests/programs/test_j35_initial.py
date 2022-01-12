@@ -87,6 +87,7 @@ class _J35Initial(ProgramTestCase):
                     ),
                 'RemoteSw': (
                     (sen['ovload'], (12.8, )),
+                    (sen['arm_remote'], 1),
                     ),
                 'Load': (
                     (sen['ovbat'], 12.8),
