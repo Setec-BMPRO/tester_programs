@@ -6,6 +6,7 @@
 from . import test_selftest
 from . import test_2040_final
 from . import test_2040_initial
+from . import test_asdisplay_initial
 from . import test_atxg4502v_final
 from . import test_batterycheck_final
 from . import test_bc2_initial
