@@ -216,7 +216,6 @@ class Devices(share.Devices):
         # Console driver
         self['arm'] = console.DirectConsole(arm_ser)
         self['can'] = self.physical_devices['_CAN']
-        self['can'].rvc_mode = False
         # Tunneled Console driver
         tunnel = tester.CANTunnel(
             self.physical_devices['CAN'],
