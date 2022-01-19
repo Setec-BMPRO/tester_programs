@@ -8,42 +8,55 @@ from ..data_feed import UnitTester, ProgramTestCase
 from programs import asdisplay
 
 
+class SerialResponder():
+
+    """Feed data bytes to serial.Serial.read.side_effect of a Mock."""
+
+    def __init__(self):
+        """Create instance."""
+        self.str_buffer = []
+
+    def append(self, str):
+        """Append a string to the response list."""
+        self.str_buffer.append(str)
+
+    def bytes_generator(self):
+        """Return generator of the strings as bytes of length 1."""
+        for a_str in self.str_buffer:
+            for a_chr in a_str:
+                yield(a_chr.encode())
+
+
 class ASDisplayInitial(ProgramTestCase):
     """ASDisplay Initial program test suite."""
 
     prog_class = asdisplay.Initial
-    debug = True
+    debug = False
     sernum = 'A2150080001'
 
     def setUp(self):
         for target in (
                 'share.programmer.ARM',
-                #'programs.asdisplay.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-
         # Patch the serial port with the expected responses
-        #patcher = patch('serial.Serial', return_value=self.mycon())
-        #self.addCleanup(patcher.stop)
-        #patcher.start()
-
+        patcher = patch('serial.Serial', return_value=self.mycon())
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
-
 
     def mycon(self):
         """ Mock the console and create responses (side_effect)
             to return a sequence of byte values.
         """
         con = MagicMock(name='console')
-        # Create the response strings.
+        # Console response strings
         cmd_set_led = 'set_led '
         on      = '0xFF,0xFF,0xFF,0xFF,0xFF'
         default = '0x01,0x00,0x00,0x00,0x00'
         cmd_prompt_resp_ok = '\rOK\r\n>'
-        cmd_leds_on = cmd_set_led + on + cmd_prompt_resp_ok
-        cmd_leds_default = cmd_set_led + default + cmd_prompt_resp_ok
         cmd_tank_levs = (
             '0x00,0x00,0x00,0x00',
             '0x01,0x01,0x01,0x01',
@@ -51,15 +64,13 @@ class ASDisplayInitial(ProgramTestCase):
             '0x03,0x03,0x03,0x03',
             '0x04,0x04,0x04,0x04',
             )
-        # Build a byte list of the expected responses.
-        response_bytes = ['testmode\rOK\r\n>'.encode()]
-        response_bytes.extend([cmd_leds_on.encode()])
-        response_bytes.extend([cmd_leds_default.encode()])
-        response_bytes.extend(
-                [char.encode()
-                 for lev in cmd_tank_levs
-                 for char in 'read_tank_level\r{0}\r\n>'.format(lev)])
-        con.read.side_effect = response_bytes
+        resp = SerialResponder()
+        resp.append('testmode\rOK\r\n>')
+        resp.append(cmd_set_led + on + cmd_prompt_resp_ok)
+        resp.append(cmd_set_led + default + cmd_prompt_resp_ok)
+        for lev in cmd_tank_levs:
+            resp.append('read_tank_level\r{0}\r\n>'.format(lev))
+        con.read.side_effect = resp.bytes_generator()
         return con
 
     def test_pass(self):
@@ -72,13 +83,13 @@ class ASDisplayInitial(ProgramTestCase):
                     (sen['3V3'], 3.3),
                     (sen['5V0'], 5.0),
                     ),
-                'Testmode_': (
+                'Testmode': (
                     (sen['test_mode'], 'OK'),
                     ),
-                'LEDCheck_': (
+                'LEDCheck': (
                     (sen['leds_on'], 'OK'),
-                    (sen['leds_off'], 'OK'),
                     (sen['LEDsOnCheck'], True),
+                    (sen['leds_off'], 'OK'),
                     ),
                 'TankSense': (
                     (sen['tank_sensor'], ((0, ) * 4,
