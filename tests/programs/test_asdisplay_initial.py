@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 """UnitTest for AsDisplay Test program."""
 
-import datetime
-import copy
-import unittest
 from unittest.mock import MagicMock, patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import asdisplay
 
@@ -38,9 +36,7 @@ class ASDisplayInitial(ProgramTestCase):
         """ Mock the console and create responses (side_effect)
             to return a sequence of byte values.
         """
-
         con = MagicMock(name='console')
-
         # Create the response strings.
         cmd_set_led = 'set_led '
         on      = '0xFF,0xFF,0xFF,0xFF,0xFF'
@@ -48,24 +44,21 @@ class ASDisplayInitial(ProgramTestCase):
         cmd_prompt_resp_ok = '\rOK\r\n>'
         cmd_leds_on = cmd_set_led + on + cmd_prompt_resp_ok
         cmd_leds_default = cmd_set_led + default + cmd_prompt_resp_ok
-        cmd_tank_levs = ('0x00,0x00,0x00,0x00',
-                         '0x01,0x01,0x01,0x01',
-                         '0x02,0x02,0x02,0x02',
-                         '0x03,0x03,0x03,0x03',
-                         '0x04,0x04,0x04,0x04')
-
+        cmd_tank_levs = (
+            '0x00,0x00,0x00,0x00',
+            '0x01,0x01,0x01,0x01',
+            '0x02,0x02,0x02,0x02',
+            '0x03,0x03,0x03,0x03',
+            '0x04,0x04,0x04,0x04',
+            )
         # Build a byte list of the expected responses.
-        response_bytes = [char.encode()
-                          for char in 'testmode\rOK\r\n>']
-        response_bytes.extend([char.encode()
-                               for char in cmd_leds_on])
-        response_bytes.extend([char.encode()
-                               for char in cmd_leds_default])
+        response_bytes = ['testmode\rOK\r\n>'.encode()]
+        response_bytes.extend([cmd_leds_on.encode()])
+        response_bytes.extend([cmd_leds_default.encode()])
         response_bytes.extend(
                 [char.encode()
                  for lev in cmd_tank_levs
-                 for char in 'read_tank_level\r{}\r\n>'.format(lev)])
-
+                 for char in 'read_tank_level\r{0}\r\n>'.format(lev)])
         con.read.side_effect = response_bytes
         return con
 
@@ -87,7 +80,6 @@ class ASDisplayInitial(ProgramTestCase):
                     (sen['leds_off'], 'OK'),
                     (sen['LEDsOnCheck'], True),
                     ),
-
                 'TankSense': (
                     (sen['tank_sensor'], ((0, ) * 4,
                                           (1, ) * 4,
@@ -97,7 +89,6 @@ class ASDisplayInitial(ProgramTestCase):
                                           )),
                     ),
                 }}
-
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
@@ -107,4 +98,3 @@ class ASDisplayInitial(ProgramTestCase):
             ['PowerUp', 'PgmARM', 'Testmode',
              'LEDCheck', 'TankSense'],
             self.tester.ut_steps)
-

@@ -1,8 +1,8 @@
 {
   "header": {
     "comment": "eric project file for project tester_programs",
-    "copyright": "Copyright (C) 2021 , ",
-    "saved": "2021-12-07, 14:56:58"
+    "copyright": "Copyright (C) 2022 , ",
+    "saved": "2022-01-19, 16:27:41"
   },
   "project": {
     "AUTHOR": "",
@@ -365,7 +365,11 @@
       "tests/programs/test_rvswt101_arduino.py",
       "programs/cn101/config.py",
       "share/console/arduino.py",
-      "programs/rvmc101/display.py"
+      "programs/rvmc101/display.py",
+      "programs/asdisplay/__init__.py",
+      "programs/asdisplay/console.py",
+      "programs/asdisplay/initial.py",
+      "tests/programs/test_asdisplay_initial.py"
     ],
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",

@@ -3,10 +3,6 @@
 # Copyright 2021 SETEC Pty Ltd
 """ASDisplay Test Program."""
 
-import re
-
-import setec
-
 import share
 
 
@@ -17,6 +13,7 @@ class Console(share.console.BadUart):
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b'>'
     tank_level_key = 'TANK_LEVEL'
+    reading_tanks = False
 
     # Console commands
     parameter = share.console.parameter
@@ -45,59 +42,24 @@ class Console(share.console.BadUart):
         }
 
     def configure(self, key):
-
+        """Remember if we are reading tank levels."""
         self.reading_tanks = (key == self.tank_level_key)
         super().configure(key)
 
     def action(self, command=None, delay=0, expected=0):
-        """ Provide a custom action when reading tanks
-            Manupilate the response to be in a (1, 1, 1, 1) format
+        """Provide a custom action when reading tanks.
 
-            > read_tank_level
-            0x00,0x00,0x00,0x00  # Tank empty, all relays off
-            0x01,0x01,0x01,0x01
-            0x02,0x02,0x02,0x02
-            0x03,0x03,0x03,0x03
-            0x04,0x04,0x04,0x04  # Tank full, all relays on
+        Manipulate the response to be in a (1, 1, 1, 1) format
+
+        > read_tank_level
+        0x00,0x00,0x00,0x00  # Tank empty, all relays off
+        0x01,0x01,0x01,0x01
+        0x02,0x02,0x02,0x02
+        0x03,0x03,0x03,0x03
+        0x04,0x04,0x04,0x04  # Tank full, all relays on
+
         """
+        reply = super().action(command, delay, expected)
         if self.reading_tanks:
-            reply = None
-            try:
-                if command:
-                    self.last_cmd = command
-                    self.port.reset_input_buffer()
-                    self._write_command(command)
-                if delay:
-                    time.sleep(delay)
-
-                response = self._read_response(expected)
-                reply = tuple(int(val, 16)
-                        for val in response.split(','))
-            except Error as err:
-                if self.measurement_fail_on_error:
-                    # Read any more waiting data (a possible hard-fault message)
-                    port_timeout = self.port.timeout
-                    self.port.timeout = 0.1
-                    data = self.port.read(1000)
-                    self.port.timeout = port_timeout
-                    if len(data) > 0:
-                        self._logger.error('Console Error extra data: %s', data)
-                    # Generate a Measurement failure
-                    self._logger.debug('Caught Error: "%s"', err)
-                    comms = tester.Measurement(
-                        tester.LimitRegExp('Action', 'ok', doc='Command succeeded'),
-                        tester.sensor.MirrorReadingString())
-                    comms.sensor.store(str(err))
-                    comms.measure()   # Generates a test FAIL result
-                else:
-                    raise
-            return reply
-
-        else:
-            return super().action(command, delay, expected)
-
-
-
-
-
-
+            reply = tuple(int(val, 16) for val in reply.split(','))
+        return reply
