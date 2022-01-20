@@ -3,6 +3,8 @@
 # Copyright 2021 SETEC Pty Ltd
 """ASDisplay Test Program."""
 
+import time
+
 import share
 
 
@@ -40,6 +42,17 @@ class Console(share.console.BadUart):
             'read_tank_level',
             write_format='{1} {0}', read_format='{0}'),
         }
+
+    def open(self):
+        self.port.baudrate = 19200
+        self.port.timeout = 5
+        super().open()
+
+    def reset(self):
+        self.port.dtr = self.port.rts = False
+        self.port.dtr = True
+        self.port.dtr = False
+        time.sleep(1)
 
     def configure(self, key):
         """Remember if we are reading tank levels."""

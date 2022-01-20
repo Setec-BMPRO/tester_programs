@@ -55,7 +55,9 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_enter_testmode(self, dev, mes):
-        dev['ASDisplay_Console'].open()
+        con = dev['ASDisplay_Console']
+        con.open()
+        con.reset()
         mes['test_mode']()
 
     @share.teststep
@@ -103,17 +105,10 @@ class Devices(share.Devices):
             bda4_signals=True,  #Use BDA4 serial lines for RESET & BOOT
             )
         # Serial connection to the console
-        console_ser = serial.Serial(baudrate=19200, timeout=5.0)
+        console_ser = serial.Serial()
         # Set port separately, as we don't want it opened yet
         self['ASDisplay_Console'] = console.Console(console_ser)
         console_ser.port = arm_port
-
-        ##Use BDA4 serial lines for RESET & BOOT
-        #console_ser.dtr = console_ser.rts = False
-        #console_ser.open()
-        #console_ser.dtr = True
-        #for n in range(1000000): pass
-        #console_ser.dtr = False
 
     def reset(self):
         """Reset instruments."""
