@@ -369,6 +369,7 @@
       "programs/asdisplay/__init__.py",
       "programs/asdisplay/console.py",
       "programs/asdisplay/initial.py",
+      "tests/programs/test_asdisplay_console.py",
       "tests/programs/test_asdisplay_initial.py"
     ],
     "SPELLEXCLUDES": "",

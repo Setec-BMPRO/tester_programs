@@ -205,6 +205,7 @@
     <Source>tests/programs/__init__.py</Source>
     <Source>tests/programs/test_2040_final.py</Source>
     <Source>tests/programs/test_2040_initial.py</Source>
+    <Source>tests/programs/test_asdisplay_console.py</Source>
     <Source>tests/programs/test_asdisplay_initial.py</Source>
     <Source>tests/programs/test_atxg4502v_final.py</Source>
     <Source>tests/programs/test_batterycheck_final.py</Source>

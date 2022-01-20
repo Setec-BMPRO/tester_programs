@@ -91,6 +91,7 @@ __all__ = [
     'test_selftest',
     'test_2040_final',
     'test_2040_initial',
+    'test_asdisplay_console',
     'test_asdisplay_initial',
     'test_atxg4502v_final',
     'test_batterycheck_final',
