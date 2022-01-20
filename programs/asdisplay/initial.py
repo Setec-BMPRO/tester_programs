@@ -31,7 +31,8 @@ class Initial(share.TestSequence):
         tester.LimitInteger('TankLevel3', 3),
         tester.LimitInteger('TankLevel4', 4),
         )
-    analog_read_wait = 2        # Analog read response time
+    # In testmode, updates of the water tank levels are less than 100ms.
+    analog_read_wait = 0.1        # Analog read response time
     sernum = None
 
     def open(self, uut):
