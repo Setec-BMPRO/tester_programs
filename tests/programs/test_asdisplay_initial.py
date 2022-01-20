@@ -19,6 +19,7 @@ class ASDisplayInitial(ProgramTestCase):
         for target in (
                 'share.programmer.ARM',
                 'programs.asdisplay.console.Console',
+                'tester.CANReader',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -33,7 +34,7 @@ class ASDisplayInitial(ProgramTestCase):
                     (sen['SnEntry'], self.sernum),
                     (sen['Vin'], 12.0),
                     (sen['3V3'], 3.3),
-                    (sen['5V0'], 5.0),
+                    (sen['5V'], 5.0),
                     ),
                 'Testmode': (
                     (sen['test_mode'], 'OK'),
@@ -52,12 +53,15 @@ class ASDisplayInitial(ProgramTestCase):
                         (4, ) * 4,
                         )),
                     ),
+                'CanBus': (
+                    ),
                 }}
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(28, len(result.readings))
+        self.assertEqual(29, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmARM', 'Testmode', 'LEDCheck', 'TankSense'],
+            ['PowerUp', 'PgmARM',
+            'Testmode', 'LEDCheck', 'TankSense', 'CanBus'],
             self.tester.ut_steps)

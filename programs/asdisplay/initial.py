@@ -21,7 +21,7 @@ class Initial(share.TestSequence):
     limitdata = (
         tester.LimitDelta('Vin', vin_set, 0.5, doc='At nominal'),
         tester.LimitPercent('3V3', 3.33, 3.0, doc='At nominal'),
-        tester.LimitPercent('5V0', 5.0, 3.0, doc='At nominal'),
+        tester.LimitPercent('5V', 5.0, 3.0, doc='At nominal'),
         tester.LimitRegExp('test_mode', '^OK$'),
         tester.LimitRegExp('leds_on', '^OK$'),
         tester.LimitRegExp('leds_off', '^OK$'),
@@ -30,6 +30,7 @@ class Initial(share.TestSequence):
         tester.LimitInteger('TankLevel2', 2),
         tester.LimitInteger('TankLevel3', 3),
         tester.LimitInteger('TankLevel4', 4),
+        tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
     # In testmode, updates of the water tank levels are less than 100ms.
     analog_read_wait = 0.1        # Analog read response time
@@ -45,6 +46,7 @@ class Initial(share.TestSequence):
             tester.TestStep('Testmode', self._step_enter_testmode),
             tester.TestStep('LEDCheck', self._step_led_check),
             tester.TestStep('TankSense', self._step_tank_sense),
+            tester.TestStep('CanBus', self._step_canbus),
             )
 
     @share.teststep
@@ -52,11 +54,11 @@ class Initial(share.TestSequence):
         """Apply Vin and check voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(self.vin_set, output=True, delay=1)
-        self.measure(('dmm_Vin', 'dmm_5V0', 'dmm_3V3', ), timeout=5)
+        self.measure(('dmm_Vin', 'dmm_5V', 'dmm_3V3', ), timeout=5)
 
     @share.teststep
     def _step_enter_testmode(self, dev, mes):
-        con = dev['ASDisplay_Console']
+        con = dev['console']
         con.open()
         con.reset()
         mes['test_mode']()
@@ -64,18 +66,28 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_led_check(self, dev, mes):
         """Toggle LED's."""
-        self.measure(('LEDsOn', 'LED_check', 'LEDsOff'), timeout=5)
+        self.measure(('LEDsOn', 'LED_check', 'LEDsOff', ), timeout=5)
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
         """Tank sensors."""
-        mes['tank_level0']()
-        for rly, tnk_lvl in (
-                ('relay{0}'.format(n), 'tank_level{0}'.format(n))
-                for n in range(1, 5)
-            ):
-            self.relay(((rly, True), ), delay=self.analog_read_wait)
-            mes[tnk_lvl]()
+        for num in range(5):    # 0 to 4 relays activated
+            if num:
+                dev['relay{0}'.format(num)].set_on(delay=self.analog_read_wait)
+            mes['tank_level{0}'.format(num)]()
+
+    @share.teststep
+    def _step_canbus(self, dev, mes):
+        """Test the CAN Bus."""
+        candev = dev['canreader']
+        candev.enable = True    # Start reading
+        try:
+            candev.read()       # Read any packet
+            result = True
+        except tester.CANReaderError:   # Error due to timeout
+            result = False
+        mes['can_active'].sensor.store(result)
+        mes['can_active']()
 
 
 class Devices(share.Devices):
@@ -108,12 +120,18 @@ class Devices(share.Devices):
         # Serial connection to the console
         console_ser = serial.Serial()
         # Set port separately, as we don't want it opened yet
-        self['ASDisplay_Console'] = console.Console(console_ser)
         console_ser.port = arm_port
+        self['console'] = console.Console(console_ser)
+        # CAN traffic reader
+        candev = tester.CANReader(self.physical_devices['_CAN'])
+        self['canreader'] = candev
+        candev.start()
+        self.add_closer(candev.stop)
 
     def reset(self):
         """Reset instruments."""
-        self['ASDisplay_Console'].close()
+        self['console'].close()
+        self['canreader'].enable = False
         for rla in ('relay1','relay2', 'relay3', 'relay4'):
             self[rla].set_off()
 
@@ -126,12 +144,13 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
+        self['MirCAN'] = sensor.MirrorReadingBoolean()
         self['Vin'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
         self['Vin'].doc = 'Vin rail'
         self['3V3'] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
         self['3V3'].doc = '3V3 rail'
-        self['5V0'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self['5V0'].doc = '5V0 rail'
+        self['5V'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
+        self['5V'].doc = '5V rail'
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('asdisplay_initial', 'msgSnEntry'),
             caption=tester.translate('asdisplay_initial', 'capSnEntry'))
@@ -141,45 +160,51 @@ class Sensors(share.Sensors):
             caption=tester.translate('asdisplay_initial', 'capLedCheck'))
         self['LEDsOnCheck'].doc = 'LEDs Turned on'
         # Console sensors
-        ASDisplay_Console = self.devices['ASDisplay_Console']
-        self['tank_sensor'] = sensor.KeyedReading(ASDisplay_Console, 'TANK_LEVEL')
+        console = self.devices['console']
+        self['tank_sensor'] = sensor.KeyedReading(console, 'TANK_LEVEL')
         for name, cmdkey in (
                 ('test_mode', 'TESTMODE'),
                 ('leds_on', 'ALL_LEDS_ON'),
                 ('leds_off', 'LEDS_OFF'),
             ):
-            self[name] = sensor.KeyedReadingString(ASDisplay_Console, cmdkey)
+            self[name] = sensor.KeyedReadingString(console, cmdkey)
 
 
 class Measurements(share.Measurements):
 
-    """Measurements:
-       measurement_name, limit_name, sensor_name, doc"""
+    """Measurements."""
 
     def open(self):
         """Create all Measurements."""
         self.create_from_names((
+            # measurement_name, limit_name, sensor_name, doc
             ('dmm_Vin', 'Vin', 'Vin', 'Vin rail ok'),
             ('dmm_3V3', '3V3', '3V3', '3V3 rail ok'),
-            ('dmm_5V0', '5V0', '5V0', '5V0 rail ok'),
+            ('dmm_5V', '5V', '5V', '5V rail ok'),
             ('test_mode', 'test_mode', 'test_mode', 'Test Mode Entered'),
             ('LED_check', 'Notify', 'LEDsOnCheck', 'LED check ok'),
             ('LEDsOn', 'leds_on', 'leds_on', 'LEDs On'),
             ('LEDsOff', 'leds_off', 'leds_off', 'LEDs Off'),
+            ('can_active', 'CANok', 'MirCAN', 'CAN traffic seen'),
             ('ui_serialnum', 'SerNum', 'SnEntry', 'S/N valid'),
             ))
         self['tank_level0'] = tester.Measurement(
                 (self.limits['TankLevel0'], ) * 4,   # A tuple of limits
-                self.sensors['tank_sensor'], doc='')
+                self.sensors['tank_sensor'],
+                doc='No inputs active')
         self['tank_level1'] = tester.Measurement(
                 (self.limits['TankLevel1'], ) * 4,
-                self.sensors['tank_sensor'], doc='')
+                self.sensors['tank_sensor'],
+                doc='1 input active')
         self['tank_level2'] = tester.Measurement(
                 (self.limits['TankLevel2'], ) * 4,
-                self.sensors['tank_sensor'], doc='')
+                self.sensors['tank_sensor'],
+                doc='2 inputs active')
         self['tank_level3'] = tester.Measurement(
                 (self.limits['TankLevel3'], ) * 4,
-                self.sensors['tank_sensor'], doc='')
+                self.sensors['tank_sensor'],
+                doc='3 inputs active')
         self['tank_level4'] = tester.Measurement(
                 (self.limits['TankLevel4'], ) * 4,
-                self.sensors['tank_sensor'], doc='')
+                self.sensors['tank_sensor'],
+                doc='4 inputs active')
