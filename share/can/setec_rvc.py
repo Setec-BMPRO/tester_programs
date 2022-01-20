@@ -431,5 +431,35 @@ class PacketPropertyReader():
             can_data = self.canreader.read()
             packet = self.packettype(can_data)
         except PacketDecodeError:       # Probably another packet type
+# FIXME: Should we return False? Or instead, read again?
             return False
         return getattr(packet, self._read_key)
+
+
+@attr.s
+class PacketDetector():
+
+    """Custom logical instrument to detect CAN packet traffic."""
+
+    canreader = attr.ib()       # tester.CANReader instance
+
+    def configure(self, key):       # pylint: disable=unused-argument
+        """Sensor: Configure for next reading."""
+
+    def opc(self):
+        """Sensor: OPC."""
+
+    def read(self, callerid):       # pylint: disable=unused-argument
+        """Sensor: Read presence of CAN traffic.
+
+        @param callerid Identity of caller
+        @return True if CAN traffic is seen
+
+        """
+        result = None
+        try:
+            self.canreader.read()
+            result = True
+        except tester.CANReaderError:   # A timeout due to no traffic
+            result = False
+        return result

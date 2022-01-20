@@ -79,14 +79,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        candev = dev['canreader']
-        candev.enable = True    # Start reading
-        try:
-            candev.read()       # Read any packet
-            result = True
-        except tester.CANReaderError:   # Error due to timeout
-            result = False
-        mes['can_active'].sensor.store(result)
+        dev['canreader'].enable = True
         mes['can_active']()
 
 
@@ -127,6 +120,8 @@ class Devices(share.Devices):
         self['canreader'] = candev
         candev.start()
         self.add_closer(candev.stop)
+        # CAN traffic detector
+        self['candetector'] = share.can.PacketDetector(self['canreader'])
 
     def reset(self):
         """Reset instruments."""
@@ -144,7 +139,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['MirCAN'] = sensor.MirrorReadingBoolean()
         self['Vin'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.01)
         self['Vin'].doc = 'Vin rail'
         self['3V3'] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
@@ -168,6 +162,8 @@ class Sensors(share.Sensors):
                 ('leds_off', 'LEDS_OFF'),
             ):
             self[name] = sensor.KeyedReadingString(console, cmdkey)
+        self['cantraffic'] = sensor.KeyedReadingBoolean(
+            self.devices['candetector'], None)
 
 
 class Measurements(share.Measurements):
@@ -185,7 +181,7 @@ class Measurements(share.Measurements):
             ('LED_check', 'Notify', 'LEDsOnCheck', 'LED check ok'),
             ('LEDsOn', 'leds_on', 'leds_on', 'LEDs On'),
             ('LEDsOff', 'leds_off', 'leds_off', 'LEDs Off'),
-            ('can_active', 'CANok', 'MirCAN', 'CAN traffic seen'),
+            ('can_active', 'CANok', 'cantraffic', 'CAN traffic seen'),
             ('ui_serialnum', 'SerNum', 'SnEntry', 'S/N valid'),
             ))
         self['tank_level0'] = tester.Measurement(
