@@ -53,6 +53,7 @@ from . import test_mb2_final
 from . import test_mb3_final
 from . import test_mb3_initial
 from . import test_mk7400_final
+from . import test_opto_initial
 from . import test_rm50_final
 from . import test_rvmc101_final
 from . import test_rvmc101_initial
@@ -139,6 +140,7 @@ __all__ = [
     'test_mb3_final',
     'test_mb3_initial',
     'test_mk7400_final',
+    'test_opto_initial',
     'test_rm50_final',
     'test_rvmc101_final',
     'test_rvmc101_initial',

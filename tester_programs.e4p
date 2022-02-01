@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2022-01-19, 15:55:33 -->
+<!-- Saved: 2022-02-01, 12:25:33 -->
 <!-- Copyright (C) 2021 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -116,6 +116,8 @@
     <Source>programs/mb3/initial.py</Source>
     <Source>programs/mk7400/__init__.py</Source>
     <Source>programs/mk7400/final.py</Source>
+    <Source>programs/opto_test/__init__.py</Source>
+    <Source>programs/opto_test/initial.py</Source>
     <Source>programs/rm50/__init__.py</Source>
     <Source>programs/rm50/final.py</Source>
     <Source>programs/rvmc101/__init__.py</Source>
@@ -253,6 +255,7 @@
     <Source>tests/programs/test_mb3_final.py</Source>
     <Source>tests/programs/test_mb3_initial.py</Source>
     <Source>tests/programs/test_mk7400_final.py</Source>
+    <Source>tests/programs/test_opto_initial.py</Source>
     <Source>tests/programs/test_rm50_final.py</Source>
     <Source>tests/programs/test_rvmc101_final.py</Source>
     <Source>tests/programs/test_rvmc101_initial.py</Source>

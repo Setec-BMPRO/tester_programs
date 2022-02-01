@@ -30,6 +30,7 @@ from . import j35
 from . import mb2
 from . import mb3
 from . import mk7400
+from . import opto_test
 from . import rvview_jdisplay
 from . import rvmc101
 from . import rvmd50
@@ -110,6 +111,7 @@ PROGRAMS = {
     'MB3 Initial': mb3.Initial,
     'MB3 Final': mb3.Final,
     'MK7-400-1 Final': mk7400.Final,
+    'Opto Initial': opto_test.Initial,
     'RvViewJDisplay Initial': rvview_jdisplay.Initial,
     'RVMC101 Final': rvmc101.Final,
     'RVMC101 Initial': rvmc101.Initial,

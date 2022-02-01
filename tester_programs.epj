@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2022 , ",
-    "saved": "2022-01-19, 16:27:41"
+    "saved": "2022-02-01, 12:20:12"
   },
   "project": {
     "AUTHOR": "",
@@ -370,7 +370,10 @@
       "programs/asdisplay/console.py",
       "programs/asdisplay/initial.py",
       "tests/programs/test_asdisplay_console.py",
-      "tests/programs/test_asdisplay_initial.py"
+      "tests/programs/test_asdisplay_initial.py",
+      "programs/opto_test/__init__.py",
+      "programs/opto_test/initial.py",
+      "tests/programs/test_opto_initial.py"
     ],
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",
