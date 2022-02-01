@@ -87,7 +87,6 @@ class SmartLink201Initial(_Initial):
                     (sen['SnEntry'], 'A2126010123'),
                     (sen['photosense1'], 0.0),
                     (sen['photosense2'], 0.0),
-                    (sen['S5can'], 3000),
                     (sen['S5tank'], 1.5),
                     (sen['Vbatt'], 12.0),
                     (sen['Vin'], 10.0),
@@ -110,7 +109,7 @@ class SmartLink201Initial(_Initial):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(45, len(result.readings))
+        self.assertEqual(44, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmARM', 'PgmNordic',
              'Nordic', 'Calibrate', 'TankSense', ],

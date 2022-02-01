@@ -21,8 +21,6 @@ class Initial(share.TestSequence):
         tester.LimitRegExp('BleMac', r'^[0-9a-f]{12}$',
             doc='Valid MAC address '),
         tester.LimitLow('PartOk', 2.0, doc='All parts present'),
-        # CAN data line voltage: Off 1.1V On 2.2V
-        tester.LimitHigh('S5can', 2.0, doc='S5 CAN ON'),
         tester.LimitLow('S5tank', 2.0, doc='S5 tank ON'),
         tester.LimitDelta('Vbatt', vin_set, 0.5, doc='At nominal'),
         tester.LimitDelta('Vin', vin_set - 2.0, 0.5, doc='At nominal'),
@@ -65,7 +63,7 @@ class Initial(share.TestSequence):
         meas1 = ('dmm_Parts2', )
         meas2 = ('dmm_Vbatt', 'dmm_Vin', 'dmm_3V3', )
         if self.cfg.is_smartlink:
-            meas1 += ('dmm_Parts1', 'dmm_S5can', )
+            meas1 += ('dmm_Parts1', )
             meas2 += ('dmm_S5tank', )
         # Do the test
         self.measure(meas1, timeout=5)
@@ -199,8 +197,6 @@ class Sensors(share.Sensors):
         self['photosense2'].doc = 'Part detector output'
         self['Vbatt'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.01)
         self['Vbatt'].doc = 'X13 pin 1'
-        self['S5can'] = sensor.Vdc(dmm, high=5, low=1, rng=10, res=0.01)
-        self['S5can'].doc = 'S5 CAN lines'
         self['S5tank'] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
         self['S5tank'].doc = 'S5 Tank Type'
         self['SnEntry'] = sensor.DataEntry(
@@ -239,8 +235,6 @@ class Measurements(share.Measurements):
                 'Tank and RJ parts fitted'),
             ('dmm_Parts2', 'PartOk', 'photosense2',
                 'Connector and switch parts fitted'),
-            ('dmm_S5can', 'S5can', 'S5can',
-                'S5 CAN switch ON'),
             ('dmm_S5tank', 'S5tank', 'S5tank',
                 'S5 Tank switch ON'),
             ('dmm_Vin', 'Vin', 'Vin', 'Vin rail ok'),
