@@ -20,19 +20,20 @@ class Initial(share.TestSequence):
 
     _opto_count = 20
     limitdata = (
-        tester.LimitLow('Isen1', 0.995),
-        tester.LimitLow('Isen10', 9.95),
+        tester.LimitHigh('Isen1', 0.995e-3),
+        tester.LimitHigh('Isen10', 9.95e-3),
         tester.LimitDelta('VinAdj', 0, 99999),
-        tester.LimitDelta('Iin1', 0.99, 1.05),
-        tester.LimitDelta('Iin10', 9.9, 10.5),
+        tester.LimitDelta('Iin1', 0.99e-3, 1.05e-3),
+        tester.LimitDelta('Iin10', 9.9e-3, 10.5e-3),
         tester.LimitHigh('Vsen', 5.0),
         tester.LimitDelta('VceAdj', 4.99, 5.04),
         tester.LimitPercent('Vce', 5.00,  1.0),
         tester.LimitDelta('VoutAdj', 0, 99999),
-        tester.LimitDelta('Iout', 0.0, 22.0),
+        tester.LimitDelta('Iout', 0.0e-3, 22.0e-3),
         tester.LimitDelta('CTR', 0, 220),
         )
     _recipient = '"Stephen Bell" <stephen.bell@setec.com.au>'
+#    _recipient = '"Wayne Tomkins" <wayne.tomkins@setec.com.au>'
     _email_server = 'smtp.mel.setec.com.au'
 
     def open(self, uut):
@@ -62,37 +63,27 @@ class Initial(share.TestSequence):
     def _step_in_adj1(self, dev, mes):
         """Input adjust and measure.
 
-        Adjust input dc source to get the required value of Iin.
+        Adjust input DC source to get the required value of Iin.
 
          """
         dev['dcs_iset'].output(22.5, True)
         self.measure(('ramp_VinAdj1', 'dmm_Iin1', ), timeout=2)
 
     @share.teststep
-    def _step_in_adj10(self, dev, mes):
-        """Input adjust and measure.
-
-        Adjust input dc source to get the required value of Iin.
-
-         """
-        dev['dcs_iset'].output(35.5, True)
-        self.measure(('ramp_VinAdj10', 'dmm_Iin10', ), timeout=2)
-
-    @share.teststep
     def _step_out_adj1(self, dev, mes):
         """Output adjust and measure.
 
         Adjust output DC source to get 5V across collector-emitter,
-        Measure Vce.
-        Measure Iout.
-        Measure Iin.
-        Calculate CTR.
+            Measure Vce.
+            Measure Iout.
+            Measure Iin.
+            Calculate CTR.
 
         """
         for i in range(self._opto_count):
             dev['dcs_vset'].output(4.7, True)
             with tester.PathName('Opto{0}'.format(i + 1)):
-                mes['ramp_VoutAdj1'][i].measure(timeout=2)
+                mes['search_VoutAdj1'][i].measure(timeout=2)
                 mes['dmm_Vce'][i].measure(timeout=2)
                 i_out = mes['dmm_Iout'][i].measure(timeout=2).reading1
                 i_in = mes['dmm_Iin1'].measure(timeout=2).reading1
@@ -102,20 +93,30 @@ class Initial(share.TestSequence):
                 mes['dmm_ctr'].measure()
 
     @share.teststep
+    def _step_in_adj10(self, dev, mes):
+        """Input adjust and measure.
+
+        Adjust input DC source to get the required value of Iin.
+
+         """
+        dev['dcs_iset'].output(35.5, True)
+        self.measure(('ramp_VinAdj10', 'dmm_Iin10', ), timeout=2)
+
+    @share.teststep
     def _step_out_adj10(self, dev, mes):
         """Output adjust and measure.
 
         Adjust output DC source to get 5V across collector-emitter,
-        Measure Vce.
-        Measure Iout.
-        Measure Iin.
-        Calculate CTR.
+            Measure Vce.
+            Measure Iout.
+            Measure Iin.
+            Calculate CTR.
 
         """
         for i in range(self._opto_count):
             dev['dcs_vset'].output(16.0, True)
             with tester.PathName('Opto{0}'.format(i + 1)):
-                mes['ramp_VoutAdj10'][i].measure(timeout=2)
+                mes['search_VoutAdj10'][i].measure(timeout=2)
                 mes['dmm_Vce'][i].measure(timeout=2)
                 i_out = mes['dmm_Iout'][i].measure(timeout=2).reading1
                 i_in = mes['dmm_Iin10'].measure(timeout=2).reading1
@@ -129,17 +130,14 @@ class Initial(share.TestSequence):
         """Email test result data."""
         now = datetime.datetime.now().isoformat()[:19]
         # First make the CSV header row
-        header = '"UUT","TestDateTime"'
-        for i in range(self._opto_count):
-            header += ',"CTR{0}_1"'.format(i + 1)
-        for i in range(self._opto_count):
-            header += ',"CTR{0}_10"'.format(i + 1)
-        data = '"{0}","{1}"'.format(self._brdnum, now)
+        lines = []
+        lines.append('"PCB-Opto","TestDateTime","CTR-1","CTR-10"')
         # Now the rows of CSV data
-        for ctr in self._ctr_data1:
-            data += ',{0}'.format(ctr)
-        for ctr in self._ctr_data10:
-            data += ',{0}'.format(ctr)
+        for opto in range(self._opto_count):
+            lines.append(
+                '"{0}-{1:02}","{2}",{3},{4}'.format(
+                    self.sernum, opto + 1, now,
+                    self._ctr_data1[opto], self._ctr_data10[opto]))
         # Build into an email and send it
         outer = MIMEMultipart()
         outer['To'] = self._recipient
@@ -148,7 +146,7 @@ class Initial(share.TestSequence):
         outer.preamble = 'You will not see this in a MIME-aware mail reader.'
         summsg = MIMEText('Opto test data is attached.')
         outer.attach(summsg)
-        msg = MIMEApplication(header + '\r\n' + data + '\r\n')
+        msg = MIMEApplication('\r\n'.join(lines))
         msg.add_header(
             'Content-Disposition',
             'attachment',
@@ -222,9 +220,8 @@ class Sensors(share.Sensors):
             s = sensor.Search(
                 stimulus=self.devices['dcs_vset'],
                 sensor=self['Vce'][i],
-                detect_limit=(
-                    self.limits['Vsen'],),
-                    response_limit=(self.limits['VceAdj'],),
+                detect_limit=self.limits['Vsen'],
+                response_limit=self.limits['VceAdj'],
                 start=4.7, stop=6.7, resolution=0.04, delay=0.1)
             self['VoutAdj1'].append(s)
         self['VoutAdj10'] = []
@@ -232,9 +229,8 @@ class Sensors(share.Sensors):
             s = sensor.Search(
                 stimulus=self.devices['dcs_vset'],
                 sensor=self['Vce'][i],
-                detect_limit=(
-                    self.limits['Vsen'],),
-                    response_limit=(self.limits['VceAdj'],),
+                detect_limit=self.limits['Vsen'],
+                response_limit=self.limits['VceAdj'],
                 start=14.0, stop=26.0, resolution=0.04, delay=0.1)
             self['VoutAdj10'].append(s)
         # Generate a list of Iout voltage sensors
@@ -271,14 +267,14 @@ class Measurements(share.Measurements):
         for sen in self.sensors['Vce']:
             self['dmm_Vce'].append(tester.Measurement(lim, sen))
         # Generate VoutAdj ramps for 1mA & 10mA inputs
-        self['ramp_VoutAdj1'] = []
+        self['search_VoutAdj1'] = []
         lim = self.limits['VoutAdj']
         for sen in self.sensors['VoutAdj1']:
-            self['ramp_VoutAdj1'].append(tester.Measurement(lim, sen))
-        self['ramp_VoutAdj10'] = []
+            self['search_VoutAdj1'].append(tester.Measurement(lim, sen))
+        self['search_VoutAdj10'] = []
         lim = self.limits['VoutAdj']
         for sen in self.sensors['VoutAdj10']:
-            self['ramp_VoutAdj10'].append(tester.Measurement(lim, sen))
+            self['search_VoutAdj10'].append(tester.Measurement(lim, sen))
         # Generate Iout voltage measurements
         self['dmm_Iout'] = []
         lim = self.limits['Iout']

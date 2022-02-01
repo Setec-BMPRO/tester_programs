@@ -39,19 +39,19 @@ class OptoInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
                 'BoardNum': (
-                    (sen['sernum'], 'A2126880001'),
+                    (sen['sernum'], 'A2201770001'),
                     ),
                 'InputAdj1': (
-                    (sen['Isense'], (0.5, ) * 30 + (1.0, 1.003), ),
+                    (sen['Isense'], (0.5, ) * 5 + (1.0, 1.003), ),
                     ),
                 'OutputAdj1': oa1 + (
-                    (sen['Isense'], 1.003),
+                    (sen['Isense'], (1.003, ) * opto_test.Initial._opto_count),
                     ),
                 'InputAdj10': (
-                    (sen['Isense'], (5.0, ) * 30 + (10.0, 10.03), ),
+                    (sen['Isense'], (5.0, ) * 5 + (10.0, 10.03), ),
                     ),
                 'OutputAdj10': oa10 + (
-                    (sen['Isense'], 10.03),
+                    (sen['Isense'], (10.03, ) * opto_test.Initial._opto_count),
                     ),
                 'Email': (
                     ),
@@ -61,7 +61,7 @@ class OptoInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(7, len(result.readings))
+        self.assertEqual(205, len(result.readings))
         self.assertEqual(
             ['BoardNum',
              'InputAdj1', 'OutputAdj1', 'InputAdj10', 'OutputAdj10',
