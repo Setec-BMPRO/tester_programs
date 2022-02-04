@@ -22,18 +22,20 @@ class Initial(share.TestSequence):
     limitdata = (
         tester.LimitHigh('Isen1', 0.995e-3),
         tester.LimitHigh('Isen10', 9.95e-3),
-        tester.LimitDelta('VinAdj', 0, 99999),
-        tester.LimitDelta('Iin1', 0.99e-3, 1.05e-3),
-        tester.LimitDelta('Iin10', 9.9e-3, 10.5e-3),
-        tester.LimitHigh('Vsen', 5.0),
-        tester.LimitDelta('VceAdj', 4.99, 5.04),
+        tester.LimitBetween('VinAdj', 0, 99999),
+        tester.LimitBetween('Iin1', 0.99e-3, 1.05e-3),
+        tester.LimitBetween('Iin10', 9.9e-3, 10.5e-3),
+        tester.LimitLow('Vsen', 5.0),
+        tester.LimitBetween('VceAdj', 4.99, 5.04),
         tester.LimitPercent('Vce', 5.00,  1.0),
-        tester.LimitDelta('VoutAdj', 0, 99999),
+        tester.LimitBetween('VoutAdj', 0, 99999),
         tester.LimitDelta('Iout', 0.0e-3, 22.0e-3),
-        tester.LimitDelta('CTR', 0, 220),
+        tester.LimitBetween('CTR', 0, 220),
         )
-    _recipient = '"Stephen Bell" <stephen.bell@setec.com.au>'
-#    _recipient = '"Wayne Tomkins" <wayne.tomkins@setec.com.au>'
+    _recipient = ', '.join((
+        '"Stephen Bell" <stephen.bell@setec.com.au>',
+        '"Wayne Tomkins" <wayne.tomkins@setec.com.au>',
+        ))
     _email_server = 'smtp.mel.setec.com.au'
 
     def open(self, uut):
@@ -66,7 +68,7 @@ class Initial(share.TestSequence):
         Adjust input DC source to get the required value of Iin.
 
          """
-        dev['dcs_iset'].output(22.5, True)
+        dev['dcs_iset'].output(21.5, True)
         self.measure(('ramp_VinAdj1', 'dmm_Iin1', ), timeout=2)
 
     @share.teststep
@@ -87,7 +89,7 @@ class Initial(share.TestSequence):
                 mes['dmm_Vce'][i].measure(timeout=2)
                 i_out = mes['dmm_Iout'][i].measure(timeout=2).reading1
                 i_in = mes['dmm_Iin1'].measure(timeout=2).reading1
-                ctr = (i_out / i_in) * 100
+                ctr = round((i_out / i_in) * 100)
                 self._ctr_data1.append(int(ctr))
                 mes['dmm_ctr'].sensor.store(ctr)
                 mes['dmm_ctr'].measure()
@@ -99,7 +101,7 @@ class Initial(share.TestSequence):
         Adjust input DC source to get the required value of Iin.
 
          """
-        dev['dcs_iset'].output(35.5, True)
+        dev['dcs_iset'].output(33.0, True)
         self.measure(('ramp_VinAdj10', 'dmm_Iin10', ), timeout=2)
 
     @share.teststep
@@ -120,7 +122,7 @@ class Initial(share.TestSequence):
                 mes['dmm_Vce'][i].measure(timeout=2)
                 i_out = mes['dmm_Iout'][i].measure(timeout=2).reading1
                 i_in = mes['dmm_Iin10'].measure(timeout=2).reading1
-                ctr = (i_out / i_in) * 100
+                ctr = round((i_out / i_in) * 100)
                 self._ctr_data10.append(int(ctr))
                 mes['dmm_ctr'].sensor.store(ctr)
                 mes['dmm_ctr'].measure()
@@ -196,14 +198,14 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcs_iset'],
             sensor=self['Isense'],
             detect_limit=(self.limits['Isen1'], ),
-            ramp_range=sensor.RampRange(start=22.5, stop=24.0, step=0.01),
+            ramp_range=sensor.RampRange(start=21.5, stop=24.0, step=0.01),
             delay=0.02)
         self['VinAdj1'].reset = False
         self['VinAdj10'] = sensor.Ramp(
             stimulus=self.devices['dcs_iset'],
             sensor=self['Isense'],
             detect_limit=(self.limits['Isen10'], ),
-            ramp_range=sensor.RampRange(start=35.5, stop=38.0, step=0.01),
+            ramp_range=sensor.RampRange(start=33.0, stop=38.0, step=0.01),
             delay=0.02)
         self['VinAdj10'].reset = False
         # Generate a list of collector-emitter voltage sensors
