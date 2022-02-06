@@ -3,7 +3,7 @@
 """UnitTest for RVSWT101 Initial Test program."""
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 
 import setec
 
@@ -30,7 +30,7 @@ class RVSWT101Initial(ProgramTestCase):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        mycon = MagicMock(name='MyConsole')
+        mycon = Mock(name='MyConsole')
         mycon.get_mac.return_value = '001ec030c2be'
         patcher = patch(
             'programs.rvswt101.console.Console', return_value=mycon)
@@ -72,10 +72,10 @@ class Fixture(unittest.TestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        self.dcs = MagicMock(name='DCS')
+        self.dcs = Mock(name='DCS')
         self.rla = ['Dummy']    # Dummy [0] entry
         for cnt in range(self.relay_count):
-            self.rla.append(MagicMock(name='RLA{0}'.format(cnt + 1)))
+            self.rla.append(Mock(name='RLA{0}'.format(cnt + 1)))
         self.fxt = rvswt101.initial.Fixture(self.dcs, self.rla)
 
     def _reset_mocks(self):

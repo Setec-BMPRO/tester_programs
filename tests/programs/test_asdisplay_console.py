@@ -3,7 +3,7 @@
 """UnitTest for AsDisplay console driver."""
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 from programs import asdisplay
 
@@ -42,7 +42,7 @@ class ASDisplayConsole(unittest.TestCase):
         resp.append(response)
         resp.append(prompt)
         # A Mock serial port
-        port = MagicMock(name='port')
+        port = Mock(name='port')
         port.read.side_effect = resp.bytes_generator()
         # Run the tank level command on the console
         mycon = asdisplay.console.Console(port)

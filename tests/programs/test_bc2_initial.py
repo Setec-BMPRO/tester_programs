@@ -3,7 +3,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """UnitTest for BC2 Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc2
 
@@ -20,7 +20,7 @@ class _BC2Initial(ProgramTestCase):
         patcher = patch('programs.bc2.console.Console')
         self.addCleanup(patcher.stop)
         patcher.start()
-        mypi = MagicMock(name='MyRasPi')
+        mypi = Mock(name='MyRasPi')
         mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
         patcher = patch(
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)

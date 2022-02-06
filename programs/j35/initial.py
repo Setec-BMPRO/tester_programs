@@ -343,7 +343,7 @@ class Sensors(share.Sensors):
         self['ocp_pre'] = sensor.Ramp(
             stimulus=self.devices['dcl_bat'],
             sensor=self['ovbat'],
-            detect_limit=(self.limits['InOCP'], ),
+            detect_limit=self.limits['InOCP'],
             ramp_range=sensor.RampRange(
                 start=low - load_current - 1,
                 stop=high - load_current + 1,
@@ -355,7 +355,7 @@ class Sensors(share.Sensors):
         self['ocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_bat'],
             sensor=self['ovbat'],
-            detect_limit=(self.limits['InOCP'], ),
+            detect_limit=self.limits['InOCP'],
             ramp_range=sensor.RampRange(
                 start=low - load_current - 1,
                 stop=high - load_current + 1,
@@ -367,7 +367,7 @@ class Sensors(share.Sensors):
         self['solar_input'] = sensor.Ramp(
             stimulus=self.devices['dcs_solar'],
             sensor=self['arm_solar_status'],
-            detect_limit=(self.limits['Solar-Status'], ),
+            detect_limit=self.limits['Solar-Status'],
             ramp_range=sensor.RampRange(
                 start=low - 0.1,
                 stop=high + 0.1,

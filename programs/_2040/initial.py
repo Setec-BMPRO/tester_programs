@@ -157,7 +157,7 @@ class Sensors(share.Sensors):
         self['oOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl_Vout'],
             sensor=self['oVout'],
-            detect_limit=(self.limits['inOCP'], ),
+            detect_limit=self.limits['inOCP'],
             ramp_range=sensor.RampRange(start=3.2, stop=4.3, step=0.05),
             delay=0.15)
 

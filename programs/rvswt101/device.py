@@ -149,7 +149,7 @@ class RVSWT101():
 
     def configure(self, key):
         """Sensor: Configure for next reading.
-        
+
         key must be one of: 'cell_voltage', 'company_id',
                             'equipment_type', 'protocol_ver',
                             'sequence', 'signature', 'switch_code',

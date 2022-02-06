@@ -197,13 +197,13 @@ class Sensors(share.Sensors):
         self['oOVP'] = sensor.Ramp(
             stimulus=self.devices['dcs_Vout'],
             sensor=self['oVcc'],
-            detect_limit=(self.limits['inOVP'], ),
+            detect_limit=self.limits['inOVP'],
             ramp_range=sensor.RampRange(start=18.0, stop=22.0, step=0.1),
             delay=0.05)
         self['oOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl'],
             sensor=self['oVout'],
-            detect_limit=(self.limits['inOCP'], ),
+            detect_limit=self.limits['inOCP'],
             ramp_range=sensor.RampRange(start=1.0, stop=3.2, step=0.03),
             delay=0.1)
         # Arduino sensor

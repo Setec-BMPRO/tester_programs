@@ -3,7 +3,7 @@
 """UnitTest for Bluetooth."""
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 
 import share
 
@@ -13,7 +13,7 @@ class RaspberryBluetooth(unittest.TestCase):
     """Raspberry Pi Bluetooth test suite."""
 
     def setUp(self):
-        self.server = MagicMock(name='MyServer')
+        self.server = Mock(name='MyServer')
         patcher = patch('jsonrpclib.ServerProxy', return_value=self.server)
         self.addCleanup(patcher.stop)
         patcher.start()

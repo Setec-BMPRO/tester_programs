@@ -18,7 +18,7 @@ class DisplayControl():
     def __init__(self, can_dev):
         """Create instance.
 
-        @param can_dev Serial2CAN interface device
+        @param can_dev CAN interface device
 
         """
         self.pkt_pattern = share.can.RVMD50ControlLCDPacket(can_dev)

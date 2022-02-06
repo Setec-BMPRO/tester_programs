@@ -120,7 +120,7 @@ class Sensors(share.Sensors):
         self['oOCP'] = sensor.Ramp(
             stimulus=self.devices['dcl'],
             sensor=self['oVout'],
-            detect_limit=(self.limits['inOCP'], ),
+            detect_limit=self.limits['inOCP'],
             ramp_range=sensor.RampRange(start=0.0, stop=0.5, step=0.05),
             delay=0.2)
         self['oOCP'].on_read = lambda value: value + self.iload

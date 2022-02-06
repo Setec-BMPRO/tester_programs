@@ -439,7 +439,7 @@ class Sensors(share.Sensors):
         self['OCP12V'] = sensor.Ramp(
             stimulus=self.devices['dcl_12V'],
             sensor=self['o12VinOCP'],
-            detect_limit=(self.limits['12V_inOCP'], ),
+            detect_limit=self.limits['12V_inOCP'],
             ramp_range=sensor.RampRange(
                 start=self.ratings.v12.ocp * 0.9,
                 stop=self.ratings.v12.ocp * 1.1,
@@ -448,7 +448,7 @@ class Sensors(share.Sensors):
         self['OCP24V'] = sensor.Ramp(
             stimulus=self.devices['dcl_24V'],
             sensor=self['o24VinOCP'],
-            detect_limit=(self.limits['24V_inOCP'], ),
+            detect_limit=self.limits['24V_inOCP'],
             ramp_range=sensor.RampRange(
                 start=self.ratings.v24.ocp * 0.9,
                 stop=self.ratings.v24.ocp * 1.1,

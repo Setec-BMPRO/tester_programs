@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for TRS-BTS Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trsbts
@@ -34,7 +34,7 @@ class TRSBTS_Initial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         # BLE scanner
-        mypi = MagicMock(name='MyRasPi')
+        mypi = Mock(name='MyRasPi')
         mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
         patcher = patch(
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)

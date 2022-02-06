@@ -33,12 +33,6 @@ class RVMN101BInitial(ProgramTestCase):
             'programs.rvmn101.console.Console101B', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
-        mycan = MagicMock(name='MySerial2CAN')
-        mycan.read_can.return_value = True
-        patcher = patch(
-            'tester.devphysical.can.SerialToCan', return_value=mycan)
-        self.addCleanup(patcher.stop)
-        patcher.start()
         super().setUp()
 
     def test_pass_run(self):

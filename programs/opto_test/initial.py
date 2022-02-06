@@ -197,14 +197,14 @@ class Sensors(share.Sensors):
         self['VinAdj1'] = sensor.Ramp(
             stimulus=self.devices['dcs_iset'],
             sensor=self['Isense'],
-            detect_limit=(self.limits['Isen1'], ),
+            detect_limit=self.limits['Isen1'],
             ramp_range=sensor.RampRange(start=21.5, stop=24.0, step=0.01),
             delay=0.02)
         self['VinAdj1'].reset = False
         self['VinAdj10'] = sensor.Ramp(
             stimulus=self.devices['dcs_iset'],
             sensor=self['Isense'],
-            detect_limit=(self.limits['Isen10'], ),
+            detect_limit=self.limits['Isen10'],
             ramp_range=sensor.RampRange(start=33.0, stop=38.0, step=0.01),
             delay=0.02)
         self['VinAdj10'].reset = False

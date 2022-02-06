@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for CN102/3 Final Test program."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, Mock
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import cn102
@@ -19,7 +19,7 @@ class CN102Final(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         # BLE scanner
-        mypi = MagicMock(name='MyRasPi')
+        mypi = Mock(name='MyRasPi')
         mypi.scan_advert_sernum.return_value = {'ad_data': '', 'rssi': -50}
         patcher = patch(
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)

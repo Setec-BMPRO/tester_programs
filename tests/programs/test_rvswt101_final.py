@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for RVSWT101 Final Test program."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, Mock
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvswt101
@@ -25,7 +25,7 @@ class RVSWT101Final(ProgramTestCase):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        mypi = MagicMock(name='decoder')
+        mypi = Mock(name='decoder')
         mypi.scan_count = 6
         mypi.read.return_value = (
             -50, '1f050112022d624c3a00000300d1139e69',

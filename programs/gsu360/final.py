@@ -100,7 +100,7 @@ class Sensors(share.Sensors):
         self['o24Vocp'] = sensor.Ramp(
             stimulus=self.devices['dcl_24V'],
             sensor=self['o24V'],
-            detect_limit=(self.limits['24Vinocp'], ),
+            detect_limit=self.limits['24Vinocp'],
             ramp_range=sensor.RampRange(start=15.0, stop=20.5, step=0.1),
             delay=0.1)
         self['o24Vocp'].reset = False

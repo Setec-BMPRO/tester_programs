@@ -12,7 +12,7 @@ Record the test result.
 import logging
 import queue
 import unittest
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import tester
 from pydispatch import dispatcher
@@ -118,27 +118,27 @@ class MockATE(dict):
         # Build a dictionary of Mocks
         storage = {}
         for dev_name in ('GEN', 'ACS', 'DIS', 'PWR', 'SAF', 'BLE', 'MAC'):
-            storage[dev_name] = MagicMock(name=dev_name)
+            storage[dev_name] = Mock(name=dev_name)
         gen = storage['GEN']
         for dev_name in ('DMM', 'DSO'):
             storage[dev_name] = (MagicMock(name=dev_name), gen)
         # Patch a Mock SerialToCAN device
         #   - Property 'ready_can' returns False
-        mycan = MagicMock(name='SerialToCan')
+        mycan = Mock(name='SerialToCan')
         type(mycan).ready_can = PropertyMock(return_value=False)
         storage['_CAN'] = mycan
-        storage['CAN'] = (mycan, MagicMock(name='SimSerial'))
+        storage['CAN'] = (mycan, Mock(name='SimSerial'))
         for i in range(1, 8):           # DC Sources 1 - 7
             dev_name = 'DCS{0}'.format(i)
-            storage[dev_name] = MagicMock(name=dev_name)
+            storage[dev_name] = Mock(name=dev_name)
         for i in range(1, 8):           # DC Loads 1 - 7
             dev_name = 'DCL{0}'.format(i)
-            storage[dev_name] = MagicMock(name=dev_name)
+            storage[dev_name] = Mock(name=dev_name)
         for i in range(1, 23):          # Relays 1 - 22
             dev_name = 'RLA{0}'.format(i)
             storage[dev_name] = (gen, i)
-        storage['PICKIT'] = MagicMock(name='PicKit')
-        storage['JLINK'] = MagicMock(name='JLink')
+        storage['PICKIT'] = Mock(name='PicKit')
+        storage['JLINK'] = Mock(name='JLink')
         super().__init__(storage)
 
     def open(self):
@@ -176,7 +176,7 @@ class ProgramTestCase(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         # Patch queue.get to speed up open() by removing the UI ping delays
-        myq = MagicMock(name='MyQueue')
+        myq = Mock(name='MyQueue')
         myq.get.side_effect = queue.Empty
         patcher = patch('queue.Queue', return_value=myq)
         patcher.start()

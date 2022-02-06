@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for BatteryCheck Final Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import batterycheck
 
@@ -18,7 +18,7 @@ class BatteryCheckFinal(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        mybt = MagicMock(name='MyBtRadio')
+        mybt = Mock(name='MyBtRadio')
         mybt.scan.return_value = True, '1234'
         mybt.jsonrpc.return_value = {
             'SoftwareVersion': batterycheck.Final.arm_version,

@@ -5,7 +5,7 @@
 import datetime
 import copy
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import cmrsbp
 
@@ -42,7 +42,7 @@ class CMRSBPInitial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         # Patch EV2200 driver
-        self.myev = MagicMock(name='EV2200_Data')
+        self.myev = Mock(name='EV2200_Data')
         self.myev.read_vit.side_effect = (
             {'Voltage': 12.20, 'Current': -2.00, 'Temperature': 300}, # V uncal
             {'Voltage': 12.00, 'Current': -2.00, 'Temperature': 300}, # V cal
@@ -54,7 +54,7 @@ class CMRSBPInitial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         # Patch CMR-SBP data monitor
-        self.mycmr = MagicMock(name='CMR-SBP_Data')
+        self.mycmr = Mock(name='CMR-SBP_Data')
         self.mycmrdata = copy.copy(_CMR_TEMPLATE)
         self.mycmr.read.return_value = self.mycmrdata
         patcher = patch(
@@ -124,12 +124,12 @@ class CMRSBPSerialDate(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         # Patch EV2200 driver
-        self.myev = MagicMock(name='EV2200')
+        self.myev = Mock(name='EV2200')
         patcher = patch(
             'programs.cmrsbp.ev2200.EV2200', return_value=self.myev)
         self.addCleanup(patcher.stop)
         patcher.start()
-        myser = MagicMock(name='SerialPort')
+        myser = Mock(name='SerialPort')
         myser.read.return_value = b''
         patcher = patch('serial.Serial', return_value=myser)
         self.addCleanup(patcher.stop)
@@ -169,7 +169,7 @@ class _CMRSBPFin(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         # Patch CMR-SBP data monitor
-        self.mycmr = MagicMock(name='CMRSBP')
+        self.mycmr = Mock(name='CMRSBP')
         self.mycmrdata = copy.copy(_CMR_TEMPLATE)
         self.mycmr.read.return_value = self.mycmrdata
         patcher = patch(
@@ -278,7 +278,7 @@ class CMRDataMonitor(unittest.TestCase):
 
     def test_read(self):
         """Read CMR data."""
-        myser = MagicMock(name='SerialPort')
+        myser = Mock(name='SerialPort')
         # Generate the binary serial data
         response = bytearray()
         for entry in self._data_template:

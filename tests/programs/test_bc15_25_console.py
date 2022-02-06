@@ -3,7 +3,7 @@
 """UnitTest for BC15/25 Initial Test program."""
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 import tester
 from programs import bc15_25
 
@@ -135,7 +135,7 @@ powersupply_ma                        10000
 
     def test_initialise(self):
         """Initialise."""
-        relay = MagicMock()
+        relay = Mock()
         self.con.port.puts('X\r\n' * 3 + self.prompt, preflush=1)
         for _ in range(3):
             self.con.port.puts(self.prompt, preflush=1)

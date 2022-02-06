@@ -3,7 +3,7 @@
 """UnitTest for share.console parameters."""
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 import share
 
 _CMD = 'x'
@@ -16,7 +16,7 @@ class Boolean(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.param = share.console.parameter.Boolean(_CMD, writeable=True)
-        self.func = MagicMock(name='Parameter')
+        self.func = Mock(name='Parameter')
 
     def test_1_rd_cmd(self):
         """Read command."""
@@ -67,7 +67,7 @@ class String(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.param = share.console.parameter.String(_CMD, writeable=True)
-        self.func = MagicMock(name='Parameter')
+        self.func = Mock(name='Parameter')
 
     def test_1_rd_cmd(self):
         """Read command."""
@@ -93,7 +93,7 @@ class Float(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.param = share.console.parameter.Float(_CMD, writeable=True)
-        self.func = MagicMock(name='Parameter')
+        self.func = Mock(name='Parameter')
 
     def test_1_rd_cmd(self):
         """Read command."""
@@ -119,7 +119,7 @@ class Hex(unittest.TestCase):
     def setUp(self):
         """Per-Test setup."""
         self.param = share.console.parameter.Hex(_CMD, writeable=True)
-        self.func = MagicMock(name='Parameter')
+        self.func = Mock(name='Parameter')
 
     def test_1_rd_cmd(self):
         """Read command."""

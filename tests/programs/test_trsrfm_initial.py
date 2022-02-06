@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for TRS-RFM Initial Test program."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trsrfm
 
@@ -25,14 +25,14 @@ class TRSRFMInitial(ProgramTestCase):
             self.addCleanup(patcher.stop)
             patcher.start()
         # Console
-        mycon = MagicMock(name='MyConsole')
+        mycon = Mock(name='MyConsole')
         mycon.get_mac.return_value = self.btmac
         patcher = patch(
             'programs.trsrfm.console.Console', return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         # BLE scanner
-        mypi = MagicMock(name='MyRasPi')
+        mypi = Mock(name='MyRasPi')
         mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
         patcher = patch(
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)

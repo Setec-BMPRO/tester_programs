@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """UnitTest for TRS-BTS Final Test program."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, Mock
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trsbts
@@ -20,14 +20,14 @@ class TRSBTSFinal(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         # Serial number to BLE MAC lookup
-        mysm = MagicMock(name='MySerMac')
+        mysm = Mock(name='MySerMac')
         mysm.blemac_get.return_value = self.btmac
         patcher = patch(
             'share.bluetooth.SerialToMAC', return_value=mysm)
         self.addCleanup(patcher.stop)
         patcher.start()
         # BLE scanner
-        mypi = MagicMock(name='MyRasPi')
+        mypi = Mock(name='MyRasPi')
         mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
         patcher = patch(
             'share.bluetooth.RaspberryBluetooth', return_value=mypi)

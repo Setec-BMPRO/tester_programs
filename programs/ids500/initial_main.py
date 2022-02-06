@@ -335,7 +335,7 @@ class Sensors(share.Sensors):
         self['ocp5v'] = sensor.Ramp(
             stimulus=self.devices['dcl_5v'],
             sensor=self['o5v'],
-            detect_limit=(self.limits['inOCP5V'], ),
+            detect_limit=self.limits['inOCP5V'],
             ramp_range=sensor.RampRange(
                 start=low - 1, stop=high + 1, step=0.1),
             delay=0.2)
@@ -343,7 +343,7 @@ class Sensors(share.Sensors):
         self['ocp15vp'] = sensor.Ramp(
             stimulus=self.devices['dcl_15vp'],
             sensor=self['o15vp'],
-            detect_limit=(self.limits['inOCP15Vp'], ),
+            detect_limit=self.limits['inOCP15Vp'],
             ramp_range=sensor.RampRange(
                 start=low - 1, stop=high + 1, step=0.1),
             delay=0.2)
@@ -351,7 +351,7 @@ class Sensors(share.Sensors):
         self['ocptec'] = sensor.Ramp(
             stimulus=self.devices['dcl_tec'],
             sensor=self['tec'],
-            detect_limit=(self.limits['inOCPTec'], ),
+            detect_limit=self.limits['inOCPTec'],
             ramp_range=sensor.RampRange(
                 start=low - 1, stop=high + 1, step=0.1),
             delay=0.2)

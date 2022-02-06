@@ -3,7 +3,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """UnitTest for RVMN101 Final Test program."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, Mock
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvmn101
@@ -25,7 +25,7 @@ class RVMN101Final(ProgramTestCase):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        mypi = MagicMock(name='MyRasPi')
+        mypi = Mock(name='MyRasPi')
         mypi.scan_advert_blemac.return_value = {
             'ad_data': {255: '1f050112022d624c3a00000300d1139e69'},
             'rssi': -50,
