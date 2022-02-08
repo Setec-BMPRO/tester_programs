@@ -27,7 +27,7 @@ class TS3020HFinal(ProgramTestCase):
                     (sen['o12V'], 13.8), (sen['oYesNoGreen'], True),
                     ),
                 'FullLoad': (
-                    (sen['o12V'], 13.6),
+                    (sen['o12V'], (13.6, 13.7, )),
                     ),
                 'OCP': (
                     (sen['o12V'], (13.4, ) * 15 + (13.0, ), ),
@@ -42,7 +42,7 @@ class TS3020HFinal(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(11, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
             ['FuseCheck', 'PowerUp', 'FullLoad', 'OCP', 'Poweroff'],
             self.tester.ut_steps)

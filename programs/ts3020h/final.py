@@ -37,20 +37,25 @@ class Final(share.TestSequence):
         mes['ui_NotifyStart']()
         dev['acsource'].output(240.0, output=True, delay=0.5)
         self.measure(('dmm_12Voff', 'ui_YesNoRed'), timeout=5)
-        dev['acsource'].output(0.0, output=True, delay=0.5)
+        dev['acsource'].output(0.0, delay=0.5)
         mes['ui_NotifyFuse']()
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Switch on unit at 240Vac, measure output voltages at no load."""
-        dev['acsource'].output(240.0, output=True, delay=0.5)
+        dev['acsource'].output(240.0, delay=0.5)
         self.measure(('dmm_12V', 'ui_YesNoGreen'), timeout=5)
 
     @share.teststep
     def _step_full_load(self, dev, mes):
         """Measure outputs at full-load."""
-        dev['dcl'].output(25.0, output=True)
-        mes['dmm_12Vfl'](timeout=5)
+        with tester.PathName('240V'):
+            dev['dcl'].output(25.0, output=True)
+            mes['dmm_12Vfl'](timeout=5)
+        with tester.PathName('90V'):
+            dev['acsource'].output(90.0, delay=1.0)
+            mes['dmm_12Vfl'](timeout=5)
+            dev['acsource'].output(240.0, delay=1.0)
 
     @share.teststep
     def _step_ocp(self, dev, mes):
