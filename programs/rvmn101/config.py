@@ -134,10 +134,11 @@ class RVMN101A(Config):
             }
     # Software versions
     _nordic_2_6_4 = 'jayco_rvmn101_signed_2.6.4-0-gd1f9eb78_factory_mcuboot.hex'
+    _nordic_2_7_1 = 'jayco_rvmn101_signed_2.7.1-0-gaa2ff6a9_factory_mcuboot.hex'
     _arm_image_1_13 = 'rvmn101_nxp_1.13.bin'
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
     _rev22_values = _Values(
-            nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
+            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_5,
             product_rev='22A', hardware_rev='20', banner_lines=5,
             reversed_output_dict={},
             )
@@ -333,9 +334,10 @@ class RVMN5x(Config):
     fixture = '034861'
     # Software versions
     _nordic_2_6_4 = 'jayco_rvmn5x_signed_2.6.4-0-gd1f9eb78_factory_mcuboot.hex'
+    _nordic_2_7_1 = 'jayco_rvmn5x_signed_2.7.1-0-gaa2ff6a9_factory_mcuboot.hex'
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     _rev12_values = _Values(
-            nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
             product_rev='12A', hardware_rev='08A', banner_lines=5,
             reversed_output_dict={},
             )
