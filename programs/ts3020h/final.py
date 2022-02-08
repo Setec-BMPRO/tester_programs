@@ -16,7 +16,7 @@ class Final(share.TestSequence):
         tester.LimitLow('12Voff', 0.5),
         tester.LimitBetween('12V', 13.7, 13.9),
         tester.LimitBetween('12Vfl', 13.43, 13.9),
-        tester.LimitBetween('OCP', 25.0, 29.3),
+        tester.LimitBetween('OCP', 25.0, 30.0),
         tester.LimitLow('inOCP', 13.3),
         )
 
