@@ -123,8 +123,8 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl'],
             sensor=self['o12V'],
             detect_limit=self.limits['inOCP'],
-            ramp_range=sensor.RampRange(start=24.5, stop=31.0, step=0.1),
-            delay=0.1)
+            ramp_range=sensor.RampRange(start=24.5, stop=31.0, step=0.5),
+            delay=3.0)
 
 
 class Measurements(share.Measurements):
