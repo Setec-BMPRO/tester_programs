@@ -30,7 +30,7 @@ class TS3020HFinal(ProgramTestCase):
                     (sen['o12V'], (13.6, 13.7, )),
                     ),
                 'OCP': (
-                    (sen['o12V'], (13.4, ) * 15 + (13.0, ), ),
+                    (sen['o12V'], (13.4, ) * 5 + (13.0, ), ),
                     ),
                 'Poweroff': (
                     (sen['oNotifyMains'], True), (sen['o12V'], 0.0),

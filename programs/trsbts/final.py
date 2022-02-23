@@ -12,11 +12,15 @@ class Final(share.TestSequence):
 
     """TRS-BTS Final Test Program."""
 
-    # Injected Vbatt
-    vbatt = 12.0
+    vbatt = 12.0    # Injected Vbatt
     rssi = -70 if share.config.System.tester_type in (
         'ATE4', 'ATE5') else -85
-
+    pc29164_lots = (    # PC-29164 for TRS-BT2 - Use BLE with chip antenna
+        'A220815', 'A220816', 'A220913', 'A221004', 'A221017', 'A221102',
+        )
+# FIXME: Set the correct limits here once PC-29164 units are available
+    pc29164_rssi = 0 if share.config.System.tester_type in (
+        'ATE4', 'ATE5') else 0
     limitdata = (
         tester.LimitDelta('Vbat', vbatt, 0.5, doc='Battery input present'),
         tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
@@ -35,6 +39,9 @@ class Final(share.TestSequence):
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
         self.sernum = None
+        # PC-29164 for TRS-BT2 - Use BLE with chip antenna
+        if uut and uut.lot in self.pc29164_lots:
+            self.limits['ScanRSSI'].adjust(self.pc29164_rssi)
 
     @share.teststep
     def _step_pin(self, dev, mes):
