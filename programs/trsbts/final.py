@@ -18,9 +18,8 @@ class Final(share.TestSequence):
     pc29164_lots = (    # PC-29164 for TRS-BT2 - Use BLE with chip antenna
         'A220815', 'A220816', 'A220913', 'A221004', 'A221017', 'A221102',
         )
-# FIXME: Set the correct limits here once PC-29164 units are available
-    pc29164_rssi = 0 if share.config.System.tester_type in (
-        'ATE4', 'ATE5') else 0
+    pc29164_rssi = -90 if share.config.System.tester_type in (
+        'ATE4', 'ATE5') else -100
     limitdata = (
         tester.LimitDelta('Vbat', vbatt, 0.5, doc='Battery input present'),
         tester.LimitLow('BrakeOff', 0.5, doc='Brakes off'),
