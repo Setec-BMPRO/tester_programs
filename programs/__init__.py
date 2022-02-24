@@ -5,6 +5,7 @@
 
 from . import selftest
 from . import _2040
+from . import asdisplay
 from . import atxg450
 from . import batterycheck
 from . import bc2
@@ -64,6 +65,7 @@ PROGRAMS = {
     'Self-Test': selftest.Main,
     '2040 Final': _2040.Final,
     '2040 Initial': _2040.Initial,
+    'ASDisplay Initial': asdisplay.Initial,
     'ATXG-450-2V Final': atxg450.Final2V,
     'BatteryCheck Final': batterycheck.Final,
     'BC2 Initial': bc2.Initial,
