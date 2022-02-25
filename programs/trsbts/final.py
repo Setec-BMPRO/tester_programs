@@ -39,7 +39,7 @@ class Final(share.TestSequence):
             )
         self.sernum = None
         # PC-29164 for TRS-BT2 - Use BLE with chip antenna
-        if uut and uut.lot in self.pc29164_lots:
+        if uut and uut.lot.number in self.pc29164_lots:
             self.limits['ScanRSSI'].adjust(self.pc29164_rssi)
 
     @share.teststep
