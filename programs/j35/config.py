@@ -22,6 +22,7 @@ def get(parameter, uut):
     """
     config = {
         'A': J35A,
+        'AS': ASPower,
         'B': J35B,
         'BL': J35BL,
         'C': J35C,
@@ -485,3 +486,19 @@ class J35D(J35C):
             tester.LimitPercent('OCP', cls.ocp_set * (12.8 / 14.0), (4.0, 7.0),
                 doc='OCP trip current'),
             )
+
+
+class ASPower(J35D):
+
+    """ASPower configuration."""
+
+    _rev1_values = _Values(
+            sw_version=J35.sw_bld, hw_version=(1, Type.D.value, 'A'),
+            output_count=14, ocp_set=35.0,
+            solar=True, canbus=True,
+            )
+    _rev_data = {
+        None: _rev1_values,
+        '1': _rev1_values,
+        }
+
