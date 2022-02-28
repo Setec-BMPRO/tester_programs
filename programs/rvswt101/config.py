@@ -11,8 +11,8 @@ class Config():
     """RVSWT101 configuration."""
 
     # Possible switch variants tuple(switch_type,  button_count)
-    #   switch_type from "034800 RVSWT Series Product Specification -F"
-    #   button_count from "035557 RVSWT Series Production Notes -G.pdf"
+    #   switch_type from "RVSWT Series Product Specification"
+    #   button_count from "RVSWT Series Production Notes"
     _types = {
         # For the 3 TMC types: BLE Code is Label Code - 1 ...
         '4gp1': (0, 4), '6gp1': (2, 6), '6gp2': (3, 6),
@@ -33,7 +33,9 @@ class Config():
          'j9-1': (40, 4),
          'j10-1': (13, 4), 'j10-2': (41, 4),
          'j11-1': (14, 4), 'j11-2': (15, 4), 'j11-3': (42, 4), 'j11-4': (51, 4),
-         'j11-5': (54, 4), 'j11-6': (55, 4)}
+         'j11-5': (54, 4), 'j11-6': (55, 4),
+         'od-01': (60, 6), 'od-02': (61, 4),
+         }
     # Software images
     _software = {   # Rev 2 'gp' units, Rev 3/4 'j' units
         '4gp1': 'rvswt101_4gp1_1.2.hex',
