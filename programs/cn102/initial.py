@@ -21,13 +21,13 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_initial
         Devices.sw_nxp_image = self.cfg.sw_nxp_image
-        Devices.sw_nordic_image = self.cfg.sw_nordic_image
+        Sensors.sw_nordic_image = self.cfg.sw_nordic_image
         super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('PgmARM', self.devices['progARM'].program),
-            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('TestArm', self._step_test_arm),
             tester.TestStep('TankSense', self._step_tank_sense),
             tester.TestStep('Bluetooth', self._step_bluetooth),
@@ -45,8 +45,12 @@ class Initial(share.TestSequence):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(8.6, output=True)
-        dev['dcs_vcom'].output(12.0, output=True, delay=5)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the micro."""
+        mes['JLink']()
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
@@ -60,7 +64,6 @@ class Initial(share.TestSequence):
         cn102.brand(
             self.cfg.hw_version,
             self.sernum,
-            dev['rla_reset'],
             self.cfg.banner_lines
             )
 
@@ -97,7 +100,6 @@ class Devices(share.Devices):
     """Devices."""
 
     sw_nxp_image = None     # ARM software image
-    sw_nordic_image = None     # Nordic software image
 
     def open(self):
         """Create all Instruments."""
@@ -105,14 +107,12 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_s1', tester.Relay, 'RLA4'),
                 ('rla_s2', tester.Relay, 'RLA5'),
                 ('rla_s3', tester.Relay, 'RLA6'),
                 ('rla_s4', tester.Relay, 'RLA7'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
@@ -121,13 +121,7 @@ class Devices(share.Devices):
             arm_port,
             pathlib.Path(__file__).parent / self.sw_nxp_image,
             crpmode=False,
-            boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset']
-            )
-        # NRF52 device programmer
-        self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_nordic_image,
-            share.config.Fixture.nrf52_sernum(fixture)
+            bda4_signals=True  #Use BDA4 serial lines for RESET & BOOT
             )
         # Serial connection to the console
         cn102_ser = serial.Serial(baudrate=115200, timeout=5.0)
@@ -142,11 +136,10 @@ class Devices(share.Devices):
     def reset(self):
         """Reset instruments."""
         self['cn102'].close()
-        for dcs in ('dcs_vin', 'dcs_vcom'):
-            self[dcs].output(0.0, False)
+        self['dcs_vin'].output(0.0, False)
         for rla in (
-                'rla_reset', 'rla_boot', 'rla_s1',
-                'rla_s2', 'rla_s3', 'rla_s4',
+                'rla_s1', 'rla_s2',
+                'rla_s3', 'rla_s4',
                 ):
             self[rla].set_off()
 
@@ -154,6 +147,9 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    projectfile = 'cn102.jflash'
+    sw_nordic_image = None
 
     def open(self):
         """Create all Sensors."""
@@ -178,6 +174,10 @@ class Sensors(share.Sensors):
                 ('tank4', 'TANK4'),
             ):
             self[name] = sensor.KeyedReading(cn102, cmdkey)
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_nordic_image)
 
 
 class Measurements(share.Measurements):
@@ -200,4 +200,5 @@ class Measurements(share.Measurements):
             ('cn102_can_bind', 'CAN_BIND', 'CANBIND', ''),
             ('scan_ser', 'ScanSer', 'mirscan',
                 'Scan for serial number over bluetooth'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))
