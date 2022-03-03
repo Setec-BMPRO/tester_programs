@@ -107,10 +107,7 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS1'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_s1', tester.Relay, 'RLA4'),
                 ('rla_s2', tester.Relay, 'RLA5'),
                 ('rla_s3', tester.Relay, 'RLA6'),
@@ -124,8 +121,7 @@ class Devices(share.Devices):
             arm_port,
             pathlib.Path(__file__).parent / sw_file,
             crpmode=False,
-            boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset']
+            bda4_signals=True  #Use BDA4 serial lines for RESET & BOOT
             )
         # Serial connection to the console
         cn101_ser = serial.Serial(baudrate=115200, timeout=5.0)
@@ -141,9 +137,6 @@ class Devices(share.Devices):
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
-        # Apply power to fixture circuits.
-        self['dcs_vcom'].output(12.0, output=True, delay=5)
-        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
