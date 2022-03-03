@@ -86,6 +86,7 @@ class Fixture():
         '033633': {'AVR': _ftdi, },     # MB3 Initial
         '034352': {'NORDIC': _ftdi, },  # TRS-BTx Initial
         '036746': {'ARM': _ftdi, },     # ASDisplay Initial
+        '028468': {'ARM': _ftdi, },     # CN101,2,3 Initial
 
         # Fixtures with a USB Hub
 
@@ -108,11 +109,6 @@ class Fixture():
             'ARM': _ftdi_hub_1,
             # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM39'}[os.name],
-            },
-        '028468': {     # CN101,2,3 Initial
-            'ARM': _ftdi_hub_1,
-            # Hub port 2:
-            'nRF52': '682195648',
             },
 # TODO: Remove the USB Hub & RN4020 on port 2
         '030451': {     # BC2/BLE2CAN/TRS2/TRSRFM Initial
