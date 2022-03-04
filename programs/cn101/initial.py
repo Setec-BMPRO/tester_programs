@@ -55,7 +55,6 @@ class Initial(share.TestSequence):
         dev['cn101'].brand(
             self.cfg.hw_version,
             self.sernum,
-            dev['rla_reset'],
             self.cfg.banner_lines
             )
         mes['cn101_swver']()

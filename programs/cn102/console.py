@@ -41,9 +41,12 @@ class _Console():
         'ADC_SCAN': parameter.Float('ADC_SCAN_INTERVAL_MSEC', writeable=True),
         }
 
-    def brand(self, hw_ver, sernum, reset_relay, banner_lines):
+    def brand(self, hw_ver, sernum, banner_lines):
         """Brand the unit with Hardware ID & Serial Number."""
-        reset_relay.pulse(0.1)
+        # Reset the UUT via bda signals
+        self.port.dtr = self.port.rts = False
+        self.port.dtr = True
+        self.port.dtr = False
         self.action(None, delay=1.5, expected=banner_lines)
         self['UNLOCK'] = True
         self['HW_VER'] = hw_ver
