@@ -138,8 +138,7 @@ class Devices(share.Devices):
         self['cn102'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in (
-                'rla_s1', 'rla_s2',
-                'rla_s3', 'rla_s4',
+                'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4',
                 ):
             self[rla].set_off()
 

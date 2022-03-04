@@ -143,8 +143,7 @@ class Devices(share.Devices):
         self['cn101tunnel'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in (
-                'rla_reset', 'rla_boot', 'rla_s1',
-                'rla_s2', 'rla_s3', 'rla_s4',
+                'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4',
                 ):
             self[rla].set_off()
 
