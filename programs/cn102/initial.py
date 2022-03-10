@@ -59,11 +59,6 @@ class Initial(share.TestSequence):
         dev['rla_reset'].set_off()  # Allow ARM to Nordic RESET
         cn102 = dev['cn102']
         cn102.open()
-# TODO: This should not really be needed, since we RESET both micros?
-        # Cycle power to get the Nordic running
-        dev['dcs_vin'].output(0, output=True, delay=2)
-        dev['dcs_vin'].output(8.6, output=True)
-        mes['dmm_3v3'](timeout=5)
         cn102.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
 
     @share.teststep
@@ -81,9 +76,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev['dcs_vin'].output(0.0, delay=1.0)
-        dev['dcs_vin'].output(12.0, delay=5.0)
-        dev['cn102'].action(None, expected=self.cfg.banner_lines)
         reply = dev['pi_bt'].scan_advert_sernum(self.sernum)
         mes['scan_ser'].sensor.store(reply is not None)
         mes['scan_ser']()
