@@ -20,9 +20,7 @@ class CN102Initial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
                 'share.programmer.ARM',
-                'share.programmer.NRF52',
-                'share.bluetooth.RaspberryBluetooth',
-                'programs.cn102.console.DirectConsole',
+                'programs.cn102.console.Console',
                 ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -42,6 +40,11 @@ class CN102Initial(ProgramTestCase):
                     (sen['oSnEntry'], 'A1526040123'),
                     (sen['oVin'], 8.0), (sen['o3V3'], 3.3),
                     ),
+                'PgmARM': (
+                    ),
+                'Program': (
+                    (sen['JLink'], 0),
+                    ),
                 'TestArm': (
                     (sen['o3V3'], 3.3),
                     ),
@@ -50,9 +53,6 @@ class CN102Initial(ProgramTestCase):
                     (sen['tank2'], 5),
                     (sen['tank3'], 5),
                     (sen['tank4'], 5),
-                    ),
-                'Bluetooth': (
-                    (sen['mirscan'], True),
                     ),
                 'CanBus': (
                     (sen['CANBIND'], 1 << 28),
@@ -63,8 +63,8 @@ class CN102Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(13, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
-            ['PartCheck', 'PowerUp', 'PgmARM', 'PgmNordic', 'TestArm',
-             'TankSense', 'Bluetooth', 'CanBus'],
+            ['PartCheck', 'PowerUp', 'PgmARM', 'Program', 'TestArm',
+             'TankSense', 'CanBus'],
             self.tester.ut_steps)

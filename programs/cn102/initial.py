@@ -30,7 +30,6 @@ class Initial(share.TestSequence):
             tester.TestStep('Program', self._step_program),
             tester.TestStep('TestArm', self._step_test_arm),
             tester.TestStep('TankSense', self._step_tank_sense),
-            tester.TestStep('Bluetooth', self._step_bluetooth),
             tester.TestStep('CanBus', self._step_canbus),
             )
         self.sernum = None
@@ -74,13 +73,6 @@ class Initial(share.TestSequence):
             timeout=5)
 
     @share.teststep
-    def _step_bluetooth(self, dev, mes):
-        """Test the Bluetooth interface."""
-        reply = dev['pi_bt'].scan_advert_sernum(self.sernum)
-        mes['scan_ser'].sensor.store(reply is not None)
-        mes['scan_ser']()
-
-    @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         mes['cn102_can_bind'](timeout=10)
@@ -121,9 +113,6 @@ class Devices(share.Devices):
         con_ser.port = arm_port
         # CN102 Console driver
         self['cn102'] = console.Console(con_ser)
-        # Bluetooth connection to server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url())
 
     def reset(self):
         """Reset instruments."""
@@ -144,7 +133,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['mirscan'] = sensor.MirrorReadingBoolean()
         self['oVin'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['o3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['sw1'] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
@@ -187,7 +175,5 @@ class Measurements(share.Measurements):
             ('tank3_level', 'Tank', 'tank3', ''),
             ('tank4_level', 'Tank', 'tank4', ''),
             ('cn102_can_bind', 'CAN_BIND', 'CANBIND', ''),
-            ('scan_ser', 'ScanSer', 'mirscan',
-                'Scan for serial number over bluetooth'),
             ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))
