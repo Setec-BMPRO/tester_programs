@@ -3,12 +3,14 @@
 # Copyright 2018 SETEC Pty Ltd
 """CN102/3 Console driver."""
 
+import time
+
 import share
 
 
-class _Console():
+class Console(share.console.BadUart):
 
-    """Base class for a CN102 console."""
+    """CN102/103 console."""
 
     parameter = share.console.parameter
     cmd_data = {
@@ -43,9 +45,10 @@ class _Console():
 
     def brand(self, hw_ver, sernum, banner_lines):
         """Brand the unit with Hardware ID & Serial Number."""
-        # Reset the UUT via bda signals
+        # Reset the UUT via BDA4 signals (DTR: RESET, RTS: BOOT)
         self.port.dtr = self.port.rts = False
         self.port.dtr = True
+        time.sleep(0.01)
         self.port.dtr = False
         self.action(None, delay=1.5, expected=banner_lines)
         self['UNLOCK'] = True
@@ -53,8 +56,3 @@ class _Console():
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
-
-
-class DirectConsole(_Console, share.console.BadUart):
-
-    """Console for a direct connection."""

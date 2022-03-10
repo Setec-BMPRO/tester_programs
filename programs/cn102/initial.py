@@ -46,26 +46,25 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vin'].output(8.6, output=True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
+        dev['rla_reset'].set_on()   # Disable ARM to Nordic RESET
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the micro."""
+        """Program the Nordic BLE module."""
         mes['JLink']()
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
+        dev['rla_reset'].set_off()  # Allow ARM to Nordic RESET
         cn102 = dev['cn102']
         cn102.open()
+# TODO: This should not really be needed, since we RESET both micros?
         # Cycle power to get the Nordic running
         dev['dcs_vin'].output(0, output=True, delay=2)
         dev['dcs_vin'].output(8.6, output=True)
         mes['dmm_3v3'](timeout=5)
-        cn102.brand(
-            self.cfg.hw_version,
-            self.sernum,
-            self.cfg.banner_lines
-            )
+        cn102.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
@@ -108,6 +107,7 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
+                ('rla_reset', tester.Relay, 'RLA1'),    # 1k RESET to 3V3
                 ('rla_s1', tester.Relay, 'RLA4'),
                 ('rla_s2', tester.Relay, 'RLA5'),
                 ('rla_s3', tester.Relay, 'RLA6'),
@@ -124,11 +124,11 @@ class Devices(share.Devices):
             bda4_signals=True  #Use BDA4 serial lines for RESET & BOOT
             )
         # Serial connection to the console
-        cn102_ser = serial.Serial(baudrate=115200, timeout=5.0)
+        con_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        cn102_ser.port = arm_port
+        con_ser.port = arm_port
         # CN102 Console driver
-        self['cn102'] = console.DirectConsole(cn102_ser)
+        self['cn102'] = console.Console(con_ser)
         # Bluetooth connection to server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
@@ -137,9 +137,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self['cn102'].close()
         self['dcs_vin'].output(0.0, False)
-        for rla in (
-                'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4',
-                ):
+        for rla in ('rla_reset', 'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4'):
             self[rla].set_off()
 
 

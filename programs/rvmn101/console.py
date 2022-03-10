@@ -181,8 +181,8 @@ class Console101A(_Console):
 
         """
         self.missing_output_dict = {
-            'LS_0A5_EN1': 34,
-            'LS_0A5_EN2': 35,
+            'LS_0A5_EN1': 34,       # See self.ls_0a5_out1
+            'LS_0A5_EN2': 35,       # See self.ls_0a5_out2
             'LS_0A5_EN3': 36,
             'LS_0A5_EN4': 37,
             }
@@ -211,8 +211,8 @@ class Console101B(_Console):
             'HS_0A5_EN14': 29,      # Implemented in Rev 14
             'HS_0A5_EN15': 30,      # Implemented in Rev 14
             'HS_0A5_EN18': 33,
-            'LS_0A5_EN1': 34,
-            'LS_0A5_EN2': 35,
+            'LS_0A5_EN1': 34,       # See self.ls_0a5_out1
+            'LS_0A5_EN2': 35,       # See self.ls_0a5_out2
             'LS_0A5_EN3': 36,
             'LS_0A5_EN4': 37,
             'OUT5A_PWM_13': 51,
@@ -255,8 +255,8 @@ class Console50(_Console):
             'HS_0A5_EN16': 31,
             'HS_0A5_EN17': 32,
             'HS_0A5_EN18': 33,
-            'LS_0A5_EN1': 34,
-            'LS_0A5_EN2': 35,
+            'LS_0A5_EN1': 34,       # See self.ls_0a5_out1
+            'LS_0A5_EN2': 35,       # See self.ls_0a5_out2
             'LS_0A5_EN3': 36,
             'LS_0A5_EN4': 37,
             'OUT5A_EN0': 38,
@@ -297,8 +297,8 @@ class Console55(_Console):
             'HS_0A5_EN16': 31,
             'HS_0A5_EN17': 32,
             'HS_0A5_EN18': 33,
-            'LS_0A5_EN1': 34,
-            'LS_0A5_EN2': 35,
+            'LS_0A5_EN1': 34,       # See self.ls_0a5_out1
+            'LS_0A5_EN2': 35,       # See self.ls_0a5_out2
             'LS_0A5_EN3': 36,
             'LS_0A5_EN4': 37,
             'OUT5A_EN0': 38,
