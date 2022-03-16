@@ -183,7 +183,7 @@ class ARM(_Base):
         result = self.pass_result
         try:
             pgm.program()
-        except isplpc.ProgrammingError as exc:
+        except Exception as exc:    # pylint: disable=broad-except
             result = str(exc)
         self.result = result
 
