@@ -18,6 +18,7 @@ class Final(share.TestSequence):
     pc29164_lots = (    # PC-29164 for TRS-BT2 - Use BLE with chip antenna
         'A220815', 'A220816', 'A220913', 'A221004', 'A221017', 'A221102',
         'A221112', 'A221202', 'A221217', 'A221303', 'A221316', 'A221317',
+        'A221411', 'A221412',
         )
     pc29164_rssi = -90 if share.config.System.tester_type in (
         'ATE4', 'ATE5') else -100
