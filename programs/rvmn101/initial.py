@@ -188,7 +188,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_reset', 'rla_boot', 'rla_pullup'):
+        for rla in ('rla_reset', 'rla_boot', 'rla_pullup', 'swd_select', ):
             self[rla].set_off()
 
     def close_can(self):
