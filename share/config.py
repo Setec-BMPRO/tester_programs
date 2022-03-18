@@ -78,6 +78,7 @@ class Fixture():
         '025197': {'ARM': _ftdi, },     # GEN8 Initial
         '027420': {'ARM': _ftdi, },     # Trek2 Initial/Final
         '028467': {'ARM': _ftdi, },     # BC15 Initial
+        '028468': {'ARM': _ftdi, },     # CN101,2,3 Initial
         '029242': {'ARM': _ftdi, },     # J35 Initial
         '029687': {'ARM': _ftdi, },     # RvView/JDisplay/RVMD50 Initial
         '031032': {'ARM': _ftdi, },     # BC25 Initial
@@ -85,8 +86,8 @@ class Fixture():
         '032870': {'ARM': _ftdi, },     # RVMC101 Initial
         '033633': {'AVR': _ftdi, },     # MB3 Initial
         '034352': {'NORDIC': _ftdi, },  # TRS-BTx Initial
+        '034861': {'NORDIC': _ftdi, },  # RVMN5x Initial
         '036746': {'ARM': _ftdi, },     # ASDisplay Initial
-        '028468': {'ARM': _ftdi, },     # CN101,2,3 Initial
 
         # Fixtures with a USB Hub
 
@@ -141,12 +142,6 @@ class Fixture():
             'ARM': _ftdi_hub_1,
             # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM38'}[os.name],
-            },
-        '034861': {     # RVMN5x Initial
-            'ARM': _ftdi_hub_1,
-            'NORDIC': _ftdi_hub_2,
-            # Hub port 3: Nordic NRF52 device programmer
-            'nRF52': '682781126',
             },
         '034882': {     # TRSRFM Initial
             'NORDIC': _ftdi_hub_1,
