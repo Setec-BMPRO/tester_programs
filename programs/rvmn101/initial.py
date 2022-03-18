@@ -143,18 +143,19 @@ class Devices(share.Devices):
                 ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # ARM device programmer
-        self['progARM'] = share.programmer.ARM(
-            share.config.Fixture.port(self.fixture, 'ARM'),
-            pathlib.Path(__file__).parent / self.arm_image,
-            boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset']
-            )
-        # Nordic NRF52 device programmer
-        self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.nordic_image,
-            share.config.Fixture.nrf52_sernum(self.fixture)
-            )
+        if self.parameter in ('101A', '101B', ):
+            # ARM device programmer
+            self['progARM'] = share.programmer.ARM(
+                share.config.Fixture.port(self.fixture, 'ARM'),
+                pathlib.Path(__file__).parent / self.arm_image,
+                boot_relay=self['rla_boot'],
+                reset_relay=self['rla_reset']
+                )
+            # Nordic NRF52 device programmer
+            self['progNordic'] = share.programmer.NRF52(
+                pathlib.Path(__file__).parent / self.nordic_image,
+                share.config.Fixture.nrf52_sernum(self.fixture)
+                )
         # Serial connection to the console
         nordic_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
@@ -174,9 +175,10 @@ class Devices(share.Devices):
         self['can'] = self.physical_devices['_CAN']
         self['can'].rvc_mode = True
         self.add_closer(self.close_can)
-        # Fixture USB hub power
-        self['dcs_vcom'].output(9.0, output=True, delay=10)
-        self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
+        if self.parameter in ('101A', '101B', ):
+            # Fixture USB hub power
+            self['dcs_vcom'].output(9.0, output=True, delay=10)
+            self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
         # Open console serial connection
         self['rvmn101'].open()
         self.add_closer(self['rvmn101'].close)
