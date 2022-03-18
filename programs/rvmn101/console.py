@@ -39,7 +39,7 @@ class _Console(share.console.Base):
             'rvmn output',
             readable=False, writeable=True, write_format='{1} {0}'),
         }
-    banner_lines = None         # Startup banner lines (set from config)
+    banner_lines = 5            # Startup banner lines
     max_output_index = 56       # Output index is range(max_output_index)
     missing_output_dict = {}    # Key: any text, Value: Output index
     reversed_output_dict = {}   # Key: any text, Value: Output index

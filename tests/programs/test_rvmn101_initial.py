@@ -65,6 +65,5 @@ class RVMN101BInitial(ProgramTestCase):
         self.assertEqual('P', result.code)
         self.assertEqual(10, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PgmARM', 'PgmNordic',
-             'Initialise', 'Output', 'CanBus'],
+            ['PowerUp', 'Program', 'Initialise', 'Output', 'CanBus'],
             self.tester.ut_steps)

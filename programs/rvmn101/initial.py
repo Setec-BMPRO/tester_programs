@@ -23,14 +23,15 @@ class Initial(share.TestSequence):
         Devices.arm_image = self.cfg.arm_image
         Devices.nordic_image = self.cfg.nordic_image
         Devices.reversed_output_dict = self.cfg.reversed_output_dict
+        Sensors.nordic_projectfile = self.cfg.nordic_projectfile
+        Sensors.nordic_image = self.cfg.nordic_image
+        Sensors.arm_projectfile = self.cfg.arm_projectfile
+        Sensors.arm_image = self.cfg.arm_image
         self.limits = self.cfg.limits_initial()
         super().open(self.limits, Devices, Sensors, Measurements)
-        # Adjust for different console behaviour
-        self.devices['rvmn101'].banner_lines = self.cfg.banner_lines
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('PgmARM', self.devices['progARM'].program),
-            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('Initialise', self._step_initialise),
             tester.TestStep('Output', self._step_output),
             tester.TestStep('CanBus', self._step_canbus),
@@ -43,6 +44,18 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
         dev['dcs_vbatt'].output(self.cfg.vbatt_set, output=True)
         self.measure(('dmm_vbatt', 'dmm_3v3', ), timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program both devices."""
+        if self.parameter in ('50', '55', ):    # 5x uses 2 x JLink
+            mes['JLinkARM']()
+            dev['swd_select'].set_on()
+            mes['JLinkBLE']()
+            dev['swd_select'].set_off()
+        else:                                   # 101x uses ISPLPC + NRF52
+            dev['progARM'].program()
+            dev['progNordic'].program()
 
     @share.teststep
     def _step_initialise(self, dev, mes):
@@ -126,6 +139,8 @@ class Devices(share.Devices):
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_pullup', tester.Relay, 'RLA3'),
+                ('swd_select', tester.Relay, 'RLA4'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
@@ -183,6 +198,11 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    nordic_projectfile = None
+    nordic_image = None
+    arm_projectfile = None
+    arm_image = None
+
     def open(self):
         """Create all Sensors."""
         dmm = self.devices['dmm']
@@ -197,6 +217,14 @@ class Sensors(share.Sensors):
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmn101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101_initial', 'capSnEntry'))
+        self['JLinkBLE'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.nordic_projectfile,
+            pathlib.Path(__file__).parent / self.nordic_image)
+        self['JLinkARM'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.arm_projectfile,
+            pathlib.Path(__file__).parent / self.arm_image)
         # Console sensors
         rvmn101 = self.devices['rvmn101']
         self['SwRev'] = sensor.KeyedReadingString(rvmn101, 'SW-REV')
@@ -229,4 +257,6 @@ class Measurements(share.Measurements):
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
             ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
             ('ble_mac', 'BleMac', 'BleMac', 'MAC address'),
+            ('JLinkARM', 'ProgramOk', 'JLinkARM', 'Programmed'),
+            ('JLinkBLE', 'ProgramOk', 'JLinkBLE', 'Programmed'),
             ))

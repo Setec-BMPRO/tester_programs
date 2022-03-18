@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2022 , ",
-    "saved": "2022-02-01, 12:20:12"
+    "saved": "2022-03-18, 11:55:07"
   },
   "project": {
     "AUTHOR": "",
@@ -74,7 +74,9 @@
       "main.py.ini",
       "programs/rvmc101/rvmc101_atmel.jflash",
       "programs/rvmd50/rvmd50_atmel.jflash",
-      "programs/trsbts/trsbts.jflash"
+      "programs/trsbts/trsbts.jflash",
+      "programs/rvmn101/nrf52.jflash",
+      "programs/rvmn101/lpc1519.jflash"
     ],
     "OTHERTOOLSPARMS": {},
     "PACKAGERSPARMS": {},

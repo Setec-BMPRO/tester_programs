@@ -38,8 +38,11 @@ class _Values():
     arm_image = attr.ib(validator=attr.validators.instance_of(str))
     product_rev = attr.ib(validator=attr.validators.instance_of(str))
     hardware_rev = attr.ib()
-    banner_lines = attr.ib(validator=attr.validators.instance_of(int))
     reversed_output_dict = attr.ib(validator=attr.validators.instance_of(dict))
+    nordic_projectfile = attr.ib(
+        default='nrf52.jflash', validator=attr.validators.instance_of(str))
+    arm_projectfile = attr.ib(
+        default='lpc1519.jflash', validator=attr.validators.instance_of(str))
 
 
 class Config():
@@ -47,11 +50,12 @@ class Config():
     """Base configuration for RVMN101 and RVMN5x."""
 
     # These values get set per Product type & revision
+    nordic_projectfile = None
     nordic_image = None
+    arm_projectfile = None
     arm_image = None
     product_rev = None
     hardware_rev = None
-    banner_lines = None
     reversed_output_dict = None
     # General parameters used in testing the units
     #  Injected voltages
@@ -91,11 +95,12 @@ class Config():
             rev = None
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
+        cls.nordic_projectfile = values.nordic_projectfile
         cls.nordic_image = values.nordic_image
+        cls.arm_projectfile = values.arm_projectfile
         cls.arm_image = values.arm_image
         cls.product_rev = values.product_rev
         cls.hardware_rev = values.hardware_rev
-        cls.banner_lines = values.banner_lines
         cls.reversed_output_dict = values.reversed_output_dict
 
     @classmethod
@@ -139,7 +144,7 @@ class RVMN101A(Config):
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
     _rev22_values = _Values(
             nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_5,
-            product_rev='22A', hardware_rev='20', banner_lines=5,
+            product_rev='22A', hardware_rev='20',
             reversed_output_dict={},
             )
     _rev_data = {
@@ -147,71 +152,71 @@ class RVMN101A(Config):
         '22': _rev22_values,
         '21': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='21A', hardware_rev='20', banner_lines=5,
+            product_rev='21A', hardware_rev='20',
             reversed_output_dict={},
             ),
         '20': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='20A', hardware_rev='14A', banner_lines=5,
+            product_rev='20A', hardware_rev='14A',
             reversed_output_dict={},
             ),
         '19': _Values(    # PC-27477
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='19C', hardware_rev='13A', banner_lines=5,
+            product_rev='19C', hardware_rev='13A',
             reversed_output_dict={},
             ),
         '18': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='18B', hardware_rev='13A', banner_lines=5,
+            product_rev='18B', hardware_rev='13A',
             reversed_output_dict={},
             ),
         # Rev 17 No production
         '16': _Values(    # Note: ECO had wrong HW rev (15A instead of 12A)
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='16E', hardware_rev='15A', banner_lines=5,
+            product_rev='16E', hardware_rev='15A',
             reversed_output_dict={},
             ),
         # Rev 15 No production
         '14': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='14F', hardware_rev='11A', banner_lines=5,
+            product_rev='14F', hardware_rev='11A',
             reversed_output_dict={},
             ),
         '13': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='13C', hardware_rev='11A', banner_lines=5,
+            product_rev='13C', hardware_rev='11A',
             reversed_output_dict={},
             ),
         '12': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_5,
-            product_rev='12D', hardware_rev='11A', banner_lines=5,
+            product_rev='12D', hardware_rev='11A',
             reversed_output_dict={},
             ),
         # Rev 11 No production
         '10': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_1_13,
-            product_rev='10E', hardware_rev='10A', banner_lines=5,
+            product_rev='10E', hardware_rev='10A',
             reversed_output_dict={},
             ),
         # MA-407: Rev <10 "Diagnose and then discard PCB""
         '9': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_1_13,
-            product_rev='09D', hardware_rev='08A', banner_lines=5,
+            product_rev='09D', hardware_rev='08A',
             reversed_output_dict=_reversed7to9,
             ),
         '8': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_1_13,
-            product_rev='08D', hardware_rev='08A', banner_lines=5,
+            product_rev='08D', hardware_rev='08A',
             reversed_output_dict=_reversed7to9,
             ),
         '7': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_1_13,
-            product_rev='07D', hardware_rev='07A', banner_lines=5,
+            product_rev='07D', hardware_rev='07A',
             reversed_output_dict=_reversed7to9,
             ),
         '6': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_1_13,
-            product_rev='06H', hardware_rev='06A', banner_lines=5,
+            product_rev='06H', hardware_rev='06A',
             reversed_output_dict={},
             ),
         # Rev 1-5 were Engineering protoype builds
@@ -242,7 +247,7 @@ class RVMN101B(Config):
     _arm_image_3_0 = 'rvmn101_nxp_3.0.bin'
     _rev17_values = _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='17A', hardware_rev='08B', banner_lines=5,
+            product_rev='17A', hardware_rev='08B',
             reversed_output_dict={},
             )
     _rev_data = {
@@ -250,62 +255,62 @@ class RVMN101B(Config):
         '17': _rev17_values,
         '16': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='16B', hardware_rev='08B', banner_lines=5,
+            product_rev='16B', hardware_rev='08B',
             reversed_output_dict={},
             ),
         '15': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='15C', hardware_rev='8B', banner_lines=5,
+            product_rev='15C', hardware_rev='8B',
             reversed_output_dict={},
             ),
         '14': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='14E', hardware_rev='8A', banner_lines=5,
+            product_rev='14E', hardware_rev='8A',
             reversed_output_dict={},
             ),
         '13': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='13F', hardware_rev='8A', banner_lines=5,
+            product_rev='13F', hardware_rev='8A',
             reversed_output_dict={},
             ),
         '12': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='12G', hardware_rev='6A', banner_lines=5,
+            product_rev='12G', hardware_rev='6A',
             reversed_output_dict={},
             ),
         '11': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='11G', hardware_rev='6A', banner_lines=5,
+            product_rev='11G', hardware_rev='6A',
             reversed_output_dict={},
             ),
         '10': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='10H', hardware_rev='6A', banner_lines=5,
+            product_rev='10H', hardware_rev='6A',
             reversed_output_dict={},
             ),
         '9': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='09H', hardware_rev='6A', banner_lines=5,
+            product_rev='09H', hardware_rev='6A',
             reversed_output_dict={},
             ),
         '8': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='08I', hardware_rev='6A', banner_lines=5,
+            product_rev='08I', hardware_rev='6A',
             reversed_output_dict={},
             ),
         '7': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='07H', hardware_rev='6A', banner_lines=5,
+            product_rev='07H', hardware_rev='6A',
             reversed_output_dict={},
             ),
         '6': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='06I', hardware_rev='6A', banner_lines=5,
+            product_rev='06I', hardware_rev='6A',
             reversed_output_dict={},
             ),
         '5': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='05H', hardware_rev='6A', banner_lines=5,
+            product_rev='05H', hardware_rev='6A',
             reversed_output_dict={},
             ),
         # Rev 1-4 were Engineering protoype builds
@@ -338,7 +343,7 @@ class RVMN5x(Config):
     _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     _rev12_values = _Values(
             nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
-            product_rev='12A', hardware_rev='08A', banner_lines=5,
+            product_rev='12A', hardware_rev='08A',
             reversed_output_dict={},
             )
     _rev_data = {
@@ -347,42 +352,42 @@ class RVMN5x(Config):
         # '11': The pilot Renesas micro version
         '10': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='10A', hardware_rev='08A', banner_lines=5,
+            product_rev='10A', hardware_rev='08A',
             reversed_output_dict={},
             ),
         '9': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='09A', hardware_rev='07A', banner_lines=5,
+            product_rev='09A', hardware_rev='07A',
             reversed_output_dict={},
             ),
         '8': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='08C', hardware_rev='05A', banner_lines=5,
+            product_rev='08C', hardware_rev='05A',
             reversed_output_dict={},
             ),
         '7': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='07B', hardware_rev='05A', banner_lines=5,
+            product_rev='07B', hardware_rev='05A',
             reversed_output_dict={},
             ),
         '6': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='06D', hardware_rev='05A', banner_lines=5,
+            product_rev='06D', hardware_rev='05A',
             reversed_output_dict={},
             ),
         '5': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='05F', hardware_rev='05A', banner_lines=5,
+            product_rev='05F', hardware_rev='05A',
             reversed_output_dict={},
             ),
         '4': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='04D', hardware_rev='04A', banner_lines=5,
+            product_rev='04D', hardware_rev='04A',
             reversed_output_dict={},
             ),
         '3': _Values(
             nordic_image=_nordic_2_6_4, arm_image=_arm_image_2_3,
-            product_rev='03G', hardware_rev='03A', banner_lines=5,
+            product_rev='03G', hardware_rev='03A',
             reversed_output_dict={},
             ),
         # Rev 1-2 were Engineering protoype builds
