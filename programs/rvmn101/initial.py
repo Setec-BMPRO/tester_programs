@@ -51,6 +51,7 @@ class Initial(share.TestSequence):
         if self.parameter in ('50', '55', ):    # 5x uses 2 x JLink
             mes['JLinkARM']()
             dev['swd_select'].set_on()
+            dev['swd_select'].opc()
             mes['JLinkBLE']()
             dev['swd_select'].set_off()
         else:                                   # 101x uses ISPLPC + NRF52

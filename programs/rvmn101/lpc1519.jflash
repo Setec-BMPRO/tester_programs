@@ -1,4 +1,4 @@
-  AppVersion = 75602
+  AppVersion = 75802
   FileVersion = 2
 [GENERAL]
   aATEModuleSel[24] = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -15,13 +15,13 @@
   IRLen = 0
   MultipleTargets = 0
   NumDevices = 0
-  Speed0 = 1000
+  Speed0 = 4000
   Speed1 = 1000
   TAP_Number = 0
   UseAdaptive0 = 0
   UseAdaptive1 = 0
-  UseMaxSpeed0 = 0
-  UseMaxSpeed1 = 0
+  UseMaxSpeed0 = 1
+  UseMaxSpeed1 = 1
 [CPU]
   NumInitSteps = 1
   InitStep0_Action = "Reset"
