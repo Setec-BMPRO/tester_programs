@@ -8,8 +8,8 @@ vaux = 12.8
 # Injected SOLAR voltage
 vsol = 14.6
 
-# Software image filename (PC-25885)
-sw_image = 'mb3_2.5.a847dc.hex'
+# Software image filename
+sw_image = 'mb3_v2.6-0-gb0c92b4.hex'
 
 # ATTiny406 fuse settings
 #   FuseName: (FuseNumber, FuseValue)
