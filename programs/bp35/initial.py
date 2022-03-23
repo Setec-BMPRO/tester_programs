@@ -22,20 +22,22 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_initial()
-        Devices.is_2 = self.cfg.is_2
-        Devices.arm_sw_version = self.cfg.arm_sw_version
+        if self.cfg.is_2:
+            arm_image = 'bp35II_{0}.bin'.format(self.cfg.arm_sw_version)
+        else:
+            arm_image = 'bp35_{0}.bin'.format(self.cfg.arm_sw_version)
+        Devices.arm_image = arm_image
         Devices.fixture_num = self.cfg.fixture_num
         Sensors.outputs = self.cfg.outputs
         Sensors.iload = self.cfg.iload
+        Sensors.pic_image = 'bp35sr_{0}.hex'.format(self.cfg.pic_sw_version)
         Measurements.is_pm = self.cfg.is_pm
         super().open(limits, Devices, Sensors, Measurements)
         self.limits['ARM-SwVer'].adjust(
             '^{0}$'.format(self.cfg.arm_sw_version.replace('.', r'\.')))
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
-            tester.TestStep('ProgramPIC', self._step_program_pic,
-                not self.cfg.is_pm),
-            tester.TestStep('ProgramARM', self._step_program_arm),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('Initialise', self._step_initialise_arm),
             tester.TestStep('SrSolar', self._step_sr_solar,
                 not self.cfg.is_pm),
@@ -64,28 +66,15 @@ class Initial(share.TestSequence):
         self.measure(('dmm_vbatin', 'dmm_3v3'), timeout=5)
 
     @share.teststep
-    def _step_program_pic(self, dev, mes):
-        """Program the dsPIC device.
-
-        Device is powered by Solar Reg input voltage.
-
-        """
-        dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
-        mes['dmm_solarvcc'](timeout=5)
-        dev['rla_pic'].set_on()
-        dev['rla_pic'].opc()
-        mes['pgm_bp35sr']()
-        dev['rla_pic'].set_off()
-        dev['SR_LowPower'].output(0.0)
-
-    @share.teststep
-    def _step_program_arm(self, dev, mes):
-        """Program the ARM device.
-
-        Device is powered by injected Battery voltage.
-
-        """
-        dev['program_arm'].program()
+    def _step_program(self, dev, mes):
+        """Program the ARM & PIC devices."""
+        dev['program_arm'].program_begin()  # Program ARM in background
+        if not self.cfg.is_pm:
+            dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
+            mes['dmm_solarvcc'](timeout=5)
+            mes['program_pic']()
+            dev['SR_LowPower'].output(0.0)
+        dev['program_arm'].program_wait()   # Wait for ARM programming
         # Cold Reset microprocessor for units that were already programmed
         # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']
@@ -111,7 +100,6 @@ class Initial(share.TestSequence):
         bp35.brand(
             self.cfg.arm_hw_version, self.sernum, dev['rla_reset'],
             self.cfg.is_pm, self.cfg.pic_hw_version)
-        mes['arm_swver']()
         if self.cfg.is_pm:
             bp35['PM_RELAY'] = False
             time.sleep(0.5)
@@ -124,7 +112,7 @@ class Initial(share.TestSequence):
     def _step_sr_solar(self, dev, mes):
         """Test & Calibrate the Solar Regulator board."""
         bp35 = dev['bp35']
-        dev['SR_HighPower'].output(True)
+        dev['SR_HighPower'].on()
         dev['SR_LowPower'].output(0.0, output=False)
         self.measure(('arm_sr_alive', 'arm_vout_ov', ), timeout=5)
         # The SR needs V & I set to zero after power up or it won't start.
@@ -159,7 +147,7 @@ class Initial(share.TestSequence):
         time.sleep(1)
         mes['arm_ioutpost'](timeout=5)
         dev['dcl_bat'].output(0.0)
-        dev['SR_HighPower'].output(False)
+        dev['SR_HighPower'].off()
 
     @share.teststep
     def _step_aux(self, dev, mes):
@@ -279,23 +267,23 @@ class SrHighPower():
         self.relay = relay
         self.acsource = acsource
 
-    def output(self, output=False):
+    def on(self):
         """Switch on the source."""
-        if output:
-            self.relay.set_on()
-            self.acsource.output(voltage=240, output=True, delay=0.5)
-        else:
-            self.acsource.output(voltage=0.0)
-            self.relay.set_off()
+        self.relay.set_on()
+        self.acsource.output(voltage=240, output=True, delay=0.5)
+
+    def off(self):
+        """Switch off the source."""
+        self.acsource.output(voltage=0.0)
+        self.relay.set_off()
 
 
 class Devices(share.Devices):
 
     """Devices."""
 
-    is_2 = None
-    arm_sw_version = None   # ARM software version
-    fixture_num = None      # Fixture number (BP35 / BP35-II)
+    arm_image = None        # ARM software image
+    fixture_num = None      # Fixture number
 
     def open(self):
         """Create all Instruments."""
@@ -317,15 +305,13 @@ class Devices(share.Devices):
                 ('rla_acsw', tester.Relay, 'RLA6'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        self['PicKit'] = tester.PicKit(
+            (self.physical_devices['PICKIT'], self['rla_pic']))
         # ARM device programmer
         arm_port = share.config.Fixture.port(self.fixture_num, 'ARM')
-        if self.is_2:
-            sw_file = 'bp35II_{0}.bin'.format(self.arm_sw_version)
-        else:
-            sw_file = 'bp35_{0}.bin'.format(self.arm_sw_version)
         self['program_arm'] = share.programmer.ARM(
             arm_port,
-            pathlib.Path(__file__).parent / sw_file,
+            pathlib.Path(__file__).parent / self.arm_image,
             crpmode=False,
             boot_relay=self['rla_boot'],
             reset_relay=self['rla_reset']
@@ -376,8 +362,9 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    outputs = None      # Number of outputs
-    iload = None        # Load current
+    outputs = None          # Number of outputs
+    iload = None            # Load current
+    pic_image = None        # PIC software image
 
     def open(self):
         """Create all Sensors."""
@@ -423,7 +410,11 @@ class Sensors(share.Sensors):
             message=tester.translate('bp35_initial', 'IsOutputLedGreen?'),
             caption=tester.translate('bp35_initial', 'capOutputLed'))
         self['yesnogreen'].doc = 'Tester operator'
-        # Arduino sensor
+        self['pickit'] = sensor.PicKit(
+            self.devices['PicKit'],
+            pathlib.Path(__file__).parent / self.pic_image,
+            '33FJ16GS402'
+            )
         ard = self.devices['ard']
         self['pgmbp35sr'] = sensor.KeyedReadingString(ard, 'PGM_BP35SR')
         # Console sensors
@@ -535,6 +526,7 @@ class Measurements(share.Measurements):
             ('arm_remote', 'ARM-RemoteClosed', 'arm_remote', 'Remote input'),
             ('TunnelSwVer', 'ARM-SwVer', 'TunnelSwVer', ''),
             ('pgm_bp35sr', 'Reply', 'pgmbp35sr', ''),
+            ('program_pic', 'ProgramOk', 'pickit', ''),
             ))
         if self.is_pm:      # PM Solar Regulator
             self.create_from_names((

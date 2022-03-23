@@ -46,12 +46,15 @@ class _BP35Initial(ProgramTestCase):
             UnitTester.key_sen: {       # Tuples of sensor data
                 'Prepare': (
                     (sen['sernum'], self.sernum),
-                    (sen['lock'], 10.0), (sen['hardware'], 4400),
-                    (sen['vbat'], 12.0), (sen['o3v3'], 3.3),
+                    (sen['lock'], 10.0),
+                    (sen['hardware'], 4400),
+                    (sen['vbat'], 12.0),
+                    (sen['o3v3'], 3.3),
                     ),
-                'ProgramPIC': (
+                'Program': (
                     (sen['solarvcc'], 3.3),
                     (sen['pgmbp35sr'], 'OK'),
+                    (sen['pickit'], 0),
                     ),
                 'Initialise': (
                     (sen['sernum'], self.sernum),
@@ -73,14 +76,18 @@ class _BP35Initial(ProgramTestCase):
                     (sen['arm_iaux'], 1.1),
                     ),
                 'PowerUp': (
-                    (sen['acin'], 240.0), (sen['pri12v'], (12.5, 14.0), ),
-                    (sen['o3v3'], 3.3), (sen['o15vs'], (12.5, 14.5), ),
-                    (sen['vbat'], 12.8), (sen['vpfc'], (415.0, 415.0), ),
+                    (sen['acin'], 240.0),
+                    (sen['pri12v'], (12.5, 14.0), ),
+                    (sen['o3v3'], 3.3),
+                    (sen['o15vs'], (12.5, 14.5), ),
+                    (sen['vbat'], 12.8),
+                    (sen['vpfc'], (415.0, 415.0), ),
                     (sen['arm_vout_ov'], (0, 0, )),
                     ),
                 'Output': (
                     (sen['vload'], 0.0),
-                    (sen['yesnored'], True), (sen['yesnogreen'], True),
+                    (sen['yesnored'], True),
+                    (sen['yesnogreen'], True),
                     ),
                 'RemoteSw': (
                     (sen['vload'], (12.34, )),
@@ -96,7 +103,8 @@ class _BP35Initial(ProgramTestCase):
                     (sen['arm_sect'], 35),
                     (sen['arm_vout'], 12.80),
                     (sen['arm_fan'], 50),
-                    (sen['fan'], (0, 12.0)), (sen['vbat'], 12.8),
+                    (sen['fan'], (0, 12.0)),
+                    (sen['vbat'], 12.8),
                     (sen['arm_ibat'], 4.0),
                     (sen['arm_ibus'], 32.0),
                     (sen['vbat'], (12.8, ) * 20 + (11.0, ), ),
@@ -130,8 +138,8 @@ class BP35_SR_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the SR program."""
         super()._pass_run(
-            65,
-            ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
+            64,
+            ['Prepare', 'Program', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
 
@@ -154,8 +162,8 @@ class BP35_HA_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the HA program."""
         super()._pass_run(
-            65,
-            ['Prepare', 'ProgramPIC', 'ProgramARM', 'Initialise', 'SrSolar',
+            64,
+            ['Prepare', 'Program', 'Initialise', 'SrSolar',
              'Aux', 'PowerUp', 'Output', 'RemoteSw', 'OCP', 'CanBus'],
             )
 
@@ -178,8 +186,8 @@ class BP35_PM_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the PM program."""
         super()._pass_run(
-            55,
-            ['Prepare', 'ProgramARM', 'Initialise', 'Aux', 'PowerUp',
+            54,
+            ['Prepare', 'Program', 'Initialise', 'Aux', 'PowerUp',
              'Output', 'RemoteSw', 'PmSolar', 'OCP', 'CanBus'],
             )
 
