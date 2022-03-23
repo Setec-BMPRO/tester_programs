@@ -69,12 +69,16 @@ class Initial(share.TestSequence):
     def _step_program(self, dev, mes):
         """Program the ARM & PIC devices."""
         dev['program_arm'].program_begin()  # Program ARM in background
-        if not self.cfg.is_pm:
-            dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
-            mes['dmm_solarvcc'](timeout=5)
-            mes['program_pic']()
-            dev['SR_LowPower'].output(0.0)
-        dev['program_arm'].program_wait()   # Wait for ARM programming
+        try:
+            if not self.cfg.is_pm:
+                dev['SR_LowPower'].output(self.cfg.sr_vin, output=True)
+                mes['dmm_solarvcc'](timeout=5)
+                mes['program_pic']()
+                dev['SR_LowPower'].output(0.0)
+        except Exception:
+            raise
+        finally:
+            dev['program_arm'].program_wait()   # Wait for ARM programming
         # Cold Reset microprocessor for units that were already programmed
         # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
         dcsource, load = dev['dcs_vbat'], dev['dcl_bat']

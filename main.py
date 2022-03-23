@@ -23,6 +23,7 @@ def _main():
     # Suppress lower level logging
     for name in (
             'gpib',
+            'isplpc',
             'tester.devphysical',
             'tester.sensor.ui.Base',
             ):
