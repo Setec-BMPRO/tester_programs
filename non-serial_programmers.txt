@@ -2,22 +2,31 @@ Non-Serial Device Programmers
 
 Laird / Nordic BLE Modules
 ==========================
-    BL652                   Done by Nordic nRF52 board
-        RVMNxx, RVSWT101
+    BL652
+        BLExtender          Done by Nordic nRF52 board
+        CN102,3             Done by Segger JLink
+        ODL103,4            Done by Segger JLink
+        RVMN101A            Done by Nordic nRF52 board
+        RVMN101B            Done by Nordic nRF52 board
+        RVMN5x              Done by Segger JLink
+        RVSWT101            Done by Nordic nRF52 board
+        Smartlink201        Done by Nordic nRF52 board
 
 MicroChip SAM Series
 ====================
 PicKit4
 
 Y   SAMC21E16A
-        RVMC101x (Non-Laird redesign)
+        RVMC101x            Done by Segger JLink
+        RVMD50              Done by Segger JLink
+        RvView2             Done by Segger JLink
 
 N   SAMB11-MR210CA          Done by ???? in fixture
         BatteryCheck 2
 
 MicroChip PIC Series
 ====================
-PicKit4
+PicKit 3/4
 
 Y   PIC10F320
         SX-750              Done by Arduino 2016-06
@@ -44,8 +53,8 @@ Y   PIC18LF252
 Y   dsPIC33FJ16GS402        Done by Arduino 2020-10
         BP35SR
 
-Microchip (ex-ATMEL)
-====================
+ATMEL
+=====
 PicKit4
 
 Y   ATtiny10
@@ -57,5 +66,8 @@ Y   ATtiny406
 Y   ATtiny1634
         WTSI200             Done by Arduino 2013-08 (Combo program & test)
 
-Y   ATmega4809
-        SX-600 (Non-NXP redesign)
+Renesas
+=======
+    RA21E Series            Can be done by Segger JLink
+        GEN9
+        SX-600
