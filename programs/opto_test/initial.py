@@ -222,18 +222,22 @@ class Sensors(share.Sensors):
             s = sensor.Search(
                 stimulus=self.devices['dcs_vset'],
                 sensor=self['Vce'][i],
-                detect_limit=self.limits['Vsen'],
-                response_limit=self.limits['VceAdj'],
-                start=4.7, stop=6.7, resolution=0.04, delay=0.1)
+                direction_limit=self.limits['Vsen'],
+                detect_limit=self.limits['VceAdj'],
+                search_range=sensor.SearchRange(
+                    start=4.7, stop=6.7, resolution=0.04),
+                delay=0.1)
             self['VoutAdj1'].append(s)
         self['VoutAdj10'] = []
         for i in range(self._opto_count):
             s = sensor.Search(
                 stimulus=self.devices['dcs_vset'],
                 sensor=self['Vce'][i],
-                detect_limit=self.limits['Vsen'],
-                response_limit=self.limits['VceAdj'],
-                start=14.0, stop=26.0, resolution=0.04, delay=0.1)
+                direction_limit=self.limits['Vsen'],
+                detect_limit=self.limits['VceAdj'],
+                search_range=sensor.SearchRange(
+                    start=14.0, stop=26.0, resolution=0.04),
+                delay=0.1)
             self['VoutAdj10'].append(s)
         # Generate a list of Iout voltage sensors
         self['Iout'] = []
