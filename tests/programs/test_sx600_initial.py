@@ -34,33 +34,37 @@ class SX600Initial(ProgramTestCase):
         sen = self.test_program.sensors
         data = {
             UnitTester.key_sen: {       # Tuples of sensor data
-                'PartDetect':(
-                    (sen['Lock'], 10.1), (sen['Part'], 0.5),
-                    (sen['R601'], 2001.0), (sen['R602'], 2002.0),
-                    (sen['R609'], 2003.0), (sen['R608'], 2004.0),
+                'Lock':(
+                    (sen['Lock'], 10.1),
                     ),
                 'Program': (
-                    (sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], (5.0,) * 2),
-                    (sen['o3V3'], 3.21), (sen['o8V5Ard'], 8.5),
-                    (sen['PriCtl'], 12.34), (sen['pgm5Vsb'], 'OK'),
-                    (sen['pgmPwrSw'], 'OK'), (sen['ocpMax'], 'OK'),
+                    (sen['o5Vsb'], 5.0),
+                    (sen['o5Vsbunsw'], (5.0,) * 2),
+                    (sen['o3V3'], 3.21),
+                    (sen['o8V5Ard'], 8.5),
+                    (sen['PriCtl'], 12.34),
+                    (sen['ocpMax'], 'OK'),
+                    (sen['JLink'], 0),
+                    (sen['o5Vsb'], 5.0),
+                    (sen['o5Vsbunsw'], 5.0),
                     ),
-                'Initialise': ((sen['o5Vsb'], 5.0), (sen['o5Vsbunsw'], 5.0), ),
                 'PowerUp': (
-                    (sen['ACin'], 240.0), (sen['PriCtl'], 12.34),
-                    (sen['o5Vsb'], 5.05), (sen['o12V'], (0.12, 12.01)),
-                    (sen['o24V'], (0.24, 24.01)), (sen['ACFAIL'], 5.0),
+                    (sen['ACin'], 240.0),
+                    (sen['PriCtl'], 12.34),
+                    (sen['o5Vsb'], 5.05),
+                    (sen['o12V'], (0.12, 12.01)),
+                    (sen['o24V'], (0.24, 24.01)),
+                    (sen['ACFAIL'], 5.0),
                     (sen['PGOOD'], 0.123),
                     (sen['PFC'], (435.0, 435.0,)),
-                    (sen['ARM_AcFreq'], 50), (sen['ARM_AcVolt'], 240),
-                    (sen['ARM_12V'], 12.180), (sen['ARM_24V'], 24.0),
-                    (sen['ARM_SwVer'],
-                        '.'.join(
-                            self.test_program.cfg._bin_version.split('.')[:2])),
-                    (sen['ARM_SwBld'],
-                        self.test_program.cfg._bin_version.split('.')[3]),
+                    (sen['ARM_AcFreq'], 50),
+                    (sen['ARM_AcVolt'], 240),
+                    (sen['ARM_12V'], 12.180),
+                    (sen['ARM_24V'], 24.0),
                     ),
-                '5Vsb': ((sen['o5Vsb'], (5.20, 5.15, 5.14, 5.10, )), ),
+                '5Vsb': (
+                    (sen['o5Vsb'], (5.20, 5.15, 5.14, 5.10, )),
+                    ),
                 '12V': (
                     (sen['o12V'], (12.34, 12.25, 12.10, 12.00, 12.34, )),
                     # OPC SET: Push 32 reads before OCP detected
@@ -74,7 +78,7 @@ class SX600Initial(ProgramTestCase):
                     ),
                 '24V': (
                     (sen['o24V'], (24.44, 24.33, 24.22, 24.11, 24.24)),
-#                    # OPC SET: Push 32 reads before OCP detected
+                    # OPC SET: Push 32 reads before OCP detected
                     # OCP CHECK: Push 18 reads before OCP detected
                     (sen['o24VinOCP'],
                         ((0.123, ) * 18 + (4.444, ))),
@@ -91,8 +95,7 @@ class SX600Initial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(42, len(result.readings))
+        self.assertEqual(41, len(result.readings))
         self.assertEqual(
-            ['PartDetect', 'Program', 'Initialise', 'PowerUp',
-             '5Vsb', '12V', '24V', 'PeakPower'],
+            ['Lock', 'Program', 'PowerUp', '5Vsb', '12V', '24V', 'PeakPower'],
             self.tester.ut_steps)

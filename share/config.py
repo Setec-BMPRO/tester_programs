@@ -101,7 +101,7 @@ class Fixture():
             'MSP1': _ftdi_hub_1,    # Programming
             'MSP2': _ftdi_hub_2,    # Console
             },
-        '022837': {     # SX-600/SX-750 Initial
+        '022837': {     # SX-750 Initial
             'ARM': _ftdi_hub_1,
             # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM5'}[os.name],
@@ -131,6 +131,11 @@ class Fixture():
         '033030': {     # RVSWT101 Final
             # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM39'}[os.name],
+            },
+        '033484': {     # SX-600 Initial
+            'ARM': _ftdi_hub_1,
+            # Hub port 2:
+            'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM5'}[os.name],
             },
         '033550': {     # RVMN101A Initial
             'ARM': _ftdi_hub_1,

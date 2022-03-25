@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2022 , ",
-    "saved": "2022-03-25, 12:09:25"
+    "saved": "2022-03-25, 14:54:24"
   },
   "project": {
     "AUTHOR": "",
@@ -76,7 +76,9 @@
       "programs/rvmd50/rvmd50_atmel.jflash",
       "programs/trsbts/trsbts.jflash",
       "programs/rvmn101/nrf52.jflash",
-      "programs/rvmn101/lpc1519.jflash"
+      "programs/rvmn101/lpc1519.jflash",
+      "programs/sx600/lpc1113.jflash",
+      "programs/sx600/r7fa2e1a7.jflash"
     ],
     "OTHERTOOLSPARMS": {},
     "PACKAGERSPARMS": {},

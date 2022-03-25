@@ -20,14 +20,15 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         self.cfg = config.Config
-        Devices.sw_image = self.cfg.arm_bin
+        self.cfg.configure(uut)
         Sensors.ratings = self.cfg.ratings
+        Sensors.projectfile = self.cfg.projectfile
+        Sensors.sw_image = self.cfg.sw_image
         self.limits = self.cfg.limits_initial
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('PartDetect', self._step_part_detect),
-            tester.TestStep('Program', self._step_program_micros),
-            tester.TestStep('Initialise', self._step_initialise_arm),
+            tester.TestStep('Lock', self._step_lock),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('5Vsb', self._step_reg_5v),
             tester.TestStep('12V', self._step_reg_12v),
@@ -36,65 +37,34 @@ class Initial(share.TestSequence):
             )
 
     @share.teststep
-    def _step_part_detect(self, dev, mes):
+    def _step_lock(self, dev, mes):
         """Check that Fixture Lock is closed."""
         mes['dmm_Lock'](timeout=2)
 
     @share.teststep
-    def _step_program_micros(self, dev, mes):
-        """Program the ARM and PIC devices.
-
-        5Vsb is injected to power the ARM and 5Vsb PIC. PriCtl is injected
-        to power the PwrSw PIC and digital pots.
-        The ARM is programmed.
-        The PIC's are programmed.
-        Digital pots are set for maximum OCP.
-        Unit is left unpowered.
-
-        """
-
-# TODO: Convert this to use a SEGGER J-Link
-
-        # Set BOOT active before power-on so the ARM boot-loader runs
-        dev['rla_boot'].set_on()
-        # Apply and check injected 5Vsb
+    def _step_program(self, dev, mes):
+        """Program the micro."""
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
             timeout=5)
-        dev['programmer'].program()     # Program the ARM device
+        mes['JLink']()      # Program the micro
 
-
-        # On xubuntu, a device detector opens the serial port for a while
-        # after it is attached. Wait for the process to release the port.
-        for _ in range(10):
-            try:
-                dev['ard'].open()
-                break
-            except:
-                time.sleep(1)
-        dev['rla_boot'].set_off(delay=2) # Wait for Arduino to start
+# TODO: Do we need to switch it off then on again ?
         # Switch off 5V rail and discharge the 5V to stop the ARM
         dev['dcs_5V'].output(0)
         self.dcload((('dcl_5V', 0.1), ), output=True, delay=0.5)
+
         # This will also enable all loads on an ATE3/4 tester.
         self.dcload(
             (('dcl_5V', 0.0), ('dcl_12V', 0.0), ('dcl_24V', 0.0), ),
             output=True)
 
-    @share.teststep
-    def _step_initialise_arm(self, dev, mes):
-        """Initialise the ARM device.
-
-        5Vsb is injected to power the ARM.
-        The ARM is initialised via the serial port.
-        Unit is left unpowered.
-
-        """
-        arm = dev['arm']
-        arm.open()
+# TODO: Do we need to switch it off then on again ?
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
+
+        arm = dev['arm']
         arm.initialise()
         # Switch everything off
         dev['dcs_5V'].output(0, False)
@@ -130,9 +100,7 @@ class Initial(share.TestSequence):
         self.measure(
             ('dmm_12V_set', 'dmm_24V_set', 'dmm_PGOOD'), timeout=2)
         # ARM data readings
-        self.measure(
-            ('arm_AcFreq', 'arm_AcVolt', 'arm_12V', 'arm_24V',
-             'arm_SwVer', 'arm_SwBld', ))
+        self.measure(('arm_AcFreq', 'arm_AcVolt', 'arm_12V', 'arm_24V', ))
         mes['ocp_max']()
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
@@ -302,7 +270,7 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_image = None     # ARM software image filename
+    fixture = '033484'
 
     def open(self):
         """Create all Instruments."""
@@ -310,50 +278,47 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('acsource', tester.ACSource, 'ACS'),
                 ('discharge', tester.Discharge, 'DIS'),
-                ('dcs_PriCtl', tester.DCSource, 'DCS1'), # SX-750
+                ('dcs_PriCtl', tester.DCSource, 'DCS1'),
                 ('dcs_5V', tester.DCSource, 'DCS2'),
                 ('dcs_Arduino', tester.DCSource, 'DCS3'),
                 ('dcs_Vcom', tester.DCSource, 'DCS4'),
-                ('dcs_DigPot', tester.DCSource, 'DCS5'), # SX-750
                 ('dcl_12V', tester.DCLoad, 'DCL1'),
                 ('dcl_5V', tester.DCLoad, 'DCL2'),
                 ('dcl_24V', tester.DCLoad, 'DCL3'),
-                ('rla_pic1', tester.Relay, 'RLA1'),
-                ('rla_pic2', tester.Relay, 'RLA2'),
-                ('rla_pson', tester.Relay, 'RLA3'),
-                ('rla_boot', tester.Relay, 'RLA4'),
-                ('rla_0Vp', tester.Relay, 'RLA5'),
-                ('rla_sw', tester.Relay, 'RLA6'),
+                ('rla_pson', tester.Relay, 'RLA1'),
+                ('rla_sw', tester.Relay, 'RLA2'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.config.Fixture.port('022837', 'ARM')
-        # ARM device programmer
-        self['programmer'] = share.programmer.ARM(
-            arm_port,
-            pathlib.Path(__file__).parent / self.sw_image,
-            boot_relay=self['rla_boot']
-            )
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = arm_port
+        arm_ser.port = share.config.Fixture.port(self.fixture, 'ARM')
         self['arm'] = console.Console(arm_ser)
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port('022837', 'ARDUINO')
+        ard_ser.port = share.config.Fixture.port(self.fixture, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
-        for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
+        for dcs in ('dcs_Arduino', 'dcs_Vcom'):
             self[dcs].output(12.0, output=True)
             self.add_closer(lambda: self[dcs].output(0.0, output=False))
         time.sleep(5)   # Allow OS to detect the new ports
+        # On xubuntu, a device detector opens the serial port for a while
+        # after it is attached. Wait for the process to release the port.
+        for _ in range(10):
+            try:
+                self['ard'].open()
+                self.add_closer(self['ard'].close)
+                break
+            except Exception:
+                time.sleep(1)
+        self['arm'].open()
+        self.add_closer(self['arm'].close)
 
     def reset(self):
         """Reset instruments."""
-        self['arm'].close()
-        self['ard'].close()
         self['acsource'].reset()
         self['dcl_5V'].output(1.0)
         self['dcl_12V'].output(5.0)
@@ -363,8 +328,7 @@ class Devices(share.Devices):
             self[ld].output(0.0)
         for dcs in ('dcs_PriCtl', 'dcs_5V'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_pic1', 'rla_pic2', 'rla_boot',
-            'rla_pson', 'rla_0Vp', 'rla_sw'):
+        for rla in ('rla_pson', 'rla_sw'):
             self[rla].set_off()
 
 
@@ -372,31 +336,28 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    ratings = None          # Product specific output load ratings
+    ratings = None          # Output load ratings
+    projectfile = None
+    sw_image = None
 
     def open(self):
         """Create all Sensor instances."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['o5Vsb'] = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
-        self['o5Vsbunsw'] = sensor.Vdc(dmm, high=18, low=3, rng=10, res=0.001)
-        self['o8V5Ard'] = sensor.Vdc(dmm, high=19, low=8, rng=100, res=0.001)
-        self['o12V'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        self['o12VinOCP'] = sensor.Vdc(dmm, high=10, low=2, rng=100, res=0.1)
-        self['o24V'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
-        self['o24VinOCP'] = sensor.Vdc(dmm, high=11, low=2, rng=100, res=0.1)
-        self['PriCtl'] = sensor.Vdc(dmm, high=8, low=2, rng=100, res=0.01)
+        self['ACin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
         self['PFC'] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.001)
+        self['o12V'] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
+        self['o24V'] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
+        self['o5Vsb'] = sensor.Vdc(dmm, high=5, low=3, rng=10, res=0.001)
         self['PGOOD'] = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.01)
         self['ACFAIL'] = sensor.Vdc(dmm, high=7, low=3, rng=10, res=0.01)
+        self['PriCtl'] = sensor.Vdc(dmm, high=8, low=2, rng=100, res=0.01)
         self['o3V3'] = sensor.Vdc(dmm, high=9, low=3, rng=10, res=0.001)
-        self['ACin'] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
+        self['o12VinOCP'] = sensor.Vdc(dmm, high=10, low=2, rng=100, res=0.1)
+        self['o24VinOCP'] = sensor.Vdc(dmm, high=11, low=2, rng=100, res=0.1)
         self['Lock'] = sensor.Res(dmm, high=12, low=4, rng=1000, res=1)
-        self['Part'] = sensor.Vdc(dmm, high=13, low=7, rng=100, res=0.01)
-        self['R601'] = sensor.Res(dmm, high=14, low=5, rng=10000, res=1)
-        self['R602'] = sensor.Res(dmm, high=15, low=5, rng=10000, res=1)
-        self['R609'] = sensor.Res(dmm, high=16, low=6, rng=10000, res=1)
-        self['R608'] = sensor.Res(dmm, high=17, low=6, rng=10000, res=1)
+        self['o5Vsbunsw'] = sensor.Vdc(dmm, high=13, low=3, rng=10, res=0.001)
+        self['o8V5Ard'] = sensor.Vdc(dmm, high=14, low=8, rng=100, res=0.001)
         self['OCP12V'] = sensor.Ramp(
             stimulus=self.devices['dcl_12V'],
             sensor=self['o12VinOCP'],
@@ -418,11 +379,8 @@ class Sensors(share.Sensors):
         # Arduino sensors
         ard = self.devices['ard']
         for name, cmdkey in (
-                ('pgm5Vsb', 'PGM_5VSB'),
-                ('pgmPwrSw', 'PGM_PWRSW'),
                 ('ocpMax', 'OCP_MAX'),
                 ('ocp12Unlock', '12_OCP_UNLOCK'),
-                ('ocp24Unlock', '24_OCP_UNLOCK'),
                 ('ocpStepDn', 'OCP_STEP_DN'),
                 ('ocpLock', 'OCP_LOCK'),
                 ('pfcDnUnlock', 'PFC_DN_UNLOCK'),
@@ -447,6 +405,10 @@ class Sensors(share.Sensors):
                 ('ARM_SwBld', 'ARM_SwBld'),
             ):
             self[name] = sensor.KeyedReadingString(arm, cmdkey)
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_image)
 
 
 class Measurements(share.Measurements):
@@ -456,7 +418,6 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurement instances."""
         self.create_from_names((
-            ('dmm_5Voff', '5Voff', 'o5Vsb', ''),
             ('dmm_5Vext', '5Vext', 'o5Vsb', ''),
             ('dmm_5Vunsw', '5Vunsw', 'o5Vsbunsw', ''),
             ('dmm_5Vnl', '5Vnl', 'o5Vsb', ''),
@@ -468,29 +429,19 @@ class Measurements(share.Measurements):
             ('dmm_24V', '24Vfl', 'o24V', ''),
             ('dmm_24V_set', '24Vnl', 'o24V', ''),
             ('dmm_24Voff', '24Voff', 'o24V', ''),
-            ('dmm_24V_inOCP', '24V_inOCP', 'o24VinOCP', ''),
             ('dmm_PriCtl', 'PriCtl', 'PriCtl', ''),
             ('dmm_PFCpre', 'PFCpre', 'PFC', ''),
             ('dmm_PFCpost', 'PFCpost', 'PFC', ''),
             ('dmm_ACin', 'ACin', 'ACin', ''),
             ('dmm_PGOOD', 'PGOOD', 'PGOOD', ''),
             ('dmm_ACFAIL', 'ACFAIL', 'ACFAIL', ''),
-            ('dmm_ACOK', 'ACOK', 'ACFAIL', ''),
             ('dmm_3V3', '3V3', 'o3V3', ''),
             ('dmm_Lock', 'FixtureLock', 'Lock', ''),
-            ('dmm_Part', 'PartCheck', 'Part', ''),
-            ('dmm_R601', 'Snubber', 'R601', ''),
-            ('dmm_R602', 'Snubber', 'R602', ''),
-            ('dmm_R609', 'Snubber', 'R609', ''),
-            ('dmm_R608', 'Snubber', 'R608', ''),
             ('rampOcp12V', '12V_OCPchk', 'OCP12V', ''),
             ('rampOcp24V', '24V_OCPchk', 'OCP24V', ''),
             ('dmm_8V5Ard', '8.5V Arduino', 'o8V5Ard', ''),
-            ('pgm_5vsb', 'Reply', 'pgm5Vsb', ''),
-            ('pgm_pwrsw', 'Reply', 'pgmPwrSw', ''),
             ('ocp_max', 'Reply', 'ocpMax', ''),
             ('ocp12_unlock', 'Reply', 'ocp12Unlock', ''),
-            ('ocp24_unlock', 'Reply', 'ocp24Unlock', ''),
             ('ocp_step_dn', 'Reply', 'ocpStepDn', ''),
             ('ocp_lock', 'Reply', 'ocpLock', ''),
             ('pfcDnUnlock', 'Reply', 'pfcDnUnlock', ''),
@@ -503,13 +454,12 @@ class Measurements(share.Measurements):
             ('arm_AcVolt', 'ARM-AcVolt', 'ARM_AcVolt', ''),
             ('arm_12V', 'ARM-12V', 'ARM_12V', ''),
             ('arm_24V', 'ARM-24V', 'ARM_24V', ''),
-            ('arm_SwVer', 'ARM-SwVer', 'ARM_SwVer', ''),
-            ('arm_SwBld', 'ARM-SwBld', 'ARM_SwBld', ''),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))
         # Suppress signals on these measurements.
         for name in (
-                'dmm_12V_inOCP', 'dmm_24V_inOCP',
-                'ocp_max', 'ocp12_unlock', 'ocp24_unlock',
+                'dmm_12V_inOCP',
+                'ocp_max', 'ocp12_unlock',
                 'ocp_step_dn', 'ocp_lock',
                 'pfcDnUnlock', 'pfcUpUnlock',
                 'pfcStepDn', 'pfcStepUp',
@@ -518,7 +468,7 @@ class Measurements(share.Measurements):
             self[name].send_signal = False
         # Suppress position failure on these measurements.
         for name in (
-                'dmm_12V_inOCP', 'dmm_24V_inOCP',
+                'dmm_12V_inOCP',
                 ):
             self[name].position_fail = False
             self[name].autoconfig = False

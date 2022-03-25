@@ -3,6 +3,8 @@
 # Copyright 2013 SETEC Pty Ltd
 """SX-600 Configuration."""
 
+import logging
+
 import attr
 
 import tester
@@ -23,10 +25,22 @@ class Ratings():
     v24 = attr.ib(validator=attr.validators.instance_of(Rail))
 
 
+@attr.s
+class _Values():
+
+    """Adjustable configuration data values."""
+
+    projectfile = attr.ib(validator=attr.validators.instance_of(str))
+    sw_image = attr.ib(validator=attr.validators.instance_of(str))
+
+
 class Config():
 
     """Configuration."""
 
+    # These values get set per Product revision
+    projectfile = None
+    sw_image = None
     # General parameters used in testing the units
     #  Injected voltages
     _5vsb_ext = 6.3
@@ -41,11 +55,6 @@ class Config():
     #  Injected voltage for fan and bracket detect circuits
     part_detect = 12.0
     fixture_fan = 12.0
-    # Initial Test parameters
-    #  Software version
-    _bin_version = '1.3.19535.1537'
-    #  Software image filenames
-    arm_bin = 'sx600_{0}.bin'.format(_bin_version)
     # PFC digital pot sensitivity (V/step)
     pfc_volt_per_step = 1.5
     # 12V & 24V output ratings (A)
@@ -82,7 +91,6 @@ class Config():
         tester.LimitLow('Reg5V', 3.0),
         tester.LimitDelta('8.5V Arduino', 8.5, 0.4),
         tester.LimitLow('FixtureLock', 200),
-        tester.LimitLow('PartCheck', 1.0),          # Photo sensor on D404
         tester.LimitBetween('Snubber', 1000, 3000), # Snubbing resistors
         tester.LimitRegExp('Reply', '^OK$'),
         tester.LimitInteger('Program', 0),
@@ -103,12 +111,6 @@ class Config():
         tester.LimitDelta('PFCpost', pfc_target, 2.0),
         tester.LimitDelta('12V_OCPchk', ratings.v12.ocp, 0.5),
         tester.LimitDelta('24V_OCPchk', ratings.v24.ocp, 2.05),
-        tester.LimitRegExp(
-            'ARM-SwVer',
-            '^{0}$'.format(r'\.'.join(_bin_version.split('.')[:2]))),
-        tester.LimitRegExp(
-            'ARM-SwBld',
-            '^{0}$'.format(_bin_version.split('.')[3])),
         )
     # Final Test limits
     limits_final = _limits_common + (
@@ -119,3 +121,31 @@ class Config():
         tester.LimitLow('FanOn', 2.0),
         tester.LimitLow('BracketDetect', 1.0),
         )
+    # Software images
+    _renesas_values = _Values(
+        projectfile='r7fa2e1a7.jflash', sw_image='None')
+    _rev_data = {
+        None: _renesas_values,
+        '5': _renesas_values,
+        '4': _Values(
+            projectfile='lpc1113.jflash',
+            sw_image='sx600_1.3.19535.1537.bin'
+            ),
+        # Rev 1-3 were Engineering protoype builds
+        }
+
+    @classmethod
+    def configure(cls, uut):
+        """Adjust configuration based on UUT Lot Number.
+
+        @param uut setec.UUT instance
+
+        """
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
+        logging.getLogger(__name__).debug('Revision detected as %s', rev)
+        values = cls._rev_data[rev]
+        cls.projectfile = values.projectfile
+        cls.sw_image = values.sw_image
