@@ -290,6 +290,11 @@ class Devices(share.Devices):
                 ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # Switch on power to fixture circuits
+        for dcs in ('dcs_Arduino', 'dcs_Vcom'):
+            self[dcs].output(12.0, output=True)
+            self.add_closer(lambda: self[dcs].output(0.0, output=False))
+        time.sleep(5)   # Allow OS to detect the new ports
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
@@ -300,11 +305,6 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port(self.fixture, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
-        # Switch on power to fixture circuits
-        for dcs in ('dcs_Arduino', 'dcs_Vcom'):
-            self[dcs].output(12.0, output=True)
-            self.add_closer(lambda: self[dcs].output(0.0, output=False))
-        time.sleep(5)   # Allow OS to detect the new ports
         # On xubuntu, a device detector opens the serial port for a while
         # after it is attached. Wait for the process to release the port.
         for _ in range(10):
