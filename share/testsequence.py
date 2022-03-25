@@ -214,6 +214,7 @@ class Devices(abc.ABC, dict):
 
     def close(self):
         """Close logical devices."""
+        self._close_callables.reverse()     # Close in LIFO order
         for target in self._close_callables:
             target()
         self._close_callables.clear()
