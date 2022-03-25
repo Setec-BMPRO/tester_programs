@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2013 SETEC Pty Ltd
-"""SX-600/750 Final Test Program."""
+"""SX-600 Final Test Program."""
 
 import tester
 
@@ -11,25 +11,18 @@ from . import config
 
 class Final(share.TestSequence):
 
-    """SX-600/750 Final Test Program."""
+    """SX-600 Final Test Program."""
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.Config.get(self.parameter)
-        limits = self.cfg.limits_final()
+        self.cfg = config.Config
+        limits = self.cfg.limits_final
         super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep('InputRes', self._step_inres,
-                self.parameter == '750'),
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_load),
             )
-
-    @share.teststep
-    def _step_inres(self, dev, mes):
-        """Verify that the hand loaded input discharge resistors are there."""
-        mes['dmm_InpRes'](timeout=5)
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -39,9 +32,9 @@ class Final(share.TestSequence):
         self.dcload(
             (('dcl_5v', 0.0), ('dcl_12v', 0.1), ('dcl_24v', 0.1)),
             output=True)
-        mes['dmm_Iecoff'](timeout=5)
-        if self.parameter == '600':
-            mes['dmm_FanOff'](timeout=5)
+        self.measure(
+            ('dmm_Iecoff', 'dmm_FanOff'),
+            timeout=5)
         dev['acsource'].output(240.0, output=True, delay=0.5)
         self.measure(
             ('dmm_Iec', 'dmm_5v', 'dmm_12voff', 'ui_YesNoGreen'),
@@ -52,13 +45,10 @@ class Final(share.TestSequence):
         """Enable all outputs and check that the LED goes blue."""
         dev['dcs_disable_pwr'].output(0.0)
         dev['rla_pwron'].set_on()
-        if self.parameter == '600':
-            self.measure(
-                ('dmm_BrktLeft', 'dmm_BrktRight', 'dmm_FanOn'),
-                timeout=10)
         self.measure(
-            ('ui_YesNoBlue', 'dmm_5v', 'dmm_PwrGood', 'dmm_AcFail', ),
-            timeout=5)
+            ('dmm_BrktLeft', 'dmm_BrktRight', 'dmm_FanOn',
+            'ui_YesNoBlue', 'dmm_5v', 'dmm_PwrGood', 'dmm_AcFail', ),
+            timeout=10)
 
     @share.teststep
     def _step_load(self, dev, mes):
@@ -127,11 +117,11 @@ class Sensors(share.Sensors):
         self['oMir12v'] = sensor.MirrorReading()
         self['oMir24v'] = sensor.MirrorReading()
         self['oYesNoGreen'] = sensor.YesNo(
-            message=tester.translate('sx750_final', 'IsLedGreen?'),
-            caption=tester.translate('sx750_final', 'capLedGreen'))
+            message=tester.translate('sx600_final', 'IsLedGreen?'),
+            caption=tester.translate('sx600_final', 'capLedGreen'))
         self['oYesNoBlue'] = sensor.YesNo(
-            message=tester.translate('sx750_final', 'IsLedBlue?'),
-            caption=tester.translate('sx750_final', 'capLedBlue'))
+            message=tester.translate('sx600_final', 'IsLedBlue?'),
+            caption=tester.translate('sx600_final', 'capLedBlue'))
 
 
 class Measurements(share.Measurements):

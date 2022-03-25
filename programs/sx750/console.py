@@ -1,25 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2013 SETEC Pty Ltd
-"""SX-600/750 console driver."""
+"""SX-750 console driver."""
 
 import time
 
 import share
 
 
-class _Console(share.console.Base):
+class Console(share.console.Base):
 
-    """Communications to SX-600/750 console."""
+    """Communications to console."""
 
-    # Number of lines in startup banner
-    banner_lines = 4
-    cmd_data = {}
-    # Time delay after NV-WRITE
-    nvwrite_delay = 1.0
+    banner_lines = 4        # Number of lines in startup banner
+    nvwrite_delay = 1.0     # Time delay after NV-WRITE
     parameter = share.console.parameter
-    # Common commands
-    common_commands = {
+    cmd_data = {
         'ARM-AcFreq': parameter.Float(
             'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
         'ARM-AcVolt': parameter.Float(
@@ -38,62 +34,6 @@ class _Console(share.console.Base):
         'NVWRITE': parameter.Boolean(
             'NV-WRITE',
             writeable=True, readable=False, write_format='{1}'),
-        }
-    # Strings to ignore in responses
-    ignore = (' ', 'Hz', 'Vrms', 'mV')
-
-    def __init__(self, port):
-        """Add common commands into cmd_data.
-
-        @param port Serial instance to use
-
-        """
-        super().__init__(port)
-        for acmd in self.common_commands:
-            self.cmd_data[acmd] = self.common_commands[acmd]
-
-
-class Console600(_Console):
-
-    """Communications to SX-600 console."""
-
-    parameter = share.console.parameter
-    cmd_data = {
-        'FAN_CHECK_DISABLE': parameter.Boolean(
-            'X-SYSTEM-ENABLE',
-            read_format='{1} X?',
-            writeable=True, write_format='{0} {1} X!'),
-        'NVDEFAULT': parameter.Boolean(
-            'NV-DEFAULT',
-            readable=False,
-            writeable=True, write_format='{1}'),
-        }
-
-    def open(self):
-        """Open console."""
-        self.port.rtscts = True
-        super().open()
-
-    def close(self):
-        """Close console."""
-        self.port.rtscts = False
-        super().close()
-
-    def initialise(self, fan_threshold=None):
-        """Initialise a device."""
-        self.action(expected=self.banner_lines)
-        self['UNLOCK'] = True
-        self['NVDEFAULT'] = True
-        self['NVWRITE'] = True
-        time.sleep(self.nvwrite_delay)
-
-
-class Console750(_Console):
-
-    """Communications to SX-750 console."""
-
-    parameter = share.console.parameter
-    cmd_data = {
         'CAL_PFC': parameter.Float(
             'CAL-PFC-BUS-VOLTS',
             scale=1000,
@@ -103,6 +43,8 @@ class Console750(_Console):
             'X-TEMPERATURE-CONTROLLER-SETPOINT',
             writeable=True, write_format='{0} {1} X!'),
         }
+    # Strings to ignore in responses
+    ignore = (' ', 'Hz', 'Vrms', 'mV')
 
     def open(self):
         """Open console."""

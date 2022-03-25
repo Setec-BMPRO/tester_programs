@@ -3,8 +3,10 @@
 """UnitTest for SX750 Safety Test program."""
 
 import unittest
+
 from ..data_feed import UnitTester, ProgramTestCase
-from programs import sx600_750
+
+from programs import sx750
 
 
 @unittest.skip('acw sensor read is broken')
@@ -12,7 +14,7 @@ class SX750Safety(ProgramTestCase):
 
     """SX750 Safety program test suite."""
 
-    prog_class = sx600_750.Safety
+    prog_class = sx750.Safety
     parameter = None
     debug = False
 

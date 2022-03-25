@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2013 SETEC Pty Ltd
-"""SX-600/750 Initial Test Program."""
+"""SX-750 Initial Test Program."""
 
 import pathlib
 import time
@@ -15,14 +15,14 @@ from . import arduino, config, console
 
 class Initial(share.TestSequence):
 
-    """SX-600/750 Initial Test Program."""
+    """SX-750 Initial Test Program."""
 
     def open(self, uut):
         """Prepare for testing."""
-        self.cfg = config.Config.get(self.parameter)
+        self.cfg = config.Config
         Devices.sw_image = self.cfg.arm_bin
         Sensors.ratings = self.cfg.ratings
-        self.limits = self.cfg.limits_initial()
+        self.limits = self.cfg.limits_initial
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartDetect', self._step_part_detect),
@@ -39,10 +39,9 @@ class Initial(share.TestSequence):
     def _step_part_detect(self, dev, mes):
         """Check that Fixture Lock is closed."""
         mes['dmm_Lock'](timeout=2)
-        if self.parameter == '750':
-            self.measure(
-                ('dmm_Part', 'dmm_R601', 'dmm_R602', 'dmm_R609', 'dmm_R608'),
-                timeout=2)
+        self.measure(
+            ('dmm_Part', 'dmm_R601', 'dmm_R602', 'dmm_R609', 'dmm_R608'),
+            timeout=2)
 
     @share.teststep
     def _step_program_micros(self, dev, mes):
@@ -73,25 +72,23 @@ class Initial(share.TestSequence):
             except:
                 time.sleep(1)
         dev['rla_boot'].set_off(delay=2) # Wait for Arduino to start
-        if self.parameter == '750':
-            dev['rla_pic1'].set_on()
-            dev['rla_pic1'].opc()
-            mes['dmm_5Vunsw'](timeout=2)
-            mes['pgm_5vsb']()           # Program the 5V Switch Board
-            dev['rla_pic1'].set_off()
+        dev['rla_pic1'].set_on()
+        dev['rla_pic1'].opc()
+        mes['dmm_5Vunsw'](timeout=2)
+        mes['pgm_5vsb']()           # Program the 5V Switch Board
+        dev['rla_pic1'].set_off()
         # Switch off 5V rail and discharge the 5V to stop the ARM
         dev['dcs_5V'].output(0)
         self.dcload((('dcl_5V', 0.1), ), output=True, delay=0.5)
-        if self.parameter == '750':
-            # Apply and check injected 12V PriCtl
-            dev['dcs_PriCtl'].output(self.cfg.prictl_ext, True)
-            mes['dmm_PriCtl'](timeout=2)
-            dev['rla_pic2'].set_on()
-            dev['rla_pic2'].opc()
-            mes['pgm_pwrsw']()      # Program the Power Switch Board
-            dev['rla_pic2'].set_off()
-            dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
-            dev['dcs_PriCtl'].output(0.0)
+        # Apply and check injected 12V PriCtl
+        dev['dcs_PriCtl'].output(self.cfg.prictl_ext, True)
+        mes['dmm_PriCtl'](timeout=2)
+        dev['rla_pic2'].set_on()
+        dev['rla_pic2'].opc()
+        mes['pgm_pwrsw']()      # Program the Power Switch Board
+        dev['rla_pic2'].set_off()
+        dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
+        dev['dcs_PriCtl'].output(0.0)
         # This will also enable all loads on an ATE3/4 tester.
         self.dcload(
             (('dcl_5V', 0.0), ('dcl_12V', 0.0), ('dcl_24V', 0.0), ),
@@ -138,9 +135,6 @@ class Initial(share.TestSequence):
             ('dmm_ACin', 'dmm_PriCtl', 'dmm_5Vnl', 'dmm_12Voff',
              'dmm_24Voff', 'dmm_ACFAIL', ), timeout=2)
         arm['UNLOCK'] = True
-        if self.parameter == '600':     # Prevent shutdown due to no fan
-            arm['FAN_CHECK_DISABLE'] = True
-            dev['dcs_PriCtl'].output(self.cfg.fixture_fan, True)  # Turn fan on
         # Switch all outputs ON
         dev['rla_pson'].set_on()
         self.measure(
@@ -153,32 +147,14 @@ class Initial(share.TestSequence):
         # Calibrate the PFC set voltage
         self._logger.info('Start PFC calibration')
         pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
-        if self.parameter == '750':
+        arm.calpfc(pfc)
+        with mes['dmm_PFCpost'].position_fail_disabled():
+            result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
+        if not result:
+            self._logger.info('Retry PFC calibration')
+            pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
             arm.calpfc(pfc)
-            with mes['dmm_PFCpost'].position_fail_disabled():
-                result = mes['dmm_PFCpost'].stable(self.cfg.pfc_stable).result
-            if not result:
-                self._logger.info('Retry PFC calibration')
-                pfc = mes['dmm_PFCpre'].stable(self.cfg.pfc_stable).reading1
-                arm.calpfc(pfc)
-                mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
-        else:   # SX-600
-            steps = round(
-                (self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
-            if steps > 0:       # Too low
-                self._logger.debug('Step UP %s steps', steps)
-                mes['pfcUpUnlock']()
-                for _ in range(steps):
-                    mes['pfcStepUp']()
-                mes['pfcUpLock']()
-            elif steps < 0:     # Too high
-                self._logger.debug('Step DOWN %s steps', -steps)
-                mes['pfcDnUnlock']()
-                for _ in range(-steps):
-                    mes['pfcStepDn']()
-                mes['pfcDnLock']()
-            if steps:   # Post-adjustment check
-                mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
+            mes['dmm_PFCpost'].stable(self.cfg.pfc_stable)
         # Leave the loads at zero
         dev['dcl_12V'].output(0)
         dev['dcl_24V'].output(0)
@@ -237,14 +213,13 @@ class Initial(share.TestSequence):
             reg_limit=self.limits['Reg24V'],
             max_load=self.cfg.ratings.v24.full,
             peak_load=self.cfg.ratings.v24.peak)
-        if self.parameter == '750':
-            self.ocp_set(
-                target=self.cfg.ratings.v24.ocp,
-                load=dev['dcl_24V'],
-                dmm=mes['dmm_24V'],
-                detect=mes['dmm_24V_inOCP'],
-                enable=mes['ocp24_unlock'],
-                olimit=self.limits['24V_ocp'])
+        self.ocp_set(
+            target=self.cfg.ratings.v24.ocp,
+            load=dev['dcl_24V'],
+            dmm=mes['dmm_24V'],
+            detect=mes['dmm_24V_inOCP'],
+            enable=mes['ocp24_unlock'],
+            olimit=self.limits['24V_ocp'])
         with tester.PathName('OCPcheck'):
             dev['dcl_24V'].binary(0.0, self.cfg.ratings.v24.ocp * 0.9, 2.0)
             mes['rampOcp24V']()
@@ -368,21 +343,16 @@ class Devices(share.Devices):
             pathlib.Path(__file__).parent / self.sw_image,
             boot_relay=self['rla_boot']
             )
-        # Console & Arduino class selection
-        con_class, ard_class = {
-            '600': (console.Console600, arduino.Arduino600),
-            '750': (console.Console750, arduino.Arduino750),
-            }[self.parameter]
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = arm_port
-        self['arm'] = con_class(arm_ser)
+        self['arm'] = console.Console(arm_ser)
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port('022837', 'ARDUINO')
-        self['ard'] = ard_class(ard_ser)
+        self['ard'] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ('dcs_Arduino', 'dcs_Vcom', 'dcs_DigPot'):
             self[dcs].output(12.0, output=True)
