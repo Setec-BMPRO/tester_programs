@@ -93,7 +93,7 @@ class Initial(share.TestSequence):
         # Measurements from here on do not fail the test instantly.
         # Always measure all the outputs, and force a fail if any output
         # has failed. So we get a full dataset on every test.
-        checker = share.MultiMeasurementSummary()
+        checker = share.MultiMeasurementSummary(default_timeout=1)
         # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101.normal_outputs:
             with tester.PathName(rvmn101.pin_name(idx)):
@@ -111,7 +111,7 @@ class Initial(share.TestSequence):
             rvmn101.ls_output(idx, False)
             checker.measure(mes[dmm_channel + '_off'])
         # This will fail the test if any outputs have failed
-        checker.finish()
+        checker.check()
 
     @share.teststep
     def _step_canbus(self, dev, mes):

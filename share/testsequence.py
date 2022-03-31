@@ -320,22 +320,32 @@ class MultiMeasurementSummary():
 
     """
 
-    result = attr.ib(init=False, default=True)  # True == PASS
-    summary_measurement = tester.Measurement(
-        tester.LimitBoolean('AllOk', True, doc='All passed'),
-        tester.sensor.MirrorReadingBoolean(),
-        doc='All checks ok'
+    default_timeout = attr.ib(
+        validator=attr.validators.instance_of((int, float)),
+        default=0
         )
+    result = attr.ib(init=False, default=True)  # True == PASS
 
-    def measure(self, measurement):
+    def measure(self, measurement, timeout=0):
         """Make a single measurement."""
         if measurement.position_fail:
             raise ValueError(
                 'Measurement {0} must have position_fail set to False'.format(
-                measurement))
-        self.result = self.result and measurement.measure(timeout=1).result
+                    measurement)
+                )
+        tmo = timeout if timeout else self.default_timeout
+        self.result = self.result and measurement.measure(timeout=tmo).result
 
-    def finish(self):
-        """Measure the overall result."""
-        self.summary_measurement.sensor.store(self.result)
-        self.summary_measurement.measure()
+    def check(self):
+        """Check (measure) the overall result."""
+        mes = tester.Measurement(
+            tester.LimitBoolean('AllOk', True, doc='All passed'),
+            tester.sensor.MirrorReadingBoolean(),
+            doc='All checks ok'
+            )
+        mes.sensor.store(self.result)
+        mes.measure()
+
+    def reset(self):
+        """Reset the overall result."""
+        self.result = True
