@@ -6,6 +6,8 @@
 import functools
 import abc
 import time
+
+import attr
 import tester
 
 
@@ -307,3 +309,33 @@ def teststep(func):
         """Decorate the function."""
         return func(self, self.devices, self.measurements)
     return new_func
+
+
+@attr.s
+class MultiMeasurementSummary():
+
+    """Check multiple measurements and calculate overall result.
+
+    All the measurements must have position_fail set to False.
+
+    """
+
+    result = attr.ib(init=False, default=True)  # True == PASS
+    summary_measurement = tester.Measurement(
+        tester.LimitBoolean('AllOk', True, doc='All passed'),
+        tester.sensor.MirrorReadingBoolean(),
+        doc='All checks ok'
+        )
+
+    def measure(self, measurement):
+        """Make a single measurement."""
+        if measurement.position_fail:
+            raise ValueError(
+                'Measurement {0} must have position_fail set to False'.format(
+                measurement))
+        self.result = self.result and measurement.measure(timeout=1).result
+
+    def finish(self):
+        """Measure the overall result."""
+        self.summary_measurement.sensor.store(self.result)
+        self.summary_measurement.measure()

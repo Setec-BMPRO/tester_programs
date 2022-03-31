@@ -5,6 +5,7 @@
 
 from .testsequence import Devices, Sensors, Measurements, TestSequence
 from .testsequence import teststep      # a decorator
+from .testsequence import MultiMeasurementSummary
 from . import bluetooth
 from . import can
 from . import console
@@ -13,7 +14,8 @@ from . import programmer
 
 
 __all__ = [
-    'Devices', 'Sensors', 'Measurements', 'TestSequence', 'teststep',
+    'Devices', 'Sensors', 'Measurements', 'TestSequence',
+    'MultiMeasurementSummary', 'teststep',
     'bluetooth',
     'can',
     'console',

@@ -77,34 +77,41 @@ class Initial(share.TestSequence):
         """Test the outputs of the unit."""
         rvmn101 = dev['rvmn101']
         dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
-        if self.parameter == '101A':
-            rvmn101.hs_output(41, False)
+        # Reversed HBridge outputs are only on 101A Rev 7-9
+        if rvmn101.reversed_outputs:
+            rvmn101.hs_output(41, False)    # Why..?
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
             dev['rla_pullup'].set_on()
             for idx in rvmn101.reversed_outputs:
                 with tester.PathName('REV{0}'.format(idx)):
                     rvmn101.hs_output(idx, True)
-                    mes['dmm_hb_on'](timeout=5)
+                    mes['dmm_hb_on'](timeout=1)
                     rvmn101.hs_output(idx, False)
-                    mes['dmm_hb_off'](timeout=5)
+                    mes['dmm_hb_off'](timeout=1)
             dev['rla_pullup'].set_off()
-        mes['dmm_hs_off'](timeout=5)
+        mes['dmm_hs_off'](timeout=1)
+        # Measurements from here on do not fail the test instantly.
+        # Always measure all the outputs, and force a fail if any output
+        # has failed. So we get a full dataset on every test.
+        checker = share.MultiMeasurementSummary()
         # Turn ON, then OFF, each HS output in turn
         for idx in rvmn101.normal_outputs:
             with tester.PathName(rvmn101.pin_name(idx)):
                 rvmn101.hs_output(idx, True)
-                mes['dmm_hs_on'](timeout=5)
+                checker.measure(mes['dmm_hs_on'])
                 rvmn101.hs_output(idx, False)
-                mes['dmm_hs_off'](timeout=5)
+                checker.measure(mes['dmm_hs_off'])
         # Turn ON, then OFF, each LS output in turn
         for idx, dmm_channel in (
                 (rvmn101.ls_0a5_out1, 'dmm_ls1'),
                 (rvmn101.ls_0a5_out2, 'dmm_ls2'),
                 ):
             rvmn101.ls_output(idx, True)
-            mes[dmm_channel + '_on'](timeout=5)
+            checker.measure(mes[dmm_channel + '_on'])
             rvmn101.ls_output(idx, False)
-            mes[dmm_channel + '_off'](timeout=5)
+            checker.measure(mes[dmm_channel + '_off'])
+        # This will fail the test if any outputs have failed
+        checker.finish()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -263,3 +270,10 @@ class Measurements(share.Measurements):
             ('JLinkARM', 'ProgramOk', 'JLinkARM', 'Programmed'),
             ('JLinkBLE', 'ProgramOk', 'JLinkBLE', 'Programmed'),
             ))
+        # Prevent test failures on these measurements.
+        for name in (
+                'dmm_hs_on', 'dmm_hs_off',
+                'dmm_ls1_on', 'dmm_ls1_off',
+                'dmm_ls2_on', 'dmm_ls2_off',
+                ):
+            self[name].position_fail = False
