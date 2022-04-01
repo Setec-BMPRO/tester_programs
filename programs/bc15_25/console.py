@@ -98,6 +98,7 @@ class Console(share.console.Base):
         self.action('1 SETPSON')
         self.action('1 SETDCDCOUT')
         self.action('0 SETPSON', delay=0.5)
+        self.action('RESETOVERVOLT')
 
     def powersupply(self):
         """Set the unit to default to Power Supply mode at switch-on."""

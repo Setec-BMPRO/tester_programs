@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2022-03-25, 12:25:33 -->
-<!-- Copyright (C) 2021 ,  -->
+<!-- Saved: 2022-04-01, 15:37:37 -->
+<!-- Copyright (C) 2022 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
@@ -160,7 +160,6 @@
     <Source>programs/sx600/console.py</Source>
     <Source>programs/sx600/final.py</Source>
     <Source>programs/sx600/initial.py</Source>
-    <Source>programs/sx600/safety.py</Source>
     <Source>programs/sx750/__init__.py</Source>
     <Source>programs/sx750/arduino.py</Source>
     <Source>programs/sx750/config.py</Source>
