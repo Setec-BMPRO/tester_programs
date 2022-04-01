@@ -77,9 +77,10 @@ class Initial(share.TestSequence):
         """Test the outputs of the unit."""
         rvmn101 = dev['rvmn101']
         dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
+        if self.parameter == '101A':
+            rvmn101.hs_output(41, False)    # Why..?
         # Reversed HBridge outputs are only on 101A Rev 7-9
         if rvmn101.reversed_outputs:
-            rvmn101.hs_output(41, False)    # Why..?
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
             dev['rla_pullup'].set_on()
             for idx in rvmn101.reversed_outputs:
