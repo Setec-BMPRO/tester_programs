@@ -334,7 +334,7 @@ class MultiMeasurementSummary():
                     measurement)
                 )
         tmo = timeout if timeout else self.default_timeout
-        self.result = self.result and measurement.measure(timeout=tmo).result
+        self.result = measurement.measure(timeout=tmo).result and self.result
 
     def check(self):
         """Check (measure) the overall result."""
