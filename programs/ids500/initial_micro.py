@@ -43,7 +43,6 @@ class InitialMicro(share.TestSequence):
         """Communicate with the PIC console."""
         pic = dev['pic']
         pic.open()
-        pic.clear_port()
         pic.expected = 1
         self.measure(('swrev', 'microtemp', ))
 

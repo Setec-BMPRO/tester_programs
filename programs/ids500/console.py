@@ -4,7 +4,9 @@
 """IDS-500 PIC processor console driver."""
 
 import time
+
 import share
+import tester
 
 
 class Console(share.console.Base):
@@ -19,7 +21,6 @@ class Console(share.console.Base):
     cmd_data = {
         'PIC-SwRev': parameter.String('?,I,1', read_format='{0}'),
         'PIC-MicroTemp': parameter.String('?,D,16', read_format='{0}'),
-        'PIC-Clear': parameter.String('', read_format='{0}'),
         'PIC-HwRev': parameter.String('?,I,2', read_format='{0}'),
         'PIC-SerNum': parameter.String('?,I,3', read_format='{0}'),
         'SwTstMode': parameter.String(
@@ -30,15 +31,6 @@ class Console(share.console.Base):
             'S,#,', writeable=True, write_format='{1}{0}'),
         }
     expected = 0
-
-    def clear_port(self):
-        """Discard unwanted strings when the port is opened"""
-        self._logger.debug('Discard unwanted strings')
-        self.expected = 1
-        self['PIC-Clear']
-        self['PIC-Clear']
-        self['PIC-Clear']
-        self.expected = 0
 
     def sw_test_mode(self):
         """Access Software Test Mode"""
@@ -87,6 +79,12 @@ class Console(share.console.Base):
         all_response = []
         for _ in range(expected):
             data = self.port.readline()
+            if not data:    # Read timeout
+                comms = tester.Measurement(
+                    tester.LimitRegExp('Action', 'ok', doc='Command succeeded'),
+                    tester.sensor.MirrorReadingString())
+                comms.sensor.store('No response')
+                comms.measure()   # Generates a test FAIL result
             data = data.replace(b'\r', b'')
             data = data.replace(b'\n', b'')
             response = data.decode(errors='ignore')

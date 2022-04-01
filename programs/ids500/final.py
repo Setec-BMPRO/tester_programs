@@ -196,7 +196,6 @@ class Final(share.TestSequence):
         """Write HW version and serial number. Read back values."""
         pic = dev['pic']
         pic.open()
-        pic.clear_port()
         pic.sw_test_mode()
         hwrev = mes['ui_hwrev']().reading1
         pic.expected = 3
