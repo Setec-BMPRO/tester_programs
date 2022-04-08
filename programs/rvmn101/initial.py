@@ -271,10 +271,3 @@ class Measurements(share.Measurements):
             ('JLinkARM', 'ProgramOk', 'JLinkARM', 'Programmed'),
             ('JLinkBLE', 'ProgramOk', 'JLinkBLE', 'Programmed'),
             ))
-        # Prevent test failures on these measurements.
-        for name in (
-                'dmm_hs_on', 'dmm_hs_off',
-                'dmm_ls1_on', 'dmm_ls1_off',
-                'dmm_ls2_on', 'dmm_ls2_off',
-                ):
-            self[name].position_fail = False

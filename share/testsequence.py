@@ -314,11 +314,7 @@ def teststep(func):
 @attr.s
 class MultiMeasurementSummary():
 
-    """Check multiple measurements and calculate overall result.
-
-    All the measurements must have position_fail set to False.
-
-    """
+    """Check multiple measurements and calculate overall result."""
 
     default_timeout = attr.ib(
         validator=attr.validators.instance_of((int, float)),
@@ -328,13 +324,13 @@ class MultiMeasurementSummary():
 
     def measure(self, measurement, timeout=0):
         """Make a single measurement."""
-        if measurement.position_fail:
-            raise ValueError(
-                'Measurement {0} must have position_fail set to False'.format(
-                    measurement)
-                )
+        pos_fail_state = measurement.position_fail
+        if pos_fail_state:      # Temporarily disable position fail
+            measurement.position_fail = False
         tmo = timeout if timeout else self.default_timeout
         self.result = measurement.measure(timeout=tmo).result and self.result
+        if pos_fail_state:      # Restore original state
+            measurement.position_fail = True
 
     def check(self):
         """Check (measure) the overall result."""
