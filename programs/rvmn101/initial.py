@@ -94,25 +94,23 @@ class Initial(share.TestSequence):
         # Measurements from here on do not fail the test instantly.
         # Always measure all the outputs, and force a fail if any output
         # has failed. So we get a full dataset on every test.
-        checker = share.MultiMeasurementSummary(default_timeout=2)
-        # Turn ON, then OFF, each HS output in turn
-        for idx in rvmn101.normal_outputs:
-            with tester.PathName(rvmn101.pin_name(idx)):
-                rvmn101.hs_output(idx, True)
-                checker.measure(mes['dmm_hs_on'])
-                rvmn101.hs_output(idx, False)
-                checker.measure(mes['dmm_hs_off'])
-        # Turn ON, then OFF, each LS output in turn
-        for idx, dmm_channel in (
-                (rvmn101.ls_0a5_out1, 'dmm_ls1'),
-                (rvmn101.ls_0a5_out2, 'dmm_ls2'),
-                ):
-            rvmn101.ls_output(idx, True)
-            checker.measure(mes[dmm_channel + '_on'])
-            rvmn101.ls_output(idx, False)
-            checker.measure(mes[dmm_channel + '_off'])
-        # This will fail the test if any outputs have failed
-        checker.check()
+        with share.MultiMeasurementSummary(default_timeout=2) as checker:
+            # Turn ON, then OFF, each HS output in turn
+            for idx in rvmn101.normal_outputs:
+                with tester.PathName(rvmn101.pin_name(idx)):
+                    rvmn101.hs_output(idx, True)
+                    checker.measure(mes['dmm_hs_on'])
+                    rvmn101.hs_output(idx, False)
+                    checker.measure(mes['dmm_hs_off'])
+            # Turn ON, then OFF, each LS output in turn
+            for idx, dmm_channel in (
+                    (rvmn101.ls_0a5_out1, 'dmm_ls1'),
+                    (rvmn101.ls_0a5_out2, 'dmm_ls2'),
+                    ):
+                rvmn101.ls_output(idx, True)
+                checker.measure(mes[dmm_channel + '_on'])
+                rvmn101.ls_output(idx, False)
+                checker.measure(mes[dmm_channel + '_off'])
 
     @share.teststep
     def _step_canbus(self, dev, mes):

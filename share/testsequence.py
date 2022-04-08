@@ -3,8 +3,9 @@
 # Copyright 2016 SETEC Pty Ltd
 """Shared modules for Tester programs."""
 
-import functools
 import abc
+import contextlib
+import functools
 import time
 
 import attr
@@ -83,18 +84,19 @@ class TestSequence(tester.TestSequence):
     def measure(self, names, timeout=0, delay=0):
         """Measure a group of measurements given the measurement names.
 
-        @param names Measurement names
+        Don't stop on a failure within the group.
+
+        @param names Tuple of Measurement names
         @param timeout Measurement timeout
         @param delay Time delay after measurements
         @return Measurement result
 
         """
-        measurements = []
-        for name in names:
-            measurements.append(self.measurements[name])
-        result = tester.MeasureGroup(measurements, timeout)
+        with MultiMeasurementSummary(default_timeout=timeout) as checker:
+            for name in names:
+                checker.measure(self.measurements[name])
         time.sleep(delay)
-        return result
+        return checker.result
 
     def dcload(self, setting, output=True, delay=0):
         """DC Load setter.
@@ -320,28 +322,41 @@ class MultiMeasurementSummary():
         validator=attr.validators.instance_of((int, float)),
         default=0
         )
-    result = attr.ib(init=False, default=True)  # True == PASS
+    result = attr.ib(init=False, factory=tester.MeasurementResult)
+    _sensor_positions = attr.ib(init=False, factory=set)
 
-    def measure(self, measurement, timeout=0):
-        """Make a single measurement."""
-        pos_fail_state = measurement.position_fail
-        if pos_fail_state:      # Temporarily disable position fail
-            measurement.position_fail = False
-        tmo = timeout if timeout else self.default_timeout
-        self.result = measurement.measure(timeout=tmo).result and self.result
-        if pos_fail_state:      # Restore original state
-            measurement.position_fail = True
+    def __enter__(self):
+        """Context Manager entry handler.
 
-    def check(self):
-        """Check (measure) the overall result."""
-        mes = tester.Measurement(
-            tester.LimitBoolean('AllOk', True, doc='All passed'),
-            tester.sensor.MirrorReadingBoolean(),
-            doc='All checks ok'
-            )
-        mes.sensor.store(self.result)
+        @return self
+
+        """
+        return self
+
+    def __exit__(self, exct_type, exce_value, trace_back):
+        """Context Manager exit handler - Check overall result."""
+        lim = tester.LimitBoolean('AllOk', True, doc='All passed')
+        sen = tester.sensor.MirrorReadingBoolean()
+        mes = tester.Measurement(lim, sen, doc='All checks ok')
+        mes.log_data = False
+        sen.position = tuple(self._sensor_positions)
+        sen.store(self.result.result)
         mes.measure()
 
-    def reset(self):
-        """Reset the overall result."""
-        self.result = True
+    def measure(self, measurement, timeout=0):
+        """Make a single measurement.
+
+        @param measurement Measurement instance
+        @param timeout Timeout for measurement
+        @return MeasurementResult instance
+
+        """
+        tmo = timeout if timeout else self.default_timeout
+        for val in measurement.sensor.position:
+            self._sensor_positions.add(val)
+        with measurement.position_fail_disabled():
+            mres = measurement.measure(timeout=tmo)
+        with contextlib.suppress(tester.measure.NoResultError):
+            for rdg in mres.readings:
+                self.result.append(mres.result, rdg)
+        return self.result
