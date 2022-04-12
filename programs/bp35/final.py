@@ -36,9 +36,10 @@ class Final(share.TestSequence):
         mes['dmm_fanoff'](timeout=5)
         dev['acsource'].output(voltage=self.cfg.vac, output=True)
         mes['dmm_fanon'](timeout=15)
-        for load in range(14):
-            with tester.PathName('L{0}'.format(load + 1)):
-                mes['dmm_vouts'][load](timeout=5)
+        with share.MultiMeasurementSummary(default_timeout=5) as checker:
+            for load in range(14):
+                with tester.PathName('L{0}'.format(load + 1)):
+                    checker.measure(mes['dmm_vouts'][load])
 
     @share.teststep
     def _step_can(self, dev, mes):
@@ -57,9 +58,10 @@ class Final(share.TestSequence):
         """Test outputs with load."""
         dev['dcl_out'].output(1.0, output=True)
         dev['dcl_out'].binary(1.0, 34.0, 2.0, delay=0.2)
-        for load in range(14):
-            with tester.PathName('L{0}'.format(load + 1)):
-                mes['dmm_vloads'][load](timeout=5)
+        with share.MultiMeasurementSummary(default_timeout=5) as checker:
+            for load in range(14):
+                with tester.PathName('L{0}'.format(load + 1)):
+                    checker.measure(mes['dmm_vloads'][load])
 
     @share.teststep
     def _step_ocp(self, dev, mes):
