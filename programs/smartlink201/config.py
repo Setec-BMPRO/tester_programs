@@ -85,21 +85,27 @@ class SmartLink201(_Config):
     """SmartLink201 config."""
 
     _arm_image = 'nxp_v0.1.0.bin'
-    _hw_rev = '02B'
-    _rev3_values = _Values(
-            product_rev = '03A',
-            hardware_rev = _hw_rev,
+    _sw_nrf_image = 'smartlink_signed_1.2.1-0-g744e6db_factory_mcuboot.hex'
+    _rev4_values = _Values(
+            product_rev = '04A',
+            hardware_rev = '03A',
             sw_arm_image = _arm_image,
-            sw_nrf_image = (
-                'smartlink_signed_1.1.7-0-g71f7a79_factory_mcuboot.hex'),
+            sw_nrf_image = _sw_nrf_image,
             is_smartlink = True
             )
     _rev_data = {
-        None: _rev3_values,
-        '3': _rev3_values,
+        None: _rev4_values,
+        '4': _rev4_values,
+        '3': _Values(
+            product_rev = '03A',
+            hardware_rev = '02B',
+            sw_arm_image = _arm_image,
+            sw_nrf_image = _sw_nrf_image,
+            is_smartlink = True
+            ),
         '2': _Values(
             product_rev = '02A',
-            hardware_rev = _hw_rev,
+            hardware_rev = '02B',
             sw_arm_image = _arm_image,
             sw_nrf_image = (
                 'smartlink_signed_1.0.0-0-gacbb530_factory_mcuboot.hex'),
