@@ -315,45 +315,51 @@ class RVMN5x(Config):
     fixture = '034861'
     # Software versions
     _nordic_2_7_1 = 'jayco_rvmn5x_signed_2.7.1-0-gaa2ff6a9_factory_mcuboot.hex'
-    _arm_image_2_3 = 'rvmn5x_nxp_2.3.bin'
-    _rev12_values = _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
-            product_rev='12A', hardware_rev='08A',
+    _nxp_image_2_3 = 'rvmn5x_nxp_2.3.bin'
+    _nordic_2_8_1 = 'jayco_rvmn5x_signed_2.8.1-0-gd63bc1d0_factory_mcuboot.hex'
+    _ra2_image_0_3_6 = 'rvmn5x_ra2_v0.3.6-0-g34e425b.hex'
+    _rev13_values = _Values(
+            nordic_image=_nordic_2_8_1, arm_image=_ra2_image_0_3_6,
+            product_rev='13A', hardware_rev='10A',
+            arm_projectfile='r7fa2l1a9.jflash',
             )
     _rev_data = {
-        None: _rev12_values,
-        '12': _rev12_values,
-        # '11': The pilot Renesas micro version
+        None: _rev13_values,
+        '13': _rev13_values,
+        '12': _Values(
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
+            product_rev='12A', hardware_rev='08A',
+            ),
         '10': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='10B', hardware_rev='08A',
             ),
         '9': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='09B', hardware_rev='07A',
             ),
         '8': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='08D', hardware_rev='05A',
             ),
         '7': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='07C', hardware_rev='05A',
             ),
         '6': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='06E', hardware_rev='05A',
             ),
         '5': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='05G', hardware_rev='05A',
             ),
         '4': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='04E', hardware_rev='04A',
             ),
         '3': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_arm_image_2_3,
+            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
             product_rev='03H', hardware_rev='03A',
             ),
         # Rev 1-2 were Engineering protoype builds
