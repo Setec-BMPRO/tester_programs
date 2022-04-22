@@ -234,13 +234,17 @@ class RVMN101B(Config):
     # Software versions
     _nordic_2_4_4 = 'tmc_rvmn101_signed_2.4.4-0-g62755a87_factory_mcuboot.hex'
     _arm_image_3_0 = 'rvmn101_nxp_3.0.bin'
-    _rev17_values = _Values(
+    _rev18_values = _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
-            product_rev='17A', hardware_rev='08B',
+            product_rev='18A', hardware_rev='18A',
             )
     _rev_data = {
-        None: _rev17_values,
-        '17': _rev17_values,
+        None: _rev18_values,
+        '18': _rev18_values,
+        '17': _Values(
+            nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
+            product_rev='17A', hardware_rev='08B',
+            ),
         '16': _Values(
             nordic_image=_nordic_2_4_4, arm_image=_arm_image_3_0,
             product_rev='16B', hardware_rev='08B',
