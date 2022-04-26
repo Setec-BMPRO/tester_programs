@@ -34,6 +34,9 @@ class Console(share.console.Base):
 
     def sw_test_mode(self):
         """Access Software Test Mode."""
+        self.port.write(b'\r\n' * 2)    # 'wake up' the serial interface
+        time.sleep(1)
+        self.port.reset_input_buffer()
         self.expected = 3
         self['SwTstMode'] = self._testmode_magic_1
         self['SwTstMode'] = self._testmode_magic_2
@@ -50,6 +53,7 @@ class Console(share.console.Base):
         @return Response (None / List of String)
 
         """
+        self.port.reset_input_buffer()
         if command:
             self._write_command(command)
         if delay:
