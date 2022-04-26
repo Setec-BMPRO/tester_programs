@@ -50,7 +50,7 @@ Y   PIC18F87J93
 Y   PIC18LF252
         CMR-SBP
 
-Y   dsPIC33FJ16GS402        Done by Arduino 2020-10
+Y   dsPIC33FJ16GS402        (Done by Arduino 2020-10 to 2022-02)
         BP35SR
 
 ATMEL
@@ -68,6 +68,6 @@ Y   ATtiny1634
 
 Renesas
 =======
-    RA21E Series            Can be done by Segger JLink
-        GEN9
-        SX-600
+    RA21E Series
+        GEN9                TBD
+        SX-600              Done by Segger JLink

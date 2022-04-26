@@ -33,7 +33,7 @@ class Console(share.console.Base):
     expected = 0
 
     def sw_test_mode(self):
-        """Access Software Test Mode"""
+        """Access Software Test Mode."""
         self.expected = 3
         self['SwTstMode'] = self._testmode_magic_1
         self['SwTstMode'] = self._testmode_magic_2
@@ -44,14 +44,13 @@ class Console(share.console.Base):
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
 
-        Overrides BaseConsole().
-        @param command Command string.
-        @param delay Delay between sending command and reading response.
-        @param expected Expected number of responses.
-        @return Response (None / List of String).
+        @param command Command string
+        @param delay Delay between sending command and reading response
+        @param expected Expected number of responses
+        @return Response (None / List of String)
 
         """
-        if command is not None:
+        if command:
             self._write_command(command)
         if delay:
             time.sleep(delay)
@@ -60,8 +59,7 @@ class Console(share.console.Base):
     def _write_command(self, command):
         """Write a command.
 
-        Overrides BaseConsole().
-        @param command Command string.
+        @param command Command string
 
         """
         cmd_data = command.encode()
@@ -69,33 +67,38 @@ class Console(share.console.Base):
         self.port.write(cmd_data + b'\r\n')
 
     def _read_response(self, expected):
-        """Read the response to a command.
+        """Read the response to a command, ignoring empty lines.
 
-        Overrides BaseConsole().
-        @param expected Expected number of responses.
-        @return Response (None / List of String).
+        @param expected Expected number of response lines
+        @return Response (None / String / List of Strings)
 
         """
-        all_response = []
+        all_response = []           # Buffer for response lines
+        buf = bytearray()           # Buffer for the response bytes
         for _ in range(expected):
-            data = self.port.readline()
-            if not data:    # Read timeout
-                comms = tester.Measurement(
-                    tester.LimitRegExp('Action', 'ok', doc='Command succeeded'),
-                    tester.sensor.MirrorReadingString())
-                comms.sensor.store('No response')
-                comms.measure()   # Generates a test FAIL result
-            data = data.replace(b'\r', b'')
-            data = data.replace(b'\n', b'')
-            response = data.decode(errors='ignore')
-            if len(response) == 0:
-                response = None
-            self._logger.debug('Response <-- %s', repr(response))
-            all_response.append(response)
+            buf.clear()
+            while b'\n' not in buf:
+                data = self.port.read(1)
+                if self.verbose:
+                    self._logger.debug('Read <-- %s', repr(data))
+                if not data:        # No data means a timeout
+                    comms = tester.Measurement(
+                        tester.LimitRegExp(
+                            'Action', 'ok', doc='Command succeeded'),
+                        tester.sensor.MirrorReadingString())
+                    comms.sensor.store('No response')
+                    comms.measure() # Generates a test FAIL result
+                buf += data
+            self._logger.debug('Response <-- %s', repr(buf))
+            buf = buf.replace(b'\r', b'')
+            buf = buf.replace(b'\n', b'')
+            response = buf.decode(errors='ignore')
+            if response:
+                all_response.append(response)
         response = all_response
         response_count = len(response)
         if response_count == 1:     # Reduce list of 1 string to a string
             response = response[0]
-        if response_count == 0:     # Reduce empty list to None
+        elif not response_count:    # Reduce empty list to None
             response = None
         return response
