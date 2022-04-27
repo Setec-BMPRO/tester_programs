@@ -116,7 +116,7 @@ class Initial(share.TestSequence):
             ('dmm_VacMin', 'dmm_AcDetOn', 'dmm_InrushOn', 'dmm_Vbus',
              'dmm_VoutPre', 'dmm_SecCtl', 'dmm_SecCtl2', ), timeout=5)
         dev['acsource'].output(0.0)
-        dev['discharge'].pulse(2.0)
+        dev['discharge'].pulse(1.0)
         mes['dmm_VbusOff'](timeout=10)
 
     @share.teststep
@@ -165,8 +165,9 @@ class Initial(share.TestSequence):
         mes['dmm_reg']()
         dev['dcl'].output(30.05, delay=1)
         mes['dmm_VoutOff'](timeout=10)
-        dev['acsource'].output(0.0)
+        dev['acsource'].output(0.0, delay=1)
         dev['dcl'].output(0.0)
+        dev['discharge'].pulse(1.0)
 
     @share.teststep
     def _step_input_ov(self, dev, mes):
