@@ -34,9 +34,10 @@ class Console(share.console.Base):
 
     def sw_test_mode(self):
         """Access Software Test Mode."""
-        self.port.write(b'\r\n' * 3)    # 'wake up' the serial interface
-        time.sleep(1)
-        self.port.reset_input_buffer()
+        for _ in range(3):      # 'wakeup/untangle' the serial interface
+            self.port.write(b'\r\n')
+            time.sleep(0.5)
+            self.port.reset_input_buffer()
         self.expected = 3
         self['SwTstMode'] = self._testmode_magic_1
         self['SwTstMode'] = self._testmode_magic_2
