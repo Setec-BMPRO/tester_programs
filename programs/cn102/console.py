@@ -3,10 +3,9 @@
 # Copyright 2018 SETEC Pty Ltd
 """CN102/3 Console driver."""
 
-import time
+import time, re
 
 import share
-
 
 class Console(share.console.BadUart):
 
@@ -56,3 +55,68 @@ class Console(share.console.BadUart):
         self['SER_ID'] = sernum
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
+
+
+class Console_ODL104(share.console.Base):
+
+    """CN104 console via J-Link RTT"""
+
+    parameter = share.console.parameter
+    reading_tanks = False
+    cmd_prompt = b'\r\n\x1b[1;32mrtt:~$ \x1b[m'
+    cmd_prompt = cmd_prompt.replace(b'\n', b'')   # Remove all '\n'
+    cmd_data = {
+        'PROD_REV': parameter.String('production product-rev',
+            writeable=True, write_format='{1} {0}'),
+        'HW_REV': parameter.String('production hw-rev',
+            writeable=True, write_format='{1} {0}'),
+        'SN': parameter.String('production serial',
+            writeable=True, write_format='{1} {0}'),
+        'REBOOT': parameter.Boolean('kernel reboot cold',
+            writeable=True, readable=True, write_format='{1}'),
+
+        # Keyed reading from the console
+        'TANK1': parameter.Float('sensor get tank1',
+            write_format='{0}', read_format='{0}', scale=25),
+        'TANK2': parameter.Float('sensor get tank2',
+            write_format='{0}', read_format='{0}', scale=25),
+        'TANK3': parameter.Float('sensor get tank3',
+            write_format='{0}', read_format='{0}', scale=25),
+        'TANK4': parameter.Float('sensor get tank4',
+            write_format='{0}', read_format='{0}', scale=25),
+        }
+
+    def brand(self, hw_ver, sernum, banner_lines):
+        """Brand the unit with Hardware ID & Serial Number.
+
+        BANNER:  '\n*** ODL104 v1.0.3-0-g8413832 ***\n\r\n\r\n\x1b[1;32mrtt:~$ \x1b[m*** Booting Zephyr OS build zephyr-v2.7.0-59-gc6fe8e97cb9a  ***\nReset reason: power-on-reset or a brownout reset'
+        hw_ver is a tuple (product-rev, hw-rev) ie. ('01A', '01A')
+        # Can't flush the banner because the command prompt is in the middle of the banner.
+        """
+        self['PROD_REV'] = hw_ver[0]
+        self['HW_REV'] = hw_ver[1]
+        self['SN'] = sernum
+
+    def configure(self, key):
+        """Remember if we are reading tank levels."""
+        tank_read_commands = ['TANK{}'.format(n) for n in range(1, 5)]
+        self.reading_tanks = key in tank_read_commands
+        super().configure(key)
+
+    def action(self, command=None, delay=0, expected=0):
+        """Provide a custom action when reading tanks.
+        Manipulate the response from the console
+        Sample response:  '\r\nchannel idx=26 distance =   25.000000'
+        Response 25.000000 means 25%
+        We need to return 1 to 5 where 1 is 0%, 2 is 25% etc.
+        """
+        response = super().action(command, delay, expected)
+        reply = 'NaN'
+        if self.reading_tanks:
+            found = re.findall(".*?(\d+\.\d+).*", response)
+            if found:
+                reply = found[0]
+
+        return reply
+
+

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2018 SETEC Pty Ltd
-"""CN102/3 Initial Test Program."""
+"""CN102/3/4 Initial Test Program."""
 
 import pathlib
+import time
 
 import serial
 import tester
@@ -14,19 +15,22 @@ from . import config, console
 
 class Initial(share.TestSequence):
 
-    """CN102/3 Initial Test Program."""
+    """CN102/3/4 Initial Test Program."""
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
+        self.is_odl104 = True if self.parameter == '104' else False
+        Devices.is_odl104 = Sensors.is_odl104 = self.is_odl104
         limits = self.cfg.limits_initial
-        Devices.sw_nxp_image = self.cfg.sw_nxp_image
         Sensors.sw_nordic_image = self.cfg.sw_nordic_image
+        if not self.is_odl104:
+            Devices.sw_nxp_image = self.cfg.sw_nxp_image
         super().open(limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('PgmARM', self.devices['progARM'].program),
+            tester.TestStep('PgmARM', self._step_program_arm),
             tester.TestStep('Program', self._step_program),
             tester.TestStep('TestArm', self._step_test_arm),
             tester.TestStep('TankSense', self._step_tank_sense),
@@ -48,22 +52,39 @@ class Initial(share.TestSequence):
         dev['rla_reset'].set_on()   # Disable ARM to Nordic RESET
 
     @share.teststep
+    def _step_program_arm(self, dev, mes):
+        """Program the ARM device."""
+        if self.is_odl104:
+            return #skip
+        self.devices['progARM'].program()
+
+    @share.teststep
     def _step_program(self, dev, mes):
         """Program the Nordic BLE module."""
         mes['JLink']()
+        if self.is_odl104:
+            # Wait for the ARM Device to be programmed by the Nordic module
+            time.sleep(5)
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
-        dev['rla_reset'].set_off()  # Allow ARM to Nordic RESET
-        cn102 = dev['cn102']
-        cn102.open()
-        cn102.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
+        if not self.is_odl104:
+            dev['rla_reset'].set_off()  # Allow ARM to Nordic RESET
+        if self.is_odl104:
+            time.sleep(1.5)
+        console = dev['console']
+        console.open()
+        console.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
+
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
         """Activate tank sensors and read."""
-        dev['cn102']['ADC_SCAN'] = 100
+        if not self.is_odl104:
+            dev['cn102']['ADC_SCAN'] = 100
+        else:
+            time.sleep(0.5)
         self.relay(
             (('rla_s1', True), ('rla_s2', True),
              ('rla_s3', True), ('rla_s4', True), ),
@@ -75,7 +96,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        mes['cn102_can_bind'](timeout=10)
+        if not self.is_odl104:
+            mes['cn102_can_bind'](timeout=10)
+        else:
+            dev['canreader'].enable = True
+            mes['can_active'](timeout=10)
 
 
 class Devices(share.Devices):
@@ -83,6 +108,7 @@ class Devices(share.Devices):
     """Devices."""
 
     sw_nxp_image = None     # ARM software image
+    is_odl104 = None
 
     def open(self):
         """Create all Instruments."""
@@ -99,24 +125,37 @@ class Devices(share.Devices):
                 ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # ARM device programmer
-        arm_port = share.config.Fixture.port(fixture, 'ARM')
-        self['progARM'] = share.programmer.ARM(
-            arm_port,
-            pathlib.Path(__file__).parent / self.sw_nxp_image,
-            crpmode=False,
-            bda4_signals=True  #Use BDA4 serial lines for RESET & BOOT
-            )
-        # Serial connection to the console
-        con_ser = serial.Serial(baudrate=115200, timeout=5.0)
-        # Set port separately, as we don't want it opened yet
-        con_ser.port = arm_port
-        # CN102 Console driver
-        self['cn102'] = console.Console(con_ser)
+
+        if self.is_odl104:
+            port = share.console.RttPort()
+            self['console'] = console.Console_ODL104(port)
+        else:
+            # ARM device programmer
+            arm_port = share.config.Fixture.port(fixture, 'ARM')
+            self['progARM'] = share.programmer.ARM(
+                arm_port,
+                pathlib.Path(__file__).parent / self.sw_nxp_image,
+                crpmode=False,
+                bda4_signals=True  #Use BDA4 serial lines for RESET & BOOT
+                )
+            # Serial connection to the CN102/103 console
+            con_ser = serial.Serial(baudrate=115200, timeout=5.0)
+            # Set port separately, as we don't want it opened yet
+            con_ser.port = arm_port
+            # CN102/CN103 Console driver
+            self['console'] = console.Console(con_ser)
+
+        # CAN traffic reader
+        candev = tester.CANReader(self.physical_devices['_CAN'])
+        self['canreader'] = candev
+        candev.start()
+        self.add_closer(candev.stop)
+        # CAN traffic detector
+        self['candetector'] = share.can.PacketDetector(self['canreader'])
 
     def reset(self):
         """Reset instruments."""
-        self['cn102'].close()
+        self['console'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4'):
             self[rla].set_off()
@@ -142,7 +181,7 @@ class Sensors(share.Sensors):
             message=tester.translate('cn102_initial', 'msgSnEntry'),
             caption=tester.translate('cn102_initial', 'capSnEntry'))
         # Console sensors
-        cn102 = self.devices['cn102']
+        console = self.devices['console']
         for name, cmdkey in (
                 ('CANBIND', 'CAN_BIND'),
                 ('tank1', 'TANK1'),
@@ -150,11 +189,16 @@ class Sensors(share.Sensors):
                 ('tank3', 'TANK3'),
                 ('tank4', 'TANK4'),
             ):
-            self[name] = sensor.KeyedReading(cn102, cmdkey)
+            self[name] = sensor.KeyedReading(console, cmdkey)
+        if self.is_odl104:
+            for name in ('tank1', 'tank2', 'tank3', 'tank4'):
+                self[name].on_read = lambda value: value + 1
         self['JLink'] = sensor.JLink(
             self.devices['JLink'],
             pathlib.Path(__file__).parent / self.projectfile,
             pathlib.Path(__file__).parent / self.sw_nordic_image)
+        self['cantraffic'] = sensor.KeyedReadingBoolean(
+            self.devices['candetector'], None)
 
 
 class Measurements(share.Measurements):
@@ -176,4 +220,5 @@ class Measurements(share.Measurements):
             ('tank4_level', 'Tank', 'tank4', ''),
             ('cn102_can_bind', 'CAN_BIND', 'CANBIND', ''),
             ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
+            ('can_active', 'CANok', 'cantraffic', 'CAN traffic seen'),
             ))

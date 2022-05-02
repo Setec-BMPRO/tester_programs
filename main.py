@@ -26,11 +26,13 @@ def _main():
             'isplpc',
             'tester.devphysical',
             'tester.sensor.ui.Base',
+            'pylink.jlink',
+            'share.console.protocol.RttPort'
             ):
         log = logging.getLogger(name)
         log.setLevel(logging.INFO)
     # Suppress lower level updi logging when running MB3 Initial
-    for name in ('nvm', 'app', 'link', 'phy'):
+    for name in ('nvm', 'app', 'link', 'phy', 'pylink.jlink'):
         log = logging.getLogger(name)
         log.setLevel(logging.WARN)
     # Read settings from the configuration file
