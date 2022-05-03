@@ -7,7 +7,7 @@ from . import parameter
 from .arduino import Arduino
 from .protocol import (
     Base, BadUart, CANTunnel, Error, CommandError,
-    ResponseError, RttPort,
+    ResponseError,
     )
 from .samb11 import SamB11
 
@@ -16,5 +16,5 @@ __all__ = [
     'parameter',
     'Base', 'BadUart', 'CANTunnel',
     'Error', 'CommandError', 'ResponseError',
-    'Arduino', 'SamB11', 'RttPort',
+    'Arduino', 'SamB11',
     ]

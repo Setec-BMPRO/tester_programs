@@ -10,6 +10,7 @@ import serial
 import tester
 
 import share
+
 from . import config, console
 
 
@@ -30,7 +31,8 @@ class Initial(share.TestSequence):
         self.steps = (
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('PgmARM', self._step_program_arm),
+            tester.TestStep(
+                'PgmARM', self._step_program_arm, not self.is_odl104),
             tester.TestStep('Program', self._step_program),
             tester.TestStep('TestArm', self._step_test_arm),
             tester.TestStep('TankSense', self._step_tank_sense),
@@ -54,8 +56,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program_arm(self, dev, mes):
         """Program the ARM device."""
-        if self.is_odl104:
-            return #skip
         self.devices['progARM'].program()
 
     @share.teststep
@@ -71,8 +71,6 @@ class Initial(share.TestSequence):
         """Test the ARM device."""
         if not self.is_odl104:
             dev['rla_reset'].set_off()  # Allow ARM to Nordic RESET
-        if self.is_odl104:
-            time.sleep(1.5)
         console = dev['console']
         console.open()
         console.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
@@ -81,10 +79,10 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_tank_sense(self, dev, mes):
         """Activate tank sensors and read."""
-        if not self.is_odl104:
-            dev['cn102']['ADC_SCAN'] = 100
-        else:
+        if self.is_odl104:
             time.sleep(0.5)
+        else:
+            dev['console']['ADC_SCAN'] = 100
         self.relay(
             (('rla_s1', True), ('rla_s2', True),
              ('rla_s3', True), ('rla_s4', True), ),
@@ -96,11 +94,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
-        if not self.is_odl104:
-            mes['cn102_can_bind'](timeout=10)
-        else:
+        if self.is_odl104:
             dev['canreader'].enable = True
             mes['can_active'](timeout=10)
+        else:
+            mes['cn102_can_bind'](timeout=10)
 
 
 class Devices(share.Devices):
@@ -127,7 +125,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
 
         if self.is_odl104:
-            port = share.console.RttPort()
+            port = tester.RttPort()
             self['console'] = console.Console_ODL104(port)
         else:
             # ARM device programmer

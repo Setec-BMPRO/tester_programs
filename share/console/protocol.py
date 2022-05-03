@@ -60,11 +60,8 @@ Protocol 4: BC15 [ LPC111x CPU, No RTOS ]
 
 """
 
+import logging
 import time
-import logging, threading
-from contextlib import suppress
-
-import pylink
 
 import tester
 
@@ -356,96 +353,3 @@ class CANTunnel(Base):
                         packet, echo))
         # And the '\r' without echo
         self.port.write(b'\r')
-
-
-class RttPort():
-    """
-    Driver for Segger J-Link RTT console
-    buffer_index (int) – the index of the RTT buffer to read from
-    """
-    timeout = 5
-    logfile = None
-    chip_name = 'NRF52832_XXAA'  #ODL-II/CN104
-    buffer_index = 0
-    num_bytes_default = 1000
-
-    def __init__(self):
-        self.jlink = pylink.JLink()
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
-
-    def open(self):
-        self.close()
-        self.jlink.open()
-        self._logger.debug("JLink S/N: %s" % self.jlink.serial_number)
-        self.jlink.set_tif(1) # Set integer identifier for the SWD interface
-
-        if self.logfile:
-            self.jlink.set_log_file(self.logfile)
-            self._logger.debug("Logging to %s" % self.logfile)
-
-        # Turn on the power supply over pin 19 of the JTAG connector.
-        self.jlink.power_on()
-        time.sleep(0.5)
-
-        self.jlink.connect(self.chip_name, verbose=True)
-        assert(self.jlink.connected()), "Error: J-Link not connected"
-        self._logger.debug("J-Link Product Name: %s" % self.jlink.product_name)
-
-        # Start RTT processing, including background read of target data.
-        self.jlink.rtt_start()
-        time.sleep(0.5)
-
-    def close(self):
-        with suppress(pylink.errors.JLinkException):
-            self.jlink.power_off()
-            self.jlink.rtt_stop()
-            self.jlink.close()
-
-    def reset_input_buffer(self):
-        """ Clear the input buffer """
-        time.sleep(0.2)
-        buf = self.jlink.rtt_read(self.buffer_index, 5000)
-        self._logger.debug('Cleared %s bytes from the RTT input buffer' %len(buf))
-
-    def read(self, num_bytes=0):
-        """
-        Read the rtt buffer until:
-            num_bytes has been read or until timeout
-        num_bytes (int) – Number of bytes to read, if 0 will read until timeout.
-        Returns A byte string, response read from RTT;
-        rtt_read() returns a list of bytes
-        """
-        data = []
-        limit_bytes_read = False
-        num_bytes = self.num_bytes_default if not num_bytes else num_bytes
-        if num_bytes:
-            limit_bytes_read = True
-            self._logger.debug('Reading %s bytes' % num_bytes)
-
-        timer = threading.Timer(self.timeout, lambda: None)
-        timer.start()
-        while timer.is_alive():
-            chars = self.jlink.rtt_read(self.buffer_index, num_bytes)
-            if chars:
-                data.extend(chars)
-            if limit_bytes_read and len(data) == num_bytes:
-                timer.cancel()
-                timer.join()
-                break
-            time.sleep(0.1)
-        else:
-            self._logger.debug('Read timed out')
-        return bytes(bytearray(data))
-
-    def write(self, cmd):
-        """
-        cmd (string) – the command string to write to the RTT buffer
-        Returns The number of bytes successfully written to the RTT buffer.
-        """
-        self._logger.debug('Writing command: %s' % cmd)
-        tx_data = lambda x: list(x)
-        sent = self.jlink.rtt_write(self.buffer_index, tx_data(cmd))
-        time.sleep(0.05)
-        return sent
-
