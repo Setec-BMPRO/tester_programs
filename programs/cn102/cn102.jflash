@@ -28,7 +28,11 @@
   InitStep0_Value0 = 0x00000000
   InitStep0_Value1 = 0x00000000
   InitStep0_Comment = "Reset and halt target"
-  NumExitSteps = 0
+  NumExitSteps = 1
+  ExitStep0_Action = "Reset"
+  ExitStep0_Value0 = 0x00000000
+  ExitStep0_Value1 = 0x00000000
+  ExitStep0_Comment = ""
   UseScriptFile = 0
   ScriptFile = ""
   UseRAM = 1
