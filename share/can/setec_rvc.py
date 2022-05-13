@@ -427,9 +427,13 @@ class PacketPropertyReader():
         @return Packet property value
 
         """
+# FIXME: How can we signal 'no/bad CAN packet' without a tester exception?
         try:
             can_data = self.canreader.read()
             packet = self.packettype(can_data)
+        except tester.CANReaderError:   # A timeout due to no traffic
+# FIXME: False only works because RVMC/RVMD look for True to pass
+            return False
         except PacketDecodeError:       # Probably another packet type
 # FIXME: Should we return False? Or instead, read again?
             return False
