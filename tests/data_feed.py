@@ -142,10 +142,16 @@ class MockATE(dict):
         super().__init__(storage)
 
     def open_early(self):
-        """Open tester."""
+        """Early open tester."""
 
     def open_late(self):
-        """Open tester."""
+        """Late open tester."""
+
+    def close_late(self):
+        """Late close tester."""
+
+    def close_early(self):
+        """Early close tester."""
 
 
 class ProgramTestCase(unittest.TestCase):

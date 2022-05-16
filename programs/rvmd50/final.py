@@ -55,28 +55,24 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        for name, devtype, phydevname in (
-                ('dcs_vin', tester.DCSource, 'DCS1'),
-            ):
-            self[name] = devtype(self.physical_devices[phydevname])
+        self['dcs_vin'] = tester.DCSource(self.physical_devices['DCS1'])
         self['can'] = self.physical_devices['_CAN']
-        self['can'].rvc_mode = True
         self['canreader'] = tester.CANReader(self['can'])
         self['decoder'] = share.can.PacketPropertyReader(
             self['canreader'], share.can.DeviceStatusPacket)
-        self['canreader'].start()
-        self.add_closer(self.close_can)
         self['display'] = display.DisplayControl(self['can'])
 
-    def reset(self):
-        """Reset instruments."""
-        self['dcs_vin'].output(0.0, output=False)
-        self['canreader'].enable = False
+    def run(self):
+        """Test run is starting."""
+        self['can'].rvc_mode = True
+        self['canreader'].start()
 
-    def close_can(self):
-        """Reset CAN system."""
+    def reset(self):
+        """Test run has stopped."""
+        self['canreader'].enable = False
         self['canreader'].stop()
         self['can'].rvc_mode = False
+        self['dcs_vin'].output(0.0, output=False)
 
 
 class Sensors(share.Sensors):

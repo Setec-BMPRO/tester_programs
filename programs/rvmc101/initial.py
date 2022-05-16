@@ -138,8 +138,6 @@ class Devices(share.Devices):
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         self['can'] = self.physical_devices['_CAN']
-        self['can'].rvc_mode = True
-        self.add_closer(self.close_can)
         self['display'] = display.LEDControl(self['can'])
         arm_port = share.config.Fixture.port('032870', 'ARM')
         self['program_arm'] = share.programmer.ARM(
@@ -154,17 +152,18 @@ class Devices(share.Devices):
             self['rla_pos3'], self['rla_pos4'],
             ]
 
+    def run(self):
+        """Test run is starting."""
+        self['can'].rvc_mode = True
+
     def reset(self):
-        """Reset instruments."""
+        """Test run has stopped."""
+        self['can'].rvc_mode = False
         self['dcs_vin'].output(0.0, False)
         for rla in (
             'rla_reset', 'rla_boot',
             'rla_pos1', 'rla_pos2', 'rla_pos3', 'rla_pos4'):
             self[rla].set_off()
-
-    def close_can(self):
-        """Restore CAN interface to default settings."""
-        self['can'].rvc_mode = False
 
 
 class Sensors(share.Sensors):

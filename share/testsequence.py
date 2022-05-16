@@ -218,11 +218,11 @@ class Devices(abc.ABC, dict):
         """Create all Instruments."""
 
     def run(self):
-        """Test run starting."""
+        """Test run is starting."""
 
     @abc.abstractmethod
     def reset(self):
-        """Test run finished - Reset instruments."""
+        """Test run has stopped - Reset instruments."""
 
     def add_closer(self, target):
         """Add a callable to be called upon close()."""

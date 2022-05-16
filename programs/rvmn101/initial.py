@@ -190,13 +190,11 @@ class Devices(share.Devices):
 
     def run(self):
         """Test run is starting."""
-        candev = self['can']
-        candev.rvc_mode = True
+        self['can'].rvc_mode = True
 
     def reset(self):
-        """Reset instruments."""
-        candev = self['can']
-        candev.rvc_mode = False
+        """Test run has stopped."""
+        self['can'].rvc_mode = False
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
             self[dcs].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot', 'rla_pullup', 'swd_select', ):

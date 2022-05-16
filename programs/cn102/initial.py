@@ -142,17 +142,20 @@ class Devices(share.Devices):
             con_ser.port = arm_port
             # CN102/CN103 Console driver
             self['console'] = console.Console(con_ser)
-
         # CAN traffic reader
         candev = tester.CANReader(self.physical_devices['_CAN'])
         self['canreader'] = candev
-        candev.start()
-        self.add_closer(candev.stop)
         # CAN traffic detector
         self['candetector'] = share.can.PacketDetector(self['canreader'])
 
+    def run(self):
+        """Test run is starting."""
+        self['canreader'].start()
+
     def reset(self):
-        """Reset instruments."""
+        """Test run has stopped."""
+        self['canreader'].enable = False
+        self['canreader'].stop()
         self['console'].close()
         self['dcs_vin'].output(0.0, False)
         for rla in ('rla_reset', 'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4'):

@@ -118,15 +118,18 @@ class Devices(share.Devices):
         # CAN traffic reader
         candev = tester.CANReader(self.physical_devices['_CAN'])
         self['canreader'] = candev
-        candev.start()
-        self.add_closer(candev.stop)
         # CAN traffic detector
         self['candetector'] = share.can.PacketDetector(self['canreader'])
 
+    def run(self):
+        """Test run is starting."""
+        self['canreader'].start()
+
     def reset(self):
-        """Reset instruments."""
-        self['console'].close()
+        """Test run has stopped."""
         self['canreader'].enable = False
+        self['canreader'].stop()
+        self['console'].close()
         for rla in ('relay1','relay2', 'relay3', 'relay4'):
             self[rla].set_off()
 
