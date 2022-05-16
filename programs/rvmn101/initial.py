@@ -176,12 +176,10 @@ class Devices(share.Devices):
             }[self.parameter]
         console_class.reversed_output_dict = self.reversed_output_dict
         self['rvmn101'] = console_class(nordic_ser)
-        # Connection to Serial To MAC server
-        self['serialtomac'] = share.bluetooth.SerialToMAC()
         # CAN interface
         self['can'] = self.physical_devices['_CAN']
-        self['can'].rvc_mode = True
-        self.add_closer(self.close_can)
+        # Connection to Serial To MAC server
+        self['serialtomac'] = share.bluetooth.SerialToMAC()
         if self.parameter in ('101A', '101B', ):
             # Fixture USB hub power
             self['dcs_vcom'].output(9.0, output=True, delay=10)
@@ -190,17 +188,19 @@ class Devices(share.Devices):
         self['rvmn101'].open()
         self.add_closer(self['rvmn101'].close)
 
+    def run(self):
+        """Test run is starting."""
+        candev = self['can']
+        candev.rvc_mode = True
+
     def reset(self):
         """Reset instruments."""
+        candev = self['can']
+        candev.rvc_mode = False
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
             self[dcs].output(0.0, False)
         for rla in ('rla_reset', 'rla_boot', 'rla_pullup', 'swd_select', ):
             self[rla].set_off()
-
-    def close_can(self):
-        """Restore CAN interface to default settings."""
-        candev = self['can']
-        candev.rvc_mode = False
 
 
 class Sensors(share.Sensors):

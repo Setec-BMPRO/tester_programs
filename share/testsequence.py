@@ -68,6 +68,15 @@ class TestSequence(tester.TestSequence):
         self.sensors.open()
         self.measurements.open()
 
+    def run(self, uuts):
+        """Run the test sequence.
+
+        @param uuts Iterable of Unit Under Test's
+
+        """
+        self.devices.run()
+        super().run(uuts)
+
     def safety(self):
         """Reset logical devices and sensors."""
         self.devices.reset()
@@ -208,9 +217,12 @@ class Devices(abc.ABC, dict):
     def open(self):
         """Create all Instruments."""
 
+    def run(self):
+        """Test run starting."""
+
     @abc.abstractmethod
     def reset(self):
-        """Reset instruments."""
+        """Test run finished - Reset instruments."""
 
     def add_closer(self, target):
         """Add a callable to be called upon close()."""

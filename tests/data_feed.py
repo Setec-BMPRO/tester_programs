@@ -141,7 +141,10 @@ class MockATE(dict):
         storage['JLINK'] = Mock(name='JLink')
         super().__init__(storage)
 
-    def open(self):
+    def open_early(self):
+        """Open tester."""
+
+    def open_late(self):
         """Open tester."""
 
 
