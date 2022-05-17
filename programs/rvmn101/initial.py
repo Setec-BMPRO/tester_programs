@@ -115,14 +115,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        candev = dev['can']
-        candev.flush()
-        try:
-            candev.read()
-            result = True
-        except tester.devphysical.CANError:
-            result = False
-        mes['can_active'].sensor.store(result)
+        dev['canreader'].enable = True
         mes['can_active']()
 
 
@@ -176,8 +169,10 @@ class Devices(share.Devices):
             }[self.parameter]
         console_class.reversed_output_dict = self.reversed_output_dict
         self['rvmn101'] = console_class(nordic_ser)
-        # CAN interface
+        # CAN devices
         self['can'] = self.physical_devices['_CAN']
+        self['canreader'] = tester.CANReader(self['can'])
+        self['candetector'] = share.can.PacketDetector(self['canreader'])
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
         if self.parameter in ('101A', '101B', ):
@@ -191,9 +186,12 @@ class Devices(share.Devices):
     def run(self):
         """Test run is starting."""
         self['can'].rvc_mode = True
+        self['canreader'].start()
 
     def reset(self):
         """Test run has stopped."""
+        self['canreader'].enable = False
+        self['canreader'].stop()
         self['can'].rvc_mode = False
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
             self[dcs].output(0.0, False)
@@ -214,7 +212,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices['dmm']
         sensor = tester.sensor
-        self['MirCAN'] = sensor.MirrorReadingBoolean()
         self['VBatt'] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self['3V3'] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self['HSout'] = sensor.Vdc(dmm, high=3, low=1, rng=100, res=0.1)
@@ -242,6 +239,8 @@ class Sensors(share.Sensors):
         self['BleMac'].on_read = (
             lambda value: value.replace(':', '').replace(' (random)', '')
             )
+        self['cantraffic'] = sensor.KeyedReadingBoolean(
+            self.devices['candetector'], None)
 
 
 class Measurements(share.Measurements):
@@ -262,7 +261,7 @@ class Measurements(share.Measurements):
             ('dmm_ls2_on', 'LSon', 'LSout2', 'Low-side driver2 ON'),
             ('dmm_ls2_off', 'LSoff', 'LSout2', 'Low-side driver2 OFF'),
             ('ui_serialnum', 'SerNum', 'SnEntry', ''),
-            ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
+            ('can_active', 'CANok', 'cantraffic', 'CAN traffic seen'),
             ('ble_mac', 'BleMac', 'BleMac', 'MAC address'),
             ('JLinkARM', 'ProgramOk', 'JLinkARM', 'Programmed'),
             ('JLinkBLE', 'ProgramOk', 'JLinkBLE', 'Programmed'),

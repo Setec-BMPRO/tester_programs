@@ -116,8 +116,7 @@ class Devices(share.Devices):
         console_ser.port = arm_port
         self['console'] = console.Console(console_ser)
         # CAN traffic reader
-        candev = tester.CANReader(self.physical_devices['_CAN'])
-        self['canreader'] = candev
+        self['canreader'] = tester.CANReader(self.physical_devices['_CAN'])
         # CAN traffic detector
         self['candetector'] = share.can.PacketDetector(self['canreader'])
 

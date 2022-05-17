@@ -142,10 +142,8 @@ class Devices(share.Devices):
             con_ser.port = arm_port
             # CN102/CN103 Console driver
             self['console'] = console.Console(con_ser)
-        # CAN traffic reader
-        candev = tester.CANReader(self.physical_devices['_CAN'])
-        self['canreader'] = candev
-        # CAN traffic detector
+        # CAN devices
+        self['canreader'] = tester.CANReader(self.physical_devices['_CAN'])
         self['candetector'] = share.can.PacketDetector(self['canreader'])
 
     def run(self):
