@@ -38,9 +38,9 @@ class Final(share.TestSequence):
         """Test the CAN Bus."""
         # Tell user to push unit's button after clicking OK
         mes['ui_buttonpress']()
-        dev['canreader'].enable = True
-        # Wait for the button press
-        mes['zone4'](timeout=10)
+        with dev['canreader']:
+            # Wait for the button press
+            mes['zone4'](timeout=10)
 
 
 class Devices(share.Devices):
@@ -62,7 +62,6 @@ class Devices(share.Devices):
 
     def reset(self):
         """Test run has stopped."""
-        self['canreader'].enable = False
         self['canreader'].stop()
         self['can'].rvc_mode = False
         self['dcs_vin'].output(0.0, output=False)

@@ -115,8 +115,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        dev['canreader'].enable = True
-        mes['can_active']()
+        with dev['canreader']:
+            mes['can_active']()
 
 
 class Devices(share.Devices):
@@ -190,7 +190,6 @@ class Devices(share.Devices):
 
     def reset(self):
         """Test run has stopped."""
-        self['canreader'].enable = False
         self['canreader'].stop()
         self['can'].rvc_mode = False
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):

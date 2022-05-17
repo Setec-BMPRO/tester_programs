@@ -98,21 +98,15 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
-        candev = dev['can']
         sel = dev['selector']
         mes_can = mes['can_active']
+        can_rdr = dev['canreader']
         for pos in self._positions():
             if tester.Measurement.position_enabled(pos):
                 mes_can.sensor.position = pos
                 sel[pos].set_on(delay=0.5)
-                candev.flush()
-                try:
-                    candev.read()
-                    result = True
-                except tester.devphysical.CANError:
-                    result = False
-                mes_can.sensor.store(result)
-                mes_can()
+                with can_rdr:
+                    mes_can()
                 sel[pos].set_off()
 
 
@@ -137,7 +131,10 @@ class Devices(share.Devices):
                 ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
+        # CAN devices
         self['can'] = self.physical_devices['_CAN']
+        self['canreader'] = tester.CANReader(self['can'])
+        self['candetector'] = share.can.PacketDetector(self['canreader'])
         self['display'] = display.LEDControl(self['can'])
         arm_port = share.config.Fixture.port('032870', 'ARM')
         self['program_arm'] = share.programmer.ARM(
@@ -155,9 +152,11 @@ class Devices(share.Devices):
     def run(self):
         """Test run is starting."""
         self['can'].rvc_mode = True
+        self['canreader'].start()
 
     def reset(self):
         """Test run has stopped."""
+        self['canreader'].stop()
         self['can'].rvc_mode = False
         self['dcs_vin'].output(0.0, False)
         for rla in (
@@ -195,7 +194,6 @@ class Sensors(share.Sensors):
                 dmm, high=8, low=1, rng=10, res=0.01, position=3)
         self['d_5v'] = sensor.Vdc(
                 dmm, high=9, low=1, rng=10, res=0.01, position=4)
-        self['MirCAN'] = sensor.MirrorReadingBoolean()
         self['JLink'] = sensor.JLink(
             self.devices['JLink'],
             pathlib.Path(__file__).parent / self.projectfile,
@@ -224,7 +222,7 @@ class Measurements(share.Measurements):
             ('dmm_5vc', '5V', 'c_5v', '5V ok'),
             ('dmm_5vd', '5V', 'd_5v', '5V ok'),
             ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
-            ('can_active', 'CANok', 'MirCAN', 'CAN bus traffic seen'),
+            ('can_active', 'CANok', 'cantraffic', 'CAN traffic seen'),
             ('ui_yesnodisplay', 'Notify', 'yesnodisplay', 'Check all displays'),
             ))
         self['dmm'] = (         # This is indexed using position (1-N)

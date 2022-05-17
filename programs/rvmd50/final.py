@@ -45,8 +45,8 @@ class Final(share.TestSequence):
     def _step_buttons(self, dev, mes):
         """Test the Buttons."""
         mes['OkCanButtonPress']()
-        dev['canreader'].enable = True
-        mes['PageButton'](timeout=10)
+        with dev['canreader']:
+            mes['PageButton'](timeout=10)
 
 
 class Devices(share.Devices):
@@ -69,7 +69,6 @@ class Devices(share.Devices):
 
     def reset(self):
         """Test run has stopped."""
-        self['canreader'].enable = False
         self['canreader'].stop()
         self['can'].rvc_mode = False
         self['dcs_vin'].output(0.0, output=False)

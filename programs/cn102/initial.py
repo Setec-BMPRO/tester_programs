@@ -95,8 +95,8 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         if self.is_odl104:
-            dev['canreader'].enable = True
-            mes['can_active'](timeout=10)
+            with dev['canreader']:
+                mes['can_active'](timeout=10)
         else:
             mes['cn102_can_bind'](timeout=10)
 
@@ -152,7 +152,6 @@ class Devices(share.Devices):
 
     def reset(self):
         """Test run has stopped."""
-        self['canreader'].enable = False
         self['canreader'].stop()
         self['console'].close()
         self['dcs_vin'].output(0.0, False)
