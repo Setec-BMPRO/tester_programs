@@ -53,7 +53,7 @@ class RVMC101Initial(_RVMC101Initial):
                     (sen['yesnodisplay'], (True, True, True, True, )),
                     ),
                 'CanBus': (
-                    (sen['MirCAN'], (True, True, True, True, )),
+                    (sen['cantraffic'], (True, True, True, True, )),
                     ),
                 },
             }

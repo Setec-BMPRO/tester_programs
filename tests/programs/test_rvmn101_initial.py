@@ -55,7 +55,7 @@ class RVMN101BInitial(ProgramTestCase):
                     (sen['LSout2'], (0.0, 11.5)),
                     ),
                 'CanBus': (
-                    (sen['MirCAN'], True),
+                    (sen['cantraffic'], True),
                     ),
                 },
             }
