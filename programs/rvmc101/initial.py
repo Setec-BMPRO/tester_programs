@@ -203,6 +203,8 @@ class Sensors(share.Sensors):
             caption=tester.translate('rvmc101_initial', 'capDisplay'),
             position=(1, 2, 3, 4))
         self['yesnodisplay'].doc = 'Tester operator'
+        self['cantraffic'] = sensor.KeyedReadingBoolean(
+            self.devices['candetector'], None)
 
 
 class Measurements(share.Measurements):
