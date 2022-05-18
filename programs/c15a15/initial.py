@@ -63,9 +63,10 @@ class Initial(share.TestSequence):
         dev['dcl'].output(0.9)
         self.measure(('dmm_vout', 'ramp_ocp', ))
         dev['dcl'].output(0.0)
-        dev['rla_load'].set_on(delay=1.0)
-        self.measure(('dmm_yellow_on', 'dmm_green_on', 'dmm_vout_ocp', ))
-        dev['rla_load'].set_off()
+        with dev['rla_load']:
+            self.measure(
+                ('dmm_yellow_on', 'dmm_green_on', 'dmm_vout_ocp', ),
+                timeout=5.0)
         mes['dmm_vout'](timeout=2.0)
 
     @share.teststep

@@ -54,11 +54,10 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_charging(self, dev, mes):
         """Load into OCP for charging check."""
-        dev['rla_load'].set_on()
-        self.measure(
-            ('dmm_vout_ocp', 'dmm_green_on', 'dmm_yellow_on', ),
-            timeout=5)
-        dev['rla_load'].set_off()
+        with dev['rla_load']:
+            self.measure(
+                ('dmm_vout_ocp', 'dmm_green_on', 'dmm_yellow_on', ),
+                timeout=5)
         mes['dmm_vout_nl'](timeout=5)
 
 

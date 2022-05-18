@@ -50,10 +50,8 @@ class Initial(share.TestSequence):
         """Program both devices."""
         if self.parameter in ('50', '55', ):    # 5x uses 2 x JLink
             mes['JLinkARM']()
-            dev['swd_select'].set_on()
-            dev['swd_select'].opc()
-            mes['JLinkBLE']()
-            dev['swd_select'].set_off()
+            with dev['swd_select']:
+                mes['JLinkBLE']()
         else:                                   # 101x uses ISPLPC + NRF52
             dev['progARM'].program()
             dev['progNordic'].program()
@@ -82,14 +80,13 @@ class Initial(share.TestSequence):
         # Reversed HBridge outputs are only on 101A Rev 7-9
         if rvmn101.reversed_outputs:
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
-            dev['rla_pullup'].set_on()
-            for idx in rvmn101.reversed_outputs:
-                with tester.PathName('REV{0}'.format(idx)):
-                    rvmn101.hs_output(idx, True)
-                    mes['dmm_hb_on'](timeout=1)
-                    rvmn101.hs_output(idx, False)
-                    mes['dmm_hb_off'](timeout=1)
-            dev['rla_pullup'].set_off()
+            with dev['rla_pullup']:
+                for idx in rvmn101.reversed_outputs:
+                    with tester.PathName('REV{0}'.format(idx)):
+                        rvmn101.hs_output(idx, True)
+                        mes['dmm_hb_on'](timeout=1)
+                        rvmn101.hs_output(idx, False)
+                        mes['dmm_hb_off'](timeout=1)
         mes['dmm_hs_off'](timeout=1)
         # Measurements from here on do not fail the test instantly.
         # Always measure all the outputs, and force a fail if any output

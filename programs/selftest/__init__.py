@@ -130,11 +130,8 @@ class Main(share.TestSequence):
         """
         mes['dmm_Rla12V'](timeout=1.0)
         for rly in dev['relays']:
-            rly.set_on()
-            rly.opc()
-            mes['dmm_RlaOn'](timeout=5.0)
-            rly.set_off()
-            rly.opc()
+            with rly:
+                mes['dmm_RlaOn'](timeout=5.0)
             mes['dmm_RlaOff'](timeout=5.0)
 
     @share.teststep

@@ -42,10 +42,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the PIC device."""
-        dev['rla_Prog'].set_on()
-        dev['rla_Prog'].opc()
-        mes['pgm_etrac2']()
-        dev['rla_Prog'].set_off()
+        with dev['rla_Prog']:
+            mes['pgm_etrac2']()
 
     @share.teststep
     def _step_load(self, dev, mes):

@@ -94,9 +94,8 @@ class Final(share.TestSequence):
         dev['dcl'].output(0.1)
         dev['dcs_vbat'].output(12.6, output=True, delay=2)
         self.measure(('dmm_vbatext', 'dmm_voutext', ), timeout=5)
-        dev['rla_remotesw'].set_on()
-        mes['dmm_voutoff'](timeout=10)
-        dev['rla_remotesw'].set_off()
+        with dev['rla_remotesw']:
+            mes['dmm_voutoff'](timeout=10)
         mes['dmm_voutext'](timeout=5)
 
 

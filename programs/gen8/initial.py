@@ -131,14 +131,13 @@ class Initial(share.TestSequence):
              'dmm_12v2off', 'dmm_24voff', 'dmm_pwrfail', ),
             timeout=5)
         # Hold the 12V2 off
-        dev['rla_12v2off'].set_on()
-        # A little load so 12V2 voltage falls when off
-        dev.loads(i12=0.1)
-        # Switch all outputs ON
-        dev['rla_pson'].set_on()
-        self.measure(('dmm_5vset', 'dmm_12v2off', 'dmm_24vpre', ), timeout=5)
-        # Switch on the 12V2
-        dev['rla_12v2off'].set_off()
+        with dev['rla_12v2off']:
+            # A little load so 12V2 voltage falls when off
+            dev.loads(i12=0.1)
+            # Switch all outputs ON
+            dev['rla_pson'].set_on()
+            self.measure(('dmm_5vset', 'dmm_12v2off', 'dmm_24vpre', ), timeout=5)
+        # 12V2 switched on again
         mes['dmm_12v2'](timeout=5)
         # Unlock ARM
         arm = dev['arm']

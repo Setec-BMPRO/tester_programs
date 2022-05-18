@@ -56,37 +56,33 @@ class Initial(share.TestSequence):
 
         """
         # Set BOOT active before power-on so the ARM boot-loader runs
-        dev['rla_boot'].set_on()
-        # Apply and check injected 5Vsb
-        dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
-        self.measure(
-            ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
-            timeout=5)
-        dev['programmer'].program()     # Program the ARM device
-        # On xubuntu, a device detector opens the serial port for a while
-        # after it is attached. Wait for the process to release the port.
-        for _ in range(10):
-            try:
-                dev['ard'].open()
-                break
-            except:
-                time.sleep(1)
-        dev['rla_boot'].set_off(delay=2) # Wait for Arduino to start
-        dev['rla_pic1'].set_on()
-        dev['rla_pic1'].opc()
-        mes['dmm_5Vunsw'](timeout=2)
-        mes['pgm_5vsb']()           # Program the 5V Switch Board
-        dev['rla_pic1'].set_off()
+        with dev['rla_boot']:
+            # Apply and check injected 5Vsb
+            dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
+            self.measure(
+                ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
+                timeout=5)
+            dev['programmer'].program()     # Program the ARM device
+            # On xubuntu, a device detector opens the serial port for a while
+            # after it is attached. Wait for the process to release the port.
+            for _ in range(10):
+                try:
+                    dev['ard'].open()
+                    time.sleep(2)       # Wait for Arduino to start
+                    break
+                except:
+                    time.sleep(1)
+        with dev['rla_pic1']:
+            mes['dmm_5Vunsw'](timeout=2)
+            mes['pgm_5vsb']()           # Program the 5V Switch Board
         # Switch off 5V rail and discharge the 5V to stop the ARM
         dev['dcs_5V'].output(0)
         self.dcload((('dcl_5V', 0.1), ), output=True, delay=0.5)
         # Apply and check injected 12V PriCtl
         dev['dcs_PriCtl'].output(self.cfg.prictl_ext, True)
         mes['dmm_PriCtl'](timeout=2)
-        dev['rla_pic2'].set_on()
-        dev['rla_pic2'].opc()
-        mes['pgm_pwrsw']()      # Program the Power Switch Board
-        dev['rla_pic2'].set_off()
+        with dev['rla_pic2']:
+            mes['pgm_pwrsw']()      # Program the Power Switch Board
         dev['rla_0Vp'].set_on()     # Disconnect 0Vp from PwrSw PIC relays
         dev['dcs_PriCtl'].output(0.0)
         # This will also enable all loads on an ATE3/4 tester.

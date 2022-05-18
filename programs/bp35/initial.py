@@ -205,10 +205,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_remote_sw(self, dev, mes):
         """Test Remote Load Isolator Switch."""
-        relay = dev['rla_loadsw']
-        relay.set_on()
-        mes['arm_remote'](timeout=5)
-        relay.set_off()
+        with dev['rla_loadsw']:
+            mes['arm_remote'](timeout=5)
         mes['dmm_vload'](timeout=5)
 
     @share.teststep

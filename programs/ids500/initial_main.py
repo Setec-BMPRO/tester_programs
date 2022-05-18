@@ -129,9 +129,8 @@ class InitialMain(share.TestSequence):
         mes['tecvmonerr'].sensor.store(Vmon - (Vtec / 3))
         mes['tecvmonerr']()
         self.measure(('ui_YesNoPsu', 'ui_YesNoTecRed'))
-        dev['rla_tecphase'].set_on()
-        self.measure(('dmm_tecphase', 'ui_YesNoTecGreen', ))
-        dev['rla_tecphase'].set_off()
+        with dev['rla_tecphase']:
+            self.measure(('dmm_tecphase', 'ui_YesNoTecGreen', ))
 
     @share.teststep
     def _step_ldd(self, dev, mes):

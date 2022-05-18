@@ -68,17 +68,15 @@ class Initial(share.TestSequence):
         sel = dev['selector']
         for pos in self._positions():
             if tester.Measurement.position_enabled(pos):
-                sel[pos].set_on()
-                sel[pos].opc()
-                if self.parameter == 'NXP':
-                    pgm = dev['program_arm']
-                    pgm.position = pos
-                    pgm.program()   # A device
-                else:
-                    pgm = mes['JLink']
-                    pgm.sensor.position = pos
-                    pgm()           # A measurement
-                sel[pos].set_off()
+                with sel[pos]:
+                    if self.parameter == 'NXP':
+                        pgm = dev['program_arm']
+                        pgm.position = pos
+                        pgm.program()   # A device
+                    else:
+                        pgm = mes['JLink']
+                        pgm.sensor.position = pos
+                        pgm()           # A measurement
 
     @share.teststep
     def _step_display(self, dev, mes):
@@ -89,11 +87,9 @@ class Initial(share.TestSequence):
         for pos in self._positions():
             if tester.Measurement.position_enabled(pos):
                 mes_dis.sensor.position = pos
-                sel[pos].set_on()
-                sel[pos].opc()
-                with dev['display']:
-                    mes_dis()
-                sel[pos].set_off()
+                with sel[pos]:
+                    with dev['display']:
+                        mes_dis()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -104,10 +100,9 @@ class Initial(share.TestSequence):
         for pos in self._positions():
             if tester.Measurement.position_enabled(pos):
                 mes_can.sensor.position = pos
-                sel[pos].set_on(delay=0.5)
-                with can_rdr:
-                    mes_can()
-                sel[pos].set_off()
+                with sel[pos]:
+                    with can_rdr:
+                        mes_can()
 
 
 class Devices(share.Devices):

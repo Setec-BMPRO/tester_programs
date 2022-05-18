@@ -82,10 +82,9 @@ class Final(share.TestSequence):
     def _step_battery(self, dev, mes):
         """Battery checks."""
         self.dcload((('dcl_Batt', 2.0), ('dcl_Load', 0.0), ), output=True)
-        dev['rla_BattSw'].set_on()
-        mes['dmm_BattFuseOut'](timeout=5)
-        dev['dcl_Batt'].output(0.0)
-        dev['rla_BattSw'].set_off(delay=0.5)
+        with dev['rla_BattSw']:
+            mes['dmm_BattFuseOut'](timeout=5)
+            dev['dcl_Batt'].output(0.0)
         self.measure(
             ('dmm_BattFuseIn', 'ui_YesNoRedOn', 'ui_YesNoRedOff', ),
             timeout=5)

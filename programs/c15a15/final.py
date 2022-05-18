@@ -46,9 +46,8 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_ocp(self, dev, mes):
         """Measure OCP."""
-        dev['rla_load'].set_on()
-        mes['ramp_OCP']()
-        dev['rla_load'].set_off()
+        with dev['rla_load']:
+            mes['ramp_OCP']()
         self.measure(('ui_YesNoYellowOn', 'dmm_Vout',), timeout=5)
 
     @share.teststep

@@ -73,9 +73,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the PIC micro."""
-        dev['rla_Erase'].set_on()
-        self.measure(('dmm_VErase', 'ProgramPIC', ), timeout=5)
-        dev['rla_Erase'].set_off()
+        with dev['rla_Erase']:
+            self.measure(('dmm_VErase', 'ProgramPIC', ), timeout=5)
 
     @share.teststep
     def _step_check_pic_vals(self, dev, mes):

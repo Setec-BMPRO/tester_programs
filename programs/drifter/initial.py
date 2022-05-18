@@ -103,26 +103,26 @@ class Initial(share.TestSequence):
     def _step_calibrate(self, dev, mes):
         """Calibrate zero current, voltage, high current."""
         # Simulate zero current
-        dev['rla_ZeroCal'].set_on(delay=0.2)
-        pic = dev['pic']
-        self._cal_reload(pic)
-        mes['pic_ZeroChk'](timeout=5)
-        # Auto-zero the PIC current
-        pic['CAL_I_ZERO'] = True
-        # Assign forced offset & threshold for current display
-        pic['CAL_OFFSET_CURRENT'] = self.force_offset
-        pic['ZERO-CURRENT-DISPLAY-THRESHOLD'] = self.force_threshold
-        # Calibrate voltage
-        dmm_vin = mes['dmm_vin'](timeout=5).reading1
-        pic_vin = mes['pic_vin'](timeout=5).reading1
-        err = ((dmm_vin - pic_vin) / dmm_vin) * 100
-        mes['ErrorV'].sensor.store(err)
-        mes['ErrorV']()
-        adjust_vcal = (err != self.limits['%CalV'])
-        # Adjust voltage if required
-        if adjust_vcal:
-            pic['CAL_V_SLOPE'] = dmm_vin
-        dev['rla_ZeroCal'].set_off()
+        with dev['rla_ZeroCal']:
+            time.sleep(0.2)
+            pic = dev['pic']
+            self._cal_reload(pic)
+            mes['pic_ZeroChk'](timeout=5)
+            # Auto-zero the PIC current
+            pic['CAL_I_ZERO'] = True
+            # Assign forced offset & threshold for current display
+            pic['CAL_OFFSET_CURRENT'] = self.force_offset
+            pic['ZERO-CURRENT-DISPLAY-THRESHOLD'] = self.force_threshold
+            # Calibrate voltage
+            dmm_vin = mes['dmm_vin'](timeout=5).reading1
+            pic_vin = mes['pic_vin'](timeout=5).reading1
+            err = ((dmm_vin - pic_vin) / dmm_vin) * 100
+            mes['ErrorV'].sensor.store(err)
+            mes['ErrorV']()
+            adjust_vcal = (err != self.limits['%CalV'])
+            # Adjust voltage if required
+            if adjust_vcal:
+                pic['CAL_V_SLOPE'] = dmm_vin
         # Simulate a high current
         dev['dcs_SlopeCal'].output(17.1, output=True, delay=0.2)
         self._cal_reload(pic)

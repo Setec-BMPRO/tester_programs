@@ -126,13 +126,11 @@ class Initial(share.TestSequence):
     def _step_shutdown(self, dev, mes):
         """Shutdown."""
         mes['dmm_fanoff'](timeout=5)
-        dev['rla_fan'].set_on()
-        mes['dmm_fanon'](timeout=5)
-        dev['rla_fan'].set_off()
+        with dev['rla_fan']:
+            mes['dmm_fanon'](timeout=5)
         mes['dmm_vout'](timeout=5)
-        dev['rla_shdwn2'].set_on()
-        self.measure(('dmm_vccoff', 'dmm_voutoff', ), timeout=5)
-        dev['rla_shdwn2'].set_off()
+        with dev['rla_shdwn2']:
+            self.measure(('dmm_vccoff', 'dmm_voutoff', ), timeout=5)
         mes['dmm_vout'](timeout=5)
 
     @share.teststep

@@ -80,9 +80,8 @@ class Initial(share.TestSequence):
             (('dcs_Vout', 13.8), ('dcs_SecCtl2', 13.8), ), output=True)
         self.measure(
             ('dmm_VoutExt', 'dmm_SecCtl2Ext', 'dmm_SecCtlExt', ), timeout=5)
-        dev['rla_Fuse'].set_on()
-        self.measure(('dmm_GreenOn', 'dmm_RedOff'), timeout=5)
-        dev['rla_Fuse'].set_off()
+        with dev['rla_Fuse']:
+            self.measure(('dmm_GreenOn', 'dmm_RedOff'), timeout=5)
         self.measure(('dmm_GreenOff', 'dmm_RedOn'), timeout=5)
 
     @share.teststep
@@ -94,9 +93,8 @@ class Initial(share.TestSequence):
 
         """
         mes['dmm_FanOff'](timeout=5)
-        dev['rla_Fan'].set_on()
-        self.measure(('dmm_FanOn', 'dmm_SecShdnOff'), timeout=10)
-        dev['rla_Fan'].set_off()
+        with dev['rla_Fan']:
+            self.measure(('dmm_FanOn', 'dmm_SecShdnOff'), timeout=10)
 
     @share.teststep
     def _step_ov_uv(self, dev, mes):
