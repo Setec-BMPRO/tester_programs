@@ -371,9 +371,9 @@ class Sensors(share.Sensors):
             stimulus=self.devices['dcl_24V'],
             sensor=self['o24VinOCP'],
             detect_limit=self.limits['24V_inOCP'],
-            ramp_range=sensor.RampRange(
-                start=self.ratings.v24.ocp * 0.9,
-                stop=self.ratings.v24.ocp * 1.1,
+            ramp_range=sensor.RampRange(            # Spec: 12.1A to 16.2A
+                start=self.ratings.v24.ocp - 0.5,   # 14.15-0.5 = 13.65
+                stop=self.ratings.v24.ocp + 2.3,    # 14.15+2.3 = 16.45
                 step=0.1),
             delay=0)
         # Arduino sensors
