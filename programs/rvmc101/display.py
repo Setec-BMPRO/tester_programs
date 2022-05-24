@@ -13,7 +13,7 @@ class LEDControl():
 
     """Control of the LEDs via CAN."""
 
-    inter_packet_gap = 0.1  # Wait between CAN packets
+    inter_packet_gap = 0.5  # Wait between CAN packets
 
     def __init__(self, candev):
         """Create instance.
