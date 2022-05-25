@@ -56,7 +56,6 @@ class BaseConsole(unittest.TestCase):
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action(expected=2)
 
-    @unittest.skip('Feature not implemented yet')
     def test_response_extra(self):
         """Too many responses."""
         self.mycon.port.puts('R1\rR2\r> ')

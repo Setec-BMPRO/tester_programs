@@ -96,7 +96,9 @@ class Base():
 
     """
 
-    # Console command prompt. Signals the end of response data.
+    # Command terminator. Signals the end of a command.
+    cmd_terminator = b'\r'
+    # Command prompt. Signals the end of response data.
     cmd_prompt = b'\r> '
     # Command suffix between echo of a command and the start of the response.
     res_suffix = b' -> '
@@ -143,7 +145,7 @@ class Base():
         """Sensor: Configure for next reading."""
         self._read_key = key
 
-    def opc(self):
+    def opc(self):      # pylint: disable=no-self-use
         """Sensor: Dummy OPC.
 
         @return None
@@ -151,7 +153,7 @@ class Base():
         """
         return None
 
-    def read(self, callerid):
+    def read(self, callerid):   # pylint: disable=unused-argument
         """Sensor: Read ARM data using the last defined key.
 
         @param callerid Identity of caller
@@ -195,8 +197,7 @@ class Base():
         reply = None
         try:
             if command:
-                self.last_cmd = command
-                self.port.reset_input_buffer()
+                self.reset_input_buffer()
                 self._write_command(command)
             if delay:
                 time.sleep(delay)
@@ -208,7 +209,7 @@ class Base():
                 self.port.timeout = 0.1
                 data = self.port.read(1000)
                 self.port.timeout = port_timeout
-                if len(data) > 0:
+                if data:
                     self._logger.error('Console Error extra data: %s', data)
                 # Generate a Measurement failure
                 self._logger.debug('Caught Error: "%s"', err)
@@ -228,24 +229,26 @@ class Base():
         @raises CommandError.
 
         """
-        # Send the command with a '\r'
+        # Send the command with a terminator
         cmd_bytes = command.encode()
         self._logger.debug('Cmd --> %s', repr(cmd_bytes))
-        self.port.write(cmd_bytes + b'\r')
+        self.port.write(cmd_bytes + self.cmd_terminator)
         # Read back the echo of the command
         cmd_echo = self.port.read(len(cmd_bytes))
         if self.verbose:
             self._logger.debug('Echo <-- %s', repr(cmd_echo))
         # The echo must match what we sent
         if cmd_echo != cmd_bytes:
-            raise CommandError('Command echo error. Tx: {0}, Rx: {1}'.format(
-                        cmd_bytes, cmd_echo))
+            raise CommandError(
+                'Command echo error. Tx: {0}, Rx: {1}'.format(
+                    cmd_bytes, cmd_echo))
 
     def _read_response(self, expected):
         """Read the response to a command.
 
-        Discard all '\n' as they are read. Keep reading until a command
-        prompt ('\r> ') is seen.
+        Discard all '\n' as they are read.
+        Keep reading until a command prompt is seen.
+        Remove all ignored strings.
 
         @param expected Expected number of responses.
         @return Response (None / String / ListOfStrings).
@@ -258,24 +261,24 @@ class Base():
             data = self.port.read(1)
             if self.verbose:
                 self._logger.debug('Read <-- %s', repr(data))
-            if len(data) == 0:              # No data means a timeout
+            if not data:            # No data means a timeout
                 raise ResponseError('Response timeout')
             buf += data
             buf = buf.replace(b'\n', b'')   # Remove all '\n'
-
-        buf = buf.replace(self.cmd_prompt, b'') # Remove the command prompt
-        buf = buf.replace(self.res_suffix, b'') # Remove any ' -> '
-        for pattern in self.ignore:         # Remove ignored strings
+        # Remove ignored strings
+        for pattern in (self.cmd_prompt, self.res_suffix):
+            buf = buf.replace(pattern, b'')
+        for pattern in self.ignore:
             buf = buf.replace(pattern.encode(), b'')
         # Decode and split response lines from the byte buffer
         response = buf.decode(errors='ignore').splitlines()
         while '' in response:       # Remove empty lines
             response.remove('')
         response_count = len(response)
-        if response_count == 1:     # Reduce list of 1 string to a string
-            response = response[0]
-        if response_count == 0:     # Reduce empty list to None
+        if not response_count:      # Reduce empty list to None
             response = None
+        elif response_count == 1:   # Reduce list of 1 string to a string
+            response = response[0]
         self._logger.debug('Response <-- %s', repr(response))
         if response_count != expected:
             raise ResponseError(
@@ -285,11 +288,10 @@ class Base():
 
 class BadUart(Base):
 
-    """Formatter for the 'Bad UART' consoles. Implements Protocols 2 & 3
+    """Formatter for the 'Bad UART' consoles. Implements Protocols 2 & 3.
 
-    - Sends a command with '\r' on the end, a byte at a time with echo
-      verification. The trailing '\r' is not echoed back.
-    - Response is the same as the BaseConsole class.
+    A UART that is prone to loosing characters if they arrive in a block.
+    Sends a command a byte at a time with echo verification.
 
     """
 
@@ -315,16 +317,16 @@ class BadUart(Base):
                 raise CommandError(
                     'Command echo error on byte {0}. Tx: {1}, Rx: {2}'.format(
                         index, a_byte, echo))
-        # And the '\r' without echo
-        self.port.write(b'\r')
+        # And the terminator without echo
+        self.port.write(self.cmd_terminator)
 
 
 class CANTunnel(Base):
 
     """Formatter for the 'CAN Tunnel' consoles. Implements Protocols 2 & 3
 
-    - Allow for possible CAN packet loss by send commands in blocks of
-      8-bytes maximum. Wait for the echo of each sent block.
+    - Send commands in blocks of 8-bytes maximum.
+      Wait for the echo of each sent block.
       The trailing '\r' is not echoed back.
     - Response is the same as the BaseConsole class.
 
@@ -351,5 +353,5 @@ class CANTunnel(Base):
                 raise CommandError(
                     'Command echo error. Tx: {0}, Rx: {1}'.format(
                         packet, echo))
-        # And the '\r' without echo
-        self.port.write(b'\r')
+        # And the terminator without echo
+        self.port.write(self.cmd_terminator)
