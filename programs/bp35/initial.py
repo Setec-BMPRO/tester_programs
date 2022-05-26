@@ -33,6 +33,8 @@ class Initial(share.TestSequence):
         Sensors.pic_image = 'bp35sr_{0}.hex'.format(self.cfg.pic_sw_version)
         Measurements.is_pm = self.cfg.is_pm
         super().open(limits, Devices, Sensors, Measurements)
+        if self.cfg.is_pm:
+            self.devices['PmTimer'].interval = self.cfg.pm_zero_wait
         self.limits['ARM-SwVer'].adjust(
             '^{0}$'.format(self.cfg.arm_sw_version.replace('.', r'\.')))
         self.steps = (
@@ -108,7 +110,7 @@ class Initial(share.TestSequence):
             bp35['PM_RELAY'] = False
             time.sleep(0.5)
             bp35['PM_RELAY'] = True
-            dev['PmTimer'].start(self.cfg.pm_zero_wait)
+            dev['PmTimer'].start()
         bp35.manual_mode(start=True)    # Start the change to manual mode
         bp35['FAN'] = 0
 
@@ -331,7 +333,7 @@ class Devices(share.Devices):
         self['bp35tunnel'] = console.TunnelConsole(tunnel)
         # High power source for the SR Solar Regulator
         self['SR_HighPower'] = SrHighPower(self['rla_acsw'], self['acsource'])
-        self['PmTimer'] = setec.BackgroundTimer()
+        self['PmTimer'] = setec.BackgroundTimer(1)
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet

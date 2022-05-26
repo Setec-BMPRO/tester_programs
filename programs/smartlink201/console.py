@@ -124,7 +124,7 @@ class SmartLink201Console(_Console):
         """
         super().__init__(port)
         # Background timer for Vbatt reading readiness
-        self.vbatttimer = setec.BackgroundTimer()
+        self.vbatttimer = setec.BackgroundTimer(self.vbatt_read_wait)
 
     def __getitem__(self, key):
         """Read a value."""
@@ -143,7 +143,7 @@ class SmartLink201Console(_Console):
 
         """
         self.action(None, expected=self.banner_lines)
-        self.vbatttimer.start(self.vbatt_read_wait)
+        self.vbatttimer.start()
         super().brand(sernum, product_rev, hardware_rev)
 
     def vbatt_cal(self, vbatt):
@@ -154,7 +154,7 @@ class SmartLink201Console(_Console):
         """
         self['BATT_CAL'] = vbatt
         self['REBOOT'] = None
-        self.vbatttimer.start(self.vbatt_read_wait)
+        self.vbatttimer.start()
 
     def analog_read(self):
         """Read analog input raw values."""

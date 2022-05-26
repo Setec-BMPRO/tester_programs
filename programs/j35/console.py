@@ -115,7 +115,7 @@ class _Console():
                 share.console.parameter.Float(
                     'LOAD_SWITCH_CURRENT_{0}'.format(i), scale=1000)
                 )
-        self._timer = setec.BackgroundTimer()
+        self._timer = setec.BackgroundTimer(self.manual_mode_wait)
 
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""
@@ -150,7 +150,7 @@ class _Console():
         """
         if start:  # Trigger manual mode, and start a timer
             self['SLEEP_MODE'] = 3
-            self._timer.start(self.manual_mode_wait)
+            self._timer.start()
         else:   # Complete manual mode setup once the timer is done.
             self._timer.wait()
             self['TASK_STARTUP'] = 0
