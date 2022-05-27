@@ -226,12 +226,33 @@ class Console101B(_Console):
 
         """
         # RVMN101B uses different names...
-        return self.output_pin_name[index].replace('OUT10A_', 'OUT10AMP_')
+        return super().pin_name(index).replace('OUT10A_', 'OUT10AMP_')
 
 
-class Console50(_Console):
+class _Console5x(_Console):
 
     """Communications to RVMN5x console."""
+
+    def pin_name(self, index):
+        """Get the schematic name of an output pin.
+
+        @param index Index number of the output
+
+        """
+        # RVMN5x HBridge outputs have Extend/Retract swapped
+        # relative to the RVMN101x...
+        name = super().pin_name(index)
+        if name.startswith('HBRIDGE'):
+            if name.endswith('extend'):
+                name = name.replace('extend', 'retract')
+            else:
+                name = name.replace('retract', 'extend')
+        return name
+
+
+class Console50(_Console5x):
+
+    """Communications to RVMN50 console."""
 
     def __init__(self, port):
         """Initialise communications.
@@ -275,7 +296,7 @@ class Console50(_Console):
         super().__init__(port)
 
 
-class Console55(_Console):
+class Console55(_Console5x):
 
     """Communications to RVMN55 console."""
 
