@@ -3,25 +3,27 @@ Non-Serial Device Programmers
 Laird / Nordic BLE Modules
 ==========================
     BL652
-        BLExtender          Done by Nordic nRF52 board
-        CN102,3             Done by Segger JLink
-        ODL103,4            Done by Segger JLink
-        RVMN101A            Done by Nordic nRF52 board
-        RVMN101B            Done by Nordic nRF52 board
-        RVMN5x              Done by Segger JLink
-        RVSWT101            Done by Nordic nRF52 board
-        Smartlink201        Done by Nordic nRF52 board
+        BLExtender          Nordic nRF52 board
+         & Smartlink201
+        CN102,3             Segger JLink
+         & ODL103,4
+        RVMN101A            Nordic nRF52 board
+        RVMN101B            Nordic nRF52 board
+        RVMN5x              Segger JLink
+        RVSWT101            Nordic nRF52 board
+        TRS-BTx             Nordic nRF52 board
+        TRS-RFM             Nordic nRF52 board
 
 MicroChip SAM Series
 ====================
 PicKit4
 
 Y   SAMC21E16A
-        RVMC101x            Done by Segger JLink
-        RVMD50              Done by Segger JLink
-        RvView2             Done by Segger JLink
+        RVMC101x            Segger JLink
+        RVMD50              Segger JLink
+        RvView2             Segger JLink
 
-N   SAMB11-MR210CA          Done by ???? in fixture
+N   SAMB11-MR210CA          ???? in fixture
         BatteryCheck 2
 
 MicroChip PIC Series
@@ -29,13 +31,13 @@ MicroChip PIC Series
 PicKit 3/4
 
 Y   PIC10F320
-        SX-750              Done by Arduino 2016-06
+        SX-750              Arduino 2016-06
 
 Y   PIC16F684
-        C45A-15             Done by Arduino 2020-07
+        C45A-15             Arduino 2020-07
 
 Y   PIC16F1828
-        ETrac-II            Done by Arduino 2020-06
+        ETrac-II            Arduino 2020-06
         GENIUS-II
 
 Y   PIC18F4321
@@ -50,7 +52,7 @@ Y   PIC18F87J93
 Y   PIC18LF252
         CMR-SBP
 
-Y   dsPIC33FJ16GS402        (Done by Arduino 2020-10 to 2022-02)
+Y   dsPIC33FJ16GS402        (Arduino 2020-10 to 2022-02)
         BP35SR
 
 ATMEL
@@ -58,16 +60,16 @@ ATMEL
 PicKit4
 
 Y   ATtiny10
-        BatteryCheck        Done by Arduino 2016-11     (Product EOL 2018-06)
+        BatteryCheck        Arduino 2016-11     (Product EOL 2018-06)
 
 Y   ATtiny406
-        MB3                 Done by Python updi module
+        MB3                 Python updi module
 
 Y   ATtiny1634
-        WTSI200             Done by Arduino 2013-08 (Combo program & test)
+        WTSI200             Arduino 2013-08 (Combo program & test)
 
 Renesas
 =======
     RA21E Series
         GEN9                TBD
-        SX-600              Done by Segger JLink
+        SX-600              Segger JLink
