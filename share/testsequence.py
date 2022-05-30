@@ -347,19 +347,15 @@ class MultiMeasurementSummary():
 
     def __exit__(self, exct_type, exce_value, trace_back):
         """Context Manager exit handler - Check overall result."""
-        # This exception can happen if the postion is disabled
-        # Thus _no_ measurements of the group were done
-        try:
+        with contextlib.suppress(tester.measure.NoResultError):
             result_overall = self.result.result
-        except tester.measure.NoResultError:
-            return
-        lim = tester.LimitBoolean('AllOk', True, doc='All passed')
-        sen = tester.sensor.MirrorReadingBoolean()
-        mes = tester.Measurement(lim, sen, doc='All checks ok')
-        mes.log_data = False
-        sen.position = tuple(self._sensor_positions)
-        sen.store(result_overall)
-        mes.measure()
+            lim = tester.LimitBoolean('AllOk', True, doc='All passed')
+            sen = tester.sensor.MirrorReadingBoolean()
+            mes = tester.Measurement(lim, sen, doc='All checks ok')
+            mes.log_data = False
+            sen.position = tuple(self._sensor_positions)
+            sen.store(result_overall)
+            mes.measure()
 
     def measure(self, measurement, timeout=0):
         """Make a single measurement.
