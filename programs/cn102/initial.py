@@ -49,9 +49,12 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+        if self.is_odl104:
+            dev['rla_nxp'].set_on()     # Disconnect BDA4 Tx/Rx from ARM
+        else:
+            dev['rla_reset'].set_on()   # Disable ARM to Nordic RESET
         dev['dcs_vin'].output(8.6, output=True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
-        dev['rla_reset'].set_on()   # Disable ARM to Nordic RESET
 
     @share.teststep
     def _step_program_arm(self, dev, mes):
@@ -69,12 +72,10 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
-        if not self.is_odl104:
-            dev['rla_reset'].set_off()  # Allow ARM to Nordic RESET
+        dev['rla_reset'].set_off()      # Allow ARM to Nordic RESET
         console = dev['console']
         console.open()
         console.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
-
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
@@ -116,6 +117,8 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('rla_reset', tester.Relay, 'RLA1'),    # 1k RESET to 3V3
+                ('rla_nxp', tester.Relay, 'RLA2'),      # Disconnect NXP Tx/Rx
+                ('rla_temp', tester.Relay, 'RLA3'),     # Temp Sensor pull down
                 ('rla_s1', tester.Relay, 'RLA4'),
                 ('rla_s2', tester.Relay, 'RLA5'),
                 ('rla_s3', tester.Relay, 'RLA6'),
@@ -155,7 +158,9 @@ class Devices(share.Devices):
         self['canreader'].stop()
         self['console'].close()
         self['dcs_vin'].output(0.0, False)
-        for rla in ('rla_reset', 'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4'):
+        for rla in (
+                'rla_reset', 'rla_nxp', 'rla_temp',
+                'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4'):
             self[rla].set_off()
 
 
