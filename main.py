@@ -21,20 +21,21 @@ def _main():
     logger = logging.getLogger(__name__)
     logger.info('Starting')
     # Suppress lower level logging
-    for name in (
-            'gpib',
-            'isplpc',
-            'tester.devphysical',
-            'tester.sensor.ui.Base',
-            'pylink.jlink',
-            'share.console.protocol.RttPort'
+    for name, level in (
+            ('gpib', logging.INFO),
+            ('isplpc', logging.INFO),
+            ('tester.devphysical', logging.INFO),
+            ('tester.sensor.ui.Base', logging.INFO),
+            ('pylink.jlink', logging.WARN),
+            ('share.console.protocol.RttPort', logging.INFO),
+            # updi logging when running MB3 Initial
+            ('nvm', logging.WARN),
+            ('app', logging.WARN),
+            ('link', logging.WARN),
+            ('phy', logging.WARN),
             ):
         log = logging.getLogger(name)
-        log.setLevel(logging.INFO)
-    # Suppress lower level updi logging when running MB3 Initial
-    for name in ('nvm', 'app', 'link', 'phy', 'pylink.jlink'):
-        log = logging.getLogger(name)
-        log.setLevel(logging.WARN)
+        log.setLevel(level)
     # Read settings from the configuration file
     config_file = __file__ + '.ini'
     logger.debug('Configuration file: %s', config_file)
