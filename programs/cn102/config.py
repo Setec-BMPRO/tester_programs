@@ -162,23 +162,15 @@ class ODL104(CN10x):
 
     _prefix = 'odl104'
     _nordic_104 = '1.0.4-0-g539e803'
-    _rev3_values = CN10xParameters(
+    _rev1_values = CN10xParameters(
             prefix=_prefix,
             sw_nxp_version=None,
             sw_nordic_version=_nordic_104,
-            hw_version=('03A', '01A'),
+            hw_version=('01A', '01A'),
             banner_lines=1
             )
     # Revision data dictionary:
     _rev_data = {
-        None: _rev3_values,
-        '3': _rev3_values,      # Rev 1 with firmware fix of PC-30010
-        # Rev 2 not released as of 2022-06-06
-        '1': CN10xParameters(
-            prefix=_prefix,
-            sw_nxp_version=None,
-            sw_nordic_version=_nordic_104,
-            hw_version=('01B', '01A'),      # Rev 1B from PC-30010
-            banner_lines=1
-            ),
+        None: _rev1_values,
+        '1': _rev1_values,
         }
