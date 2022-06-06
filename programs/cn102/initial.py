@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2018 SETEC Pty Ltd
-"""CN102/3/4 Initial Test Program."""
+"""CN102 / CN103 / ODL103 / ODL104 Initial Test Program.
+
+There are 3 different hardware:
+    CN102
+    CN103 & ODL103 are identical hardware & firmware. Front label differs.
+    ODL104
+
+"""
 
 import pathlib
 import time
@@ -16,7 +23,7 @@ from . import config, console
 
 class Initial(share.TestSequence):
 
-    """CN102/3/4 Initial Test Program."""
+    """CN102 / CN103 / ODL103 / ODL104 Initial Test Program."""
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
@@ -67,6 +74,7 @@ class Initial(share.TestSequence):
         mes['JLink']()
         if self.is_odl104:
             # Wait for the ARM Device to be programmed by the Nordic module
+            # LED quickly flashes white while this is done
             time.sleep(5)
 
     @share.teststep
@@ -183,7 +191,6 @@ class Sensors(share.Sensors):
         self['oSnEntry'] = sensor.DataEntry(
             message=tester.translate('cn102_initial', 'msgSnEntry'),
             caption=tester.translate('cn102_initial', 'capSnEntry'))
-        # Console sensors
         console = self.devices['console']
         for name, cmdkey in (
                 ('CANBIND', 'CAN_BIND'),
