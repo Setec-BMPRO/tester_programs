@@ -6,7 +6,6 @@
 import time
 
 import share
-import tester
 
 
 class Console(share.console.Base):
@@ -87,12 +86,7 @@ class Console(share.console.Base):
                 if self.verbose:
                     self._logger.debug('Read <-- %s', repr(data))
                 if not data:        # No data means a timeout
-                    comms = tester.Measurement(
-                        tester.LimitRegExp(
-                            'Action', 'ok', doc='Command succeeded'),
-                        tester.sensor.MirrorReadingString())
-                    comms.sensor.store('No response')
-                    comms.measure() # Generates a test FAIL result
+                    break           # We can't guarantee the number of responses received
                 buf += data
             self._logger.debug('Response <-- %s', repr(buf))
             buf = buf.replace(b'\r', b'')
@@ -101,6 +95,8 @@ class Console(share.console.Base):
             if response:
                 all_response.append(response)
         response = all_response
+        while '' in response:       # Remove empty lines
+            response.remove('')
         response_count = len(response)
         if response_count == 1:     # Reduce list of 1 string to a string
             response = response[0]
