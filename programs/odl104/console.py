@@ -65,9 +65,8 @@ class Console(share.console.Base):
     def action(self, command=None, delay=0, expected=0):
         """Provide a custom action when reading tanks."""
         response = super().action(command, delay, expected)
-        reply = 'NaN'
         if command.startswith('sensor get tank'):
             found = self._tank_regex.findall(response)
             if found:
-                reply = found[0]
-        return reply
+                response = found[0]
+        return response

@@ -164,7 +164,7 @@ class Sensors(share.Sensors):
         self['BleMac'].doc = 'Nordic BLE MAC'
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self['BleMac'].on_read = (
-            lambda value: value.replace(':', '').replace(' (random)', '')
+            lambda value: value.replace(':', '').replace(' (random)', '').lower()
             )
         self['JLink'] = sensor.JLink(
             self.devices['JLink'],
