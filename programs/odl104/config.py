@@ -26,7 +26,12 @@ class ODL10xParameters():
     """ODL10x model specific parameters."""
 
     # Initial test limits
-    limits_initial = (
+    limits_common = (
+        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
+            doc='Valid MAC address'),
+        )
+    # Initial test limits
+    limits_initial = limits_common + (
         tester.LimitLow('Part', 500.0),
         tester.LimitDelta('Vin', 8.0, 0.5),
         tester.LimitPercent('3V3', 3.30, 3.0),
@@ -34,9 +39,7 @@ class ODL10xParameters():
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
     # Final test limits
-    limits_final = (
-        tester.LimitRegExp('BleMac', '^[0-9a-f]{12}$',
-            doc='Valid MAC address'),
+    limits_final = limits_common + (
         tester.LimitBoolean('ScanMac', True, doc='MAC address detected'),
         tester.LimitHigh(
             'ScanRSSI',

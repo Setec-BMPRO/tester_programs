@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2022 , ",
-    "saved": "2022-06-08, 10:04:21"
+    "saved": "2022-06-08, 11:22:04"
   },
   "project": {
     "AUTHOR": "",
@@ -349,6 +349,8 @@
       "tests/programs/test_mb3_final.py",
       "tests/programs/test_mb3_initial.py",
       "tests/programs/test_mk7400_final.py",
+      "tests/programs/test_odl104_final.py",
+      "tests/programs/test_odl104_initial.py",
       "tests/programs/test_opto_initial.py",
       "tests/programs/test_rm50_final.py",
       "tests/programs/test_rvmc101_final.py",

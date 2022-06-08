@@ -26,7 +26,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_serialnum')
+        self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         # Lookup the MAC address from the server
         mac = dev['serialtomac'].blemac_get(self.sernum)
         mes['ble_mac'].sensor.store(mac)

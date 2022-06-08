@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
             tester.TestStep('PartCheck', self._step_part_check),
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep('Program', self._step_program),
-            tester.TestStep('TestNordic', self._step_test_nordic),
+            tester.TestStep('Nordic', self._step_nordic),
             tester.TestStep('TankSense', self._step_tank_sense),
             tester.TestStep('CanBus', self._step_canbus),
             )
@@ -59,7 +59,7 @@ class Initial(share.TestSequence):
         time.sleep(5)
 
     @share.teststep
-    def _step_test_nordic(self, dev, mes):
+    def _step_nordic(self, dev, mes):
         """Test the Nordic device."""
         console = dev['console']
         console.open()
@@ -151,17 +151,17 @@ class Sensors(share.Sensors):
             caption=tester.translate('cn102_initial', 'capSnEntry'))
         console = self.devices['console']
         for name, cmdkey in (
-                ('CANBIND', 'CAN_BIND'),
                 ('tank1', 'TANK1'),
                 ('tank2', 'TANK2'),
                 ('tank3', 'TANK3'),
                 ('tank4', 'TANK4'),
-                ('BleMac', 'MAC'),
             ):
             self[name] = sensor.KeyedReading(console, cmdkey)
         # Convert tank readings from zero to one based
         for name in ('tank1', 'tank2', 'tank3', 'tank4'):
             self[name].on_read = lambda value: value + 1
+        self['BleMac'] = sensor.KeyedReadingString(console, 'MAC')
+        self['BleMac'].doc = 'Nordic BLE MAC'
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self['BleMac'].on_read = (
             lambda value: value.replace(':', '').replace(' (random)', '')
