@@ -48,13 +48,13 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program both devices."""
-        if self.parameter in ('50', '55', ):    # 5x uses 2 x JLink
+        if self.parameter == '101B':        # 101B uses ISPLPC + NRF52
+            dev['progARM'].program()
+            dev['progNordic'].program()
+        else:                               # Others use 2 x JLink
             mes['JLinkARM']()
             with dev['swd_select']:
                 mes['JLinkBLE']()
-        else:                                   # 101x uses ISPLPC + NRF52
-            dev['progARM'].program()
-            dev['progNordic'].program()
 
     @share.teststep
     def _step_initialise(self, dev, mes):
@@ -140,7 +140,7 @@ class Devices(share.Devices):
                 ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        if self.parameter in ('101A', '101B', ):
+        if self.parameter == '101B':
             # ARM device programmer
             self['progARM'] = share.programmer.ARM(
                 share.config.Fixture.port(self.fixture, 'ARM'),
@@ -172,7 +172,7 @@ class Devices(share.Devices):
         self['candetector'] = share.can.PacketDetector(self['canreader'])
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
-        if self.parameter in ('101A', '101B', ):
+        if self.parameter == '101B':
             # Fixture USB hub power
             self['dcs_vcom'].output(9.0, output=True, delay=10)
             self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
