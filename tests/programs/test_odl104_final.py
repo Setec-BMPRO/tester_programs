@@ -17,6 +17,12 @@ class ODL104Final(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
+        for target in (
+                'share.bluetooth.SerialToMAC',
+                ):
+            patcher = patch(target)
+            self.addCleanup(patcher.stop)
+            patcher.start()
         mypi = Mock(name='MyRasPi')
         mypi.scan_advert_blemac.return_value = {
             'ad_data': {255: 'databytes'},

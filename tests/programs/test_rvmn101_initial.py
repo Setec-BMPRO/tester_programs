@@ -20,8 +20,6 @@ class RVMN101BInitial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.programmer.ARM',
-                'share.programmer.NRF52',
                 'share.bluetooth.SerialToMAC',
                 ):
             patcher = patch(target)
@@ -45,6 +43,10 @@ class RVMN101BInitial(ProgramTestCase):
                     (sen['VBatt'], 12.0),
                     (sen['3V3'], 3.3),
                     ),
+                'Program': (
+                    (sen['JLinkARM'], 0),
+                    (sen['JLinkBLE'], 0),
+                    ),
                 'Initialise': (
                     (sen['BleMac'], 'aabbccddeeff'),
                     ),
@@ -63,7 +65,7 @@ class RVMN101BInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(10, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'Program', 'Initialise', 'Output', 'CanBus'],
             self.tester.ut_steps)
