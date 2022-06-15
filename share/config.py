@@ -84,6 +84,7 @@ class Fixture():
         '031032': {'ARM': _ftdi, },     # BC25 Initial
         '032715': {'ARM': _ftdi, },     # GEN9-540 Initial
         '032870': {'ARM': _ftdi, },     # RVMC101 Initial
+        '033550': {'NORDIC': _ftdi, },  # RVMN101A Initial
         '033633': {'AVR': _ftdi, },     # MB3 Initial
         '034352': {'NORDIC': _ftdi, },  # TRS-BTx Initial
         '034861': {'NORDIC': _ftdi, },  # RVMN5x Initial
@@ -136,12 +137,6 @@ class Fixture():
             'ARM': _ftdi_hub_1,
             # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM5'}[os.name],
-            },
-        '033550': {     # RVMN101A Initial
-            'ARM': _ftdi_hub_1,
-            'NORDIC': _ftdi_hub_2,
-            # Hub port 3: Nordic NRF52 device programmer
-            'nRF52': '682553964',
             },
         '034400': {     # BP35-II Initial
             'ARM': _ftdi_hub_1,

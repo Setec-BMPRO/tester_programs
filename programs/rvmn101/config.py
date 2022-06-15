@@ -73,7 +73,7 @@ class Config():
         tester.LimitHigh('HSon', 10.0, doc='HS output on (high)'),
         tester.LimitLow('HSoff', 3.0, doc='All HS outputs off (low)'),
         tester.LimitLow('HBon', 2.0, doc='Reversed HBridge on (low)'),
-        tester.LimitHigh('HBoff', 8.0, doc='Reversed HBridge off (high)'),
+        tester.LimitHigh('HBoff', 6.0, doc='Reversed HBridge off (high)'),
         tester.LimitLow('LSon', 1.0, doc='LS output on (low)'),
         tester.LimitHigh('LSoff', 10.0, doc='LS output off (high)'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
