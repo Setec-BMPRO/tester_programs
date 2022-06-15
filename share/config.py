@@ -84,6 +84,7 @@ class Fixture():
         '031032': {'ARM': _ftdi, },     # BC25 Initial
         '032715': {'ARM': _ftdi, },     # GEN9-540 Initial
         '032870': {'ARM': _ftdi, },     # RVMC101 Initial
+        '032871': {'NORDIC': _ftdi, },  # RVMN101B Initial
         '033550': {'NORDIC': _ftdi, },  # RVMN101A Initial
         '033633': {'AVR': _ftdi, },     # MB3 Initial
         '034352': {'NORDIC': _ftdi, },  # TRS-BTx Initial
@@ -122,12 +123,6 @@ class Fixture():
             'NORDIC': _ftdi_hub_1,
             # Hub port 2: Nordic NRF52 device programmer
             'nRF52': '682507721',
-            },
-        '032871': {     # RVMN101B Initial
-            'ARM': _ftdi_hub_1,
-            'NORDIC': _ftdi_hub_2,
-            # Hub port 3: Nordic NRF52 device programmer
-            'nRF52': '682329023',
             },
         '033030': {     # RVSWT101 Final
             # Hub port 2:

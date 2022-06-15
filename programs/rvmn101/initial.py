@@ -48,13 +48,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program both devices."""
-        if self.parameter == '101B':        # 101B uses ISPLPC + NRF52
-            dev['progARM'].program()
-            dev['progNordic'].program()
-        else:                               # Others use 2 x JLink
-            mes['JLinkARM']()
-            with dev['swd_select']:
-                mes['JLinkBLE']()
+        mes['JLinkARM']()
+        with dev['swd_select']:
+            mes['JLinkBLE']()
 
     @share.teststep
     def _step_initialise(self, dev, mes):
@@ -130,29 +126,14 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vcom', tester.DCSource, 'DCS4'),
                 ('dcs_vbatt', tester.DCSource, 'DCS2'),
                 ('dcs_vhbridge', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_boot', tester.Relay, 'RLA2'),
                 ('rla_pullup', tester.Relay, 'RLA3'),
                 ('swd_select', tester.Relay, 'RLA4'),
                 ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        if self.parameter == '101B':
-            # ARM device programmer
-            self['progARM'] = share.programmer.ARM(
-                share.config.Fixture.port(self.fixture, 'ARM'),
-                pathlib.Path(__file__).parent / self.arm_image,
-                boot_relay=self['rla_boot'],
-                reset_relay=self['rla_reset']
-                )
-            # Nordic NRF52 device programmer
-            self['progNordic'] = share.programmer.NRF52(
-                pathlib.Path(__file__).parent / self.nordic_image,
-                share.config.Fixture.nrf52_sernum(self.fixture)
-                )
         # Serial connection to the console
         nordic_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
@@ -172,10 +153,6 @@ class Devices(share.Devices):
         self['candetector'] = share.can.PacketDetector(self['canreader'])
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
-        if self.parameter == '101B':
-            # Fixture USB hub power
-            self['dcs_vcom'].output(9.0, output=True, delay=10)
-            self.add_closer(lambda: self['dcs_vcom'].output(0.0, output=False))
         # Open console serial connection
         self['rvmn101'].open()
         self.add_closer(self['rvmn101'].close)
@@ -191,7 +168,7 @@ class Devices(share.Devices):
         self['can'].rvc_mode = False
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
             self[dcs].output(0.0, False)
-        for rla in ('rla_reset', 'rla_boot', 'rla_pullup', 'swd_select', ):
+        for rla in ('rla_reset', 'rla_pullup', ):
             self[rla].set_off()
 
 
