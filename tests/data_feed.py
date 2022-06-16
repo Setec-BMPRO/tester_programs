@@ -12,7 +12,7 @@ Record the test result.
 import logging
 import queue
 import unittest
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from unittest.mock import Mock, patch
 
 import tester
 from pydispatch import dispatcher
@@ -104,56 +104,6 @@ class UnitTester(tester.Tester):
         self.ut_result.append(kwargs['result'])
 
 
-class MockATE(dict):
-
-    """A Mock ATE."""
-
-    def __init__(self, tester_type):
-        """Create Mock ATE."""
-        self.tester_type = tester_type
-        # Dummy methods
-        self.opc = lambda: None
-        self.error = lambda: None
-        self.close = lambda: None
-        # Build a dictionary of Mocks
-        storage = {}
-        for dev_name in ('GEN', 'ACS', 'DIS', 'PWR', 'SAF', 'BLE', 'MAC'):
-            storage[dev_name] = Mock(name=dev_name)
-        gen = storage['GEN']
-        for dev_name in ('DMM', 'DSO'):
-            storage[dev_name] = (MagicMock(name=dev_name), gen)
-        # Patch a Mock SerialToCAN device
-        #   - Property 'ready_can' returns False
-        mycan = Mock(name='SerialToCan')
-        type(mycan).ready_can = PropertyMock(return_value=False)
-        storage['_CAN'] = mycan
-        storage['CAN'] = (mycan, Mock(name='SimSerial'))
-        for i in range(1, 8):           # DC Sources 1 - 7
-            dev_name = 'DCS{0}'.format(i)
-            storage[dev_name] = Mock(name=dev_name)
-        for i in range(1, 8):           # DC Loads 1 - 7
-            dev_name = 'DCL{0}'.format(i)
-            storage[dev_name] = Mock(name=dev_name)
-        for i in range(1, 23):          # Relays 1 - 22
-            dev_name = 'RLA{0}'.format(i)
-            storage[dev_name] = (gen, i)
-        storage['PICKIT'] = Mock(name='PicKit')
-        storage['JLINK'] = Mock(name='JLink')
-        super().__init__(storage)
-
-    def open_early(self):
-        """Early open tester."""
-
-    def open_late(self):
-        """Late open tester."""
-
-    def close_late(self):
-        """Late close tester."""
-
-    def close_early(self):
-        """Early close tester."""
-
-
 class ProgramTestCase(unittest.TestCase):
 
     """Product test program wrapper."""
@@ -174,10 +124,6 @@ class ProgramTestCase(unittest.TestCase):
         # Patch time.sleep to remove delays
         cls.patcher = patch('time.sleep')
         cls.patcher.start()
-        # Patch tester physical instruments
-        cls.tst_patcher = patch(
-            'tester.devphysical.PhysicalDevices', new=MockATE)
-        cls.tst_patcher.start()
         # Create the tester instance
         cls.tester = UnitTester(cls.prog_class, cls.per_panel, cls.parameter)
         cls.tester.start()
@@ -205,5 +151,4 @@ class ProgramTestCase(unittest.TestCase):
             log = logging.getLogger(name)
             log.setLevel(logging.INFO)
         cls.patcher.stop()
-        cls.tst_patcher.stop()
         cls.tester.stop()

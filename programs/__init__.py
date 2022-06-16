@@ -3,6 +3,10 @@
 # Copyright 2013 SETEC Pty Ltd.
 """Product Test Programs."""
 
+import tester
+
+import share
+
 from . import selftest
 from . import _2040
 from . import asdisplay
@@ -54,6 +58,61 @@ from . import ts3520
 from . import uni750
 from . import wtsi200
 
+
+class MockSequence(share.TestSequence):
+
+    """Mock Test Sequence.
+
+    Used for interactive testing of the Test Executive.
+
+    """
+
+    def open(self, uut):
+        """Create the test program as a linear sequence."""
+        super().open(tuple(), MockDevices, MockSensors, MockMeasurements)
+        self.steps = (
+            tester.TestStep('Step1', self._step1),
+            )
+
+    @share.teststep
+    def _step1(self, dev, mes):
+        """Startup with DC Input, measure output at no load."""
+        mes['YesNoPass']()
+
+
+class MockDevices(share.Devices):
+
+    """Devices."""
+
+    def open(self):
+        """Create all Instruments."""
+
+    def reset(self):
+        """Reset instruments."""
+
+
+class MockSensors(share.Sensors):
+
+    """Sensors."""
+
+    def open(self):
+        """Create all Sensors."""
+        self['YesNoPass'] = tester.sensor.YesNo(
+            message=tester.translate('mocksequence', 'ShouldTestPass?'),
+            caption=tester.translate('mocksequence', 'capTestResult'))
+
+
+class MockMeasurements(share.Measurements):
+
+    """Measurements."""
+
+    def open(self):
+        """Create all Measurements."""
+        self.create_from_names((
+            ('YesNoPass', 'Notify', 'YesNoPass', ''),
+            ))
+
+
 # All the Test Programs
 #   Each Dictionary entry is:
 #       Key:
@@ -64,6 +123,7 @@ from . import wtsi200
 #           The class to use to create a program instance
 
 PROGRAMS = {
+    'MockSequence': MockSequence,
     'Self-Test': selftest.Main,
     '2040 Final': _2040.Final,
     '2040 Initial': _2040.Initial,
