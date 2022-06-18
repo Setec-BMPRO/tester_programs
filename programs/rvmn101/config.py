@@ -140,6 +140,7 @@ class RVMN101A(Config):
             }
     # Software versions
     _nordic_2_7_1 = 'jayco_rvmn101_signed_2.7.1-0-gaa2ff6a9_factory_mcuboot.hex'
+    _nordic_3_0_4 = 'jayco_rvmn101_signed_3.0.4-0-gd3142626_factory_mcuboot.hex'
     _arm_image_1_13 = 'rvmn101_nxp_1.13.bin'
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
     _rev23_values = _Values(
@@ -214,6 +215,18 @@ class RVMN101A(Config):
             ),
         # Rev 1-5 were Engineering protoype builds
         }
+
+    @classmethod
+    def _configure(cls, uut):
+        """Adjust configuration based on UUT Lot Number.
+
+        @param uut setec.UUT instance
+
+        """
+        super()._configure(uut)
+        if uut and uut.lot.number == 'A222402':     # PC-30067
+            cls.nordic_image = cls._nordic_3_0_4
+            cls.product_rev = '23A'
 
     @classmethod
     def limits_final(cls):
@@ -323,8 +336,9 @@ class RVMN5x(Config):
     fixture = '034861'
     # Software versions
     _nordic_2_7_1 = 'jayco_rvmn5x_signed_2.7.1-0-gaa2ff6a9_factory_mcuboot.hex'
-    _nxp_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     _nordic_2_8_1 = 'jayco_rvmn5x_signed_2.8.1-0-gd63bc1d0_factory_mcuboot.hex'
+    _nordic_3_0_4 = 'jayco_rvmn5x_signed_3.0.4-0-gd3142626_factory_mcuboot.hex'
+    _nxp_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     _ra2_image_0_3_6 = 'rvmn5x_ra2_v0.3.6-0-g34e425b.hex'
     _rev13_values = _Values(
             nordic_image=_nordic_2_8_1, arm_image=_ra2_image_0_3_6,
@@ -372,6 +386,18 @@ class RVMN5x(Config):
             ),
         # Rev 1-2 were Engineering protoype builds
         }
+
+    @classmethod
+    def _configure(cls, uut):
+        """Adjust configuration based on UUT Lot Number.
+
+        @param uut setec.UUT instance
+
+        """
+        super()._configure(uut)
+        if uut and uut.lot.number == 'A222306':     # PC-30068 for RVMN50
+            cls.nordic_image = cls._nordic_3_0_4
+            cls.product_rev = '14A'
 
     @classmethod
     def limits_final(cls):
