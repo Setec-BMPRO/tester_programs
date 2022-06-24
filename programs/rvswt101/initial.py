@@ -50,7 +50,7 @@ class Initial(share.TestSequence):
         Test the Bluetooth interface.
 
         """
-        program_nordic = mes['JLinkBLE']
+        program_nordic = mes['JLink']
         # Open console serial connection
         dev['rvswt101'].open()
         for pos in range(self.per_panel):
