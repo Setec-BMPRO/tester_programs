@@ -23,10 +23,6 @@ class Initial(share.TestSequence):
         Sensors.sw_image = self.cfg['software']
         Sensors.jlink_projectfile = self.cfg['jlink_projectfile']
         super().open(self.cfg['limits_ini'], Devices, Sensors, Measurements)
-        # Force code the RVSWT101 switch code
-        self.devices['progNordic'].rvswt101_forced_switch_code = (
-            self.cfg['forced_code']
-            )
         # Adjust for different console behaviour
         self.devices['rvswt101'].banner_lines = self.cfg['banner_lines']
         self.steps = (
