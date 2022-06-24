@@ -143,6 +143,7 @@ class Config():
                 pass
         return {
             'software': image,
+            'jlink_projectfile': 'nrf52.jflash',
             'limits_ini': cls._common_limits + cls._initial_limits,
             'limits_fin': (
                 cls._common_limits + cls._final_limits + (type_lim, )

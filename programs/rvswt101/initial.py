@@ -20,7 +20,8 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
-        Devices.sw_image = self.cfg['software']
+        Sensors.sw_image = self.cfg['software']
+        Sensors.jlink_projectfile = self.cfg['jlink_projectfile']
         super().open(self.cfg['limits_ini'], Devices, Sensors, Measurements)
         # Force code the RVSWT101 switch code
         self.devices['progNordic'].rvswt101_forced_switch_code = (
@@ -53,7 +54,7 @@ class Initial(share.TestSequence):
         Test the Bluetooth interface.
 
         """
-        pgm = dev['progNordic']
+        program_nordic = mes['JLinkBLE']
         # Open console serial connection
         dev['rvswt101'].open()
         for pos in range(self.per_panel):
@@ -61,11 +62,11 @@ class Initial(share.TestSequence):
             if tester.Measurement.position_enabled(mypos):
                 # Set sensor positions
                 for sen in (
-                        pgm, mes['ble_mac'].sensor, mes['scan_mac'].sensor
+                        program_nordic, mes['ble_mac'].sensor, mes['scan_mac'].sensor
                         ):
                     sen.position = mypos
                 dev['fixture'].connect(mypos)
-                pgm.program()
+                program_nordic()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Get the MAC address from the console.
@@ -91,15 +92,12 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_image = None
-
     def open(self):
         """Create all Instruments."""
         fixture = '032869'
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_usb', tester.DCSource, 'DCS4'),
                 ('dcs_vin', tester.DCSource, 'DCS2'),
                 ('dcs_switch', tester.DCSource, 'DCS3'),
                 ('rla_pos1', tester.Relay, 'RLA1'),
@@ -112,11 +110,9 @@ class Devices(share.Devices):
                 ('rla_pos8', tester.Relay, 'RLA8'),
                 ('rla_pos9', tester.Relay, 'RLA9'),
                 ('rla_pos10', tester.Relay, 'RLA10'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Fixture USB hub power
-        self['dcs_usb'].output(9.0, output=True, delay=5)
-        self.add_closer(lambda: self['dcs_usb'].output(0.0, output=False))
         # Fixture helper device
         self['fixture'] = Fixture(
             self['dcs_switch'],
@@ -127,11 +123,6 @@ class Devices(share.Devices):
                 self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
                 self['rla_pos10'],
             ]
-            )
-        # Nordic NRF52 device programmer
-        self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_image,
-            share.config.Fixture.nrf52_sernum(fixture)
             )
         # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
@@ -268,6 +259,9 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
+    projectfile = None
+    sw_image = None
+
     def open(self):
         """Create all Sensors."""
         dmm = self.devices['dmm']
@@ -275,6 +269,10 @@ class Sensors(share.Sensors):
         self['mirmac'] = sensor.MirrorReadingString()
         self['mirscan'] = sensor.MirrorReadingBoolean()
         self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.jlink_projectfile,
+            pathlib.Path(__file__).parent / self.sw_image)
         # Console sensors
         rvswt101 = self.devices['rvswt101']
         for device, name, cmdkey in (
@@ -294,4 +292,5 @@ class Measurements(share.Measurements):
             ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from console'),
             ('scan_mac', 'ScanMac', 'mirscan',
                 'Scan for MAC address over bluetooth'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))

@@ -83,6 +83,7 @@ class Fixture():
         '029687': {'ARM': _ftdi, },     # RvView/JDisplay/RVMD50 Initial
         '031032': {'ARM': _ftdi, },     # BC25 Initial
         '032715': {'ARM': _ftdi, },     # GEN9-540 Initial
+        '032869': {'NORDIC': _ftdi, },  # RVSWT101 Initial
         '032870': {'ARM': _ftdi, },     # RVMC101 Initial
         '032871': {'NORDIC': _ftdi, },  # RVMN101B Initial
         '033550': {'NORDIC': _ftdi, },  # RVMN101A Initial
@@ -118,11 +119,6 @@ class Fixture():
             'ARM': _ftdi_hub_1,
             # Hub port 2: FTDI
             'BLE': {'posix': '/dev/ttyUSB2', 'nt': 'COM7'}[os.name],
-            },
-        '032869': {     # RVSWT101 Initial
-            'NORDIC': _ftdi_hub_1,
-            # Hub port 2: Nordic NRF52 device programmer
-            'nRF52': '682507721',
             },
         '033030': {     # RVSWT101 Final
             # Hub port 2:
