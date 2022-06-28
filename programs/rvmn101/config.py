@@ -224,9 +224,10 @@ class RVMN101A(Config):
 
         """
         super()._configure(uut)
-        if uut and uut.lot.number == 'A222402':     # PC-30067
+        # PC-30067
+        if uut and uut.lot.number in ('A222402', 'A222706', 'A222804'):
             cls.nordic_image = cls._nordic_3_0_4
-            cls.product_rev = '23A'
+            cls.product_rev = '24A'
 
     @classmethod
     def limits_final(cls):
@@ -395,7 +396,8 @@ class RVMN5x(Config):
 
         """
         super()._configure(uut)
-        if uut and uut.lot.number == 'A222306':     # PC-30068 for RVMN50
+        # PC-30068 for RVMN50
+        if uut and uut.lot.number in ('A222306', 'A222708', 'A222806'):
             cls.nordic_image = cls._nordic_3_0_4
             cls.product_rev = '14A'
 
