@@ -209,7 +209,7 @@ class Sensors(share.Sensors):
         self['SL_MAC'].doc = 'Nordic BLE MAC'
         # Convert "xx:xx:xx:xx:xx:xx(random)" to "xxxxxxxxxxxx"
         self['SL_MAC'].on_read = (
-            lambda value: value.replace(':', '').replace(' (random)', '')
+            lambda value: value.replace(':', '').replace(' (random)', '').lower()
             )
         self['SL_Vbatt'] = sensor.KeyedReading(smartlink201, 'BATT')
         self['SL_Vbatt'].doc = 'Nordic Vbatt reading'
