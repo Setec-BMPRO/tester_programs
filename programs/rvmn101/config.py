@@ -398,7 +398,8 @@ class RVMN5x(Config):
         """
         super()._configure(uut)
         # PC-30068 for RVMN50
-        if uut and uut.lot.number in ('A222306', 'A222708', 'A222806'):
+        if uut and uut.lot.number in (
+                'A222306', 'A222708', 'A222806', 'A222917', 'A223016'):
             cls.nordic_image = cls._nordic_3_0_4
             cls.product_rev = '14A'
 
