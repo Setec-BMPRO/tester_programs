@@ -337,54 +337,52 @@ class RVMN5x(Config):
     # Initial Test parameters
     fixture = '034861'
     # Software versions
-    _nordic_2_7_1 = 'jayco_rvmn5x_signed_2.7.1-0-gaa2ff6a9_factory_mcuboot.hex'
-    _nordic_2_8_1 = 'jayco_rvmn5x_signed_2.8.1-0-gd63bc1d0_factory_mcuboot.hex'
     _nordic_3_0_4 = 'jayco_rvmn5x_signed_3.0.4-0-gd3142626_factory_mcuboot.hex'
     _nxp_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     _ra2_image_0_3_6 = 'rvmn5x_ra2_v0.3.6-0-g34e425b.hex'
     _rev13_values = _Values(
-            nordic_image=_nordic_2_8_1, arm_image=_ra2_image_0_3_6,
-            product_rev='13A', hardware_rev='10A',
+            nordic_image=_nordic_3_0_4, arm_image=_ra2_image_0_3_6,
+            product_rev='13B', hardware_rev='10A',
             arm_projectfile='r7fa2l1a9.jflash',
             )
     _rev_data = {
         None: _rev13_values,
         '13': _rev13_values,
         '12': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
-            product_rev='12A', hardware_rev='08A',
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
+            product_rev='12B', hardware_rev='08A',
             ),
         '10': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
-            product_rev='10B', hardware_rev='08A',
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
+            product_rev='10C', hardware_rev='08A',
             ),
         '9': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
-            product_rev='09B', hardware_rev='07A',
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
+            product_rev='09C', hardware_rev='07A',
             ),
         '8': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
-            product_rev='08D', hardware_rev='05A',
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
+            product_rev='08E', hardware_rev='05A',
             ),
         '7': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
             product_rev='07C', hardware_rev='05A',
             ),
         '6': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
             product_rev='06E', hardware_rev='05A',
             ),
         '5': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
-            product_rev='05G', hardware_rev='05A',
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
+            product_rev='05H', hardware_rev='05A',
             ),
         '4': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
             product_rev='04E', hardware_rev='04A',
             ),
         '3': _Values(
-            nordic_image=_nordic_2_7_1, arm_image=_nxp_image_2_3,
-            product_rev='03H', hardware_rev='03A',
+            nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
+            product_rev='03I', hardware_rev='03A',
             ),
         # Rev 1-2 were Engineering protoype builds
         }
@@ -400,7 +398,6 @@ class RVMN5x(Config):
         # PC-30068 for RVMN50
         if uut and uut.lot.number in (
                 'A222306', 'A222708', 'A222806', 'A222917', 'A223016'):
-            cls.nordic_image = cls._nordic_3_0_4
             cls.product_rev = '14A'
 
     @classmethod
