@@ -82,14 +82,19 @@ class ODL104():
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         cls.parameters = cls._rev_data[rev]
 
-    _nordic_104 = 'odl104_nordic_1.0.4-0-g539e803.hex'
-    _rev1_values = ODL10xParameters(
-            sw_nordic_image=_nordic_104,
-            hw_version=('01A', '01A'),
+    _nordic_105 = 'odl104_v1.0.5-0-gc62c5a1-signed-mcuboot-factory.hex'
+    _rev2_values = ODL10xParameters(
+            sw_nordic_image=_nordic_105,
+            hw_version=('02A', '01A'),
             banner_lines=1
             )
     # Revision data dictionary:
     _rev_data = {
-        None: _rev1_values,
-        '1': _rev1_values,
+        None: _rev2_values,
+        '2': _rev2_values,
+        '1': ODL10xParameters(
+            sw_nordic_image=_nordic_105,
+            hw_version=('01B', '01A'),
+            banner_lines=1
+            ),
         }
