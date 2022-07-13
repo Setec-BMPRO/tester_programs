@@ -130,7 +130,7 @@ class _Console(share.console.Base):
 
         @param sernum SETEC Serial Number 'AYYWWLLNNNN'
         @param product_rev Product revision from ECO eg: '03A'
-        @param hardware_rev Hardware revision from Prod. Notes.
+        @param hardware_rev Hardware revision from ECO eg: '03A'.
 
         """
         self.action(None, expected=self.banner_lines)

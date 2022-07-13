@@ -144,18 +144,18 @@ class RVMN101A(Config):
     _arm_image_2_5 = 'rvmn101_nxp_2.5.bin'
     _rev23_values = _Values(
             nordic_image=_nordic_3_0_4, arm_image=_arm_image_2_5,
-            product_rev='23B', hardware_rev='21',
+            product_rev='23B', hardware_rev='21A',  # '21' in the ECO
             )
     _rev_data = {
         None: _rev23_values,
         '23': _rev23_values,
         '22': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_arm_image_2_5,
-            product_rev='22B', hardware_rev='20',
+            product_rev='22B', hardware_rev='20A',  # Not in the ECO
             ),
         '21': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_arm_image_2_5,
-            product_rev='21C', hardware_rev='20',
+            product_rev='21C', hardware_rev='20A',  # '20' in the ECO
             ),
         '20': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_arm_image_2_5,
