@@ -37,6 +37,8 @@ class SerialToMAC():
         try:
             svr = self._server()
             mac = svr.blemac_get(serial)
+            svr('close')
+            del svr
         except Exception as exc:    # pylint: disable=broad-except
             mac = str(exc)
         return mac
@@ -50,3 +52,5 @@ class SerialToMAC():
         """
         svr = self._server()
         svr.blemac_set(serial, blemac)
+        svr('close')
+        del svr
