@@ -16,14 +16,13 @@ class RVSWT101Initial(ProgramTestCase):
     """RVSWT101 Initial program test suite."""
 
     prog_class = rvswt101.Initial
-    per_panel = 10
+    per_panel = 1
     parameter = '4gp1'
     debug = False
 
     def setUp(self):
         """Per-Test setup."""
         for target in (
-                'share.programmer.NRF52',
                 'share.bluetooth.RaspberryBluetooth',
                 'share.bluetooth.SerialToMAC',
                 ):
@@ -47,6 +46,7 @@ class RVSWT101Initial(ProgramTestCase):
                     (sen['vin'], 3.3),
                     ),
                 'ProgramTest': (
+                    (sen['JLink'], 0),
                     (sen['mirmac'], 'ec70225e3dba'),
                     (sen['mirscan'], True),
                     ),
@@ -58,7 +58,7 @@ class RVSWT101Initial(ProgramTestCase):
                 for uut in range(1, self.per_panel + 1)))
         for res in self.tester.ut_result:
             self.assertEqual('P', res.code)
-            self.assertEqual(3, len(res.readings))
+            self.assertEqual(4, len(res.readings))
         self.assertEqual(
             ['PowerUp', 'ProgramTest'],
             self.tester.ut_steps)

@@ -50,7 +50,6 @@ class Initial(share.TestSequence):
         Test the Bluetooth interface.
 
         """
-        program_nordic = mes['JLink']
         # Open console serial connection
         dev['rvswt101'].open()
         for pos in range(self.per_panel):
@@ -58,11 +57,13 @@ class Initial(share.TestSequence):
             if tester.Measurement.position_enabled(mypos):
                 # Set sensor positions
                 for sen in (
-                        program_nordic, mes['ble_mac'].sensor, mes['scan_mac'].sensor
+                        mes['JLink'].sensor,
+                        mes['ble_mac'].sensor,
+                        mes['scan_mac'].sensor,
                         ):
                     sen.position = mypos
                 dev['fixture'].connect(mypos)
-                program_nordic()
+                mes['JLink']()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Get the MAC address from the console.
@@ -90,7 +91,6 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        fixture = '032869'
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
