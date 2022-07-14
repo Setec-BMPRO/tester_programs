@@ -3,31 +3,41 @@
 # Copyright 2019 SETEC Pty Ltd.
 """Bluetooth SerialNumber to MAC Storage."""
 
+import attr
 import jsonrpclib
 
 
+@attr.s
 class SerialToMAC():
 
-    """Save/Read the blutooth MAC address for a Serial Number."""
+    """Save/Read the bluetooth MAC address for a Serial Number."""
 
-    # The RPC server location
-    server_url = 'https://webapp.mel.setec.com.au/ate/rpc/'
+    server_url = attr.ib(default='https://webapp.mel.setec.com.au/ate/rpc/')
 
-    def __init__(self):
-        """Create the instance."""
-        self.server = jsonrpclib.ServerProxy(self.server_url)
+# FIXME: We should be able to reuse the ServerProxy
+# ATE3b uses Python 3.10 with OpenSSL 3 and gets an "unexpected EOF" SSL
+# error about 30 sec after the first RPC call.
+# Use a new ServerProxy for every RPC call as a work around.
+
+    def _server(self):
+        """Create a new connection.
+
+        @return jsonrpclib.ServerProxy instance
+
+        """
+        return jsonrpclib.ServerProxy(self.server_url)
 
     def blemac_get(self, serial):
         """Retrieve a Bluetooth MAC for a Serial Number.
 
         @param serial Unit serial number ('AYYWWLLNNNN')
         @return 12 hex digit Bluetooth MAC address
-            (which will be tested with a Measurement)
 
         """
         try:
-            mac = self.server.blemac_get(serial)
-        except jsonrpclib.jsonrpc.ProtocolError as exc:
+            svr = self._server()
+            mac = svr.blemac_get(serial)
+        except Exception as exc:    # pylint: disable=broad-except
             mac = str(exc)
         return mac
 
@@ -38,4 +48,5 @@ class SerialToMAC():
         @param blemac Bluetooth MAC address (12 hex digits)
 
         """
-        self.server.blemac_set(serial, blemac)
+        svr = self._server()
+        svr.blemac_set(serial, blemac)
