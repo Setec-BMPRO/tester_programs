@@ -351,8 +351,14 @@ class RVMN5x(Config):
             product_rev='13B', hardware_rev='10A',
             arm_projectfile='r7fa2l1a9.jflash',
             )
+    _rev14_values = _Values(
+            nordic_image=_nordic_3_0_4, arm_image=_ra2_image_0_3_6,
+            product_rev='14A', hardware_rev='10A',
+            arm_projectfile='r7fa2l1a9.jflash',
+            )
     _rev_data = {
-        None: _rev13_values,
+        None: _rev14_values,
+        '14': _rev14_values,
         '13': _rev13_values,
         '12': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
