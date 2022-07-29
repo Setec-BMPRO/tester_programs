@@ -3,8 +3,6 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Configuration."""
 
-import logging
-
 import tester
 
 
@@ -126,11 +124,6 @@ class Config():
         @return Dictionary of configuration data
 
         """
-        try:
-            rev = uut.lot.item.revision
-        except AttributeError:
-            rev = None
-        logging.getLogger(__name__).debug('Revision detected as %s', rev)
         if parameter == 'series':       # Initial builds of Rev 3
             type_lim = tester.LimitBetween(
                 'SwitchType', 1, 42, doc='Switch type code')
