@@ -124,6 +124,7 @@ class Config():
         @return Dictionary of configuration data
 
         """
+        rev = uut.lot.item.revision
         if parameter == 'series':       # Initial builds of Rev 3
             type_lim = tester.LimitBetween(
                 'SwitchType', 1, 42, doc='Switch type code')
