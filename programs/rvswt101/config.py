@@ -3,6 +3,8 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Configuration."""
 
+import logging
+
 import tester
 
 
@@ -16,32 +18,37 @@ class Config():
     _types = {
         # For the 3 TMC types: BLE Code is Label Code - 1 ...
         '4gp1': (0, 4), '6gp1': (2, 6), '6gp2': (3, 6),
-         'j3-1': (16, 6), 'j3-2': (17, 6), 'j3-3': (18, 6),
-         'j3-4': (29, 6), 'j3-5': (30, 6),
-         'j3-6': (31, 6), 'j3-7': (5, 4), 'j3-8': (47, 4), 'j3-9': (52, 4),
-         'j4-1': (19, 6), 'j4-2': (20, 6), 'j4-4': (21, 6), 'j4-5': (32, 6),
-         'j4-6': (6, 4), 'j4-7': (7, 4),
-         'j4-8': (48, 4), 'j4-9': (53, 4),
-         'j5-1': (22, 6), 'j5-2': (23, 6), 'j5-3': (33, 6), 'j5-4': (34, 6),
-         'j5-5': (49, 4), 'j5-6': (8, 4),
-         'j5-7': (9, 4), 'j5-8': (45, 6), 'j5-9': (56, 6),
-         'j6-1': (25, 6), 'j6-2': (35, 6), 'j6-3': (10, 4), 'j6-4': (11, 4),
-         'j6-5': (12, 4),
-         'j6-6': (50, 4), 'j6-7': (36, 6), 'j6-8': (27, 6), 'j6-9': (46, 6),
-         'j7-1': (38, 4),
-         'j8-1': (37, 6), 'j8-2': (28, 6), 'j8-3': (39, 4), 'j8-4': (57, 6),
-         'j9-1': (40, 4),
-         'j10-1': (13, 4), 'j10-2': (41, 4),
-         'j11-1': (14, 4), 'j11-2': (15, 4), 'j11-3': (42, 4), 'j11-4': (51, 4),
-         'j11-5': (54, 4), 'j11-6': (55, 4),
-         'od-01': (60, 6), 'od-02': (61, 4),
-         }
+        'j3-1': (16, 6), 'j3-2': (17, 6), 'j3-3': (18, 6),
+        'j3-4': (29, 6), 'j3-5': (30, 6),
+        'j3-6': (31, 6), 'j3-7': (5, 4), 'j3-8': (47, 4), 'j3-9': (52, 4),
+        'j4-1': (19, 6), 'j4-2': (20, 6), 'j4-4': (21, 6), 'j4-5': (32, 6),
+        'j4-6': (6, 4), 'j4-7': (7, 4),
+        'j4-8': (48, 4), 'j4-9': (53, 4),
+        'j5-1': (22, 6), 'j5-2': (23, 6), 'j5-3': (33, 6), 'j5-4': (34, 6),
+        'j5-5': (49, 4), 'j5-6': (8, 4),
+        'j5-7': (9, 4), 'j5-8': (45, 6), 'j5-9': (56, 6),
+        'j6-1': (25, 6), 'j6-2': (35, 6), 'j6-3': (10, 4), 'j6-4': (11, 4),
+        'j6-5': (12, 4),
+        'j6-6': (50, 4), 'j6-7': (36, 6), 'j6-8': (27, 6), 'j6-9': (46, 6),
+        'j7-1': (38, 4),
+        'j8-1': (37, 6), 'j8-2': (28, 6), 'j8-3': (39, 4), 'j8-4': (57, 6),
+        'j9-1': (40, 4),
+        'j10-1': (13, 4), 'j10-2': (41, 4),
+        'j11-1': (14, 4), 'j11-2': (15, 4), 'j11-3': (42, 4), 'j11-4': (51, 4),
+        'j11-5': (54, 4), 'j11-6': (55, 4),
+        'od-01': (60, 6), 'od-02': (61, 4),
+        }
+    # Series software images per revision
+    _rev_software = dict.fromkeys(
+            [None,  5], 'rvswt101_nrf52810_pca10040_v1.6.1-0-g459fa86.hex')
+    _rev_software.update(dict.fromkeys(
+            [4,  3], 'rvswt101_series_1.5.hex'))
     # Software images
     _software = {   # Rev 2 'gp' units, Rev 3/4 'j' units
         '4gp1': 'rvswt101_4gp1_1.2.hex',
         '6gp1': 'rvswt101_6gp1_1.2.hex',
         '6gp2': 'rvswt101_6gp2_1.2.hex',
-        'series': 'rvswt101_series_1.5.hex',
+        'series': _rev_software,
         }
     # Common Test limits
     _common_limits = (
@@ -107,6 +114,8 @@ class Config():
             doc='Expected switch code for button 6'),
         )
 
+    
+    
     @classmethod
     def get(cls, parameter, uut):
 
@@ -117,6 +126,11 @@ class Config():
         @return Dictionary of configuration data
 
         """
+        try:
+            rev = uut.lot.item.revision
+        except AttributeError:
+            rev = None
+        logging.getLogger(__name__).debug('Revision detected as %s', rev)
         if parameter == 'series':       # Initial builds of Rev 3
             type_lim = tester.LimitBetween(
                 'SwitchType', 1, 42, doc='Switch type code')
@@ -128,7 +142,7 @@ class Config():
             image = cls._software[parameter]
             banner_lines = 1
         else:                           # Rev 3+ auto-coded switch types
-            image = cls._software['series']
+            image = cls._software['series'][rev]
             banner_lines = 2
         # Force code the RVSWT101 switch code as required
         forced_code = 0
