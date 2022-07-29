@@ -38,9 +38,9 @@ class Config():
         }
     # Series software images per revision
     _rev_software = dict.fromkeys(
-            [None,  5], 'rvswt101_nrf52810_pca10040_v1.6.1-0-g459fa86.hex')
+            [None,  '5'], 'rvswt101_nrf52810_pca10040_v1.6.1-0-g459fa86.hex')
     _rev_software.update(dict.fromkeys(
-            [4,  3], 'rvswt101_series_1.5.hex'))
+            ['4',  '3'], 'rvswt101_series_1.5.hex'))
     # Software images
     _software = {   # Rev 2 'gp' units, Rev 3/4 'j' units
         '4gp1': 'rvswt101_4gp1_1.2.hex',
