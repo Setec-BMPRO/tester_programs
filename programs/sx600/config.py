@@ -123,7 +123,7 @@ class Config():
         )
     # Software images
     _renesas_values = _Values(
-        projectfile='r7fa2e1a7.jflash', sw_image='None')
+        projectfile='r7fa2e1a7.jflash', sw_image='sx600_renesas_1.0.0-0-gfd443df.hex')
     _rev_data = {
         None: _renesas_values,
         '5': _renesas_values,
