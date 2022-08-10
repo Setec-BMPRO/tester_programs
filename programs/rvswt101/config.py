@@ -34,7 +34,7 @@ class Config():
         'j10-1': (13, 4), 'j10-2': (41, 4),
         'j11-1': (14, 4), 'j11-2': (15, 4), 'j11-3': (42, 4), 'j11-4': (51, 4),
         'j11-5': (54, 4), 'j11-6': (55, 4),
-        'od-01': (60, 6), 'od-02': (61, 4),
+        '6g od-01': (60, 6), '4g od-02': (61, 4),
         }
     # Series software images per revision
     _rev_software = dict.fromkeys(
