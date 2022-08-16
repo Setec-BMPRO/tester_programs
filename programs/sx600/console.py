@@ -48,7 +48,7 @@ class Console(share.console.Base):
 
     def open(self):
         """Open console."""
-        self.port.rtscts = False   # Renesas
+        self.port.rtscts = True
         super().open()
 
     def close(self):
