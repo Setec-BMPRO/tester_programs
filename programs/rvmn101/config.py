@@ -378,11 +378,11 @@ class RVMN5x(Config):
             ),
         '7': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
-            product_rev='07C', hardware_rev='05A',
+            product_rev='07D', hardware_rev='05A',
             ),
         '6': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
-            product_rev='06E', hardware_rev='05A',
+            product_rev='06F', hardware_rev='05A',
             ),
         '5': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
@@ -390,7 +390,7 @@ class RVMN5x(Config):
             ),
         '4': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
-            product_rev='04E', hardware_rev='04A',
+            product_rev='04F', hardware_rev='04A',
             ),
         '3': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
