@@ -17,6 +17,7 @@ class Console(share.console.Base):
     parameter = share.console.parameter
     renesas_revisions = ('5',)
     uut = None
+    revision = None
     cmd_data = {
         'ARM-AcFreq': parameter.Float(
             'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
@@ -44,6 +45,11 @@ class Console(share.console.Base):
             'NV-DEFAULT',
             readable=False,
             writeable=True, write_format='{1}'),
+        'RESTART' : parameter.Boolean(
+            'RESTART',
+            readable=False,
+            writeable=True, write_format='{1}',
+            write_expected=banner_lines),
         }
     # Strings to ignore in responses
     ignore = (' ', 'Hz', 'Vrms', 'mV')
@@ -51,10 +57,10 @@ class Console(share.console.Base):
     def open(self):
         """Open console."""
         if self.uut.lot.item:
-            revision = self.uut.lot.item.revision
+            self.revision = self.uut.lot.item.revision
         else:
-            revision = '5' # default
-        if revision in self.renesas_revisions:
+            self.revision = '5' # default
+        if self.revision in self.renesas_revisions:
             self.port.rtscts = False  # no flow control
         else:
             self.port.rtscts = True
@@ -72,3 +78,8 @@ class Console(share.console.Base):
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
         time.sleep(self.nvwrite_delay)
+        if self.revision in self.renesas_revisions:
+            # The 5V discharge doesn't seem to stop the renesas
+            # so restart via console command.
+            self['RESTART'] = True
+            time.sleep(self.nvwrite_delay)
