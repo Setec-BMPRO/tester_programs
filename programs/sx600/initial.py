@@ -24,6 +24,7 @@ class Initial(share.TestSequence):
         Sensors.ratings = self.cfg.ratings
         Sensors.projectfile = self.cfg.projectfile
         Sensors.sw_image = self.cfg.sw_image
+        Devices.uut = uut
         self.limits = self.cfg.limits_initial
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
@@ -271,6 +272,7 @@ class Devices(share.Devices):
     """Devices."""
 
     fixture = '033484'
+    uut = None
 
     def open(self):
         """Create all Instruments."""
@@ -300,6 +302,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         arm_ser.port = share.config.Fixture.port(self.fixture, 'ARM')
         self['arm'] = console.Console(arm_ser)
+        self['arm'].uut_revision = self.uut.lot.item.revision
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
