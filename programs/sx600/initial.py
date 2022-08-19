@@ -302,7 +302,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         arm_ser.port = share.config.Fixture.port(self.fixture, 'ARM')
         self['arm'] = console.Console(arm_ser)
-        self['arm'].uut_revision = self.uut.lot.item.revision
+        self['arm'].uut = self.uut
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

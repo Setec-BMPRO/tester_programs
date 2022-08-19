@@ -16,7 +16,7 @@ class Console(share.console.Base):
     nvwrite_delay = 1.0     # Time delay after NV-WRITE
     parameter = share.console.parameter
     renesas_revisions = ('5',)
-    uut_revision = None
+    uut = None
     cmd_data = {
         'ARM-AcFreq': parameter.Float(
             'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
@@ -50,7 +50,11 @@ class Console(share.console.Base):
 
     def open(self):
         """Open console."""
-        if self.uut_revision in self.renesas_revisions:
+        if self.uut.lot.item:
+            revision = self.uut.lot.item.revision
+        else:
+            revision = '5' # default
+        if revision in self.renesas_revisions:
             self.port.rtscts = False  # no flow control
         else:
             self.port.rtscts = True
