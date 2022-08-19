@@ -21,6 +21,7 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.Config
         self.cfg.configure(uut)
+        self.uut = uut
         Sensors.ratings = self.cfg.ratings
         Sensors.projectfile = self.cfg.projectfile
         Sensors.sw_image = self.cfg.sw_image
@@ -89,7 +90,10 @@ class Initial(share.TestSequence):
         dev['dcl_12V'].output(1.0)
         dev['dcl_24V'].output(1.0)
         arm = dev['arm']
-        arm.action(expected=arm.banner_lines)
+        if self.uut.lot.item.revision not in arm.renesas_revisions:
+            # renesas was restarted during initialise() so we
+            # don't need to get the banner here.
+            arm.action(expected=arm.banner_lines)
         self.measure(
             ('dmm_ACin', 'dmm_PriCtl', 'dmm_5Vnl', 'dmm_12Voff',
              'dmm_24Voff', 'dmm_ACFAIL', ), timeout=2)
