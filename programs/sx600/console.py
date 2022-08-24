@@ -8,7 +8,7 @@ import time
 import share
 
 
-class Console(share.console.Base):
+class Console(share.console.BadUart):
 
     """Communications to console."""
 
