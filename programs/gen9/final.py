@@ -83,17 +83,14 @@ class Devices(share.Devices):
         for name, devtype, phydevname, doc in (
                 ('dmm', tester.DMM, 'DMM', ''),
                 ('acsource', tester.ACSource, 'ACS', 'AC Input'),
+                ('dcl_12v', tester.DCLoad, 'DCL1', '12V Load'),
                 ('dcl_24v', tester.DCLoad, 'DCL3', '24V Load'),
-                ('dcl_12a', tester.DCLoad, 'DCL2', '12V Load'),
-                ('dcl_12b', tester.DCLoad, 'DCL6', '12V Load'),
                 ('dcl_5v', tester.DCLoad, 'DCL4', '5V Load'),
                 ('rla_pson', tester.Relay, 'RLA3', 'PSON control'),
                 ('dcs_airflow', tester.DCSource, 'DCS3',
                  'Power to airflow detector'),
             ):
             self[name] = devtype(self.physical_devices[phydevname], doc)
-        self['dcl_12v'] = tester.DCLoadParallel(
-            ((self['dcl_12a'], 10), (self['dcl_12b'], 10)))
         self['dcs_airflow'].output(12.0, True)
         self.add_closer(lambda: self['dcs_airflow'].output(0.0, False))
 
