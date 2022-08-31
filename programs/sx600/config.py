@@ -32,6 +32,7 @@ class _Values():
 
     projectfile = attr.ib(validator=attr.validators.instance_of(str))
     sw_image = attr.ib(validator=attr.validators.instance_of(str))
+    is_renesas = attr.ib(validator=attr.validators.instance_of(bool))
 
 
 class Config():
@@ -41,6 +42,7 @@ class Config():
     # These values get set per Product revision
     projectfile = None
     sw_image = None
+    is_renesas = None
     # General parameters used in testing the units
     #  Injected voltages
     _5vsb_ext = 6.3
@@ -123,13 +125,17 @@ class Config():
         )
     # Software images
     _renesas_values = _Values(
-        projectfile='r7fa2e1a7.jflash', sw_image='sx600_renesas_1.0.0-0-gfd443df.hex')
+        projectfile='r7fa2e1a7.jflash',
+        sw_image='sx600_renesas_1.0.0-0-gfd443df.hex',
+        is_renesas=True
+        )
     _rev_data = {
         None: _renesas_values,
         '5': _renesas_values,
         '4': _Values(
             projectfile='lpc1113.jflash',
-            sw_image='sx600_1.3.19535.1537.bin'
+            sw_image='sx600_1.3.19535.1537.bin',
+            is_renesas=False
             ),
         # Rev 1-3 were Engineering protoype builds
         }
@@ -141,11 +147,9 @@ class Config():
         @param uut setec.UUT instance
 
         """
-        try:
-            rev = uut.lot.item.revision
-        except AttributeError:
-            rev = None
+        rev = uut.revision
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
         cls.projectfile = values.projectfile
         cls.sw_image = values.sw_image
+        cls.is_renesas = values.is_renesas

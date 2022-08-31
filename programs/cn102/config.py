@@ -92,10 +92,7 @@ class CN10x():
         @param uut setec.UUT instance
 
         """
-        try:
-            rev = uut.lot.item.revision
-        except AttributeError:
-            rev = None
+        rev = uut.revision
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         cls.parameters = cls._rev_data[rev]
 

@@ -14,6 +14,7 @@ import queue
 import unittest
 from unittest.mock import Mock, patch
 
+import setec
 import tester
 from pydispatch import dispatcher
 
@@ -49,7 +50,8 @@ class UnitTester(tester.Tester):
 
     def open(self):
         """Open a program, by using our pre-built one."""
-        super().open(self.ut_program, uut=None)
+        uut = setec.UUT.from_sernum('A0000000001')
+        super().open(self.ut_program, uut=uut)
 
     def stop(self):
         """Release resources."""

@@ -15,9 +15,7 @@ class Console(share.console.BadUart):
     banner_lines = 4        # Number of lines in startup banner
     nvwrite_delay = 1.0     # Time delay after NV-WRITE
     parameter = share.console.parameter
-    renesas_revisions = ('5',)
-    uut = None
-    revision = None
+    is_renesas = None
     cmd_data = {
         'ARM-AcFreq': parameter.Float(
             'X-AC-LINE-FREQUENCY', read_format='{0} X?'),
@@ -56,14 +54,7 @@ class Console(share.console.BadUart):
 
     def open(self):
         """Open console."""
-        if self.uut.lot.item:
-            self.revision = self.uut.lot.item.revision
-        else:
-            self.revision = '5' # default
-        if self.revision in self.renesas_revisions:
-            self.port.rtscts = False  # no flow control
-        else:
-            self.port.rtscts = True
+        self.port.rtscts = not self.is_renesas
         super().open()
 
     def close(self):

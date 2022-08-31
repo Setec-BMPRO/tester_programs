@@ -187,10 +187,7 @@ class BP35():
         @param uut setec.UUT instance
 
         """
-        try:
-            cls._rev = uut.lot.item.revision
-        except AttributeError:
-            cls._rev = None
+        cls._rev = uut.revision
         logging.getLogger(__name__).debug('Revision detected as %s', cls._rev)
         values = cls._rev_data[cls._rev]
         cls.arm_hw_version = values.hw_version

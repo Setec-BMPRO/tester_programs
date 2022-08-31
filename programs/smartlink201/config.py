@@ -47,10 +47,7 @@ class _Config():
         @param uut setec.UUT instance
 
         """
-        try:
-            rev = uut.lot.item.revision
-        except AttributeError:
-            rev = None
+        rev = uut.revision
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
         cls.product_rev = values.product_rev

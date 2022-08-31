@@ -21,11 +21,10 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.Config
         self.cfg.configure(uut)
-        self.uut = uut
         Sensors.ratings = self.cfg.ratings
         Sensors.projectfile = self.cfg.projectfile
         Sensors.sw_image = self.cfg.sw_image
-        Devices.uut = uut
+        Devices.is_renesas = self.cfg.is_renesas
         self.limits = self.cfg.limits_initial
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
@@ -90,8 +89,8 @@ class Initial(share.TestSequence):
         dev['dcl_12V'].output(1.0)
         dev['dcl_24V'].output(1.0)
         arm = dev['arm']
-        if self.uut.lot.item.revision not in arm.renesas_revisions:
-            # renesas was restarted during initialise() so we
+        if not self.cfg.is_renesas:
+            # Renesas was restarted during arm.initialise() so we
             # don't need to get the banner here.
             arm.action(expected=arm.banner_lines)
         self.measure(
@@ -276,7 +275,7 @@ class Devices(share.Devices):
     """Devices."""
 
     fixture = '033484'
-    uut = None
+    is_renesas = None
 
     def open(self):
         """Create all Instruments."""
@@ -306,7 +305,7 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         arm_ser.port = share.config.Fixture.port(self.fixture, 'ARM')
         self['arm'] = console.Console(arm_ser)
-        self['arm'].uut = self.uut
+        self['arm'].is_renesas = self.is_renesas
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet

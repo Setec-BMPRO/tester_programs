@@ -95,12 +95,9 @@ class Config():
         @param uut setec.UUT instance
 
         """
-        try:
-            cls._rev = uut.lot.item.revision
-        except AttributeError:
-            cls._rev = None
-        logging.getLogger(__name__).debug('Revision detected as %s', cls._rev)
-        values = cls._rev_data[cls._rev]
+        rev = uut.revision
+        logging.getLogger(__name__).debug('Revision detected as %s', rev)
+        values = cls._rev_data[rev]
         cls.hw_version = values.hw_version
         cls.sw_version = values.sw_version
         cls._swver_limit = (

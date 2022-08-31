@@ -112,8 +112,6 @@ class Config():
             doc='Expected switch code for button 6'),
         )
 
-    
-    
     @classmethod
     def get(cls, parameter, uut):
 
@@ -124,7 +122,7 @@ class Config():
         @return Dictionary of configuration data
 
         """
-        rev = uut.lot.item.revision
+        rev = uut.revision
         if parameter == 'series':       # Initial builds of Rev 3
             type_lim = tester.LimitBetween(
                 'SwitchType', 1, 42, doc='Switch type code')

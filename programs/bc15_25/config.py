@@ -89,10 +89,7 @@ class BCx5():
         @param uut setec.UUT instance
 
         """
-        try:
-            rev = uut.lot.item.revision
-        except AttributeError:
-            rev = None
+        rev = uut.revision
         logging.getLogger(__name__).debug('Revision detected as %s', rev)
         values = cls._rev_data[rev]
         cls.arm_file = values.arm_file
