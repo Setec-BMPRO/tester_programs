@@ -101,11 +101,10 @@ class SmartLink201(_Config):
             is_smartlink = True
             ),
         '2': _Values(
-            product_rev = '02A',
+            product_rev = '02B',
             hardware_rev = '02B',
             sw_arm_image = _arm_image,
-            sw_nrf_image = (
-                'smartlink_signed_1.0.0-0-gacbb530_factory_mcuboot.hex'),
+            sw_nrf_image = _sw_nrf_image,   # PC-30636
             is_smartlink = True
             ),
         # No Rev 1 production
