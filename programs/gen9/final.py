@@ -26,7 +26,7 @@ class Final(share.TestSequence):
         tester.LimitPercent('24V', 24.0, 2.5, doc='24V output ok'),
         tester.LimitLow('PwrFail', 0.4, doc='PFAIL asserted'),
         tester.LimitHigh('PwrFailOff', 11.0, doc='PFAIL not asserted'),
-        tester.LimitLow('12Vmax', 0.1, doc='12V transient ok'),
+        tester.LimitLow('12Vmax', 0.045, doc='12V transient ok'),
         )
 
     def open(self, uut):
@@ -101,7 +101,7 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname, doc in (
                 ('dmm', tester.DMM, 'DMM', ''),
-                ('dso', tester.DSO, 'DSO'),
+                ('dso', tester.DSO, 'DSO',  ''),
                 ('acsource', tester.ACSource, 'ACS', 'AC Input'),
                 ('dcl_12v', tester.DCLoad, 'DCL1', '12V Load'),
                 ('dcl_24v', tester.DCLoad, 'DCL3', '24V Load'),
@@ -151,10 +151,10 @@ class Sensors(share.Sensors):
         tbase = sensor.Timebase(
             range=0.001, main_mode=True, delay=0, centre_ref=False)
         chan = sensor.Channel(
-            ch=1, mux=1, range=0.8, offset=0.0,
+            ch=1, mux=1, range=0.4, offset=0.0,
             dc_coupling=False, att=1, bwlim=True)
         trg = sensor.Trigger(
-            ch=1, level=-0.1, normal_mode=True, pos_slope=False)
+            ch=1, level=-0.04, normal_mode=True, pos_slope=False)
         rdg = sensor.Vmax(ch=1)
         self['12V_Vmax'] = sensor.DSO(
             dso, [chan], tbase, trg, [rdg], single=True)
