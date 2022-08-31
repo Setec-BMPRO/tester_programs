@@ -69,7 +69,7 @@ class Console(share.console.BadUart):
         self['NVDEFAULT'] = True
         self['NVWRITE'] = True
         time.sleep(self.nvwrite_delay)
-        if self.revision in self.renesas_revisions:
+        if self.is_renesas:
             # The 5V discharge doesn't seem to stop the renesas
             # so restart via console command.
             self['RESTART'] = True
