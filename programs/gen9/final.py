@@ -64,7 +64,21 @@ class Final(share.TestSequence):
 
     @share.teststep
     def _step_transient(self, dev, mes):
-        """Full Load step."""
+        """12V Transient Response.
+
+        To detect U104 pin-9 to pin-10 short.
+
+        Verification data:
+            Unit        Ok      Faulty_1    Faulty_2
+        ---------------------------------------------
+        A2152270010     11      83          77
+        A2152270011     13      61          58
+        A2152270012     23      73          70
+        A2152270013     16      64          61
+        A2152270014     13      69          72
+        A1927040011     20      x           x
+
+        """
         # Wait long enough for DSO AC coupling to settle
         dev['dcl_12v'].output(2.0, delay=2)
         # This DSO measurement will callback to _dso_callback()
