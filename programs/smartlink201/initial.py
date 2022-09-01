@@ -100,20 +100,26 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_tank_sense(self, dev, mes):
         """Tank sensors."""
-        smartlink201 = dev['smartlink201']
-        smartlink201.analog_read()      # Read all tank sensor inputs
-        for index in range(16):         # All analog tank inputs
-            name = console.tank_name(index)
-            mes[name]()
-        self.relay(                     # Pull down alternate inputs
-            (('rla_s1', True), ('rla_s3', True), ),
-            delay=self.analog_read_wait)
-        smartlink201.analog_read()      # Read all tank sensor inputs
-        for index in range(16):         # All analog tank inputs
-            name = console.tank_name(index)
-            if not index % 2:           # Every 2nd input is now low
-                name += '_L'
-            mes[name]()
+        # Measurements from here on do not fail the test instantly.
+        # Always measure all the inputs, and force a fail if any input
+        # has failed. So we get a full dataset on every test.
+        with share.MultiMeasurementSummary(default_timeout=2) as checker:
+            smartlink201 = dev['smartlink201']
+            smartlink201.analog_read()      # Read all tank sensor inputs
+            for index in range(16):         # All analog tank inputs
+                name = console.tank_name(index)
+                with tester.PathName(name):
+                    checker.measure(mes[name])
+            self.relay(                     # Pull down alternate inputs
+                (('rla_s1', True), ('rla_s3', True), ),
+                delay=self.analog_read_wait)
+            smartlink201.analog_read()      # Read all tank sensor inputs
+            for index in range(16):         # All analog tank inputs
+                name = console.tank_name(index)
+                if not index % 2:           # Every 2nd input is now low
+                    name += '_L'
+                with tester.PathName(name):
+                    checker.measure(mes[name])
 
 
 class Devices(share.Devices):
