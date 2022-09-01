@@ -94,17 +94,17 @@ class SmartLink201(_Config):
         None: _rev4_values,
         '4': _rev4_values,
         '3': _Values(
-            product_rev = '03A',
+            product_rev = '03B',
             hardware_rev = '02B',
             sw_arm_image = _arm_image,
-            sw_nrf_image = _sw_nrf_image,
+            sw_nrf_image = _sw_nrf_image,   # MA-401
             is_smartlink = True
             ),
         '2': _Values(
             product_rev = '02B',
             hardware_rev = '02B',
             sw_arm_image = _arm_image,
-            sw_nrf_image = _sw_nrf_image,   # PC-30636
+            sw_nrf_image = _sw_nrf_image,   # MA-401
             is_smartlink = True
             ),
         # No Rev 1 production

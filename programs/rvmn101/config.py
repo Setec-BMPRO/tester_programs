@@ -256,12 +256,12 @@ class RVMN101B(Config):
     # Software versions
     _nordic_2_4_5 = 'tmc_rvmn101_signed_2.4.5-0-gfc39b943_factory_mcuboot.hex'  #037612
     _arm_image_3_0 = 'rvmn101_nxp_3.0.bin'  #035879 Rev ≥ 14
-    _arm_image_old = 'RVMN101_v1.9.bin'     #033092 Rev ≤ 13
+    _arm_image_1_9 = 'rvmn101_nxp_1.9.bin'  #033092 Rev ≤ 13
     _rev18_values = _Values(
             nordic_image=_nordic_2_4_5, arm_image=_arm_image_3_0,
             product_rev='18B', hardware_rev='18A',
             )
-    _rev19_values = _Values(   #Implement ECO-30424 for RVMN101B
+    _rev19_values = _Values(    # Implement ECO-30424 for RVMN101B
             nordic_image=_nordic_2_4_5, arm_image=_arm_image_3_0,
             product_rev='19A', hardware_rev='08B',
             )
@@ -286,39 +286,39 @@ class RVMN101B(Config):
             product_rev='14F', hardware_rev='8A',
             ),
         '13': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='13G', hardware_rev='8A',
             ),
         '12': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='12H', hardware_rev='6A',
             ),
         '11': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='11H', hardware_rev='6A',
             ),
         '10': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='10I', hardware_rev='6A',
             ),
         '9': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='09I', hardware_rev='6A',
             ),
         '8': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='08J', hardware_rev='6A',
             ),
         '7': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='07I', hardware_rev='6A',
             ),
         '6': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='06J', hardware_rev='6A',
             ),
         '5': _Values(
-            nordic_image=_nordic_2_4_5, arm_image=_arm_image_old,
+            nordic_image=_nordic_2_4_5, arm_image=_arm_image_1_9,
             product_rev='05I', hardware_rev='6A',
             ),
         # Rev 1-4 were Engineering protoype builds
@@ -349,16 +349,6 @@ class RVMN5x(Config):
     _nordic_3_0_4 = 'jayco_rvmn5x_signed_3.0.4-0-gd3142626_factory_mcuboot.hex'
     _nxp_image_2_3 = 'rvmn5x_nxp_2.3.bin'
     _ra2_image_0_3_6 = 'rvmn5x_ra2_v0.3.6-0-g34e425b.hex'
-    _rev13_values = _Values(
-            nordic_image=_nordic_3_0_4, arm_image=_ra2_image_0_3_6,
-            product_rev='13B', hardware_rev='10A',
-            arm_projectfile='r7fa2l1a9.jflash',
-            )
-    _rev14_values = _Values(
-            nordic_image=_nordic_3_0_4, arm_image=_ra2_image_0_3_6,
-            product_rev='14A', hardware_rev='10A',
-            arm_projectfile='r7fa2l1a9.jflash',
-            )
     _rev15_values = _Values(
             nordic_image=_nordic_3_0_4, arm_image=_ra2_image_0_3_6,
             product_rev='15A', hardware_rev='11A',
@@ -367,8 +357,16 @@ class RVMN5x(Config):
     _rev_data = {
         None: _rev15_values,
         '15': _rev15_values,
-        '14': _rev14_values,
-        '13': _rev13_values,
+        '14': _Values(
+            nordic_image=_nordic_3_0_4, arm_image=_ra2_image_0_3_6,
+            product_rev='14A', hardware_rev='10A',
+            arm_projectfile='r7fa2l1a9.jflash',
+            ),
+        '13': _Values(
+            nordic_image=_nordic_3_0_4, arm_image=_ra2_image_0_3_6,
+            product_rev='13B', hardware_rev='10A',
+            arm_projectfile='r7fa2l1a9.jflash',
+            ),
         '12': _Values(
             nordic_image=_nordic_3_0_4, arm_image=_nxp_image_2_3,
             product_rev='12B', hardware_rev='08A',
