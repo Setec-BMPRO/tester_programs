@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
     """ASDisplay Initial Test Program."""
 
     vin_set = 12.0      # Input voltage (V)
-    sw_arm_image = 'ASDisplay 1.1.0.bin'
+    sw_arm_image = 'ASDisplay 1.2.0.bin'    # PC-30654
     limitdata = (
         tester.LimitDelta('Vin', vin_set, 0.5, doc='At nominal'),
         tester.LimitPercent('3V3', 3.33, 3.0, doc='At nominal'),
