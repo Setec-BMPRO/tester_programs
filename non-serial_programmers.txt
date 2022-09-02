@@ -7,11 +7,11 @@ Laird / Nordic BLE Modules
          & Smartlink201
         CN102,3             Segger JLink
          & ODL103,4
-        RVMN101A            Nordic nRF52 board
-        RVMN101B            Nordic nRF52 board
+        RVMN101A            Segger JLink
+        RVMN101B            Segger JLink
         RVMN5x              Segger JLink
-        RVSWT101            Nordic nRF52 board
-        TRS-BTx             Nordic nRF52 board
+        RVSWT101            Segger JLink
+        TRS-BTx             Segger JLink
         TRS-RFM             Nordic nRF52 board
 
 MicroChip SAM Series

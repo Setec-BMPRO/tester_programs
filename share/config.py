@@ -139,7 +139,7 @@ class Fixture():
             # Hub port 2: Nordic NRF52 device programmer
             'nRF52': '682639845',
             },
-        '035827': {     # SmartLink201 Initial
+        '035827': {     # SmartLink201/BLExtender Initial
             'ARM': _ftdi_hub_1,
             'NORDIC': _ftdi_hub_2,
             # Hub port 3: Nordic NRF52 device programmer
