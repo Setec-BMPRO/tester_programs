@@ -103,7 +103,7 @@ class Initial(share.TestSequence):
         # Measurements from here on do not fail the test instantly.
         # Always measure all the inputs, and force a fail if any input
         # has failed. So we get a full dataset on every test.
-        with share.MultiMeasurementSummary(default_timeout=2) as checker:
+        with share.MultiMeasurementSummary() as checker:
             smartlink201 = dev['smartlink201']
             smartlink201.analog_read()      # Read all tank sensor inputs
             for index in range(16):         # All analog tank inputs
