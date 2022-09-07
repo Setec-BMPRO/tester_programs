@@ -55,8 +55,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
+        # Open console serial connection
         rvmn101 = dev['rvmn101']
-        rvmn101.reset_input_buffer()
+        rvmn101.open()
         # Cycle power to restart the unit
         dev['dcs_vbatt'].output(0.0, delay=0.5)
         dev['dcs_vbatt'].output(self.cfg.vbatt_set, delay=2.0)
@@ -153,9 +154,6 @@ class Devices(share.Devices):
         self['candetector'] = share.can.PacketDetector(self['canreader'])
         # Connection to Serial To MAC server
         self['serialtomac'] = share.bluetooth.SerialToMAC()
-        # Open console serial connection
-        self['rvmn101'].open()
-        self.add_closer(self['rvmn101'].close)
 
     def run(self):
         """Test run is starting."""
@@ -164,6 +162,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Test run has stopped."""
+        self['rvmn101'].close()
         self['canreader'].stop()
         self['can'].rvc_mode = False
         for dcs in ('dcs_vbatt', 'dcs_vhbridge'):

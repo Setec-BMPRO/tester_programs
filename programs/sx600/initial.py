@@ -66,11 +66,20 @@ class Initial(share.TestSequence):
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
 
         arm = dev['arm']
+        arm.open()
         arm.initialise()
         # Switch everything off
         dev['dcs_5V'].output(0, False)
         dev['dcl_5V'].output(0.1, delay=0.5)
         dev['dcl_5V'].output(0)
+        # On xubuntu, a device detector opens the serial port for a while
+        # after it is attached. Wait for the process to release the port.
+        for _ in range(10):
+            try:
+                dev['ard'].open()
+                break
+            except Exception:
+                time.sleep(1)
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -311,20 +320,11 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         ard_ser.port = share.config.Fixture.port(self.fixture, 'ARDUINO')
         self['ard'] = arduino.Arduino(ard_ser)
-        # On xubuntu, a device detector opens the serial port for a while
-        # after it is attached. Wait for the process to release the port.
-        for _ in range(10):
-            try:
-                self['ard'].open()
-                self.add_closer(self['ard'].close)
-                break
-            except Exception:
-                time.sleep(1)
-        self['arm'].open()
-        self.add_closer(self['arm'].close)
 
     def reset(self):
         """Reset instruments."""
+        self['arm'].close()
+        self['ard'].close()
         self['acsource'].reset()
         self['dcl_5V'].output(1.0)
         self['dcl_12V'].output(5.0)
