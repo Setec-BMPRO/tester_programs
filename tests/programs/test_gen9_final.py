@@ -30,6 +30,9 @@ class GEN9Final(ProgramTestCase):
                     (sen['pwrfail'], 12.0), (sen['gpo1'], 240.0),
                     (sen['gpo2'], 240.0),
                     ),
+                'Transient': (
+                    (sen['12V_Vmax'], ((0.01, ), )),
+                    ),
                 'FullLoad': (
                     (sen['o5v'], 5.0), (sen['o12v'], 12.0),
                     (sen['o24v'], 24.0),
@@ -44,7 +47,7 @@ class GEN9Final(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(17, len(result.readings))
+        self.assertEqual(18, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PowerOn', 'FullLoad', '115V'],
+            ['PowerUp', 'PowerOn', 'Transient', 'FullLoad', '115V'],
             self.tester.ut_steps)

@@ -34,6 +34,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input DC and measure voltages."""
+        dev['ard'].open()
         dev['rla_SS'].set_on()
         dev['dcs_Vin'].output(13.0, output=True)
         self.measure(
@@ -77,11 +78,10 @@ class Devices(share.Devices):
         # Switch on power to fixture circuits
         self['dcs_Vcom'].output(12.0, output=True, delay=2)
         self.add_closer(lambda: self['dcs_Vcom'].output(0.0, output=False))
-        self['ard'].open()
-        self.add_closer(lambda: self['ard'].close())
 
     def reset(self):
         """Reset instruments."""
+        self['ard'].close()
         self['dcs_Vin'].output(0.0, False)
         for rla in ('rla_SS', 'rla_Prog', 'rla_BattLoad'):
             self[rla].set_off()
