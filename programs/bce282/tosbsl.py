@@ -747,13 +747,11 @@ class LowLevel:
         it is retried (forever).
         """
         loopcnt = 5                                 #Max. tries to get synchronization
-
         if DEBUG > 1:
             sys.stderr.write("* bslSync(wait=%d)\n" % wait)
         while wait or loopcnt:
             loopcnt = loopcnt - 1                   #count down tries
             self.serialport.reset_input_buffer()            #clear input, in case a prog is running
-
             self.serialport.write(bytearray([self.BSL_SYNC]))   #Send synchronization byte
             c = self.serialport.read(1)             #read answer
             if type(c) != str:                      #for Python 3
@@ -782,8 +780,7 @@ class LowLevel:
             else:                                   #garbage
                 if DEBUG > 1:
                     sys.stderr.write("  bslSync() failed (0x%02x), retry ...\n" % ord(c))
-
-                raise BSLException(self.ERR_BSL_SYNC)       #Sync. failed
+        raise BSLException(self.ERR_BSL_SYNC)       #Sync. failed
 
     def bslTxRx(self, cmd, addr, length = 0, blkout = None, wait=0):
         """Transmits a command (cmd) with its parameters:
