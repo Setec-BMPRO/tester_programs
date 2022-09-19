@@ -50,36 +50,25 @@ class Initial(share.TestSequence):
             ('dmm_5Vext', 'dmm_5Vunsw', 'dmm_3V3', 'dmm_8V5Ard'),
             timeout=5)
         mes['JLink']()      # Program the micro
-
 # TODO: Do we need to switch it off then on again ?
         # Switch off 5V rail and discharge the 5V to stop the ARM
         dev['dcs_5V'].output(0)
         self.dcload((('dcl_5V', 0.1), ), output=True, delay=0.5)
-
+        arm = dev['arm']
+        arm.open()  # Open before power-up, to catch the banner
         # This will also enable all loads on an ATE3/4 tester.
         self.dcload(
             (('dcl_5V', 0.0), ('dcl_12V', 0.0), ('dcl_24V', 0.0), ),
             output=True)
-
 # TODO: Do we need to switch it off then on again ?
         dev['dcs_5V'].output(self.cfg._5vsb_ext, True)
         self.measure(('dmm_5Vext', 'dmm_5Vunsw'), timeout=2)
-
-        arm = dev['arm']
-        arm.open()
         arm.initialise()
         # Switch everything off
         dev['dcs_5V'].output(0, False)
         dev['dcl_5V'].output(0.1, delay=0.5)
         dev['dcl_5V'].output(0)
-        # On xubuntu, a device detector opens the serial port for a while
-        # after it is attached. Wait for the process to release the port.
-        for _ in range(10):
-            try:
-                dev['ard'].open()
-                break
-            except Exception:
-                time.sleep(1)
+        dev['ard'].open()
 
     @share.teststep
     def _step_powerup(self, dev, mes):
