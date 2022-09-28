@@ -63,6 +63,7 @@ class Initial(share.TestSequence):
         """
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         mes['dmm_tstpincov'](timeout=5)
+        dev['ble2can'].open()
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', 'dmm_5v'), timeout=5)
 
@@ -71,7 +72,6 @@ class Initial(share.TestSequence):
         """Test operation."""
         dev['rla_wdog'].disable()
         ble2can = dev['ble2can']
-        ble2can.open()
         ble2can.brand(self.hw_version, self.sernum)
         self.measure(
             ('SwVer', 'dmm_redoff', 'dmm_blueoff', 'dmm_greenoff'),
