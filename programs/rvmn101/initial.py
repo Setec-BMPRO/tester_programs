@@ -71,7 +71,6 @@ class Initial(share.TestSequence):
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
         rvmn101 = dev['rvmn101']
-        dev['dcs_vhbridge'].output(self.cfg.vbatt_set, output=True, delay=0.2)
         if self.parameter == '101A':
             rvmn101.hs_output(41, False)    # Why..?
         # Reversed HBridge outputs are only on 101A Rev 7-9
@@ -128,7 +127,6 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_vbatt', tester.DCSource, 'DCS2'),
-                ('dcs_vhbridge', tester.DCSource, 'DCS3'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_pullup', tester.Relay, 'RLA3'),
                 ('swd_select', tester.Relay, 'RLA4'),
@@ -165,8 +163,7 @@ class Devices(share.Devices):
         self['rvmn101'].close()
         self['canreader'].stop()
         self['can'].rvc_mode = False
-        for dcs in ('dcs_vbatt', 'dcs_vhbridge'):
-            self[dcs].output(0.0, False)
+        self['dcs_vbatt'].output(0.0, False)
         for rla in ('rla_reset', 'rla_pullup', ):
             self[rla].set_off()
 
