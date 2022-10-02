@@ -22,6 +22,7 @@ class Final(share.TestSequence):
             tester.TestStep('PowerUp', self._step_powerup),
             tester.TestStep('PowerOn', self._step_poweron),
             tester.TestStep('Load', self._step_load),
+            tester.TestStep('Load115', self._step_load115),
             )
 
     @share.teststep
@@ -65,6 +66,13 @@ class Final(share.TestSequence):
         mes['reg12v'].sensor.store(100 * (nl12v - fl12v) / nl12v)
         mes['reg24v'].sensor.store(100 * (nl24v - fl24v) / nl24v)
         self.measure(('reg12v', 'reg24v', ))
+
+    @share.teststep
+    def _step_load115(self, dev, mes):
+        """115Vac step."""
+        dev['acsource'].output(voltage=115.0, delay=0.5)
+        self.measure(
+            ('dmm_5vfl', 'dmm_12vfl', 'dmm_24vfl', ), timeout=5)
 
 
 class Devices(share.Devices):
