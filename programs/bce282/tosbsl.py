@@ -339,6 +339,10 @@ class LowLevel:
             parity = serial.PARITY_EVEN,
             timeout = self.timeout
         )
+        # Start SETEC modification
+        #   Allow a little time between port open and buffer flush
+        time.sleep(0.2)
+        # End SETEC modification
         if DEBUG: sys.stderr.write("using serial port %r\n" % self.serialport.portstr)
         if not self.z1:
             self.SetRSTpin()                        #enable power
