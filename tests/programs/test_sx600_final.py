@@ -36,12 +36,17 @@ class SX600Final(ProgramTestCase):
                     (sen['o24v'], (24.1, 24.0)), (sen['oPwrGood'], 0.1),
                     (sen['oAcFail'], 5.1),
                     ),
+                'Load115': (
+                    (sen['o5v'], 5.1),
+                    (sen['o12v'], 12.0),
+                    (sen['o24v'], 24.0),
+                    ),
                 },
             }
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(22, len(result.readings))
+        self.assertEqual(25, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'PowerOn', 'Load'], self.tester.ut_steps)
+            ['PowerUp', 'PowerOn', 'Load', 'Load115'], self.tester.ut_steps)

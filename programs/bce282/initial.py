@@ -140,8 +140,8 @@ class Initial(share.TestSequence):
         dev['rla_prog'].set_on()
         try:
             # STEP 1 - SAVE INTERNAL CALIBRATION
-            sys.argv = (['',
-                '--comport={0}'.format(msp_port1), ] +
+            sys.argv = (
+                ['', '--comport={0}'.format(msp_port1), '--slow', ] +
                 (['-P', str(self.msp_password), ] if password else []) +
                 ['--upload=0x10C0', '--size=64', '--ti', ]
                 )
@@ -154,6 +154,7 @@ class Initial(share.TestSequence):
             # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
             sys.argv = ['',
                 '--comport={0}'.format(msp_port1),
+                '--slow',
                 '--masserase',
                 '--program', str(self.msp_savefile),
                 ]
@@ -162,6 +163,7 @@ class Initial(share.TestSequence):
             hexfile = self.limitdata[self.parameter]['HexFile']
             sys.argv = ['',
                 '--comport={0}'.format(msp_port1),
+                '--slow',
                 '--program', str(pathlib.Path(__file__).parent / hexfile),
                 ]
             tosbsl.main()
