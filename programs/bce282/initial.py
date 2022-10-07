@@ -30,6 +30,8 @@ class Initial(share.TestSequence):
         'posix': '/home/setec/testdata/bslpassword.txt',
         'nt': 'C:/TestGear/TestData/bslpassword.txt',
         }[os.name])
+    # TI Text format firmware image
+    _hexfile = 'bce282_4a.txt'
     # Factor to tighten the calibration check
     _cal_factor = 0.5
     # Limits common to both versions
@@ -57,9 +59,7 @@ class Initial(share.TestSequence):
                 tester.LimitDelta('VoutPostCal', 13.8, _cal_factor * 0.15),
                 tester.LimitBetween('MspVout', 13.0, 14.6),
                 ),
-            'LoadRatio': (20, 14),      # Iout:Ibat
             'ScaleFactor': 1000,
-            'HexFile': 'bce282_4a.txt'  # TI Text format
             },
         '24': {
             'Limits': _common + (
@@ -70,9 +70,7 @@ class Initial(share.TestSequence):
                 tester.LimitDelta('VoutPostCal', 27.6, _cal_factor * 0.25),
                 tester.LimitBetween('MspVout', 26.0, 29.2),
                 ),
-            'LoadRatio': (10, 6),       # Iout:Ibat
             'ScaleFactor': 500,
-            'HexFile': 'bce282_4a.txt'  # TI Text format
             },
         }
 
@@ -160,11 +158,10 @@ class Initial(share.TestSequence):
                 ]
             tosbsl.main()
             # STEP 3 - PROGRAM
-            hexfile = self.limitdata[self.parameter]['HexFile']
             sys.argv = ['',
                 '--comport={0}'.format(msp_port1),
                 '--slow',
-                '--program', str(pathlib.Path(__file__).parent / hexfile),
+                '--program', str(pathlib.Path(__file__).parent / self._hexfile),
                 ]
             tosbsl.main()
         finally:
