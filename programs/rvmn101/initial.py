@@ -126,7 +126,7 @@ class Devices(share.Devices):
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vbatt', tester.DCSource, 'DCS2'),
+                ('dcs_vbatt', tester.DCSource, 'DCS1'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_pullup', tester.Relay, 'RLA3'),
                 ('swd_select', tester.Relay, 'RLA4'),
