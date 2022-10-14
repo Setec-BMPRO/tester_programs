@@ -101,8 +101,8 @@ class Fixture():
             'CMR': {'posix': '/dev/ttyUSB1', 'nt': 'COM22'}[os.name],
             },
         '020827': {     # BCE282 Initial
-            'MSP1': _ftdi_hub_1,    # Programming
-            'MSP2': _ftdi_hub_2,    # Console
+            'BSL': _ftdi_hub_1,     # Programming
+            'CON': _ftdi_hub_2,     # Console
             },
         '022837': {     # SX-750 Initial
             'ARM': _ftdi_hub_1,

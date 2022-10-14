@@ -34,10 +34,12 @@ class Initial(share.TestSequence):
     _hexfile = 'bce282_4a.txt'
     # Factor to tighten the calibration check
     _cal_factor = 0.5
+    # Injected Vcc Bias
+    _vcc_bias_set = 15.0
     # Limits common to both versions
     _common = (
         tester.LimitLow('FixtureLock', 200),
-        tester.LimitDelta('VccBiasExt', 15.0, 1.0),
+        tester.LimitDelta('VccBiasExt', _vcc_bias_set, 1.0),
         tester.LimitDelta('Vac', 240.0, 5.0),
         tester.LimitBetween('Vbus', 330.0, 350.0),
         tester.LimitPercent('VccPri', 15.6, 5.0),
@@ -92,7 +94,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare: Dc input, measure."""
-        dev['dcs_vccbias'].output(15.0, True)
+        dev['dcs_vccbias'].output(self._vcc_bias_set, output=True)
         self.measure(('dmm_lock', 'dmm_vccbiasext',), timeout=5)
 
     @share.teststep
@@ -119,27 +121,24 @@ class Initial(share.TestSequence):
         is essential that these values be saved and restored.
 
         """
-        # Serial port for programming MSP430.
-        msp_port1 = share.config.Fixture.port('020827', 'MSP1')
         # Get any existing password & write to MSP_PASSWORD file
-        msp = dev['msp']
-        password = None
-        try:    # Fails if device has never been programmed
-            msp.open()
+        with dev['msp'] as msp:
             msp.measurement_fail_on_error = False
-            password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
-            with self.msp_password.open('w') as fout:
-                fout.write(password)
-        except share.console.Error:
-            pass
-        finally:
-            msp.measurement_fail_on_error = True
-            msp.close()
-        dev['rla_prog'].set_on()
-        try:
+            password = None
+            try:    # Fails if device has never been programmed
+                password = '@ffe0\n{0}\nq\n'.format(msp['PASSWD'])
+                with self.msp_password.open('w') as fout:
+                    fout.write(password)
+            except share.console.Error:
+                pass
+            finally:
+                msp.measurement_fail_on_error = True
+        with dev['rla_prog']:
+            # BSL serial port for programming MSP430
+            bsl_port = share.config.Fixture.port('020827', 'BSL')
             # STEP 1 - SAVE INTERNAL CALIBRATION
             sys.argv = (
-                ['', '--comport={0}'.format(msp_port1), '--slow', ] +
+                ['', '--comport={0}'.format(bsl_port), '--slow', ] +
                 (['-P', str(self.msp_password), ] if password else []) +
                 ['--upload=0x10C0', '--size=64', '--ti', ]
                 )
@@ -147,11 +146,10 @@ class Initial(share.TestSequence):
             # Write TI Text format calibration data to a file for use later
             with self.msp_savefile.open('w') as fout:
                 for aline in tosbsl.SAVEDATA:
-                    fout.write(aline)
-                    fout.write('\n')
+                    fout.write(aline + '\n')
             # STEP 2 - ERASE & RESTORE INTERNAL CALIBRATION
             sys.argv = ['',
-                '--comport={0}'.format(msp_port1),
+                '--comport={0}'.format(bsl_port),
                 '--slow',
                 '--masserase',
                 '--program', str(self.msp_savefile),
@@ -159,20 +157,18 @@ class Initial(share.TestSequence):
             tosbsl.main()
             # STEP 3 - PROGRAM
             sys.argv = ['',
-                '--comport={0}'.format(msp_port1),
+                '--comport={0}'.format(bsl_port),
                 '--slow',
                 '--program', str(pathlib.Path(__file__).parent / self._hexfile),
                 ]
             tosbsl.main()
-        finally:
-            dev['rla_prog'].set_off()
-            dev['dcs_vccbias'].output(0.0, delay=1)
+        dev['dcs_vccbias'].output(0.0, output=False, delay=1)
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Power up the unit at 240Vac and measure voltages at min load."""
         dev['acsource'].output(voltage=240.0, output=True, delay=1.0)
-        dev['dcl_vbat'].output(0.1, True)
+        dev['dcl_vbat'].output(0.1, output=True)
         self.measure(
             ('dmm_vac', 'dmm_vbus', 'dmm_vccpri', 'dmm_vccbias',
              'dmm_vbatoff', 'dmm_alarmclose',
@@ -182,18 +178,16 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_cal(self, dev, mes):
         """Calibration."""
-        msp = dev['msp']
-        msp.open()
-        msp.initialise()
-        mes['msp_status']()
-        msp.filter_reload()
-        mes['msp_vout']()
-        dmm_V = mes['dmm_voutpre'].stable(delta=0.005).reading1
-        msp['CAL-V'] = dmm_V
-        mes['dmm_voutpost'].stable(delta=0.005)
-        msp['NV-WRITE'] = True
-        mes['msp_status']()
-        msp.close()
+        with dev['msp'] as msp:
+            msp.initialise()
+            mes['msp_status']()
+            msp.filter_reload()
+            mes['msp_vout']()
+            dmm_V = mes['dmm_voutpre'].stable(delta=0.005).reading1
+            msp['CAL-V'] = dmm_V
+            mes['dmm_voutpost'].stable(delta=0.005)
+            msp['NV-WRITE'] = True
+            mes['msp_status']()
 
     @share.teststep
     def _step_ocp(self, dev, mes):
@@ -225,11 +219,11 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the MSP430
         self['msp_ser'] = serial.Serial(baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self['msp_ser'].port = share.config.Fixture.port('020827', 'MSP2')
+        self['msp_ser'].port = share.config.Fixture.port('020827', 'CON')
         # MSP430 Console driver
         self['msp'] = console.Console(self['msp_ser'])
         # Apply power to fixture circuits.
-        self['dcs_vcom'].output(9.0, True, delay=5)
+        self['dcs_vcom'].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self['dcs_vcom'].output(0.0, False))
 
     def reset(self):
@@ -241,9 +235,9 @@ class Devices(share.Devices):
         time.sleep(1)
         self['discharge'].pulse()
         for ld in ('dcl_vout', 'dcl_vbat'):
-            self[ld].output(0.0, False)
+            self[ld].output(0.0, output=False)
         for dcs in ('dcs_vccbias', ):
-            self[dcs].output(0.0, False)
+            self[dcs].output(0.0, output=False)
         self['rla_prog'].set_off()
 
 

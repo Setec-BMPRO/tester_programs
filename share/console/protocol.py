@@ -126,6 +126,19 @@ class Base():
             '.'.join((__name__, self.__class__.__name__)))
         self.port = port
 
+    def __enter__(self):
+        """Context Manager entry handler: Open console.
+
+        @return self
+
+        """
+        self.open()
+        return self
+
+    def __exit__(self, exct_type, exce_value, trace_back):
+        """Context Manager exit handler: Close console."""
+        self.close()
+
     def open(self):
         """Open connection to unit."""
         self.port.open()
