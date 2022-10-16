@@ -188,7 +188,6 @@ class Devices(share.Devices):
         trsbts_ser.port = nordic_port
         # trsbts Console driver
         self['trsbts'] = console.Console(trsbts_ser)
-        self['trsbts'].measurement_fail_on_error = False
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
