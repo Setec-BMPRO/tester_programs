@@ -68,14 +68,14 @@ class Config():
         )
     # Initial Test limits common to both units
     _base_limits_initial = _base_limits + (
-        tester.LimitDelta('Vbatt', vbatt_set - 0.5, 0.5, doc='Battery input'),
+        tester.LimitDelta('Vbatt', vbatt_set - 0.5, 1.0, doc='Battery input'),
         tester.LimitPercent('3V3', 3.3, 6.0, doc='Internal 3V rail'),
-        tester.LimitHigh('HSon', 10.0, doc='HS output on (high)'),
+        tester.LimitHigh('HSon', 9.0, doc='HS output on (high)'),
         tester.LimitLow('HSoff', 3.0, doc='All HS outputs off (low)'),
         tester.LimitLow('HBon', 2.0, doc='Reversed HBridge on (low)'),
         tester.LimitHigh('HBoff', 6.0, doc='Reversed HBridge off (high)'),
         tester.LimitLow('LSon', 1.0, doc='LS output on (low)'),
-        tester.LimitHigh('LSoff', 10.0, doc='LS output off (high)'),
+        tester.LimitHigh('LSoff', 9.0, doc='LS output off (high)'),
         tester.LimitBoolean('CANok', True, doc='CAN bus active'),
         )
     # Final Test limits common to both units
@@ -118,7 +118,6 @@ class Config():
 
         """
         return cls._base_limits_final
-
 
 class RVMN101A(Config):
 

@@ -28,6 +28,7 @@ class Initial(share.TestSequence):
         Sensors.arm_projectfile = self.cfg.arm_projectfile
         Sensors.arm_image = self.cfg.arm_image
         self.limits = self.cfg.limits_initial()
+
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -59,8 +60,8 @@ class Initial(share.TestSequence):
         rvmn101 = dev['rvmn101']
         rvmn101.open()
         # Cycle power to restart the unit
-        dev['dcs_vbatt'].output(0.0, delay=0.5)
-        dev['dcs_vbatt'].output(self.cfg.vbatt_set, delay=2.0)
+        dev['dcs_vbatt'].output(output=False, delay=1.5)
+        dev['dcs_vbatt'].output(output=True, delay=2.0)
         rvmn101.brand(
             self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
@@ -72,7 +73,7 @@ class Initial(share.TestSequence):
         """Test the outputs of the unit."""
         rvmn101 = dev['rvmn101']
         if self.parameter == '101A':
-            rvmn101.hs_output(41, False)    # Why..?
+            rvmn101.hs_output(41, False)    # Defaults to on, so we turn it off.
         # Reversed HBridge outputs are only on 101A Rev 7-9
         if rvmn101.reversed_outputs:
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
@@ -187,6 +188,7 @@ class Sensors(share.Sensors):
         self['ReverseHB'] = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.1)
         self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.1)
         self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
+
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmn101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101_initial', 'capSnEntry'))
