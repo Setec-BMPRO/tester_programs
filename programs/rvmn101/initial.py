@@ -28,7 +28,6 @@ class Initial(share.TestSequence):
         Sensors.arm_projectfile = self.cfg.arm_projectfile
         Sensors.arm_image = self.cfg.arm_image
         self.limits = self.cfg.limits_initial()
-
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
@@ -188,7 +187,6 @@ class Sensors(share.Sensors):
         self['ReverseHB'] = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.1)
         self['LSout1'] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.1)
         self['LSout2'] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
-
         self['SnEntry'] = sensor.DataEntry(
             message=tester.translate('rvmn101_initial', 'msgSnEntry'),
             caption=tester.translate('rvmn101_initial', 'capSnEntry'))

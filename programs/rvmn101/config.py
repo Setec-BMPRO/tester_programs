@@ -119,6 +119,7 @@ class Config():
         """
         return cls._base_limits_final
 
+
 class RVMN101A(Config):
 
     """RVMN101A configuration."""
