@@ -44,7 +44,7 @@ class Initial(share.TestSequence):
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
-            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('Program', self._step_program),
             tester.TestStep('Operation', self._step_operation),
             tester.TestStep('Bluetooth', self._step_bluetooth),
             )
@@ -56,6 +56,11 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, 'SerNum', 'ui_sernum')
         dev['dcs_vin'].output(self.vbatt, True)
         self.measure(('dmm_vin', 'dmm_3v3', ), timeout=5)
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program both devices."""
+        mes['JLink']()
 
     @share.teststep
     def _step_operation(self, dev, mes):
@@ -95,25 +100,18 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_image = None
-
     def open(self):
         """Create all Instruments."""
         fixture = '034882'
         # Physical Instrument based devices
         for name, devtype, phydevname in (
                 ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vfix', tester.DCSource, 'DCS1'),
-                ('dcs_vin', tester.DCSource, 'DCS2'),
+                ('dcs_vin', tester.DCSource, 'DCS1'),
                 ('rla_reset', tester.Relay, 'RLA1'),
                 ('rla_pair_btn', tester.Relay, 'RLA8'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Nordic NRF52 device programmer
-        self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_image,
-            share.config.Fixture.nrf52_sernum(fixture)
-            )
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
@@ -123,9 +121,7 @@ class Devices(share.Devices):
         # Connection to RaspberryPi bluetooth server
         self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
             share.config.System.ble_url())
-        # Apply power to fixture circuits.
-        self['dcs_vfix'].output(9.0, output=True, delay=5)
-        self.add_closer(lambda: self['dcs_vfix'].output(0.0, output=False))
+            
 
     def reset(self):
         """Reset instruments."""
@@ -138,6 +134,8 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+    
+    sw_image = None
 
     def open(self):
         """Create all Sensors."""
@@ -155,6 +153,12 @@ class Sensors(share.Sensors):
         self['blue'].doc = 'Led cathode'
         self['mirmac'] = sensor.MirrorReadingString()
         self['mirscan'] = sensor.MirrorReadingBoolean()
+        # JLink programmer
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / 'self.projectfile',
+            pathlib.Path(__file__).parent / self.sw_image
+            )
         # Console sensors
         trsrfm = self.devices['trsrfm']
         for name, cmdkey in (
@@ -190,4 +194,5 @@ class Measurements(share.Measurements):
                 'Unit software version'),
             ('ui_sernum', 'SerNum', 'sernum',
                 'Unit serial number'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))

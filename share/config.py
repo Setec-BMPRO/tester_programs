@@ -90,6 +90,7 @@ class Fixture():
         '033633': {'AVR': _ftdi, },     # MB3 Initial
         '034352': {'NORDIC': _ftdi, },  # TRS-BTx Initial
         '034861': {'NORDIC': _ftdi, },  # RVMN5x Initial
+        '034882': {'NORDIC': _ftdi, },  # TRSRFM Initial
         '036746': {'ARM': _ftdi, },     # ASDisplay Initial
 
         # Fixtures with a USB Hub
@@ -133,11 +134,6 @@ class Fixture():
             'ARM': _ftdi_hub_1,
             # Hub port 2:
             'ARDUINO': {'posix': '/dev/ttyACM1', 'nt': 'COM38'}[os.name],
-            },
-        '034882': {     # TRSRFM Initial
-            'NORDIC': _ftdi_hub_1,
-            # Hub port 2: Nordic NRF52 device programmer
-            'nRF52': '682639845',
             },
         '035827': {     # SmartLink201/BLExtender Initial
             'ARM': _ftdi_hub_1,
