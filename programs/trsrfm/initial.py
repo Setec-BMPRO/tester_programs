@@ -41,6 +41,7 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         Sensors.sw_image = self.sw_image
+        Sensors.projectfile = "nrf52.jflash"
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('Prepare', self._step_prepare),
@@ -136,6 +137,7 @@ class Sensors(share.Sensors):
     """Sensors."""
     
     sw_image = None
+    projectfile = None
 
     def open(self):
         """Create all Sensors."""
@@ -156,7 +158,7 @@ class Sensors(share.Sensors):
         # JLink programmer
         self['JLink'] = sensor.JLink(
             self.devices['JLink'],
-            pathlib.Path(__file__).parent / 'self.projectfile',
+            pathlib.Path(__file__).parent / self.projectfile,
             pathlib.Path(__file__).parent / self.sw_image
             )
         # Console sensors
