@@ -40,14 +40,15 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
         Devices.sw_arm_image = self.cfg.sw_arm_image
-        Devices.sw_nrf_image = self.cfg.sw_nrf_image
+        Sensors.sw_nrf_image = self.cfg.sw_nrf_image
+        Sensors.sw_nrf_projectfile = self.cfg.sw_nrf_projectfile
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep('PowerUp', self._step_power_up),
             tester.TestStep(
                 'PgmARM',
                 self.devices['progARM'].program, self.cfg.is_smartlink),
-            tester.TestStep('PgmNordic', self.devices['progNordic'].program),
+            tester.TestStep('PgmNordic', self._step_program_nordic),
             tester.TestStep('Nordic', self._step_test_nordic),
             tester.TestStep(
                 'Calibrate', self._step_calibrate, self.cfg.is_smartlink),
@@ -69,6 +70,11 @@ class Initial(share.TestSequence):
         self.measure(meas1, timeout=5)
         dev['dcs_Vbatt'].output(self.vin_set, output=True, delay=1)
         self.measure(meas2, timeout=5)
+
+    @share.teststep
+    def _step_program_nordic(self, dev, mes):
+        """Program Nordic."""
+        mes['JLink']()
 
     @share.teststep
     def _step_test_nordic(self, dev, mes):
@@ -128,7 +134,6 @@ class Devices(share.Devices):
     """Devices."""
 
     sw_arm_image = None
-    sw_nrf_image = None
 
     def open(self):
         """Create all Instruments."""
@@ -138,12 +143,11 @@ class Devices(share.Devices):
                 ('dmm', tester.DMM, 'DMM'),
                 ('dcs_Vbatt', tester.DCSource, 'DCS2'),
                 ('dcs_USB', tester.DCSource, 'DCS3'),
-                ('rla_reset', tester.Relay, 'RLA1'),
-                ('rla_boot', tester.Relay, 'RLA2'),
-                ('rla_s1', tester.Relay, 'RLA4'),   # 4k7 pull-down on tanks
-                ('rla_s2', tester.Relay, 'RLA5'),
-                ('rla_s3', tester.Relay, 'RLA6'),
-                ('rla_s4', tester.Relay, 'RLA7'),
+                ('rla_s1', tester.Relay, 'RLA1'),   # 4k7 pull-down on tanks
+                ('rla_s2', tester.Relay, 'RLA2'),
+                ('rla_s3', tester.Relay, 'RLA3'),
+                ('rla_s4', tester.Relay, 'RLA4'),
+                ('JLink', tester.JLink, 'JLINK'),
             ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
@@ -152,14 +156,13 @@ class Devices(share.Devices):
             arm_port,
             pathlib.Path(__file__).parent / self.sw_arm_image,
             crpmode=False,
-            boot_relay=self['rla_boot'],
-            reset_relay=self['rla_reset']
+            bda4_signals=True,
             )
         # Nordic NRF52 device programmer
-        self['progNordic'] = share.programmer.NRF52(
-            pathlib.Path(__file__).parent / self.sw_nrf_image,
-            share.config.Fixture.nrf52_sernum(fixture)
-            )
+        #self['progNordic'] = share.programmer.NRF52(
+        #    pathlib.Path(__file__).parent / self.sw_nrf_image,
+        #    share.config.Fixture.nrf52_sernum(fixture)
+        #    )
         # Serial connection to the Nordic console
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
         #   Set port separately, as we don't want it opened yet
@@ -180,7 +183,6 @@ class Devices(share.Devices):
         self['smartlink201'].close()
         self['dcs_Vbatt'].output(0.0, False)
         for rla in (
-                'rla_reset', 'rla_boot',
                 'rla_s1', 'rla_s2', 'rla_s3', 'rla_s4',
                 ):
             self[rla].set_off()
@@ -189,6 +191,9 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    sw_nrf_image = None
+    sw_nrf_projectfile = None
 
     def open(self):
         """Create all Sensors."""
@@ -210,6 +215,10 @@ class Sensors(share.Sensors):
             message=tester.translate('smartlink201_initial', 'msgSnEntry'),
             caption=tester.translate('smartlink201_initial', 'capSnEntry'))
         self['SnEntry'].doc = 'Entered S/N'
+        self['JLink'] = sensor.JLink(
+            self.devices['JLink'],
+            pathlib.Path(__file__).parent / self.sw_nrf_projectfile,
+            pathlib.Path(__file__).parent / self.sw_nrf_image)
         # Console sensors
         smartlink201 = self.devices['smartlink201']
         self['SL_MAC'] = sensor.KeyedReadingString(smartlink201, 'MAC')
@@ -253,6 +262,7 @@ class Measurements(share.Measurements):
             ('SL_Vbatt', 'SL_Vbatt', 'SL_Vbatt',
                 'Nordic Vbatt after adjustment'),
             ('SL_MAC', 'BleMac', 'SL_MAC', 'Nordic MAC address valid'),
+            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
             ))
         for index in range(16):         # All tank inputs High
             name = console.tank_name(index)

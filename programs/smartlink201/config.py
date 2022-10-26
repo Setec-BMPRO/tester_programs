@@ -33,6 +33,7 @@ class _Values():
     hardware_rev = attr.ib(validator=attr.validators.instance_of(str))
     sw_arm_image = attr.ib(validator=attr.validators.instance_of(str))
     sw_nrf_image = attr.ib(validator=attr.validators.instance_of(str))
+    sw_nrf_projectfile = attr.ib(validator=attr.validators.instance_of(str))
     is_smartlink = attr.ib(validator=attr.validators.instance_of(bool))
 
 
@@ -54,6 +55,7 @@ class _Config():
         cls.hardware_rev = values.hardware_rev
         cls.sw_arm_image = values.sw_arm_image
         cls.sw_nrf_image = values.sw_nrf_image
+        cls.sw_nrf_projectfile = 'nrf52.jflash'
         cls.is_smartlink = values.is_smartlink
 
 
