@@ -50,6 +50,9 @@ class TRSRFMInitial(ProgramTestCase):
                     (sen['vin'], 12.0),
                     (sen['3v3'], 3.30),
                     ),
+                'Program': (
+                    (sen['JLink'], 0),
+                    ),
                 'Operation': (
                     (sen['red'], (3.1, 0.5, 3.1, )),
                     (sen['green'], (3.1, 0.0, 3.1, )),
@@ -64,7 +67,7 @@ class TRSRFMInitial(ProgramTestCase):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(12, len(result.readings))
+        self.assertEqual(13, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'PgmNordic', 'Operation', 'Bluetooth'],
+            ['Prepare', 'Program', 'Operation', 'Bluetooth'],
             self.tester.ut_steps)

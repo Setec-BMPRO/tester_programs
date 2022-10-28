@@ -55,6 +55,9 @@ class BLExtenderInitial(_Initial):
                     (sen['Vin'], 10.0),
                     (sen['3V3'], 3.3),
                     ),
+                'PgmNordic': (
+                    (sen['JLink'], 0),
+                    ),
                 'Nordic': (
                     (sen['3V3'], 3.3),
                     (sen['SL_MAC'], 'aabbccddeeff'),
@@ -65,7 +68,7 @@ class BLExtenderInitial(_Initial):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(7, len(result.readings))
+        self.assertEqual(8, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmNordic', 'Nordic', ],
             self.tester.ut_steps)
@@ -92,6 +95,9 @@ class SmartLink201Initial(_Initial):
                     (sen['Vin'], 10.0),
                     (sen['3V3'], 3.3),
                     ),
+                'PgmNordic': (
+                    (sen['JLink'], 0),
+                    ),
                 'Nordic': (
                     (sen['3V3'], 3.3),
                     (sen['SL_MAC'], 'aabbccddeeff'),
@@ -109,7 +115,7 @@ class SmartLink201Initial(_Initial):
         self.tester.test(('UUT1', ))
         result = self.tester.ut_result[0]
         self.assertEqual('P', result.code)
-        self.assertEqual(44, len(result.readings))
+        self.assertEqual(45, len(result.readings))
         self.assertEqual(
             ['PowerUp', 'PgmARM', 'PgmNordic',
              'Nordic', 'Calibrate', 'TankSense', ],
