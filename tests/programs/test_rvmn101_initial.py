@@ -13,22 +13,19 @@ class RVMN101BInitial(ProgramTestCase):
     """RVMN101B Initial program test suite."""
 
     prog_class = rvmn101.Initial
-    parameter = '101B'
+    parameter = "101B"
     hs_outputs = [1, 2, 3]
     debug = False
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-                'share.bluetooth.SerialToMAC',
-                ):
+        for target in ("share.bluetooth.SerialToMAC",):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        mycon = MagicMock(name='MyCon')
+        mycon = MagicMock(name="MyCon")
         type(mycon).valid_outputs = PropertyMock(return_value=self.hs_outputs)
-        patcher = patch(
-            'programs.rvmn101.console.Console101B', return_value=mycon)
+        patcher = patch("programs.rvmn101.console.Console101B", return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -37,35 +34,31 @@ class RVMN101BInitial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': (
-                    (sen['SnEntry'], 'A2126010123'),
-                    (sen['VBatt'], 12.0),
-                    (sen['3V3'], 3.3),
-                    ),
-                'Program': (
-                    (sen['JLinkARM'], 0),
-                    (sen['JLinkBLE'], 0),
-                    ),
-                'Initialise': (
-                    (sen['BleMac'], 'aabbccddeeff'),
-                    ),
-                'Output': (
-                    (sen['HSout'],
-                        (0.0, ) + (11.5, 0.0) * len(self.hs_outputs)),
-                    (sen['LSout1'], (0.0, 11.5)),
-                    (sen['LSout2'], (0.0, 11.5)),
-                    ),
-                'CanBus': (
-                    (sen['cantraffic'], True),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerUp": (
+                    (sen["SnEntry"], "A2126010123"),
+                    (sen["VBatt"], 12.0),
+                    (sen["3V3"], 3.3),
+                ),
+                "Program": (
+                    (sen["JLinkARM"], 0),
+                    (sen["JLinkBLE"], 0),
+                ),
+                "Initialise": ((sen["BleMac"], "aabbccddeeff"),),
+                "Output": (
+                    (sen["HSout"], (0.0,) + (11.5, 0.0) * len(self.hs_outputs)),
+                    (sen["LSout1"], (0.0, 11.5)),
+                    (sen["LSout2"], (0.0, 11.5)),
+                ),
+                "CanBus": ((sen["cantraffic"], True),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(12, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'Program', 'Initialise', 'Output', 'CanBus'],
-            self.tester.ut_steps)
+            ["PowerUp", "Program", "Initialise", "Output", "CanBus"],
+            self.tester.ut_steps,
+        )

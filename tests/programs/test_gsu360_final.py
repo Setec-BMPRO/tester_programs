@@ -18,29 +18,30 @@ class GSU3601TAFinal(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': (
-                    (sen['o24V'], 24.00), (sen['oYesNoGreen'], True),
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerUp": (
+                    (sen["o24V"], 24.00),
+                    (sen["oYesNoGreen"], True),
+                ),
+                "FullLoad": (
+                    (sen["o24V"], 24.10),
+                    (sen["o24V"], 24.00),
+                ),
+                "OCP": (
+                    (
+                        sen["o24V"],
+                        (24.1,) * 15 + (22.0,),
                     ),
-                'FullLoad': (
-                    (sen['o24V'], 24.10), (sen['o24V'], 24.00),
-                    ),
-                'OCP': (
-                    (sen['o24V'], (24.1, ) * 15 + (22.0, ), ),
-                    ),
-                'Shutdown': (
-                    (sen['o24V'], 4.0),
-                    ),
-                'Restart': (
-                    (sen['o24V'], 24.0),
-                    ),
-                },
-            }
+                ),
+                "Shutdown": ((sen["o24V"], 4.0),),
+                "Restart": ((sen["o24V"], 24.0),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(7, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'FullLoad', 'OCP', 'Shutdown', 'Restart'],
-            self.tester.ut_steps)
+            ["PowerUp", "FullLoad", "OCP", "Shutdown", "Restart"], self.tester.ut_steps
+        )

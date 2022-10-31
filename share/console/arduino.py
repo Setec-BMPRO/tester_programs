@@ -23,15 +23,15 @@ class Arduino(protocol.Base):
     def open(self):
         """Open port, with auto re-try."""
         retry_max = 20
-        logger = logging.getLogger('.'.join((__name__, self.__class__.__name__)))
+        logger = logging.getLogger(".".join((__name__, self.__class__.__name__)))
         for retry in range(retry_max + 1):
             try:
                 super().open()
                 break
             except serial.serialutil.SerialException:
-                logger.debug('Arduino open failed')
+                logger.debug("Arduino open failed")
                 if retry == retry_max:
-                    logger.error('Arduino open timeout')
+                    logger.error("Arduino open timeout")
                     raise
                 time.sleep(1)
         # Let the Arduino start after the 'port open reset'

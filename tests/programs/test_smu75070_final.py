@@ -18,26 +18,26 @@ class SMU750Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': (
-                    (sen['o70V'], 70.0), (sen['oYesNoFan'], True),
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerUp": (
+                    (sen["o70V"], 70.0),
+                    (sen["oYesNoFan"], True),
+                ),
+                "FullLoad": ((sen["o70V"], 70.0),),
+                "OCP": (
+                    (
+                        sen["o70V"],
+                        (70.0,) * 15 + (69.2,),
                     ),
-                'FullLoad': (
-                    (sen['o70V'], 70.0),
-                    ),
-                'OCP': (
-                    (sen['o70V'], (70.0, ) * 15 + (69.2, ), ),
-                    ),
-                'Shutdown': (
-                    (sen['o70V'], (10.0, 70.0)),
-                    ),
-                },
-            }
+                ),
+                "Shutdown": ((sen["o70V"], (10.0, 70.0)),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(6, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'FullLoad', 'OCP', 'Shutdown'],
-            self.tester.ut_steps)
+            ["PowerUp", "FullLoad", "OCP", "Shutdown"], self.tester.ut_steps
+        )

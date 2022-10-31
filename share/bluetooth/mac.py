@@ -8,16 +8,16 @@ import jsonrpclib
 
 
 @attr.s
-class SerialToMAC():
+class SerialToMAC:
 
     """Save/Read the bluetooth MAC address for a Serial Number."""
 
-    server_url = attr.ib(default='https://webapp.mel.setec.com.au/ate/rpc/')
+    server_url = attr.ib(default="https://webapp.mel.setec.com.au/ate/rpc/")
 
-# FIXME: We should be able to reuse the ServerProxy
-# ATE3b uses Python 3.10 with OpenSSL 3 and gets an "unexpected EOF" SSL
-# error about 30 sec after the first RPC call.
-# Use a new ServerProxy for every RPC call as a work around.
+    # FIXME: We should be able to reuse the ServerProxy
+    # ATE3b uses Python 3.10 with OpenSSL 3 and gets an "unexpected EOF" SSL
+    # error about 30 sec after the first RPC call.
+    # Use a new ServerProxy for every RPC call as a work around.
 
     def _server(self):
         """Create a new connection.
@@ -37,9 +37,9 @@ class SerialToMAC():
         try:
             svr = self._server()
             mac = svr.blemac_get(serial)
-            svr('close')
+            svr("close")
             del svr
-        except Exception as exc:    # pylint: disable=broad-except
+        except Exception as exc:  # pylint: disable=broad-except
             mac = str(exc)
         return mac
 
@@ -52,5 +52,5 @@ class SerialToMAC():
         """
         svr = self._server()
         svr.blemac_set(serial, blemac)
-        svr('close')
+        svr("close")
         del svr

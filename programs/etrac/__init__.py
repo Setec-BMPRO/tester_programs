@@ -6,4 +6,4 @@
 from .initial import Initial
 
 
-__all__ = ['Initial']
+__all__ = ["Initial"]

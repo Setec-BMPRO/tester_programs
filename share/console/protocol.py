@@ -66,7 +66,6 @@ import time
 import tester
 
 
-
 class Error(Exception):
 
     """Console Error."""
@@ -82,7 +81,7 @@ class ResponseError(Error):
     """Console Response Error."""
 
 
-class Base():
+class Base:
 
     """Formatter for the base console. Implements Protocols 1 & 4.
 
@@ -97,12 +96,12 @@ class Base():
     """
 
     # Command terminator. Signals the end of a command.
-    cmd_terminator = b'\r'
+    cmd_terminator = b"\r"
     # Command prompt. Signals the end of response data.
-    cmd_prompt = b'\r> '
+    cmd_prompt = b"\r> "
     # Command suffix between echo of a command and the start of the response.
-    res_suffix = b' -> '
-    ignore = ()    # Tuple of strings to remove from responses
+    res_suffix = b" -> "
+    ignore = ()  # Tuple of strings to remove from responses
     # Fail a measurement upon a console Error
     measurement_fail_on_error = True
     # Operating as a sensor: key value
@@ -112,9 +111,9 @@ class Base():
     # True for verbose logging
     verbose = False
     # Response of the last call to __setitem__
-    last_setitem_response = ''
+    last_setitem_response = ""
     # Magic command key to read last __setitem__ response
-    query_last_response = 'LAST_RESPONSE?'
+    query_last_response = "LAST_RESPONSE?"
 
     def __init__(self, port):
         """Initialise communications.
@@ -122,8 +121,7 @@ class Base():
         @param port Serial instance to use
 
         """
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
+        self._logger = logging.getLogger(".".join((__name__, self.__class__.__name__)))
         self.port = port
 
     def __enter__(self):
@@ -158,7 +156,7 @@ class Base():
         """Sensor: Configure for next reading."""
         self._read_key = key
 
-    def opc(self):      # pylint: disable=no-self-use
+    def opc(self):  # pylint: disable=no-self-use
         """Sensor: Dummy OPC.
 
         @return None
@@ -166,7 +164,7 @@ class Base():
         """
         return None
 
-    def read(self, callerid):   # pylint: disable=unused-argument
+    def read(self, callerid):  # pylint: disable=unused-argument
         """Sensor: Read ARM data using the last defined key.
 
         @param callerid Identity of caller
@@ -194,8 +192,7 @@ class Base():
         @param value Data value
 
         """
-        self.last_setitem_response = (
-            self.cmd_data[key].write(value, self.action))
+        self.last_setitem_response = self.cmd_data[key].write(value, self.action)
 
     def action(self, command=None, delay=0, expected=0):
         """Send a command, and read the response.
@@ -223,14 +220,15 @@ class Base():
                 data = self.port.read(1000)
                 self.port.timeout = port_timeout
                 if data:
-                    self._logger.error('Console Error extra data: %s', data)
+                    self._logger.error("Console Error extra data: %s", data)
                 # Generate a Measurement failure
                 self._logger.debug('Caught Error: "%s"', err)
                 comms = tester.Measurement(
-                    tester.LimitRegExp('Action', 'ok', doc='Command succeeded'),
-                    tester.sensor.MirrorReadingString())
+                    tester.LimitRegExp("Action", "ok", doc="Command succeeded"),
+                    tester.sensor.MirrorReadingString(),
+                )
                 comms.sensor.store(str(err))
-                comms.measure()   # Generates a test FAIL result
+                comms.measure()  # Generates a test FAIL result
             else:
                 raise
         return reply
@@ -244,17 +242,17 @@ class Base():
         """
         # Send the command with a terminator
         cmd_bytes = command.encode()
-        self._logger.debug('Cmd --> %s', repr(cmd_bytes))
+        self._logger.debug("Cmd --> %s", repr(cmd_bytes))
         self.port.write(cmd_bytes + self.cmd_terminator)
         # Read back the echo of the command
         cmd_echo = self.port.read(len(cmd_bytes))
         if self.verbose:
-            self._logger.debug('Echo <-- %s', repr(cmd_echo))
+            self._logger.debug("Echo <-- %s", repr(cmd_echo))
         # The echo must match what we sent
         if cmd_echo != cmd_bytes:
             raise CommandError(
-                'Command echo error. Tx: {0}, Rx: {1}'.format(
-                    cmd_bytes, cmd_echo))
+                "Command echo error. Tx: {0}, Rx: {1}".format(cmd_bytes, cmd_echo)
+            )
 
     def _read_response(self, expected):
         """Read the response to a command.
@@ -269,33 +267,34 @@ class Base():
 
         """
         # Read bytes until the command prompt is seen.
-        buf = bytearray()           # Buffer for the response bytes
+        buf = bytearray()  # Buffer for the response bytes
         while self.cmd_prompt not in buf:
             data = self.port.read(1)
             if self.verbose:
-                self._logger.debug('Read <-- %s', repr(data))
-            if not data:            # No data means a timeout
-                raise ResponseError('Response timeout')
+                self._logger.debug("Read <-- %s", repr(data))
+            if not data:  # No data means a timeout
+                raise ResponseError("Response timeout")
             buf += data
-            buf = buf.replace(b'\n', b'')   # Remove all '\n'
+            buf = buf.replace(b"\n", b"")  # Remove all '\n'
         # Remove ignored strings
         for pattern in (self.cmd_prompt, self.res_suffix):
-            buf = buf.replace(pattern, b'')
+            buf = buf.replace(pattern, b"")
         for pattern in self.ignore:
-            buf = buf.replace(pattern.encode(), b'')
+            buf = buf.replace(pattern.encode(), b"")
         # Decode and split response lines from the byte buffer
-        response = buf.decode(errors='ignore').splitlines()
-        while '' in response:       # Remove empty lines
-            response.remove('')
+        response = buf.decode(errors="ignore").splitlines()
+        while "" in response:  # Remove empty lines
+            response.remove("")
         response_count = len(response)
-        if not response_count:      # Reduce empty list to None
+        if not response_count:  # Reduce empty list to None
             response = None
-        elif response_count == 1:   # Reduce list of 1 string to a string
+        elif response_count == 1:  # Reduce list of 1 string to a string
             response = response[0]
-        self._logger.debug('Response <-- %s', repr(response))
+        self._logger.debug("Response <-- %s", repr(response))
         if response_count != expected:
             raise ResponseError(
-                'Expected {0}, actual {1}'.format(expected, response_count))
+                "Expected {0}, actual {1}".format(expected, response_count)
+            )
         return response
 
 
@@ -316,20 +315,22 @@ class BadUart(Base):
 
         """
         cmd_bytes = command.encode()
-        self._logger.debug('Cmd --> %s', repr(cmd_bytes))
+        self._logger.debug("Cmd --> %s", repr(cmd_bytes))
         # Send each byte with echo verification
         index = -1
         for a_byte in cmd_bytes:
             index += 1
-            a_byte = bytes([a_byte])    # We need a byte, not an integer
+            a_byte = bytes([a_byte])  # We need a byte, not an integer
             self.port.write(a_byte)
             echo = self.port.read(1)
             if self.verbose:
-                self._logger.debug(' Tx -> %s Rx <- %s', a_byte, echo)
+                self._logger.debug(" Tx -> %s Rx <- %s", a_byte, echo)
             if echo != a_byte:
                 raise CommandError(
-                    'Command echo error on byte {0}. Tx: {1}, Rx: {2}'.format(
-                        index, a_byte, echo))
+                    "Command echo error on byte {0}. Tx: {1}, Rx: {2}".format(
+                        index, a_byte, echo
+                    )
+                )
         # And the terminator without echo
         self.port.write(self.cmd_terminator)
 
@@ -353,7 +354,7 @@ class CANTunnel(Base):
 
         """
         cmd_bytes = command.encode()
-        self._logger.debug('Cmd --> %s', repr(cmd_bytes))
+        self._logger.debug("Cmd --> %s", repr(cmd_bytes))
         can_packet_size = 8
         while len(cmd_bytes) > 0:
             packet = cmd_bytes[:can_packet_size]
@@ -361,10 +362,10 @@ class CANTunnel(Base):
             self.port.write(packet)
             echo = self.port.read(len(packet))
             if self.verbose:
-                self._logger.debug(' Tx -> %s Rx <- %s', packet, echo)
+                self._logger.debug(" Tx -> %s Rx <- %s", packet, echo)
             if echo != packet:
                 raise CommandError(
-                    'Command echo error. Tx: {0}, Rx: {1}'.format(
-                        packet, echo))
+                    "Command echo error. Tx: {0}, Rx: {1}".format(packet, echo)
+                )
         # And the terminator without echo
         self.port.write(self.cmd_terminator)

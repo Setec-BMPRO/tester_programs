@@ -8,7 +8,7 @@ from . import test_console
 from . import test_parameter
 
 __all__ = [
-    'test_bluetooth',
-    'test_console',
-    'test_parameter',
-    ]
+    "test_bluetooth",
+    "test_console",
+    "test_parameter",
+]

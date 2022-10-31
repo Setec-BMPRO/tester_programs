@@ -16,27 +16,30 @@ class _BC15_25_Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerOn':
-                    ((sen['yesnopsmode'], True), (sen['vout'], 13.80), ),
-                'Load':
-                    ((sen['vout'], (14.23, ) + (14.2, ) * 8 + (11.0, )),
-                     (sen['yesnochmode'], True), ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerOn": (
+                    (sen["yesnopsmode"], True),
+                    (sen["vout"], 13.80),
+                ),
+                "Load": (
+                    (sen["vout"], (14.23,) + (14.2,) * 8 + (11.0,)),
+                    (sen["yesnochmode"], True),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(5, len(result.readings))
-        self.assertEqual(['PowerOn', 'Load'], self.tester.ut_steps)
+        self.assertEqual(["PowerOn", "Load"], self.tester.ut_steps)
 
 
 class BC15_Final(_BC15_25_Final):
 
     """BC15 Initial program test suite."""
 
-    parameter = '15'
+    parameter = "15"
     debug = False
 
     def test_pass_run(self):
@@ -48,7 +51,7 @@ class BC25_Final(_BC15_25_Final):
 
     """BC25 Initial program test suite."""
 
-    parameter = '25'
+    parameter = "25"
     debug = False
 
     def test_pass_run(self):

@@ -18,22 +18,22 @@ class Ids500InitialBus(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': (
-                    (sen['olock'], 0.0),
-                    (sen['o400V'], 400.0),
-                    ),
-                'TecLddStartup': (
-                    (sen['o20VT'], (23, 23, 22, 19)),
-                    (sen['o9V'], (11, 10, 10, 11 )),
-                    (sen['o20VL'], (23, 23, 21, 23)),
-                    (sen['o_20V'], (-23, -23, -21, -23)),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerUp": (
+                    (sen["olock"], 0.0),
+                    (sen["o400V"], 400.0),
+                ),
+                "TecLddStartup": (
+                    (sen["o20VT"], (23, 23, 22, 19)),
+                    (sen["o9V"], (11, 10, 10, 11)),
+                    (sen["o20VL"], (23, 23, 21, 23)),
+                    (sen["o_20V"], (-23, -23, -21, -23)),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(18, len(result.readings))
-        self.assertEqual(['PowerUp', 'TecLddStartup'], self.tester.ut_steps)
+        self.assertEqual(["PowerUp", "TecLddStartup"], self.tester.ut_steps)

@@ -23,8 +23,8 @@ class DeviceID(enum.IntEnum):
 
     """
 
-    RVMC101 = 0X44
-    RVMN101 = 0X54
+    RVMC101 = 0x44
+    RVMN101 = 0x54
     RVMD50 = RVMC101
     RVMN5X = RVMN101
 
@@ -44,9 +44,9 @@ class SetecRVC(enum.IntEnum):
 
     """Generic SETEC RV-C CAN parameters."""
 
-    DATA_LEN = 8            # Packets always have 8 bytes of data
-    COMMAND_ID_INDEX = 0    # Command ID is 1st data byte
-    MESSAGE_ID_INDEX = 0    # Message ID is 1st data byte
+    DATA_LEN = 8  # Packets always have 8 bytes of data
+    COMMAND_ID_INDEX = 0  # Command ID is 1st data byte
+    MESSAGE_ID_INDEX = 0  # Message ID is 1st data byte
 
 
 @enum.unique
@@ -118,21 +118,21 @@ class _SwitchStatusField(ctypes.Structure):
 
     # pylint: disable=too-few-public-methods
     _fields_ = [
-        ('_pairing', ctypes.c_uint, 2),
-        ('retract', ctypes.c_uint, 2),
-        ('extend', ctypes.c_uint, 2),
-        ('_unused1', ctypes.c_uint, 2),
-        ('zone1', ctypes.c_uint, 2),
-        ('zone2', ctypes.c_uint, 2),
-        ('zone3', ctypes.c_uint, 2),
-        ('zone4', ctypes.c_uint, 2),
-        ('_hex', ctypes.c_uint, 4),
-        ('up', ctypes.c_uint, 2),
-        ('down', ctypes.c_uint, 2),
-        ('usb_pwr', ctypes.c_uint, 1),
-        ('wake_up', ctypes.c_uint, 1),
-        ('_unused2', ctypes.c_uint, 6),
-        ]
+        ("_pairing", ctypes.c_uint, 2),
+        ("retract", ctypes.c_uint, 2),
+        ("extend", ctypes.c_uint, 2),
+        ("_unused1", ctypes.c_uint, 2),
+        ("zone1", ctypes.c_uint, 2),
+        ("zone2", ctypes.c_uint, 2),
+        ("zone3", ctypes.c_uint, 2),
+        ("zone4", ctypes.c_uint, 2),
+        ("_hex", ctypes.c_uint, 4),
+        ("up", ctypes.c_uint, 2),
+        ("down", ctypes.c_uint, 2),
+        ("usb_pwr", ctypes.c_uint, 1),
+        ("wake_up", ctypes.c_uint, 1),
+        ("_unused2", ctypes.c_uint, 6),
+    ]
 
 
 class _SwitchStatusRaw(ctypes.Union):
@@ -141,12 +141,12 @@ class _SwitchStatusRaw(ctypes.Union):
 
     # pylint: disable=too-few-public-methods
     _fields_ = [
-        ('uint', ctypes.c_uint),
-        ('switch', _SwitchStatusField),
-        ]
+        ("uint", ctypes.c_uint),
+        ("switch", _SwitchStatusField),
+    ]
 
 
-class SwitchStatusPacket():         # pylint: disable=too-few-public-methods
+class SwitchStatusPacket:  # pylint: disable=too-few-public-methods
 
     """A Switch Status packet."""
 
@@ -158,16 +158,18 @@ class SwitchStatusPacket():         # pylint: disable=too-few-public-methods
 
         """
         payload = packet.data
-        if (len(payload) != SetecRVC.DATA_LEN.value
-                or payload[SetecRVC.COMMAND_ID_INDEX.value]
-                    != CommandID.SWITCH_STATUS.value):
+        if (
+            len(payload) != SetecRVC.DATA_LEN.value
+            or payload[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.SWITCH_STATUS.value
+        ):
             raise PacketDecodeError()
-        (   self.msgtype,
+        (
+            self.msgtype,
             switch_data,
             self.swver,
             self.counter,
             self.checksum,
-            ) = struct.Struct('<BL3B').unpack(payload)
+        ) = struct.Struct("<BL3B").unpack(payload)
         # Decode the switch data
         switch_raw = _SwitchStatusRaw()
         switch_raw.uint = switch_data
@@ -196,19 +198,19 @@ class _DeviceStatusField(ctypes.Structure):
     # pylint: disable=too-few-public-methods
     _fields_ = [
         # Byte D1
-        ('page', ctypes.c_uint, 1),
-        ('sel', ctypes.c_uint, 1),
-        ('soft1', ctypes.c_uint, 1),
-        ('soft2', ctypes.c_uint, 1),
-        ('light1', ctypes.c_uint, 1),
-        ('light2', ctypes.c_uint, 1),
-        ('light3', ctypes.c_uint, 1),
-        ('pump', ctypes.c_uint, 1),
+        ("page", ctypes.c_uint, 1),
+        ("sel", ctypes.c_uint, 1),
+        ("soft1", ctypes.c_uint, 1),
+        ("soft2", ctypes.c_uint, 1),
+        ("light1", ctypes.c_uint, 1),
+        ("light2", ctypes.c_uint, 1),
+        ("light3", ctypes.c_uint, 1),
+        ("pump", ctypes.c_uint, 1),
         # Byte D2
-        ('acmain', ctypes.c_uint, 1),
-        ('_reserved', ctypes.c_uint, 6),
-        ('backlight', ctypes.c_uint, 1),
-        ]
+        ("acmain", ctypes.c_uint, 1),
+        ("_reserved", ctypes.c_uint, 6),
+        ("backlight", ctypes.c_uint, 1),
+    ]
 
 
 class _DeviceStatusRaw(ctypes.Union):
@@ -217,12 +219,12 @@ class _DeviceStatusRaw(ctypes.Union):
 
     # pylint: disable=too-few-public-methods
     _fields_ = [
-        ('uint', ctypes.c_uint, 16),
-        ('button', _DeviceStatusField),
-        ]
+        ("uint", ctypes.c_uint, 16),
+        ("button", _DeviceStatusField),
+    ]
 
 
-class DeviceStatusPacket():         # pylint: disable=too-few-public-methods
+class DeviceStatusPacket:  # pylint: disable=too-few-public-methods
 
     """A Device Status packet."""
 
@@ -234,15 +236,16 @@ class DeviceStatusPacket():         # pylint: disable=too-few-public-methods
 
         """
         payload = packet.data
-        if (len(payload) != SetecRVC.DATA_LEN.value
-                or payload[SetecRVC.COMMAND_ID_INDEX.value]
-                    not in (0, CommandID.DEVICE_STATUS.value)):
+        if len(payload) != SetecRVC.DATA_LEN.value or payload[
+            SetecRVC.COMMAND_ID_INDEX.value
+        ] not in (0, CommandID.DEVICE_STATUS.value):
             raise PacketDecodeError()
-        (   self.msgtype,       # D0
-            button_data,        # D1,2
-            self.menu_state,    # D3
-            _,                  # D4-7
-            ) = struct.Struct('<BHBL').unpack(payload)
+        (
+            self.msgtype,  # D0
+            button_data,  # D1,2
+            self.menu_state,  # D3
+            _,  # D4-7
+        ) = struct.Struct("<BHBL").unpack(payload)
         # Decode the button data
         button_raw = _DeviceStatusRaw()
         button_raw.uint = button_data
@@ -260,12 +263,12 @@ class DeviceStatusPacket():         # pylint: disable=too-few-public-methods
         self.backlight = bool(zss.backlight)
 
 
-class _RVMD50MessagePacket():       # pylint: disable=too-few-public-methods
+class _RVMD50MessagePacket:  # pylint: disable=too-few-public-methods
 
     """A RVMD50 message packet."""
 
-    _cmd_id_index = 1           # Index of Cmd ID value
-    _cmd_id_range = range(3)    # Valid range of Cmd ID values
+    _cmd_id_index = 1  # Index of Cmd ID value
+    _cmd_id_range = range(3)  # Valid range of Cmd ID values
 
     def __init__(self, candev, cmd_id):
         """Create instance.
@@ -276,11 +279,11 @@ class _RVMD50MessagePacket():       # pylint: disable=too-few-public-methods
         """
         self._candev = candev
         if cmd_id not in self._cmd_id_range:
-            raise ValueError('Cmd ID out of range')
+            raise ValueError("Cmd ID out of range")
         header = tester.devphysical.can.RVCHeader()
-        msg = header.message                # Packet...
-        msg.DGN = DGN.RVMD50.value          #  to the RVMD50
-        msg.SA = DeviceID.RVMN5X.value      #  from a RVMN5x
+        msg = header.message  # Packet...
+        msg.DGN = DGN.RVMD50.value  #  to the RVMD50
+        msg.SA = DeviceID.RVMN5X.value  #  from a RVMN5x
         data = bytearray(SetecRVC.DATA_LEN.value)
         data[SetecRVC.MESSAGE_ID_INDEX.value] = MessageID.COMMAND.value
         data[self._cmd_id_index] = cmd_id
@@ -295,8 +298,8 @@ class RVMD50ControlLCDPacket(_RVMD50MessagePacket):
 
     """A RVMD50 Control LCD packet."""
 
-    _cmd_id = 0             # Cmd ID: 0 = Control LCD
-    _pattern_index = 2      # Index of test pattern value
+    _cmd_id = 0  # Cmd ID: 0 = Control LCD
+    _pattern_index = 2  # Index of test pattern value
 
     def __init__(self, candev):
         """Create instance.
@@ -324,7 +327,7 @@ class RVMD50ControlLCDPacket(_RVMD50MessagePacket):
 
         """
         if value not in range(4):
-            raise ValueError('Test pattern must be 0-3')
+            raise ValueError("Test pattern must be 0-3")
         self.pkt.data[self._pattern_index] = value
 
 
@@ -333,7 +336,7 @@ class RVMD50ResetPacket(_RVMD50MessagePacket):
     """A RVMD50 Reset packet."""
 
     # pylint: disable=too-few-public-methods
-    _cmd_id = 1             # Cmd ID: 1 = Reset
+    _cmd_id = 1  # Cmd ID: 1 = Reset
 
     def __init__(self, candev):
         """Create instance.
@@ -348,10 +351,10 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
 
     """A RVMD50 Control Button packet."""
 
-    _cmd_id = 2             # Cmd ID: 2 = Control Button
-    _group_id = 1           # Group ID: 0 = Off, 1 = On
-    _group_id_index = 2     # Index of Group ID value
-    _button_index = 3       # Index of button value
+    _cmd_id = 2  # Cmd ID: 2 = Control Button
+    _group_id = 1  # Group ID: 0 = Off, 1 = On
+    _group_id_index = 2  # Index of Group ID value
+    _button_index = 3  # Index of button value
 
     def __init__(self, candev):
         """Create instance.
@@ -380,7 +383,7 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
 
         """
         if not isinstance(value, bool):
-            raise ValueError('Enable must be boolean')
+            raise ValueError("Enable must be boolean")
         self.pkt.data[self._group_id_index] = int(value)
 
     @property
@@ -400,17 +403,17 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
 
         """
         if not isinstance(value, bool):
-            raise ValueError('Button must be boolean')
+            raise ValueError("Button must be boolean")
         self.pkt.data[self._button_index] = int(value)
 
 
 @attr.s
-class PacketPropertyReader():
+class PacketPropertyReader:
 
     """Custom logical instrument to read CAN packet properties."""
 
-    canreader = attr.ib()       # tester.CANReader instance
-    packettype = attr.ib()      # CAN packet class
+    canreader = attr.ib()  # tester.CANReader instance
+    packettype = attr.ib()  # CAN packet class
     _read_key = attr.ib(init=False, default=None)
 
     def configure(self, key):
@@ -420,40 +423,40 @@ class PacketPropertyReader():
     def opc(self):
         """Sensor: OPC."""
 
-    def read(self, callerid):       # pylint: disable=unused-argument
+    def read(self, callerid):  # pylint: disable=unused-argument
         """Sensor: Read payload data using the last configured key.
 
         @param callerid Identity of caller
         @return Packet property value
 
         """
-# FIXME: How can we signal 'no/bad CAN packet' without a tester exception?
+        # FIXME: How can we signal 'no/bad CAN packet' without a tester exception?
         try:
             can_data = self.canreader.read()
             packet = self.packettype(can_data)
-        except tester.CANReaderError:   # A timeout due to no traffic
-# FIXME: False only works because RVMC/RVMD look for True to pass
+        except tester.CANReaderError:  # A timeout due to no traffic
+            # FIXME: False only works because RVMC/RVMD look for True to pass
             return False
-        except PacketDecodeError:       # Probably another packet type
-# FIXME: Should we return False? Or instead, read again?
+        except PacketDecodeError:  # Probably another packet type
+            # FIXME: Should we return False? Or instead, read again?
             return False
         return getattr(packet, self._read_key)
 
 
 @attr.s
-class PacketDetector():
+class PacketDetector:
 
     """Custom logical instrument to detect CAN packet traffic."""
 
-    canreader = attr.ib()       # tester.CANReader instance
+    canreader = attr.ib()  # tester.CANReader instance
 
-    def configure(self, key):       # pylint: disable=unused-argument
+    def configure(self, key):  # pylint: disable=unused-argument
         """Sensor: Configure for next reading."""
 
     def opc(self):
         """Sensor: OPC."""
 
-    def read(self, callerid):       # pylint: disable=unused-argument
+    def read(self, callerid):  # pylint: disable=unused-argument
         """Sensor: Read presence of CAN traffic.
 
         @param callerid Identity of caller
@@ -464,6 +467,6 @@ class PacketDetector():
         try:
             self.canreader.read()
             result = True
-        except tester.CANReaderError:   # A timeout due to no traffic
+        except tester.CANReaderError:  # A timeout due to no traffic
             result = False
         return result

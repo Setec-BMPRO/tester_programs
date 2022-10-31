@@ -3,12 +3,13 @@
 # Copyright 2017 SETEC Pty Ltd.
 """Unittests."""
 
-#import unittest
+# import unittest
 import logging
 
 _LOG_LEVEL = logging.DEBUG
-_LOG_FORMAT = '%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s'
+_LOG_FORMAT = "%(asctime)s:%(name)s:%(threadName)s:%(levelname)s:%(message)s"
 _LOG_SETUP = False
+
 
 def logging_setup():
     """Setup the logging system.
@@ -29,6 +30,7 @@ def logging_setup():
             logging.root.addHandler(hdlr)
         logging.root.setLevel(logging.DEBUG)
         _LOG_SETUP = True
+
 
 # Imported here so that logging_setup already exists in the namespace
 from . import share

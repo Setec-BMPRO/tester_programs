@@ -8,11 +8,11 @@ import time
 import share
 
 
-class DisplayControl():
+class DisplayControl:
 
     """Control of the LCD & Backlight via CAN."""
 
-    test_pattern = 1        # LCD test pattern to use
+    test_pattern = 1  # LCD test pattern to use
     inter_packet_gap = 0.1  # Wait between CAN packets
 
     def __init__(self, can_dev):

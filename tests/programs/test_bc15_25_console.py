@@ -12,7 +12,7 @@ class BC25_Console(unittest.TestCase):
 
     """BC25 Console program test suite."""
 
-    prompt = '\r\n> '
+    prompt = "\r\n> "
     stat_reply = """# error blink count...
 # battery:    solid
 # polarity    1
@@ -100,10 +100,11 @@ logm                                      0
 powersupply_mv                        13600
 powersupply_ma                        10000
 """
+
     @classmethod
     def setUpClass(cls):
         # We need a tester to get MeasurementFailedError.
-        cls.tester = tester.Tester('MockATE', {})
+        cls.tester = tester.Tester("MockATE", {})
         cls.tester.start()
 
     @classmethod
@@ -112,16 +113,14 @@ powersupply_ma                        10000
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-                'time.sleep',
-                ):
+        for target in ("time.sleep",):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
         port = tester.devphysical.sim_serial.SimSerial()
         port.echo = True
         self.con = bc15_25.console.Console(port)
-        self.con.cal_linecount = 39     # Early BC15
+        self.con.cal_linecount = 39  # Early BC15
 
     def test_nobanner(self):
         """Missing banner lines."""
@@ -130,30 +129,28 @@ powersupply_ma                        10000
 
     def test_banner(self):
         """Banner lines present."""
-        self.con.port.puts('X\r\n' * 3 + self.prompt)
+        self.con.port.puts("X\r\n" * 3 + self.prompt)
         self.con.banner()
 
     def test_initialise(self):
         """Initialise."""
         relay = Mock()
-        self.con.port.puts('X\r\n' * 3 + self.prompt, preflush=1)
+        self.con.port.puts("X\r\n" * 3 + self.prompt, preflush=1)
         for _ in range(3):
             self.con.port.puts(self.prompt, preflush=1)
         self.con.initialise(relay)
         written = self.con.port.get()
-        self.assertEqual(b'0xDEADBEA7 UNLOCK\rNV-DEFAULT\rNV-WRITE\r', written)
+        self.assertEqual(b"0xDEADBEA7 UNLOCK\rNV-DEFAULT\rNV-WRITE\r", written)
         self.assertTrue(relay.pulse.called)
 
     def test_stat(self):
         """STAT response."""
-        self.con.port.puts(
-            self.stat_reply.replace('\n', '\r\n') + '> ', preflush=1)
+        self.con.port.puts(self.stat_reply.replace("\n", "\r\n") + "> ", preflush=1)
         self.con.stat()
         self.assertEqual(25, len(self.con.stat_data))
 
     def test_cal(self):
         """CAL? response."""
-        self.con.port.puts(
-            self.cal_reply.replace('\n', ' \r\n') + '> ', preflush=1)
+        self.con.port.puts(self.cal_reply.replace("\n", " \r\n") + "> ", preflush=1)
         self.con.cal_read()
         self.assertEqual(39, len(self.con.cal_data))

@@ -38,34 +38,34 @@ import logging
 import setec
 
 
-class CmrSbp():
+class CmrSbp:
 
     """CMR Monitor."""
 
     _datamap = {
-        'BATTERY MODE':             (0, int),
-        'TEMPERATURE':              (0.0, float),
-        'VOLTAGE':                  (0.0, float),
-        'CURRENT':                  (0.0, float),
-        'REL STATE OF CHARGE':      (0, int),
-        'ABS STATE OF CHARGE':      (0, int),
-        'REMAINING CAPACITY':       (0, int),
-        'FULL CHARGE CAPACITY':     (0, int),
-        'CHARGING CURRENT':         (0.0, float),
-        'CHARGING VOLTAGE':         (0.0, float),
-        'BATTERY STATUS':           (0, int),
-        'CYCLE COUNT':              (0, int),
-        'PACK STATUS AND CONFIG':   (0, int),
-        'FULL PACK READING':        (0, int),
-        'HALF CELL READING':        (0, int),
-        'SENSE RESISTOR READING':   (0, int),
-        'CHARGE INPUT READING':     (0, int),
-        'ROTARY SWITCH READING':    (0, int),
-        'SERIAL NUMBER':            (0, int),
-        }
+        "BATTERY MODE": (0, int),
+        "TEMPERATURE": (0.0, float),
+        "VOLTAGE": (0.0, float),
+        "CURRENT": (0.0, float),
+        "REL STATE OF CHARGE": (0, int),
+        "ABS STATE OF CHARGE": (0, int),
+        "REMAINING CAPACITY": (0, int),
+        "FULL CHARGE CAPACITY": (0, int),
+        "CHARGING CURRENT": (0.0, float),
+        "CHARGING VOLTAGE": (0.0, float),
+        "BATTERY STATUS": (0, int),
+        "CYCLE COUNT": (0, int),
+        "PACK STATUS AND CONFIG": (0, int),
+        "FULL PACK READING": (0, int),
+        "HALF CELL READING": (0, int),
+        "SENSE RESISTOR READING": (0, int),
+        "CHARGE INPUT READING": (0, int),
+        "ROTARY SWITCH READING": (0, int),
+        "SERIAL NUMBER": (0, int),
+    }
 
     # RegExp object to match the CMR data lines
-    _regexp = re.compile('^#([A-Z ]+),([0-9\.\-]+)$')
+    _regexp = re.compile("^#([A-Z ]+),([0-9\.\-]+)$")
 
     def __init__(self, port, data_timeout=1.0):
         """Define our data, and start the worker.
@@ -74,14 +74,14 @@ class CmrSbp():
         @param data_timeout Timeout for received CMR-SBP data
 
         """
-        self._logger = logging.getLogger(
-            '.'.join((__name__, self.__class__.__name__)))
+        self._logger = logging.getLogger(".".join((__name__, self.__class__.__name__)))
         self.port = port
         self.resultq = queue.Queue()
         self._evt_read = threading.Event()
         self._evt_close = threading.Event()
         self._worker = threading.Thread(
-            target=self.worker, name='ListenerThread', args=(data_timeout, ))
+            target=self.worker, name="ListenerThread", args=(data_timeout,)
+        )
         self._worker.start()
 
     def _scan_line(self, line, tdata):
@@ -90,7 +90,7 @@ class CmrSbp():
         @return Key, if found, or None
 
         """
-        self._logger.debug('Line %s', line)
+        self._logger.debug("Line %s", line)
         match = self._regexp.match(line)
         if match:
             key, val = match.groups()
@@ -102,8 +102,8 @@ class CmrSbp():
 
     def worker(self, data_timeout):
         """Worker to listen to a CMR."""
-        self._logger.info('Started')
-        err = ''
+        self._logger.info("Started")
+        err = ""
         run = False
         try:
             self.port.reset_input_buffer()
@@ -114,12 +114,11 @@ class CmrSbp():
             tdata.start()
             run = True
         except Exception:
-            err = ' '.join(
-                ('_cmr Error:',
-                 str(sys.exc_info()[0]),
-                 str(sys.exc_info()[1])))
+            err = " ".join(
+                ("_cmr Error:", str(sys.exc_info()[0]), str(sys.exc_info()[1]))
+            )
             self._logger.warning(err)
-        buf = ''
+        buf = ""
         state = 0
         # Data reader states:
         #  0 = idle
@@ -128,23 +127,23 @@ class CmrSbp():
         #  1 = data ready
         timeup = threading.Event()
         while run:
-            rawdata = self.port.read(512).decode(errors='ignore')
-            buf += rawdata.replace('\r', '')
-            pos = buf.find('\n')
+            rawdata = self.port.read(512).decode(errors="ignore")
+            buf += rawdata.replace("\r", "")
+            pos = buf.find("\n")
             while pos >= 0:
-                line, buf = buf[:pos], buf[pos + 1:]
+                line, buf = buf[:pos], buf[pos + 1 :]
                 if len(line) > 0:
                     key = self._scan_line(line, tdata)
-                    if state == 3 and key == 'BATTERY MODE':
-                        self._logger.debug('Start data block')
+                    if state == 3 and key == "BATTERY MODE":
+                        self._logger.debug("Start data block")
                         state = 2
-                    if state == 2 and key == 'SERIAL NUMBER':
-                        self._logger.debug('End data block')
+                    if state == 2 and key == "SERIAL NUMBER":
+                        self._logger.debug("End data block")
                         state = 1
-                pos = buf.find('\n')
+                pos = buf.find("\n")
             if self._evt_read.is_set():
                 self._evt_read.clear()
-                self._logger.debug('Starting data read')
+                self._logger.debug("Starting data read")
                 state = 3
                 timeup.clear()
                 tmr = threading.Timer(20.0, timeup.set)
@@ -158,17 +157,17 @@ class CmrSbp():
             if state == 1:
                 tmr.cancel()
                 state = 0
-                self._logger.debug('Data read completed')
-                self.resultq.put(tdata.data)    # this will be valid data
+                self._logger.debug("Data read completed")
+                self.resultq.put(tdata.data)  # this will be valid data
             if state > 0 and timeup.is_set():
                 state = 0
-                self._logger.debug('Data read timeout')
-                self.resultq.put(tdata.data)    # this will be empty data
+                self._logger.debug("Data read timeout")
+                self.resultq.put(tdata.data)  # this will be empty data
         try:
             tdata.stop()
         except Exception:
             pass
-        self._logger.info('Finished!')
+        self._logger.info("Finished!")
 
     def read(self):
         """Return status data.
@@ -176,7 +175,7 @@ class CmrSbp():
         The worker thread will send data in response to a 'READ' event.
 
         """
-        self._logger.debug('Read')
+        self._logger.debug("Read")
         self._evt_read.set()
         data = self.resultq.get()
         self.resultq.task_done()
@@ -188,7 +187,7 @@ class CmrSbp():
         The worker thread will shut down in response to a 'CLOSE' event.
 
         """
-        self._logger.debug('Close')
+        self._logger.debug("Close")
         self._evt_close.set()
         self._worker.join()
         self.port.close()

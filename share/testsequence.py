@@ -22,18 +22,11 @@ class TestSequence(tester.TestSequence):
 
     limit_builtin = (
         tester.LimitRegExp(
-            'SerNum',
-            r'^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$',
-            doc='Serial Number'),
-        tester.LimitBoolean(
-            'Notify',
-            True,
-            doc='YES response'),
-        tester.LimitInteger(
-            'ProgramOk',
-            0,
-            doc='Exit code 0'),
-        )
+            "SerNum", r"^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$", doc="Serial Number"
+        ),
+        tester.LimitBoolean("Notify", True, doc="YES response"),
+        tester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
+    )
     duplicate_limit_error = False
 
     def __init__(self):
@@ -57,7 +50,8 @@ class TestSequence(tester.TestSequence):
         """
         super().open()
         self.limits = tester.LimitDict(
-            self.limit_builtin + limits, self.duplicate_limit_error)
+            self.limit_builtin + limits, self.duplicate_limit_error
+        )
         self.devices = cls_devices(self.physical_devices)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
@@ -190,7 +184,7 @@ class TestSequence(tester.TestSequence):
         try:
             sernum = uuts[0].sernum
         except AttributeError:
-            sernum = ''
+            sernum = ""
         limit = self.limits[limit_name]
         measurement = self.measurements[measurement_name]
         if not limit.check(sernum):
@@ -230,7 +224,7 @@ class Devices(abc.ABC, dict):
 
     def close(self):
         """Close logical devices."""
-        self._close_callables.reverse()     # Close in LIFO order
+        self._close_callables.reverse()  # Close in LIFO order
         for target in self._close_callables:
             target()
         self._close_callables.clear()
@@ -307,7 +301,8 @@ class Measurements(abc.ABC, dict):
         """
         for measurement_name, limit_name, sensor_name, doc in namedata:
             self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sensors[sensor_name], doc=doc)
+                self.limits[limit_name], self.sensors[sensor_name], doc=doc
+            )
 
 
 def teststep(func):
@@ -318,22 +313,23 @@ def teststep(func):
     @return Decorated function
 
     """
+
     @functools.wraps(func)
     def new_func(self):
         """Decorate the function."""
         return func(self, self.devices, self.measurements)
+
     return new_func
 
 
 @attr.s
-class MultiMeasurementSummary():
+class MultiMeasurementSummary:
 
     """Check multiple measurements and calculate overall result."""
 
     default_timeout = attr.ib(
-        validator=attr.validators.instance_of((int, float)),
-        default=0
-        )
+        validator=attr.validators.instance_of((int, float)), default=0
+    )
     result = attr.ib(init=False, factory=tester.MeasurementResult)
     _sensor_positions = attr.ib(init=False, factory=set)
 
@@ -349,9 +345,9 @@ class MultiMeasurementSummary():
         """Context Manager exit handler - Check overall result."""
         with contextlib.suppress(tester.measure.NoResultError):
             result_overall = self.result.result
-            lim = tester.LimitBoolean('AllOk', True, doc='All passed')
+            lim = tester.LimitBoolean("AllOk", True, doc="All passed")
             sen = tester.sensor.MirrorReadingBoolean()
-            mes = tester.Measurement(lim, sen, doc='All checks ok')
+            mes = tester.Measurement(lim, sen, doc="All checks ok")
             mes.log_data = False
             sen.position = tuple(self._sensor_positions)
             sen.store(result_overall)

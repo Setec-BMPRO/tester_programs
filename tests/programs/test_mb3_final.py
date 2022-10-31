@@ -18,21 +18,21 @@ class MB3Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerOn': (
-                    (sen['vaux'], 12.8),
-                    (sen['vbat'], 14.6),
-                    (sen['vchem'], 2.5),
-                    ),
-                'Solar': (
-                    (sen['vsol'], 14.6),
-                    (sen['vbat'], (0.0, 14.6)),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerOn": (
+                    (sen["vaux"], 12.8),
+                    (sen["vbat"], 14.6),
+                    (sen["vchem"], 2.5),
+                ),
+                "Solar": (
+                    (sen["vsol"], 14.6),
+                    (sen["vbat"], (0.0, 14.6)),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(6, len(result.readings))
-        self.assertEqual(['PowerOn', 'Solar'], self.tester.ut_steps)
+        self.assertEqual(["PowerOn", "Solar"], self.tester.ut_steps)

@@ -18,30 +18,27 @@ class Console(share.console.Base):
     _testmode_magic_3 = 42
     parameter = share.console.parameter
     cmd_data = {
-        'PIC-SwRev': parameter.String('?,I,1', read_format='{0}'),
-        'PIC-MicroTemp': parameter.String('?,D,16', read_format='{0}'),
-        'PIC-HwRev': parameter.String('?,I,2', read_format='{0}'),
-        'PIC-SerNum': parameter.String('?,I,3', read_format='{0}'),
-        'SwTstMode': parameter.String(
-            'S,:,', writeable=True, write_format='{1}{0}'),
-        'WriteHwRev': parameter.String(
-            'S,@,', writeable=True, write_format='{1}{0}'),
-        'WriteSerNum': parameter.String(
-            'S,#,', writeable=True, write_format='{1}{0}'),
-        }
+        "PIC-SwRev": parameter.String("?,I,1", read_format="{0}"),
+        "PIC-MicroTemp": parameter.String("?,D,16", read_format="{0}"),
+        "PIC-HwRev": parameter.String("?,I,2", read_format="{0}"),
+        "PIC-SerNum": parameter.String("?,I,3", read_format="{0}"),
+        "SwTstMode": parameter.String("S,:,", writeable=True, write_format="{1}{0}"),
+        "WriteHwRev": parameter.String("S,@,", writeable=True, write_format="{1}{0}"),
+        "WriteSerNum": parameter.String("S,#,", writeable=True, write_format="{1}{0}"),
+    }
     expected = 0
 
     def sw_test_mode(self):
         """Access Software Test Mode."""
-        for _ in range(3):      # 'wakeup/untangle' the serial interface
-            self.port.write(b'\r\n')
+        for _ in range(3):  # 'wakeup/untangle' the serial interface
+            self.port.write(b"\r\n")
             time.sleep(0.5)
             self.port.reset_input_buffer()
         self.expected = 3
-        self['SwTstMode'] = self._testmode_magic_1
-        self['SwTstMode'] = self._testmode_magic_2
+        self["SwTstMode"] = self._testmode_magic_1
+        self["SwTstMode"] = self._testmode_magic_2
         self.expected = 4
-        self['SwTstMode'] = self._testmode_magic_3
+        self["SwTstMode"] = self._testmode_magic_3
         self.expected = 0
 
     def action(self, command=None, delay=0, expected=0):
@@ -67,8 +64,8 @@ class Console(share.console.Base):
 
         """
         cmd_data = command.encode()
-        self._logger.debug('Cmd --> %s', repr(cmd_data))
-        self.port.write(cmd_data + b'\r\n')
+        self._logger.debug("Cmd --> %s", repr(cmd_data))
+        self.port.write(cmd_data + b"\r\n")
 
     def _read_response(self, expected):
         """Read the response to a command, ignoring empty lines.
@@ -77,29 +74,29 @@ class Console(share.console.Base):
         @return Response (None / String / List of Strings)
 
         """
-        all_response = []           # Buffer for response lines
-        buf = bytearray()           # Buffer for the response bytes
+        all_response = []  # Buffer for response lines
+        buf = bytearray()  # Buffer for the response bytes
         for _ in range(expected):
             buf.clear()
-            while b'\n' not in buf:
+            while b"\n" not in buf:
                 data = self.port.read(1)
                 if self.verbose:
-                    self._logger.debug('Read <-- %s', repr(data))
-                if not data:        # No data means a timeout
-                    break           # We can't guarantee the number of responses received
+                    self._logger.debug("Read <-- %s", repr(data))
+                if not data:  # No data means a timeout
+                    break  # We can't guarantee the number of responses received
                 buf += data
-            self._logger.debug('Response <-- %s', repr(buf))
-            buf = buf.replace(b'\r', b'')
-            buf = buf.replace(b'\n', b'')
-            response = buf.decode(errors='ignore')
+            self._logger.debug("Response <-- %s", repr(buf))
+            buf = buf.replace(b"\r", b"")
+            buf = buf.replace(b"\n", b"")
+            response = buf.decode(errors="ignore")
             if response:
                 all_response.append(response)
         response = all_response
-        while '' in response:       # Remove empty lines
-            response.remove('')
+        while "" in response:  # Remove empty lines
+            response.remove("")
         response_count = len(response)
-        if response_count == 1:     # Reduce list of 1 string to a string
+        if response_count == 1:  # Reduce list of 1 string to a string
             response = response[0]
-        elif not response_count:    # Reduce empty list to None
+        elif not response_count:  # Reduce empty list to None
             response = None
         return response

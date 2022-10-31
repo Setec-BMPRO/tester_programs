@@ -14,20 +14,19 @@ class BatteryCheckFinal(ProgramTestCase):
     prog_class = batterycheck.Final
     parameter = None
     debug = False
-    serial = 'A1509020010'
+    serial = "A1509020010"
 
     def setUp(self):
         """Per-Test setup."""
-        mybt = Mock(name='MyBtRadio')
-        mybt.scan.return_value = True, '1234'
+        mybt = Mock(name="MyBtRadio")
+        mybt.scan.return_value = True, "1234"
         mybt.jsonrpc.return_value = {
-            'SoftwareVersion': batterycheck.Final.arm_version,
-            'SerialID': self.serial,
-            }
+            "SoftwareVersion": batterycheck.Final.arm_version,
+            "SerialID": self.serial,
+        }
         patcher = patch(
-            'programs.batterycheck.eunistone_pan1322.BtRadio',
-            return_value=mybt
-            )
+            "programs.batterycheck.eunistone_pan1322.BtRadio", return_value=mybt
+        )
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -36,16 +35,16 @@ class BatteryCheckFinal(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': (
-                    (sen['oSnEntry'], (self.serial, )),
-                    (sen['o12V'], 12.0),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerUp": (
+                    (sen["oSnEntry"], (self.serial,)),
+                    (sen["o12V"], 12.0),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(6, len(result.readings))
-        self.assertEqual(['PowerUp', 'TestBlueTooth'], self.tester.ut_steps)
+        self.assertEqual(["PowerUp", "TestBlueTooth"], self.tester.ut_steps)

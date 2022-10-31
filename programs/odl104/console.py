@@ -12,33 +12,40 @@ class Console(share.console.Base):
 
     """Console via J-Link RTT"""
 
-    cmd_prompt = b'\r\n\x1b[1;32mrtt:~$ \x1b[m'.replace(b'\n', b'')
+    cmd_prompt = b"\r\n\x1b[1;32mrtt:~$ \x1b[m".replace(b"\n", b"")
     parameter = share.console.parameter
     cmd_data = {
-        'PROD_REV': parameter.String('production product-rev',
-            writeable=True, write_format='{1} {0}'),
-        'HW_REV': parameter.String('production hw-rev',
-            writeable=True, write_format='{1} {0}'),
-        'SN': parameter.String('production serial',
-            writeable=True, write_format='{1} {0}'),
-        'REBOOT': parameter.Boolean('kernel reboot cold',
-            writeable=True, readable=True, write_format='{1}'),
-        'MAC': parameter.String(
-            'production mac', read_format='{0}'),
+        "PROD_REV": parameter.String(
+            "production product-rev", writeable=True, write_format="{1} {0}"
+        ),
+        "HW_REV": parameter.String(
+            "production hw-rev", writeable=True, write_format="{1} {0}"
+        ),
+        "SN": parameter.String(
+            "production serial", writeable=True, write_format="{1} {0}"
+        ),
+        "REBOOT": parameter.Boolean(
+            "kernel reboot cold", writeable=True, readable=True, write_format="{1}"
+        ),
+        "MAC": parameter.String("production mac", read_format="{0}"),
         # Keyed reading from the console
-        'TANK1': parameter.Float('sensor get tank1',
-            write_format='{0}', read_format='{0}', scale=25),
-        'TANK2': parameter.Float('sensor get tank2',
-            write_format='{0}', read_format='{0}', scale=25),
-        'TANK3': parameter.Float('sensor get tank3',
-            write_format='{0}', read_format='{0}', scale=25),
-        'TANK4': parameter.Float('sensor get tank4',
-            write_format='{0}', read_format='{0}', scale=25),
-        }
+        "TANK1": parameter.Float(
+            "sensor get tank1", write_format="{0}", read_format="{0}", scale=25
+        ),
+        "TANK2": parameter.Float(
+            "sensor get tank2", write_format="{0}", read_format="{0}", scale=25
+        ),
+        "TANK3": parameter.Float(
+            "sensor get tank3", write_format="{0}", read_format="{0}", scale=25
+        ),
+        "TANK4": parameter.Float(
+            "sensor get tank4", write_format="{0}", read_format="{0}", scale=25
+        ),
+    }
     # Match the response from the console
     # Sample response:  '\r\nchannel idx=26 distance =   25.000000'
     # Response 25.000000 means 25%
-    _tank_regex = re.compile(r'.*?(\d+\.\d+).*')
+    _tank_regex = re.compile(r".*?(\d+\.\d+).*")
 
     def brand(self, hw_ver, sernum, banner_lines):
         """Brand the unit with Hardware ID & Serial Number.
@@ -58,14 +65,14 @@ class Console(share.console.Base):
         the banner.
 
         """
-        self['PROD_REV'] = hw_ver[0]
-        self['HW_REV'] = hw_ver[1]
-        self['SN'] = sernum
+        self["PROD_REV"] = hw_ver[0]
+        self["HW_REV"] = hw_ver[1]
+        self["SN"] = sernum
 
     def action(self, command=None, delay=0, expected=0):
         """Provide a custom action when reading tanks."""
         response = super().action(command, delay, expected)
-        if command.startswith('sensor get tank'):
+        if command.startswith("sensor get tank"):
             found = self._tank_regex.findall(response)
             if found:
                 response = found[0]

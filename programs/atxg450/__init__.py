@@ -6,4 +6,4 @@
 from .final_2v import Final2V
 
 
-__all__ = ['Final2V']
+__all__ = ["Final2V"]

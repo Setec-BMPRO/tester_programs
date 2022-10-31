@@ -6,4 +6,4 @@
 from .initial import Initial
 from .final import Final
 
-__all__ = ['Final', 'Initial']
+__all__ = ["Final", "Initial"]

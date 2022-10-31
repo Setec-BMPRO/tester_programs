@@ -21,14 +21,14 @@ def get(parameter, uut):
 
     """
     config = {
-        'A': J35A,
-        'AS': ASPower,
-        'B': J35B,
-        'BL': J35BL,
-        'C': J35C,
-        'D': J35D,
-        }[parameter]
-    config._configure(uut)    # Adjust for the revision
+        "A": J35A,
+        "AS": ASPower,
+        "B": J35B,
+        "BL": J35BL,
+        "C": J35C,
+        "D": J35D,
+    }[parameter]
+    config._configure(uut)  # Adjust for the revision
     return config
 
 
@@ -44,7 +44,7 @@ class Type(enum.IntEnum):
 
 
 @attr.s
-class _Values():
+class _Values:
 
     """Adjustable configuration data values."""
 
@@ -56,14 +56,14 @@ class _Values():
     canbus = attr.ib(validator=attr.validators.instance_of(bool))
 
 
-class J35():
+class J35:
 
     """Base configuration for J35."""
 
     # Available software versions
-    sw_13 = '1.3.15775.997'     # For 'A' & 'B' < Rev 8
-    sw_15 = '1.5.17467.1373'    # Rev 12 release
-    sw_bld = '1.5.20386.1374'   # Rev 13 release
+    sw_13 = "1.3.15775.997"  # For 'A' & 'B' < Rev 8
+    sw_15 = "1.5.17467.1373"  # Rev 12 release
+    sw_bld = "1.5.20386.1374"  # Rev 13 release
     # These values get set per Product type & revision
     sw_version = None
     hw_version = None
@@ -90,88 +90,125 @@ class J35():
     # Load on each output channel
     load_per_output = 2.0
     # Test limits common to all tests and versions
-    _base_limits_all = (
-        tester.LimitRegExp('SwVer', '', doc='Software version'),
-        )
+    _base_limits_all = (tester.LimitRegExp("SwVer", "", doc="Software version"),)
     # Initial Test limits common to all versions
     _base_limits_initial = _base_limits_all + (
-        tester.LimitDelta('ACin', ac_volt, delta=5.0, doc='AC input voltage'),
-        tester.LimitDelta('Vbus', ac_volt * math.sqrt(2), delta=10.0,
-            doc='Peak of AC input'),
-        tester.LimitBetween('12Vpri', 11.5, 13.0, doc='12Vpri rail'),
-        tester.LimitPercent('Vload', vout_set, percent=3.0,
-            doc='AC-DC convertor voltage setpoint'),
-        tester.LimitLow('VloadOff', 0.5, doc='When output is OFF'),
-        tester.LimitDelta('VbatIn', vbat_inject, delta=1.0,
-            doc='Voltage at Batt when 12.6V is injected into Batt'),
-        tester.LimitDelta('VfuseIn', vbat_inject, delta=1.0,
-            doc='Voltage after fuse when 12.6V is injected into Batt'),
-        tester.LimitDelta('VbatOut', aux_solar_inject, delta=0.5,
-            doc='Voltage at Batt when 13.5V is injected into Aux'),
-        tester.LimitDelta('Vbat', vout_set, delta=0.2,
-            doc='Voltage at Batt when unit is running'),
-        tester.LimitPercent('VbatLoad', vout_set, percent=5.0,
-            doc='Voltage at Batt when unit is running under load'),
-        tester.LimitDelta('Vair', aux_solar_inject, delta=0.5,
-            doc='Voltage at Air when 13.5V is injected into Solar'),
-        tester.LimitPercent('3V3U', 3.30, percent=1.5,
-            doc='3V3 unswitched when 12.6V is injected into Batt'),
-        tester.LimitPercent('3V3', 3.30, percent=1.5, doc='3V3 internal rail'),
-        tester.LimitBetween('15Vs', 11.5, 13.0, doc='15Vs internal rail'),
-        tester.LimitDelta('FanOn', vout_set, delta=1.0, doc='Fan running'),
-        tester.LimitLow('FanOff', 0.5, doc='Fan not running'),
-        tester.LimitPercent('ARM-AuxV',
-            aux_solar_inject, percent=2.0, delta=0.3,
-            doc='ARM Aux voltage reading'),
-        tester.LimitBetween('ARM-AuxI', 0.0, 1.5,
-            doc='ARM Aux current reading'),
-        tester.LimitInteger('Vout_OV', 0, doc='Over-voltage not triggered'),
-        tester.LimitPercent('ARM-AcV', ac_volt, percent=4.0, delta=1.0,
-            doc='ARM AC voltage reading'),
-        tester.LimitPercent('ARM-AcF', ac_freq, percent=4.0, delta=1.0,
-            doc='ARM AC frequency reading'),
-        tester.LimitBetween('ARM-SecT', 8.0, 70.0,
-            doc='ARM secondary temperature sensor'),
-        tester.LimitPercent('ARM-Vout', vout_set, percent=2.0, delta=0.1,
-            doc='ARM measured Vout'),
-        tester.LimitBetween('ARM-Fan', 0, 100, doc='ARM fan speed'),
-        tester.LimitPercent('ARM-BattI', batt_current, percent=1.7, delta=1.0,
-            doc='ARM battery current reading'),
-        tester.LimitDelta('ARM-LoadI', load_per_output, delta=0.9,
-            doc='ARM output current reading'),
-        tester.LimitInteger('ARM-RemoteClosed', 1),
-        tester.LimitDelta('CanPwr', vout_set, delta=1.8,
-            doc='CAN bus power supply'),
-        tester.LimitInteger('LOAD_SET', 0x5555555,
-            doc='ARM output load enable setting'),
-        tester.LimitInteger('CAN_BIND', 1 << 28,
-            doc='ARM reports CAN bus operational'),
-        tester.LimitLow('InOCP', vout_set - 1.2, doc='Output is in OCP'),
-        tester.LimitPercent('SolarCutoffPre', 14.125, percent=6,
-            doc='Solar Cut-Off voltage threshold uncertainty'),
-        tester.LimitBetween('SolarCutoff', 13.75, 14.5,
-            doc='Solar Cut-Off voltage threshold range'),
-        tester.LimitLow('FixtureLock', 200,
-            doc='Test fixture lid microswitch'),
-        tester.LimitBoolean('Solar-Status', True,
-            doc='Solar Comparator Status is set'),
-        tester.LimitBoolean('DetectCal', True,
-            doc='Solar comparator calibrated'),
-        )
+        tester.LimitDelta("ACin", ac_volt, delta=5.0, doc="AC input voltage"),
+        tester.LimitDelta(
+            "Vbus", ac_volt * math.sqrt(2), delta=10.0, doc="Peak of AC input"
+        ),
+        tester.LimitBetween("12Vpri", 11.5, 13.0, doc="12Vpri rail"),
+        tester.LimitPercent(
+            "Vload", vout_set, percent=3.0, doc="AC-DC convertor voltage setpoint"
+        ),
+        tester.LimitLow("VloadOff", 0.5, doc="When output is OFF"),
+        tester.LimitDelta(
+            "VbatIn",
+            vbat_inject,
+            delta=1.0,
+            doc="Voltage at Batt when 12.6V is injected into Batt",
+        ),
+        tester.LimitDelta(
+            "VfuseIn",
+            vbat_inject,
+            delta=1.0,
+            doc="Voltage after fuse when 12.6V is injected into Batt",
+        ),
+        tester.LimitDelta(
+            "VbatOut",
+            aux_solar_inject,
+            delta=0.5,
+            doc="Voltage at Batt when 13.5V is injected into Aux",
+        ),
+        tester.LimitDelta(
+            "Vbat", vout_set, delta=0.2, doc="Voltage at Batt when unit is running"
+        ),
+        tester.LimitPercent(
+            "VbatLoad",
+            vout_set,
+            percent=5.0,
+            doc="Voltage at Batt when unit is running under load",
+        ),
+        tester.LimitDelta(
+            "Vair",
+            aux_solar_inject,
+            delta=0.5,
+            doc="Voltage at Air when 13.5V is injected into Solar",
+        ),
+        tester.LimitPercent(
+            "3V3U",
+            3.30,
+            percent=1.5,
+            doc="3V3 unswitched when 12.6V is injected into Batt",
+        ),
+        tester.LimitPercent("3V3", 3.30, percent=1.5, doc="3V3 internal rail"),
+        tester.LimitBetween("15Vs", 11.5, 13.0, doc="15Vs internal rail"),
+        tester.LimitDelta("FanOn", vout_set, delta=1.0, doc="Fan running"),
+        tester.LimitLow("FanOff", 0.5, doc="Fan not running"),
+        tester.LimitPercent(
+            "ARM-AuxV",
+            aux_solar_inject,
+            percent=2.0,
+            delta=0.3,
+            doc="ARM Aux voltage reading",
+        ),
+        tester.LimitBetween("ARM-AuxI", 0.0, 1.5, doc="ARM Aux current reading"),
+        tester.LimitInteger("Vout_OV", 0, doc="Over-voltage not triggered"),
+        tester.LimitPercent(
+            "ARM-AcV", ac_volt, percent=4.0, delta=1.0, doc="ARM AC voltage reading"
+        ),
+        tester.LimitPercent(
+            "ARM-AcF", ac_freq, percent=4.0, delta=1.0, doc="ARM AC frequency reading"
+        ),
+        tester.LimitBetween(
+            "ARM-SecT", 8.0, 70.0, doc="ARM secondary temperature sensor"
+        ),
+        tester.LimitPercent(
+            "ARM-Vout", vout_set, percent=2.0, delta=0.1, doc="ARM measured Vout"
+        ),
+        tester.LimitBetween("ARM-Fan", 0, 100, doc="ARM fan speed"),
+        tester.LimitPercent(
+            "ARM-BattI",
+            batt_current,
+            percent=1.7,
+            delta=1.0,
+            doc="ARM battery current reading",
+        ),
+        tester.LimitDelta(
+            "ARM-LoadI", load_per_output, delta=0.9, doc="ARM output current reading"
+        ),
+        tester.LimitInteger("ARM-RemoteClosed", 1),
+        tester.LimitDelta("CanPwr", vout_set, delta=1.8, doc="CAN bus power supply"),
+        tester.LimitInteger(
+            "LOAD_SET", 0x5555555, doc="ARM output load enable setting"
+        ),
+        tester.LimitInteger("CAN_BIND", 1 << 28, doc="ARM reports CAN bus operational"),
+        tester.LimitLow("InOCP", vout_set - 1.2, doc="Output is in OCP"),
+        tester.LimitPercent(
+            "SolarCutoffPre",
+            14.125,
+            percent=6,
+            doc="Solar Cut-Off voltage threshold uncertainty",
+        ),
+        tester.LimitBetween(
+            "SolarCutoff", 13.75, 14.5, doc="Solar Cut-Off voltage threshold range"
+        ),
+        tester.LimitLow("FixtureLock", 200, doc="Test fixture lid microswitch"),
+        tester.LimitBoolean("Solar-Status", True, doc="Solar Comparator Status is set"),
+        tester.LimitBoolean("DetectCal", True, doc="Solar comparator calibrated"),
+    )
     # Final Test limits common to all versions
     _base_limits_final = _base_limits_all + (
-        tester.LimitLow('FanOff', 1.0, doc='No airflow seen'),
-        tester.LimitHigh('FanOn', 10.0, doc='Airflow seen'),
-        tester.LimitDelta('Can12V', 12.5, delta=2.0, doc='CAN_POWER rail'),
-        tester.LimitLow('Can0V', 0.5,  doc='CAN BUS removed'),
-        tester.LimitDelta('Vout', 12.8, delta=0.2,
-            doc='No load output voltage'),
-        tester.LimitPercent('Vload', 12.8, percent=5,
-            doc='Loaded output voltage'),
-        tester.LimitLow('InOCP', 11.6, doc='Output voltage to detect OCP'),
-        )
+        tester.LimitLow("FanOff", 1.0, doc="No airflow seen"),
+        tester.LimitHigh("FanOn", 10.0, doc="Airflow seen"),
+        tester.LimitDelta("Can12V", 12.5, delta=2.0, doc="CAN_POWER rail"),
+        tester.LimitLow("Can0V", 0.5, doc="CAN BUS removed"),
+        tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
+        tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
+        tester.LimitLow("InOCP", 11.6, doc="Output voltage to detect OCP"),
+    )
     # Internal data storage
-    _rev_data = None        # Revision data dictionary
+    _rev_data = None  # Revision data dictionary
 
     @classmethod
     def _configure(cls, uut):
@@ -181,7 +218,7 @@ class J35():
 
         """
         rev = uut.revision
-        logging.getLogger(__name__).debug('Revision detected as %s', rev)
+        logging.getLogger(__name__).debug("Revision detected as %s", rev)
         values = cls._rev_data[rev]
         cls.sw_version = values.sw_version
         cls.hw_version = values.hw_version
@@ -198,48 +235,69 @@ class J35A(J35):
     # Output set points when running in manual mode
     ocp_man_set = 20.0
     _rev12_values = _Values(
-            sw_version=J35.sw_15, hw_version=(12, Type.A.value, 'A'),
-            output_count=7, ocp_set=20.0,
-            solar=False, canbus=True,
-            )
+        sw_version=J35.sw_15,
+        hw_version=(12, Type.A.value, "A"),
+        output_count=7,
+        ocp_set=20.0,
+        solar=False,
+        canbus=True,
+    )
     _rev_data = {
         None: _rev12_values,
         # Rev 13 never built
-        '12': _rev12_values,
-        '11': _Values(
-            sw_version=J35.sw_15, hw_version=(11, Type.A.value, 'A'),
-            output_count=7, ocp_set=20.0,
-            solar=False, canbus=True,
-            ),
-        '10': _Values(
-            sw_version=J35.sw_15, hw_version=(10, Type.A.value, 'A'),
-            output_count=7, ocp_set=20.0,
-            solar=False, canbus=True,
-            ),
-        '9': _Values(
-            sw_version=J35.sw_15, hw_version=(9, Type.A.value, 'B'),
-            output_count=7, ocp_set=20.0,
-            solar=False, canbus=True,
-            ),
-        '8': _Values(
-            sw_version=J35.sw_15, hw_version=(8, Type.A.value, 'C'),
-            output_count=7, ocp_set=20.0,
-            solar=False, canbus=True,
-            ),
+        "12": _rev12_values,
+        "11": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(11, Type.A.value, "A"),
+            output_count=7,
+            ocp_set=20.0,
+            solar=False,
+            canbus=True,
+        ),
+        "10": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(10, Type.A.value, "A"),
+            output_count=7,
+            ocp_set=20.0,
+            solar=False,
+            canbus=True,
+        ),
+        "9": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(9, Type.A.value, "B"),
+            output_count=7,
+            ocp_set=20.0,
+            solar=False,
+            canbus=True,
+        ),
+        "8": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(8, Type.A.value, "C"),
+            output_count=7,
+            ocp_set=20.0,
+            solar=False,
+            canbus=True,
+        ),
         # Rev <8 uses an older software version
         # No Rev 4,5,6 created
         # No Rev 3 production
-        '2': _Values(
-            sw_version=J35.sw_13, hw_version=(2, Type.A.value, 'B'),
-            output_count=7, ocp_set=20.0,
-            solar=False, canbus=False,
-            ),
-        '1': _Values(
-            sw_version=J35.sw_13, hw_version=(1, Type.A.value, 'B'),
-            output_count=7, ocp_set=20.0,
-            solar=False, canbus=False,
-            ),
-        }
+        "2": _Values(
+            sw_version=J35.sw_13,
+            hw_version=(2, Type.A.value, "B"),
+            output_count=7,
+            ocp_set=20.0,
+            solar=False,
+            canbus=False,
+        ),
+        "1": _Values(
+            sw_version=J35.sw_13,
+            hw_version=(1, Type.A.value, "B"),
+            output_count=7,
+            ocp_set=20.0,
+            solar=False,
+            canbus=False,
+        ),
+    }
 
     @classmethod
     def limits_initial(cls):
@@ -250,12 +308,15 @@ class J35A(J35):
         """
         return super()._base_limits_initial + (
             tester.LimitPercent(
-                'OCP_pre', cls.ocp_set,
+                "OCP_pre",
+                cls.ocp_set,
                 (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 10.0),
-                doc='OCP trip range before adjustment'),
-            tester.LimitPercent('OCP', cls.ocp_set, (4.0, 10.0),
-                doc='OCP trip range after adjustment'),
-            )
+                doc="OCP trip range before adjustment",
+            ),
+            tester.LimitPercent(
+                "OCP", cls.ocp_set, (4.0, 10.0), doc="OCP trip range after adjustment"
+            ),
+        )
 
     @classmethod
     def limits_final(cls):
@@ -265,9 +326,10 @@ class J35A(J35):
 
         """
         return super()._base_limits_final + (
-            tester.LimitPercent('OCP', cls.ocp_set, (4.0, 10.0),
-                    doc='OCP trip current'),
-            )
+            tester.LimitPercent(
+                "OCP", cls.ocp_set, (4.0, 10.0), doc="OCP trip current"
+            ),
+        )
 
 
 class J35B(J35):
@@ -275,48 +337,69 @@ class J35B(J35):
     """J35B configuration."""
 
     _rev12_values = _Values(
-            sw_version=J35.sw_15, hw_version=(12, Type.B.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            )
+        sw_version=J35.sw_15,
+        hw_version=(12, Type.B.value, "A"),
+        output_count=14,
+        ocp_set=35.0,
+        solar=True,
+        canbus=True,
+    )
     _rev_data = {
         None: _rev12_values,
         # Rev 13 never built
-        '12': _rev12_values,
-        '11': _Values(
-            sw_version=J35.sw_15, hw_version=(11, Type.B.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '10': _Values(
-            sw_version=J35.sw_15, hw_version=(10, Type.B.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '9': _Values(
-            sw_version=J35.sw_15, hw_version=(9, Type.B.value, 'B'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '8': _Values(
-            sw_version=J35.sw_15, hw_version=(8, Type.B.value, 'C'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
+        "12": _rev12_values,
+        "11": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(11, Type.B.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "10": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(10, Type.B.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "9": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(9, Type.B.value, "B"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "8": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(8, Type.B.value, "C"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
         # Rev <8 uses an older software version
         # No Rev 5,6 created
         # No Rev 3,4 production
-        '2': _Values(
-            sw_version=J35.sw_13, hw_version=(2, Type.B.value, 'D'),
-            output_count=14, ocp_set=35.0,
-            solar=False, canbus=False,
-            ),
-        '1': _Values(
-            sw_version=J35.sw_13, hw_version=(1, Type.B.value, 'B'),
-            output_count=14, ocp_set=35.0,
-            solar=False, canbus=False,
-            ),
-        }
+        "2": _Values(
+            sw_version=J35.sw_13,
+            hw_version=(2, Type.B.value, "D"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=False,
+            canbus=False,
+        ),
+        "1": _Values(
+            sw_version=J35.sw_13,
+            hw_version=(1, Type.B.value, "B"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=False,
+            canbus=False,
+        ),
+    }
 
     @classmethod
     def limits_initial(cls):
@@ -327,12 +410,15 @@ class J35B(J35):
         """
         return super()._base_limits_initial + (
             tester.LimitPercent(
-                'OCP_pre', cls.ocp_set,
+                "OCP_pre",
+                cls.ocp_set,
                 (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
-                doc='OCP trip range before adjustment'),
-            tester.LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
-                doc='OCP trip range after adjustment'),
-            )
+                doc="OCP trip range before adjustment",
+            ),
+            tester.LimitPercent(
+                "OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip range after adjustment"
+            ),
+        )
 
     @classmethod
     def limits_final(cls):
@@ -342,9 +428,8 @@ class J35B(J35):
 
         """
         return super()._base_limits_final + (
-            tester.LimitPercent('OCP', cls.ocp_set, (4.0, 7.0),
-                    doc='OCP trip current'),
-            )
+            tester.LimitPercent("OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip current"),
+        )
 
 
 class J35BL(J35B):
@@ -352,14 +437,17 @@ class J35BL(J35B):
     """J35BL configuration."""
 
     _rev13_values = _Values(
-            sw_version=J35.sw_bld, hw_version=(13, Type.BL.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            )
+        sw_version=J35.sw_bld,
+        hw_version=(13, Type.BL.value, "A"),
+        output_count=14,
+        ocp_set=35.0,
+        solar=True,
+        canbus=True,
+    )
     _rev_data = {
         None: _rev13_values,
-        '13': _rev13_values,
-        }
+        "13": _rev13_values,
+    }
 
 
 class J35C(J35B):
@@ -367,57 +455,81 @@ class J35C(J35B):
     """J35C configuration."""
 
     _rev12_values = _Values(
-            sw_version=J35.sw_15, hw_version=(12, Type.C.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            )
+        sw_version=J35.sw_15,
+        hw_version=(12, Type.C.value, "A"),
+        output_count=14,
+        ocp_set=35.0,
+        solar=True,
+        canbus=True,
+    )
     _rev_data = {
         None: _rev12_values,
         # Rev 13 never built
-        '12': _rev12_values,
-        '11': _Values(
-            sw_version=J35.sw_15, hw_version=(11, Type.C.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '10': _Values(
-            sw_version=J35.sw_15, hw_version=(10, Type.C.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '9': _Values(
-            sw_version=J35.sw_15, hw_version=(9, Type.C.value, 'B'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '8': _Values(
-            sw_version=J35.sw_15, hw_version=(8, Type.C.value, 'C'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '7': _Values(
-            sw_version=J35.sw_15, hw_version=(7, Type.C.value, 'C'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '6': _Values(
-            sw_version=J35.sw_15, hw_version=(6, Type.C.value, 'E'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
+        "12": _rev12_values,
+        "11": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(11, Type.C.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "10": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(10, Type.C.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "9": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(9, Type.C.value, "B"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "8": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(8, Type.C.value, "C"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "7": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(7, Type.C.value, "C"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "6": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(6, Type.C.value, "E"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
         # No Rev 5 production
         # 469 x J35C were converted to J35B via PC 4885
         #   J35C Rev 4, Lots: A164211 (x135), A164309 (x265)
-        '4': _Values(
-            sw_version=J35.sw_15, hw_version=(4, Type.C.value, 'B'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
+        "4": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(4, Type.C.value, "B"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
         # Rev 1-3 must be scrapped per MA-328
-        '3': None,
-        '2': None,
-        '1': None,
-        }
+        "3": None,
+        "2": None,
+        "1": None,
+    }
 
 
 class J35D(J35C):
@@ -425,34 +537,49 @@ class J35D(J35C):
     """J35D configuration."""
 
     _rev13_values = _Values(
-            sw_version=J35.sw_bld, hw_version=(13, Type.D.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            )
+        sw_version=J35.sw_bld,
+        hw_version=(13, Type.D.value, "A"),
+        output_count=14,
+        ocp_set=35.0,
+        solar=True,
+        canbus=True,
+    )
     _rev_data = {
         None: _rev13_values,
-        '13': _rev13_values,
-        '12': _Values(
-            sw_version=J35.sw_15, hw_version=(12, Type.D.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '11': _Values(
-            sw_version=J35.sw_15, hw_version=(11, Type.D.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '10': _Values(
-            sw_version=J35.sw_15, hw_version=(10, Type.D.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        '9': _Values(
-            sw_version=J35.sw_15, hw_version=(9, Type.D.value, 'B'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            ),
-        }
+        "13": _rev13_values,
+        "12": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(12, Type.D.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "11": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(11, Type.D.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "10": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(10, Type.D.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+        "9": _Values(
+            sw_version=J35.sw_15,
+            hw_version=(9, Type.D.value, "B"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
+    }
 
     @classmethod
     def limits_initial(cls):
@@ -462,11 +589,16 @@ class J35D(J35C):
 
         """
         return super().limits_initial() + (
-            tester.LimitPercent('SolarCutoffPre', 14.3, percent=6,
-                doc='Solar Cut-Off voltage threshold uncertainty'),
-            tester.LimitBetween('SolarCutoff', 14.0, 14.6,
-                doc='Solar Cut-Off voltage threshold range'),
-            )
+            tester.LimitPercent(
+                "SolarCutoffPre",
+                14.3,
+                percent=6,
+                doc="Solar Cut-Off voltage threshold uncertainty",
+            ),
+            tester.LimitBetween(
+                "SolarCutoff", 14.0, 14.6, doc="Solar Cut-Off voltage threshold range"
+            ),
+        )
 
     @classmethod
     def limits_final(cls):
@@ -476,13 +608,12 @@ class J35D(J35C):
 
         """
         return super()._base_limits_final + (
-            tester.LimitDelta('Vout', 14.0, delta=0.2,
-                doc='No load output voltage'),
-            tester.LimitPercent('Vload', 14.0, percent=5,
-                doc='Loaded output voltage'),
-            tester.LimitPercent('OCP', cls.ocp_set * (12.8 / 14.0), (4.0, 7.0),
-                doc='OCP trip current'),
-            )
+            tester.LimitDelta("Vout", 14.0, delta=0.2, doc="No load output voltage"),
+            tester.LimitPercent("Vload", 14.0, percent=5, doc="Loaded output voltage"),
+            tester.LimitPercent(
+                "OCP", cls.ocp_set * (12.8 / 14.0), (4.0, 7.0), doc="OCP trip current"
+            ),
+        )
 
 
 class ASPower(J35D):
@@ -490,12 +621,14 @@ class ASPower(J35D):
     """ASPower configuration."""
 
     _rev1_values = _Values(
-            sw_version=J35.sw_bld, hw_version=(1, Type.D.value, 'A'),
-            output_count=14, ocp_set=35.0,
-            solar=True, canbus=True,
-            )
+        sw_version=J35.sw_bld,
+        hw_version=(1, Type.D.value, "A"),
+        output_count=14,
+        ocp_set=35.0,
+        solar=True,
+        canbus=True,
+    )
     _rev_data = {
         None: _rev1_values,
-        '1': _rev1_values,
-        }
-
+        "1": _rev1_values,
+    }

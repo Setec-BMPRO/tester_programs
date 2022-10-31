@@ -25,7 +25,7 @@ For "Rerun Failed" unittest, loadTestsFromName is called with parameters:
 import logging
 import unittest
 
-from tests import programs, share # for running individual tests
+from tests import programs, share  # for running individual tests
 
 
 def suite():
@@ -36,21 +36,21 @@ def suite():
     """
     testnames = []
     for name in share.__all__:
-        testnames.append('tests.share.' + name)
+        testnames.append("tests.share." + name)
     for name in programs.__all__:
-        testnames.append('tests.programs.' + name)
+        testnames.append("tests.programs." + name)
     testsuite = unittest.defaultTestLoader.loadTestsFromNames(testnames)
     return testsuite
 
 
-class Main():
+class Main:
 
     # Configuration of console logger.
     #   Log Levels are: CRITICAL,ERROR,WARNING,INFO,DEBUG
     log_level = logging.CRITICAL
-    log_format = '{asctime}:{name}:{threadName}:{levelname}:{message}'
+    log_format = "{asctime}:{name}:{threadName}:{levelname}:{message}"
     # Set these logger names to INFO level
-    logger_names = ('gpib', )
+    logger_names = ("gpib",)
 
     @classmethod
     def setup(cls):
@@ -63,7 +63,7 @@ class Main():
         hdlr = logging.StreamHandler()
         hdlr.setLevel(cls.log_level)
         # Log record formatter
-        fmtr = logging.Formatter(cls.log_format, style='{')
+        fmtr = logging.Formatter(cls.log_format, style="{")
         # Connect it all together
         hdlr.setFormatter(fmtr)
         if not logging.root.hasHandlers():
@@ -84,5 +84,5 @@ class Main():
         runner.run(testsuite)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Main.run()

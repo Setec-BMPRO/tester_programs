@@ -18,18 +18,23 @@ class MB2Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerOn': (
-                    (sen['vin'], (12.9, 9.1)),
-                    (sen['yesnolight'], True),
-                    (sen['vout'], 14.4),
-                    (sen['yesnooff'], True),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerOn": (
+                    (sen["vin"], (12.9, 9.1)),
+                    (sen["yesnolight"], True),
+                    (sen["vout"], 14.4),
+                    (sen["yesnooff"], True),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(5, len(result.readings))
-        self.assertEqual(['PowerOn', ], self.tester.ut_steps)
+        self.assertEqual(
+            [
+                "PowerOn",
+            ],
+            self.tester.ut_steps,
+        )

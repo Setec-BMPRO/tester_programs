@@ -6,4 +6,6 @@
 from .final import Final
 
 
-__all__ = ['Final', ]
+__all__ = [
+    "Final",
+]

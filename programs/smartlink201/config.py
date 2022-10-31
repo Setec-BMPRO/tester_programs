@@ -17,15 +17,15 @@ def get(parameter, uut):
 
     """
     config = {
-        'B': BLExtender,
-        'S': SmartLink201,
-        }[parameter]
-    config._configure(uut)    # Adjust for the revision
+        "B": BLExtender,
+        "S": SmartLink201,
+    }[parameter]
+    config._configure(uut)  # Adjust for the revision
     return config
 
 
 @attr.s
-class _Values():
+class _Values:
 
     """Configuration data values."""
 
@@ -37,7 +37,7 @@ class _Values():
     is_smartlink = attr.ib(validator=attr.validators.instance_of(bool))
 
 
-class _Config():
+class _Config:
 
     """Configuration options."""
 
@@ -49,7 +49,7 @@ class _Config():
 
         """
         rev = uut.revision
-        logging.getLogger(__name__).debug('Revision detected as %s', rev)
+        logging.getLogger(__name__).debug("Revision detected as %s", rev)
         values = cls._rev_data[rev]
         cls.product_rev = values.product_rev
         cls.hardware_rev = values.hardware_rev
@@ -63,56 +63,55 @@ class BLExtender(_Config):
 
     """BLExtender config."""
 
-    _arm_image = 'nxp_v0.1.0.bin'
-    _hw_rev = '02B'
+    _arm_image = "nxp_v0.1.0.bin"
+    _hw_rev = "02B"
     _rev1_values = _Values(
-        product_rev = '01A',
-        hardware_rev = _hw_rev,
-        sw_arm_image = _arm_image,      # no NXP in this product
-        sw_nrf_image = (
-            'blextender_v1.3.0-0-g6c6b4fa-signed-mcuboot-factory.hex'),
-        sw_nrf_projectfile = 'nrf52.jflash',
-        is_smartlink = False
-        )
+        product_rev="01A",
+        hardware_rev=_hw_rev,
+        sw_arm_image=_arm_image,  # no NXP in this product
+        sw_nrf_image=("blextender_v1.3.0-0-g6c6b4fa-signed-mcuboot-factory.hex"),
+        sw_nrf_projectfile="nrf52.jflash",
+        is_smartlink=False,
+    )
     _rev_data = {
         None: _rev1_values,
-        '1': _rev1_values,
-        }
+        "1": _rev1_values,
+    }
 
 
 class SmartLink201(_Config):
 
     """SmartLink201 config."""
 
-    _arm_image = 'nxp_v0.1.0.bin'
-    _sw_nrf_image = 'smartlink_signed_1.2.1-0-g744e6db_factory_mcuboot.hex'
-    _sw_nrf_projectfile = 'nrf52.jflash'
+    _arm_image = "nxp_v0.1.0.bin"
+    _sw_nrf_image = "smartlink_signed_1.2.1-0-g744e6db_factory_mcuboot.hex"
+    _sw_nrf_projectfile = "nrf52.jflash"
     _rev4_values = _Values(
-            product_rev = '04A',
-            hardware_rev = '03A',
-            sw_arm_image = _arm_image,
-            sw_nrf_image = _sw_nrf_image,
-            sw_nrf_projectfile = _sw_nrf_projectfile,
-            is_smartlink = True
-            )
+        product_rev="04A",
+        hardware_rev="03A",
+        sw_arm_image=_arm_image,
+        sw_nrf_image=_sw_nrf_image,
+        sw_nrf_projectfile=_sw_nrf_projectfile,
+        is_smartlink=True,
+    )
     _rev_data = {
         None: _rev4_values,
-        '4': _rev4_values,
-        '3': _Values(
-            product_rev = '03B',
-            hardware_rev = '02B',
-            sw_arm_image = _arm_image,
-            sw_nrf_image = _sw_nrf_image,   # MA-401
-            sw_nrf_projectfile = _sw_nrf_projectfile,
-            is_smartlink = True
-            ),
-        '2': _Values(
-            product_rev = '02B',
-            hardware_rev = '02B',
-            sw_arm_image = _arm_image,
-            sw_nrf_image = _sw_nrf_image,   # MA-401
-            sw_nrf_projectfile = _sw_nrf_projectfile,
-            is_smartlink = True
-            ),
+        "4": _rev4_values,
+        "3": _Values(
+            product_rev="03B",
+            hardware_rev="02B",
+            sw_arm_image=_arm_image,
+            sw_nrf_image=_sw_nrf_image,  # MA-401
+            sw_nrf_projectfile=_sw_nrf_projectfile,
+            is_smartlink=True,
+        ),
+        "2": _Values(
+            product_rev="02B",
+            hardware_rev="02B",
+            sw_arm_image=_arm_image,
+            sw_nrf_image=_sw_nrf_image,  # MA-401
+            sw_nrf_projectfile=_sw_nrf_projectfile,
+            is_smartlink=True,
+        ),
         # No Rev 1 production
-        }
+    }

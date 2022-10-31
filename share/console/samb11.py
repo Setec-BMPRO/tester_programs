@@ -21,19 +21,24 @@ class SamB11(protocol.BadUart):
     banner_lines = 3
     # Common commands
     common_commands = {
-        'NVDEFAULT': parameter.Boolean(
-            'NV-DEFAULT', writeable=True, readable=False, write_format='{1}'),
-        'NVWRITE': parameter.Boolean(
-            'NV-WRITE', writeable=True, readable=False, write_format='{1}'),
-        'SER_ID': parameter.String(
-            'SET-SERIAL-ID', writeable=True, readable=False,
-            write_format='"{0} {1}'),
-        'HW_VER': parameter.String(
-            'SET-HW-VER', writeable=True, readable=False,
-            write_format='{0[0]} {0[1]} "{0[2]} {1}'),
-        'SW_VER': parameter.String('SW-VERSION', read_format='{0}?'),
-        'BT_MAC': parameter.String('BLE-MAC', read_format='{0}?'),
-        }
+        "NVDEFAULT": parameter.Boolean(
+            "NV-DEFAULT", writeable=True, readable=False, write_format="{1}"
+        ),
+        "NVWRITE": parameter.Boolean(
+            "NV-WRITE", writeable=True, readable=False, write_format="{1}"
+        ),
+        "SER_ID": parameter.String(
+            "SET-SERIAL-ID", writeable=True, readable=False, write_format='"{0} {1}'
+        ),
+        "HW_VER": parameter.String(
+            "SET-HW-VER",
+            writeable=True,
+            readable=False,
+            write_format='{0[0]} {0[1]} "{0[2]} {1}',
+        ),
+        "SW_VER": parameter.String("SW-VERSION", read_format="{0}?"),
+        "BT_MAC": parameter.String("BLE-MAC", read_format="{0}?"),
+    }
 
     def __init__(self, port):
         """Add common commands into cmd_data.
@@ -48,10 +53,10 @@ class SamB11(protocol.BadUart):
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
         self.banner()
-        self['HW_VER'] = hw_ver
-        self['SER_ID'] = sernum
-        self['NVDEFAULT'] = True
-        self['NVWRITE'] = True
+        self["HW_VER"] = hw_ver
+        self["SER_ID"] = sernum
+        self["NVDEFAULT"] = True
+        self["NVWRITE"] = True
 
     def banner(self):
         """Flush the startup banner lines."""

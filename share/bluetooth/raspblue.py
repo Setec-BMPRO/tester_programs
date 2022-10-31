@@ -4,7 +4,7 @@
 """JSONRPC Client for the Raspberry Pi Bluetooth helper."""
 
 import abc
-import jsonrpclib       # Install with: pip install jsonrpclib-pelix
+import jsonrpclib  # Install with: pip install jsonrpclib-pelix
 
 
 class SerialIO(abc.ABC):
@@ -20,8 +20,8 @@ class SerialIO(abc.ABC):
 
     def __init__(self):
         """Create instance."""
-        self.write_data = bytearray()           # write data buffer
-        self.read_data = bytearray()            # read data buffer
+        self.write_data = bytearray()  # write data buffer
+        self.read_data = bytearray()  # read data buffer
 
     def reset_input_buffer(self):
         """Flush input data"""
@@ -35,13 +35,13 @@ class SerialIO(abc.ABC):
         """
         for abyte in data:
             abyte = bytes([abyte])
-            self.read_data.extend(abyte)        # simulate echo
-            if abyte == b'\r':
+            self.read_data.extend(abyte)  # simulate echo
+            if abyte == b"\r":
                 reply = self.action(self.write_data.decode())
                 self.write_data.clear()
                 self.read_data.extend(reply.encode())
             else:
-                self.write_data.extend(abyte)   # save for command locating
+                self.write_data.extend(abyte)  # save for command locating
 
     def read(self, count=1):
         """Simulate Serial.read
@@ -70,7 +70,7 @@ class RaspberryBluetooth(SerialIO):
     """Connection to a Raspberry Pi with Bluetooth helper running."""
 
     # Calibration command end with this string
-    cal_command = ' CAL'
+    cal_command = " CAL"
 
     def __init__(self, server):
         """Create instance.
@@ -148,7 +148,7 @@ class RaspberryBluetooth(SerialIO):
         # CAL command: skip command echo line & 1st response (2 lines)
         # Other commands: skip command echo line
         firstline = 2 if is_cal else 1
-        reply = '\r\n'.join(lines[firstline:])
+        reply = "\r\n".join(lines[firstline:])
         return reply
 
     def close(self):

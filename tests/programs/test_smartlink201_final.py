@@ -18,15 +18,12 @@ class SmartLink201Final(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         # BLE scanner
-        mypi = Mock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
-        patcher = patch(
-            'share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        mypi = Mock(name="MyRasPi")
+        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
+        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
-        for target in (
-                'share.bluetooth.SerialToMAC',
-                ):
+        for target in ("share.bluetooth.SerialToMAC",):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
@@ -36,15 +33,13 @@ class SmartLink201Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Bluetooth': (
-                    (sen['SnEntry'], 'A2126010123'),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "Bluetooth": ((sen["SnEntry"], "A2126010123"),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(2, len(result.readings))
-        self.assertEqual(['Bluetooth'], self.tester.ut_steps)
+        self.assertEqual(["Bluetooth"], self.tester.ut_steps)

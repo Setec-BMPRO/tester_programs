@@ -17,9 +17,7 @@ class TRSFinal(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-                'share.bluetooth.RaspberryBluetooth',
-                ):
+        for target in ("share.bluetooth.RaspberryBluetooth",):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
@@ -29,19 +27,23 @@ class TRSFinal(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare': (
-                    (sen['sernum'], 'A1526040123'),
-                    (sen['vin'], 12.0),
-                    ),
-                'Bluetooth': (
-                    (sen['mirscan'], True),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "Prepare": (
+                    (sen["sernum"], "A1526040123"),
+                    (sen["vin"], 12.0),
+                ),
+                "Bluetooth": ((sen["mirscan"], True),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(3, len(result.readings))
-        self.assertEqual(['Prepare', 'Bluetooth', ], self.tester.ut_steps)
+        self.assertEqual(
+            [
+                "Prepare",
+                "Bluetooth",
+            ],
+            self.tester.ut_steps,
+        )

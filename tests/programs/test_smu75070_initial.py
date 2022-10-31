@@ -18,35 +18,46 @@ class SMU75070Initial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PartDetect': (
-                    (sen['lock'], 10.0), (sen['inrush'], 150.0),
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PartDetect": (
+                    (sen["lock"], 10.0),
+                    (sen["inrush"], 150.0),
+                ),
+                "PowerOn": (
+                    (sen["vac"], 100.0),
+                    (sen["vdd"], 13.5),
+                    (sen["vsecctl"], 13.0),
+                    (sen["vbus"], (400.0, 0)),
+                    (sen["vout"], 69.0),
+                ),
+                "AdjOutput": (
+                    (sen["vac"], 240.0),
+                    (sen["vdd"], 13.5),
+                    (sen["vsecctl"], 13.0),
+                    (sen["adj_vout"], True),
+                    (sen["vout"], (69.0, 69.1, 69.2, 70.0)),
+                ),
+                "FullLoad": (
+                    (sen["vbus"], 400.0),
+                    (sen["vdd"], 13.5),
+                    (sen["vsecctl"], 13.0),
+                    (sen["vout"], 70.0),
+                ),
+                "OCP": (
+                    (sen["vout"], 70.0),
+                    (
+                        sen["vout"],
+                        (70.0,) * 5 + (69.0,),
                     ),
-                'PowerOn': (
-                    (sen['vac'], 100.0), (sen['vdd'], 13.5),
-                    (sen['vsecctl'], 13.0), (sen['vbus'], (400.0, 0)),
-                    (sen['vout'], 69.0),
-                    ),
-                'AdjOutput': (
-                    (sen['vac'], 240.0), (sen['vdd'], 13.5),
-                    (sen['vsecctl'], 13.0), (sen['adj_vout'], True),
-                    (sen['vout'], (69.0, 69.1, 69.2, 70.0)),
-                    ),
-                'FullLoad': (
-                    (sen['vbus'], 400.0), (sen['vdd'], 13.5),
-                    (sen['vsecctl'], 13.0), (sen['vout'], 70.0),
-                    ),
-                'OCP': (
-                    (sen['vout'], 70.0),
-                    (sen['vout'], (70.0, ) * 5 + (69.0, ), ),
-                    ),
-                },
-            }
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(21, len(result.readings))
         self.assertEqual(
-            ['PartDetect', 'PowerOn', 'AdjOutput', 'FullLoad', 'OCP'],
-            self.tester.ut_steps)
+            ["PartDetect", "PowerOn", "AdjOutput", "FullLoad", "OCP"],
+            self.tester.ut_steps,
+        )

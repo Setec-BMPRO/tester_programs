@@ -18,26 +18,35 @@ class _2040Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'DCPowerOn':
-                    ((sen['o20V'], 20.0), (sen['oYesNoGreen'], True),
-                     (sen['o20V'], 20.0), ),
-                'DCLoad':
-                    ((sen['o20V'], 20.0), (sen['oYesNoDCOff'], True), ),
-                'ACPowerOn':
-                    ((sen['o20V'], 20.0), ),
-                'ACLoad':
-                    ((sen['o20V'], 20.0), (sen['oYesNoACOff'], True),
-                     (sen['o20V'], 0.0), (sen['oYesNoACOn'], True), ),
-                'Recover':
-                    ((sen['o20V'], 0.0), (sen['o20V'], 20.0), ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "DCPowerOn": (
+                    (sen["o20V"], 20.0),
+                    (sen["oYesNoGreen"], True),
+                    (sen["o20V"], 20.0),
+                ),
+                "DCLoad": (
+                    (sen["o20V"], 20.0),
+                    (sen["oYesNoDCOff"], True),
+                ),
+                "ACPowerOn": ((sen["o20V"], 20.0),),
+                "ACLoad": (
+                    (sen["o20V"], 20.0),
+                    (sen["oYesNoACOff"], True),
+                    (sen["o20V"], 0.0),
+                    (sen["oYesNoACOn"], True),
+                ),
+                "Recover": (
+                    (sen["o20V"], 0.0),
+                    (sen["o20V"], 20.0),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(12, len(result.readings))
         self.assertEqual(
-            ['DCPowerOn', 'DCLoad', 'ACPowerOn', 'ACLoad', 'Recover'],
-            self.tester.ut_steps)
+            ["DCPowerOn", "DCLoad", "ACPowerOn", "ACLoad", "Recover"],
+            self.tester.ut_steps,
+        )

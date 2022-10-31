@@ -18,23 +18,26 @@ class DrifterFinal(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'DisplayCheck': (
-                    (sen['oYesNoSeg'], True),
-                    (sen['oYesNoBklight'], True),
-                    (sen['oYesNoDisplay'], True),
-                    ),
-                'SwitchCheck': (
-                    (sen['oNotifySwOff'], True), (sen['oWaterPump'], 0.1),
-                    (sen['oBattSw'], 0.1), (sen['oNotifySwOn'], True),
-                    (sen['oWaterPump'], 11.0), (sen['oBattSw'], 11.0),
-                    (sen['oUSB5V'], 5.0),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "DisplayCheck": (
+                    (sen["oYesNoSeg"], True),
+                    (sen["oYesNoBklight"], True),
+                    (sen["oYesNoDisplay"], True),
+                ),
+                "SwitchCheck": (
+                    (sen["oNotifySwOff"], True),
+                    (sen["oWaterPump"], 0.1),
+                    (sen["oBattSw"], 0.1),
+                    (sen["oNotifySwOn"], True),
+                    (sen["oWaterPump"], 11.0),
+                    (sen["oBattSw"], 11.0),
+                    (sen["oUSB5V"], 5.0),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(10, len(result.readings))
-        self.assertEqual(['DisplayCheck', 'SwitchCheck'], self.tester.ut_steps)
+        self.assertEqual(["DisplayCheck", "SwitchCheck"], self.tester.ut_steps)

@@ -13,31 +13,27 @@ class TRSBTS_Initial(ProgramTestCase):
     """TRS-BTS Initial program test suite."""
 
     prog_class = trsbts.Initial
-    parameter = 'BTS'
+    parameter = "BTS"
     debug = True
-    btmac = '001ec030bc15'
+    btmac = "001ec030bc15"
 
     def setUp(self):
         """Per-Test setup."""
 
-        for target in (
-                'share.bluetooth.SerialToMAC',
-                ):
+        for target in ("share.bluetooth.SerialToMAC",):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
         # Console
-        mycon = MagicMock(name='MyConsole')
+        mycon = MagicMock(name="MyConsole")
         mycon.get_mac.return_value = self.btmac
-        patcher = patch(
-            'programs.trsbts.console.Console', return_value=mycon)
+        patcher = patch("programs.trsbts.console.Console", return_value=mycon)
         self.addCleanup(patcher.stop)
         patcher.start()
         # BLE scanner
-        mypi = Mock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
-        patcher = patch(
-            'share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        mypi = Mock(name="MyRasPi")
+        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
+        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -46,42 +42,40 @@ class TRSBTS_Initial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare': (
-                    (sen['sernum'], 'A2026040123'),
-                    (sen['vbat'], 12.5),
-                    (sen['3v3'], 3.30),
-                    (sen['chem'], 3.0),
-                    (sen['sway-'], 2.0),
-                    (sen['sway+'], 1.0),
-                    (sen['light'], (0.0, 12.0)),
-                    (sen['brake'], (0.0, 12.0)),
-                    ),
-                'PgmNordic': (
-                    (sen['JLink'], 0),
-                    ),
-                'Operation': (
-                    (sen['arm_swver'], self.test_program.config.sw_version),
-                    (sen['red'], (0.0, 1.8, 0.0)),
-                    (sen['green'], (0.0, 2.5, 0.0)),
-                    (sen['blue'], (0.0, 2.8, 0.0)),
-                    (sen['light'], 0.1),
-                    (sen['remote'], (11.9, 0.0)),
-                    ),
-                'Calibrate': (
-                    (sen['arm_vbatt'], (12.4, 12.1)),
-                    (sen['vbat'], (12.0, 12.0)),
-                    (sen['arm_vpin'], 0.1),
-                    ),
-                'Bluetooth': (
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "Prepare": (
+                    (sen["sernum"], "A2026040123"),
+                    (sen["vbat"], 12.5),
+                    (sen["3v3"], 3.30),
+                    (sen["chem"], 3.0),
+                    (sen["sway-"], 2.0),
+                    (sen["sway+"], 1.0),
+                    (sen["light"], (0.0, 12.0)),
+                    (sen["brake"], (0.0, 12.0)),
+                ),
+                "PgmNordic": ((sen["JLink"], 0),),
+                "Operation": (
+                    (sen["arm_swver"], self.test_program.config.sw_version),
+                    (sen["red"], (0.0, 1.8, 0.0)),
+                    (sen["green"], (0.0, 2.5, 0.0)),
+                    (sen["blue"], (0.0, 2.8, 0.0)),
+                    (sen["light"], 0.1),
+                    (sen["remote"], (11.9, 0.0)),
+                ),
+                "Calibrate": (
+                    (sen["arm_vbatt"], (12.4, 12.1)),
+                    (sen["vbat"], (12.0, 12.0)),
+                    (sen["arm_vpin"], 0.1),
+                ),
+                "Bluetooth": (),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(28, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'PgmNordic', 'Operation', 'Calibrate', 'Bluetooth'],
-            self.tester.ut_steps)
+            ["Prepare", "PgmNordic", "Operation", "Calibrate", "Bluetooth"],
+            self.tester.ut_steps,
+        )

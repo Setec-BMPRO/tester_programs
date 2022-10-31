@@ -9,7 +9,7 @@ import tester
 import share
 
 
-class LEDControl():
+class LEDControl:
 
     """Control of the LEDs via CAN."""
 
@@ -31,7 +31,7 @@ class LEDControl():
         @return self
 
         """
-        self._worker = threading.Thread(target=self.worker, name='LEDThread')
+        self._worker = threading.Thread(target=self.worker, name="LEDThread")
         self._worker.start()
         return self
 
@@ -45,10 +45,10 @@ class LEDControl():
         """Thread to send a stream of LED_DISPLAY CAN packets."""
         header = tester.devphysical.can.RVCHeader()
         msg = header.message
-        msg.DGN = share.can.DGN.RVMC101.value           #  to the RVMC101
-        msg.SA = share.can.DeviceID.RVMN101.value       #  from a RVMN101
+        msg.DGN = share.can.DGN.RVMC101.value  #  to the RVMC101
+        msg.SA = share.can.DeviceID.RVMN101.value  #  from a RVMN101
         data = bytearray([share.can.MessageID.LED_DISPLAY.value])
-        data.extend(b'\x00\x00\xff\xff\xff\x00\x00')
+        data.extend(b"\x00\x00\xff\xff\xff\x00\x00")
         pkt = tester.devphysical.can.CANPacket(header, data)
         # [0]: LED Display = 0x01
         # [1]: LED 7 segment DIGIT0 (LSB, right)
@@ -66,6 +66,6 @@ class LEDControl():
             # number. The 2nd+ packets WILL be acted upon.
             pkt.data[1] = pkt.data[2] = pattern
             pattern = 0x01 if pattern == 0x40 else pattern << 1
-            pkt.data[6] = (pkt.data[6] + 1) & 0xff  # Sequence number
-            pkt.data[7] = sum(pkt.data[:7]) & 0xff  # Checksum
+            pkt.data[6] = (pkt.data[6] + 1) & 0xFF  # Sequence number
+            pkt.data[7] = sum(pkt.data[:7]) & 0xFF  # Checksum
             self.candev.send(pkt)

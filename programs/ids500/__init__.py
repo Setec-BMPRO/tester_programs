@@ -13,7 +13,11 @@ from .final import Final
 
 
 __all__ = [
-    'Final',
-    'InitialMain',
-    'InitialMicro', 'InitialAux', 'InitialBias', 'InitialBus', 'InitialSyn'
-    ]
+    "Final",
+    "InitialMain",
+    "InitialMicro",
+    "InitialAux",
+    "InitialBias",
+    "InitialBus",
+    "InitialSyn",
+]

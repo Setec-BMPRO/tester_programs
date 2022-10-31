@@ -7,4 +7,4 @@ from .initial import Initial
 from .final import Final
 from .safety import Safety
 
-__all__ = ['Final', 'Initial', 'Safety']
+__all__ = ["Final", "Initial", "Safety"]

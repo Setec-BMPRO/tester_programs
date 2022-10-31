@@ -13,17 +13,16 @@ class _BC2Initial(ProgramTestCase):
     """BC2 Initial program test suite."""
 
     prog_class = bc2.Initial
-    btmac = '001EC030BC15'
+    btmac = "001EC030BC15"
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.bc2.console.Console')
+        patcher = patch("programs.bc2.console.Console")
         self.addCleanup(patcher.stop)
         patcher.start()
-        mypi = Mock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
-        patcher = patch(
-            'share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        mypi = Mock(name="MyRasPi")
+        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
+        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -32,40 +31,39 @@ class _BC2Initial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare': (
-                    (sen['sernum'], 'A1526040123'),
-                    (sen['vin'], 15.0), (sen['3v3'], 3.30),
-                    ),
-                'TestArm': (
-                    (sen['arm_SwVer'], self.test_program.cfg.sw_version),
-                    ),
-                'Calibrate': (
-                    (sen['vin'], (14.9999, 15.0)),
-                    (sen['mircal'], ('cal success:', ) * 2),
-                    (sen['arm_Vbatt'], 15.0), (sen['arm_Ibatt'], 0.0),
-                    (sen['arm_Ioffset'], -1), (sen['arm_VbattLSB'], 2440),
-                    ),
-                'Bluetooth': (
-                    (sen['arm_BtMAC'], self.btmac),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "Prepare": (
+                    (sen["sernum"], "A1526040123"),
+                    (sen["vin"], 15.0),
+                    (sen["3v3"], 3.30),
+                ),
+                "TestArm": ((sen["arm_SwVer"], self.test_program.cfg.sw_version),),
+                "Calibrate": (
+                    (sen["vin"], (14.9999, 15.0)),
+                    (sen["mircal"], ("cal success:",) * 2),
+                    (sen["arm_Vbatt"], 15.0),
+                    (sen["arm_Ibatt"], 0.0),
+                    (sen["arm_Ioffset"], -1),
+                    (sen["arm_VbattLSB"], 2440),
+                ),
+                "Bluetooth": ((sen["arm_BtMAC"], self.btmac),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(13, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'TestArm', 'Calibrate','Bluetooth'],
-            self.tester.ut_steps)
+            ["Prepare", "TestArm", "Calibrate", "Bluetooth"], self.tester.ut_steps
+        )
 
 
 class BC2_Initial(_BC2Initial):
 
     """BC2 Initial program test suite."""
 
-    parameter = '100'
+    parameter = "100"
     debug = False
 
     def test_pass_run(self):
@@ -77,7 +75,7 @@ class BC2H_Initial(_BC2Initial):
 
     """BC2H Initial program test suite."""
 
-    parameter = '300'
+    parameter = "300"
     debug = False
 
     def test_pass_run(self):

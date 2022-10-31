@@ -18,9 +18,7 @@ class MB3Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-                'share.programmer.AVR',
-                ):
+        for target in ("share.programmer.AVR",):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
@@ -30,20 +28,17 @@ class MB3Initial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerOn': (
-                    (sen['vaux'], 12.8),
-                    (sen['5V'], 5.0),
-                    ),
-                'Output': (
-                    (sen['vbat'], 14.6),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerOn": (
+                    (sen["vaux"], 12.8),
+                    (sen["5V"], 5.0),
+                ),
+                "Output": ((sen["vbat"], 14.6),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(3, len(result.readings))
-        self.assertEqual(
-            ['PowerOn', 'PgmAVR', 'Output'], self.tester.ut_steps)
+        self.assertEqual(["PowerOn", "PgmAVR", "Output"], self.tester.ut_steps)

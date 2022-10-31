@@ -16,37 +16,46 @@ def get(parameter, uut):
     @return configuration class
 
     """
-    CN101._configure(uut)    # Adjust for the revision
+    CN101._configure(uut)  # Adjust for the revision
     return CN101
 
 
-class CN101():
+class CN101:
 
     """CN101 parameters."""
 
     # Initial test limits
     limits_initial = (
-        tester.LimitRegExp('SwVer', '',        # Adjusted during _configure()
-            doc='Software version'),
-        tester.LimitLow('Part', 100.0),
-        tester.LimitDelta('Vin', 8.0, 0.5),
-        tester.LimitPercent('3V3', 3.30, 3.0),
-        tester.LimitInteger('CAN_BIND', 1 << 28),
-        tester.LimitRegExp('BtMac', '(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}'),
-        tester.LimitBoolean('DetectBT', True),
-        tester.LimitInteger('Tank', 5),
-        )
+        tester.LimitRegExp(
+            "SwVer", "", doc="Software version"  # Adjusted during _configure()
+        ),
+        tester.LimitLow("Part", 100.0),
+        tester.LimitDelta("Vin", 8.0, 0.5),
+        tester.LimitPercent("3V3", 3.30, 3.0),
+        tester.LimitInteger("CAN_BIND", 1 << 28),
+        tester.LimitRegExp("BtMac", "(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}"),
+        tester.LimitBoolean("DetectBT", True),
+        tester.LimitInteger("Tank", 5),
+    )
     # These values get set per revision
     sw_version = None
     hw_version = None
     banner_lines = None
     # Revision data dictionary:
-    _rev6_values = ('1.2.17835.298', (6, 0, 'A'), 2, )
+    _rev6_values = (
+        "1.2.17835.298",
+        (6, 0, "A"),
+        2,
+    )
     _rev_data = {
         None: _rev6_values,
-        '6': _rev6_values,
-        '5': ('1.1.13665.176', (5, 0, 'A'), 0, ),
-        }
+        "6": _rev6_values,
+        "5": (
+            "1.1.13665.176",
+            (5, 0, "A"),
+            0,
+        ),
+    }
 
     @classmethod
     def _configure(cls, uut):
@@ -56,5 +65,5 @@ class CN101():
 
         """
         rev = uut.revision
-        logging.getLogger(__name__).debug('Revision detected as %s', rev)
+        logging.getLogger(__name__).debug("Revision detected as %s", rev)
         cls.sw_version, cls.hw_version, cls.banner_lines = cls._rev_data[rev]

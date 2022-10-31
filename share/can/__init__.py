@@ -18,22 +18,22 @@ from .setec_rvc import (
     RVMD50ControlButtonPacket,
     RVMD50ControlLCDPacket,
     RVMD50ResetPacket,
-    )
+)
 
 
 __all__ = [
-    'CommandID',
-    'DeviceID',
-    'DGN',
-    'MessageID',
-    'PacketPropertyReader',
-    'PacketDetector',
-    'SwitchStatusPacket',
-    'DeviceStatusPacket',
-    'RVMD50ControlButtonPacket',
-    'RVMD50ControlLCDPacket',
-    'RVMD50ResetPacket',
-    ]
+    "CommandID",
+    "DeviceID",
+    "DGN",
+    "MessageID",
+    "PacketPropertyReader",
+    "PacketDetector",
+    "SwitchStatusPacket",
+    "DeviceStatusPacket",
+    "RVMD50ControlButtonPacket",
+    "RVMD50ControlLCDPacket",
+    "RVMD50ResetPacket",
+]
 
 
 @enum.unique

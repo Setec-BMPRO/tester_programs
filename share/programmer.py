@@ -20,17 +20,16 @@ class _Base(abc.ABC):
 
     """Programmer base class."""
 
-    pass_result = 'ok'
+    pass_result = "ok"
 
     def __init__(self):
         """Create a programmer."""
         self._measurement = tester.Measurement(
             tester.LimitRegExp(
-                name='Program',
-                testlimit=self.pass_result,
-                doc='Programming succeeded'),
-            tester.sensor.MirrorReadingString()
-            )
+                name="Program", testlimit=self.pass_result, doc="Programming succeeded"
+            ),
+            tester.sensor.MirrorReadingString(),
+        )
         self._result = None
 
     @property
@@ -51,7 +50,7 @@ class _Base(abc.ABC):
         """
         if not isinstance(value, str):  # A subprocess exit code
             if value:
-                value = 'Error {0}'.format(value)
+                value = "Error {0}".format(value)
             else:
                 value = self.pass_result
         self._result = value
@@ -103,13 +102,14 @@ class ARM(_Base):
     """ARM programmer using the isplpc package."""
 
     def __init__(
-            self,
-            port,
-            file,
-            crpmode=None,
-            boot_relay=None,
-            reset_relay=None,
-            bda4_signals=False):
+        self,
+        port,
+        file,
+        crpmode=None,
+        boot_relay=None,
+        reset_relay=None,
+        bda4_signals=False,
+    ):
         """Create a programmer.
 
         @param port Serial port to use
@@ -143,7 +143,7 @@ class ARM(_Base):
         """
         # Read the image & open serial port on main thread
         if not self._bindata:
-            with self.file.open('rb') as infile:
+            with self.file.open("rb") as infile:
                 self._bindata = bytearray(infile.read())
         self._ser = serial.Serial(port=self.port, baudrate=self.baudrate)
         # We need to wait just a little before flushing the port
@@ -151,27 +151,29 @@ class ARM(_Base):
         self._ser.reset_input_buffer()
         # Device I/O activity is only done on main thread
         if self.bda4_signals:
-            self._ser.rts = self._ser.dtr = True    # Assert BOOT & RESET
+            self._ser.rts = self._ser.dtr = True  # Assert BOOT & RESET
             time.sleep(0.01)
-            self._ser.dtr = False                   # Release RESET
+            self._ser.dtr = False  # Release RESET
             time.sleep(0.01)
-            self._ser.rts = False                   # Release BOOT
+            self._ser.rts = False  # Release BOOT
         else:
             if self.boot_relay:
-                self.boot_relay.set_on()            # Assert BOOT
+                self.boot_relay.set_on()  # Assert BOOT
             if self.reset_relay:
-                self.reset_relay.pulse(0.1)         # Pulse RESET
+                self.reset_relay.pulse(0.1)  # Pulse RESET
             if self.boot_relay:
-                self.boot_relay.set_off()           # Release BOOT
+                self.boot_relay.set_off()  # Release BOOT
         # Target device is now running in ISP mode
         pgm = isplpc.Programmer(
             self._ser,
             self._bindata,
             erase_only=False,
             verify=False,
-            crpmode=self.crpmode)
+            crpmode=self.crpmode,
+        )
         self._worker = threading.Thread(
-            target=self.worker, name='ARMthread', args=(pgm, ))
+            target=self.worker, name="ARMthread", args=(pgm,)
+        )
         self._worker.start()
 
     def worker(self, pgm):
@@ -183,7 +185,7 @@ class ARM(_Base):
         result = self.pass_result
         try:
             pgm.program()
-        except Exception as exc:    # pylint: disable=broad-except
+        except Exception as exc:  # pylint: disable=broad-except
             result = str(exc)
         self.result = result
 
@@ -199,13 +201,7 @@ class AVR(_Base):
 
     """AVR programmer using the updi package."""
 
-    def __init__(
-            self,
-            port,
-            file,
-            baudrate=115200,
-            device='tiny406',
-            fuses=None):
+    def __init__(self, port, file, baudrate=115200, device="tiny406", fuses=None):
         """Create a programmer.
 
         @param port Serial port name to use
@@ -227,7 +223,8 @@ class AVR(_Base):
         """Program a device."""
         try:
             nvm = updi.UpdiNvmProgrammer(
-                comport=self._port, baud=self._baudrate, device=self._device)
+                comport=self._port, baud=self._baudrate, device=self._device
+            )
             try:
                 nvm.enter_progmode()
             except updi.UpdiError:
@@ -239,8 +236,7 @@ class AVR(_Base):
             readback = nvm.read_flash(nvm.device.flash_start, len(data))
             for offset in range(len(data)):
                 if data[offset] != readback[offset]:
-                    raise VerificationError(
-                        'Verify error at 0x{0:04X}'.format(offset))
+                    raise VerificationError("Verify error at 0x{0:04X}".format(offset))
             for fuse_num, fuse_val in self._fuses.values():
                 nvm.write_fuse(fuse_num, fuse_val)
             nvm.leave_progmode()
@@ -258,8 +254,9 @@ class NRF52(_Base):
     """Nordic Semiconductors programmer using a NRF52."""
 
     bin_nt = pathlib.PureWindowsPath(
-        'C:/Program Files/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe')
-    bin_posix = pathlib.PurePosixPath('nrfjprog')
+        "C:/Program Files/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe"
+    )
+    bin_posix = pathlib.PurePosixPath("nrfjprog")
     # HACK: Force coded RVSWT101 switch code if != 0
     rvswt101_forced_switch_code = 0
 
@@ -277,30 +274,36 @@ class NRF52(_Base):
     def program_begin(self):
         """Begin device programming."""
         binary = {
-            'nt': self.bin_nt,
-            'posix': self.bin_posix,
-            }[os.name]
+            "nt": self.bin_nt,
+            "posix": self.bin_posix,
+        }[os.name]
         command = [
             str(binary),
-            '-f', 'NRF52',
-            '--chiperase',
-            '--program', str(self._file),
-            '--verify',
-            ]
+            "-f",
+            "NRF52",
+            "--chiperase",
+            "--program",
+            str(self._file),
+            "--verify",
+        ]
         if self._sernum:
-            command.extend(['--snr', self._sernum])
+            command.extend(["--snr", self._sernum])
         process = subprocess.Popen(
-            command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+        )
         result = process.wait(timeout=60)
         # HACK: Force code an RVSWT101 switch code
         if not result and self.rvswt101_forced_switch_code:
             command = [
                 self.binary,
-                '--memwr', '0x70000',
-                '--val', str(self.rvswt101_forced_switch_code),
-                ]
+                "--memwr",
+                "0x70000",
+                "--val",
+                str(self.rvswt101_forced_switch_code),
+            ]
             process = subprocess.Popen(
-                command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+            )
             result = process.wait(timeout=60)
         self.result = result
 

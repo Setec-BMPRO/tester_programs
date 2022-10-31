@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2022 , ",
-    "saved": "2022-06-08, 11:22:04"
+    "saved": "2022-10-31, 12:34:04"
   },
   "project": {
     "AUTHOR": "",
@@ -30,9 +30,10 @@
       }
     },
     "DESCRIPTION": "",
-    "DOCSTRING": "",
+    "DOCSTRING": "ericdoc",
     "DOCUMENTATIONPARMS": {},
     "EMAIL": "",
+    "EMBEDDED_VENV": false,
     "EOL": 1,
     "FILETYPES": {
       "*.e4p": "OTHERS",
@@ -60,6 +61,7 @@
     },
     "INTERFACES": [],
     "LEXERASSOCS": {},
+    "LICENSE": "",
     "MAINSCRIPT": "testsuite.py",
     "MAKEPARAMS": {
       "MakeEnabled": false,
@@ -69,7 +71,7 @@
       "MakeTarget": "",
       "MakeTestOnly": true
     },
-    "MIXEDLANGUAGE": 0,
+    "MIXEDLANGUAGE": false,
     "OTHERS": [
       "main.py.ini",
       "programs/rvmc101/rvmc101_atmel.jflash",
@@ -80,7 +82,18 @@
       "programs/sx600/r7fa2e1a7.jflash",
       "programs/trsbts/trsbts.jflash"
     ],
-    "OTHERTOOLSPARMS": {},
+    "OTHERTOOLSPARMS": {
+      "Black": {
+        "exclude": "/(\\.direnv|\\.eggs|\\.git|\\.hg|\\.mypy_cache|\\.nox|\\.tox|\\.venv|venv|\\.svn|\\.ipynb_checkpoints|_build|buck-out|build|dist|__pypackages__)/",
+        "extend-exclude": "",
+        "force-exclude": "",
+        "line-length": 88,
+        "skip-magic-trailing-comma": false,
+        "skip-string-normalization": false,
+        "source": "project",
+        "target-version": []
+      }
+    },
     "PACKAGERSPARMS": {},
     "PROGLANGUAGE": "Python3",
     "PROJECTTYPE": "Console",
@@ -397,6 +410,7 @@
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",
     "SPELLWORDS": "",
+    "TESTING_FRAMEWORK": "unittest",
     "TRANSLATIONEXCEPTIONS": [],
     "TRANSLATIONPATTERN": "",
     "TRANSLATIONS": [],

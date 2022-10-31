@@ -14,17 +14,16 @@ class BLE2CANInitial(ProgramTestCase):
     prog_class = ble2can.Initial
     parameter = None
     debug = False
-    btmac = '00:1E:C0:30:BC:15'
+    btmac = "00:1E:C0:30:BC:15"
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.ble2can.console.Console')
+        patcher = patch("programs.ble2can.console.Console")
         self.addCleanup(patcher.stop)
         patcher.start()
-        mypi = Mock(name='MyRasPi')
-        mypi.scan_advert_blemac.return_value = {'ad_data': '', 'rssi': -50}
-        patcher = patch(
-            'share.bluetooth.RaspberryBluetooth', return_value=mypi)
+        mypi = Mock(name="MyRasPi")
+        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
+        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -33,30 +32,50 @@ class BLE2CANInitial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare': (
-                    (sen['sernum'], 'A1526040123'),
-                    (sen['tstpin_cover'], 0.0), (sen['vin'], 12.0),
-                    (sen['3v3'], 3.30), (sen['5v'], 5.0),
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "Prepare": (
+                    (sen["sernum"], "A1526040123"),
+                    (sen["tstpin_cover"], 0.0),
+                    (sen["vin"], 12.0),
+                    (sen["3v3"], 3.30),
+                    (sen["5v"], 5.0),
+                ),
+                "TestArm": (
+                    (
+                        sen["red"],
+                        (
+                            3.1,
+                            0.5,
+                            3.1,
+                        ),
                     ),
-                'TestArm': (
-                    (sen['red'], (3.1, 0.5, 3.1, )),
-                    (sen['green'], (3.1, 0.0, 3.1, )),
-                    (sen['blue'], (3.1, 0.25, 3.1, )),
-                    (sen['SwVer'], self.test_program.sw_version),
+                    (
+                        sen["green"],
+                        (
+                            3.1,
+                            0.0,
+                            3.1,
+                        ),
                     ),
-                'Bluetooth': (
-                    (sen['BtMac'], self.btmac),
+                    (
+                        sen["blue"],
+                        (
+                            3.1,
+                            0.25,
+                            3.1,
+                        ),
                     ),
-                'CanBus': (
-                    (sen['CANbind'], 1 << 28),
-                    ),
-                },
-            }
+                    (sen["SwVer"], self.test_program.sw_version),
+                ),
+                "Bluetooth": ((sen["BtMac"], self.btmac),),
+                "CanBus": ((sen["CANbind"], 1 << 28),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(18, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'TestArm', 'Bluetooth', 'CanBus'], self.tester.ut_steps)
+            ["Prepare", "TestArm", "Bluetooth", "CanBus"], self.tester.ut_steps
+        )

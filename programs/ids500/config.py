@@ -5,8 +5,8 @@
 
 
 # Software image filenames
-pic_hex_mic = 'ids_picMic_2.hex'
-pic_hex_syn = 'ids_picSyn_2.hex'
+pic_hex_mic = "ids_picMic_2.hex"
+pic_hex_syn = "ids_picSyn_2.hex"
 
 # LDD absolute error limits in Amps
 #   Ellex "SP-LPPSU-05 (Customer Specification Issue 5)":
@@ -21,7 +21,7 @@ ldd_out_mon_error_6 = 0.092
 ldd_set_out_error_50 = 0.36
 ldd_out_mon_error_50 = 0.40
 # Pre-Rev 9 limits
-#ldd_set_out_error_6 = 0.07
-#ldd_out_mon_error_6 = 0.092
-#ldd_set_out_error_50 = 0.7
-#ldd_out_mon_error_50 = 0.7
+# ldd_set_out_error_6 = 0.07
+# ldd_out_mon_error_6 = 0.092
+# ldd_set_out_error_50 = 0.7
+# ldd_out_mon_error_50 = 0.7

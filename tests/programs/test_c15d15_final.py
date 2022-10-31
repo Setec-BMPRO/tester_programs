@@ -18,31 +18,30 @@ class C15D15Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'PowerUp': (
-                    (sen['oVout'], 15.5),
-                    (sen['oYesNoGreen'], True),
-                    (sen['oYesNoYellowOff'], True),
-                    (sen['oNotifyYellow'], True),
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "PowerUp": (
+                    (sen["oVout"], 15.5),
+                    (sen["oYesNoGreen"], True),
+                    (sen["oYesNoYellowOff"], True),
+                    (sen["oNotifyYellow"], True),
+                ),
+                "OCP": (
+                    (
+                        sen["oVout"],
+                        (15.5,) * 5 + (13.5,),
                     ),
-                'OCP': (
-                    (sen['oVout'], (15.5, ) * 5 + (13.5, ), ),
-                    (sen['oYesNoYellowOn'], True),
-                    (sen['oVout'], 15.5),
-                    ),
-                'OverLoad': (
-                    (sen['oVout'], 4.0),
-                    ),
-                'Recover': (
-                    (sen['oVout'], 15.5),
-                    ),
-                },
-            }
+                    (sen["oYesNoYellowOn"], True),
+                    (sen["oVout"], 15.5),
+                ),
+                "OverLoad": ((sen["oVout"], 4.0),),
+                "Recover": ((sen["oVout"], 15.5),),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(9, len(result.readings))
         self.assertEqual(
-            ['PowerUp', 'OCP', 'OverLoad', 'Recover', 'PowerOff'],
-            self.tester.ut_steps)
+            ["PowerUp", "OCP", "OverLoad", "Recover", "PowerOff"], self.tester.ut_steps
+        )

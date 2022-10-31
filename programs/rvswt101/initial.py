@@ -20,15 +20,15 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
-        Sensors.sw_image = self.cfg['software']
-        Sensors.jlink_projectfile = self.cfg['jlink_projectfile']
-        super().open(self.cfg['limits_ini'], Devices, Sensors, Measurements)
+        Sensors.sw_image = self.cfg["software"]
+        Sensors.jlink_projectfile = self.cfg["jlink_projectfile"]
+        super().open(self.cfg["limits_ini"], Devices, Sensors, Measurements)
         # Adjust for different console behaviour
-        self.devices['rvswt101'].banner_lines = self.cfg['banner_lines']
+        self.devices["rvswt101"].banner_lines = self.cfg["banner_lines"]
         self.steps = (
-            tester.TestStep('PowerUp', self._step_power_up),
-            tester.TestStep('ProgramTest', self._step_program_test),
-            )
+            tester.TestStep("PowerUp", self._step_power_up),
+            tester.TestStep("ProgramTest", self._step_program_test),
+        )
         # This is a multi-unit parallel program so we can't stop on errors.
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
@@ -37,9 +37,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 3V3dc and measure voltages."""
-        dev['dcs_vin'].output(3.3, output=True)
-        mes['dmm_vin'].sensor.position = tuple(range(1, self.per_panel + 1))
-        mes['dmm_vin'](timeout=5)
+        dev["dcs_vin"].output(3.3, output=True)
+        mes["dmm_vin"].sensor.position = tuple(range(1, self.per_panel + 1))
+        mes["dmm_vin"](timeout=5)
 
     @share.teststep
     def _step_program_test(self, dev, mes):
@@ -51,38 +51,38 @@ class Initial(share.TestSequence):
 
         """
         # Open console serial connection
-        dev['rvswt101'].open()
+        dev["rvswt101"].open()
         for pos in range(self.per_panel):
             mypos = pos + 1
             if tester.Measurement.position_enabled(mypos):
                 # Set sensor positions
                 for sen in (
-                        mes['JLink'].sensor,
-                        mes['ble_mac'].sensor,
-                        mes['scan_mac'].sensor,
-                        ):
+                    mes["JLink"].sensor,
+                    mes["ble_mac"].sensor,
+                    mes["scan_mac"].sensor,
+                ):
                     sen.position = mypos
-                dev['fixture'].connect(mypos)
-                mes['JLink']()
+                dev["fixture"].connect(mypos)
+                mes["JLink"]()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Get the MAC address from the console.
-                dev['dcs_vin'].output(0.0, delay=0.5)
-                dev['rvswt101'].port.reset_input_buffer()
-                dev['dcs_vin'].output(3.3, delay=0.1)
-                self.mac = dev['rvswt101'].get_mac()
-                mes['ble_mac'].sensor.store(self.mac)
-                mes['ble_mac']()
+                dev["dcs_vin"].output(0.0, delay=0.5)
+                dev["rvswt101"].port.reset_input_buffer()
+                dev["dcs_vin"].output(3.3, delay=0.1)
+                self.mac = dev["rvswt101"].get_mac()
+                mes["ble_mac"].sensor.store(self.mac)
+                mes["ble_mac"]()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Save SerialNumber & MAC on a remote server.
-                dev['serialtomac'].blemac_set(self.uuts[pos].sernum, self.mac)
+                dev["serialtomac"].blemac_set(self.uuts[pos].sernum, self.mac)
                 # Press Button2 to broadcast on bluetooth
-                dev['fixture'].press(mypos)
-                reply = dev['pi_bt'].scan_advert_blemac(self.mac, timeout=20)
-                dev['fixture'].release()
-                mes['scan_mac'].sensor.store(reply is not None)
-                mes['scan_mac']()
+                dev["fixture"].press(mypos)
+                reply = dev["pi_bt"].scan_advert_blemac(self.mac, timeout=20)
+                dev["fixture"].release()
+                mes["scan_mac"].sensor.store(reply is not None)
+                mes["scan_mac"]()
 
 
 class Devices(share.Devices):
@@ -93,52 +93,59 @@ class Devices(share.Devices):
         """Create all Instruments."""
         # Physical Instrument based devices
         for name, devtype, phydevname in (
-                ('dmm', tester.DMM, 'DMM'),
-                ('dcs_vin', tester.DCSource, 'DCS2'),
-                ('dcs_switch', tester.DCSource, 'DCS3'),
-                ('rla_pos1', tester.Relay, 'RLA1'),
-                ('rla_pos2', tester.Relay, 'RLA2'),
-                ('rla_pos3', tester.Relay, 'RLA3'),
-                ('rla_pos4', tester.Relay, 'RLA4'),
-                ('rla_pos5', tester.Relay, 'RLA5'),
-                ('rla_pos6', tester.Relay, 'RLA6'),
-                ('rla_pos7', tester.Relay, 'RLA7'),
-                ('rla_pos8', tester.Relay, 'RLA8'),
-                ('rla_pos9', tester.Relay, 'RLA9'),
-                ('rla_pos10', tester.Relay, 'RLA10'),
-                ('JLink', tester.JLink, 'JLINK'),
-            ):
+            ("dmm", tester.DMM, "DMM"),
+            ("dcs_vin", tester.DCSource, "DCS2"),
+            ("dcs_switch", tester.DCSource, "DCS3"),
+            ("rla_pos1", tester.Relay, "RLA1"),
+            ("rla_pos2", tester.Relay, "RLA2"),
+            ("rla_pos3", tester.Relay, "RLA3"),
+            ("rla_pos4", tester.Relay, "RLA4"),
+            ("rla_pos5", tester.Relay, "RLA5"),
+            ("rla_pos6", tester.Relay, "RLA6"),
+            ("rla_pos7", tester.Relay, "RLA7"),
+            ("rla_pos8", tester.Relay, "RLA8"),
+            ("rla_pos9", tester.Relay, "RLA9"),
+            ("rla_pos10", tester.Relay, "RLA10"),
+            ("JLink", tester.JLink, "JLINK"),
+        ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Fixture helper device
-        self['fixture'] = Fixture(
-            self['dcs_switch'],
+        self["fixture"] = Fixture(
+            self["dcs_switch"],
             [
-                None,   # Dummy entry to give 1-based relay number indexing
-                self['rla_pos1'], self['rla_pos2'], self['rla_pos3'],
-                self['rla_pos4'], self['rla_pos5'], self['rla_pos6'],
-                self['rla_pos7'], self['rla_pos8'], self['rla_pos9'],
-                self['rla_pos10'],
-            ]
-            )
+                None,  # Dummy entry to give 1-based relay number indexing
+                self["rla_pos1"],
+                self["rla_pos2"],
+                self["rla_pos3"],
+                self["rla_pos4"],
+                self["rla_pos5"],
+                self["rla_pos6"],
+                self["rla_pos7"],
+                self["rla_pos8"],
+                self["rla_pos9"],
+                self["rla_pos10"],
+            ],
+        )
         # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bl652_port = share.config.Fixture.port('032869', 'NORDIC')
+        bl652_port = share.config.Fixture.port("032869", "NORDIC")
         rvswt101_ser.port = bl652_port
         # RVSWT101 Console driver
-        self['rvswt101'] = console.Console(rvswt101_ser)
-        self['rvswt101'].measurement_fail_on_error = False
+        self["rvswt101"] = console.Console(rvswt101_ser)
+        self["rvswt101"].measurement_fail_on_error = False
         # Connection to RaspberryPi bluetooth server
-        self['pi_bt'] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url())
+        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
+            share.config.System.ble_url()
+        )
         # Connection to Serial To MAC server
-        self['serialtomac'] = share.bluetooth.SerialToMAC()
+        self["serialtomac"] = share.bluetooth.SerialToMAC()
 
     def reset(self):
         """Reset instruments."""
-        self['rvswt101'].close()
-        self['fixture'].reset()
-        self['dcs_vin'].output(0.0, False)
+        self["rvswt101"].close()
+        self["fixture"].reset()
+        self["dcs_vin"].output(0.0, False)
 
 
 class FixtureError(Exception):
@@ -155,7 +162,7 @@ class FixtureState(enum.IntEnum):
     button = 2
 
 
-class Fixture():
+class Fixture:
 
     """Helper class for fixture circuit control.
 
@@ -206,7 +213,7 @@ class Fixture():
 
         """
         if self._position:
-            raise FixtureError('Concurrent connections are not allowed')
+            raise FixtureError("Concurrent connections are not allowed")
         self._relays[position].set_on()
         self._relays[position].opc()
         self._position = position
@@ -225,9 +232,8 @@ class Fixture():
 
         """
         self._disconnect()
-        if self.state != FixtureState.program: # Swap to PROGRAM mode
-            self._dcs.output(
-                self.dcs_program, output=True, delay=self.dcs_delay)
+        if self.state != FixtureState.program:  # Swap to PROGRAM mode
+            self._dcs.output(self.dcs_program, output=True, delay=self.dcs_delay)
             self.state = FixtureState.program
         self._connect(position)
 
@@ -239,15 +245,14 @@ class Fixture():
         """
         if self.state != FixtureState.button:  # Swap to BUTTON mode
             self._disconnect()
-            self._dcs.output(
-                self.dcs_button, output=True, delay=self.dcs_delay)
+            self._dcs.output(self.dcs_button, output=True, delay=self.dcs_delay)
             self.state = FixtureState.button
         self._connect(position)
 
     def release(self):
         """Release a button."""
         if self.state != FixtureState.button:
-            raise FixtureError('Release called in program mode')
+            raise FixtureError("Release called in program mode")
         self._disconnect()
 
 
@@ -260,20 +265,19 @@ class Sensors(share.Sensors):
 
     def open(self):
         """Create all Sensors."""
-        dmm = self.devices['dmm']
+        dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self['mirmac'] = sensor.MirrorReadingString()
-        self['mirscan'] = sensor.MirrorReadingBoolean()
-        self['vin'] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
-        self['JLink'] = sensor.JLink(
-            self.devices['JLink'],
+        self["mirmac"] = sensor.MirrorReadingString()
+        self["mirscan"] = sensor.MirrorReadingBoolean()
+        self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
+        self["JLink"] = sensor.JLink(
+            self.devices["JLink"],
             pathlib.Path(__file__).parent / self.jlink_projectfile,
-            pathlib.Path(__file__).parent / self.sw_image)
+            pathlib.Path(__file__).parent / self.sw_image,
+        )
         # Console sensors
-        rvswt101 = self.devices['rvswt101']
-        for device, name, cmdkey in (
-                (rvswt101, 'SwVer', 'SW_VER'),
-            ):
+        rvswt101 = self.devices["rvswt101"]
+        for device, name, cmdkey in ((rvswt101, "SwVer", "SW_VER"),):
             self[name] = sensor.KeyedReadingString(device, cmdkey)
 
 
@@ -283,10 +287,16 @@ class Measurements(share.Measurements):
 
     def open(self):
         """Create all Measurements."""
-        self.create_from_names((
-            ('dmm_vin', 'Vin', 'vin', ''),
-            ('ble_mac', 'BleMac', 'mirmac', 'Get MAC address from console'),
-            ('scan_mac', 'ScanMac', 'mirscan',
-                'Scan for MAC address over bluetooth'),
-            ('JLink', 'ProgramOk', 'JLink', 'Programmed'),
-            ))
+        self.create_from_names(
+            (
+                ("dmm_vin", "Vin", "vin", ""),
+                ("ble_mac", "BleMac", "mirmac", "Get MAC address from console"),
+                (
+                    "scan_mac",
+                    "ScanMac",
+                    "mirscan",
+                    "Scan for MAC address over bluetooth",
+                ),
+                ("JLink", "ProgramOk", "JLink", "Programmed"),
+            )
+        )

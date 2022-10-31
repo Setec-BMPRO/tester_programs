@@ -8,6 +8,6 @@ from .raspblue import RaspberryBluetooth
 
 
 __all__ = [
-    'RaspberryBluetooth',
-    'SerialToMAC',
-    ]
+    "RaspberryBluetooth",
+    "SerialToMAC",
+]

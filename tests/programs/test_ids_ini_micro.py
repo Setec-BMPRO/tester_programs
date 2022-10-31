@@ -17,9 +17,7 @@ class Ids500MicroInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-                'programs.ids500.console.Console',
-                ):
+        for target in ("programs.ids500.console.Console",):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
@@ -29,20 +27,20 @@ class Ids500MicroInitial(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Program': (
-                    (sen['Vsec5VuP'], 5.0),
-                    (sen['PicKit'], 0),
-                    ),
-                'Comms': (
-                    (sen['SwRev'], ('I,  1, 2,Software Revision', )),
-                    (sen['MicroTemp'], ('D, 16,    22,MICRO Temp.(C)', )),
-                    ),
-                },
-            }
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "Program": (
+                    (sen["Vsec5VuP"], 5.0),
+                    (sen["PicKit"], 0),
+                ),
+                "Comms": (
+                    (sen["SwRev"], ("I,  1, 2,Software Revision",)),
+                    (sen["MicroTemp"], ("D, 16,    22,MICRO Temp.(C)",)),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(4, len(result.readings))
-        self.assertEqual(['Program', 'Comms'], self.tester.ut_steps)
+        self.assertEqual(["Program", "Comms"], self.tester.ut_steps)

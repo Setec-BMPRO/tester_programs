@@ -11,7 +11,7 @@ class ParameterError(Exception):
     """Parameter Error."""
 
 
-class _Parameter():
+class _Parameter:
 
     """Parameter base class."""
 
@@ -20,12 +20,15 @@ class _Parameter():
     _rd_fmt = '"{0} XN?'
 
     def __init__(
-            self,
-            command,
-            writeable=False, readable=True,
-            write_format=None, read_format=None,
-            write_expected=0, read_expected=1
-            ):
+        self,
+        command,
+        writeable=False,
+        readable=True,
+        write_format=None,
+        read_format=None,
+        write_expected=0,
+        read_expected=1,
+    ):
         """Initialise the parameter.
 
         @param command Command verb of this parameter.
@@ -56,7 +59,7 @@ class _Parameter():
 
         """
         if not self._writeable:
-            raise ParameterError('Parameter is not writable')
+            raise ParameterError("Parameter is not writable")
         write_cmd = self._wr_fmt.format(value, self.command)
         response = func(write_cmd, expected=self.write_expected)
         return response
@@ -69,7 +72,7 @@ class _Parameter():
 
         """
         if not self._readable:
-            raise ParameterError('Parameter is not readable')
+            raise ParameterError("Parameter is not readable")
         read_cmd = self._rd_fmt.format(self.command)
         response = func(read_cmd, expected=self.read_expected)
         return response
@@ -111,19 +114,28 @@ class Float(_Parameter):
     """Float parameter type."""
 
     def __init__(
-            self,
-            command,
-            writeable=False, readable=True,
-            minimum=0, maximum=1000, scale=1,
-            write_format=None, read_format=None,
-            write_expected=0, read_expected=1
-            ):
+        self,
+        command,
+        writeable=False,
+        readable=True,
+        minimum=0,
+        maximum=1000,
+        scale=1,
+        write_format=None,
+        read_format=None,
+        write_expected=0,
+        read_expected=1,
+    ):
         """Remember the scaling and data limits."""
         super().__init__(
             command,
-            writeable, readable,
-            write_format, read_format,
-            write_expected, read_expected)
+            writeable,
+            readable,
+            write_format,
+            read_format,
+            write_expected,
+            read_expected,
+        )
         self.min = minimum
         self.max = maximum
         self.scale = scale
@@ -138,7 +150,8 @@ class Float(_Parameter):
         """
         if value < self.min or value > self.max:
             raise ParameterError(
-                'Value out of range {0} → {1}'.format(self.min, self.max))
+                "Value out of range {0} → {1}".format(self.min, self.max)
+            )
         return super().write(round(value * self.scale), func)
 
     def read(self, func):
@@ -150,7 +163,7 @@ class Float(_Parameter):
         """
         value = super().read(func)
         if value is None:
-            value = '0'
+            value = "0"
         return float(value) / self.scale
 
 
@@ -164,11 +177,8 @@ class Calibration(Float):
     def __init__(self, command, scale=1000, write_expected=1):
         """Override write_format and create instance."""
         super().__init__(
-            command,
-            writeable=True,
-            scale=scale,
-            write_expected=write_expected
-            )
+            command, writeable=True, scale=scale, write_expected=write_expected
+        )
 
 
 class Hex(_Parameter):
@@ -179,18 +189,29 @@ class Hex(_Parameter):
     _wr_fmt = '${0:08X} "{1} XN!'
 
     def __init__(
-            self,
-            command, writeable=False, readable=True,
-            minimum=0, maximum=1000, scale=1, mask=0xFFFFFFFF,
-            write_format=None, read_format=None,
-            write_expected=0, read_expected=1
-            ):
+        self,
+        command,
+        writeable=False,
+        readable=True,
+        minimum=0,
+        maximum=1000,
+        scale=1,
+        mask=0xFFFFFFFF,
+        write_format=None,
+        read_format=None,
+        write_expected=0,
+        read_expected=1,
+    ):
         """Remember the data limits."""
         super().__init__(
             command,
-            writeable, readable,
-            write_format, read_format,
-            write_expected, read_expected)
+            writeable,
+            readable,
+            write_format,
+            read_format,
+            write_expected,
+            read_expected,
+        )
         self.min = minimum
         self.max = maximum
         self.scale = scale
@@ -206,7 +227,8 @@ class Hex(_Parameter):
         """
         if value < self.min or value > self.max:
             raise ParameterError(
-                'Value out of range {0} → {1}'.format(self.min, self.max))
+                "Value out of range {0} → {1}".format(self.min, self.max)
+            )
         return super().write(round(value * self.scale), func)
 
     def read(self, func):
@@ -218,7 +240,7 @@ class Hex(_Parameter):
         """
         value = super().read(func)
         if value is None:
-            value = '0'
+            value = "0"
         return (int(value, 16) & self.mask) / self.scale
 
 
@@ -239,8 +261,5 @@ class Override(Float):
     def __init__(self, command):
         """Create instance."""
         super().__init__(
-            command,
-            writeable=True,
-            minimum=min(OverrideTo),
-            maximum=max(OverrideTo)
-            )
+            command, writeable=True, minimum=min(OverrideTo), maximum=max(OverrideTo)
+        )

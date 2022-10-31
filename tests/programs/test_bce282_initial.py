@@ -15,50 +15,67 @@ class _BCE282Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        patcher = patch('programs.bce282.console.Console')
+        patcher = patch("programs.bce282.console.Console")
         self.addCleanup(patcher.stop)
         patcher.start()
-        self.mybsl = MagicMock(name='tosbsl')
-        patcher = patch('programs.bce282.tosbsl.main', new=self.mybsl)
+        self.mybsl = MagicMock(name="tosbsl")
+        patcher = patch("programs.bce282.tosbsl.main", new=self.mybsl)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
-        self.test_program.msp_password = MagicMock(name='msp_password')
-        self.test_program.msp_savefile = MagicMock(name='msp_savefile')
+        self.test_program.msp_password = MagicMock(name="msp_password")
+        self.test_program.msp_savefile = MagicMock(name="msp_savefile")
 
     def _pass_run(self):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'Prepare': (
-                    (sen['lock'], 10.0), (sen['vcc_bias'], 15.0),
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "Prepare": (
+                    (sen["lock"], 10.0),
+                    (sen["vcc_bias"], 15.0),
+                ),
+                "PowerUp": (
+                    (sen["vac"], 240.0),
+                    (sen["vbus"], 340.0),
+                    (sen["vcc_pri"], 15.5),
+                    (sen["vcc_bias"], 15.0),
+                    (sen["vbat"], 0.0),
+                    (sen["alarm"], 2200),
+                ),
+                "Calibration": (
+                    (sen["vout"], (self.vout,) * 4),
+                    (
+                        sen["msp_stat"],
+                        (
+                            0,
+                            0,
+                        ),
                     ),
-                'PowerUp': (
-                    (sen['vac'], 240.0), (sen['vbus'], 340.0),
-                    (sen['vcc_pri'], 15.5), (sen['vcc_bias'], 15.0),
-                    (sen['vbat'], 0.0), (sen['alarm'], 2200),
+                    (sen["msp_vo"], self.vout),
+                ),
+                "OCP": (
+                    (sen["alarm"], 12000),
+                    (
+                        sen["vout"],
+                        (self.vout,) * 15 + (self.inocp,),
                     ),
-                'Calibration': (
-                    (sen['vout'], (self.vout, ) * 4),
-                    (sen['msp_stat'], (0, 0, )),
-                    (sen['msp_vo'], self.vout),
+                    (
+                        sen["vbat"],
+                        (self.vout,) * 15 + (self.inocp,),
                     ),
-                'OCP': (
-                    (sen['alarm'], 12000),
-                    (sen['vout'], (self.vout, ) * 15 + (self.inocp, ), ),
-                    (sen['vbat'], (self.vout, ) * 15 + (self.inocp, ), ),
-                    ),
-                },
-            }
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(16, len(result.readings))
         self.assertEqual(
-            ['Prepare', 'Program', 'PowerUp', 'Calibration', 'OCP'],
-            self.tester.ut_steps)
+            ["Prepare", "Program", "PowerUp", "Calibration", "OCP"],
+            self.tester.ut_steps,
+        )
         # Calls to tosbsl.main
         self.assertEqual(3, self.mybsl.call_count)
 
@@ -67,7 +84,7 @@ class BCE282_12_Initial(_BCE282Initial):
 
     """BCE282-12 Initial program test suite."""
 
-    parameter = '12'
+    parameter = "12"
     vout = 13.8
     inocp = 12.9
     debug = False
@@ -81,7 +98,7 @@ class BCE282_24_Initial(_BCE282Initial):
 
     """BCE282-12 Initial program test suite."""
 
-    parameter = '24'
+    parameter = "24"
     vout = 27.6
     inocp = 25.9
     debug = False

@@ -18,31 +18,45 @@ class TS3020HFinal(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_program.sensors
         data = {
-            UnitTester.key_sen: {       # Tuples of sensor data
-                'FuseCheck': (
-                    (sen['oNotifyStart'], True), (sen['o12V'], 0.0),
-                    (sen['oYesNoRed'], True), (sen['oNotifyFuse'], True),
+            UnitTester.key_sen: {  # Tuples of sensor data
+                "FuseCheck": (
+                    (sen["oNotifyStart"], True),
+                    (sen["o12V"], 0.0),
+                    (sen["oYesNoRed"], True),
+                    (sen["oNotifyFuse"], True),
+                ),
+                "PowerUp": (
+                    (sen["o12V"], 13.8),
+                    (sen["oYesNoGreen"], True),
+                ),
+                "FullLoad": (
+                    (
+                        sen["o12V"],
+                        (
+                            13.6,
+                            13.7,
+                        ),
                     ),
-                'PowerUp': (
-                    (sen['o12V'], 13.8), (sen['oYesNoGreen'], True),
+                ),
+                "OCP": (
+                    (
+                        sen["o12V"],
+                        (13.4,) * 5 + (13.0,),
                     ),
-                'FullLoad': (
-                    (sen['o12V'], (13.6, 13.7, )),
-                    ),
-                'OCP': (
-                    (sen['o12V'], (13.4, ) * 5 + (13.0, ), ),
-                    ),
-                'Poweroff': (
-                    (sen['oNotifyMains'], True), (sen['o12V'], 0.0),
-                    (sen['oYesNoOff'], True),
-                    ),
-                },
-            }
+                ),
+                "Poweroff": (
+                    (sen["oNotifyMains"], True),
+                    (sen["o12V"], 0.0),
+                    (sen["oYesNoOff"], True),
+                ),
+            },
+        }
         self.tester.ut_load(data, self.test_program.sensor_store)
-        self.tester.test(('UUT1', ))
+        self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
-        self.assertEqual('P', result.code)
+        self.assertEqual("P", result.code)
         self.assertEqual(12, len(result.readings))
         self.assertEqual(
-            ['FuseCheck', 'PowerUp', 'FullLoad', 'OCP', 'Poweroff'],
-            self.tester.ut_steps)
+            ["FuseCheck", "PowerUp", "FullLoad", "OCP", "Poweroff"],
+            self.tester.ut_steps,
+        )
