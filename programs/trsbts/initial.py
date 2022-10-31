@@ -122,15 +122,15 @@ class Initial(share.TestSequence):
         self.measure(
             ("arm_swver", "dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5
         )
-        trsbts.override(share.console.parameter.OverrideTo.force_on)
+        trsbts.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(
             ("dmm_remoteon", "dmm_redon", "dmm_greenon", "dmm_blueon"), timeout=5
         )
-        trsbts.override(share.console.parameter.OverrideTo.force_off)
+        trsbts.override(share.console.parameter.OverrideTo.FORCE_OFF)
         self.measure(
             ("dmm_remoteoff", "dmm_redoff", "dmm_greenoff", "dmm_blueoff"), timeout=5
         )
-        trsbts.override(share.console.parameter.OverrideTo.normal)
+        trsbts.override(share.console.parameter.OverrideTo.NORMAL)
 
     @share.teststep
     def _step_calibrate(self, dev, mes):

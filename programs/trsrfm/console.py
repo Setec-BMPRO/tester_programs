@@ -57,7 +57,7 @@ class Console(share.console.Base):
         """Flush the startup banner lines."""
         self.action(None, expected=self.banner_lines)
 
-    def override(self, state=parameter.OverrideTo.normal):
+    def override(self, state=parameter.OverrideTo.NORMAL):
         """Manually override functions of the unit.
 
         @param state OverrideTo enumeration

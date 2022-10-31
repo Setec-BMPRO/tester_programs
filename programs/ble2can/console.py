@@ -31,16 +31,16 @@ class Console(share.console.SamB11):
         ),
     }
 
-    def override(self, state=share.console.parameter.OverrideTo.normal):
+    def override(self, state=share.console.parameter.OverrideTo.NORMAL):
         """Manually override LED operation.
 
         @param state OverrideTo enumeration
 
         """
-        if state == share.console.parameter.OverrideTo.normal:
+        if state == share.console.parameter.OverrideTo.NORMAL:
             value = 0xFFFFFFFF
-        if state == share.console.parameter.OverrideTo.force_on:
+        if state == share.console.parameter.OverrideTo.FORCE_ON:
             value = 0b111
-        if state == share.console.parameter.OverrideTo.force_off:
+        if state == share.console.parameter.OverrideTo.FORCE_OFF:
             value = 0b000
         self["LEDS"] = value

@@ -234,8 +234,8 @@ class AVR(_Base):
             nvm.chip_erase()
             nvm.write_flash(start_address, data)
             readback = nvm.read_flash(nvm.device.flash_start, len(data))
-            for offset in range(len(data)):
-                if data[offset] != readback[offset]:
+            for offset, value in enumerate(data):
+                if value != readback[offset]:
                     raise VerificationError("Verify error at 0x{0:04X}".format(offset))
             for fuse_num, fuse_val in self._fuses.values():
                 nvm.write_fuse(fuse_num, fuse_val)
@@ -253,10 +253,12 @@ class NRF52(_Base):
 
     """Nordic Semiconductors programmer using a NRF52."""
 
-    bin_nt = pathlib.PureWindowsPath(
-        "C:/Program Files/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe"
-    )
-    bin_posix = pathlib.PurePosixPath("nrfjprog")
+    _binary = {
+        "nt": pathlib.PureWindowsPath(
+            "C:/Program Files/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe"
+        ),
+        "posix": pathlib.PurePosixPath("nrfjprog"),
+    }[os.name]
     # HACK: Force coded RVSWT101 switch code if != 0
     rvswt101_forced_switch_code = 0
 
@@ -273,12 +275,8 @@ class NRF52(_Base):
 
     def program_begin(self):
         """Begin device programming."""
-        binary = {
-            "nt": self.bin_nt,
-            "posix": self.bin_posix,
-        }[os.name]
         command = [
-            str(binary),
+            str(self._binary),
             "-f",
             "NRF52",
             "--chiperase",
@@ -288,10 +286,10 @@ class NRF52(_Base):
         ]
         if self._sernum:
             command.extend(["--snr", self._sernum])
-        process = subprocess.Popen(
+        with subprocess.Popen(
             command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
-        )
-        result = process.wait(timeout=60)
+        ) as process:
+            result = process.wait(timeout=60)
         # HACK: Force code an RVSWT101 switch code
         if not result and self.rvswt101_forced_switch_code:
             command = [
@@ -301,10 +299,10 @@ class NRF52(_Base):
                 "--val",
                 str(self.rvswt101_forced_switch_code),
             ]
-            process = subprocess.Popen(
+            with subprocess.Popen(
                 command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
-            )
-            result = process.wait(timeout=60)
+            ) as process:
+                result = process.wait(timeout=60)
         self.result = result
 
     def program_wait(self):

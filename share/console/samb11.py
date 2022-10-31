@@ -47,8 +47,9 @@ class SamB11(protocol.BadUart):
 
         """
         super().__init__(port)
-        for cmd in self.common_commands:
-            self.cmd_data[cmd] = self.common_commands[cmd]
+        for key, command in self.common_commands.items():
+            self.cmd_data[key] = command
+        self.override_commands = ()
 
     def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
@@ -62,7 +63,7 @@ class SamB11(protocol.BadUart):
         """Flush the startup banner lines."""
         self.action(None, expected=self.banner_lines)
 
-    def override(self, state=parameter.OverrideTo.normal):
+    def override(self, state=parameter.OverrideTo.NORMAL):
         """Manually override functions of the unit.
 
         @param state OverrideTo enumeration

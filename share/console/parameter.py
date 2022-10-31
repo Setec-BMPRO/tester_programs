@@ -249,9 +249,9 @@ class OverrideTo(enum.IntEnum):
 
     """Console manual override constants."""
 
-    normal = 0
-    force_off = 1
-    force_on = 2
+    NORMAL = enum.auto()
+    FORCE_OFF = enum.auto()
+    FORCE_ON = enum.auto()
 
 
 class Override(Float):

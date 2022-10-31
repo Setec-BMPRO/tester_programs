@@ -156,7 +156,7 @@ class Base:
         """Sensor: Configure for next reading."""
         self._read_key = key
 
-    def opc(self):  # pylint: disable=no-self-use
+    def opc(self):
         """Sensor: Dummy OPC.
 
         @return None
@@ -182,8 +182,7 @@ class Base:
         """
         if key == self.query_last_response:
             return self.last_setitem_response
-        else:
-            return self.cmd_data[key].read(self.action)
+        return self.cmd_data[key].read(self.action)
 
     def __setitem__(self, key, value):
         """Write a value to the console.

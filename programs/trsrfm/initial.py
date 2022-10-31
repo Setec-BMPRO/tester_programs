@@ -80,11 +80,11 @@ class Initial(share.TestSequence):
         dev["dcs_vin"].output(self.vbatt)
         trsrfm.brand(self.hw_version, self.sernum)
         mes["arm_swver"]()
-        trsrfm.override(share.console.parameter.OverrideTo.force_on)
+        trsrfm.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(("dmm_redon", "dmm_greenon", "dmm_blueon"), timeout=5)
-        trsrfm.override(share.console.parameter.OverrideTo.force_off)
+        trsrfm.override(share.console.parameter.OverrideTo.FORCE_OFF)
         self.measure(("dmm_redoff", "dmm_greenoff", "dmm_blueoff"), timeout=5)
-        trsrfm.override(share.console.parameter.OverrideTo.normal)
+        trsrfm.override(share.console.parameter.OverrideTo.NORMAL)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
