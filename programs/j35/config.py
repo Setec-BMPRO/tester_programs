@@ -43,17 +43,17 @@ class Type(enum.IntEnum):
     BL = 5
 
 
-@attr.s
+@attr.define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    sw_version = attr.ib(validator=attr.validators.instance_of(str))
-    hw_version = attr.ib(validator=attr.validators.instance_of(tuple))
-    output_count = attr.ib(validator=attr.validators.instance_of(int))
-    ocp_set = attr.ib(validator=attr.validators.instance_of(float))
-    solar = attr.ib(validator=attr.validators.instance_of(bool))
-    canbus = attr.ib(validator=attr.validators.instance_of(bool))
+    sw_version = attr.field(validator=attr.validators.instance_of(str))
+    hw_version = attr.field(validator=attr.validators.instance_of(tuple))
+    output_count = attr.field(validator=attr.validators.instance_of(int))
+    ocp_set = attr.field(validator=attr.validators.instance_of(float))
+    solar = attr.field(validator=attr.validators.instance_of(bool))
+    canbus = attr.field(validator=attr.validators.instance_of(bool))
 
 
 class J35:

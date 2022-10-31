@@ -29,22 +29,22 @@ def get(parameter, uut):
     return config
 
 
-@attr.s
+@attr.define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    nordic_image = attr.ib(validator=attr.validators.instance_of(str))
-    arm_image = attr.ib(validator=attr.validators.instance_of(str))
-    product_rev = attr.ib(validator=attr.validators.instance_of(str))
-    hardware_rev = attr.ib()
-    reversed_output_dict = attr.ib(
+    nordic_image = attr.field(validator=attr.validators.instance_of(str))
+    arm_image = attr.field(validator=attr.validators.instance_of(str))
+    product_rev = attr.field(validator=attr.validators.instance_of(str))
+    hardware_rev = attr.field()
+    reversed_output_dict = attr.field(
         default={}, validator=attr.validators.instance_of(dict)
     )
-    nordic_projectfile = attr.ib(
+    nordic_projectfile = attr.field(
         default="nrf52.jflash", validator=attr.validators.instance_of(str)
     )
-    arm_projectfile = attr.ib(
+    arm_projectfile = attr.field(
         default="lpc1519.jflash", validator=attr.validators.instance_of(str)
     )
 

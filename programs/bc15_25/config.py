@@ -28,15 +28,15 @@ def get(parameter, uut):
     return config
 
 
-@attr.s
+@attr.define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    arm_file = attr.ib(validator=attr.validators.instance_of(str))
-    arm_port = attr.ib(validator=attr.validators.instance_of(str))
-    sw_version = attr.ib(validator=attr.validators.instance_of(str))
-    cal_linecount = attr.ib(validator=attr.validators.instance_of(int))
+    arm_file = attr.field(validator=attr.validators.instance_of(str))
+    arm_port = attr.field(validator=attr.validators.instance_of(str))
+    sw_version = attr.field(validator=attr.validators.instance_of(str))
+    cal_linecount = attr.field(validator=attr.validators.instance_of(int))
 
 
 class BCx5:

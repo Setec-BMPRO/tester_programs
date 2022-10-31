@@ -322,16 +322,16 @@ def teststep(func):
     return new_func
 
 
-@attr.s
+@attr.define
 class MultiMeasurementSummary:
 
     """Check multiple measurements and calculate overall result."""
 
-    default_timeout = attr.ib(
+    default_timeout = attr.field(
         validator=attr.validators.instance_of((int, float)), default=0
     )
-    result = attr.ib(init=False, factory=tester.MeasurementResult)
-    _sensor_positions = attr.ib(init=False, factory=set)
+    result = attr.field(init=False, factory=tester.MeasurementResult)
+    _sensor_positions = attr.field(init=False, factory=set)
 
     def __enter__(self):
         """Context Manager entry handler.

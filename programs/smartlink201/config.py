@@ -24,17 +24,17 @@ def get(parameter, uut):
     return config
 
 
-@attr.s
+@attr.define
 class _Values:
 
     """Configuration data values."""
 
-    product_rev = attr.ib(validator=attr.validators.instance_of(str))
-    hardware_rev = attr.ib(validator=attr.validators.instance_of(str))
-    sw_arm_image = attr.ib(validator=attr.validators.instance_of(str))
-    sw_nrf_image = attr.ib(validator=attr.validators.instance_of(str))
-    sw_nrf_projectfile = attr.ib(validator=attr.validators.instance_of(str))
-    is_smartlink = attr.ib(validator=attr.validators.instance_of(bool))
+    product_rev = attr.field(validator=attr.validators.instance_of(str))
+    hardware_rev = attr.field(validator=attr.validators.instance_of(str))
+    sw_arm_image = attr.field(validator=attr.validators.instance_of(str))
+    sw_nrf_image = attr.field(validator=attr.validators.instance_of(str))
+    sw_nrf_projectfile = attr.field(validator=attr.validators.instance_of(str))
+    is_smartlink = attr.field(validator=attr.validators.instance_of(bool))
 
 
 class _Config:
