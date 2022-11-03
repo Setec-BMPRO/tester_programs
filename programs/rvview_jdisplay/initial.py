@@ -163,14 +163,14 @@ class Initial(share.TestSequence):
             self.devices["arm"].testmode(state)
 
 
-@attr.define
+@attr.s
 class LatchingRelay:
 
     """A latching relay, with 'on' and 'off' drive lines."""
 
-    rla_on = attr.field()
-    rla_off = attr.field()
-    _pulse_time = attr.field(init=False, default=0.01)
+    rla_on = attr.ib()
+    rla_off = attr.ib()
+    _pulse_time = attr.ib(init=False, default=0.01)
 
     def set_on(self):
         """Set ON."""

@@ -407,14 +407,14 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
         self.pkt.data[self._button_index] = int(value)
 
 
-@attr.define
+@attr.s
 class PacketPropertyReader:
 
     """Custom logical instrument to read CAN packet properties."""
 
-    canreader = attr.field()  # tester.CANReader instance
-    packettype = attr.field()  # CAN packet class
-    _read_key = attr.field(init=False, default=None)
+    canreader = attr.ib()  # tester.CANReader instance
+    packettype = attr.ib()  # CAN packet class
+    _read_key = attr.ib(init=False, default=None)
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -443,12 +443,12 @@ class PacketPropertyReader:
         return getattr(packet, self._read_key)
 
 
-@attr.define
+@attr.s
 class PacketDetector:
 
     """Custom logical instrument to detect CAN packet traffic."""
 
-    canreader = attr.field()  # tester.CANReader instance
+    canreader = attr.ib()  # tester.CANReader instance
 
     def configure(self, key):  # pylint: disable=unused-argument
         """Sensor: Configure for next reading."""

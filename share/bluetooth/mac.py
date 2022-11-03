@@ -7,12 +7,12 @@ import attr
 import jsonrpclib
 
 
-@attr.define
+@attr.s
 class SerialToMAC:
 
     """Save/Read the bluetooth MAC address for a Serial Number."""
 
-    server_url = attr.field(default="https://webapp.mel.setec.com.au/ate/rpc/")
+    server_url = attr.ib(default="https://webapp.mel.setec.com.au/ate/rpc/")
 
     # FIXME: We should be able to reuse the ServerProxy
     # ATE3b uses Python 3.10 with OpenSSL 3 and gets an "unexpected EOF" SSL

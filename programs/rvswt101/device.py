@@ -11,21 +11,21 @@ import attr
 import tester
 
 
-@attr.define
+@attr.s
 class _ASwitchState:
 
     """A single RVSWT switch state."""
 
-    state = attr.field(converter=bool)
-    count = attr.field(converter=int)
+    state = attr.ib(converter=bool)
+    count = attr.ib(converter=int)
 
 
-@attr.define
+@attr.s
 class _SwitchState:
 
     """All RVSWT switch states."""
 
-    _states = attr.field()
+    _states = attr.ib()
 
     @_states.validator
     def _states_len(self, attribute, value):
@@ -33,7 +33,7 @@ class _SwitchState:
         if len(self._states) != 8:
             raise ValueError("8 (state, count) values are required")
 
-    _data = attr.field(init=False, factory=list)
+    _data = attr.ib(init=False, factory=list)
 
     def __attrs_post_init__(self):
         """Populate _data with _ASwitchState instances."""
@@ -148,15 +148,15 @@ class Packet:
         self.switch_code = int(all_switches, 2)  # int value between 0-255
 
 
-@attr.define
+@attr.s
 class RVSWT101:
 
     """Custom logical instrument to read packet properties."""
 
-    bleserver = attr.field()
-    always_scan = attr.field(init=False, default=True)
-    _read_key = attr.field(init=False, default=None)
-    _packet = attr.field(init=False, default=None)
+    bleserver = attr.ib()
+    always_scan = attr.ib(init=False, default=True)
+    _read_key = attr.ib(init=False, default=None)
+    _packet = attr.ib(init=False, default=None)
 
     def configure(self, key):
         """Sensor: Configure for next reading.

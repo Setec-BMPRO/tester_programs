@@ -10,31 +10,31 @@ import attr
 import tester
 
 
-@attr.define
+@attr.s
 class Rail:
     """Rail data values."""
 
-    full = attr.field(validator=attr.validators.instance_of(float))
-    peak = attr.field(validator=attr.validators.instance_of(float))
-    ocp = attr.field(validator=attr.validators.instance_of(float))
+    full = attr.ib(validator=attr.validators.instance_of(float))
+    peak = attr.ib(validator=attr.validators.instance_of(float))
+    ocp = attr.ib(validator=attr.validators.instance_of(float))
 
 
-@attr.define
+@attr.s
 class Ratings:
     """Ratings data values."""
 
-    v12 = attr.field(validator=attr.validators.instance_of(Rail))
-    v24 = attr.field(validator=attr.validators.instance_of(Rail))
+    v12 = attr.ib(validator=attr.validators.instance_of(Rail))
+    v24 = attr.ib(validator=attr.validators.instance_of(Rail))
 
 
-@attr.define
+@attr.s
 class _Values:
 
     """Adjustable configuration data values."""
 
-    projectfile = attr.field(validator=attr.validators.instance_of(str))
-    sw_image = attr.field(validator=attr.validators.instance_of(str))
-    is_renesas = attr.field(validator=attr.validators.instance_of(bool))
+    projectfile = attr.ib(validator=attr.validators.instance_of(str))
+    sw_image = attr.ib(validator=attr.validators.instance_of(str))
+    is_renesas = attr.ib(validator=attr.validators.instance_of(bool))
 
 
 class Config:

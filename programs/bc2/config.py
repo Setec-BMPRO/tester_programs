@@ -27,13 +27,13 @@ def get(parameter, uut):
     return config
 
 
-@attr.define
+@attr.s
 class _Values:
 
     """Adjustable configuration data values."""
 
-    hw_version = attr.field(validator=attr.validators.instance_of(tuple))
-    sw_version = attr.field(validator=attr.validators.instance_of(str))
+    hw_version = attr.ib(validator=attr.validators.instance_of(tuple))
+    sw_version = attr.ib(validator=attr.validators.instance_of(str))
 
 
 class Config:
