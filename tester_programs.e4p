@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2022-04-01, 15:37:37 -->
+<!-- Saved: 2022-11-05, 13:24:40 -->
 <!-- Copyright (C) 2022 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -116,6 +116,11 @@
     <Source>programs/mb3/initial.py</Source>
     <Source>programs/mk7400/__init__.py</Source>
     <Source>programs/mk7400/final.py</Source>
+    <Source>programs/odl104/__init__.py</Source>
+    <Source>programs/odl104/config.py</Source>
+    <Source>programs/odl104/console.py</Source>
+    <Source>programs/odl104/final.py</Source>
+    <Source>programs/odl104/initial.py</Source>
     <Source>programs/opto_test/__init__.py</Source>
     <Source>programs/opto_test/initial.py</Source>
     <Source>programs/rm50/__init__.py</Source>
