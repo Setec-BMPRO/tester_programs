@@ -53,7 +53,7 @@ class UnitTester(tester.Tester):
 
     def open(self):
         """Open a program, by using our pre-built one."""
-        uut = setec.UUT.from_sernum("A0000000001")
+        uut = setec.tester.UUT.from_sernum("A0000000001")
         super().open(self.ut_program, uut=uut)
 
     def stop(self):

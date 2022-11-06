@@ -52,7 +52,7 @@ class RVSWT101Initial(ProgramTestCase):
         self.tester.ut_load(data, self.test_program.sensor_store)
         self.tester.test(
             tuple(
-                setec.UUT.from_sernum("A000000{0:04}".format(uut))
+                setec.tester.UUT.from_sernum("A000000{0:04}".format(uut))
                 for uut in range(1, self.per_panel + 1)
             )
         )

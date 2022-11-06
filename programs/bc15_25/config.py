@@ -16,7 +16,7 @@ def get(parameter, uut):
     """Get a configuration based on the parameter and lot.
 
     @param parameter Type of unit
-    @param uut setec.UUT instance
+    @param uut setec.tester.UUT instance
     @return configuration class
 
     """
@@ -86,7 +86,7 @@ class BCx5:
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut setec.UUT instance
+        @param uut setec.tester.UUT instance
 
         """
         rev = uut.revision

@@ -15,7 +15,7 @@ def get(parameter, uut):
     """Select a configuration based on the parameter.
 
     @param parameter Type of unit
-    @param uut setec.UUT instance
+    @param uut setec.tester.UUT instance
     @return configuration class
 
     """
@@ -89,7 +89,7 @@ class Config:
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut setec.UUT instance
+        @param uut setec.tester.UUT instance
 
         """
         rev = uut.revision
@@ -266,7 +266,7 @@ class RVMN101A(Config):
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut setec.UUT instance
+        @param uut setec.tester.UUT instance
 
         """
         super()._configure(uut)
@@ -510,7 +510,7 @@ class RVMN5x(Config):
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut setec.UUT instance
+        @param uut setec.tester.UUT instance
 
         """
         super()._configure(uut)

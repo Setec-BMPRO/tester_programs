@@ -55,11 +55,11 @@ def _main():
     sernum = config["DEFAULT"].get("Sernum")
     if not sernum:
         sernum = "A0000000001"
-    uut = setec.UUT.from_sernum(sernum)
+    uut = setec.tester.UUT.from_sernum(sernum)
     revision = config["DEFAULT"].get("Revision")
     if not revision:
         revision = ""
-    uut.lot.item = setec.Item(
+    uut.lot.item = setec.tester.Item(
         number="000000", description="DummyItem", revision=revision
     )
     # Receive Test Result signals here
