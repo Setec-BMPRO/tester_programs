@@ -110,6 +110,21 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_program(self, dev, mes):
+        """Program the board."""
+        try:
+            self._tosbsl(dev)
+            dev["dcs_vccbias"].output(0.0, output=False, delay=1)
+        except tosbsl.BSLException as exc:  # Change exception into test fail
+            _measurement = tester.Measurement(
+                tester.LimitRegExp(
+                    name="Program", testlimit="ok", doc="Programming succeeded"
+                ),
+                tester.sensor.MirrorReadingString(),
+            )
+            _measurement.sensor.store(str(exc))
+            _measurement()
+
+    def _tosbsl(self, dev):
         """Program the board.
 
         Notes from the BCE282 Testing Notes:
@@ -192,7 +207,6 @@ class Initial(share.TestSequence):
                 str(pathlib.Path(__file__).parent / self._hexfile),
             ]
             tosbsl.main()
-        dev["dcs_vccbias"].output(0.0, output=False, delay=1)
 
     @share.teststep
     def _step_power_up(self, dev, mes):
