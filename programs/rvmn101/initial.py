@@ -66,6 +66,7 @@ class Initial(share.TestSequence):
         rvmn101.open()
         # Cycle power to restart the unit
         dev["dcs_vbatt"].output(output=False, delay=1.5)
+        rvmn101.reset_input_buffer()
         dev["dcs_vbatt"].output(output=True, delay=2.0)
         rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
