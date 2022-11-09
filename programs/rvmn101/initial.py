@@ -133,9 +133,8 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vbatt", tester.DCSource, "DCS1"),
-            ("rla_reset", tester.Relay, "RLA1"),
-            ("rla_pullup", tester.Relay, "RLA3"),
-            ("swd_select", tester.Relay, "RLA4"),
+            ("swd_select", tester.Relay, "RLA1"),
+            ("rla_pullup", tester.Relay, "RLA2"),
             ("JLink", tester.JLink, "JLINK"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -170,11 +169,7 @@ class Devices(share.Devices):
         self["canreader"].stop()
         self["can"].rvc_mode = False
         self["dcs_vbatt"].output(0.0, False)
-        for rla in (
-            "rla_reset",
-            "rla_pullup",
-        ):
-            self[rla].set_off()
+        self["rla_pullup"].set_off()
 
 
 class Sensors(share.Sensors):
