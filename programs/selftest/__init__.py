@@ -204,11 +204,11 @@ class Devices(share.Devices):
             tester.DCSource(self.physical_devices["DCS2"]),
             tester.DCSource(self.physical_devices["DCS3"]),
             tester.DCSource(self.physical_devices["DCS4"]),
-            tester.DCSource(self.physical_devices["DCS5"]),
         ]
-        if not self.is_ate2:
+        if not self.is_ate2:  # ATE2a: #5 faulty, #6,#7 not wired
             self["dcs"].extend(
                 [
+                    tester.DCSource(self.physical_devices["DCS5"]),
                     tester.DCSource(self.physical_devices["DCS6"]),
                     tester.DCSource(self.physical_devices["DCS7"]),
                 ]
@@ -352,11 +352,11 @@ class Sensors(share.Sensors):
             sensor.Vdc(dmm, high=19, low=8, rng=100, res=0.001),
             sensor.Vdc(dmm, high=20, low=8, rng=100, res=0.001),
             sensor.Vdc(dmm, high=21, low=8, rng=100, res=0.001),
-            sensor.Vdc(dmm, high=22, low=8, rng=100, res=0.001),
         ]
         if not self.devices.is_ate2:
             self["dcs"].extend(
                 [
+                    sensor.Vdc(dmm, high=22, low=8, rng=100, res=0.001),
                     sensor.Vdc(dmm, high=23, low=8, rng=100, res=0.001),
                     sensor.Vdc(dmm, high=24, low=8, rng=100, res=0.001),
                 ]
