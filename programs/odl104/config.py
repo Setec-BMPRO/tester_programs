@@ -64,8 +64,7 @@ class ODL104:
 
     """Configuration for ODL104."""
 
-    # Instance of ODL10xParameters
-    parameters = None
+    parameters = None  # Instance of ODL10xParameters
 
     @classmethod
     def _configure(cls, uut):
@@ -78,15 +77,17 @@ class ODL104:
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         cls.parameters = cls._rev_data[rev]
 
-    _nordic_105 = "odl104_v1.0.5-0-gc62c5a1-signed-mcuboot-factory.hex"
-    _rev2_values = ODL10xParameters(
-        sw_nordic_image=_nordic_105, hw_version=("02A", "01A"), banner_lines=1
+    _nordic_107 = "odl104_v1.0.7-0-g2c7123e-signed-mcuboot-factory.hex"
+    _rev3_values = ODL10xParameters(
+        sw_nordic_image=_nordic_107, hw_version=("03A", "01A"), banner_lines=1
     )
-    # Revision data dictionary:
-    _rev_data = {
-        None: _rev2_values,
-        "2": _rev2_values,
+    _rev_data = {  # Revision data dictionary
+        None: _rev3_values,
+        "3": _rev3_values,
+        "2": ODL10xParameters(
+            sw_nordic_image=_nordic_107, hw_version=("02B", "01A"), banner_lines=1
+        ),
         "1": ODL10xParameters(
-            sw_nordic_image=_nordic_105, hw_version=("01B", "01A"), banner_lines=1
+            sw_nordic_image=_nordic_107, hw_version=("01C", "01A"), banner_lines=1
         ),
     }
