@@ -67,7 +67,7 @@ def _main():
         logger.info('Test Result: "%s"', result.code)
         for rdg in result.readings:
             logger.info(
-                ' "%s", %s, %s', rdg.path, rdg.value, "Pass" if rdg.is_pass else "Fail"
+                ' "%s", %s, %s', rdg.name, rdg.value, "Pass" if rdg.is_pass else "Fail"
             )
 
     dispatcher.connect(
