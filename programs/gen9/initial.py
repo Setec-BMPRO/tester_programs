@@ -140,17 +140,17 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
         # Calibrate the PFC set voltage
-        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).reading1
+        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).reading1.value
         arm.calpfc(pfc)
         mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
         if not mesres.result:  # 1st retry
-            arm.calpfc(mesres.reading1)
+            arm.calpfc(mesres.reading1.value)
             mesres = mes["dmm_pfcpost2"].stable(self.pfc_stable)
         if not mesres.result:  # 2nd retry
-            arm.calpfc(mesres.reading1)
+            arm.calpfc(mesres.reading1.value)
             mesres = mes["dmm_pfcpost3"].stable(self.pfc_stable)
         if not mesres.result:  # 3rd retry
-            arm.calpfc(mesres.reading1)
+            arm.calpfc(mesres.reading1.value)
             mes["dmm_pfcpost4"].stable(self.pfc_stable)
         arm.nvwrite()
         # A final PFC setup check
@@ -336,12 +336,12 @@ class Sensors(share.Sensors):
             ("arm_12v", "12V"),
             ("arm_24v", "24V"),
         ):
-            self[name] = sensor.KeyedReading(arm, cmdkey)
+            self[name] = sensor.Keyed(arm, cmdkey)
         for name, cmdkey in (
             ("arm_swver", "SwVer"),
             ("arm_swbld", "SwBld"),
         ):
-            self[name] = sensor.KeyedReadingString(arm, cmdkey)
+            self[name] = sensor.Keyed(arm, cmdkey)
 
 
 class Measurements(share.Measurements):

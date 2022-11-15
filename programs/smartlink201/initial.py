@@ -88,14 +88,14 @@ class Initial(share.TestSequence):
         mes["dmm_3V3"](timeout=5)
         smartlink201.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["SL_MAC"]().reading1
+        mac = mes["SL_MAC"]().reading1.value
         dev["serialtomac"].blemac_set(self.sernum, mac)
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
         """Calibrate Vbatt."""
         smartlink201 = dev["smartlink201"]
-        vbatt = mes["dmm_Vbatt"](timeout=5).reading1
+        vbatt = mes["dmm_Vbatt"](timeout=5).reading1.value
         # Adjust Pre & Post reading dependant limits
         self.limits["SL_VbattPre"].adjust(nominal=vbatt)
         self.limits["SL_Vbatt"].adjust(nominal=vbatt)
@@ -230,13 +230,13 @@ class Sensors(share.Sensors):
         )
         # Console sensors
         smartlink201 = self.devices["smartlink201"]
-        self["SL_MAC"] = sensor.KeyedReadingString(smartlink201, "MAC")
+        self["SL_MAC"] = sensor.Keyed(smartlink201, "MAC")
         self["SL_MAC"].doc = "Nordic BLE MAC"
         # Convert "xx:xx:xx:xx:xx:xx(random)" to "xxxxxxxxxxxx"
         self["SL_MAC"].on_read = (
             lambda value: value.replace(":", "").replace(" (random)", "").lower()
         )
-        self["SL_Vbatt"] = sensor.KeyedReading(smartlink201, "BATT")
+        self["SL_Vbatt"] = sensor.Keyed(smartlink201, "BATT")
         self["SL_Vbatt"].doc = "Nordic Vbatt reading"
         self["SL_Vbatt"].scale = 1000
         # Convert "Current Battery Voltage: xxxxx mV" to "xxxxx"
@@ -245,7 +245,7 @@ class Sensors(share.Sensors):
         ).replace(" mV", "")
         for index in range(16):  # 16 analog tank inputs
             name = console.tank_name(index)
-            self[name] = sensor.KeyedReading(smartlink201, name)
+            self[name] = sensor.Keyed(smartlink201, name)
 
 
 class Measurements(share.Measurements):

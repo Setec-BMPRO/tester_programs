@@ -216,7 +216,7 @@ class Sensors(share.Sensors):
             ("tank3", "TANK3"),
             ("tank4", "TANK4"),
         ):
-            self[name] = sensor.KeyedReading(console, cmdkey)
+            self[name] = sensor.Keyed(console, cmdkey)
         if self.is_odl104:
             for name in ("tank1", "tank2", "tank3", "tank4"):
                 self[name].on_read = lambda value: value + 1
@@ -225,9 +225,7 @@ class Sensors(share.Sensors):
             pathlib.Path(__file__).parent / self.projectfile,
             pathlib.Path(__file__).parent / self.sw_nordic_image,
         )
-        self["cantraffic"] = sensor.KeyedReadingBoolean(
-            self.devices["candetector"], None
-        )
+        self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
 class Measurements(share.Measurements):

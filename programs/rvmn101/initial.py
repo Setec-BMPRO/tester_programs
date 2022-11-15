@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
         dev["dcs_vbatt"].output(output=True, delay=2.0)
         rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["ble_mac"]().reading1
+        mac = mes["ble_mac"]().reading1.value
         dev["serialtomac"].blemac_set(self.sernum, mac)
 
     @share.teststep
@@ -207,17 +207,15 @@ class Sensors(share.Sensors):
         )
         # Console sensors
         rvmn101 = self.devices["rvmn101"]
-        self["SwRev"] = sensor.KeyedReadingString(rvmn101, "SW-REV")
+        self["SwRev"] = sensor.Keyed(rvmn101, "SW-REV")
         self["SwRev"].doc = "Nordic software version"
-        self["BleMac"] = sensor.KeyedReadingString(rvmn101, "MAC")
+        self["BleMac"] = sensor.Keyed(rvmn101, "MAC")
         self["BleMac"].doc = "Nordic BLE MAC"
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self["BleMac"].on_read = lambda value: value.replace(":", "").replace(
             " (random)", ""
         )
-        self["cantraffic"] = sensor.KeyedReadingBoolean(
-            self.devices["candetector"], None
-        )
+        self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
 class Measurements(share.Measurements):

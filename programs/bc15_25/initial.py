@@ -98,7 +98,7 @@ class Initial(share.TestSequence):
                 "arm_2amp",
                 "arm_switch",
             )
-        ).reading1
+        ).reading1.value
         arm.cal_vout(vout)
         mes["dmm_vout_cal"]()
 
@@ -110,7 +110,7 @@ class Initial(share.TestSequence):
         current = self.ocp_nominal * 0.8
         # Measure actual OCP setting
         dcload.output(current, True, delay=0.5)
-        ocp_actual = mes["ramp_ocp_pre"]().reading1
+        ocp_actual = mes["ramp_ocp_pre"]().reading1.value
         ocp_factor = self.ocp_nominal / ocp_actual
         # Shutdown and startup
         dev["acsource"].output(voltage=0, delay=1)
@@ -220,12 +220,12 @@ class Sensors(share.Sensors):
         )
         # Console sensors
         arm = self.devices["arm"]
-        self["arm_vout"] = sensor.KeyedReading(arm, "not-pulsing-volts")
+        self["arm_vout"] = sensor.Keyed(arm, "not-pulsing-volts")
         self["arm_vout"].scale = 1000
-        self["arm_iout"] = sensor.KeyedReading(arm, "not-pulsing-current")
+        self["arm_iout"] = sensor.Keyed(arm, "not-pulsing-current")
         self["arm_iout"].scale = 1000
-        self["arm_switch"] = sensor.KeyedReading(arm, "SWITCH")
-        self["arm_swver"] = sensor.KeyedReadingString(arm, "SW_VER")
+        self["arm_switch"] = sensor.Keyed(arm, "SWITCH")
+        self["arm_swver"] = sensor.Keyed(arm, "SW_VER")
 
 
 class Measurements(share.Measurements):

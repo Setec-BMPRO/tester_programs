@@ -150,9 +150,9 @@ class Initial(share.TestSequence):
         """Measure load regulation."""
         dev["dcl"].output(0.0, True)
         dev["rla_Load"].set_on()
-        noload = mes["dmm_Vout"](timeout=5).reading1
+        noload = mes["dmm_Vout"](timeout=5).reading1.value
         dev["dcl"].output(3.0)
-        fullload = mes["dmm_Vout"](timeout=5).reading1
+        fullload = mes["dmm_Vout"](timeout=5).reading1.value
         reg = ((fullload - noload) / noload) * 100
         mes["loadReg"].sensor.store(reg)
         mes["loadReg"]()
@@ -218,7 +218,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["oMirReg"] = sensor.MirrorReading()
+        self["oMirReg"] = sensor.Mirror()
         self["oLock"] = sensor.Res(dmm, high=14, low=6, rng=10000, res=1)
         self["oVac"] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.1)
         self["oVbus"] = sensor.Vdc(dmm, high=2, low=2, rng=1000, res=0.01)
@@ -246,7 +246,7 @@ class Sensors(share.Sensors):
         )
         # Arduino sensor
         ard = self.devices["ard"]
-        self["pgmC45A15"] = sensor.KeyedReadingString(ard, "PGM_C45A15")
+        self["pgmC45A15"] = sensor.Keyed(ard, "PGM_C45A15")
 
 
 class Measurements(share.Measurements):

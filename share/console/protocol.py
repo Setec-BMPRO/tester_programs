@@ -224,7 +224,7 @@ class Base:
                 self._logger.debug('Caught Error: "%s"', err)
                 comms = tester.Measurement(
                     tester.LimitRegExp("Action", "ok", doc="Command succeeded"),
-                    tester.sensor.MirrorReadingString(),
+                    tester.sensor.Mirror(),
                 )
                 comms.sensor.store(str(err))
                 comms.measure()  # Generates a test FAIL result

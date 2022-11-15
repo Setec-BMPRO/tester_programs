@@ -73,9 +73,9 @@ class Sensors(share.Sensors):
             message=tester.translate("rvmn101_final", "msgSnEntry"),
             caption=tester.translate("rvmn101_final", "capSnEntry"),
         )
-        self["mirscan"] = sensor.MirrorReadingBoolean()
-        self["mirmac"] = sensor.MirrorReadingString()
-        self["mirrssi"] = sensor.MirrorReading()
+        self["mirscan"] = sensor.Mirror()
+        self["mirmac"] = sensor.Mirror()
+        self["mirrssi"] = sensor.Mirror()
 
 
 class Measurements(share.Measurements):

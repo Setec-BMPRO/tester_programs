@@ -121,7 +121,7 @@ class Initial(share.TestSequence):
         dev["dcs_solar"].output(13.0, True, delay=1.0)
         j35["SOLAR"] = True
         j35["SOLAR_STATUS"] = False
-        solar_trip = mes["ramp_solar_pre"]().reading1
+        solar_trip = mes["ramp_solar_pre"]().reading1.value
         result = self.limits["SolarCutoff"].check(solar_trip)
         if not result:
             low, high = self.limits["SolarCutoff"].limit
@@ -132,7 +132,7 @@ class Initial(share.TestSequence):
             j35["NVWRITE"] = True
             # Check the setting after adjustment
             j35["SOLAR_STATUS"] = False
-            solar_trip = mes["ramp_solar"]().reading1
+            solar_trip = mes["ramp_solar"]().reading1.value
             result = self.limits["SolarCutoff"].check(solar_trip)
         mes["detectcal"].sensor.store(result)
         mes["detectcal"]()
@@ -163,7 +163,7 @@ class Initial(share.TestSequence):
             ),
             timeout=5,
         )
-        v_actual = self.measure(("dmm_vbat",), timeout=10).reading1
+        v_actual = self.measure(("dmm_vbat",), timeout=10).reading1.value
         j35["VSET_CAL"] = v_actual  # Calibrate Vout setting and reading
         j35["VBUS_CAL"] = v_actual
         j35["NVWRITE"] = True
@@ -190,7 +190,7 @@ class Initial(share.TestSequence):
     def _step_load(self, dev, mes):
         """Test with load."""
         j35 = dev["j35"]
-        val = mes["arm_loadset"]().reading1
+        val = mes["arm_loadset"]().reading1.value
         self._logger.debug("0x{:08X}".format(int(val)))
         output_count = self.cfg.output_count
         dev["dcl_out"].binary(1.0, output_count * self.cfg.load_per_output, 5.0)
@@ -213,7 +213,7 @@ class Initial(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         j35 = dev["j35"]
-        ocp_actual = mes["ramp_ocp_pre"]().reading1
+        ocp_actual = mes["ramp_ocp_pre"]().reading1.value
         # Adjust current setpoint
         j35["OCP_CAL"] = round(j35.ocp_cal() * ocp_actual / self.cfg.ocp_set)
         j35["NVWRITE"] = True
@@ -328,7 +328,7 @@ class Sensors(share.Sensors):
             message=tester.translate("j35_initial", "msgSnEntry"),
             caption=tester.translate("j35_initial", "capSnEntry"),
         )
-        self["mircal"] = sensor.MirrorReadingBoolean()
+        self["mircal"] = sensor.Mirror()
         # Console sensors
         j35 = self.devices["j35"]
         for name, cmdkey in (
@@ -345,18 +345,18 @@ class Sensors(share.Sensors):
             ("arm_loadset", "LOAD_SET"),
             ("arm_remote", "BATT_SWITCH"),
         ):
-            self[name] = sensor.KeyedReading(j35, cmdkey)
+            self[name] = sensor.Keyed(j35, cmdkey)
         for name, cmdkey in (("arm_solar_status", "SOLAR_STATUS"),):
-            self[name] = sensor.KeyedReadingBoolean(j35, cmdkey)
+            self[name] = sensor.Keyed(j35, cmdkey)
         for name, cmdkey in (
             ("arm_swver", "SW_VER"),
             ("TunnelSwVer", "SW_VER"),
         ):
-            self[name] = sensor.KeyedReadingString(j35, cmdkey)
+            self[name] = sensor.Keyed(j35, cmdkey)
         # Generate load current sensors
         self["arm_loads"] = []
         for i in range(self.output_count):
-            sen = sensor.KeyedReading(j35, "LOAD_{0}".format(i + 1))
+            sen = sensor.Keyed(j35, "LOAD_{0}".format(i + 1))
             self["arm_loads"].append(sen)
         load_current = self.output_count * self.load_per_output
         # Pre-adjust OCP

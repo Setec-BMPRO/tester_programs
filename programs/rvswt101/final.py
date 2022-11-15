@@ -61,7 +61,7 @@ class Final(share.TestSequence):
                         True,
                         "No UUT was detected in the fixture",
                     ),
-                    tester.sensor.MirrorReadingBoolean(),
+                    tester.sensor.Mirror(),
                 )
                 uut_check.sensor.store(False)
                 uut_check()
@@ -118,7 +118,7 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self["mirmac"] = sensor.MirrorReadingString()
+        self["mirmac"] = sensor.Mirror()
         self["SnEntry"] = sensor.DataEntry(
             message=tester.translate("rvswt101_final", "msgSnEntry"),
             caption=tester.translate("rvswt101_final", "capSnEntry"),
@@ -132,13 +132,13 @@ class Sensors(share.Sensors):
             caption=tester.translate("rvswt101_final", "capAddUUT"),
         )
         decoder = self.devices["decoder"]  # tester.BLE device
-        self["cell_voltage"] = sensor.KeyedReading(decoder, "cell_voltage")
-        self["switch_type"] = sensor.KeyedReading(decoder, "switch_type")
-        self["RSSI"] = sensor.KeyedReading(decoder, "rssi")
+        self["cell_voltage"] = sensor.Keyed(decoder, "cell_voltage")
+        self["switch_type"] = sensor.Keyed(decoder, "switch_type")
+        self["RSSI"] = sensor.Keyed(decoder, "rssi")
         self["RSSI"].rereadable = True
         for button in range(1, 7):
             name = "switch_{0}_measure".format(button)
-            self[name] = sensor.KeyedReading(decoder, "switch_code")
+            self[name] = sensor.Keyed(decoder, "switch_code")
             self[name].rereadable = True
         # Arduino sensors - sensor_name, key
         ard = self.devices["ard"]
@@ -151,7 +151,7 @@ class Sensors(share.Sensors):
             ("6ButtonModel", "6BUTTON_MODEL"),
             ("exercise_actuators", "EXERCISE"),
         ):
-            self[name] = sensor.KeyedReadingString(ard, cmdkey)
+            self[name] = sensor.Keyed(ard, cmdkey)
         # Create additional arduino sensors for buttonPress and buttonRelease
         for button in range(1, 7):
             _data = (
@@ -162,7 +162,7 @@ class Sensors(share.Sensors):
                 ),
             )
             for name, cmdkey in _data:
-                self[name] = sensor.KeyedReadingString(ard, cmdkey)
+                self[name] = sensor.Keyed(ard, cmdkey)
 
 
 class Measurements(share.Measurements):

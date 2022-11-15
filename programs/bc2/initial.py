@@ -59,7 +59,7 @@ class Initial(share.TestSequence):
 
         """
         bc2 = dev["bc2"]
-        dmm_v = mes["dmm_vin"].stable(delta=0.001).reading1
+        dmm_v = mes["dmm_vin"].stable(delta=0.001).reading1.value
         mes["arm_vbatt"].testlimit[0].adjust(nominal=dmm_v)
         bc2["BATT_V_CAL"] = dmm_v
         mes["detectCAL"].sensor.store(bc2["LAST_RESPONSE?"][1])
@@ -72,7 +72,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = setec.MAC.loads(mes["arm_btmac"]().reading1)
+        btmac = setec.MAC.loads(mes["arm_btmac"]().reading1.value)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
         reply = dev["pi_bt"].scan_advert_blemac(btmac.dumps(separator=""), timeout=20)
         reply = reply is not None  # To boolean
@@ -134,22 +134,22 @@ class Sensors(share.Sensors):
         self["vin"].doc = "X4"
         self["3v3"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self["3v3"].doc = "U2 output"
-        self["mirbt"] = sensor.MirrorReadingBoolean()
-        self["mircal"] = sensor.MirrorReadingString()
+        self["mirbt"] = sensor.Mirror()
+        self["mircal"] = sensor.Mirror()
         # Console sensors
         bc2 = self.devices["bc2"]
         for name, cmdkey in (
             ("arm_BtMAC", "BT_MAC"),
             ("arm_SwVer", "SW_VER"),
         ):
-            self[name] = sensor.KeyedReadingString(bc2, cmdkey)
+            self[name] = sensor.Keyed(bc2, cmdkey)
         for name, cmdkey in (
             ("arm_Ioffset", "I_ADC_OFFSET"),
             ("arm_VbattLSB", "BATT_V_LSB"),
             ("arm_Vbatt", "BATT_V"),
             ("arm_Ibatt", "BATT_I"),
         ):
-            self[name] = sensor.KeyedReading(bc2, cmdkey)
+            self[name] = sensor.Keyed(bc2, cmdkey)
         self["sernum"] = sensor.DataEntry(
             message=tester.translate("bc2_initial", "msgSnEntry"),
             caption=tester.translate("bc2_initial", "capSnEntry"),

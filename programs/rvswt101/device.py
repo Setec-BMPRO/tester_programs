@@ -123,7 +123,7 @@ class Packet:
             """
             mes = tester.Measurement(
                 tester.LimitBoolean("valid_packet", True, "Non-empty packet"),
-                tester.sensor.MirrorReadingBoolean(),
+                tester.sensor.Mirror(),
             )
             mes.sensor.store(False)
             mes()
@@ -185,7 +185,6 @@ class RVSWT101:
             rssi, ad_data = self.bleserver.read(callerid)
             self._rssi = rssi
             self._packet = Packet(ad_data)
-
         return getattr(self._packet, self._read_key, self._rssi)
 
     def reset(self):

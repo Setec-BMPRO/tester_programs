@@ -267,8 +267,8 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["mirmac"] = sensor.MirrorReadingString()
-        self["mirscan"] = sensor.MirrorReadingBoolean()
+        self["mirmac"] = sensor.Mirror()
+        self["mirscan"] = sensor.Mirror()
         self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
@@ -278,7 +278,7 @@ class Sensors(share.Sensors):
         # Console sensors
         rvswt101 = self.devices["rvswt101"]
         for device, name, cmdkey in ((rvswt101, "SwVer", "SW_VER"),):
-            self[name] = sensor.KeyedReadingString(device, cmdkey)
+            self[name] = sensor.Keyed(device, cmdkey)
 
 
 class Measurements(share.Measurements):

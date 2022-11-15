@@ -89,7 +89,7 @@ class Sensors(share.Sensors):
             message=tester.translate("rvmd50_final", "msgPressButton"),
             caption=tester.translate("rvmd50_final", "capPressButton"),
         )
-        self["PageButton"] = sensor.KeyedReadingBoolean(self.devices["decoder"], "page")
+        self["PageButton"] = sensor.Keyed(self.devices["decoder"], "page")
 
 
 class Measurements(share.Measurements):

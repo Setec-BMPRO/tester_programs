@@ -194,9 +194,9 @@ class Initial(share.TestSequence):
         )
         # Measure load regulation
         dev["dcl"].output(0.0)
-        noload = mes["dmm_Vout"](timeout=5).reading1
+        noload = mes["dmm_Vout"](timeout=5).reading1.value
         dev["dcl"].output(24.0)
-        fullload = mes["dmm_Vout"](timeout=5).reading1
+        fullload = mes["dmm_Vout"](timeout=5).reading1.value
         reg = ((noload - fullload) / noload) * 100
         mes["dmm_reg"].sensor.store(reg)
         mes["dmm_reg"]()
@@ -273,7 +273,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["oMirReg"] = sensor.MirrorReading()
+        self["oMirReg"] = sensor.Mirror()
         self["oLock"] = sensor.Res(dmm, high=17, low=5, rng=10000, res=1)
         self["oFanConn"] = sensor.Res(dmm, high=6, low=6, rng=1000, res=1)
         self["oInrush"] = sensor.Res(dmm, high=1, low=2, rng=1000, res=0.1)

@@ -161,13 +161,13 @@ class Initial(share.TestSequence):
         mes["ocp_max"]()
         # Calibrate the PFC set voltage
         self._logger.info("Start PFC calibration")
-        pfc = mes["dmm_PFCpre"].stable(self.cfg.pfc_stable).reading1
+        pfc = mes["dmm_PFCpre"].stable(self.cfg.pfc_stable).reading1.value
         arm.calpfc(pfc)
         with mes["dmm_PFCpost"].position_fail_disabled():
             result = mes["dmm_PFCpost"].stable(self.cfg.pfc_stable).result
         if not result:
             self._logger.info("Retry PFC calibration")
-            pfc = mes["dmm_PFCpre"].stable(self.cfg.pfc_stable).reading1
+            pfc = mes["dmm_PFCpre"].stable(self.cfg.pfc_stable).reading1.value
             arm.calpfc(pfc)
             mes["dmm_PFCpost"].stable(self.cfg.pfc_stable)
         # Leave the loads at zero
@@ -316,14 +316,14 @@ class Initial(share.TestSequence):
         with tester.PathName("NoLoad"):
             dcl_out.output(0.0)
             dcl_out.opc()
-            volt00 = dmm_out.measure().reading1
+            volt00 = dmm_out.measure().reading1.value
         with tester.PathName("MaxLoad"):
             dcl_out.binary(0.0, max_load, max(1.0, max_load / 16))
             dmm_out.measure()
         with tester.PathName("LoadReg"):
             dcl_out.output(peak_load * 0.95)
             dcl_out.opc()
-            volt = dmm_out.measure().reading1
+            volt = dmm_out.measure().reading1.value
             load_reg = 100.0 * (volt00 - volt) / volt00
             reg_limit.check(load_reg)
         with tester.PathName("PeakLoad"):
@@ -476,7 +476,7 @@ class Sensors(share.Sensors):
             ("pfcDnLock", "PFC_DN_LOCK"),
             ("pfcUpLock", "PFC_UP_LOCK"),
         ):
-            self[name] = sensor.KeyedReadingString(ard, cmdkey)
+            self[name] = sensor.Keyed(ard, cmdkey)
         # ARM sensors
         arm = self.devices["arm"]
         for name, cmdkey in (
@@ -485,12 +485,12 @@ class Sensors(share.Sensors):
             ("ARM_12V", "ARM-12V"),
             ("ARM_24V", "ARM-24V"),
         ):
-            self[name] = sensor.KeyedReading(arm, cmdkey)
+            self[name] = sensor.Keyed(arm, cmdkey)
         for name, cmdkey in (
             ("ARM_SwVer", "ARM_SwVer"),
             ("ARM_SwBld", "ARM_SwBld"),
         ):
-            self[name] = sensor.KeyedReadingString(arm, cmdkey)
+            self[name] = sensor.Keyed(arm, cmdkey)
 
 
 class Measurements(share.Measurements):

@@ -104,8 +104,8 @@ class Sensors(share.Sensors):
         pic = self.devices["pic"]
         sensor = tester.sensor
         self["Vsec5VuP"] = sensor.Vdc(dmm, high=19, low=1, rng=10, res=0.001)
-        self["SwRev"] = sensor.KeyedReadingString(pic, "PIC-SwRev")
-        self["MicroTemp"] = sensor.KeyedReadingString(pic, "PIC-MicroTemp")
+        self["SwRev"] = sensor.Keyed(pic, "PIC-SwRev")
+        self["MicroTemp"] = sensor.Keyed(pic, "PIC-MicroTemp")
         self["PicKit"] = sensor.PicKit(
             self.devices["PicKit"],
             pathlib.Path(__file__).parent / self.pic_hex_mic,

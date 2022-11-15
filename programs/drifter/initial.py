@@ -116,8 +116,8 @@ class Initial(share.TestSequence):
             pic["CAL_OFFSET_CURRENT"] = self.force_offset
             pic["ZERO-CURRENT-DISPLAY-THRESHOLD"] = self.force_threshold
             # Calibrate voltage
-            dmm_vin = mes["dmm_vin"](timeout=5).reading1
-            pic_vin = mes["pic_vin"](timeout=5).reading1
+            dmm_vin = mes["dmm_vin"](timeout=5).reading1.value
+            pic_vin = mes["pic_vin"](timeout=5).reading1.value
             err = ((dmm_vin - pic_vin) / dmm_vin) * 100
             mes["ErrorV"].sensor.store(err)
             mes["ErrorV"]()
@@ -131,13 +131,13 @@ class Initial(share.TestSequence):
         if adjust_vcal:
             # This will check any voltage adjust done above
             # ...we are using this CAL_RELOAD to save 10sec
-            pic_vin = mes["pic_vin"](timeout=5).reading1
+            pic_vin = mes["pic_vin"](timeout=5).reading1.value
             err = ((dmm_vin - pic_vin) / dmm_vin) * 100
             mes["CalV"].sensor.store(err)
             mes["CalV"]()
         # Now we proceed to calibrate the current
-        dmm_isense = mes["dmm_isense"](timeout=5).reading1
-        pic_isense = mes["pic_isense"](timeout=5).reading1
+        dmm_isense = mes["dmm_isense"](timeout=5).reading1.value
+        pic_isense = mes["pic_isense"](timeout=5).reading1.value
         err = ((dmm_isense - pic_isense) / dmm_isense) * 100
         mes["ErrorI"].sensor.store(err)
         mes["ErrorI"]()
@@ -145,7 +145,7 @@ class Initial(share.TestSequence):
         if err != self.limits["%CalI"]:
             pic["CAL_I_SLOPE"] = dmm_isense
             self._cal_reload(pic)
-            pic_isense = mes["pic_isense"](timeout=5).reading1
+            pic_isense = mes["pic_isense"](timeout=5).reading1.value
             err = ((dmm_isense - pic_isense) / dmm_isense) * 100
             mes["CalI"].sensor.store(err)
             mes["CalI"]()
@@ -217,8 +217,8 @@ class Sensors(share.Sensors):
         dmm = self.devices["dmm"]
         pic = self.devices["pic"]
         sensor = tester.sensor
-        self["oMirErrorV"] = sensor.MirrorReading()
-        self["oMirErrorI"] = sensor.MirrorReading()
+        self["oMirErrorV"] = sensor.Mirror()
+        self["oMirErrorI"] = sensor.Mirror()
         self["oVin"] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self["oVsw"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.001)
         self["oVref"] = sensor.Vdc(dmm, high=3, low=1, rng=10, res=0.001)
@@ -242,7 +242,7 @@ class Sensors(share.Sensors):
             ("pic_Ioffset", "CAL_OFFSET_CURRENT"),
             ("pic_Ithreshold", "ZERO-CURRENT-DISPLAY-THRESHOLD"),
         ):
-            self[sen] = sensor.KeyedReading(pic, cmd)
+            self[sen] = sensor.Keyed(pic, cmd)
 
 
 class Measurements(share.Measurements):

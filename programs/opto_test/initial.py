@@ -95,8 +95,8 @@ class Initial(share.TestSequence):
             with tester.PathName("Opto{0}".format(i + 1)):
                 mes["search_VoutAdj1"][i].measure(timeout=2)
                 mes["dmm_Vce"][i].measure(timeout=2)
-                i_out = mes["dmm_Iout"][i].measure(timeout=2).reading1
-                i_in = mes["dmm_Iin1"].measure(timeout=2).reading1
+                i_out = mes["dmm_Iout"][i].measure(timeout=2).reading1.value
+                i_in = mes["dmm_Iin1"].measure(timeout=2).reading1.value
                 ctr = round((i_out / i_in) * 100)
                 self._ctr_data1.append(int(ctr))
                 mes["dmm_ctr"].sensor.store(ctr)
@@ -134,8 +134,8 @@ class Initial(share.TestSequence):
             with tester.PathName("Opto{0}".format(i + 1)):
                 mes["search_VoutAdj10"][i].measure(timeout=2)
                 mes["dmm_Vce"][i].measure(timeout=2)
-                i_out = mes["dmm_Iout"][i].measure(timeout=2).reading1
-                i_in = mes["dmm_Iin10"].measure(timeout=2).reading1
+                i_out = mes["dmm_Iout"][i].measure(timeout=2).reading1.value
+                i_in = mes["dmm_Iin10"].measure(timeout=2).reading1.value
                 ctr = round((i_out / i_in) * 100)
                 self._ctr_data10.append(int(ctr))
                 mes["dmm_ctr"].sensor.store(ctr)
@@ -209,7 +209,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["MirCTR"] = sensor.MirrorReading()
+        self["MirCTR"] = sensor.Mirror()
         self["Isense"] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001, scale=0.001)
         self["VinAdj1"] = sensor.Ramp(
             stimulus=self.devices["dcs_iset"],

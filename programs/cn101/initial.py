@@ -84,7 +84,7 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         dev["dcs_vin"].output(0.0, delay=1.0)
         dev["dcs_vin"].output(12.0, delay=15.0)
-        btmac = setec.MAC.loads(mes["cn101_btmac"]().reading1)
+        btmac = setec.MAC.loads(mes["cn101_btmac"]().reading1.value)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
         reply = dev["pi_bt"].scan_advert_blemac(btmac.dumps(separator=""), timeout=20)
         reply = reply is not None  # To boolean
@@ -167,7 +167,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["oMirBT"] = sensor.MirrorReadingBoolean()
+        self["oMirBT"] = sensor.Mirror()
         self["microsw"] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
         self["sw1"] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
         self["sw2"] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
@@ -187,13 +187,13 @@ class Sensors(share.Sensors):
             ("tank3", "TANK3"),
             ("tank4", "TANK4"),
         ):
-            self[name] = sensor.KeyedReading(cn101, cmdkey)
+            self[name] = sensor.Keyed(cn101, cmdkey)
         for device, name, cmdkey in (
             (cn101, "oSwVer", "SW_VER"),
             (cn101, "oBtMac", "BT_MAC"),
             (cn101tunnel, "TunnelSwVer", "SW_VER"),
         ):
-            self[name] = sensor.KeyedReadingString(device, cmdkey)
+            self[name] = sensor.Keyed(device, cmdkey)
 
 
 class Measurements(share.Measurements):

@@ -142,7 +142,7 @@ class Initial(share.TestSequence):
         trsbts = dev["trsbts"]
         mes["arm_vbatt"](timeout=5)
         # Battery calibration at nominal voltage
-        dmm_v = mes["dmm_vbat"].stable(delta=0.002).reading1
+        dmm_v = mes["dmm_vbat"].stable(delta=0.002).reading1.value
         trsbts["VBATT_CAL"] = dmm_v
         # Save new calibration settings
         trsbts["NVWRITE"] = True
@@ -241,8 +241,8 @@ class Sensors(share.Sensors):
         self["light"].doc = "Lights output"
         self["remote"] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
         self["remote"].doc = "Remote output"
-        self["mirmac"] = sensor.MirrorReadingString()
-        self["mirscan"] = sensor.MirrorReadingBoolean()
+        self["mirmac"] = sensor.Mirror()
+        self["mirscan"] = sensor.Mirror()
         self["sernum"] = sensor.DataEntry(
             message=tester.translate("trsbts_initial", "msgSnEntry"),
             caption=tester.translate("trsbts_initial", "capSnEntry"),
@@ -251,12 +251,12 @@ class Sensors(share.Sensors):
         # Console sensors
         trsbts = self.devices["trsbts"]
         for name, cmdkey in (("arm_swver", "SW_VER"),):
-            self[name] = sensor.KeyedReadingString(trsbts, cmdkey)
+            self[name] = sensor.Keyed(trsbts, cmdkey)
         for name, cmdkey, units in (
             ("arm_vbatt", "VBATT", "V"),
             ("arm_vpin", "VPIN", "V"),
         ):
-            self[name] = sensor.KeyedReading(trsbts, cmdkey)
+            self[name] = sensor.Keyed(trsbts, cmdkey)
             if units:
                 self[name].units = units
         self["JLink"] = sensor.JLink(

@@ -76,7 +76,7 @@ class Sensors(share.Sensors):
             caption=tester.translate("smartlink201_final", "capSnEntry"),
         )
         self["SnEntry"].doc = "Entered S/N"
-        self["mir_RSSI"] = sensor.MirrorReading()
+        self["mir_RSSI"] = sensor.Mirror()
         self["mir_RSSI"].doc = "Measured RSSI"
 
 

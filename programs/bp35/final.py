@@ -119,7 +119,7 @@ class Sensors(share.Sensors):
         self["can12v"] = sensor.Vdc(dmm, high=16, low=3, rng=100, res=0.1)
         self["can12v"].doc = "X303 CAN_POWER"
         bp35 = self.devices["bp35"]
-        self["arm_swver"] = sensor.KeyedReadingString(bp35, "SW_VER")
+        self["arm_swver"] = sensor.Keyed(bp35, "SW_VER")
         self["notifycable"] = sensor.Notify(
             message=tester.translate("bp35_final", "PullCableOut"),
             caption=tester.translate("bp35_final", "capCableOut"),

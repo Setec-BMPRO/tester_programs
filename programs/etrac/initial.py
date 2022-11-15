@@ -115,7 +115,7 @@ class Sensors(share.Sensors):
         self["oVbat"] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.001)
         # Arduino sensor
         ard = self.devices["ard"]
-        self["pgmEtrac2"] = sensor.KeyedReadingString(ard, "PGM_ETRAC2")
+        self["pgmEtrac2"] = sensor.Keyed(ard, "PGM_ETRAC2")
 
 
 class Measurements(share.Measurements):

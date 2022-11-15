@@ -157,8 +157,8 @@ class Sensors(share.Sensors):
         self["green"].doc = "Led cathode"
         self["blue"] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01)
         self["blue"].doc = "Led cathode"
-        self["mirmac"] = sensor.MirrorReadingString()
-        self["mirscan"] = sensor.MirrorReadingBoolean()
+        self["mirmac"] = sensor.Mirror()
+        self["mirscan"] = sensor.Mirror()
         # JLink programmer
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
@@ -168,7 +168,7 @@ class Sensors(share.Sensors):
         # Console sensors
         trsrfm = self.devices["trsrfm"]
         for name, cmdkey in (("arm_SwVer", "SW_VER"),):
-            self[name] = sensor.KeyedReadingString(trsrfm, cmdkey)
+            self[name] = sensor.Keyed(trsrfm, cmdkey)
         self["sernum"] = sensor.DataEntry(
             message=tester.translate("trsrfm_initial", "msgSnEntry"),
             caption=tester.translate("trsrfm_initial", "capSnEntry"),

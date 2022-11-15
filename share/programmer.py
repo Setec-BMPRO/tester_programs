@@ -28,7 +28,7 @@ class _Base(abc.ABC):
             tester.LimitRegExp(
                 name="Program", testlimit=self.pass_result, doc="Programming succeeded"
             ),
-            tester.sensor.MirrorReadingString(),
+            tester.sensor.Mirror(),
         )
         self._result = None
 

@@ -252,7 +252,7 @@ class Sensors(share.Sensors):
         arm = self.devices["arm"]
         armtunnel = self.devices["armtunnel"]
         sensor = tester.sensor
-        self["mir_can"] = sensor.MirrorReadingString()
+        self["mir_can"] = sensor.Mirror()
         self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self["vin"].doc = "X1"
         self["3v3"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
@@ -281,9 +281,9 @@ class Sensors(share.Sensors):
         )
         self["oYesNoOff"].doc = "Operator input"
         # Console sensors
-        self["canbind"] = sensor.KeyedReading(arm, "CAN_BIND")
-        self["swver"] = sensor.KeyedReadingString(arm, "SW_VER")
-        self["tunnelswver"] = sensor.KeyedReadingString(armtunnel, "SW_VER")
+        self["canbind"] = sensor.Keyed(arm, "CAN_BIND")
+        self["swver"] = sensor.Keyed(arm, "SW_VER")
+        self["tunnelswver"] = sensor.Keyed(armtunnel, "SW_VER")
 
 
 class Measurements(share.Measurements):

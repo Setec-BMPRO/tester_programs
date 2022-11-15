@@ -201,14 +201,14 @@ class Sensors(share.Sensors):
             for sens in range(1, 5):
                 name = "tank{0}_s{1}".format(tank, sens)
                 key = "TANK{0}_S{1}".format(tank, sens)
-                self[name] = sensor.KeyedReading(armtunnel, key)
+                self[name] = sensor.Keyed(armtunnel, key)
         self["tank1-4"] = (
-            sensor.KeyedReading(armtunnel, "TANK1"),
-            sensor.KeyedReading(armtunnel, "TANK2"),
-            sensor.KeyedReading(armtunnel, "TANK3"),
-            sensor.KeyedReading(armtunnel, "TANK4"),
+            sensor.Keyed(armtunnel, "TANK1"),
+            sensor.Keyed(armtunnel, "TANK2"),
+            sensor.Keyed(armtunnel, "TANK3"),
+            sensor.Keyed(armtunnel, "TANK4"),
         )
-        self["swver"] = sensor.KeyedReadingString(armtunnel, "SW_VER")
+        self["swver"] = sensor.Keyed(armtunnel, "SW_VER")
         self["sernum"] = sensor.DataEntry(
             message=tester.translate("j35_final", "msgSnEntry"),
             caption=tester.translate("j35_final", "capSnEntry"),

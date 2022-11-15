@@ -89,7 +89,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = setec.MAC.loads(mes["arm_btmac"]().reading1)
+        btmac = setec.MAC.loads(mes["arm_btmac"]().reading1.value)
         dev["dcs_vin"].output(0.0, True, delay=1.0)
         dev["rla_pair_btn"].set_on(delay=0.2)
         dev["dcs_vin"].output(self.vbatt, True)
@@ -162,14 +162,14 @@ class Sensors(share.Sensors):
         self["blue"].doc = "Led cathode"
         self["tstpin_cover"] = sensor.Vdc(dmm, high=16, low=1, rng=100, res=0.01)
         self["tstpin_cover"].doc = "Photo sensor"
-        self["mirbt"] = sensor.MirrorReadingBoolean()
+        self["mirbt"] = sensor.Mirror()
         # Console sensors
         trsrfm = self.devices["trsrfm"]
         for name, cmdkey in (
             ("arm_BtMAC", "BT_MAC"),
             ("arm_SwVer", "SW_VER"),
         ):
-            self[name] = sensor.KeyedReadingString(trsrfm, cmdkey)
+            self[name] = sensor.Keyed(trsrfm, cmdkey)
         self["sernum"] = sensor.DataEntry(
             message=tester.translate("trsrfm_initial", "msgSnEntry"),
             caption=tester.translate("trsrfm_initial", "capSnEntry"),

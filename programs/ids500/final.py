@@ -152,9 +152,9 @@ class Final(share.TestSequence):
             timeout=5,
         ).readings
         self._logger.debug("Vset:%s, Vmon:%s, Vtec:%s", Vset, Vmon, Vtec)
-        mes["tecerr"].sensor.store(Vtec - (Vset * 3))
+        mes["tecerr"].sensor.store(Vtec.value - (Vset.value * 3))
         mes["tecerr"]()
-        mes["tecvmonerr"].sensor.store(Vmon - (Vtec / 3))
+        mes["tecvmonerr"].sensor.store(Vmon.value - (Vtec.value / 3))
         mes["tecvmonerr"]()
         self.measure(("ui_YesNoPsu", "ui_YesNoTecGreen"))
         with dev["rla_tecphase"]:
@@ -198,7 +198,7 @@ class Final(share.TestSequence):
                 ),
                 timeout=5,
             ).readings
-            self._ldd_err(mes, Iset, Iout, Imon)
+            self._ldd_err(mes, Iset.value, Iout.value, Imon.value)
             mes["ui_YesNoLddGreen"]()
         with tester.PathName("50A"):
             dev["LDD_Vset"].output(5.0, delay=1)
@@ -214,7 +214,7 @@ class Final(share.TestSequence):
             try:  # Adjust limits for 50A checks
                 self.limits["SetOutErr"].adjust(delta=config.ldd_set_out_error_50)
                 self.limits["MonOutErr"].adjust(delta=config.ldd_out_mon_error_50)
-                self._ldd_err(mes, Iset, Iout, Imon)
+                self._ldd_err(mes, Iset.value, Iout.value, Imon.value)
             finally:  # Restore the limits for 6A checks
                 self.limits["SetOutErr"].adjust(delta=config.ldd_set_out_error_6)
                 self.limits["MonOutErr"].adjust(delta=config.ldd_out_mon_error_6)
@@ -247,7 +247,7 @@ class Final(share.TestSequence):
         pic = dev["pic"]
         pic.open()
         pic.sw_test_mode()
-        hwrev = mes["ui_hwrev"]().reading1
+        hwrev = mes["ui_hwrev"]().reading1.value
         pic.expected = 3
         pic["WriteHwRev"] = hwrev
         # Only the very 1st time a HwRev is written, the unit outputs 4 lines
@@ -365,9 +365,9 @@ class Sensors(share.Sensors):
         dmm = self.devices["dmm"]
         pic = self.devices["pic"]
         sensor = tester.sensor
-        self["oMirTecErr"] = sensor.MirrorReading()
-        self["oMirTecVmonErr"] = sensor.MirrorReading()
-        self["oMirIsErr"] = sensor.MirrorReading()
+        self["oMirTecErr"] = sensor.Mirror()
+        self["oMirTecVmonErr"] = sensor.Mirror()
+        self["oMirIsErr"] = sensor.Mirror()
         self["tec"] = sensor.Vdc(dmm, high=1, low=3, rng=100, res=0.001)
         self["tecvset"] = sensor.Vdc(dmm, high=3, low=6, rng=10, res=0.001)
         self["tecvmon"] = sensor.Vdc(dmm, high=4, low=6, rng=10, res=0.001)
@@ -413,8 +413,8 @@ class Sensors(share.Sensors):
             caption=tester.translate("ids500_final", "capHwRev"),
         )
         self["oHwRevEntry"].on_read = lambda value: value.upper().strip()
-        self["hwrev"] = sensor.KeyedReadingString(pic, "PIC-HwRev")
-        self["sernum"] = sensor.KeyedReadingString(pic, "PIC-SerNum")
+        self["hwrev"] = sensor.Keyed(pic, "PIC-HwRev")
+        self["sernum"] = sensor.Keyed(pic, "PIC-SerNum")
 
 
 class Measurements(share.Measurements):

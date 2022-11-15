@@ -172,16 +172,14 @@ class Sensors(share.Sensors):
         self["LEDsOnCheck"].doc = "LEDs Turned on"
         # Console sensors
         console = self.devices["console"]
-        self["tank_sensor"] = sensor.KeyedReading(console, "TANK_LEVEL")
+        self["tank_sensor"] = sensor.Keyed(console, "TANK_LEVEL")
         for name, cmdkey in (
             ("test_mode", "TESTMODE"),
             ("leds_on", "ALL_LEDS_ON"),
             ("leds_off", "LEDS_OFF"),
         ):
-            self[name] = sensor.KeyedReadingString(console, cmdkey)
-        self["cantraffic"] = sensor.KeyedReadingBoolean(
-            self.devices["candetector"], None
-        )
+            self[name] = sensor.Keyed(console, cmdkey)
+        self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
 class Measurements(share.Measurements):

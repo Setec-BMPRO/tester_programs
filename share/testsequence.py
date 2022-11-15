@@ -188,7 +188,7 @@ class TestSequence(tester.TestSequence):
         limit = self.limits[limit_name]
         measurement = self.measurements[measurement_name]
         if not limit.check(sernum):
-            sernum = measurement.measure().reading1
+            sernum = measurement.measure().reading1.value
         return sernum
 
 
@@ -346,7 +346,7 @@ class MultiMeasurementSummary:
         with contextlib.suppress(tester.measure.NoResultError):
             result_overall = self.result.result
             lim = tester.LimitBoolean("AllOk", True, doc="All passed")
-            sen = tester.sensor.MirrorReadingBoolean()
+            sen = tester.sensor.Mirror()
             mes = tester.Measurement(lim, sen, doc="All checks ok")
             mes.log_data = False
             sen.position = tuple(self._sensor_positions)

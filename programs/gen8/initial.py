@@ -174,29 +174,29 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         dev.loads(i12=1.0, i24=1.0)
         # Calibrate the PFC set voltage
-        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).reading1
+        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).reading1.value
         arm.calpfc(pfc)
         mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
         if not mesres.result:  # 1st retry
-            arm.calpfc(mesres.reading1)
+            arm.calpfc(mesres.reading1.value)
             mesres = mes["dmm_pfcpost2"].stable(self.pfc_stable)
         if not mesres.result:  # 2nd retry
-            arm.calpfc(mesres.reading1)
+            arm.calpfc(mesres.reading1.value)
             mesres = mes["dmm_pfcpost3"].stable(self.pfc_stable)
         if not mesres.result:  # 3rd retry
-            arm.calpfc(mesres.reading1)
+            arm.calpfc(mesres.reading1.value)
             mes["dmm_pfcpost4"].stable(self.pfc_stable)
         # A final PFC setup check
         mes["dmm_pfcpost"].stable(self.pfc_stable)
         # no load for 12V calibration
         dev.loads(i12=0, i24=0)
         # Calibrate the 12V set voltage
-        v12 = mes["dmm_12vpre"].stable(self.v12_stable).reading1
+        v12 = mes["dmm_12vpre"].stable(self.v12_stable).reading1.value
         arm.cal12v(v12)
         with mes["dmm_12vset"].position_fail_disabled():
             result = mes["dmm_12vset"].stable(self.v12_stable).result
         if not result:
-            v12 = mes["dmm_12vpre"].stable(self.v12_stable).reading1
+            v12 = mes["dmm_12vpre"].stable(self.v12_stable).reading1.value
             arm.cal12v(v12)
             mes["dmm_12vset"].stable(self.v12_stable)
         self.measure(
@@ -398,12 +398,12 @@ class Sensors(share.Sensors):
             ("arm_12v", "12V"),
             ("arm_24v", "24V"),
         ):
-            self[name] = sensor.KeyedReading(arm, cmdkey)
+            self[name] = sensor.Keyed(arm, cmdkey)
         for name, cmdkey in (
             ("arm_swver", "SwVer"),
             ("arm_swbld", "SwBld"),
         ):
-            self[name] = sensor.KeyedReadingString(arm, cmdkey)
+            self[name] = sensor.Keyed(arm, cmdkey)
 
 
 class Measurements(share.Measurements):

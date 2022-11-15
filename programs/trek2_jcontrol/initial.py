@@ -165,9 +165,9 @@ class Sensors(share.Sensors):
         )
         self["sernum"].doc = "Barcode scanner"
         # Console sensors
-        self["canbind"] = sensor.KeyedReading(arm, "CAN_BIND")
-        self["swver"] = sensor.KeyedReadingString(arm, "SW_VER")
-        self["tunnelswver"] = sensor.KeyedReadingString(armtunnel, "SW_VER")
+        self["canbind"] = sensor.Keyed(arm, "CAN_BIND")
+        self["swver"] = sensor.Keyed(arm, "SW_VER")
+        self["tunnelswver"] = sensor.Keyed(armtunnel, "SW_VER")
 
 
 class Measurements(share.Measurements):

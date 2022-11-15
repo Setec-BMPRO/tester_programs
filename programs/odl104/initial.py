@@ -71,7 +71,7 @@ class Initial(share.TestSequence):
         console.open()
         console.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["ble_mac"]().reading1
+        mac = mes["ble_mac"]().reading1.value
         dev["serialtomac"].blemac_set(self.sernum, mac)
 
     @share.teststep
@@ -166,11 +166,11 @@ class Sensors(share.Sensors):
             ("tank3", "TANK3"),
             ("tank4", "TANK4"),
         ):
-            self[name] = sensor.KeyedReading(console, cmdkey)
+            self[name] = sensor.Keyed(console, cmdkey)
         # Convert tank readings from zero to one based
         for name in ("tank1", "tank2", "tank3", "tank4"):
             self[name].on_read = lambda value: value + 1
-        self["BleMac"] = sensor.KeyedReadingString(console, "MAC")
+        self["BleMac"] = sensor.Keyed(console, "MAC")
         self["BleMac"].doc = "Nordic BLE MAC"
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self["BleMac"].on_read = (
@@ -181,9 +181,7 @@ class Sensors(share.Sensors):
             pathlib.Path(__file__).parent / self.projectfile,
             pathlib.Path(__file__).parent / self.sw_nordic_image,
         )
-        self["cantraffic"] = sensor.KeyedReadingBoolean(
-            self.devices["candetector"], None
-        )
+        self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
 class Measurements(share.Measurements):

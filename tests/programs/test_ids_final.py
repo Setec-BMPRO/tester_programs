@@ -52,7 +52,7 @@ class Ids500Final(ProgramTestCase):
                 ),
                 "KeySw12": (
                     (sen["tec"], 0.0),
-                    (sen["tecvmon"], 240.0),
+                    (sen["tecvmon"], 0.0),
                     (sen["ldd"], 0.0),
                     (sen["IS_Vmon"], 0.0),
                     (sen["o15v"], 15.0),

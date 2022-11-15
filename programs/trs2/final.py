@@ -82,7 +82,7 @@ class Sensors(share.Sensors):
             caption=tester.translate("trs2_final", "capSnEntry"),
         )
         self["sernum"].doc = "Barcode scanner"
-        self["mirscan"] = sensor.MirrorReadingBoolean()
+        self["mirscan"] = sensor.Mirror()
 
 
 class Measurements(share.Measurements):

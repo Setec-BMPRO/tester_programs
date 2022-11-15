@@ -65,11 +65,11 @@ class Final(share.TestSequence):
         Measure the drop in the track between dc input and output at full load.
         """
         dev["dcl_dcout"].output(2.1, True)
-        val = mes["dmm_24Vdcin"](timeout=5).reading1
+        val = mes["dmm_24Vdcin"](timeout=5).reading1.value
         # Slightly higher dc input to compensate for drop in fixture cabling
         dev["dcs_24V"].output(24.0 + (24.0 - val))
         vals = self.measure(("dmm_24Vdcin", "dmm_24Vdcout"), timeout=5).readings
-        mes["dmm_vdcDrop"].sensor.store(vals[0] - vals[1])
+        mes["dmm_vdcDrop"].sensor.store(vals[0].value - vals[1].value)
         mes["dmm_vdcDrop"]()
         dev["dcs_24V"].output(0.0, output=False)
         dev["dcl_dcout"].output(0.0)
@@ -135,9 +135,9 @@ class Final(share.TestSequence):
     def _step_efficiency(self, dev, mes):
         """Measure efficiency."""
         dev["dcl_out"].output(2.1)
-        inp_pwr_fl = mes["dmm_powerFL"](timeout=5).reading1
-        out_volts_fl = mes["dmm_24Vfl"](timeout=5).reading1
-        out_curr_fl = mes["dmm_currShunt"](timeout=5).reading1
+        inp_pwr_fl = mes["dmm_powerFL"](timeout=5).reading1.value
+        out_volts_fl = mes["dmm_24Vfl"](timeout=5).reading1.value
+        out_curr_fl = mes["dmm_currShunt"](timeout=5).reading1.value
         eff = 100 * out_volts_fl * out_curr_fl / inp_pwr_fl
         mes["dmm_eff"].sensor.store(eff)
         mes["dmm_eff"]()
@@ -180,9 +180,9 @@ class Sensors(share.Sensors):
         dmm = self.devices["dmm"]
         pwr = self.devices["pwr"]
         sensor = tester.sensor
-        self["oMirVdcDrop"] = sensor.MirrorReading()
-        self["oMirPowNL"] = sensor.MirrorReading()
-        self["oMirEff"] = sensor.MirrorReading()
+        self["oMirVdcDrop"] = sensor.Mirror()
+        self["oMirPowNL"] = sensor.Mirror()
+        self["oMirEff"] = sensor.Mirror()
         self["Lock"] = sensor.Res(dmm, high=9, low=5, rng=10000, res=1)
         self["oRsense"] = sensor.Res(dmm, high=1, low=1, rng=10000, res=1)
         self["oVsense"] = sensor.Vdc(dmm, high=1, low=1, rng=1, res="MAX", scale=0.001)

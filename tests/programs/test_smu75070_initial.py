@@ -43,13 +43,7 @@ class SMU75070Initial(ProgramTestCase):
                     (sen["vsecctl"], 13.0),
                     (sen["vout"], 70.0),
                 ),
-                "OCP": (
-                    (sen["vout"], 70.0),
-                    (
-                        sen["vout"],
-                        (70.0,) * 5 + (69.0,),
-                    ),
-                ),
+                "OCP": ((sen["vout"], (70.0,) * 6 + (69.0, 1.0)),),
             },
         }
         self.tester.ut_load(data, self.test_program.sensor_store)

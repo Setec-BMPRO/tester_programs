@@ -142,7 +142,7 @@ class Initial(share.TestSequence):
         bp35.sr_set(self.cfg.sr_vset, self.cfg.sr_iset, delay=2)
         bp35["VOUT_OV"] = 2  # Reset OVP Latch because of Solar overshoot
         # Read solar input voltage and patch measurement limits
-        sr_vin = mes["dmm_solarvin"](timeout=5).reading1
+        sr_vin = mes["dmm_solarvin"](timeout=5).reading1.value
         mes["arm_sr_vin_pre"].testlimit = (
             tester.LimitPercent(
                 "ARM-SolarVin-Pre", sr_vin, self.cfg.sr_vin_pre_percent
@@ -163,7 +163,7 @@ class Initial(share.TestSequence):
             timeout=5,
         )
         # Wait for the voltage to settle
-        vmeasured = mes["dmm_vsetpre"].stable(self.cfg.sr_vset_settle).reading1
+        vmeasured = mes["dmm_vsetpre"].stable(self.cfg.sr_vset_settle).reading1.value
         bp35["SR_VCAL"] = vmeasured  # Calibrate output voltage setpoint
         bp35["SR_VIN_CAL"] = sr_vin  # Calibrate input voltage reading
         # Solar sw ver 182 will not change the setpoint until a DIFFERENT
@@ -214,7 +214,7 @@ class Initial(share.TestSequence):
         mes["arm_vout_ov"]()
         # Is it now running on it's own?
         self.measure(("dmm_3v3", "dmm_15vs"), timeout=10)
-        v_actual = self.measure(("dmm_vbat",), timeout=10).reading1
+        v_actual = self.measure(("dmm_vbat",), timeout=10).reading1.value
         bp35["VSET_CAL"] = v_actual  # Calibrate Vout setting and reading
         bp35["VBUS_CAL"] = v_actual
         bp35["NVWRITE"] = True
@@ -279,7 +279,7 @@ class Initial(share.TestSequence):
         for load in range(self.cfg.outputs):
             with tester.PathName("L{0}".format(load + 1)):
                 mes["arm_loads"][load](timeout=5)
-        ocp_actual = mes["ramp_ocp_pre"]().reading1
+        ocp_actual = mes["ramp_ocp_pre"]().reading1.value
         # Adjust current setpoint
         bp35["OCP_CAL"] = round(bp35.ocp_cal() * ocp_actual / self.cfg.ocp_set)
         bp35["NVWRITE"] = True
@@ -470,7 +470,7 @@ class Sensors(share.Sensors):
             "33FJ16GS402",
         )
         ard = self.devices["ard"]
-        self["pgmbp35sr"] = sensor.KeyedReadingString(ard, "PGM_BP35SR")
+        self["pgmbp35sr"] = sensor.Keyed(ard, "PGM_BP35SR")
         # Console sensors
         bp35 = self.devices["bp35"]
         bp35tunnel = self.devices["bp35tunnel"]
@@ -498,15 +498,15 @@ class Sensors(share.Sensors):
             ("arm_pm_iout", "PM_IOUT", "A"),
             ("arm_pm_iout_rev", "PM_IOUT_REV", "-A"),
         ):
-            self[name] = sensor.KeyedReading(bp35, cmdkey)
+            self[name] = sensor.Keyed(bp35, cmdkey)
             if units:
                 self[name].units = units
-        self["arm_swver"] = sensor.KeyedReadingString(bp35, "SW_VER")
-        self["TunnelSwVer"] = sensor.KeyedReadingString(bp35tunnel, "SW_VER")
+        self["arm_swver"] = sensor.Keyed(bp35, "SW_VER")
+        self["TunnelSwVer"] = sensor.Keyed(bp35tunnel, "SW_VER")
         # Generate load current sensors
         loads = []
         for i in range(1, self.outputs + 1):
-            loads.append(sensor.KeyedReading(bp35, "LOAD_{0}".format(i)))
+            loads.append(sensor.Keyed(bp35, "LOAD_{0}".format(i)))
         self["arm_loads"] = loads
         # Pre-adjust OCP
         low, high = self.limits["OCP_pre"].limit

@@ -87,8 +87,8 @@ class Final(share.TestSequence):
             )
         ).readings
         # Load regulation values in %
-        mes["reg12v"].sensor.store(100 * (nl12v - fl12v) / nl12v)
-        mes["reg24v"].sensor.store(100 * (nl24v - fl24v) / nl24v)
+        mes["reg12v"].sensor.store(100 * (nl12v.value - fl12v.value) / nl12v.value)
+        mes["reg24v"].sensor.store(100 * (nl24v.value - fl24v.value) / nl24v.value)
         self.measure(
             (
                 "reg12v",
@@ -144,8 +144,8 @@ class Sensors(share.Sensors):
         self["oFanDet"] = sensor.Vdc(dmm, high=8, low=2, rng=100, res=0.01)
         self["oBrktLeft"] = sensor.Vdc(dmm, high=9, low=2, rng=100, res=0.01)
         self["oBrktRight"] = sensor.Vdc(dmm, high=10, low=2, rng=100, res=0.01)
-        self["oMir12v"] = sensor.MirrorReading()
-        self["oMir24v"] = sensor.MirrorReading()
+        self["oMir12v"] = sensor.Mirror()
+        self["oMir24v"] = sensor.Mirror()
         self["oYesNoGreen"] = sensor.YesNo(
             message=tester.translate("sx750_final", "IsLedGreen?"),
             caption=tester.translate("sx750_final", "capLedGreen"),

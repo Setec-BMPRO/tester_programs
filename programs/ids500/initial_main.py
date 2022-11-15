@@ -159,9 +159,9 @@ class InitialMain(share.TestSequence):
             timeout=5,
         ).readings
         self._logger.debug("Vset:%s, Vmon:%s, Vtec:%s", Vset, Vmon, Vtec)
-        mes["tecerr"].sensor.store(Vtec - (Vset * 3))
+        mes["tecerr"].sensor.store(Vtec.value - (Vset.value * 3))
         mes["tecerr"]()
-        mes["tecvmonerr"].sensor.store(Vmon - (Vtec / 3))
+        mes["tecvmonerr"].sensor.store(Vmon.value - (Vtec.value / 3))
         mes["tecvmonerr"]()
         self.measure(("ui_YesNoPsu", "ui_YesNoTecRed"))
         with dev["rla_tecphase"]:
@@ -207,7 +207,7 @@ class InitialMain(share.TestSequence):
                 timeout=5,
             ).readings
             mes["LDD_on"](timeout=5)
-            self._ldd_err(mes, Iset, Iout, Imon)
+            self._ldd_err(mes, Iset.value, Iout.value, Imon.value)
             mes["ui_YesNoLddGreen"]()
         with tester.PathName("50A"):
             dev["LDD_Vset"].output(5.0, delay=1)
@@ -224,7 +224,7 @@ class InitialMain(share.TestSequence):
             try:  # Adjust limits for 50A checks
                 self.limits["SetOutErr"].adjust(delta=config.ldd_set_out_error_50)
                 self.limits["MonOutErr"].adjust(delta=config.ldd_out_mon_error_50)
-                self._ldd_err(mes, Iset, Iout, Imon)
+                self._ldd_err(mes, Iset.value, Iout.value, Imon.value)
             finally:  # Restore the limits for 6A checks
                 self.limits["SetOutErr"].adjust(delta=config.ldd_set_out_error_6)
                 self.limits["MonOutErr"].adjust(delta=config.ldd_out_mon_error_6)
@@ -403,9 +403,9 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["oMirTecErr"] = sensor.MirrorReading()
-        self["oMirTecVmonErr"] = sensor.MirrorReading()
-        self["oMirIsErr"] = sensor.MirrorReading()
+        self["oMirTecErr"] = sensor.Mirror()
+        self["oMirTecVmonErr"] = sensor.Mirror()
+        self["oMirIsErr"] = sensor.Mirror()
         self["lock"] = sensor.Res(dmm, high=18, low=3, rng=10000, res=1)
         self["tec"] = sensor.Vdc(dmm, high=1, low=4, rng=100, res=0.001, scale=-1.0)
         self["ldd"] = sensor.Vdc(dmm, high=2, low=5, rng=100, res=0.001)

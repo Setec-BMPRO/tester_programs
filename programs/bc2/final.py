@@ -108,13 +108,13 @@ class Sensors(share.Sensors):
         # Console sensors
         bc2 = self.devices["bc2"]
         qlr = share.console.Base.query_last_response
-        self["arm_swver"] = sensor.KeyedReadingString(bc2, "SW_VER")
-        self["arm_query_last"] = sensor.KeyedReadingString(bc2, qlr)
+        self["arm_swver"] = sensor.Keyed(bc2, "SW_VER")
+        self["arm_query_last"] = sensor.Keyed(bc2, qlr)
         for name, cmdkey in (
             ("arm_ShuntRes", "SHUNT_RES"),
             ("arm_Ibatt", "BATT_I"),
         ):
-            self[name] = sensor.KeyedReading(bc2, cmdkey)
+            self[name] = sensor.Keyed(bc2, cmdkey)
 
 
 class Measurements(share.Measurements):

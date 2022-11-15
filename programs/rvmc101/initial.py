@@ -200,9 +200,7 @@ class Sensors(share.Sensors):
             position=(1, 2, 3, 4),
         )
         self["yesnodisplay"].doc = "Tester operator"
-        self["cantraffic"] = sensor.KeyedReadingBoolean(
-            self.devices["candetector"], None
-        )
+        self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
 class Measurements(share.Measurements):
