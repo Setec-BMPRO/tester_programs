@@ -13,7 +13,7 @@ class ODL104Initial(ProgramTestCase):
     """ODL104 Initial program test suite."""
 
     prog_class = odl104.Initial
-    debug = True
+    debug = False
 
     def setUp(self):
         """Per-Test setup."""

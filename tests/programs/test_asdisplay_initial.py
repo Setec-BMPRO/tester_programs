@@ -12,7 +12,7 @@ class ASDisplayInitial(ProgramTestCase):
     """ASDisplay Initial program test suite."""
 
     prog_class = asdisplay.Initial
-    debug = True
+    debug = False
     sernum = "A2150080001"
 
     def setUp(self):

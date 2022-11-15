@@ -14,7 +14,7 @@ class TRSBTS_Initial(ProgramTestCase):
 
     prog_class = trsbts.Initial
     parameter = "BTS"
-    debug = True
+    debug = False
     btmac = "001ec030bc15"
 
     def setUp(self):
