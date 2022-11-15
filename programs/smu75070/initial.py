@@ -100,7 +100,7 @@ class Initial(share.TestSequence):
     def _step_ocp(self, dev, mes):
         """Test OCP."""
         dev["dcl"].output(0.1)
-        vout = mes["dmm_vout"](timeout=5).reading1.value
+        vout = mes["dmm_vout"](timeout=5).value1
         trip_level = vout - (vout * self.vout_load_reg) / 100
         self.limits["InOCP"].adjust(trip_level)
         mes["ramp_ocp"](timeout=5)

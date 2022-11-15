@@ -98,7 +98,7 @@ class Initial(share.TestSequence):
                 "arm_2amp",
                 "arm_switch",
             )
-        ).reading1.value
+        ).value1
         arm.cal_vout(vout)
         mes["dmm_vout_cal"]()
 
@@ -110,7 +110,7 @@ class Initial(share.TestSequence):
         current = self.ocp_nominal * 0.8
         # Measure actual OCP setting
         dcload.output(current, True, delay=0.5)
-        ocp_actual = mes["ramp_ocp_pre"]().reading1.value
+        ocp_actual = mes["ramp_ocp_pre"]().value1
         ocp_factor = self.ocp_nominal / ocp_actual
         # Shutdown and startup
         dev["acsource"].output(voltage=0, delay=1)

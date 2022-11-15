@@ -84,7 +84,7 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         dev["dcs_vin"].output(0.0, delay=1.0)
         dev["dcs_vin"].output(12.0, delay=15.0)
-        btmac = setec.MAC.loads(mes["cn101_btmac"]().reading1.value)
+        btmac = setec.MAC.loads(mes["cn101_btmac"]().value1)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
         reply = dev["pi_bt"].scan_advert_blemac(btmac.dumps(separator=""), timeout=20)
         reply = reply is not None  # To boolean

@@ -174,29 +174,29 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         dev.loads(i12=1.0, i24=1.0)
         # Calibrate the PFC set voltage
-        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).reading1.value
+        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
         arm.calpfc(pfc)
         mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
         if not mesres.result:  # 1st retry
-            arm.calpfc(mesres.reading1.value)
+            arm.calpfc(mesres.value1)
             mesres = mes["dmm_pfcpost2"].stable(self.pfc_stable)
         if not mesres.result:  # 2nd retry
-            arm.calpfc(mesres.reading1.value)
+            arm.calpfc(mesres.value1)
             mesres = mes["dmm_pfcpost3"].stable(self.pfc_stable)
         if not mesres.result:  # 3rd retry
-            arm.calpfc(mesres.reading1.value)
+            arm.calpfc(mesres.value1)
             mes["dmm_pfcpost4"].stable(self.pfc_stable)
         # A final PFC setup check
         mes["dmm_pfcpost"].stable(self.pfc_stable)
         # no load for 12V calibration
         dev.loads(i12=0, i24=0)
         # Calibrate the 12V set voltage
-        v12 = mes["dmm_12vpre"].stable(self.v12_stable).reading1.value
+        v12 = mes["dmm_12vpre"].stable(self.v12_stable).value1
         arm.cal12v(v12)
         with mes["dmm_12vset"].position_fail_disabled():
             result = mes["dmm_12vset"].stable(self.v12_stable).result
         if not result:
-            v12 = mes["dmm_12vpre"].stable(self.v12_stable).reading1.value
+            v12 = mes["dmm_12vpre"].stable(self.v12_stable).value1
             arm.cal12v(v12)
             mes["dmm_12vset"].stable(self.v12_stable)
         self.measure(

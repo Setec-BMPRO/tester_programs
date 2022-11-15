@@ -140,17 +140,17 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
         # Calibrate the PFC set voltage
-        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).reading1.value
+        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
         arm.calpfc(pfc)
         mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
         if not mesres.result:  # 1st retry
-            arm.calpfc(mesres.reading1.value)
+            arm.calpfc(mesres.value1)
             mesres = mes["dmm_pfcpost2"].stable(self.pfc_stable)
         if not mesres.result:  # 2nd retry
-            arm.calpfc(mesres.reading1.value)
+            arm.calpfc(mesres.value1)
             mesres = mes["dmm_pfcpost3"].stable(self.pfc_stable)
         if not mesres.result:  # 3rd retry
-            arm.calpfc(mesres.reading1.value)
+            arm.calpfc(mesres.value1)
             mes["dmm_pfcpost4"].stable(self.pfc_stable)
         arm.nvwrite()
         # A final PFC setup check

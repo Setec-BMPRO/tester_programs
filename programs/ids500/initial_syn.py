@@ -189,7 +189,7 @@ class InitialSyn(share.TestSequence):
 
         """
         dev["dcs_lddiset"].output(5.0, True, delay=0.5)
-        setI = mes["dmm_ISIset5V"](timeout=5).reading1.value * 10  # 5V == 50A
+        setI = mes["dmm_ISIset5V"](timeout=5).value1 * 10  # 5V == 50A
         self.limits["AdjLimits"].adjust(nominal=setI)
         lo_lim, hi_lim = self.limits["AdjLimits"].limit
         mes["ui_AdjLdd"].sensor.low = lo_lim

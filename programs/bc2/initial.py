@@ -59,7 +59,7 @@ class Initial(share.TestSequence):
 
         """
         bc2 = dev["bc2"]
-        dmm_v = mes["dmm_vin"].stable(delta=0.001).reading1.value
+        dmm_v = mes["dmm_vin"].stable(delta=0.001).value1
         mes["arm_vbatt"].testlimit[0].adjust(nominal=dmm_v)
         bc2["BATT_V_CAL"] = dmm_v
         mes["detectCAL"].sensor.store(bc2["LAST_RESPONSE?"][1])
@@ -72,7 +72,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = setec.MAC.loads(mes["arm_btmac"]().reading1.value)
+        btmac = setec.MAC.loads(mes["arm_btmac"]().value1)
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
         reply = dev["pi_bt"].scan_advert_blemac(btmac.dumps(separator=""), timeout=20)
         reply = reply is not None  # To boolean

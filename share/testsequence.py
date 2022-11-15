@@ -188,7 +188,7 @@ class TestSequence(tester.TestSequence):
         limit = self.limits[limit_name]
         measurement = self.measurements[measurement_name]
         if not limit.check(sernum):
-            sernum = measurement.measure().reading1.value
+            sernum = measurement.measure().value1
         return sernum
 
 

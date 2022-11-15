@@ -71,7 +71,7 @@ class Initial(share.TestSequence):
         console.open()
         console.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["ble_mac"]().reading1.value
+        mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
 
     @share.teststep

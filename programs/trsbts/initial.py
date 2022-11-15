@@ -142,7 +142,7 @@ class Initial(share.TestSequence):
         trsbts = dev["trsbts"]
         mes["arm_vbatt"](timeout=5)
         # Battery calibration at nominal voltage
-        dmm_v = mes["dmm_vbat"].stable(delta=0.002).reading1.value
+        dmm_v = mes["dmm_vbat"].stable(delta=0.002).value1
         trsbts["VBATT_CAL"] = dmm_v
         # Save new calibration settings
         trsbts["NVWRITE"] = True

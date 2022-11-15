@@ -125,7 +125,7 @@ class Initial(share.TestSequence):
             dev["rla_Pic"].set_off()
             dev["rla_PicReset"].set_on(delay=3)
             dev["rla_EVM"].set_on()
-            dmm_vbat = mes["dmm_vbat"](timeout=5).reading1.value
+            dmm_vbat = mes["dmm_vbat"](timeout=5).value1
             ev_data = evdev.read_vit()
             mes["bq_ErrVUncal"].sensor.store(dmm_vbat - ev_data["Voltage"])
             mes["bq_Temp"].sensor.store(ev_data["Temperature"])
@@ -143,7 +143,7 @@ class Initial(share.TestSequence):
         try:
             evdev = dev["ev"]
             dev["dcl_ibat"].output(2.0, True)
-            dmm_ibat = mes["dmm_ibat"](timeout=5).reading1.value
+            dmm_ibat = mes["dmm_ibat"](timeout=5).value1
             time.sleep(3)
             ev_data = evdev.read_vit()
             mes["bq_ErrIUncal"].sensor.store(dmm_ibat - ev_data["Current"])
@@ -177,7 +177,7 @@ class SerialDate(share.TestSequence):
             dev["dcs_vbat"].output(12.20, output=True)
             dev["rla_PicReset"].set_on(delay=2)
             dev["rla_EVM"].set_on()
-            sernum = mes["ui_SnEntry"]().reading1.value[-4:]  # Last 4 digits only
+            sernum = mes["ui_SnEntry"]().value1[-4:]  # Last 4 digits only
             current_date = datetime.date.today().isoformat()
             evdev.sn_date(datecode=current_date, serialno=sernum)
         except ev2200.Ev2200Error as err:
@@ -244,14 +244,14 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_startup(self, dev, mes):
         """Power comms interface, connect to PIC."""
-        sernum = mes["ui_SnEntry"]().reading1.value
+        sernum = mes["ui_SnEntry"]().value1
         self.limits["SerNumChk"].adjust(str(int(sernum[-4:])))
         dev["rla_Pic"].set_on()
 
     @share.teststep
     def _step_verify(self, dev, mes):
         """Read data broadcast from the PIC and verify values."""
-        dmm_vbatIn = mes["dmm_vbatIn"](timeout=5).reading1.value
+        dmm_vbatIn = mes["dmm_vbatIn"](timeout=5).value1
         cmr_data = dev["cmr"].read()
         mes["cmr_vbatIn"].sensor.store(cmr_data["VOLTAGE"])
         mes["cmr_ErrV"].sensor.store(dmm_vbatIn - cmr_data["VOLTAGE"])

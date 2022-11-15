@@ -142,7 +142,7 @@ class Initial(share.TestSequence):
         bp35.sr_set(self.cfg.sr_vset, self.cfg.sr_iset, delay=2)
         bp35["VOUT_OV"] = 2  # Reset OVP Latch because of Solar overshoot
         # Read solar input voltage and patch measurement limits
-        sr_vin = mes["dmm_solarvin"](timeout=5).reading1.value
+        sr_vin = mes["dmm_solarvin"](timeout=5).value1
         mes["arm_sr_vin_pre"].testlimit = (
             tester.LimitPercent(
                 "ARM-SolarVin-Pre", sr_vin, self.cfg.sr_vin_pre_percent
@@ -163,7 +163,7 @@ class Initial(share.TestSequence):
             timeout=5,
         )
         # Wait for the voltage to settle
-        vmeasured = mes["dmm_vsetpre"].stable(self.cfg.sr_vset_settle).reading1.value
+        vmeasured = mes["dmm_vsetpre"].stable(self.cfg.sr_vset_settle).value1
         bp35["SR_VCAL"] = vmeasured  # Calibrate output voltage setpoint
         bp35["SR_VIN_CAL"] = sr_vin  # Calibrate input voltage reading
         # Solar sw ver 182 will not change the setpoint until a DIFFERENT
@@ -214,7 +214,7 @@ class Initial(share.TestSequence):
         mes["arm_vout_ov"]()
         # Is it now running on it's own?
         self.measure(("dmm_3v3", "dmm_15vs"), timeout=10)
-        v_actual = self.measure(("dmm_vbat",), timeout=10).reading1.value
+        v_actual = self.measure(("dmm_vbat",), timeout=10).value1
         bp35["VSET_CAL"] = v_actual  # Calibrate Vout setting and reading
         bp35["VBUS_CAL"] = v_actual
         bp35["NVWRITE"] = True
@@ -279,7 +279,7 @@ class Initial(share.TestSequence):
         for load in range(self.cfg.outputs):
             with tester.PathName("L{0}".format(load + 1)):
                 mes["arm_loads"][load](timeout=5)
-        ocp_actual = mes["ramp_ocp_pre"]().reading1.value
+        ocp_actual = mes["ramp_ocp_pre"]().value1
         # Adjust current setpoint
         bp35["OCP_CAL"] = round(bp35.ocp_cal() * ocp_actual / self.cfg.ocp_set)
         bp35["NVWRITE"] = True

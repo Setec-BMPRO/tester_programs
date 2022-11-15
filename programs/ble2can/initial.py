@@ -86,7 +86,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = setec.MAC.loads(mes["BtMac"]().reading1.value)
+        btmac = setec.MAC.loads(mes["BtMac"]().value1)
         dev["rla_pair_btn"].press()
         self._reset_unit()
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())

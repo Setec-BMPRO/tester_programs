@@ -234,7 +234,7 @@ class Initial(share.TestSequence):
             mes["msp_status"]()
             msp.filter_reload()
             mes["msp_vout"]()
-            dmm_V = mes["dmm_voutpre"].stable(delta=0.005).reading1.value
+            dmm_V = mes["dmm_voutpre"].stable(delta=0.005).value1
             msp["CAL-V"] = dmm_V
             mes["dmm_voutpost"].stable(delta=0.005)
             msp["NV-WRITE"] = True

@@ -88,14 +88,14 @@ class Initial(share.TestSequence):
         mes["dmm_3V3"](timeout=5)
         smartlink201.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["SL_MAC"]().reading1.value
+        mac = mes["SL_MAC"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
         """Calibrate Vbatt."""
         smartlink201 = dev["smartlink201"]
-        vbatt = mes["dmm_Vbatt"](timeout=5).reading1.value
+        vbatt = mes["dmm_Vbatt"](timeout=5).value1
         # Adjust Pre & Post reading dependant limits
         self.limits["SL_VbattPre"].adjust(nominal=vbatt)
         self.limits["SL_Vbatt"].adjust(nominal=vbatt)

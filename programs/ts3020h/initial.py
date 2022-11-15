@@ -194,9 +194,9 @@ class Initial(share.TestSequence):
         )
         # Measure load regulation
         dev["dcl"].output(0.0)
-        noload = mes["dmm_Vout"](timeout=5).reading1.value
+        noload = mes["dmm_Vout"](timeout=5).value1
         dev["dcl"].output(24.0)
-        fullload = mes["dmm_Vout"](timeout=5).reading1.value
+        fullload = mes["dmm_Vout"](timeout=5).value1
         reg = ((noload - fullload) / noload) * 100
         mes["dmm_reg"].sensor.store(reg)
         mes["dmm_reg"]()

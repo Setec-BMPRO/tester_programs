@@ -247,7 +247,7 @@ class Final(share.TestSequence):
         pic = dev["pic"]
         pic.open()
         pic.sw_test_mode()
-        hwrev = mes["ui_hwrev"]().reading1.value
+        hwrev = mes["ui_hwrev"]().value1
         pic.expected = 3
         pic["WriteHwRev"] = hwrev
         # Only the very 1st time a HwRev is written, the unit outputs 4 lines

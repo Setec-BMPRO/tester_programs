@@ -95,8 +95,8 @@ class Initial(share.TestSequence):
             with tester.PathName("Opto{0}".format(i + 1)):
                 mes["search_VoutAdj1"][i].measure(timeout=2)
                 mes["dmm_Vce"][i].measure(timeout=2)
-                i_out = mes["dmm_Iout"][i].measure(timeout=2).reading1.value
-                i_in = mes["dmm_Iin1"].measure(timeout=2).reading1.value
+                i_out = mes["dmm_Iout"][i].measure(timeout=2).value1
+                i_in = mes["dmm_Iin1"].measure(timeout=2).value1
                 ctr = round((i_out / i_in) * 100)
                 self._ctr_data1.append(int(ctr))
                 mes["dmm_ctr"].sensor.store(ctr)
@@ -134,8 +134,8 @@ class Initial(share.TestSequence):
             with tester.PathName("Opto{0}".format(i + 1)):
                 mes["search_VoutAdj10"][i].measure(timeout=2)
                 mes["dmm_Vce"][i].measure(timeout=2)
-                i_out = mes["dmm_Iout"][i].measure(timeout=2).reading1.value
-                i_in = mes["dmm_Iin10"].measure(timeout=2).reading1.value
+                i_out = mes["dmm_Iout"][i].measure(timeout=2).value1
+                i_in = mes["dmm_Iin10"].measure(timeout=2).value1
                 ctr = round((i_out / i_in) * 100)
                 self._ctr_data10.append(int(ctr))
                 mes["dmm_ctr"].sensor.store(ctr)

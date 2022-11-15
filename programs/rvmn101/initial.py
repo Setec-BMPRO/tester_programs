@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
         dev["dcs_vbatt"].output(output=True, delay=2.0)
         rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["ble_mac"]().reading1.value
+        mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
 
     @share.teststep

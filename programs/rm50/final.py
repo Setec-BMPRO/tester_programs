@@ -65,7 +65,7 @@ class Final(share.TestSequence):
         Measure the drop in the track between dc input and output at full load.
         """
         dev["dcl_dcout"].output(2.1, True)
-        val = mes["dmm_24Vdcin"](timeout=5).reading1.value
+        val = mes["dmm_24Vdcin"](timeout=5).value1
         # Slightly higher dc input to compensate for drop in fixture cabling
         dev["dcs_24V"].output(24.0 + (24.0 - val))
         vals = self.measure(("dmm_24Vdcin", "dmm_24Vdcout"), timeout=5).readings
@@ -135,9 +135,9 @@ class Final(share.TestSequence):
     def _step_efficiency(self, dev, mes):
         """Measure efficiency."""
         dev["dcl_out"].output(2.1)
-        inp_pwr_fl = mes["dmm_powerFL"](timeout=5).reading1.value
-        out_volts_fl = mes["dmm_24Vfl"](timeout=5).reading1.value
-        out_curr_fl = mes["dmm_currShunt"](timeout=5).reading1.value
+        inp_pwr_fl = mes["dmm_powerFL"](timeout=5).value1
+        out_volts_fl = mes["dmm_24Vfl"](timeout=5).value1
+        out_curr_fl = mes["dmm_currShunt"](timeout=5).value1
         eff = 100 * out_volts_fl * out_curr_fl / inp_pwr_fl
         mes["dmm_eff"].sensor.store(eff)
         mes["dmm_eff"]()
