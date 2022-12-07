@@ -22,8 +22,8 @@ class Initial(share.TestSequence):
     }
     limitdata = (
         tester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
-        tester.LimitDelta("3V3", 3.3, 0.1, doc="3V3 present"),
-        tester.LimitDelta("5V", 5.0, 0.2, doc="5V present"),
+        tester.LimitPercent("3V3", 3.3, 3, doc="3V3 present"),
+        tester.LimitPercent("5V", 5.0, 5, doc="5V present"),
         tester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
     is_full = None  # False if 'Lite' version (no micro fitted)
