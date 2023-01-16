@@ -536,6 +536,14 @@ class J35D(J35C):
 
     """J35D configuration."""
 
+    _rev14_values = _Values(
+        sw_version=J35.sw_bld,
+        hw_version=(14, Type.D.value, "A"),
+        output_count=14,
+        ocp_set=35.0,
+        solar=True,
+        canbus=True,
+    )
     _rev13_values = _Values(
         sw_version=J35.sw_bld,
         hw_version=(13, Type.D.value, "A"),
@@ -546,6 +554,7 @@ class J35D(J35C):
     )
     _rev_data = {
         None: _rev13_values,
+        "14": _rev14_values,
         "13": _rev13_values,
         "12": _Values(
             sw_version=J35.sw_15,
