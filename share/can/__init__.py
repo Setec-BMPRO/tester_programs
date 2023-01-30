@@ -18,6 +18,7 @@ from .setec_rvc import (
     RVMD50ControlButtonPacket,
     RVMD50ControlLCDPacket,
     RVMD50ResetPacket,
+    ACMONStatusPacket,
 )
 
 
@@ -33,6 +34,7 @@ __all__ = [
     "RVMD50ControlButtonPacket",
     "RVMD50ControlLCDPacket",
     "RVMD50ResetPacket",
+    "ACMONStatusPacket",
 ]
 
 

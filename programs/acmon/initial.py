@@ -15,10 +15,13 @@ class Initial(share.TestSequence):
     """RVMD50 Initial Test Program."""
 
     sw_image = "no_sw_available_yet.bin"
-    vin_set = 12.0  # Input voltage to power the unit
+    vin_set = 12.0  # Input DC voltage to power the unit
+    vac_set = 220.0 # Input AC voltage
     testlimits = (  # Test limits
         tester.LimitBetween("Vin", vin_set - 1.0, vin_set, doc="Input voltage present"),
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
+        tester.LimitPercent("AcVoltage", vac_set, 10.0, doc="AC voltage reading"),
+        tester.LimitPercent("AcCurrent", 100.0, 10.0, doc="AC current reading"),
     )
 
     def open(self, uut):
@@ -45,7 +48,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_run(self, dev, mes):
         """Run the unit."""
-        # TODO: AC Source 220V, Read & decode CAN traffic
+
+# FIXME: AC Source 220V, Read & decode CAN traffic
 
 
 class Devices(share.Devices):
@@ -62,13 +66,19 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         self["can"] = self.physical_devices["_CAN"]
+        self["canreader"] = tester.CANReader(self["can"])
+        self["decoder"] = share.can.PacketPropertyReader(
+            self["canreader"], share.can.ACMONStatusPacket
+        )
 
     def run(self):
         """Test run is starting."""
         self["can"].rvc_mode = True
+        self["canreader"].start()
 
     def reset(self):
         """Test run has stopped."""
+        self["canreader"].stop()
         self["can"].rvc_mode = False
         self["acs"].output(0.0, False)
         self["dcs_vin"].output(0.0, False)
@@ -94,6 +104,10 @@ class Sensors(share.Sensors):
             pathlib.Path(__file__).parent / self.projectfile,
             pathlib.Path(__file__).parent / self.sw_image,
         )
+        self["voltage1"] = sensor.Keyed(self.devices["decoder"], "voltage1")
+        self["voltage2"] = sensor.Keyed(self.devices["decoder"], "voltage2")
+        self["current1"] = sensor.Keyed(self.devices["decoder"], "current1")
+        self["current2"] = sensor.Keyed(self.devices["decoder"], "current2")
 
 
 class Measurements(share.Measurements):
@@ -107,5 +121,9 @@ class Measurements(share.Measurements):
                 ("dmm_vin", "Vin", "vin", "Input voltage"),
                 ("dmm_3v3", "3V3", "3v3", "3V3 rail voltage"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
+                ("voltage1", "AcVoltage", "voltage1", "Phase 1 voltage"),
+                ("voltage2", "AcVoltage", "voltage2", "Phase 2 voltage"),
+                ("current1", "AcCurrent", "current1", "Current sensor 1"),
+                ("current2", "AcCurrent", "current2", "Current sensor 2"),
             )
         )

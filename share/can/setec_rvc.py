@@ -226,7 +226,7 @@ class _DeviceStatusRaw(ctypes.Union):
 
 class DeviceStatusPacket:  # pylint: disable=too-few-public-methods
 
-    """A Device Status packet."""
+    """RVMD50 Device Status packet."""
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, packet):
@@ -405,6 +405,13 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
         if not isinstance(value, bool):
             raise ValueError("Button must be boolean")
         self.pkt.data[self._button_index] = int(value)
+
+
+class ACMONStatusPacket:  # pylint: disable=too-few-public-methods
+
+    """ACMON Status packet."""
+
+# FIXME: Implement ACMON CAN Packet decoder
 
 
 @attr.s

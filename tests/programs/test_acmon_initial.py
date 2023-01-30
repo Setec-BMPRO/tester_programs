@@ -11,6 +11,7 @@ class ACMONInitial(ProgramTestCase):
     """ACMON Initial program test suite."""
 
     prog_class = acmon.Initial
+    parameter = None
     debug = False
 
     def test_pass_run(self):
