@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project tester_programs -->
-<!-- Saved: 2022-11-05, 13:24:40 -->
-<!-- Copyright (C) 2022 ,  -->
+<!-- Saved: 2023-01-30, 16:54:00 -->
+<!-- Copyright (C) 2023 ,  -->
 <Project version="5.1">
   <Language>en_US</Language>
   <Hash>a15b28d938d11c34d6d60656499952eced8c02e6</Hash>
@@ -18,6 +18,8 @@
     <Source>programs/_2040/final.py</Source>
     <Source>programs/_2040/initial.py</Source>
     <Source>programs/__init__.py</Source>
+    <Source>programs/acmon/__init__.py</Source>
+    <Source>programs/acmon/initial.py</Source>
     <Source>programs/asdisplay/__init__.py</Source>
     <Source>programs/asdisplay/console.py</Source>
     <Source>programs/asdisplay/initial.py</Source>
@@ -218,6 +220,7 @@
     <Source>tests/programs/__init__.py</Source>
     <Source>tests/programs/test_2040_final.py</Source>
     <Source>tests/programs/test_2040_initial.py</Source>
+    <Source>tests/programs/test_acmon_initial.py</Source>
     <Source>tests/programs/test_asdisplay_console.py</Source>
     <Source>tests/programs/test_asdisplay_initial.py</Source>
     <Source>tests/programs/test_atxg4502v_final.py</Source>

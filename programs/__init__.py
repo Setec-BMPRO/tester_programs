@@ -9,6 +9,7 @@ import share
 
 from . import selftest
 from . import _2040
+from . import acmon
 from . import asdisplay
 from . import atxg450
 from . import batterycheck
@@ -124,6 +125,7 @@ PROGRAMS = {
     "Self-Test": selftest.Main,
     "2040 Final": _2040.Final,
     "2040 Initial": _2040.Initial,
+    "ACMON Initial": acmon.Initial,
     "ASDisplay Initial": asdisplay.Initial,
     "ATXG-450-2V Final": atxg450.Final2V,
     "BatteryCheck Final": batterycheck.Final,

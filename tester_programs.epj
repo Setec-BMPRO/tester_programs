@@ -1,8 +1,8 @@
 {
   "header": {
     "comment": "eric project file for project tester_programs",
-    "copyright": "Copyright (C) 2022 , ",
-    "saved": "2022-10-31, 12:34:04"
+    "copyright": "Copyright (C) 2023 , ",
+    "saved": "2023-01-30, 16:39:54"
   },
   "project": {
     "AUTHOR": "",
@@ -112,6 +112,8 @@
       "programs/_2040/final.py",
       "programs/_2040/initial.py",
       "programs/__init__.py",
+      "programs/acmon/__init__.py",
+      "programs/acmon/initial.py",
       "programs/asdisplay/__init__.py",
       "programs/asdisplay/console.py",
       "programs/asdisplay/initial.py",
@@ -314,6 +316,7 @@
       "tests/programs/__init__.py",
       "tests/programs/test_2040_final.py",
       "tests/programs/test_2040_initial.py",
+      "tests/programs/test_acmon_initial.py",
       "tests/programs/test_asdisplay_console.py",
       "tests/programs/test_asdisplay_initial.py",
       "tests/programs/test_atxg4502v_final.py",
@@ -415,6 +418,7 @@
     "TRANSLATIONPATTERN": "",
     "TRANSLATIONS": [],
     "TRANSLATIONSBINPATH": "",
+    "TRANSLATIONSOURCESTARTPATH": "",
     "UICPARAMS": {
       "Package": "",
       "PackagesRoot": "",
