@@ -313,7 +313,7 @@ class BP35_II(BP35):
     is_2 = True
     # ARM software version
     arm_5015 = "2.0.20330.5015"  # PC-24332 & MA-368 (All Rev 3)
-    arm_5073 = "2.0.64652.5073"  # Rev 4 @ ECO-23109 & MA395, Rev 5
+    arm_5073 = "2.0.64652.5073"  # Rev 4 @ ECO-23109 & MA395, Rev 5, Rev 7
     arm_5090 = "2.0.1072.5090"  # Rev 6
     fixture_num = "034400"  # BP35-II Fixture
 
@@ -325,7 +325,8 @@ class BP35_II(BP35):
 
         """
         crails = {
-            None: cls._crail_6,
+            None: cls._crail_3_5,
+            "7": cls._crail_3_5,
             "6": cls._crail_6,
             "5": cls._crail_3_5,
             "4": cls._crail_3_5,
@@ -357,12 +358,15 @@ class BP35IIHA(BP35IISR):
 
     """BP35-IIHA configuration."""
 
-    _rev6_values = _Values(
-        hw_version=(18, Type.HA.value, "A"), arm_sw_version=BP35_II.arm_5090
+    _rev7_values = _Values(
+        hw_version=(19, Type.HA.value, "A"), arm_sw_version=BP35_II.arm_5073
     )
     _rev_data = {
-        None: _rev6_values,
-        "6": _rev6_values,
+        None: _rev7_values,
+        "7": _rev7_values,
+        "6": _Values(
+            hw_version=(18, Type.HA.value, "A"), arm_sw_version=BP35_II.arm_5090
+        ),
         "5": _Values(
             hw_version=(17, Type.HA.value, "A"), arm_sw_version=BP35_II.arm_5073
         ),
@@ -383,12 +387,15 @@ class BP35IISI(BP35_II):
     is_pm = True
     # PM Solar Reg settings
     pm_zero_wait = 30  # Settling delay for zero calibration
-    _rev6_values = _Values(
-        hw_version=(18, Type.SI.value, "A"), arm_sw_version=BP35_II.arm_5090
+    _rev7_values = _Values(
+        hw_version=(19, Type.SI.value, "A"), arm_sw_version=BP35_II.arm_5073
     )
     _rev_data = {
-        None: _rev6_values,
-        "6": _rev6_values,
+        None: _rev7_values,
+        "7": _rev7_values,
+        "6": _Values(
+            hw_version=(18, Type.SI.value, "A"), arm_sw_version=BP35_II.arm_5090
+        ),
         "5": _Values(
             hw_version=(17, Type.SI.value, "A"), arm_sw_version=BP35_II.arm_5073
         ),
