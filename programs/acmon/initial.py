@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2020 SETEC Pty Ltd
-"""RVMD50 Initial Test Program."""
+"""ACMON Initial Test Program."""
 
 import pathlib
 
@@ -12,15 +12,17 @@ import share
 
 class Initial(share.TestSequence):
 
-    """RVMD50 Initial Test Program."""
+    """ACMON Initial Test Program."""
 
     sw_image = "no_sw_available_yet.bin"
-    vin_set = 12.0  # Input DC voltage to power the unit
+    vin_set = 12.0  # Input DC voltage to power the unit from CAN bus
     vac_set = 220.0 # Input AC voltage
     testlimits = (  # Test limits
+        tester.LimitLow("FixtureLock", 100),
         tester.LimitBetween("Vin", vin_set - 1.0, vin_set, doc="Input voltage present"),
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        tester.LimitPercent("AcVoltage", vac_set, 10.0, doc="AC voltage reading"),
+        tester.LimitPercent("Vac1", vac_set / 2, 5.0, doc="AC voltage reading between X1_L1 and X1_N"),
+        tester.LimitPercent("Vac2", vac_set / 2, 5.0, doc="AC voltage reading between X1_L2 and X1_N"),
         tester.LimitPercent("AcCurrent", 100.0, 10.0, doc="AC current reading"),
     )
 
@@ -61,7 +63,7 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("acs", tester.ACSource, "ACS"),
-            ("dcs_vin", tester.DCSource, "DCS2"),
+            ("dcs_vin", tester.DCSource, "DCS1"),
             ("JLink", tester.JLink, "JLINK"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -95,10 +97,15 @@ class Sensors(share.Sensors):
         """Create all Sensor instances."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
-        self["vin"].doc = "X1"
-        self["3v3"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self["3v3"].doc = "U1 output"
+        self["lock"] = sensor.Res(dmm, high=11, low=7, rng=10000, res=1)
+        self["vac1"] = sensor.Vac(dmm, high=1, low=1, rng=1000, res=0.01)
+        self["vac1"].doc = "Between X1_L1 and X1_N"
+        self["vac2"] = sensor.Vac(dmm, high=2, low=1, rng=1000, res=0.01)
+        self["vac2"].doc = "Between X1_L2 and X1_N"
+        self["vin"] = sensor.Vdc(dmm, high=3, low=2, rng=100, res=0.01)
+        self["vin"].doc = "X6 CAN bus"
+        self["3v3"] = sensor.Vdc(dmm, high=4, low=2, rng=10, res=0.01)
+        self["3v3"].doc = "U5 output"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
             pathlib.Path(__file__).parent / self.projectfile,
@@ -118,7 +125,10 @@ class Measurements(share.Measurements):
         """Create all Measurement instances."""
         self.create_from_names(
             (
-                ("dmm_vin", "Vin", "vin", "Input voltage"),
+                ("dmm_lock", "FixtureLock", "lock", ""),
+                ("dmm_vac1", "Vac1", "vac1", "AC Input voltage at L1"),
+                ("dmm_vac2", "Vac2", "vac2", "AC Input voltage at L2"),
+                ("dmm_vin", "Vin", "vin", "DC Input voltage from CAN bus"),
                 ("dmm_3v3", "3V3", "3v3", "3V3 rail voltage"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
                 ("voltage1", "AcVoltage", "voltage1", "Phase 1 voltage"),
