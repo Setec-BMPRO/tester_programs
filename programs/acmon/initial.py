@@ -16,13 +16,18 @@ class Initial(share.TestSequence):
 
     sw_image = "no_sw_available_yet.bin"
     vin_set = 12.0  # Input DC voltage to power the unit from CAN bus
-    vac_set = 220.0 # Input AC voltage
+    vac_set = 220.0  # Input AC voltage
     testlimits = (  # Test limits
         tester.LimitLow("FixtureLock", 100),
         tester.LimitBetween("Vin", vin_set - 1.0, vin_set, doc="Input voltage present"),
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        tester.LimitPercent("Vac1", vac_set / 2, 5.0, doc="AC voltage reading between X1_L1 and X1_N"),
-        tester.LimitPercent("Vac2", vac_set / 2, 5.0, doc="AC voltage reading between X1_L2 and X1_N"),
+        # FIXME: Unit cannot measure voltage, just On/Off
+        tester.LimitPercent(
+            "Vac1", vac_set / 2, 5.0, doc="AC voltage reading between X1_L1 and X1_N"
+        ),
+        tester.LimitPercent(
+            "Vac2", vac_set / 2, 5.0, doc="AC voltage reading between X1_L2 and X1_N"
+        ),
         tester.LimitPercent("AcCurrent", 100.0, 10.0, doc="AC current reading"),
     )
 
@@ -40,7 +45,7 @@ class Initial(share.TestSequence):
     def _step_power_up(self, dev, mes):
         """Apply input voltage and measure voltages."""
         dev["dcs_vin"].output(self.vin_set, output=True)
-        self.measure(("dmm_vin", "dmm_3v3"), timeout=5)
+        self.measure(("dmm_lock", "dmm_vin", "dmm_3v3"), timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -50,6 +55,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_run(self, dev, mes):
         """Run the unit."""
+
 
 # FIXME: AC Source 220V, Read & decode CAN traffic
 
@@ -131,8 +137,8 @@ class Measurements(share.Measurements):
                 ("dmm_vin", "Vin", "vin", "DC Input voltage from CAN bus"),
                 ("dmm_3v3", "3V3", "3v3", "3V3 rail voltage"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
-                ("voltage1", "AcVoltage", "voltage1", "Phase 1 voltage"),
-                ("voltage2", "AcVoltage", "voltage2", "Phase 2 voltage"),
+                ("voltage1", "Vac1", "voltage1", "Phase 1 voltage"),
+                ("voltage2", "Vac2", "voltage2", "Phase 2 voltage"),
                 ("current1", "AcCurrent", "current1", "Current sensor 1"),
                 ("current2", "AcCurrent", "current2", "Current sensor 2"),
             )

@@ -20,6 +20,7 @@ class ACMONInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
+                    (sen["lock"], 50),
                     (sen["vin"], 11.5),
                     (sen["3v3"], 3.3),
                 ),
@@ -32,5 +33,5 @@ class ACMONInitial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(3, len(result.readings))
+        self.assertEqual(4, len(result.readings))
         self.assertEqual(["PowerUp", "Program", "Run"], self.tester.ut_steps)
