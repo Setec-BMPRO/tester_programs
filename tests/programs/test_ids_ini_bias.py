@@ -20,15 +20,12 @@ class Ids500InitialBias(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
-                    (sen["olock"], 0.0),
-                    (sen["o400V"], 400.0),
-                    (sen["oPVcc"], 14.0),
+                    (sen["lock"], 0.0),
+                    (sen["400V"], 400.0),
+                    (sen["Vcc"], 14.0),
                 ),
-                "OCP": (
-                    (
-                        sen["o12Vsbraw"],
-                        (13.0,) * 4 + (12.5, 0.0),
-                    ),
+                "Load": (
+                    (sen["12V"], (13.0, 12.8)),
                 ),
             },
         }
@@ -36,5 +33,5 @@ class Ids500InitialBias(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(6, len(result.readings))
-        self.assertEqual(["PowerUp", "OCP"], self.tester.ut_steps)
+        self.assertEqual(5, len(result.readings))
+        self.assertEqual(["PowerUp", "Load"], self.tester.ut_steps)
