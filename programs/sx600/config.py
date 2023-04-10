@@ -133,6 +133,7 @@ class Config:
     )
     _rev_data = {
         None: _renesas_values,
+        "6": _renesas_values,
         "5": _renesas_values,
         "4": _Values(
             projectfile="lpc1113.jflash",
