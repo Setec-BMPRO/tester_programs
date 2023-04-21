@@ -7,6 +7,7 @@ Reference:  "RVM101_5x CAN Specification"
 
 """
 
+import contextlib
 import ctypes
 import enum
 import struct
@@ -127,8 +128,8 @@ class _SwitchStatusField(ctypes.Structure):
         ("zone3", ctypes.c_uint, 2),
         ("zone4", ctypes.c_uint, 2),
         ("_hex", ctypes.c_uint, 4),
-        ("up", ctypes.c_uint, 2),
-        ("down", ctypes.c_uint, 2),
+        ("btnup", ctypes.c_uint, 2),
+        ("btndown", ctypes.c_uint, 2),
         ("usb_pwr", ctypes.c_uint, 1),
         ("wake_up", ctypes.c_uint, 1),
         ("_unused2", ctypes.c_uint, 6),
@@ -146,45 +147,37 @@ class _SwitchStatusRaw(ctypes.Union):
     ]
 
 
+@attr.s
 class SwitchStatusPacket:  # pylint: disable=too-few-public-methods
 
-    """A Switch Status packet."""
+    """A RVMC Switch Status packet."""
 
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, packet):
-        """Create instance.
+    data = attr.ib(validator=attr.validators.instance_of(bytes))
+    fields = attr.ib(init=False, factory=dict)
 
-        @param packet CAN payload of SetecRVC.data_len bytes
-
-        """
-        payload = packet.data
+    def __attrs_post_init__(self):
+        """Populate fields."""
         if (
-            len(payload) != SetecRVC.DATA_LEN.value
-            or payload[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.SWITCH_STATUS.value
+            len(self.data) != SetecRVC.DATA_LEN.value
+            or self.data[SetecRVC.COMMAND_ID_INDEX.value]
+            != CommandID.SWITCH_STATUS.value
         ):
             raise PacketDecodeError()
         (
-            self.msgtype,
-            switch_data,
-            self.swver,
-            self.counter,
-            self.checksum,
-        ) = struct.Struct("<BL3B").unpack(payload)
+            self.fields["msgtype"],  # D0
+            switch_data,  # D1-4
+            self.fields["swver"],  # D5
+            self.fields["counter"],  # D6
+            self.fields["checksum"],  # D7
+        ) = struct.Struct("<BL3B").unpack(self.data)
         # Decode the switch data
         switch_raw = _SwitchStatusRaw()
+        # pylint: disable=attribute-defined-outside-init
         switch_raw.uint = switch_data
         zss = switch_raw.switch
-        # Assign switch data to my properties
-        self.retract = bool(zss.retract)
-        self.extend = bool(zss.extend)
-        self.zone1 = bool(zss.zone1)
-        self.zone2 = bool(zss.zone2)
-        self.zone3 = bool(zss.zone3)
-        self.zone4 = bool(zss.zone4)
-        self.btnup = bool(zss.up)
-        self.btndown = bool(zss.down)
-        self.usb_pwr = bool(zss.usb_pwr)
-        self.wake_up = bool(zss.wake_up)
+        # pylint: disable=protected-access
+        for name in tuple(field[0] for field in _SwitchStatusField._fields_):
+            self.fields[name] = getattr(zss, name)
 
 
 class _DeviceStatusField(ctypes.Structure):
@@ -197,7 +190,6 @@ class _DeviceStatusField(ctypes.Structure):
 
     # pylint: disable=too-few-public-methods
     _fields_ = [
-        # Byte D1
         ("page", ctypes.c_uint, 1),
         ("sel", ctypes.c_uint, 1),
         ("soft1", ctypes.c_uint, 1),
@@ -206,7 +198,6 @@ class _DeviceStatusField(ctypes.Structure):
         ("light2", ctypes.c_uint, 1),
         ("light3", ctypes.c_uint, 1),
         ("pump", ctypes.c_uint, 1),
-        # Byte D2
         ("acmain", ctypes.c_uint, 1),
         ("_reserved", ctypes.c_uint, 6),
         ("backlight", ctypes.c_uint, 1),
@@ -224,43 +215,36 @@ class _DeviceStatusRaw(ctypes.Union):
     ]
 
 
+@attr.s
 class DeviceStatusPacket:  # pylint: disable=too-few-public-methods
 
     """RVMD50 Device Status packet."""
 
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, packet):
-        """Create instance.
+    data = attr.ib(validator=attr.validators.instance_of(bytes))
+    fields = attr.ib(init=False, factory=dict)
 
-        @param packet CAN payload of SetecRVC.data_len bytes
-
-        """
-        payload = packet.data
-        if len(payload) != SetecRVC.DATA_LEN.value or payload[
-            SetecRVC.COMMAND_ID_INDEX.value
-        ] not in (0, CommandID.DEVICE_STATUS.value):
+    def __attrs_post_init__(self):
+        """Populate fields."""
+        if (
+            len(self.data) != SetecRVC.DATA_LEN.value
+            or self.data[SetecRVC.COMMAND_ID_INDEX.value]
+            != CommandID.DEVICE_STATUS.value
+        ):
             raise PacketDecodeError()
         (
-            self.msgtype,  # D0
+            self.fields["msgtype"],  # D0
             button_data,  # D1,2
-            self.menu_state,  # D3
-            _,  # D4-7
-        ) = struct.Struct("<BHBL").unpack(payload)
+            self.fields["menu_state"],  # D3
+            self.fields["_unused"],  # D4-7
+        ) = struct.Struct("<BHBL").unpack(self.data)
         # Decode the button data
         button_raw = _DeviceStatusRaw()
+        # pylint: disable=attribute-defined-outside-init
         button_raw.uint = button_data
         zss = button_raw.button
-        # Assign button data to my properties
-        self.page = bool(zss.page)
-        self.sel = bool(zss.sel)
-        self.soft1 = bool(zss.soft1)
-        self.soft2 = bool(zss.soft2)
-        self.light1 = bool(zss.light1)
-        self.light2 = bool(zss.light2)
-        self.light3 = bool(zss.light3)
-        self.pump = bool(zss.pump)
-        self.acmain = bool(zss.acmain)
-        self.backlight = bool(zss.backlight)
+        # pylint: disable=protected-access
+        for name in tuple(field[0] for field in _DeviceStatusField._fields_):
+            self.fields[name] = getattr(zss, name)
 
 
 class _RVMD50MessagePacket:  # pylint: disable=too-few-public-methods
@@ -411,7 +395,8 @@ class ACMONStatusPacket:  # pylint: disable=too-few-public-methods
 
     """ACMON Status packet."""
 
-# FIXME: Implement ACMON CAN Packet decoder
+
+# TODO: Implement ACMON CAN Packet decoder
 
 
 @attr.s
@@ -437,17 +422,14 @@ class PacketPropertyReader:
         @return Packet property value
 
         """
-        # FIXME: How can we signal 'no/bad CAN packet' without a tester exception?
         try:
-            can_data = self.canreader.read()
-            packet = self.packettype(can_data)
+            pkt = self.canreader.read()
+            packet = self.packettype(pkt.data)
         except tester.CANReaderError:  # A timeout due to no traffic
-            # FIXME: False only works because RVMC/RVMD look for True to pass
-            return False
-        except PacketDecodeError:  # Probably another packet type
-            # FIXME: Should we return False? Or instead, read again?
-            return False
-        return getattr(packet, self._read_key)
+            return None
+        except PacketDecodeError:  # Probably incorrect packet type
+            return None
+        return packet.fields[self._read_key]
 
 
 @attr.s
@@ -471,9 +453,7 @@ class PacketDetector:
 
         """
         result = None
-        try:
+        with contextlib.suppress(tester.CANReaderError):
             self.canreader.read()
             result = True
-        except tester.CANReaderError:  # A timeout due to no traffic
-            result = False
         return result

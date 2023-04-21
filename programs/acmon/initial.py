@@ -21,7 +21,7 @@ class Initial(share.TestSequence):
         tester.LimitLow("FixtureLock", 100),
         tester.LimitBetween("Vin", vin_set - 1.0, vin_set, doc="Input voltage present"),
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        # FIXME: Unit cannot measure voltage, just On/Off
+        # TODO: Unit cannot measure voltage, just On/Off
         tester.LimitPercent(
             "Vac1", vac_set / 2, 5.0, doc="AC voltage reading between X1_L1 and X1_N"
         ),
@@ -57,7 +57,7 @@ class Initial(share.TestSequence):
         """Run the unit."""
 
 
-# FIXME: AC Source 220V, Read & decode CAN traffic
+# TODO: AC Source 220V, Read & decode CAN traffic
 
 
 class Devices(share.Devices):
