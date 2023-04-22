@@ -176,8 +176,11 @@ class SwitchStatusPacket:  # pylint: disable=too-few-public-methods
         switch_raw.uint = switch_data
         zss = switch_raw.switch
         # pylint: disable=protected-access
-        for name in tuple(field[0] for field in _SwitchStatusField._fields_):
-            self.fields[name] = getattr(zss, name)
+        for name, _, bits in _SwitchStatusField._fields_:
+            value = getattr(zss, name)
+            if bits < 3:
+                value = bool(value)
+            self.fields[name] = value
 
 
 class _DeviceStatusField(ctypes.Structure):
@@ -243,8 +246,11 @@ class DeviceStatusPacket:  # pylint: disable=too-few-public-methods
         button_raw.uint = button_data
         zss = button_raw.button
         # pylint: disable=protected-access
-        for name in tuple(field[0] for field in _DeviceStatusField._fields_):
-            self.fields[name] = getattr(zss, name)
+        for name, _, bits in _DeviceStatusField._fields_:
+            value = getattr(zss, name)
+            if bits < 2:
+                value = bool(value)
+            self.fields[name] = value
 
 
 class _RVMD50MessagePacket:  # pylint: disable=too-few-public-methods
