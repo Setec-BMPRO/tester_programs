@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2023 , ",
-    "saved": "2023-01-30, 16:39:54"
+    "saved": "2023-04-24, 14:12:00"
   },
   "project": {
     "AUTHOR": "",
@@ -406,6 +406,7 @@
       "tests/programs/test_wtsi200_final.py",
       "tests/share/__init__.py",
       "tests/share/test_bluetooth.py",
+      "tests/share/test_can.py",
       "tests/share/test_console.py",
       "tests/share/test_parameter.py",
       "testsuite.py"

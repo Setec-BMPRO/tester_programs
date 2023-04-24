@@ -5,24 +5,18 @@
 
 import time
 
+import attr
 import share
 
 
+@attr.s
 class DisplayControl:
 
     """Control of the LCD & Backlight via CAN."""
 
-    test_pattern = 1  # LCD test pattern to use
-    inter_packet_gap = 0.1  # Wait between CAN packets
-
-    def __init__(self, can_dev):
-        """Create instance.
-
-        @param can_dev CAN interface device
-
-        """
-        self.pkt_pattern = share.can.RVMD50ControlLCDPacket(can_dev)
-        self.pkt_button = share.can.RVMD50ControlButtonPacket(can_dev)
+    can_dev = attr.ib()
+    bld_pattern = attr.ib(init=False, factory=share.can.RVMD50ControlLCDBuilder)
+    bld_button = attr.ib(init=False, factory=share.can.RVMD50ControlButtonBuilder)
 
     def __enter__(self):
         """Context Manager entry handler - Override LCD & Backlight.
@@ -30,17 +24,21 @@ class DisplayControl:
         @return self
 
         """
-        self.pkt_pattern.pattern = self.test_pattern
-        self.pkt_pattern.send()
-        time.sleep(self.inter_packet_gap)
-        self.pkt_button.enable = self.pkt_button.button = True
-        self.pkt_button.send()
+        self.bld_pattern.pattern = 1  # LCD test pattern to use
+        self.bld_button.enable = True
+        self.bld_button.button = True
+        self._send(self.bld_pattern.packet, self.bld_button.packet)
         return self
 
     def __exit__(self, exct_type, exce_value, trace_back):
         """Context Manager exit handler - Release overrides."""
-        self.pkt_button.enable = self.pkt_pattern.button = False
-        self.pkt_button.send()
-        time.sleep(self.inter_packet_gap)
-        self.pkt_pattern.pattern = 0
-        self.pkt_pattern.send()
+        self.bld_pattern.pattern = 0
+        self.bld_button.enable = False
+        self.bld_pattern.button = False
+        self._send(self.bld_button.packet, self.bld_pattern.packet)
+
+    def _send(self, packet1, packet2):
+        """Send CAN Packets with a delay between them."""
+        self.can_dev.send(packet1)
+        time.sleep(0.1)  # Wait between CAN packets
+        self.can_dev.send(packet2)

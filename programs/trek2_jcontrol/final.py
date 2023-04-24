@@ -76,7 +76,9 @@ class Final(share.TestSequence):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vin_set, output=True, delay=self.can_bind_time)
-        self.send_preconditions(self.physical_devices["CAN"][0])
+        precon = share.can.PreConditionsBuilder()
+        candev = self.physical_devices["CAN"][0]
+        candev.send(precon.packet)
 
     @share.teststep
     def _step_tunnel_open(self, dev, mes):
@@ -133,17 +135,6 @@ class Final(share.TestSequence):
             logger.debug("Results => %s", results)
             raise
         unit.testmode(False)
-
-    @staticmethod
-    def send_preconditions(candev):
-        """Send a Preconditions packet (for Trek2)."""
-        header = tester.devphysical.can.SETECHeader()
-        msg = header.message
-        msg.device_id = share.can.SETECDeviceID.BP35.value
-        msg.msg_type = tester.devphysical.can.SETECMessageType.ANNOUNCE.value
-        msg.data_id = tester.devphysical.can.SETECDataID.PRECONDITIONS.value
-        data = b"\x00\x00"  # Dummy data
-        candev.send(tester.devphysical.can.CANPacket(header, data))
 
 
 class Devices(share.Devices):

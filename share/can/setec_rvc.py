@@ -3,11 +3,12 @@
 # Copyright 2020 SETEC Pty Ltd.
 """SETEC RV-C CAN Packet decoder & generator.
 
-Reference:  "RVM101_5x CAN Specification"
+Reference:
+    PLM/SYSTEMS/RVM5x/11_RD/60_Software/40_SW_Specifications/_Working/
+        WIP_RVM101_5x CAN Specification_v0.6.docx
 
 """
 
-import contextlib
 import ctypes
 import enum
 import struct
@@ -113,26 +114,33 @@ class _SwitchStatusField(ctypes.Structure):
 
     """RVMC switch field definition.
 
-    Refer to "RVM101 CAN Specification"
+    5.5.6 SWITCH_STATUS
+
+    5.1 Data type definitions:
+    "Bit fields" are 2-bit:
+        11b – Data not available
+        10b – Error
+        01b – On
+        00b – Off
 
     """
 
     # pylint: disable=too-few-public-methods
     _fields_ = [
-        ("_pairing", ctypes.c_uint, 2),
+        ("pairing", ctypes.c_uint, 2),
         ("retract", ctypes.c_uint, 2),
         ("extend", ctypes.c_uint, 2),
-        ("_unused1", ctypes.c_uint, 2),
+        ("_unused1", ctypes.c_uint, 2),  # always 11b
         ("zone1", ctypes.c_uint, 2),
         ("zone2", ctypes.c_uint, 2),
         ("zone3", ctypes.c_uint, 2),
         ("zone4", ctypes.c_uint, 2),
-        ("_hex", ctypes.c_uint, 4),
+        ("hex", ctypes.c_uint, 4),  # Hex switch, 0000b if unused
         ("btnup", ctypes.c_uint, 2),
         ("btndown", ctypes.c_uint, 2),
         ("usb_pwr", ctypes.c_uint, 1),
         ("wake_up", ctypes.c_uint, 1),
-        ("_unused2", ctypes.c_uint, 6),
+        ("_unused2", ctypes.c_uint, 6),  # always 111111b
     ]
 
 
@@ -148,9 +156,9 @@ class _SwitchStatusRaw(ctypes.Union):
 
 
 @attr.s
-class SwitchStatusPacket:  # pylint: disable=too-few-public-methods
+class SwitchStatusDecoder:  # pylint: disable=too-few-public-methods
 
-    """A RVMC Switch Status packet."""
+    """A RVMC Switch Status decoder."""
 
     data = attr.ib(validator=attr.validators.instance_of(bytes))
     fields = attr.ib(init=False, factory=dict)
@@ -179,7 +187,7 @@ class SwitchStatusPacket:  # pylint: disable=too-few-public-methods
         for name, _, bits in _SwitchStatusField._fields_:
             value = getattr(zss, name)
             if bits < 3:
-                value = bool(value)
+                value = bool(value) if value < 2 else None
             self.fields[name] = value
 
 
@@ -187,7 +195,7 @@ class _DeviceStatusField(ctypes.Structure):
 
     """RVMD50 button field definition.
 
-    Refer to "RVMN101_5x CAN Specification"
+    5.5.10.12 Command Signal and Parameter Definition
 
     """
 
@@ -202,7 +210,7 @@ class _DeviceStatusField(ctypes.Structure):
         ("light3", ctypes.c_uint, 1),
         ("pump", ctypes.c_uint, 1),
         ("acmain", ctypes.c_uint, 1),
-        ("_reserved", ctypes.c_uint, 6),
+        ("_reserved", ctypes.c_uint, 6),  # always 111111b
         ("backlight", ctypes.c_uint, 1),
     ]
 
@@ -219,9 +227,9 @@ class _DeviceStatusRaw(ctypes.Union):
 
 
 @attr.s
-class DeviceStatusPacket:  # pylint: disable=too-few-public-methods
+class DeviceStatusDecoder:  # pylint: disable=too-few-public-methods
 
-    """RVMD50 Device Status packet."""
+    """RVMD50 Device Status decoder."""
 
     data = attr.ib(validator=attr.validators.instance_of(bytes))
     fields = attr.ib(init=False, factory=dict)
@@ -248,27 +256,86 @@ class DeviceStatusPacket:  # pylint: disable=too-few-public-methods
         # pylint: disable=protected-access
         for name, _, bits in _DeviceStatusField._fields_:
             value = getattr(zss, name)
-            if bits < 2:
+            if bits == 1:
                 value = bool(value)
             self.fields[name] = value
 
 
-class _RVMD50MessagePacket:  # pylint: disable=too-few-public-methods
+class ACMONStatusDecoder:  # pylint: disable=too-few-public-methods
 
-    """A RVMD50 message packet."""
+    """ACMON Status decoder."""
+
+
+# TODO: Implement ACMON CAN Packet decoder
+
+
+@attr.s
+class RVMC101ControlLEDBuilder:
+
+    """A RVMC101 Control LED packet builder.
+
+        [0]: LED Display = 0x01
+        [1]: LED 7 segment DIGIT0 (LSB, right)
+        [2]: LED 7 segment DIGIT1 (MSB, left)
+        [3.0]: 1 = Enable power to USB (Default)
+        [3.1]: 1 = Stay Awake
+        [3.2-7]: Unused: 0xFC
+        [4-5]: Unused: 0xFF
+        [6]: Sequence number
+        [7]: Checksum
+
+    """
+
+    packet = attr.ib(init=False)
+
+    @packet.default
+    def _packet_default(self):
+        """Populate CAN Packet."""
+        header = tester.devphysical.can.RVCHeader()
+        msg = header.message
+        msg.DGN = DGN.RVMC101.value  #  to the RVMC101
+        msg.SA = DeviceID.RVMN101.value  #  from a RVMN101
+        data = bytearray([MessageID.LED_DISPLAY.value])
+        data.extend(b"\x00\x00\xff\xff\xff\x00\x00")
+        return tester.devphysical.can.CANPacket(header, data)
+
+    @property
+    def pattern(self):
+        """pattern property getter.
+
+        @return Test pattern value
+
+        """
+        return self.packet.data[1]
+
+    @pattern.setter
+    def pattern(self, value):
+        """Set pattern property.
+
+        @param value Test pattern
+
+        """
+        self.packet.data[1] = self.packet.data[2] = value
+        self.packet.data[6] = (self.packet.data[6] + 1) & 0xFF  # Sequence number
+        self.packet.data[7] = sum(self.packet.data[:7]) & 0xFF  # Checksum
+
+
+class _RVMD50Message:  # pylint: disable=too-few-public-methods
+
+    """A generic RVMD50 message packet."""
 
     _cmd_id_index = 1  # Index of Cmd ID value
     _cmd_id_range = range(3)  # Valid range of Cmd ID values
 
-    def __init__(self, candev, cmd_id):
+    @classmethod
+    def create(cls, cmd_id):
         """Create instance.
 
-        @param candev CAN device
         @param cmd_id Cmd ID value
+        @return CANPacket instance
 
         """
-        self._candev = candev
-        if cmd_id not in self._cmd_id_range:
+        if cmd_id not in cls._cmd_id_range:
             raise ValueError("Cmd ID out of range")
         header = tester.devphysical.can.RVCHeader()
         msg = header.message  # Packet...
@@ -276,28 +343,22 @@ class _RVMD50MessagePacket:  # pylint: disable=too-few-public-methods
         msg.SA = DeviceID.RVMN5X.value  #  from a RVMN5x
         data = bytearray(SetecRVC.DATA_LEN.value)
         data[SetecRVC.MESSAGE_ID_INDEX.value] = MessageID.COMMAND.value
-        data[self._cmd_id_index] = cmd_id
-        self.pkt = tester.devphysical.can.CANPacket(header, data)
-
-    def send(self):
-        """Send the packet to the CAN bus."""
-        self._candev.send(self.pkt)
+        data[cls._cmd_id_index] = cmd_id
+        return tester.devphysical.can.CANPacket(header, data)
 
 
-class RVMD50ControlLCDPacket(_RVMD50MessagePacket):
+@attr.s
+class RVMD50ControlLCDBuilder:
 
-    """A RVMD50 Control LCD packet."""
+    """A RVMD50 Control LCD packet builder."""
 
-    _cmd_id = 0  # Cmd ID: 0 = Control LCD
     _pattern_index = 2  # Index of test pattern value
 
-    def __init__(self, candev):
-        """Create instance.
+    # Cmd ID: 0 = Control LCD
+    packet = attr.ib(init=False, factory=lambda: _RVMD50Message.create(cmd_id=0))
 
-        @param candev 2CAN device
-
-        """
-        super().__init__(candev, self._cmd_id)
+    def __attrs_post_init__(self):
+        """Populate fields."""
         self.pattern = 0
 
     @property
@@ -307,7 +368,7 @@ class RVMD50ControlLCDPacket(_RVMD50MessagePacket):
         @return Test pattern value (0-3)
 
         """
-        return self.pkt.data[self._pattern_index]
+        return self.packet.data[self._pattern_index]
 
     @pattern.setter
     def pattern(self, value):
@@ -318,41 +379,31 @@ class RVMD50ControlLCDPacket(_RVMD50MessagePacket):
         """
         if value not in range(4):
             raise ValueError("Test pattern must be 0-3")
-        self.pkt.data[self._pattern_index] = value
+        self.packet.data[self._pattern_index] = value
 
 
-class RVMD50ResetPacket(_RVMD50MessagePacket):
+@attr.s
+class RVMD50ResetBuilder:  # pylint: disable=too-few-public-methods
 
-    """A RVMD50 Reset packet."""
+    """A RVMD50 Reset packet builder."""
 
-    # pylint: disable=too-few-public-methods
-    _cmd_id = 1  # Cmd ID: 1 = Reset
-
-    def __init__(self, candev):
-        """Create instance.
-
-        @param candev CAN device
-
-        """
-        super().__init__(candev, self._cmd_id)
+    # Cmd ID: 1 = Reset
+    packet = attr.ib(init=False, factory=lambda: _RVMD50Message.create(cmd_id=1))
 
 
-class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
+@attr.s
+class RVMD50ControlButtonBuilder:
 
-    """A RVMD50 Control Button packet."""
+    """A RVMD50 Control Button packet builder."""
 
-    _cmd_id = 2  # Cmd ID: 2 = Control Button
-    _group_id = 1  # Group ID: 0 = Off, 1 = On
     _group_id_index = 2  # Index of Group ID value
-    _button_index = 3  # Index of button value
+    _button_index = 3  # Index of Button value
 
-    def __init__(self, candev):
-        """Create instance.
+    # Cmd ID: 2 = Control Button
+    packet = attr.ib(init=False, factory=lambda: _RVMD50Message.create(cmd_id=2))
 
-        @param candev CAN device
-
-        """
-        super().__init__(candev, self._cmd_id)
+    def __attrs_post_init__(self):
+        """Populate fields."""
         self.enable = False
         self.button = False
 
@@ -363,7 +414,7 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
         @return Test button value (0-3)
 
         """
-        return bool(self.pkt.data[self._group_id_index])
+        return bool(self.packet.data[self._group_id_index])
 
     @enable.setter
     def enable(self, value):
@@ -374,7 +425,7 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
         """
         if not isinstance(value, bool):
             raise ValueError("Enable must be boolean")
-        self.pkt.data[self._group_id_index] = int(value)
+        self.packet.data[self._group_id_index] = int(value)
 
     @property
     def button(self):
@@ -383,7 +434,7 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
         @return Button value boolean
 
         """
-        return bool(self.pkt.data[self._button_index])
+        return bool(self.packet.data[self._button_index])
 
     @button.setter
     def button(self, value):
@@ -394,72 +445,4 @@ class RVMD50ControlButtonPacket(_RVMD50MessagePacket):
         """
         if not isinstance(value, bool):
             raise ValueError("Button must be boolean")
-        self.pkt.data[self._button_index] = int(value)
-
-
-class ACMONStatusPacket:  # pylint: disable=too-few-public-methods
-
-    """ACMON Status packet."""
-
-
-# TODO: Implement ACMON CAN Packet decoder
-
-
-@attr.s
-class PacketPropertyReader:
-
-    """Custom logical instrument to read CAN packet properties."""
-
-    canreader = attr.ib()  # tester.CANReader instance
-    packettype = attr.ib()  # CAN packet class
-    _read_key = attr.ib(init=False, default=None)
-
-    def configure(self, key):
-        """Sensor: Configure for next reading."""
-        self._read_key = key
-
-    def opc(self):
-        """Sensor: OPC."""
-
-    def read(self, callerid):  # pylint: disable=unused-argument
-        """Sensor: Read payload data using the last configured key.
-
-        @param callerid Identity of caller
-        @return Packet property value
-
-        """
-        try:
-            pkt = self.canreader.read()
-            packet = self.packettype(pkt.data)
-        except tester.CANReaderError:  # A timeout due to no traffic
-            return None
-        except PacketDecodeError:  # Probably incorrect packet type
-            return None
-        return packet.fields[self._read_key]
-
-
-@attr.s
-class PacketDetector:
-
-    """Custom logical instrument to detect CAN packet traffic."""
-
-    canreader = attr.ib()  # tester.CANReader instance
-
-    def configure(self, key):  # pylint: disable=unused-argument
-        """Sensor: Configure for next reading."""
-
-    def opc(self):
-        """Sensor: OPC."""
-
-    def read(self, callerid):  # pylint: disable=unused-argument
-        """Sensor: Read presence of CAN traffic.
-
-        @param callerid Identity of caller
-        @return True if CAN traffic is seen
-
-        """
-        result = None
-        with contextlib.suppress(tester.CANReaderError):
-            self.canreader.read()
-            result = True
-        return result
+        self.packet.data[self._button_index] = int(value)
