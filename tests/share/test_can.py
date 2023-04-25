@@ -61,6 +61,14 @@ class CAN(unittest.TestCase):
         data = share.can.DeviceStatusDecoder(pktdata)
         self.assertEqual(data.fields, decoded)
 
+    def test_preconditionsbuilder(self):
+        """PreConditionsBuilder creation."""
+        hdr = 0x18004069
+        data = b"\x00\x00"
+        bld = share.can.PreConditionsBuilder()
+        self.assertEqual(bld.packet.header.uint, hdr)
+        self.assertEqual(bld.packet.data, data)
+
     def test_rvmc101controlledbuilder(self):
         """RVMC101ControlLEDBuilder creation."""
         data = b"\x01\x00\x00\xff\xff\xff\x00\x00"
