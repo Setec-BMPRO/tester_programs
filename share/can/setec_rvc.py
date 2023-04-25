@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2020 SETEC Pty Ltd.
-"""SETEC RV-C CAN Packet decoder & generator.
+"""SETEC RV-C CAN Packet decoders & builders.
 
 Reference:
     PLM/SYSTEMS/RVM5x/11_RD/60_Software/40_SW_Specifications/_Working/
@@ -15,6 +15,8 @@ import struct
 
 import attr
 import tester
+
+from . import _base
 
 
 class DeviceID(enum.IntEnum):
@@ -105,11 +107,6 @@ class MessageID(enum.IntEnum):
     GENERAL_CONFIG = 34
 
 
-class PacketDecodeError(Exception):
-
-    """Error decoding a CAN packet."""
-
-
 class _SwitchStatusField(ctypes.Structure):
 
     """RVMC switch field definition.
@@ -156,28 +153,26 @@ class _SwitchStatusRaw(ctypes.Union):
 
 
 @attr.s
-class SwitchStatusDecoder:  # pylint: disable=too-few-public-methods
+class SwitchStatusDecoder(_base.DataDecoderMixIn):
 
     """A RVMC Switch Status decoder."""
 
-    data = attr.ib(validator=attr.validators.instance_of(bytes))
-    fields = attr.ib(init=False, factory=dict)
-
-    def __attrs_post_init__(self):
-        """Populate fields."""
+    # pylint: disable=too-few-public-methods
+    def decode(self, data):
+        """Decode packet data."""
+        self.fields.clear()
         if (
-            len(self.data) != SetecRVC.DATA_LEN.value
-            or self.data[SetecRVC.COMMAND_ID_INDEX.value]
-            != CommandID.SWITCH_STATUS.value
+            len(data) != SetecRVC.DATA_LEN.value
+            or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.SWITCH_STATUS.value
         ):
-            raise PacketDecodeError()
+            raise _base.DataDecodeError()
         (
             self.fields["msgtype"],  # D0
             switch_data,  # D1-4
             self.fields["swver"],  # D5
             self.fields["counter"],  # D6
             self.fields["checksum"],  # D7
-        ) = struct.Struct("<BL3B").unpack(self.data)
+        ) = struct.Struct("<BL3B").unpack(data)
         # Decode the switch data
         switch_raw = _SwitchStatusRaw()
         # pylint: disable=attribute-defined-outside-init
@@ -227,27 +222,25 @@ class _DeviceStatusRaw(ctypes.Union):
 
 
 @attr.s
-class DeviceStatusDecoder:  # pylint: disable=too-few-public-methods
+class DeviceStatusDecoder(_base.DataDecoderMixIn):
 
     """RVMD50 Device Status decoder."""
 
-    data = attr.ib(validator=attr.validators.instance_of(bytes))
-    fields = attr.ib(init=False, factory=dict)
-
-    def __attrs_post_init__(self):
-        """Populate fields."""
+    # pylint: disable=too-few-public-methods
+    def decode(self, data):
+        """Decode packet data."""
+        self.fields.clear()
         if (
-            len(self.data) != SetecRVC.DATA_LEN.value
-            or self.data[SetecRVC.COMMAND_ID_INDEX.value]
-            != CommandID.DEVICE_STATUS.value
+            len(data) != SetecRVC.DATA_LEN.value
+            or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.DEVICE_STATUS.value
         ):
-            raise PacketDecodeError()
+            raise _base.DataDecodeError()
         (
             self.fields["msgtype"],  # D0
             button_data,  # D1,2
             self.fields["menu_state"],  # D3
             self.fields["_unused"],  # D4-7
-        ) = struct.Struct("<BHBL").unpack(self.data)
+        ) = struct.Struct("<BHBL").unpack(data)
         # Decode the button data
         button_raw = _DeviceStatusRaw()
         # pylint: disable=attribute-defined-outside-init
@@ -261,28 +254,38 @@ class DeviceStatusDecoder:  # pylint: disable=too-few-public-methods
             self.fields[name] = value
 
 
-class ACMONStatusDecoder:  # pylint: disable=too-few-public-methods
+# TODO: Complete the ACMON Status decoder
+@attr.s
+class ACMONStatusDecoder(_base.DataDecoderMixIn):
 
     """ACMON Status decoder."""
 
-
-# TODO: Implement ACMON CAN Packet decoder
+    # pylint: disable=too-few-public-methods
+    def decode(self, data):
+        """Decode packet data."""
+        self.fields.clear()
+        if (
+            len(data) != SetecRVC.DATA_LEN.value
+            or data[SetecRVC.COMMAND_ID_INDEX.value]
+            != 42  # FIXME: Put the real command value here
+        ):
+            raise _base.DataDecodeError()
 
 
 @attr.s
-class RVMC101ControlLEDBuilder:
+class RVMC101ControlLEDBuilder:  # pylint: disable=too-few-public-methods
 
     """A RVMC101 Control LED packet builder.
 
-        [0]: LED Display = 0x01
-        [1]: LED 7 segment DIGIT0 (LSB, right)
-        [2]: LED 7 segment DIGIT1 (MSB, left)
-        [3.0]: 1 = Enable power to USB (Default)
-        [3.1]: 1 = Stay Awake
-        [3.2-7]: Unused: 0xFC
-        [4-5]: Unused: 0xFF
-        [6]: Sequence number
-        [7]: Checksum
+    [0]: LED Display = 0x01
+    [1]: LED 7 segment DIGIT0 (LSB, right)
+    [2]: LED 7 segment DIGIT1 (MSB, left)
+    [3.0]: 1 = Enable power to USB (Default)
+    [3.1]: 1 = Stay Awake
+    [3.2-7]: Unused: 0xFC
+    [4-5]: Unused: 0xFF
+    [6]: Sequence number
+    [7]: Checksum
 
     """
 
@@ -348,7 +351,7 @@ class _RVMD50Message:  # pylint: disable=too-few-public-methods
 
 
 @attr.s
-class RVMD50ControlLCDBuilder:
+class RVMD50ControlLCDBuilder:  # pylint: disable=too-few-public-methods
 
     """A RVMD50 Control LCD packet builder."""
 

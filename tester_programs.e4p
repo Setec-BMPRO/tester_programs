@@ -206,6 +206,8 @@
     <Source>share/bluetooth/mac.py</Source>
     <Source>share/bluetooth/raspblue.py</Source>
     <Source>share/can/__init__.py</Source>
+    <Source>share/can/_base.py</Source>
+    <Source>share/can/setec_can.py</Source>
     <Source>share/can/setec_rvc.py</Source>
     <Source>share/config.py</Source>
     <Source>share/console/__init__.py</Source>

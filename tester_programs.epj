@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2023 , ",
-    "saved": "2023-04-24, 14:12:00"
+    "saved": "2023-04-25, 21:38:56"
   },
   "project": {
     "AUTHOR": "",
@@ -302,6 +302,8 @@
       "share/bluetooth/mac.py",
       "share/bluetooth/raspblue.py",
       "share/can/__init__.py",
+      "share/can/_base.py",
+      "share/can/setec_can.py",
       "share/can/setec_rvc.py",
       "share/config.py",
       "share/console/__init__.py",

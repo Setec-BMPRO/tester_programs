@@ -53,7 +53,7 @@ class Devices(share.Devices):
         self["can"] = self.physical_devices["_CAN"]
         self["canreader"] = tester.CANReader(self["can"])
         self["decoder"] = share.can.PacketPropertyReader(
-            canreader=self["canreader"], decoder=share.can.SwitchStatusDecoder
+            canreader=self["canreader"], decoder=share.can.SwitchStatusDecoder()
         )
 
     def run(self):

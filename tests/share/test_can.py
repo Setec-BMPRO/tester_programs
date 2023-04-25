@@ -11,7 +11,39 @@ class CAN(unittest.TestCase):
 
     """CAN test suite."""
 
-    _hdr = 0x18ef4454  # Node to controller packet header
+    _hdr = 0x18ef4454  # RVMN Node to RVM[CD] controller packet header
+
+    def test_acmonstatusdecoder(self):
+        """ACMONStatusDecoder decoding."""
+        pktdata = b"\x2a\x00\x00\x00\x00\x00\x00\x00"
+        decoded = {
+        }
+        dec = share.can.ACMONStatusDecoder()
+        dec.decode(pktdata)
+        self.assertEqual(dec.fields, decoded)
+
+    def test_devicestatuspacket(self):
+        """DeviceStatusPacket decoding."""
+        pktdata = b"\x0a\x00\x00\x00\x00\x00\x00\x00"
+        decoded = {
+            "msgtype": 10,
+            "page": False,
+            "sel": False,
+            "soft1": False,
+            "soft2": False,
+            "light1": False,
+            "light2": False,
+            "light3": False,
+            "pump": False,
+            "acmain": False,
+            "_reserved": 0,
+            "backlight": False,
+            "menu_state": 0,
+            "_unused": 0,
+        }
+        dec = share.can.DeviceStatusDecoder()
+        dec.decode(pktdata)
+        self.assertEqual(dec.fields, decoded)
 
     def test_switchstatuspacket(self):
         """SwitchStatusPacket decoding."""
@@ -36,30 +68,9 @@ class CAN(unittest.TestCase):
             "counter": 0,
             "checksum": 0xa5,
         }
-        data = share.can.SwitchStatusDecoder(pktdata)
-        self.assertEqual(data.fields, decoded)
-
-    def test_devicestatuspacket(self):
-        """DeviceStatusPacket decoding."""
-        pktdata = b"\x0a\x00\x00\x00\x00\x00\x00\x00"
-        decoded = {
-            "msgtype": 10,
-            "page": False,
-            "sel": False,
-            "soft1": False,
-            "soft2": False,
-            "light1": False,
-            "light2": False,
-            "light3": False,
-            "pump": False,
-            "acmain": False,
-            "_reserved": 0,
-            "backlight": False,
-            "menu_state": 0,
-            "_unused": 0,
-        }
-        data = share.can.DeviceStatusDecoder(pktdata)
-        self.assertEqual(data.fields, decoded)
+        dec = share.can.SwitchStatusDecoder()
+        dec.decode(pktdata)
+        self.assertEqual(dec.fields, decoded)
 
     def test_preconditionsbuilder(self):
         """PreConditionsBuilder creation."""
