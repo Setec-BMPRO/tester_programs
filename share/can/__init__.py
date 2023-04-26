@@ -10,30 +10,46 @@ import tester
 
 from . import _base
 from .setec_can import (
-    PreConditionsBuilder,
+    # Packet builders
+    Trek2PreConditionsBuilder,
+    RvviewTestModeBuilder,
+    # Protocol data
     SETECDeviceID,
 )
 from .setec_rvc import (
-    # Packet generators
+    # Packet builders
     RVMC101ControlLEDBuilder,
     RVMD50ControlButtonBuilder,
     RVMD50ControlLCDBuilder,
     RVMD50ResetBuilder,
-    # Packet data decoders
+    # Packet decoders
     ACMONStatusDecoder,
     DeviceStatusDecoder,
     SwitchStatusDecoder,
 )
 
+CANPacket = _base.CANPacket
+RVCHeader = _base.RVCHeader
+SETECHeader = _base.SETECHeader
+SETECMessageType = _base.SETECMessageType
+SETECDataID = _base.SETECDataID
+
 
 __all__ = [
-    # SETEC custom data
+    "CANPacket",
+    # RV-C protocol data
+    "RVCHeader",
+    # SETEC protocol data
+    "SETECHeader",
+    "SETECMessageType",
+    "SETECDataID",
     "SETECDeviceID",
     # Sensors
     "PacketPropertyReader",
     "PacketDetector",
     # Packet generators
-    "PreConditionsBuilder",
+    "Trek2PreConditionsBuilder",
+    "RvviewTestModeBuilder",
     "RVMC101ControlLEDBuilder",
     "RVMD50ControlButtonBuilder",
     "RVMD50ControlLCDBuilder",
@@ -70,12 +86,12 @@ class PacketPropertyReader:
         """
         try:
             packet = self.canreader.read()
-            data = self.decoder.decode(packet.data)
+            data = self.decoder.decode(packet)
         except tester.CANReaderError:  # A timeout due to no traffic
             return None
         except _base.DataDecodeError:  # Probably incorrect packet type
             return None
-        return data.fields[self._read_key]
+        return data.get(self._read_key)
 
 
 @attr.s

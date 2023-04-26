@@ -151,14 +151,9 @@ class Initial(share.TestSequence):
 
         """
         if self.is_atsam:
-            header = tester.devphysical.can.SETECHeader()
-            msg = header.message
-            msg.device_id = share.can.SETECDeviceID.RVVIEW.value
-            msg.msg_type = tester.devphysical.can.SETECMessageType.COMMAND.value
-            msg.data_id = tester.devphysical.can.SETECDataID.XREG.value
-            data = b"\xC5"  # XReg 0xC5 toggles testmode
+            testmode = share.can.RvviewTestModeBuilder()
             candev = self.physical_devices["_CAN"]
-            candev.send(tester.devphysical.can.CANPacket(header, data))
+            candev.send(testmode.packet)
         else:
             self.devices["arm"].testmode(state)
 

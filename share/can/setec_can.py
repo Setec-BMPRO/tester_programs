@@ -12,7 +12,8 @@ Reference:
 import enum
 
 import attr
-import tester
+
+from . import _base
 
 
 @enum.unique
@@ -33,7 +34,7 @@ class SETECDeviceID(enum.IntEnum):  # pylint: disable=too-few-public-methods
 
 
 @attr.s
-class PreConditionsBuilder:  # pylint: disable=too-few-public-methods
+class Trek2PreConditionsBuilder:  # pylint: disable=too-few-public-methods
 
     """A TREK2 PreConditions packet builder."""
 
@@ -41,11 +42,30 @@ class PreConditionsBuilder:  # pylint: disable=too-few-public-methods
 
     @packet.default
     def _packet_default(self):
-        """Build a Preconditions packet (for Trek2)."""
-        header = tester.devphysical.can.SETECHeader()
+        """Build a Preconditions packet."""
+        header = _base.SETECHeader()
         msg = header.message
         msg.device_id = SETECDeviceID.BP35.value
-        msg.msg_type = tester.devphysical.can.SETECMessageType.ANNOUNCE.value
-        msg.data_id = tester.devphysical.can.SETECDataID.PRECONDITIONS.value
+        msg.msg_type = _base.SETECMessageType.ANNOUNCE.value
+        msg.data_id = _base.SETECDataID.PRECONDITIONS.value
         data = b"\x00\x00"  # Dummy data
-        return tester.devphysical.can.CANPacket(header, data)
+        return _base.CANPacket(header, data)
+
+
+@attr.s
+class RvviewTestModeBuilder:  # pylint: disable=too-few-public-methods
+
+    """A RVVIEW TestMode packet builder."""
+
+    packet = attr.ib(init=False)
+
+    @packet.default
+    def _packet_default(self):
+        """Build a TestMode packet."""
+        header = _base.SETECHeader()
+        msg = header.message
+        msg.device_id = SETECDeviceID.RVVIEW.value
+        msg.msg_type = _base.SETECMessageType.COMMAND.value
+        msg.data_id = _base.SETECDataID.XREG.value
+        data = b"\xC5"  # XReg 0xC5 toggles testmode
+        return _base.CANPacket(header, data)

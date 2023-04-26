@@ -15,16 +15,79 @@ class CAN(unittest.TestCase):
 
     def test_acmonstatusdecoder(self):
         """ACMONStatusDecoder decoding."""
-        pktdata = b"\x2a\x00\x00\x00\x00\x00\x00\x00"
-        decoded = {
-        }
         dec = share.can.ACMONStatusDecoder()
-        dec.decode(pktdata)
+        header = share.can.RVCHeader()
+        # ACSTATUS1, 2 legs
+        header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS1
+        data = b"\x00\xff\xff\x10\x40\x10\x20\x00"
+        packet = share.can.CANPacket(header, data)
+        dec.decode(packet)
+        data = b"\x80\xff\xff\x10\x10\x00\x50\x00"
+        packet = share.can.CANPacket(header, data)
+        dec.decode(packet)
+        header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS3
+        # ACSTATUS3, 2 legs
+        data = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+        packet = share.can.CANPacket(header, data)
+        dec.decode(packet)
+        data = b"\x80\x00\x00\x00\x00\x00\x00\x00"
+        packet = share.can.CANPacket(header, data)
+        dec.decode(packet)
+        # Check full dataset
+        decoded = {
+            'S1L1_current': 16400,
+            'S1L1_frequency': 8208,
+            'S1L1_groundcurrent': 0,
+            'S1L1_instance': 0,
+            'S1L1_iotype': 0,
+            'S1L1_leg': 0,
+            'S1L1_open_ground': 0,
+            'S1L1_open_neutral': 0,
+            'S1L1_polarity': 0,
+            'S1L1_source': 0,
+            'S1L1_voltage': 65535,
+            'S1L2_current': 4112,
+            'S1L2_frequency': 20480,
+            'S1L2_groundcurrent': 0,
+            'S1L2_instance': 0,
+            'S1L2_iotype': 0,
+            'S1L2_leg': 1,
+            'S1L2_open_ground': 0,
+            'S1L2_open_neutral': 0,
+            'S1L2_polarity': 0,
+            'S1L2_source': 0,
+            'S1L2_voltage': 65535,
+            'S3L1__unused': 0,
+            'S3L1_complementary_leg': 0,
+            'S3L1_harmonics': 0,
+            'S3L1_instance': 0,
+            'S3L1_iotype': 0,
+            'S3L1_leg': 0,
+            'S3L1_phase': 0,
+            'S3L1_power_reactive': 0,
+            'S3L1_power_real': 0,
+            'S3L1_source': 0,
+            'S3L1_waveform': 0,
+            'S3L2__unused': 0,
+            'S3L2_complementary_leg': 0,
+            'S3L2_harmonics': 0,
+            'S3L2_instance': 0,
+            'S3L2_iotype': 0,
+            'S3L2_leg': 1,
+            'S3L2_phase': 0,
+            'S3L2_power_reactive': 0,
+            'S3L2_power_real': 0,
+            'S3L2_source': 0,
+            'S3L2_waveform': 0,
+            }
+        self.maxDiff = None
         self.assertEqual(dec.fields, decoded)
 
     def test_devicestatuspacket(self):
         """DeviceStatusPacket decoding."""
-        pktdata = b"\x0a\x00\x00\x00\x00\x00\x00\x00"
+        header = share.can.RVCHeader()
+        data = b"\x0a\x00\x00\x00\x00\x00\x00\x00"
+        packet = share.can.CANPacket(header, data)
         decoded = {
             "msgtype": 10,
             "page": False,
@@ -42,12 +105,14 @@ class CAN(unittest.TestCase):
             "_unused": 0,
         }
         dec = share.can.DeviceStatusDecoder()
-        dec.decode(pktdata)
+        dec.decode(packet)
         self.assertEqual(dec.fields, decoded)
 
     def test_switchstatuspacket(self):
         """SwitchStatusPacket decoding."""
-        pktdata = b"\x00\x00\x40\x00\x00\x00\x00\xa5"
+        header = share.can.RVCHeader()
+        data = b"\x00\x00\x40\x00\x00\x00\x00\xa5"
+        packet = share.can.CANPacket(header, data)
         decoded = {
             "msgtype": 0,
             "swver": 0,
@@ -69,14 +134,14 @@ class CAN(unittest.TestCase):
             "checksum": 0xa5,
         }
         dec = share.can.SwitchStatusDecoder()
-        dec.decode(pktdata)
+        dec.decode(packet)
         self.assertEqual(dec.fields, decoded)
 
-    def test_preconditionsbuilder(self):
-        """PreConditionsBuilder creation."""
+    def test_trek2preconditionsbuilder(self):
+        """Trek2PreConditionsBuilder creation."""
         hdr = 0x18004069
         data = b"\x00\x00"
-        bld = share.can.PreConditionsBuilder()
+        bld = share.can.Trek2PreConditionsBuilder()
         self.assertEqual(bld.packet.header.uint, hdr)
         self.assertEqual(bld.packet.data, data)
 

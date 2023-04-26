@@ -76,7 +76,7 @@ class Final(share.TestSequence):
         """Apply input 12Vdc and measure voltages."""
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vin_set, output=True, delay=self.can_bind_time)
-        precon = share.can.PreConditionsBuilder()
+        precon = share.can.Trek2PreConditionsBuilder()
         candev = self.physical_devices["CAN"][0]
         candev.send(precon.packet)
 

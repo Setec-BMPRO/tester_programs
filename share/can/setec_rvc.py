@@ -11,10 +11,8 @@ Reference:
 
 import ctypes
 import enum
-import struct
 
 import attr
-import tester
 
 from . import _base
 
@@ -37,6 +35,8 @@ class DGN(enum.IntEnum):
 
     """RV-C Data Group Number (DGN) values for message destinations."""
 
+    ACSTATUS1 = 0x1FFAD
+    ACSTATUS3 = 0x1FFAB
     PROPRIETARY_MESSAGE = 0xEF00
     RVMC101 = PROPRIETARY_MESSAGE + DeviceID.RVMC101.value
     RVMN101 = PROPRIETARY_MESSAGE + DeviceID.RVMN101.value
@@ -107,7 +107,7 @@ class MessageID(enum.IntEnum):
     GENERAL_CONFIG = 34
 
 
-class _SwitchStatusField(ctypes.Structure):
+class _SwitchStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
     """RVMC switch field definition.
 
@@ -122,33 +122,25 @@ class _SwitchStatusField(ctypes.Structure):
 
     """
 
-    # pylint: disable=too-few-public-methods
     _fields_ = [
-        ("pairing", ctypes.c_uint, 2),
-        ("retract", ctypes.c_uint, 2),
-        ("extend", ctypes.c_uint, 2),
-        ("_unused1", ctypes.c_uint, 2),  # always 11b
-        ("zone1", ctypes.c_uint, 2),
-        ("zone2", ctypes.c_uint, 2),
-        ("zone3", ctypes.c_uint, 2),
-        ("zone4", ctypes.c_uint, 2),
-        ("hex", ctypes.c_uint, 4),  # Hex switch, 0000b if unused
-        ("btnup", ctypes.c_uint, 2),
-        ("btndown", ctypes.c_uint, 2),
-        ("usb_pwr", ctypes.c_uint, 1),
-        ("wake_up", ctypes.c_uint, 1),
-        ("_unused2", ctypes.c_uint, 6),  # always 111111b
-    ]
-
-
-class _SwitchStatusRaw(ctypes.Union):
-
-    """Union of the RVMC switch type with unsigned integer."""
-
-    # pylint: disable=too-few-public-methods
-    _fields_ = [
-        ("uint", ctypes.c_uint),
-        ("switch", _SwitchStatusField),
+        ("msgtype", ctypes.c_ulonglong, 8),  # D0
+        ("pairing", ctypes.c_ulonglong, 2),  # D1-4...
+        ("retract", ctypes.c_ulonglong, 2),
+        ("extend", ctypes.c_ulonglong, 2),
+        ("_unused1", ctypes.c_ulonglong, 2),  # Always 11b
+        ("zone1", ctypes.c_ulonglong, 2),
+        ("zone2", ctypes.c_ulonglong, 2),
+        ("zone3", ctypes.c_ulonglong, 2),
+        ("zone4", ctypes.c_ulonglong, 2),
+        ("hex", ctypes.c_ulonglong, 4),  # Hex switch, 0000b if unused
+        ("btnup", ctypes.c_ulonglong, 2),
+        ("btndown", ctypes.c_ulonglong, 2),
+        ("usb_pwr", ctypes.c_ulonglong, 1),
+        ("wake_up", ctypes.c_ulonglong, 1),
+        ("_unused2", ctypes.c_ulonglong, 6),  # Always 111111b
+        ("swver", ctypes.c_ulonglong, 8),  # D5
+        ("counter", ctypes.c_ulonglong, 8),  # D6
+        ("checksum", ctypes.c_ulonglong, 8),  # D7
     ]
 
 
@@ -157,36 +149,29 @@ class SwitchStatusDecoder(_base.DataDecoderMixIn):
 
     """A RVMC Switch Status decoder."""
 
-    # pylint: disable=too-few-public-methods
-    def decode(self, data):
-        """Decode packet data."""
-        self.fields.clear()
+    def worker(self, packet, fields):
+        """Decode packet.
+
+        @param packet CANPacket instance
+        @param fields Dictionary to hold decoded field data
+
+        """
+        data = packet.data
         if (
             len(data) != SetecRVC.DATA_LEN.value
             or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.SWITCH_STATUS.value
         ):
             raise _base.DataDecodeError()
-        (
-            self.fields["msgtype"],  # D0
-            switch_data,  # D1-4
-            self.fields["swver"],  # D5
-            self.fields["counter"],  # D6
-            self.fields["checksum"],  # D7
-        ) = struct.Struct("<BL3B").unpack(data)
-        # Decode the switch data
-        switch_raw = _SwitchStatusRaw()
-        # pylint: disable=attribute-defined-outside-init
-        switch_raw.uint = switch_data
-        zss = switch_raw.switch
+        zss = _SwitchStatus.from_buffer_copy(data)
         # pylint: disable=protected-access
-        for name, _, bits in _SwitchStatusField._fields_:
+        for name, _, bits in _SwitchStatus._fields_:
             value = getattr(zss, name)
             if bits < 3:
                 value = bool(value) if value < 2 else None
-            self.fields[name] = value
+            fields[name] = value
 
 
-class _DeviceStatusField(ctypes.Structure):
+class _DeviceStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
     """RVMD50 button field definition.
 
@@ -194,30 +179,21 @@ class _DeviceStatusField(ctypes.Structure):
 
     """
 
-    # pylint: disable=too-few-public-methods
     _fields_ = [
-        ("page", ctypes.c_uint, 1),
-        ("sel", ctypes.c_uint, 1),
-        ("soft1", ctypes.c_uint, 1),
-        ("soft2", ctypes.c_uint, 1),
-        ("light1", ctypes.c_uint, 1),
-        ("light2", ctypes.c_uint, 1),
-        ("light3", ctypes.c_uint, 1),
-        ("pump", ctypes.c_uint, 1),
-        ("acmain", ctypes.c_uint, 1),
-        ("_reserved", ctypes.c_uint, 6),  # always 111111b
-        ("backlight", ctypes.c_uint, 1),
-    ]
-
-
-class _DeviceStatusRaw(ctypes.Union):
-
-    """Union of the button with unsigned integer."""
-
-    # pylint: disable=too-few-public-methods
-    _fields_ = [
-        ("uint", ctypes.c_uint, 16),
-        ("button", _DeviceStatusField),
+        ("msgtype", ctypes.c_ulonglong, 8),  # D0
+        ("page", ctypes.c_ulonglong, 1),  # D1,2...
+        ("sel", ctypes.c_ulonglong, 1),
+        ("soft1", ctypes.c_ulonglong, 1),
+        ("soft2", ctypes.c_ulonglong, 1),
+        ("light1", ctypes.c_ulonglong, 1),
+        ("light2", ctypes.c_ulonglong, 1),
+        ("light3", ctypes.c_ulonglong, 1),
+        ("pump", ctypes.c_ulonglong, 1),
+        ("acmain", ctypes.c_ulonglong, 1),
+        ("_reserved", ctypes.c_ulonglong, 6),  # Always 111111b
+        ("backlight", ctypes.c_ulonglong, 1),
+        ("menu_state", ctypes.c_ulonglong, 8),  # D3
+        ("_unused", ctypes.c_ulonglong, 32),  # D4-7
     ]
 
 
@@ -226,50 +202,131 @@ class DeviceStatusDecoder(_base.DataDecoderMixIn):
 
     """RVMD50 Device Status decoder."""
 
-    # pylint: disable=too-few-public-methods
-    def decode(self, data):
-        """Decode packet data."""
-        self.fields.clear()
+    def worker(self, packet, fields):
+        """Decode packet.
+
+        @param packet CANPacket instance
+        @param fields Dictionary to hold decoded field data
+
+        """
+        data = packet.data
         if (
             len(data) != SetecRVC.DATA_LEN.value
             or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.DEVICE_STATUS.value
         ):
             raise _base.DataDecodeError()
-        (
-            self.fields["msgtype"],  # D0
-            button_data,  # D1,2
-            self.fields["menu_state"],  # D3
-            self.fields["_unused"],  # D4-7
-        ) = struct.Struct("<BHBL").unpack(data)
-        # Decode the button data
-        button_raw = _DeviceStatusRaw()
-        # pylint: disable=attribute-defined-outside-init
-        button_raw.uint = button_data
-        zss = button_raw.button
+        zss = _DeviceStatus.from_buffer_copy(data)
         # pylint: disable=protected-access
-        for name, _, bits in _DeviceStatusField._fields_:
+        for name, _, bits in _DeviceStatus._fields_:
             value = getattr(zss, name)
             if bits == 1:
                 value = bool(value)
-            self.fields[name] = value
+            fields[name] = value
 
 
-# TODO: Complete the ACMON Status decoder
+class _ACStatus1(ctypes.Structure):  # pylint: disable=too-few-public-methods
+
+    """Automatic Transfer Switch AC Status1 field definition.
+
+    DGN = 0x1FFAD, Priority = 3,
+    Rate = 50ms when L1+L2 current > 10A (Alternating Leg1/Leg2 packets)
+    Current: uint16 from -1600A to 1612.5A, resolution 0.05A, offset 1600A
+    Frequency: uint16 from 0Hz to 500Hz, resolution 1/128Hz
+
+    """
+
+    _fields_ = [
+        ("instance", ctypes.c_ulonglong, 3),  # Always 001b
+        ("iotype", ctypes.c_ulonglong, 1),
+        ("source", ctypes.c_ulonglong, 3),  # Always 000b
+        ("leg", ctypes.c_ulonglong, 1),
+        ("voltage", ctypes.c_ulonglong, 16),  # Always 0xFFFF
+        ("current", ctypes.c_ulonglong, 16),
+        ("frequency", ctypes.c_ulonglong, 16),
+        ("open_ground", ctypes.c_ulonglong, 2),
+        ("open_neutral", ctypes.c_ulonglong, 2),
+        ("polarity", ctypes.c_ulonglong, 2),
+        ("groundcurrent", ctypes.c_ulonglong, 2),
+    ]
+
+
+class _ACStatus3(ctypes.Structure):  # pylint: disable=too-few-public-methods
+
+    """Automatic Transfer Switch AC Status3 field definition.
+
+    DGN = 0x1FFAB, Priority = 3,
+    Rate = 1s (Alternating Leg1/Leg2 packets)
+
+    """
+
+    _fields_ = [
+        ("instance", ctypes.c_ulonglong, 3),  # Always 001b
+        ("iotype", ctypes.c_ulonglong, 1),
+        ("source", ctypes.c_ulonglong, 3),  # Always 000b
+        ("leg", ctypes.c_ulonglong, 1),
+        ("waveform", ctypes.c_ulonglong, 2),  # Always 11b
+        ("phase", ctypes.c_ulonglong, 4),
+        ("_unused", ctypes.c_ulonglong, 2),  # Always 11b
+        ("power_real", ctypes.c_ulonglong, 16),  # Always 0xFFFF
+        ("power_reactive", ctypes.c_ulonglong, 16),  # Always 0xFFFF
+        ("harmonics", ctypes.c_ulonglong, 8),  # Always 0xFF
+        ("complementary_leg", ctypes.c_ulonglong, 8),  # Always 0xFF
+    ]
+
+
 @attr.s
 class ACMONStatusDecoder(_base.DataDecoderMixIn):
 
-    """ACMON Status decoder."""
+    """ACMON Status decoder.
 
-    # pylint: disable=too-few-public-methods
-    def decode(self, data):
-        """Decode packet data."""
-        self.fields.clear()
-        if (
-            len(data) != SetecRVC.DATA_LEN.value
-            or data[SetecRVC.COMMAND_ID_INDEX.value]
-            != 42  # FIXME: Put the real command value here
-        ):
+    ACMON units transmit 4 differnet packets, at 2 different rates:
+    - ASStatus1_Leg1, ASStatus1_Leg2, ASStatus3_Leg1, ASStatus3_Leg2
+    To get a complete dataset you need to see 1 of each of the 4 types.
+
+    """
+
+    ats1l1 = attr.ib(init=False, factory=dict)
+    ats1l2 = attr.ib(init=False, factory=dict)
+    ats3l1 = attr.ib(init=False, factory=dict)
+    ats3l2 = attr.ib(init=False, factory=dict)
+
+    def worker(self, packet, fields):
+        """Decode packet.
+
+        @param packet CANPacket instance
+        @param fields Dictionary to hold decoded field data
+
+        """
+        data = packet.data
+        dgn = packet.header.message.DGN
+        if len(data) != SetecRVC.DATA_LEN.value:
             raise _base.DataDecodeError()
+        field_groups = [  # (Dictionary, Prefix)
+            (self.ats1l1, "S1L1", ),
+            (self.ats1l2, "S1L2", ),
+            (self.ats3l1, "S3L1", ),
+            (self.ats3l2, "S3L2", ),
+            ]
+        # pylint: disable=protected-access
+        if dgn == DGN.ACSTATUS1:
+            ats_fields = _ACStatus1.from_buffer_copy(data)
+            ats_names = _ACStatus1._fields_
+            index = 0
+        elif dgn == DGN.ACSTATUS3:
+            ats_fields = _ACStatus3.from_buffer_copy(data)
+            ats_names = _ACStatus3._fields_
+            index = 2
+        else:
+            raise _base.DataDecodeError()
+        index += getattr(ats_fields, "leg")  # 0-3
+        group, _ = field_groups[index]  # Choose 1 of 4 field dictionaries
+        group.clear()
+        for name, _, _ in ats_names:
+            group[name] = getattr(ats_fields, name)
+        # Merge the 4 field dictionaries into fields
+        for group, prefix in field_groups:
+            for key, value in group.items():
+                fields["{0}_{1}".format(prefix, key)] = value
 
 
 @attr.s
@@ -294,13 +351,13 @@ class RVMC101ControlLEDBuilder:  # pylint: disable=too-few-public-methods
     @packet.default
     def _packet_default(self):
         """Populate CAN Packet."""
-        header = tester.devphysical.can.RVCHeader()
+        header = _base.RVCHeader()
         msg = header.message
         msg.DGN = DGN.RVMC101.value  #  to the RVMC101
         msg.SA = DeviceID.RVMN101.value  #  from a RVMN101
         data = bytearray([MessageID.LED_DISPLAY.value])
         data.extend(b"\x00\x00\xff\xff\xff\x00\x00")
-        return tester.devphysical.can.CANPacket(header, data)
+        return _base.CANPacket(header, data)
 
     @property
     def pattern(self):
@@ -340,14 +397,14 @@ class _RVMD50Message:  # pylint: disable=too-few-public-methods
         """
         if cmd_id not in cls._cmd_id_range:
             raise ValueError("Cmd ID out of range")
-        header = tester.devphysical.can.RVCHeader()
+        header = _base.RVCHeader()
         msg = header.message  # Packet...
         msg.DGN = DGN.RVMD50.value  #  to the RVMD50
         msg.SA = DeviceID.RVMN5X.value  #  from a RVMN5x
         data = bytearray(SetecRVC.DATA_LEN.value)
         data[SetecRVC.MESSAGE_ID_INDEX.value] = MessageID.COMMAND.value
         data[cls._cmd_id_index] = cmd_id
-        return tester.devphysical.can.CANPacket(header, data)
+        return _base.CANPacket(header, data)
 
 
 @attr.s
