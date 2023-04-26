@@ -162,10 +162,10 @@ class SwitchStatusDecoder(_base.DataDecoderMixIn):
             or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.SWITCH_STATUS.value
         ):
             raise _base.DataDecodeError()
-        zss = _SwitchStatus.from_buffer_copy(data)
+        ss_fields = _SwitchStatus.from_buffer_copy(data)
         # pylint: disable=protected-access
         for name, _, bits in _SwitchStatus._fields_:
-            value = getattr(zss, name)
+            value = getattr(ss_fields, name)
             if bits < 3:
                 value = bool(value) if value < 2 else None
             fields[name] = value
@@ -215,10 +215,10 @@ class DeviceStatusDecoder(_base.DataDecoderMixIn):
             or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.DEVICE_STATUS.value
         ):
             raise _base.DataDecodeError()
-        zss = _DeviceStatus.from_buffer_copy(data)
+        ds_fields = _DeviceStatus.from_buffer_copy(data)
         # pylint: disable=protected-access
         for name, _, bits in _DeviceStatus._fields_:
-            value = getattr(zss, name)
+            value = getattr(ds_fields, name)
             if bits == 1:
                 value = bool(value)
             fields[name] = value
@@ -235,11 +235,14 @@ class _ACStatus1(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
     """
 
-    _fields_ = [
+    _ats_common_ = [
         ("instance", ctypes.c_ulonglong, 3),  # Always 001b
         ("iotype", ctypes.c_ulonglong, 1),
         ("source", ctypes.c_ulonglong, 3),  # Always 000b
         ("leg", ctypes.c_ulonglong, 1),
+        ]
+
+    _fields_ = _ats_common_ + [
         ("voltage", ctypes.c_ulonglong, 16),  # Always 0xFFFF
         ("current", ctypes.c_ulonglong, 16),
         ("frequency", ctypes.c_ulonglong, 16),
@@ -259,13 +262,9 @@ class _ACStatus3(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
     """
 
-    _fields_ = [
-        ("instance", ctypes.c_ulonglong, 3),  # Always 001b
-        ("iotype", ctypes.c_ulonglong, 1),
-        ("source", ctypes.c_ulonglong, 3),  # Always 000b
-        ("leg", ctypes.c_ulonglong, 1),
+    _fields_ = _ACStatus1._ats_common_ + [
         ("waveform", ctypes.c_ulonglong, 2),  # Always 11b
-        ("phase", ctypes.c_ulonglong, 4),
+        ("phase", ctypes.c_ulonglong, 4),  # 0010b: 180deg (240 VAC available)
         ("_unused", ctypes.c_ulonglong, 2),  # Always 11b
         ("power_real", ctypes.c_ulonglong, 16),  # Always 0xFFFF
         ("power_reactive", ctypes.c_ulonglong, 16),  # Always 0xFFFF

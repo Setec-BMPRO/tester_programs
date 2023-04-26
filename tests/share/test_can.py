@@ -19,18 +19,18 @@ class CAN(unittest.TestCase):
         header = share.can.RVCHeader()
         # ACSTATUS1, 2 legs
         header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS1
-        data = b"\x00\xff\xff\x10\x40\x10\x20\x00"
+        data = b"\x01\xff\xff\x10\x40\x10\x20\x00"
         packet = share.can.CANPacket(header, data)
         dec.decode(packet)
-        data = b"\x80\xff\xff\x10\x10\x00\x50\x00"
+        data = b"\x81\xff\xff\x10\x10\x00\x50\x00"
         packet = share.can.CANPacket(header, data)
         dec.decode(packet)
         header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS3
         # ACSTATUS3, 2 legs
-        data = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+        data = b"\x01\xcb\xff\xff\xff\xff\xff\xff"
         packet = share.can.CANPacket(header, data)
         dec.decode(packet)
-        data = b"\x80\x00\x00\x00\x00\x00\x00\x00"
+        data = b"\x81\xcb\xff\xff\xff\xff\xff\xff"
         packet = share.can.CANPacket(header, data)
         dec.decode(packet)
         # Check full dataset
@@ -38,7 +38,7 @@ class CAN(unittest.TestCase):
             'S1L1_current': 16400,
             'S1L1_frequency': 8208,
             'S1L1_groundcurrent': 0,
-            'S1L1_instance': 0,
+            'S1L1_instance': 1,
             'S1L1_iotype': 0,
             'S1L1_leg': 0,
             'S1L1_open_ground': 0,
@@ -49,7 +49,7 @@ class CAN(unittest.TestCase):
             'S1L2_current': 4112,
             'S1L2_frequency': 20480,
             'S1L2_groundcurrent': 0,
-            'S1L2_instance': 0,
+            'S1L2_instance': 1,
             'S1L2_iotype': 0,
             'S1L2_leg': 1,
             'S1L2_open_ground': 0,
@@ -57,28 +57,28 @@ class CAN(unittest.TestCase):
             'S1L2_polarity': 0,
             'S1L2_source': 0,
             'S1L2_voltage': 65535,
-            'S3L1__unused': 0,
-            'S3L1_complementary_leg': 0,
-            'S3L1_harmonics': 0,
-            'S3L1_instance': 0,
+            'S3L1__unused': 3,
+            'S3L1_complementary_leg': 255,
+            'S3L1_harmonics': 255,
+            'S3L1_instance': 1,
             'S3L1_iotype': 0,
             'S3L1_leg': 0,
-            'S3L1_phase': 0,
-            'S3L1_power_reactive': 0,
-            'S3L1_power_real': 0,
+            'S3L1_phase': 2,
+            'S3L1_power_reactive': 65535,
+            'S3L1_power_real': 65535,
             'S3L1_source': 0,
-            'S3L1_waveform': 0,
-            'S3L2__unused': 0,
-            'S3L2_complementary_leg': 0,
-            'S3L2_harmonics': 0,
-            'S3L2_instance': 0,
+            'S3L1_waveform': 3,
+            'S3L2__unused': 3,
+            'S3L2_complementary_leg': 255,
+            'S3L2_harmonics': 255,
+            'S3L2_instance': 1,
             'S3L2_iotype': 0,
             'S3L2_leg': 1,
-            'S3L2_phase': 0,
-            'S3L2_power_reactive': 0,
-            'S3L2_power_real': 0,
+            'S3L2_phase': 2,
+            'S3L2_power_reactive': 65535,
+            'S3L2_power_real': 65535,
             'S3L2_source': 0,
-            'S3L2_waveform': 0,
+            'S3L2_waveform': 3,
             }
         self.maxDiff = None
         self.assertEqual(dec.fields, decoded)
