@@ -11,7 +11,7 @@ class CAN(unittest.TestCase):
 
     """CAN test suite."""
 
-    _hdr = 0x18ef4454  # RVMN Node to RVM[CD] controller packet header
+    _hdr = 0x18EF4454  # RVMN Node to RVM[CD] controller packet header
 
     def test_acmonstatusdecoder(self):
         """ACMONStatusDecoder decoding."""
@@ -19,10 +19,10 @@ class CAN(unittest.TestCase):
         header = share.can.RVCHeader()
         # ACSTATUS1, 2 legs
         header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS1
-        data = b"\x01\xff\xff\x10\x40\x10\x20\x00"
+        data = b"\x01\xff\xff\xd0\x84\x00\x18\x00"
         packet = share.can.CANPacket(header, data)
         dec.decode(packet)
-        data = b"\x81\xff\xff\x10\x10\x00\x50\x00"
+        data = b"\x81\xff\xff\x08\x84\x00\x1a\x00"
         packet = share.can.CANPacket(header, data)
         dec.decode(packet)
         header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS3
@@ -35,51 +35,45 @@ class CAN(unittest.TestCase):
         dec.decode(packet)
         # Check full dataset
         decoded = {
-            'S1L1_current': 16400,
-            'S1L1_frequency': 8208,
-            'S1L1_groundcurrent': 0,
-            'S1L1_instance': 1,
-            'S1L1_iotype': 0,
-            'S1L1_leg': 0,
-            'S1L1_open_ground': 0,
-            'S1L1_open_neutral': 0,
-            'S1L1_polarity': 0,
-            'S1L1_source': 0,
-            'S1L1_voltage': 65535,
-            'S1L2_current': 4112,
-            'S1L2_frequency': 20480,
-            'S1L2_groundcurrent': 0,
-            'S1L2_instance': 1,
-            'S1L2_iotype': 0,
-            'S1L2_leg': 1,
-            'S1L2_open_ground': 0,
-            'S1L2_open_neutral': 0,
-            'S1L2_polarity': 0,
-            'S1L2_source': 0,
-            'S1L2_voltage': 65535,
-            'S3L1__unused': 3,
-            'S3L1_complementary_leg': 255,
-            'S3L1_harmonics': 255,
-            'S3L1_instance': 1,
-            'S3L1_iotype': 0,
-            'S3L1_leg': 0,
-            'S3L1_phase': 2,
-            'S3L1_power_reactive': 65535,
-            'S3L1_power_real': 65535,
-            'S3L1_source': 0,
-            'S3L1_waveform': 3,
-            'S3L2__unused': 3,
-            'S3L2_complementary_leg': 255,
-            'S3L2_harmonics': 255,
-            'S3L2_instance': 1,
-            'S3L2_iotype': 0,
-            'S3L2_leg': 1,
-            'S3L2_phase': 2,
-            'S3L2_power_reactive': 65535,
-            'S3L2_power_real': 65535,
-            'S3L2_source': 0,
-            'S3L2_waveform': 3,
-            }
+            "S1L1_current": 100.0,
+            "S1L1_fault": 0,
+            "S1L1_frequency": 48.0,
+            "S1L1_instance": 1,
+            "S1L1_iotype": 0,
+            "S1L1_leg": 0,
+            "S1L1_source": 0,
+            "S1L1_voltage": 65535,
+            "S1L2_current": 90.0,
+            "S1L2_fault": 0,
+            "S1L2_frequency": 52.0,
+            "S1L2_instance": 1,
+            "S1L2_iotype": 0,
+            "S1L2_leg": 1,
+            "S1L2_source": 0,
+            "S1L2_voltage": 65535,
+            "S3L1__unused": 3,
+            "S3L1_complementary_leg": 255,
+            "S3L1_harmonics": 255,
+            "S3L1_instance": 1,
+            "S3L1_iotype": 0,
+            "S3L1_leg": 0,
+            "S3L1_phase": 2,
+            "S3L1_power_reactive": 65535,
+            "S3L1_power_real": 65535,
+            "S3L1_source": 0,
+            "S3L1_waveform": 3,
+            "S3L2__unused": 3,
+            "S3L2_complementary_leg": 255,
+            "S3L2_harmonics": 255,
+            "S3L2_instance": 1,
+            "S3L2_iotype": 0,
+            "S3L2_leg": 1,
+            "S3L2_phase": 2,
+            "S3L2_power_reactive": 65535,
+            "S3L2_power_real": 65535,
+            "S3L2_source": 0,
+            "S3L2_waveform": 3,
+        }
         self.maxDiff = None
         self.assertEqual(dec.fields, decoded)
 
@@ -131,7 +125,7 @@ class CAN(unittest.TestCase):
             "wake_up": False,
             "_unused2": 0,
             "counter": 0,
-            "checksum": 0xa5,
+            "checksum": 0xA5,
         }
         dec = share.can.SwitchStatusDecoder()
         dec.decode(packet)

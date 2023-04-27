@@ -246,10 +246,7 @@ class _ACStatus1(ctypes.Structure):  # pylint: disable=too-few-public-methods
         ("voltage", ctypes.c_ulonglong, 16),  # Always 0xFFFF
         ("current", ctypes.c_ulonglong, 16),
         ("frequency", ctypes.c_ulonglong, 16),
-        ("open_ground", ctypes.c_ulonglong, 2),
-        ("open_neutral", ctypes.c_ulonglong, 2),
-        ("polarity", ctypes.c_ulonglong, 2),
-        ("groundcurrent", ctypes.c_ulonglong, 2),
+        ("fault", ctypes.c_ulonglong, 8),  # 4 x 2b faults
     ]
 
 
@@ -325,6 +322,12 @@ class ACMONStatusDecoder(_base.DataDecoderMixIn):
         # Merge the 4 field dictionaries into fields
         for group, prefix in field_groups:
             for key, value in group.items():
+                # Current: -1600A to +1612.5A, res 0.05A, offset 1600A
+                if key == "current":
+                    value = float(value) * 0.05 - 1600.0
+                # Frequency: 0Hz to 500Hz, res 1/128Hz
+                if key == "frequency":
+                    value = float(value) / 128.0
                 fields["{0}_{1}".format(prefix, key)] = value
 
 

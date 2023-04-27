@@ -21,14 +21,10 @@ class Initial(share.TestSequence):
         tester.LimitLow("FixtureLock", 100),
         tester.LimitBetween("Vin", vin_set - 1.0, vin_set, doc="Input voltage present"),
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        # TODO: Unit cannot measure voltage, just On/Off
-        tester.LimitPercent(
-            "Vac1", vac_set / 2, 5.0, doc="AC voltage reading between X1_L1 and X1_N"
-        ),
-        tester.LimitPercent(
-            "Vac2", vac_set / 2, 5.0, doc="AC voltage reading between X1_L2 and X1_N"
-        ),
+        tester.LimitPercent("Vac", vac_set / 2, 5.0, doc="AC voltage reading"),
+        tester.LimitPercent("Frequency", 50, 5.0, doc="AC frequency reading"),
         tester.LimitPercent("AcCurrent", 100.0, 10.0, doc="AC current reading"),
+        tester.LimitInteger("Phase", 2, doc="AC phase reading"),
     )
 
     def open(self, uut):
@@ -43,7 +39,7 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_power_up(self, dev, mes):
-        """Apply input voltage and measure voltages."""
+        """Power up the unit."""
         dev["dcs_vin"].output(self.vin_set, output=True)
         self.measure(("dmm_lock", "dmm_vin", "dmm_3v3"), timeout=5)
 
@@ -54,10 +50,21 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_run(self, dev, mes):
-        """Run the unit."""
-
-
-# TODO: AC Source 220V, Read & decode CAN traffic
+        """Run the unit and monitor CAN packets."""
+        dev["acs"].output(self.vac_set, output=True)
+        self.measure(("dmm_vac1", "dmm_vac2"), timeout=5)
+        with dev["canreader"]:
+            self.measure(
+                (
+                    "current1",
+                    "current2",
+                    "frequency1",
+                    "frequency2",
+                    "phase1",
+                    "phase2",
+                ),
+                timeout=5,
+            )
 
 
 class Devices(share.Devices):
@@ -96,7 +103,7 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "acmon_XXXX.jflash"
+    projectfile = "R7FA2L1x.jflash"
     sw_image = None
 
     def open(self):
@@ -117,10 +124,13 @@ class Sensors(share.Sensors):
             pathlib.Path(__file__).parent / self.projectfile,
             pathlib.Path(__file__).parent / self.sw_image,
         )
-        self["voltage1"] = sensor.Keyed(self.devices["decoder"], "voltage1")
-        self["voltage2"] = sensor.Keyed(self.devices["decoder"], "voltage2")
-        self["current1"] = sensor.Keyed(self.devices["decoder"], "current1")
-        self["current2"] = sensor.Keyed(self.devices["decoder"], "current2")
+        dec = self.devices["decoder"]
+        self["current1"] = sensor.Keyed(dec, "S1L1_current")
+        self["current2"] = sensor.Keyed(dec, "S1L2_current")
+        self["frequency1"] = sensor.Keyed(dec, "S1L1_frequency")
+        self["frequency2"] = sensor.Keyed(dec, "S1L2_frequency")
+        self["phase1"] = sensor.Keyed(dec, "S3L1_phase")
+        self["phase2"] = sensor.Keyed(dec, "S3L2_phase")
 
 
 class Measurements(share.Measurements):
@@ -132,14 +142,16 @@ class Measurements(share.Measurements):
         self.create_from_names(
             (
                 ("dmm_lock", "FixtureLock", "lock", ""),
-                ("dmm_vac1", "Vac1", "vac1", "AC Input voltage at L1"),
-                ("dmm_vac2", "Vac2", "vac2", "AC Input voltage at L2"),
+                ("dmm_vac1", "Vac", "vac1", "AC Input voltage at L1"),
+                ("dmm_vac2", "Vac", "vac2", "AC Input voltage at L2"),
                 ("dmm_vin", "Vin", "vin", "DC Input voltage from CAN bus"),
                 ("dmm_3v3", "3V3", "3v3", "3V3 rail voltage"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
-                ("voltage1", "Vac1", "voltage1", "Phase 1 voltage"),
-                ("voltage2", "Vac2", "voltage2", "Phase 2 voltage"),
                 ("current1", "AcCurrent", "current1", "Current sensor 1"),
                 ("current2", "AcCurrent", "current2", "Current sensor 2"),
+                ("frequency1", "Frequency", "frequency1", "Phase 1 frequency"),
+                ("frequency2", "Frequency", "frequency2", "Phase 2 frequency"),
+                ("phase1", "Phase", "phase1", "Phase 1"),
+                ("phase2", "Phase", "phase2", "Phase 2"),
             )
         )

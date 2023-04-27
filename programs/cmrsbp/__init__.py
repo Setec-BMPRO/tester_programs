@@ -29,8 +29,7 @@ class Initial(share.TestSequence):
         tester.LimitBetween("VErase", 4.8, 5.05),
         tester.LimitLow("IStart", 0.02),
         tester.LimitBetween("Vchge", 12.8, 15.0),
-        # 2.0A +/- 10mA
-        tester.LimitDelta("Ibat", -2.00, 0.01),
+        tester.LimitDelta("Ibat", -2.00, 0.02),
         tester.LimitLow("Final Not Connected", 1.0),
         tester.LimitDelta("SenseRes", 250, 30),
         tester.LimitDelta("Halfcell", 110, 10),

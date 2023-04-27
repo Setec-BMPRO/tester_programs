@@ -24,8 +24,18 @@ class ACMONInitial(ProgramTestCase):
                     (sen["vin"], 11.5),
                     (sen["3v3"], 3.3),
                 ),
-                "Program": ((sen["JLink"], 0),),
+                "Program": (
+                    (sen["JLink"], 0),
+                ),
                 "Run": (
+                    (sen["vac1"], 110),
+                    (sen["vac2"], 110),
+                    (sen["current1"], 100),
+                    (sen["current2"], 100),
+                    (sen["frequency1"], 50),
+                    (sen["frequency2"], 50),
+                    (sen["phase1"], 2),
+                    (sen["phase2"], 2),
                 ),
             },
         }
@@ -33,5 +43,5 @@ class ACMONInitial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(["PowerUp", "Program", "Run"], self.tester.ut_steps)
