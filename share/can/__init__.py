@@ -86,12 +86,12 @@ class PacketPropertyReader:
         """
         try:
             packet = self.canreader.read()
-            data = self.decoder.decode(packet)
+            self.decoder.decode(packet)
         except tester.CANReaderError:  # A timeout due to no traffic
             return None
         except _base.DataDecodeError:  # Probably incorrect packet type
             return None
-        return data.get(self._read_key)
+        return self.decoder.get(self._read_key)
 
 
 @attr.s
