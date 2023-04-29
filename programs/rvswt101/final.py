@@ -131,7 +131,7 @@ class Sensors(share.Sensors):
             message=tester.translate("rvswt101_final", "msgAddUUT"),
             caption=tester.translate("rvswt101_final", "capAddUUT"),
         )
-        decoder = self.devices["decoder"]  # tester.BLE device
+        decoder = self.devices["decoder"]
         self["cell_voltage"] = sensor.Keyed(decoder, "cell_voltage")
         self["switch_type"] = sensor.Keyed(decoder, "switch_type")
         self["RSSI"] = sensor.Keyed(decoder, "rssi")

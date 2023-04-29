@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVSWT101 Advertisment decoder."""
+"""RVSWT101 BLE Advertisment packet decoder."""
 
 import ctypes
 import struct
@@ -11,45 +11,7 @@ import attr
 import tester
 
 
-@attr.s
-class _ASwitchState:
-
-    """A single RVSWT switch state."""
-
-    state = attr.ib(converter=bool)
-    count = attr.ib(converter=int)
-
-
-@attr.s
-class _SwitchState:
-
-    """All RVSWT switch states."""
-
-    _states = attr.ib()
-
-    @_states.validator
-    def _states_len(self, attribute, value):
-        """Validate states."""
-        if len(self._states) != 8:
-            raise ValueError("8 (state, count) values are required")
-
-    _data = attr.ib(init=False, factory=list)
-
-    def __attrs_post_init__(self):
-        """Populate _data with _ASwitchState instances."""
-        for state, count in self._states:
-            self._data.append(_ASwitchState(state, count))
-
-    def __iter__(self):
-        """Return iterator of _data."""
-        return iter(self._data)
-
-    def __len__(self):
-        """Return len of _data."""
-        return len(self._data)
-
-
-class _SwitchField(ctypes.Structure):
+class _Switch(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
     """RVSWT switch field definition.
 
@@ -83,69 +45,66 @@ class _SwitchField(ctypes.Structure):
     ]
 
 
-class _SwitchRaw(ctypes.Union):
+@attr.s
+class PacketDecoder:
 
-    """Union of the RVSWT switch type with unsigned integer."""
+    """RVSWT101 BLE broadcast packet decoder."""
 
-    _fields_ = [
-        ("uint", ctypes.c_uint),
-        ("switch", _SwitchField),
-    ]
+    fields = attr.ib(init=False, factory=dict)
 
+    def decode(self, rssi, payload):
+        """Decode a BLE packet.
 
-class Packet:
-
-    """A RVSWT101 BLE broadcast packet."""
-
-    def __init__(self, payload):
-        """Create instance.
-
+        @param rssi RSSI value
         @param payload BLE broadcast packet payload
             EG: '1f050112022d624c3a00000300d1139e69'
 
         """
+        self.clear()
+        self.fields["rssi"] = rssi
+        payload_bytes = bytes.fromhex(payload)
         try:
-            payload_bytes = bytearray.fromhex(payload)
             (
-                self.company_id,
-                self.equipment_type,
-                self.protocol_ver,
-                self.switch_type,
-                self.sequence,
+                self.fields["company_id"],
+                self.fields["equipment_type"],
+                self.fields["protocol_ver"],
+                self.fields["switch_type"],
+                self.fields["sequence"],
                 voltage_data,
                 switch_data,
-                self.signature,
+                self.fields["signature"],
             ) = struct.Struct("<H3B2HLL").unpack(payload_bytes)
         except struct.error:
-            """
-            Handle struct.error when unpacking the payload:
-            Add a new measurment called 'valid_packet' with a fail result.
-            """
             mes = tester.Measurement(
                 tester.LimitBoolean("valid_packet", True, "Non-empty packet"),
                 tester.sensor.Mirror(),
             )
             mes.sensor.store(False)
             mes()
+        self.fields["cell_voltage"] = voltage_data * 3.6 / (2 ^ 14 - 1) / 1000
+        # Decode the switch data
+        sw_fields = _Switch.from_buffer_copy(switch_data.to_bytes(4, "little"))
+        # pylint: disable=protected-access
+        values = list(getattr(sw_fields, name) for name, _, _ in _Switch._fields_)
+        states = []
+        for index in range(0, len(values), 2):  # Every 2nd value is a button state
+            states.append(values[index])
+        # Build a 8 character binary string
+        all_switches = "".join([str(int(val)) for val in states])
+        # Convert to an integer value between 0-255
+        self.fields["switch_code"] = int(all_switches, 2)
 
-        self.cell_voltage = voltage_data * 3.6 / (2 ^ 14 - 1) / 1000
-        switch_raw = _SwitchRaw()
-        switch_raw.uint = switch_data
-        zss = switch_raw.switch
-        self.switches = _SwitchState(
-            (
-                (zss.S0state, zss.S0count),
-                (zss.S1state, zss.S1count),
-                (zss.S2state, zss.S2count),
-                (zss.S3state, zss.S3count),
-                (zss.S4state, zss.S4count),
-                (zss.S5state, zss.S5count),
-                (zss.S6state, zss.S6count),
-                (zss.S7state, zss.S7count),
-            )
-        )
-        all_switches = "".join([str(int(val.state)) for val in self.switches])
-        self.switch_code = int(all_switches, 2)  # int value between 0-255
+    def get(self, name):
+        """Access a field value.
+
+        @return Field value, or None for invalid name
+
+        """
+        return self.fields.get(name)
+
+    def clear(self):
+        """Clear stored data."""
+        self.fields.clear()
 
 
 @attr.s
@@ -155,39 +114,31 @@ class RVSWT101:
 
     bleserver = attr.ib()
     always_scan = attr.ib(init=False, default=True)
-    _read_key = attr.ib(init=False, default=None)
-    _packet = attr.ib(init=False, default=None)
+    _key = attr.ib(init=False, default=None)
+    _decoder = attr.ib(init=False, factory=PacketDecoder)
 
     def configure(self, key):
-        """Sensor: Configure for next reading.
-
-        key must be one of: 'cell_voltage', 'company_id',
-                            'equipment_type', 'protocol_ver',
-                            'sequence', 'signature', 'switch_code',
-                            'switch_type', 'switches'
-        """
-        self._read_key = key
+        """Sensor: Configure for next reading."""
+        self._key = key
 
     def opc(self):
         """Sensor: OPC."""
         self.bleserver.opc()
 
     def read(self, callerid):
-        """Sensor: Read payload data using the last configured key.
+        """Sensor: Read packet payload data using the last configured key.
 
         @param callerid Identity of caller
         @return Packet property value
 
-        Now that the button jig is used, the UUT is always the same distance
-         from the bleserver and rssi levels can be tested.
         """
         if self.always_scan:
             rssi, ad_data = self.bleserver.read(callerid)
-            self._rssi = rssi
-            self._packet = Packet(ad_data)
-        return getattr(self._packet, self._read_key, self._rssi)
+            self._decoder.decode(rssi, ad_data)
+        return self._decoder.get(self._key)
 
     def reset(self):
+        """Reset internal state."""
         self.bleserver.uut = None
-        self._packet = None
         self.always_scan = True
+        self._decoder.clear()

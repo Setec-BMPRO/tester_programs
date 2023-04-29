@@ -15,20 +15,19 @@ class RVSWT101Device(unittest.TestCase):
     # A sample BLE payload
     payload = "1f050112022d624c3a00000300d1139e69"
 
-    def setUp(self):
-        """Per-Test setup."""
-        self.pkt = rvswt101.device.Packet(self.payload)
-
     def test_packet(self):
         """Packet decoder."""
+        pkt = rvswt101.device.PacketDecoder()
+        pkt.decode(-75, self.payload)
         for prop, value in (
-            (self.pkt.company_id, 1311),
-            (self.pkt.equipment_type, 1),
-            (self.pkt.protocol_ver, 18),
-            (self.pkt.switch_type, 2),
-            (self.pkt.sequence, 25133),
-            (self.pkt.cell_voltage, 3.58176),
-            (self.pkt.signature, 1771967441),
+            ("cell_voltage", 3.58176),
+            ("company_id", 1311),
+            ("equipment_type", 1),
+            ("protocol_ver", 18),
+            ("rssi", -75),
+            ("sequence", 25133),
+            ("signature", 1771967441),
+            ("switch_code", 8),
+            ("switch_type", 2),
         ):
-            self.assertEqual(value, prop)
-        self.assertEqual(8, len(self.pkt.switches))
+            self.assertEqual(value, pkt.get(prop))
