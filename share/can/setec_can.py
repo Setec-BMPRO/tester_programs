@@ -49,7 +49,7 @@ class Trek2PreConditionsBuilder:  # pylint: disable=too-few-public-methods
         msg.msg_type = _base.SETECMessageType.ANNOUNCE.value
         msg.data_id = _base.SETECDataID.PRECONDITIONS.value
         data = b"\x00\x00"  # Dummy data
-        return _base.CANPacket(header, data)
+        return _base.CANPacket(header, data, rvc_mode=False)
 
 
 @attr.s
@@ -68,4 +68,4 @@ class RvviewTestModeBuilder:  # pylint: disable=too-few-public-methods
         msg.msg_type = _base.SETECMessageType.COMMAND.value
         msg.data_id = _base.SETECDataID.XREG.value
         data = b"\xC5"  # XReg 0xC5 toggles testmode
-        return _base.CANPacket(header, data)
+        return _base.CANPacket(header, data, rvc_mode=False)

@@ -20,18 +20,18 @@ class CAN(unittest.TestCase):
         # ACSTATUS1, 2 legs
         header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS1
         data = b"\x01\xff\xff\xd0\x84\x00\x18\x00"
-        packet = share.can.CANPacket(header, data)
+        packet = share.can.CANPacket(header, data, rvc_mode=True)
         dec.decode(packet)
         data = b"\x81\xff\xff\x08\x84\x00\x1a\x00"
-        packet = share.can.CANPacket(header, data)
+        packet = share.can.CANPacket(header, data, rvc_mode=True)
         dec.decode(packet)
         header.message.DGN = share.can.setec_rvc.DGN.ACSTATUS3
         # ACSTATUS3, 2 legs
         data = b"\x01\xcb\xff\xff\xff\xff\xff\xff"
-        packet = share.can.CANPacket(header, data)
+        packet = share.can.CANPacket(header, data, rvc_mode=True)
         dec.decode(packet)
         data = b"\x81\xcb\xff\xff\xff\xff\xff\xff"
-        packet = share.can.CANPacket(header, data)
+        packet = share.can.CANPacket(header, data, rvc_mode=True)
         dec.decode(packet)
         # Check full dataset
         decoded = {
@@ -81,7 +81,7 @@ class CAN(unittest.TestCase):
         """DeviceStatusPacket decoding."""
         header = share.can.RVCHeader()
         data = b"\x0a\x00\x00\x00\x00\x00\x00\x00"
-        packet = share.can.CANPacket(header, data)
+        packet = share.can.CANPacket(header, data, rvc_mode=True)
         decoded = {
             "msgtype": 10,
             "page": False,
@@ -106,7 +106,7 @@ class CAN(unittest.TestCase):
         """SwitchStatusPacket decoding."""
         header = share.can.RVCHeader()
         data = b"\x00\x00\x40\x00\x00\x00\x00\xa5"
-        packet = share.can.CANPacket(header, data)
+        packet = share.can.CANPacket(header, data, rvc_mode=True)
         decoded = {
             "msgtype": 0,
             "swver": 0,

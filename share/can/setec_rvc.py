@@ -359,7 +359,7 @@ class RVMC101ControlLEDBuilder:  # pylint: disable=too-few-public-methods
         msg.SA = DeviceID.RVMN101.value  #  from a RVMN101
         data = bytearray([MessageID.LED_DISPLAY.value])
         data.extend(b"\x00\x00\xff\xff\xff\x00\x00")
-        return _base.CANPacket(header, data)
+        return _base.CANPacket(header, data, rvc_mode=True)
 
     @property
     def pattern(self):
@@ -406,7 +406,7 @@ class _RVMD50Message:  # pylint: disable=too-few-public-methods
         data = bytearray(SetecRVC.DATA_LEN.value)
         data[SetecRVC.MESSAGE_ID_INDEX.value] = MessageID.COMMAND.value
         data[cls._cmd_id_index] = cmd_id
-        return _base.CANPacket(header, data)
+        return _base.CANPacket(header, data, rvc_mode=True)
 
 
 @attr.s
