@@ -46,33 +46,33 @@ class _Switch(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @attr.s
-class PacketDecoder:
+class PacketDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """RVSWT101 BLE broadcast packet decoder."""
 
-    fields = attr.ib(init=False, factory=dict)
+    def worker(self, fields, data):
+        """Decode packet.
 
-    def decode(self, rssi, payload):
-        """Decode a BLE packet.
-
-        @param rssi RSSI value
-        @param payload BLE broadcast packet payload
-            EG: '1f050112022d624c3a00000300d1139e69'
+        @param fields Dictionary to hold decoded field data
+        @param data Tuple(
+            rssi RSSI value
+            payload BLE broadcast packet payload
+                EG: '1f050112022d624c3a00000300d1139e69'
+            )
 
         """
-        self.clear()
-        self.fields["rssi"] = rssi
+        fields["rssi"], payload = data
         payload_bytes = bytes.fromhex(payload)
         try:
             (
-                self.fields["company_id"],
-                self.fields["equipment_type"],
-                self.fields["protocol_ver"],
-                self.fields["switch_type"],
-                self.fields["sequence"],
+                fields["company_id"],
+                fields["equipment_type"],
+                fields["protocol_ver"],
+                fields["switch_type"],
+                fields["sequence"],
                 voltage_data,
                 switch_data,
-                self.fields["signature"],
+                fields["signature"],
             ) = struct.Struct("<H3B2HLL").unpack(payload_bytes)
         except struct.error:
             mes = tester.Measurement(
@@ -81,7 +81,7 @@ class PacketDecoder:
             )
             mes.sensor.store(False)
             mes()
-        self.fields["cell_voltage"] = voltage_data * 3.6 / (2 ^ 14 - 1) / 1000
+        fields["cell_voltage"] = voltage_data * 3.6 / (2 ^ 14 - 1) / 1000
         # Decode the switch data
         sw_fields = _Switch.from_buffer_copy(switch_data.to_bytes(4, "little"))
         # pylint: disable=protected-access
@@ -92,19 +92,7 @@ class PacketDecoder:
         # Build a 8 character binary string
         all_switches = "".join([str(int(val)) for val in states])
         # Convert to an integer value between 0-255
-        self.fields["switch_code"] = int(all_switches, 2)
-
-    def get(self, name):
-        """Access a field value.
-
-        @return Field value, or None for invalid name
-
-        """
-        return self.fields.get(name)
-
-    def clear(self):
-        """Clear stored data."""
-        self.fields.clear()
+        fields["switch_code"] = int(all_switches, 2)
 
 
 @attr.s
@@ -134,7 +122,7 @@ class RVSWT101:
         """
         if self.always_scan:
             rssi, ad_data = self.bleserver.read(callerid)
-            self._decoder.decode(rssi, ad_data)
+            self._decoder.decode((rssi, ad_data, ))
         return self._decoder.get(self._key)
 
     def reset(self):

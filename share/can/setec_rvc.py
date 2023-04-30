@@ -13,6 +13,7 @@ import ctypes
 import enum
 
 import attr
+import tester
 
 from . import _base
 
@@ -145,15 +146,15 @@ class _SwitchStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @attr.s
-class SwitchStatusDecoder(_base.DataDecoderMixIn):
+class SwitchStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """A RVMC Switch Status decoder."""
 
-    def worker(self, packet, fields):
+    def worker(self, fields, packet):
         """Decode packet.
 
-        @param packet CANPacket instance
         @param fields Dictionary to hold decoded field data
+        @param packet CANPacket instance
 
         """
         data = packet.data
@@ -161,7 +162,7 @@ class SwitchStatusDecoder(_base.DataDecoderMixIn):
             len(data) != SetecRVC.DATA_LEN.value
             or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.SWITCH_STATUS.value
         ):
-            raise _base.DataDecodeError()
+            raise tester.sensor.KeyedDataDecodeError()
         ss_fields = _SwitchStatus.from_buffer_copy(data)
         # pylint: disable=protected-access
         for name, _, bits in _SwitchStatus._fields_:
@@ -198,15 +199,15 @@ class _DeviceStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @attr.s
-class DeviceStatusDecoder(_base.DataDecoderMixIn):
+class DeviceStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """RVMD50 Device Status decoder."""
 
-    def worker(self, packet, fields):
+    def worker(self, fields, packet):
         """Decode packet.
 
-        @param packet CANPacket instance
         @param fields Dictionary to hold decoded field data
+        @param packet CANPacket instance
 
         """
         data = packet.data
@@ -214,7 +215,7 @@ class DeviceStatusDecoder(_base.DataDecoderMixIn):
             len(data) != SetecRVC.DATA_LEN.value
             or data[SetecRVC.COMMAND_ID_INDEX.value] != CommandID.DEVICE_STATUS.value
         ):
-            raise _base.DataDecodeError()
+            raise tester.sensor.KeyedDataDecodeError()
         ds_fields = _DeviceStatus.from_buffer_copy(data)
         # pylint: disable=protected-access
         for name, _, bits in _DeviceStatus._fields_:
@@ -271,7 +272,7 @@ class _ACStatus3(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @attr.s
-class ACMONStatusDecoder(_base.DataDecoderMixIn):
+class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """ACMON Status decoder.
 
@@ -286,17 +287,17 @@ class ACMONStatusDecoder(_base.DataDecoderMixIn):
     ats3l1 = attr.ib(init=False, factory=dict)
     ats3l2 = attr.ib(init=False, factory=dict)
 
-    def worker(self, packet, fields):
+    def worker(self, fields, packet):
         """Decode packet.
 
-        @param packet CANPacket instance
         @param fields Dictionary to hold decoded field data
+        @param packet CANPacket instance
 
         """
         data = packet.data
         dgn = packet.header.message.DGN
         if len(data) != SetecRVC.DATA_LEN.value:
-            raise _base.DataDecodeError()
+            raise tester.sensor.KeyedDataDecodeError()
         field_groups = [  # (Dictionary, Prefix)
             (self.ats1l1, "S1L1", ),
             (self.ats1l2, "S1L2", ),
@@ -313,7 +314,7 @@ class ACMONStatusDecoder(_base.DataDecoderMixIn):
             ats_names = _ACStatus3._fields_
             index = 2
         else:
-            raise _base.DataDecodeError()
+            raise tester.sensor.KeyedDataDecodeError()
         index += getattr(ats_fields, "leg")  # 0-3
         group, _ = field_groups[index]  # Choose 1 of 4 field dictionaries
         group.clear()

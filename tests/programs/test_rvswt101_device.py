@@ -18,7 +18,7 @@ class RVSWT101Device(unittest.TestCase):
     def test_packet(self):
         """Packet decoder."""
         pkt = rvswt101.device.PacketDecoder()
-        pkt.decode(-75, self.payload)
+        pkt.decode((-75, self.payload, ))
         for prop, value in (
             ("cell_voltage", 3.58176),
             ("company_id", 1311),
