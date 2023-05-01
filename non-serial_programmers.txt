@@ -3,7 +3,7 @@ Non-Serial Device Programmers
 Laird / Nordic BLE Modules
 ==========================
     BL652
-        BLExtender          Nordic nRF52 board
+        BLExtender          Segger JLink
          & Smartlink201
         CN102,3             Segger JLink
          & ODL103,4
@@ -12,7 +12,7 @@ Laird / Nordic BLE Modules
         RVMN5x              Segger JLink
         RVSWT101            Segger JLink
         TRS-BTx             Segger JLink
-        TRS-RFM             Nordic nRF52 board
+        TRS-RFM             Segger JLink
 
 MicroChip SAM Series
 ====================
