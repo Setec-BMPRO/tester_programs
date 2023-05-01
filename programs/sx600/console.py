@@ -65,13 +65,12 @@ class Console(share.console.BadUart):
 
     def initialise(self):
         """Initialise a device."""
-        self.action(expected=self.banner_lines)
+        time.sleep(1)
+        self.reset_input_buffer()
         self["UNLOCK"] = True
         self["NVDEFAULT"] = True
         self["NVWRITE"] = True
         time.sleep(self.nvwrite_delay)
-        if self.is_renesas:
-            # The 5V discharge doesn't seem to stop the renesas
-            # so restart via console command.
-            self["RESTART"] = True
-            time.sleep(self.nvwrite_delay)
+        self["RESTART"] = True
+        time.sleep(self.nvwrite_delay)
+

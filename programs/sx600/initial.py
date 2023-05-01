@@ -41,21 +41,7 @@ class Initial(share.TestSequence):
     def _step_lock(self, dev, mes):
         """Check that Fixture Lock is closed."""
         mes["dmm_Lock"](timeout=2)
-
-    @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the micro."""
-        dev["dcs_5V"].output(self.cfg._5vsb_ext, True)
-        self.measure(("dmm_5Vext", "dmm_5Vunsw", "dmm_3V3", "dmm_8V5Ard"), timeout=5)
-        mes["JLink"]()  # Program the micro
-        # TODO: Do we need to switch it off then on again ?
-        # Switch off 5V rail and discharge the 5V to stop the ARM
-        dev["dcs_5V"].output(0)
-        self.dcload((("dcl_5V", 0.1),), output=True, delay=0.5)
-        arm = dev["arm"]
-        arm.open()  # Open before power-up, to catch the banner
-        # This will also enable all loads on an ATE3/4 tester.
-        self.dcload(
+        self.dcload(  # This will also enable all loads on an ATE3/4 tester.
             (
                 ("dcl_5V", 0.0),
                 ("dcl_12V", 0.0),
@@ -63,15 +49,20 @@ class Initial(share.TestSequence):
             ),
             output=True,
         )
-        # TODO: Do we need to switch it off then on again ?
-        dev["dcs_5V"].output(self.cfg._5vsb_ext, True)
-        self.measure(("dmm_5Vext", "dmm_5Vunsw"), timeout=2)
-        arm.initialise()
-        # Switch everything off
-        dev["dcs_5V"].output(0, False)
-        dev["dcl_5V"].output(0.1, delay=0.5)
-        dev["dcl_5V"].output(0)
         dev["ard"].open()
+        dev["arm"].open()
+
+    @share.teststep
+    def _step_program(self, dev, mes):
+        """Program the micro.
+
+        Leave the 5V supply ON to keep the micro running.
+
+        """
+        dev["dcs_5V"].output(self.cfg._5vsb_ext, True)
+        self.measure(("dmm_5Vext", "dmm_5Vunsw", "dmm_3V3", "dmm_8V5Ard"), timeout=5)
+        mes["JLink"]()
+        dev["arm"].initialise()
 
     @share.teststep
     def _step_powerup(self, dev, mes):
@@ -90,10 +81,6 @@ class Initial(share.TestSequence):
         dev["dcl_12V"].output(1.0)
         dev["dcl_24V"].output(1.0)
         arm = dev["arm"]
-        if not self.cfg.is_renesas:
-            # Renesas was restarted during arm.initialise() so we
-            # don't need to get the banner here.
-            arm.action(expected=arm.banner_lines)
         self.measure(
             (
                 "dmm_ACin",
@@ -105,6 +92,7 @@ class Initial(share.TestSequence):
             ),
             timeout=2,
         )
+        dev["dcs_5V"].output(0, False)
         arm["UNLOCK"] = True
         arm["FAN_CHECK_DISABLE"] = True
         dev["dcs_PriCtl"].output(self.cfg.fixture_fan, True)  # Turn fan on
@@ -256,9 +244,10 @@ class Initial(share.TestSequence):
                 self.measurements["ocp_step_dn"]()
                 if detect.measure().result:
                     break
-            load.output(0.0)
             self.measurements["ocp_lock"]()
-            olimit.check(setting)
+            load.output(0.0)
+            olimit.check(setting)  # FIXME: This should be a Measurement
+            self._logger.debug("OCP Pot setting = %s", setting)
 
     @staticmethod
     def reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
