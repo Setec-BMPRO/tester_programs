@@ -49,7 +49,6 @@ class Initial(share.TestSequence):
             ),
             output=True,
         )
-        dev["ard"].open()
         dev["arm"].open()
 
     @share.teststep
@@ -74,13 +73,13 @@ class Initial(share.TestSequence):
         Unit is left running at 240Vac, no load.
 
         """
+        dev["ard"].open()
         dev["acsource"].output(voltage=240.0, output=True)
         # Switch 5V output ON (SX-600)
         dev["rla_sw"].set_on()
         # A little load so PFC voltage falls faster
         dev["dcl_12V"].output(1.0)
         dev["dcl_24V"].output(1.0)
-        arm = dev["arm"]
         self.measure(
             (
                 "dmm_ACin",
@@ -93,6 +92,7 @@ class Initial(share.TestSequence):
             timeout=2,
         )
         dev["dcs_5V"].output(0, False)
+        arm = dev["arm"]
         arm["UNLOCK"] = True
         arm["FAN_CHECK_DISABLE"] = True
         dev["dcs_PriCtl"].output(self.cfg.fixture_fan, True)  # Turn fan on
@@ -130,6 +130,7 @@ class Initial(share.TestSequence):
         # Leave the loads at zero
         dev["dcl_12V"].output(0)
         dev["dcl_24V"].output(0)
+        dev["ard"].close()
 
     @share.teststep
     def _step_reg_5v(self, dev, mes):

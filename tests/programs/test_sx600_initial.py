@@ -100,7 +100,6 @@ class SX600Initial(ProgramTestCase):
                 ),
                 "24V": (
                     (sen["o24V"], (24.44, 24.33, 24.22, 24.11, 24.24)),
-                    # OPC SET: Push 32 reads before OCP detected
                     # OCP CHECK: Push 18 reads before OCP detected
                     (sen["o24VinOCP"], ((0.123,) * 18 + (4.444,))),
                 ),
@@ -116,7 +115,7 @@ class SX600Initial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(41, len(result.readings))
+        self.assertEqual(39, len(result.readings))
         self.assertEqual(
             ["Lock", "Program", "PowerUp", "5Vsb", "12V", "24V", "PeakPower"],
             self.tester.ut_steps,

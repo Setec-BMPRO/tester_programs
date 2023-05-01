@@ -45,6 +45,7 @@ class _Genius2Initial(ProgramTestCase):
                         (
                             13.65,
                             13.65,
+                            13.65,
                         ),
                     ),
                     (sen["ovbatctl"], 13.0),
