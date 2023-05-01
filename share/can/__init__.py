@@ -89,7 +89,7 @@ class PacketPropertyReader:
             self.decoder.decode(packet)
         except tester.CANReaderError:  # A timeout due to no traffic
             return None
-        except _base.DataDecodeError:  # Probably incorrect packet type
+        except tester.sensor.KeyedDataDecodeError:  # Probably incorrect packet type
             return None
         return self.decoder.get(self._read_key)
 
