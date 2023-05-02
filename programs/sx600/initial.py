@@ -106,20 +106,20 @@ class Initial(share.TestSequence):
         self._logger.info("Start PFC calibration")
         pfc = mes["dmm_PFCpre"].stable(self.cfg.pfc_stable).value1
         steps = round((self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
-        with dev["ard"]:  # Arduino RESET upon Open hardware has been disabled
-            if steps > 0:  # Too low
-                self._logger.debug("Step UP %s steps", steps)
-                mes["pfcUpUnlock"]()
-                for _ in range(steps):
-                    mes["pfcStepUp"]()
-                mes["pfcUpLock"]()
-            elif steps < 0:  # Too high
-                self._logger.debug("Step DOWN %s steps", -steps)
-                mes["pfcDnUnlock"]()
-                for _ in range(-steps):
-                    mes["pfcStepDn"]()
-                mes["pfcDnLock"]()
-            if steps:  # Post-adjustment check
+        if steps:
+            with dev["ard"]:  # Arduino RESET upon Open hardware has been disabled
+                if steps > 0:  # Too low
+                    self._logger.debug("Step UP %s steps", steps)
+                    mes["pfcUpUnlock"]()
+                    for _ in range(steps):
+                        mes["pfcStepUp"]()
+                    mes["pfcUpLock"]()
+                elif steps < 0:  # Too high
+                    self._logger.debug("Step DOWN %s steps", -steps)
+                    mes["pfcDnUnlock"]()
+                    for _ in range(-steps):
+                        mes["pfcStepDn"]()
+                    mes["pfcDnLock"]()
                 mes["dmm_PFCpost"].stable(self.cfg.pfc_stable)
         dev["dcl_12V"].output(0)  # Leave the loads at zero
         dev["dcl_24V"].output(0)
