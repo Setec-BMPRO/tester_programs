@@ -32,7 +32,7 @@ class Initial(share.TestSequence):
         # This is a multi-unit parallel program so we can't stop on errors.
         self.stop_on_failrdg = False
         # This is a multi-unit parallel program so we can't raise exceptions.
-        tester.Tester.measurement_failure_exception = False
+        tester.MeasurementFailureException.enabled = False
 
     @share.teststep
     def _step_power_up(self, dev, mes):
