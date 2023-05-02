@@ -106,10 +106,9 @@ class Config:
         tester.LimitLow("ARM-24V", 999),
         tester.LimitDelta("5Vext", _5vsb_ext - 0.8, 1.0),
         tester.LimitDelta("5Vunsw", _5vsb_ext - 0.8 - 0.7, 1.0),
-        tester.LimitHigh("12V_inOCP", 4.0),  # Detect OCP when TP405>4V
-        tester.LimitHigh("24V_inOCP", 4.0),  # Detect OCP when TP404>4V
+        tester.LimitHigh("12V_inOCP", 4.0),  # Detect OCP when TP4 > 4V
+        tester.LimitHigh("24V_inOCP", 4.0),  # Detect OCP when TP5 > 4V
         tester.LimitBetween("12V_ocp", 4, 63),  # Digital Pot setting
-        tester.LimitBetween("24V_ocp", 4, 63),  # Digital Pot setting
         tester.LimitBetween("PriCtl", 12.0, 14.5),
         tester.LimitDelta("PFCpre", pfc_target, 30),
         tester.LimitDelta("PFCpost", pfc_target, 2.0),

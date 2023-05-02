@@ -73,12 +73,10 @@ class Initial(share.TestSequence):
         Unit is left running at 240Vac, no load.
 
         """
-        dev["ard"].open()
+        dev["ard"].open()  # Arduino RESET upon Open hardware has been disabled
         dev["acsource"].output(voltage=240.0, output=True)
-        # Switch 5V output ON (SX-600)
-        dev["rla_sw"].set_on()
-        # A little load so PFC voltage falls faster
-        dev["dcl_12V"].output(1.0)
+        dev["rla_sw"].set_on()  # Switch 5V output ON (SX-600)
+        dev["dcl_12V"].output(1.0)  # A little load so PFC voltage falls faster
         dev["dcl_24V"].output(1.0)
         self.measure(
             (
@@ -96,10 +94,8 @@ class Initial(share.TestSequence):
         arm["UNLOCK"] = True
         arm["FAN_CHECK_DISABLE"] = True
         dev["dcs_PriCtl"].output(self.cfg.fixture_fan, True)  # Turn fan on
-        # Switch all outputs ON
-        dev["rla_pson"].set_on()
+        dev["rla_pson"].set_on()  # Switch all outputs ON
         self.measure(("dmm_12V_set", "dmm_24V_set", "dmm_PGOOD"), timeout=2)
-        # ARM data readings
         self.measure(
             (
                 "arm_AcFreq",
@@ -108,8 +104,6 @@ class Initial(share.TestSequence):
                 "arm_24V",
             )
         )
-        mes["ocp_max"]()
-        # Calibrate the PFC set voltage
         self._logger.info("Start PFC calibration")
         pfc = mes["dmm_PFCpre"].stable(self.cfg.pfc_stable).value1
         steps = round((self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
@@ -127,10 +121,9 @@ class Initial(share.TestSequence):
             mes["pfcDnLock"]()
         if steps:  # Post-adjustment check
             mes["dmm_PFCpost"].stable(self.cfg.pfc_stable)
-        # Leave the loads at zero
-        dev["dcl_12V"].output(0)
-        dev["dcl_24V"].output(0)
         dev["ard"].close()
+        dev["dcl_12V"].output(0)  # Leave the loads at zero
+        dev["dcl_24V"].output(0)
 
     @share.teststep
     def _step_reg_5v(self, dev, mes):
@@ -162,14 +155,10 @@ class Initial(share.TestSequence):
             max_load=self.cfg.ratings.v12.full,
             peak_load=self.cfg.ratings.v12.peak,
         )
-        self.ocp_set(
-            target=self.cfg.ratings.v12.ocp,
-            load=dev["dcl_12V"],
-            dmm=mes["dmm_12V"],
-            detect=mes["dmm_12V_inOCP"],
-            enable=mes["ocp12_unlock"],
-            olimit=self.limits["12V_ocp"],
-        )
+        with tester.PathName("OCPset"):
+            setting = self.ocp12_set()
+            mes["opc_pot"].sensor.store(setting)
+            mes["opc_pot"]()
         with tester.PathName("OCPcheck"):
             dev["dcl_12V"].binary(0.0, self.cfg.ratings.v12.ocp * 0.9, 2.0)
             mes["rampOcp12V"]()
@@ -219,36 +208,29 @@ class Initial(share.TestSequence):
         dev["dcl_12V"].output(0)
         dev["dcl_5V"].output(0)
 
-    def ocp_set(self, target, load, dmm, detect, enable, olimit):
-        """Set OCP of an output.
+    def ocp12_set(self):
+        """Set 12V OCP.
 
-        target: Target setpoint in Amp.
-        load: Load instrument.
-        dmm: Measurement of output voltage.
-        detect: Measurement of 'In OCP'.
-        enable: Measurement to call to enable digital pot.
-        olimit: Limit to check OCP pot setting.
-
-        OCP has been set to maximum in the programming step.
         Apply the desired load current, then lower the OCP setting until
         OCP triggers. The unit is left running at no load.
 
         """
-        with tester.PathName("OCPset"):
-            load.output(target)
-            dmm.measure()
-            detect.configure()
-            detect.opc()
-            enable.measure()
-            setting = 0
-            for setting in range(63, 0, -1):
-                self.measurements["ocp_step_dn"]()
-                if detect.measure().result:
-                    break
-            self.measurements["ocp_lock"]()
-            load.output(0.0)
-            olimit.check(setting)  # FIXME: This should be a Measurement
-            self._logger.debug("OCP Pot setting = %s", setting)
+        mes = self.measurements
+        detect = mes["dmm_12V_inOCP"]
+        load = self.devices["dcl_12V"]
+        mes["ocp_max"]()
+        load.output(self.cfg.ratings.v12.ocp)
+        mes["dmm_12V"].measure()
+        detect.configure()
+        detect.opc()
+        mes["ocp12_unlock"].measure()
+        for setting in range(63, 0, -1):
+            mes["ocp_step_dn"]()
+            if detect.measure().result:
+                break
+        mes["ocp_lock"]()
+        load.output(0.0)
+        return setting
 
     @staticmethod
     def reg_check(dmm_out, dcl_out, reg_limit, max_load, peak_load):
@@ -368,6 +350,7 @@ class Sensors(share.Sensors):
         self["Lock"] = sensor.Res(dmm, high=12, low=4, rng=1000, res=1)
         self["o5Vsbunsw"] = sensor.Vdc(dmm, high=13, low=3, rng=10, res=0.001)
         self["o8V5Ard"] = sensor.Vdc(dmm, high=14, low=8, rng=100, res=0.001)
+        self["OCPpot"] = sensor.Mirror()
         self["OCP12V"] = sensor.Ramp(
             stimulus=self.devices["dcl_12V"],
             sensor=self["o12VinOCP"],
@@ -471,6 +454,7 @@ class Measurements(share.Measurements):
                 ("arm_12V", "ARM-12V", "ARM_12V", ""),
                 ("arm_24V", "ARM-24V", "ARM_24V", ""),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
+                ("opc_pot", "12V_ocp", "OCPpot", ""),
             )
         )
         # Suppress signals on these measurements.

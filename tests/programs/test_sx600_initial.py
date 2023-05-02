@@ -115,7 +115,7 @@ class SX600Initial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(39, len(result.readings))
+        self.assertEqual(40, len(result.readings))
         self.assertEqual(
             ["Lock", "Program", "PowerUp", "5Vsb", "12V", "24V", "PeakPower"],
             self.tester.ut_steps,
