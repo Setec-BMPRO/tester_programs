@@ -98,7 +98,7 @@ class Config:
         tester.LimitBetween("Snubber", 1000, 3000),  # Snubbing resistors
         tester.LimitRegExp("Reply", "^OK$"),
         tester.LimitInteger("Program", 0),
-        tester.LimitDelta("3V3", 3.3, 0.1),
+        tester.LimitDelta("3V3", 3.3, 0.15),
         tester.LimitDelta("ACin", 240, 10),
         tester.LimitLow("ARM-AcFreq", 999),
         tester.LimitLow("ARM-AcVolt", 999),

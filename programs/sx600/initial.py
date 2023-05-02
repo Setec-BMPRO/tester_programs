@@ -50,7 +50,6 @@ class Initial(share.TestSequence):
             output=True,
         )
         dev["arm"].open()
-        dev["ard"].open()  # Arduino RESET upon Open hardware has been disabled
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -107,20 +106,21 @@ class Initial(share.TestSequence):
         self._logger.info("Start PFC calibration")
         pfc = mes["dmm_PFCpre"].stable(self.cfg.pfc_stable).value1
         steps = round((self.cfg.pfc_target - pfc) / self.cfg.pfc_volt_per_step)
-        if steps > 0:  # Too low
-            self._logger.debug("Step UP %s steps", steps)
-            mes["pfcUpUnlock"]()
-            for _ in range(steps):
-                mes["pfcStepUp"]()
-            mes["pfcUpLock"]()
-        elif steps < 0:  # Too high
-            self._logger.debug("Step DOWN %s steps", -steps)
-            mes["pfcDnUnlock"]()
-            for _ in range(-steps):
-                mes["pfcStepDn"]()
-            mes["pfcDnLock"]()
-        if steps:  # Post-adjustment check
-            mes["dmm_PFCpost"].stable(self.cfg.pfc_stable)
+        with dev["ard"]:  # Arduino RESET upon Open hardware has been disabled
+            if steps > 0:  # Too low
+                self._logger.debug("Step UP %s steps", steps)
+                mes["pfcUpUnlock"]()
+                for _ in range(steps):
+                    mes["pfcStepUp"]()
+                mes["pfcUpLock"]()
+            elif steps < 0:  # Too high
+                self._logger.debug("Step DOWN %s steps", -steps)
+                mes["pfcDnUnlock"]()
+                for _ in range(-steps):
+                    mes["pfcStepDn"]()
+                mes["pfcDnLock"]()
+            if steps:  # Post-adjustment check
+                mes["dmm_PFCpost"].stable(self.cfg.pfc_stable)
         dev["dcl_12V"].output(0)  # Leave the loads at zero
         dev["dcl_24V"].output(0)
 
@@ -155,7 +155,8 @@ class Initial(share.TestSequence):
             peak_load=self.cfg.ratings.v12.peak,
         )
         with tester.PathName("OCPset"):
-            setting = self.ocp12_set()
+            with dev["ard"]:  # Arduino RESET upon Open hardware has been disabled
+                setting = self.ocp12_set()
             mes["opc_pot"].sensor.store(setting)
             mes["opc_pot"]()
         with tester.PathName("OCPcheck"):
@@ -211,7 +212,7 @@ class Initial(share.TestSequence):
         """Set 12V OCP.
 
         Apply the desired load current, then lower the OCP setting until
-        OCP triggers. The unit is left running at no load.
+        OCP triggers. The unit is left running at full load.
 
         """
         mes = self.measurements
@@ -228,7 +229,7 @@ class Initial(share.TestSequence):
             if detect.measure().result:
                 break
         mes["ocp_lock"]()
-        load.output(0.0)
+        load.output(self.cfg.ratings.v12.full)
         return setting
 
     @staticmethod
