@@ -50,6 +50,7 @@ class Initial(share.TestSequence):
             output=True,
         )
         dev["arm"].open()
+        dev["ard"].open()  # Arduino RESET upon Open hardware has been disabled
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -73,7 +74,6 @@ class Initial(share.TestSequence):
         Unit is left running at 240Vac, no load.
 
         """
-        dev["ard"].open()  # Arduino RESET upon Open hardware has been disabled
         dev["acsource"].output(voltage=240.0, output=True)
         dev["rla_sw"].set_on()  # Switch 5V output ON (SX-600)
         dev["dcl_12V"].output(1.0)  # A little load so PFC voltage falls faster
@@ -121,7 +121,6 @@ class Initial(share.TestSequence):
             mes["pfcDnLock"]()
         if steps:  # Post-adjustment check
             mes["dmm_PFCpost"].stable(self.cfg.pfc_stable)
-        dev["ard"].close()
         dev["dcl_12V"].output(0)  # Leave the loads at zero
         dev["dcl_24V"].output(0)
 
@@ -454,7 +453,7 @@ class Measurements(share.Measurements):
                 ("arm_12V", "ARM-12V", "ARM_12V", ""),
                 ("arm_24V", "ARM-24V", "ARM_24V", ""),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
-                ("opc_pot", "12V_ocp", "OCPpot", ""),
+                ("opc_pot", "OCPset", "OCPpot", ""),
             )
         )
         # Suppress signals on these measurements.
