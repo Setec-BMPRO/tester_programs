@@ -63,7 +63,7 @@ class BaseConsole(unittest.TestCase):
             self.mycon.action(expected=1)
 
     def test_noprompt(self):
-        self.mycon.port.puts(" -> \r")
+        self.mycon.port.puts(" -> \r")  # "> " is missing
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action("NP")
 
@@ -110,7 +110,7 @@ class BadUartConsole(unittest.TestCase):
         self.assertEqual(response, "1234")
 
     def test_noprompt(self):
-        self.mycon.port.puts(" -> \r\n")
+        self.mycon.port.puts(" -> \r\n")  # "> " is missing
         with self.assertRaises(tester.MeasurementFailedError):
             self.mycon.action("NP")
 
