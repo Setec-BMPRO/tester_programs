@@ -80,8 +80,8 @@ def _main():
     )
     # Make and run the TESTER
     logger.info('Creating "%s" Tester', tester_type)
-    tst = tester.Tester(tester_type, programs.PROGRAMS)
-    tst.start()
+    tst = tester.Tester()
+    tst.start(tester_type, programs.PROGRAMS)
     share.config.System.tester_type = tester_type
     logger.info('Create Program "%s"', test_program)
     # Make a TEST PROGRAM descriptor

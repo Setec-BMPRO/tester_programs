@@ -31,8 +31,7 @@ class UnitTester(tester.Tester):
 
     def __init__(self, prog_class, per_panel, parameter):
         """Initalise the data feeder."""
-        # Create a Tester instance
-        super().__init__("MockATE", {repr(prog_class): prog_class})
+        super().__init__()
         self.ut_program = tester.TestProgram(
             repr(prog_class), per_panel=per_panel, parameter=parameter
         )
@@ -133,7 +132,7 @@ class ProgramTestCase(unittest.TestCase):
         cls.patcher.start()
         # Create the tester instance
         cls.tester = UnitTester(cls.prog_class, cls.per_panel, cls.parameter)
-        cls.tester.start()
+        cls.tester.start("MockATE", {repr(cls.prog_class): cls.prog_class})
 
     def setUp(self):
         """Per-Test setup."""
@@ -144,7 +143,7 @@ class ProgramTestCase(unittest.TestCase):
         patcher.start()
         self.tester.open()
         patcher.stop()
-        self.test_program = self.tester.runner.program
+        self.test_program = self.tester._runner.program
 
     def tearDown(self):
         """Per-Test tear down."""

@@ -104,8 +104,8 @@ powersupply_ma                        10000
     @classmethod
     def setUpClass(cls):
         # We need a tester to get MeasurementFailedError.
-        cls.tester = tester.Tester("MockATE", {})
-        cls.tester.start()
+        cls.tester = tester.Tester()
+        cls.tester.start("MockATE", {})
 
     @classmethod
     def tearDownClass(cls):
