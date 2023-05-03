@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2020 SETEC Pty Ltd
+# Copyright 2023 SETEC Pty Ltd
 """ACMON Initial Test Program."""
 
 import pathlib
@@ -14,7 +14,7 @@ class Initial(share.TestSequence):
 
     """ACMON Initial Test Program."""
 
-    sw_image = "no_sw_available_yet.bin"
+    sw_image = "acmon-2-110_v1.1.0-0-g5158fad.hex"
     vin_set = 12.0  # Input DC voltage to power the unit from CAN bus
     vac_set = 220.0  # Input AC voltage
     testlimits = (  # Test limits
