@@ -40,10 +40,6 @@ class Initial(share.TestSequence):
             tester.TestStep("Display", self._step_display, self.is_full),
             tester.TestStep("CanBus", self._step_canbus, self.is_full),
         )
-        # This is a multi-unit parallel program so we can't stop on errors.
-        self.stop_on_failrdg = False
-        # This is a multi-unit parallel program so we can't raise exceptions.
-        tester.MeasurementFailureException.enabled = False
 
     def _positions(self):
         """Range of my active PCB positions.
