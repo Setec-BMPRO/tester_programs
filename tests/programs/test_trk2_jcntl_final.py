@@ -27,17 +27,17 @@ class _CommonFinal(ProgramTestCase):
 
     def _tank_sensors(self, value):
         """Fill all tank sensors with a value."""
-        for sen in self.test_program.sensors["tank1-4"]:
+        for sen in self.test_sequence.sensors["tank1-4"]:
             sen.store(value)
 
     def _pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": ((sen["sernum"], self.sernum),),
                 "Display": (
-                    (sen["swver"], self.test_program.config.sw_version),
+                    (sen["swver"], self.test_sequence.config.sw_version),
                     (sen["yesnoseg"], True),
                     (sen["yesnobklght"], True),
                 ),
@@ -46,7 +46,7 @@ class _CommonFinal(ProgramTestCase):
                 "Tanks": (self._tank_sensors, (1, 2, 3, 4)),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

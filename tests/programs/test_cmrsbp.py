@@ -70,7 +70,7 @@ class CMRSBPInitial(ProgramTestCase):
         self.mycmrdata["FULL CHARGE CAPACITY"] = 13000
         self.mycmrdata["SENSE RESISTOR READING"] = 250
         self.mycmrdata["HALF CELL READING"] = (110,)
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
@@ -91,7 +91,7 @@ class CMRSBPInitial(ProgramTestCase):
                 "CalBQcurrent": ((sen["oibat"], -0.02),),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
@@ -137,7 +137,7 @@ class CMRSBPSerialDate(ProgramTestCase):
 
     def test_pass(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "SerialDate": (
@@ -146,7 +146,7 @@ class CMRSBPSerialDate(ProgramTestCase):
                 ),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
@@ -180,14 +180,14 @@ class _CMRSBPFin(ProgramTestCase):
 
     def _pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Startup": ((sen["sn_entry_fin"], (self.sernum,)),),
                 "Verify": ((sen["ovbatIn"], 13.72),),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

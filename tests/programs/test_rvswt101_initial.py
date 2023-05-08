@@ -38,7 +38,7 @@ class RVSWT101Initial(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": ((sen["vin"], 3.3),),
@@ -49,7 +49,7 @@ class RVSWT101Initial(ProgramTestCase):
                 ),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(
             tuple(
                 setec.tester.UUT.from_sernum("A000000{0:04}".format(uut))
@@ -82,7 +82,7 @@ class Fixture(unittest.TestCase):
         for cnt in range(self.relay_count):
             self.rla[cnt + 1].reset_mock()
 
-    def test_program_mode(self):
+    def test_sequence_mode(self):
         """Program mode."""
         self.dcs.output.assert_called_once_with(0.0, output=False)
         self.assertEqual(self.fxt.state, rvswt101.initial.FixtureState.idle)

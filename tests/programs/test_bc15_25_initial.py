@@ -26,7 +26,7 @@ class _BC15_25_Initial(ProgramTestCase):
 
     def _pass_run(self, ocp_steps):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PartDetect": (
@@ -34,7 +34,7 @@ class _BC15_25_Initial(ProgramTestCase):
                     (sen["fanshort"], 3300.0),
                 ),
                 "Program": ((sen["3V3"], 3.3),),
-                "Initialise": ((sen["arm_swver"], self.test_program.cfg.sw_version),),
+                "Initialise": ((sen["arm_swver"], self.test_sequence.cfg.sw_version),),
                 "PowerUp": (
                     (sen["ACin"], 240.0),
                     (sen["Vbus"], 330.0),
@@ -63,12 +63,12 @@ class _BC15_25_Initial(ProgramTestCase):
                     (sen["arm_vout"], 14400),
                     (
                         sen["arm_iout"],
-                        round(1000 * 0.8 * self.test_program.ocp_nominal),
+                        round(1000 * 0.8 * self.test_sequence.ocp_nominal),
                     ),
                 ),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

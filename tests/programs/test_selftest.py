@@ -16,7 +16,7 @@ class SelfTest(ProgramTestCase):
 
     def _dso_store(self, value):
         """Fill all DSO sensors with a value."""
-        sensors = self.test_program.sensors
+        sensors = self.test_sequence.sensors
         subsen = sensors["subchan"]
         for sen in subsen:
             sen.store(value)
@@ -27,13 +27,13 @@ class SelfTest(ProgramTestCase):
 
     def _dcs_store(self, value):
         """Fill all DC Source sensors with a value."""
-        dcssen = self.test_program.sensors["dcs"]
+        dcssen = self.test_sequence.sensors["dcs"]
         for sen in dcssen:
             sen.store(value)
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "ACSource": ((sen["oAcs"], (120, 240)),),
@@ -85,7 +85,7 @@ class SelfTest(ProgramTestCase):
                 ),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

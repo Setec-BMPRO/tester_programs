@@ -30,7 +30,7 @@ class BLE2CANInitial(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
@@ -65,13 +65,13 @@ class BLE2CANInitial(ProgramTestCase):
                             3.1,
                         ),
                     ),
-                    (sen["SwVer"], self.test_program.sw_version),
+                    (sen["SwVer"], self.test_sequence.sw_version),
                 ),
                 "Bluetooth": ((sen["BtMac"], self.btmac),),
                 "CanBus": ((sen["CANbind"], 1 << 28),),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

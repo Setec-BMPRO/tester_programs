@@ -29,7 +29,7 @@ class _BC2Initial(ProgramTestCase):
 
     def _pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
@@ -37,7 +37,7 @@ class _BC2Initial(ProgramTestCase):
                     (sen["vin"], 15.0),
                     (sen["3v3"], 3.30),
                 ),
-                "TestArm": ((sen["arm_SwVer"], self.test_program.cfg.sw_version),),
+                "TestArm": ((sen["arm_SwVer"], self.test_sequence.cfg.sw_version),),
                 "Calibrate": (
                     (sen["vin"], (14.9999, 15.0)),
                     (sen["mircal"], ("cal success:",) * 2),
@@ -49,7 +49,7 @@ class _BC2Initial(ProgramTestCase):
                 "Bluetooth": ((sen["arm_BtMAC"], self.btmac),),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

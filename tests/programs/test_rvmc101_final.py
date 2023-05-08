@@ -17,7 +17,7 @@ class RVMC101Final(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": ((sen["TabletScreen"], True),),
@@ -27,7 +27,7 @@ class RVMC101Final(ProgramTestCase):
                 ),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(
             tuple("UUT{0}".format(uut) for uut in range(1, self.per_panel + 1))
         )
@@ -47,13 +47,13 @@ class RVMC101FinalLite(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": ((sen["TabletScreen"], True),),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(
             tuple("UUT{0}".format(uut) for uut in range(1, self.per_panel + 1))
         )

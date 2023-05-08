@@ -34,13 +34,13 @@ class _BP35Initial(ProgramTestCase):
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         for sensor in sen["arm_loads"]:
             sensor.store(value)
 
     def _pass_run(self, rdg_count, steps):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
@@ -57,7 +57,7 @@ class _BP35Initial(ProgramTestCase):
                 ),
                 "Initialise": (
                     (sen["sernum"], self.sernum),
-                    (sen["arm_swver"], self.test_program.cfg.arm_sw_version),
+                    (sen["arm_swver"], self.test_sequence.cfg.arm_sw_version),
                 ),
                 "SrSolar": (
                     (sen["vset"], (13.0, 13.0, 13.5)),
@@ -151,14 +151,14 @@ class _BP35Initial(ProgramTestCase):
                 "CanBus": (
                     (sen["canpwr"], 12.5),
                     (sen["arm_canbind"], 1 << 28),
-                    (sen["TunnelSwVer"], self.test_program.cfg.arm_sw_version),
+                    (sen["TunnelSwVer"], self.test_sequence.cfg.arm_sw_version),
                 ),
             },
             UnitTester.key_call: {  # Callables
                 "OCP": (self._arm_loads, 2.0),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

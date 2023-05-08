@@ -40,7 +40,7 @@ class TRSBTS_Initial(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
@@ -55,7 +55,7 @@ class TRSBTS_Initial(ProgramTestCase):
                 ),
                 "PgmNordic": ((sen["JLink"], 0),),
                 "Operation": (
-                    (sen["arm_swver"], self.test_program.config.sw_version),
+                    (sen["arm_swver"], self.test_sequence.config.sw_version),
                     (sen["red"], (0.0, 1.8, 0.0)),
                     (sen["green"], (0.0, 2.5, 0.0)),
                     (sen["blue"], (0.0, 2.8, 0.0)),
@@ -70,7 +70,7 @@ class TRSBTS_Initial(ProgramTestCase):
                 "Bluetooth": (),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

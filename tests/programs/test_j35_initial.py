@@ -32,13 +32,13 @@ class _J35Initial(ProgramTestCase):
 
     def _arm_loads(self, value):
         """Fill all ARM Load sensors with a value."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         for sensor in sen["arm_loads"]:
             sensor.store(value)
 
     def _pass_run(self, rdg_count, steps):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
@@ -124,17 +124,17 @@ class _J35Initial(ProgramTestCase):
             },
             UnitTester.key_call: {  # Callables
                 "Initialise": (
-                    self.test_program.sensors["arm_swver"].store,
-                    self.test_program.cfg.sw_version,
+                    self.test_sequence.sensors["arm_swver"].store,
+                    self.test_sequence.cfg.sw_version,
                 ),
                 "Load": (self._arm_loads, 2.0),
                 "CanBus": (
-                    self.test_program.sensors["TunnelSwVer"].store,
-                    self.test_program.cfg.sw_version,
+                    self.test_sequence.sensors["TunnelSwVer"].store,
+                    self.test_sequence.cfg.sw_version,
                 ),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

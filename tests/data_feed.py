@@ -9,6 +9,7 @@ Record the test result.
 
 """
 
+import datetime
 import logging
 import queue
 import unittest
@@ -115,6 +116,7 @@ class ProgramTestCase(unittest.TestCase):
     """Product test program wrapper."""
 
     debug = False
+    prog_class = None
     parameter = None
     _logger_names = ("tester", "share", "programs")
     per_panel = 1
@@ -122,7 +124,11 @@ class ProgramTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Per-Class setup."""
+        cls.start_time = datetime.datetime.now()
         logging_setup()
+        logging.getLogger(__name__).info(
+            "setUpClass() '%s' [%s]", cls.prog_class, cls.parameter
+        )
         # Set lower level logging level
         for name in cls._logger_names:
             log = logging.getLogger(name)
@@ -139,11 +145,9 @@ class ProgramTestCase(unittest.TestCase):
         # Patch queue.get to speed up open() by removing the UI ping delays
         myq = Mock(name="MyQueue")
         myq.get.side_effect = queue.Empty
-        patcher = patch("queue.Queue", return_value=myq)
-        patcher.start()
-        self.tester.open()
-        patcher.stop()
-        self.test_program = self.tester._runner.program
+        with patch("queue.Queue", return_value=myq):
+            self.tester.open()
+        self.test_sequence = self.tester.sequence
 
     def tearDown(self):
         """Per-Test tear down."""
@@ -158,3 +162,8 @@ class ProgramTestCase(unittest.TestCase):
             log.setLevel(logging.INFO)
         cls.patcher.stop()
         cls.tester.stop()
+        elapsed = datetime.datetime.now() - cls.start_time
+        elapsed = round(float(elapsed.seconds) + float(elapsed.microseconds) / 1000)
+        logging.getLogger(__name__).info(
+            "tearDownClass() UnitTest Run Time = %sms", elapsed
+        )

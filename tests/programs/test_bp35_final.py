@@ -32,13 +32,13 @@ class BP35Final(ProgramTestCase):
 
     def _dmm_loads(self, value):
         """Fill all DMM Load sensors with a value."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         for sensor in sen["vloads"]:
             sensor.store(value)
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
@@ -47,7 +47,7 @@ class BP35Final(ProgramTestCase):
                 ),
                 "CAN": (
                     (sen["can12v"], 12.0),
-                    (sen["arm_swver"], self.test_program.cfg.arm_sw_version),
+                    (sen["arm_swver"], self.test_sequence.cfg.arm_sw_version),
                 ),
                 "OCP": (
                     (
@@ -65,7 +65,7 @@ class BP35Final(ProgramTestCase):
                 "Load": (self._dmm_loads, self.vout),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

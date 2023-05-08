@@ -31,7 +31,7 @@ class SX750Initial(ProgramTestCase):
 
     def test_pass_run(self):
         """PASS run of the program."""
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PartDetect": (
@@ -81,8 +81,8 @@ class SX750Initial(ProgramTestCase):
                     (sen["ARM_AcVolt"], 240),
                     (sen["ARM_12V"], 12.180),
                     (sen["ARM_24V"], 24.0),
-                    (sen["ARM_SwVer"], self.test_program.cfg._bin_version[:3]),
-                    (sen["ARM_SwBld"], self.test_program.cfg._bin_version[4:]),
+                    (sen["ARM_SwVer"], self.test_sequence.cfg._bin_version[:3]),
+                    (sen["ARM_SwBld"], self.test_sequence.cfg._bin_version[4:]),
                 ),
                 "5Vsb": (
                     (
@@ -136,7 +136,7 @@ class SX750Initial(ProgramTestCase):
                 ),
             },
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)

@@ -27,7 +27,7 @@ class ASDisplayInitial(ProgramTestCase):
         super().setUp()
 
     def test_pass(self):
-        sen = self.test_program.sensors
+        sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {
                 "PowerUp": (
@@ -57,7 +57,7 @@ class ASDisplayInitial(ProgramTestCase):
                 "CanBus": (),
             }
         }
-        self.tester.ut_load(data, self.test_program.sensor_store)
+        self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
