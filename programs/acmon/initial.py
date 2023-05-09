@@ -103,7 +103,7 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "R7FA2L1x.jflash"
+    projectfile = "r7fa2l1a9.jflash"
     sw_image = None
 
     def open(self):
