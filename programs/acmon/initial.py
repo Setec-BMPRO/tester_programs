@@ -23,7 +23,7 @@ class Initial(share.TestSequence):
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
         tester.LimitPercent("Vac", vac_set / 2, 5.0, doc="AC voltage reading"),
         tester.LimitPercent("Frequency", 50, 5.0, doc="AC frequency reading"),
-        tester.LimitPercent("AcCurrent", 100.0, 10.0, doc="AC current reading"),
+        tester.LimitPercent("AcCurrent", 25.0, 20.0, doc="AC current reading"),
         tester.LimitInteger("Phase", 2, doc="AC phase reading"),
     )
 
