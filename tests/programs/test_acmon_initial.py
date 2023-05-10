@@ -30,8 +30,8 @@ class ACMONInitial(ProgramTestCase):
                 "Run": (
                     (sen["vac1"], 110),
                     (sen["vac2"], 110),
-                    (sen["current1"], 100),
-                    (sen["current2"], 100),
+                    (sen["current1"], 25),
+                    (sen["current2"], 25),
                     (sen["frequency1"], 50),
                     (sen["frequency2"], 50),
                     (sen["phase1"], 2),
