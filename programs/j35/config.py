@@ -64,6 +64,7 @@ class J35:
     sw_13 = "1.3.15775.997"  # For 'A' & 'B' < Rev 8
     sw_15 = "1.5.17467.1373"  # Rev 12 release
     sw_bld = "1.5.20386.1374"  # Rev 13 release
+    sw_16 = "1.6.7634.1421"  # Rev 14 release
     # These values get set per Product type & revision
     sw_version = None
     hw_version = None
@@ -436,17 +437,25 @@ class J35BL(J35B):
 
     """J35BL configuration."""
 
-    _rev13_values = _Values(
-        sw_version=J35.sw_bld,
-        hw_version=(13, Type.BL.value, "A"),
+    _rev14_values = _Values(
+        sw_version=J35.sw_16,
+        hw_version=(14, Type.BL.value, "A"),
         output_count=14,
         ocp_set=35.0,
         solar=True,
         canbus=True,
     )
     _rev_data = {
-        None: _rev13_values,
-        "13": _rev13_values,
+        None: _rev14_values,
+        "14": _rev14_values,
+        "13": _Values(
+            sw_version=J35.sw_bld,
+            hw_version=(13, Type.BL.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
     }
 
 
@@ -536,26 +545,25 @@ class J35D(J35C):
 
     """J35D configuration."""
 
-#    _rev14_values = _Values(
-#        sw_version=J35.sw_bld,
-#        hw_version=(14, Type.D.value, "A"),
-#        output_count=14,
-#        ocp_set=35.0,
-#        solar=True,
-#        canbus=True,
-#    )
-    _rev13_values = _Values(
-        sw_version=J35.sw_bld,
-        hw_version=(13, Type.D.value, "A"),
+    _rev14_values = _Values(
+        sw_version=J35.sw_16,
+        hw_version=(14, Type.D.value, "A"),
         output_count=14,
         ocp_set=35.0,
         solar=True,
         canbus=True,
     )
     _rev_data = {
-        None: _rev13_values,
-#        "14": _rev14_values,
-        "13": _rev13_values,
+        None: _rev14_values,
+        "14": _rev14_values,
+        "13": _Values(
+            sw_version=J35.sw_bld,
+            hw_version=(13, Type.D.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
         "12": _Values(
             sw_version=J35.sw_15,
             hw_version=(12, Type.D.value, "A"),
@@ -629,15 +637,23 @@ class ASPower(J35D):
 
     """ASPower configuration."""
 
-    _rev1_values = _Values(
-        sw_version=J35.sw_bld,
-        hw_version=(1, Type.D.value, "A"),
+    _rev2_values = _Values(
+        sw_version=J35.sw_16,
+        hw_version=(2, Type.D.value, "A"),
         output_count=14,
         ocp_set=35.0,
         solar=True,
         canbus=True,
     )
     _rev_data = {
-        None: _rev1_values,
-        "1": _rev1_values,
+        None: _rev2_values,
+        "2": _rev2_values,
+        "1": _Values(
+            sw_version=J35.sw_bld,
+            hw_version=(1, Type.D.value, "A"),
+            output_count=14,
+            ocp_set=35.0,
+            solar=True,
+            canbus=True,
+        ),
     }
