@@ -192,7 +192,7 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "cn102.jflash"
+    projectfile = "nrf52832.jflash"
     sw_nordic_image = None
 
     def open(self):

@@ -238,7 +238,7 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "rvview2_atmel.jflash"
+    projectfile = "atsamc21e17.jflash"
     sw_file = None
 
     def open(self):

@@ -31,10 +31,14 @@ class _Values:
 
     product_rev = attr.ib(validator=attr.validators.instance_of(str))
     hardware_rev = attr.ib(validator=attr.validators.instance_of(str))
-    sw_arm_image = attr.ib(validator=attr.validators.instance_of(str))
     sw_nrf_image = attr.ib(validator=attr.validators.instance_of(str))
-    sw_nrf_projectfile = attr.ib(validator=attr.validators.instance_of(str))
-    is_smartlink = attr.ib(validator=attr.validators.instance_of(bool))
+    sw_arm_image = attr.ib(
+        default="nxp_v0.1.0.bin", validator=attr.validators.instance_of(str)
+        )
+    sw_nrf_projectfile = attr.ib(
+        default="nrf52832.jflash", validator=attr.validators.instance_of(str)
+    )
+    is_smartlink = attr.ib(default=True, validator=attr.validators.instance_of(bool))
 
 
 class _Config:
@@ -63,14 +67,11 @@ class BLExtender(_Config):
 
     """BLExtender config."""
 
-    _arm_image = "nxp_v0.1.0.bin"
     _hw_rev = "02B"
     _rev1_values = _Values(
         product_rev="01A",
         hardware_rev=_hw_rev,
-        sw_arm_image=_arm_image,  # no NXP in this product
         sw_nrf_image=("blextender_v1.3.0-0-g6c6b4fa-signed-mcuboot-factory.hex"),
-        sw_nrf_projectfile="nrf52.jflash",
         is_smartlink=False,
     )
     _rev_data = {
@@ -83,16 +84,11 @@ class SmartLink201(_Config):
 
     """SmartLink201 config."""
 
-    _arm_image = "nxp_v0.1.0.bin"
     _sw_nrf_image = "smartlink_signed_1.2.1-0-g744e6db_factory_mcuboot.hex"
-    _sw_nrf_projectfile = "nrf52.jflash"
     _rev4_values = _Values(
         product_rev="04A",
         hardware_rev="03A",
-        sw_arm_image=_arm_image,
         sw_nrf_image=_sw_nrf_image,
-        sw_nrf_projectfile=_sw_nrf_projectfile,
-        is_smartlink=True,
     )
     _rev_data = {
         None: _rev4_values,
@@ -100,18 +96,12 @@ class SmartLink201(_Config):
         "3": _Values(
             product_rev="03B",
             hardware_rev="02B",
-            sw_arm_image=_arm_image,
             sw_nrf_image=_sw_nrf_image,  # MA-401
-            sw_nrf_projectfile=_sw_nrf_projectfile,
-            is_smartlink=True,
         ),
         "2": _Values(
             product_rev="02B",
             hardware_rev="02B",
-            sw_arm_image=_arm_image,
             sw_nrf_image=_sw_nrf_image,  # MA-401
-            sw_nrf_projectfile=_sw_nrf_projectfile,
-            is_smartlink=True,
         ),
         # No Rev 1 production
     }

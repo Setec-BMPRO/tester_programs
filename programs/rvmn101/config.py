@@ -22,6 +22,7 @@ def get(parameter, uut):
     config = {
         "101A": RVMN101A,
         "101B": RVMN101B,
+        "101C": RVMN101C,
         "50": RVMN5x,
         "55": RVMN5x,
     }[parameter]
@@ -42,7 +43,7 @@ class _Values:
         default={}, validator=attr.validators.instance_of(dict)
     )
     nordic_projectfile = attr.ib(
-        default="nrf52.jflash", validator=attr.validators.instance_of(str)
+        default="nrf52832.jflash", validator=attr.validators.instance_of(str)
     )
     arm_projectfile = attr.ib(
         default="lpc1519.jflash", validator=attr.validators.instance_of(str)
@@ -414,6 +415,40 @@ class RVMN101B(Config):
         """
         # 3dB below the -A version
         rssi = -73 if share.config.System.tester_type in ("ATE4", "ATE5") else -88
+        return cls._base_limits_final + (
+            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+        )
+
+
+class RVMN101C(Config):
+
+    """RVMN101C configuration."""
+
+    # Initial Test parameters
+    fixture = "032871"
+    # Software versions
+    _sonic_1_0_3 = "bmpro_connect_signed_1.0.3-0-gaec189d4_factory_mcuboot.hex"
+    _arm_image_2_5 = "rvmn101_nxp_2.5.bin"
+    _rev3_values = _Values(
+        nordic_image=_sonic_1_0_3,
+        arm_image=_arm_image_2_5,
+        product_rev="03A",
+        hardware_rev="02A",
+        nordic_projectfile = "nrf52840.jflash"
+    )
+    _rev_data = {
+        None: _rev3_values,
+        "3": _rev3_values,
+    }
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
         return cls._base_limits_final + (
             tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
         )

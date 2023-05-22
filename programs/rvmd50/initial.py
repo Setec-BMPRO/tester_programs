@@ -134,7 +134,7 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "rvmd50_atmel.jflash"
+    projectfile = "atsamc21e17.jflash"
     sw_image = None
 
     def open(self):

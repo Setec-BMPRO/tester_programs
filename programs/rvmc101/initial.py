@@ -16,7 +16,7 @@ class Initial(share.TestSequence):
     """RVMC101x Initial Test Program."""
 
     sw_image = {
-        "ATMEL": "rvmc101_sam_2.0.0-0-g04bd047.bin",
+        "ATMEL": "rvmc101_sam_2.1.0-0-g3780794.bin",
         "LITE": "None",
         "NXP": "rvmc101_0.4.bin",
     }
@@ -167,7 +167,7 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "rvmc101_atmel.jflash"
+    projectfile = "atsamc21e16.jflash"
     sw_image = None
 
     def open(self):

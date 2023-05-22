@@ -74,6 +74,10 @@ class Config:
         "jm-05": (70, 6),
         "od-01": (60, 6),
         "od-02": (61, 4),
+        "bc-05": (71, 4),
+        "bc-06": (72, 4),
+        "bc-07": (73, 6),
+        "bc-08": (74, 6),
     }
     # Series software images per revision
     _rev_software = dict.fromkeys(
@@ -192,7 +196,7 @@ class Config:
                 pass
         return {
             "software": image,
-            "jlink_projectfile": "nrf52.jflash",
+            "jlink_projectfile": "nrf52832.jflash",
             "limits_ini": cls._common_limits + cls._initial_limits,
             "limits_fin": (cls._common_limits + cls._final_limits + (type_lim,)),
             "limits_fin_4_button": (

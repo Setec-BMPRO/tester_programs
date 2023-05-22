@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2023 , ",
-    "saved": "2023-04-25, 21:38:56"
+    "saved": "2023-05-17, 10:02:51"
   },
   "project": {
     "AUTHOR": "",
@@ -73,14 +73,7 @@
     },
     "MIXEDLANGUAGE": false,
     "OTHERS": [
-      "main.py.ini",
-      "programs/rvmc101/rvmc101_atmel.jflash",
-      "programs/rvmd50/rvmd50_atmel.jflash",
-      "programs/rvmn101/lpc1519.jflash",
-      "programs/rvmn101/nrf52.jflash",
-      "programs/sx600/lpc1113.jflash",
-      "programs/sx600/r7fa2e1a7.jflash",
-      "programs/trsbts/trsbts.jflash"
+      "main.py.ini"
     ],
     "OTHERTOOLSPARMS": {
       "Black": {

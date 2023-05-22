@@ -41,7 +41,7 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         Sensors.sw_image = self.sw_image
-        Sensors.projectfile = "nrf52.jflash"
+        Sensors.projectfile = "nrf52832.jflash"
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
