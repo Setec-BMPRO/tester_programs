@@ -110,6 +110,8 @@ class Base:
     cmd_data = {}
     # True for verbose logging
     verbose = False
+    # Time delay between port open and input flush
+    open_wait_delay = 0.1
     # Response of the last call to __setitem__
     last_setitem_response = ""
     # Magic command key to read last __setitem__ response
@@ -141,7 +143,7 @@ class Base:
         """Open connection to unit."""
         self.port.open()
         # We need to wait just a little before flushing the port
-        time.sleep(0.1)
+        time.sleep(self.open_wait_delay)
         self.reset_input_buffer()
 
     def close(self):

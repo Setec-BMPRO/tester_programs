@@ -10,6 +10,9 @@ class Arduino(share.console.Base):
 
     """Communications to Arduino console."""
 
+    # Time delay between port open and input flush
+    open_wait_delay = 0.2
+
     cmd_data = {
         "VERSION": share.console.parameter.String("VERSION?", read_format="{0}"),
         "DEBUG": share.console.parameter.String("1 DEBUG", read_format="{0}"),
