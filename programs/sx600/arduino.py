@@ -3,15 +3,14 @@
 # Copyright 2016 SETEC Pty Ltd
 """SX-600 Arduino console driver."""
 
+import time
+
 import share
 
 
 class Arduino(share.console.Base):
 
     """Communications to Arduino console."""
-
-    # Time delay between port open and input flush
-    open_wait_delay = 0.2
 
     cmd_data = {
         "VERSION": share.console.parameter.String("VERSION?", read_format="{0}"),
@@ -36,3 +35,11 @@ class Arduino(share.console.Base):
         "PFC_DN_LOCK": share.console.parameter.String("PFC-DN-LOCK", read_format="{0}"),
         "PFC_UP_LOCK": share.console.parameter.String("PFC-UP-LOCK", read_format="{0}"),
     }
+
+    def open(self):
+        """Open connection to unit."""
+        self.port.open()
+        time.sleep(self.open_wait_delay)
+        self.port.write(self.cmd_terminator)  # Flush any output junk
+        time.sleep(self.open_wait_delay)
+        self.reset_input_buffer()  # Flush any input junk
