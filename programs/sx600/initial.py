@@ -74,9 +74,10 @@ class Initial(share.TestSequence):
 
         """
         dev["acsource"].output(voltage=240.0, output=True)
-        dev["rla_sw"].set_on()  # Switch 5V output ON (SX-600)
+        dev["rla_sw"].set_on()  # Switch 5V output ON
         dev["dcl_12V"].output(1.0)  # A little load so PFC voltage falls faster
         dev["dcl_24V"].output(1.0)
+        dev["dcs_5V"].output(0, False)
         self.measure(
             (
                 "dmm_ACin",
@@ -88,7 +89,6 @@ class Initial(share.TestSequence):
             ),
             timeout=2,
         )
-        dev["dcs_5V"].output(0, False)
         arm = dev["arm"]
         arm["UNLOCK"] = True
         arm["FAN_CHECK_DISABLE"] = True
