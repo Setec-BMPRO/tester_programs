@@ -230,6 +230,16 @@ class Console101B(_Console):
         return super().pin_name(index).replace("OUT10A_", "OUT10AMP_")
 
 
+class Console101C(Console101A):
+
+    """Communications to RVMN101C console."""
+
+    banner_lines = 13  # Startup banner lines
+    # Console command prompt. Signals the end of response data.
+    # FIXME: Firmware 1.0.3 does not have the leading "\r\n"...
+    cmd_prompt = b"\x1b[1;32muart:~$ \x1b[m"
+
+
 class _Console5x(_Console):
 
     """Communications to RVMN5x console."""

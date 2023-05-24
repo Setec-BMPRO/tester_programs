@@ -146,7 +146,7 @@ class Devices(share.Devices):
         console_class = {
             "101A": console.Console101A,
             "101B": console.Console101B,
-            "101C": console.Console101A,
+            "101C": console.Console101C,
             "50": console.Console50,
             "55": console.Console55,
         }[self.parameter]
