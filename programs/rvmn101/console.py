@@ -238,6 +238,8 @@ class Console101C(Console101A):
     # Console command prompt. Signals the end of response data.
     # FIXME: Firmware 1.0.3 does not have the leading "\r\n"...
     cmd_prompt = b"\x1b[1;32muart:~$ \x1b[m"
+    # FIXME: Firmware 1.0.3 spits out a random "\r\n" during "*****"...
+    ignore = ("*")  # Tuple of strings to remove from responses
 
 
 class _Console5x(_Console):
