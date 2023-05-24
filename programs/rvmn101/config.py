@@ -425,7 +425,7 @@ class RVMN101C(Config):
     """RVMN101C configuration."""
 
     # Initial Test parameters
-    fixture = "032871"
+    fixture = "033550"
     # Software versions
     _sonic_1_0_3 = "rvmn101c_signed_1.0.3-0-gaec189d4_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_v3.01_0_gc609bee.bin"
