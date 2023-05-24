@@ -139,9 +139,9 @@ class RVMN101A(Config):
         "HBRIDGE 3 RETRACT": 5,
     }
     # Software versions
-    _nordic_3_1_3 = "jayco_rvmn101_signed_3.1.3-0-gfa47b7fc_factory_mcuboot.hex"
-    _arm_image_1_13 = "rvmn101_nxp_1.13.bin"
-    _arm_image_2_5 = "rvmn101_nxp_2.5.bin"
+    _nordic_3_1_3 = "rvmn101a_signed_3.1.3-0-gfa47b7fc_factory_mcuboot.hex"
+    _arm_image_1_13 = "rvmn101a_nxp_1.13.bin"
+    _arm_image_2_5 = "rvmn101a_nxp_2.5.bin"
     _rev27_values = _Values(
         nordic_image=_nordic_3_1_3,
         arm_image=_arm_image_2_5,
@@ -301,9 +301,9 @@ class RVMN101B(Config):
     # Initial Test parameters
     fixture = "032871"
     # Software versions
-    _nordic_2_4_6 = "tmc_rvmn101_signed_2.4.6-0-g5807fc70_factory_mcuboot.hex"  # 038685
-    _arm_image_3_0 = "rvmn101_nxp_3.0.bin"  # 035879 Rev ≥ 14
-    _arm_image_1_9 = "rvmn101_nxp_1.9.bin"  # 033092 Rev ≤ 13
+    _nordic_2_4_6 = "rvmn101b_signed_2.4.6-0-g5807fc70_factory_mcuboot.hex"  # 038685
+    _arm_image_3_0 = "rvmn101b_nxp_3.0.bin"  # 035879 Rev ≥ 14
+    _arm_image_1_9 = "rvmn101b_nxp_1.9.bin"  # 033092 Rev ≤ 13
     _rev20_values = _Values(
         nordic_image=_nordic_2_4_6,
         arm_image=_arm_image_3_0,
@@ -427,11 +427,11 @@ class RVMN101C(Config):
     # Initial Test parameters
     fixture = "032871"
     # Software versions
-    _sonic_1_0_3 = "bmpro_connect_signed_1.0.3-0-gaec189d4_factory_mcuboot.hex"
-    _arm_image_2_5 = "rvmn101_nxp_2.5.bin"
+    _sonic_1_0_3 = "rvmn101c_signed_1.0.3-0-gaec189d4_factory_mcuboot.hex"
+    _arm_image_3_0_1 = "rvmn101c_nxp_v3.01_0_gc609bee.bin"
     _rev3_values = _Values(
         nordic_image=_sonic_1_0_3,
-        arm_image=_arm_image_2_5,
+        arm_image=_arm_image_3_0_1,
         product_rev="03A",
         hardware_rev="02A",
         nordic_projectfile = "nrf52840.jflash"
@@ -461,7 +461,7 @@ class RVMN5x(Config):
     # Initial Test parameters
     fixture = "034861"
     # Software versions
-    _nordic_3_1_3 = "jayco_rvmn5x_signed_3.1.3-0-gfa47b7fc_factory_mcuboot.hex"
+    _nordic_3_1_3 = "rvmn5x_signed_3.1.3-0-gfa47b7fc_factory_mcuboot.hex"
     _nxp_image_2_3 = "rvmn5x_nxp_2.3.bin"
     _ra2_image_0_3_6 = "rvmn5x_ra2_v0.3.6-0-g34e425b.hex"
     _rev17_values = _Values(
