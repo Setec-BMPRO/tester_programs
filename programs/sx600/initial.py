@@ -120,6 +120,7 @@ class Initial(share.TestSequence):
                     for _ in range(-steps):
                         mes["pfcStepDn"]()
                     mes["pfcDnLock"]()
+                time.sleep(0.2)  # Let voltage rise/fall
                 mes["dmm_PFCpost"].stable(self.cfg.pfc_stable)
         dev["dcl_12V"].output(0)  # Leave the loads at zero
         dev["dcl_24V"].output(0)
