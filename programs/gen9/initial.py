@@ -234,7 +234,7 @@ class Devices(share.Devices):
             ((self["dcl_12a"], 10), (self["dcl_12b"], 10))
         )
         # Serial uses a BDA4 with DTR driving RESET
-        arm_ser = serial.Serial(baudrate=115200, rtscts=True, timeout=2)
+        arm_ser = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately - don't open until after programming
         arm_ser.port = share.config.Fixture.port("032715", "ARM")
         self["arm"] = console.Console(arm_ser)
