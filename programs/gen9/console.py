@@ -3,6 +3,8 @@
 # Copyright 2018 SETEC Pty Ltd
 """GEN9-540 ARM processor console driver."""
 
+import time
+
 import share
 
 
@@ -19,8 +21,6 @@ class Console(share.console.Base):
         "5V": parameter.Float("X-RAIL-VOLTAGE-5V", scale=1000, read_format="{0} X?"),
         "12V": parameter.Float("X-RAIL-VOLTAGE-12V", scale=1000, read_format="{0} X?"),
         "24V": parameter.Float("X-RAIL-VOLTAGE-24V", scale=1000, read_format="{0} X?"),
-        "SwVer": parameter.String("X-SOFTWARE-VERSION", read_format="{0} X?"),
-        "SwBld": parameter.String("X-BUILD-NUMBER", read_format="{0} X?"),
         "CAL_PFC": parameter.Float(
             "CAL-PFC-BUS-VOLTS",
             writeable=True,
@@ -41,6 +41,16 @@ class Console(share.console.Base):
     # Strings to ignore in responses
     ignore = (" ", "Hz", "Vrms", "mV")
 
+    def initialise(self):
+        """First time initialisation."""
+        self.port.dtr = True  # Pulse RESET using DTR of the BDA4
+        time.sleep(0.01)
+        self.port.dtr = False
+        self.banner()
+        self.unlock()
+        self["NVDEFAULT"] = True
+        self.nvwrite()
+
     def banner(self):
         """Flush the console banner lines."""
         self.action(None, expected=self.banner_lines)
@@ -52,13 +62,6 @@ class Console(share.console.Base):
     def nvwrite(self):
         """Save calibration values in NV memory."""
         self["NVWRITE"] = True
-
-    def initialise(self):
-        """First time initialisation."""
-        self.banner()
-        self.unlock()
-        self["NVDEFAULT"] = True
-        self.nvwrite()
 
     def calpfc(self, voltage):
         """Calibration PFC set voltage.

@@ -8,31 +8,19 @@ from pydispatch import dispatcher
 import tester
 
 import share
+from . import config
 
 
 class Final(share.TestSequence):
 
     """GEN9-540 Final Test Program."""
 
-    limitdata = (
-        tester.LimitLow("FanOff", 9.0, doc="Airflow not present"),
-        tester.LimitHigh("FanOn", 11.0, doc="Airflow present"),
-        tester.LimitDelta("GPO1out", 240, 10, doc="Voltage present"),
-        tester.LimitDelta("GPO2out", 240, 10, doc="Voltage present"),
-        tester.LimitPercent("5V", 5.10, 2.0, doc="5V output ok"),
-        tester.LimitLow("12Voff", 0.5, doc="12V output off"),
-        tester.LimitPercent("12V", 12.0, 2.5, doc="12V output ok"),
-        tester.LimitLow("24Voff", 0.5, doc="24V output off"),
-        tester.LimitPercent("24V", 24.0, 2.5, doc="24V output ok"),
-        tester.LimitLow("PwrFail", 0.4, doc="PFAIL asserted"),
-        tester.LimitHigh("PwrFailOff", 11.0, doc="PFAIL not asserted"),
-        tester.LimitLow("12Vmax", 0.045, doc="12V transient ok"),
-    )
-
     def open(self, uut):
         """Create the test program as a linear sequence."""
+        self.cfg = config.Config
+        self.cfg.configure(uut)
         Sensors.callback = self._dso_callback
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().open(self.cfg.limits_final, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwrup),
             tester.TestStep("PowerOn", self._step_pwron),

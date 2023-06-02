@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2023 , ",
-    "saved": "2023-05-17, 10:02:51"
+    "saved": "2023-05-30, 11:51:00"
   },
   "project": {
     "AUTHOR": "",
@@ -175,6 +175,7 @@
       "programs/gen8/final.py",
       "programs/gen8/initial.py",
       "programs/gen9/__init__.py",
+      "programs/gen9/config.py",
       "programs/gen9/console.py",
       "programs/gen9/final.py",
       "programs/gen9/initial.py",

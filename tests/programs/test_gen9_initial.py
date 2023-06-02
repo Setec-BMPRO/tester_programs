@@ -35,7 +35,10 @@ class Gen9Initial(ProgramTestCase):
                     (sen["lock"], 10.0),
                     (sen["fanshort"], 700.0),
                 ),
-                "Program": ((sen["o3v3"], 3.3),),
+                "Program": (
+                    (sen["o3v3"], 3.3),
+                    (sen["JLink"], 0),
+                    ),
                 "PowerUp": (
                     (sen["acin"], 240.0),
                     (
@@ -80,8 +83,6 @@ class Gen9Initial(ProgramTestCase):
                     (sen["arm_5v"], 5.05),
                     (sen["arm_12v"], 12.0),
                     (sen["arm_24v"], 24.0),
-                    (sen["arm_swver"], self.test_sequence.sw_ver),
-                    (sen["arm_swbld"], self.test_sequence.sw_build),
                 ),
                 "5V": ((sen["o5v"], (5.15, 5.14, 5.10)),),
                 "12V": ((sen["o12v"], (12.24, 12.15, 12.00)),),
@@ -92,7 +93,7 @@ class Gen9Initial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(33, len(result.readings))
+        self.assertEqual(32, len(result.readings))
         self.assertEqual(
             ["PartDetect", "Program", "Initialise", "PowerUp", "5V", "12V", "24V"],
             self.tester.ut_steps,

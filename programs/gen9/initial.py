@@ -9,54 +9,22 @@ import serial
 import tester
 
 import share
-from . import console
+from . import config, console
 
 
 class Initial(share.TestSequence):
 
     """GEN9-540 Initial Test Program."""
 
-    # Reading to reading difference for PFC voltage stability
-    pfc_stable = 0.05
-    sw_ver = "1.0"
-    sw_svn = "18392"
-    sw_build = "2512"
-    # Software image filename
-    sw_image = "gen9_{0}.{1}.{2}.bin".format(sw_ver, sw_svn, sw_build)
-    limitdata = (
-        tester.LimitHigh("FanShort", 500),
-        tester.LimitLow("FixtureLock", 200),
-        tester.LimitPercent("3V3", 3.30, 10.0),
-        tester.LimitLow("5Voff", 0.5),
-        tester.LimitPercent("5Vset", 5.137, 1.0),
-        tester.LimitPercent("5V", 5.1, 2.0),
-        tester.LimitLow("12Voff", 0.5),
-        tester.LimitPercent("12V", 12.0, 2.5),
-        tester.LimitLow("24Voff", 0.5),
-        tester.LimitPercent("24V", 24.0, 2.5),
-        tester.LimitLow("PwrFail", 0.4),
-        tester.LimitDelta("ACin", 240, 10),
-        tester.LimitDelta("15Vccpri", 15.0, 1.0),
-        tester.LimitBetween("12Vpri", 11.4, 17.0),
-        tester.LimitBetween("PFCpre", 408, 450),
-        tester.LimitDelta("PFCpost1", 426.0, 2.9),
-        tester.LimitDelta("PFCpost2", 426.0, 2.9),
-        tester.LimitDelta("PFCpost3", 426.0, 2.9),
-        tester.LimitDelta("PFCpost4", 426.0, 2.9),
-        tester.LimitDelta("PFCpost", 426.0, 3.0),
-        tester.LimitDelta("ARM-AcFreq", 50, 10),
-        tester.LimitDelta("ARM-AcVolt", 240, 20),
-        tester.LimitDelta("ARM-5V", 5.0, 1.0),
-        tester.LimitDelta("ARM-12V", 12.0, 1.0),
-        tester.LimitDelta("ARM-24V", 24.0, 2.0),
-        tester.LimitRegExp("SwVer", "^{0}$".format(sw_ver.replace(".", r"\."))),
-        tester.LimitRegExp("SwBld", "^{0}$".format(sw_build)),
-    )
+    pfc_stable = 0.05  # Reading to reading difference for PFC voltage stability
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.sw_image = self.sw_image
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        self.cfg = config.Config
+        self.cfg.configure(uut)
+        Sensors.projectfile = self.cfg.projectfile
+        Sensors.sw_image = self.cfg.sw_image
+        super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("Program", self._step_program),
@@ -79,10 +47,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_program(self, dev, mes):
         """Program the ARM device."""
-        dev["rla_reset"].set_on()
         dev["dcs_5v"].output(5.0, True)
         mes["dmm_3v3"](timeout=5)
-        dev["program_arm"].program()
+        mes["JLink"]()
 
     @share.teststep
     def _step_initialise_arm(self, dev, mes):
@@ -93,7 +60,6 @@ class Initial(share.TestSequence):
         """
         arm = dev["arm"]
         arm.open()
-        dev["rla_reset"].pulse(0.1)
         arm.initialise()
         dev["dcs_5v"].output(0.0, False)
         dev["dcl_5v"].output(0.1, True, delay=0.5)
@@ -109,8 +75,6 @@ class Initial(share.TestSequence):
 
         """
         dev["acsource"].output(voltage=240.0, output=True)
-        # Switch 5V output ON
-        dev["rla_sw"].set_on()
         self.measure(
             (
                 "dmm_acin",
@@ -123,8 +87,7 @@ class Initial(share.TestSequence):
             ),
             timeout=5,
         )
-        # Switch all outputs ON
-        dev["rla_pson"].set_on()
+        dev["rla_pson"].set_on()  # Switch all outputs ON
         self.measure(
             (
                 "dmm_5vset",
@@ -133,7 +96,6 @@ class Initial(share.TestSequence):
             ),
             timeout=5,
         )
-        # Unlock ARM
         arm = dev["arm"]
         arm.banner()
         arm.unlock()
@@ -162,8 +124,6 @@ class Initial(share.TestSequence):
                 "arm_5v",
                 "arm_12v",
                 "arm_24v",
-                "arm_swver",
-                "arm_swbld",
             ),
         )
 
@@ -255,11 +215,8 @@ class Devices(share.Devices):
 
     """Devices."""
 
-    sw_image = None
-
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("acsource", tester.ACSource, "ACS"),
@@ -269,28 +226,17 @@ class Devices(share.Devices):
             ("dcl_12a", tester.DCLoad, "DCL2"),
             ("dcl_12b", tester.DCLoad, "DCL6"),
             ("dcl_5v", tester.DCLoad, "DCL4"),
-            ("rla_reset", tester.Relay, "RLA1"),
-            ("rla_boot", tester.Relay, "RLA2"),
-            ("rla_pson", tester.Relay, "RLA3"),
-            ("rla_sw", tester.Relay, "RLA4"),
+            ("rla_pson", tester.Relay, "RLA1"),
+            ("JLink", tester.JLink, "JLINK"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         self["dcl_12v"] = tester.DCLoadParallel(
             ((self["dcl_12a"], 10), (self["dcl_12b"], 10))
         )
-        # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.config.Fixture.port("032715", "ARM")
-        # ARM device programmer
-        self["program_arm"] = share.programmer.ARM(
-            arm_port,
-            pathlib.Path(__file__).parent / self.sw_image,
-            boot_relay=self["rla_boot"],
-            reset_relay=self["rla_reset"],
-        )
-        # Serial connection to the ARM console
-        arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
+        # Serial uses a BDA4 with DTR driving RESET
+        arm_ser = serial.Serial(baudrate=115200, rtscts=True, timeout=2)
         # Set port separately - don't open until after programming
-        arm_ser.port = arm_port
+        arm_ser.port = share.config.Fixture.port("032715", "ARM")
         self["arm"] = console.Console(arm_ser)
 
     def reset(self):
@@ -305,13 +251,15 @@ class Devices(share.Devices):
         for ld in ("dcl_5v", "dcl_12v", "dcl_24v"):
             self[ld].output(0.0, False)
         self["dcs_5v"].output(0.0, False)
-        for rla in ("rla_reset", "rla_boot", "rla_pson", "rla_sw"):
-            self[rla].set_off()
+        self["rla_pson"].set_off()
 
 
 class Sensors(share.Sensors):
 
     """Sensors."""
+
+    projectfile = None
+    sw_image = None
 
     def open(self):
         """Create all Sensors."""
@@ -342,6 +290,11 @@ class Sensors(share.Sensors):
             ("arm_swbld", "SwBld"),
         ):
             self[name] = sensor.Keyed(arm, cmdkey)
+        self["JLink"] = sensor.JLink(
+            self.devices["JLink"],
+            pathlib.Path(__file__).parent / self.projectfile,
+            pathlib.Path(__file__).parent / self.sw_image,
+        )
 
 
 class Measurements(share.Measurements):
@@ -376,8 +329,7 @@ class Measurements(share.Measurements):
                 ("arm_5v", "ARM-5V", "arm_5v", ""),
                 ("arm_12v", "ARM-12V", "arm_12v", ""),
                 ("arm_24v", "ARM-24V", "arm_24v", ""),
-                ("arm_swver", "SwVer", "arm_swver", ""),
-                ("arm_swbld", "SwBld", "arm_swbld", ""),
+                ("JLink", "ProgramOk", "JLink", "Programmed"),
             )
         )
         # Prevent test failures on these limits.
