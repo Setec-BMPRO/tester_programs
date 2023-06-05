@@ -107,6 +107,10 @@ class ARM(_base._Base):
     def program_wait(self):
         """Wait for device programming to finish."""
         self._worker.join()
+        if self.bda4_signals:
+            self._ser.dtr = True  # Pulse RESET
+            time.sleep(0.01)
+            self._ser.dtr = False
         self._ser.close()
         self._ser = None
         self.result_check()

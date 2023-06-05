@@ -88,7 +88,7 @@ class BLExtenderConsole(_Console):
         """
         self.reset()
         self.action(None, expected=self.banner_lines)
-        super().brand(sernum, product_rev, hardware_rev)
+        super().initialise(sernum, product_rev, hardware_rev)
 
 
 class SmartLink201Console(_Console):
@@ -163,7 +163,7 @@ class SmartLink201Console(_Console):
         self.reset()
         self.action(None, expected=self.banner_lines)
         self.vbatttimer.start()
-        super().brand(sernum, product_rev, hardware_rev)
+        super().initialise(sernum, product_rev, hardware_rev)
 
     def vbatt_cal(self, vbatt):
         """Calibrate Vbatt reading.
