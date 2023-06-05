@@ -19,9 +19,8 @@ class Initial(share.TestSequence):
 
     """TRS-BTS Initial Test Program."""
 
-    # Injected Vbatt
-    vbatt = 12.0
-    _common = (
+    vbatt = 12.0  # Injected Vbatt
+    _limits = (
         tester.LimitDelta("Vbat", vbatt, 0.5, doc="Battery input present"),
         tester.LimitPercent("3V3", 3.3, 1.7, doc="3V3 present"),
         tester.LimitLow("BrakeOff", 0.5, doc="Brakes off"),
@@ -49,39 +48,12 @@ class Initial(share.TestSequence):
         tester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
         tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )
-    # Variant specific configuration data. Indexed by test program parameter.
-    config_data = {
-        "BT2": {
-            "Config": config.TrsBt2,
-            "Limits": _common
-            + (
-                tester.LimitRegExp(
-                    "ARM-SwVer",
-                    "^{0}$".format(config.TrsBt2.sw_version.replace(".", r"\.")),
-                    doc="Software version",
-                ),
-            ),
-        },
-        "BTS": {
-            "Config": config.TrsBts,
-            "Limits": _common
-            + (
-                tester.LimitRegExp(
-                    "ARM-SwVer",
-                    "^{0}$".format(config.TrsBts.sw_version.replace(".", r"\.")),
-                    doc="Software version",
-                ),
-            ),
-        },
-    }
 
     def open(self, uut):
         """Prepare for testing."""
-        self.config = self.config_data[self.parameter]["Config"]
+        self.config = config.get(self.parameter)
         Sensors.sw_image = self.config.sw_image
-        super().open(
-            self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
-        )
+        super().open(self._limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("PgmNordic", self._step_program),
@@ -120,7 +92,7 @@ class Initial(share.TestSequence):
         dev["dcs_vbat"].output(self.vbatt)
         trsbts.brand(self.config.hw_version, self.sernum)
         self.measure(
-            ("arm_swver", "dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5
+            ("dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5
         )
         trsbts.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(
@@ -212,7 +184,6 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "nrf52832.jflash"
     sw_image = None
 
     def open(self):
@@ -250,18 +221,15 @@ class Sensors(share.Sensors):
         self["sernum"].doc = "Barcode scanner"
         # Console sensors
         trsbts = self.devices["trsbts"]
-        for name, cmdkey in (("arm_swver", "SW_VER"),):
-            self[name] = sensor.Keyed(trsbts, cmdkey)
         for name, cmdkey, units in (
             ("arm_vbatt", "VBATT", "V"),
             ("arm_vpin", "VPIN", "V"),
         ):
             self[name] = sensor.Keyed(trsbts, cmdkey)
-            if units:
-                self[name].units = units
+            self[name].units = units
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
 
@@ -313,7 +281,6 @@ class Measurements(share.Measurements):
                     "mirscan",
                     "Validate MAC address over bluetooth",
                 ),
-                ("arm_swver", "ARM-SwVer", "arm_swver", "Unit software version"),
                 ("arm_vbatt", "ARM-Vbatt", "arm_vbatt", "Vbatt before cal"),
                 ("arm_vbatt_cal", "ARM-Vbatt-Cal", "arm_vbatt", "Vbatt after cal"),
                 ("arm_vpin", "ARM-Vpin", "arm_vpin", "Voltage on the pin microswitch"),

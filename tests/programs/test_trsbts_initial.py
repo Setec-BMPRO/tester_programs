@@ -55,7 +55,6 @@ class TRSBTS_Initial(ProgramTestCase):
                 ),
                 "PgmNordic": ((sen["JLink"], 0),),
                 "Operation": (
-                    (sen["arm_swver"], self.test_sequence.config.sw_version),
                     (sen["red"], (0.0, 1.8, 0.0)),
                     (sen["green"], (0.0, 2.5, 0.0)),
                     (sen["blue"], (0.0, 2.8, 0.0)),
@@ -74,7 +73,7 @@ class TRSBTS_Initial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(28, len(result.readings))
+        self.assertEqual(27, len(result.readings))
         self.assertEqual(
             ["Prepare", "PgmNordic", "Operation", "Calibrate", "Bluetooth"],
             self.tester.ut_steps,
