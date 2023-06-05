@@ -41,7 +41,6 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         Sensors.sw_image = self.sw_image
-        Sensors.projectfile = "nrf52832.jflash"
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
@@ -56,13 +55,7 @@ class Initial(share.TestSequence):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vbatt, True)
-        self.measure(
-            (
-                "dmm_vin",
-                "dmm_3v3",
-            ),
-            timeout=5,
-        )
+        self.measure(("dmm_vin", "dmm_3v3", ), timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -74,11 +67,7 @@ class Initial(share.TestSequence):
         """Test the operation of TRSRFM."""
         trsrfm = dev["trsrfm"]
         trsrfm.open()
-        # Power cycle after programming
-        dev["dcs_vin"].output(0.0, delay=0.5)
-        trsrfm.reset_input_buffer()
-        dev["dcs_vin"].output(self.vbatt)
-        trsrfm.brand(self.hw_version, self.sernum)
+        trsrfm.initialise(self.hw_version, self.sernum)
         mes["arm_swver"]()
         trsrfm.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(("dmm_redon", "dmm_greenon", "dmm_blueon"), timeout=5)
@@ -121,7 +110,6 @@ class Devices(share.Devices):
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
         trsrfm_ser.port = share.config.Fixture.port(fixture, "NORDIC")
-        # Console driver
         self["trsrfm"] = console.Console(trsrfm_ser)
         # Connection to RaspberryPi bluetooth server
         self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
@@ -141,7 +129,6 @@ class Sensors(share.Sensors):
     """Sensors."""
 
     sw_image = None
-    projectfile = None
 
     def open(self):
         """Create all Sensors."""
@@ -159,16 +146,13 @@ class Sensors(share.Sensors):
         self["blue"].doc = "Led cathode"
         self["mirmac"] = sensor.Mirror()
         self["mirscan"] = sensor.Mirror()
-        # JLink programmer
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
-        # Console sensors
         trsrfm = self.devices["trsrfm"]
-        for name, cmdkey in (("arm_SwVer", "SW_VER"),):
-            self[name] = sensor.Keyed(trsrfm, cmdkey)
+        self["arm_SwVer"] = sensor.Keyed(trsrfm, "SW_VER")
         self["sernum"] = sensor.DataEntry(
             message=tester.translate("trsrfm_initial", "msgSnEntry"),
             caption=tester.translate("trsrfm_initial", "capSnEntry"),

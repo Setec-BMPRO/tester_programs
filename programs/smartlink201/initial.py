@@ -81,11 +81,9 @@ class Initial(share.TestSequence):
         """Test the Nordic device."""
         smartlink201 = dev["smartlink201"]
         smartlink201.open()
-        # Cycle power to get the Nordic running
-        dev["dcs_Vbatt"].output(0, output=True, delay=2)
-        dev["dcs_Vbatt"].output(self.vin_set, output=True, delay=1)
-        mes["dmm_3V3"](timeout=5)
-        smartlink201.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
+        smartlink201.initialise(
+            self.sernum, self.cfg.product_rev, self.cfg.hardware_rev
+        )
         # Save SerialNumber & MAC on a remote server.
         mac = mes["SL_MAC"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)

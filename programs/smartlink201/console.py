@@ -4,6 +4,7 @@
 """BLExtender/SmartLink201 Test Program."""
 
 import re
+import time
 
 import setec
 
@@ -28,7 +29,13 @@ class _Console(share.console.Base):
     cmd_prompt = b"uart:~$ \x1b[m"
     ignore = ("\x1b[m", "\x1b[1;31m", "\x1b[1;32m")
 
-    def brand(self, sernum, product_rev, hardware_rev):
+    def reset(self):
+        """RESET using the BDA4."""
+        self.port.dtr = True  # Pulse RESET using DTR of the BDA4
+        time.sleep(0.01)
+        self.port.dtr = False
+
+    def initialise(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
 
         @param sernum SETEC Serial Number 'AYYWWLLNNNN'
@@ -71,7 +78,7 @@ class BLExtenderConsole(_Console):
         "MAC": parameter.String("setec mac", read_format="{0}"),
     }
 
-    def brand(self, sernum, product_rev, hardware_rev):
+    def initialise(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
 
         @param sernum SETEC Serial Number 'AYYWWLLNNNN'
@@ -79,6 +86,7 @@ class BLExtenderConsole(_Console):
         @param hardware_rev Hardware revision from ECO eg: '02A'
 
         """
+        self.reset()
         self.action(None, expected=self.banner_lines)
         super().brand(sernum, product_rev, hardware_rev)
 
@@ -144,7 +152,7 @@ class SmartLink201Console(_Console):
             self.vbatttimer.wait()
         return super().__getitem__(key)  # Try the command table
 
-    def brand(self, sernum, product_rev, hardware_rev):
+    def initialise(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
 
         @param sernum SETEC Serial Number 'AYYWWLLNNNN'
@@ -152,6 +160,7 @@ class SmartLink201Console(_Console):
         @param hardware_rev Hardware revision from ECO eg: '02A'
 
         """
+        self.reset()
         self.action(None, expected=self.banner_lines)
         self.vbatttimer.start()
         super().brand(sernum, product_rev, hardware_rev)

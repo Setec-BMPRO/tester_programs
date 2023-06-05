@@ -21,7 +21,6 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
         Sensors.sw_image = self.cfg["software"]
-        Sensors.jlink_projectfile = self.cfg["jlink_projectfile"]
         super().open(self.cfg["limits_ini"], Devices, Sensors, Measurements)
         # Adjust for different console behaviour
         self.devices["rvswt101"].banner_lines = self.cfg["banner_lines"]
@@ -127,7 +126,6 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         bl652_port = share.config.Fixture.port("032869", "NORDIC")
         rvswt101_ser.port = bl652_port
-        # RVSWT101 Console driver
         self["rvswt101"] = console.Console(rvswt101_ser)
         self["rvswt101"].measurement_fail_on_error = False
         # Connection to RaspberryPi bluetooth server
@@ -256,7 +254,6 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = None
     sw_image = None
 
     def open(self):
@@ -268,13 +265,9 @@ class Sensors(share.Sensors):
         self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.jlink_projectfile,
+            share.config.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
-        # Console sensors
-        rvswt101 = self.devices["rvswt101"]
-        for device, name, cmdkey in ((rvswt101, "SwVer", "SW_VER"),):
-            self[name] = sensor.Keyed(device, cmdkey)
 
 
 class Measurements(share.Measurements):
