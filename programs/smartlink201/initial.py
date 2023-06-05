@@ -40,7 +40,6 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, uut)
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Sensors.sw_nrf_image = self.cfg.sw_nrf_image
-        Sensors.sw_nrf_projectfile = self.cfg.sw_nrf_projectfile
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -162,11 +161,6 @@ class Devices(share.Devices):
             crpmode=False,
             bda4_signals=True,
         )
-        # Nordic NRF52 device programmer
-        # self['progNordic'] = share.programmer.NRF52(
-        #    pathlib.Path(__file__).parent / self.sw_nrf_image,
-        #    share.config.Fixture.nrf52_sernum(fixture)
-        #    )
         # Serial connection to the Nordic console
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
         #   Set port separately, as we don't want it opened yet
@@ -200,7 +194,6 @@ class Sensors(share.Sensors):
     """Sensors."""
 
     sw_nrf_image = None
-    sw_nrf_projectfile = None
 
     def open(self):
         """Create all Sensors."""
@@ -225,7 +218,7 @@ class Sensors(share.Sensors):
         self["SnEntry"].doc = "Entered S/N"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.sw_nrf_projectfile,
+            share.config.JFlashProject("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_nrf_image,
         )
         # Console sensors

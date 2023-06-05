@@ -15,7 +15,7 @@ class _Values:
 
     """Adjustable configuration data values."""
 
-    projectfile = attr.ib(validator=attr.validators.instance_of(str))
+    devicetype = attr.ib(validator=attr.validators.instance_of(str))
     sw_image = attr.ib(validator=attr.validators.instance_of(str))
     is_renesas = attr.ib(validator=attr.validators.instance_of(bool))
 
@@ -25,7 +25,7 @@ class Config:
     """Configuration."""
 
     # These values get set per Product revision
-    projectfile = None
+    devicetype = None
     sw_image = None
     is_renesas = None
     # Common Test limits common to both test types
@@ -70,12 +70,12 @@ class Config:
     )
     # Software image filename
     _lpc_values = _Values(
-            projectfile="lpc1113.jflash",
+            devicetype="lpc1113",
             sw_image="gen9_1.0.18392.2512.bin",
             is_renesas=False,
         )
     _renesas_values = _Values(
-        projectfile="r7fa2e1a7.jflash",
+        devicetype="r7fa2e1a7",
         sw_image="gen9_renesas_1.0.0-0-g12d33fe.hex",
         is_renesas=True,
     )
@@ -99,6 +99,6 @@ class Config:
         rev = uut.revision
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         values = cls._rev_data[rev]
-        cls.projectfile = values.projectfile
+        cls.devicetype = values.devicetype
         cls.sw_image = values.sw_image
         cls.is_renesas = values.is_renesas

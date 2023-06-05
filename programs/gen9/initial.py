@@ -22,7 +22,7 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config
         self.cfg.configure(uut)
-        Sensors.projectfile = self.cfg.projectfile
+        Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
         super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
         self.steps = (
@@ -258,7 +258,7 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = None
+    devicetype = None
     sw_image = None
 
     def open(self):
@@ -292,7 +292,7 @@ class Sensors(share.Sensors):
             self[name] = sensor.Keyed(arm, cmdkey)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject(self.devicetype),
             pathlib.Path(__file__).parent / self.sw_image,
         )
 

@@ -103,7 +103,6 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "r7fa2l1a9.jflash"
     sw_image = None
 
     def open(self):
@@ -121,7 +120,7 @@ class Sensors(share.Sensors):
         self["3v3"].doc = "U5 output"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject("r7fa2l1a9"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
         dec = self.devices["decoder"]

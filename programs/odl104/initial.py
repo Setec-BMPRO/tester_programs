@@ -3,7 +3,7 @@
 # Copyright 2022 SETEC Pty Ltd
 """ODL104 Initial Test Program.
 
-Shares the test fixture with the CN101 and CN102 programs.
+Shares the test fixture with the CN102 program.
 
 """
 
@@ -48,13 +48,7 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["rla_nxp"].set_on()  # Disconnect BDA4 Tx/Rx from ARM
         dev["dcs_vin"].output(8.6, output=True)
-        self.measure(
-            (
-                "dmm_vin",
-                "dmm_3v3",
-            ),
-            timeout=5,
-        )
+        self.measure(("dmm_vin", "dmm_3v3", ), timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -143,7 +137,6 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "nrf52832.jflash"
     sw_nordic_image = None
 
     def open(self):
@@ -178,7 +171,7 @@ class Sensors(share.Sensors):
         )
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_nordic_image,
         )
         self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)

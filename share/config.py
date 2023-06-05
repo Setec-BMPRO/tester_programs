@@ -4,6 +4,7 @@
 """Configuration classes."""
 
 import os
+import pathlib
 
 
 class System:  # pylint: disable=too-few-public-methods
@@ -170,8 +171,6 @@ class Fixture:
         "035827": {  # SmartLink201/BLExtender Initial
             "ARM": _ftdi_hub_1,
             "NORDIC": _ftdi_hub_2,
-            # Hub port 3: Nordic NRF52 device programmer
-            "nRF52": "682952990",
         },
     }
 
@@ -190,12 +189,17 @@ class Fixture:
             result = "/dev/ttyACM2"
         return result
 
-    @classmethod
-    def nrf52_sernum(cls, fixture):
-        """Lookup the nRF52 serial number in a fixture.
 
-        @param fixture Fixture ID
-        @return Serial number string
+class JFlashProject:
+
+    """Common store of JFlash project files for devices."""
+
+    @classmethod
+    def projectfile(cls, device):
+        """Path to a device's jflash project file.
+
+        @param device Device name string (Matches project filename)
+        @return Path to device project file
 
         """
-        return cls._data[fixture]["nRF52"]
+        return pathlib.Path(__file__).parent / "programmer" / device + ".jflash"

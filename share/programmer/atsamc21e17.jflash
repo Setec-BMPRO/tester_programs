@@ -1,4 +1,4 @@
-  AppVersion = 75802
+  AppVersion = 75602
   FileVersion = 2
 [GENERAL]
   aATEModuleSel[24] = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -32,32 +32,32 @@
   UseScriptFile = 0
   ScriptFile = ""
   UseRAM = 1
-  RAMAddr = 0x20004000
+  RAMAddr = 0x20000000
   RAMSize = 0x00004000
   CheckCoreID = 1
-  CoreID = 0x5BA00477
+  CoreID = 0x0BC11477
   CoreIDMask = 0x0F000FFF
   UseAutoSpeed = 0x00000001
   ClockSpeed = 0x00000000
   EndianMode = 0
-  ChipName = "Renesas R7FA2E1A7"
+  ChipName = "Microchip ATSAMC21E17"
 [FLASH]
   NumBanks = 3
 [FLASH0]
-  aRangeSel[1] = 0
-  BankName = "Internal option-setting memory"
-  BankSelMode = 1
-  BaseAddr = 0x01010010
-[FLASH1]
-  aRangeSel[1] = 0-31
+  aRangeSel[1] = 0-511
   BankName = "Internal program flash"
   BankSelMode = 1
   BaseAddr = 0x00000000
-[FLASH2]
-  aRangeSel[1] = 0-3
-  BankName = "Internal data flash"
+[FLASH1]
+  aRangeSel[1] = 0-15
+  BankName = "RWW section"
   BankSelMode = 1
-  BaseAddr = 0x40100000
+  BaseAddr = 0x00400000
+[FLASH2]
+  aRangeSel[1] = 0
+  BankName = "NVM User Row"
+  BankSelMode = 1
+  BaseAddr = 0x00804000
 [PRODUCTION]
   AutoPerformsDisconnect = 1
   AutoPerformsErase = 1
@@ -68,7 +68,7 @@
   AutoPerformsVerify = 1
   EnableFixedVTref = 0
   EnableTargetPower = 3
-  EraseType = 3
+  EraseType = 1
   FixedVTref = 0x00000CE4
   MonitorVTref = 1
   MonitorVTrefMax = 0x0000157C

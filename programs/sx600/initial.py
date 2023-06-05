@@ -22,7 +22,7 @@ class Initial(share.TestSequence):
         self.cfg = config.Config
         self.cfg.configure(uut)
         Sensors.ratings = self.cfg.ratings
-        Sensors.projectfile = self.cfg.projectfile
+        Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
         Devices.is_renesas = self.cfg.is_renesas
         self.limits = self.cfg.limits_initial
@@ -330,7 +330,7 @@ class Sensors(share.Sensors):
     """Sensors."""
 
     ratings = None  # Output load ratings
-    projectfile = None
+    devicetype = None
     sw_image = None
 
     def open(self):
@@ -405,7 +405,7 @@ class Sensors(share.Sensors):
             self[name] = sensor.Keyed(arm, cmdkey)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject(self.devicetype),
             pathlib.Path(__file__).parent / self.sw_image,
         )
 

@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2023 , ",
-    "saved": "2023-05-30, 11:51:00"
+    "saved": "2023-06-05, 11:12:37"
   },
   "project": {
     "AUTHOR": "",
@@ -305,7 +305,11 @@
       "share/console/parameter.py",
       "share/console/protocol.py",
       "share/console/samb11.py",
-      "share/programmer.py",
+      "share/programmer/__init__.py",
+      "share/programmer/_base.py",
+      "share/programmer/arm.py",
+      "share/programmer/avr.py",
+      "share/programmer/nrf52.py",
       "share/testsequence.py",
       "tests/__init__.py",
       "tests/data_feed.py",

@@ -32,7 +32,7 @@ class _Values:
 
     """Adjustable configuration data values."""
 
-    projectfile = attr.ib(validator=attr.validators.instance_of(str))
+    devicetype = attr.ib(validator=attr.validators.instance_of(str))
     sw_image = attr.ib(validator=attr.validators.instance_of(str))
     is_renesas = attr.ib(validator=attr.validators.instance_of(bool))
 
@@ -42,7 +42,7 @@ class Config:
     """Configuration."""
 
     # These values get set per Product revision
-    projectfile = None
+    devicetype = None
     sw_image = None
     is_renesas = None
     # General parameters used in testing the units
@@ -126,7 +126,7 @@ class Config:
     )
     # Software images
     _renesas_values = _Values(
-        projectfile="r7fa2e1a7.jflash",
+        devicetype="r7fa2e1a7",
         sw_image="sx600_renesas_1.0.0-0-gfd443df.hex",
         is_renesas=True,
     )
@@ -135,7 +135,7 @@ class Config:
         "6": _renesas_values,
         "5": _renesas_values,
         "4": _Values(
-            projectfile="lpc1113.jflash",
+            devicetype="lpc1113",
             sw_image="sx600_1.3.19535.1537.bin",
             is_renesas=False,
         ),
@@ -152,6 +152,6 @@ class Config:
         rev = uut.revision
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         values = cls._rev_data[rev]
-        cls.projectfile = values.projectfile
+        cls.devicetype = values.devicetype
         cls.sw_image = values.sw_image
         cls.is_renesas = values.is_renesas

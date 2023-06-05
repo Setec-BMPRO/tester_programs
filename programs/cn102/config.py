@@ -20,7 +20,6 @@ def get(parameter, uut):
     config = {
         "102": CN102,
         "103": CN103,
-        "104": ODL104,
     }[parameter]
     config._configure(uut)  # Adjust for the revision
     return config.parameters
@@ -30,7 +29,6 @@ class CN10xParameters:
 
     """CN10x model specific parameters."""
 
-    # Initial test limits
     limits_initial = (
         tester.LimitRegExp(
             "SwArmVer", "", doc="ARM Software version"  # Adjusted during open()
@@ -46,8 +44,6 @@ class CN10xParameters:
         tester.LimitInteger("Tank", 5),
         tester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
-
-    # Final test limits
     limits_final = (
         tester.LimitHigh(
             "ScanRSSI",
@@ -149,24 +145,4 @@ class CN103(CN10x):
             hw_version=(1, 0, "A"),
             banner_lines=2,
         ),
-    }
-
-
-class ODL104(CN10x):
-
-    """Configuration for ODL104."""
-
-    _prefix = "odl104"
-    _nordic_104 = "1.0.4-0-g539e803"
-    _rev1_values = CN10xParameters(
-        prefix=_prefix,
-        sw_nxp_version=None,
-        sw_nordic_version=_nordic_104,
-        hw_version=("01A", "01A"),
-        banner_lines=1,
-    )
-    # Revision data dictionary:
-    _rev_data = {
-        None: _rev1_values,
-        "1": _rev1_values,
     }

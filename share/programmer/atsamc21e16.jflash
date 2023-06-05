@@ -1,4 +1,4 @@
-  AppVersion = 75802
+  AppVersion = 75602
   FileVersion = 2
 [GENERAL]
   aATEModuleSel[24] = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -20,8 +20,8 @@
   TAP_Number = 0
   UseAdaptive0 = 0
   UseAdaptive1 = 0
-  UseMaxSpeed0 = 1
-  UseMaxSpeed1 = 1
+  UseMaxSpeed0 = 0
+  UseMaxSpeed1 = 0
 [CPU]
   NumInitSteps = 1
   InitStep0_Action = "Reset"
@@ -32,21 +32,32 @@
   UseScriptFile = 0
   ScriptFile = ""
   UseRAM = 1
-  RAMAddr = 0x10000000
+  RAMAddr = 0x20000000
   RAMSize = 0x00002000
   CheckCoreID = 1
-  CoreID = 0x0BB11477
+  CoreID = 0x0BC11477
   CoreIDMask = 0x0F000FFF
   UseAutoSpeed = 0x00000001
   ClockSpeed = 0x00000000
   EndianMode = 0
-  ChipName = "NXP LPC1113/302"
+  ChipName = "Microchip ATSAMC21E16"
 [FLASH]
-  aRangeSel[1] = 0-5
-  BankName = "Internal flash"
+  NumBanks = 3
+[FLASH0]
+  aRangeSel[1] = 0-255
+  BankName = "Internal program flash"
   BankSelMode = 1
   BaseAddr = 0x00000000
-  NumBanks = 1
+[FLASH1]
+  aRangeSel[1] = 0-7
+  BankName = "RWW section"
+  BankSelMode = 1
+  BaseAddr = 0x00400000
+[FLASH2]
+  aRangeSel[1] = 0
+  BankName = "NVM User Row"
+  BankSelMode = 1
+  BaseAddr = 0x00804000
 [PRODUCTION]
   AutoPerformsDisconnect = 1
   AutoPerformsErase = 1
@@ -57,7 +68,7 @@
   AutoPerformsVerify = 1
   EnableFixedVTref = 0
   EnableTargetPower = 3
-  EraseType = 3
+  EraseType = 1
   FixedVTref = 0x00000CE4
   MonitorVTref = 1
   MonitorVTrefMax = 0x0000157C

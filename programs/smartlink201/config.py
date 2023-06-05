@@ -35,9 +35,6 @@ class _Values:
     sw_arm_image = attr.ib(
         default="nxp_v0.1.0.bin", validator=attr.validators.instance_of(str)
         )
-    sw_nrf_projectfile = attr.ib(
-        default="nrf52832.jflash", validator=attr.validators.instance_of(str)
-    )
     is_smartlink = attr.ib(default=True, validator=attr.validators.instance_of(bool))
 
 
@@ -59,7 +56,6 @@ class _Config:
         cls.hardware_rev = values.hardware_rev
         cls.sw_arm_image = values.sw_arm_image
         cls.sw_nrf_image = values.sw_nrf_image
-        cls.sw_nrf_projectfile = values.sw_nrf_projectfile
         cls.is_smartlink = values.is_smartlink
 
 
