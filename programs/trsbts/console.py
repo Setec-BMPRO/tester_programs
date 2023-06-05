@@ -60,19 +60,19 @@ class Console(share.console.Base):
         "BLUE_LED",
     )
 
-    def brand(self, hw_ver, sernum):
+    def initialise(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
-        self.banner()
+        self.reset_input_buffer()
+        self.port.dtr = True  # Pulse RESET using DTR of the BDA4
+        time.sleep(0.01)
+        self.port.dtr = False
+        self.action(None, expected=self.banner_lines)
         self["UNLOCK"] = True
         self["HW_VER"] = hw_ver
         self["SER_ID"] = sernum
         self["NVDEFAULT"] = True
         self["NVWRITE"] = True
         self["DEBUG"] = False  # Suppress debug messages
-
-    def banner(self):
-        """Flush the startup banner lines."""
-        self.action(None, expected=self.banner_lines)
 
     def override(self, state=parameter.OverrideTo.NORMAL):
         """Manually override functions of the unit.

@@ -86,11 +86,7 @@ class Initial(share.TestSequence):
         """Test the operation of LEDs."""
         trsbts = dev["trsbts"]
         trsbts.open()
-        # Power cycle after programming
-        dev["dcs_vbat"].output(0.0, delay=0.5)
-        trsbts.reset_input_buffer()
-        dev["dcs_vbat"].output(self.vbatt)
-        trsbts.brand(self.config.hw_version, self.sernum)
+        trsbts.initialise(self.config.hw_version, self.sernum)
         self.measure(
             ("dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5
         )
