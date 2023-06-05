@@ -292,7 +292,7 @@ class Sensors(share.Sensors):
             self[name] = sensor.Keyed(arm, cmdkey)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject(self.devicetype),
+            share.config.JFlashProject.projectfile(self.devicetype),
             pathlib.Path(__file__).parent / self.sw_image,
         )
 

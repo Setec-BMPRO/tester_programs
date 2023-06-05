@@ -42,7 +42,6 @@ class CN102Initial(ProgramTestCase):
                     (sen["oVin"], 8.0),
                     (sen["o3V3"], 3.3),
                 ),
-                "PgmARM": (),
                 "Program": ((sen["JLink"], 0),),
                 "TestArm": ((sen["o3V3"], 3.3),),
                 "TankSense": (
@@ -63,7 +62,6 @@ class CN102Initial(ProgramTestCase):
             [
                 "PartCheck",
                 "PowerUp",
-                "PgmARM",
                 "Program",
                 "TestArm",
                 "TankSense",

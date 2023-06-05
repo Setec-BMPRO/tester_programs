@@ -202,4 +202,4 @@ class JFlashProject:
         @return Path to device project file
 
         """
-        return pathlib.Path(__file__).parent / "programmer" / device + ".jflash"
+        return pathlib.Path(__file__).parent / "programmer" / (device + ".jflash")

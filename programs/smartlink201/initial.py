@@ -218,7 +218,7 @@ class Sensors(share.Sensors):
         self["SnEntry"].doc = "Entered S/N"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject("nrf52832"),
+            share.config.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_nrf_image,
         )
         # Console sensors
