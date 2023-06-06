@@ -68,15 +68,12 @@ class ARM(_base._Base):
         if self.bda4_signals:
             self._ser.rts = self._ser.dtr = True  # Assert BOOT & RESET
             self._ser.dtr = False  # Release RESET
-            self._ser.reset_input_buffer()
             self._ser.rts = False  # Release BOOT
         else:
             if self.boot_relay:
                 self.boot_relay.set_on()  # Assert BOOT
             if self.reset_relay:
-                self.reset_relay.set_on()  # Pulse RESET
-                self._ser.reset_input_buffer()
-                self.reset_relay.set_off()
+                self.reset_relay.pulse(0.1)  # Pulse RESET
             if self.boot_relay:
                 self.boot_relay.set_off()  # Release BOOT
         # Target device is now running in ISP mode
