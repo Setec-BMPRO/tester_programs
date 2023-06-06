@@ -4,6 +4,7 @@
 """RVMN101x and RVMN5x Initial Test Program."""
 
 import pathlib
+import time
 
 import serial
 import tester
@@ -41,13 +42,7 @@ class Initial(share.TestSequence):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["dcs_vbatt"].output(self.cfg.vbatt_set, output=True)
-        self.measure(
-            (
-                "dmm_vbatt",
-                "dmm_3v3",
-            ),
-            timeout=5,
-        )
+        self.measure(("dmm_vbatt", "dmm_3v3", ), timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -59,10 +54,14 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
-        # Open console serial connection
         rvmn101 = dev["rvmn101"]
         rvmn101.open()
         rvmn101.reset()
+        if self.parameter == "101B":
+            # RVMN101B 2.4.6 firmware needs delay or you get an error:
+            #       Cmd --> b'rvmn serial A2121090085'
+            #       Response <-- 'Usage: serial [AXXXXAAXXXX]'
+            time.sleep(1)
         rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1

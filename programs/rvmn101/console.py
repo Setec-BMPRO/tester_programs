@@ -21,7 +21,14 @@ class _Console(share.console.Base):
     """
 
     # Console command prompt. Signals the end of response data.
-    cmd_prompt = b"\r\x1b[1;32muart:~$ \x1b[m"
+    cmd_prompt = b"uart:~$ \x1b[m"
+    ignore = (  # Tuple of strings to remove from responses
+        "\x1b[1;32m",
+        "\x1b[1;31m",
+        "\x1b[m",
+        "*",  # FIXME: 101C 1.0.3 spits out a random "\r\n" during banner "*****"
+       )
+
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
@@ -112,6 +119,7 @@ class _Console(share.console.Base):
 
         """
         super().__init__(port)
+        port.dtr = False  # BDA4 RESET not asserted
         missing_set = set()
         for key in self.missing_output_dict:
             missing_set.add(self.missing_output_dict[key])
@@ -241,11 +249,6 @@ class Console101C(Console101A):
     """Communications to RVMN101C console."""
 
     banner_lines = 13  # Startup banner lines
-    # Console command prompt. Signals the end of response data.
-    # FIXME: Firmware 1.0.3 does not have the leading "\r\n"...
-    cmd_prompt = b"\x1b[1;32muart:~$ \x1b[m"
-    # FIXME: Firmware 1.0.3 spits out a random "\r\n" during "*****"...
-    ignore = ("*", )  # Tuple of strings to remove from responses
 
 
 class _Console5x(_Console):
