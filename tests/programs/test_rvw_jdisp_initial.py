@@ -20,8 +20,7 @@ class _CommonInitial(ProgramTestCase):
         """Per-Test setup."""
         for target in (
             "share.programmer.ARM",
-            "programs.rvview_jdisplay.console.TunnelConsole",
-            "programs.rvview_jdisplay.console.DirectConsole",
+            "programs.rvview_jdisplay.console.Console",
         ):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
@@ -38,7 +37,6 @@ class _CommonInitial(ProgramTestCase):
                     (sen["vin"], 7.5),
                     (sen["3v3"], 3.3),
                 ),
-                "Initialise": ((sen["swver"], self.test_sequence.config.sw_version),),
                 "Display": (
                     (sen["oYesNoOn"], True),
                     (sen["oYesNoOff"], True),
@@ -46,7 +44,6 @@ class _CommonInitial(ProgramTestCase):
                 ),
                 "CanBus": (
                     (sen["canbind"], 1 << 28),
-                    (sen["tunnelswver"], self.test_sequence.config.sw_version),
                 ),
             },
         }
@@ -54,7 +51,7 @@ class _CommonInitial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(10, len(result.readings))
+        self.assertEqual(8, len(result.readings))
         self.assertEqual(
             ["PowerUp", "Program", "Initialise", "Display", "CanBus"],
             self.tester.ut_steps,

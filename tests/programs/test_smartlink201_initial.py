@@ -27,11 +27,11 @@ class _Initial(ProgramTestCase):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-            patcher = patch(
-                "programs.smartlink201.console.tank_name", return_value="tank"
-            )
-            self.addCleanup(patcher.stop)
-            patcher.start()
+        patcher = patch(
+            "programs.smartlink201.console.tank_name", return_value="tank"
+        )
+        self.addCleanup(patcher.stop)
+        patcher.start()
         super().setUp()
 
 
@@ -56,7 +56,6 @@ class BLExtenderInitial(_Initial):
                 ),
                 "PgmNordic": ((sen["JLink"], 0),),
                 "Nordic": (
-                    (sen["3V3"], 3.3),
                     (sen["SL_MAC"], "aabbccddeeff"),
                 ),
             },
@@ -65,7 +64,7 @@ class BLExtenderInitial(_Initial):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(8, len(result.readings))
+        self.assertEqual(7, len(result.readings))
         self.assertEqual(
             [
                 "PowerUp",
@@ -99,7 +98,6 @@ class SmartLink201Initial(_Initial):
                 ),
                 "PgmNordic": ((sen["JLink"], 0),),
                 "Nordic": (
-                    (sen["3V3"], 3.3),
                     (sen["SL_MAC"], "aabbccddeeff"),
                 ),
                 "Calibrate": (
@@ -129,7 +127,7 @@ class SmartLink201Initial(_Initial):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(45, len(result.readings))
+        self.assertEqual(44, len(result.readings))
         self.assertEqual(
             [
                 "PowerUp",

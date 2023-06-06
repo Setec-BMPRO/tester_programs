@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2020 SETEC Pty Ltd
-"""RVMD50 Initial Test Program."""
+"""RVMD50 Initial Test Program.
+
+Shares the test fixture with the RVView/JDisplay program.
+
+"""
 
 import pathlib
 
@@ -134,7 +138,6 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "atsamc21e17.jflash"
     sw_image = None
 
     def open(self):
@@ -149,7 +152,7 @@ class Sensors(share.Sensors):
         self["bklght"].doc = "Across backlight"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject.projectfile("atsamc21e17"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
         self["YesNoDisplay"] = sensor.YesNo(

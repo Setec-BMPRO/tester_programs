@@ -20,12 +20,10 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
         Devices.fixture = self.cfg.fixture
-        Devices.arm_image = self.cfg.arm_image
-        Devices.nordic_image = self.cfg.nordic_image
         Devices.reversed_output_dict = self.cfg.reversed_output_dict
-        Sensors.nordic_projectfile = self.cfg.nordic_projectfile
+        Sensors.nordic_devicetype = self.cfg.nordic_devicetype
         Sensors.nordic_image = self.cfg.nordic_image
-        Sensors.arm_projectfile = self.cfg.arm_projectfile
+        Sensors.arm_devicetype = self.cfg.arm_devicetype
         Sensors.arm_image = self.cfg.arm_image
         self.limits = self.cfg.limits_initial()
         super().open(self.limits, Devices, Sensors, Measurements)
@@ -64,10 +62,7 @@ class Initial(share.TestSequence):
         # Open console serial connection
         rvmn101 = dev["rvmn101"]
         rvmn101.open()
-        # Cycle power to restart the unit
-        dev["dcs_vbatt"].output(output=False, delay=1.5)
-        rvmn101.reset_input_buffer()
-        dev["dcs_vbatt"].output(output=True, delay=2.0)
+        rvmn101.reset()
         rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
@@ -123,8 +118,6 @@ class Devices(share.Devices):
     """Devices."""
 
     fixture = None  # Fixture number
-    arm_image = None  # ARM software image filename
-    nordic_image = None  # Nordic software image filename
     reversed_output_dict = None  # Outputs with reversed operation
 
     def open(self):
@@ -177,9 +170,9 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    nordic_projectfile = None
+    nordic_devicetype = None
     nordic_image = None
-    arm_projectfile = None
+    arm_devicetype = None
     arm_image = None
 
     def open(self):
@@ -198,12 +191,12 @@ class Sensors(share.Sensors):
         )
         self["JLinkBLE"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.nordic_projectfile,
+            share.config.JFlashProject.projectfile(self.nordic_devicetype),
             pathlib.Path(__file__).parent / self.nordic_image,
         )
         self["JLinkARM"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.arm_projectfile,
+            share.config.JFlashProject.projectfile(self.arm_devicetype),
             pathlib.Path(__file__).parent / self.arm_image,
         )
         # Console sensors

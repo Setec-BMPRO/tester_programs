@@ -4,7 +4,6 @@
 """CN102/3 Console driver."""
 
 import re
-import time
 
 import share
 
@@ -53,7 +52,6 @@ class Console(share.console.BadUart):
         # Reset the UUT via BDA4 signals (DTR: RESET, RTS: BOOT)
         self.port.dtr = self.port.rts = False
         self.port.dtr = True
-        time.sleep(0.01)
         self.port.dtr = False
         self.action(None, delay=1.5, expected=banner_lines)
         self["UNLOCK"] = True

@@ -33,7 +33,9 @@ class RVMD50Initial(ProgramTestCase):
                     (sen["vin"], 7.5),
                     (sen["3v3"], 3.3),
                 ),
-                "Program": ((sen["JLink"], 0),),
+                "Program": (
+                    (sen["JLink"], 0),
+                ),
                 "Display": (
                     (sen["bklght"], (0.0, 3.0)),
                     (sen["YesNoDisplay"], True),

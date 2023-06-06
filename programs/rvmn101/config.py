@@ -42,11 +42,11 @@ class _Values:
     reversed_output_dict = attr.ib(
         default={}, validator=attr.validators.instance_of(dict)
     )
-    nordic_projectfile = attr.ib(
-        default="nrf52832.jflash", validator=attr.validators.instance_of(str)
+    nordic_devicetype = attr.ib(
+        default="nrf52832", validator=attr.validators.instance_of(str)
     )
-    arm_projectfile = attr.ib(
-        default="lpc1519.jflash", validator=attr.validators.instance_of(str)
+    arm_devicetype = attr.ib(
+        default="lpc1519", validator=attr.validators.instance_of(str)
     )
 
 
@@ -55,9 +55,9 @@ class Config:
     """Base configuration for RVMN101 and RVMN5x."""
 
     # These values get set per Product type & revision
-    nordic_projectfile = None
+    nordic_devicetype = None
     nordic_image = None
-    arm_projectfile = None
+    arm_devicetype = None
     arm_image = None
     product_rev = None
     hardware_rev = None
@@ -96,9 +96,9 @@ class Config:
         rev = uut.revision
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         values = cls._rev_data[rev]
-        cls.nordic_projectfile = values.nordic_projectfile
+        cls.nordic_devicetype = values.nordic_devicetype
         cls.nordic_image = values.nordic_image
-        cls.arm_projectfile = values.arm_projectfile
+        cls.arm_devicetype = values.arm_devicetype
         cls.arm_image = values.arm_image
         cls.product_rev = values.product_rev
         cls.hardware_rev = values.hardware_rev
@@ -434,7 +434,7 @@ class RVMN101C(Config):
         arm_image=_arm_image_3_0_1,
         product_rev="03A",
         hardware_rev="02A",
-        nordic_projectfile = "nrf52840.jflash"
+        nordic_devicetype = "nrf52840"
     )
     _rev_data = {
         None: _rev3_values,
@@ -469,7 +469,7 @@ class RVMN5x(Config):
         arm_image=_ra2_image_0_3_6,
         product_rev="17A",
         hardware_rev="11A",
-        arm_projectfile="r7fa2l1a9.jflash",
+        arm_devicetype="r7fa2l1a9",
     )
     _rev_data = {
         None: _rev17_values,
@@ -479,28 +479,28 @@ class RVMN5x(Config):
             arm_image=_ra2_image_0_3_6,
             product_rev="16B",
             hardware_rev="11A",
-            arm_projectfile="r7fa2l1a9.jflash",
+            arm_devicetype="r7fa2l1a9",
         ),
         "15": _Values(
             nordic_image=_nordic_3_1_3,
             arm_image=_ra2_image_0_3_6,
             product_rev="15C",
             hardware_rev="11A",
-            arm_projectfile="r7fa2l1a9.jflash",
+            arm_devicetype="r7fa2l1a9",
         ),
         "14": _Values(
             nordic_image=_nordic_3_1_3,
             arm_image=_ra2_image_0_3_6,
             product_rev="14C",
             hardware_rev="10A",
-            arm_projectfile="r7fa2l1a9.jflash",
+            arm_devicetype="r7fa2l1a9",
         ),
         "13": _Values(
             nordic_image=_nordic_3_1_3,
             arm_image=_ra2_image_0_3_6,
             product_rev="13D",
             hardware_rev="10A",
-            arm_projectfile="r7fa2l1a9.jflash",
+            arm_devicetype="r7fa2l1a9",
         ),
         "12": _Values(
             nordic_image=_nordic_3_1_3,

@@ -3,6 +3,8 @@
 # Copyright 2017 SETEC Pty Ltd
 """RvView/JDisplay Initial Test Program.
 
+Shares the test fixture with the RVMD50 program.
+
 The ATSAMC21 version does not do:
 - Serial console.
 - Console tunnel over CAN.
@@ -25,10 +27,8 @@ class Initial(share.TestSequence):
 
     """RvView/JDisplay Initial Test Program."""
 
-    # Input voltage to power the unit
-    vin_set = 8.1
-    # Common limits
-    _common = (
+    vin_set = 8.1  # Input voltage to power the unit
+    _limits = (
         tester.LimitBetween(
             "Vin", vin_set - 1.1, vin_set - 0.1, doc="Input voltage present"
         ),
@@ -38,52 +38,13 @@ class Initial(share.TestSequence):
         # CAN Bus is operational if status bit 28 is set
         tester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
     )
-    # Variant specific configuration data. Indexed by test program parameter.
-    config_data = {
-        "JD": {  # LPC1519 micro
-            "Config": config.JDisplay,
-            "Limits": _common
-            + (
-                tester.LimitRegExp(
-                    "SwVer",
-                    "^{0}$".format(config.JDisplay.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-        "RV": {  # LPC1519 micro
-            "Config": config.RvView,
-            "Limits": _common
-            + (
-                tester.LimitRegExp(
-                    "SwVer",
-                    "^{0}$".format(config.RvView.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-        "RV2": {  # LPC1519 micro
-            "Config": config.RvView2,
-            "Limits": _common
-            + (
-                tester.LimitRegExp(
-                    "SwVer",
-                    "^{0}$".format(config.RvView2.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-        "RV2A": {  # ATSAMC21 micro
-            "Config": config.RvView2a,
-            "Limits": _common + (tester.LimitRegExp("SwVer", "Dummy"),),
-        },
-    }
 
     def open(self, uut):
         """Prepare for testing."""
-        self.config = self.config_data[self.parameter]["Config"]
+        self.config = config.get(self.parameter)
+        self.is_atsam = self.config.is_atsam
         Devices.sw_file = Sensors.sw_file = self.config.sw_file
-        super().open(
-            self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
-        )
-        self.is_atsam = self.parameter == "RV2A"
+        super().open(self._limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),
@@ -117,8 +78,8 @@ class Initial(share.TestSequence):
         """
         arm = dev["arm"]
         arm.open()
-        arm.brand(self.config.hw_version, self.sernum, dev["rla_reset"])
-        mes["sw_ver"]()
+        dev["rla_reset"].pulse(0.1)
+        arm.brand(self.config.hw_version, self.sernum)
 
     @share.teststep
     def _step_display(self, dev, mes):
@@ -139,10 +100,6 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the CAN Bus."""
         mes["can_bind"](timeout=10)
-        armtunnel = dev["armtunnel"]
-        armtunnel.open()
-        mes["tunnel_swver"]()
-        armtunnel.close()
 
     def _testmode(self, state):
         """Control of product testmode.
@@ -210,25 +167,16 @@ class Devices(share.Devices):
             boot_relay=self["rla_boot"],
             reset_relay=self["rla_reset"],
         )
-        # Direct Console driver
         arm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         arm_ser.port = arm_port
-        # Console driver
-        self["arm"] = console.DirectConsole(arm_ser)
-        self["can"] = self.physical_devices["_CAN"]
-        # Tunneled Console driver
-        tunnel = tester.CANTunnel(
-            self.physical_devices["CAN"], share.can.SETECDeviceID.RVVIEW.value
-        )
-        self["armtunnel"] = console.TunnelConsole(tunnel)
+        self["arm"] = console.Console(arm_ser)
         self["dcs_rst"].output(8.0, True)  # Fixture RESET circuit
         self.add_closer(lambda: self["dcs_rst"].output(0.0, output=False))
 
     def reset(self):
         """Reset instruments."""
         self["arm"].close()
-        self["armtunnel"].close()
         self["dcs_vin"].output(0.0, False)
         for rla in ("rla_reset", "rla_boot", "rla_wd"):
             self[rla].set_off()
@@ -238,14 +186,11 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "atsamc21e17.jflash"
     sw_file = None
 
     def open(self):
         """Create all Sensor instances."""
         dmm = self.devices["dmm"]
-        arm = self.devices["arm"]
-        armtunnel = self.devices["armtunnel"]
         sensor = tester.sensor
         self["mir_can"] = sensor.Mirror()
         self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
@@ -256,7 +201,7 @@ class Sensors(share.Sensors):
         self["bklght"].doc = "Across backlight"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject.projectfile("atsamc21e17"),
             pathlib.Path(__file__).parent / self.sw_file,
         )
         self["sernum"] = sensor.DataEntry(
@@ -275,10 +220,7 @@ class Sensors(share.Sensors):
             caption=tester.translate("rvview_jdisplay_initial", "capButtonOff"),
         )
         self["oYesNoOff"].doc = "Operator input"
-        # Console sensors
-        self["canbind"] = sensor.Keyed(arm, "CAN_BIND")
-        self["swver"] = sensor.Keyed(arm, "SW_VER")
-        self["tunnelswver"] = sensor.Keyed(armtunnel, "SW_VER")
+        self["canbind"] = sensor.Keyed(self.devices["arm"], "CAN_BIND")
 
 
 class Measurements(share.Measurements):
@@ -294,11 +236,9 @@ class Measurements(share.Measurements):
                 ("dmm_bklghtoff", "BkLghtOff", "bklght", "Test backlight"),
                 ("dmm_bklghton", "BkLghtOn", "bklght", "Test backlight"),
                 ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
-                ("sw_ver", "SwVer", "swver", "Unit software version"),
                 ("ui_yesnoon", "Notify", "oYesNoOn", "Button on"),
                 ("ui_yesnooff", "Notify", "oYesNoOff", "Button off"),
                 ("can_bind", "CAN_BIND", "canbind", "CAN bound"),
-                ("tunnel_swver", "SwVer", "tunnelswver", "Unit software version"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
             )
         )

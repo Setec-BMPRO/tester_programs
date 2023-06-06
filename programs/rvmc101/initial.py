@@ -30,10 +30,9 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        Devices.sw_image = self.sw_image[self.parameter]
-        Sensors.sw_image = self.sw_image[self.parameter]
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
         self.is_full = self.parameter != "LITE"
+        super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program, self.is_full),
@@ -167,7 +166,6 @@ class Sensors(share.Sensors):
 
     """Sensors."""
 
-    projectfile = "atsamc21e16.jflash"
     sw_image = None
 
     def open(self):
@@ -187,7 +185,7 @@ class Sensors(share.Sensors):
         self["d_5v"] = sensor.Vdc(dmm, high=9, low=1, rng=10, res=0.01, position=4)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            pathlib.Path(__file__).parent / self.projectfile,
+            share.config.JFlashProject.projectfile("atsamc21e16"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
         self["yesnodisplay"] = sensor.YesNo(

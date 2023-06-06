@@ -126,6 +126,12 @@ class _Console(share.console.Base):
             if idx in reversed_set:
                 self.reversed_outputs.append(idx)
 
+    def reset(self):
+        """Pulse RESET using DTR of the BDA4 (both micros)."""
+        self.port.dtr = True
+        self.reset_input_buffer()
+        self.port.dtr = False
+
     def brand(self, sernum, product_rev, hardware_rev):
         """Brand the unit with Serial Number.
 

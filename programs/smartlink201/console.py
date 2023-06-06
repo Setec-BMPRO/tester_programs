@@ -4,7 +4,6 @@
 """BLExtender/SmartLink201 Test Program."""
 
 import re
-import time
 
 import setec
 
@@ -32,7 +31,6 @@ class _Console(share.console.Base):
     def reset(self):
         """RESET using the BDA4."""
         self.port.dtr = True  # Pulse RESET using DTR of the BDA4
-        time.sleep(0.01)
         self.port.dtr = False
 
     def initialise(self, sernum, product_rev, hardware_rev):
