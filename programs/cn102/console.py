@@ -52,6 +52,7 @@ class Console(share.console.BadUart):
         # Reset the UUT via BDA4 signals (DTR: RESET, RTS: BOOT)
         self.port.dtr = self.port.rts = False
         self.port.dtr = True
+        self.port.reset_input_buffer()
         self.port.dtr = False
         self.action(None, delay=1.5, expected=banner_lines)
         self["UNLOCK"] = True

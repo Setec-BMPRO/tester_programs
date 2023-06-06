@@ -62,9 +62,8 @@ class Console(share.console.Base):
 
     def initialise(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
-        self.reset_input_buffer()
         self.port.dtr = True  # Pulse RESET using DTR of the BDA4
-        time.sleep(0.01)
+        self.reset_input_buffer()
         self.port.dtr = False
         self.action(None, expected=self.banner_lines)
         self["UNLOCK"] = True

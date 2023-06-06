@@ -42,6 +42,7 @@ class Console(share.console.Base):
     def initialise(self):
         """First time initialisation."""
         self.port.dtr = True  # Pulse RESET using DTR of the BDA4
+        self.port.reset_input_buffer()
         self.port.dtr = False
         self.banner()
         self.unlock()

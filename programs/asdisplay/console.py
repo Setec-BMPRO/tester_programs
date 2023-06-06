@@ -51,6 +51,7 @@ class Console(share.console.BadUart):
     def reset(self):
         self.port.dtr = self.port.rts = False
         self.port.dtr = True
+        self.port.reset_input_buffer()
         self.port.dtr = False
         time.sleep(1)
 

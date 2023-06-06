@@ -48,9 +48,10 @@ class _Console:
 
     def brand(self, hw_ver, sernum, banner_lines):
         """Brand the unit with Hardware ID & Serial Number."""
-        # Reset the UUT via bda signals
+        # Reset the UUT via BDA4 signals
         self.port.dtr = self.port.rts = False
         self.port.dtr = True
+        self.port.reset_input_buffer()
         self.port.dtr = False
         self.action(None, delay=1.5, expected=banner_lines)
         self["UNLOCK"] = True
