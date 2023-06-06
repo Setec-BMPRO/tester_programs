@@ -13,19 +13,14 @@ class InvalidOutputError(Exception):
 
 class _Console(share.console.Base):
 
-    """Communications to RVMN101x and RVMN5x console.
-
-    This class contains the present command syntax.
-    See RVMN101B for the older version syntax.
-
-    """
+    """Communications to RVMN101x and RVMN5x console."""
 
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b"uart:~$ \x1b[m"
     ignore = (  # Tuple of strings to remove from responses
-        "\x1b[1;32m",
-        "\x1b[1;31m",
-        "\x1b[m",
+        "\x1b[m",  # Normal
+        "\x1b[1;31m",  # Bold, Red
+        "\x1b[1;32m",  # Bold, Green
         "*",  # FIXME: 101C 1.0.3 spits out a random "\r\n" during banner "*****"
        )
 

@@ -3,8 +3,6 @@
 # Copyright 2018 SETEC Pty Ltd
 """GEN9-540 ARM processor console driver."""
 
-import time
-
 import share
 
 
@@ -44,7 +42,6 @@ class Console(share.console.Base):
     def initialise(self):
         """First time initialisation."""
         self.port.dtr = True  # Pulse RESET using DTR of the BDA4
-        time.sleep(0.01)
         self.port.dtr = False
         self.banner()
         self.unlock()
