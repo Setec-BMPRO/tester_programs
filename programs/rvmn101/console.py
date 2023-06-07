@@ -114,7 +114,6 @@ class _Console(share.console.Base):
 
         """
         super().__init__(port)
-        port.dtr = False  # BDA4 RESET not asserted
         missing_set = set()
         for key in self.missing_output_dict:
             missing_set.add(self.missing_output_dict[key])

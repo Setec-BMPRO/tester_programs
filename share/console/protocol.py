@@ -125,6 +125,8 @@ class Base:
         """
         self._logger = logging.getLogger(".".join((__name__, self.__class__.__name__)))
         self.port = port
+        self.port.dtr = False  # BDA4 RESET not asserted
+        self.port.rts = False  # BDA4 BOOT not asserted
 
     def __enter__(self):
         """Context Manager entry handler: Open console.

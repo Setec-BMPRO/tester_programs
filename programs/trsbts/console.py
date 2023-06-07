@@ -60,21 +60,14 @@ class Console(share.console.Base):
         "BLUE_LED",
     )
 
-    def __init__(self, port):
-        """Initialise communications.
-
-        @param port Serial instance to use
-
-        """
-        super().__init__(port)
-        self.port.dtr = False  # BDA4 RESET not asserted
+    def reset(self, hw_ver, sernum):
+        """Reset device using the BDA4 RESET line."""
+        self.port.dtr = True
+        self.reset_input_buffer()
+        self.port.dtr = False
 
     def initialise(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number."""
-        self.port.dtr = True  # Pulse RESET using DTR of the BDA4
-        time.sleep(0.1)
-        self.reset_input_buffer()
-        self.port.dtr = False
         self.action(None, expected=self.banner_lines)
         self["UNLOCK"] = True
         self["HW_VER"] = hw_ver

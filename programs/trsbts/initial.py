@@ -86,6 +86,11 @@ class Initial(share.TestSequence):
         """Test the operation of LEDs."""
         trsbts = dev["trsbts"]
         trsbts.open()
+        # Using device RESET results in sporadic duplicate startup banners
+        # So, it's faster to just power cycle, than untangle the crappy console...
+        dev["dcs_vbat"].output(0.0, delay=0.5)
+        trsbts.reset_input_buffer()
+        dev["dcs_vbat"].output(self.vbatt)
         trsbts.initialise(self.config.hw_version, self.sernum)
         self.measure(
             ("dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5
