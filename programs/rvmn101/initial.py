@@ -57,11 +57,12 @@ class Initial(share.TestSequence):
         rvmn101 = dev["rvmn101"]
         rvmn101.open()
         rvmn101.reset()
-        if self.parameter == "101B":
+        if self.parameter in ("101A", "101B",  ):
+            # RVMN101A 3.1.3 firmware needs delay or you get an error:
             # RVMN101B 2.4.6 firmware needs delay or you get an error:
             #       Cmd --> b'rvmn serial A2121090085'
             #       Response <-- 'Usage: serial [AXXXXAAXXXX]'
-            time.sleep(1)
+            time.sleep(0.5)
         rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
