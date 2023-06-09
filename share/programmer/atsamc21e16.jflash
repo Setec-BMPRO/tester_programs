@@ -1,4 +1,4 @@
-  AppVersion = 75602
+  AppVersion = 75802
   FileVersion = 2
 [GENERAL]
   aATEModuleSel[24] = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -68,7 +68,7 @@
   AutoPerformsVerify = 1
   EnableFixedVTref = 0
   EnableTargetPower = 3
-  EraseType = 1
+  EraseType = 3
   FixedVTref = 0x00000CE4
   MonitorVTref = 1
   MonitorVTrefMax = 0x0000157C
