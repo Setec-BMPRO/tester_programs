@@ -70,7 +70,6 @@ class Devices(share.Devices):
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vcc", tester.DCSource, "DCS1"),
             ("rla_mic", tester.Relay, "RLA10"),
-            ("rla_comm", tester.Relay, "RLA13"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         self["PicKit"] = tester.PicKit(
@@ -81,8 +80,6 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         pic_ser.port = share.config.Fixture.port("017056", "PIC")
         self["pic"] = console.Console(pic_ser)
-        self["rla_comm"].set_on()
-        self.add_closer(lambda: self["rla_comm"].set_off())
 
     def reset(self):
         """Reset instruments."""
