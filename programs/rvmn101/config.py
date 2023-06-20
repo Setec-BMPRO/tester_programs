@@ -433,12 +433,12 @@ class RVMN101C(Config):
     # Initial Test parameters
     fixture = "033550"
     # Software versions
-    _sonic_1_0_3 = "rvmn101c_signed_1.0.3-0-gaec189d4_factory_mcuboot.hex"
+    _sonic_1_0_4 = "rvmn101c_signed_1.0.3-0-gaec189d4_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
     _rev3_values = _Values(
-        nordic_image=_sonic_1_0_3,
+        nordic_image=_sonic_1_0_4,
         arm_image=_arm_image_3_0_1,
-        product_rev="03A",
+        product_rev="03B",
         hardware_rev="02A",
         nordic_devicetype = "nrf52840"
     )
