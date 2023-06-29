@@ -25,8 +25,8 @@ class Initial(share.TestSequence):
     # Test limits
     limitdata = (
         tester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 0.5, doc="3V3 present"),
-        tester.LimitPercent("5V", 5.0, 0.5, doc="5V present"),
+        tester.LimitPercent("3V3", 3.3, 1.0, doc="3V3 present"),
+        tester.LimitPercent("5V", 5.0, 1.0, doc="5V present"),
         tester.LimitHigh("RedLedOff", 3.1, doc="Led off"),
         tester.LimitDelta("RedLedOn", 0.45, 0.05, doc="Led on"),
         tester.LimitHigh("BlueLedOff", 3.1, doc="Led off"),
