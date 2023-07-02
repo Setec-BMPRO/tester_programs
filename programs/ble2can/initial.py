@@ -73,7 +73,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_test_arm(self, dev, mes):
         """Test operation."""
-        dev["rla_wdog"].disable()
         ble2can = dev["ble2can"]
         ble2can.brand(self.hw_version, self.sernum)
         self.measure(("SwVer", "dmm_redoff", "dmm_blueoff", "dmm_greenoff"), timeout=5)
@@ -106,9 +105,7 @@ class Initial(share.TestSequence):
     def _reset_unit(self):
         """Reset the unit."""
         dev = self.devices
-        dev["rla_wdog"].enable()
         dev["rla_reset"].pulse(0.1)
-        dev["rla_wdog"].disable()
         dev["ble2can"].banner()
 
 
@@ -125,14 +122,10 @@ class Devices(share.Devices):
             ("dcs_vin", tester.DCSource, "DCS2"),
             ("dcs_cover", tester.DCSource, "DCS5"),
             ("rla_reset", tester.Relay, "RLA1"),
-            ("rla_wdog", tester.Relay, "RLA2"),
             ("rla_pair_btn", tester.Relay, "RLA8"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Some more obvious ways to use the relays
-        wdog = self["rla_wdog"]
-        wdog.disable = wdog.set_on
-        wdog.enable = wdog.set_off
         pair = self["rla_pair_btn"]
         pair.press = pair.set_on
         pair.release = pair.set_off
@@ -156,7 +149,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self["ble2can"].close()
         self["dcs_vin"].output(0.0, False)
-        for rla in ("rla_reset", "rla_wdog", "rla_pair_btn"):
+        for rla in ("rla_reset", "rla_pair_btn"):
             self[rla].set_off()
 
 
