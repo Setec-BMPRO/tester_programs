@@ -208,6 +208,14 @@ class Initial(share.TestSequence):
         """
         dev["acsource"].output(voltage=90.0)
         self.dcload((("dcl_5v", 2.0), ("dcl_24v", 10.0), ("dcl_12v", 24.0)), delay=0.5)
+        self.measure(
+            (
+                "dmm_5v",
+                "dmm_24v",
+                "dmm_12v",
+            ),
+            timeout=5,
+        )
         mes["dso_holdup"]()  # The callback will switch off the AC power
 
     def _dso_callback(self):
@@ -290,7 +298,7 @@ class Sensors(share.Sensors):
         )
         tbase = sensor.Timebase(range=0.2, main_mode=True, delay=0, centre_ref=False)
         trg = sensor.Trigger(ch=1, level=6.0, normal_mode=True, pos_slope=False)
-        rdg = sensor.Tval(level=20, transition=-1, ch=2)
+        rdg = sensor.Tval(level=23, transition=-1, ch=2)
         self["holdup"] = sensor.DSO(
             self.devices["dso"], [chan1, chan2], tbase, trg, [rdg], single=True
         )
