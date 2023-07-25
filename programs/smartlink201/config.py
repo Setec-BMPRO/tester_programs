@@ -64,15 +64,22 @@ class BLExtender(_Config):
     """BLExtender config."""
 
     _hw_rev = "02B"
-    _rev1_values = _Values(
-        product_rev="01A",
+    _sw_nrf_image = "blextender_v1.3.1-0-g88992a0_signed_mcuboot_factory.hex"
+    _rev2_values = _Values(
+        product_rev="02A",
         hardware_rev=_hw_rev,
-        sw_nrf_image=("blextender_v1.3.0-0-g6c6b4fa-signed-mcuboot-factory.hex"),
+        sw_nrf_image=_sw_nrf_image,
         is_smartlink=False,
     )
     _rev_data = {
-        None: _rev1_values,
-        "1": _rev1_values,
+        None: _rev2_values,
+        "2": _rev2_values,
+        "1": _Values(
+            product_rev="01B",
+            hardware_rev=_hw_rev,
+            sw_nrf_image=_sw_nrf_image,  # MA-451
+            is_smartlink=False,
+        ),
     }
 
 
