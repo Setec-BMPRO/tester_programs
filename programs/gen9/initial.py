@@ -29,29 +29,26 @@ class Initial(share.TestSequence):
         Sensors.callback = self._dso_callback
         super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
         self.steps = (
-            tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Initialise", self._step_initialise_arm),
             tester.TestStep("PowerUp", self._step_powerup),
             tester.TestStep("5V", self._step_reg_5v),
             tester.TestStep("12V", self._step_reg_12v),
             tester.TestStep("24V", self._step_reg_24v),
+            tester.TestStep("HoldUp", self._step_holdup, self.cfg.is_renesas),
         )
 
     @share.teststep
-    def _step_part_detect(self, dev, mes):
-        """Prepare to run a test.
+    def _step_program(self, dev, mes):
+        """Program the ARM device.
 
-        Measure fixture lock and part detection micro-switches.
+        Renesas units will fail 'fanshort' for 5min after a test due to a FET
+        gate staying charged while the micro is not running.
+        Running the micro makes the pin switch to be an output and switch the FET off.
 
         """
-        self.measure(("dmm_lock", "dmm_fanshort"), timeout=5)
-
-    @share.teststep
-    def _step_program(self, dev, mes):
-        """Program the ARM device."""
         dev["dcs_5v"].output(5.0, True)
-        mes["dmm_3v3"](timeout=5)
+        self.measure(("dmm_3v3", "dmm_lock", "dmm_fanshort"), timeout=5)
         mes["JLink"]()
 
     @share.teststep
@@ -100,21 +97,11 @@ class Initial(share.TestSequence):
             timeout=5,
         )
         arm = dev["arm"]
-        # A little load so PFC voltage falls faster
-        self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
-        # Renesas units: PFC adjust is broken...
-        # So we measure PWR_FAIL to 24V hold up time at full load
-        if self.cfg.is_renesas:
-            dev["acsource"].output(voltage=90.0)
-            self.dcload(
-                (("dcl_5v", 2.0), ("dcl_24v", 10.0), ("dcl_12v", 24.0)), delay=0.5
-            )
-            mes["dso_holdup"]()  # The callback will switch off the AC power
-            self.dcload((("dcl_5v", 0.0), ("dcl_12v", 1.0), ("dcl_24v", 1.0)))
-            dev["acsource"].output(voltage=240.0, delay=1)
         arm.banner()
         arm.unlock()
         if not self.cfg.is_renesas:  # NXP units: The PFC adjust does work
+            # A little load so PFC voltage falls faster
+            self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
             # Calibrate the PFC set voltage
             pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
             arm.calpfc(pfc)
@@ -129,7 +116,6 @@ class Initial(share.TestSequence):
                 arm.calpfc(mesres.value1)
                 mes["dmm_pfcpost4"].stable(self.pfc_stable)
             arm.nvwrite()
-            # A final PFC setup check
             mes["dmm_pfcpost"].stable(self.pfc_stable)
         self.measure(
             (
@@ -138,12 +124,8 @@ class Initial(share.TestSequence):
                 "arm_5v",
                 "arm_12v",
                 "arm_24v",
-            ),
+            ), timeout=5
         )
-
-    def _dso_callback(self):
-        """The DSO should trigger as PWR_FAIL switches."""
-        self.devices["acsource"].output(voltage=0.0, delay=0.5)
 
     @share.teststep
     def _step_reg_5v(self, dev, mes):
@@ -159,7 +141,7 @@ class Initial(share.TestSequence):
                 ("dcl_24v", 0.1),
             )
         )
-        self.reg_check(
+        self._reg_check(
             dmm_out=mes["dmm_5v"], dcl_out=dev["dcl_5v"], max_load=2.0, peak_load=2.5
         )
 
@@ -172,7 +154,7 @@ class Initial(share.TestSequence):
 
         """
         dev["dcl_24v"].output(0.1)
-        self.reg_check(
+        self._reg_check(
             dmm_out=mes["dmm_12v"],
             dcl_out=dev["dcl_12v"],
             max_load=24.0,
@@ -188,14 +170,32 @@ class Initial(share.TestSequence):
 
         """
         dev["dcl_12v"].output(1.0)
-        self.reg_check(
+        self._reg_check(
             dmm_out=mes["dmm_24v"],
             dcl_out=dev["dcl_24v"],
             max_load=10.0,
             peak_load=11.0,
         )
 
-    def reg_check(self, dmm_out, dcl_out, max_load, peak_load):
+    @share.teststep
+    def _step_holdup(self, dev, mes):
+        """Renesas micro PFC adjustment does not work at all.
+
+        Instead, measure PWR_FAIL to 24V hold-up time at full load.
+        This is the variable that PFC voltage adjustment controls.
+
+        """
+        dev["acsource"].output(voltage=90.0)
+        self.dcload(
+            (("dcl_5v", 2.0), ("dcl_24v", 10.0), ("dcl_12v", 24.0)), delay=0.5
+        )
+        mes["dso_holdup"]()  # The callback will switch off the AC power
+
+    def _dso_callback(self):
+        """The DSO will trigger as PWR_FAIL falls."""
+        self.devices["acsource"].output(voltage=0.0, delay=0.5)
+
+    def _reg_check(self, dmm_out, dcl_out, max_load, peak_load):
         """Check regulation of an output.
 
         dmm_out: Measurement instance for output voltage.
@@ -299,13 +299,13 @@ class Sensors(share.Sensors):
         dso = self.devices["dso"]
         tbase = sensor.Timebase(range=0.2, main_mode=True, delay=0, centre_ref=False)
         chan1 = sensor.Channel(
-            ch=1, mux=1, range=32.0, offset=0.0, dc_coupling=True, att=1, bwlim=True
+            ch=1, mux=1, range=16.0, offset=6.0, dc_coupling=True, att=1, bwlim=True
         )
         chan2 = sensor.Channel(
-            ch=2, mux=1, range=16.0, offset=0.0, dc_coupling=True, att=1, bwlim=True
+            ch=2, mux=1, range=32.0, offset=12.0, dc_coupling=True, att=1, bwlim=True
         )
-        trg = sensor.Trigger(ch=2, level=6.0, normal_mode=True, pos_slope=False)
-        rdg = sensor.Tval(level=23.4, transition=-1, ch=2)
+        trg = sensor.Trigger(ch=1, level=6.0, normal_mode=True, pos_slope=False)
+        rdg = sensor.Tval(level=20, transition=-1, ch=2)
         self["holdup"] = sensor.DSO(dso, [chan1, chan2], tbase, trg, [rdg], single=True)
         dispatcher.connect(
             self._dso_trigger, sender=self["holdup"], signal=tester.SigDso

@@ -31,12 +31,10 @@ class Gen9Initial(ProgramTestCase):
         sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
-                "PartDetect": (
-                    (sen["lock"], 10.0),
-                    (sen["fanshort"], 700.0),
-                ),
                 "Program": (
                     (sen["o3v3"], 3.3),
+                    (sen["lock"], 10.0),
+                    (sen["fanshort"], 700.0),
                     (sen["JLink"], 0),
                     ),
                 "PowerUp": (
@@ -78,7 +76,6 @@ class Gen9Initial(ProgramTestCase):
                             426.0,  # Final reading
                         ),
                     ),
-                    (sen["holdup"], ((0.07,),)),
                     (sen["arm_acfreq"], 50),
                     (sen["arm_acvolt"], 240),
                     (sen["arm_5v"], 5.05),
@@ -88,6 +85,7 @@ class Gen9Initial(ProgramTestCase):
                 "5V": ((sen["o5v"], (5.15, 5.14, 5.10)),),
                 "12V": ((sen["o12v"], (12.24, 12.15, 12.00)),),
                 "24V": ((sen["o24v"], (24.33, 24.22, 24.11)),),
+                "HoldUp": ((sen["holdup"], ((0.07,),)),),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
@@ -96,6 +94,6 @@ class Gen9Initial(ProgramTestCase):
         self.assertEqual("P", result.code)
         self.assertEqual(29, len(result.readings))
         self.assertEqual(
-            ["PartDetect", "Program", "Initialise", "PowerUp", "5V", "12V", "24V"],
+            ["Program", "Initialise", "PowerUp", "5V", "12V", "24V", "HoldUp"],
             self.tester.ut_steps,
         )
