@@ -92,7 +92,7 @@ class Gen9Initial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(29, len(result.readings))
+        self.assertEqual(30, len(result.readings))
         self.assertEqual(
             ["Program", "Initialise", "PowerUp", "5V", "12V", "24V", "HoldUp"],
             self.tester.ut_steps,

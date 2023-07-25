@@ -54,7 +54,9 @@ class Config:
         tester.LimitDelta("PFCpost3", 426.0, 2.9),
         tester.LimitDelta("PFCpost4", 426.0, 2.9),
         tester.LimitDelta("PFCpost", 426.0, 3.0),
-        tester.LimitHigh("HoldUpTime", 0.060),
+        tester.LimitBetween(
+            "HoldUpTime", 0.050 * 1.2, 1, doc="50ms + 20% for ageing"
+        ),
         tester.LimitDelta("ARM-AcFreq", 50, 10),
         tester.LimitDelta("ARM-AcVolt", 240, 20),
         tester.LimitDelta("ARM-5V", 5.0, 1.0),
@@ -71,10 +73,10 @@ class Config:
     )
     # Software image filename
     _lpc_values = _Values(
-            devicetype="lpc1113",
-            sw_image="gen9_1.0.18392.2512.bin",
-            is_renesas=False,
-        )
+        devicetype="lpc1113",
+        sw_image="gen9_1.0.18392.2512.bin",
+        is_renesas=False,
+    )
     _renesas_values = _Values(
         devicetype="r7fa2e1a7",
         sw_image="gen9_renesas_1.0.0-0-g12d33fe.hex",

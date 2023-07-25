@@ -35,7 +35,7 @@ class Initial(share.TestSequence):
             tester.TestStep("5V", self._step_reg_5v),
             tester.TestStep("12V", self._step_reg_12v),
             tester.TestStep("24V", self._step_reg_24v),
-            tester.TestStep("HoldUp", self._step_holdup, self.cfg.is_renesas),
+            tester.TestStep("HoldUp", self._step_holdup),
         )
 
     @share.teststep
@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
         """Power-Up the Unit.
 
         240Vac is applied.
-        PFC voltage is calibrated.
+        PFC voltage is calibrated (NXP only).
         Unit is left running at 240Vac, no load.
 
         """
@@ -87,7 +87,7 @@ class Initial(share.TestSequence):
             ),
             timeout=5,
         )
-        dev["rla_pson"].set_on()  # Switch all outputs ON
+        dev["rla_pson"].set_on()  # Switch 12V & 24V outputs ON
         self.measure(
             (
                 "dmm_5vset",
@@ -99,11 +99,10 @@ class Initial(share.TestSequence):
         arm = dev["arm"]
         arm.banner()
         arm.unlock()
+        # A little load so PFC voltage falls faster
+        self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
+        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
         if not self.cfg.is_renesas:  # NXP units: The PFC adjust does work
-            # A little load so PFC voltage falls faster
-            self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
-            # Calibrate the PFC set voltage
-            pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
             arm.calpfc(pfc)
             mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
             if not mesres.result:  # 1st retry
@@ -124,17 +123,14 @@ class Initial(share.TestSequence):
                 "arm_5v",
                 "arm_12v",
                 "arm_24v",
-            ), timeout=5
+            ),
+            timeout=5,
         )
+        self.dcload((("dcl_12v", 0.0), ("dcl_24v", 0.0)))
 
     @share.teststep
     def _step_reg_5v(self, dev, mes):
-        """Check regulation of the 5V.
-
-        Min = 0, Max = 2.0A, Peak = 2.5A
-        Unit is left running at no load.
-
-        """
+        """Check regulation of the 5V. Unit is left running at no load."""
         self.dcload(
             (
                 ("dcl_12v", 1.0),
@@ -142,17 +138,15 @@ class Initial(share.TestSequence):
             )
         )
         self._reg_check(
-            dmm_out=mes["dmm_5v"], dcl_out=dev["dcl_5v"], max_load=2.0, peak_load=2.5
+            dmm_out=mes["dmm_5v"],
+            dcl_out=dev["dcl_5v"],
+            max_load=2.0,
+            peak_load=2.5,
         )
 
     @share.teststep
     def _step_reg_12v(self, dev, mes):
-        """Check regulation and OCP of the 12V.
-
-        Min = 1.0, Max = 24A, Peak = 26A
-        Unit is left running at no load.
-
-        """
+        """Check regulation of the 12V. Unit is left running at no load."""
         dev["dcl_24v"].output(0.1)
         self._reg_check(
             dmm_out=mes["dmm_12v"],
@@ -163,12 +157,7 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_reg_24v(self, dev, mes):
-        """Check regulation and OCP of the 24V.
-
-        Min = 0.1, Max = 10A, Peak = 11A
-        Unit is left running at no load.
-
-        """
+        """Check regulation of the 24V. Unit is left running at no load."""
         dev["dcl_12v"].output(1.0)
         self._reg_check(
             dmm_out=mes["dmm_24v"],
@@ -177,24 +166,6 @@ class Initial(share.TestSequence):
             peak_load=11.0,
         )
 
-    @share.teststep
-    def _step_holdup(self, dev, mes):
-        """Renesas micro PFC adjustment does not work at all.
-
-        Instead, measure PWR_FAIL to 24V hold-up time at full load.
-        This is the variable that PFC voltage adjustment controls.
-
-        """
-        dev["acsource"].output(voltage=90.0)
-        self.dcload(
-            (("dcl_5v", 2.0), ("dcl_24v", 10.0), ("dcl_12v", 24.0)), delay=0.5
-        )
-        mes["dso_holdup"]()  # The callback will switch off the AC power
-
-    def _dso_callback(self):
-        """The DSO will trigger as PWR_FAIL falls."""
-        self.devices["acsource"].output(voltage=0.0, delay=0.5)
-
     def _reg_check(self, dmm_out, dcl_out, max_load, peak_load):
         """Check regulation of an output.
 
@@ -202,7 +173,6 @@ class Initial(share.TestSequence):
         dcl_out: DC Load instance.
         max_load: Maximum output load.
         peak_load: Peak output load.
-        fet: Measurement instance to check 24V output FET
 
         Unit is left running at no load.
 
@@ -227,6 +197,22 @@ class Initial(share.TestSequence):
                 ("dcl_24v", 0.0),
             )
         )
+
+    @share.teststep
+    def _step_holdup(self, dev, mes):
+        """Renesas micro PFC adjustment does not work at all.
+
+        So we measure PWR_FAIL to 24V hold-up time at full load.
+        This is the specification that PFC voltage adjustment controls.
+
+        """
+        dev["acsource"].output(voltage=90.0)
+        self.dcload((("dcl_5v", 2.0), ("dcl_24v", 10.0), ("dcl_12v", 24.0)), delay=0.5)
+        mes["dso_holdup"]()  # The callback will switch off the AC power
+
+    def _dso_callback(self):
+        """The DSO will trigger as PWR_FAIL falls."""
+        self.devices["acsource"].output(voltage=0.0, delay=0.5)
 
 
 class Devices(share.Devices):
@@ -296,20 +282,19 @@ class Sensors(share.Sensors):
         self["pwrfail"] = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.01)
         self["fanshort"] = sensor.Res(dmm, high=10, low=5, rng=1000, res=0.1)
         self["lock"] = sensor.Res(dmm, high=11, low=6, rng=10000, res=1)
-        dso = self.devices["dso"]
-        tbase = sensor.Timebase(range=0.2, main_mode=True, delay=0, centre_ref=False)
         chan1 = sensor.Channel(
             ch=1, mux=1, range=16.0, offset=6.0, dc_coupling=True, att=1, bwlim=True
         )
         chan2 = sensor.Channel(
             ch=2, mux=1, range=32.0, offset=12.0, dc_coupling=True, att=1, bwlim=True
         )
+        tbase = sensor.Timebase(range=0.2, main_mode=True, delay=0, centre_ref=False)
         trg = sensor.Trigger(ch=1, level=6.0, normal_mode=True, pos_slope=False)
         rdg = sensor.Tval(level=20, transition=-1, ch=2)
-        self["holdup"] = sensor.DSO(dso, [chan1, chan2], tbase, trg, [rdg], single=True)
-        dispatcher.connect(
-            self._dso_trigger, sender=self["holdup"], signal=tester.SigDso
+        self["holdup"] = sensor.DSO(
+            self.devices["dso"], [chan1, chan2], tbase, trg, [rdg], single=True
         )
+        dispatcher.connect(self.callback, sender=self["holdup"], signal=tester.SigDso)
         arm = self.devices["arm"]
         for name, cmdkey in (
             ("arm_acfreq", "AcFreq"),
@@ -329,11 +314,6 @@ class Sensors(share.Sensors):
             share.config.JFlashProject.projectfile(self.devicetype),
             pathlib.Path(__file__).parent / self.sw_image,
         )
-
-    def _dso_trigger(self):
-        """DSO Ready handler."""
-        if self.callback:
-            self.callback()
 
 
 class Measurements(share.Measurements):
