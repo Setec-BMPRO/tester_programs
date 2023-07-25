@@ -54,6 +54,7 @@ class Config:
         tester.LimitDelta("PFCpost3", 426.0, 2.9),
         tester.LimitDelta("PFCpost4", 426.0, 2.9),
         tester.LimitDelta("PFCpost", 426.0, 3.0),
+        tester.LimitHigh("HoldUpTime", 0.060),
         tester.LimitDelta("ARM-AcFreq", 50, 10),
         tester.LimitDelta("ARM-AcVolt", 240, 20),
         tester.LimitDelta("ARM-5V", 5.0, 1.0),

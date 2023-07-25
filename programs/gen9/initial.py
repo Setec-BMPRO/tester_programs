@@ -5,6 +5,8 @@
 
 import pathlib
 
+from pydispatch import dispatcher
+
 import serial
 import tester
 
@@ -24,6 +26,7 @@ class Initial(share.TestSequence):
         self.cfg.configure(uut)
         Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
+        Sensors.callback = self._dso_callback
         super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
@@ -97,26 +100,37 @@ class Initial(share.TestSequence):
             timeout=5,
         )
         arm = dev["arm"]
-        arm.banner()
-        arm.unlock()
         # A little load so PFC voltage falls faster
         self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
-        # Calibrate the PFC set voltage
-        pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
-        arm.calpfc(pfc)
-        mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
-        if not mesres.result:  # 1st retry
-            arm.calpfc(mesres.value1)
-            mesres = mes["dmm_pfcpost2"].stable(self.pfc_stable)
-        if not mesres.result:  # 2nd retry
-            arm.calpfc(mesres.value1)
-            mesres = mes["dmm_pfcpost3"].stable(self.pfc_stable)
-        if not mesres.result:  # 3rd retry
-            arm.calpfc(mesres.value1)
-            mes["dmm_pfcpost4"].stable(self.pfc_stable)
-        arm.nvwrite()
-        # A final PFC setup check
-        mes["dmm_pfcpost"].stable(self.pfc_stable)
+        # Renesas units: PFC adjust is broken...
+        # So we measure PWR_FAIL to 24V hold up time at full load
+        if self.cfg.is_renesas:
+            dev["acsource"].output(voltage=90.0)
+            self.dcload(
+                (("dcl_5v", 2.0), ("dcl_24v", 10.0), ("dcl_12v", 24.0)), delay=0.5
+            )
+            mes["dso_holdup"]()  # The callback will switch off the AC power
+            self.dcload((("dcl_5v", 0.0), ("dcl_12v", 1.0), ("dcl_24v", 1.0)))
+            dev["acsource"].output(voltage=240.0, delay=1)
+        arm.banner()
+        arm.unlock()
+        if not self.cfg.is_renesas:  # NXP units: The PFC adjust does work
+            # Calibrate the PFC set voltage
+            pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
+            arm.calpfc(pfc)
+            mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
+            if not mesres.result:  # 1st retry
+                arm.calpfc(mesres.value1)
+                mesres = mes["dmm_pfcpost2"].stable(self.pfc_stable)
+            if not mesres.result:  # 2nd retry
+                arm.calpfc(mesres.value1)
+                mesres = mes["dmm_pfcpost3"].stable(self.pfc_stable)
+            if not mesres.result:  # 3rd retry
+                arm.calpfc(mesres.value1)
+                mes["dmm_pfcpost4"].stable(self.pfc_stable)
+            arm.nvwrite()
+            # A final PFC setup check
+            mes["dmm_pfcpost"].stable(self.pfc_stable)
         self.measure(
             (
                 "arm_acfreq",
@@ -126,6 +140,10 @@ class Initial(share.TestSequence):
                 "arm_24v",
             ),
         )
+
+    def _dso_callback(self):
+        """The DSO should trigger as PWR_FAIL switches."""
+        self.devices["acsource"].output(voltage=0.0, delay=0.5)
 
     @share.teststep
     def _step_reg_5v(self, dev, mes):
@@ -219,6 +237,7 @@ class Devices(share.Devices):
         """Create all Instruments."""
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
+            ("dso", tester.DSO, "DSO"),
             ("acsource", tester.ACSource, "ACS"),
             ("discharge", tester.Discharge, "DIS"),
             ("dcs_5v", tester.DCSource, "DCS2"),
@@ -260,6 +279,7 @@ class Sensors(share.Sensors):
 
     devicetype = None
     sw_image = None
+    callback = None
 
     def open(self):
         """Create all Sensors."""
@@ -276,6 +296,20 @@ class Sensors(share.Sensors):
         self["pwrfail"] = sensor.Vdc(dmm, high=9, low=4, rng=100, res=0.01)
         self["fanshort"] = sensor.Res(dmm, high=10, low=5, rng=1000, res=0.1)
         self["lock"] = sensor.Res(dmm, high=11, low=6, rng=10000, res=1)
+        dso = self.devices["dso"]
+        tbase = sensor.Timebase(range=0.2, main_mode=True, delay=0, centre_ref=False)
+        chan1 = sensor.Channel(
+            ch=1, mux=1, range=32.0, offset=0.0, dc_coupling=True, att=1, bwlim=True
+        )
+        chan2 = sensor.Channel(
+            ch=2, mux=1, range=16.0, offset=0.0, dc_coupling=True, att=1, bwlim=True
+        )
+        trg = sensor.Trigger(ch=2, level=6.0, normal_mode=True, pos_slope=False)
+        rdg = sensor.Tval(level=23.4, transition=-1, ch=2)
+        self["holdup"] = sensor.DSO(dso, [chan1, chan2], tbase, trg, [rdg], single=True)
+        dispatcher.connect(
+            self._dso_trigger, sender=self["holdup"], signal=tester.SigDso
+        )
         arm = self.devices["arm"]
         for name, cmdkey in (
             ("arm_acfreq", "AcFreq"),
@@ -295,6 +329,11 @@ class Sensors(share.Sensors):
             share.config.JFlashProject.projectfile(self.devicetype),
             pathlib.Path(__file__).parent / self.sw_image,
         )
+
+    def _dso_trigger(self):
+        """DSO Ready handler."""
+        if self.callback:
+            self.callback()
 
 
 class Measurements(share.Measurements):
@@ -324,6 +363,7 @@ class Measurements(share.Measurements):
                 ("dmm_pfcpost4", "PFCpost4", "pfc", ""),
                 ("dmm_pfcpost", "PFCpost", "pfc", ""),
                 ("dmm_pwrfail", "PwrFail", "pwrfail", ""),
+                ("dso_holdup", "HoldUpTime", "holdup", "Holdup time ok"),
                 ("arm_acfreq", "ARM-AcFreq", "arm_acfreq", ""),
                 ("arm_acvolt", "ARM-AcVolt", "arm_acvolt", ""),
                 ("arm_5v", "ARM-5V", "arm_5v", ""),

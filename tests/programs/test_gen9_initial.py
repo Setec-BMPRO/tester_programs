@@ -78,6 +78,7 @@ class Gen9Initial(ProgramTestCase):
                             426.0,  # Final reading
                         ),
                     ),
+                    (sen["holdup"], ((0.07,),)),
                     (sen["arm_acfreq"], 50),
                     (sen["arm_acvolt"], 240),
                     (sen["arm_5v"], 5.05),
@@ -93,7 +94,7 @@ class Gen9Initial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(32, len(result.readings))
+        self.assertEqual(29, len(result.readings))
         self.assertEqual(
             ["PartDetect", "Program", "Initialise", "PowerUp", "5V", "12V", "24V"],
             self.tester.ut_steps,

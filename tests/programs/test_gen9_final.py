@@ -34,7 +34,9 @@ class GEN9Final(ProgramTestCase):
                     (sen["gpo1"], 240.0),
                     (sen["gpo2"], 240.0),
                 ),
-                "Transient": ((sen["12V_Vmax"], ((0.01,),)),),
+                "Transient": (
+                    (sen["12V_Vmax"], ((0.01,),)),
+                ),
                 "FullLoad": (
                     (sen["o5v"], 5.0),
                     (sen["o12v"], 12.0),
