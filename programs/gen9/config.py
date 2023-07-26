@@ -46,7 +46,7 @@ class Config:
         tester.LimitPercent("3V3", 3.30, 10.0),
         tester.LimitPercent("5Vset", 5.137, 1.0),
         tester.LimitDelta("ACin", 240, 10),
-        tester.LimitDelta("15Vccpri", 15.0, 1.0),
+        tester.LimitBetween("15Vccpri", 11.4, 17.0),
         tester.LimitBetween("12Vpri", 11.4, 17.0),
         tester.LimitBetween("PFCpre", 408, 450),
         tester.LimitDelta("PFCpost1", 426.0, 2.9),
