@@ -78,6 +78,12 @@ class Config:
         "bc-06": (72, 4),
         "bc-07": (73, 6),
         "bc-08": (74, 6),
+        "4g tmc-02": (75, 4),
+        "4g tmc-03": (76, 4),
+        "6g tmc-03": (77, 6),
+        "6g tmc-04": (78, 6),
+        "6g tmc-05": (79, 6),
+        "6g tmc-06": (80, 6),
     }
     # Series software images per revision
     _rev_software = dict.fromkeys(
