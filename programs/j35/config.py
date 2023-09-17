@@ -54,6 +54,7 @@ class _Values:
     ocp_set = attr.ib(validator=attr.validators.instance_of(float))
     solar = attr.ib(validator=attr.validators.instance_of(bool))
     canbus = attr.ib(validator=attr.validators.instance_of(bool))
+    air = attr.ib(validator=attr.validators.instance_of(bool))
 
 
 class J35:
@@ -72,6 +73,7 @@ class J35:
     ocp_set = None
     solar = None
     canbus = None
+    air = None
     # General parameters used in testing the units
     # Injected voltages
     #  Battery bus
@@ -227,6 +229,7 @@ class J35:
         cls.ocp_set = values.ocp_set
         cls.solar = values.solar
         cls.canbus = values.canbus
+        cls.air = values.air
 
 
 class J35A(J35):
@@ -242,6 +245,7 @@ class J35A(J35):
         ocp_set=20.0,
         solar=False,
         canbus=True,
+        air=False,
     )
     _rev_data = {
         None: _rev12_values,
@@ -254,6 +258,7 @@ class J35A(J35):
             ocp_set=20.0,
             solar=False,
             canbus=True,
+            air=False,
         ),
         "10": _Values(
             sw_version=J35.sw_15,
@@ -262,6 +267,7 @@ class J35A(J35):
             ocp_set=20.0,
             solar=False,
             canbus=True,
+            air=False,
         ),
         "9": _Values(
             sw_version=J35.sw_15,
@@ -270,6 +276,7 @@ class J35A(J35):
             ocp_set=20.0,
             solar=False,
             canbus=True,
+            air=False,
         ),
         "8": _Values(
             sw_version=J35.sw_15,
@@ -278,6 +285,7 @@ class J35A(J35):
             ocp_set=20.0,
             solar=False,
             canbus=True,
+            air=False,
         ),
         # Rev <8 uses an older software version
         # No Rev 4,5,6 created
@@ -289,6 +297,7 @@ class J35A(J35):
             ocp_set=20.0,
             solar=False,
             canbus=False,
+            air=False,
         ),
         "1": _Values(
             sw_version=J35.sw_13,
@@ -297,6 +306,7 @@ class J35A(J35):
             ocp_set=20.0,
             solar=False,
             canbus=False,
+            air=False,
         ),
     }
 
@@ -344,6 +354,7 @@ class J35B(J35):
         ocp_set=35.0,
         solar=True,
         canbus=True,
+        air=False,
     )
     _rev_data = {
         None: _rev12_values,
@@ -356,6 +367,7 @@ class J35B(J35):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=False,
         ),
         "10": _Values(
             sw_version=J35.sw_15,
@@ -364,6 +376,7 @@ class J35B(J35):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=False,
         ),
         "9": _Values(
             sw_version=J35.sw_15,
@@ -372,6 +385,7 @@ class J35B(J35):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=False,
         ),
         "8": _Values(
             sw_version=J35.sw_15,
@@ -380,6 +394,7 @@ class J35B(J35):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=False,
         ),
         # Rev <8 uses an older software version
         # No Rev 5,6 created
@@ -391,6 +406,7 @@ class J35B(J35):
             ocp_set=35.0,
             solar=False,
             canbus=False,
+            air=False,
         ),
         "1": _Values(
             sw_version=J35.sw_13,
@@ -399,6 +415,7 @@ class J35B(J35):
             ocp_set=35.0,
             solar=False,
             canbus=False,
+            air=False,
         ),
     }
 
@@ -444,6 +461,7 @@ class J35BL(J35B):
         ocp_set=35.0,
         solar=True,
         canbus=True,
+        air=False,
     )
     _rev_data = {
         None: _rev14_values,
@@ -455,6 +473,7 @@ class J35BL(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=False,
         ),
     }
 
@@ -470,6 +489,7 @@ class J35C(J35B):
         ocp_set=35.0,
         solar=True,
         canbus=True,
+        air=True,
     )
     _rev_data = {
         None: _rev12_values,
@@ -482,6 +502,7 @@ class J35C(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "10": _Values(
             sw_version=J35.sw_15,
@@ -490,6 +511,7 @@ class J35C(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "9": _Values(
             sw_version=J35.sw_15,
@@ -498,6 +520,7 @@ class J35C(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "8": _Values(
             sw_version=J35.sw_15,
@@ -506,6 +529,7 @@ class J35C(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "7": _Values(
             sw_version=J35.sw_15,
@@ -514,6 +538,7 @@ class J35C(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "6": _Values(
             sw_version=J35.sw_15,
@@ -522,6 +547,7 @@ class J35C(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         # No Rev 5 production
         # 469 x J35C were converted to J35B via PC 4885
@@ -533,6 +559,7 @@ class J35C(J35B):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         # Rev 1-3 must be scrapped per MA-328
         "3": None,
@@ -552,6 +579,7 @@ class J35D(J35C):
         ocp_set=35.0,
         solar=True,
         canbus=True,
+        air=False,  # No AIR on Rev 14
     )
     _rev_data = {
         None: _rev14_values,
@@ -563,6 +591,7 @@ class J35D(J35C):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "12": _Values(
             sw_version=J35.sw_15,
@@ -571,6 +600,7 @@ class J35D(J35C):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "11": _Values(
             sw_version=J35.sw_15,
@@ -579,6 +609,7 @@ class J35D(J35C):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "10": _Values(
             sw_version=J35.sw_15,
@@ -587,6 +618,7 @@ class J35D(J35C):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
         "9": _Values(
             sw_version=J35.sw_15,
@@ -595,6 +627,7 @@ class J35D(J35C):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
     }
 
@@ -644,6 +677,7 @@ class ASPower(J35D):
         ocp_set=35.0,
         solar=True,
         canbus=True,
+        air=True,
     )
     _rev_data = {
         None: _rev2_values,
@@ -655,5 +689,6 @@ class ASPower(J35D):
             ocp_set=35.0,
             solar=True,
             canbus=True,
+            air=True,
         ),
     }

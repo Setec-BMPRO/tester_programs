@@ -85,14 +85,19 @@ class Gen9Initial(ProgramTestCase):
                 "5V": ((sen["o5v"], (5.15, 5.14, 5.10)),),
                 "12V": ((sen["o12v"], (12.24, 12.15, 12.00)),),
                 "24V": ((sen["o24v"], (24.33, 24.22, 24.11)),),
-                "HoldUp": ((sen["holdup"], ((0.07,),)),),
+                "HoldUp": (
+                    (sen["o5v"], 5.11),
+                    (sen["o12v"], 12.0),
+                    (sen["o24v"], 24.0),
+                    (sen["holdup"], ((0.07,),)),
+                ),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(30, len(result.readings))
+        self.assertEqual(33, len(result.readings))
         self.assertEqual(
             ["Program", "Initialise", "PowerUp", "5V", "12V", "24V", "HoldUp"],
             self.tester.ut_steps,
