@@ -65,11 +65,11 @@ class Config:
     # General parameters used in testing the units
     #  Injected voltages
     vbatt_set = 12.5
-    # Test limits common to both units and test types
+    # Test limits common to all units and test types
     _base_limits = (
         tester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
     )
-    # Initial Test limits common to both units
+    # Initial Test limits common to all units
     _base_limits_initial = _base_limits + (
         tester.LimitDelta("Vbatt", vbatt_set - 0.5, 1.0, doc="Battery input"),
         tester.LimitPercent("3V3", 3.3, 6.0, doc="Internal 3V rail"),
@@ -80,8 +80,9 @@ class Config:
         tester.LimitLow("LSon", 1.0, doc="LS output on (low)"),
         tester.LimitHigh("LSoff", 9.0, doc="LS output off (high)"),
         tester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        tester.LimitBetween("AllInputs", 0, 0xFFFF, doc="Digital inputs"),
     )
-    # Final Test limits common to both units
+    # Final Test limits common to all units
     _base_limits_final = _base_limits + (
         tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )

@@ -1,18 +1,25 @@
 Non-Serial Device Programmers
 
-Laird / Nordic BLE Modules
-==========================
+Nordic nRF52 BLE Device
+=======================
+    nRF52810
+        RVSWT101x           Segger JLink
+
+Laird (Nordic nRF52) BLE Module
+===============================
     BL652
         BLExtender          Segger JLink
          & Smartlink201
         CN102,3             Segger JLink
          & ODL103,4
-        RVMN101A            Segger JLink
-        RVMN101B            Segger JLink
+        RVMN101A,B          Segger JLink
         RVMN5x              Segger JLink
-        RVSWT101            Segger JLink
         TRS-BTx             Segger JLink
         TRS-RFM             Segger JLink
+
+SONIC (Nordic nRF52) BLE Module
+===============================
+        RVMN101C            Segger JLink
 
 MicroChip SAM Series
 ====================
@@ -23,8 +30,9 @@ Y   SAMC21E16A
         RVMD50              Segger JLink
         RvView2             Segger JLink
 
-N   SAMB11-MR210CA          ???? in fixture
-        BatteryCheck 2
+N   SAMB11-MR210CA          ???? in fixture             (Product EOL 2024-04)
+        BC2 Series
+        BLE2CAN
 
 MicroChip PIC Series
 ====================
@@ -57,10 +65,9 @@ Y   dsPIC33FJ16GS402        (Arduino 2020-10 to 2022-02)
 
 ATMEL
 =====
-PicKit4
 
 Y   ATtiny10
-        BatteryCheck        Arduino 2016-11     (Product EOL 2018-06)
+        BatteryCheck        Arduino 2016-11             (Product EOL 2018-06)
 
 Y   ATtiny406
         MB3                 Python updi module
@@ -71,5 +78,5 @@ Y   ATtiny1634
 Renesas
 =======
     RA21E Series
-        GEN9                TBD
+        GEN9-540            Segger JLink
         SX-600              Segger JLink

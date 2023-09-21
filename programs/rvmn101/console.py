@@ -1,7 +1,47 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101x and RVMN5x Console driver."""
+"""RVMN101x and RVMN5x Console driver.
+
+'rvmn analog' inputs:
+        '101A/C,5x'         '101B'
+    0   TANK 1              TANK 1
+    1   TANK 2              -
+    2   TANK 3              TANK 3
+    3   TANK 4              TANK 4
+    4   TANK 5              TANK 5
+    5   TANK 6              -
+    6   VOLTAGE 1           VOLTAGE 1
+    7   VOLTAGE 2           VOLTAGE 2
+    8   TEMP SENSOR 1       TEMP SENSOR 1
+    9   TEMP SENSOR 2       -
+    10  TEMP SENSOR 3       TEMP SENSOR 3
+    11  TEMP SENSOR 4       -
+    12  FUEL SENSOR 1       FUEL SENSOR 1
+    13  FUEL SENSOR 2       -
+    14  VOLTAGE SYS         VOLTAGE SYS
+
+'rvmn input' response is 32-bit data (b0-31):
+        '101A/C'            '101B'              '5x'
+    0   GEN_PUR_HS_SW1      GEN_PUR_LS_SW       GEN_PUR_HS_SW1
+    1   GEN_PUR_HS_SW2      GEN_PUR_LS_SW       GEN_PUR_HS_SW2
+    2   GEN_PUR_HS_SW3      GEN_PUR_LS_SW       GEN_PUR_HS_SW3
+    3   GEN_PUR_HS_SW4      GEN_PUR_LS_SW       GEN_PUR_HS_SW4
+    4   GEN_PUR_HS_SW5      GEN_PUR_HS_SW       GEN_PUR_HS_SW5
+    5   GEN_PUR_HS_SW6      GEN_PUR_HS_SW       GEN_PUR_HS_SW6
+    6   GEN_PUR_HS_SW7      -                   GEN_PUR_HS_SW7
+    7   GEN_PUR_HS_SW8      -                   GEN_PUR_HS_SW8
+    8   -                   GEN_PUR_HS_SW9      GEN_PUR_HS_SW9
+    9   -                   GEN_PUR_LS_SW10     GEN_PUR_HS_SW10
+    10  -                   GEN_PUR_HS_SW11     GEN_PUR_HS_SW11
+    11  -                   -                   GEN_PUR_HS_SW12
+    12  -                   -                   GEN_PUR_HS_SW13
+    13  -                   -                   GEN_PUR_HS_SW14
+    14  -                   -                   GEN_PUR_HS_SW15
+    15  -                   -                   GEN_PUR_HS_SW16
+    16  -                   -                   GEN_PUR_HS_SW17
+
+"""
 
 import share
 
@@ -41,6 +81,8 @@ class _Console(share.console.Base):
         "OUTPUT": parameter.String(
             "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
         ),
+        "ANALOG": parameter.String("rvmn analog", read_format="{1} {0}"),
+        "INPUT": parameter.String("rvmn input", read_format="{1} {0}"),
     }
     banner_lines = 5  # Startup banner lines
     max_output_index = 56  # Output index is range(max_output_index)
@@ -85,8 +127,8 @@ class _Console(share.console.Base):
         33: "HS_0A5_EN18",
         34: "LS_0A5_EN1",
         35: "LS_0A5_EN2",
-        36: "Unused",
-        37: "Unused",
+        36: "LS_0A5_EN3",
+        37: "LS_0A5_EN4",
         38: "OUT5A_EN0",
         39: "OUT5A_EN1",
         40: "OUT5A_EN2",
@@ -234,7 +276,7 @@ class Console101B(_Console):
         @param index Index number of the output
 
         """
-        # RVMN101B uses different names...
+        # RVMN101B schematic uses different names...
         return super().pin_name(index).replace("OUT10A_", "OUT10AMP_")
 
 

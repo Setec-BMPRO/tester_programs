@@ -32,6 +32,7 @@ class Initial(share.TestSequence):
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Initialise", self._step_initialise),
+            tester.TestStep("Input", self._step_input),
             tester.TestStep("Output", self._step_output),
             tester.TestStep("CanBus", self._step_canbus),
         )
@@ -62,6 +63,11 @@ class Initial(share.TestSequence):
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
+
+    @share.teststep
+    def _step_input(self, dev, mes):
+        """Test the inputs of the unit."""
+        mes["dig_in"]()
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -204,6 +210,8 @@ class Sensors(share.Sensors):
         self["BleMac"].on_read = lambda value: value.replace(":", "").replace(
             " (random)", ""
         )
+        self["Input"] = sensor.Keyed(rvmn101, "INPUT")
+        self["Input"].doc = "All digital inputs"
         self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
@@ -230,5 +238,6 @@ class Measurements(share.Measurements):
                 ("ble_mac", "BleMac", "BleMac", "MAC address"),
                 ("JLinkARM", "ProgramOk", "JLinkARM", "Programmed"),
                 ("JLinkBLE", "ProgramOk", "JLinkBLE", "Programmed"),
+                ("dig_in", "AllInputs", "Input", "Digital input reading"),
             )
         )
