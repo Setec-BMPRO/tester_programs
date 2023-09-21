@@ -82,7 +82,7 @@ class _Console(share.console.Base):
             "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
         ),
         "ANALOG": parameter.String("rvmn analog", read_format="{1} {0}"),
-        "INPUT": parameter.String("rvmn input", read_format="{1} {0}"),
+        "INPUT": parameter.Hex("rvmn input", read_format="{0}"),
     }
     banner_lines = 5  # Startup banner lines
     max_output_index = 56  # Output index is range(max_output_index)
