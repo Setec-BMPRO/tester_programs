@@ -92,7 +92,7 @@ class Initial(share.TestSequence):
         with share.MultiMeasurementSummary(default_timeout=2) as checker:
             # Turn ON, then OFF, each HS output in turn
             for idx in rvmn101.normal_outputs:
-                with tester.PathName(rvmn101.pin_name(idx)):
+                with tester.PathName(rvmn101.output_pin_name(idx)):
                     rvmn101.hs_output(idx, True)
                     checker.measure(mes["dmm_hs_on"])
                     rvmn101.hs_output(idx, False)

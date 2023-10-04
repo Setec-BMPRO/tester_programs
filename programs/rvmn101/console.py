@@ -23,12 +23,12 @@
 
 'rvmn input' response is 32-bit data (b0-31):
         '101A/C'            '101B'              '5x'
-    0   GEN_PUR_HS_SW1      GEN_PUR_LS_SW       GEN_PUR_HS_SW1
-    1   GEN_PUR_HS_SW2      GEN_PUR_LS_SW       GEN_PUR_HS_SW2
-    2   GEN_PUR_HS_SW3      GEN_PUR_LS_SW       GEN_PUR_HS_SW3
-    3   GEN_PUR_HS_SW4      GEN_PUR_LS_SW       GEN_PUR_HS_SW4
-    4   GEN_PUR_HS_SW5      GEN_PUR_HS_SW       GEN_PUR_HS_SW5
-    5   GEN_PUR_HS_SW6      GEN_PUR_HS_SW       GEN_PUR_HS_SW6
+    0   GEN_PUR_HS_SW1      GEN_PUR_LS_SW1      GEN_PUR_HS_SW1
+    1   GEN_PUR_HS_SW2      GEN_PUR_LS_SW2      GEN_PUR_HS_SW2
+    2   GEN_PUR_HS_SW3      GEN_PUR_LS_SW3      GEN_PUR_HS_SW3
+    3   GEN_PUR_HS_SW4      GEN_PUR_LS_SW4      GEN_PUR_HS_SW4
+    4   GEN_PUR_HS_SW5      GEN_PUR_HS_SW5      GEN_PUR_HS_SW5
+    5   GEN_PUR_HS_SW6      GEN_PUR_HS_SW6      GEN_PUR_HS_SW6
     6   GEN_PUR_HS_SW7      -                   GEN_PUR_HS_SW7
     7   GEN_PUR_HS_SW8      -                   GEN_PUR_HS_SW8
     8   -                   GEN_PUR_HS_SW9      GEN_PUR_HS_SW9
@@ -62,7 +62,7 @@ class _Console(share.console.Base):
         "\x1b[1;31m",  # Bold, Red
         "\x1b[1;32m",  # Bold, Green
         "*",  # FIXME: 101C 1.0.3 spits out a random "\r\n" during banner "*****"
-       )
+    )
 
     # Console commands
     parameter = share.console.parameter
@@ -81,7 +81,7 @@ class _Console(share.console.Base):
         "OUTPUT": parameter.String(
             "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
         ),
-        "ANALOG": parameter.String("rvmn analog", read_format="{1} {0}"),
+        "ANALOG": parameter.Hex("rvmn analog", read_format="{1} {0}"),
         "INPUT": parameter.Hex("rvmn input", read_format="{0}"),
     }
     banner_lines = 5  # Startup banner lines
@@ -90,7 +90,8 @@ class _Console(share.console.Base):
     reversed_output_dict = {}  # Key: any text, Value: Output index
     ls_0a5_out1 = 34
     ls_0a5_out2 = 35
-    output_pin_name = {  # Key: Output index, Value: Schematic pin name
+    _ls_pins = (ls_0a5_out1, ls_0a5_out2)  # Valid LS Pins
+    _output_pin_name = {  # Key: Output index, Value: Schematic pin name
         0: "HBRIDGE_1_extend",
         1: "HBRIDGE_1_retract",
         2: "HBRIDGE_2_extend",
@@ -148,6 +149,27 @@ class _Console(share.console.Base):
         54: "OUT10A_3",
         55: "OUT10A_4",
     }
+    max_input_index = 17  # Output index is range(max_output_index)
+    missing_input_dict = {}  # Key: any text, Value: Output index
+    _input_pin_name = {  # Key: Input index, Value: Schematic pin name
+        0: "GEN_PUR_HS_SW1",
+        1: "GEN_PUR_HS_SW2",
+        2: "GEN_PUR_HS_SW3",
+        3: "GEN_PUR_HS_SW4",
+        4: "GEN_PUR_HS_SW5",
+        5: "GEN_PUR_HS_SW6",
+        6: "GEN_PUR_HS_SW7",
+        7: "GEN_PUR_HS_SW8",
+        8: "GEN_PUR_HS_SW9",
+        9: "GEN_PUR_HS_SW10",
+        10: "GEN_PUR_HS_SW11",
+        11: "GEN_PUR_HS_SW12",
+        12: "GEN_PUR_HS_SW13",
+        13: "GEN_PUR_HS_SW14",
+        14: "GEN_PUR_HS_SW15",
+        15: "GEN_PUR_HS_SW16",
+        16: "GEN_PUR_HS_SW17",
+    }
 
     def __init__(self, port):
         """Initialise communications.
@@ -156,6 +178,7 @@ class _Console(share.console.Base):
 
         """
         super().__init__(port)
+        # Outputs
         missing_set = set()
         for key in self.missing_output_dict:
             missing_set.add(self.missing_output_dict[key])
@@ -169,6 +192,14 @@ class _Console(share.console.Base):
                 self.normal_outputs.append(idx)
             if idx in reversed_set:
                 self.reversed_outputs.append(idx)
+        # Digital Inputs
+        missing_set.clear()
+        for key in self.missing_input_dict:
+            missing_set.add(self.missing_input_dict[key])
+        self.digital_inputs = []  # List of input index
+        for idx in range(self.max_input_index):
+            if idx not in missing_set:
+                self.digital_inputs.append(idx)
 
     def reset(self):
         """Pulse RESET using DTR of the BDA4 (both micros)."""
@@ -208,17 +239,25 @@ class _Console(share.console.Base):
         @param state True for ON, False for OFF
 
         """
-        if index not in (self.ls_0a5_out1, self.ls_0a5_out2):
+        if index not in self._ls_pins:
             raise InvalidOutputError
         self["OUTPUT"] = "{0} {1}".format(index, 1 if state else 0)
 
-    def pin_name(self, index):
+    def output_pin_name(self, index):
         """Get the schematic name of an output pin.
 
         @param index Index number of the output
 
         """
-        return self.output_pin_name[index]
+        return self._output_pin_name[index]
+
+    def input_pin_name(self, index):
+        """Get the schematic name of an input pin.
+
+        @param index Index number of the input
+
+        """
+        return self._input_pin_name[index]
 
 
 class Console101A(_Console):
@@ -232,10 +271,21 @@ class Console101A(_Console):
 
         """
         self.missing_output_dict = {
-            "LS_0A5_EN1": 34,  # See self.ls_0a5_out1
-            "LS_0A5_EN2": 35,  # See self.ls_0a5_out2
+            "LS_0A5_EN1": 34,
+            "LS_0A5_EN2": 35,
             "LS_0A5_EN3": 36,
             "LS_0A5_EN4": 37,
+        }
+        self.missing_input_dict = {
+            "GEN_PUR_HS_SW9": 8,
+            "GEN_PUR_HS_SW10": 9,
+            "GEN_PUR_HS_SW11": 10,
+            "GEN_PUR_HS_SW12": 11,
+            "GEN_PUR_HS_SW13": 12,
+            "GEN_PUR_HS_SW14": 13,
+            "GEN_PUR_HS_SW15": 14,
+            "GEN_PUR_HS_SW16": 15,
+            "GEN_PUR_HS_SW17": 16,
         }
         super().__init__(port)
 
@@ -262,22 +312,40 @@ class Console101B(_Console):
             "HS_0A5_EN14": 29,  # Implemented in Rev 14
             "HS_0A5_EN15": 30,  # Implemented in Rev 14
             "HS_0A5_EN18": 33,
-            "LS_0A5_EN1": 34,  # See self.ls_0a5_out1
-            "LS_0A5_EN2": 35,  # See self.ls_0a5_out2
+            "LS_0A5_EN1": 34,
+            "LS_0A5_EN2": 35,
             "LS_0A5_EN3": 36,
             "LS_0A5_EN4": 37,
             "OUT5A_PWM_13": 51,
         }
+        self.missing_input_dict = {
+            "GEN_PUR_HS_SW7": 6,
+            "GEN_PUR_HS_SW8": 7,
+            "GEN_PUR_HS_SW12": 11,
+            "GEN_PUR_HS_SW13": 12,
+            "GEN_PUR_HS_SW14": 13,
+            "GEN_PUR_HS_SW15": 14,
+            "GEN_PUR_HS_SW16": 15,
+            "GEN_PUR_HS_SW17": 16,
+        }
+        for idx, name in (  # 101B has some different input names
+            (0, "GEN_PUR_LS_SW1"),
+            (1, "GEN_PUR_LS_SW2"),
+            (2, "GEN_PUR_LS_SW3"),
+            (3, "GEN_PUR_LS_SW4"),
+            (9, "GEN_PUR_LS_SW10"),
+        ):
+            self._input_pin_name[idx] = name
         super().__init__(port)
 
-    def pin_name(self, index):
+    def output_pin_name(self, index):
         """Get the schematic name of an output pin.
 
         @param index Index number of the output
 
         """
         # RVMN101B schematic uses different names...
-        return super().pin_name(index).replace("OUT10A_", "OUT10AMP_")
+        return super().output_pin_name(index).replace("OUT10A_", "OUT10AMP_")
 
 
 class Console101C(Console101A):
@@ -291,15 +359,15 @@ class _Console5x(_Console):
 
     """Communications to RVMN5x console."""
 
-    def pin_name(self, index):
+    def output_pin_name(self, index):
         """Get the schematic name of an output pin.
 
         @param index Index number of the output
 
         """
         # RVMN5x HBridge outputs have Extend/Retract swapped
-        # relative to the RVMN101x...
-        name = super().pin_name(index)
+        # relative to the RVMN101x
+        name = super().output_pin_name(index)
         if name.startswith("HBRIDGE"):
             if name.endswith("extend"):
                 name = name.replace("extend", "retract")
@@ -334,8 +402,8 @@ class Console50(_Console5x):
             "HS_0A5_EN16": 31,
             "HS_0A5_EN17": 32,
             "HS_0A5_EN18": 33,
-            "LS_0A5_EN1": 34,  # See self.ls_0a5_out1
-            "LS_0A5_EN2": 35,  # See self.ls_0a5_out2
+            "LS_0A5_EN1": 34,
+            "LS_0A5_EN2": 35,
             "LS_0A5_EN3": 36,
             "LS_0A5_EN4": 37,
             "OUT5A_EN0": 38,
@@ -376,8 +444,8 @@ class Console55(_Console5x):
             "HS_0A5_EN16": 31,
             "HS_0A5_EN17": 32,
             "HS_0A5_EN18": 33,
-            "LS_0A5_EN1": 34,  # See self.ls_0a5_out1
-            "LS_0A5_EN2": 35,  # See self.ls_0a5_out2
+            "LS_0A5_EN1": 34,
+            "LS_0A5_EN2": 35,
             "LS_0A5_EN3": 36,
             "LS_0A5_EN4": 37,
             "OUT5A_EN0": 38,
