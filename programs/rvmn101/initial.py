@@ -144,8 +144,8 @@ class Devices(share.Devices):
             "50": console.Console50,
             "55": console.Console55,
         }[self.parameter]
-        console_class.reversed_output_dict = self.reversed_output_dict
         self["rvmn101"] = console_class(nordic_ser)
+        self["rvmn101"].output_reversed(self.reversed_output_dict)
         # CAN devices
         self["can"] = self.physical_devices["_CAN"]
         self["canreader"] = tester.CANReader(self["can"])

@@ -43,6 +43,8 @@
 
 """
 
+import attr
+
 import share
 
 
@@ -51,47 +53,13 @@ class InvalidOutputError(Exception):
     """Attempt to set a non-existing output."""
 
 
-class _Console(share.console.Base):
+@attr.s
+class PinName:
 
-    """Communications to RVMN101x and RVMN5x console."""
+    """Pin name mappings from index number."""
 
-    # Console command prompt. Signals the end of response data.
-    cmd_prompt = b"uart:~$ \x1b[m"
-    ignore = (  # Tuple of strings to remove from responses
-        "\x1b[m",  # Normal
-        "\x1b[1;31m",  # Bold, Red
-        "\x1b[1;32m",  # Bold, Green
-        "*",  # FIXME: 101C 1.0.3 spits out a random "\r\n" during banner "*****"
-    )
-
-    # Console commands
-    parameter = share.console.parameter
-    cmd_data = {
-        "MAC": parameter.String("rvmn mac", read_format="{0}"),
-        "SERIAL": parameter.String(
-            "rvmn serial", writeable=True, write_format="{1} {0}"
-        ),
-        "PRODUCT-REV": parameter.String(
-            "rvmn product-rev", writeable=True, write_format="{1} {0}"
-        ),
-        "SW-REV": parameter.String("rvmn sw-rev", read_format="{0}"),
-        "HARDWARE-REV": parameter.String(
-            "rvmn hw-rev", writeable=True, write_format="{1} {0}"
-        ),
-        "OUTPUT": parameter.String(
-            "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
-        ),
-        "ANALOG": parameter.Hex("rvmn analog", read_format="{1} {0}"),
-        "INPUT": parameter.Hex("rvmn input", read_format="{0}"),
-    }
-    banner_lines = 5  # Startup banner lines
-    max_output_index = 56  # Output index is range(max_output_index)
-    missing_output_dict = {}  # Key: any text, Value: Output index
-    reversed_output_dict = {}  # Key: any text, Value: Output index
-    ls_0a5_out1 = 34
-    ls_0a5_out2 = 35
-    _ls_pins = (ls_0a5_out1, ls_0a5_out2)  # Valid LS Pins
-    _output_pin_name = {  # Key: Output index, Value: Schematic pin name
+    # Key: Output index, Value: Schematic pin name
+    _output = attr.ib(init=False, default={
         0: "HBRIDGE_1_extend",
         1: "HBRIDGE_1_retract",
         2: "HBRIDGE_2_extend",
@@ -148,10 +116,9 @@ class _Console(share.console.Base):
         53: "OUT10A_2",
         54: "OUT10A_3",
         55: "OUT10A_4",
-    }
-    max_input_index = 17  # Output index is range(max_output_index)
-    missing_input_dict = {}  # Key: any text, Value: Output index
-    _input_pin_name = {  # Key: Input index, Value: Schematic pin name
+    })
+    # Key: Input index, Value: Schematic pin name
+    _input = attr.ib(init=False, default={
         0: "GEN_PUR_HS_SW1",
         1: "GEN_PUR_HS_SW2",
         2: "GEN_PUR_HS_SW3",
@@ -169,7 +136,82 @@ class _Console(share.console.Base):
         14: "GEN_PUR_HS_SW15",
         15: "GEN_PUR_HS_SW16",
         16: "GEN_PUR_HS_SW17",
+    })
+
+    def input_rename(self, names):
+        """Rename input pins.
+
+        @param names Dict{index: name}
+
+        """
+        for idx, value in names.items():
+            self._input[idx] = value
+
+    def output_rename(self, names):
+        """Rename output pins.
+
+        @param names Dict{index: name}
+
+        """
+        for idx, value in names.items():
+            self._output[idx] = value
+
+    def input(self, idx):
+        """Input pin index to pin name.
+
+        @param idx Pin index
+        @return Pin name
+
+        """
+        return self._input[idx]
+
+    def output(self, idx):
+        """Output pin index to pin name.
+
+        @param idx Pin index
+        @return Pin name
+
+        """
+        return self._output[idx]
+
+
+class _Console(share.console.Base):
+
+    """Communications to RVMN101x and RVMN5x console."""
+
+    # Console command prompt. Signals the end of response data.
+    cmd_prompt = b"uart:~$ \x1b[m"
+    ignore = (  # Tuple of strings to remove from responses
+        "\x1b[m",  # Normal
+        "\x1b[1;31m",  # Bold, Red
+        "\x1b[1;32m",  # Bold, Green
+        "*",  # FIXME: 101C 1.0.3 spits out a random "\r\n" during banner "*****"
+    )
+    # Console commands
+    parameter = share.console.parameter
+    cmd_data = {
+        "MAC": parameter.String("rvmn mac", read_format="{0}"),
+        "SERIAL": parameter.String(
+            "rvmn serial", writeable=True, write_format="{1} {0}"
+        ),
+        "PRODUCT-REV": parameter.String(
+            "rvmn product-rev", writeable=True, write_format="{1} {0}"
+        ),
+        "SW-REV": parameter.String("rvmn sw-rev", read_format="{0}"),
+        "HARDWARE-REV": parameter.String(
+            "rvmn hw-rev", writeable=True, write_format="{1} {0}"
+        ),
+        "OUTPUT": parameter.String(
+            "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
+        ),
+        "ANALOG": parameter.Hex("rvmn analog", read_format="{1} {0}"),
+        "INPUT": parameter.Hex("rvmn input", read_format="{0}"),
     }
+    banner_lines = 5
+    max_output_index = 56
+    max_input_index = 17
+    ls_0a5_out1 = 34
+    ls_0a5_out2 = 35
 
     def __init__(self, port):
         """Initialise communications.
@@ -178,28 +220,18 @@ class _Console(share.console.Base):
 
         """
         super().__init__(port)
-        # Outputs
-        missing_set = set()
-        for key in self.missing_output_dict:
-            missing_set.add(self.missing_output_dict[key])
-        reversed_set = set()
-        for key in self.reversed_output_dict:
-            reversed_set.add(self.reversed_output_dict[key])
-        self.normal_outputs = []  # List of normal output index
-        self.reversed_outputs = []  # List of reversed output index
-        for idx in range(self.max_output_index):
-            if not (idx in missing_set or idx in reversed_set):
-                self.normal_outputs.append(idx)
-            if idx in reversed_set:
-                self.reversed_outputs.append(idx)
-        # Digital Inputs
-        missing_set.clear()
-        for key in self.missing_input_dict:
-            missing_set.add(self.missing_input_dict[key])
-        self.digital_inputs = []  # List of input index
-        for idx in range(self.max_input_index):
-            if idx not in missing_set:
-                self.digital_inputs.append(idx)
+        self.pin_name = PinName()
+        self.hs_outputs = list(range(self.max_output_index))
+        self.reversed_outputs = []
+        self.digital_inputs = list(range(self.max_input_index))
+        self.output_remove(
+            {
+                "LS_0A5_EN1": 34,
+                "LS_0A5_EN2": 35,
+                "LS_0A5_EN3": 36,
+                "LS_0A5_EN4": 37,
+            }
+        )
 
     def reset(self):
         """Pulse RESET using DTR of the BDA4 (both micros)."""
@@ -228,7 +260,7 @@ class _Console(share.console.Base):
         @param state True for ON, False for OFF
 
         """
-        if not (index in self.normal_outputs or index in self.reversed_outputs):
+        if not (index in self.hs_outputs or index in self.reversed_outputs):
             raise InvalidOutputError
         self["OUTPUT"] = "{0} {1}".format(index, 1 if state else 0)
 
@@ -239,7 +271,7 @@ class _Console(share.console.Base):
         @param state True for ON, False for OFF
 
         """
-        if index not in self._ls_pins:
+        if index not in (self.ls_0a5_out1, self.ls_0a5_out2):
             raise InvalidOutputError
         self["OUTPUT"] = "{0} {1}".format(index, 1 if state else 0)
 
@@ -249,7 +281,7 @@ class _Console(share.console.Base):
         @param index Index number of the output
 
         """
-        return self._output_pin_name[index]
+        return self.pin_name.output(index)
 
     def input_pin_name(self, index):
         """Get the schematic name of an input pin.
@@ -257,7 +289,35 @@ class _Console(share.console.Base):
         @param index Index number of the input
 
         """
-        return self._input_pin_name[index]
+        return self.pin_name.input(index)
+
+    def input_remove(self, names):
+        """Remove inputs from use.
+
+        @param names Dict{name: index}
+
+        """
+        for idx in names.values():
+            self.digital_inputs.remove(idx)
+
+    def output_remove(self, names):
+        """Remove outputs from use.
+
+        @param names Dict{name: index}
+
+        """
+        for idx in names.values():
+            self.hs_outputs.remove(idx)
+
+    def output_reversed(self, names):
+        """Set reversed outputs.
+
+        @param names Dict{name: index}
+
+        """
+        for idx in names.values():
+            self.hs_outputs.remove(idx)
+            self.reversed_outputs.append(idx)
 
 
 class Console101A(_Console):
@@ -270,24 +330,20 @@ class Console101A(_Console):
         @param port Serial instance to use
 
         """
-        self.missing_output_dict = {
-            "LS_0A5_EN1": 34,
-            "LS_0A5_EN2": 35,
-            "LS_0A5_EN3": 36,
-            "LS_0A5_EN4": 37,
-        }
-        self.missing_input_dict = {
-            "GEN_PUR_HS_SW9": 8,
-            "GEN_PUR_HS_SW10": 9,
-            "GEN_PUR_HS_SW11": 10,
-            "GEN_PUR_HS_SW12": 11,
-            "GEN_PUR_HS_SW13": 12,
-            "GEN_PUR_HS_SW14": 13,
-            "GEN_PUR_HS_SW15": 14,
-            "GEN_PUR_HS_SW16": 15,
-            "GEN_PUR_HS_SW17": 16,
-        }
         super().__init__(port)
+        self.input_remove(
+            {
+                "GEN_PUR_HS_SW9": 8,
+                "GEN_PUR_HS_SW10": 9,
+                "GEN_PUR_HS_SW11": 10,
+                "GEN_PUR_HS_SW12": 11,
+                "GEN_PUR_HS_SW13": 12,
+                "GEN_PUR_HS_SW14": 13,
+                "GEN_PUR_HS_SW15": 14,
+                "GEN_PUR_HS_SW16": 15,
+                "GEN_PUR_HS_SW17": 16,
+            }
+        )
 
 
 class Console101B(_Console):
@@ -300,52 +356,52 @@ class Console101B(_Console):
         @param port Serial instance to use
 
         """
-        self.missing_output_dict = {
-            "HBRIDGE 3 EXTEND": 4,
-            "HBRIDGE 3 RETRACT": 5,
-            "HBRIDGE 4 EXTEND": 6,
-            "HBRIDGE 4 RETRACT": 7,
-            "HBRIDGE 5 EXTEND": 8,
-            "HBRIDGE 5 RETRACT": 9,
-            "HS_0A5_EN5": 20,
-            "HS_0A5_EN13": 28,
-            "HS_0A5_EN14": 29,  # Implemented in Rev 14
-            "HS_0A5_EN15": 30,  # Implemented in Rev 14
-            "HS_0A5_EN18": 33,
-            "LS_0A5_EN1": 34,
-            "LS_0A5_EN2": 35,
-            "LS_0A5_EN3": 36,
-            "LS_0A5_EN4": 37,
-            "OUT5A_PWM_13": 51,
-        }
-        self.missing_input_dict = {
-            "GEN_PUR_HS_SW7": 6,
-            "GEN_PUR_HS_SW8": 7,
-            "GEN_PUR_HS_SW12": 11,
-            "GEN_PUR_HS_SW13": 12,
-            "GEN_PUR_HS_SW14": 13,
-            "GEN_PUR_HS_SW15": 14,
-            "GEN_PUR_HS_SW16": 15,
-            "GEN_PUR_HS_SW17": 16,
-        }
-        for idx, name in (  # 101B has some different input names
-            (0, "GEN_PUR_LS_SW1"),
-            (1, "GEN_PUR_LS_SW2"),
-            (2, "GEN_PUR_LS_SW3"),
-            (3, "GEN_PUR_LS_SW4"),
-            (9, "GEN_PUR_LS_SW10"),
-        ):
-            self._input_pin_name[idx] = name
         super().__init__(port)
-
-    def output_pin_name(self, index):
-        """Get the schematic name of an output pin.
-
-        @param index Index number of the output
-
-        """
-        # RVMN101B schematic uses different names...
-        return super().output_pin_name(index).replace("OUT10A_", "OUT10AMP_")
+        self.output_remove(
+            {
+                "HBRIDGE 3 EXTEND": 4,
+                "HBRIDGE 3 RETRACT": 5,
+                "HBRIDGE 4 EXTEND": 6,
+                "HBRIDGE 4 RETRACT": 7,
+                "HBRIDGE 5 EXTEND": 8,
+                "HBRIDGE 5 RETRACT": 9,
+                "HS_0A5_EN5": 20,
+                "HS_0A5_EN13": 28,
+                "HS_0A5_EN14": 29,  # Implemented in Rev 14
+                "HS_0A5_EN15": 30,  # Implemented in Rev 14
+                "HS_0A5_EN18": 33,
+                "OUT5A_PWM_13": 51,
+            }
+        )
+        self.pin_name.output_rename(
+            {
+                52: "OUT10AMP_1",
+                53: "OUT10AMP_2",
+                54: "OUT10AMP_3",
+                55: "OUT10AMP_4",
+            }
+        )
+        self.input_remove(
+            {
+                "GEN_PUR_HS_SW7": 6,
+                "GEN_PUR_HS_SW8": 7,
+                "GEN_PUR_HS_SW12": 11,
+                "GEN_PUR_HS_SW13": 12,
+                "GEN_PUR_HS_SW14": 13,
+                "GEN_PUR_HS_SW15": 14,
+                "GEN_PUR_HS_SW16": 15,
+                "GEN_PUR_HS_SW17": 16,
+            }
+        )
+        self.pin_name.input_rename(
+            {
+                0: "GEN_PUR_LS_SW1",
+                1: "GEN_PUR_LS_SW2",
+                2: "GEN_PUR_LS_SW3",
+                3: "GEN_PUR_LS_SW4",
+                9: "GEN_PUR_LS_SW10",
+            }
+        )
 
 
 class Console101C(Console101A):
@@ -359,14 +415,51 @@ class _Console5x(_Console):
 
     """Communications to RVMN5x console."""
 
+    def __init__(self, port):
+        """Initialise communications.
+
+        @param port Serial instance to use
+
+        """
+        super().__init__(port)
+        self.output_remove(
+            {
+                "HBRIDGE 3 EXTEND": 4,
+                "HBRIDGE 3 RETRACT": 5,
+                "HBRIDGE 8 EXTEND": 14,
+                "HBRIDGE 8 RETRACT": 15,
+                "HS_0A5_EN7": 22,
+                "HS_0A5_EN13": 28,
+                "HS_0A5_EN14": 29,
+                "HS_0A5_EN15": 30,
+                "HS_0A5_EN16": 31,
+                "HS_0A5_EN17": 32,
+                "HS_0A5_EN18": 33,
+                "OUT5A_EN0": 38,
+                "OUT5A_EN1": 39,
+                "OUT5A_EN2": 40,
+                "OUT5A_EN3": 41,
+                "OUT5A_EN4": 42,
+                "OUT5A_EN5": 43,
+                "OUT5A_PWM_EN6": 44,
+                "OUT5A_PWM_EN7": 45,
+                "OUT5A_PWM_EN8": 46,
+                "OUT10A_2": 53,
+                "OUT10A_3": 54,
+                "OUT10A_4": 55,
+            }
+        )
+
     def output_pin_name(self, index):
         """Get the schematic name of an output pin.
+
+        RVMN5x HBridge outputs have Extend/Retract swapped relative to the RVMN101x
+        It is easier to hack the returned names here than it is to rename them
+        using self.pin_name.output_rename().
 
         @param index Index number of the output
 
         """
-        # RVMN5x HBridge outputs have Extend/Retract swapped
-        # relative to the RVMN101x
         name = super().output_pin_name(index)
         if name.startswith("HBRIDGE"):
             if name.endswith("extend"):
@@ -386,79 +479,17 @@ class Console50(_Console5x):
         @param port Serial instance to use
 
         """
-        self.missing_output_dict = {
-            "HBRIDGE 2 EXTEND": 2,
-            "HBRIDGE 2 RETRACT": 3,
-            "HBRIDGE 3 EXTEND": 4,
-            "HBRIDGE 3 RETRACT": 5,
-            "HBRIDGE 7 EXTEND": 12,
-            "HBRIDGE 7 RETRACT": 13,
-            "HBRIDGE 8 EXTEND": 14,
-            "HBRIDGE 8 RETRACT": 15,
-            "HS_0A5_EN7": 22,
-            "HS_0A5_EN13": 28,
-            "HS_0A5_EN14": 29,
-            "HS_0A5_EN15": 30,
-            "HS_0A5_EN16": 31,
-            "HS_0A5_EN17": 32,
-            "HS_0A5_EN18": 33,
-            "LS_0A5_EN1": 34,
-            "LS_0A5_EN2": 35,
-            "LS_0A5_EN3": 36,
-            "LS_0A5_EN4": 37,
-            "OUT5A_EN0": 38,
-            "OUT5A_EN1": 39,
-            "OUT5A_EN2": 40,
-            "OUT5A_EN3": 41,
-            "OUT5A_EN4": 42,
-            "OUT5A_EN5": 43,
-            "OUT5A_PWM_EN6": 44,
-            "OUT5A_PWM_EN7": 45,
-            "OUT5A_PWM_EN8": 46,
-            "OUT10A_2": 53,
-            "OUT10A_3": 54,
-            "OUT10A_4": 55,
-        }
         super().__init__(port)
+        self.output_remove(
+            {
+                "HBRIDGE 2 EXTEND": 2,
+                "HBRIDGE 2 RETRACT": 3,
+                "HBRIDGE 7 EXTEND": 12,
+                "HBRIDGE 7 RETRACT": 13,
+            }
+        )
 
 
 class Console55(_Console5x):
 
     """Communications to RVMN55 console."""
-
-    def __init__(self, port):
-        """Initialise communications.
-
-        @param port Serial instance to use
-
-        """
-        self.missing_output_dict = {
-            "HBRIDGE 3 EXTEND": 4,
-            "HBRIDGE 3 RETRACT": 5,
-            "HBRIDGE 8 EXTEND": 14,
-            "HBRIDGE 8 RETRACT": 15,
-            "HS_0A5_EN7": 22,
-            "HS_0A5_EN13": 28,
-            "HS_0A5_EN14": 29,
-            "HS_0A5_EN15": 30,
-            "HS_0A5_EN16": 31,
-            "HS_0A5_EN17": 32,
-            "HS_0A5_EN18": 33,
-            "LS_0A5_EN1": 34,
-            "LS_0A5_EN2": 35,
-            "LS_0A5_EN3": 36,
-            "LS_0A5_EN4": 37,
-            "OUT5A_EN0": 38,
-            "OUT5A_EN1": 39,
-            "OUT5A_EN2": 40,
-            "OUT5A_EN3": 41,
-            "OUT5A_EN4": 42,
-            "OUT5A_EN5": 43,
-            "OUT5A_PWM_EN6": 44,
-            "OUT5A_PWM_EN7": 45,
-            "OUT5A_PWM_EN8": 46,
-            "OUT10A_2": 53,
-            "OUT10A_3": 54,
-            "OUT10A_4": 55,
-        }
-        super().__init__(port)
