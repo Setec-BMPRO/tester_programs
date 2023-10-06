@@ -1,47 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101x and RVMN5x Console driver.
-
-'rvmn analog' inputs:
-        '101A/C,5x'         '101B'
-    0   TANK 1              TANK 1
-    1   TANK 2              -
-    2   TANK 3              TANK 3
-    3   TANK 4              TANK 4
-    4   TANK 5              TANK 5
-    5   TANK 6              -
-    6   VOLTAGE 1           VOLTAGE 1
-    7   VOLTAGE 2           VOLTAGE 2
-    8   TEMP SENSOR 1       TEMP SENSOR 1
-    9   TEMP SENSOR 2       -
-    10  TEMP SENSOR 3       TEMP SENSOR 3
-    11  TEMP SENSOR 4       -
-    12  FUEL SENSOR 1       FUEL SENSOR 1
-    13  FUEL SENSOR 2       -
-    14  VOLTAGE SYS         VOLTAGE SYS
-
-'rvmn input' response is 32-bit data (b0-31):
-        '101A/C'            '101B'              '5x'
-    0   GEN_PUR_HS_SW1      GEN_PUR_LS_SW1      GEN_PUR_HS_SW1
-    1   GEN_PUR_HS_SW2      GEN_PUR_LS_SW2      GEN_PUR_HS_SW2
-    2   GEN_PUR_HS_SW3      GEN_PUR_LS_SW3      GEN_PUR_HS_SW3
-    3   GEN_PUR_HS_SW4      GEN_PUR_LS_SW4      GEN_PUR_HS_SW4
-    4   GEN_PUR_HS_SW5      GEN_PUR_HS_SW5      GEN_PUR_HS_SW5
-    5   GEN_PUR_HS_SW6      GEN_PUR_HS_SW6      GEN_PUR_HS_SW6
-    6   GEN_PUR_HS_SW7      -                   GEN_PUR_HS_SW7
-    7   GEN_PUR_HS_SW8      -                   GEN_PUR_HS_SW8
-    8   -                   GEN_PUR_HS_SW9      GEN_PUR_HS_SW9
-    9   -                   GEN_PUR_LS_SW10     GEN_PUR_HS_SW10
-    10  -                   GEN_PUR_HS_SW11     GEN_PUR_HS_SW11
-    11  -                   -                   GEN_PUR_HS_SW12
-    12  -                   -                   GEN_PUR_HS_SW13
-    13  -                   -                   GEN_PUR_HS_SW14
-    14  -                   -                   GEN_PUR_HS_SW15
-    15  -                   -                   GEN_PUR_HS_SW16
-    16  -                   -                   GEN_PUR_HS_SW17
-
-"""
+"""RVMN101x and RVMN5x Console driver."""
 
 import attr
 
@@ -59,84 +19,111 @@ class PinName:
     """Pin name mappings from index number."""
 
     # Key: Output index, Value: Schematic pin name
-    _output = attr.ib(init=False, default={
-        0: "HBRIDGE_1_extend",
-        1: "HBRIDGE_1_retract",
-        2: "HBRIDGE_2_extend",
-        3: "HBRIDGE_2_retract",
-        4: "HBRIDGE_3_extend",
-        5: "HBRIDGE_3_retract",
-        6: "HBRIDGE_4_extend",
-        7: "HBRIDGE_4_retract",
-        8: "HBRIDGE_5_extend",
-        9: "HBRIDGE_5_retract",
-        10: "HBRIDGE_6_extend",
-        11: "HBRIDGE_6_retract",
-        12: "HBRIDGE_7_extend",
-        13: "HBRIDGE_7_retract",
-        14: "HBRIDGE_8_extend",
-        15: "HBRIDGE_8_retract",
-        16: "HS_0A5_EN1",
-        17: "HS_0A5_EN2",
-        18: "HS_0A5_EN3",
-        19: "HS_0A5_EN4",
-        20: "HS_0A5_EN5",
-        21: "HS_0A5_EN6",
-        22: "HS_0A5_EN7",
-        23: "HS_0A5_EN8",
-        24: "HS_0A5_EN9",
-        25: "HS_0A5_EN10",
-        26: "HS_0A5_EN11",
-        27: "HS_0A5_EN12",
-        28: "HS_0A5_EN13",
-        29: "HS_0A5_EN14",
-        30: "HS_0A5_EN15",
-        31: "HS_0A5_EN16",
-        32: "HS_0A5_EN17",
-        33: "HS_0A5_EN18",
-        34: "LS_0A5_EN1",
-        35: "LS_0A5_EN2",
-        36: "LS_0A5_EN3",
-        37: "LS_0A5_EN4",
-        38: "OUT5A_EN0",
-        39: "OUT5A_EN1",
-        40: "OUT5A_EN2",
-        41: "OUT5A_EN3",
-        42: "OUT5A_EN4",
-        43: "OUT5A_EN5",
-        44: "OUT5A_PWM_EN6",
-        45: "OUT5A_PWM_EN7",
-        46: "OUT5A_PWM_EN8",
-        47: "OUT5A_PWM_EN9",
-        48: "OUT5A_PWM_EN10",
-        49: "OUT5A_PWM_EN11",
-        50: "OUT5A_PWM_EN12",
-        51: "OUT5A_PWM_EN13",
-        52: "OUT10A_1",
-        53: "OUT10A_2",
-        54: "OUT10A_3",
-        55: "OUT10A_4",
-    })
+    _output = attr.ib(
+        init=False,
+        default={
+            0: "HBRIDGE_1_extend",
+            1: "HBRIDGE_1_retract",
+            2: "HBRIDGE_2_extend",
+            3: "HBRIDGE_2_retract",
+            4: "HBRIDGE_3_extend",
+            5: "HBRIDGE_3_retract",
+            6: "HBRIDGE_4_extend",
+            7: "HBRIDGE_4_retract",
+            8: "HBRIDGE_5_extend",
+            9: "HBRIDGE_5_retract",
+            10: "HBRIDGE_6_extend",
+            11: "HBRIDGE_6_retract",
+            12: "HBRIDGE_7_extend",
+            13: "HBRIDGE_7_retract",
+            14: "HBRIDGE_8_extend",
+            15: "HBRIDGE_8_retract",
+            16: "HS_0A5_EN1",
+            17: "HS_0A5_EN2",
+            18: "HS_0A5_EN3",
+            19: "HS_0A5_EN4",
+            20: "HS_0A5_EN5",
+            21: "HS_0A5_EN6",
+            22: "HS_0A5_EN7",
+            23: "HS_0A5_EN8",
+            24: "HS_0A5_EN9",
+            25: "HS_0A5_EN10",
+            26: "HS_0A5_EN11",
+            27: "HS_0A5_EN12",
+            28: "HS_0A5_EN13",
+            29: "HS_0A5_EN14",
+            30: "HS_0A5_EN15",
+            31: "HS_0A5_EN16",
+            32: "HS_0A5_EN17",
+            33: "HS_0A5_EN18",
+            34: "LS_0A5_EN1",
+            35: "LS_0A5_EN2",
+            36: "LS_0A5_EN3",
+            37: "LS_0A5_EN4",
+            38: "OUT5A_EN0",
+            39: "OUT5A_EN1",
+            40: "OUT5A_EN2",
+            41: "OUT5A_EN3",
+            42: "OUT5A_EN4",
+            43: "OUT5A_EN5",
+            44: "OUT5A_PWM_EN6",
+            45: "OUT5A_PWM_EN7",
+            46: "OUT5A_PWM_EN8",
+            47: "OUT5A_PWM_EN9",
+            48: "OUT5A_PWM_EN10",
+            49: "OUT5A_PWM_EN11",
+            50: "OUT5A_PWM_EN12",
+            51: "OUT5A_PWM_EN13",
+            52: "OUT10A_1",
+            53: "OUT10A_2",
+            54: "OUT10A_3",
+            55: "OUT10A_4",
+        },
+    )
     # Key: Input index, Value: Schematic pin name
-    _input = attr.ib(init=False, default={
-        0: "GEN_PUR_HS_SW1",
-        1: "GEN_PUR_HS_SW2",
-        2: "GEN_PUR_HS_SW3",
-        3: "GEN_PUR_HS_SW4",
-        4: "GEN_PUR_HS_SW5",
-        5: "GEN_PUR_HS_SW6",
-        6: "GEN_PUR_HS_SW7",
-        7: "GEN_PUR_HS_SW8",
-        8: "GEN_PUR_HS_SW9",
-        9: "GEN_PUR_HS_SW10",
-        10: "GEN_PUR_HS_SW11",
-        11: "GEN_PUR_HS_SW12",
-        12: "GEN_PUR_HS_SW13",
-        13: "GEN_PUR_HS_SW14",
-        14: "GEN_PUR_HS_SW15",
-        15: "GEN_PUR_HS_SW16",
-        16: "GEN_PUR_HS_SW17",
-    })
+    _input = attr.ib(
+        init=False,
+        default={
+            0: "GEN_PUR_HS_SW1",
+            1: "GEN_PUR_HS_SW2",
+            2: "GEN_PUR_HS_SW3",
+            3: "GEN_PUR_HS_SW4",
+            4: "GEN_PUR_HS_SW5",
+            5: "GEN_PUR_HS_SW6",
+            6: "GEN_PUR_HS_SW7",
+            7: "GEN_PUR_HS_SW8",
+            8: "GEN_PUR_HS_SW9",
+            9: "GEN_PUR_HS_SW10",
+            10: "GEN_PUR_HS_SW11",
+            11: "GEN_PUR_HS_SW12",
+            12: "GEN_PUR_HS_SW13",
+            13: "GEN_PUR_HS_SW14",
+            14: "GEN_PUR_HS_SW15",
+            15: "GEN_PUR_HS_SW16",
+            16: "GEN_PUR_HS_SW17",
+        },
+    )
+    # Key: Input index, Value: Schematic pin name
+    _analog = attr.ib(
+        init=False,
+        default={
+            0: "TANK 1",
+            1: "TANK 2",
+            2: "TANK 3",
+            3: "TANK 4",
+            4: "TANK 5",
+            5: "TANK 6",
+            6: "VOLTAGE 1",
+            7: "VOLTAGE 2",
+            8: "TEMP SENSOR 1",
+            9: "TEMP SENSOR 2",
+            10: "TEMP SENSOR 3",
+            11: "TEMP SENSOR 4",
+            12: "FUEL SENSOR 1",
+            13: "FUEL SENSOR 2",
+            14: "VOLTAGE SYS",
+        },
+    )
 
     def input_rename(self, names):
         """Rename input pins.
@@ -174,6 +161,15 @@ class PinName:
         """
         return self._output[idx]
 
+    def analog(self, idx):
+        """Analog pin index to pin name.
+
+        @param idx Pin index
+        @return Pin name
+
+        """
+        return self._analog[idx]
+
 
 class _Console(share.console.Base):
 
@@ -205,13 +201,9 @@ class _Console(share.console.Base):
             "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
         ),
         "ANALOG": parameter.Hex("rvmn analog", read_format="{1} {0}"),
-        "INPUT": parameter.Hex("rvmn input", read_format="{0}"),
+        "INPUT": parameter.Hex("rvmn input", read_format="{0}"),  # Read all at once
     }
     banner_lines = 5
-    max_output_index = 56
-    max_input_index = 17
-    ls_0a5_out1 = 34
-    ls_0a5_out2 = 35
 
     def __init__(self, port):
         """Initialise communications.
@@ -221,10 +213,10 @@ class _Console(share.console.Base):
         """
         super().__init__(port)
         self.pin_name = PinName()
-        self.hs_outputs = list(range(self.max_output_index))
+        max_output_index = 56
+        self.hs_outputs = list(range(max_output_index))
         self.reversed_outputs = []
-        self.digital_inputs = list(range(self.max_input_index))
-        self.output_remove(
+        self.output_remove(  # Remove the LS outputs from the HS outputs list
             {
                 "LS_0A5_EN1": 34,
                 "LS_0A5_EN2": 35,
@@ -232,6 +224,11 @@ class _Console(share.console.Base):
                 "LS_0A5_EN4": 37,
             }
         )
+        self.ls_outputs = [34, 35]
+        max_input_index = 17
+        self.digital_inputs = list(range(max_input_index))
+        max_analog_index = 15
+        self.analog_inputs = list(range(max_analog_index))
 
     def reset(self):
         """Pulse RESET using DTR of the BDA4 (both micros)."""
@@ -271,17 +268,17 @@ class _Console(share.console.Base):
         @param state True for ON, False for OFF
 
         """
-        if index not in (self.ls_0a5_out1, self.ls_0a5_out2):
+        if index not in self.ls_outputs:
             raise InvalidOutputError
         self["OUTPUT"] = "{0} {1}".format(index, 1 if state else 0)
 
-    def output_pin_name(self, index):
-        """Get the schematic name of an output pin.
+    def analog_pin_name(self, index):
+        """Get the schematic name of an analog input pin.
 
-        @param index Index number of the output
+        @param index Index number of the input
 
         """
-        return self.pin_name.output(index)
+        return self.pin_name.analog(index)
 
     def input_pin_name(self, index):
         """Get the schematic name of an input pin.
@@ -291,8 +288,25 @@ class _Console(share.console.Base):
         """
         return self.pin_name.input(index)
 
+    def output_pin_name(self, index):
+        """Get the schematic name of an output pin.
+
+        @param index Index number of the output
+
+        """
+        return self.pin_name.output(index)
+
+    def analog_remove(self, names):
+        """Remove analog inputs from use.
+
+        @param names Dict{name: index}
+
+        """
+        for idx in names.values():
+            self.analog_inputs.remove(idx)
+
     def input_remove(self, names):
-        """Remove inputs from use.
+        """Remove digital inputs from use.
 
         @param names Dict{name: index}
 
@@ -301,7 +315,7 @@ class _Console(share.console.Base):
             self.digital_inputs.remove(idx)
 
     def output_remove(self, names):
-        """Remove outputs from use.
+        """Remove HS outputs from use.
 
         @param names Dict{name: index}
 
@@ -310,7 +324,7 @@ class _Console(share.console.Base):
             self.hs_outputs.remove(idx)
 
     def output_reversed(self, names):
-        """Set reversed outputs.
+        """Set reversed HS outputs.
 
         @param names Dict{name: index}
 
@@ -400,6 +414,15 @@ class Console101B(_Console):
                 2: "GEN_PUR_LS_SW3",
                 3: "GEN_PUR_LS_SW4",
                 9: "GEN_PUR_LS_SW10",
+            }
+        )
+        self.analog_remove(
+            {
+                "TANK 2": 1,
+                "TANK 6": 5,
+                "TEMP SENSOR 2": 9,
+                "TEMP SENSOR 4": 11,
+                "FUEL SENSOR 2": 13,
             }
         )
 

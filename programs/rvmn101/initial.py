@@ -20,12 +20,12 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
-        Devices.fixture = self.cfg.fixture
-        Devices.reversed_output_dict = self.cfg.reversed_output_dict
-        Sensors.nordic_devicetype = self.cfg.nordic_devicetype
-        Sensors.nordic_image = self.cfg.nordic_image
-        Sensors.arm_devicetype = self.cfg.arm_devicetype
-        Sensors.arm_image = self.cfg.arm_image
+        Devices.fixture = self.cfg.values.fixture
+        Devices.reversed_outputs = self.cfg.values.reversed_outputs
+        Sensors.nordic_devicetype = self.cfg.values.nordic_devicetype
+        Sensors.nordic_image = self.cfg.values.nordic_image
+        Sensors.arm_devicetype = self.cfg.values.arm_devicetype
+        Sensors.arm_image = self.cfg.values.arm_image
         self.limits = self.cfg.limits_initial()
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
@@ -43,7 +43,13 @@ class Initial(share.TestSequence):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["dcs_vbatt"].output(self.cfg.vbatt_set, output=True)
-        self.measure(("dmm_vbatt", "dmm_3v3", ), timeout=5)
+        self.measure(
+            (
+                "dmm_vbatt",
+                "dmm_3v3",
+            ),
+            timeout=5,
+        )
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -59,7 +65,9 @@ class Initial(share.TestSequence):
         rvmn101.open()
         rvmn101.reset()
         time.sleep(2)
-        rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
+        rvmn101.brand(
+            self.sernum, self.cfg.values.product_rev, self.cfg.values.hardware_rev
+        )
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
@@ -91,21 +99,21 @@ class Initial(share.TestSequence):
         # has failed. So we get a full dataset on every test.
         with share.MultiMeasurementSummary(default_timeout=2) as checker:
             # Turn ON, then OFF, each HS output in turn
-            for idx in rvmn101.normal_outputs:
+            for idx in rvmn101.hs_outputs:
                 with tester.PathName(rvmn101.output_pin_name(idx)):
                     rvmn101.hs_output(idx, True)
                     checker.measure(mes["dmm_hs_on"])
                     rvmn101.hs_output(idx, False)
                     checker.measure(mes["dmm_hs_off"])
             # Turn ON, then OFF, each LS output in turn
-            for idx, dmm_channel in (
-                (rvmn101.ls_0a5_out1, "dmm_ls1"),
-                (rvmn101.ls_0a5_out2, "dmm_ls2"),
-            ):
+            ls_count = 1
+            for idx in rvmn101.ls_outputs:
+                dmm_channel = "dmm_ls{0}".format(ls_count)
                 rvmn101.ls_output(idx, True)
                 checker.measure(mes[dmm_channel + "_on"])
                 rvmn101.ls_output(idx, False)
                 checker.measure(mes[dmm_channel + "_off"])
+                ls_count += 1
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -119,7 +127,7 @@ class Devices(share.Devices):
     """Devices."""
 
     fixture = None  # Fixture number
-    reversed_output_dict = None  # Outputs with reversed operation
+    reversed_outputs = None  # Outputs with reversed operation
 
     def open(self):
         """Create all Instruments."""
@@ -145,7 +153,7 @@ class Devices(share.Devices):
             "55": console.Console55,
         }[self.parameter]
         self["rvmn101"] = console_class(nordic_ser)
-        self["rvmn101"].output_reversed(self.reversed_output_dict)
+        self["rvmn101"].output_reversed(self.reversed_outputs)
         # CAN devices
         self["can"] = self.physical_devices["_CAN"]
         self["canreader"] = tester.CANReader(self["can"])
