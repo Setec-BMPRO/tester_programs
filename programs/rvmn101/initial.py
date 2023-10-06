@@ -76,6 +76,7 @@ class Initial(share.TestSequence):
     def _step_input(self, dev, mes):
         """Test the inputs of the unit."""
         mes["dig_in"]()
+        self.measure(mes.analog_inputs)
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -108,12 +109,13 @@ class Initial(share.TestSequence):
             # Turn ON, then OFF, each LS output in turn
             ls_count = 1
             for idx in rvmn101.ls_outputs:
-                dmm_channel = "dmm_ls{0}".format(ls_count)
-                rvmn101.ls_output(idx, True)
-                checker.measure(mes[dmm_channel + "_on"])
-                rvmn101.ls_output(idx, False)
-                checker.measure(mes[dmm_channel + "_off"])
-                ls_count += 1
+                with tester.PathName(rvmn101.output_pin_name(idx)):
+                    dmm_channel = "dmm_ls{0}".format(ls_count)
+                    rvmn101.ls_output(idx, True)
+                    checker.measure(mes[dmm_channel + "_on"])
+                    rvmn101.ls_output(idx, False)
+                    checker.measure(mes[dmm_channel + "_off"])
+                    ls_count += 1
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -220,6 +222,24 @@ class Sensors(share.Sensors):
         )
         self["Input"] = sensor.Keyed(rvmn101, "INPUT")
         self["Input"].doc = "All digital inputs"
+        for analog in (
+            "TANK 1",
+            "TANK 2",
+            "TANK 3",
+            "TANK 4",
+            "TANK 5",
+            "TANK 6",
+            "VOLTAGE 1",
+            "VOLTAGE 2",
+            "TEMP SENSOR 1",
+            "TEMP SENSOR 2",
+            "TEMP SENSOR 3",
+            "TEMP SENSOR 4",
+            "FUEL SENSOR 1",
+            "FUEL SENSOR 2",
+            "VOLTAGE SYS",
+        ):
+            self[analog] = sensor.Keyed(rvmn101, analog)
         self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
@@ -249,3 +269,10 @@ class Measurements(share.Measurements):
                 ("dig_in", "AllInputs", "Input", "Digital input reading"),
             )
         )
+        self.analog_inputs = []
+        console = self.sensors.devices["rvmn101"]
+        for idx in console.analog_inputs:
+            name = console.analog_pin_name(idx)
+            self.analog_inputs.append(
+                tester.Measurement("AllInputs", self.sensors[name])
+            )

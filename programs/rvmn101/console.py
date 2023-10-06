@@ -200,8 +200,23 @@ class _Console(share.console.Base):
         "OUTPUT": parameter.String(
             "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
         ),
-        "ANALOG": parameter.Hex("rvmn analog", read_format="{1} {0}"),
         "INPUT": parameter.Hex("rvmn input", read_format="{0}"),  # Read all at once
+        # These names must match those in PinName._analog
+        "TANK 1": parameter.Hex("rvmn analog 0", read_format="{0}"),
+        "TANK 2": parameter.Hex("rvmn analog 1", read_format="{0}"),
+        "TANK 3": parameter.Hex("rvmn analog 2", read_format="{0}"),
+        "TANK 4": parameter.Hex("rvmn analog 3", read_format="{0}"),
+        "TANK 5": parameter.Hex("rvmn analog 4", read_format="{0}"),
+        "TANK 6": parameter.Hex("rvmn analog 5", read_format="{0}"),
+        "VOLTAGE 1": parameter.Hex("rvmn analog 6", read_format="{0}"),
+        "VOLTAGE 2": parameter.Hex("rvmn analog 7", read_format="{0}"),
+        "TEMP SENSOR 1": parameter.Hex("rvmn analog 8", read_format="{0}"),
+        "TEMP SENSOR 2": parameter.Hex("rvmn analog 9", read_format="{0}"),
+        "TEMP SENSOR 3": parameter.Hex("rvmn analog 10", read_format="{0}"),
+        "TEMP SENSOR 4": parameter.Hex("rvmn analog 11", read_format="{0}"),
+        "FUEL SENSOR 1": parameter.Hex("rvmn analog 12", read_format="{0}"),
+        "FUEL SENSOR 2": parameter.Hex("rvmn analog 13", read_format="{0}"),
+        "VOLTAGE SYS": parameter.Hex("rvmn analog 14", read_format="{0}"),
     }
     banner_lines = 5
 
