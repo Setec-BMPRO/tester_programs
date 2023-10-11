@@ -142,6 +142,7 @@ class Devices(share.Devices):
         """Test run has stopped."""
         self["canreader"].stop()
         self["console"].close()
+        self["dcs_vin"].output(0.0, output=False)
         for rla in ("relay1", "relay2", "relay3", "relay4"):
             self[rla].set_off()
 
