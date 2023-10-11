@@ -67,7 +67,9 @@ class ARM(_base._Base):
         # Device I/O activity is only done on main thread
         if self.bda4_signals:
             self._ser.rts = self._ser.dtr = True  # Assert BOOT & RESET
+            time.sleep(0.01)
             self._ser.dtr = False  # Release RESET
+            time.sleep(0.01)
             self._ser.rts = False  # Release BOOT
         else:
             if self.boot_relay:
@@ -107,6 +109,7 @@ class ARM(_base._Base):
         self._worker.join()
         if self.bda4_signals:
             self._ser.dtr = True  # Pulse RESET
+            time.sleep(0.01)
             self._ser.dtr = False
         self._ser.close()
         self._ser = None
