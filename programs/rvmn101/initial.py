@@ -75,8 +75,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_input(self, dev, mes):
         """Test the inputs of the unit."""
-        mes["dig_in"]()
-        self.measure(mes.analog_inputs)
+        with tester.PathName("Digital"):
+            mes["dig_in"]()
+        for name in mes.analog_inputs:
+            with tester.PathName(name):
+                mes[name]()
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -271,8 +274,8 @@ class Measurements(share.Measurements):
         )
         self.analog_inputs = []
         console = self.sensors.devices["rvmn101"]
+        lim = self.limits["AllInputs"]
         for idx in console.analog_inputs:
             name = console.analog_pin_name(idx)
-            self.analog_inputs.append(
-                tester.Measurement("AllInputs", self.sensors[name])
-            )
+            self[name] = tester.Measurement(lim, self.sensors[name])
+            self.analog_inputs.append(name)
