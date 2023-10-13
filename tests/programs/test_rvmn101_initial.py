@@ -44,11 +44,14 @@ class RVMN101BInitial(ProgramTestCase):
                     (sen["JLinkARM"], 0),
                     (sen["JLinkBLE"], 0),
                 ),
-                "Initialise": ((sen["BleMac"], "aabbccddeeff"),),
+                "Initialise": (
+                    (sen["BleMac"], "aabbccddeeff"),
+                    ),
+                "Input": (
+                    (sen["Input"], 0x5a5a),
+                    ),
                 "Output": (
-                    (sen["HSout"], (0.0,) + (11.5, 0.0) * len(self.hs_outputs)),
-                    (sen["LSout1"], (0.0, 11.5)),
-                    (sen["LSout2"], (0.0, 11.5)),
+                    (sen["HSout"], 0),
                 ),
                 "CanBus": ((sen["cantraffic"], True),),
             },
@@ -57,8 +60,8 @@ class RVMN101BInitial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(12, len(result.readings))
+        self.assertEqual(9, len(result.readings))
         self.assertEqual(
-            ["PowerUp", "Program", "Initialise", "Output", "CanBus"],
+            ["PowerUp", "Program", "Initialise", "Input", "Output", "CanBus"],
             self.tester.ut_steps,
         )

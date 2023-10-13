@@ -20,18 +20,19 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
-        Devices.fixture = self.cfg.fixture
-        Devices.reversed_output_dict = self.cfg.reversed_output_dict
-        Sensors.nordic_devicetype = self.cfg.nordic_devicetype
-        Sensors.nordic_image = self.cfg.nordic_image
-        Sensors.arm_devicetype = self.cfg.arm_devicetype
-        Sensors.arm_image = self.cfg.arm_image
+        Devices.fixture = self.cfg.values.fixture
+        Devices.reversed_outputs = self.cfg.values.reversed_outputs
+        Sensors.nordic_devicetype = self.cfg.values.nordic_devicetype
+        Sensors.nordic_image = self.cfg.values.nordic_image
+        Sensors.arm_devicetype = self.cfg.values.arm_devicetype
+        Sensors.arm_image = self.cfg.values.arm_image
         self.limits = self.cfg.limits_initial()
         super().open(self.limits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Initialise", self._step_initialise),
+            tester.TestStep("Input", self._step_input),
             tester.TestStep("Output", self._step_output),
             tester.TestStep("CanBus", self._step_canbus),
         )
@@ -42,7 +43,13 @@ class Initial(share.TestSequence):
         """Apply input power and measure voltages."""
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["dcs_vbatt"].output(self.cfg.vbatt_set, output=True)
-        self.measure(("dmm_vbatt", "dmm_3v3", ), timeout=5)
+        self.measure(
+            (
+                "dmm_vbatt",
+                "dmm_3v3",
+            ),
+            timeout=5,
+        )
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -58,10 +65,21 @@ class Initial(share.TestSequence):
         rvmn101.open()
         rvmn101.reset()
         time.sleep(2)
-        rvmn101.brand(self.sernum, self.cfg.product_rev, self.cfg.hardware_rev)
+        rvmn101.brand(
+            self.sernum, self.cfg.values.product_rev, self.cfg.values.hardware_rev
+        )
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
+
+    @share.teststep
+    def _step_input(self, dev, mes):
+        """Test the inputs of the unit."""
+        with tester.PathName("Digital"):
+            mes["dig_in"]()
+        for name in mes.analog_inputs:
+            with tester.PathName(name):
+                mes[name]()
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -85,21 +103,22 @@ class Initial(share.TestSequence):
         # has failed. So we get a full dataset on every test.
         with share.MultiMeasurementSummary(default_timeout=2) as checker:
             # Turn ON, then OFF, each HS output in turn
-            for idx in rvmn101.normal_outputs:
-                with tester.PathName(rvmn101.pin_name(idx)):
+            for idx in rvmn101.hs_outputs:
+                with tester.PathName(rvmn101.output_pin_name(idx)):
                     rvmn101.hs_output(idx, True)
                     checker.measure(mes["dmm_hs_on"])
                     rvmn101.hs_output(idx, False)
                     checker.measure(mes["dmm_hs_off"])
             # Turn ON, then OFF, each LS output in turn
-            for idx, dmm_channel in (
-                (rvmn101.ls_0a5_out1, "dmm_ls1"),
-                (rvmn101.ls_0a5_out2, "dmm_ls2"),
-            ):
-                rvmn101.ls_output(idx, True)
-                checker.measure(mes[dmm_channel + "_on"])
-                rvmn101.ls_output(idx, False)
-                checker.measure(mes[dmm_channel + "_off"])
+            ls_count = 1
+            for idx in rvmn101.ls_outputs:
+                with tester.PathName(rvmn101.output_pin_name(idx)):
+                    dmm_channel = "dmm_ls{0}".format(ls_count)
+                    rvmn101.ls_output(idx, True)
+                    checker.measure(mes[dmm_channel + "_on"])
+                    rvmn101.ls_output(idx, False)
+                    checker.measure(mes[dmm_channel + "_off"])
+                    ls_count += 1
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -113,7 +132,7 @@ class Devices(share.Devices):
     """Devices."""
 
     fixture = None  # Fixture number
-    reversed_output_dict = None  # Outputs with reversed operation
+    reversed_outputs = None  # Outputs with reversed operation
 
     def open(self):
         """Create all Instruments."""
@@ -138,8 +157,8 @@ class Devices(share.Devices):
             "50": console.Console50,
             "55": console.Console55,
         }[self.parameter]
-        console_class.reversed_output_dict = self.reversed_output_dict
         self["rvmn101"] = console_class(nordic_ser)
+        self["rvmn101"].output_reversed(self.reversed_outputs)
         # CAN devices
         self["can"] = self.physical_devices["_CAN"]
         self["canreader"] = tester.CANReader(self["can"])
@@ -204,6 +223,26 @@ class Sensors(share.Sensors):
         self["BleMac"].on_read = lambda value: value.replace(":", "").replace(
             " (random)", ""
         )
+        self["Input"] = sensor.Keyed(rvmn101, "INPUT")
+        self["Input"].doc = "All digital inputs"
+        for analog in (
+            "TANK 1",
+            "TANK 2",
+            "TANK 3",
+            "TANK 4",
+            "TANK 5",
+            "TANK 6",
+            "VOLTAGE 1",
+            "VOLTAGE 2",
+            "TEMP SENSOR 1",
+            "TEMP SENSOR 2",
+            "TEMP SENSOR 3",
+            "TEMP SENSOR 4",
+            "FUEL SENSOR 1",
+            "FUEL SENSOR 2",
+            "VOLTAGE SYS",
+        ):
+            self[analog] = sensor.Keyed(rvmn101, analog)
         self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
@@ -230,5 +269,13 @@ class Measurements(share.Measurements):
                 ("ble_mac", "BleMac", "BleMac", "MAC address"),
                 ("JLinkARM", "ProgramOk", "JLinkARM", "Programmed"),
                 ("JLinkBLE", "ProgramOk", "JLinkBLE", "Programmed"),
+                ("dig_in", "AllInputs", "Input", "Digital input reading"),
             )
         )
+        self.analog_inputs = []
+        console = self.sensors.devices["rvmn101"]
+        lim = self.limits["AllInputs"]
+        for idx in console.analog_inputs:
+            name = console.analog_pin_name(idx)
+            self[name] = tester.Measurement(lim, self.sensors[name])
+            self.analog_inputs.append(name)
