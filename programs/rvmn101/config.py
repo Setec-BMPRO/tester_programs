@@ -127,135 +127,141 @@ class RVMN101A(Config):
         "HBRIDGE 3 EXTEND": 4,
         "HBRIDGE 3 RETRACT": 5,
     }
-    _nordic_3_1_5 = "rvmn101a_signed_3.1.5-0-g42007340_factory_mcuboot.hex"
+    _nordic_3_2_7 = "rvmn101a_signed_3.2.7-0-gaa43c0ef_factory_mcuboot.hex"
     _arm_image_1_13 = "rvmn101a_nxp_1.13.bin"
     _arm_image_2_5 = "rvmn101a_nxp_2.5.bin"
-    _rev28_values = Values(
-        nordic_image=_nordic_3_1_5,
+    _rev29_values = Values(
+        nordic_image=_nordic_3_2_7,
         arm_image=_arm_image_2_5,
-        product_rev="28A",
+        product_rev="29A",
         hardware_rev="22A",
     )
     _rev_data = {
-        None: _rev28_values,
-        "28": _rev28_values,
-        "27": Values(
-            nordic_image=_nordic_3_1_5,
+        None: _rev29_values,
+        "29": _rev29_values,
+        "28": Values(
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="27B",
+            product_rev="28B",
+            hardware_rev="22A",
+        ),
+        "27": Values(
+            nordic_image=_nordic_3_2_7,
+            arm_image=_arm_image_2_5,
+            product_rev="27C",
             hardware_rev="19A",
         ),
         "26": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="26C",
+            product_rev="26D",
             hardware_rev="19A",
         ),
         "25": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="25D",
+            product_rev="25E",
             hardware_rev="19A",
         ),
         "24": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="24D",
+            product_rev="24E",
             hardware_rev="21A",
         ),
         "23": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="23E",
+            product_rev="23F",
             hardware_rev="21A",  # '21' in the ECO
         ),
         "22": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="22E",
+            product_rev="22F",
             hardware_rev="20A",  # Missing in the ECO
         ),
         "21": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="21F",
+            product_rev="21G",
             hardware_rev="20A",  # '20' in the ECO
         ),
         "20": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="20F",
+            product_rev="20G",
             hardware_rev="14A",
         ),
         "19": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="19H",
+            product_rev="19I",
             hardware_rev="13A",
         ),
         "18": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="18G",
+            product_rev="18H",
             hardware_rev="13A",
         ),
         # Rev 17 No production
         "16": Values(  # Note: ECO had wrong HW rev (15A instead of 12A)
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="16J",
+            product_rev="16K",
             hardware_rev="15A",
         ),
         # Rev 15 No production
         "14": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="14K",
+            product_rev="14L",
             hardware_rev="11A",
         ),
         "13": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="13H",
+            product_rev="13I",
             hardware_rev="11A",
         ),
         "12": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_2_5,
-            product_rev="12I",
+            product_rev="12J",
             hardware_rev="11A",
         ),
         # Rev 11 No production
         "10": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_1_13,
-            product_rev="10J",
+            product_rev="10K",
             hardware_rev="10A",
         ),
         # MA-415: Rev <10 "Diagnose and then discard PCB""
         "9": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_1_13,
             product_rev="09A",
             hardware_rev="08A",
             reversed_outputs=_reversed7to9,
         ),
         "8": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_1_13,
             product_rev="08A",
             hardware_rev="08A",
             reversed_outputs=_reversed7to9,
         ),
         "7": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_1_13,
             product_rev="07A",
             hardware_rev="07A",
             reversed_outputs=_reversed7to9,
         ),
         "6": Values(
-            nordic_image=_nordic_3_1_5,
+            nordic_image=_nordic_3_2_7,
             arm_image=_arm_image_1_13,
             product_rev="06A",
             hardware_rev="06A",
