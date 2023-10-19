@@ -299,106 +299,112 @@ class RVMN101B(Config):
     """RVMN101B configuration."""
 
     _fixture = "032871"
-    _nordic_2_4_6 = "rvmn101b_signed_2.4.6-0-g5807fc70_factory_mcuboot.hex"  # 038685
+    _nordic_2_5_8 = "rvmn101b_signed_2.5.8-0-gaa43c0ef_factory_mcuboot.hex"
     _arm_image_3_0 = "rvmn101b_nxp_3.0.bin"  # 035879 Rev ≥ 14
     _arm_image_1_9 = "rvmn101b_nxp_1.9.bin"  # 033092 Rev ≤ 13
-    _rev20_values = Values(
-        nordic_image=_nordic_2_4_6,
+    _rev21_values = Values(
+        nordic_image=_nordic_2_5_8,
         arm_image=_arm_image_3_0,
-        product_rev="20A",
-        hardware_rev="18A",
+        product_rev="21A",
+        hardware_rev="08B",
     )
     _rev_data = {
-        None: _rev20_values,
-        "20": _rev20_values,
-        "19": Values(
-            nordic_image=_nordic_2_4_6,
+        None: _rev21_values,
+        "21": _rev21_values,
+        "20": Values(
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_3_0,
-            product_rev="19B",
+            product_rev="20B",
+            hardware_rev="08B",
+        ),
+        "19": Values(
+            nordic_image=_nordic_2_5_8,
+            arm_image=_arm_image_3_0,
+            product_rev="19C",
             hardware_rev="08B",
         ),
         "18": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_3_0,
-            product_rev="18C",
-            hardware_rev="18A",
+            product_rev="18D",
+            hardware_rev="18A",  # This looks wrong, but is per the ECO
         ),
         "17": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_3_0,
-            product_rev="17C",
+            product_rev="17D",
             hardware_rev="08B",
         ),
         "16": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_3_0,
-            product_rev="16D",
+            product_rev="16E",
             hardware_rev="08B",
         ),
         "15": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_3_0,
-            product_rev="15E",
+            product_rev="15F",
             hardware_rev="8B",
         ),
         "14": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_3_0,
-            product_rev="14G",
+            product_rev="14H",
             hardware_rev="8A",
         ),
         "13": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="13H",
+            product_rev="13I",
             hardware_rev="8A",
         ),
         "12": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="12I",
+            product_rev="12J",
             hardware_rev="6A",
         ),
         "11": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="11I",
+            product_rev="11J",
             hardware_rev="6A",
         ),
         "10": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="10J",
+            product_rev="10K",
             hardware_rev="6A",
         ),
         "9": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="09J",
+            product_rev="09K",
             hardware_rev="6A",
         ),
         "8": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="08K",
+            product_rev="08L",
             hardware_rev="6A",
         ),
         "7": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="07J",
+            product_rev="07K",
             hardware_rev="6A",
         ),
         "6": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="06K",
+            product_rev="06L",
             hardware_rev="6A",
         ),
         "5": Values(
-            nordic_image=_nordic_2_4_6,
+            nordic_image=_nordic_2_5_8,
             arm_image=_arm_image_1_9,
-            product_rev="05J",
+            product_rev="05K",
             hardware_rev="6A",
         ),
         # Rev 1-4 were Engineering protoype builds
@@ -423,12 +429,12 @@ class RVMN101C(Config):
     """RVMN101C configuration."""
 
     _fixture = "033550"
-    _sonic_1_0_4 = "rvmn101c_signed_1.0.4-0-g7937e578_factory_mcuboot.hex"
+    _sonic_1_0_5 = "rvmn101c_signed_1.0.5-0-g93b400e6_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
     _rev3_values = Values(
-        nordic_image=_sonic_1_0_4,
+        nordic_image=_sonic_1_0_5,
         arm_image=_arm_image_3_0_1,
-        product_rev="03B",
+        product_rev="03C",  # PC-34457
         hardware_rev="02A",
         nordic_devicetype="nrf52840",
     )
