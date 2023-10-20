@@ -84,6 +84,7 @@ class Config:
         "tm6g-04": (78, 6),
         "tm6g-05": (79, 6),
         "tm6g-06": (80, 6),
+        "tm6g-07": (81, 6),
     }
     # Series software images per revision
     _rev_software = dict.fromkeys(
