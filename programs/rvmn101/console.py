@@ -379,6 +379,9 @@ class Console101B(_Console):
 
     """Communications to RVMN101B console."""
 
+    # Firmware 2.5.8 dropped "\x1b[m" from the prompt tail
+    cmd_prompt = b"uart:~$ "
+
     def __init__(self, port):
         """Initialise communications.
 
