@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2023 , ",
-    "saved": "2023-06-05, 11:12:37"
+    "saved": "2023-10-23, 15:52:06"
   },
   "project": {
     "AUTHOR": "",
@@ -221,6 +221,7 @@
       "programs/rvmc101/final.py",
       "programs/rvmc101/initial.py",
       "programs/rvmd50/__init__.py",
+      "programs/rvmd50/config.py",
       "programs/rvmd50/display.py",
       "programs/rvmd50/final.py",
       "programs/rvmd50/initial.py",
@@ -411,6 +412,7 @@
       "tests/share/test_parameter.py",
       "testsuite.py"
     ],
+    "SOURCESDIR": "",
     "SPELLEXCLUDES": "",
     "SPELLLANGUAGE": "en_US",
     "SPELLWORDS": "",

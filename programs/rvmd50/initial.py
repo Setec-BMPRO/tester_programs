@@ -13,17 +13,13 @@ import attr
 import tester
 
 import share
-from . import display
+from . import config, display
 
 
 class Initial(share.TestSequence):
 
     """RVMD50 Initial Test Program."""
 
-    sw_image = {
-        "ATMEL": "rvmd_sam_1.9.0-0-gd59e853.bin",
-        "NXP": "rvmd50_1.6.bin",
-    }
     vin_set = 8.1  # Input voltage to power the unit
     testlimits = (  # Test limits
         tester.LimitBetween("Vin", 7.0, 8.0, doc="Input voltage present"),
@@ -34,7 +30,8 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
+        self.cfg = config.get(self.parameter, uut)
+        Devices.sw_image = Sensors.sw_image = self.cfg.values.sw_image
         super().open(self.testlimits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
