@@ -185,9 +185,12 @@ class Initial(share.TestSequence):
         self._logger.debug("0x{:08X}".format(int(val)))
         output_count = self.cfg.output_count
         dev["dcl_out"].binary(1.0, output_count * self.cfg.load_per_output, 5.0)
-        for load in range(output_count):
-            with tester.PathName("L{0}".format(load + 1)):
-                mes["arm_loads"][load](timeout=5)
+        # Always measure all the outputs, and force a fail if any output
+        # has failed. So we get a full dataset on every test.
+        with share.MultiMeasurementSummary(default_timeout=5) as checker:
+            for load in range(output_count):
+                with tester.PathName("L{0}".format(load + 1)):
+                    checker.measure(mes["arm_loads"][load])
         # Calibrate current reading
         j35["BUS_ICAL"] = output_count * self.cfg.load_per_output
         j35["NVWRITE"] = True
