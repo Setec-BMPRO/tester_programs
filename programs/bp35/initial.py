@@ -276,9 +276,12 @@ class Initial(share.TestSequence):
             timeout=5,
         )
         bp35["BUS_ICAL"] = self.cfg.iload + self.cfg.ibatt  # Calibrate current reading
-        for load in range(self.cfg.outputs):
-            with tester.PathName("L{0}".format(load + 1)):
-                mes["arm_loads"][load](timeout=5)
+        # Always measure all the outputs, and force a fail if any output
+        # has failed. So we get a full dataset on every test.
+        with share.MultiMeasurementSummary(default_timeout=5) as checker:
+            for load in range(self.cfg.outputs):
+                with tester.PathName("L{0}".format(load + 1)):
+                    checker.measure(mes["arm_loads"][load])
         ocp_actual = mes["ramp_ocp_pre"]().value1
         # Adjust current setpoint
         bp35["OCP_CAL"] = round(bp35.ocp_cal() * ocp_actual / self.cfg.ocp_set)
