@@ -429,18 +429,25 @@ class RVMN101C(Config):
     """RVMN101C configuration."""
 
     _fixture = "033550"
-    _sonic_1_0_5 = "rvmn101c_signed_1.0.5-0-g93b400e6_factory_mcuboot.hex"
+    _sonic_1_0_6 = "rvmn101c_signed_1.0.6-0-gd721feb0_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
-    _rev3_values = Values(
-        nordic_image=_sonic_1_0_5,
+    _rev4_values = Values(
+        nordic_image=_sonic_1_0_6,
         arm_image=_arm_image_3_0_1,
-        product_rev="03C",  # PC-34457
-        hardware_rev="02A",
+        product_rev="04A",
+        hardware_rev="04A",
         nordic_devicetype="nrf52840",
     )
     _rev_data = {
-        None: _rev3_values,
-        "3": _rev3_values,
+        None: _rev4_values,
+        "4": _rev4_values,
+        "3": Values(
+            nordic_image=_sonic_1_0_6,
+            arm_image=_arm_image_3_0_1,
+            product_rev="03D",
+            hardware_rev="03A",
+            nordic_devicetype="nrf52840",
+        ),
     }
 
     @classmethod
