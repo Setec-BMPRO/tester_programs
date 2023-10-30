@@ -17,6 +17,8 @@ class DisplayControl:
     can_dev = attr.ib()
     bld_pattern = attr.ib(init=False, factory=share.can.RVMD50ControlLCDBuilder)
     bld_button = attr.ib(init=False, factory=share.can.RVMD50ControlButtonBuilder)
+    # Added for firmware 1.13 which resets if you send the LCD packet...
+    lcd_packet_enable = attr.ib(init=False, default=True)
 
     def __enter__(self):
         """Context Manager entry handler - Override LCD & Backlight.
@@ -24,21 +26,21 @@ class DisplayControl:
         @return self
 
         """
-        self.bld_pattern.pattern = 1  # LCD test pattern to use
+        if self.lcd_packet_enable:
+            self.bld_pattern.pattern = 1  # LCD test pattern to use
+            self.can_dev.send(self.bld_pattern.packet)
+            time.sleep(0.1)  # Wait between CAN packets
         self.bld_button.enable = True
         self.bld_button.button = True
-        self._send(self.bld_pattern.packet, self.bld_button.packet)
+        self.can_dev.send(self.bld_button.packet)
         return self
 
     def __exit__(self, exct_type, exce_value, trace_back):
         """Context Manager exit handler - Release overrides."""
-        self.bld_pattern.pattern = 0
         self.bld_button.enable = False
-        self.bld_pattern.button = False
-        self._send(self.bld_button.packet, self.bld_pattern.packet)
-
-    def _send(self, packet1, packet2):
-        """Send CAN Packets with a delay between them."""
-        self.can_dev.send(packet1)
-        time.sleep(0.1)  # Wait between CAN packets
-        self.can_dev.send(packet2)
+        self.bld_button.button = False
+        self.can_dev.send(self.bld_button.packet)
+        if self.lcd_packet_enable:
+            time.sleep(0.1)  # Wait between CAN packets
+            self.bld_pattern.pattern = 0
+            self.can_dev.send(self.bld_pattern.packet)

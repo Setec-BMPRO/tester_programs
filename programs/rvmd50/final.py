@@ -6,21 +6,20 @@
 import tester
 import share
 
-from . import display
+from . import config, display
 
 
 class Final(share.TestSequence):
 
     """RVMD50 Final Test Program."""
 
-    vin_set = 12.0  # Input voltage to power the unit
-    start_delay = 5.0  # Start up delay timer
-    limitdata = (  # Test Limits
-        tester.LimitBoolean("PagePressed", True, doc="Button pressed"),
-    )
+    vin_set = 12.0
+    start_delay = 5.0
+    limitdata = (tester.LimitBoolean("PagePressed", True, doc="Button pressed"),)
 
     def open(self, uut):
         """Prepare for testing."""
+        self.cfg = config.get(self.parameter, uut)
         super().open(self.limitdata, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -36,6 +35,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Display test pattern & backlight."""
+        dev["display"].lcd_packet_enable = self.cfg.lcd_packet_enable
         with dev["display"]:
             mes["YesNoDisplayOk"](timeout=5)
 

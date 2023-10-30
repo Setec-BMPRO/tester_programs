@@ -20,8 +20,8 @@ class Initial(share.TestSequence):
 
     """RVMD50 Initial Test Program."""
 
-    vin_set = 8.1  # Input voltage to power the unit
-    testlimits = (  # Test limits
+    vin_set = 8.1
+    testlimits = (
         tester.LimitBetween("Vin", 7.0, 8.0, doc="Input voltage present"),
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
         tester.LimitLow("BkLghtOff", 0.5, doc="Backlight off"),
@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, uut)
-        Devices.sw_image = Sensors.sw_image = self.cfg.values.sw_image
+        Devices.sw_image = Sensors.sw_image = self.cfg.sw_image
         super().open(self.testlimits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -60,6 +60,7 @@ class Initial(share.TestSequence):
         """Test the LCD and Backlight."""
         dev["rla_reset"].pulse(0.1, delay=5)
         mes["dmm_bklghtoff"](timeout=5)
+        dev["display"].lcd_packet_enable = self.cfg.lcd_packet_enable
         with dev["display"]:
             self.measure(("YesNoDisplayOk", "dmm_bklghton"), timeout=5)
 
