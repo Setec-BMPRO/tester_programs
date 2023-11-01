@@ -277,8 +277,12 @@ class RVMN101A(Config):
 
         """
         super()._configure(uut)
-        # PC-30067
-        if uut and uut.lot.number in ("A222304", "A222402", "A222706", "A222804"):
+        if uut and uut.lot.number in (  # PC-30067
+            "A222304",
+            "A222402",
+            "A222706",
+            "A222804",
+        ):
             cls.product_rev = "24A"
 
     @classmethod

@@ -63,7 +63,7 @@ class Config:  # pylint: disable=too-few-public-methods
         # Firmware 1.13 crashes if you send a LCD Test Packet...
         # There are Production Concessions to not use the packet
         if uut.lot.job in (
-            # "59445-0",  # PC-??? for RVMD50
+            "59445-0",  # PC-103 for RVMD50
             "59458-0",  # PC-102 for RVMD50B
             # "59459-0",  # PC-??? for RVMD50B
             # "59460-0",  # PC-??? for RVMD50B
