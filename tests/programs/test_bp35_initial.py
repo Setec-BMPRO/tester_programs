@@ -137,6 +137,7 @@ class _BP35Initial(ProgramTestCase):
                     (sen["arm_fan"], 50),
                     (sen["fan"], (0, 12.0)),
                     (sen["vbat"], 12.8),
+                    (sen["arm_vbat"], 12.8),
                     (sen["arm_ibat"], 4.0),
                     (sen["arm_ibus"], 32.0),
                     (
@@ -176,7 +177,7 @@ class BP35_SR_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the SR program."""
         super()._pass_run(
-            64,
+            65,
             [
                 "Prepare",
                 "Program",
@@ -210,7 +211,7 @@ class BP35_HA_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the HA program."""
         super()._pass_run(
-            64,
+            65,
             [
                 "Prepare",
                 "Program",
@@ -244,7 +245,7 @@ class BP35_PM_Initial(_BP35Initial):
     def test_pass_run(self):
         """PASS run of the PM program."""
         super()._pass_run(
-            54,
+            55,
             [
                 "Prepare",
                 "Program",

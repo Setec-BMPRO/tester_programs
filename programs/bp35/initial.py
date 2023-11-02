@@ -270,6 +270,7 @@ class Initial(share.TestSequence):
         self.measure(
             (
                 "dmm_vbat",
+                "arm_vbat",
                 "arm_ibat",
                 "arm_ibus",
             ),
@@ -484,6 +485,7 @@ class Sensors(share.Sensors):
             ("arm_vout", "BUS_V", "V"),
             ("arm_fan", "FAN", "%"),
             ("arm_canbind", "CAN_BIND", ""),
+            ("arm_vbat", "BATT_V", "V"),
             ("arm_ibat", "BATT_I", "A"),
             ("arm_ibus", "BUS_I", "A"),
             ("arm_vaux", "AUX_V", "V"),
@@ -574,6 +576,7 @@ class Measurements(share.Measurements):
                 ("arm_fan", "ARM-Fan", "arm_fan", "FAN speed setting"),
                 ("dmm_canpwr", "CanPwr", "canpwr", "CAN bus rail voltage"),
                 ("arm_can_bind", "CAN_BIND", "arm_canbind", "CAN bound"),
+                ("arm_vbat", "Vbat", "arm_vbat", "Battery voltage"),
                 ("arm_ibat", "ARM-BattI", "arm_ibat", "Battery current"),
                 ("arm_ibus", "ARM-BusI", "arm_ibus", "Bus current"),
                 ("arm_vaux", "ARM-AuxV", "arm_vaux", "Aux voltage"),
