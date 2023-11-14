@@ -65,8 +65,12 @@ class Config:  # pylint: disable=too-few-public-methods
         if uut.lot.job in (
             "59445-0",  # PC-103 for RVMD50
             "59458-0",  # PC-102 for RVMD50B
-            # "59459-0",  # PC-??? for RVMD50B
-            # "59460-0",  # PC-??? for RVMD50B
+            "59459-0",  # PC-110 for RVMD50B
+            "59460-0",  # PC-111 for RVMD50B
+            "59581-0",  # PC-112 for RVMD50B
+            "59677-0",  # PC-113 for RVMD50
+            "59678-0",  # PC-114 for RVMD50T
+            "59679-0",  # PC-115 for RVMD50B
         ):
             values.lcd_packet_enable = False
         return values
