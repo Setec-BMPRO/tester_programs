@@ -74,20 +74,23 @@ class Initial(share.TestSequence):
         Unit is left running at 240Vac, no load.
 
         """
-        dev["acsource"].output(voltage=240.0, output=True)
-        self.measure(
-            (
-                "dmm_acin",
-                "dmm_15vccpri",
-                "dmm_12vpri",
-                "dmm_5vset",
-                "dmm_12voff",
-                "dmm_24voff",
-                "dmm_pwrfail",
-            ),
-            timeout=5,
-        )
-        dev["rla_pson"].set_on()  # Switch 12V & 24V outputs ON
+        with dev["rla_5Von"]:  # 5V output ON
+            dev["acsource"].output(voltage=240.0, output=True)
+            self.measure(
+                (
+                    "dmm_acin",
+                    "dmm_15vccpri",
+                    "dmm_12vpri",
+                    "dmm_5vset",
+                    "dmm_12voff",
+                    "dmm_24voff",
+                    "dmm_pwrfail",
+                ),
+                timeout=5,
+            )
+        mes["dmm_5Voff"]()
+        for rla in ("rla_5Von", "rla_pson"):  # All outputs ON
+            dev[rla].set_on()
         self.measure(
             (
                 "dmm_5vset",
@@ -240,6 +243,7 @@ class Devices(share.Devices):
             ("dcl_12b", tester.DCLoad, "DCL6"),
             ("dcl_5v", tester.DCLoad, "DCL4"),
             ("rla_pson", tester.Relay, "RLA1"),
+            ("rla_5Von", tester.Relay, "RLA2"),
             ("JLink", tester.JLink, "JLINK"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -264,7 +268,8 @@ class Devices(share.Devices):
         for ld in ("dcl_5v", "dcl_12v", "dcl_24v"):
             self[ld].output(0.0, False)
         self["dcs_5v"].output(0.0, False)
-        self["rla_pson"].set_off()
+        for rla in ("rla_pson", "rla_5Von"):
+            self[rla].set_off()
 
 
 class Sensors(share.Sensors):
@@ -338,6 +343,7 @@ class Measurements(share.Measurements):
                 ("dmm_15vccpri", "15Vccpri", "o15vccpri", ""),
                 ("dmm_12vpri", "12Vpri", "o12vpri", ""),
                 ("dmm_3v3", "3V3", "o3v3", ""),
+                ("dmm_5Voff", "5Voff", "o5v", ""),
                 ("dmm_5vset", "5Vset", "o5v", ""),
                 ("dmm_5v", "5V", "o5v", ""),
                 ("dmm_12voff", "12Voff", "o12v", ""),
