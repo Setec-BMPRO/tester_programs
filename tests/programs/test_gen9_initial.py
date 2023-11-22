@@ -34,8 +34,10 @@ class Gen9Initial(ProgramTestCase):
                 "Program": (
                     (sen["o3v3"], 3.3),
                     (sen["lock"], 10.0),
-                    (sen["fanshort"], 700.0),
                     (sen["JLink"], 0),
+                    ),
+                "Initialise": (
+                    (sen["fanshort"], 700.0),
                     ),
                 "PowerUp": (
                     (sen["acin"], 240.0),

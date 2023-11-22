@@ -49,7 +49,7 @@ class Initial(share.TestSequence):
         """
         dev["rla_5Von"].set_on()
         dev["dcs_5v"].output(5.0, True)
-        self.measure(("dmm_3v3", "dmm_lock", "dmm_fanshort"), timeout=5)
+        self.measure(("dmm_3v3", "dmm_lock"), timeout=5)
         mes["JLink"]()
 
     @share.teststep
@@ -62,6 +62,7 @@ class Initial(share.TestSequence):
         arm = dev["arm"]
         arm.open()
         arm.initialise()
+        mes["dmm_fanshort"](timeout=5)
         dev["dcs_5v"].output(0.0, False)
         dev["dcl_5v"].output(0.1, True, delay=0.5)
         dev["dcl_5v"].output(0.0, True)
