@@ -89,7 +89,9 @@ class Initial(share.TestSequence):
                 ),
                 timeout=5,
             )
-        mes["dmm_5Voff"]()
+        dev["dcl_5v"].output(0.1)
+        mes["dmm_5Voff"](timeout=5)
+        dev["dcl_5v"].output(0.0)
         for rla in ("rla_5Von", "rla_pson"):  # All outputs ON
             dev[rla].set_on()
         self.measure(
