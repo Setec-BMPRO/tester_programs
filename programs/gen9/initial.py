@@ -47,6 +47,7 @@ class Initial(share.TestSequence):
         Running the micro makes the pin switch to be an output and switch the FET off.
 
         """
+        dev["rla_5Von"].set_on()
         dev["dcs_5v"].output(5.0, True)
         self.measure(("dmm_3v3", "dmm_lock", "dmm_fanshort"), timeout=5)
         mes["JLink"]()
