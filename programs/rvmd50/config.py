@@ -77,6 +77,7 @@ class Config:  # pylint: disable=too-few-public-methods
             "59903-0",  # PC-121 for RVMD50B
             "60020-0",  # PC-126 for RVMD50
             "60021-0",  # PC-127 for RVMD50B
+            "60133-0",  # PC-132 for RVMD50B
         ):
             values.lcd_packet_enable = False
         return values
