@@ -3,9 +3,8 @@
 # Copyright 2013 SETEC Pty Ltd.
 """Product Test Programs."""
 
-import tester
-
 import share
+import tester
 
 from . import selftest
 from . import _2040
@@ -62,26 +61,34 @@ from . import wtsi200
 
 class MockSequence(share.TestSequence):
 
-    """Mock Test Sequence.
-
-    Used for interactive testing of the Test Executive.
-
-    """
+    """Mock Test Sequence used for interactive testing of the Test Executive."""
 
     def open(self, uut):
-        """Create the test program as a linear sequence."""
+        """Open the test program."""
         super().open(tuple(), MockDevices, MockSensors, MockMeasurements)
         self.steps = (tester.TestStep("Step1", self._step1),)
 
+    def run(self, uuts):
+        """Run the test sequence."""
+        super().run(uuts)
+
+    def safety(self):
+        """Reset logical devices and sensors."""
+        super().safety()
+
+    def close(self):
+        """Close logical devices."""
+        super().close()
+
     @share.teststep
     def _step1(self, dev, mes):
-        """Startup with DC Input, measure output at no load."""
+        """The only test step."""
         mes["YesNoPass"]()
 
 
 class MockDevices(share.Devices):
 
-    """Devices."""
+    """Mock Devices."""
 
     def open(self):
         """Create all Instruments."""
@@ -92,7 +99,7 @@ class MockDevices(share.Devices):
 
 class MockSensors(share.Sensors):
 
-    """Sensors."""
+    """Mock Sensors."""
 
     def open(self):
         """Create all Sensors."""
@@ -104,7 +111,7 @@ class MockSensors(share.Sensors):
 
 class MockMeasurements(share.Measurements):
 
-    """Measurements."""
+    """Mock Measurements."""
 
     def open(self):
         """Create all Measurements."""
