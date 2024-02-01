@@ -18,10 +18,6 @@ class TRSRFMInitial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        for target in ("share.programmer.NRF52",):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
         # Console
         mycon = Mock(name="MyConsole")
         mycon.get_mac.return_value = self.btmac

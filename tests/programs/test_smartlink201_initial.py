@@ -19,7 +19,6 @@ class _Initial(ProgramTestCase):
         for target in (
             "setec.BackgroundTimer",
             "share.programmer.ARM",
-            "share.programmer.NRF52",
             "share.bluetooth.SerialToMAC",
             "programs.smartlink201.console.BLExtenderConsole",
             "programs.smartlink201.console.SmartLink201Console",

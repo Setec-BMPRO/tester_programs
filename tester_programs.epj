@@ -1,8 +1,8 @@
 {
   "header": {
     "comment": "eric project file for project tester_programs",
-    "copyright": "Copyright (C) 2023 , ",
-    "saved": "2023-10-23, 15:52:06"
+    "copyright": "Copyright (C) 2024 , ",
+    "saved": "2024-02-02, 10:26:38"
   },
   "project": {
     "AUTHOR": "",
@@ -310,7 +310,6 @@
       "share/programmer/_base.py",
       "share/programmer/arm.py",
       "share/programmer/avr.py",
-      "share/programmer/nrf52.py",
       "share/testsequence.py",
       "tests/__init__.py",
       "tests/data_feed.py",

@@ -6,11 +6,9 @@
 from ._base import VerificationError
 from .arm import ARM
 from .avr import AVR
-from .nrf52 import NRF52
 
 __all__ = [
     "VerificationError",
     "ARM",
     "AVR",
-    "NRF52",
 ]

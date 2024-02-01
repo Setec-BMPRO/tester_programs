@@ -190,17 +190,7 @@ class Config:
         else:  # Rev 3+ auto-coded switch types
             image = cls._software["series"][rev]
             banner_lines = 2
-        # Force code the RVSWT101 switch code as required
-        forced_code = 0
         fixture_num = "033030"  # RVSWT101 Final Fixture
-        if uut:
-            try:
-                forced_code = {
-                    # PC-5092: Force J11-1 to be J11-3
-                    "A193824": cls._types["j11-3"],
-                }[uut.lot.number]
-            except KeyError:
-                pass
         return {
             "software": image,
             "limits_ini": cls._common_limits + cls._initial_limits,
@@ -218,7 +208,6 @@ class Config:
                 + (type_lim,)
             ),
             "banner_lines": banner_lines,
-            "forced_code": forced_code,
             "fixture_num": fixture_num,
             "button_count": button_count,
         }
