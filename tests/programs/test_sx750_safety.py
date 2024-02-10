@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for SX750 Safety Test program."""
 
 import unittest

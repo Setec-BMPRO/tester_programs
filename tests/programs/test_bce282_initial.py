@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for BCE282-12/24 Initial Test program."""
 
 from unittest.mock import MagicMock, patch

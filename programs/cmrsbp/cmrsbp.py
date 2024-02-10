@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2014 SETEC Pty Ltd.
 """Utility Server - CMR Listener.
 
@@ -35,7 +34,7 @@ import threading
 import queue
 import logging
 
-import setec
+import share
 
 
 class CmrSbp:
@@ -65,7 +64,7 @@ class CmrSbp:
     }
 
     # RegExp object to match the CMR data lines
-    _regexp = re.compile("^#([A-Z ]+),([0-9\.\-]+)$")
+    _regexp = re.compile(r"^#([A-Z ]+),([0-9\.\-]+)$")
 
     def __init__(self, port, data_timeout=1.0):
         """Define our data, and start the worker.
@@ -110,7 +109,7 @@ class CmrSbp:
             data_template = {}
             for parameter in iter(self._datamap):
                 data_template[parameter] = self._datamap[parameter][0]
-            tdata = setec.TimedStore(data_template, data_timeout)
+            tdata = share.TimedStore(data_template, data_timeout)
             tdata.start()
             run = True
         except Exception:

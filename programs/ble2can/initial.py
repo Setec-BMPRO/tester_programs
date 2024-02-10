@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2017 SETEC Pty Ltd
 """BLE2CAN Initial Program."""
 
 import serial
 
-import setec
 import share
 import tester
 
@@ -85,7 +83,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = setec.MAC.loads(mes["BtMac"]().value1)
+        btmac = share.MAC.loads(mes["BtMac"]().value1)
         dev["rla_pair_btn"].press()
         self._reset_unit()
         self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())

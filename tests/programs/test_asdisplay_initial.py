@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for AsDisplay Test program."""
 
 from unittest.mock import patch

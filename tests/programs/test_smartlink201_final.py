@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for SmartLink201 Final Test program."""
 
 from unittest.mock import patch, Mock

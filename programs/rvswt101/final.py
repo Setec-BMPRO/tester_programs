@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Final Test Program."""
 

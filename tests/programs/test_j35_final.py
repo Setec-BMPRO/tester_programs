@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for J35C Final Test program."""
 
 from unittest.mock import patch

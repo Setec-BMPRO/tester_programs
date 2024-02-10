@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for SMU750-70 Initial Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase

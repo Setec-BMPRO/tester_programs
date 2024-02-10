@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for C45A-15 Final Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase

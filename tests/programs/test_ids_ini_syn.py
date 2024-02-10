@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for IDS500 SynBuck Initial Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase

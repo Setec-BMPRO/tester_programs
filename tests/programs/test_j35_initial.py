@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for J35 Initial Test program."""
 
 from unittest.mock import MagicMock, patch
@@ -22,7 +21,7 @@ class _J35Initial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-            "setec.BackgroundTimer",
+            "share.BackgroundTimer",
             "share.programmer.ARM",
         ):
             patcher = patch(target)

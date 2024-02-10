@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for SX750 Initial Test program."""
 
 from unittest.mock import patch

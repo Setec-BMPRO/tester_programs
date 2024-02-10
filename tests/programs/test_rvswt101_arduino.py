@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for RVSWT101 Arduino Console Test program."""
 
 import unittest

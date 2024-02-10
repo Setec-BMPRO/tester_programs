@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2016 SETEC Pty Ltd.
 """SamB11 device Base console driver.
 

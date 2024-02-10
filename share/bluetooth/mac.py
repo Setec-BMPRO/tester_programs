@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2019 SETEC Pty Ltd.
 """Bluetooth SerialNumber to MAC Storage."""
 
@@ -15,7 +14,7 @@ class SerialToMAC:
     server_url = attr.ib(default="https://webapp.mel.setec.com.au/ate/rpc/")
 
     # FIXME: We should be able to reuse the ServerProxy
-    # ATE3b uses Python 3.10 with OpenSSL 3 and gets an "unexpected EOF" SSL
+    # Python 3.10 with OpenSSL 3 and gets an "unexpected EOF" SSL
     # error about 30 sec after the first RPC call.
     # Use a new ServerProxy for every RPC call as a work around.
 

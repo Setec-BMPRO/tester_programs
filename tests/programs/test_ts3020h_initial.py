@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for TS3020H Initial Test program."""
 
 from ..data_feed import UnitTester, ProgramTestCase

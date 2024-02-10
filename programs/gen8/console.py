@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2014 SETEC Pty Ltd.
 """GEN8 ARM processor console driver."""
 

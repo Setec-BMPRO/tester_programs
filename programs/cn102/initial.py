@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2018 SETEC Pty Ltd
 """CN10[23] / ODL10[13] Initial Test Program.
 

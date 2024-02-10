@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2014 SETEC Pty Ltd.
 """BCE282-12/24 Final Program."""
 

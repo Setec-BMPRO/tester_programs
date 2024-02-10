@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2021 SETEC Pty Ltd
 """BLExtender/SmartLink201 Test Program."""
 
 import re
-
-import setec
 
 import share
 
@@ -141,7 +138,7 @@ class SmartLink201Console(_Console):
         """
         super().__init__(port)
         # Background timer for Vbatt reading readiness
-        self.vbatttimer = setec.BackgroundTimer(self.vbatt_read_wait)
+        self.vbatttimer = share.BackgroundTimer(self.vbatt_read_wait)
 
     def __getitem__(self, key):
         """Read a value."""

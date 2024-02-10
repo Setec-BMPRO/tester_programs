@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for BatteryCheck Final Test program."""
 
 from unittest.mock import Mock, patch

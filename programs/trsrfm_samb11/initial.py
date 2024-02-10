@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2017 SETEC Pty Ltd
 """TRSRFM Initial Program."""
 
 import serial
 
-import setec
 import share
 import tester
 
@@ -89,7 +87,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        btmac = setec.MAC.loads(mes["arm_btmac"]().value1)
+        btmac = share.MAC.loads(mes["arm_btmac"]().value1)
         dev["dcs_vin"].output(0.0, True, delay=1.0)
         dev["rla_pair_btn"].set_on(delay=0.2)
         dev["dcs_vin"].output(self.vbatt, True)

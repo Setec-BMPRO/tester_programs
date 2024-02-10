@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for Trek2/JControl Final Test program."""
 
 from unittest.mock import patch

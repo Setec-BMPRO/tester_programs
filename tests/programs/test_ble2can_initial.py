@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for BLE2CAN Initial Test program."""
 
 from unittest.mock import Mock, patch

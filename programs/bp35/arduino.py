@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2016 SETEC Pty Ltd
 """BP35 / BP35-II Initial Test Programs."""
 

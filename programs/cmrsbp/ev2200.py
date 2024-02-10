@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2015 SETEC Pty Ltd.
 """Texas Instruments EV220x Controller.
 

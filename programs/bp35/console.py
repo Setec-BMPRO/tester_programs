@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2015 SETEC Pty Ltd.
 """BP35 / BP35-II ARM processor console driver."""
 
 import time
-
-import setec
 
 import share
 
@@ -151,7 +148,7 @@ class _Console:
             self.cmd_data["LOAD_{0}".format(i)] = share.console.parameter.Float(
                 "LOAD_SWITCH_CURRENT_{0}".format(i), scale=1000
             )
-        self._timer = setec.BackgroundTimer(self.manual_mode_wait)
+        self._timer = share.BackgroundTimer(self.manual_mode_wait)
 
     def brand(self, hw_ver, sernum, reset_relay, is_pm, pic_hw_ver):
         """Brand the unit with Hardware ID & Serial Number."""

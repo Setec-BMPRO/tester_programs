@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for CMR-SBP Test program."""
 
 import datetime
@@ -126,6 +125,9 @@ class CMRSBPSerialDate(ProgramTestCase):
         # Patch EV2200 driver
         self.myev = Mock(name="EV2200")
         patcher = patch("programs.cmrsbp.ev2200.EV2200", return_value=self.myev)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch("programs.cmrsbp.cmrsbp.CmrSbp")
         self.addCleanup(patcher.stop)
         patcher.start()
         myser = Mock(name="SerialPort")
@@ -268,6 +270,12 @@ class CMRDataMonitor(unittest.TestCase):
         ("ROTARY SWITCH READING", "256"),
         ("SERIAL NUMBER", "949"),
     )
+
+    def setUp(self):
+        """Per-Test setup."""
+        patcher = patch("share.timed.RepeatTimer")
+        self.addCleanup(patcher.stop)
+        patcher.start()
 
     def test_read(self):
         """Read CMR data."""

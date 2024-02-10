@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for BLExtender/SmartLink201 Initial Test program."""
 
 from unittest.mock import patch
@@ -17,7 +16,7 @@ class _Initial(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         for target in (
-            "setec.BackgroundTimer",
+            "share.BackgroundTimer",
             "share.programmer.ARM",
             "share.bluetooth.SerialToMAC",
             "programs.smartlink201.console.BLExtenderConsole",

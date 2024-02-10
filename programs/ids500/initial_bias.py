@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2016 SETEC Pty Ltd.
 """IDS-500 Bias Initial Test Program."""
 

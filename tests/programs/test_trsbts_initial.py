@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for TRS-BTS Initial Test program."""
 
 from unittest.mock import MagicMock, Mock, patch

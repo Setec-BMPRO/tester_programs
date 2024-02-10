@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for BP35 / BP35-II Initial Test program."""
 
 from unittest.mock import MagicMock, patch
@@ -22,7 +21,7 @@ class _BP35Initial(ProgramTestCase):
         self.addCleanup(patcher.stop)
         patcher.start()
         for target in (
-            "setec.BackgroundTimer",
+            "share.BackgroundTimer",
             "share.programmer.ARM",
             "programs.bp35.arduino.Arduino",
             "programs.bp35.console.TunnelConsole",

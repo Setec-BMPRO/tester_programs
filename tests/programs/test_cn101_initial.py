@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """UnitTest for CN101 Initial Test program."""
 
 from unittest.mock import patch
