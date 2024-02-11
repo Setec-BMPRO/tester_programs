@@ -171,7 +171,7 @@ class TestSequence(tester.TestSequence):
     def get_serial(self, uuts, limit_name, measurement_name):
         """Find the unit's Serial number.
 
-        @param uuts Tuple of setec.tester.UUT instances
+        @param uuts Tuple of libtester.UUT instances
         @param limit_name TestLimit to validate a serial number
         @param measurement_name Measurement to ask the operator for the number
         @return Serial Number

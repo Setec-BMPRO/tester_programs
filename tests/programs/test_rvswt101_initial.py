@@ -4,7 +4,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-import setec
+import libtester
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvswt101
@@ -51,7 +51,7 @@ class RVSWT101Initial(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(
             tuple(
-                setec.tester.UUT.from_sernum("A000000{0:04}".format(uut))
+                libtester.UUT.from_sernum("A000000{0:04}".format(uut))
                 for uut in range(1, self.per_panel + 1)
             )
         )

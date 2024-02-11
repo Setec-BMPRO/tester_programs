@@ -7,7 +7,7 @@ import logging
 import time
 import traceback
 
-import setec
+import libtester
 import tester
 from pydispatch import dispatcher
 
@@ -54,11 +54,11 @@ def _main():
     sernum = config["DEFAULT"].get("Sernum")
     if not sernum:
         sernum = "A0000000001"
-    uut = setec.tester.UUT.from_sernum(sernum)
+    uut = libtester.UUT.from_sernum(sernum)
     revision = config["DEFAULT"].get("Revision")
     if not revision:
         revision = ""
-    uut.lot.item = setec.tester.Item(
+    uut.lot.item = libtester.Item(
         number="000000", description="DummyItem", revision=revision
     )
     # Receive Test Result signals here

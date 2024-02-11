@@ -95,7 +95,7 @@ class Config:
     def configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut setec.tester.UUT instance
+        @param uut libtester.UUT instance
 
         """
         rev = uut.revision

@@ -11,7 +11,7 @@ def get(parameter, uut):
     """Select a configuration based on the parameter.
 
     @param parameter Type of unit
-    @param uut setec.tester.UUT instance
+    @param uut libtester.UUT instance
     @return configuration class
 
     """
@@ -45,7 +45,7 @@ class _Config:
     def _configure(cls, uut):
         """Adjust configuration based on UUT Lot Number.
 
-        @param uut setec.tester.UUT instance
+        @param uut libtester.UUT instance
 
         """
         rev = uut.revision

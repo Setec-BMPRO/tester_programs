@@ -171,7 +171,7 @@ class Config:
         """Get configuration.
 
         @param parameter String to select the switch type
-        @param uut setec.tester.UUT instance
+        @param uut libtester.UUT instance
         @return Dictionary of configuration data
 
         """

@@ -11,7 +11,7 @@ def get(parameter, uut):  # pylint: disable=unused-argument
     """Get a configuration.
 
     @param parameter Test program parameter
-    @param uut setec.tester.UUT instance
+    @param uut libtester.UUT instance
     @return Values instance
 
     """
@@ -52,7 +52,7 @@ class Config:  # pylint: disable=too-few-public-methods
     def get(cls, uut):
         """Get configuration based on UUT.
 
-        @param uut setec.tester.UUT instance
+        @param uut libtester.UUT instance
         @return Values instance
 
         """
