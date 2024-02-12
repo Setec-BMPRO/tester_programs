@@ -40,7 +40,7 @@
   UseAutoSpeed = 0x00000001
   ClockSpeed = 0x00000000
   EndianMode = 0
-  ChipName = "Microchip ATSAMC21E17"
+  ChipName = "Microchip ATSAMC21E17A"
 [FLASH]
   NumBanks = 3
 [FLASH0]
