@@ -59,7 +59,7 @@ class Config:  # pylint: disable=too-few-public-methods
         rev = uut.revision
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         values = cls._rev_data[rev]
-        # Firmware 1.13 crashes if you send a LCD Test Packet...
+        # Firmware 1.13 intermittently crashes if you send a LCD Test Packet...
         # There are Production Concessions to not use the packet
         if uut.lot.job in (
             "59445-0",  # PC-103 for RVMD50 (2023-10-24)
@@ -81,7 +81,10 @@ class Config:  # pylint: disable=too-few-public-methods
             "60226-0",  # PC-148 for RVMD50B
             "60343-0",  # PC-149 for RVMD50T
             "60344-0",  # PC-150 for RVMD50B
-#            "60416-0",  # PC-xxx for RVMD50B
+            "60416-0",  # PC-160 for RVMD50B
+            "60466-0",  # PC-161 for RVMD50B
+            "60595-0",  # PC-162 for RVMD50T
+            "60596-0",  # PC-163 for RVMD50B
         ):
             values.lcd_packet_enable = False
         return values
