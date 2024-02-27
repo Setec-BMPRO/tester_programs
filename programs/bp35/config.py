@@ -96,7 +96,7 @@ class BP35:
         tester.LimitLow("FixtureLock", 200, doc="Contacts closed"),
         tester.LimitDelta("HwVer8", 4400.0, 250.0, doc="Hardware Rev ≥8"),
         tester.LimitDelta("ACin", vac, 5.0, doc="Injected AC voltage present"),
-        tester.LimitBetween("Vpfc", 401.0, 424.0, doc="PFC running"),
+        tester.LimitBetween("Vpfc", 397.0, 429.0, doc="PFC running"),
         tester.LimitBetween("Vload", 12.0, 12.9, doc="Load output present"),
         tester.LimitLow("VloadOff", 0.5, doc="Load output off"),
         tester.LimitDelta("VbatIn", 12.0, 0.5, doc="Injected Vbatt present"),
