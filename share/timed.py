@@ -8,20 +8,12 @@ import threading
 import attr
 
 
-# TODO: Remove this when attrs gt validator is available
-def _gt_zero(instance, _, value):
-    """Pre attrs 21.3 'gt' validator."""
-    if value <= 0:
-        raise ValueError("Value must be greater than zero")
-
-
 @attr.s
 class BackgroundTimer:
 
     """Generic second timer with a 'done' property."""
 
-    # interval = attr.ib(converter=float, validator=attr.validators.gt(0.0))
-    interval = attr.ib(converter=float, validator=_gt_zero)
+    interval = attr.ib(converter=float, validator=attr.validators.gt(0.0))
     _stop = attr.ib(init=False, factory=threading.Event)
     _worker = attr.ib(init=False, default=None)
 
@@ -68,8 +60,7 @@ class RepeatTimer:
 
     """Repeatedly call a function at a regular interval."""
 
-    # interval = attr.ib(converter=float, validator=attr.validators.gt(0.0))
-    interval = attr.ib(converter=float, validator=_gt_zero)
+    interval = attr.ib(converter=float, validator=attr.validators.gt(0.0))
     function = attr.ib(validator=attr.validators.is_callable())
     _stop = attr.ib(init=False, factory=threading.Event)
     _worker = attr.ib(init=False, default=None)
@@ -109,8 +100,7 @@ class TimedStore:
     """
 
     default = attr.ib(validator=attr.validators.instance_of(dict))
-    # timeout = attr.ib(converter=float, validator=attr.validators.gt(0.0))
-    timeout = attr.ib(converter=float, validator=_gt_zero)
+    timeout = attr.ib(converter=float, validator=attr.validators.gt(0.0))
     data = attr.ib(init=False, factory=dict)
     tick_interval = attr.ib(init=False, default=0.5)
     _timer = attr.ib(init=False, default=None)
