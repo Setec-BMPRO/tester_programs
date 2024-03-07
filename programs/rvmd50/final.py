@@ -34,7 +34,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_display(self, dev, mes):
         """Display test pattern & backlight."""
-        dev["display"].lcd_packet_enable = self.cfg.lcd_packet_enable
         with dev["display"]:
             mes["YesNoDisplayOk"](timeout=5)
 

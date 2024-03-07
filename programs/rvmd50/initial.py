@@ -59,7 +59,6 @@ class Initial(share.TestSequence):
         """Test the LCD and Backlight."""
         dev["rla_reset"].pulse(0.1, delay=5)
         mes["dmm_bklghtoff"](timeout=5)
-        dev["display"].lcd_packet_enable = self.cfg.lcd_packet_enable
         with dev["display"]:
             self.measure(("YesNoDisplayOk", "dmm_bklghton"), timeout=5)
 
