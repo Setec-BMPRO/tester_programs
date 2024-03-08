@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2024 , ",
-    "saved": "2024-02-10, 20:35:35"
+    "saved": "2024-03-08, 11:26:33"
   },
   "project": {
     "AUTHOR": "",
@@ -33,19 +33,23 @@
     "DOCSTRING": "ericdoc",
     "DOCUMENTATIONPARMS": {},
     "EMAIL": "",
-    "EMBEDDED_VENV": false,
+    "EMBEDDED_VENV": true,
     "EOL": 1,
     "FILETYPES": {
-      "*.e4p": "OTHERS",
-      "*.idl": "INTERFACES",
+      "*.cfg": "OTHERS",
+      "*.epj": "OTHERS",
+      "*.ini": "OTHERS",
+      "*.json": "OTHERS",
       "*.md": "OTHERS",
-      "*.proto": "PROTOCOLS",
       "*.py": "SOURCES",
       "*.py3": "SOURCES",
       "*.pyw": "SOURCES",
       "*.pyw3": "SOURCES",
       "*.rst": "OTHERS",
+      "*.toml": "OTHERS",
       "*.txt": "OTHERS",
+      "*.yaml": "OTHERS",
+      "*.yml": "OTHERS",
       "GNUmakefile": "OTHERS",
       "Makefile": "OTHERS",
       "README": "OTHERS",
@@ -64,15 +68,16 @@
     "LICENSE": "",
     "MAINSCRIPT": "testsuite.py",
     "MAKEPARAMS": {
-      "MakeEnabled": false,
+      "MakeEnabled": true,
       "MakeExecutable": "",
-      "MakeFile": "",
+      "MakeFile": "Makefile",
       "MakeParameters": "",
-      "MakeTarget": "",
+      "MakeTarget": "dist",
       "MakeTestOnly": true
     },
     "MIXEDLANGUAGE": false,
     "OTHERS": [
+      "Makefile",
       "main.py.ini"
     ],
     "OTHERTOOLSPARMS": {

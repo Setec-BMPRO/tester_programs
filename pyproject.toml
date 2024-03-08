@@ -1,0 +1,30 @@
+[build-system]
+requires = [
+    "setuptools",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "setec-tester-programs"
+# Use a datecode version: YYYMMDD.n (n is for multi release per day)
+version = "20240308.0"
+description = "SETEC product test programs."
+authors = [
+    {name = "Stephen Bell", email = "stephen.bell@setec.com.au"},
+]
+readme = "README.rst"
+requires-python = ">=3.8"
+dependencies = [
+    "attrs",
+    "jsonrpclib-pelix",
+    "pydispatcher",
+    "pyserial",
+    "setec-isplpc",
+    "setec-libtester",
+    "setec-tester",
+    "setec-updi",
+    "setec-utility[erp]",
+]
+
+[tool.setuptools.packages.find]
+include = ["programs*", "share*"]

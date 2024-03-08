@@ -1,0 +1,4 @@
+include programs/*/*.bin
+include programs/*/*.hex
+include programs/bce282/*.txt
+include share/programmer/*.jflash
