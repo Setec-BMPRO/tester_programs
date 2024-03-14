@@ -25,6 +25,7 @@ def get(parameter, uut):
         "SR2": BP35IISR,
         "HA2": BP35IIHA,
         "SI2": BP35IISI,
+        "UHA2": BP35IIUSHA,
     }[parameter]
     config._configure(uut)  # Adjust for the revision
     return config
@@ -405,4 +406,24 @@ class BP35IISI(BP35_II):
             hw_version=(15, Type.SI.value, "E"), arm_sw_version=BP35_II.arm_5015
         ),
         # No Rev 1 or 2
+    }
+
+
+class BP35IIUSHA(BP35IISR):
+
+    """BP35-IIUSHA configuration."""
+
+    _rev6_values = _Values(
+        hw_version=(19, Type.HA.value, "A"), arm_sw_version=BP35_II.arm_5073
+    )
+    _rev_data = {
+        None: _rev6_values,
+        "6": _rev6_values,
+        "5": _Values(
+            hw_version=(17, Type.HA.value, "A"), arm_sw_version=BP35_II.arm_5073
+        ),
+        "4": _Values(
+            hw_version=(16, Type.HA.value, "B"), arm_sw_version=BP35_II.arm_5073
+        ),
+        # No Rev 1-3
     }
