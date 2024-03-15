@@ -17,7 +17,7 @@ class Final(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config
-        self.cfg.configure(uut)
+        self.cfg.configure(self.parameter, uut)
         Sensors.callback = self._dso_callback
         super().open(self.cfg.limits_final, Devices, Sensors, Measurements)
         self.steps = (

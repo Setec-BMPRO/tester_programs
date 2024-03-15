@@ -10,7 +10,7 @@ class GEN9Final(ProgramTestCase):
     """GEN9-540 Final program test suite."""
 
     prog_class = gen9.Final
-    parameter = None
+    parameter = "S"
     debug = False
 
     def test_pass_run(self):

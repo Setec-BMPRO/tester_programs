@@ -53,9 +53,7 @@ class Config:
         tester.LimitDelta("PFCpost3", 426.0, 2.9),
         tester.LimitDelta("PFCpost4", 426.0, 2.9),
         tester.LimitDelta("PFCpost", 426.0, 3.0),
-        tester.LimitBetween(
-            "HoldUpTime", 0.050 * 1.2, 1, doc="50ms + 20% for ageing"
-        ),
+        tester.LimitBetween("HoldUpTime", 0.050 * 1.2, 1, doc="50ms + 20% for ageing"),
         tester.LimitDelta("ARM-AcFreq", 50, 10),
         tester.LimitDelta("ARM-AcVolt", 240, 20),
         tester.LimitDelta("ARM-5V", 5.0, 1.0),
@@ -81,26 +79,40 @@ class Config:
         sw_image="gen9_renesas_1.0.0-0-g12d33fe.hex",
         is_renesas=True,
     )
+    _renesas_fix_values = _Values(
+        devicetype="r7fa2e1a7",
+        sw_image="gen9_renesas_XXXXXX.hex",
+        is_renesas=True,
+    )
     _rev_data = {
-        None: _renesas_values,
-        "7A": _renesas_values,
-        "6C": _lpc_values,
-        "6B": _lpc_values,
-        "6A": _lpc_values,
-        "5": _lpc_values,
-        # Rev 1-4 were Engineering protoype builds
+        "G": {  # GEN9-540-G (Gold)
+            None: _renesas_values,
+            "2": _renesas_values,
+            # Rev 1 was Engineering protoype build
+        },
+        "S": {  # GEN9-540 (Silver)
+            None: _renesas_values,
+            "8A": _renesas_fix_values,
+            "7A": _renesas_values,
+            "6C": _lpc_values,
+            "6B": _lpc_values,
+            "6A": _lpc_values,
+            "5": _lpc_values,
+            # Rev 1-4 were Engineering protoype builds
+        },
     }
 
     @classmethod
-    def configure(cls, uut):
+    def configure(cls, parameter, uut):
         """Adjust configuration based on UUT Lot Number.
 
+        @param parameter Product selector
         @param uut libtester.UUT instance
 
         """
         rev = uut.revision
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
-        values = cls._rev_data[rev]
+        values = cls._rev_data[parameter][rev]
         cls.devicetype = values.devicetype
         cls.sw_image = values.sw_image
         cls.is_renesas = values.is_renesas

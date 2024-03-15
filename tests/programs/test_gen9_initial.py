@@ -11,7 +11,7 @@ class Gen9Initial(ProgramTestCase):
     """GEN9-540 Initial program test suite."""
 
     prog_class = gen9.Initial
-    parameter = None
+    parameter = "S"
     debug = False
 
     def setUp(self):
