@@ -427,3 +427,12 @@ class BP35IIUSHA(BP35IISR):
         ),
         # No Rev 1-3
     }
+
+    @classmethod
+    def limits_initial(cls):
+        """Initial test limits.
+
+        @return Tuple of limits
+
+        """
+        return cls._base_limits_initial + cls._crail_3_5
