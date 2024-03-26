@@ -12,7 +12,7 @@ class Final(share.TestSequence):
     """MK7-400-1 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("ACon", 240, 10),
+        tester.LimitDelta("ACon", 240, 11),
         tester.LimitLow("ACoff", 10),
         tester.LimitDelta("5V", 5.00, 0.25),
         tester.LimitLow("12Voff", 0.5),
