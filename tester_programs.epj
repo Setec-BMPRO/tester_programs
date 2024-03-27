@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2024 , ",
-    "saved": "2024-03-08, 11:26:33"
+    "saved": "2024-03-27, 11:35:32"
   },
   "project": {
     "AUTHOR": "",
@@ -77,8 +77,10 @@
     },
     "MIXEDLANGUAGE": false,
     "OTHERS": [
+      "MANIFEST.in",
       "Makefile",
-      "main.py.ini"
+      "main.py.ini",
+      "pyproject.toml"
     ],
     "OTHERTOOLSPARMS": {
       "Black": {
