@@ -6,12 +6,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setec-tester-programs"
-version = "1.4.1"
+version = "1.5.0"
 description = "SETEC product test programs."
 authors = [
     {name = "Stephen Bell", email = "stephen.bell@setec.com.au"},
 ]
-#readme = "README.md"
+readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "attrs",

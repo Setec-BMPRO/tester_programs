@@ -10,15 +10,22 @@ SOURCES += $(wildcard *.toml)
 VENV := .venv
 VENV_NEW_FLAG := $(VENV)/_venv_is_new
 VPYTHON := $(VENV)/bin/python3
+PYCACHE := __pycache__
 CLEAN_TARGETS := dist *.egg-info
-.PHONY: clean venv _venv
+DEEP_CLEAN_TARGETS := $(VENV)
+.PHONY: clean deepclean venv _venv
 # Build the output packages
 dist: $(VENV) $(SOURCES)
 	@rm -f $(VENV_NEW_FLAG)
 	$(VPYTHON) -m build
-# Remove output packages
+# Remove output packages and cache files
 clean:
 	@rm -rf $(CLEAN_TARGETS)
+	@find -type d -name $(PYCACHE) -execdir rm -rf {} +
+# Remove venv as well
+deepclean:
+	$(MAKE) clean
+	@rm -rf $(DEEP_CLEAN_TARGETS)
 # Create the venv
 $(VENV):
 	python3 -m venv $(VENV)
