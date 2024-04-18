@@ -108,7 +108,7 @@ class Initial(share.TestSequence):
         # A little load so PFC voltage falls faster
         self.dcload((("dcl_12v", 1.0), ("dcl_24v", 1.0)), output=True)
         pfc = mes["dmm_pfcpre"].stable(self.pfc_stable).value1
-        if not self.cfg.is_renesas:  # NXP units: The PFC adjust does work
+        if self.cfg.pfc_trim:
             arm.calpfc(pfc)
             mesres = mes["dmm_pfcpost1"].stable(self.pfc_stable)
             if not mesres.result:  # 1st retry

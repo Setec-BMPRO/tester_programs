@@ -16,7 +16,7 @@ class _Values:
 
     devicetype = attr.ib(validator=attr.validators.instance_of(str))
     sw_image = attr.ib(validator=attr.validators.instance_of(str))
-    is_renesas = attr.ib(validator=attr.validators.instance_of(bool))
+    pfc_trim = attr.ib(validator=attr.validators.instance_of(bool))
 
 
 class Config:
@@ -26,7 +26,7 @@ class Config:
     # These values get set per Product revision
     devicetype = None
     sw_image = None
-    is_renesas = None
+    pfc_trim = None
     # Common Test limits common to both test types
     _limits_common = (
         tester.LimitLow("5Voff", 0.5, doc="5V output off"),
@@ -72,17 +72,12 @@ class Config:
     _lpc_values = _Values(
         devicetype="lpc1113",
         sw_image="gen9_1.0.18392.2512.bin",
-        is_renesas=False,
+        pfc_trim=True,
     )
     _renesas_values = _Values(
         devicetype="r7fa2e1a7",
-        sw_image="gen9_renesas_1.0.0-0-g12d33fe.hex",
-        is_renesas=True,
-    )
-    _renesas_fix_values = _Values(
-        devicetype="r7fa2e1a7",
-        sw_image="gen9_renesas_XXXXXX.hex",
-        is_renesas=True,
+        sw_image="gen9_renesas_1.1.0-0-g6d37938.hex",
+        pfc_trim=False,
     )
     _rev_data = {
         "G": {  # GEN9-540-G (Gold)
@@ -92,7 +87,7 @@ class Config:
         },
         "S": {  # GEN9-540 (Silver)
             None: _renesas_values,
-            "8A": _renesas_fix_values,
+            "8A": _renesas_values,
             "7A": _renesas_values,
             "6C": _lpc_values,
             "6B": _lpc_values,
@@ -115,4 +110,4 @@ class Config:
         values = cls._rev_data[parameter][rev]
         cls.devicetype = values.devicetype
         cls.sw_image = values.sw_image
-        cls.is_renesas = values.is_renesas
+        cls.pfc_trim = values.pfc_trim
