@@ -293,7 +293,7 @@ class Base:
         elif response_count == 1:  # Reduce list of 1 string to a string
             response = response[0]
         self._logger.debug("Response <-- %s", repr(response))
-        if response_count != expected:
+        if isinstance(expected, int) and response_count != expected:
             raise ResponseError(
                 "Expected {0}, actual {1}".format(expected, response_count)
             )

@@ -180,7 +180,6 @@ class _Console(share.console.Base):
         "\x1b[m",  # Normal
         "\x1b[1;31m",  # Bold, Red
         "\x1b[1;32m",  # Bold, Green
-        "*",  # FIXME: 101C 1.0.3 spits out a random "\r\n" during banner "*****"
     )
     # Console commands
     parameter = share.console.parameter
@@ -448,7 +447,7 @@ class Console101C(Console101A):
 
     """Communications to RVMN101C console."""
 
-    banner_lines = 13  # Startup banner lines
+    banner_lines = None  # A non-int will ignore number of lines
 
 
 class _Console5x(_Console):
