@@ -17,6 +17,7 @@ from . import bce4
 from . import bce282
 from . import ble2can
 from . import bp35
+from . import bsgateway
 from . import c15a15
 from . import c15d15
 from . import c45a15
@@ -122,7 +123,7 @@ class MockMeasurements(share.Measurements):
 #       Key:
 #           Name of the program,
 #           Note that this name must match the entry in:
-#               The ATE4 storage system (No size limit)
+#               The ATE4 storage system
 #       Value:
 #           The class to use to create a program instance
 
@@ -145,6 +146,7 @@ PROGRAMS = {
     "BLE2CAN Initial": ble2can.Initial,
     "BP35 Initial": bp35.Initial,
     "BP35 Final": bp35.Final,
+    "BSGateway Initial": bsgateway.Initial,
     "C15A-15 Initial": c15a15.Initial,
     "C15A-15 Final": c15a15.Final,
     "C15D-15(M) Initial": c15d15.Initial,

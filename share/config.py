@@ -126,6 +126,9 @@ class Fixture:
         "036746": {
             "ARM": _ftdi,
         },  # ASDisplay Initial
+        "039517": {
+            "ARM": _ftdi,
+        },  # BSGateway Initial
         # Fixtures with a USB Hub
         "017789": {  # CMR-SBP Initial (Prolific)
             # Hub port 1:

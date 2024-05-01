@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2024 , ",
-    "saved": "2024-03-27, 11:55:09"
+    "saved": "2024-05-01, 14:27:28"
   },
   "project": {
     "AUTHOR": "",
@@ -150,6 +150,9 @@
       "programs/bp35/console.py",
       "programs/bp35/final.py",
       "programs/bp35/initial.py",
+      "programs/bsgateway/__init__.py",
+      "programs/bsgateway/console.py",
+      "programs/bsgateway/initial.py",
       "programs/c15a15/__init__.py",
       "programs/c15a15/final.py",
       "programs/c15a15/initial.py",
@@ -343,6 +346,7 @@
       "tests/programs/test_ble2can_initial.py",
       "tests/programs/test_bp35_final.py",
       "tests/programs/test_bp35_initial.py",
+      "tests/programs/test_bsgateway_initial.py",
       "tests/programs/test_c15a15_final.py",
       "tests/programs/test_c15a15_initial.py",
       "tests/programs/test_c15d15_final.py",

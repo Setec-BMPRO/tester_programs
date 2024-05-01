@@ -20,6 +20,7 @@ from . import test_bce282_final
 from . import test_bce282_initial
 from . import test_bce4_final
 from . import test_ble2can_initial
+from . import test_bsgateway_initial
 from . import test_c15a15_initial
 from . import test_c15a15_final
 from . import test_c15d15_initial
@@ -112,6 +113,7 @@ __all__ = [
     "test_bce282_initial",
     "test_bce4_final",
     "test_ble2can_initial",
+    "test_bsgateway_initial",
     "test_c15a15_initial",
     "test_c15a15_final",
     "test_c15d15_initial",
