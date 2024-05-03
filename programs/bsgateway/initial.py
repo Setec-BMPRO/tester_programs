@@ -14,7 +14,11 @@ from . import console
 class Initial(share.TestSequence):
     """Initial Test Program."""
 
-    sw_image = "FIXME.hex"
+    sw_image = {  # Key: Revision, Value: Image filename
+        None: "PreRelease.hex",
+        "1": "PreRelease.hex",
+        "2": None,
+        }
     v_set = 12.0  # Input DC voltage to power the unit
     testlimits = (  # Test limits
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
@@ -23,7 +27,7 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        Sensors.sw_image = self.sw_image
+        Sensors.sw_image = self.sw_image[uut.revision]
         super().open(self.testlimits, Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
