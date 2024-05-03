@@ -15,8 +15,7 @@ class Initial(share.TestSequence):
     """Initial Test Program."""
 
     sw_image = {  # Key: Revision, Value: Image filename
-        None: "PreRelease.hex",
-        "1": "PreRelease.hex",
+        "1": "bsgateway_v1.0.0-0-g5927f65_pre_release.hex",
         "2": None,
         }
     v_set = 12.0  # Input DC voltage to power the unit
