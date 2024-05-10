@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
     sw_image = {  # Key: Revision, Value: Image filename
         "1": "bsgateway_v1.0.0-0-g5927f65_pre_release.hex",
         "2": None,
-        }
+    }
     v_set = 12.0  # Input DC voltage to power the unit
     testlimits = (  # Test limits
         tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
@@ -52,6 +52,7 @@ class Initial(share.TestSequence):
         """Calibrate the unit."""
         con = dev["console"]
         con.open()
+        con.pre_calibrate()
         rla = dev["rla_cal"]
         rla.set_on(delay=0.1)
         offacc = con.cali()

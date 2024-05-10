@@ -276,8 +276,8 @@ class Base:
                 self._logger.debug("Read <-- %s", repr(data))
             if not data:  # No data means a timeout
                 raise ResponseError("Response timeout")
-            buf += data
-            buf = buf.replace(b"\n", b"")  # Remove all '\n'
+            if data != b"\n":  # Ignore all '\n'
+                buf += data
         # Remove ignored strings
         for pattern in (self.cmd_prompt, self.res_suffix):
             buf = buf.replace(pattern, b"")

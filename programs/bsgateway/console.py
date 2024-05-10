@@ -7,7 +7,7 @@ import time
 import share
 
 
-class Console(share.console.Base):
+class Console(share.console.BadUart):
     """BSGateway console."""
 
     # Console command prompt. Signals the end of response data.
@@ -17,10 +17,18 @@ class Console(share.console.Base):
     cmd_data = {
         # Writable values
         "SET_DAC": parameter.Hex(
-            "set_dac", writeable=True, write_format="{1} 0x{0:04X}", readable=False
+            "set_dac",
+            writeable=True,
+            write_format="{1} 0x{0:04X}",
+            readable=False,
+            maximum=0xFFFF,
         ),
         "SET_OFF": parameter.Hex(
-            "set_off", writeable=True, write_format="{1} 0x{0:04X}", readable=False
+            "set_off",
+            writeable=True,
+            write_format="{1} 0x{0:04X}",
+            readable=False,
+            maximum=0xFFFF,
         ),
         # Action commands
         "CALI": parameter.Hex("cali", read_format="{0}"),
@@ -46,12 +54,17 @@ class Console(share.console.Base):
         self.port.dtr = False
         time.sleep(1)
 
+    def pre_calibrate(self):
+        """Prepare for calibration of the unit."""
+        self["SET_DAC"] = 0
+        self["SET_OFF"] = 0
+
     def cali(self):
-        """Measure the responce to the "cali" command."""
+        """Measure the response to the "cali" command."""
         return self["CALI"]
 
     def calibrate(self, vcc, offacc, iacc):
-        """Appy calibration to the unit.
+        """Apply calibration to the unit.
 
         @param vcc 3.3V rail voltage
         @param offacc "cali" response with inputs shorted
