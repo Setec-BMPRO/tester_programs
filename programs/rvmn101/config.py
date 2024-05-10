@@ -698,8 +698,8 @@ class RVMN6x(Config):
     _rev1_values = Values(
         nordic_image=_nordic_4_2_0,
         arm_image=_ra2_image_0_3_6,
-        product_rev="1A",
-        hardware_rev="1A",
+        product_rev="01A",
+        hardware_rev="01A",
         arm_devicetype="r7fa2l1a9",
     )
     _rev_data = {
