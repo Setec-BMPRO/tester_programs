@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101x and RVMN5x Configuration."""
+"""RVMN Configuration."""
 
 import logging
 
@@ -22,8 +22,11 @@ def get(parameter, uut):
         "101A": RVMN101A,
         "101B": RVMN101B,
         "101C": RVMN101C,
+        "200A": RVMN200A,
         "50": RVMN5x,
         "55": RVMN5x,
+        "60": RVMN6x,
+        "65": RVMN6x,
     }[parameter]
     config._configure(uut)  # Adjust for the revision
     return config
@@ -492,6 +495,38 @@ class RVMN101C(Config):
         )
 
 
+class RVMN200A(Config):
+
+    """RVMN200A configuration."""
+
+    _fixture = "033550"
+    _sonic_4_2_0 = "rvmn200a_signed_4.2.0-0-g0734a4ac_factory_mcuboot.hex"
+    _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
+    _rev1_values = Values(
+        nordic_image=_sonic_4_2_0,
+        arm_image=_arm_image_3_0_1,
+        product_rev="01A",
+        hardware_rev="01A",
+        nordic_devicetype="nrf52840",
+    )
+    _rev_data = {
+        None: _rev1_values,
+        "1": _rev1_values,
+    }
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
+        return cls._base_limits_final + (
+            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+        )
+
+
 class RVMN5x(Config):
 
     """RVMN5x configuration."""
@@ -639,6 +674,38 @@ class RVMN5x(Config):
             "A223016",
         ):
             cls.product_rev = "14A"
+
+    @classmethod
+    def limits_final(cls):
+        """Final test limits.
+
+        @return Tuple(limits)
+
+        """
+        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
+        return cls._base_limits_final + (
+            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+        )
+
+
+class RVMN6x(Config):
+
+    """RVMN6x configuration."""
+
+    _fixture = "034861"
+    _nordic_4_2_0 = "rvmn6x_signed_4.2.0-0-g0734a4ac_factory_mcuboot.hex"
+    _ra2_image_0_3_6 = "rvmn5x_ra2_v0.3.6-0-g34e425b.hex"
+    _rev1_values = Values(
+        nordic_image=_nordic_4_2_0,
+        arm_image=_ra2_image_0_3_6,
+        product_rev="1A",
+        hardware_rev="1A",
+        arm_devicetype="r7fa2l1a9",
+    )
+    _rev_data = {
+        None: _rev1_values,
+        "1": _rev1_values,
+    }
 
     @classmethod
     def limits_final(cls):
