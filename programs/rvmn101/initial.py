@@ -84,7 +84,7 @@ class Initial(share.TestSequence):
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
         rvmn101 = dev["rvmn101"]
-        if self.parameter == "101A":
+        if self.parameter in ("101A", "200A"):
             rvmn101.hs_output(41, False)  # Defaults to on, so we turn it off.
         # Reversed HBridge outputs are only on 101A Rev 7-9
         if rvmn101.reversed_outputs:
@@ -153,8 +153,11 @@ class Devices(share.Devices):
             "101A": console.Console101A,
             "101B": console.Console101B,
             "101C": console.Console101C,
+            "200A": console.Console200A,
             "50": console.Console50,
             "55": console.Console55,
+            "60": console.Console60,
+            "65": console.Console65,
         }[self.parameter]
         self["rvmn101"] = console_class(nordic_ser)
         self["rvmn101"].output_reversed(self.reversed_outputs)
