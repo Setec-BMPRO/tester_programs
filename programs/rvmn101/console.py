@@ -2,6 +2,8 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101x and RVMN5x Console driver."""
 
+import time
+
 import attr
 
 import share
@@ -247,6 +249,7 @@ class _Console(share.console.Base):
         """Pulse RESET using DTR of the BDA4 (both micros)."""
         self.port.dtr = True
         self.reset_input_buffer()
+        time.sleep(0.1)
         self.port.dtr = False
 
     def brand(self, sernum, product_rev, hardware_rev):

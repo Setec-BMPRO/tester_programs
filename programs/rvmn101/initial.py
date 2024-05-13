@@ -62,6 +62,9 @@ class Initial(share.TestSequence):
         """Initialise the unit."""
         rvmn101 = dev["rvmn101"]
         rvmn101.open()
+        if self.parameter in ("101C", "200A"):  # SONIC needs a power cycle
+            dev["dcs_vbatt"].output(0.0, delay=0.5)
+            dev["dcs_vbatt"].output(self.cfg.vbatt_set)
         rvmn101.reset()
         time.sleep(2)
         rvmn101.brand(
