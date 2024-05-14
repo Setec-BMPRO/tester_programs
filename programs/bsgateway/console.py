@@ -4,6 +4,7 @@
 
 import time
 
+import tester
 import share
 
 
@@ -72,9 +73,17 @@ class Console(share.console.BadUart):
 
         """
         # Equation lifted verbatim from the Production Notes
-        self["SET_DAC"] = round(
-            (-(iacc - offacc) * 4095 * 11.77e-6 * 22000) / (vcc * 100 * 16)
-        )
+        dac = round((-(iacc - offacc) * 4095 * 11.77e-6 * 22000) / (vcc * 100 * 16))
+        self["SET_DAC"] = dac
         self["SET_OFF"] = offacc
         self["EECLR"] = None
         self["EEWR"] = None
+        # Log calibration values
+        sensor = tester.sensor.Mirror()
+        limit = tester.LimitBetween("X Cal", 0x0, 0xFFFF)
+        meas = tester.Measurement(limit, sensor)
+        for name, value in (("3V3", vcc), ("DAC", dac), ("OFF", offacc)):
+            limit.name = "{0} Cal".format(name)
+            limit.doc = "{0} value".format(name)
+            sensor.store(value)
+            meas.measure()

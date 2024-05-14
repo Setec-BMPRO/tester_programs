@@ -14,8 +14,10 @@ from . import console
 class Initial(share.TestSequence):
     """Initial Test Program."""
 
+    _pre_release = "bsgateway_v1.0.0-0-g5927f65_pre_release.hex"
     sw_image = {  # Key: Revision, Value: Image filename
-        "1": "bsgateway_v1.0.0-0-g5927f65_pre_release.hex",
+        None: _pre_release,
+        "1": _pre_release,
         "2": None,
     }
     v_set = 12.0  # Input DC voltage to power the unit
