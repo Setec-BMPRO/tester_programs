@@ -88,6 +88,8 @@ class Initial(share.TestSequence):
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
         rvmn101 = dev["rvmn101"]
+        if self.parameter == "200A":  # Test for 2 x wire links
+            dev["rla_link"].set_on()
         if self.parameter in ("101A", "200A"):
             rvmn101.hs_output(41, False)  # Defaults to on, so we turn it off.
         # Reversed HBridge outputs are only on 101A Rev 7-9
@@ -145,6 +147,7 @@ class Devices(share.Devices):
             ("dcs_vbatt", tester.DCSource, "DCS1"),
             ("swd_select", tester.Relay, "RLA1"),
             ("rla_pullup", tester.Relay, "RLA2"),
+            ("rla_link", tester.Relay, "RLA3"),
             ("JLink", tester.JLink, "JLINK"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
@@ -183,7 +186,8 @@ class Devices(share.Devices):
         self["canreader"].stop()
         self["can"].rvc_mode = False
         self["dcs_vbatt"].output(0.0, False)
-        self["rla_pullup"].set_off()
+        for rla in ("rla_pullup", "rla_link"):
+            rla.set_off()
 
 
 class Sensors(share.Sensors):
