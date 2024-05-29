@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101x and RVMN5x Console driver."""
+"""RVMNx Console driver."""
 
 import time
 
@@ -174,7 +174,7 @@ class PinName:
 
 class _Console(share.console.Base):
 
-    """Communications to RVMN101x and RVMN5x console."""
+    """Communications to RVMNx console."""
 
     # Console command prompt. Signals the end of response data.
     cmd_prompt = b"uart:~$ \x1b[m"
@@ -186,17 +186,19 @@ class _Console(share.console.Base):
     # Console commands
     parameter = share.console.parameter
     cmd_data = {
-        "MAC": parameter.String("rvmn mac", read_format="{0}"),
         "SERIAL": parameter.String(
-            "rvmn serial", writeable=True, write_format="{1} {0}"
+            "rvmn serial", read_format="{0}",
+            writeable=True, write_format="{1} {0}"
         ),
         "PRODUCT-REV": parameter.String(
-            "rvmn product-rev", writeable=True, write_format="{1} {0}"
+            "rvmn product-rev", read_format="{0}",
+            writeable=True, write_format="{1} {0}"
         ),
-        "SW-REV": parameter.String("rvmn sw-rev", read_format="{0}"),
         "HARDWARE-REV": parameter.String(
-            "rvmn hw-rev", writeable=True, write_format="{1} {0}"
+            "rvmn hw-rev", read_format="{0}",
+            writeable=True, write_format="{1} {0}"
         ),
+        "MAC": parameter.String("rvmn mac", read_format="{0}"),
         "OUTPUT": parameter.String(
             "rvmn output", readable=False, writeable=True, write_format="{1} {0}"
         ),

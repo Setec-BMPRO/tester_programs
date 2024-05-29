@@ -67,18 +67,19 @@ class Initial(share.TestSequence):
         rvmn.brand(
             self.sernum, self.cfg.values.product_rev, self.cfg.values.product_rev
         )
-        # FIXME: Power cycle module to reload everything from NV storage
-        dcs = dev["dcs_vbatt"]
-        dcs.output(0.0, delay=0.5)
-        dcs.output(self.cfg.vbatt_set, delay=2)
-        # FIXME: Check that firmware has really saved the branding data
-        for name, value in (  # Set the test limits
-            ("SerNum", self.sernum),
-            ("ProdRev", self.cfg.values.product_rev),
-            ("HardRev", self.cfg.values.product_rev),
-        ):
-            mes[name].testlimit[0].adjust("^{0}$".format(value))
-        self.measure(("SerNum", "ProdRev", "HardRev"))
+        with tester.PathName("Verify"):
+            # FIXME: Power cycle module to reload everything from NV storage
+            dcs = dev["dcs_vbatt"]
+            dcs.output(0.0, delay=0.5)
+            dcs.output(self.cfg.vbatt_set, delay=2)
+            # FIXME: Check that firmware has really saved the branding data
+            for name, value in (  # Set the test limits
+                ("SerNum", self.sernum),
+                ("ProdRev", self.cfg.values.product_rev),
+                ("HardRev", self.cfg.values.product_rev),
+            ):
+                mes[name].testlimit[0].adjust("^{0}$".format(value))
+            self.measure(("SerNum", "ProdRev", "HardRev"))
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)

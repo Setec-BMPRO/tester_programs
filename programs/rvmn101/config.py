@@ -704,6 +704,7 @@ class RVMN6x(Config):
         product_rev="01A",
         hardware_rev="01A",
         arm_devicetype="r7fa2l1a9",
+        nordic_devicetype="nrf52840",
     )
     _rev_data = {
         None: _rev1_values,
