@@ -32,7 +32,6 @@ def get(parameter, uut):
 
 
 class Type(enum.IntEnum):
-
     """Product type numbers for hardware revisions."""
 
     A = 1
@@ -44,7 +43,6 @@ class Type(enum.IntEnum):
 
 @attr.s
 class _Values:
-
     """Adjustable configuration data values."""
 
     sw_version = attr.ib(validator=attr.validators.instance_of(str))
@@ -57,7 +55,6 @@ class _Values:
 
 
 class J35:
-
     """Base configuration for J35."""
 
     # Available software versions
@@ -186,15 +183,6 @@ class J35:
         ),
         tester.LimitInteger("CAN_BIND", 1 << 28, doc="ARM reports CAN bus operational"),
         tester.LimitLow("InOCP", vout_set - 1.2, doc="Output is in OCP"),
-        tester.LimitPercent(
-            "SolarCutoffPre",
-            14.125,
-            percent=6,
-            doc="Solar Cut-Off voltage threshold uncertainty",
-        ),
-        tester.LimitBetween(
-            "SolarCutoff", 13.75, 14.5, doc="Solar Cut-Off voltage threshold range"
-        ),
         tester.LimitLow("FixtureLock", 200, doc="Test fixture lid microswitch"),
         tester.LimitBoolean("Solar-Status", True, doc="Solar Comparator Status is set"),
         tester.LimitBoolean("DetectCal", True, doc="Solar comparator calibrated"),
@@ -205,8 +193,6 @@ class J35:
         tester.LimitHigh("FanOn", 10.0, doc="Airflow seen"),
         tester.LimitDelta("Can12V", 12.5, delta=2.0, doc="CAN_POWER rail"),
         tester.LimitLow("Can0V", 0.5, doc="CAN BUS removed"),
-        tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
-        tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
         tester.LimitLow("InOCP", 11.6, doc="Output voltage to detect OCP"),
     )
     # Internal data storage
@@ -232,7 +218,6 @@ class J35:
 
 
 class J35A(J35):
-
     """J35A configuration."""
 
     # Output set points when running in manual mode
@@ -316,7 +301,16 @@ class J35A(J35):
         @return Tuple of limits
 
         """
-        return super()._base_limits_initial + (
+        return cls._base_limits_initial + (
+            tester.LimitPercent(  # Not used. Needed by Sensors
+                "SolarCutoffPre",
+                14.125,
+                percent=6,
+                doc="Solar Cut-Off voltage threshold uncertainty",
+            ),
+            tester.LimitBetween(  # Not used. Needed by Sensors
+                "SolarCutoff", 13.75, 14.5, doc="Solar Cut-Off voltage threshold range"
+            ),
             tester.LimitPercent(
                 "OCP_pre",
                 cls.ocp_set,
@@ -335,7 +329,9 @@ class J35A(J35):
         @return Tuple of limits
 
         """
-        return super()._base_limits_final + (
+        return cls._base_limits_final + (
+            tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
+            tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
             tester.LimitPercent(
                 "OCP", cls.ocp_set, (4.0, 10.0), doc="OCP trip current"
             ),
@@ -343,7 +339,6 @@ class J35A(J35):
 
 
 class J35B(J35):
-
     """J35B configuration."""
 
     _rev12_values = _Values(
@@ -420,12 +415,21 @@ class J35B(J35):
 
     @classmethod
     def limits_initial(cls):
-        """J35-B/C/D initial test limits.
+        """J35-B initial test limits.
 
         @return Tuple of limits
 
         """
-        return super()._base_limits_initial + (
+        return cls._base_limits_initial + (
+            tester.LimitPercent(
+                "SolarCutoffPre",
+                14.125,
+                percent=6,
+                doc="Solar Cut-Off voltage threshold uncertainty",
+            ),
+            tester.LimitBetween(
+                "SolarCutoff", 13.75, 14.5, doc="Solar Cut-Off voltage threshold range"
+            ),
             tester.LimitPercent(
                 "OCP_pre",
                 cls.ocp_set,
@@ -439,18 +443,19 @@ class J35B(J35):
 
     @classmethod
     def limits_final(cls):
-        """J35-B/C final test limits.
+        """J35-B final test limits.
 
         @return Tuple of limits
 
         """
-        return super()._base_limits_final + (
+        return cls._base_limits_final + (
+            tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
+            tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
             tester.LimitPercent("OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip current"),
         )
 
 
 class J35BL(J35B):
-
     """J35BL configuration."""
 
     _rev14_values = _Values(
@@ -477,8 +482,7 @@ class J35BL(J35B):
     }
 
 
-class J35C(J35B):
-
+class J35C(J35):
     """J35C configuration."""
 
     _rev12_values = _Values(
@@ -566,9 +570,49 @@ class J35C(J35B):
         "1": None,
     }
 
+    @classmethod
+    def limits_initial(cls):
+        """J35-C initial test limits.
 
-class J35D(J35C):
+        @return Tuple of limits
 
+        """
+        return cls._base_limits_initial + (
+            tester.LimitPercent(
+                "SolarCutoffPre",
+                14.125,
+                percent=6,
+                doc="Solar Cut-Off voltage threshold uncertainty",
+            ),
+            tester.LimitBetween(
+                "SolarCutoff", 14.0, 14.6, doc="Solar Cut-Off voltage threshold range"
+            ),
+            tester.LimitPercent(
+                "OCP_pre",
+                cls.ocp_set,
+                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
+                doc="OCP trip range before adjustment",
+            ),
+            tester.LimitPercent(
+                "OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip range after adjustment"
+            ),
+        )
+
+    @classmethod
+    def limits_final(cls):
+        """J35-C final test limits.
+
+        @return Tuple of limits
+
+        """
+        return cls._base_limits_final + (
+            tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
+            tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
+            tester.LimitPercent("OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip current"),
+        )
+
+
+class J35D(J35):
     """J35D configuration."""
 
     _rev14_values = _Values(
@@ -637,7 +681,7 @@ class J35D(J35C):
         @return Tuple of limits
 
         """
-        return super().limits_initial() + (
+        return cls._base_limits_initial + (
             tester.LimitPercent(
                 "SolarCutoffPre",
                 14.3,
@@ -646,6 +690,15 @@ class J35D(J35C):
             ),
             tester.LimitBetween(
                 "SolarCutoff", 14.0, 14.6, doc="Solar Cut-Off voltage threshold range"
+            ),
+            tester.LimitPercent(
+                "OCP_pre",
+                cls.ocp_set,
+                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
+                doc="OCP trip range before adjustment",
+            ),
+            tester.LimitPercent(
+                "OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip range after adjustment"
             ),
         )
 
@@ -656,7 +709,7 @@ class J35D(J35C):
         @return Tuple of limits
 
         """
-        return super()._base_limits_final + (
+        return cls._base_limits_final + (
             tester.LimitDelta("Vout", 14.0, delta=0.2, doc="No load output voltage"),
             tester.LimitPercent("Vload", 14.0, percent=5, doc="Loaded output voltage"),
             tester.LimitPercent(
@@ -666,7 +719,6 @@ class J35D(J35C):
 
 
 class ASPower(J35D):
-
     """ASPower configuration."""
 
     _rev2_values = _Values(

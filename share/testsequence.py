@@ -26,7 +26,6 @@ class TestSequence(tester.TestSequence):
         tester.LimitBoolean("Notify", True, doc="YES response"),
         tester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
     )
-    duplicate_limit_error = False
 
     def __init__(self):
         """Create instance variables."""
@@ -48,9 +47,7 @@ class TestSequence(tester.TestSequence):
 
         """
         super().open()
-        self.limits = tester.LimitDict(
-            self.limit_builtin + limits, self.duplicate_limit_error
-        )
+        self.limits = tester.LimitDict(self.limit_builtin + limits)
         self.devices = cls_devices(self.physical_devices)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
