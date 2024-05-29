@@ -4,19 +4,19 @@
 
 import threading
 
-import attr
+from attrs import define, field
 
 import share
 
 
-@attr.s
+@define
 class LEDControl:
 
     """Control of the LEDs via CAN."""
 
-    candev = attr.ib()
-    _worker = attr.ib(init=False, default=None)
-    _evt = attr.ib(init=False, factory=threading.Event)
+    candev = field()
+    _worker = field(init=False, default=None)
+    _evt = field(init=False, factory=threading.Event)
     inter_packet_gap = 0.5  # Wait between CAN packets
 
     def __enter__(self):

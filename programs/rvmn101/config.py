@@ -4,7 +4,7 @@
 
 import logging
 
-import attr
+from attrs import define, field, validators
 import tester
 
 import share
@@ -32,7 +32,7 @@ def get(parameter, uut):
     return config
 
 
-@attr.s
+@define
 class Values:
 
     """Adjustable configuration data values.
@@ -41,20 +41,20 @@ class Values:
 
     """
 
-    nordic_image = attr.ib(validator=attr.validators.instance_of(str))
-    arm_image = attr.ib(validator=attr.validators.instance_of(str))
-    product_rev = attr.ib(validator=attr.validators.instance_of(str))
-    hardware_rev = attr.ib()
-    reversed_outputs = attr.ib(
-        factory=dict, validator=attr.validators.instance_of(dict)
+    nordic_image = field(validator=validators.instance_of(str))
+    arm_image = field(validator=validators.instance_of(str))
+    product_rev = field(validator=validators.instance_of(str))
+    hardware_rev = field()
+    reversed_outputs = field(
+        factory=dict, validator=validators.instance_of(dict)
     )
-    nordic_devicetype = attr.ib(
-        default="nrf52832", validator=attr.validators.instance_of(str)
+    nordic_devicetype = field(
+        default="nrf52832", validator=validators.instance_of(str)
     )
-    arm_devicetype = attr.ib(
-        default="lpc1519", validator=attr.validators.instance_of(str)
+    arm_devicetype = field(
+        default="lpc1519", validator=validators.instance_of(str)
     )
-    fixture = attr.ib(default="", validator=attr.validators.instance_of(str))
+    fixture = field(default="", validator=validators.instance_of(str))
 
 
 class Config:

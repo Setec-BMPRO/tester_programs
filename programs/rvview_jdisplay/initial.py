@@ -13,7 +13,7 @@ It's testmode is controlled using CAN packets.
 
 import pathlib
 
-import attr
+from attrs import define, field
 import serial
 import tester
 
@@ -114,14 +114,14 @@ class Initial(share.TestSequence):
             self.devices["arm"].testmode(state)
 
 
-@attr.s
+@define
 class LatchingRelay:
 
     """A latching relay, with 'on' and 'off' drive lines."""
 
-    rla_on = attr.ib()
-    rla_off = attr.ib()
-    _pulse_time = attr.ib(init=False, default=0.01)
+    rla_on = field()
+    rla_off = field()
+    _pulse_time = field(init=False, default=0.01)
 
     def set_on(self):
         """Set ON."""

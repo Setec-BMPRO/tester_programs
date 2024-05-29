@@ -5,7 +5,7 @@
 import logging
 import math
 
-import attr
+from attrs import define, field, validators
 import tester
 
 import share
@@ -27,15 +27,15 @@ def get(parameter, uut):
     return config
 
 
-@attr.s
+@define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    arm_file = attr.ib(validator=attr.validators.instance_of(str))
-    arm_port = attr.ib(validator=attr.validators.instance_of(str))
-    sw_version = attr.ib(validator=attr.validators.instance_of(str))
-    cal_linecount = attr.ib(validator=attr.validators.instance_of(int))
+    arm_file = field(validator=validators.instance_of(str))
+    arm_port = field(validator=validators.instance_of(str))
+    sw_version = field(validator=validators.instance_of(str))
+    cal_linecount = field(validator=validators.instance_of(int))
 
 
 class BCx5:

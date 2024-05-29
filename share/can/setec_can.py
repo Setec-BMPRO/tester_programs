@@ -10,7 +10,7 @@ Reference:
 
 import enum
 
-import attr
+from attrs import define, field
 
 from . import _base
 
@@ -32,12 +32,12 @@ class SETECDeviceID(enum.IntEnum):  # pylint: disable=too-few-public-methods
     GENERIC = 16400
 
 
-@attr.s
+@define
 class Trek2PreConditionsBuilder:  # pylint: disable=too-few-public-methods
 
     """A TREK2 PreConditions packet builder."""
 
-    packet = attr.ib(init=False)
+    packet = field(init=False)
 
     @packet.default
     def _packet_default(self):
@@ -51,12 +51,12 @@ class Trek2PreConditionsBuilder:  # pylint: disable=too-few-public-methods
         return _base.CANPacket(header, data, rvc_mode=False)
 
 
-@attr.s
+@define
 class RvviewTestModeBuilder:  # pylint: disable=too-few-public-methods
 
     """A RVVIEW TestMode packet builder."""
 
-    packet = attr.ib(init=False)
+    packet = field(init=False)
 
     @packet.default
     def _packet_default(self):

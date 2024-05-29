@@ -2,16 +2,16 @@
 # Copyright 2019 SETEC Pty Ltd.
 """Bluetooth SerialNumber to MAC Storage."""
 
-import attr
+from attrs import define, field
 import jsonrpclib
 
 
-@attr.s
+@define
 class SerialToMAC:
 
     """Save/Read the bluetooth MAC address for a Serial Number."""
 
-    server_url = attr.ib(default="https://webapp.mel.setec.com.au/ate/rpc/")
+    server_url = field(default="https://webapp.mel.setec.com.au/ate/rpc/")
 
     # FIXME: We should be able to reuse the ServerProxy
     # Python 3.10 with OpenSSL 3 and gets an "unexpected EOF" SSL

@@ -4,7 +4,7 @@
 
 import contextlib
 
-import attr
+from attrs import define, field
 import tester
 
 from . import _base
@@ -60,14 +60,14 @@ __all__ = [
 ]
 
 
-@attr.s
+@define
 class PacketPropertyReader:
 
     """Custom logical instrument to read CAN packet properties."""
 
-    canreader = attr.ib()  # tester.CANReader instance
-    decoder = attr.ib()  # CAN packet data decoder instance
-    _read_key = attr.ib(init=False, default=None)
+    canreader = field()  # tester.CANReader instance
+    decoder = field()  # CAN packet data decoder instance
+    _read_key = field(init=False, default=None)
 
     def configure(self, key):
         """Sensor: Configure for next reading."""
@@ -93,12 +93,12 @@ class PacketPropertyReader:
         return self.decoder.get(self._read_key)
 
 
-@attr.s
+@define
 class PacketDetector:
 
     """Custom logical instrument to detect CAN packet traffic."""
 
-    canreader = attr.ib()  # tester.CANReader instance
+    canreader = field()  # tester.CANReader instance
 
     def configure(self, key):  # pylint: disable=unused-argument
         """Sensor: Configure for next reading."""

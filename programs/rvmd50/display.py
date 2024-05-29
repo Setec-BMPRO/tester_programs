@@ -4,18 +4,18 @@
 
 import time
 
-import attr
+from attrs import define, field
 import share
 
 
-@attr.s
+@define
 class DisplayControl:
 
     """Control of the LCD & Backlight via CAN."""
 
-    can_dev = attr.ib()
-    bld_pattern = attr.ib(init=False, factory=share.can.RVMD50ControlLCDBuilder)
-    bld_button = attr.ib(init=False, factory=share.can.RVMD50ControlButtonBuilder)
+    can_dev = field()
+    bld_pattern = field(init=False, factory=share.can.RVMD50ControlLCDBuilder)
+    bld_button = field(init=False, factory=share.can.RVMD50ControlButtonBuilder)
 
     def __enter__(self):
         """Context Manager entry handler - Override LCD & Backlight.

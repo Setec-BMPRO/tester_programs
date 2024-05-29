@@ -4,36 +4,36 @@
 
 import logging
 
-import attr
+from attrs import define, field, validators
 
 import tester
 
 
-@attr.s
+@define
 class Rail:
     """Rail data values."""
 
-    full = attr.ib(validator=attr.validators.instance_of(float))
-    peak = attr.ib(validator=attr.validators.instance_of(float))
-    ocp = attr.ib(validator=attr.validators.instance_of(float))
+    full = field(validator=validators.instance_of(float))
+    peak = field(validator=validators.instance_of(float))
+    ocp = field(validator=validators.instance_of(float))
 
 
-@attr.s
+@define
 class Ratings:
     """Ratings data values."""
 
-    v12 = attr.ib(validator=attr.validators.instance_of(Rail))
-    v24 = attr.ib(validator=attr.validators.instance_of(Rail))
+    v12 = field(validator=validators.instance_of(Rail))
+    v24 = field(validator=validators.instance_of(Rail))
 
 
-@attr.s
+@define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    devicetype = attr.ib(validator=attr.validators.instance_of(str))
-    sw_image = attr.ib(validator=attr.validators.instance_of(str))
-    is_renesas = attr.ib(validator=attr.validators.instance_of(bool))
+    devicetype = field(validator=validators.instance_of(str))
+    sw_image = field(validator=validators.instance_of(str))
+    is_renesas = field(validator=validators.instance_of(bool))
 
 
 class Config:

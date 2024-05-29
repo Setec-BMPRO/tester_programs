@@ -5,7 +5,7 @@
 import ctypes
 import struct
 
-import attr
+from attrs import define, field
 
 import tester
 
@@ -44,7 +44,7 @@ class _Switch(ctypes.Structure):  # pylint: disable=too-few-public-methods
     ]
 
 
-@attr.s
+@define
 class PacketDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """RVSWT101 BLE broadcast packet decoder."""
@@ -94,15 +94,15 @@ class PacketDecoder(tester.sensor.KeyedDataDecoderMixIn):
         fields["switch_code"] = int(all_switches, 2)
 
 
-@attr.s
+@define
 class RVSWT101:
 
     """Custom logical instrument to read packet properties."""
 
-    bleserver = attr.ib()
-    always_scan = attr.ib(init=False, default=True)
-    _key = attr.ib(init=False, default=None)
-    _decoder = attr.ib(init=False, factory=PacketDecoder)
+    bleserver = field()
+    always_scan = field(init=False, default=True)
+    _key = field(init=False, default=None)
+    _decoder = field(init=False, factory=PacketDecoder)
 
     def configure(self, key):
         """Sensor: Configure for next reading."""

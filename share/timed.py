@@ -5,17 +5,17 @@
 import copy
 import threading
 
-import attr
+from attrs import define, field, validators
 
 
-@attr.s
+@define
 class BackgroundTimer:
 
     """Generic second timer with a 'done' property."""
 
-    interval = attr.ib(converter=float, validator=attr.validators.gt(0.0))
-    _stop = attr.ib(init=False, factory=threading.Event)
-    _worker = attr.ib(init=False, default=None)
+    interval = field(converter=float, validator=validators.gt(0.0))
+    _stop = field(init=False, factory=threading.Event)
+    _worker = field(init=False, default=None)
 
     def start(self):
         """Start timer."""
@@ -55,15 +55,15 @@ class BackgroundTimer:
         self._stop.clear()
 
 
-@attr.s
+@define
 class RepeatTimer:
 
     """Repeatedly call a function at a regular interval."""
 
-    interval = attr.ib(converter=float, validator=attr.validators.gt(0.0))
-    function = attr.ib(validator=attr.validators.is_callable())
-    _stop = attr.ib(init=False, factory=threading.Event)
-    _worker = attr.ib(init=False, default=None)
+    interval = field(converter=float, validator=validators.gt(0.0))
+    function = field(validator=validators.is_callable())
+    _stop = field(init=False, factory=threading.Event)
+    _worker = field(init=False, default=None)
 
     def start(self):
         """Start timer."""
@@ -87,7 +87,7 @@ class RepeatTimer:
         self._stop.clear()
 
 
-@attr.s
+@define
 class TimedStore:
 
     """Dictionary with timeout.
@@ -99,14 +99,14 @@ class TimedStore:
 
     """
 
-    default = attr.ib(validator=attr.validators.instance_of(dict))
-    timeout = attr.ib(converter=float, validator=attr.validators.gt(0.0))
-    data = attr.ib(init=False, factory=dict)
-    tick_interval = attr.ib(init=False, default=0.5)
-    _timer = attr.ib(init=False, default=None)
-    _lock = attr.ib(init=False, factory=threading.RLock)
-    _ticks_total = attr.ib(init=False, default=0)
-    _ticks_left = attr.ib(init=False, default=0)
+    default = field(validator=validators.instance_of(dict))
+    timeout = field(converter=float, validator=validators.gt(0.0))
+    data = field(init=False, factory=dict)
+    tick_interval = field(init=False, default=0.5)
+    _timer = field(init=False, default=None)
+    _lock = field(init=False, factory=threading.RLock)
+    _ticks_total = field(init=False, default=0)
+    _ticks_left = field(init=False, default=0)
 
     def _tick_handler(self):
         """Reset data dictionary if the timeout has expired."""

@@ -4,7 +4,7 @@
 
 import logging
 
-import attr
+from attrs import define, field, validators
 
 
 def get(parameter, uut):
@@ -23,18 +23,18 @@ def get(parameter, uut):
     return config
 
 
-@attr.s
+@define
 class _Values:
 
     """Configuration data values."""
 
-    product_rev = attr.ib(validator=attr.validators.instance_of(str))
-    hardware_rev = attr.ib(validator=attr.validators.instance_of(str))
-    sw_nrf_image = attr.ib(validator=attr.validators.instance_of(str))
-    sw_arm_image = attr.ib(
-        default="nxp_v0.1.0.bin", validator=attr.validators.instance_of(str)
+    product_rev = field(validator=validators.instance_of(str))
+    hardware_rev = field(validator=validators.instance_of(str))
+    sw_nrf_image = field(validator=validators.instance_of(str))
+    sw_arm_image = field(
+        default="nxp_v0.1.0.bin", validator=validators.instance_of(str)
         )
-    is_smartlink = attr.ib(default=True, validator=attr.validators.instance_of(bool))
+    is_smartlink = field(default=True, validator=validators.instance_of(bool))
 
 
 class _Config:

@@ -6,7 +6,7 @@ import enum
 import logging
 import math
 
-import attr
+from attrs import define, field, validators
 
 import tester
 
@@ -41,17 +41,17 @@ class Type(enum.IntEnum):
     BL = 5
 
 
-@attr.s
+@define
 class _Values:
     """Adjustable configuration data values."""
 
-    sw_version = attr.ib(validator=attr.validators.instance_of(str))
-    hw_version = attr.ib(validator=attr.validators.instance_of(tuple))
-    output_count = attr.ib(validator=attr.validators.instance_of(int))
-    ocp_set = attr.ib(validator=attr.validators.instance_of(float))
-    solar = attr.ib(validator=attr.validators.instance_of(bool))
-    canbus = attr.ib(validator=attr.validators.instance_of(bool))
-    air = attr.ib(validator=attr.validators.instance_of(bool))
+    sw_version = field(validator=validators.instance_of(str))
+    hw_version = field(validator=validators.instance_of(tuple))
+    output_count = field(validator=validators.instance_of(int))
+    ocp_set = field(validator=validators.instance_of(float))
+    solar = field(validator=validators.instance_of(bool))
+    canbus = field(validator=validators.instance_of(bool))
+    air = field(validator=validators.instance_of(bool))
 
 
 class J35:

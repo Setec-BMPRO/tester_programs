@@ -11,7 +11,7 @@ Reference:
 import ctypes
 import enum
 
-import attr
+from attrs import define, field
 import tester
 
 from . import _base
@@ -144,7 +144,7 @@ class _SwitchStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
     ]
 
 
-@attr.s
+@define
 class SwitchStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """A RVMC Switch Status decoder."""
@@ -197,7 +197,7 @@ class _DeviceStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
     ]
 
 
-@attr.s
+@define
 class DeviceStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """RVMD50 Device Status decoder."""
@@ -270,7 +270,7 @@ class _ACStatus3(ctypes.Structure):  # pylint: disable=too-few-public-methods
     ]
 
 
-@attr.s
+@define
 class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """ACMON Status decoder.
@@ -281,10 +281,10 @@ class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
     """
 
-    ats1l1 = attr.ib(init=False, factory=dict)
-    ats1l2 = attr.ib(init=False, factory=dict)
-    ats3l1 = attr.ib(init=False, factory=dict)
-    ats3l2 = attr.ib(init=False, factory=dict)
+    ats1l1 = field(init=False, factory=dict)
+    ats1l2 = field(init=False, factory=dict)
+    ats3l1 = field(init=False, factory=dict)
+    ats3l2 = field(init=False, factory=dict)
 
     def worker(self, fields, packet):
         """Decode packet.
@@ -331,7 +331,7 @@ class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
                 fields["{0}_{1}".format(prefix, key)] = value
 
 
-@attr.s
+@define
 class RVMC101ControlLEDBuilder:  # pylint: disable=too-few-public-methods
 
     """A RVMC101 Control LED packet builder.
@@ -348,7 +348,7 @@ class RVMC101ControlLEDBuilder:  # pylint: disable=too-few-public-methods
 
     """
 
-    packet = attr.ib(init=False)
+    packet = field(init=False)
 
     @packet.default
     def _packet_default(self):
@@ -409,7 +409,7 @@ class _RVMD50Message:  # pylint: disable=too-few-public-methods
         return _base.CANPacket(header, data, rvc_mode=True)
 
 
-@attr.s
+@define
 class RVMD50ControlLCDBuilder:  # pylint: disable=too-few-public-methods
 
     """A RVMD50 Control LCD packet builder."""
@@ -417,7 +417,7 @@ class RVMD50ControlLCDBuilder:  # pylint: disable=too-few-public-methods
     _pattern_index = 2  # Index of test pattern value
 
     # Cmd ID: 0 = Control LCD
-    packet = attr.ib(init=False, factory=lambda: _RVMD50Message.create(cmd_id=0))
+    packet = field(init=False, factory=lambda: _RVMD50Message.create(cmd_id=0))
 
     def __attrs_post_init__(self):
         """Populate fields."""
@@ -444,16 +444,16 @@ class RVMD50ControlLCDBuilder:  # pylint: disable=too-few-public-methods
         self.packet.data[self._pattern_index] = value
 
 
-@attr.s
+@define
 class RVMD50ResetBuilder:  # pylint: disable=too-few-public-methods
 
     """A RVMD50 Reset packet builder."""
 
     # Cmd ID: 1 = Reset
-    packet = attr.ib(init=False, factory=lambda: _RVMD50Message.create(cmd_id=1))
+    packet = field(init=False, factory=lambda: _RVMD50Message.create(cmd_id=1))
 
 
-@attr.s
+@define
 class RVMD50ControlButtonBuilder:
 
     """A RVMD50 Control Button packet builder."""
@@ -462,7 +462,7 @@ class RVMD50ControlButtonBuilder:
     _button_index = 3  # Index of Button value
 
     # Cmd ID: 2 = Control Button
-    packet = attr.ib(init=False, factory=lambda: _RVMD50Message.create(cmd_id=2))
+    packet = field(init=False, factory=lambda: _RVMD50Message.create(cmd_id=2))
 
     def __attrs_post_init__(self):
         """Populate fields."""

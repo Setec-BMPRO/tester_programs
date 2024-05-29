@@ -4,19 +4,19 @@
 
 import logging
 
-import attr
+from attrs import define, field, validators
 
 import tester
 
 
-@attr.s
+@define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    devicetype = attr.ib(validator=attr.validators.instance_of(str))
-    sw_image = attr.ib(validator=attr.validators.instance_of(str))
-    pfc_trim = attr.ib(validator=attr.validators.instance_of(bool))
+    devicetype = field(validator=validators.instance_of(str))
+    sw_image = field(validator=validators.instance_of(str))
+    pfc_trim = field(validator=validators.instance_of(bool))
 
 
 class Config:

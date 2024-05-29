@@ -8,15 +8,15 @@ See https://en.wikipedia.org/wiki/MAC_address
 
 import re
 
-import attr
+from attrs import define, field, validators
 
 
-@attr.s
+@define
 class MAC:
 
     """Device MAC address."""
 
-    mac = attr.ib(validator=attr.validators.instance_of(bytes))
+    mac = field(validator=validators.instance_of(bytes))
 
     @mac.validator
     def _mac_validator(self, _, value):

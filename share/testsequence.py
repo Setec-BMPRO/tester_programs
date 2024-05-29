@@ -7,7 +7,7 @@ import contextlib
 import functools
 import time
 
-import attr
+from attrs import define, field, validators
 import tester
 
 
@@ -16,12 +16,131 @@ class DuplicateNameError(Exception):
     """Duplicate name error."""
 
 
-@attr.s
+def teststep(func):
+    """Decorator to add arguments to the test step calls.
+
+    Requires self.devices and self.measurements
+
+    @return Decorated function
+
+    """
+
+    @functools.wraps(func)
+    def new_func(self):
+        """Decorate the function."""
+        return func(self, self.devices, self.measurements)
+
+    return new_func
+
+
+@define
+class Devices(abc.ABC):
+
+    """Devices abstract base class."""
+
+    physical_devices = field()
+    parameter = field(init=False, default=None)
+    _close_callables = field(init=False, factory=list)
+    _store = field(init=False, factory=dict)
+
+    def __setitem__(self, name, value):
+        """Add a Device, rejecting duplicate names.
+
+        @param name Device name
+        @param value Device instance
+
+        """
+        if name in self._store:
+            raise DuplicateNameError('Device name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Device name
+        @return Device instance
+
+        """
+        return self._store[name]
+
+    @abc.abstractmethod
+    def open(self):
+        """Create all devices."""
+
+    def run(self):
+        """Test run is starting."""
+
+    @abc.abstractmethod
+    def reset(self):
+        """Test run has stopped - Reset instruments."""
+
+    def add_closer(self, target):
+        """Add a callable to be called upon close()."""
+        self._close_callables.append(target)
+
+    def close(self):
+        """Close devices."""
+        self._close_callables.reverse()  # Close in LIFO order
+        for target in self._close_callables:
+            target()
+        self._close_callables.clear()
+        self._store.clear()
+
+
+@define
+class Sensors(abc.ABC):
+
+    """Sensors."""
+
+    devices = field()
+    limits = field()
+    parameter = field(init=False, default=None)
+    _store = field(init=False, factory=dict)
+
+    def __setitem__(self, name, value):
+        """Add a Sensor, rejecting duplicate names.
+
+        @param name Sensor name
+        @param value Sensor instance
+
+        """
+        if name in self._store:
+            raise DuplicateNameError('Sensor name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Sensor name
+        @return Sensor instance
+
+        """
+        return self._store[name]
+
+    @abc.abstractmethod
+    def open(self):
+        """Create all sensors."""
+
+    def reset(self):
+        """Reset sensors by flushing any stored data."""
+        for name, sensor in self._store.items():
+            try:
+                for subsensor in iter(sensor):  # It could be a sequence of sensors
+                    subsensor.clear()
+            except TypeError:  # Not iterable is a single sensor
+                sensor.clear()
+
+    def close(self):
+        """Close sensors."""
+        self._store.clear()
+
+
+@define
 class TestLimits:
 
     """Dictionary of Test Limits."""
 
-    _store = attr.ib(init=False, factory=dict)
+    _store = field(init=False, factory=dict)
 
     def load(self, limitdata):
         """Load Test Limit data.
@@ -54,15 +173,66 @@ class TestLimits:
         return self._store[name]
 
 
+@define
+class Measurements(abc.ABC):
+
+    """Measurements."""
+
+    sensors = field()
+    limits = field()
+    parameter = field(init=False, default=None)
+    _store = field(init=False, factory=dict)
+
+    def __setitem__(self, name, value):
+        """Add a Measurement, rejecting duplicate names.
+
+        @param name Measurement name
+        @param value Measurement instance
+
+        """
+        if name in self._store:
+            raise DuplicateNameError('Measurement name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Measurement name
+        @return Measurement instance
+
+        """
+        return self._store[name]
+
+    @abc.abstractmethod
+    def open(self):
+        """Create all measurements."""
+
+    def reset(self):
+        """Reset measurements."""
+
+    def close(self):
+        """Close measurements."""
+        self._store.clear()
+
+    def create_from_names(self, namedata):
+        """Create measurements from name data.
+
+        @param namedata Iterable of Tuple of
+                (measurement_name, limit_name, sensor_name, doc)
+
+        """
+        for measurement_name, limit_name, sensor_name, doc in namedata:
+            self[measurement_name] = tester.Measurement(
+                self.limits[limit_name], self.sensors[sensor_name], doc=doc
+            )
+
+
+@define
 class TestSequence(tester.TestSequence):
 
-    """Base class for Test Programs.
+    """Base class for Test Programs."""
 
-    Manages the common instances
-
-    """
-
-    limit_builtin = (
+    _limit_builtin = (
         tester.LimitRegExp(
             "SerNum", r"^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$", doc="Serial Number"
         ),
@@ -70,14 +240,11 @@ class TestSequence(tester.TestSequence):
         tester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
     )
 
-    def __init__(self):
-        """Create instance variables."""
-        super().__init__()
-        self.devices = None
-        self.limits = TestLimits()
-        self.sensors = None
-        self.measurements = None
-        self.parameter = None
+    devices = field(init=False, default=None)
+    sensors = field(init=False, default=None)
+    limits = field(init=False, factory=TestLimits)
+    measurements = field(init=False, default=None)
+    parameter = field(init=False, default=None)
 
     @abc.abstractmethod
     def open(self, limits, cls_devices, cls_sensors, cls_measurements):
@@ -90,7 +257,7 @@ class TestSequence(tester.TestSequence):
 
         """
         super().open()
-        self.limits.load(self.limit_builtin + limits)
+        self.limits.load(self._limit_builtin + limits)
         self.devices = cls_devices(self.physical_devices)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
@@ -231,189 +398,16 @@ class TestSequence(tester.TestSequence):
         return sernum
 
 
-@attr.s
-class Devices(abc.ABC):
-
-    """Devices abstract base class."""
-
-    physical_devices = attr.ib()
-    parameter = attr.ib(init=False, default=None)
-    _close_callables = attr.ib(init=False, factory=list)
-    _store = attr.ib(init=False, factory=dict)
-
-    def __setitem__(self, name, value):
-        """Add a Device, rejecting duplicate names.
-
-        @param name Device name
-        @param value Device instance
-
-        """
-        if name in self._store:
-            raise DuplicateNameError('Device name "{0}"'.format(name))
-        self._store[name] = value
-
-    def __getitem__(self, name):
-        """Indexed access by name.
-
-        @param name Device name
-        @return Device instance
-
-        """
-        return self._store[name]
-
-    @abc.abstractmethod
-    def open(self):
-        """Create all devices."""
-
-    def run(self):
-        """Test run is starting."""
-
-    @abc.abstractmethod
-    def reset(self):
-        """Test run has stopped - Reset instruments."""
-
-    def add_closer(self, target):
-        """Add a callable to be called upon close()."""
-        self._close_callables.append(target)
-
-    def close(self):
-        """Close devices."""
-        self._close_callables.reverse()  # Close in LIFO order
-        for target in self._close_callables:
-            target()
-        self._close_callables.clear()
-        self._store.clear()
-
-
-@attr.s
-class Sensors(abc.ABC):
-
-    """Sensors."""
-
-    devices = attr.ib()
-    limits = attr.ib()
-    parameter = attr.ib(init=False, default=None)
-    _store = attr.ib(init=False, factory=dict)
-
-    def __setitem__(self, name, value):
-        """Add a Sensor, rejecting duplicate names.
-
-        @param name Sensor name
-        @param value Sensor instance
-
-        """
-        if name in self._store:
-            raise DuplicateNameError('Sensor name "{0}"'.format(name))
-        self._store[name] = value
-
-    def __getitem__(self, name):
-        """Indexed access by name.
-
-        @param name Sensor name
-        @return Sensor instance
-
-        """
-        return self._store[name]
-
-    @abc.abstractmethod
-    def open(self):
-        """Create all sensors."""
-
-    def reset(self):
-        """Reset sensors by flushing any stored data."""
-        for name, sensor in self._store.items():
-            try:
-                for subsensor in iter(sensor):  # It could be a sequence of sensors
-                    subsensor.clear()
-            except TypeError:  # Not iterable is a single sensor
-                sensor.clear()
-
-    def close(self):
-        """Close sensors."""
-        self._store.clear()
-
-
-@attr.s
-class Measurements(abc.ABC):
-
-    """Measurements."""
-
-    sensors = attr.ib()
-    limits = attr.ib()
-    parameter = attr.ib(init=False, default=None)
-    _store = attr.ib(init=False, factory=dict)
-
-    def __setitem__(self, name, value):
-        """Add a Measurement, rejecting duplicate names.
-
-        @param name Measurement name
-        @param value Measurement instance
-
-        """
-        if name in self._store:
-            raise DuplicateNameError('Measurement name "{0}"'.format(name))
-        self._store[name] = value
-
-    def __getitem__(self, name):
-        """Indexed access by name.
-
-        @param name Measurement name
-        @return Measurement instance
-
-        """
-        return self._store[name]
-
-    @abc.abstractmethod
-    def open(self):
-        """Create all measurements."""
-
-    def reset(self):
-        """Reset measurements."""
-
-    def close(self):
-        """Close measurements."""
-        self._store.clear()
-
-    def create_from_names(self, namedata):
-        """Create measurements from name data.
-
-        @param namedata Iterable of Tuple of
-                (measurement_name, limit_name, sensor_name, doc)
-
-        """
-        for measurement_name, limit_name, sensor_name, doc in namedata:
-            self[measurement_name] = tester.Measurement(
-                self.limits[limit_name], self.sensors[sensor_name], doc=doc
-            )
-
-
-def teststep(func):
-    """Decorator to add arguments to the test step calls.
-
-    Requires self.devices and self.measurements
-
-    @return Decorated function
-
-    """
-
-    @functools.wraps(func)
-    def new_func(self):
-        """Decorate the function."""
-        return func(self, self.devices, self.measurements)
-
-    return new_func
-
-
-@attr.s
+@define
 class MultiMeasurementSummary:
 
     """Check multiple measurements and calculate overall result."""
 
-    default_timeout = attr.ib(
-        validator=attr.validators.instance_of((int, float)), default=0
+    default_timeout = field(
+        validator=validators.instance_of((int, float)), default=0
     )
-    result = attr.ib(init=False, factory=tester.MeasurementResult)
-    _sensor_positions = attr.ib(init=False, factory=set)
+    result = field(init=False, factory=tester.MeasurementResult)
+    _sensor_positions = field(init=False, factory=set)
 
     def __enter__(self):
         """Context Manager entry handler.

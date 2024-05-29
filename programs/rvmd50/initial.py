@@ -8,7 +8,7 @@ Shares the test fixture with the RVView/JDisplay program.
 
 import pathlib
 
-import attr
+from attrs import define, field
 import tester
 
 import share
@@ -63,14 +63,14 @@ class Initial(share.TestSequence):
             self.measure(("YesNoDisplayOk", "dmm_bklghton"), timeout=5)
 
 
-@attr.s
+@define
 class LatchingRelay:
 
     """A latching relay, with 'on' and 'off' drive lines."""
 
-    rla_on = attr.ib()
-    rla_off = attr.ib()
-    _pulse_time = attr.ib(init=False, default=0.01)
+    rla_on = field()
+    rla_off = field()
+    _pulse_time = field(init=False, default=0.01)
 
     def set_on(self):
         """Set ON."""

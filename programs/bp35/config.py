@@ -5,7 +5,7 @@
 import enum
 import logging
 
-import attr
+from attrs import define, field, validators
 
 import tester
 
@@ -41,13 +41,13 @@ class Type(enum.IntEnum):
     HA = 3
 
 
-@attr.s
+@define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    hw_version = attr.ib(validator=attr.validators.instance_of(tuple))
-    arm_sw_version = attr.ib(validator=attr.validators.instance_of(str))
+    hw_version = field(validator=validators.instance_of(tuple))
+    arm_sw_version = field(validator=validators.instance_of(str))
 
 
 class BP35:

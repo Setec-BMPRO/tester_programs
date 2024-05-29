@@ -4,7 +4,7 @@
 
 import logging
 
-import attr
+from attrs import define, field, validators
 
 
 def get(parameter, uut):  # pylint: disable=unused-argument
@@ -18,12 +18,12 @@ def get(parameter, uut):  # pylint: disable=unused-argument
     return Config.get(uut)
 
 
-@attr.s
+@define
 class Values:  # pylint: disable=too-few-public-methods
 
     """Configuration data values."""
 
-    sw_image = attr.ib(validator=attr.validators.instance_of(str))
+    sw_image = field(validator=validators.instance_of(str))
 
 
 class Config:  # pylint: disable=too-few-public-methods

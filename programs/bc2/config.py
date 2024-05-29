@@ -4,7 +4,7 @@
 
 import logging
 
-import attr
+from attrs import define, field, validators
 
 import tester
 
@@ -26,13 +26,13 @@ def get(parameter, uut):
     return config
 
 
-@attr.s
+@define
 class _Values:
 
     """Adjustable configuration data values."""
 
-    hw_version = attr.ib(validator=attr.validators.instance_of(tuple))
-    sw_version = attr.ib(validator=attr.validators.instance_of(str))
+    hw_version = field(validator=validators.instance_of(tuple))
+    sw_version = field(validator=validators.instance_of(str))
 
 
 class Config:

@@ -4,7 +4,7 @@
 
 import time
 
-import attr
+from attrs import define, field
 
 import share
 
@@ -14,13 +14,13 @@ class InvalidOutputError(Exception):
     """Attempt to set a non-existing output."""
 
 
-@attr.s
+@define
 class PinName:
 
     """Pin name mappings from index number."""
 
     # Key: Output index, Value: Schematic pin name
-    _output = attr.ib(
+    _output = field(
         init=False,
         default={
             0: "HBRIDGE_1_extend",
@@ -82,7 +82,7 @@ class PinName:
         },
     )
     # Key: Input index, Value: Schematic pin name
-    _input = attr.ib(
+    _input = field(
         init=False,
         default={
             0: "GEN_PUR_HS_SW1",
@@ -105,7 +105,7 @@ class PinName:
         },
     )
     # Key: Input index, Value: Schematic pin name
-    _analog = attr.ib(
+    _analog = field(
         init=False,
         default={
             0: "TANK 1",
