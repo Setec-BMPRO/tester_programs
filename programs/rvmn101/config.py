@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN Configuration."""
+"""RVMNx Configuration."""
 
 import logging
 
@@ -59,7 +59,7 @@ class Values:
 
 class Config:
 
-    """Base configuration for RVMN101 and RVMN5x."""
+    """Base configuration for RVMNx."""
 
     values = None  # Values instance
     vbatt_set = 12.5
@@ -79,6 +79,9 @@ class Config:
         tester.LimitHigh("LSoff", 9.0, doc="LS output off (high)"),
         tester.LimitBoolean("CANok", True, doc="CAN bus active"),
         tester.LimitBetween("AllInputs", 0, 0xFFFF, doc="Digital inputs"),
+        tester.LimitRegExp("SerNum", "", doc="Correct serial number"),
+        tester.LimitRegExp("ProdRev", "", doc="Correct product revision"),
+        tester.LimitRegExp("HardRev", "", doc="Correct hardware revision"),
     )
     # Final Test limits common to all units
     _base_limits_final = _base_limits + (

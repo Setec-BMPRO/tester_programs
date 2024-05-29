@@ -59,7 +59,7 @@ class RVMN101BInitial(ProgramTestCase):
         self.tester.test(("UUT1",))
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(9, len(result.readings))
+        self.assertEqual(8, len(result.readings))
         self.assertEqual(
             ["PowerUp", "Program", "Initialise", "Input", "Output", "CanBus"],
             self.tester.ut_steps,

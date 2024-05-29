@@ -13,7 +13,6 @@ from . import console, config
 
 
 class Initial(share.TestSequence):
-
     """RVMN101 and RVMN5x Initial Test Program."""
 
     def open(self, uut):
@@ -60,17 +59,26 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
-        rvmn101 = dev["rvmn101"]
-        rvmn101.open()
-        if self.cfg.values.nordic_devicetype == "nrf52840":  # Power cycle SONIC
-            dcs = dev["dcs_vbatt"]
-            dcs.output(0.0, delay=0.5)
-            dcs.output(self.cfg.vbatt_set)
-        rvmn101.reset()
-        time.sleep(2)
-        rvmn101.brand(
-            self.sernum, self.cfg.values.product_rev, self.cfg.values.hardware_rev
+        rvmn = dev["rvmn"]
+        rvmn.open()
+        rvmn.reset()
+        # FIXME: Console prompt appears before it is ready to accept commands
+        time.sleep(4)  # RVMN200A: 2s gives a 1 in 5 branding failure rate
+        rvmn.brand(
+            self.sernum, self.cfg.values.product_rev, self.cfg.values.product_rev
         )
+        # FIXME: Power cycle module to reload everything from NV storage
+        dcs = dev["dcs_vbatt"]
+        dcs.output(0.0, delay=0.5)
+        dcs.output(self.cfg.vbatt_set, delay=2)
+        # FIXME: Check that firmware has really saved the branding data
+        for name, value in (  # Set the test limits
+            ("SerNum", self.sernum),
+            ("ProdRev", self.cfg.values.product_rev),
+            ("HardRev", self.cfg.values.product_rev),
+        ):
+            mes[name].testlimit[0].adjust("^{0}$".format(value))
+        self.measure(("SerNum", "ProdRev", "HardRev"))
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
@@ -87,20 +95,20 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_output(self, dev, mes):
         """Test the outputs of the unit."""
-        rvmn101 = dev["rvmn101"]
+        rvmn = dev["rvmn"]
         if self.parameter == "200A":  # Test for 2 x wire links
             dev["rla_link"].set_on()
         if self.parameter in ("101A", "200A"):
-            rvmn101.hs_output(41, False)  # Defaults to on, so we turn it off.
+            rvmn.hs_output(41, False)  # Defaults to on, so we turn it off.
         # Reversed HBridge outputs are only on 101A Rev 7-9
-        if rvmn101.reversed_outputs:
+        if rvmn.reversed_outputs:
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
             with dev["rla_pullup"]:
-                for idx in rvmn101.reversed_outputs:
+                for idx in rvmn.reversed_outputs:
                     with tester.PathName("REV{0}".format(idx)):
-                        rvmn101.hs_output(idx, True)
+                        rvmn.hs_output(idx, True)
                         mes["dmm_hb_on"](timeout=1)
-                        rvmn101.hs_output(idx, False)
+                        rvmn.hs_output(idx, False)
                         mes["dmm_hb_off"](timeout=1)
         mes["dmm_hs_off"](timeout=1)
         # Measurements from here on do not fail the test instantly.
@@ -108,20 +116,20 @@ class Initial(share.TestSequence):
         # has failed. So we get a full dataset on every test.
         with share.MultiMeasurementSummary(default_timeout=2) as checker:
             # Turn ON, then OFF, each HS output in turn
-            for idx in rvmn101.hs_outputs:
-                with tester.PathName(rvmn101.output_pin_name(idx)):
-                    rvmn101.hs_output(idx, True)
+            for idx in rvmn.hs_outputs:
+                with tester.PathName(rvmn.output_pin_name(idx)):
+                    rvmn.hs_output(idx, True)
                     checker.measure(mes["dmm_hs_on"])
-                    rvmn101.hs_output(idx, False)
+                    rvmn.hs_output(idx, False)
                     checker.measure(mes["dmm_hs_off"])
             # Turn ON, then OFF, each LS output in turn
             ls_count = 1
-            for idx in rvmn101.ls_outputs:
-                with tester.PathName(rvmn101.output_pin_name(idx)):
+            for idx in rvmn.ls_outputs:
+                with tester.PathName(rvmn.output_pin_name(idx)):
                     dmm_channel = "dmm_ls{0}".format(ls_count)
-                    rvmn101.ls_output(idx, True)
+                    rvmn.ls_output(idx, True)
                     checker.measure(mes[dmm_channel + "_on"])
-                    rvmn101.ls_output(idx, False)
+                    rvmn.ls_output(idx, False)
                     checker.measure(mes[dmm_channel + "_off"])
                     ls_count += 1
 
@@ -133,7 +141,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     fixture = None  # Fixture number
@@ -166,8 +173,8 @@ class Devices(share.Devices):
             "60": console.Console60,
             "65": console.Console65,
         }[self.parameter]
-        self["rvmn101"] = console_class(nordic_ser)
-        self["rvmn101"].output_reversed(self.reversed_outputs)
+        self["rvmn"] = console_class(nordic_ser)
+        self["rvmn"].output_reversed(self.reversed_outputs)
         # CAN devices
         self["can"] = self.physical_devices["_CAN"]
         self["canreader"] = tester.CANReader(self["can"])
@@ -182,16 +189,15 @@ class Devices(share.Devices):
 
     def reset(self):
         """Test run has stopped."""
-        self["rvmn101"].close()
+        self["rvmn"].close()
         self["canreader"].stop()
         self["can"].rvc_mode = False
         self["dcs_vbatt"].output(0.0, False)
         for rla in ("rla_pullup", "rla_link"):
-            rla.set_off()
+            self[rla].set_off()
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     nordic_devicetype = None
@@ -224,16 +230,20 @@ class Sensors(share.Sensors):
             pathlib.Path(__file__).parent / self.arm_image,
         )
         # Console sensors
-        rvmn101 = self.devices["rvmn101"]
-        self["SwRev"] = sensor.Keyed(rvmn101, "SW-REV")
-        self["SwRev"].doc = "Nordic software version"
-        self["BleMac"] = sensor.Keyed(rvmn101, "MAC")
-        self["BleMac"].doc = "Nordic BLE MAC"
+        rvmn = self.devices["rvmn"]
+        self["SERIAL"] = sensor.Keyed(rvmn, "SERIAL")
+        self["SERIAL"].doc = "Serial number"
+        self["PRODUCT-REV"] = sensor.Keyed(rvmn, "PRODUCT-REV")
+        self["PRODUCT-REV"].doc = "Product revision"
+        self["HARDWARE-REV"] = sensor.Keyed(rvmn, "HARDWARE-REV")
+        self["HARDWARE-REV"].doc = "Hardware revision"
+        self["BleMac"] = sensor.Keyed(rvmn, "MAC")
+        self["BleMac"].doc = "BLE MAC"
         # Convert "xx:xx:xx:xx:xx:xx (random)" to "xxxxxxxxxxxx"
         self["BleMac"].on_read = lambda value: value.replace(":", "").replace(
             " (random)", ""
         )
-        self["Input"] = sensor.Keyed(rvmn101, "INPUT")
+        self["Input"] = sensor.Keyed(rvmn, "INPUT")
         self["Input"].doc = "All digital inputs"
         for analog in (
             "TANK 1",
@@ -252,12 +262,11 @@ class Sensors(share.Sensors):
             "FUEL SENSOR 2",
             "VOLTAGE SYS",
         ):
-            self[analog] = sensor.Keyed(rvmn101, analog)
+            self[analog] = sensor.Keyed(rvmn, analog)
         self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):
@@ -280,10 +289,13 @@ class Measurements(share.Measurements):
                 ("JLinkARM", "ProgramOk", "JLinkARM", "Programmed"),
                 ("JLinkBLE", "ProgramOk", "JLinkBLE", "Programmed"),
                 ("dig_in", "AllInputs", "Input", "Digital input reading"),
+                ("SerNum", "SerNum", "SERIAL", "Serial number saved"),
+                ("ProdRev", "ProdRev", "PRODUCT-REV", "Product revision saved"),
+                ("HardRev", "HardRev", "HARDWARE-REV", "Hardware revision saved"),
             )
         )
         self.analog_inputs = []
-        console = self.sensors.devices["rvmn101"]
+        console = self.sensors.devices["rvmn"]
         lim = self.limits["AllInputs"]
         for idx in console.analog_inputs:
             name = console.analog_pin_name(idx)
