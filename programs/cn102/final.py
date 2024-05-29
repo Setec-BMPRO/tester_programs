@@ -50,6 +50,9 @@ class Devices(share.Devices):
         self["dcs_vbat"].output(self.vbatt, output=True, delay=5.0)
         self.add_closer(lambda: self["dcs_vbat"].output(0.0, output=False))
 
+    def reset(self):
+        """Reset instruments."""
+
 
 class Sensors(share.Sensors):
 

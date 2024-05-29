@@ -25,11 +25,6 @@ class _Initial(ProgramTestCase):
             patcher = patch(target)
             self.addCleanup(patcher.stop)
             patcher.start()
-        patcher = patch(
-            "programs.smartlink201.console.tank_name", return_value="tank"
-        )
-        self.addCleanup(patcher.stop)
-        patcher.start()
         super().setUp()
 
 
@@ -83,6 +78,11 @@ class SmartLink201Initial(_Initial):
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_sequence.sensors
+        sen_tank = []  # Build tank sensor data
+        for index in range(16):
+            name = smartlink201.console.tank_name(index)
+            data = (0xFFF, 0xFFF) if index % 2 else (0xFFF, 0x100)
+            sen_tank.append((sen[name], data))
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
@@ -108,17 +108,7 @@ class SmartLink201Initial(_Initial):
                         ),
                     ),
                 ),
-                "TankSense": (
-                    (
-                        sen["tank"],
-                        (0xFFF,) * 16
-                        + (
-                            0x100,
-                            0xFFF,
-                        )
-                        * 8,
-                    ),
-                ),
+                "TankSense": sen_tank,
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)

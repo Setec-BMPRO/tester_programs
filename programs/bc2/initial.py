@@ -17,8 +17,7 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
-        self.limits = self.cfg.limits_initial()
-        super().open(self.limits, Devices, Sensors, Measurements)
+        super().open(self.cfg.limits_initial(), Devices, Sensors, Measurements)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("TestArm", self._step_test_arm),

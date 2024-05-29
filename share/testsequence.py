@@ -11,6 +11,49 @@ import attr
 import tester
 
 
+class DuplicateNameError(Exception):
+
+    """Duplicate name error."""
+
+
+@attr.s
+class TestLimits:
+
+    """Dictionary of Test Limits."""
+
+    _store = attr.ib(init=False, factory=dict)
+
+    def load(self, limitdata):
+        """Load Test Limit data.
+
+        @param limitdata iterable(TestLimit)
+
+        """
+        self._store.clear()
+        for alimit in limitdata:
+            self[alimit.name] = alimit
+
+    def __setitem__(self, name, value):
+        """Add a Test Limit, rejecting duplicate names.
+
+        @param name Test limit name
+        @param value Test limit instance
+
+        """
+        if name in self._store:
+            raise DuplicateNameError('Limit name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Test limit name
+        @return TestLimit instance
+
+        """
+        return self._store[name]
+
+
 class TestSequence(tester.TestSequence):
 
     """Base class for Test Programs.
@@ -31,7 +74,7 @@ class TestSequence(tester.TestSequence):
         """Create instance variables."""
         super().__init__()
         self.devices = None
-        self.limits = None
+        self.limits = TestLimits()
         self.sensors = None
         self.measurements = None
         self.parameter = None
@@ -47,7 +90,7 @@ class TestSequence(tester.TestSequence):
 
         """
         super().open()
-        self.limits = tester.LimitDict(self.limit_builtin + limits)
+        self.limits.load(self.limit_builtin + limits)
         self.devices = cls_devices(self.physical_devices)
         self.devices.parameter = self.parameter
         self.sensors = cls_sensors(self.devices, self.limits)
@@ -188,24 +231,39 @@ class TestSequence(tester.TestSequence):
         return sernum
 
 
-class Devices(abc.ABC, dict):
+@attr.s
+class Devices(abc.ABC):
 
     """Devices abstract base class."""
 
-    def __init__(self, physical_devices):
-        """Create instance.
+    physical_devices = attr.ib()
+    parameter = attr.ib(init=False, default=None)
+    _close_callables = attr.ib(init=False, factory=list)
+    _store = attr.ib(init=False, factory=dict)
 
-        @param physical_devices Physical instruments
+    def __setitem__(self, name, value):
+        """Add a Device, rejecting duplicate names.
+
+        @param name Device name
+        @param value Device instance
 
         """
-        super().__init__()
-        self.physical_devices = physical_devices
-        self._close_callables = []
-        self.parameter = None
+        if name in self._store:
+            raise DuplicateNameError('Device name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Device name
+        @return Device instance
+
+        """
+        return self._store[name]
 
     @abc.abstractmethod
     def open(self):
-        """Create all Instruments."""
+        """Create all devices."""
 
     def run(self):
         """Test run is starting."""
@@ -219,29 +277,43 @@ class Devices(abc.ABC, dict):
         self._close_callables.append(target)
 
     def close(self):
-        """Close logical devices."""
+        """Close devices."""
         self._close_callables.reverse()  # Close in LIFO order
         for target in self._close_callables:
             target()
         self._close_callables.clear()
-        self.clear()
+        self._store.clear()
 
 
-class Sensors(abc.ABC, dict):
+@attr.s
+class Sensors(abc.ABC):
 
     """Sensors."""
 
-    def __init__(self, devices, limits):
-        """Create Sensors instance.
+    devices = attr.ib()
+    limits = attr.ib()
+    parameter = attr.ib(init=False, default=None)
+    _store = attr.ib(init=False, factory=dict)
 
-        @param devices Logical instruments
-        @param limits Test limits
+    def __setitem__(self, name, value):
+        """Add a Sensor, rejecting duplicate names.
+
+        @param name Sensor name
+        @param value Sensor instance
 
         """
-        super().__init__()
-        self.devices = devices
-        self.limits = limits
-        self.parameter = None
+        if name in self._store:
+            raise DuplicateNameError('Sensor name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Sensor name
+        @return Sensor instance
+
+        """
+        return self._store[name]
 
     @abc.abstractmethod
     def open(self):
@@ -249,33 +321,47 @@ class Sensors(abc.ABC, dict):
 
     def reset(self):
         """Reset sensors by flushing any stored data."""
-        for sensor in self:
+        for name, sensor in self._store.items():
             try:
-                self[sensor].clear()
-            except AttributeError:  # if it's a List of Sensors
-                for subsensor in self[sensor]:
+                for subsensor in iter(sensor):  # It could be a sequence of sensors
                     subsensor.clear()
+            except TypeError:  # Not iterable is a single sensor
+                sensor.clear()
 
     def close(self):
         """Close sensors."""
-        self.clear()
+        self._store.clear()
 
 
-class Measurements(abc.ABC, dict):
+@attr.s
+class Measurements(abc.ABC):
 
     """Measurements."""
 
-    def __init__(self, sensors, limits):
-        """Create measurement instance.
+    sensors = attr.ib()
+    limits = attr.ib()
+    parameter = attr.ib(init=False, default=None)
+    _store = attr.ib(init=False, factory=dict)
 
-        @param sensors Sensors
-        @param limits Test limits
+    def __setitem__(self, name, value):
+        """Add a Measurement, rejecting duplicate names.
+
+        @param name Measurement name
+        @param value Measurement instance
 
         """
-        super().__init__()
-        self.sensors = sensors
-        self.limits = limits
-        self.parameter = None
+        if name in self._store:
+            raise DuplicateNameError('Measurement name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Measurement name
+        @return Measurement instance
+
+        """
+        return self._store[name]
 
     @abc.abstractmethod
     def open(self):
@@ -286,7 +372,7 @@ class Measurements(abc.ABC, dict):
 
     def close(self):
         """Close measurements."""
-        self.clear()
+        self._store.clear()
 
     def create_from_names(self, namedata):
         """Create measurements from name data.
