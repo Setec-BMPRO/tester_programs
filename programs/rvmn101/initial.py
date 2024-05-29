@@ -74,12 +74,12 @@ class Initial(share.TestSequence):
             dcs.output(self.cfg.vbatt_set, delay=2)
             # FIXME: Check that firmware has really saved the branding data
             for name, value in (  # Set the test limits
-                ("SerNum", self.sernum),
+                ("Serial", self.sernum),
                 ("ProdRev", self.cfg.values.product_rev),
                 ("HardRev", self.cfg.values.product_rev),
             ):
                 mes[name].testlimit[0].adjust("^{0}$".format(value))
-            self.measure(("SerNum", "ProdRev", "HardRev"))
+            self.measure(("Serial", "ProdRev", "HardRev"))
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
         dev["serialtomac"].blemac_set(self.sernum, mac)
@@ -290,7 +290,7 @@ class Measurements(share.Measurements):
                 ("JLinkARM", "ProgramOk", "JLinkARM", "Programmed"),
                 ("JLinkBLE", "ProgramOk", "JLinkBLE", "Programmed"),
                 ("dig_in", "AllInputs", "Input", "Digital input reading"),
-                ("SerNum", "SerNum", "SERIAL", "Serial number saved"),
+                ("Serial", "Serial", "SERIAL", "Serial number saved"),
                 ("ProdRev", "ProdRev", "PRODUCT-REV", "Product revision saved"),
                 ("HardRev", "HardRev", "HARDWARE-REV", "Hardware revision saved"),
             )

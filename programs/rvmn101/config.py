@@ -79,7 +79,7 @@ class Config:
         tester.LimitHigh("LSoff", 9.0, doc="LS output off (high)"),
         tester.LimitBoolean("CANok", True, doc="CAN bus active"),
         tester.LimitBetween("AllInputs", 0, 0xFFFF, doc="Digital inputs"),
-        tester.LimitRegExp("SerNum", "", doc="Correct serial number"),
+        tester.LimitRegExp("Serial", "", doc="Correct serial number"),
         tester.LimitRegExp("ProdRev", "", doc="Correct product revision"),
         tester.LimitRegExp("HardRev", "", doc="Correct hardware revision"),
     )
