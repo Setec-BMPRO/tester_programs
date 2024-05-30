@@ -33,7 +33,7 @@ def teststep(func):
     return new_func
 
 
-@define
+@define(slots=False)
 class Devices(abc.ABC):
 
     """Devices abstract base class."""
@@ -87,7 +87,7 @@ class Devices(abc.ABC):
         self._store.clear()
 
 
-@define
+@define(slots=False)
 class Sensors(abc.ABC):
 
     """Sensors."""
@@ -173,7 +173,7 @@ class TestLimits:
         return self._store[name]
 
 
-@define
+@define(slots=False)
 class Measurements(abc.ABC):
 
     """Measurements."""
@@ -227,7 +227,7 @@ class Measurements(abc.ABC):
             )
 
 
-@define
+@define(slots=False)
 class TestSequence(tester.TestSequence):
 
     """Base class for Test Programs."""
