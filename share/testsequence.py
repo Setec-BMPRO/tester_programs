@@ -2,9 +2,9 @@
 # Copyright 2016 SETEC Pty Ltd
 """Shared modules for Tester programs."""
 
-import abc
 import contextlib
 import functools
+import logging
 import time
 
 from attrs import define, field, validators
@@ -34,12 +34,12 @@ def teststep(func):
 
 
 @define(slots=False)
-class Devices(abc.ABC):
+class Devices:
 
     """Devices abstract base class."""
 
-    physical_devices = field()
-    parameter = field(init=False, default=None)
+    physical_devices = field(validator=validators.instance_of(tester.PhysicalDevices))
+    parameter = field()
     _close_callables = field(init=False, factory=list)
     _store = field(init=False, factory=dict)
 
@@ -63,14 +63,12 @@ class Devices(abc.ABC):
         """
         return self._store[name]
 
-    @abc.abstractmethod
     def open(self):
         """Create all devices."""
 
     def run(self):
         """Test run is starting."""
 
-    @abc.abstractmethod
     def reset(self):
         """Test run has stopped - Reset instruments."""
 
@@ -84,54 +82,6 @@ class Devices(abc.ABC):
         for target in self._close_callables:
             target()
         self._close_callables.clear()
-        self._store.clear()
-
-
-@define(slots=False)
-class Sensors(abc.ABC):
-
-    """Sensors."""
-
-    devices = field()
-    limits = field()
-    parameter = field(init=False, default=None)
-    _store = field(init=False, factory=dict)
-
-    def __setitem__(self, name, value):
-        """Add a Sensor, rejecting duplicate names.
-
-        @param name Sensor name
-        @param value Sensor instance
-
-        """
-        if name in self._store:
-            raise DuplicateNameError('Sensor name "{0}"'.format(name))
-        self._store[name] = value
-
-    def __getitem__(self, name):
-        """Indexed access by name.
-
-        @param name Sensor name
-        @return Sensor instance
-
-        """
-        return self._store[name]
-
-    @abc.abstractmethod
-    def open(self):
-        """Create all sensors."""
-
-    def reset(self):
-        """Reset sensors by flushing any stored data."""
-        for name, sensor in self._store.items():
-            try:
-                for subsensor in iter(sensor):  # It could be a sequence of sensors
-                    subsensor.clear()
-            except TypeError:  # Not iterable is a single sensor
-                sensor.clear()
-
-    def close(self):
-        """Close sensors."""
         self._store.clear()
 
 
@@ -174,13 +124,60 @@ class TestLimits:
 
 
 @define(slots=False)
-class Measurements(abc.ABC):
+class Sensors:
+
+    """Sensors."""
+
+    devices = field(validator=validators.instance_of(Devices))
+    limits = field(validator=validators.instance_of(TestLimits))
+    parameter = field()
+    _store = field(init=False, factory=dict)
+
+    def __setitem__(self, name, value):
+        """Add a Sensor, rejecting duplicate names.
+
+        @param name Sensor name
+        @param value Sensor instance
+
+        """
+        if name in self._store:
+            raise DuplicateNameError('Sensor name "{0}"'.format(name))
+        self._store[name] = value
+
+    def __getitem__(self, name):
+        """Indexed access by name.
+
+        @param name Sensor name
+        @return Sensor instance
+
+        """
+        return self._store[name]
+
+    def open(self):
+        """Create all sensors."""
+
+    def reset(self):
+        """Reset sensors by flushing any stored data."""
+        for sensor in self._store.values():
+            try:
+                for subsensor in iter(sensor):  # It could be a sequence of sensors
+                    subsensor.clear()
+            except TypeError:  # Not iterable is a single sensor
+                sensor.clear()
+
+    def close(self):
+        """Close sensors."""
+        self._store.clear()
+
+
+@define(slots=False)
+class Measurements:
 
     """Measurements."""
 
-    sensors = field()
-    limits = field()
-    parameter = field(init=False, default=None)
+    sensors = field(validator=validators.instance_of(Sensors))
+    limits = field(validator=validators.instance_of(TestLimits))
+    parameter = field()
     _store = field(init=False, factory=dict)
 
     def __setitem__(self, name, value):
@@ -203,7 +200,6 @@ class Measurements(abc.ABC):
         """
         return self._store[name]
 
-    @abc.abstractmethod
     def open(self):
         """Create all measurements."""
 
@@ -228,11 +224,11 @@ class Measurements(abc.ABC):
 
 
 @define(slots=False)
-class TestSequence(tester.TestSequence):
+class TestSequence:
 
     """Base class for Test Programs."""
 
-    _limit_builtin = (
+    _limit_builtin = (  # Built-in limits added to every test program
         tester.LimitRegExp(
             "SerNum", r"^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$", doc="Serial Number"
         ),
@@ -240,30 +236,70 @@ class TestSequence(tester.TestSequence):
         tester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
     )
 
+    physical_devices = field(
+        validator=validators.instance_of(tester.devphysical.PhysicalDevices),
+        )
+    per_panel = field(
+        validator=validators.and_(validators.instance_of(int), validators.ge(1)),
+    )
+    parameter = field()
+    engine = field(init=False, factory=tester.TestSequenceEngine)
+    limits = field(init=False, factory=TestLimits)
+    uuts = field(init=False, factory=list)
     devices = field(init=False, default=None)
     sensors = field(init=False, default=None)
-    limits = field(init=False, factory=TestLimits)
     measurements = field(init=False, default=None)
-    parameter = field(init=False, default=None)
+    _logger = field(init=False)
 
-    @abc.abstractmethod
+    @_logger.default
+    def _logger_default(self):
+        return logging.getLogger(".".join((__name__, self.__class__.__name__)))
+
+    def __attrs_post_init__(self):
+        """Instance settings."""
+        self.engine.per_panel = self.per_panel
+
+    @property
+    def multi_unit_mode(self):
+        """Number of units tested together on each panel.
+
+        @return Number of units per panel
+
+        """
+        return self.engine.multi_unit_mode
+
+    @property
+    def steps(self):
+        """Test program steps.
+
+        @return Dictionary of test steps
+
+        """
+        return self.engine.steps
+
+    @steps.setter
+    def steps(self, value):
+        """Add test steps.
+
+        @param value Test steps
+
+        """
+        self.engine.steps = value
+
     def open(self, limits, cls_devices, cls_sensors, cls_measurements):
         """Open test program by creating supporting instances.
 
-        @param limits Tuple of test limits
-        @param cls_devices Devices class
-        @param cls_sensors Sensors class
-        @param cls_measurements Measurements class
+        @param limits Iterable tester.Limit*
+        @param cls_devices subclass of Devices
+        @param cls_sensors subclass of Sensors
+        @param cls_measurements subclass of Measurements
 
         """
-        super().open()
         self.limits.load(self._limit_builtin + limits)
-        self.devices = cls_devices(self.physical_devices)
-        self.devices.parameter = self.parameter
-        self.sensors = cls_sensors(self.devices, self.limits)
-        self.sensors.parameter = self.parameter
-        self.measurements = cls_measurements(self.sensors, self.limits)
-        self.measurements.parameter = self.parameter
+        self.devices = cls_devices(self.physical_devices, self.parameter)
+        self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
+        self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
+        self.engine.open()
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
@@ -274,21 +310,31 @@ class TestSequence(tester.TestSequence):
         @param uuts Iterable of Unit Under Test's
 
         """
+        self.uuts.clear()
+        self.uuts += uuts
         self.devices.run()
-        super().run(uuts)
+        self.engine.run()
 
     def safety(self):
-        """Reset logical devices and sensors."""
+        """Reset everything ready for another test."""
         self.devices.reset()
         self.sensors.reset()
         self.measurements.reset()
 
     def close(self):
-        """Close logical devices."""
+        """Close everything."""
         self.measurements.close()
         self.sensors.close()
         self.devices.close()
-        super().close()
+        self.engine.close()
+
+    def sensor_store(self, data):
+        """Push reading values into sensor FIFOs.
+
+        @param data Iterable ( Sensor, Value)
+
+        """
+        self.engine.sensor_store(data)
 
     def measure(self, names, timeout=0, delay=0):
         """Measure a group of measurements given the measurement names.
