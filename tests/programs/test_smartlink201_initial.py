@@ -8,7 +8,6 @@ from programs import smartlink201
 
 
 class _Initial(ProgramTestCase):
-
     """Base Initial program test suite."""
 
     prog_class = smartlink201.Initial
@@ -29,7 +28,6 @@ class _Initial(ProgramTestCase):
 
 
 class BLExtenderInitial(_Initial):
-
     """BLExtender Initial program test suite."""
 
     parameter = "B"
@@ -41,23 +39,20 @@ class BLExtenderInitial(_Initial):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
-                    (sen["SnEntry"], "A2126010123"),
                     (sen["photosense2"], 0.0),
                     (sen["Vbatt"], 12.0),
                     (sen["Vin"], 10.0),
                     (sen["3V3"], 3.3),
                 ),
                 "PgmNordic": ((sen["JLink"], 0),),
-                "Nordic": (
-                    (sen["SL_MAC"], "aabbccddeeff"),
-                ),
+                "Nordic": ((sen["SL_MAC"], "aabbccddeeff"),),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(7, len(result.readings))
+        self.assertEqual(6, len(result.readings))
         self.assertEqual(
             [
                 "PowerUp",
@@ -69,7 +64,6 @@ class BLExtenderInitial(_Initial):
 
 
 class SmartLink201Initial(_Initial):
-
     """SmartLink201 Initial program test suite."""
 
     parameter = "S"
@@ -86,7 +80,6 @@ class SmartLink201Initial(_Initial):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
-                    (sen["SnEntry"], "A2126010123"),
                     (sen["photosense1"], 0.0),
                     (sen["photosense2"], 0.0),
                     (sen["S5tank"], 1.5),
@@ -95,9 +88,7 @@ class SmartLink201Initial(_Initial):
                     (sen["3V3"], 3.3),
                 ),
                 "PgmNordic": ((sen["JLink"], 0),),
-                "Nordic": (
-                    (sen["SL_MAC"], "aabbccddeeff"),
-                ),
+                "Nordic": ((sen["SL_MAC"], "aabbccddeeff"),),
                 "Calibrate": (
                     (sen["Vbatt"], 12.01),
                     (
@@ -112,10 +103,10 @@ class SmartLink201Initial(_Initial):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(44, len(result.readings))
+        self.assertEqual(43, len(result.readings))
         self.assertEqual(
             [
                 "PowerUp",

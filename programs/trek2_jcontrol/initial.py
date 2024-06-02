@@ -12,7 +12,6 @@ from . import config, console
 
 
 class Initial(share.TestSequence):
-
     """Trek2/JControl Initial Test Program."""
 
     # Startup voltage
@@ -99,7 +98,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_image = None
@@ -144,7 +142,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -170,7 +167,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

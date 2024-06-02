@@ -8,7 +8,6 @@ import share
 
 
 class _Console:
-
     """Communications to J35 console."""
 
     # Number of lines in startup banner
@@ -216,10 +215,8 @@ class _Console:
 
 
 class DirectConsole(_Console, share.console.BadUart):
-
     """Console for a direct connection."""
 
 
 class TunnelConsole(_Console, share.console.CANTunnel):
-
     """Console for a CAN tunneled connection."""

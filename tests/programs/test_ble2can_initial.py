@@ -7,7 +7,6 @@ from programs import ble2can
 
 
 class BLE2CANInitial(ProgramTestCase):
-
     """BLE2CAN Initial program test suite."""
 
     prog_class = ble2can.Initial
@@ -33,7 +32,6 @@ class BLE2CANInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
-                    (sen["sernum"], "A1526040123"),
                     (sen["tstpin_cover"], 0.0),
                     (sen["vin"], 12.0),
                     (sen["3v3"], 3.30),
@@ -71,10 +69,10 @@ class BLE2CANInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(18, len(result.readings))
+        self.assertEqual(17, len(result.readings))
         self.assertEqual(
             ["Prepare", "TestArm", "Bluetooth", "CanBus"], self.tester.ut_steps
         )

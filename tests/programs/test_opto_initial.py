@@ -8,7 +8,6 @@ from programs import opto_test
 
 
 class OptoInitial(ProgramTestCase):
-
     """Opto Initial program test suite."""
 
     prog_class = opto_test.Initial
@@ -37,7 +36,6 @@ class OptoInitial(ProgramTestCase):
             )
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
-                "BoardNum": ((sen["sernum"], "A2201770001"),),
                 "InputAdj1": (
                     (
                         sen["Isense"],
@@ -58,10 +56,10 @@ class OptoInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(205, len(result.readings))
+        self.assertEqual(204, len(result.readings))
         self.assertEqual(
             [
                 "BoardNum",

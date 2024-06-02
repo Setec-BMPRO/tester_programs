@@ -28,7 +28,6 @@ def get(parameter, uut):
 
 @define
 class _Values:
-
     """Adjustable configuration data values."""
 
     hw_version = field(validator=validators.instance_of(tuple))
@@ -36,7 +35,6 @@ class _Values:
 
 
 class Config:
-
     """Base configuration for BatteryCheck."""
 
     # These values are set per Product revision
@@ -104,7 +102,6 @@ class Config:
 
 
 class BatteryCheck100(Config):
-
     """BatteryCheck100 configuration."""
 
     model = 0  # Model selector code
@@ -152,7 +149,6 @@ class BatteryCheck100(Config):
 
 
 class BatteryCheck300(Config):
-
     """BatteryCheck300 configuration."""
 
     model = 1  # Model selector code
@@ -200,7 +196,6 @@ class BatteryCheck300(Config):
 
 
 class BatteryCheckPRO(BatteryCheck300):
-
     """BatteryCheckPRO configuration."""
 
     model = 2  # Model selector code

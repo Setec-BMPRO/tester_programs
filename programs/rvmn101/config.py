@@ -34,7 +34,6 @@ def get(parameter, uut):
 
 @define
 class Values:
-
     """Adjustable configuration data values.
 
     These values get set per Product type & revision
@@ -45,20 +44,13 @@ class Values:
     arm_image = field(validator=validators.instance_of(str))
     product_rev = field(validator=validators.instance_of(str))
     hardware_rev = field()
-    reversed_outputs = field(
-        factory=dict, validator=validators.instance_of(dict)
-    )
-    nordic_devicetype = field(
-        default="nrf52832", validator=validators.instance_of(str)
-    )
-    arm_devicetype = field(
-        default="lpc1519", validator=validators.instance_of(str)
-    )
+    reversed_outputs = field(factory=dict, validator=validators.instance_of(dict))
+    nordic_devicetype = field(default="nrf52832", validator=validators.instance_of(str))
+    arm_devicetype = field(default="lpc1519", validator=validators.instance_of(str))
     fixture = field(default="", validator=validators.instance_of(str))
 
 
 class Config:
-
     """Base configuration for RVMNx."""
 
     values = None  # Values instance
@@ -79,9 +71,9 @@ class Config:
         tester.LimitHigh("LSoff", 9.0, doc="LS output off (high)"),
         tester.LimitBoolean("CANok", True, doc="CAN bus active"),
         tester.LimitBetween("AllInputs", 0, 0xFFFF, doc="Digital inputs"),
-        tester.LimitRegExp("Serial", "", doc="Correct serial number"),
-        tester.LimitRegExp("ProdRev", "", doc="Correct product revision"),
-        tester.LimitRegExp("HardRev", "", doc="Correct hardware revision"),
+        tester.LimitRegExp("Serial", "None", doc="Correct serial number"),
+        tester.LimitRegExp("ProdRev", "None", doc="Correct product revision"),
+        tester.LimitRegExp("HardRev", "None", doc="Correct hardware revision"),
     )
     # Final Test limits common to all units
     _base_limits_final = _base_limits + (
@@ -120,7 +112,6 @@ class Config:
 
 
 class RVMN101A(Config):
-
     """RVMN101A configuration."""
 
     _fixture = "033550"
@@ -316,7 +307,6 @@ class RVMN101A(Config):
 
 
 class RVMN101B(Config):
-
     """RVMN101B configuration."""
 
     _fixture = "032871"
@@ -453,7 +443,6 @@ class RVMN101B(Config):
 
 
 class RVMN101C(Config):
-
     """RVMN101C configuration."""
 
     _fixture = "033550"
@@ -499,7 +488,6 @@ class RVMN101C(Config):
 
 
 class RVMN200A(Config):
-
     """RVMN200A configuration."""
 
     _fixture = "033550"
@@ -531,7 +519,6 @@ class RVMN200A(Config):
 
 
 class RVMN5x(Config):
-
     """RVMN5x configuration."""
 
     _fixture = "034861"
@@ -692,7 +679,6 @@ class RVMN5x(Config):
 
 
 class RVMN6x(Config):
-
     """RVMN6x configuration."""
 
     _fixture = "034861"

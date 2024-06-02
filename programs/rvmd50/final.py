@@ -9,7 +9,6 @@ from . import config, display
 
 
 class Final(share.TestSequence):
-
     """RVMD50 Final Test Program."""
 
     vin_set = 12.0
@@ -46,7 +45,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -72,7 +70,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -91,7 +88,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

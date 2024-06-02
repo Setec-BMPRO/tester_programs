@@ -8,7 +8,6 @@ import share
 
 
 class Final(share.TestSequence):
-
     """C15A-15 Final Test Program."""
 
     # Resistive loading during OCP
@@ -77,7 +76,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -99,7 +97,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     # Resistive loading during OCP
@@ -137,7 +134,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

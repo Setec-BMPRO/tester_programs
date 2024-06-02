@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to IDS-500 console."""
 
     # Magic numbers to unlock test mode

@@ -6,7 +6,6 @@ from programs import atxg450
 
 
 class ATXG4502VFinal(ProgramTestCase):
-
     """ATXG450-2V Final program test suite."""
 
     prog_class = atxg450.Final2V
@@ -64,7 +63,7 @@ class ATXG4502VFinal(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(31, len(result.readings))

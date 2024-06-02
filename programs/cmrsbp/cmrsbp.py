@@ -38,7 +38,6 @@ import share
 
 
 class CmrSbp:
-
     """CMR Monitor."""
 
     _datamap = {

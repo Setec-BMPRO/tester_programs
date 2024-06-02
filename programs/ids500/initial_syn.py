@@ -11,7 +11,6 @@ from . import config
 
 
 class InitialSyn(share.TestSequence):
-
     """IDS-500 Initial SynBuck Test Program."""
 
     # Test limits
@@ -204,7 +203,6 @@ class InitialSyn(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -256,7 +254,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     # Firmware image
@@ -296,7 +293,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """SynBuck Measurements."""
 
     def open(self):

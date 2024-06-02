@@ -10,13 +10,11 @@ import share
 
 
 class InvalidOutputError(Exception):
-
     """Attempt to set a non-existing output."""
 
 
 @define
 class PinName:
-
     """Pin name mappings from index number."""
 
     # Key: Output index, Value: Schematic pin name
@@ -173,7 +171,6 @@ class PinName:
 
 
 class _Console(share.console.Base):
-
     """Communications to RVMNx console."""
 
     # Console command prompt. Signals the end of response data.
@@ -187,16 +184,16 @@ class _Console(share.console.Base):
     parameter = share.console.parameter
     cmd_data = {
         "SERIAL": parameter.String(
-            "rvmn serial", read_format="{0}",
-            writeable=True, write_format="{1} {0}"
+            "rvmn serial", read_format="{0}", writeable=True, write_format="{1} {0}"
         ),
         "PRODUCT-REV": parameter.String(
-            "rvmn product-rev", read_format="{0}",
-            writeable=True, write_format="{1} {0}"
+            "rvmn product-rev",
+            read_format="{0}",
+            writeable=True,
+            write_format="{1} {0}",
         ),
         "HARDWARE-REV": parameter.String(
-            "rvmn hw-rev", read_format="{0}",
-            writeable=True, write_format="{1} {0}"
+            "rvmn hw-rev", read_format="{0}", writeable=True, write_format="{1} {0}"
         ),
         "MAC": parameter.String("rvmn mac", read_format="{0}"),
         "OUTPUT": parameter.String(
@@ -353,7 +350,6 @@ class _Console(share.console.Base):
 
 
 class Console101A(_Console):
-
     """Communications to RVMN101A console."""
 
     def __init__(self, port):
@@ -379,7 +375,6 @@ class Console101A(_Console):
 
 
 class Console101B(_Console):
-
     """Communications to RVMN101B console."""
 
     # Firmware 2.5.8 dropped "\x1b[m" from the prompt tail
@@ -449,21 +444,18 @@ class Console101B(_Console):
 
 
 class Console101C(Console101A):
-
     """Communications to RVMN101C console."""
 
     banner_lines = None  # A non-int will ignore number of lines
 
 
 class Console200A(Console101A):
-
     """Communications to RVMN200A console."""
 
     banner_lines = None  # A non-int will ignore number of lines
 
 
 class _Console5x(_Console):
-
     """Communications to RVMN5x console."""
 
     def __init__(self, port):
@@ -521,7 +513,6 @@ class _Console5x(_Console):
 
 
 class Console50(_Console5x):
-
     """Communications to RVMN50 console."""
 
     def __init__(self, port):
@@ -542,19 +533,16 @@ class Console50(_Console5x):
 
 
 class Console55(_Console5x):
-
     """Communications to RVMN55 console."""
 
 
 class Console60(Console50):
-
     """Communications to RVMN60 console."""
 
     banner_lines = None  # A non-int will ignore number of lines
 
 
 class Console65(Console55):
-
     """Communications to RVMN65 console."""
 
     banner_lines = None  # A non-int will ignore number of lines

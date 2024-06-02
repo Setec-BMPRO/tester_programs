@@ -8,7 +8,6 @@ from programs import trsbts
 
 
 class TRSBTSFinal(ProgramTestCase):
-
     """TRS-BTS Final program test suite."""
 
     prog_class = trsbts.Final
@@ -38,7 +37,6 @@ class TRSBTSFinal(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Pin": (
-                    (sen["sernum"], "A2026040123"),
                     (sen["vbat"], 12.0),
                     (sen["brake"], (12.0, 0.1)),
                     (sen["pin_in"], True),
@@ -46,8 +44,8 @@ class TRSBTSFinal(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(8, len(result.readings))
+        self.assertEqual(7, len(result.readings))
         self.assertEqual(["Pin", "Bluetooth"], self.tester.ut_steps)

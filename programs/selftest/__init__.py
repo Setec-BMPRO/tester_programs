@@ -7,7 +7,6 @@ import share
 
 
 class Main(share.TestSequence):
-
     """Selfchecker Test Program."""
 
     limitdata = (
@@ -181,7 +180,6 @@ class Main(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     # True if the tester is an ATE2
@@ -246,7 +244,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -363,7 +360,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

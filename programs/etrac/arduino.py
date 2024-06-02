@@ -6,7 +6,6 @@ import share
 
 
 class Arduino(share.console.Arduino):
-
     """Communications to ETrac-II Arduino console."""
 
     cmd_data = {

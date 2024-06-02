@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.BadUart):
-
     """ASDisplay console."""
 
     # Console command prompt. Signals the end of response data.

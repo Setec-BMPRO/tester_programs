@@ -12,7 +12,6 @@ from . import config, console
 
 
 class Initial(share.TestSequence):
-
     """J35 Initial Test Program."""
 
     def open(self, uut):
@@ -231,7 +230,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_version = None  # ARM software version
@@ -293,7 +291,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     output_count = None
@@ -385,7 +382,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

@@ -7,7 +7,6 @@ from programs import gen9
 
 
 class Gen9Initial(ProgramTestCase):
-
     """GEN9-540 Initial program test suite."""
 
     prog_class = gen9.Initial
@@ -34,10 +33,8 @@ class Gen9Initial(ProgramTestCase):
                     (sen["o3v3"], 3.3),
                     (sen["lock"], 10.0),
                     (sen["JLink"], 0),
-                    ),
-                "Initialise": (
-                    (sen["fanshort"], 700.0),
-                    ),
+                ),
+                "Initialise": ((sen["fanshort"], 700.0),),
                 "PowerUp": (
                     (sen["acin"], 240.0),
                     (
@@ -96,7 +93,7 @@ class Gen9Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(34, len(result.readings))

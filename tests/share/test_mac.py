@@ -8,7 +8,6 @@ import share
 
 
 class MACtest(unittest.TestCase):
-
     """MAC test suite."""
 
     mac_bytes = b"\x00\x1e\xc00\xbc\x15"

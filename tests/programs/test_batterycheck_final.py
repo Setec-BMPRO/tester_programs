@@ -7,13 +7,11 @@ from programs import batterycheck
 
 
 class BatteryCheckFinal(ProgramTestCase):
-
     """BatteryCheck Final program test suite."""
 
     prog_class = batterycheck.Final
     parameter = None
     debug = False
-    serial = "A1509020010"
 
     def setUp(self):
         """Per-Test setup."""
@@ -21,7 +19,7 @@ class BatteryCheckFinal(ProgramTestCase):
         mybt.scan.return_value = True, "1234"
         mybt.jsonrpc.return_value = {
             "SoftwareVersion": batterycheck.Final.arm_version,
-            "SerialID": self.serial,
+            "SerialID": self.uuts[0].sernum,
         }
         patcher = patch(
             "programs.batterycheck.eunistone_pan1322.BtRadio", return_value=mybt
@@ -36,14 +34,13 @@ class BatteryCheckFinal(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
-                    (sen["oSnEntry"], (self.serial,)),
                     (sen["o12V"], 12.0),
                 ),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(6, len(result.readings))
+        self.assertEqual(5, len(result.readings))
         self.assertEqual(["PowerUp", "TestBlueTooth"], self.tester.ut_steps)

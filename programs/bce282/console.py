@@ -7,7 +7,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to BCE282 console."""
 
     # Console command prompt. Signals the end of output data.

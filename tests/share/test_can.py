@@ -7,7 +7,6 @@ import share
 
 
 class CAN(unittest.TestCase):
-
     """CAN test suite."""
 
     _hdr = 0x18EF4454  # RVMN Node to RVM[CD] controller packet header

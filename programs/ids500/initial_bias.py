@@ -8,7 +8,6 @@ import share
 
 
 class InitialBias(share.TestSequence):
-
     """IDS-500 Initial Bias Test Program."""
 
     limitdata = (
@@ -53,7 +52,6 @@ class InitialBias(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Bias Devices."""
 
     def open(self):
@@ -74,7 +72,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Bias Sensors."""
 
     def open(self):
@@ -88,7 +85,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Bias Measurements."""
 
     def open(self):

@@ -6,7 +6,6 @@ from programs import gsu360
 
 
 class GSU3601TAFinal(ProgramTestCase):
-
     """GSU360-1TA Final program test suite."""
 
     prog_class = gsu360.Final
@@ -37,7 +36,7 @@ class GSU3601TAFinal(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(7, len(result.readings))

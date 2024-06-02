@@ -10,7 +10,6 @@ import share
 
 
 class Initial(share.TestSequence):
-
     """ACMON Initial Test Program."""
 
     sw_image = "acmon-2-110_v1.1.0-0-g5158fad.hex"
@@ -67,7 +66,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -99,7 +97,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_image = None
@@ -132,7 +129,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

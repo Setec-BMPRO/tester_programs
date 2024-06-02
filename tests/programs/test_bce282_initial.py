@@ -7,7 +7,6 @@ from programs import bce282
 
 
 class _BCE282Initial(ProgramTestCase):
-
     """BCE282 Initial program test suite."""
 
     prog_class = bce282.Initial
@@ -67,7 +66,7 @@ class _BCE282Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(16, len(result.readings))
@@ -80,7 +79,6 @@ class _BCE282Initial(ProgramTestCase):
 
 
 class BCE282_12_Initial(_BCE282Initial):
-
     """BCE282-12 Initial program test suite."""
 
     parameter = "12"
@@ -94,7 +92,6 @@ class BCE282_12_Initial(_BCE282Initial):
 
 
 class BCE282_24_Initial(_BCE282Initial):
-
     """BCE282-12 Initial program test suite."""
 
     parameter = "24"

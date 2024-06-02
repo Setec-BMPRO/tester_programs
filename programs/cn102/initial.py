@@ -21,7 +21,6 @@ from . import config, console
 
 
 class Initial(share.TestSequence):
-
     """CN10x / ODL10x Initial Test Program."""
 
     def open(self, uut):
@@ -52,7 +51,13 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["rla_reset"].set_on()  # Disable ARM to Nordic RESET
         dev["dcs_vin"].output(8.6, output=True)
-        self.measure(("dmm_vin", "dmm_3v3", ), timeout=5)
+        self.measure(
+            (
+                "dmm_vin",
+                "dmm_3v3",
+            ),
+            timeout=5,
+        )
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -92,7 +97,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_nxp_image = None  # ARM software image
@@ -146,7 +150,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_nordic_image = None
@@ -181,7 +184,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

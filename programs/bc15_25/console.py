@@ -7,7 +7,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to BC15/25 console."""
 
     # Number of lines in startup banner

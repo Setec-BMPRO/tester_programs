@@ -21,7 +21,6 @@ def get(parameter, uut):
 
 
 class ODL10xParameters:
-
     """ODL10x model specific parameters."""
 
     # Initial test limits
@@ -60,7 +59,6 @@ class ODL10xParameters:
 
 
 class ODL104:
-
     """Configuration for ODL104."""
 
     parameters = None  # Instance of ODL10xParameters

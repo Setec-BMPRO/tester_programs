@@ -14,7 +14,7 @@ import queue
 import unittest
 from unittest.mock import Mock, patch
 
-import libtester
+from libtester import UUT
 import tester
 from pydispatch import dispatcher
 
@@ -22,7 +22,6 @@ from . import logging_setup
 
 
 class UnitTester(tester.Tester):
-
     """Tester with data feeder functionality."""
 
     # Dictionary keys into data given to ut_load() method
@@ -52,7 +51,7 @@ class UnitTester(tester.Tester):
 
     def open(self):
         """Open a program, by using our pre-built one."""
-        uut = libtester.UUT.from_sernum("A0000000001")
+        uut = UUT.from_sernum("A0000000001")
         super().open(self.ut_program, uut=uut)
 
     def stop(self):
@@ -111,7 +110,6 @@ class UnitTester(tester.Tester):
 
 
 class ProgramTestCase(unittest.TestCase):
-
     """Product test program wrapper."""
 
     debug = False
@@ -138,6 +136,10 @@ class ProgramTestCase(unittest.TestCase):
         # Create the tester instance
         cls.tester = UnitTester(cls.prog_class, cls.per_panel, cls.parameter)
         cls.tester.start("MockATE", {repr(cls.prog_class): cls.prog_class})
+        cls.uuts = list(
+            UUT.from_sernum("A000000000{0}".format(uut))
+            for uut in range(1, cls.per_panel + 1)
+        )
 
     def setUp(self):
         """Per-Test setup."""

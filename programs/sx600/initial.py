@@ -13,7 +13,6 @@ from . import arduino, config, console
 
 
 class Initial(share.TestSequence):
-
     """SX-600 Initial Test Program."""
 
     def open(self, uut):
@@ -265,7 +264,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     fixture = "033484"
@@ -324,7 +322,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     ratings = None  # Output load ratings
@@ -409,7 +406,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

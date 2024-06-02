@@ -9,7 +9,6 @@ from programs import rvmn101
 
 
 class RVMN101Final(ProgramTestCase):
-
     """RVMN101 Final program test suite."""
 
     prog_class = rvmn101.Final
@@ -38,7 +37,6 @@ class RVMN101Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Bluetooth": (
-                    (sen["SnEntry"], "A1526040123"),
                     (sen["mirmac"], "001ec030c2be"),
                     (sen["mirscan"], True),
                     (sen["mirrssi"], -50),
@@ -46,8 +44,8 @@ class RVMN101Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(4, len(result.readings))
+        self.assertEqual(3, len(result.readings))
         self.assertEqual(["Bluetooth"], self.tester.ut_steps)

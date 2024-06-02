@@ -9,7 +9,6 @@ from . import config
 
 
 class Final(share.TestSequence):
-
     """ODL104 Final Test Program."""
 
     def open(self, uut):
@@ -42,7 +41,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices. Uses Trek/JControl fixture."""
 
     vbatt = 12.0  # Injected Vbatt
@@ -65,7 +63,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -82,7 +79,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

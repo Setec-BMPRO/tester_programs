@@ -8,7 +8,6 @@ import share
 
 
 class Final(share.TestSequence):
-
     """UNI-750 Final Test Program."""
 
     limitdata = (
@@ -102,7 +101,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -130,7 +128,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -153,7 +150,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

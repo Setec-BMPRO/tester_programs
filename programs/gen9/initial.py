@@ -14,7 +14,6 @@ from . import config, console
 
 
 class Initial(share.TestSequence):
-
     """GEN9-540 Initial Test Program."""
 
     pfc_stable = 0.05  # Reading to reading difference for PFC voltage stability
@@ -230,7 +229,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -276,7 +274,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     devicetype = None
@@ -333,7 +330,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

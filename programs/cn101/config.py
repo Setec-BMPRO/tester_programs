@@ -20,13 +20,12 @@ def get(parameter, uut):
 
 
 class CN101:
-
     """CN101 parameters."""
 
     # Initial test limits
     limits_initial = (
         tester.LimitRegExp(
-            "SwVer", "", doc="Software version"  # Adjusted during _configure()
+            "SwVer", "None", doc="Software version"  # Adjusted during _configure()
         ),
         tester.LimitLow("Part", 100.0),
         tester.LimitDelta("Vin", 8.0, 0.5),

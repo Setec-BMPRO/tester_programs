@@ -8,7 +8,6 @@ import share
 
 
 class InitialAux(share.TestSequence):
-
     """IDS-500 Initial Aux Test Program."""
 
     # Test limits
@@ -148,7 +147,6 @@ class InitialAux(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Aux Devices."""
 
     def open(self):
@@ -189,7 +187,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Aux Sensors."""
 
     def open(self):
@@ -225,7 +222,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Aux Measurements."""
 
     def open(self):

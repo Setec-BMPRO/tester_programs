@@ -13,7 +13,6 @@ from . import arduino, console, config
 
 
 class Initial(share.TestSequence):
-
     """BP35 / BP35-II Initial Test Programs."""
 
     def open(self, uut):
@@ -307,7 +306,6 @@ class Initial(share.TestSequence):
 
 
 class SrHighPower:
-
     """High power source to power the SR Solar Regulator.
 
     It is a BCE282-24 (modified for 20V output) inside the fixture which is
@@ -333,7 +331,6 @@ class SrHighPower:
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     arm_image = None  # ARM software image
@@ -412,7 +409,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     outputs = None  # Number of outputs
@@ -538,7 +534,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     is_pm = None

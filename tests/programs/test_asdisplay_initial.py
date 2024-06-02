@@ -12,7 +12,6 @@ class ASDisplayInitial(ProgramTestCase):
 
     prog_class = asdisplay.Initial
     debug = False
-    sernum = "A2150080001"
 
     def setUp(self):
         for target in (
@@ -30,7 +29,6 @@ class ASDisplayInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {
                 "PowerUp": (
-                    (sen["SnEntry"], self.sernum),
                     (sen["Vin"], 12.0),
                     (sen["3V3"], 3.3),
                     (sen["5V"], 5.0),
@@ -57,10 +55,10 @@ class ASDisplayInitial(ProgramTestCase):
             }
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(29, len(result.readings))
+        self.assertEqual(28, len(result.readings))
         self.assertEqual(
             ["PowerUp", "PgmARM", "Testmode", "LEDCheck", "TankSense", "CanBus"],
             self.tester.ut_steps,

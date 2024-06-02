@@ -6,7 +6,6 @@ from programs import wtsi200
 
 
 class WTSI200Final(ProgramTestCase):
-
     """WTSI200 Final program test suite."""
 
     prog_class = wtsi200.Final
@@ -52,7 +51,7 @@ class WTSI200Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(30, len(result.readings))

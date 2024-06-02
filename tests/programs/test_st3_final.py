@@ -6,7 +6,6 @@ from programs import st3
 
 
 class _STxxIIIFinal(ProgramTestCase):
-
     """STxx-III Final program base test suite."""
 
     prog_class = st3.Final
@@ -55,7 +54,7 @@ class _STxxIIIFinal(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(21, len(result.readings))
@@ -66,7 +65,6 @@ class _STxxIIIFinal(ProgramTestCase):
 
 
 class ST20_III_Final(_STxxIIIFinal):
-
     """ST20-III Final program test suite."""
 
     parameter = "20"
@@ -78,7 +76,6 @@ class ST20_III_Final(_STxxIIIFinal):
 
 
 class ST35_III_Final(_STxxIIIFinal):
-
     """ST35-III Final program test suite."""
 
     parameter = "35"

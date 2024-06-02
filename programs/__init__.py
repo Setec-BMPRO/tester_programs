@@ -60,7 +60,6 @@ from . import wtsi200
 
 
 class MockSequence(share.TestSequence):
-
     """Mock Test Sequence used for interactive testing of the Test Executive."""
 
     def open(self, uut):
@@ -87,7 +86,6 @@ class MockSequence(share.TestSequence):
 
 
 class MockDevices(share.Devices):
-
     """Mock Devices."""
 
     def open(self):
@@ -98,7 +96,6 @@ class MockDevices(share.Devices):
 
 
 class MockSensors(share.Sensors):
-
     """Mock Sensors."""
 
     def open(self):
@@ -110,7 +107,6 @@ class MockSensors(share.Sensors):
 
 
 class MockMeasurements(share.Measurements):
-
     """Mock Measurements."""
 
     def open(self):

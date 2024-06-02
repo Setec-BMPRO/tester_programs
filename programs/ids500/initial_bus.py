@@ -8,7 +8,6 @@ import share
 
 
 class InitialBus(share.TestSequence):
-
     """IDS-500 Initial Bus Test Program."""
 
     # Test limits
@@ -127,7 +126,6 @@ class InitialBus(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Bus Devices."""
 
     def open(self):
@@ -176,7 +174,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Bus Sensors."""
 
     def open(self):
@@ -192,7 +189,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Bus Measurements."""
 
     def open(self):

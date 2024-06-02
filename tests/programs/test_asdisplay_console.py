@@ -8,7 +8,6 @@ from programs import asdisplay
 
 
 class SerialResponder:
-
     """Generate a stream of bytes() of length 1 from strings."""
 
     def __init__(self):
@@ -27,7 +26,6 @@ class SerialResponder:
 
 
 class ASDisplayConsole(unittest.TestCase):
-
     """ASDisplay console program test suite."""
 
     def test_console(self):

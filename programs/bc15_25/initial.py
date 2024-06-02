@@ -15,7 +15,6 @@ from . import config
 
 
 class Initial(share.TestSequence):
-
     """BC15/25 Initial Test Program."""
 
     def open(self, uut):
@@ -136,7 +135,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     arm_file = None  # Firmware image filename
@@ -186,7 +184,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     ocp_nominal = None  # Nominal OCP point of unit
@@ -228,7 +225,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

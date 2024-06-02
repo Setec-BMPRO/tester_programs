@@ -6,7 +6,6 @@ from programs import genius2
 
 
 class _Genius2Initial(ProgramTestCase):
-
     """GENIUS-II Initial program test suite."""
 
     prog_class = genius2.Initial
@@ -66,7 +65,7 @@ class _Genius2Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(29, len(result.readings))
@@ -77,7 +76,6 @@ class _Genius2Initial(ProgramTestCase):
 
 
 class _Genius2_Initial(_Genius2Initial):
-
     """GENIUS-II Initial program test suite."""
 
     parameter = "STD"
@@ -89,7 +87,6 @@ class _Genius2_Initial(_Genius2Initial):
 
 
 class _Genius2_H_Initial(_Genius2Initial):
-
     """GENIUS-II-H Initial program test suite."""
 
     parameter = "H"

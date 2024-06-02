@@ -12,7 +12,6 @@ from . import config, console
 
 
 class Initial(share.TestSequence):
-
     """BLExtender/SmartLink201 Initial Test Program."""
 
     vin_set = 12.0  # Input voltage (V)
@@ -130,7 +129,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_arm_image = None
@@ -187,7 +185,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_nrf_image = None
@@ -239,7 +236,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

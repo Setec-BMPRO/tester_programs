@@ -6,7 +6,6 @@ from programs import ids500
 
 
 class Ids500InitialBus(ProgramTestCase):
-
     """IDS500 Bus Initial program test suite."""
 
     prog_class = ids500.InitialBus
@@ -31,7 +30,7 @@ class Ids500InitialBus(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(18, len(result.readings))

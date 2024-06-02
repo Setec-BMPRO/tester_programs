@@ -11,7 +11,6 @@ import tester
 
 @define
 class _Values:
-
     """Adjustable configuration data values."""
 
     devicetype = field(validator=validators.instance_of(str))
@@ -20,7 +19,6 @@ class _Values:
 
 
 class Config:
-
     """Configuration."""
 
     # These values get set per Product revision

@@ -25,7 +25,6 @@ class Ratings:
 
 
 class Config:
-
     """Configuration."""
 
     # General parameters used in testing the units

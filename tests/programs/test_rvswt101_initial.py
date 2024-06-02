@@ -11,7 +11,6 @@ from programs import rvswt101
 
 
 class RVSWT101Initial(ProgramTestCase):
-
     """RVSWT101 Initial program test suite."""
 
     prog_class = rvswt101.Initial
@@ -62,7 +61,6 @@ class RVSWT101Initial(ProgramTestCase):
 
 
 class Fixture(unittest.TestCase):
-
     """RVSWT101 Initial Fixture test suite."""
 
     relay_count = 2

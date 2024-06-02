@@ -6,7 +6,6 @@ from programs import gen9
 
 
 class GEN9Final(ProgramTestCase):
-
     """GEN9-540 Final program test suite."""
 
     prog_class = gen9.Final
@@ -33,9 +32,7 @@ class GEN9Final(ProgramTestCase):
                     (sen["gpo1"], 240.0),
                     (sen["gpo2"], 240.0),
                 ),
-                "Transient": (
-                    (sen["12V_Vmax"], ((0.01,),)),
-                ),
+                "Transient": ((sen["12V_Vmax"], ((0.01,),)),),
                 "FullLoad": (
                     (sen["o5v"], 5.0),
                     (sen["o12v"], 12.0),
@@ -49,7 +46,7 @@ class GEN9Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(18, len(result.readings))

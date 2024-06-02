@@ -10,7 +10,6 @@ import share
 
 
 class BackgroundTimer(unittest.TestCase):
-
     """BackgroundTimer test suite."""
 
     def setUp(self):
@@ -31,7 +30,6 @@ class BackgroundTimer(unittest.TestCase):
 
 
 class RepeatTimer(unittest.TestCase):
-
     """RepeatTimer test suite."""
 
     def setUp(self):
@@ -61,7 +59,6 @@ class RepeatTimer(unittest.TestCase):
 
 
 class TimedStore(unittest.TestCase):
-
     """TimedStore test suite."""
 
     def setUp(self):

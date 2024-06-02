@@ -18,7 +18,6 @@ def get(parameter):
 
 
 class TrsBt2:
-
     """TRS-BT2 configuration."""
 
     sw_image = "trs-bts_factory_2.0.20494.2194.hex"
@@ -26,7 +25,6 @@ class TrsBt2:
 
 
 class TrsBts:
-
     """TRS-BTS configuration."""
 
     sw_image = TrsBt2.sw_image

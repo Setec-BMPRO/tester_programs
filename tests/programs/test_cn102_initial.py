@@ -8,7 +8,6 @@ from programs import cn102
 
 
 class CN102Initial(ProgramTestCase):
-
     """CN102 Initial program test suite."""
 
     prog_class = cn102.Initial
@@ -37,7 +36,6 @@ class CN102Initial(ProgramTestCase):
                     (sen["sw2"], 10.0),
                 ),
                 "PowerUp": (
-                    (sen["oSnEntry"], "A1526040123"),
                     (sen["oVin"], 8.0),
                     (sen["o3V3"], 3.3),
                 ),
@@ -53,10 +51,10 @@ class CN102Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(12, len(result.readings))
+        self.assertEqual(11, len(result.readings))
         self.assertEqual(
             [
                 "PartCheck",

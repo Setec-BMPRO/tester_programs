@@ -6,7 +6,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to GEN9-540 console."""
 
     # Number of lines in startup banner

@@ -8,7 +8,6 @@ import share
 
 
 class _Console:
-
     """Base class for a BP35 / BP35-II console."""
 
     # Number of lines in startup banner
@@ -240,10 +239,8 @@ class _Console:
 
 
 class DirectConsole(_Console, share.console.BadUart):
-
     """Console for a direct connection."""
 
 
 class TunnelConsole(_Console, share.console.CANTunnel):
-
     """Console for a CAN tunneled connection."""

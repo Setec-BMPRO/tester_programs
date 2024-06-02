@@ -8,7 +8,6 @@ from programs import rvmc101
 
 
 class _RVMC101Initial(ProgramTestCase):
-
     """RVMC101x Initial program test suite."""
 
     prog_class = rvmc101.Initial
@@ -24,7 +23,6 @@ class _RVMC101Initial(ProgramTestCase):
 
 
 class RVMC101Initial(_RVMC101Initial):
-
     """RVMC101x Initial program test suite."""
 
     parameter = "NXP"
@@ -71,9 +69,7 @@ class RVMC101Initial(_RVMC101Initial):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(
-            tuple("UUT{0}".format(uut) for uut in range(1, self.per_panel + 1))
-        )
+        self.tester.test(self.uuts)
         for res in self.tester.ut_result:
             self.assertEqual("P", res.code)
             self.assertEqual(5, len(res.readings))
@@ -83,7 +79,6 @@ class RVMC101Initial(_RVMC101Initial):
 
 
 class RVMC101InitialLite(_RVMC101Initial):
-
     """RVMC101x Lite Initial program test suite."""
 
     parameter = "LITE"
@@ -104,9 +99,7 @@ class RVMC101InitialLite(_RVMC101Initial):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(
-            tuple("UUT{0}".format(uut) for uut in range(1, self.per_panel + 1))
-        )
+        self.tester.test(self.uuts)
         for res in self.tester.ut_result:
             self.assertEqual("P", res.code)
             self.assertEqual(2, len(res.readings))

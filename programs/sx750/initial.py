@@ -13,7 +13,6 @@ from . import arduino, config, console
 
 
 class Initial(share.TestSequence):
-
     """SX-750 Initial Test Program."""
 
     def open(self, uut):
@@ -331,7 +330,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_image = None  # ARM software image filename
@@ -407,7 +405,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     ratings = None  # Product specific output load ratings
@@ -492,7 +489,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

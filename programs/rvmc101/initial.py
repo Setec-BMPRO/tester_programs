@@ -11,7 +11,6 @@ from . import display
 
 
 class Initial(share.TestSequence):
-
     """RVMC101x Initial Test Program."""
 
     sw_image = {
@@ -100,7 +99,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_image = None
@@ -162,7 +160,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_image = None
@@ -197,7 +194,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

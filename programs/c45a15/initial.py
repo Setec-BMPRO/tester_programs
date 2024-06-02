@@ -11,7 +11,6 @@ from . import arduino
 
 
 class Initial(share.TestSequence):
-
     """C45A-15 Initial Test Program."""
 
     limitdata = (
@@ -156,7 +155,7 @@ class Initial(share.TestSequence):
         mes["loadReg"].sensor.store(reg)
         mes["loadReg"]()
         # Calculate the trip point of output voltage for OCP check
-        reg = self.limits["Reg"].limit[0]
+        reg, _ = self.limits["Reg"].limit
         triplevel = noload + (noload * (reg / 100))
         self._logger.debug("OCP Trip Level: %s", triplevel)
         self.limits["inOCP"].adjust(triplevel)
@@ -168,7 +167,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -210,7 +208,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -249,7 +246,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

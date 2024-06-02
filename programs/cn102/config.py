@@ -25,15 +25,14 @@ def get(parameter, uut):
 
 
 class CN10xParameters:
-
     """CN10x model specific parameters."""
 
     limits_initial = (
         tester.LimitRegExp(
-            "SwArmVer", "", doc="ARM Software version"  # Adjusted during open()
+            "SwArmVer", "None", doc="ARM Software version"  # Adjusted during open()
         ),
         tester.LimitRegExp(
-            "SwNrfVer", "", doc="Nordic Software version"  # Adjusted during open()
+            "SwNrfVer", "None", doc="Nordic Software version"  # Adjusted during open()
         ),
         tester.LimitLow("Part", 500.0),
         tester.LimitDelta("Vin", 8.0, 0.5),
@@ -70,7 +69,6 @@ class CN10xParameters:
 
 
 class CN10x:
-
     """Configuration for CN10x."""
 
     # These values get overriden by child classes
@@ -91,7 +89,6 @@ class CN10x:
 
 
 class CN102(CN10x):
-
     """Configuration for CN102."""
 
     _prefix = "cn102"
@@ -111,7 +108,6 @@ class CN102(CN10x):
 
 
 class CN103(CN10x):
-
     """Configuration for CN103."""
 
     _prefix = "cn103"

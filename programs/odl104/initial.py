@@ -17,7 +17,6 @@ from . import config, console
 
 
 class Initial(share.TestSequence):
-
     """ODL104 Initial Test Program."""
 
     def open(self, uut):
@@ -47,7 +46,13 @@ class Initial(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["rla_nxp"].set_on()  # Disconnect BDA4 Tx/Rx from ARM
         dev["dcs_vin"].output(8.6, output=True)
-        self.measure(("dmm_vin", "dmm_3v3", ), timeout=5)
+        self.measure(
+            (
+                "dmm_vin",
+                "dmm_3v3",
+            ),
+            timeout=5,
+        )
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -92,7 +97,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -133,7 +137,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_nordic_image = None
@@ -177,7 +180,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

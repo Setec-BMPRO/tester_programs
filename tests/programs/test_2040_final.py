@@ -6,7 +6,6 @@ from programs import _2040
 
 
 class _2040Final(ProgramTestCase):
-
     """2040 Final program test suite."""
 
     prog_class = _2040.Final
@@ -41,7 +40,7 @@ class _2040Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(12, len(result.readings))

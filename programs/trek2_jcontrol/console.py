@@ -6,7 +6,6 @@ import share
 
 
 class _Console:
-
     """Base class for a Trek2/JControl console."""
 
     # Number of lines in startup banner
@@ -111,10 +110,8 @@ class _Console:
 
 
 class DirectConsole(_Console, share.console.BadUart):
-
     """Console for a direct connection to a Trek2/JControl."""
 
 
 class TunnelConsole(_Console, share.console.CANTunnel):
-
     """Console for a CAN tunneled connection to a Trek2/JControl."""

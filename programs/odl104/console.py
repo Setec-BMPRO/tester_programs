@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Console via J-Link RTT"""
 
     cmd_prompt = b"\r\n\x1b[1;32mrtt:~$ \x1b[m".replace(b"\n", b"")

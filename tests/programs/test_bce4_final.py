@@ -6,7 +6,6 @@ from programs import bce4
 
 
 class _BCE4Final(ProgramTestCase):
-
     """BCE4/5 Final program base test suite."""
 
     prog_class = bce4.Final
@@ -15,7 +14,7 @@ class _BCE4Final(ProgramTestCase):
     def _pass_run(self, data):
         """PASS run of the program."""
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(10, len(result.readings))
@@ -25,7 +24,6 @@ class _BCE4Final(ProgramTestCase):
 
 
 class BCE4_Final(_BCE4Final):
-
     """BCE4 Final program test suite."""
 
     parameter = "4"
@@ -63,7 +61,6 @@ class BCE4_Final(_BCE4Final):
 
 
 class BCE5_Final(_BCE4Final):
-
     """BCE5 Final program test suite."""
 
     parameter = "5"

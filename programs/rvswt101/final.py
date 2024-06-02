@@ -10,7 +10,6 @@ from . import config, device, arduino
 
 
 class Final(share.TestSequence):
-
     """RVSWT101 Final Test Program."""
 
     def open(self, uut):
@@ -79,7 +78,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     fixture_num = None  # Fixture number
@@ -111,7 +109,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -165,7 +162,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

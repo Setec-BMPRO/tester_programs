@@ -9,7 +9,6 @@ from programs import rvswt101
 
 
 class RVSWT101_Arduino_Console(unittest.TestCase):
-
     """RVMN101 Console program test suite."""
 
     prompt = "\r> "

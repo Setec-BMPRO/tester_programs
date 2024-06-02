@@ -7,7 +7,6 @@ from programs import drifter
 
 
 class _DrifterInitial(ProgramTestCase):
-
     """Drifter(BM) Initial program test suite."""
 
     prog_class = drifter.Initial
@@ -64,7 +63,7 @@ class _DrifterInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(23, len(result.readings))
@@ -74,7 +73,6 @@ class _DrifterInitial(ProgramTestCase):
 
 
 class Drifter_Initial(_DrifterInitial):
-
     """Drifter Initial program test suite."""
 
     parameter = "STD"
@@ -86,7 +84,6 @@ class Drifter_Initial(_DrifterInitial):
 
 
 class DrifterBM_Initial(_DrifterInitial):
-
     """DrifterBM Initial program test suite."""
 
     parameter = "BM"

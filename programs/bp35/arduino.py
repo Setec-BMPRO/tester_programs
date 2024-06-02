@@ -6,7 +6,6 @@ import share
 
 
 class Arduino(share.console.Arduino):
-
     """Communications to BP35 / BP35-II Arduino programmer console."""
 
     cmd_data = {

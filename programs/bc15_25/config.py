@@ -29,7 +29,6 @@ def get(parameter, uut):
 
 @define
 class _Values:
-
     """Adjustable configuration data values."""
 
     arm_file = field(validator=validators.instance_of(str))
@@ -39,7 +38,6 @@ class _Values:
 
 
 class BCx5:
-
     """Base configuration for BC15/25."""
 
     # These values get set per Product type & revision
@@ -98,7 +96,6 @@ class BCx5:
 
 
 class BC15(BCx5):
-
     """BC15 configuration."""
 
     sw_version = "2.0.18498.2003"
@@ -161,7 +158,6 @@ class BC15(BCx5):
 
 
 class BC25(BCx5):
-
     """BC25 configuration."""
 
     sw_version = "2.0.20136.2004"

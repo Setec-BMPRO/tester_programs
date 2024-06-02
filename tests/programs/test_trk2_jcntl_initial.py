@@ -7,11 +7,9 @@ from programs import trek2_jcontrol
 
 
 class _CommonInitial(ProgramTestCase):
-
     """Trek2/JControl Initial program test suite."""
 
     prog_class = trek2_jcontrol.Initial
-    ser_num = "A1526040123"
 
     def setUp(self):
         """Per-Test setup."""
@@ -31,7 +29,6 @@ class _CommonInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
-                    (sen["sernum"], (self.ser_num,)),
                     (sen["vin"], (7.0, 12.0)),
                     (sen["3v3"], 3.3),
                 ),
@@ -43,17 +40,16 @@ class _CommonInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(6, len(result.readings))
+        self.assertEqual(5, len(result.readings))
         self.assertEqual(
             ["PowerUp", "Program", "TestArm", "CanBus"], self.tester.ut_steps
         )
 
 
 class Trek2Initial(_CommonInitial):
-
     """Trek2 Initial program test suite."""
 
     parameter = "TK2"
@@ -65,7 +61,6 @@ class Trek2Initial(_CommonInitial):
 
 
 class JControlInitial(_CommonInitial):
-
     """JControl Initial program test suite."""
 
     parameter = "JC"

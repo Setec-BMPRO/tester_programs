@@ -9,7 +9,6 @@ _CMD = "x"
 
 
 class Boolean(unittest.TestCase):
-
     """Boolean test suite."""
 
     def setUp(self):
@@ -58,7 +57,6 @@ class Boolean(unittest.TestCase):
 
 
 class String(unittest.TestCase):
-
     """String test suite."""
 
     def setUp(self):
@@ -82,7 +80,6 @@ class String(unittest.TestCase):
 
 
 class Float(unittest.TestCase):
-
     """Float test suite."""
 
     def setUp(self):
@@ -108,7 +105,6 @@ class Float(unittest.TestCase):
 
 
 class Hex(unittest.TestCase):
-
     """Hex test suite."""
 
     def setUp(self):

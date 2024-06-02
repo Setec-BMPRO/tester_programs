@@ -25,7 +25,6 @@ def get(parameter, uut):
 
 @define
 class _Values:
-
     """Configuration data values."""
 
     product_rev = field(validator=validators.instance_of(str))
@@ -33,12 +32,11 @@ class _Values:
     sw_nrf_image = field(validator=validators.instance_of(str))
     sw_arm_image = field(
         default="nxp_v0.1.0.bin", validator=validators.instance_of(str)
-        )
+    )
     is_smartlink = field(default=True, validator=validators.instance_of(bool))
 
 
 class _Config:
-
     """Configuration options."""
 
     @classmethod
@@ -59,7 +57,6 @@ class _Config:
 
 
 class BLExtender(_Config):
-
     """BLExtender config."""
 
     _hw_rev = "02B"
@@ -83,7 +80,6 @@ class BLExtender(_Config):
 
 
 class SmartLink201(_Config):
-
     """SmartLink201 config."""
 
     _sw_nrf_image = "smartlink_signed_1.2.1-0-g744e6db_factory_mcuboot.hex"

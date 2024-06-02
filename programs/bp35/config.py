@@ -32,7 +32,6 @@ def get(parameter, uut):
 
 
 class Type(enum.IntEnum):
-
     """Product type numbers for hardware revisions."""
 
     SR = 1
@@ -43,7 +42,6 @@ class Type(enum.IntEnum):
 
 @define
 class _Values:
-
     """Adjustable configuration data values."""
 
     hw_version = field(validator=validators.instance_of(tuple))
@@ -51,7 +49,6 @@ class _Values:
 
 
 class BP35:
-
     """Base configuration."""
 
     is_2 = False
@@ -87,7 +84,7 @@ class BP35:
     ocp_adjust_percent = 10.0
     # Test limits common to all tests and versions
     _base_limits_all = (
-        tester.LimitRegExp("ARM-SwVer", "", doc="Software version"),
+        tester.LimitRegExp("ARM-SwVer", "None", doc="Software version"),
         tester.LimitDelta("Vload", 12.45, 0.45, doc="Load output present"),
         tester.LimitLow("InOCP", 11.6, doc="Output voltage in OCP"),
         tester.LimitPercent("OCP", ocp_set, 4.0, doc="After adjustment"),
@@ -198,7 +195,6 @@ class BP35:
 
 
 class BP35_I(BP35):
-
     """BP35 series base configuration."""
 
     @classmethod
@@ -212,7 +208,6 @@ class BP35_I(BP35):
 
 
 class BP35SR(BP35_I):
-
     """BP35SR configuration."""
 
     is_pm = False
@@ -255,7 +250,6 @@ class BP35SR(BP35_I):
 
 
 class BP35HA(BP35SR):
-
     """BP35HA configuration."""
 
     _rev14_values = _Values(
@@ -279,7 +273,6 @@ class BP35HA(BP35SR):
 
 
 class BP35PM(BP35_I):
-
     """BP35PM configuration."""
 
     is_pm = True
@@ -306,7 +299,6 @@ class BP35PM(BP35_I):
 
 
 class BP35_II(BP35):
-
     """Base configuration for BP35-II."""
 
     is_2 = True
@@ -335,7 +327,6 @@ class BP35_II(BP35):
 
 
 class BP35IISR(BP35_II):
-
     """BP35-IISR configuration."""
 
     is_pm = False
@@ -354,7 +345,6 @@ class BP35IISR(BP35_II):
 
 
 class BP35IIHA(BP35IISR):
-
     """BP35-IIHA configuration."""
 
     _rev7_values = _Values(
@@ -380,7 +370,6 @@ class BP35IIHA(BP35IISR):
 
 
 class BP35IISI(BP35_II):
-
     """BP35-IISI configuration."""
 
     is_pm = True
@@ -409,7 +398,6 @@ class BP35IISI(BP35_II):
 
 
 class BP35IIUSHA(BP35IISR):
-
     """BP35-IIUSHA configuration."""
 
     _rev6_values = _Values(

@@ -6,7 +6,6 @@ from programs import bce282
 
 
 class _BCE282Final(ProgramTestCase):
-
     """BCE282 Final program base test suite."""
 
     prog_class = bce282.Final
@@ -15,7 +14,7 @@ class _BCE282Final(ProgramTestCase):
     def _pass_run(self, data):
         """PASS run of the program."""
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(10, len(result.readings))
@@ -23,7 +22,6 @@ class _BCE282Final(ProgramTestCase):
 
 
 class BCE282_12_Final(_BCE282Final):
-
     """BCE282-12 Final program test suite."""
 
     parameter = "12"
@@ -54,7 +52,6 @@ class BCE282_12_Final(_BCE282Final):
 
 
 class BCE282_24_Final(_BCE282Final):
-
     """BCE282-24 Final program test suite."""
 
     parameter = "24"

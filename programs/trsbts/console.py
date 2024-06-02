@@ -9,7 +9,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to TRS-BTS console."""
 
     re_blemac = re.compile("[0-9a-f]{12}")  # 'mac' response parser

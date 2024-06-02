@@ -12,7 +12,6 @@ from . import config, console
 
 
 class InitialMicro(share.TestSequence):
-
     """IDS-500 Initial Micro Test Program."""
 
     # test limits
@@ -59,7 +58,6 @@ class InitialMicro(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Micro Devices."""
 
     def open(self):
@@ -88,7 +86,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Micro Sensors."""
 
     # Firmware image
@@ -110,7 +107,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Micro Measurements."""
 
     def open(self):

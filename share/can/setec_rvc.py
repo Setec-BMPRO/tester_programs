@@ -145,7 +145,7 @@ class _SwitchStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @define(slots=False)
-class SwitchStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
+class SwitchStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
 
     """A RVMC Switch Status decoder."""
 
@@ -198,7 +198,7 @@ class _DeviceStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @define(slots=False)
-class DeviceStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
+class DeviceStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
 
     """RVMD50 Device Status decoder."""
 
@@ -271,7 +271,7 @@ class _ACStatus3(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @define(slots=False)
-class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixIn):
+class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
 
     """ACMON Status decoder.
 

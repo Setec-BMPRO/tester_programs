@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.BadUart):
-
     """Communications to console."""
 
     banner_lines = 4  # Number of lines in startup banner
@@ -72,4 +71,3 @@ class Console(share.console.BadUart):
         time.sleep(self.nvwrite_delay)
         self["RESTART"] = True
         time.sleep(self.nvwrite_delay)
-

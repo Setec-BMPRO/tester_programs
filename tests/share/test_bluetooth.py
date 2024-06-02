@@ -8,7 +8,6 @@ import share
 
 
 class RaspberryBluetooth(unittest.TestCase):
-
     """Raspberry Pi Bluetooth test suite."""
 
     def setUp(self):

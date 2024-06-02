@@ -8,7 +8,6 @@ from programs import rvswt101
 
 
 class RVSWT101Final(ProgramTestCase):
-
     """RVSWT101 Final program test suite."""
 
     prog_class = rvswt101.Final
@@ -41,7 +40,6 @@ class RVSWT101Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Bluetooth": (  # Bluetooth TestStep
-                    (sen["SnEntry"], "A1526040123"),
                     (sen["mirmac"], "001ec030c2be"),
                     (sen["cell_voltage"], (3.31,)),
                     (sen["switch_type"], (2,)),
@@ -68,8 +66,8 @@ class RVSWT101Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(17, len(result.readings))
+        self.assertEqual(16, len(result.readings))
         self.assertEqual(["Bluetooth"], self.tester.ut_steps)

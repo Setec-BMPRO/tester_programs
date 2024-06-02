@@ -9,7 +9,6 @@ from . import config
 
 
 class InitialMain(share.TestSequence):
-
     """IDS-500 Initial Main Test Program."""
 
     # Test limits
@@ -330,7 +329,6 @@ class InitialMain(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -395,7 +393,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -479,7 +476,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

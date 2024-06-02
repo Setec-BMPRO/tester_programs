@@ -13,12 +13,10 @@ import time
 
 
 class BtRadioError(Exception):
-
     """Bluetooth error."""
 
 
 class MAC:
-
     """Bluetooth MAC address."""
 
     # Regular expression for a MAC address, with optional ':' characters
@@ -62,7 +60,6 @@ class MAC:
 
 
 class BtRadio:
-
     """BT Radio interface functions."""
 
     # Command to escape from streaming data mode

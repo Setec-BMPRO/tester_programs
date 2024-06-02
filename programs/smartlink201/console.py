@@ -18,7 +18,6 @@ def tank_name(index):
 
 
 class _Console(share.console.Base):
-
     """BLExtender/SmartLink201 base console."""
 
     # Console command prompt. Signals the end of response data.
@@ -45,7 +44,6 @@ class _Console(share.console.Base):
 
 
 class BLExtenderConsole(_Console):
-
     """BLExtender console."""
 
     banner_lines = 11  # Startup banner lines
@@ -88,7 +86,6 @@ class BLExtenderConsole(_Console):
 
 
 class SmartLink201Console(_Console):
-
     """SmartLink201 console."""
 
     banner_lines = 12  # Startup banner lines

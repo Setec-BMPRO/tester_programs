@@ -8,7 +8,6 @@ from programs import odl104
 
 
 class ODL104Initial(ProgramTestCase):
-
     """ODL104 Initial program test suite."""
 
     prog_class = odl104.Initial
@@ -37,7 +36,6 @@ class ODL104Initial(ProgramTestCase):
                     (sen["sw2"], 10.0),
                 ),
                 "PowerUp": (
-                    (sen["oSnEntry"], "A2226010123"),
                     (sen["oVin"], 8.0),
                     (sen["o3V3"], 3.3),
                 ),
@@ -56,10 +54,10 @@ class ODL104Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(13, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
             ["PartCheck", "PowerUp", "Program", "Nordic", "TankSense", "CanBus"],
             self.tester.ut_steps,

@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.BadUart):
-
     """CN102/103 console."""
 
     parameter = share.console.parameter
@@ -62,7 +61,6 @@ class Console(share.console.BadUart):
 
 
 class Console_ODL104(share.console.Base):
-
     """CN104 console via J-Link RTT"""
 
     cmd_prompt = b"\r\n\x1b[1;32mrtt:~$ \x1b[m"

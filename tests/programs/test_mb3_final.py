@@ -6,7 +6,6 @@ from programs import mb3
 
 
 class MB3Final(ProgramTestCase):
-
     """MB3 Final program test suite."""
 
     prog_class = mb3.Final
@@ -30,7 +29,7 @@ class MB3Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(6, len(result.readings))

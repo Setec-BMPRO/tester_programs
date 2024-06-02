@@ -6,7 +6,6 @@ from programs import smu75070
 
 
 class SMU75070Initial(ProgramTestCase):
-
     """SMU750-70 Initial program test suite."""
 
     prog_class = smu75070.Initial
@@ -46,7 +45,7 @@ class SMU75070Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(21, len(result.readings))

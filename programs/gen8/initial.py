@@ -13,7 +13,6 @@ from . import console
 
 
 class Initial(share.TestSequence):
-
     """GEN8 Initial Test Program."""
 
     # Software binary version
@@ -297,7 +296,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -368,7 +366,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -406,7 +403,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

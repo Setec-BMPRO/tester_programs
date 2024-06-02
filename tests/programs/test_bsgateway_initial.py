@@ -8,7 +8,6 @@ from programs import bsgateway
 
 
 class BSGatewayInitial(ProgramTestCase):
-
     """BSGateway Initial program test suite."""
 
     prog_class = bsgateway.Initial
@@ -31,19 +30,16 @@ class BSGatewayInitial(ProgramTestCase):
                     (sen["dev_3v3"], 3.3),
                     (sen["can_3v3"], 3.3),
                 ),
-                "Program": (
-                    (sen["JLink"], 0),
-                ),
-                "Calibrate": (
-                    (sen["dev_3v3"], 3.3),
-                ),
+                "Program": ((sen["JLink"], 0),),
+                "Calibrate": ((sen["dev_3v3"], 3.3),),
                 "CanBus": (),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(5, len(result.readings))
         self.assertEqual(
-            ["PowerUp", "Program", "Calibrate", "CanBus"], self.tester.ut_steps)
+            ["PowerUp", "Program", "Calibrate", "CanBus"], self.tester.ut_steps
+        )

@@ -15,7 +15,6 @@ from . import console
 
 
 class Initial(share.TestSequence):
-
     """TRS-BTS Initial Test Program."""
 
     vbatt = 12.0  # Injected Vbatt
@@ -91,9 +90,7 @@ class Initial(share.TestSequence):
         trsbts.reset_input_buffer()
         dev["dcs_vbat"].output(self.vbatt)
         trsbts.initialise(self.config.hw_version, self.sernum)
-        self.measure(
-            ("dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5
-        )
+        self.measure(("dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5)
         trsbts.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(
             ("dmm_remoteon", "dmm_redon", "dmm_greenon", "dmm_blueon"), timeout=5
@@ -141,7 +138,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -181,7 +177,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_image = None
@@ -235,7 +230,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

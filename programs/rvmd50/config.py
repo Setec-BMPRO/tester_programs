@@ -20,14 +20,12 @@ def get(parameter, uut):  # pylint: disable=unused-argument
 
 @define
 class Values:  # pylint: disable=too-few-public-methods
-
     """Configuration data values."""
 
     sw_image = field(validator=validators.instance_of(str))
 
 
 class Config:  # pylint: disable=too-few-public-methods
-
     """Configuration data storage and lookup."""
 
     _sw_1_6 = "rvmd50_1.6.bin"

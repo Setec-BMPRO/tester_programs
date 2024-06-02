@@ -11,7 +11,6 @@ from .. import logging_setup
 
 
 class BaseConsole(unittest.TestCase):
-
     """BaseConsole test suite."""
 
     @classmethod
@@ -72,7 +71,6 @@ class BaseConsole(unittest.TestCase):
 
 
 class BadUartConsole(unittest.TestCase):
-
     """BadUartConsole test suite."""
 
     @classmethod

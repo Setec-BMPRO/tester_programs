@@ -6,7 +6,6 @@ import tester
 
 
 class Config:
-
     """RVSWT101 configuration."""
 
     # Possible switch variants tuple(switch_type,  button_count)
@@ -167,7 +166,6 @@ class Config:
 
     @classmethod
     def get(cls, parameter, uut):
-
         """Get configuration.
 
         @param parameter String to select the switch type

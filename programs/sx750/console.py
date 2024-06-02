@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to console."""
 
     banner_lines = 4  # Number of lines in startup banner

@@ -6,7 +6,6 @@ import share
 
 
 class Console(share.console.SamB11):
-
     """Communications to TRSRFM console."""
 
     cmd_data = {

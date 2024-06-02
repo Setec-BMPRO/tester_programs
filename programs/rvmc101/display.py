@@ -11,7 +11,6 @@ import share
 
 @define
 class LEDControl:
-
     """Control of the LEDs via CAN."""
 
     candev = field()

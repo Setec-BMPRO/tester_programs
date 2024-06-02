@@ -19,7 +19,6 @@ import re
 
 
 class EV2200:
-
     """EV2200 Controller."""
 
     # BQ2060A ADC reading cycle time
@@ -755,5 +754,4 @@ def _dumper(raw_data):
 
 
 class Ev2200Error(Exception):
-
     """EV2200 Exception class."""

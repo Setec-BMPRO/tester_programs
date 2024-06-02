@@ -6,7 +6,6 @@ import share
 
 
 class _Console:
-
     """Base class for a CN101 console."""
 
     parameter = share.console.parameter
@@ -61,10 +60,8 @@ class _Console:
 
 
 class DirectConsole(_Console, share.console.BadUart):
-
     """Console for a direct connection."""
 
 
 class TunnelConsole(_Console, share.console.CANTunnel):
-
     """Console for a CAN tunneled connection."""

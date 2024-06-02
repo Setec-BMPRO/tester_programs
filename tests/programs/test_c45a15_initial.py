@@ -7,7 +7,6 @@ from programs import c45a15
 
 
 class C45A15Initial(ProgramTestCase):
-
     """C45A-15 Initial program test suite."""
 
     prog_class = c45a15.Initial
@@ -63,7 +62,7 @@ class C45A15Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(29, len(result.readings))

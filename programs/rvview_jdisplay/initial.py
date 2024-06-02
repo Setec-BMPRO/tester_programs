@@ -23,7 +23,6 @@ from . import config
 
 
 class Initial(share.TestSequence):
-
     """RvView/JDisplay Initial Test Program."""
 
     vin_set = 8.1  # Input voltage to power the unit
@@ -116,7 +115,6 @@ class Initial(share.TestSequence):
 
 @define
 class LatchingRelay:
-
     """A latching relay, with 'on' and 'off' drive lines."""
 
     rla_on = field()
@@ -138,7 +136,6 @@ class LatchingRelay:
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_file = None
@@ -182,7 +179,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_file = None
@@ -223,7 +219,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

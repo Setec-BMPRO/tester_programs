@@ -7,7 +7,6 @@ from programs import trsrfm
 
 
 class TRSRFMInitial(ProgramTestCase):
-
     """TRS-RFM Initial program test suite."""
 
     prog_class = trsrfm.Initial
@@ -37,7 +36,6 @@ class TRSRFMInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
-                    (sen["sernum"], "A1526040123"),
                     (sen["vin"], 12.0),
                     (sen["3v3"], 3.30),
                 ),
@@ -73,10 +71,10 @@ class TRSRFMInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(13, len(result.readings))
+        self.assertEqual(12, len(result.readings))
         self.assertEqual(
             ["Prepare", "Program", "Operation", "Bluetooth"], self.tester.ut_steps
         )

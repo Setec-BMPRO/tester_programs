@@ -6,7 +6,6 @@ from programs import ts3020h
 
 
 class TS3020HFinal(ProgramTestCase):
-
     """TS3020H Final program test suite."""
 
     prog_class = ts3020h.Final
@@ -51,7 +50,7 @@ class TS3020HFinal(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(12, len(result.readings))

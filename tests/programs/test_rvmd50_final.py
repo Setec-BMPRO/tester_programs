@@ -7,7 +7,6 @@ from programs import rvmd50
 
 
 class RVMD50Final(ProgramTestCase):
-
     """RVMD50 Final program test suite."""
 
     prog_class = rvmd50.Final
@@ -28,7 +27,7 @@ class RVMD50Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(3, len(result.readings))

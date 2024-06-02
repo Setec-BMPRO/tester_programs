@@ -7,11 +7,9 @@ from programs import j35
 
 
 class _J35Final(ProgramTestCase):
-
     """J35 Final program base test suite."""
 
     prog_class = j35.Final
-    sernum = "A1626010123"
     parameter = None
     vout = 12.7
 
@@ -40,7 +38,6 @@ class _J35Final(ProgramTestCase):
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
                     (sen["photo"], (0.0, 12.0)),
-                    (sen["sernum"], self.sernum),
                 ),
                 "CAN": ((sen["can12v"], 12.0),),
                 "OCP": (
@@ -64,7 +61,7 @@ class _J35Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(rdg_count, len(result.readings))
@@ -72,7 +69,6 @@ class _J35Final(ProgramTestCase):
 
 
 class J35_A_Final(_J35Final):
-
     """J35-A Final program test suite."""
 
     parameter = "A"
@@ -80,11 +76,10 @@ class J35_A_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the A program."""
-        super()._pass_run(22, ["PowerUp", "CAN", "Load", "OCP", "CanCable"])
+        super()._pass_run(21, ["PowerUp", "CAN", "Load", "OCP", "CanCable"])
 
 
 class J35_B_Final(_J35Final):
-
     """J35-B Final program test suite."""
 
     parameter = "B"
@@ -92,11 +87,10 @@ class J35_B_Final(_J35Final):
 
     def test_pass_run(self):
         """PASS run of the B program."""
-        super()._pass_run(36, ["PowerUp", "CAN", "Load", "OCP", "CanCable"])
+        super()._pass_run(35, ["PowerUp", "CAN", "Load", "OCP", "CanCable"])
 
 
 class J35_C_Final(J35_B_Final):
-
     """J35-C Final program test suite."""
 
     parameter = "C"
@@ -104,7 +98,6 @@ class J35_C_Final(J35_B_Final):
 
 
 class J35_D_Final(J35_B_Final):
-
     """J35-D Final program test suite."""
 
     parameter = "D"

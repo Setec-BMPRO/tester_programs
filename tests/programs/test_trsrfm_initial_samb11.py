@@ -7,7 +7,6 @@ from programs import trsrfm_samb11
 
 
 class TRSRFMInitial(ProgramTestCase):
-
     """TRSRFM Initial program test suite."""
 
     prog_class = trsrfm_samb11.Initial
@@ -33,7 +32,6 @@ class TRSRFMInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
-                    (sen["sernum"], "A1526040123"),
                     (sen["tstpin_cover"], 0.0),
                     (sen["vin"], 12.0),
                     (sen["3v3"], 3.30),
@@ -69,8 +67,8 @@ class TRSRFMInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(16, len(result.readings))
+        self.assertEqual(15, len(result.readings))
         self.assertEqual(["Prepare", "TestArm", "Bluetooth"], self.tester.ut_steps)

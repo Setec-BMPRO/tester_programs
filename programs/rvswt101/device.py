@@ -11,7 +11,6 @@ import tester
 
 
 class _Switch(ctypes.Structure):  # pylint: disable=too-few-public-methods
-
     """RVSWT switch field definition.
 
     Switch 0 bits 3-0, Switch 1 bits 7-4
@@ -45,8 +44,7 @@ class _Switch(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 @define
-class PacketDecoder(tester.sensor.KeyedDataDecoderMixIn):
-
+class PacketDecoder(tester.sensor.KeyedDataDecoderMixin):
     """RVSWT101 BLE broadcast packet decoder."""
 
     def worker(self, fields, data):
@@ -96,7 +94,6 @@ class PacketDecoder(tester.sensor.KeyedDataDecoderMixIn):
 
 @define
 class RVSWT101:
-
     """Custom logical instrument to read packet properties."""
 
     bleserver = field()
@@ -121,7 +118,12 @@ class RVSWT101:
         """
         if self.always_scan:
             rssi, ad_data = self.bleserver.read(callerid)
-            self._decoder.decode((rssi, ad_data, ))
+            self._decoder.decode(
+                (
+                    rssi,
+                    ad_data,
+                )
+            )
         return self._decoder.get(self._key)
 
     def reset(self):

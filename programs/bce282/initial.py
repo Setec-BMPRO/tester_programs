@@ -16,7 +16,6 @@ from . import tosbsl
 
 
 class Initial(share.TestSequence):
-
     """BCE282-12/24 Initial Test Program."""
 
     # Calibration data save file (TI Text format)
@@ -249,7 +248,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -292,7 +290,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -331,7 +328,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

@@ -6,7 +6,6 @@ from programs import drifter
 
 
 class DrifterFinal(ProgramTestCase):
-
     """Drifter Final program test suite."""
 
     prog_class = drifter.Final
@@ -35,7 +34,7 @@ class DrifterFinal(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(10, len(result.readings))

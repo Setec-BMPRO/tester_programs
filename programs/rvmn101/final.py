@@ -9,7 +9,6 @@ from . import config
 
 
 class Final(share.TestSequence):
-
     """RVMN101 and RVMN5x Final Test Program."""
 
     def open(self, uut):
@@ -42,7 +41,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -61,7 +59,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -77,7 +74,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

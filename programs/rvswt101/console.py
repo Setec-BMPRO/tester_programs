@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to RVSWT101 console."""
 
     re_banner = re.compile("^ble addr ([0-9a-f]{12})$")
@@ -35,5 +34,4 @@ class Console(share.console.Base):
 
 
 class DirectConsole(Console, share.console.BadUart):
-
     """Console for a direct connection."""

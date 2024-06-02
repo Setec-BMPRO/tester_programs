@@ -8,7 +8,6 @@ from programs import rvmd50
 
 
 class RVMD50Initial(ProgramTestCase):
-
     """RVMD50 Initial program test suite."""
 
     prog_class = rvmd50.Initial
@@ -32,9 +31,7 @@ class RVMD50Initial(ProgramTestCase):
                     (sen["vin"], 7.5),
                     (sen["3v3"], 3.3),
                 ),
-                "Program": (
-                    (sen["JLink"], 0),
-                ),
+                "Program": ((sen["JLink"], 0),),
                 "Display": (
                     (sen["bklght"], (0.0, 3.0)),
                     (sen["YesNoDisplay"], True),
@@ -42,7 +39,7 @@ class RVMD50Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(5, len(result.readings))

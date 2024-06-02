@@ -6,7 +6,6 @@ import share
 
 
 class Console(share.console.SamB11):
-
     """Communications to BC2 console."""
 
     parameter = share.console.parameter

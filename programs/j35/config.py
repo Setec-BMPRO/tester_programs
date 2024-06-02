@@ -89,7 +89,7 @@ class J35:
     # Load on each output channel
     load_per_output = 2.0
     # Test limits common to all tests and versions
-    _base_limits_all = (tester.LimitRegExp("SwVer", "", doc="Software version"),)
+    _base_limits_all = (tester.LimitRegExp("SwVer", "None", doc="Software version"),)
     # Initial Test limits common to all versions
     _base_limits_initial = _base_limits_all + (
         tester.LimitDelta("ACin", ac_volt, delta=5.0, doc="AC input voltage"),

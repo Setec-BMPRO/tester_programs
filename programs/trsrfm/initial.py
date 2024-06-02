@@ -13,7 +13,6 @@ from . import console
 
 
 class Initial(share.TestSequence):
-
     """TRS-RFM Initial Test Program."""
 
     # Injected Vbatt
@@ -54,7 +53,13 @@ class Initial(share.TestSequence):
         """Prepare to run a test."""
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vbatt, True)
-        self.measure(("dmm_vin", "dmm_3v3", ), timeout=5)
+        self.measure(
+            (
+                "dmm_vin",
+                "dmm_3v3",
+            ),
+            timeout=5,
+        )
 
     @share.teststep
     def _step_program(self, dev, mes):
@@ -90,7 +95,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -124,7 +128,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_image = None
@@ -160,7 +163,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

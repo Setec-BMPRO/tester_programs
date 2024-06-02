@@ -6,7 +6,6 @@ from programs import acmon
 
 
 class ACMONInitial(ProgramTestCase):
-
     """ACMON Initial program test suite."""
 
     prog_class = acmon.Initial
@@ -23,9 +22,7 @@ class ACMONInitial(ProgramTestCase):
                     (sen["vin"], 11.5),
                     (sen["3v3"], 3.3),
                 ),
-                "Program": (
-                    (sen["JLink"], 0),
-                ),
+                "Program": ((sen["JLink"], 0),),
                 "Run": (
                     (sen["vac1"], 110),
                     (sen["vac2"], 110),
@@ -39,7 +36,7 @@ class ACMONInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(12, len(result.readings))

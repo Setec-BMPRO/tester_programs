@@ -7,13 +7,11 @@ from programs import ids500
 
 
 class Ids500Final(ProgramTestCase):
-
     """IDS500 Final program test suite."""
 
     prog_class = ids500.Final
     parameter = None
     debug = False
-    sernum = "A1504010034"
 
     def setUp(self):
         """Per-Test setup."""
@@ -77,10 +75,13 @@ class Ids500Final(ProgramTestCase):
                     (sen["oYesNoLddRed"], True),
                 ),
                 "Comms": (
-                    (sen["oSerNumEntry"], (self.sernum,)),
+                    (sen["oSerNumEntry"], (self.uuts[0].sernum,)),
                     (sen["oHwRevEntry"], ("07A ",)),
                     (sen["hwrev"], ("I,  2, 07A,Hardware Revision",)),
-                    (sen["sernum"], ("I,  3, {0},Serial Number".format(self.sernum),)),
+                    (
+                        sen["sernum"],
+                        ("I,  3, {0},Serial Number".format(self.uuts[0].sernum),),
+                    ),
                 ),
                 "EmergStop": (
                     (sen["tec"], 0.0),
@@ -96,10 +97,10 @@ class Ids500Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(68, len(result.readings))
+        self.assertEqual(67, len(result.readings))
         self.assertEqual(
             ["PowerUp", "KeySw1", "KeySw12", "TEC", "LDD", "Comms", "EmergStop"],
             self.tester.ut_steps,

@@ -6,7 +6,6 @@ import share
 
 
 class Console(share.console.BadUart):
-
     """Base class for a RvView/JDisplay console."""
 
     # Test mode controlled by STATUS bit 31

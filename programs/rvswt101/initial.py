@@ -13,7 +13,6 @@ from . import console, config
 
 
 class Initial(share.TestSequence):
-
     """RVSWT101 Initial Test Program."""
 
     def open(self, uut):
@@ -80,7 +79,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -142,12 +140,10 @@ class Devices(share.Devices):
 
 
 class FixtureError(Exception):
-
     """Fixture operating sequence error."""
 
 
 class FixtureState(enum.IntEnum):
-
     """State definitions for the Fixture class."""
 
     idle = 0
@@ -156,7 +152,6 @@ class FixtureState(enum.IntEnum):
 
 
 class Fixture:
-
     """Helper class for fixture circuit control.
 
     DC Source 'dcs' drives a relay that directs relay coil power to:
@@ -250,7 +245,6 @@ class Fixture:
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_image = None
@@ -270,7 +264,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

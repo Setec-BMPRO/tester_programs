@@ -9,7 +9,6 @@ from programs import rvmn101
 
 
 class RVMN101B_Console(unittest.TestCase):
-
     """RVMN101 Console program test suite."""
 
     prompt = "\r\x1b[1;32muart:~$ \x1b[m"

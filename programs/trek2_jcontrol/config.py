@@ -4,7 +4,6 @@
 
 
 class JControl:
-
     """JControl configuration."""
 
     sw_version = "1.7.20388.329"  # 035826 Rev 2      PC-24868
@@ -13,7 +12,6 @@ class JControl:
 
 
 class Trek2:
-
     """Trek2 configuration."""
 
     sw_version = "1.7.20512.331"  # 035862 Rev 2      MA-378
@@ -22,7 +20,6 @@ class Trek2:
 
 
 class Trek3:
-
     """Trek3 configuration."""
 
     sw_version = "1.7.20512.331"  # 035862 Rev 2      PC-25163

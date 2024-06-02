@@ -8,7 +8,6 @@ import share
 
 
 class Initial(share.TestSequence):
-
     """C15D-15 Initial Test Program."""
 
     vin_set = 30.0  # Input voltage setting
@@ -73,7 +72,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -95,7 +93,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -117,7 +114,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

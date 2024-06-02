@@ -8,19 +8,20 @@ import share
 
 
 class Final(share.TestSequence):
-
     """SmartLink201 Final Test Program."""
 
     limitdata = (
         tester.LimitHigh(
             "ScanRSSI",
-            -70
-            if share.config.System.tester_type
-            in (
-                "ATE4",
-                "ATE5",
-            )
-            else -85,
+            (
+                -70
+                if share.config.System.tester_type
+                in (
+                    "ATE4",
+                    "ATE5",
+                )
+                else -85
+            ),
             doc="Strong signal",
         ),
     )
@@ -44,7 +45,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices. Uses SmartLink201 fixture."""
 
     vin_set = 12.0  # Injected Vin (V)
@@ -67,7 +67,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -83,7 +82,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

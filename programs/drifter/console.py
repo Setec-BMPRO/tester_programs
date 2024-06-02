@@ -6,7 +6,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to Drifter console."""
 
     parameter = share.console.parameter

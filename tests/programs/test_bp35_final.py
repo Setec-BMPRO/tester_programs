@@ -8,13 +8,11 @@ from programs import bp35
 
 
 class BP35Final(ProgramTestCase):
-
     """BP35 / BP35-II Final program test suite."""
 
     prog_class = bp35.Final
     parameter = "SR"
     debug = False
-    sernum = "A1626010123"
     vout = 12.7
 
     def setUp(self):
@@ -41,7 +39,6 @@ class BP35Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
-                    (sen["sernum"], self.sernum),
                     (sen["photo"], (0.0, 12.0)),
                 ),
                 "CAN": (
@@ -65,10 +62,10 @@ class BP35Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(36, len(result.readings))
+        self.assertEqual(35, len(result.readings))
         self.assertEqual(
             ["PowerUp", "CAN", "Load", "OCP", "CanCable"], self.tester.ut_steps
         )

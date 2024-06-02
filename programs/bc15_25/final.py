@@ -8,7 +8,6 @@ from . import config
 
 
 class Final(share.TestSequence):
-
     """BC15/25 Final Test Program."""
 
     def open(self, uut):
@@ -50,7 +49,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -70,7 +68,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     ocp_nominal = None  # Nominal OCP point of unit
@@ -102,7 +99,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

@@ -8,7 +8,6 @@ from programs import bc2
 
 
 class _BC2Final(ProgramTestCase):
-
     """BC2 Final program test suite."""
 
     prog_class = bc2.Final
@@ -29,7 +28,6 @@ class _BC2Final(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
-                    (sen["sernum"], "A1745120031"),
                     (sen["vin"], 15.0),
                 ),
                 "Bluetooth": ((sen["arm_swver"], self.test_sequence.cfg.sw_version),),
@@ -42,15 +40,14 @@ class _BC2Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(6, len(result.readings))
+        self.assertEqual(5, len(result.readings))
         self.assertEqual(["Prepare", "Bluetooth", "Calibrate"], self.tester.ut_steps)
 
 
 class BC2_Final(_BC2Final):
-
     """BC2 Final program test suite."""
 
     parameter = "100"
@@ -63,7 +60,6 @@ class BC2_Final(_BC2Final):
 
 
 class BC2H_Final(_BC2Final):
-
     """BC2H Final program test suite."""
 
     parameter = "300"

@@ -10,7 +10,6 @@ import share
 
 @define
 class DisplayControl:
-
     """Control of the LCD & Backlight via CAN."""
 
     can_dev = field()

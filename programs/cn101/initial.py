@@ -13,7 +13,6 @@ from . import config, console
 
 
 class Initial(share.TestSequence):
-
     """CN101 Initial Test Program."""
 
     def open(self, uut):
@@ -101,7 +100,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_version = None  # ARM software version
@@ -158,7 +156,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -195,7 +192,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

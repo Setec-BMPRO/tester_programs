@@ -16,7 +16,6 @@ from . import config, display
 
 
 class Initial(share.TestSequence):
-
     """RVMD50 Initial Test Program."""
 
     vin_set = 8.1
@@ -65,7 +64,6 @@ class Initial(share.TestSequence):
 
 @define
 class LatchingRelay:
-
     """A latching relay, with 'on' and 'off' drive lines."""
 
     rla_on = field()
@@ -87,7 +85,6 @@ class LatchingRelay:
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     sw_image = None
@@ -131,7 +128,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     sw_image = None
@@ -159,7 +155,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

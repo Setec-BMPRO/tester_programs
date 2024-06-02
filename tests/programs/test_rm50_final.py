@@ -7,7 +7,6 @@ from programs import rm50
 
 
 class RM5024Final(ProgramTestCase):
-
     """RM-50-24 Final program test suite."""
 
     prog_class = rm50.Final
@@ -49,7 +48,7 @@ class RM5024Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(24, len(result.readings))

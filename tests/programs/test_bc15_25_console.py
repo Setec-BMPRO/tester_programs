@@ -8,7 +8,6 @@ from programs import bc15_25
 
 
 class BC25_Console(unittest.TestCase):
-
     """BC25 Console program test suite."""
 
     prompt = "\r\n> "

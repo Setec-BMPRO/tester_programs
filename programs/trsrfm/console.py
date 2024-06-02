@@ -8,7 +8,6 @@ import share
 
 
 class Console(share.console.Base):
-
     """Communications to TRS-RFM console."""
 
     re_blemac = re.compile(r"[0-9a-f]{12}")

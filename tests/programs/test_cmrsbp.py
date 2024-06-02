@@ -32,7 +32,6 @@ _CMR_TEMPLATE = {
 
 
 class CMRSBPInitial(ProgramTestCase):
-
     """CMRSBP Initial program test suite."""
 
     prog_class = cmrsbp.Initial
@@ -91,7 +90,7 @@ class CMRSBPInitial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(17, len(result.readings))
@@ -113,7 +112,6 @@ class CMRSBPInitial(ProgramTestCase):
 
 
 class CMRSBPSerialDate(ProgramTestCase):
-
     """CMRSBP SerialDate program test suite."""
 
     prog_class = cmrsbp.SerialDate
@@ -149,7 +147,7 @@ class CMRSBPSerialDate(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(2, len(result.readings))
@@ -161,7 +159,6 @@ class CMRSBPSerialDate(ProgramTestCase):
 
 
 class _CMRSBPFin(ProgramTestCase):
-
     """CMRSBP Final program test suite."""
 
     prog_class = cmrsbp.Final
@@ -190,7 +187,7 @@ class _CMRSBPFin(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(13, len(result.readings))
@@ -200,7 +197,6 @@ class _CMRSBPFin(ProgramTestCase):
 
 
 class CMR_8_Final(_CMRSBPFin):
-
     """CMR-SBP-8 Final program test suite."""
 
     parameter = "8"
@@ -215,7 +211,6 @@ class CMR_8_Final(_CMRSBPFin):
 
 
 class CMR_13_Final(_CMRSBPFin):
-
     """CMR-SBP-13 Final program test suite."""
 
     parameter = "13"
@@ -230,7 +225,6 @@ class CMR_13_Final(_CMRSBPFin):
 
 
 class CMR_17_Final(_CMRSBPFin):
-
     """CMR-SBP-17 Final program test suite."""
 
     parameter = "17"
@@ -246,7 +240,6 @@ class CMR_17_Final(_CMRSBPFin):
 
 
 class CMRDataMonitor(unittest.TestCase):
-
     """CMR-SBP data monitor test suite."""
 
     _data_template = (

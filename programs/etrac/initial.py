@@ -10,7 +10,6 @@ from . import arduino
 
 
 class Initial(share.TestSequence):
-
     """ETrac-II Initial Test Program."""
 
     limitdata = (
@@ -67,7 +66,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -100,7 +98,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -118,7 +115,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

@@ -8,7 +8,6 @@ from programs import rvmn101
 
 
 class RVMN101BInitial(ProgramTestCase):
-
     """RVMN101B Initial program test suite."""
 
     prog_class = rvmn101.Initial
@@ -35,7 +34,6 @@ class RVMN101BInitial(ProgramTestCase):
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
                 "PowerUp": (
-                    (sen["SnEntry"], "A2126010123"),
                     (sen["VBatt"], 12.0),
                     (sen["3V3"], 3.3),
                 ),
@@ -43,23 +41,17 @@ class RVMN101BInitial(ProgramTestCase):
                     (sen["JLinkARM"], 0),
                     (sen["JLinkBLE"], 0),
                 ),
-                "Initialise": (
-                    (sen["BleMac"], "aabbccddeeff"),
-                    ),
-                "Input": (
-                    (sen["Input"], 0x5a5a),
-                    ),
-                "Output": (
-                    (sen["HSout"], 0),
-                ),
+                "Initialise": ((sen["BleMac"], "aabbccddeeff"),),
+                "Input": ((sen["Input"], 0x5A5A),),
+                "Output": ((sen["HSout"], 0),),
                 "CanBus": ((sen["cantraffic"], True),),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
-        self.assertEqual(9, len(result.readings))
+        self.assertEqual(8, len(result.readings))
         self.assertEqual(
             ["PowerUp", "Program", "Initialise", "Input", "Output", "CanBus"],
             self.tester.ut_steps,

@@ -8,7 +8,6 @@ import share
 
 
 class Arduino(share.console.Base):
-
     """Communications to Arduino console."""
 
     cmd_data = {

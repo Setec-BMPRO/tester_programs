@@ -6,7 +6,6 @@ from programs import ids500
 
 
 class Ids500InitialBias(ProgramTestCase):
-
     """IDS500 Bias Initial program test suite."""
 
     prog_class = ids500.InitialBias
@@ -23,13 +22,11 @@ class Ids500InitialBias(ProgramTestCase):
                     (sen["400V"], 400.0),
                     (sen["Vcc"], 14.0),
                 ),
-                "Load": (
-                    (sen["12V"], (13.0, 12.8)),
-                ),
+                "Load": ((sen["12V"], (13.0, 12.8)),),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(5, len(result.readings))

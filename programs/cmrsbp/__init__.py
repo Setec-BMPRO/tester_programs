@@ -15,7 +15,6 @@ from . import cmrsbp
 
 
 class Initial(share.TestSequence):
-
     """CMR-SBP Initial Test Program."""
 
     # PIC firmware image file
@@ -156,7 +155,6 @@ class Initial(share.TestSequence):
 
 
 class SerialDate(share.TestSequence):
-
     """CMR-SBP SerialDate Test Program."""
 
     def open(self, uut):
@@ -183,7 +181,6 @@ class SerialDate(share.TestSequence):
 
 
 class Final(share.TestSequence):
-
     """CMR-SBP Final Test Program."""
 
     # Common test limits
@@ -194,7 +191,7 @@ class Final(share.TestSequence):
         tester.LimitInteger("RotarySw", 256),
         tester.LimitDelta("Halfcell", 400, 50),
         tester.LimitBoolean("VFCcalStatus", True),
-        tester.LimitRegExp("SerNumChk", ""),
+        tester.LimitRegExp("SerNumChk", "None"),
     )
     # Common to both sets of 8Ah
     _common8 = _common + (
@@ -294,7 +291,6 @@ class Final(share.TestSequence):
 
 
 class EvError:
-
     """EV2200 error handler."""
 
     def __init__(self, err):
@@ -312,7 +308,6 @@ class EvError:
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -375,7 +370,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -422,7 +416,6 @@ class Sensors(share.Sensors):
 
 
 class MeasureIni(share.Measurements):
-
     """Measurements."""
 
     def open(self):
@@ -451,7 +444,6 @@ class MeasureIni(share.Measurements):
 
 
 class MeasureFin(share.Measurements):
-
     """Measurements."""
 
     def open(self):

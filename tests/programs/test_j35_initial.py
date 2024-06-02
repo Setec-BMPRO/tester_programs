@@ -7,11 +7,9 @@ from programs import j35
 
 
 class _J35Initial(ProgramTestCase):
-
     """J35 Initial program test suite."""
 
     prog_class = j35.Initial
-    sernum = "A1626010123"
 
     def setUp(self):
         """Per-Test setup."""
@@ -42,13 +40,12 @@ class _J35Initial(ProgramTestCase):
             UnitTester.key_sen: {  # Tuples of sensor data
                 "Prepare": (
                     (sen["olock"], 10.0),
-                    (sen["sernum"], self.sernum),
                     (sen["ovfuse"], 12.0),
                     (sen["ovbat"], 12.0),
                     (sen["ovfuse"], 12.0),
                     (sen["o3V3U"], 3.3),
                 ),
-                "Initialise": ((sen["sernum"], self.sernum),),
+                "Initialise": (),
                 "Aux": (
                     (sen["ovbat"], 13.5),
                     (sen["arm_auxv"], 13.5),
@@ -134,7 +131,7 @@ class _J35Initial(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(rdg_count, len(result.readings))
@@ -142,7 +139,6 @@ class _J35Initial(ProgramTestCase):
 
 
 class J35_A_Initial(_J35Initial):
-
     """J35-A Initial program test suite."""
 
     parameter = "A"
@@ -151,7 +147,7 @@ class J35_A_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the A program."""
         super()._pass_run(
-            44,
+            43,
             [
                 "Prepare",
                 "ProgramARM",
@@ -169,7 +165,6 @@ class J35_A_Initial(_J35Initial):
 
 
 class J35_B_Initial(_J35Initial):
-
     """J35-B Initial program test suite."""
 
     parameter = "B"
@@ -178,7 +173,7 @@ class J35_B_Initial(_J35Initial):
     def test_pass_run(self):
         """PASS run of the B program."""
         super()._pass_run(
-            55,
+            54,
             [
                 "Prepare",
                 "ProgramARM",
@@ -198,7 +193,6 @@ class J35_B_Initial(_J35Initial):
 
 
 class J35_C_Initial(J35_B_Initial):
-
     """J35-C Initial program test suite."""
 
     parameter = "C"
@@ -206,7 +200,6 @@ class J35_C_Initial(J35_B_Initial):
 
 
 class J35_D_Initial(J35_B_Initial):
-
     """J35-D Initial program test suite."""
 
     parameter = "D"

@@ -14,7 +14,6 @@ import share
 
 
 class Initial(share.TestSequence):
-
     """Opto Test Program."""
 
     _opto_count = 20
@@ -179,7 +178,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -199,7 +197,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     _opto_count = None
@@ -266,7 +263,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):

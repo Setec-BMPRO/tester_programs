@@ -12,7 +12,6 @@ from . import config, console
 
 
 class Final(share.TestSequence):
-
     """IDS-500 Final Test Programes."""
 
     # Test limits
@@ -296,7 +295,6 @@ class Final(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -356,7 +354,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -417,7 +414,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):
@@ -467,8 +463,8 @@ class Measurements(share.Measurements):
         )
         # Create limits locally for these dynamic measurements.
         self["pic_hwrev"] = tester.Measurement(
-            tester.LimitRegExp("HwRev-PIC", ""), self.sensors["hwrev"]
+            tester.LimitRegExp("HwRev-PIC", "None"), self.sensors["hwrev"]
         )
         self["pic_sernum"] = tester.Measurement(
-            tester.LimitRegExp("SerNum-PIC", ""), self.sensors["sernum"]
+            tester.LimitRegExp("SerNum-PIC", "None"), self.sensors["sernum"]
         )

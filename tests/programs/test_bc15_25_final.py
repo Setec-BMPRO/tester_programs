@@ -6,7 +6,6 @@ from programs import bc15_25
 
 
 class _BC15_25_Final(ProgramTestCase):
-
     """BC15/25 Final program test suite."""
 
     prog_class = bc15_25.Final
@@ -27,7 +26,7 @@ class _BC15_25_Final(ProgramTestCase):
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
-        self.tester.test(("UUT1",))
+        self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.code)
         self.assertEqual(5, len(result.readings))
@@ -35,7 +34,6 @@ class _BC15_25_Final(ProgramTestCase):
 
 
 class BC15_Final(_BC15_25_Final):
-
     """BC15 Initial program test suite."""
 
     parameter = "15"
@@ -47,7 +45,6 @@ class BC15_Final(_BC15_25_Final):
 
 
 class BC25_Final(_BC15_25_Final):
-
     """BC25 Initial program test suite."""
 
     parameter = "25"

@@ -11,7 +11,6 @@ import share
 
 
 class Initial(share.TestSequence):
-
     """GENIUS-II Initial Test Program."""
 
     # PIC firmware image file
@@ -173,7 +172,6 @@ class Initial(share.TestSequence):
 
 
 class Devices(share.Devices):
-
     """Devices."""
 
     def open(self):
@@ -225,7 +223,6 @@ class Devices(share.Devices):
 
 
 class Sensors(share.Sensors):
-
     """Sensors."""
 
     def open(self):
@@ -272,7 +269,6 @@ class Sensors(share.Sensors):
 
 
 class Measurements(share.Measurements):
-
     """Measurements."""
 
     def open(self):
