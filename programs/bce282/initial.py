@@ -115,7 +115,7 @@ class Initial(share.TestSequence):
         except tosbsl.BSLException as exc:  # Change exception into test fail
             _measurement = tester.Measurement(
                 tester.LimitRegExp(
-                    name="Program", testlimit="ok", doc="Programming succeeded"
+                    name="Program", limit="ok", doc="Programming succeeded"
                 ),
                 tester.sensor.Mirror(),
             )

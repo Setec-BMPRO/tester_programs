@@ -17,7 +17,7 @@ class _Base(abc.ABC):
         """Create a programmer."""
         self._measurement = tester.Measurement(
             tester.LimitRegExp(
-                name="Program", testlimit=self.pass_result, doc="Programming succeeded"
+                name="Program", limit=self.pass_result, doc="Programming succeeded"
             ),
             tester.sensor.Mirror(),
         )

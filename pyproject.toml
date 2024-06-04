@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setec-tester-programs"
-version = "1.17.0"
+version = "1.18.0"
 description = "SETEC product test programs."
 authors = [
     {name = "Stephen Bell", email = "stephen.bell@setec.com.au"},
