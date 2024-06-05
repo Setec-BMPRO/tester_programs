@@ -67,30 +67,36 @@ class Config:
         tester.LimitLow("12Vmax", 0.045, doc="12V transient ok"),
     )
     # Software image filename
-    _lpc_values = _Values(
+    _silver_nxp_values = _Values(
         devicetype="lpc1113",
         sw_image="gen9_1.0.18392.2512.bin",
         pfc_trim=True,
     )
-    _renesas_values = _Values(
+    _silver_renesas_values = _Values(
         devicetype="r7fa2e1a7",
         sw_image="gen9_renesas_1.1.0-0-g6d37938.hex",
         pfc_trim=False,
     )
+    _gold_values = _Values(
+        devicetype="r7fa2e1a7",
+        sw_image="gen9g_1.2.0-0-g2d5106a.hex",
+        pfc_trim=True,
+    )
     _rev_data = {
         "G": {  # GEN9-540-G (Gold)
-            None: _renesas_values,
-            "2": _renesas_values,
+            None: _gold_values,
+            "3": _gold_values,
+            "2": _silver_renesas_values,
             # Rev 1 was Engineering protoype build
         },
         "S": {  # GEN9-540 (Silver)
-            None: _renesas_values,
-            "8A": _renesas_values,
-            "7A": _renesas_values,
-            "6C": _lpc_values,
-            "6B": _lpc_values,
-            "6A": _lpc_values,
-            "5": _lpc_values,
+            None: _silver_renesas_values,
+            "8A": _silver_renesas_values,
+            "7A": _silver_renesas_values,
+            "6C": _silver_nxp_values,
+            "6B": _silver_nxp_values,
+            "6A": _silver_nxp_values,
+            "5": _silver_nxp_values,
             # Rev 1-4 were Engineering protoype builds
         },
     }
