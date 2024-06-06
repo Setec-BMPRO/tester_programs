@@ -6,12 +6,10 @@ import enum
 
 
 class ParameterError(Exception):
-
     """Parameter Error."""
 
 
 class _Parameter:
-
     """Parameter base class."""
 
     # Default read/write format strings for the X-Register based consoles
@@ -78,12 +76,10 @@ class _Parameter:
 
 
 class String(_Parameter):
-
     """String parameter type."""
 
 
 class Boolean(_Parameter):
-
     """Boolean parameter type."""
 
     def write(self, value, func):
@@ -109,7 +105,6 @@ class Boolean(_Parameter):
 
 
 class Float(_Parameter):
-
     """Float parameter type."""
 
     def __init__(
@@ -167,7 +162,6 @@ class Float(_Parameter):
 
 
 class Calibration(Float):
-
     """A write-only parameter for calibration commands."""
 
     # write format string
@@ -181,7 +175,6 @@ class Calibration(Float):
 
 
 class Hex(_Parameter):
-
     """Hex parameter type with '$' prefix hex literal."""
 
     # write format string
@@ -245,7 +238,6 @@ class Hex(_Parameter):
 
 @enum.unique
 class OverrideTo(enum.IntEnum):
-
     """Console manual override constants."""
 
     NORMAL = 0
@@ -254,7 +246,6 @@ class OverrideTo(enum.IntEnum):
 
 
 class Override(Float):
-
     """A parameter for overriding SamB11 unit operation."""
 
     def __init__(self, command):

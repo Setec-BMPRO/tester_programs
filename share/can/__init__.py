@@ -62,7 +62,6 @@ __all__ = [
 
 @define
 class PacketPropertyReader:
-
     """Custom logical instrument to read CAN packet properties."""
 
     canreader = field()  # tester.CANReader instance
@@ -95,7 +94,6 @@ class PacketPropertyReader:
 
 @define
 class PacketDetector:
-
     """Custom logical instrument to detect CAN packet traffic."""
 
     canreader = field()  # tester.CANReader instance

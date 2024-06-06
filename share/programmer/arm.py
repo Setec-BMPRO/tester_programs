@@ -12,7 +12,6 @@ from . import _base
 
 
 class ARM(_base._Base):
-
     """ARM programmer using the isplpc package."""
 
     def __init__(

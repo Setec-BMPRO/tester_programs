@@ -17,7 +17,6 @@ from . import _base
 
 @enum.unique
 class SETECDeviceID(enum.IntEnum):  # pylint: disable=too-few-public-methods
-
     """CAN Device ID values for different SETEC products."""
 
     CN100 = 4
@@ -34,7 +33,6 @@ class SETECDeviceID(enum.IntEnum):  # pylint: disable=too-few-public-methods
 
 @define
 class Trek2PreConditionsBuilder:  # pylint: disable=too-few-public-methods
-
     """A TREK2 PreConditions packet builder."""
 
     packet = field(init=False)
@@ -53,7 +51,6 @@ class Trek2PreConditionsBuilder:  # pylint: disable=too-few-public-methods
 
 @define
 class RvviewTestModeBuilder:  # pylint: disable=too-few-public-methods
-
     """A RVVIEW TestMode packet builder."""
 
     packet = field(init=False)

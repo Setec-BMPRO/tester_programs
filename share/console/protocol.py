@@ -66,22 +66,18 @@ import tester
 
 
 class Error(Exception):
-
     """Console Error."""
 
 
 class CommandError(Error):
-
     """Console Command Error."""
 
 
 class ResponseError(Error):
-
     """Console Response Error."""
 
 
 class Base:
-
     """Formatter for the base console. Implements Protocols 1 & 4.
 
     - Sends a command with '\r' on the end, in a single write.
@@ -301,7 +297,6 @@ class Base:
 
 
 class BadUart(Base):
-
     """Formatter for the 'Bad UART' consoles. Implements Protocols 2 & 3.
 
     A UART that is prone to loosing characters if they arrive in a block.
@@ -338,7 +333,6 @@ class BadUart(Base):
 
 
 class CANTunnel(Base):
-
     """Formatter for the 'CAN Tunnel' consoles. Implements Protocols 2 & 3
 
     - Send commands in blocks of 8-bytes maximum.

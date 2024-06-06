@@ -13,7 +13,6 @@ from . import protocol
 
 
 class SamB11(protocol.BadUart):
-
     """Communications to SamB11 based console."""
 
     # Number of lines in startup banner

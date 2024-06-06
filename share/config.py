@@ -7,7 +7,6 @@ import pathlib
 
 
 class System:  # pylint: disable=too-few-public-methods
-
     """System data."""
 
     # Type of Tester.
@@ -31,7 +30,6 @@ class System:  # pylint: disable=too-few-public-methods
 
 
 class Fixture:
-
     """Fixture specific data, such as serial port assignment.
 
     Linux testers:
@@ -193,7 +191,6 @@ class Fixture:
 
 
 class JFlashProject:
-
     """Common store of JFlash project files for devices."""
 
     @classmethod

@@ -8,7 +8,6 @@ import tester
 
 
 class _Base(abc.ABC):
-
     """Programmer base class."""
 
     pass_result = "ok"
@@ -84,5 +83,4 @@ class _Base(abc.ABC):
 
 
 class VerificationError(Exception):
-
     """Verification error."""

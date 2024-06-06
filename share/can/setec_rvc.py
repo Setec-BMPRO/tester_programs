@@ -18,7 +18,6 @@ from . import _base
 
 
 class DeviceID(enum.IntEnum):
-
     """RV-C CAN Device ID values for different SETEC products.
 
     Used for the packet Source Address (SA)
@@ -32,7 +31,6 @@ class DeviceID(enum.IntEnum):
 
 
 class DGN(enum.IntEnum):
-
     """RV-C Data Group Number (DGN) values for message destinations."""
 
     ACSTATUS1 = 0x1FFAD
@@ -45,7 +43,6 @@ class DGN(enum.IntEnum):
 
 
 class SetecRVC(enum.IntEnum):
-
     """Generic SETEC RV-C CAN parameters."""
 
     DATA_LEN = 8  # Packets always have 8 bytes of data
@@ -55,7 +52,6 @@ class SetecRVC(enum.IntEnum):
 
 @enum.unique
 class CommandID(enum.IntEnum):
-
     """Command ID for packets sent from RVM[CD] to RVMN.
 
     5.5.10.1 RVMD50 Proprietary Message
@@ -77,7 +73,6 @@ class CommandID(enum.IntEnum):
 
 @enum.unique
 class MessageID(enum.IntEnum):
-
     """Message ID for packets sent from RVMN to RVM[CD].
 
     5.5.10.2 RVMN5x Proprietary Message
@@ -108,7 +103,6 @@ class MessageID(enum.IntEnum):
 
 
 class _SwitchStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
-
     """RVMC switch field definition.
 
     5.5.6 SWITCH_STATUS
@@ -146,7 +140,6 @@ class _SwitchStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 @define(slots=False)
 class SwitchStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
-
     """A RVMC Switch Status decoder."""
 
     def worker(self, fields, packet):
@@ -172,7 +165,6 @@ class SwitchStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
 
 
 class _DeviceStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
-
     """RVMD50 button field definition.
 
     5.5.10.12 Command Signal and Parameter Definition
@@ -199,7 +191,6 @@ class _DeviceStatus(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 @define(slots=False)
 class DeviceStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
-
     """RVMD50 Device Status decoder."""
 
     def worker(self, fields, packet):
@@ -225,7 +216,6 @@ class DeviceStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
 
 
 class _ACStatus1(ctypes.Structure):  # pylint: disable=too-few-public-methods
-
     """Automatic Transfer Switch AC Status1 field definition.
 
     DGN = 0x1FFAD, Priority = 3,
@@ -240,7 +230,7 @@ class _ACStatus1(ctypes.Structure):  # pylint: disable=too-few-public-methods
         ("iotype", ctypes.c_ulonglong, 1),
         ("source", ctypes.c_ulonglong, 3),  # Always 000b
         ("leg", ctypes.c_ulonglong, 1),
-        ]
+    ]
 
     _fields_ = _ats_common_ + [
         ("voltage", ctypes.c_ulonglong, 16),  # Always 0xFFFF
@@ -251,7 +241,6 @@ class _ACStatus1(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 
 class _ACStatus3(ctypes.Structure):  # pylint: disable=too-few-public-methods
-
     """Automatic Transfer Switch AC Status3 field definition.
 
     DGN = 0x1FFAB, Priority = 3,
@@ -272,7 +261,6 @@ class _ACStatus3(ctypes.Structure):  # pylint: disable=too-few-public-methods
 
 @define(slots=False)
 class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
-
     """ACMON Status decoder.
 
     ACMON units transmit 4 differnet packets, at 2 different rates:
@@ -298,11 +286,23 @@ class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
         if len(data) != SetecRVC.DATA_LEN.value:
             raise tester.sensor.KeyedDataDecodeError()
         field_groups = [  # (Dictionary, Prefix)
-            (self.ats1l1, "S1L1", ),
-            (self.ats1l2, "S1L2", ),
-            (self.ats3l1, "S3L1", ),
-            (self.ats3l2, "S3L2", ),
-            ]
+            (
+                self.ats1l1,
+                "S1L1",
+            ),
+            (
+                self.ats1l2,
+                "S1L2",
+            ),
+            (
+                self.ats3l1,
+                "S3L1",
+            ),
+            (
+                self.ats3l2,
+                "S3L2",
+            ),
+        ]
         # pylint: disable=protected-access
         if dgn == DGN.ACSTATUS1:
             ats_fields = _ACStatus1.from_buffer_copy(data)
@@ -333,7 +333,6 @@ class ACMONStatusDecoder(tester.sensor.KeyedDataDecoderMixin):
 
 @define
 class RVMC101ControlLEDBuilder:  # pylint: disable=too-few-public-methods
-
     """A RVMC101 Control LED packet builder.
 
     [0]: LED Display = 0x01
@@ -383,7 +382,6 @@ class RVMC101ControlLEDBuilder:  # pylint: disable=too-few-public-methods
 
 
 class _RVMD50Message:  # pylint: disable=too-few-public-methods
-
     """A generic RVMD50 message packet."""
 
     _cmd_id_index = 1  # Index of Cmd ID value
@@ -411,7 +409,6 @@ class _RVMD50Message:  # pylint: disable=too-few-public-methods
 
 @define
 class RVMD50ControlLCDBuilder:  # pylint: disable=too-few-public-methods
-
     """A RVMD50 Control LCD packet builder."""
 
     _pattern_index = 2  # Index of test pattern value
@@ -446,7 +443,6 @@ class RVMD50ControlLCDBuilder:  # pylint: disable=too-few-public-methods
 
 @define
 class RVMD50ResetBuilder:  # pylint: disable=too-few-public-methods
-
     """A RVMD50 Reset packet builder."""
 
     # Cmd ID: 1 = Reset
@@ -455,7 +451,6 @@ class RVMD50ResetBuilder:  # pylint: disable=too-few-public-methods
 
 @define
 class RVMD50ControlButtonBuilder:
-
     """A RVMD50 Control Button packet builder."""
 
     _group_id_index = 2  # Index of Group ID value

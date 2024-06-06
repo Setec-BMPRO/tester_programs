@@ -1,12 +1,12 @@
 PACKAGE1 := programs
 PACKAGE2 := share
-DEPENDENCIES := pip setuptools build mypy
+DEPENDENCIES := pip setuptools build black mypy
 DEPENDENCIES += attrs jsonrpclib-pelix pydispatcher pyserial
 DEPENDENCIES += setec-isplpc==1.* setec-libtester==1.* setec-tester==1.*
 DEPENDENCIES += setec-updi==1.* setec-utility[erp]==1.*
-SOURCES := $(wildcard $(PACKAGE1)/*.py) $(wildcard $(PACKAGE1)/*/*.py)
-SOURCES += $(wildcard $(PACKAGE2)/*.py) $(wildcard $(PACKAGE2)/*/*.py)
-SOURCES += $(wildcard *.toml)
+PYSOURCES := $(shell find $(PACKAGE1) -name '*.py')
+PYSOURCES += $(shell find $(PACKAGE2) -name '*.py')
+SOURCES := $(PYSOURCES) $(wildcard *.toml)
 VENV := .venv
 VENV_NEW_FLAG := $(VENV)/_venv_is_new
 VPYTHON := $(VENV)/bin/python3
@@ -18,6 +18,9 @@ DEEP_CLEAN_TARGETS := $(VENV)
 dist: $(VENV) $(SOURCES)
 	@rm -f $(VENV_NEW_FLAG)
 	$(VPYTHON) -m build
+# Reformat code
+black:
+	@$(VPYTHON) -m black $(PYSOURCES)
 # Remove output packages and cache files
 clean:
 	@rm -rf $(CLEAN_TARGETS)

@@ -10,7 +10,6 @@ from attrs import define, field, validators
 
 @define
 class BackgroundTimer:
-
     """Generic second timer with a 'done' property."""
 
     interval = field(converter=float, validator=validators.gt(0.0))
@@ -57,7 +56,6 @@ class BackgroundTimer:
 
 @define
 class RepeatTimer:
-
     """Repeatedly call a function at a regular interval."""
 
     interval = field(converter=float, validator=validators.gt(0.0))
@@ -89,7 +87,6 @@ class RepeatTimer:
 
 @define
 class TimedStore:
-
     """Dictionary with timeout.
 
     Manage a stored dictionary of data.

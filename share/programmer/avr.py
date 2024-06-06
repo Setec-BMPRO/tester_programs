@@ -8,7 +8,6 @@ from . import _base
 
 
 class AVR(_base._Base):
-
     """AVR programmer using the updi package."""
 
     def __init__(self, port, file, baudrate=115200, device="tiny406", fuses=None):
@@ -46,7 +45,9 @@ class AVR(_base._Base):
             readback = nvm.read_flash(nvm.device.flash_start, len(data))
             for offset, value in enumerate(data):
                 if value != readback[offset]:
-                    raise _base.VerificationError("Verify error at 0x{0:04X}".format(offset))
+                    raise _base.VerificationError(
+                        "Verify error at 0x{0:04X}".format(offset)
+                    )
             for fuse_num, fuse_val in self._fuses.values():
                 nvm.write_fuse(fuse_num, fuse_val)
             nvm.leave_progmode()

@@ -13,7 +13,6 @@ from attrs import define, field, validators
 
 @define
 class MAC:
-
     """Device MAC address."""
 
     mac = field(validator=validators.instance_of(bytes))

@@ -12,7 +12,6 @@ import tester
 
 
 class DuplicateNameError(Exception):
-
     """Duplicate name error."""
 
 
@@ -35,7 +34,6 @@ def teststep(func):
 
 @define(slots=False)
 class Devices:
-
     """Devices abstract base class."""
 
     physical_devices = field(validator=validators.instance_of(tester.PhysicalDevices))
@@ -87,7 +85,6 @@ class Devices:
 
 @define
 class TestLimits:
-
     """Dictionary of Test Limits."""
 
     _store = field(init=False, factory=dict)
@@ -125,7 +122,6 @@ class TestLimits:
 
 @define(slots=False)
 class Sensors:
-
     """Sensors."""
 
     devices = field(validator=validators.instance_of(Devices))
@@ -172,7 +168,6 @@ class Sensors:
 
 @define(slots=False)
 class Measurements:
-
     """Measurements."""
 
     sensors = field(validator=validators.instance_of(Sensors))
@@ -225,7 +220,6 @@ class Measurements:
 
 @define(slots=False)
 class TestSequence:
-
     """Base class for Test Programs."""
 
     _limit_builtin = (  # Built-in limits added to every test program
@@ -238,7 +232,7 @@ class TestSequence:
 
     physical_devices = field(
         validator=validators.instance_of(tester.devphysical.PhysicalDevices),
-        )
+    )
     per_panel = field(
         validator=validators.and_(validators.instance_of(int), validators.ge(1)),
     )
@@ -446,12 +440,9 @@ class TestSequence:
 
 @define
 class MultiMeasurementSummary:
-
     """Check multiple measurements and calculate overall result."""
 
-    default_timeout = field(
-        validator=validators.instance_of((int, float)), default=0
-    )
+    default_timeout = field(validator=validators.instance_of((int, float)), default=0)
     result = field(init=False, factory=tester.MeasurementResult)
     _sensor_positions = field(init=False, factory=set)
 

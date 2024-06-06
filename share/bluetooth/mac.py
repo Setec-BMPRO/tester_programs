@@ -8,7 +8,6 @@ import jsonrpclib
 
 @define
 class SerialToMAC:
-
     """Save/Read the bluetooth MAC address for a Serial Number."""
 
     server_url = field(default="https://webapp.mel.setec.com.au/ate/rpc/")

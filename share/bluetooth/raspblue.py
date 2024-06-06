@@ -7,7 +7,6 @@ import jsonrpclib  # Install with: pip install jsonrpclib-pelix
 
 
 class SerialIO(abc.ABC):
-
     """Serial compatible interface for RPC attached consoles.
 
     Simulates a serial console with character echo enabled.
@@ -65,7 +64,6 @@ class SerialIO(abc.ABC):
 
 
 class RaspberryBluetooth(SerialIO):
-
     """Connection to a Raspberry Pi with Bluetooth helper running."""
 
     # Calibration command end with this string

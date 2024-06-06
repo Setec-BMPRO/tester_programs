@@ -16,7 +16,6 @@ from . import protocol
 
 
 class Arduino(protocol.Base):
-
     """Communications to Arduino programmer console."""
 
     def open(self):
