@@ -110,7 +110,7 @@ class Devices(share.Devices):
             boot_relay=self["rla_boot"],
             reset_relay=self["rla_reset"],
         )
-        self["can"] = self.physical_devices["_CAN"]
+        self["can"] = self.physical_devices["CAN"]
         self["display"] = display.DisplayControl(self["can"])
         self["dcs_rst"].output(8.0, True)  # Fixture RESET circuit
         self.add_closer(lambda: self["dcs_rst"].output(0.0, output=False))

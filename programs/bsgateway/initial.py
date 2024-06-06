@@ -87,9 +87,9 @@ class Devices(share.Devices):
         # Set port separately - don't open until after programming
         con_ser.port = share.config.Fixture.port("039517", "ARM")
         self["console"] = console.Console(con_ser)
-        self["can"] = self.physical_devices["_CAN"]
+        self["can"] = self.physical_devices["CAN"]
         # CAN traffic reader
-        self["canreader"] = tester.CANReader(self.physical_devices["_CAN"])
+        self["canreader"] = tester.CANReader(self.physical_devices["CAN"])
         # CAN traffic detector
         self["candetector"] = share.can.PacketDetector(self["canreader"])
 

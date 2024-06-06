@@ -75,7 +75,7 @@ class Final(share.TestSequence):
         self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vin_set, output=True, delay=self.can_bind_time)
         precon = share.can.Trek2PreConditionsBuilder()
-        candev = self.physical_devices["CAN"][0]
+        candev = self.physical_devices["CAN"]
         candev.send(precon.packet)
 
     @share.teststep

@@ -176,7 +176,7 @@ class Devices(share.Devices):
         self["rvmn"] = console_class(nordic_ser)
         self["rvmn"].output_reversed(self.reversed_outputs)
         # CAN devices
-        self["can"] = self.physical_devices["_CAN"]
+        self["can"] = self.physical_devices["CAN"]
         self["canreader"] = tester.CANReader(self["can"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
         # Connection to Serial To MAC server

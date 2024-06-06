@@ -119,7 +119,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # CAN devices
-        self["can"] = self.physical_devices["_CAN"]
+        self["can"] = self.physical_devices["CAN"]
         self["canreader"] = tester.CANReader(self["can"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
         self["display"] = display.LEDControl(self["can"])

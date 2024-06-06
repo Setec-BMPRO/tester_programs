@@ -107,7 +107,7 @@ class Initial(share.TestSequence):
         """
         if self.is_atsam:
             testmode = share.can.RvviewTestModeBuilder()
-            candev = self.physical_devices["_CAN"]
+            candev = self.physical_devices["CAN"]
             candev.send(testmode.packet)
         else:
             self.devices["arm"].testmode(state)

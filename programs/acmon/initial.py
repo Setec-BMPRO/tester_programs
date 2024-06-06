@@ -77,7 +77,7 @@ class Devices(share.Devices):
             ("JLink", tester.JLink, "JLINK"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
-        self["can"] = self.physical_devices["_CAN"]
+        self["can"] = self.physical_devices["CAN"]
         self["canreader"] = tester.CANReader(self["can"])
         self["decoder"] = share.can.PacketPropertyReader(
             canreader=self["canreader"], decoder=share.can.ACMONStatusDecoder()

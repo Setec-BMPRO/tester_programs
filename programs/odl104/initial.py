@@ -118,7 +118,7 @@ class Devices(share.Devices):
         port = tester.RttPort()
         self["console"] = console.Console(port)
         # CAN devices
-        self["canreader"] = tester.CANReader(self.physical_devices["_CAN"])
+        self["canreader"] = tester.CANReader(self.physical_devices["CAN"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
         # Connection to Serial To MAC server
         self["serialtomac"] = share.bluetooth.SerialToMAC()

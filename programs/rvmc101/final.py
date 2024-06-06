@@ -47,7 +47,7 @@ class Devices(share.Devices):
     def open(self):
         """Create all Instruments."""
         self["dcs_vin"] = tester.DCSource(self.physical_devices["DCS1"])
-        self["can"] = self.physical_devices["_CAN"]
+        self["can"] = self.physical_devices["CAN"]
         self["canreader"] = tester.CANReader(self["can"])
         self["decoder"] = share.can.PacketPropertyReader(
             canreader=self["canreader"], decoder=share.can.SwitchStatusDecoder()
