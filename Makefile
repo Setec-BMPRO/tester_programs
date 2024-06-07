@@ -1,9 +1,9 @@
 PACKAGE1 := programs
 PACKAGE2 := share
-DEPENDENCIES := pip setuptools build black mypy
+DEPENDENCIES := pip build black mypy
 DEPENDENCIES += attrs jsonrpclib-pelix pydispatcher pyserial
-DEPENDENCIES += setec-isplpc==1.* setec-libtester==1.* setec-tester==1.*
-DEPENDENCIES += setec-updi==1.* setec-utility[erp]==1.*
+EDITABLES := ../isplpc ../gpib-devices ../libtester ../setec ../updi
+EDITABLES += ../tester
 PYSOURCES := $(shell find $(PACKAGE1) -name '*.py')
 PYSOURCES += $(shell find $(PACKAGE2) -name '*.py')
 SOURCES := $(PYSOURCES) $(wildcard *.toml)
@@ -32,6 +32,7 @@ deepclean:
 # Create the venv
 $(VENV):
 	python3 -m venv $(VENV)
+	for PKG in $(EDITABLES); do $(VPYTHON) -m pip install -e $$PKG; done
 	@touch $(VENV_NEW_FLAG)
 	$(MAKE) _venv
 # Update the venv
