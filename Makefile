@@ -1,6 +1,6 @@
 PACKAGE1 := programs
 PACKAGE2 := share
-DEPENDENCIES := pip build black mypy
+DEPENDENCIES := build black mypy
 DEPENDENCIES += attrs jsonrpclib-pelix pydispatcher pyserial
 EDITABLES := ../isplpc ../gpib-devices ../libtester ../setec ../updi
 EDITABLES += ../tester
@@ -32,6 +32,7 @@ deepclean:
 # Create the venv
 $(VENV):
 	python3 -m venv $(VENV)
+	$(VPYTHON) -m pip install -U pip
 	for PKG in $(EDITABLES); do $(VPYTHON) -m pip install -e $$PKG; done
 	@touch $(VENV_NEW_FLAG)
 	$(MAKE) _venv

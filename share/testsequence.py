@@ -4,10 +4,11 @@
 
 import contextlib
 import functools
-import logging
 import time
+from typing import Any, Callable, Optional, Sequence, Union
 
 from attrs import define, field, validators
+import libtester
 import tester
 
 
@@ -15,7 +16,7 @@ class DuplicateNameError(Exception):
     """Duplicate name error."""
 
 
-def teststep(func):
+def teststep(func: Callable) -> Callable:
     """Decorator to add arguments to the test step calls.
 
     Requires self.devices and self.measurements
@@ -25,14 +26,14 @@ def teststep(func):
     """
 
     @functools.wraps(func)
-    def new_func(self):
+    def new_func(self) -> Callable:
         """Decorate the function."""
         return func(self, self.devices, self.measurements)
 
     return new_func
 
 
-@define(slots=False)
+@define
 class Devices:
     """Devices abstract base class."""
 
@@ -120,7 +121,7 @@ class TestLimits:
         return self._store[name]
 
 
-@define(slots=False)
+@define
 class Sensors:
     """Sensors."""
 
@@ -166,7 +167,7 @@ class Sensors:
         self._store.clear()
 
 
-@define(slots=False)
+@define
 class Measurements:
     """Measurements."""
 
@@ -218,117 +219,17 @@ class Measurements:
             )
 
 
-@define(slots=False)
-class TestSequence:
-    """Base class for Test Programs."""
+@define
+class TestSequenceMixin:
+    """Utility methods for Test Programs."""
 
-    _limit_builtin = (  # Built-in limits added to every test program
+    _limit_builtin = (  # Built-in limits available to every test program
         tester.LimitRegExp(
             "SerNum", r"^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$", doc="Serial Number"
         ),
         tester.LimitBoolean("Notify", True, doc="YES response"),
         tester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
     )
-
-    physical_devices = field(
-        validator=validators.instance_of(tester.devphysical.PhysicalDevices),
-    )
-    per_panel = field(
-        validator=validators.and_(validators.instance_of(int), validators.ge(1)),
-    )
-    parameter = field()
-    engine = field(init=False, factory=tester.TestSequenceEngine)
-    limits = field(init=False, factory=TestLimits)
-    uuts = field(init=False, factory=list)
-    devices = field(init=False, default=None)
-    sensors = field(init=False, default=None)
-    measurements = field(init=False, default=None)
-    _logger = field(init=False)
-
-    @_logger.default
-    def _logger_default(self):
-        return logging.getLogger(".".join((__name__, self.__class__.__name__)))
-
-    def __attrs_post_init__(self):
-        """Instance settings."""
-        self.engine.per_panel = self.per_panel
-
-    @property
-    def multi_unit_mode(self):
-        """Number of units tested together on each panel.
-
-        @return Number of units per panel
-
-        """
-        return self.engine.multi_unit_mode
-
-    @property
-    def steps(self):
-        """Test program steps.
-
-        @return Dictionary of test steps
-
-        """
-        return self.engine.steps
-
-    @steps.setter
-    def steps(self, value):
-        """Add test steps.
-
-        @param value Test steps
-
-        """
-        self.engine.steps = value
-
-    def open(self, limits, cls_devices, cls_sensors, cls_measurements):
-        """Open test program by creating supporting instances.
-
-        @param limits Iterable tester.Limit*
-        @param cls_devices subclass of Devices
-        @param cls_sensors subclass of Sensors
-        @param cls_measurements subclass of Measurements
-
-        """
-        self.limits.load(self._limit_builtin + limits)
-        self.devices = cls_devices(self.physical_devices, self.parameter)
-        self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
-        self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
-        self.engine.open()
-        self.devices.open()
-        self.sensors.open()
-        self.measurements.open()
-
-    def run(self, uuts):
-        """Run the test sequence.
-
-        @param uuts Iterable of Unit Under Test's
-
-        """
-        self.uuts.clear()
-        self.uuts += uuts
-        self.devices.run()
-        self.engine.run()
-
-    def safety(self):
-        """Reset everything ready for another test."""
-        self.devices.reset()
-        self.sensors.reset()
-        self.measurements.reset()
-
-    def close(self):
-        """Close everything."""
-        self.measurements.close()
-        self.sensors.close()
-        self.devices.close()
-        self.engine.close()
-
-    def sensor_store(self, data):
-        """Push reading values into sensor FIFOs.
-
-        @param data Iterable ( Sensor, Value)
-
-        """
-        self.engine.sensor_store(data)
 
     def measure(self, names, timeout=0, delay=0):
         """Measure a group of measurements given the measurement names.
@@ -439,14 +340,98 @@ class TestSequence:
 
 
 @define
+class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
+    """Base class for Test Programs."""
+
+    physical_devices: tester.devphysical.PhysicalDevices = field(
+        validator=validators.instance_of(tester.devphysical.PhysicalDevices),
+    )
+    limits: TestLimits = field(init=False, factory=TestLimits)
+    uuts: Sequence[libtester.UUT] = field(init=False, factory=list)
+    devices: Optional[Devices] = field(
+        init=False,
+        default=None,
+        validator=validators.optional(validators.instance_of(Devices)),
+    )
+    sensors: Optional[Sensors] = field(
+        init=False,
+        default=None,
+        validator=validators.optional(validators.instance_of(Sensors)),
+    )
+    measurements: Optional[Measurements] = field(
+        init=False,
+        default=None,
+        validator=validators.optional(validators.instance_of(Measurements)),
+    )
+    parameter: Optional[str] = field(
+        init=False,
+        default=None,
+        validator=validators.optional(validators.instance_of(str)),
+    )
+
+    def open(
+        self,
+        limits: Sequence,
+        cls_devices: Devices,
+        cls_sensors: Sensors,
+        cls_measurements: Measurements,
+    ) -> None:
+        """Open test program by creating supporting instances.
+
+        @param limits Iterable tester.Limit*
+        @param cls_devices subclass of Devices
+        @param cls_sensors subclass of Sensors
+        @param cls_measurements subclass of Measurements
+
+        """
+        self.limits.load(self._limit_builtin + limits)
+        self.devices = cls_devices(self.physical_devices, self.parameter)
+        self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
+        self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
+        super().open()
+        self.devices.open()
+        self.sensors.open()
+        self.measurements.open()
+
+    def run(self, uuts: Sequence[libtester.UUT]) -> None:
+        """Run the test sequence.
+
+        @param uuts Iterable of Unit Under Test's
+
+        """
+        self.uuts.clear()
+        self.uuts += uuts
+        self.devices.run()
+        super().run()
+
+    def safety(self):
+        """Reset everything ready for another test."""
+        self.devices.reset()
+        self.sensors.reset()
+        self.measurements.reset()
+        super().safety()
+
+    def close(self) -> None:
+        """Close everything."""
+        self.measurements.close()
+        self.sensors.close()
+        self.devices.close()
+        super().close()
+
+
+@define
 class MultiMeasurementSummary:
     """Check multiple measurements and calculate overall result."""
 
-    default_timeout = field(validator=validators.instance_of((int, float)), default=0)
-    result = field(init=False, factory=tester.MeasurementResult)
-    _sensor_positions = field(init=False, factory=set)
+    default_timeout: Union[int, float] = field(
+        validator=validators.instance_of((int, float)), default=0
+    )
+    result: tester.MeasurementResult = field(
+        init=False, factory=tester.MeasurementResult
+    )
+    _sensor_positions: set = field(init=False, factory=set)
 
-    def __enter__(self):
+    def __enter__(self) -> "MultiMeasurementSummary":
         """Context Manager entry handler.
 
         @return self
@@ -454,7 +439,7 @@ class MultiMeasurementSummary:
         """
         return self
 
-    def __exit__(self, exct_type, exce_value, trace_back):
+    def __exit__(self, exct_type: Any, exce_value: Any, trace_back: Any) -> None:
         """Context Manager exit handler - Check overall result."""
         with contextlib.suppress(tester.measure.NoResultError):
             result_overall = self.result.result
@@ -466,7 +451,9 @@ class MultiMeasurementSummary:
             sen.store(result_overall)
             mes.measure()
 
-    def measure(self, measurement, timeout=0):
+    def measure(
+        self, measurement: tester.Measurement, timeout: int = 0
+    ) -> tester.MeasurementResult:
         """Make a single measurement.
 
         @param measurement Measurement instance
