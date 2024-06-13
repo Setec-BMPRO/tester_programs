@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import serial
 import tester
 
@@ -20,10 +21,10 @@ class Initial(share.TestSequence):
     vin_set = 12.0
     # Common limits
     _common = (
-        tester.LimitDelta("Vin", vin_start - 0.75, 0.5, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
+        libtester.LimitDelta("Vin", vin_start - 0.75, 0.5, doc="Input voltage present"),
+        libtester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
         # CAN Bus is operational if status bit 28 is set
-        tester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
+        libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
     )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
@@ -31,9 +32,9 @@ class Initial(share.TestSequence):
             "Config": config.JControl,
             "Limits": _common
             + (
-                tester.LimitRegExp(
+                libtester.LimitRegExp(
                     "SwVer",
-                    "^{0}$".format(config.JControl.sw_version.replace(".", r"\.")),
+                    r"^{0}$".format(config.JControl.sw_version.replace(".", r"\.")),
                 ),
             ),
         },
@@ -41,8 +42,8 @@ class Initial(share.TestSequence):
             "Config": config.Trek2,
             "Limits": _common
             + (
-                tester.LimitRegExp(
-                    "SwVer", "^{0}$".format(config.Trek2.sw_version.replace(".", r"\."))
+                libtester.LimitRegExp(
+                    "SwVer", r"^{0}$".format(config.Trek2.sw_version.replace(".", r"\."))
                 ),
             ),
         },
@@ -50,8 +51,8 @@ class Initial(share.TestSequence):
             "Config": config.Trek3,
             "Limits": _common
             + (
-                tester.LimitRegExp(
-                    "SwVer", "^{0}$".format(config.Trek3.sw_version.replace(".", r"\."))
+                libtester.LimitRegExp(
+                    "SwVer", r"^{0}$".format(config.Trek3.sw_version.replace(".", r"\."))
                 ),
             ),
         },

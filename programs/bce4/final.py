@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """BCE4/5 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -12,21 +13,21 @@ class Final(share.TestSequence):
 
     # Limits common to both versions
     _common = (
-        tester.LimitDelta("AlarmOpen", 10.0, 1.0, doc="Contacts open"),
-        tester.LimitLow("AlarmClosed", 1.0, doc="Contacts closed"),
-        tester.LimitBetween("Dropout", 150.0, 180.0, doc="AC dropout voltage"),
+        libtester.LimitDelta("AlarmOpen", 10.0, 1.0, doc="Contacts open"),
+        libtester.LimitLow("AlarmClosed", 1.0, doc="Contacts closed"),
+        libtester.LimitBetween("Dropout", 150.0, 180.0, doc="AC dropout voltage"),
     )
     # Test limit selection keyed by program parameter
     limitdata = {
         "4": {
             "Limits": _common
             + (
-                tester.LimitBetween("VoutNL", 13.50, 13.80),
-                tester.LimitBetween("Vout", 13.28, 13.80),
-                tester.LimitBetween("Vbat", 13.28, 13.92),
-                tester.LimitLow("inOCP", 13.28),
-                tester.LimitBetween("OCP", 10.2, 13.0),
-                tester.LimitLow("InDropout", 13.28),
+                libtester.LimitBetween("VoutNL", 13.50, 13.80),
+                libtester.LimitBetween("Vout", 13.28, 13.80),
+                libtester.LimitBetween("Vbat", 13.28, 13.92),
+                libtester.LimitLow("inOCP", 13.28),
+                libtester.LimitBetween("OCP", 10.2, 13.0),
+                libtester.LimitLow("InDropout", 13.28),
             ),
             "FullLoad": 10.1,
             "OCPramp": (10.0, 13.5),
@@ -34,12 +35,12 @@ class Final(share.TestSequence):
         "5": {
             "Limits": _common
             + (
-                tester.LimitBetween("VoutNL", 27.00, 27.60),
-                tester.LimitBetween("Vout", 26.56, 27.84),
-                tester.LimitBetween("Vbat", 26.56, 27.84),
-                tester.LimitLow("inOCP", 26.56),
-                tester.LimitBetween("OCP", 5.1, 6.3),
-                tester.LimitLow("InDropout", 26.56),
+                libtester.LimitBetween("VoutNL", 27.00, 27.60),
+                libtester.LimitBetween("Vout", 26.56, 27.84),
+                libtester.LimitBetween("Vbat", 26.56, 27.84),
+                libtester.LimitLow("inOCP", 26.56),
+                libtester.LimitBetween("OCP", 5.1, 6.3),
+                libtester.LimitLow("InDropout", 26.56),
             ),
             "FullLoad": 5.1,
             "OCPramp": (5.0, 7.0),

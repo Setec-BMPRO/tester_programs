@@ -4,7 +4,7 @@
 
 import logging
 
-import tester
+import libtester
 import share
 
 
@@ -25,20 +25,20 @@ class ODL10xParameters:
 
     # Initial test limits
     limits_common = (
-        tester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
     )
     # Initial test limits
     limits_initial = limits_common + (
-        tester.LimitLow("Part", 500.0),
-        tester.LimitDelta("Vin", 8.0, 0.5),
-        tester.LimitPercent("3V3", 3.30, 3.0),
-        tester.LimitInteger("Tank", 5),
-        tester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        libtester.LimitLow("Part", 500.0),
+        libtester.LimitDelta("Vin", 8.0, 0.5),
+        libtester.LimitPercent("3V3", 3.30, 3.0),
+        libtester.LimitInteger("Tank", 5),
+        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
     # Final test limits
     limits_final = limits_common + (
-        tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
-        tester.LimitHigh(
+        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitHigh(
             "ScanRSSI",
             -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85,
             doc="Strong BLE signal",

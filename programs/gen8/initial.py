@@ -5,6 +5,7 @@
 import pathlib
 import time
 
+import libtester
 import serial
 import tester
 
@@ -25,42 +26,42 @@ class Initial(share.TestSequence):
     arm_bin = "gen8_{0}.bin".format(bin_version)
 
     limitdata = (
-        tester.LimitLow("PartCheck", 100),  # uSwitches on C106, C107, D2
-        tester.LimitHigh("FanShort", 20),  # Short on fan connector
-        tester.LimitLow("FixtureLock", 200),
-        tester.LimitLow("5Voff", 0.5),
-        tester.LimitPercent("5Vset", 5.10, 1.0),
-        tester.LimitPercent("5V", 5.10, 2.0),
-        tester.LimitLow("12Voff", 0.5),
-        tester.LimitDelta("12Vpre", 12.1, 1.0),
-        tester.LimitDelta("12Vset", 12.18, 0.01),
-        tester.LimitPercent("12V", 12.18, 2.5),
-        tester.LimitLow("12V2off", 0.5),
-        tester.LimitDelta("12V2pre", 12.0, 1.0),
-        tester.LimitBetween("12V2", 11.8146, 12.4845),  # 12.18 +2.5% -3.0%
-        tester.LimitLow("24Voff", 0.5),
-        tester.LimitDelta("24Vpre", 24.0, 2.0),  # TestEng estimate
-        tester.LimitBetween("24V", 22.80, 25.68),  # 24.0 +7% -5%
-        tester.LimitLow("VdsQ103", 0.30),
-        tester.LimitPercent("3V3", 3.30, 10.0),  # TestEng estimate
-        tester.LimitLow("PwrFail", 0.5),
-        tester.LimitDelta("InputFuse", 240, 10),
-        tester.LimitBetween("12Vpri", 11.4, 17.0),
-        tester.LimitDelta("PFCpre", 435, 15),
-        tester.LimitDelta("PFCpost1", 440.0, 0.8),
-        tester.LimitDelta("PFCpost2", 440.0, 0.8),
-        tester.LimitDelta("PFCpost3", 440.0, 0.8),
-        tester.LimitDelta("PFCpost4", 440.0, 0.8),
-        tester.LimitDelta("PFCpost", 440.0, 0.9),
-        tester.LimitDelta("ARM-AcFreq", 50, 10),
-        tester.LimitLow("ARM-AcVolt", 300),
-        tester.LimitDelta("ARM-5V", 5.0, 1.0),
-        tester.LimitDelta("ARM-12V", 12.0, 1.0),
-        tester.LimitDelta("ARM-24V", 24.0, 2.0),
-        tester.LimitRegExp(
+        libtester.LimitLow("PartCheck", 100),  # uSwitches on C106, C107, D2
+        libtester.LimitHigh("FanShort", 20),  # Short on fan connector
+        libtester.LimitLow("FixtureLock", 200),
+        libtester.LimitLow("5Voff", 0.5),
+        libtester.LimitPercent("5Vset", 5.10, 1.0),
+        libtester.LimitPercent("5V", 5.10, 2.0),
+        libtester.LimitLow("12Voff", 0.5),
+        libtester.LimitDelta("12Vpre", 12.1, 1.0),
+        libtester.LimitDelta("12Vset", 12.18, 0.01),
+        libtester.LimitPercent("12V", 12.18, 2.5),
+        libtester.LimitLow("12V2off", 0.5),
+        libtester.LimitDelta("12V2pre", 12.0, 1.0),
+        libtester.LimitBetween("12V2", 11.8146, 12.4845),  # 12.18 +2.5% -3.0%
+        libtester.LimitLow("24Voff", 0.5),
+        libtester.LimitDelta("24Vpre", 24.0, 2.0),  # TestEng estimate
+        libtester.LimitBetween("24V", 22.80, 25.68),  # 24.0 +7% -5%
+        libtester.LimitLow("VdsQ103", 0.30),
+        libtester.LimitPercent("3V3", 3.30, 10.0),  # TestEng estimate
+        libtester.LimitLow("PwrFail", 0.5),
+        libtester.LimitDelta("InputFuse", 240, 10),
+        libtester.LimitBetween("12Vpri", 11.4, 17.0),
+        libtester.LimitDelta("PFCpre", 435, 15),
+        libtester.LimitDelta("PFCpost1", 440.0, 0.8),
+        libtester.LimitDelta("PFCpost2", 440.0, 0.8),
+        libtester.LimitDelta("PFCpost3", 440.0, 0.8),
+        libtester.LimitDelta("PFCpost4", 440.0, 0.8),
+        libtester.LimitDelta("PFCpost", 440.0, 0.9),
+        libtester.LimitDelta("ARM-AcFreq", 50, 10),
+        libtester.LimitLow("ARM-AcVolt", 300),
+        libtester.LimitDelta("ARM-5V", 5.0, 1.0),
+        libtester.LimitDelta("ARM-12V", 12.0, 1.0),
+        libtester.LimitDelta("ARM-24V", 24.0, 2.0),
+        libtester.LimitRegExp(
             "SwVer", "^{0}$".format(bin_version[:3].replace(".", r"\."))
         ),
-        tester.LimitRegExp("SwBld", "^{0}$".format(bin_version[4:])),
+        libtester.LimitRegExp("SwBld", r"^{0}$".format(bin_version[4:])),
     )
 
     def open(self, uut):

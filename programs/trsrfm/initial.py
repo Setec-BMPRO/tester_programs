@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import serial
 import tester
 
@@ -23,17 +24,17 @@ class Initial(share.TestSequence):
     hw_version = (5, 0, "A")
     # Test limits
     limitdata = (
-        tester.LimitDelta("Vin", vbatt, 0.5, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 1.5, doc="3V3 present"),
-        tester.LimitHigh("LedOff", 3.1, doc="Led off"),
-        tester.LimitLow("LedOn", 0.5, doc="Led on"),
-        tester.LimitRegExp(
+        libtester.LimitDelta("Vin", vbatt, 0.5, doc="Input voltage present"),
+        libtester.LimitPercent("3V3", 3.3, 1.5, doc="3V3 present"),
+        libtester.LimitHigh("LedOff", 3.1, doc="Led off"),
+        libtester.LimitLow("LedOn", 0.5, doc="Led on"),
+        libtester.LimitRegExp(
             "ARM-SwVer",
-            "^{0}$".format(sw_version.replace(".", r"\.")),
+            r"^{0}$".format(sw_version.replace(".", r"\.")),
             doc="Software version",
         ),
-        tester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address"),
-        tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )
 
     def open(self, uut):

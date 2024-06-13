@@ -2,6 +2,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """MB3 Final Program."""
 
+import libtester
 import tester
 
 import share
@@ -12,11 +13,11 @@ class Final(share.TestSequence):
     """MB3 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("Vaux", config.vaux, 0.5),
-        tester.LimitDelta("Vsolar", config.vsol, 0.5),
-        tester.LimitDelta("Vbat", 14.6, 0.3),
-        tester.LimitLow("Vbatoff", 0.5),
-        tester.LimitHigh("Vchem", 2.0, doc="Voltage present on sense conn"),
+        libtester.LimitDelta("Vaux", config.vaux, 0.5),
+        libtester.LimitDelta("Vsolar", config.vsol, 0.5),
+        libtester.LimitDelta("Vbat", 14.6, 0.3),
+        libtester.LimitLow("Vbatoff", 0.5),
+        libtester.LimitHigh("Vchem", 2.0, doc="Voltage present on sense conn"),
     )
 
     def open(self, uut):

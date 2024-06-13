@@ -7,7 +7,7 @@ import logging
 
 from attrs import define, field, validators
 
-import tester
+import libtester
 
 
 def get(parameter, uut):
@@ -84,88 +84,96 @@ class BP35:
     ocp_adjust_percent = 10.0
     # Test limits common to all tests and versions
     _base_limits_all = (
-        tester.LimitRegExp("ARM-SwVer", "None", doc="Software version"),
-        tester.LimitDelta("Vload", 12.45, 0.45, doc="Load output present"),
-        tester.LimitLow("InOCP", 11.6, doc="Output voltage in OCP"),
-        tester.LimitPercent("OCP", ocp_set, 4.0, doc="After adjustment"),
+        libtester.LimitRegExp("ARM-SwVer", "None", doc="Software version"),
+        libtester.LimitDelta("Vload", 12.45, 0.45, doc="Load output present"),
+        libtester.LimitLow("InOCP", 11.6, doc="Output voltage in OCP"),
+        libtester.LimitPercent("OCP", ocp_set, 4.0, doc="After adjustment"),
     )
     # Initial Test limits common to all versions
     _base_limits_initial = _base_limits_all + (
-        tester.LimitLow("FixtureLock", 200, doc="Contacts closed"),
-        tester.LimitDelta("HwVer8", 4400.0, 250.0, doc="Hardware Rev ≥8"),
-        tester.LimitDelta("ACin", vac, 5.0, doc="Injected AC voltage present"),
-        tester.LimitBetween("Vpfc", 397.0, 429.0, doc="PFC running"),
-        tester.LimitLow("VloadOff", 0.5, doc="Load output off"),
-        tester.LimitDelta("VbatIn", 12.0, 0.5, doc="Injected Vbatt present"),
-        tester.LimitBetween("Vbat", 12.2, 13.0, doc="Vbatt present"),
-        tester.LimitDelta("Vaux", 13.4, 0.4, doc="Vaux present"),
-        tester.LimitDelta("3V3", 3.30, 0.05, doc="3V3 present"),
-        tester.LimitDelta("FanOn", 12.5, 0.5, doc="Fans ON"),
-        tester.LimitLow("FanOff", 0.5, doc="Fans OFF"),
-        tester.LimitPercent(
+        libtester.LimitLow("FixtureLock", 200, doc="Contacts closed"),
+        libtester.LimitDelta("HwVer8", 4400.0, 250.0, doc="Hardware Rev ≥8"),
+        libtester.LimitDelta("ACin", vac, 5.0, doc="Injected AC voltage present"),
+        libtester.LimitBetween("Vpfc", 397.0, 429.0, doc="PFC running"),
+        libtester.LimitLow("VloadOff", 0.5, doc="Load output off"),
+        libtester.LimitDelta("VbatIn", 12.0, 0.5, doc="Injected Vbatt present"),
+        libtester.LimitBetween("Vbat", 12.2, 13.0, doc="Vbatt present"),
+        libtester.LimitDelta("Vaux", 13.4, 0.4, doc="Vaux present"),
+        libtester.LimitDelta("3V3", 3.30, 0.05, doc="3V3 present"),
+        libtester.LimitDelta("FanOn", 12.5, 0.5, doc="Fans ON"),
+        libtester.LimitLow("FanOff", 0.5, doc="Fans OFF"),
+        libtester.LimitPercent(
             "OCP_pre", ocp_set, 4.0 + ocp_adjust_percent, doc="Before adjustment"
         ),
-        tester.LimitDelta("ARM-AcV", vac, 10.0, doc="AC voltage"),
-        tester.LimitDelta("ARM-AcF", 50.0, 3.0, doc="AC frequency"),
-        tester.LimitBetween("ARM-SecT", 8.0, 70.0, doc="Reading ok"),
-        tester.LimitDelta("ARM-Vout", 12.45, 0.45),
-        tester.LimitBetween("ARM-Fan", 0, 100, doc="Fan running"),
-        tester.LimitDelta("ARM-LoadI", 2.1, 0.9, doc="Load current flowing"),
-        tester.LimitDelta("ARM-BattI", ibatt, 1.0, doc="Battery current flowing"),
-        tester.LimitDelta("ARM-BusI", iload + ibatt, 3.0, doc="Bus current flowing"),
-        tester.LimitPercent(
+        libtester.LimitDelta("ARM-AcV", vac, 10.0, doc="AC voltage"),
+        libtester.LimitDelta("ARM-AcF", 50.0, 3.0, doc="AC frequency"),
+        libtester.LimitBetween("ARM-SecT", 8.0, 70.0, doc="Reading ok"),
+        libtester.LimitDelta("ARM-Vout", 12.45, 0.45),
+        libtester.LimitBetween("ARM-Fan", 0, 100, doc="Fan running"),
+        libtester.LimitDelta("ARM-LoadI", 2.1, 0.9, doc="Load current flowing"),
+        libtester.LimitDelta("ARM-BattI", ibatt, 1.0, doc="Battery current flowing"),
+        libtester.LimitDelta("ARM-BusI", iload + ibatt, 3.0, doc="Bus current flowing"),
+        libtester.LimitPercent(
             "ARM-AuxV", vaux_in, percent=2.0, delta=0.3, doc="AUX present"
         ),
-        tester.LimitBetween("ARM-AuxI", 0.0, 1.5, doc="AUX current flowing"),
-        tester.LimitInteger("ARM-RemoteClosed", 1, doc="REMOTE input connected"),
-        tester.LimitDelta("CanPwr", vout_set, delta=3.0, doc="CAN bus power present"),
-        tester.LimitRegExp("CAN_RX", r"^RRQ,32,0", doc="Expected CAN message"),
-        tester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN comms established"),
-        tester.LimitInteger("Vout_OV", 0, doc="Over-voltage not triggered"),
-        tester.LimitRegExp("Reply", "^OK$"),
-        # SR limits
-        tester.LimitDelta("SolarVcc", 3.3, 0.1, doc="Vcc present"),
-        tester.LimitDelta("SolarVin", sr_vin, 0.5, doc="Input present"),
-        tester.LimitPercent("VsetPre", sr_vset, 6.0, doc="Vout before calibration"),
-        tester.LimitPercent("VsetPost", sr_vset, 1.5, doc="Vout after calibration"),
-        tester.LimitPercent(
-            "ARM-IoutPre", sr_ical, (9.0, 20.0), doc="Iout before calibration"
+        libtester.LimitBetween("ARM-AuxI", 0.0, 1.5, doc="AUX current flowing"),
+        libtester.LimitInteger("ARM-RemoteClosed", 1, doc="REMOTE input connected"),
+        libtester.LimitDelta(
+            "CanPwr", vout_set, delta=3.0, doc="CAN bus power present"
         ),
-        tester.LimitPercent("ARM-IoutPost", sr_ical, 3.0, doc="Iout after calibration"),
-        tester.LimitPercent(
+        libtester.LimitRegExp("CAN_RX", r"^RRQ,32,0", doc="Expected CAN message"),
+        libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN comms established"),
+        libtester.LimitInteger("Vout_OV", 0, doc="Over-voltage not triggered"),
+        libtester.LimitRegExp("Reply", "^OK$"),
+        # SR limits
+        libtester.LimitDelta("SolarVcc", 3.3, 0.1, doc="Vcc present"),
+        libtester.LimitDelta("SolarVin", sr_vin, 0.5, doc="Input present"),
+        libtester.LimitPercent("VsetPre", sr_vset, 6.0, doc="Vout before calibration"),
+        libtester.LimitPercent("VsetPost", sr_vset, 1.5, doc="Vout after calibration"),
+        libtester.LimitPercentLoHi(
+            "ARM-IoutPre", sr_ical, 9.0, 20.0, doc="Iout before calibration"
+        ),
+        libtester.LimitPercent(
+            "ARM-IoutPost", sr_ical, 3.0, doc="Iout after calibration"
+        ),
+        libtester.LimitPercent(
             "ARM-SolarVin-Pre", sr_vin, sr_vin_pre_percent, doc="Vin before calibration"
         ),
-        tester.LimitPercent(
+        libtester.LimitPercent(
             "ARM-SolarVin-Post",
             sr_vin,
             sr_vin_post_percent,
             doc="Vin after calibration",
         ),
-        tester.LimitInteger("SR-Alive", 1, doc="Detected"),
-        tester.LimitInteger("SR-Relay", 1, doc="Input relay ON"),
-        tester.LimitInteger("SR-Error", 0, doc="No error"),
+        libtester.LimitInteger("SR-Alive", 1, doc="Detected"),
+        libtester.LimitInteger("SR-Relay", 1, doc="Input relay ON"),
+        libtester.LimitInteger("SR-Error", 0, doc="No error"),
         # PM limits
-        tester.LimitInteger("PM-Alive", 1, doc="Detected"),
-        tester.LimitDelta("ARM-PmSolarIz-Pre", 0, 0.6, doc="Zero reading before cal"),
-        tester.LimitDelta("ARM-PmSolarIz-Post", 0, 0.1, doc="Zero reading after cal"),
+        libtester.LimitInteger("PM-Alive", 1, doc="Detected"),
+        libtester.LimitDelta(
+            "ARM-PmSolarIz-Pre", 0, 0.6, doc="Zero reading before cal"
+        ),
+        libtester.LimitDelta(
+            "ARM-PmSolarIz-Post", 0, 0.1, doc="Zero reading after cal"
+        ),
     )
     # BP35xx Rev 3-5 control rails
     _crail_3_5 = (
-        tester.LimitBetween("12Vpri", 11.5, 13.0, doc="Control rail present"),
-        tester.LimitBetween("15Vs", 11.5, 13.0, doc="Control rail present"),
+        libtester.LimitBetween("12Vpri", 11.5, 13.0, doc="Control rail present"),
+        libtester.LimitBetween("15Vs", 11.5, 13.0, doc="Control rail present"),
     )
     # BP35-II Rev 6 control rails
     _crail_6 = (
-        tester.LimitBetween("12Vpri", 13.6, 15.0, doc="Control rail present"),
-        tester.LimitBetween("15Vs", 14.3, 14.9, doc="Control rail present"),
+        libtester.LimitBetween("12Vpri", 13.6, 15.0, doc="Control rail present"),
+        libtester.LimitBetween("15Vs", 14.3, 14.9, doc="Control rail present"),
     )
     # Final Test limits common to all versions
     _base_limits_final = _base_limits_all + (
-        tester.LimitDelta("Can12V", 12.0, delta=3.0, doc="CAN_POWER rail"),
-        tester.LimitLow("Can0V", 0.5, doc="CAN BUS removed"),
-        tester.LimitHigh("FanOn", 10.0, doc="Fan running"),
-        tester.LimitLow("FanOff", 1.0, doc="Fan not running"),
-        tester.LimitBetween("Vout", 12.0, 12.9, doc="No load output voltage"),
+        libtester.LimitDelta("Can12V", 12.0, delta=3.0, doc="CAN_POWER rail"),
+        libtester.LimitLow("Can0V", 0.5, doc="CAN BUS removed"),
+        libtester.LimitHigh("FanOn", 10.0, doc="Fan running"),
+        libtester.LimitLow("FanOff", 1.0, doc="Fan not running"),
+        libtester.LimitBetween("Vout", 12.0, 12.9, doc="No load output voltage"),
     )
     # Internal data storage
     _rev = None  # Selected revision

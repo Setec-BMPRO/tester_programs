@@ -8,7 +8,7 @@ import math
 
 from attrs import define, field, validators
 
-import tester
+import libtester
 
 
 def get(parameter, uut):
@@ -89,111 +89,115 @@ class J35:
     # Load on each output channel
     load_per_output = 2.0
     # Test limits common to all tests and versions
-    _base_limits_all = (tester.LimitRegExp("SwVer", "None", doc="Software version"),)
+    _base_limits_all = (libtester.LimitRegExp("SwVer", "None", doc="Software version"),)
     # Initial Test limits common to all versions
     _base_limits_initial = _base_limits_all + (
-        tester.LimitDelta("ACin", ac_volt, delta=5.0, doc="AC input voltage"),
-        tester.LimitDelta(
+        libtester.LimitDelta("ACin", ac_volt, delta=5.0, doc="AC input voltage"),
+        libtester.LimitDelta(
             "Vbus", ac_volt * math.sqrt(2), delta=10.0, doc="Peak of AC input"
         ),
-        tester.LimitBetween("12Vpri", 11.5, 13.0, doc="12Vpri rail"),
-        tester.LimitPercent(
+        libtester.LimitBetween("12Vpri", 11.5, 13.0, doc="12Vpri rail"),
+        libtester.LimitPercent(
             "Vload", vout_set, percent=3.0, doc="AC-DC convertor voltage setpoint"
         ),
-        tester.LimitLow("VloadOff", 0.5, doc="When output is OFF"),
-        tester.LimitDelta(
+        libtester.LimitLow("VloadOff", 0.5, doc="When output is OFF"),
+        libtester.LimitDelta(
             "VbatIn",
             vbat_inject,
             delta=1.0,
             doc="Voltage at Batt when 12.6V is injected into Batt",
         ),
-        tester.LimitDelta(
+        libtester.LimitDelta(
             "VfuseIn",
             vbat_inject,
             delta=1.0,
             doc="Voltage after fuse when 12.6V is injected into Batt",
         ),
-        tester.LimitDelta(
+        libtester.LimitDelta(
             "VbatOut",
             aux_solar_inject,
             delta=0.5,
             doc="Voltage at Batt when 13.5V is injected into Aux",
         ),
-        tester.LimitDelta(
+        libtester.LimitDelta(
             "Vbat", vout_set, delta=0.2, doc="Voltage at Batt when unit is running"
         ),
-        tester.LimitPercent(
+        libtester.LimitPercent(
             "VbatLoad",
             vout_set,
             percent=5.0,
             doc="Voltage at Batt when unit is running under load",
         ),
-        tester.LimitDelta(
+        libtester.LimitDelta(
             "Vair",
             aux_solar_inject,
             delta=0.5,
             doc="Voltage at Air when 13.5V is injected into Solar",
         ),
-        tester.LimitPercent(
+        libtester.LimitPercent(
             "3V3U",
             3.30,
             percent=1.5,
             doc="3V3 unswitched when 12.6V is injected into Batt",
         ),
-        tester.LimitPercent("3V3", 3.30, percent=1.5, doc="3V3 internal rail"),
-        tester.LimitBetween("15Vs", 11.5, 13.0, doc="15Vs internal rail"),
-        tester.LimitDelta("FanOn", vout_set, delta=1.0, doc="Fan running"),
-        tester.LimitLow("FanOff", 0.5, doc="Fan not running"),
-        tester.LimitPercent(
+        libtester.LimitPercent("3V3", 3.30, percent=1.5, doc="3V3 internal rail"),
+        libtester.LimitBetween("15Vs", 11.5, 13.0, doc="15Vs internal rail"),
+        libtester.LimitDelta("FanOn", vout_set, delta=1.0, doc="Fan running"),
+        libtester.LimitLow("FanOff", 0.5, doc="Fan not running"),
+        libtester.LimitPercent(
             "ARM-AuxV",
             aux_solar_inject,
             percent=2.0,
             delta=0.3,
             doc="ARM Aux voltage reading",
         ),
-        tester.LimitBetween("ARM-AuxI", 0.0, 1.5, doc="ARM Aux current reading"),
-        tester.LimitInteger("Vout_OV", 0, doc="Over-voltage not triggered"),
-        tester.LimitPercent(
+        libtester.LimitBetween("ARM-AuxI", 0.0, 1.5, doc="ARM Aux current reading"),
+        libtester.LimitInteger("Vout_OV", 0, doc="Over-voltage not triggered"),
+        libtester.LimitPercent(
             "ARM-AcV", ac_volt, percent=4.0, delta=1.0, doc="ARM AC voltage reading"
         ),
-        tester.LimitPercent(
+        libtester.LimitPercent(
             "ARM-AcF", ac_freq, percent=4.0, delta=1.0, doc="ARM AC frequency reading"
         ),
-        tester.LimitBetween(
+        libtester.LimitBetween(
             "ARM-SecT", 8.0, 70.0, doc="ARM secondary temperature sensor"
         ),
-        tester.LimitPercent(
+        libtester.LimitPercent(
             "ARM-Vout", vout_set, percent=2.0, delta=0.1, doc="ARM measured Vout"
         ),
-        tester.LimitBetween("ARM-Fan", 0, 100, doc="ARM fan speed"),
-        tester.LimitPercent(
+        libtester.LimitBetween("ARM-Fan", 0, 100, doc="ARM fan speed"),
+        libtester.LimitPercent(
             "ARM-BattI",
             batt_current,
             percent=1.7,
             delta=1.0,
             doc="ARM battery current reading",
         ),
-        tester.LimitDelta(
+        libtester.LimitDelta(
             "ARM-LoadI", load_per_output, delta=0.9, doc="ARM output current reading"
         ),
-        tester.LimitInteger("ARM-RemoteClosed", 1),
-        tester.LimitDelta("CanPwr", vout_set, delta=1.8, doc="CAN bus power supply"),
-        tester.LimitInteger(
+        libtester.LimitInteger("ARM-RemoteClosed", 1),
+        libtester.LimitDelta("CanPwr", vout_set, delta=1.8, doc="CAN bus power supply"),
+        libtester.LimitInteger(
             "LOAD_SET", 0x5555555, doc="ARM output load enable setting"
         ),
-        tester.LimitInteger("CAN_BIND", 1 << 28, doc="ARM reports CAN bus operational"),
-        tester.LimitLow("InOCP", vout_set - 1.2, doc="Output is in OCP"),
-        tester.LimitLow("FixtureLock", 200, doc="Test fixture lid microswitch"),
-        tester.LimitBoolean("Solar-Status", True, doc="Solar Comparator Status is set"),
-        tester.LimitBoolean("DetectCal", True, doc="Solar comparator calibrated"),
+        libtester.LimitInteger(
+            "CAN_BIND", 1 << 28, doc="ARM reports CAN bus operational"
+        ),
+        libtester.LimitLow("InOCP", vout_set - 1.2, doc="Output is in OCP"),
+        libtester.LimitLow("FixtureLock", 200, doc="Test fixture lid microswitch"),
+        libtester.LimitBoolean(
+            "Solar-Status", True, doc="Solar Comparator Status is set"
+        ),
+        libtester.LimitBoolean("DetectCal", True, doc="Solar comparator calibrated"),
     )
     # Final Test limits common to all versions
     _base_limits_final = _base_limits_all + (
-        tester.LimitLow("FanOff", 1.0, doc="No airflow seen"),
-        tester.LimitHigh("FanOn", 10.0, doc="Airflow seen"),
-        tester.LimitDelta("Can12V", 12.5, delta=2.0, doc="CAN_POWER rail"),
-        tester.LimitLow("Can0V", 0.5, doc="CAN BUS removed"),
-        tester.LimitLow("InOCP", 11.6, doc="Output voltage to detect OCP"),
+        libtester.LimitLow("FanOff", 1.0, doc="No airflow seen"),
+        libtester.LimitHigh("FanOn", 10.0, doc="Airflow seen"),
+        libtester.LimitDelta("Can12V", 12.5, delta=2.0, doc="CAN_POWER rail"),
+        libtester.LimitLow("Can0V", 0.5, doc="CAN BUS removed"),
+        libtester.LimitLow("InOCP", 11.6, doc="Output voltage to detect OCP"),
     )
     # Internal data storage
     _rev_data = None  # Revision data dictionary
@@ -302,23 +306,23 @@ class J35A(J35):
 
         """
         return cls._base_limits_initial + (
-            tester.LimitPercent(  # Not used. Needed by Sensors
+            libtester.LimitPercent(  # Not used. Needed by Sensors
                 "SolarCutoffPre",
                 14.125,
                 percent=6,
                 doc="Solar Cut-Off voltage threshold uncertainty",
             ),
-            tester.LimitBetween(  # Not used. Needed by Sensors
+            libtester.LimitBetween(  # Not used. Needed by Sensors
                 "SolarCutoff", 13.75, 14.5, doc="Solar Cut-Off voltage threshold range"
             ),
-            tester.LimitPercent(
+            libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 10.0),
+                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 10.0,
                 doc="OCP trip range before adjustment",
             ),
-            tester.LimitPercent(
-                "OCP", cls.ocp_set, (4.0, 10.0), doc="OCP trip range after adjustment"
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set, 4.0, 10.0, doc="OCP trip range after adjustment"
             ),
         )
 
@@ -330,10 +334,12 @@ class J35A(J35):
 
         """
         return cls._base_limits_final + (
-            tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
-            tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
-            tester.LimitPercent(
-                "OCP", cls.ocp_set, (4.0, 10.0), doc="OCP trip current"
+            libtester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
+            libtester.LimitPercent(
+                "Vload", 12.8, percent=5, doc="Loaded output voltage"
+            ),
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set, 4.0, 10.0, doc="OCP trip current"
             ),
         )
 
@@ -421,23 +427,23 @@ class J35B(J35):
 
         """
         return cls._base_limits_initial + (
-            tester.LimitPercent(
+            libtester.LimitPercent(
                 "SolarCutoffPre",
                 14.125,
                 percent=6,
                 doc="Solar Cut-Off voltage threshold uncertainty",
             ),
-            tester.LimitBetween(
+            libtester.LimitBetween(
                 "SolarCutoff", 13.75, 14.5, doc="Solar Cut-Off voltage threshold range"
             ),
-            tester.LimitPercent(
+            libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
+                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0,
                 doc="OCP trip range before adjustment",
             ),
-            tester.LimitPercent(
-                "OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip range after adjustment"
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set, 4.0, 7.0, doc="OCP trip range after adjustment"
             ),
         )
 
@@ -449,9 +455,13 @@ class J35B(J35):
 
         """
         return cls._base_limits_final + (
-            tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
-            tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
-            tester.LimitPercent("OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip current"),
+            libtester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
+            libtester.LimitPercent(
+                "Vload", 12.8, percent=5, doc="Loaded output voltage"
+            ),
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set, 4.0, 7.0, doc="OCP trip current"
+            ),
         )
 
 
@@ -578,23 +588,23 @@ class J35C(J35):
 
         """
         return cls._base_limits_initial + (
-            tester.LimitPercent(
+            libtester.LimitPercent(
                 "SolarCutoffPre",
                 14.125,
                 percent=6,
                 doc="Solar Cut-Off voltage threshold uncertainty",
             ),
-            tester.LimitBetween(
+            libtester.LimitBetween(
                 "SolarCutoff", 14.0, 14.6, doc="Solar Cut-Off voltage threshold range"
             ),
-            tester.LimitPercent(
+            libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
+                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0,
                 doc="OCP trip range before adjustment",
             ),
-            tester.LimitPercent(
-                "OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip range after adjustment"
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set, 4.0, 7.0, doc="OCP trip range after adjustment"
             ),
         )
 
@@ -606,9 +616,13 @@ class J35C(J35):
 
         """
         return cls._base_limits_final + (
-            tester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
-            tester.LimitPercent("Vload", 12.8, percent=5, doc="Loaded output voltage"),
-            tester.LimitPercent("OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip current"),
+            libtester.LimitDelta("Vout", 12.8, delta=0.2, doc="No load output voltage"),
+            libtester.LimitPercent(
+                "Vload", 12.8, percent=5, doc="Loaded output voltage"
+            ),
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set, 4.0, 7.0, doc="OCP trip current"
+            ),
         )
 
 
@@ -682,23 +696,23 @@ class J35D(J35):
 
         """
         return cls._base_limits_initial + (
-            tester.LimitPercent(
+            libtester.LimitPercent(
                 "SolarCutoffPre",
                 14.3,
                 percent=6,
                 doc="Solar Cut-Off voltage threshold uncertainty",
             ),
-            tester.LimitBetween(
+            libtester.LimitBetween(
                 "SolarCutoff", 14.0, 14.6, doc="Solar Cut-Off voltage threshold range"
             ),
-            tester.LimitPercent(
+            libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                (cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0),
+                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0,
                 doc="OCP trip range before adjustment",
             ),
-            tester.LimitPercent(
-                "OCP", cls.ocp_set, (4.0, 7.0), doc="OCP trip range after adjustment"
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set, 4.0, 7.0, doc="OCP trip range after adjustment"
             ),
         )
 
@@ -710,10 +724,12 @@ class J35D(J35):
 
         """
         return cls._base_limits_final + (
-            tester.LimitDelta("Vout", 14.0, delta=0.2, doc="No load output voltage"),
-            tester.LimitPercent("Vload", 14.0, percent=5, doc="Loaded output voltage"),
-            tester.LimitPercent(
-                "OCP", cls.ocp_set * (12.8 / 14.0), (4.0, 7.0), doc="OCP trip current"
+            libtester.LimitDelta("Vout", 14.0, delta=0.2, doc="No load output voltage"),
+            libtester.LimitPercent(
+                "Vload", 14.0, percent=5, doc="Loaded output voltage"
+            ),
+            libtester.LimitPercentLoHi(
+                "OCP", cls.ocp_set * (12.8 / 14.0), 4.0, 7.0, doc="OCP trip current"
             ),
         )
 

@@ -2,6 +2,7 @@
 # Copyright 2021 SETEC Pty Ltd
 """BLExtender/SmartLink201 Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,7 +12,7 @@ class Final(share.TestSequence):
     """SmartLink201 Final Test Program."""
 
     limitdata = (
-        tester.LimitHigh(
+        libtester.LimitHigh(
             "ScanRSSI",
             (
                 -70

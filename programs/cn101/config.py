@@ -4,7 +4,7 @@
 
 import logging
 
-import tester
+import libtester
 
 
 def get(parameter, uut):
@@ -24,16 +24,16 @@ class CN101:
 
     # Initial test limits
     limits_initial = (
-        tester.LimitRegExp(
+        libtester.LimitRegExp(
             "SwVer", "None", doc="Software version"  # Adjusted during _configure()
         ),
-        tester.LimitLow("Part", 100.0),
-        tester.LimitDelta("Vin", 8.0, 0.5),
-        tester.LimitPercent("3V3", 3.30, 3.0),
-        tester.LimitInteger("CAN_BIND", 1 << 28),
-        tester.LimitRegExp("BtMac", "(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}"),
-        tester.LimitBoolean("DetectBT", True),
-        tester.LimitInteger("Tank", 5),
+        libtester.LimitLow("Part", 100.0),
+        libtester.LimitDelta("Vin", 8.0, 0.5),
+        libtester.LimitPercent("3V3", 3.30, 3.0),
+        libtester.LimitInteger("CAN_BIND", 1 << 28),
+        libtester.LimitRegExp("BtMac", r"(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}"),
+        libtester.LimitBoolean("DetectBT", True),
+        libtester.LimitInteger("Tank", 5),
     )
     # These values get set per revision
     sw_version = None

@@ -9,6 +9,7 @@ Shares the test fixture with the RVView/JDisplay program.
 import pathlib
 
 from attrs import define, field
+import libtester
 import tester
 
 import share
@@ -20,10 +21,10 @@ class Initial(share.TestSequence):
 
     vin_set = 8.1
     testlimits = (
-        tester.LimitBetween("Vin", 7.0, 8.0, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        tester.LimitLow("BkLghtOff", 0.5, doc="Backlight off"),
-        tester.LimitBetween("BkLghtOn", 2.5, 3.5, doc="Backlight on"),
+        libtester.LimitBetween("Vin", 7.0, 8.0, doc="Input voltage present"),
+        libtester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
+        libtester.LimitLow("BkLghtOff", 0.5, doc="Backlight off"),
+        libtester.LimitBetween("BkLghtOn", 2.5, 3.5, doc="Backlight on"),
     )
 
     def open(self, uut):

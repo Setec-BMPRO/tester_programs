@@ -2,6 +2,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """IDS-500 Bias Initial Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,10 +12,10 @@ class InitialBias(share.TestSequence):
     """IDS-500 Initial Bias Test Program."""
 
     limitdata = (
-        tester.LimitLow("FixtureLock", 20),
-        tester.LimitDelta("400V", 390, 410),
-        tester.LimitBetween("Vcc", 12.8, 14.5),
-        tester.LimitBetween("12V", 12.7, 13.49),
+        libtester.LimitLow("FixtureLock", 20),
+        libtester.LimitDelta("400V", 390, 410),
+        libtester.LimitBetween("Vcc", 12.8, 14.5),
+        libtester.LimitBetween("12V", 12.7, 13.49),
     )
     full_load = 1.2  # Must supply at least this much current
 

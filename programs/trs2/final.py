@@ -2,6 +2,7 @@
 # Copyright 2017 SETEC Pty Ltd
 """TRS2 Final Program."""
 
+import libtester
 import tester
 
 import share
@@ -14,8 +15,8 @@ class Final(share.TestSequence):
     vbatt = 12.0
     # Test limits
     limitdata = (
-        tester.LimitDelta("Vin", vbatt, 0.5, doc="Input voltage present"),
-        tester.LimitBoolean("ScanSer", True, doc="Serial number detected"),
+        libtester.LimitDelta("Vin", vbatt, 0.5, doc="Input voltage present"),
+        libtester.LimitBoolean("ScanSer", True, doc="Serial number detected"),
     )
 
     def open(self, uut):

@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """GSU360-1TA Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,10 +12,10 @@ class Final(share.TestSequence):
     """GSU360-1TA Final Test Program."""
 
     limitdata = (
-        tester.LimitBetween("24V", 23.40, 24.60),
-        tester.LimitLow("24Vinocp", 23.4),
-        tester.LimitBetween("24Vocp", 15.5, 20.0),
-        tester.LimitLow("24Voff", 5.0),
+        libtester.LimitBetween("24V", 23.40, 24.60),
+        libtester.LimitLow("24Vinocp", 23.4),
+        libtester.LimitBetween("24Vocp", 15.5, 20.0),
+        libtester.LimitLow("24Voff", 5.0),
     )
 
     def open(self, uut):

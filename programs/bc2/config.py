@@ -6,7 +6,7 @@ import logging
 
 from attrs import define, field, validators
 
-import tester
+import libtester
 
 
 def get(parameter, uut):
@@ -45,26 +45,32 @@ class Config:
     vbatt = 15.0
     ibatt = 10.0
     # Test limits common to all units and test types
-    _base_limits = (tester.LimitDelta("Vin", vbatt, 0.5, doc="Input voltage present"),)
+    _base_limits = (
+        libtester.LimitDelta("Vin", vbatt, 0.5, doc="Input voltage present"),
+    )
     # Initial Test limits common to all units
     _base_limits_initial = _base_limits + (
-        tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        tester.LimitRegExp(
+        libtester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
+        libtester.LimitRegExp(
             "BtMac", "(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}", doc="Valid MAC address "
         ),
-        tester.LimitBoolean("DetectBT", True, doc="MAC address detected"),
-        tester.LimitRegExp("ARM-CalOk", "cal success:", doc="Calibration success"),
-        tester.LimitBetween(
+        libtester.LimitBoolean("DetectBT", True, doc="MAC address detected"),
+        libtester.LimitRegExp("ARM-CalOk", "cal success:", doc="Calibration success"),
+        libtester.LimitBetween(
             "ARM-I_ADCOffset", -3, 3, doc="Current ADC offset calibrated"
         ),
-        tester.LimitBetween("ARM-VbattLSB", 2391, 2489, doc="LSB voltage calibrated"),
-        tester.LimitPercent(
+        libtester.LimitBetween(
+            "ARM-VbattLSB", 2391, 2489, doc="LSB voltage calibrated"
+        ),
+        libtester.LimitPercent(
             "ARM-Vbatt", vbatt, 0.5, delta=0.02, doc="Battery voltage calibrated"
         ),
     )
     # Final Test limits common to all units
     _base_limits_final = _base_limits + (
-        tester.LimitRegExp("ARM-QueryLast", "cal success:", doc="Calibration success"),
+        libtester.LimitRegExp(
+            "ARM-QueryLast", "cal success:", doc="Calibration success"
+        ),
     )
     _sw_1_0 = "1.0.16764.1813"
     _sw_1_7 = "1.7.17895.1845"
@@ -93,7 +99,7 @@ class Config:
         cls.hw_version = values.hw_version
         cls.sw_version = values.sw_version
         cls._swver_limit = (
-            tester.LimitRegExp(
+            libtester.LimitRegExp(
                 "ARM-SwVer",
                 "^{0}$".format(cls.sw_version.replace(".", r"\.")),
                 doc="Software version",
@@ -117,7 +123,7 @@ class BatteryCheck100(Config):
             cls._swver_limit
             + cls._base_limits_initial
             + (
-                tester.LimitDelta(
+                libtester.LimitDelta(
                     "ARM-IbattZero", 0.0, 0.031, doc="Zero battery current calibrated"
                 ),
             )
@@ -134,10 +140,10 @@ class BatteryCheck100(Config):
             cls._swver_limit
             + cls._base_limits_final
             + (
-                tester.LimitPercent(
+                libtester.LimitPercent(
                     "ARM-ShuntRes", 800000, 5.0, doc="Shunt resistance calibrated"
                 ),
-                tester.LimitPercent(
+                libtester.LimitPercent(
                     "ARM-Ibatt",
                     cls.ibatt,
                     1,
@@ -164,7 +170,7 @@ class BatteryCheck300(Config):
             cls._swver_limit
             + cls._base_limits_initial
             + (
-                tester.LimitDelta(
+                libtester.LimitDelta(
                     "ARM-IbattZero", 0.0, 0.3, doc="Zero battery current calibrated"
                 ),
             )
@@ -181,10 +187,10 @@ class BatteryCheck300(Config):
             cls._swver_limit
             + cls._base_limits_final
             + (
-                tester.LimitPercent(
+                libtester.LimitPercent(
                     "ARM-ShuntRes", 90000, 30.0, doc="Shunt resistance calibrated"
                 ),
-                tester.LimitPercent(
+                libtester.LimitPercent(
                     "ARM-Ibatt",
                     cls.ibatt,
                     3,

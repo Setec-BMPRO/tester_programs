@@ -7,6 +7,7 @@ import pathlib
 import time
 import serial
 
+import libtester
 import tester
 
 import share
@@ -21,25 +22,25 @@ class Initial(share.TestSequence):
     pic_hex = "CMR-SBP-9.hex"
     # Test limits
     limitdata = (
-        tester.LimitDelta("Vbat", 12.0, 0.10),
-        tester.LimitBetween("VbatCharge", 11.8, 12.5),
-        tester.LimitDelta("Vcc", 3.3, 0.2),
-        tester.LimitBetween("VErase", 4.8, 5.05),
-        tester.LimitLow("IStart", 0.02),
-        tester.LimitBetween("Vchge", 12.8, 15.0),
-        tester.LimitDelta("Ibat", -2.00, 0.02),
-        tester.LimitLow("Final Not Connected", 1.0),
-        tester.LimitDelta("SenseRes", 250, 30),
-        tester.LimitDelta("Halfcell", 110, 10),
-        tester.LimitDelta("VChgeOn", 350, 50),
-        tester.LimitDelta("ErrVUncal", 0.0, 0.5),
-        tester.LimitDelta("ErrVCal", 0.0, 0.03),
-        tester.LimitDelta("ErrIUncal", 0.0, 0.060),
-        tester.LimitDelta("ErrICal", 0.0, 0.015),
+        libtester.LimitDelta("Vbat", 12.0, 0.10),
+        libtester.LimitBetween("VbatCharge", 11.8, 12.5),
+        libtester.LimitDelta("Vcc", 3.3, 0.2),
+        libtester.LimitBetween("VErase", 4.8, 5.05),
+        libtester.LimitLow("IStart", 0.02),
+        libtester.LimitBetween("Vchge", 12.8, 15.0),
+        libtester.LimitDelta("Ibat", -2.00, 0.02),
+        libtester.LimitLow("Final Not Connected", 1.0),
+        libtester.LimitDelta("SenseRes", 250, 30),
+        libtester.LimitDelta("Halfcell", 110, 10),
+        libtester.LimitDelta("VChgeOn", 350, 50),
+        libtester.LimitDelta("ErrVUncal", 0.0, 0.5),
+        libtester.LimitDelta("ErrVCal", 0.0, 0.03),
+        libtester.LimitDelta("ErrIUncal", 0.0, 0.060),
+        libtester.LimitDelta("ErrICal", 0.0, 0.015),
         # 298K nominal +/- 2.5K in Kelvin (25C +/- 2.5C in Celsius).
-        tester.LimitDelta("BQ-Temp", 300, 4.5),
+        libtester.LimitDelta("BQ-Temp", 300, 4.5),
         # SerialDate
-        tester.LimitRegExp("CmrSerNum", r"^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$"),
+        libtester.LimitRegExp("CmrSerNum", r"^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$"),
     )
 
     def open(self, uut):
@@ -185,47 +186,49 @@ class Final(share.TestSequence):
 
     # Common test limits
     _common = (
-        tester.LimitDelta("ErrV", 0.0, 0.03),
-        tester.LimitHigh("CycleCnt", 1.0),
-        tester.LimitBoolean("RelrnFlg", False),
-        tester.LimitInteger("RotarySw", 256),
-        tester.LimitDelta("Halfcell", 400, 50),
-        tester.LimitBoolean("VFCcalStatus", True),
-        tester.LimitRegExp("SerNumChk", "None"),
+        libtester.LimitDelta("ErrV", 0.0, 0.03),
+        libtester.LimitHigh("CycleCnt", 1.0),
+        libtester.LimitBoolean("RelrnFlg", False),
+        libtester.LimitInteger("RotarySw", 256),
+        libtester.LimitDelta("Halfcell", 400, 50),
+        libtester.LimitBoolean("VFCcalStatus", True),
+        libtester.LimitRegExp("SerNumChk", "None"),
     )
     # Common to both sets of 8Ah
     _common8 = _common + (
-        tester.LimitBetween("VbatIn", 12.8, 15.0),
-        tester.LimitBetween("SenseRes", 39.0, 91.0),
-        tester.LimitDelta("StateOfCharge", 100.0, 10.5),
-        tester.LimitRegExp(
+        libtester.LimitBetween("VbatIn", 12.8, 15.0),
+        libtester.LimitBetween("SenseRes", 39.0, 91.0),
+        libtester.LimitDelta("StateOfCharge", 100.0, 10.5),
+        libtester.LimitRegExp(
             "CmrSerNum", r"^[9A-HJ-NP-V][1-9A-C](36861|40214)F[0-9]{4}$"
         ),
     )
     # Common to both sets of 13Ah
     _common13 = _common + (
-        tester.LimitBetween("VbatIn", 12.8, 15.0),
-        tester.LimitBetween("SenseRes", 221.0, 280.0),
-        tester.LimitDelta("StateOfCharge", 100.0, 10.5),
-        tester.LimitRegExp(
+        libtester.LimitBetween("VbatIn", 12.8, 15.0),
+        libtester.LimitBetween("SenseRes", 221.0, 280.0),
+        libtester.LimitDelta("StateOfCharge", 100.0, 10.5),
+        libtester.LimitRegExp(
             "CmrSerNum", r"^[9A-HJ-NP-V][1-9A-C](36862|40166)F[0-9]{4}$"
         ),
     )
     # Common to both sets of 17Ah
     _common17 = _common + (
-        tester.LimitBetween("VbatIn", 11.8, 15.0),  # Due to <30% charge
-        tester.LimitBetween("SenseRes", 400.0, 460.0),
-        tester.LimitLow("StateOfCharge", 30.0),
-        tester.LimitRegExp("CmrSerNum", r"^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$"),
+        libtester.LimitBetween("VbatIn", 11.8, 15.0),  # Due to <30% charge
+        libtester.LimitBetween("SenseRes", 400.0, 460.0),
+        libtester.LimitLow("StateOfCharge", 30.0),
+        libtester.LimitRegExp(
+            "CmrSerNum", r"^[9A-HJ-NP-V][1-9A-C]403(15|23)F[0-9]{4}$"
+        ),
     )
     # Test limit selection keyed by program parameter
     limitdata = {
-        "8": _common8 + (tester.LimitBetween("Capacity", 7000, 11000),),
-        "8_RMA": _common8 + (tester.LimitBetween("Capacity", 6400, 11000),),
-        "13": _common13 + (tester.LimitBetween("Capacity", 11000, 15000),),
-        "13_RMA": _common13 + (tester.LimitBetween("Capacity", 10700, 15000),),
-        "17": _common17 + (tester.LimitBetween("Capacity", 15500, 20000),),
-        "17_RMA": _common17 + (tester.LimitBetween("Capacity", 13900, 20000),),
+        "8": _common8 + (libtester.LimitBetween("Capacity", 7000, 11000),),
+        "8_RMA": _common8 + (libtester.LimitBetween("Capacity", 6400, 11000),),
+        "13": _common13 + (libtester.LimitBetween("Capacity", 11000, 15000),),
+        "13_RMA": _common13 + (libtester.LimitBetween("Capacity", 10700, 15000),),
+        "17": _common17 + (libtester.LimitBetween("Capacity", 15500, 20000),),
+        "17_RMA": _common17 + (libtester.LimitBetween("Capacity", 13900, 20000),),
     }
 
     def open(self, uut):
@@ -300,7 +303,7 @@ class EvError:
 
         """
         tmp = tester.Measurement(
-            tester.LimitRegExp("Ev2200", "ok", doc="Command succeeded"),
+            libtester.LimitRegExp("Ev2200", "ok", doc="Command succeeded"),
             tester.sensor.Mirror(),
         )
         tmp.sensor.store(str(err))

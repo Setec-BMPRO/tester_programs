@@ -6,7 +6,7 @@ import logging
 
 from attrs import define, field, validators
 
-import tester
+import libtester
 
 
 @define
@@ -27,44 +27,46 @@ class Config:
     pfc_trim = None
     # Common Test limits common to both test types
     _limits_common = (
-        tester.LimitLow("5Voff", 0.5, doc="5V output off"),
-        tester.LimitPercent("5V", 5.10, 2.0, doc="5V output ok"),
-        tester.LimitLow("12Voff", 0.5, doc="12V output off"),
-        tester.LimitPercent("12V", 12.0, 2.5, doc="12V output ok"),
-        tester.LimitLow("24Voff", 0.5, doc="24V output off"),
-        tester.LimitPercent("24V", 24.0, 2.5, doc="24V output ok"),
-        tester.LimitLow("PwrFail", 0.4, doc="PFAIL asserted"),
-        tester.LimitHigh("PwrFailOff", 11.0, doc="PFAIL not asserted"),
+        libtester.LimitLow("5Voff", 0.5, doc="5V output off"),
+        libtester.LimitPercent("5V", 5.10, 2.0, doc="5V output ok"),
+        libtester.LimitLow("12Voff", 0.5, doc="12V output off"),
+        libtester.LimitPercent("12V", 12.0, 2.5, doc="12V output ok"),
+        libtester.LimitLow("24Voff", 0.5, doc="24V output off"),
+        libtester.LimitPercent("24V", 24.0, 2.5, doc="24V output ok"),
+        libtester.LimitLow("PwrFail", 0.4, doc="PFAIL asserted"),
+        libtester.LimitHigh("PwrFailOff", 11.0, doc="PFAIL not asserted"),
     )
     # Initial Test limits
     limits_initial = _limits_common + (
-        tester.LimitHigh("FanShort", 500),
-        tester.LimitLow("FixtureLock", 200),
-        tester.LimitPercent("3V3", 3.30, 10.0),
-        tester.LimitPercent("5Vset", 5.137, 1.0),
-        tester.LimitDelta("ACin", 240, 10),
-        tester.LimitBetween("15Vccpri", 11.4, 17.0),
-        tester.LimitBetween("12Vpri", 11.4, 17.0),
-        tester.LimitBetween("PFCpre", 408, 450),
-        tester.LimitDelta("PFCpost1", 426.0, 2.9),
-        tester.LimitDelta("PFCpost2", 426.0, 2.9),
-        tester.LimitDelta("PFCpost3", 426.0, 2.9),
-        tester.LimitDelta("PFCpost4", 426.0, 2.9),
-        tester.LimitDelta("PFCpost", 426.0, 3.0),
-        tester.LimitBetween("HoldUpTime", 0.050 * 1.2, 1, doc="50ms + 20% for ageing"),
-        tester.LimitDelta("ARM-AcFreq", 50, 10),
-        tester.LimitDelta("ARM-AcVolt", 240, 20),
-        tester.LimitDelta("ARM-5V", 5.0, 1.0),
-        tester.LimitDelta("ARM-12V", 12.0, 1.0),
-        tester.LimitDelta("ARM-24V", 24.0, 2.0),
+        libtester.LimitHigh("FanShort", 500),
+        libtester.LimitLow("FixtureLock", 200),
+        libtester.LimitPercent("3V3", 3.30, 10.0),
+        libtester.LimitPercent("5Vset", 5.137, 1.0),
+        libtester.LimitDelta("ACin", 240, 10),
+        libtester.LimitBetween("15Vccpri", 11.4, 17.0),
+        libtester.LimitBetween("12Vpri", 11.4, 17.0),
+        libtester.LimitBetween("PFCpre", 408, 450),
+        libtester.LimitDelta("PFCpost1", 426.0, 2.9),
+        libtester.LimitDelta("PFCpost2", 426.0, 2.9),
+        libtester.LimitDelta("PFCpost3", 426.0, 2.9),
+        libtester.LimitDelta("PFCpost4", 426.0, 2.9),
+        libtester.LimitDelta("PFCpost", 426.0, 3.0),
+        libtester.LimitBetween(
+            "HoldUpTime", 0.050 * 1.2, 1, doc="50ms + 20% for ageing"
+        ),
+        libtester.LimitDelta("ARM-AcFreq", 50, 10),
+        libtester.LimitDelta("ARM-AcVolt", 240, 20),
+        libtester.LimitDelta("ARM-5V", 5.0, 1.0),
+        libtester.LimitDelta("ARM-12V", 12.0, 1.0),
+        libtester.LimitDelta("ARM-24V", 24.0, 2.0),
     )
     # Final Test limits
     limits_final = _limits_common + (
-        tester.LimitLow("FanOff", 9.0, doc="Airflow not present"),
-        tester.LimitHigh("FanOn", 11.0, doc="Airflow present"),
-        tester.LimitDelta("GPO1out", 240, 10, doc="Voltage present"),
-        tester.LimitDelta("GPO2out", 240, 10, doc="Voltage present"),
-        tester.LimitLow("12Vmax", 0.045, doc="12V transient ok"),
+        libtester.LimitLow("FanOff", 9.0, doc="Airflow not present"),
+        libtester.LimitHigh("FanOn", 11.0, doc="Airflow present"),
+        libtester.LimitDelta("GPO1out", 240, 10, doc="Voltage present"),
+        libtester.LimitDelta("GPO2out", 240, 10, doc="Voltage present"),
+        libtester.LimitLow("12Vmax", 0.045, doc="12V transient ok"),
     )
     # Software image filename
     _silver_nxp_values = _Values(

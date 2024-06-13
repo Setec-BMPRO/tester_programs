@@ -4,6 +4,7 @@
 
 import serial
 
+import libtester
 import share
 import tester
 
@@ -21,26 +22,26 @@ class Initial(share.TestSequence):
     hw_version = (5, 0, "A")
     # Test limits
     limitdata = (
-        tester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 1.0, doc="3V3 present"),
-        tester.LimitPercent("5V", 5.0, 1.0, doc="5V present"),
-        tester.LimitHigh("RedLedOff", 3.1, doc="Led off"),
-        tester.LimitDelta("RedLedOn", 0.45, 0.05, doc="Led on"),
-        tester.LimitHigh("BlueLedOff", 3.1, doc="Led off"),
-        tester.LimitDelta("BlueLedOn", 0.3, 0.09, doc="Led on"),
-        tester.LimitHigh("GreenLedOff", 3.1, doc="Led off"),
-        tester.LimitLow("GreenLedOn", 0.2, doc="Led on"),
-        tester.LimitLow("TestPinCover", 0.5, doc="Cover in place"),
-        tester.LimitRegExp(
+        libtester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
+        libtester.LimitPercent("3V3", 3.3, 1.0, doc="3V3 present"),
+        libtester.LimitPercent("5V", 5.0, 1.0, doc="5V present"),
+        libtester.LimitHigh("RedLedOff", 3.1, doc="Led off"),
+        libtester.LimitDelta("RedLedOn", 0.45, 0.05, doc="Led on"),
+        libtester.LimitHigh("BlueLedOff", 3.1, doc="Led off"),
+        libtester.LimitDelta("BlueLedOn", 0.3, 0.09, doc="Led on"),
+        libtester.LimitHigh("GreenLedOff", 3.1, doc="Led off"),
+        libtester.LimitLow("GreenLedOn", 0.2, doc="Led on"),
+        libtester.LimitLow("TestPinCover", 0.5, doc="Cover in place"),
+        libtester.LimitRegExp(
             "SwVer",
             "^{0}$".format(sw_version.replace(".", r"\.")),
             doc="Software version",
         ),
-        tester.LimitRegExp(
+        libtester.LimitRegExp(
             "BtMac", "(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}", doc="Valid MAC address"
         ),
-        tester.LimitBoolean("DetectBT", True, doc="MAC address detected"),
-        tester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
+        libtester.LimitBoolean("DetectBT", True, doc="MAC address detected"),
+        libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
     )
 
     def open(self, uut):

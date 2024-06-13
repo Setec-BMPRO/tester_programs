@@ -4,6 +4,7 @@
 
 from pydispatch import dispatcher
 
+import libtester
 import tester
 
 import share
@@ -13,13 +14,13 @@ class Final(share.TestSequence):
     """WTSI200 Final Test Program."""
 
     limitdata = (
-        tester.LimitBetween("T1level1", 3.0, 3.5),
-        tester.LimitBetween("T2level1", 3.0, 3.5),
-        tester.LimitBetween("T3level1", 3.0, 3.5),
-        tester.LimitBetween("level1", 3.0, 3.5),
-        tester.LimitBetween("level2", 2.33, 2.58),
-        tester.LimitBetween("level3", 1.62, 1.79),
-        tester.LimitBetween("level4", 0.0, 0.5),
+        libtester.LimitBetween("T1level1", 3.0, 3.5),
+        libtester.LimitBetween("T2level1", 3.0, 3.5),
+        libtester.LimitBetween("T3level1", 3.0, 3.5),
+        libtester.LimitBetween("level1", 3.0, 3.5),
+        libtester.LimitBetween("level2", 2.33, 2.58),
+        libtester.LimitBetween("level3", 1.62, 1.79),
+        libtester.LimitBetween("level4", 0.0, 0.5),
     )
 
     def open(self, uut):

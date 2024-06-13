@@ -62,6 +62,7 @@ Protocol 4: BC15 [ LPC111x CPU, No RTOS ]
 import logging
 import time
 
+import libtester
 import tester
 
 
@@ -222,7 +223,7 @@ class Base:
                 # Generate a Measurement failure
                 self._logger.debug('Caught Error: "%s"', err)
                 comms = tester.Measurement(
-                    tester.LimitRegExp("Action", "ok", doc="Command succeeded"),
+                    libtester.LimitRegExp("Action", r"ok", doc="Command succeeded"),
                     tester.sensor.Mirror(),
                 )
                 comms.sensor.store(str(err))

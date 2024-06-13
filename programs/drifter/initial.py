@@ -5,6 +5,7 @@
 import pathlib
 import time
 
+import libtester
 import serial
 import tester
 
@@ -20,34 +21,34 @@ class Initial(share.TestSequence):
     force_threshold = 160
     # Limits common to both versions
     _common = (
-        tester.LimitDelta("Vin", 12.0, 0.1),
-        tester.LimitDelta("Vsw", 0, 100),
-        tester.LimitDelta("Vref", 0, 100),
-        tester.LimitDelta("Vcc", 3.30, 0.07),
-        tester.LimitDelta("Isense", -90, 5),
-        tester.LimitBetween("3V3", -3.3, -2.5),
-        tester.LimitDelta("%ErrorV", 0, 2.24),
-        tester.LimitDelta("%CalV", 0, 0.36),
-        tester.LimitDelta("%ErrorI", 0, 2.15),
-        tester.LimitDelta("%CalI", 0, 0.50),
+        libtester.LimitDelta("Vin", 12.0, 0.1),
+        libtester.LimitDelta("Vsw", 0, 100),
+        libtester.LimitDelta("Vref", 0, 100),
+        libtester.LimitDelta("Vcc", 3.30, 0.07),
+        libtester.LimitDelta("Isense", -90, 5),
+        libtester.LimitBetween("3V3", -3.3, -2.5),
+        libtester.LimitDelta("%ErrorV", 0, 2.24),
+        libtester.LimitDelta("%CalV", 0, 0.36),
+        libtester.LimitDelta("%ErrorI", 0, 2.15),
+        libtester.LimitDelta("%CalI", 0, 0.50),
         # Data reported by the PIC
-        tester.LimitInteger("PicStatus 0", 0),
-        tester.LimitDelta("PicZeroChk", 0, 65.0),
-        tester.LimitDelta("PicVin", 12.0, 0.5),
-        tester.LimitDelta("PicIsense", -90, 5),
-        tester.LimitDelta("PicVfactor", 20000, 1000),
-        tester.LimitDelta("PicIfactor", 15000, 1000),
-        tester.LimitBetween("PicIoffset", -8.01, -8),
-        tester.LimitBetween("PicIthreshold", 160, 160.01),
+        libtester.LimitInteger("PicStatus 0", 0),
+        libtester.LimitDelta("PicZeroChk", 0, 65.0),
+        libtester.LimitDelta("PicVin", 12.0, 0.5),
+        libtester.LimitDelta("PicIsense", -90, 5),
+        libtester.LimitDelta("PicVfactor", 20000, 1000),
+        libtester.LimitDelta("PicIfactor", 15000, 1000),
+        libtester.LimitBetween("PicIoffset", -8.01, -8),
+        libtester.LimitBetween("PicIthreshold", 160, 160.01),
     )
     # Test limit selection keyed by program parameter
     limitdata = {
         "STD": {
-            "Limits": _common + (tester.LimitBetween("0V8", -1.2, -0.4),),
+            "Limits": _common + (libtester.LimitBetween("0V8", -1.2, -0.4),),
             "Software": "Drifter-5.hex",
         },
         "BM": {
-            "Limits": _common + (tester.LimitBetween("0V8", -1.4, -0.6),),
+            "Limits": _common + (libtester.LimitBetween("0V8", -1.4, -0.6),),
             "Software": "DrifterBM-2.hex",
         },
     }

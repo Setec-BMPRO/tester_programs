@@ -2,6 +2,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """IDS-500 Bus Initial Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -12,24 +13,24 @@ class InitialBus(share.TestSequence):
 
     # Test limits
     limitdata = (
-        tester.LimitBetween("400V", 390, 410),
-        tester.LimitBetween("20VT_load0_out", 22.0, 24.0),
-        tester.LimitBetween("9V_load0_out", 10.8, 12.0),
-        tester.LimitBetween("20VL_load0_out", 22.0, 24.0),
-        tester.LimitBetween("-20V_load0_out", -25.0, -22.0),
-        tester.LimitBetween("20VT_load1_out", 22.0, 25.0),
-        tester.LimitBetween("9V_load1_out", 9.0, 11.0),
-        tester.LimitBetween("20VL_load1_out", 22.0, 25.0),
-        tester.LimitBetween("-20V_load1_out", -26.0, -22.0),
-        tester.LimitBetween("20VT_load2_out", 19.0, 24.0),
-        tester.LimitBetween("9V_load2_out", 9.0, 11.0),
-        tester.LimitBetween("20VL_load2_out", 19.0, 21.5),
-        tester.LimitBetween("-20V_load2_out", -22.2, -20.0),
-        tester.LimitBetween("20VT_load3_out", 17.5, 20.0),
-        tester.LimitBetween("9V_load3_out", 9.0, 12.0),
-        tester.LimitBetween("20VL_load3_out", 22.0, 24.0),
-        tester.LimitBetween("-20V_load3_out", -26.0, -22.0),
-        tester.LimitLow("FixtureLock", 20),
+        libtester.LimitBetween("400V", 390, 410),
+        libtester.LimitBetween("20VT_load0_out", 22.0, 24.0),
+        libtester.LimitBetween("9V_load0_out", 10.8, 12.0),
+        libtester.LimitBetween("20VL_load0_out", 22.0, 24.0),
+        libtester.LimitBetween("-20V_load0_out", -25.0, -22.0),
+        libtester.LimitBetween("20VT_load1_out", 22.0, 25.0),
+        libtester.LimitBetween("9V_load1_out", 9.0, 11.0),
+        libtester.LimitBetween("20VL_load1_out", 22.0, 25.0),
+        libtester.LimitBetween("-20V_load1_out", -26.0, -22.0),
+        libtester.LimitBetween("20VT_load2_out", 19.0, 24.0),
+        libtester.LimitBetween("9V_load2_out", 9.0, 11.0),
+        libtester.LimitBetween("20VL_load2_out", 19.0, 21.5),
+        libtester.LimitBetween("-20V_load2_out", -22.2, -20.0),
+        libtester.LimitBetween("20VT_load3_out", 17.5, 20.0),
+        libtester.LimitBetween("9V_load3_out", 9.0, 12.0),
+        libtester.LimitBetween("20VL_load3_out", 22.0, 24.0),
+        libtester.LimitBetween("-20V_load3_out", -26.0, -22.0),
+        libtester.LimitLow("FixtureLock", 20),
     )
 
     def open(self, uut):

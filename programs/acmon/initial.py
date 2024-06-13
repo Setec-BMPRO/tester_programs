@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import tester
 
 import share
@@ -16,13 +17,15 @@ class Initial(share.TestSequence):
     vin_set = 12.0  # Input DC voltage to power the unit from CAN bus
     vac_set = 220.0  # Input AC voltage
     testlimits = (  # Test limits
-        tester.LimitLow("FixtureLock", 100),
-        tester.LimitBetween("Vin", vin_set - 1.0, vin_set, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        tester.LimitPercent("Vac", vac_set / 2, 5.0, doc="AC voltage reading"),
-        tester.LimitPercent("Frequency", 50, 5.0, doc="AC frequency reading"),
-        tester.LimitPercent("AcCurrent", 25.0, 20.0, doc="AC current reading"),
-        tester.LimitInteger("Phase", 2, doc="AC phase reading"),
+        libtester.LimitLow("FixtureLock", 100),
+        libtester.LimitBetween(
+            "Vin", vin_set - 1.0, vin_set, doc="Input voltage present"
+        ),
+        libtester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
+        libtester.LimitPercent("Vac", vac_set / 2, 5.0, doc="AC voltage reading"),
+        libtester.LimitPercent("Frequency", 50, 5.0, doc="AC frequency reading"),
+        libtester.LimitPercent("AcCurrent", 25.0, 20.0, doc="AC current reading"),
+        libtester.LimitInteger("Phase", 2, doc="AC phase reading"),
     )
 
     def open(self, uut):

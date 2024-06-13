@@ -4,7 +4,7 @@
 
 import logging
 
-import tester
+import libtester
 import share
 
 
@@ -28,22 +28,22 @@ class CN10xParameters:
     """CN10x model specific parameters."""
 
     limits_initial = (
-        tester.LimitRegExp(
+        libtester.LimitRegExp(
             "SwArmVer", "None", doc="ARM Software version"  # Adjusted during open()
         ),
-        tester.LimitRegExp(
+        libtester.LimitRegExp(
             "SwNrfVer", "None", doc="Nordic Software version"  # Adjusted during open()
         ),
-        tester.LimitLow("Part", 500.0),
-        tester.LimitDelta("Vin", 8.0, 0.5),
-        tester.LimitPercent("3V3", 3.30, 3.0),
-        tester.LimitInteger("CAN_BIND", 1 << 28),
-        tester.LimitBoolean("ScanSer", True, doc="Serial number detected"),
-        tester.LimitInteger("Tank", 5),
-        tester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        libtester.LimitLow("Part", 500.0),
+        libtester.LimitDelta("Vin", 8.0, 0.5),
+        libtester.LimitPercent("3V3", 3.30, 3.0),
+        libtester.LimitInteger("CAN_BIND", 1 << 28),
+        libtester.LimitBoolean("ScanSer", True, doc="Serial number detected"),
+        libtester.LimitInteger("Tank", 5),
+        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
     limits_final = (
-        tester.LimitHigh(
+        libtester.LimitHigh(
             "ScanRSSI",
             -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85,
             doc="Strong BLE signal",

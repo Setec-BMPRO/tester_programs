@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """MK7-400-1 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,16 +12,16 @@ class Final(share.TestSequence):
     """MK7-400-1 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("ACon", 240, 10),
-        tester.LimitLow("ACoff", 10),
-        tester.LimitDelta("5V", 5.00, 0.25),
-        tester.LimitLow("12Voff", 0.5),
-        tester.LimitBetween("12Von", 12.0, 12.6),
-        tester.LimitLow("24Voff", 0.5),
-        tester.LimitDelta("24Von", 24.0, 0.6),
-        tester.LimitLow("24V2off", 0.5),
-        tester.LimitDelta("24V2on", 24.0, 0.6),
-        tester.LimitHigh("PwrFailOff", 11.0),
+        libtester.LimitDelta("ACon", 240, 10),
+        libtester.LimitLow("ACoff", 10),
+        libtester.LimitDelta("5V", 5.00, 0.25),
+        libtester.LimitLow("12Voff", 0.5),
+        libtester.LimitBetween("12Von", 12.0, 12.6),
+        libtester.LimitLow("24Voff", 0.5),
+        libtester.LimitDelta("24Von", 24.0, 0.6),
+        libtester.LimitLow("24V2off", 0.5),
+        libtester.LimitDelta("24V2on", 24.0, 0.6),
+        libtester.LimitHigh("PwrFailOff", 11.0),
     )
 
     def open(self, uut):

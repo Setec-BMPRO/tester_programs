@@ -7,6 +7,7 @@ import struct
 
 from attrs import define, field
 
+import libtester
 import tester
 
 
@@ -73,7 +74,7 @@ class PacketDecoder(tester.sensor.KeyedDataDecoderMixin):
             ) = struct.Struct("<H3B2HLL").unpack(payload_bytes)
         except struct.error:
             mes = tester.Measurement(
-                tester.LimitBoolean("valid_packet", True, "Non-empty packet"),
+                libtester.LimitBoolean("valid_packet", True, "Non-empty packet"),
                 tester.sensor.Mirror(),
             )
             mes.sensor.store(False)

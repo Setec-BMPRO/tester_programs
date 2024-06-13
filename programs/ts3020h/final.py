@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """TS3020H Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,11 +12,11 @@ class Final(share.TestSequence):
     """TS3020H Final Test Program."""
 
     limitdata = (
-        tester.LimitLow("12Voff", 0.5),
-        tester.LimitBetween("12V", 13.7, 13.9),
-        tester.LimitBetween("12Vfl", 13.43, 13.9),
-        tester.LimitBetween("OCP", 25.0, 30.0),
-        tester.LimitLow("inOCP", 13.3),
+        libtester.LimitLow("12Voff", 0.5),
+        libtester.LimitBetween("12V", 13.7, 13.9),
+        libtester.LimitBetween("12Vfl", 13.43, 13.9),
+        libtester.LimitBetween("OCP", 25.0, 30.0),
+        libtester.LimitLow("inOCP", 13.3),
     )
 
     def open(self, uut):

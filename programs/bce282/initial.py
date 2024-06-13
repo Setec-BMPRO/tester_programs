@@ -7,6 +7,7 @@ import pathlib
 import sys
 import time
 
+import libtester
 import serial
 import tester
 
@@ -40,16 +41,16 @@ class Initial(share.TestSequence):
     _vcc_bias_set = 15.0
     # Limits common to both versions
     _common = (
-        tester.LimitLow("FixtureLock", 200),
-        tester.LimitDelta("VccBiasExt", _vcc_bias_set, 1.0),
-        tester.LimitDelta("Vac", 240.0, 5.0),
-        tester.LimitBetween("Vbus", 330.0, 350.0),
-        tester.LimitPercent("VccPri", 15.6, 5.0),
-        tester.LimitPercent("VccBias", 15.0, 13.0),
-        tester.LimitLow("VbatOff", 0.5),
-        tester.LimitBetween("AlarmClosed", 1000, 3000),
-        tester.LimitBetween("AlarmOpen", 11000, 13000),
-        tester.LimitBetween("Status 0", -0.1, 0.1),
+        libtester.LimitLow("FixtureLock", 200),
+        libtester.LimitDelta("VccBiasExt", _vcc_bias_set, 1.0),
+        libtester.LimitDelta("Vac", 240.0, 5.0),
+        libtester.LimitBetween("Vbus", 330.0, 350.0),
+        libtester.LimitPercent("VccPri", 15.6, 5.0),
+        libtester.LimitPercent("VccBias", 15.0, 13.0),
+        libtester.LimitLow("VbatOff", 0.5),
+        libtester.LimitBetween("AlarmClosed", 1000, 3000),
+        libtester.LimitBetween("AlarmOpen", 11000, 13000),
+        libtester.LimitBetween("Status 0", -0.1, 0.1),
     )
     # ScaleFactor: 24V model responds with 12V output to measurement "msp_vout"
     # and is designed to be calibrated with half its measured output voltage.
@@ -57,24 +58,24 @@ class Initial(share.TestSequence):
         "12": {
             "Limits": _common
             + (
-                tester.LimitBetween("OutOCP", 20.05, 24.00),
-                tester.LimitBetween("BattOCP", 14.175, 15.825),
-                tester.LimitLow("InOCP", 13.0),
-                tester.LimitPercent("VoutPreCal", 13.8, 2.6),
-                tester.LimitDelta("VoutPostCal", 13.8, _cal_factor * 0.15),
-                tester.LimitBetween("MspVout", 13.0, 14.6),
+                libtester.LimitBetween("OutOCP", 20.05, 24.00),
+                libtester.LimitBetween("BattOCP", 14.175, 15.825),
+                libtester.LimitLow("InOCP", 13.0),
+                libtester.LimitPercent("VoutPreCal", 13.8, 2.6),
+                libtester.LimitDelta("VoutPostCal", 13.8, _cal_factor * 0.15),
+                libtester.LimitBetween("MspVout", 13.0, 14.6),
             ),
             "ScaleFactor": 1000,
         },
         "24": {
             "Limits": _common
             + (
-                tester.LimitBetween("OutOCP", 10.0, 12.0),
-                tester.LimitBetween("BattOCP", 6.0, 9.0),
-                tester.LimitLow("InOCP", 26.0),
-                tester.LimitPercent("VoutPreCal", 27.6, 2.6),
-                tester.LimitDelta("VoutPostCal", 27.6, _cal_factor * 0.25),
-                tester.LimitBetween("MspVout", 26.0, 29.2),
+                libtester.LimitBetween("OutOCP", 10.0, 12.0),
+                libtester.LimitBetween("BattOCP", 6.0, 9.0),
+                libtester.LimitLow("InOCP", 26.0),
+                libtester.LimitPercent("VoutPreCal", 27.6, 2.6),
+                libtester.LimitDelta("VoutPostCal", 27.6, _cal_factor * 0.25),
+                libtester.LimitBetween("MspVout", 26.0, 29.2),
             ),
             "ScaleFactor": 500,
         },
@@ -114,7 +115,7 @@ class Initial(share.TestSequence):
             dev["dcs_vccbias"].output(0.0, output=False, delay=1)
         except tosbsl.BSLException as exc:  # Change exception into test fail
             _measurement = tester.Measurement(
-                tester.LimitRegExp(
+                libtester.LimitRegExp(
                     name="Program", limit="ok", doc="Programming succeeded"
                 ),
                 tester.sensor.Mirror(),

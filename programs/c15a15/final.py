@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """C15A-15 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -13,10 +14,10 @@ class Final(share.TestSequence):
     # Resistive loading during OCP
     iload = 1.0
     limitdata = (
-        tester.LimitDelta("Vout", 15.5, 0.3),
-        tester.LimitLow("Voutfl", 5.0),
-        tester.LimitBetween("OCP", 1.0, 1.4),
-        tester.LimitLow("inOCP", 13.6),
+        libtester.LimitDelta("Vout", 15.5, 0.3),
+        libtester.LimitLow("Voutfl", 5.0),
+        libtester.LimitBetween("OCP", 1.0, 1.4),
+        libtester.LimitLow("inOCP", 13.6),
     )
 
     def open(self, uut):

@@ -2,6 +2,7 @@
 # Copyright 2013 SETEC Pty Ltd.
 """GEN8 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,16 +12,16 @@ class Final(share.TestSequence):
     """GEN8 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("Iecon", 240, 10),
-        tester.LimitLow("Iecoff", 10),
-        tester.LimitBetween("5V", 4.998, 5.202),
-        tester.LimitLow("24Voff", 0.5),
-        tester.LimitLow("12Voff", 0.5),
-        tester.LimitLow("12V2off", 0.5),
-        tester.LimitBetween("24Von", 22.80, 25.44),
-        tester.LimitBetween("12Von", 11.8755, 12.4845),
-        tester.LimitBetween("12V2on", 11.8146, 12.4845),
-        tester.LimitHigh("PwrFailOff", 11.0),
+        libtester.LimitDelta("Iecon", 240, 10),
+        libtester.LimitLow("Iecoff", 10),
+        libtester.LimitBetween("5V", 4.998, 5.202),
+        libtester.LimitLow("24Voff", 0.5),
+        libtester.LimitLow("12Voff", 0.5),
+        libtester.LimitLow("12V2off", 0.5),
+        libtester.LimitBetween("24Von", 22.80, 25.44),
+        libtester.LimitBetween("12Von", 11.8755, 12.4845),
+        libtester.LimitBetween("12V2on", 11.8146, 12.4845),
+        libtester.LimitHigh("PwrFailOff", 11.0),
     )
 
     def open(self, uut):

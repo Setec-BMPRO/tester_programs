@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """BCE282-12/24 Final Program."""
 
+import libtester
 import tester
 
 import share
@@ -12,21 +13,21 @@ class Final(share.TestSequence):
 
     # Limits common to both versions
     _common = (
-        tester.LimitDelta("AlarmOpen", 10000, 1000, doc="Contacts open"),
-        tester.LimitLow("AlarmClosed", 100, doc="Contacts closed"),
+        libtester.LimitDelta("AlarmOpen", 10000, 1000, doc="Contacts open"),
+        libtester.LimitLow("AlarmClosed", 100, doc="Contacts closed"),
     )
     # Test limit selection keyed by program parameter
     limitdata = {
         "12": {
             "Limits": _common
             + (
-                tester.LimitDelta("VoutNL", 13.55, 0.20, doc="Output at no load"),
-                tester.LimitBetween("VbatNL", 13.20, 13.75, doc="Output at no load"),
-                tester.LimitBetween("Vout", 12.98, 13.75, doc="Output with load"),
-                tester.LimitBetween("Vbat", 12.98, 13.75, doc="Output with load"),
-                tester.LimitLow("inOCP", 12.98, doc="OCP active"),
-                tester.LimitBetween("OCPLoad", 20.0, 25.0, doc="OCP point"),
-                tester.LimitBetween("OCPBatt", 10.0, 12.0, doc="OCP point"),
+                libtester.LimitDelta("VoutNL", 13.55, 0.20, doc="Output at no load"),
+                libtester.LimitBetween("VbatNL", 13.20, 13.75, doc="Output at no load"),
+                libtester.LimitBetween("Vout", 12.98, 13.75, doc="Output with load"),
+                libtester.LimitBetween("Vbat", 12.98, 13.75, doc="Output with load"),
+                libtester.LimitLow("inOCP", 12.98, doc="OCP active"),
+                libtester.LimitBetween("OCPLoad", 20.0, 25.0, doc="OCP point"),
+                libtester.LimitBetween("OCPBatt", 10.0, 12.0, doc="OCP point"),
             ),
             "FullLoad": 20.1,
             "OCPrampLoad": (20.0, 25.5),
@@ -35,13 +36,13 @@ class Final(share.TestSequence):
         "24": {
             "Limits": _common
             + (
-                tester.LimitDelta("VoutNL", 27.60, 0.25, doc="Output at no load"),
-                tester.LimitBetween("VbatNL", 27.35, 27.85, doc="Output at no load"),
-                tester.LimitBetween("Vout", 26.80, 27.85, doc="Output with load"),
-                tester.LimitBetween("Vbat", 26.80, 27.85, doc="Output with load"),
-                tester.LimitLow("inOCP", 26.80, doc="OCP active"),
-                tester.LimitBetween("OCPLoad", 10.0, 13.0, doc="OCP point"),
-                tester.LimitBetween("OCPBatt", 5.0, 6.0, doc="OCP point"),
+                libtester.LimitDelta("VoutNL", 27.60, 0.25, doc="Output at no load"),
+                libtester.LimitBetween("VbatNL", 27.35, 27.85, doc="Output at no load"),
+                libtester.LimitBetween("Vout", 26.80, 27.85, doc="Output with load"),
+                libtester.LimitBetween("Vbat", 26.80, 27.85, doc="Output with load"),
+                libtester.LimitLow("inOCP", 26.80, doc="OCP active"),
+                libtester.LimitBetween("OCPLoad", 10.0, 13.0, doc="OCP point"),
+                libtester.LimitBetween("OCPBatt", 5.0, 6.0, doc="OCP point"),
             ),
             "FullLoad": 10.1,
             "OCPrampLoad": (10.0, 13.5),

@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """ETrac-II Initial Test Program."""
 
+import libtester
 import serial
 import tester
 
@@ -13,12 +14,12 @@ class Initial(share.TestSequence):
     """ETrac-II Initial Test Program."""
 
     limitdata = (
-        tester.LimitBetween("Vin", 12.9, 13.1),
-        tester.LimitBetween("Vin2", 10.8, 12.8),
-        tester.LimitBetween("5V", 4.95, 5.05),
-        tester.LimitBetween("5Vusb", 4.75, 5.25),
-        tester.LimitBetween("Vbat", 8.316, 8.484),
-        tester.LimitRegExp("Reply", "^OK$"),
+        libtester.LimitBetween("Vin", 12.9, 13.1),
+        libtester.LimitBetween("Vin2", 10.8, 12.8),
+        libtester.LimitBetween("5V", 4.95, 5.05),
+        libtester.LimitBetween("5Vusb", 4.75, 5.25),
+        libtester.LimitBetween("Vbat", 8.316, 8.484),
+        libtester.LimitRegExp("Reply", r"^OK$"),
     )
 
     def open(self, uut):

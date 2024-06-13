@@ -4,6 +4,7 @@
 
 import serial
 
+import libtester
 import tester
 
 import share
@@ -14,35 +15,35 @@ class Initial(share.TestSequence):
     """C45A-15 Initial Test Program."""
 
     limitdata = (
-        tester.LimitDelta("VacStart", 95.0, 3.0),
-        tester.LimitDelta("Vac", 240.0, 5.0),
-        tester.LimitDelta("Vbus", 340.0, 10.0),
-        tester.LimitBetween("Vcc", 9.5, 15.0),
-        tester.LimitDelta("Vref", 5.0, 0.1),
-        tester.LimitLow("VrefOff", 1.0),
-        tester.LimitDelta("VoutPreExt", 12.0, 0.1),
-        tester.LimitDelta("VoutExt", 12.0, 0.1),
-        tester.LimitDelta("VoutPre", 12.0, 0.1),
+        libtester.LimitDelta("VacStart", 95.0, 3.0),
+        libtester.LimitDelta("Vac", 240.0, 5.0),
+        libtester.LimitDelta("Vbus", 340.0, 10.0),
+        libtester.LimitBetween("Vcc", 9.5, 15.0),
+        libtester.LimitDelta("Vref", 5.0, 0.1),
+        libtester.LimitLow("VrefOff", 1.0),
+        libtester.LimitDelta("VoutPreExt", 12.0, 0.1),
+        libtester.LimitDelta("VoutExt", 12.0, 0.1),
+        libtester.LimitDelta("VoutPre", 12.0, 0.1),
         # PS-5056: Change limit from 9.0V ± 5% to 8.75V ± 5%
-        #        tester.LimitBetween('VoutLow', 8.55, 9.45),
-        tester.LimitPercent("VoutLow", 8.75, 5),
-        tester.LimitBetween("Vout", 15.2, 16.8),
-        tester.LimitBetween("VsenseLow", 8.2, 10.0),
-        tester.LimitBetween("VsenseOn", 11.8, 12.1),
-        tester.LimitLow("VsenseOff", 1.0),
-        tester.LimitBetween("GreenOn", 1.8, 2.2),
-        tester.LimitBetween("YellowOn", 1.6, 2.2),
-        tester.LimitBetween("RedOn", 4.0, 5.5),
-        tester.LimitBetween("RedFlash", 2.0, 2.75),
-        tester.LimitLow("LedOff", 0.2),
-        tester.LimitLow("inOVP", 6.5),
-        tester.LimitBetween("OVP", 18.0, 21.0),
-        tester.LimitBetween("Reg", -1.5, 0),
-        tester.LimitLow("inOCP", 1e6),
-        tester.LimitBetween("OCP", 2.85, 3.15),
-        tester.LimitLow("FixtureLock", 20),
-        tester.LimitInteger("Program", 0),
-        tester.LimitRegExp("Reply", "^OK$"),
+        #        libtester.LimitBetween('VoutLow', 8.55, 9.45),
+        libtester.LimitPercent("VoutLow", 8.75, 5),
+        libtester.LimitBetween("Vout", 15.2, 16.8),
+        libtester.LimitBetween("VsenseLow", 8.2, 10.0),
+        libtester.LimitBetween("VsenseOn", 11.8, 12.1),
+        libtester.LimitLow("VsenseOff", 1.0),
+        libtester.LimitBetween("GreenOn", 1.8, 2.2),
+        libtester.LimitBetween("YellowOn", 1.6, 2.2),
+        libtester.LimitBetween("RedOn", 4.0, 5.5),
+        libtester.LimitBetween("RedFlash", 2.0, 2.75),
+        libtester.LimitLow("LedOff", 0.2),
+        libtester.LimitLow("inOVP", 6.5),
+        libtester.LimitBetween("OVP", 18.0, 21.0),
+        libtester.LimitBetween("Reg", -1.5, 0),
+        libtester.LimitLow("inOCP", 1e6),
+        libtester.LimitBetween("OCP", 2.85, 3.15),
+        libtester.LimitLow("FixtureLock", 20),
+        libtester.LimitInteger("Program", 0),
+        libtester.LimitRegExp("Reply", "^OK$"),
     )
 
     def open(self, uut):

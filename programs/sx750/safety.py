@@ -2,6 +2,7 @@
 # Copyright 2013 SETEC Pty Ltd
 """SX-750 Safety Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,9 +12,9 @@ class Safety(share.TestSequence):
     """SX-750 Safety Test Program."""
 
     limitdata = (
-        tester.LimitBetween("gnd", 20, 100),
-        tester.LimitBetween("arc", -0.001, 0),
-        tester.LimitBetween("acw", 2.0, 4.0),
+        libtester.LimitBetween("gnd", 20, 100),
+        libtester.LimitBetween("arc", -0.001, 0),
+        libtester.LimitBetween("acw", 2.0, 4.0),
     )
 
     def open(self, uut):

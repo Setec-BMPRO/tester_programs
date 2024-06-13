@@ -5,6 +5,7 @@
 import pathlib
 import time
 
+import libtester
 import tester
 
 import share
@@ -20,35 +21,35 @@ class Initial(share.TestSequence):
     _ocp_high = 43.0
     # Test limits common to both versions
     _common = (
-        tester.LimitLow("DetectDiode", 0.3),
-        tester.LimitDelta("FlyLead", 30.0, 10.0),
-        tester.LimitDelta("AcIn", 240.0, 5.0),
-        tester.LimitDelta("Vbus", 330.0, 20.0),
-        tester.LimitBetween("Vcc", 13.8, 22.5),
-        tester.LimitLow("VccOff", 5.0),
-        tester.LimitDelta("Vdd", 5.00, 0.1),
-        tester.LimitBetween("VbatCtl", 12.7, 13.5),
-        tester.LimitDelta("Vctl", 12.0, 0.5),
-        tester.LimitBetween("VoutPre", 12.5, 15.0),
-        tester.LimitDelta("Vout", 13.65, 0.05),
-        tester.LimitLow("VoutOff", 1.0),
-        tester.LimitBetween("VbatPre", 12.5, 15.0),
-        tester.LimitDelta("Vbat", 13.65, 0.05),
-        tester.LimitDelta("Vaux", 13.70, 0.5),
-        tester.LimitLow("FanOff", 0.5),
-        tester.LimitBetween("FanOn", 12.0, 14.1),
-        tester.LimitLow("InOCP", 13.24),
-        tester.LimitBetween("OCP", _ocp_low, _ocp_high),
-        tester.LimitLow("FixtureLock", 200),
+        libtester.LimitLow("DetectDiode", 0.3),
+        libtester.LimitDelta("FlyLead", 30.0, 10.0),
+        libtester.LimitDelta("AcIn", 240.0, 5.0),
+        libtester.LimitDelta("Vbus", 330.0, 20.0),
+        libtester.LimitBetween("Vcc", 13.8, 22.5),
+        libtester.LimitLow("VccOff", 5.0),
+        libtester.LimitDelta("Vdd", 5.00, 0.1),
+        libtester.LimitBetween("VbatCtl", 12.7, 13.5),
+        libtester.LimitDelta("Vctl", 12.0, 0.5),
+        libtester.LimitBetween("VoutPre", 12.5, 15.0),
+        libtester.LimitDelta("Vout", 13.65, 0.05),
+        libtester.LimitLow("VoutOff", 1.0),
+        libtester.LimitBetween("VbatPre", 12.5, 15.0),
+        libtester.LimitDelta("Vbat", 13.65, 0.05),
+        libtester.LimitDelta("Vaux", 13.70, 0.5),
+        libtester.LimitLow("FanOff", 0.5),
+        libtester.LimitBetween("FanOn", 12.0, 14.1),
+        libtester.LimitLow("InOCP", 13.24),
+        libtester.LimitBetween("OCP", _ocp_low, _ocp_high),
+        libtester.LimitLow("FixtureLock", 200),
     )
     # Test limit selection keyed by program parameter
     limitdata = {
         "STD": {
-            "Limits": _common + (tester.LimitLow("VbatOCP", 10.0),),
+            "Limits": _common + (libtester.LimitLow("VbatOCP", 10.0),),
             "LoadRatio": (29, 14),  # Iout:Ibat
         },
         "H": {
-            "Limits": _common + (tester.LimitHigh("VbatOCP", 13.0),),
+            "Limits": _common + (libtester.LimitHigh("VbatOCP", 13.0),),
             "LoadRatio": (5, 30),  # Iout:Ibat
         },
     }

@@ -5,7 +5,7 @@
 import logging
 
 from attrs import define, field, validators
-import tester
+import libtester
 
 import share
 
@@ -57,27 +57,27 @@ class Config:
     vbatt_set = 12.5
     # Test limits common to all units and test types
     _base_limits = (
-        tester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
     )
     # Initial Test limits common to all units
     _base_limits_initial = _base_limits + (
-        tester.LimitDelta("Vbatt", vbatt_set - 0.5, 1.0, doc="Battery input"),
-        tester.LimitPercent("3V3", 3.3, 6.0, doc="Internal 3V rail"),
-        tester.LimitHigh("HSon", 9.0, doc="HS output on (high)"),
-        tester.LimitLow("HSoff", 3.0, doc="All HS outputs off (low)"),
-        tester.LimitLow("HBon", 2.0, doc="Reversed HBridge on (low)"),
-        tester.LimitHigh("HBoff", 6.0, doc="Reversed HBridge off (high)"),
-        tester.LimitLow("LSon", 1.0, doc="LS output on (low)"),
-        tester.LimitHigh("LSoff", 9.0, doc="LS output off (high)"),
-        tester.LimitBoolean("CANok", True, doc="CAN bus active"),
-        tester.LimitBetween("AllInputs", 0, 0xFFFF, doc="Digital inputs"),
-        tester.LimitRegExp("Serial", "None", doc="Correct serial number"),
-        tester.LimitRegExp("ProdRev", "None", doc="Correct product revision"),
-        tester.LimitRegExp("HardRev", "None", doc="Correct hardware revision"),
+        libtester.LimitDelta("Vbatt", vbatt_set - 0.5, 1.0, doc="Battery input"),
+        libtester.LimitPercent("3V3", 3.3, 6.0, doc="Internal 3V rail"),
+        libtester.LimitHigh("HSon", 9.0, doc="HS output on (high)"),
+        libtester.LimitLow("HSoff", 3.0, doc="All HS outputs off (low)"),
+        libtester.LimitLow("HBon", 2.0, doc="Reversed HBridge on (low)"),
+        libtester.LimitHigh("HBoff", 6.0, doc="Reversed HBridge off (high)"),
+        libtester.LimitLow("LSon", 1.0, doc="LS output on (low)"),
+        libtester.LimitHigh("LSoff", 9.0, doc="LS output off (high)"),
+        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        libtester.LimitBetween("AllInputs", 0, 0xFFFF, doc="Digital inputs"),
+        libtester.LimitRegExp("Serial", "None", doc="Correct serial number"),
+        libtester.LimitRegExp("ProdRev", "None", doc="Correct product revision"),
+        libtester.LimitRegExp("HardRev", "None", doc="Correct hardware revision"),
     )
     # Final Test limits common to all units
     _base_limits_final = _base_limits + (
-        tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )
 
     @classmethod
@@ -302,7 +302,7 @@ class RVMN101A(Config):
         """
         rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
         return cls._base_limits_final + (
-            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
         )
 
 
@@ -438,7 +438,7 @@ class RVMN101B(Config):
         # 3dB below the -A version
         rssi = -73 if share.config.System.tester_type in ("ATE4", "ATE5") else -88
         return cls._base_limits_final + (
-            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
         )
 
 
@@ -483,7 +483,7 @@ class RVMN101C(Config):
         """
         rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
         return cls._base_limits_final + (
-            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
         )
 
 
@@ -514,7 +514,7 @@ class RVMN200A(Config):
         """
         rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
         return cls._base_limits_final + (
-            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
         )
 
 
@@ -674,7 +674,7 @@ class RVMN5x(Config):
         """
         rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
         return cls._base_limits_final + (
-            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
         )
 
 
@@ -706,5 +706,5 @@ class RVMN6x(Config):
         """
         rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
         return cls._base_limits_final + (
-            tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
         )

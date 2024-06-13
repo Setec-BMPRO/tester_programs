@@ -5,6 +5,7 @@
 import pathlib
 import time
 
+import libtester
 import serial
 import tester
 
@@ -19,32 +20,32 @@ class Initial(share.TestSequence):
 
     vbatt = 12.0  # Injected Vbatt
     _limits = (
-        tester.LimitDelta("Vbat", vbatt, 0.5, doc="Battery input present"),
-        tester.LimitPercent("3V3", 3.3, 1.7, doc="3V3 present"),
-        tester.LimitLow("BrakeOff", 0.5, doc="Brakes off"),
-        tester.LimitDelta("BrakeOn", vbatt, 0.5, doc="Brakes on"),
-        tester.LimitLow("LightOff", 0.5, doc="Lights off"),
-        tester.LimitDelta("LightOn", vbatt, 0.25, doc="Lights on"),
-        tester.LimitLow("RemoteOff", 0.5, doc="Remote off"),
-        tester.LimitDelta("RemoteOn", vbatt, 0.25, doc="Remote on"),
-        tester.LimitLow("RedLedOff", 1.0, doc="Led off"),
-        tester.LimitDelta("RedLedOn", 1.8, 0.14, doc="Led on"),
-        tester.LimitLow("GreenLedOff", 1.0, doc="Led off"),
-        tester.LimitDelta("GreenLedOn", 2.5, 0.4, doc="Led on"),
-        tester.LimitLow("BlueLedOff", 1.0, doc="Led off"),
-        tester.LimitDelta("BlueLedOn", 2.65, 0.2, doc="Led on"),
-        tester.LimitDelta("Chem wire", 3.0, 0.5, doc="Voltage present"),
-        tester.LimitDelta("Sway- wire", 2.0, 0.5, doc="Voltage present"),
-        tester.LimitDelta("Sway+ wire", 1.0, 0.5, doc="Voltage present"),
-        tester.LimitPercent(
+        libtester.LimitDelta("Vbat", vbatt, 0.5, doc="Battery input present"),
+        libtester.LimitPercent("3V3", 3.3, 1.7, doc="3V3 present"),
+        libtester.LimitLow("BrakeOff", 0.5, doc="Brakes off"),
+        libtester.LimitDelta("BrakeOn", vbatt, 0.5, doc="Brakes on"),
+        libtester.LimitLow("LightOff", 0.5, doc="Lights off"),
+        libtester.LimitDelta("LightOn", vbatt, 0.25, doc="Lights on"),
+        libtester.LimitLow("RemoteOff", 0.5, doc="Remote off"),
+        libtester.LimitDelta("RemoteOn", vbatt, 0.25, doc="Remote on"),
+        libtester.LimitLow("RedLedOff", 1.0, doc="Led off"),
+        libtester.LimitDelta("RedLedOn", 1.8, 0.14, doc="Led on"),
+        libtester.LimitLow("GreenLedOff", 1.0, doc="Led off"),
+        libtester.LimitDelta("GreenLedOn", 2.5, 0.4, doc="Led on"),
+        libtester.LimitLow("BlueLedOff", 1.0, doc="Led off"),
+        libtester.LimitDelta("BlueLedOn", 2.65, 0.2, doc="Led on"),
+        libtester.LimitDelta("Chem wire", 3.0, 0.5, doc="Voltage present"),
+        libtester.LimitDelta("Sway- wire", 2.0, 0.5, doc="Voltage present"),
+        libtester.LimitDelta("Sway+ wire", 1.0, 0.5, doc="Voltage present"),
+        libtester.LimitPercent(
             "ARM-Vbatt", vbatt, 4.8, delta=0.088, doc="Voltage present"
         ),
-        tester.LimitPercent(
+        libtester.LimitPercent(
             "ARM-Vbatt-Cal", vbatt, 1.8, delta=0.088, doc="Voltage present"
         ),
-        tester.LimitDelta("ARM-Vpin", 0.0, 1.0, doc="Micro switch voltage ok"),
-        tester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
-        tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitDelta("ARM-Vpin", 0.0, 1.0, doc="Micro switch voltage ok"),
+        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )
 
     def open(self, uut):

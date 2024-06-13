@@ -224,11 +224,11 @@ class TestSequenceMixin:
     """Utility methods for Test Programs."""
 
     _limit_builtin = (  # Built-in limits available to every test program
-        tester.LimitRegExp(
+        libtester.LimitRegExp(
             "SerNum", r"^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$", doc="Serial Number"
         ),
-        tester.LimitBoolean("Notify", True, doc="YES response"),
-        tester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
+        libtester.LimitBoolean("Notify", True, doc="YES response"),
+        libtester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
     )
 
     def measure(self, names, timeout=0, delay=0):
@@ -378,7 +378,7 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
     ) -> None:
         """Open test program by creating supporting instances.
 
-        @param limits Iterable tester.Limit*
+        @param limits Iterable libtester.Limit*
         @param cls_devices subclass of Devices
         @param cls_sensors subclass of Sensors
         @param cls_measurements subclass of Measurements
@@ -443,7 +443,7 @@ class MultiMeasurementSummary:
         """Context Manager exit handler - Check overall result."""
         with contextlib.suppress(tester.measure.NoResultError):
             result_overall = self.result.result
-            lim = tester.LimitBoolean("AllOk", True, doc="All passed")
+            lim = libtester.LimitBoolean("AllOk", True, doc="All passed")
             sen = tester.sensor.Mirror()
             mes = tester.Measurement(lim, sen, doc="All checks ok")
             mes.log_data = False

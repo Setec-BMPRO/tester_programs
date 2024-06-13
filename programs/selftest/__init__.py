@@ -2,6 +2,7 @@
 # Copyright 2013 SETEC Pty Ltd
 """Selfchecker Test Program."""
 
+import libtester
 import tester
 import share
 
@@ -10,28 +11,28 @@ class Main(share.TestSequence):
     """Selfchecker Test Program."""
 
     limitdata = (
-        tester.LimitDelta("12V", 12.0, 0.5),
-        tester.LimitDelta("5V", 5.0, 0.5),
-        tester.LimitBetween("ShieldOFF", -0.5, 7.0),
-        tester.LimitBetween("ShieldON", -0.5, 7.0),
-        tester.LimitDelta("Dso8", 8.0, 0.5),
-        tester.LimitDelta("Dso6", 6.0, 0.5),
-        tester.LimitDelta("Dso4", 4.0, 0.5),
-        tester.LimitBetween("Dso2", 1.35, 2.5),
-        tester.LimitDelta("Dcs5", 5.0, 0.5),
-        tester.LimitDelta("Dcs10", 10.0, 0.5),
-        tester.LimitDelta("Dcs20", 20.0, 0.5),
-        tester.LimitDelta("Dcs35", 35.0, 0.5),
-        tester.LimitDelta("120Vac", 120.0, 5.0),
-        tester.LimitDelta("240Vac", 240.0, 5.0),
-        tester.LimitDelta("Dcl05", 5.0, 1),
-        tester.LimitDelta("Dcl10", 10.0, 1),
-        tester.LimitDelta("Dcl20", 20.0, 1),
-        tester.LimitDelta("Dcl40", 40.0, 1),
-        tester.LimitDelta("RlaOff", 12.0, 0.5),
-        tester.LimitLow("RlaOn", 1.5),
-        tester.LimitDelta("Disch_on", 10.0, 1.0),
-        tester.LimitLow("Disch_off", 0.5),
+        libtester.LimitDelta("12V", 12.0, 0.5),
+        libtester.LimitDelta("5V", 5.0, 0.5),
+        libtester.LimitBetween("ShieldOFF", -0.5, 7.0),
+        libtester.LimitBetween("ShieldON", -0.5, 7.0),
+        libtester.LimitDelta("Dso8", 8.0, 0.5),
+        libtester.LimitDelta("Dso6", 6.0, 0.5),
+        libtester.LimitDelta("Dso4", 4.0, 0.5),
+        libtester.LimitBetween("Dso2", 1.35, 2.5),
+        libtester.LimitDelta("Dcs5", 5.0, 0.5),
+        libtester.LimitDelta("Dcs10", 10.0, 0.5),
+        libtester.LimitDelta("Dcs20", 20.0, 0.5),
+        libtester.LimitDelta("Dcs35", 35.0, 0.5),
+        libtester.LimitDelta("120Vac", 120.0, 5.0),
+        libtester.LimitDelta("240Vac", 240.0, 5.0),
+        libtester.LimitDelta("Dcl05", 5.0, 1),
+        libtester.LimitDelta("Dcl10", 10.0, 1),
+        libtester.LimitDelta("Dcl20", 20.0, 1),
+        libtester.LimitDelta("Dcl40", 40.0, 1),
+        libtester.LimitDelta("RlaOff", 12.0, 0.5),
+        libtester.LimitLow("RlaOn", 1.5),
+        libtester.LimitDelta("Disch_on", 10.0, 1.0),
+        libtester.LimitLow("Disch_off", 0.5),
     )
 
     def open(self, uut):

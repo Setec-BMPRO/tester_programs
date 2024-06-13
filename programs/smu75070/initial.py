@@ -2,6 +2,7 @@
 # Copyright 2017 SETEC Pty Ltd
 """SMU750-70 Initial Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -14,19 +15,25 @@ class Initial(share.TestSequence):
     vout_load_reg = 0.4
 
     limitdata = (
-        tester.LimitLow("FixtureLock", 200, doc="Closed micro switch"),
-        tester.LimitBetween("InrushOff", 120, 180, doc="Inrush resistors with K1 off"),
-        tester.LimitBetween("VacMin", 95.0, 105.0, doc="Min AC input voltage"),
-        tester.LimitBetween("Vac", 237.0, 242.0, doc="AC input voltage"),
-        tester.LimitDelta("Vbus", 399.0, 11.0, doc="PFC voltage"),
-        tester.LimitLow("VbusOff", 50.0, doc="PFC voltage off"),
-        tester.LimitBetween("Vdd", 12.0, 14.0, doc="Driver_vdd internal rail"),
-        tester.LimitBetween("VsecCtl", 11.0, 15.0, doc="VsecCtl internal rail"),
-        tester.LimitBetween("VoutPre", 61.3, 78.5, doc="Output voltage before adjust"),
-        tester.LimitPercent("Vout", 70.0, 1.0, doc="Output voltage after adjust"),
-        tester.LimitLow("VoutOff", 5.0, doc="Output voltage off"),
-        tester.LimitBetween("OCP", 9.3, 13.3, doc="OCP trip limits before fine tuning"),
-        tester.LimitLow(
+        libtester.LimitLow("FixtureLock", 200, doc="Closed micro switch"),
+        libtester.LimitBetween(
+            "InrushOff", 120, 180, doc="Inrush resistors with K1 off"
+        ),
+        libtester.LimitBetween("VacMin", 95.0, 105.0, doc="Min AC input voltage"),
+        libtester.LimitBetween("Vac", 237.0, 242.0, doc="AC input voltage"),
+        libtester.LimitDelta("Vbus", 399.0, 11.0, doc="PFC voltage"),
+        libtester.LimitLow("VbusOff", 50.0, doc="PFC voltage off"),
+        libtester.LimitBetween("Vdd", 12.0, 14.0, doc="Driver_vdd internal rail"),
+        libtester.LimitBetween("VsecCtl", 11.0, 15.0, doc="VsecCtl internal rail"),
+        libtester.LimitBetween(
+            "VoutPre", 61.3, 78.5, doc="Output voltage before adjust"
+        ),
+        libtester.LimitPercent("Vout", 70.0, 1.0, doc="Output voltage after adjust"),
+        libtester.LimitLow("VoutOff", 5.0, doc="Output voltage off"),
+        libtester.LimitBetween(
+            "OCP", 9.3, 13.3, doc="OCP trip limits before fine tuning"
+        ),
+        libtester.LimitLow(
             "InOCP",
             9999.0,
             doc="Calculated trip voltage [Vout - (Vout * %Load Reg) / 100]",

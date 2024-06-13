@@ -2,6 +2,7 @@
 # Copyright 2015 SETEC Pty Ltd.
 """2040 Initial Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,26 +12,26 @@ class Initial(share.TestSequence):
     """2040 Initial Test Program."""
 
     limitdata = (
-        tester.LimitBetween("VccAC", 9.0, 16.5),
-        tester.LimitBetween("VccDC", 7.8, 14.0),
-        tester.LimitDelta("VbusMin", 130.0, 10.0),
-        tester.LimitDelta("SDOff", 20.0, 1.0),
-        tester.LimitLow("SDOn", 5.0),
-        tester.LimitDelta("ACmin", 90.0, 2.0),
-        tester.LimitDelta("ACtyp", 240.0, 2.0),
-        tester.LimitDelta("ACmax", 265.0, 2.0),
-        tester.LimitDelta("VoutExt", 20.0, 0.2),
-        tester.LimitDelta("Vout", 20.0, 0.4),
-        tester.LimitBetween("GreenOn", 15.0, 20.0),
-        tester.LimitBetween("RedDCOff", 9.0, 15.0),
-        tester.LimitBetween("RedDCOn", 1.8, 3.5),
-        tester.LimitBetween("RedACOff", 9.0, 50.0),
-        tester.LimitDelta("DCmin", 10.0, 1.0),
-        tester.LimitDelta("DCtyp", 24.5, 1.5),
-        tester.LimitDelta("DCmax", 40.0, 2.0),
-        tester.LimitBetween("OCP", 3.5, 4.1),
-        tester.LimitLow("inOCP", 19.0),
-        tester.LimitLow("FixtureLock", 20),
+        libtester.LimitBetween("VccAC", 9.0, 16.5),
+        libtester.LimitBetween("VccDC", 7.8, 14.0),
+        libtester.LimitDelta("VbusMin", 130.0, 10.0),
+        libtester.LimitDelta("SDOff", 20.0, 1.0),
+        libtester.LimitLow("SDOn", 5.0),
+        libtester.LimitDelta("ACmin", 90.0, 2.0),
+        libtester.LimitDelta("ACtyp", 240.0, 2.0),
+        libtester.LimitDelta("ACmax", 265.0, 2.0),
+        libtester.LimitDelta("VoutExt", 20.0, 0.2),
+        libtester.LimitDelta("Vout", 20.0, 0.4),
+        libtester.LimitBetween("GreenOn", 15.0, 20.0),
+        libtester.LimitBetween("RedDCOff", 9.0, 15.0),
+        libtester.LimitBetween("RedDCOn", 1.8, 3.5),
+        libtester.LimitBetween("RedACOff", 9.0, 50.0),
+        libtester.LimitDelta("DCmin", 10.0, 1.0),
+        libtester.LimitDelta("DCtyp", 24.5, 1.5),
+        libtester.LimitDelta("DCmax", 40.0, 2.0),
+        libtester.LimitBetween("OCP", 3.5, 4.1),
+        libtester.LimitLow("inOCP", 19.0),
+        libtester.LimitLow("FixtureLock", 20),
     )
 
     def open(self, uut):

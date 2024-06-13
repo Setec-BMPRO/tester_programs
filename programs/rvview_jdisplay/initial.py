@@ -14,6 +14,7 @@ It's testmode is controlled using CAN packets.
 import pathlib
 
 from attrs import define, field
+import libtester
 import serial
 import tester
 
@@ -27,14 +28,14 @@ class Initial(share.TestSequence):
 
     vin_set = 8.1  # Input voltage to power the unit
     _limits = (
-        tester.LimitBetween(
+        libtester.LimitBetween(
             "Vin", vin_set - 1.1, vin_set - 0.1, doc="Input voltage present"
         ),
-        tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        tester.LimitLow("BkLghtOff", 0.5, doc="Backlight off"),
-        tester.LimitBetween("BkLghtOn", 2.5, 3.5, doc="Backlight on"),
+        libtester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
+        libtester.LimitLow("BkLghtOff", 0.5, doc="Backlight off"),
+        libtester.LimitBetween("BkLghtOn", 2.5, 3.5, doc="Backlight on"),
         # CAN Bus is operational if status bit 28 is set
-        tester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
+        libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
     )
 
     def open(self, uut):

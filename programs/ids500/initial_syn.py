@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import tester
 
 import share
@@ -15,34 +16,34 @@ class InitialSyn(share.TestSequence):
 
     # Test limits
     limitdata = (
-        tester.LimitDelta("20VT", nominal=20.0, delta=(1.5, 2.0)),
-        tester.LimitDelta("-20V", nominal=-20.0, delta=2.0),
-        tester.LimitDelta("9V", nominal=9.0, delta=(1.0, 2.5)),
-        tester.LimitDelta("TecOff", nominal=0, delta=0.5),
-        tester.LimitLow("Tec0V", 1.0),
-        tester.LimitDelta("Tec2V5", nominal=7.5, delta=0.3),
-        tester.LimitDelta("Tec5V", nominal=15.0, delta=0.5),
-        tester.LimitDelta("Tec5V_Rev", nominal=-15.0, delta=0.5),
-        tester.LimitLow("TecVmonOff", 0.5),
-        tester.LimitLow("TecVmon0V", 0.8),
-        tester.LimitPercent("TecVmon2V5", nominal=2.5, percent=2.5),
-        tester.LimitPercent("TecVmon5V", nominal=5.0, percent=1.5),
-        tester.LimitLow("TecVsetOff", 0.5),
-        tester.LimitLow("LddOff", 0.5),
-        tester.LimitLow("Ldd0A", 0.5),
-        tester.LimitBetween("Ldd6A", 0.6, 1.8, doc="Vout @ 6A"),
-        tester.LimitBetween("Ldd50A", 1.0, 2.5, doc="Vout @ 50A"),
-        tester.LimitLow("LddVmonOff", 0.5),
-        tester.LimitLow("LddImonOff", 0.5),
-        tester.LimitLow("LddImon0V", 0.05),
-        tester.LimitDelta("LddImon0V6", nominal=0.60, delta=0.05),
-        tester.LimitDelta("LddImon5V", nominal=5.0, delta=0.2),
-        tester.LimitLow("ISIout0A", 1.0),
-        tester.LimitDelta("ISIout6A", nominal=6.0, delta=1.0),
-        tester.LimitDelta("ISIout50A", nominal=50.0, delta=2.0),
-        tester.LimitDelta("ISIset5V", nominal=5.0, delta=0.2),
-        tester.LimitPercent("AdjLimits", nominal=50.0, percent=0.2),
-        tester.LimitLow("FixtureLock", 20),
+        libtester.LimitDeltaLoHi("20VT", 20.0, 1.5, 2.0),
+        libtester.LimitDelta("-20V", -20.0, 2.0),
+        libtester.LimitDeltaLoHi("9V", 9.0, 1.0, 2.5),
+        libtester.LimitDelta("TecOff", 0, 0.5),
+        libtester.LimitLow("Tec0V", 1.0),
+        libtester.LimitDelta("Tec2V5", 7.5, 0.3),
+        libtester.LimitDelta("Tec5V", 15.0, 0.5),
+        libtester.LimitDelta("Tec5V_Rev", -15.0, 0.5),
+        libtester.LimitLow("TecVmonOff", 0.5),
+        libtester.LimitLow("TecVmon0V", 0.8),
+        libtester.LimitPercent("TecVmon2V5", 2.5, 2.5),
+        libtester.LimitPercent("TecVmon5V", 5.0, 1.5),
+        libtester.LimitLow("TecVsetOff", 0.5),
+        libtester.LimitLow("LddOff", 0.5),
+        libtester.LimitLow("Ldd0A", 0.5),
+        libtester.LimitBetween("Ldd6A", 0.6, 1.8, doc="Vout @ 6A"),
+        libtester.LimitBetween("Ldd50A", 1.0, 2.5, doc="Vout @ 50A"),
+        libtester.LimitLow("LddVmonOff", 0.5),
+        libtester.LimitLow("LddImonOff", 0.5),
+        libtester.LimitLow("LddImon0V", 0.05),
+        libtester.LimitDelta("LddImon0V6", 0.60, 0.05),
+        libtester.LimitDelta("LddImon5V", 5.0, 0.2),
+        libtester.LimitLow("ISIout0A", 1.0),
+        libtester.LimitDelta("ISIout6A", 6.0, 1.0),
+        libtester.LimitDelta("ISIout50A", 50.0, 2.0),
+        libtester.LimitDelta("ISIset5V", 5.0, 0.2),
+        libtester.LimitPercent("AdjLimits", 50.0, 0.2),
+        libtester.LimitLow("FixtureLock", 20),
     )
 
     def open(self, uut):

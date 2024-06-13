@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """RM-50-24 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,22 +12,22 @@ class Final(share.TestSequence):
     """RM-50-24 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("Rsense", 1000, 20),
-        tester.LimitLow("Vsense", 0.0001),
-        tester.LimitLow("uSwitch", 100),
-        tester.LimitLow("Vdrop", 0.4),
-        tester.LimitBetween("24Vdcin", 23.0, 24.4),
-        tester.LimitBetween("24Vdcout", 23.6, 24.4),
-        tester.LimitLow("24Voff", 1.0),
-        tester.LimitBetween("24Vnl", 23.6, 24.4),
-        tester.LimitBetween("24Vfl", 23.4, 24.1),
-        tester.LimitBetween("24Vpl", 23.0, 24.1),
-        tester.LimitBetween("OCP", 3.2, 4.3),
-        tester.LimitLow("inOCP", 23.0),
-        tester.LimitLow("CurrShunt", 2.5),
-        tester.LimitBetween("PowNL", 1.0, 5.0),
-        tester.LimitBetween("PowFL", 40.0, 70.0),
-        tester.LimitHigh("Eff", 84.0),
+        libtester.LimitDelta("Rsense", 1000, 20),
+        libtester.LimitLow("Vsense", 0.0001),
+        libtester.LimitLow("uSwitch", 100),
+        libtester.LimitLow("Vdrop", 0.4),
+        libtester.LimitBetween("24Vdcin", 23.0, 24.4),
+        libtester.LimitBetween("24Vdcout", 23.6, 24.4),
+        libtester.LimitLow("24Voff", 1.0),
+        libtester.LimitBetween("24Vnl", 23.6, 24.4),
+        libtester.LimitBetween("24Vfl", 23.4, 24.1),
+        libtester.LimitBetween("24Vpl", 23.0, 24.1),
+        libtester.LimitBetween("OCP", 3.2, 4.3),
+        libtester.LimitLow("inOCP", 23.0),
+        libtester.LimitLow("CurrShunt", 2.5),
+        libtester.LimitBetween("PowNL", 1.0, 5.0),
+        libtester.LimitBetween("PowFL", 40.0, 70.0),
+        libtester.LimitHigh("Eff", 84.0),
     )
 
     def open(self, uut):

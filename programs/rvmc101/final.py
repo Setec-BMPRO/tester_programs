@@ -2,6 +2,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMC101x Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,8 +12,8 @@ class Final(share.TestSequence):
     """RVMC101x Final Test Program."""
 
     limitdata = (
-        tester.LimitBoolean("ButtonOk", True, doc="Ok entered"),
-        tester.LimitBoolean("Zone4Pressed", True, doc="Button pressed"),
+        libtester.LimitBoolean("ButtonOk", True, doc="Ok entered"),
+        libtester.LimitBoolean("Zone4Pressed", True, doc="Button pressed"),
     )
     is_full = None  # False if 'Lite' version (no uC)
 

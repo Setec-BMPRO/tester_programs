@@ -4,6 +4,7 @@
 
 import serial
 
+import libtester
 import tester
 
 import share
@@ -17,11 +18,13 @@ class Final(share.TestSequence):
     # Software binary version
     arm_version = "1.7.4080"
     limitdata = (
-        tester.LimitDelta("12V", 12.0, 0.1),
-        tester.LimitBoolean("BTscan", True),
-        tester.LimitBoolean("BTpair", True),
-        tester.LimitBoolean("ARMSerNum", True),
-        tester.LimitRegExp("ARMSwVer", "^{0}$".format(arm_version.replace(".", r"\."))),
+        libtester.LimitDelta("12V", 12.0, 0.1),
+        libtester.LimitBoolean("BTscan", True),
+        libtester.LimitBoolean("BTpair", True),
+        libtester.LimitBoolean("ARMSerNum", True),
+        libtester.LimitRegExp(
+            "ARMSwVer", "^{0}$".format(arm_version.replace(".", r"\."))
+        ),
     )
 
     def open(self, uut):

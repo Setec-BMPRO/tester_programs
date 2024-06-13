@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import serial
 import tester
 
@@ -16,9 +17,9 @@ class InitialMicro(share.TestSequence):
 
     # test limits
     limitdata = (
-        tester.LimitDelta("5V", nominal=5.0, delta=0.05),
-        tester.LimitRegExp("SwRev", "I,  1, 2,Software Revision"),
-        tester.LimitRegExp("MicroTemp", "D, 16,    [0-9]{2},MICRO Temp\.\(C\)"),
+        libtester.LimitDelta("5V", 5.0, 0.05),
+        libtester.LimitRegExp("SwRev", "I,  1, 2,Software Revision"),
+        libtester.LimitRegExp("MicroTemp", r"D, 16,    [0-9]{2},MICRO Temp\.\(C\)"),
     )
 
     def open(self, uut):

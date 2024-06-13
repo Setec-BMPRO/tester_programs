@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """UNI-750 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,17 +12,17 @@ class Final(share.TestSequence):
     """UNI-750 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("AcUnsw", 240, 10),
-        tester.LimitLow("AcSwOff", 0.5),
-        tester.LimitDelta("AcSwOn", 240, 10),
-        tester.LimitBetween("24V", 23.256, 24.552),
-        tester.LimitBetween("24Vfl", 23.5, 24.3),
-        tester.LimitDelta("15V", 15.0, 0.75),
-        tester.LimitDelta("12V", 12.0, 0.6),
-        tester.LimitBetween("5V", 5.0, 5.212),
-        tester.LimitBetween("3.3V", 3.25, 3.423),
-        tester.LimitBetween("5Vi", 4.85, 5.20),
-        tester.LimitBetween("PGood", 5.0, 5.25),
+        libtester.LimitDelta("AcUnsw", 240, 10),
+        libtester.LimitLow("AcSwOff", 0.5),
+        libtester.LimitDelta("AcSwOn", 240, 10),
+        libtester.LimitBetween("24V", 23.256, 24.552),
+        libtester.LimitBetween("24Vfl", 23.5, 24.3),
+        libtester.LimitDelta("15V", 15.0, 0.75),
+        libtester.LimitDelta("12V", 12.0, 0.6),
+        libtester.LimitBetween("5V", 5.0, 5.212),
+        libtester.LimitBetween("3.3V", 3.25, 3.423),
+        libtester.LimitBetween("5Vi", 4.85, 5.20),
+        libtester.LimitBetween("PGood", 5.0, 5.25),
     )
 
     def open(self, uut):

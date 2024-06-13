@@ -2,6 +2,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """IDS-500 Aux Initial Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -12,27 +13,27 @@ class InitialAux(share.TestSequence):
 
     # Test limits
     limitdata = (
-        tester.LimitBetween("5V", 4.90, 5.10),
-        tester.LimitLow("5VOff", 0.5),
-        tester.LimitLow("15VpOff", 0.5),
-        tester.LimitBetween("15Vp", 14.25, 15.75),
-        tester.LimitLow("15VpSwOff", 0.5),
-        tester.LimitBetween("15VpSw", 14.25, 15.75),
-        tester.LimitBetween("20VL", 18.0, 25.0),
-        tester.LimitBetween("-20V", -25.0, -18.0),
-        tester.LimitBetween("15V", 14.25, 15.75),
-        tester.LimitBetween("-15V", -15.75, -14.25),
-        tester.LimitLow("PwrGoodOff", 0.5),
-        tester.LimitBetween("PwrGood", 4.8, 5.1),
-        tester.LimitBetween("ACurr_5V_1", -0.1, 0.1),
-        tester.LimitBetween("ACurr_5V_2", 1.76, 2.15),
-        tester.LimitBetween("ACurr_15V_1", -0.1, 0.13),
-        tester.LimitBetween("ACurr_15V_2", 1.16, 1.42),
-        tester.LimitBetween("AuxTemp", 2.1, 4.3),
-        tester.LimitLow("InOCP5V", 4.8),
-        tester.LimitLow("InOCP15Vp", 14.2),
-        tester.LimitBetween("OCP", 7.0, 10.0),
-        tester.LimitLow("FixtureLock", 20),
+        libtester.LimitBetween("5V", 4.90, 5.10),
+        libtester.LimitLow("5VOff", 0.5),
+        libtester.LimitLow("15VpOff", 0.5),
+        libtester.LimitBetween("15Vp", 14.25, 15.75),
+        libtester.LimitLow("15VpSwOff", 0.5),
+        libtester.LimitBetween("15VpSw", 14.25, 15.75),
+        libtester.LimitBetween("20VL", 18.0, 25.0),
+        libtester.LimitBetween("-20V", -25.0, -18.0),
+        libtester.LimitBetween("15V", 14.25, 15.75),
+        libtester.LimitBetween("-15V", -15.75, -14.25),
+        libtester.LimitLow("PwrGoodOff", 0.5),
+        libtester.LimitBetween("PwrGood", 4.8, 5.1),
+        libtester.LimitBetween("ACurr_5V_1", -0.1, 0.1),
+        libtester.LimitBetween("ACurr_5V_2", 1.76, 2.15),
+        libtester.LimitBetween("ACurr_15V_1", -0.1, 0.13),
+        libtester.LimitBetween("ACurr_15V_2", 1.16, 1.42),
+        libtester.LimitBetween("AuxTemp", 2.1, 4.3),
+        libtester.LimitLow("InOCP5V", 4.8),
+        libtester.LimitLow("InOCP15Vp", 14.2),
+        libtester.LimitBetween("OCP", 7.0, 10.0),
+        libtester.LimitLow("FixtureLock", 20),
     )
 
     def open(self, uut):

@@ -2,6 +2,7 @@
 # Copyright 2020 SETEC Pty Ltd.
 """TRS-BTx Final Program."""
 
+import libtester
 import tester
 
 import share
@@ -33,12 +34,12 @@ class Final(share.TestSequence):
     )
     pc29164_rssi = -90 if share.config.System.tester_type in ("ATE4", "ATE5") else -100
     limitdata = (
-        tester.LimitDelta("Vbat", vbatt, 0.5, doc="Battery input present"),
-        tester.LimitLow("BrakeOff", 0.5, doc="Brakes off"),
-        tester.LimitDelta("BrakeOn", vbatt, 0.5, doc="Brakes on"),
-        tester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
-        tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
-        tester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+        libtester.LimitDelta("Vbat", vbatt, 0.5, doc="Battery input present"),
+        libtester.LimitLow("BrakeOff", 0.5, doc="Brakes off"),
+        libtester.LimitDelta("BrakeOn", vbatt, 0.5, doc="Brakes on"),
+        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
     )
 
     def open(self, uut):

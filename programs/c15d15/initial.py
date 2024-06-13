@@ -2,6 +2,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """C15D-15 Initial Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -14,15 +15,15 @@ class Initial(share.TestSequence):
     vout = 15.5
     vout_min = vout * (1.0 - ((2.0 + 1.5) / 100))  # Vout - 2% - 1.5%
     limitdata = (
-        tester.LimitDelta("Vin", vin_set, 2.0),
-        tester.LimitBetween("Vcc", 11.0, 14.0),
-        tester.LimitPercent("VoutNL", vout, 2.0),
-        tester.LimitPercent("VoutFL", vout, (2.0 + 1.5, 2.0)),
-        tester.LimitBetween("VoutOCP", 12.5, vout_min),
-        tester.LimitLow("LedOff", 0.5),
-        tester.LimitBetween("LedOn", 7.0, 13.5),
-        tester.LimitLow("inOCP", vout_min),
-        tester.LimitBetween("OCP", 1.0, 1.4),
+        libtester.LimitDelta("Vin", vin_set, 2.0),
+        libtester.LimitBetween("Vcc", 11.0, 14.0),
+        libtester.LimitPercent("VoutNL", vout, 2.0),
+        libtester.LimitPercentLoHi("VoutFL", vout, 2.0 + 1.5, 2.0),
+        libtester.LimitBetween("VoutOCP", 12.5, vout_min),
+        libtester.LimitLow("LedOff", 0.5),
+        libtester.LimitBetween("LedOn", 7.0, 13.5),
+        libtester.LimitLow("inOCP", vout_min),
+        libtester.LimitBetween("OCP", 1.0, 1.4),
     )
 
     def open(self, uut):

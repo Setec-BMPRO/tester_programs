@@ -3,6 +3,8 @@
 """RVSWT101 Final Test Program."""
 
 import serial
+
+import libtester
 import tester
 
 import share
@@ -54,7 +56,7 @@ class Final(share.TestSequence):
             mes["ui_add_uut"]()
             if not dev["ard"].check_uut_in_place():
                 uut_check = tester.Measurement(
-                    tester.LimitBoolean(
+                    libtester.LimitBoolean(
                         "Detect UUT is in fixture",
                         True,
                         "No UUT was detected in the fixture",

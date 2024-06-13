@@ -4,6 +4,7 @@
 
 import logging
 
+import libtester
 import tester
 
 import share
@@ -19,10 +20,10 @@ class Final(share.TestSequence):
     can_bind_time = 9
     # Common limits
     _common = (
-        tester.LimitInteger("ARM-level1", 1),
-        tester.LimitInteger("ARM-level2", 2),
-        tester.LimitInteger("ARM-level3", 3),
-        tester.LimitInteger("ARM-level4", 4),
+        libtester.LimitInteger("ARM-level1", 1),
+        libtester.LimitInteger("ARM-level2", 2),
+        libtester.LimitInteger("ARM-level3", 3),
+        libtester.LimitInteger("ARM-level4", 4),
     )
     # Variant specific configuration data. Indexed by test program parameter.
     config_data = {
@@ -30,9 +31,9 @@ class Final(share.TestSequence):
             "Config": config.JControl,
             "Limits": _common
             + (
-                tester.LimitRegExp(
+                libtester.LimitRegExp(
                     "SwVer",
-                    "^{0}$".format(config.JControl.sw_version.replace(".", r"\.")),
+                    r"^{0}$".format(config.JControl.sw_version.replace(".", r"\.")),
                 ),
             ),
         },
@@ -40,8 +41,8 @@ class Final(share.TestSequence):
             "Config": config.Trek2,
             "Limits": _common
             + (
-                tester.LimitRegExp(
-                    "SwVer", "^{0}$".format(config.Trek2.sw_version.replace(".", r"\."))
+                libtester.LimitRegExp(
+                    "SwVer", r"^{0}$".format(config.Trek2.sw_version.replace(".", r"\."))
                 ),
             ),
         },
@@ -49,8 +50,8 @@ class Final(share.TestSequence):
             "Config": config.Trek3,
             "Limits": _common
             + (
-                tester.LimitRegExp(
-                    "SwVer", "^{0}$".format(config.Trek3.sw_version.replace(".", r"\."))
+                libtester.LimitRegExp(
+                    "SwVer", r"^{0}$".format(config.Trek3.sw_version.replace(".", r"\."))
                 ),
             ),
         },

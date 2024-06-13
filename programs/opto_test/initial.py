@@ -8,6 +8,7 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 
+import libtester
 import tester
 
 import share
@@ -18,17 +19,17 @@ class Initial(share.TestSequence):
 
     _opto_count = 20
     limitdata = (
-        tester.LimitHigh("Isen1", 0.995e-3),
-        tester.LimitHigh("Isen10", 9.95e-3),
-        tester.LimitBetween("VinAdj", 0, 99999),
-        tester.LimitBetween("Iin1", 0.99e-3, 1.05e-3),
-        tester.LimitBetween("Iin10", 9.9e-3, 10.5e-3),
-        tester.LimitLow("Vsen", 5.0),
-        tester.LimitBetween("VceAdj", 4.99, 5.04),
-        tester.LimitPercent("Vce", 5.00, 1.0),
-        tester.LimitBetween("VoutAdj", 0, 99999),
-        tester.LimitDelta("Iout", 0.0e-3, 22.0e-3),
-        tester.LimitBetween("CTR", 0, 220),
+        libtester.LimitHigh("Isen1", 0.995e-3),
+        libtester.LimitHigh("Isen10", 9.95e-3),
+        libtester.LimitBetween("VinAdj", 0, 99999),
+        libtester.LimitBetween("Iin1", 0.99e-3, 1.05e-3),
+        libtester.LimitBetween("Iin10", 9.9e-3, 10.5e-3),
+        libtester.LimitLow("Vsen", 5.0),
+        libtester.LimitBetween("VceAdj", 4.99, 5.04),
+        libtester.LimitPercent("Vce", 5.00, 1.0),
+        libtester.LimitBetween("VoutAdj", 0, 99999),
+        libtester.LimitDelta("Iout", 0.0e-3, 22.0e-3),
+        libtester.LimitBetween("CTR", 0, 220),
     )
     _recipient = ", ".join(
         (

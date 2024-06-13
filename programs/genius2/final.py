@@ -2,6 +2,7 @@
 # Copyright 2013 SETEC Pty Ltd.
 """Final Test Program for GENIUS-II and GENIUS-II-H."""
 
+import libtester
 import tester
 
 import share
@@ -12,16 +13,16 @@ class Final(share.TestSequence):
 
     # Common test limits
     _common = (
-        tester.LimitBetween("InRes", 80e3, 170e3),
-        tester.LimitHigh("DCinShort", 10),
-        tester.LimitDelta("Vout", 13.675, 0.1),
-        tester.LimitLow("VoutOff", 2.0),
-        tester.LimitBetween("VoutStartup", 13.60, 14.10),
-        tester.LimitDelta("Vbat", 13.675, 0.1),
-        tester.LimitLow("VbatOff", 1.0),
-        tester.LimitBetween("ExtBatt", 11.5, 12.8),
-        tester.LimitLow("InOCP", 13.24),
-        tester.LimitBetween("OCP", 34.0, 43.0),
+        libtester.LimitBetween("InRes", 80e3, 170e3),
+        libtester.LimitHigh("DCinShort", 10),
+        libtester.LimitDelta("Vout", 13.675, 0.1),
+        libtester.LimitLow("VoutOff", 2.0),
+        libtester.LimitBetween("VoutStartup", 13.60, 14.10),
+        libtester.LimitDelta("Vbat", 13.675, 0.1),
+        libtester.LimitLow("VbatOff", 1.0),
+        libtester.LimitBetween("ExtBatt", 11.5, 12.8),
+        libtester.LimitLow("InOCP", 13.24),
+        libtester.LimitBetween("OCP", 34.0, 43.0),
     )
     # Test limit selection keyed by program parameter
     limitdata = {

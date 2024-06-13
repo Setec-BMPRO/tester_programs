@@ -4,6 +4,7 @@
 
 import serial
 
+import libtester
 import share
 import tester
 
@@ -20,24 +21,24 @@ class Initial(share.TestSequence):
     hw_version = (4, 0, "A")
     # Test limits
     limitdata = (
-        tester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 1.5, doc="3V3 present"),
-        tester.LimitHigh("RedLedOff", 3.1, doc="Led off"),
-        tester.LimitDelta("RedLedOn", 0.5, 0.1, doc="Led on"),
-        tester.LimitHigh("GreenLedOff", 3.1, doc="Led off"),
-        tester.LimitLow("GreenLedOn", 0.2, doc="Led on"),
-        tester.LimitHigh("BlueLedOff", 3.1, doc="Led off"),
-        tester.LimitDelta("BlueLedOn", 0.3, 0.09, doc="Led on"),
-        tester.LimitLow("TestPinCover", 0.5, doc="Cover in place"),
-        tester.LimitRegExp(
+        libtester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
+        libtester.LimitPercent("3V3", 3.3, 1.5, doc="3V3 present"),
+        libtester.LimitHigh("RedLedOff", 3.1, doc="Led off"),
+        libtester.LimitDelta("RedLedOn", 0.5, 0.1, doc="Led on"),
+        libtester.LimitHigh("GreenLedOff", 3.1, doc="Led off"),
+        libtester.LimitLow("GreenLedOn", 0.2, doc="Led on"),
+        libtester.LimitHigh("BlueLedOff", 3.1, doc="Led off"),
+        libtester.LimitDelta("BlueLedOn", 0.3, 0.09, doc="Led on"),
+        libtester.LimitLow("TestPinCover", 0.5, doc="Cover in place"),
+        libtester.LimitRegExp(
             "ARM-SwVer",
-            "^{0}$".format(sw_version.replace(".", r"\.")),
+            r"^{0}$".format(sw_version.replace(".", r"\.")),
             doc="Software version",
         ),
-        tester.LimitRegExp(
-            "BtMac", "(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}", doc="Valid MAC address"
+        libtester.LimitRegExp(
+            "BtMac", r"(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}", doc="Valid MAC address"
         ),
-        tester.LimitBoolean("DetectBT", True, doc="MAC address detected"),
+        libtester.LimitBoolean("DetectBT", True, doc="MAC address detected"),
     )
 
     def open(self, uut):

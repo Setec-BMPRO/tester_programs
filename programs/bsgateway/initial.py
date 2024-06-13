@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import serial
 import tester
 
@@ -22,8 +23,8 @@ class Initial(share.TestSequence):
     }
     v_set = 12.0  # Input DC voltage to power the unit
     testlimits = (  # Test limits
-        tester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        tester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        libtester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
+        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
 
     def open(self, uut):

@@ -4,7 +4,7 @@
 
 from attrs import define, field, validators
 
-import tester
+import libtester
 
 
 @define
@@ -56,63 +56,63 @@ class Config:
     # Common Test limits common to both test types & units
     _limits_common = (
         # Outputs off
-        tester.LimitLow("5Voff", 0.5),
-        tester.LimitLow("12Voff", 0.5),
-        tester.LimitLow("24Voff", 0.5),
+        libtester.LimitLow("5Voff", 0.5),
+        libtester.LimitLow("12Voff", 0.5),
+        libtester.LimitLow("24Voff", 0.5),
         # Full Load
-        tester.LimitPercent("5Vfl", 5.0, 4.5),
-        tester.LimitPercent("12Vfl", 12.0, 6.5),
-        tester.LimitPercent("24Vfl", 24.0, 9.0),
+        libtester.LimitPercent("5Vfl", 5.0, 4.5),
+        libtester.LimitPercent("12Vfl", 12.0, 6.5),
+        libtester.LimitPercent("24Vfl", 24.0, 9.0),
         # Signals
-        tester.LimitDelta("ACFAIL", 5.0, 0.5),
-        tester.LimitLow("ACOK", 0.5),
-        tester.LimitLow("PGOOD", 0.5),
+        libtester.LimitDelta("ACFAIL", 5.0, 0.5),
+        libtester.LimitLow("ACOK", 0.5),
+        libtester.LimitLow("PGOOD", 0.5),
         # Voltages
-        tester.LimitPercent("5Vnl", 5.10, 1.5),
-        tester.LimitPercent("12Vnl", 12.25, 2.0),
-        tester.LimitPercent("24Vnl", 24.13, 2.0),
+        libtester.LimitPercent("5Vnl", 5.10, 1.5),
+        libtester.LimitPercent("12Vnl", 12.25, 2.0),
+        libtester.LimitPercent("24Vnl", 24.13, 2.0),
         # Load regulation (values in %)
-        tester.LimitBetween("Reg12V", 0.2, 5.0),
-        tester.LimitBetween("Reg24V", 0.2, 7.5),
+        libtester.LimitBetween("Reg12V", 0.2, 5.0),
+        libtester.LimitBetween("Reg24V", 0.2, 7.5),
     )
     # Initial Test limits common to both units
     limits_initial = _limits_common + (
         # Load regulation (values in %)
-        tester.LimitLow("Reg5V", 3.0),
-        tester.LimitDelta("8.5V Arduino", 8.5, 0.4),
-        tester.LimitLow("FixtureLock", 200),
-        tester.LimitLow("PartCheck", 1.0),  # Photo sensor on D404
-        tester.LimitBetween("Snubber", 1000, 3000),  # Snubbing resistors
-        tester.LimitRegExp("Reply", "^OK$"),
-        tester.LimitInteger("Program", 0),
-        tester.LimitDelta("3V3", 3.3, 0.1),
-        tester.LimitDelta("ACin", 240, 10),
-        tester.LimitLow("ARM-AcFreq", 999),
-        tester.LimitLow("ARM-AcVolt", 999),
-        tester.LimitLow("ARM-12V", 999),
-        tester.LimitLow("ARM-24V", 999),
-        tester.LimitDelta("5Vext", _5vsb_ext - 0.8, 1.0),
-        tester.LimitDelta("5Vunsw", _5vsb_ext - 0.8 - 0.7, 1.0),
-        tester.LimitHigh("12V_inOCP", 4.0),  # Detect OCP when TP405>4V
-        tester.LimitHigh("24V_inOCP", 4.0),  # Detect OCP when TP404>4V
-        tester.LimitBetween("12V_ocp", 4, 63),  # Digital Pot setting
-        tester.LimitBetween("24V_ocp", 4, 63),  # Digital Pot setting
-        tester.LimitBetween("PriCtl", 11.40, 17.0),
-        tester.LimitDelta("PFCpre", 420, 20),
-        tester.LimitDelta("PFCpost", pfc_target, 1.0),
-        tester.LimitDelta("12V_OCPchk", ratings.v12.ocp, 0.4),
-        tester.LimitDelta("24V_OCPchk", ratings.v24.ocp, 0.2),
-        tester.LimitRegExp(
+        libtester.LimitLow("Reg5V", 3.0),
+        libtester.LimitDelta("8.5V Arduino", 8.5, 0.4),
+        libtester.LimitLow("FixtureLock", 200),
+        libtester.LimitLow("PartCheck", 1.0),  # Photo sensor on D404
+        libtester.LimitBetween("Snubber", 1000, 3000),  # Snubbing resistors
+        libtester.LimitRegExp("Reply", "^OK$"),
+        libtester.LimitInteger("Program", 0),
+        libtester.LimitDelta("3V3", 3.3, 0.1),
+        libtester.LimitDelta("ACin", 240, 10),
+        libtester.LimitLow("ARM-AcFreq", 999),
+        libtester.LimitLow("ARM-AcVolt", 999),
+        libtester.LimitLow("ARM-12V", 999),
+        libtester.LimitLow("ARM-24V", 999),
+        libtester.LimitDelta("5Vext", _5vsb_ext - 0.8, 1.0),
+        libtester.LimitDelta("5Vunsw", _5vsb_ext - 0.8 - 0.7, 1.0),
+        libtester.LimitHigh("12V_inOCP", 4.0),  # Detect OCP when TP405>4V
+        libtester.LimitHigh("24V_inOCP", 4.0),  # Detect OCP when TP404>4V
+        libtester.LimitBetween("12V_ocp", 4, 63),  # Digital Pot setting
+        libtester.LimitBetween("24V_ocp", 4, 63),  # Digital Pot setting
+        libtester.LimitBetween("PriCtl", 11.40, 17.0),
+        libtester.LimitDelta("PFCpre", 420, 20),
+        libtester.LimitDelta("PFCpost", pfc_target, 1.0),
+        libtester.LimitDelta("12V_OCPchk", ratings.v12.ocp, 0.4),
+        libtester.LimitDelta("24V_OCPchk", ratings.v24.ocp, 0.2),
+        libtester.LimitRegExp(
             "ARM-SwVer", "^{0}$".format(r"\.".join(_bin_version.split(".")[:2]))
         ),
-        tester.LimitRegExp("ARM-SwBld", "^{0}$".format(_bin_version.split(".")[2])),
+        libtester.LimitRegExp("ARM-SwBld", "^{0}$".format(_bin_version.split(".")[2])),
     )
     # Final Test limits common to both units
     limits_final = _limits_common + (
-        tester.LimitLow("IECoff", 0.5),
-        tester.LimitDelta("IEC", 240, 5),
-        tester.LimitDelta("InRes", 70000, 10000),
-        tester.LimitHigh("FanOff", 3.0),
-        tester.LimitLow("FanOn", 2.0),
-        tester.LimitLow("BracketDetect", 1.0),
+        libtester.LimitLow("IECoff", 0.5),
+        libtester.LimitDelta("IEC", 240, 5),
+        libtester.LimitDelta("InRes", 70000, 10000),
+        libtester.LimitHigh("FanOff", 3.0),
+        libtester.LimitLow("FanOn", 2.0),
+        libtester.LimitLow("BracketDetect", 1.0),
     )

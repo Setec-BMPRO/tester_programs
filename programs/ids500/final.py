@@ -5,6 +5,7 @@
 import time
 import serial
 
+import libtester
 import tester
 
 import share
@@ -16,40 +17,40 @@ class Final(share.TestSequence):
 
     # Test limits
     limitdata = (
-        tester.LimitLow("TecOff", 1.5),
-        tester.LimitLow("TecVmonOff", 1.5),
-        tester.LimitLow("LddOff", 1.5),
-        tester.LimitLow("IsVmonOff", 0.5),
-        tester.LimitLow("15VOff", 1.5),
-        tester.LimitHigh("-15VOff", -1.5),
-        tester.LimitLow("15VpOff", 1.5),
-        tester.LimitLow("15VpSwOff", 1.5),
-        tester.LimitLow("5VOff", 1.5),
-        tester.LimitDelta("15V", 15.00, 0.75),
-        tester.LimitDelta("-15V", -15.00, 0.75),
-        tester.LimitDelta("15Vp", 15.00, 0.75),
-        tester.LimitDelta("15VpSw", 15.00, 0.75),
-        tester.LimitDelta("5V", 4.95, 0.15),
-        tester.LimitDelta("Tec", 15.00, 0.30),
-        tester.LimitDelta("TecPhase", -15.00, 0.30),
-        tester.LimitBetween("TecVset", 4.95, 5.05),
-        tester.LimitLow("TecVmon0V", 0.5),
-        tester.LimitDelta("TecVmon", 5.00, 0.10),
-        tester.LimitDelta("TecErr", 0.000, 0.275),
-        tester.LimitDelta("TecVmonErr", 0.000, 0.030),
-        tester.LimitBetween("LddOn", -0.4, 2.5),
-        tester.LimitLow("IsOut0A", 1.0),
-        tester.LimitDelta("IsOut6A", nominal=6.0, delta=1.0),
-        tester.LimitDelta("IsOut50A", nominal=50.0, delta=2.0),
-        tester.LimitDelta("IsIout0V", 0.00, 0.05),
-        tester.LimitDelta("IsIout06V", 0.60, 0.02),
-        tester.LimitDelta("IsIout5V", 5.00, 0.10),
-        tester.LimitDelta("IsSet06V", 0.60, 0.05),
-        tester.LimitDelta("IsSet5V", 5.00, 0.05),
-        tester.LimitRegExp("HwRev", r"^[0-9]{2}[A-D]$"),
+        libtester.LimitLow("TecOff", 1.5),
+        libtester.LimitLow("TecVmonOff", 1.5),
+        libtester.LimitLow("LddOff", 1.5),
+        libtester.LimitLow("IsVmonOff", 0.5),
+        libtester.LimitLow("15VOff", 1.5),
+        libtester.LimitHigh("-15VOff", -1.5),
+        libtester.LimitLow("15VpOff", 1.5),
+        libtester.LimitLow("15VpSwOff", 1.5),
+        libtester.LimitLow("5VOff", 1.5),
+        libtester.LimitDelta("15V", 15.00, 0.75),
+        libtester.LimitDelta("-15V", -15.00, 0.75),
+        libtester.LimitDelta("15Vp", 15.00, 0.75),
+        libtester.LimitDelta("15VpSw", 15.00, 0.75),
+        libtester.LimitDelta("5V", 4.95, 0.15),
+        libtester.LimitDelta("Tec", 15.00, 0.30),
+        libtester.LimitDelta("TecPhase", -15.00, 0.30),
+        libtester.LimitBetween("TecVset", 4.95, 5.05),
+        libtester.LimitLow("TecVmon0V", 0.5),
+        libtester.LimitDelta("TecVmon", 5.00, 0.10),
+        libtester.LimitDelta("TecErr", 0.000, 0.275),
+        libtester.LimitDelta("TecVmonErr", 0.000, 0.030),
+        libtester.LimitBetween("LddOn", -0.4, 2.5),
+        libtester.LimitLow("IsOut0A", 1.0),
+        libtester.LimitDelta("IsOut6A", 6.0, 1.0),
+        libtester.LimitDelta("IsOut50A", 50.0, 2.0),
+        libtester.LimitDelta("IsIout0V", 0.00, 0.05),
+        libtester.LimitDelta("IsIout06V", 0.60, 0.02),
+        libtester.LimitDelta("IsIout5V", 5.00, 0.10),
+        libtester.LimitDelta("IsSet06V", 0.60, 0.05),
+        libtester.LimitDelta("IsSet5V", 5.00, 0.05),
+        libtester.LimitRegExp("HwRev", r"^[0-9]{2}[A-D]$"),
         # These 2 are patched and then restored during the LDD accuracy test
-        tester.LimitDelta("SetOutErr", 0, config.ldd_set_out_error_6),
-        tester.LimitDelta("MonOutErr", 0, config.ldd_out_mon_error_6),
+        libtester.LimitDelta("SetOutErr", 0, config.ldd_set_out_error_6),
+        libtester.LimitDelta("MonOutErr", 0, config.ldd_out_mon_error_6),
     )
 
     def open(self, uut):
@@ -463,8 +464,8 @@ class Measurements(share.Measurements):
         )
         # Create limits locally for these dynamic measurements.
         self["pic_hwrev"] = tester.Measurement(
-            tester.LimitRegExp("HwRev-PIC", "None"), self.sensors["hwrev"]
+            libtester.LimitRegExp("HwRev-PIC", "None"), self.sensors["hwrev"]
         )
         self["pic_sernum"] = tester.Measurement(
-            tester.LimitRegExp("SerNum-PIC", "None"), self.sensors["sernum"]
+            libtester.LimitRegExp("SerNum-PIC", "None"), self.sensors["sernum"]
         )

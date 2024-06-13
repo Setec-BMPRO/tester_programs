@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """Drifter Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,9 +12,9 @@ class Final(share.TestSequence):
     """Drifter Final Test Program."""
 
     limitdata = (
-        tester.LimitLow("SwOff", 1.0),
-        tester.LimitHigh("SwOn", 10.0),
-        tester.LimitDelta("USB5V", 5.00, 0.25),
+        libtester.LimitLow("SwOff", 1.0),
+        libtester.LimitHigh("SwOn", 10.0),
+        libtester.LimitDelta("USB5V", 5.00, 0.25),
     )
 
     def open(self, uut):

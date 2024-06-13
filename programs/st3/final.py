@@ -4,6 +4,7 @@
 
 import time
 
+import libtester
 import tester
 
 import share
@@ -14,23 +15,23 @@ class Final(share.TestSequence):
 
     # Test limits common to both versions
     _common = (
-        tester.LimitLow("Voff", 2.0),
-        tester.LimitBetween("Vout", 13.60, 13.70),
-        tester.LimitBetween("Vbat", 13.40, 13.70),
-        tester.LimitBetween("Vtrickle", 3.90, 5.70),
-        tester.LimitBetween("Vboost", 13.80, 14.10),
-        tester.LimitLow("inOCP", 11.6),
-        tester.LimitLow("FuseOut", 0.5),
-        tester.LimitBetween("FuseIn", 13.60, 13.70),
+        libtester.LimitLow("Voff", 2.0),
+        libtester.LimitBetween("Vout", 13.60, 13.70),
+        libtester.LimitBetween("Vbat", 13.40, 13.70),
+        libtester.LimitBetween("Vtrickle", 3.90, 5.70),
+        libtester.LimitBetween("Vboost", 13.80, 14.10),
+        libtester.LimitLow("inOCP", 11.6),
+        libtester.LimitLow("FuseOut", 0.5),
+        libtester.LimitBetween("FuseIn", 13.60, 13.70),
     )
     # Test limit selection keyed by program parameter
     limitdata = {
         "20": {
             "Limits": _common
             + (
-                tester.LimitBetween("LoadOCP", 20.5, 26.0),
-                tester.LimitBetween("BattOCP", 9.0, 11.5),
-                tester.LimitRegExp("FuseLabel", "^ST20\-III$"),
+                libtester.LimitBetween("LoadOCP", 20.5, 26.0),
+                libtester.LimitBetween("BattOCP", 9.0, 11.5),
+                libtester.LimitRegExp("FuseLabel", r"^ST20\-III$"),
             ),
             "FullLoad": 20.1,
             "LoadOCPramp": (19.5, 28.0),
@@ -39,9 +40,9 @@ class Final(share.TestSequence):
         "35": {
             "Limits": _common
             + (
-                tester.LimitBetween("LoadOCP", 35.1, 42.5),
-                tester.LimitBetween("BattOCP", 14.0, 17.0),
-                tester.LimitRegExp("FuseLabel", "^ST35\-III$"),
+                libtester.LimitBetween("LoadOCP", 35.1, 42.5),
+                libtester.LimitBetween("BattOCP", 14.0, 17.0),
+                libtester.LimitRegExp("FuseLabel", r"^ST35\-III$"),
             ),
             "FullLoad": 35.1,
             "LoadOCPramp": (34.1, 43.5),

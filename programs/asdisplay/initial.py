@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import serial
 import tester
 
@@ -17,18 +18,18 @@ class Initial(share.TestSequence):
     vin_set = 12.0  # Input voltage (V)
     sw_arm_image = "ASDisplay 1.2.0.bin"  # PC-30654
     limitdata = (
-        tester.LimitDelta("Vin", vin_set, 0.5, doc="At nominal"),
-        tester.LimitPercent("3V3", 3.33, 3.0, doc="At nominal"),
-        tester.LimitPercent("5V", 5.0, 3.0, doc="At nominal"),
-        tester.LimitRegExp("test_mode", "^OK$"),
-        tester.LimitRegExp("leds_on", "^OK$"),
-        tester.LimitRegExp("leds_off", "^OK$"),
-        tester.LimitInteger("TankLevel0", 0),
-        tester.LimitInteger("TankLevel1", 1),
-        tester.LimitInteger("TankLevel2", 2),
-        tester.LimitInteger("TankLevel3", 3),
-        tester.LimitInteger("TankLevel4", 4),
-        tester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        libtester.LimitDelta("Vin", vin_set, 0.5, doc="At nominal"),
+        libtester.LimitPercent("3V3", 3.33, 3.0, doc="At nominal"),
+        libtester.LimitPercent("5V", 5.0, 3.0, doc="At nominal"),
+        libtester.LimitRegExp("test_mode", "^OK$"),
+        libtester.LimitRegExp("leds_on", "^OK$"),
+        libtester.LimitRegExp("leds_off", "^OK$"),
+        libtester.LimitInteger("TankLevel0", 0),
+        libtester.LimitInteger("TankLevel1", 1),
+        libtester.LimitInteger("TankLevel2", 2),
+        libtester.LimitInteger("TankLevel3", 3),
+        libtester.LimitInteger("TankLevel4", 4),
+        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
     # In testmode, updates of the water tank levels are less than 100ms.
     analog_read_wait = 0.1  # Analog read response time

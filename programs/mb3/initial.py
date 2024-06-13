@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import tester
 
 import share
@@ -14,9 +15,9 @@ class Initial(share.TestSequence):
     """MB3 Initial Test Program."""
 
     limitdata = (
-        tester.LimitDelta("Vaux", config.vaux, 0.5),
-        tester.LimitPercent("5V", 5.0, 1.0),
-        tester.LimitDelta("Vbat", 14.6, 0.3),
+        libtester.LimitDelta("Vaux", config.vaux, 0.5),
+        libtester.LimitPercent("5V", 5.0, 1.0),
+        libtester.LimitDelta("Vbat", 14.6, 0.3),
     )
 
     def open(self, uut):

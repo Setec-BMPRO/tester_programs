@@ -2,7 +2,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVSWT101 Configuration."""
 
-import tester
+import libtester
 
 
 class Config:
@@ -98,17 +98,17 @@ class Config:
     }
     # Common Test limits
     _common_limits = (
-        tester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
-        tester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )
     # Initial Test limits
-    _initial_limits = (tester.LimitDelta("Vin", 3.3, 0.3, doc="Injected power"),)
+    _initial_limits = (libtester.LimitDelta("Vin", 3.3, 0.3, doc="Injected power"),)
     # Final Test limits
     _final_limits = (
-        tester.LimitBoolean("ButtonOk", True, doc="Ok entered"),
-        tester.LimitDelta("CellVoltage", 3.3, 0.3, doc="Button cell charged"),
-        tester.LimitRegExp("Reply", "^OK$"),
-        tester.LimitHigh("RSSI Level", -55, doc="Bluetooth RSSI Level"),
+        libtester.LimitBoolean("ButtonOk", True, doc="Ok entered"),
+        libtester.LimitDelta("CellVoltage", 3.3, 0.3, doc="Button cell charged"),
+        libtester.LimitRegExp("Reply", "^OK$"),
+        libtester.LimitHigh("RSSI Level", -55, doc="Bluetooth RSSI Level"),
     )
 
     """
@@ -123,43 +123,43 @@ class Config:
     4-6        3-4        6-1
     """
     _limits_4_button = (
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_1_pressed", 8, doc="Expected switch code for button 1"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_2_pressed", 64, doc="Expected switch code for button 2"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_3_pressed", 4, doc="Expected switch code for button 3"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_4_pressed", 128, doc="Expected switch code for button 4"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_5_pressed", -1, doc="Expected switch code for button 5"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_6_pressed", -1, doc="Expected switch code for button 6"
         ),
     )
 
     _limits_6_button = (
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_1_pressed", 16, doc="Expected switch code for button 1"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_2_pressed", 32, doc="Expected switch code for button 2"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_3_pressed", 8, doc="Expected switch code for button 3"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_4_pressed", 64, doc="Expected switch code for button 4"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_5_pressed", 4, doc="Expected switch code for button 5"
         ),
-        tester.LimitInteger(
+        libtester.LimitInteger(
             "switch_6_pressed", 128, doc="Expected switch code for button 6"
         ),
     )
@@ -175,10 +175,12 @@ class Config:
         """
         rev = uut.revision
         if parameter == "series":  # Initial builds of Rev 3
-            type_lim = tester.LimitBetween("SwitchType", 1, 42, doc="Switch type code")
+            type_lim = libtester.LimitBetween(
+                "SwitchType", 1, 42, doc="Switch type code"
+            )
         else:  # Later builds of Rev 3+
             switch_type, button_count = cls._types[parameter]
-            type_lim = tester.LimitInteger(
+            type_lim = libtester.LimitInteger(
                 "SwitchType", switch_type, doc="Switch type code"
             )
         if parameter in cls._software:  # Rev 2 hard coded switch types

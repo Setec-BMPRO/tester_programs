@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """2040 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,10 +12,10 @@ class Final(share.TestSequence):
     """2040 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("20V", 20.0, 0.4),
-        tester.LimitBetween("20Vload", 19.4, 20.4),
-        tester.LimitLow("20Voff", 1.0),
-        tester.LimitDelta("OCP", 14.0, 2.0),
+        libtester.LimitDelta("20V", 20.0, 0.4),
+        libtester.LimitBetween("20Vload", 19.4, 20.4),
+        libtester.LimitLow("20Voff", 1.0),
+        libtester.LimitDelta("OCP", 14.0, 2.0),
     )
 
     def open(self, uut):

@@ -5,6 +5,7 @@
 import pathlib
 import time
 
+import libtester
 import serial
 import tester
 
@@ -141,12 +142,12 @@ class Initial(share.TestSequence):
         # Read solar input voltage and patch measurement limits
         sr_vin = mes["dmm_solarvin"](timeout=5).value1
         mes["arm_sr_vin_pre"].testlimit = (
-            tester.LimitPercent(
+            libtester.LimitPercent(
                 "ARM-SolarVin-Pre", sr_vin, self.cfg.sr_vin_pre_percent
             ),
         )
         mes["arm_sr_vin_post"].testlimit = (
-            tester.LimitPercent(
+            libtester.LimitPercent(
                 "ARM-SolarVin-Post", sr_vin, self.cfg.sr_vin_post_percent
             ),
         )

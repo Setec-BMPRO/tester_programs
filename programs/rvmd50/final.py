@@ -2,6 +2,7 @@
 # Copyright 2020 SETEC Pty Ltd
 """RVMD50 Final Test Program."""
 
+import libtester
 import tester
 import share
 
@@ -13,7 +14,7 @@ class Final(share.TestSequence):
 
     vin_set = 12.0
     start_delay = 5.0
-    limitdata = (tester.LimitBoolean("PagePressed", True, doc="Button pressed"),)
+    limitdata = (libtester.LimitBoolean("PagePressed", True, doc="Button pressed"),)
 
     def open(self, uut):
         """Prepare for testing."""

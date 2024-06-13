@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import tester
 
 import share
@@ -19,10 +20,10 @@ class Initial(share.TestSequence):
         "NXP": "rvmc101_0.4.bin",
     }
     limitdata = (
-        tester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
-        tester.LimitPercent("3V3", 3.3, 3, doc="3V3 present"),
-        tester.LimitPercent("5V", 5.0, 5, doc="5V present"),
-        tester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        libtester.LimitDelta("Vin", 12.0, 0.5, doc="Input voltage present"),
+        libtester.LimitPercent("3V3", 3.3, 3, doc="3V3 present"),
+        libtester.LimitPercent("5V", 5.0, 5, doc="5V present"),
+        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
     is_full = None  # False if 'Lite' version (no micro fitted)
 

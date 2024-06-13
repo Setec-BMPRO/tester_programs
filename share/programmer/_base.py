@@ -4,18 +4,19 @@
 
 import abc
 
+import libtester
 import tester
 
 
 class _Base(abc.ABC):
     """Programmer base class."""
 
-    pass_result = "ok"
+    pass_result = r"ok"
 
     def __init__(self):
         """Create a programmer."""
         self._measurement = tester.Measurement(
-            tester.LimitRegExp(
+            libtester.LimitRegExp(
                 name="Program", limit=self.pass_result, doc="Programming succeeded"
             ),
             tester.sensor.Mirror(),

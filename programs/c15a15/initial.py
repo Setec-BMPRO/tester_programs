@@ -2,6 +2,7 @@
 # Copyright 2016 SETEC Pty Ltd.
 """C15A-15 Initial Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,19 +12,19 @@ class Initial(share.TestSequence):
     """C15A-15 Initial Test Program."""
 
     limitdata = (
-        tester.LimitBetween("AcMin", 85, 95),
-        tester.LimitBetween("VbusMin", 120, 135),
-        tester.LimitBetween("VccMin", 7, 14),
-        tester.LimitBetween("Ac", 230, 245),
-        tester.LimitBetween("Vbus", 330, 350),
-        tester.LimitBetween("Vcc", 10, 14),
-        tester.LimitHigh("LedOn", 6.5),
-        tester.LimitLow("LedOff", 0.5),
-        tester.LimitPercent("Vout", 15.5, 2.0),
-        tester.LimitBetween("OCP_Range", 0.9, 1.4),
-        tester.LimitLow("inOCP", 15.2),
-        tester.LimitBetween("OCP", 1.05, 1.35),
-        tester.LimitBetween("VoutOcp", 5, 16),
+        libtester.LimitBetween("AcMin", 85, 95),
+        libtester.LimitBetween("VbusMin", 120, 135),
+        libtester.LimitBetween("VccMin", 7, 14),
+        libtester.LimitBetween("Ac", 230, 245),
+        libtester.LimitBetween("Vbus", 330, 350),
+        libtester.LimitBetween("Vcc", 10, 14),
+        libtester.LimitHigh("LedOn", 6.5),
+        libtester.LimitLow("LedOff", 0.5),
+        libtester.LimitPercent("Vout", 15.5, 2.0),
+        libtester.LimitBetween("OCP_Range", 0.9, 1.4),
+        libtester.LimitLow("inOCP", 15.2),
+        libtester.LimitBetween("OCP", 1.05, 1.35),
+        libtester.LimitBetween("VoutOcp", 5, 16),
     )
 
     def open(self, uut):

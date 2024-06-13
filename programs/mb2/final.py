@@ -2,6 +2,7 @@
 # Copyright 2017 SETEC Pty Ltd
 """MB2 Final Program."""
 
+import libtester
 import tester
 
 import share
@@ -14,8 +15,8 @@ class Final(share.TestSequence):
     vstop = 9.1
 
     limitdata = (
-        tester.LimitBetween("Vin", 9.0, 13.0),
-        tester.LimitPercent("Vout", 14.4, 3.0),
+        libtester.LimitBetween("Vin", 9.0, 13.0),
+        libtester.LimitPercent("Vout", 14.4, 3.0),
     )
 
     def open(self, uut):

@@ -2,6 +2,7 @@
 # Copyright 2014 SETEC Pty Ltd.
 """C45A-15 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,10 +12,10 @@ class Final(share.TestSequence):
     """C45A-15 Final Test Program."""
 
     limitdata = (
-        tester.LimitBetween("Vstart", 8.55, 9.45),
-        tester.LimitBetween("Vout", 15.6, 16.4),
-        tester.LimitLow("Vshdn", 8.0),
-        tester.LimitLow("Voff", 1.0),
+        libtester.LimitBetween("Vstart", 8.55, 9.45),
+        libtester.LimitBetween("Vout", 15.6, 16.4),
+        libtester.LimitLow("Vshdn", 8.0),
+        libtester.LimitLow("Voff", 1.0),
     )
 
     def open(self, uut):

@@ -2,6 +2,7 @@
 # Copyright 2013 SETEC Pty Ltd.
 """ATXG-450-2V Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,31 +12,31 @@ class Final2V(share.TestSequence):
     """ATXG-450-2V Final Test Program."""
 
     limitdata = (
-        tester.LimitBetween("5Vsb", 4.845, 5.202),
-        tester.LimitLow("5Vsbinocp", 4.70),
-        tester.LimitBetween("5Vsbocp", 2.6, 4.0),
-        tester.LimitLow("24Voff", 0.5),
-        tester.LimitBetween("24Von", 23.75, 26.25),
-        tester.LimitLow("24Vinocp", 22.8),
-        tester.LimitBetween("24Vocp", 18.0, 24.0),
-        tester.LimitLow("12Voff", 0.5),
-        tester.LimitBetween("12Von", 11.685, 12.669),
-        tester.LimitLow("12Vinocp", 10.0),
-        tester.LimitBetween("12Vocp", 20.5, 26.0),
-        tester.LimitLow("5Voff", 0.5),
-        tester.LimitBetween("5Von", 4.725, 5.4075),
-        tester.LimitLow("5Vinocp", 4.75),
-        tester.LimitBetween("5Vocp", 20.5, 26.0),
-        tester.LimitLow("3V3off", 0.5),
-        tester.LimitBetween("3V3on", 3.1825, 3.4505),
-        tester.LimitLow("3V3inocp", 3.20),
-        tester.LimitBetween("3V3ocp", 17.0, 26.0),
-        tester.LimitHigh("-12Voff", -0.5),
-        tester.LimitBetween("-12Von", -12.48, -11.52),
-        tester.LimitLow("PwrGoodOff", 0.5),
-        tester.LimitHigh("PwrGoodOn", 4.5),
-        tester.LimitHigh("PwrFailOff", 4.5),
-        tester.LimitLow("PwrFailOn", 0.5),
+        libtester.LimitBetween("5Vsb", 4.845, 5.202),
+        libtester.LimitLow("5Vsbinocp", 4.70),
+        libtester.LimitBetween("5Vsbocp", 2.6, 4.0),
+        libtester.LimitLow("24Voff", 0.5),
+        libtester.LimitBetween("24Von", 23.75, 26.25),
+        libtester.LimitLow("24Vinocp", 22.8),
+        libtester.LimitBetween("24Vocp", 18.0, 24.0),
+        libtester.LimitLow("12Voff", 0.5),
+        libtester.LimitBetween("12Von", 11.685, 12.669),
+        libtester.LimitLow("12Vinocp", 10.0),
+        libtester.LimitBetween("12Vocp", 20.5, 26.0),
+        libtester.LimitLow("5Voff", 0.5),
+        libtester.LimitBetween("5Von", 4.725, 5.4075),
+        libtester.LimitLow("5Vinocp", 4.75),
+        libtester.LimitBetween("5Vocp", 20.5, 26.0),
+        libtester.LimitLow("3V3off", 0.5),
+        libtester.LimitBetween("3V3on", 3.1825, 3.4505),
+        libtester.LimitLow("3V3inocp", 3.20),
+        libtester.LimitBetween("3V3ocp", 17.0, 26.0),
+        libtester.LimitHigh("-12Voff", -0.5),
+        libtester.LimitBetween("-12Von", -12.48, -11.52),
+        libtester.LimitLow("PwrGoodOff", 0.5),
+        libtester.LimitHigh("PwrGoodOn", 4.5),
+        libtester.LimitHigh("PwrFailOff", 4.5),
+        libtester.LimitLow("PwrFailOn", 0.5),
     )
 
     def open(self, uut):

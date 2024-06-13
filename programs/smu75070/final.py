@@ -2,6 +2,7 @@
 # Copyright 2015 SETEC Pty Ltd.
 """SMU750-70 Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -11,10 +12,10 @@ class Final(share.TestSequence):
     """SMU750-70 Final Test Program."""
 
     limitdata = (
-        tester.LimitDelta("70VOn", 70.0, 0.7),
-        tester.LimitLow("70VOff", 69.2),
-        tester.LimitDelta("OCP", 11.5, 0.1),
-        tester.LimitLow("inOCP", 69.3),
+        libtester.LimitDelta("70VOn", 70.0, 0.7),
+        libtester.LimitLow("70VOff", 69.2),
+        libtester.LimitDelta("OCP", 11.5, 0.1),
+        libtester.LimitLow("inOCP", 69.3),
     )
 
     def open(self, uut):

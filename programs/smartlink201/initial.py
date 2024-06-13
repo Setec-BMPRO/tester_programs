@@ -4,6 +4,7 @@
 
 import pathlib
 
+import libtester
 import serial
 import tester
 
@@ -16,19 +17,19 @@ class Initial(share.TestSequence):
 
     vin_set = 12.0  # Input voltage (V)
     limitdata = (
-        tester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address "),
-        tester.LimitLow("PartOk", 2.0, doc="All parts present"),
-        tester.LimitLow("S5tank", 2.0, doc="S5 tank ON"),
-        tester.LimitDelta("Vbatt", vin_set, 0.5, doc="At nominal"),
-        tester.LimitDelta("Vin", vin_set - 2.0, 0.5, doc="At nominal"),
-        tester.LimitPercent("3V3", 3.33, 3.0, doc="At nominal"),
-        tester.LimitDelta("SL_VbattPre", vin_set, 0.25, doc="Before cal"),
-        tester.LimitDelta("SL_Vbatt", vin_set, 0.05, doc="After cal"),
+        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address "),
+        libtester.LimitLow("PartOk", 2.0, doc="All parts present"),
+        libtester.LimitLow("S5tank", 2.0, doc="S5 tank ON"),
+        libtester.LimitDelta("Vbatt", vin_set, 0.5, doc="At nominal"),
+        libtester.LimitDelta("Vin", vin_set - 2.0, 0.5, doc="At nominal"),
+        libtester.LimitPercent("3V3", 3.33, 3.0, doc="At nominal"),
+        libtester.LimitDelta("SL_VbattPre", vin_set, 0.25, doc="Before cal"),
+        libtester.LimitDelta("SL_Vbatt", vin_set, 0.05, doc="After cal"),
         # Analog tank inputs
         #   Open: approx. > 0xFF0
         #   Short:  Sense 1: 170-200    Sense 2-4: 60-80
-        tester.LimitHigh("TankHi", 0xF00),
-        tester.LimitLow("TankLo", 0x200),
+        libtester.LimitHigh("TankHi", 0xF00),
+        libtester.LimitLow("TankLo", 0x200),
     )
     analog_read_wait = 2  # Analog read response time
     sernum = None
