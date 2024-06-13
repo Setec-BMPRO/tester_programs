@@ -42,7 +42,8 @@ class Final(share.TestSequence):
             "Limits": _common
             + (
                 libtester.LimitRegExp(
-                    "SwVer", r"^{0}$".format(config.Trek2.sw_version.replace(".", r"\."))
+                    "SwVer",
+                    r"^{0}$".format(config.Trek2.sw_version.replace(".", r"\.")),
                 ),
             ),
         },
@@ -51,7 +52,8 @@ class Final(share.TestSequence):
             "Limits": _common
             + (
                 libtester.LimitRegExp(
-                    "SwVer", r"^{0}$".format(config.Trek3.sw_version.replace(".", r"\."))
+                    "SwVer",
+                    r"^{0}$".format(config.Trek3.sw_version.replace(".", r"\.")),
                 ),
             ),
         },

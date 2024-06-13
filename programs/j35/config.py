@@ -318,7 +318,8 @@ class J35A(J35):
             libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 10.0,
+                cls.ocp_adjust_percent + 4.0,
+                cls.ocp_adjust_percent + 10.0,
                 doc="OCP trip range before adjustment",
             ),
             libtester.LimitPercentLoHi(
@@ -439,7 +440,8 @@ class J35B(J35):
             libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0,
+                cls.ocp_adjust_percent + 4.0,
+                cls.ocp_adjust_percent + 7.0,
                 doc="OCP trip range before adjustment",
             ),
             libtester.LimitPercentLoHi(
@@ -600,7 +602,8 @@ class J35C(J35):
             libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0,
+                cls.ocp_adjust_percent + 4.0,
+                cls.ocp_adjust_percent + 7.0,
                 doc="OCP trip range before adjustment",
             ),
             libtester.LimitPercentLoHi(
@@ -708,7 +711,8 @@ class J35D(J35):
             libtester.LimitPercentLoHi(
                 "OCP_pre",
                 cls.ocp_set,
-                cls.ocp_adjust_percent + 4.0, cls.ocp_adjust_percent + 7.0,
+                cls.ocp_adjust_percent + 4.0,
+                cls.ocp_adjust_percent + 7.0,
                 doc="OCP trip range before adjustment",
             ),
             libtester.LimitPercentLoHi(
