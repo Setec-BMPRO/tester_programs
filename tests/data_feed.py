@@ -28,12 +28,8 @@ class UnitTester(tester.Tester):
     key_sen = "Sen"
     key_call = "Call"
 
-    def __init__(self, prog_class, per_panel, parameter):
+    def start(self, tester_type, programs):
         """Initalise the data feeder."""
-        super().__init__()
-        self.ut_program = tester.TestProgram(
-            repr(prog_class), per_panel=per_panel, parameter=parameter
-        )
         self.ut_result = []
         self.ut_steps = []
         self.ut_data = None
@@ -48,11 +44,7 @@ class UnitTester(tester.Tester):
             sender=tester.signals.Thread.tester,
             signal=tester.signals.TestRun.result,
         )
-
-    def open(self):
-        """Open a program, by using our pre-built one."""
-        uut = UUT.from_sernum("A0000000001")
-        super().open(self.ut_program, uut=uut)
+        super().start(tester_type, programs)
 
     def stop(self):
         """Release resources."""
@@ -134,7 +126,10 @@ class ProgramTestCase(unittest.TestCase):
         cls.patcher = patch("time.sleep")
         cls.patcher.start()
         # Create the tester instance
-        cls.tester = UnitTester(cls.prog_class, cls.per_panel, cls.parameter)
+        cls.ut_program = tester.TestProgram(
+            repr(cls.prog_class), cls.per_panel, cls.parameter
+        )
+        cls.tester = UnitTester()
         cls.tester.start("MockATE", {repr(cls.prog_class): cls.prog_class})
         cls.uuts = list(
             UUT.from_sernum("A000000000{0}".format(uut))
@@ -147,7 +142,7 @@ class ProgramTestCase(unittest.TestCase):
         myq = Mock(name="MyQueue")
         myq.get.side_effect = queue.Empty
         with patch("queue.Queue", return_value=myq):
-            self.tester.open()
+            self.tester.open(self.ut_program, self.uuts[0])
         self.test_sequence = self.tester.sequence
 
     def tearDown(self):

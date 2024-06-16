@@ -15,7 +15,8 @@ class Final(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_final()
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.limits["ARM-SwVer"].adjust(
             "^{0}$".format(self.cfg.arm_sw_version.replace(".", r"\."))
         )
@@ -26,12 +27,10 @@ class Final(share.TestSequence):
             tester.TestStep("OCP", self._step_ocp),
             tester.TestStep("CanCable", self._step_can_cable),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit and measure output voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         mes["dmm_fanoff"](timeout=5)
         dev["acsource"].output(voltage=self.cfg.vac, output=True)
         mes["dmm_fanon"](timeout=15)
@@ -48,7 +47,7 @@ class Final(share.TestSequence):
         bp35.open()
         mes["arm_swver"]()
         # Set unit internal Serial Number to match the outside label
-        bp35["SER_ID"] = self.sernum
+        bp35["SER_ID"] = self.uuts[0].sernum
         bp35["NVWRITE"] = True
         bp35.close()
 
@@ -121,11 +120,6 @@ class Sensors(share.Sensors):
             caption=tester.translate("bp35_final", "capCableOut"),
         )
         self["notifycable"].doc = "Tester operator"
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("bp35_final", "msgSnEntry"),
-            caption=tester.translate("bp35_final", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
         # Generate load voltage sensors
         vloads = []
         for i in range(14):
@@ -158,7 +152,6 @@ class Measurements(share.Measurements):
                 ("dmm_can0v", "Can0V", "can12v", "CAN Bus 0V"),
                 ("ramp_ocp", "OCP", "ocp", "Output OCP"),
                 ("ui_notifycable", "Notify", "notifycable", "Remove the CAN cable"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("arm_swver", "ARM-SwVer", "arm_swver", "Unit software version"),
             )
         )

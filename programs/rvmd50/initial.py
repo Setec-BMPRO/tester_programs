@@ -31,7 +31,8 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, uut)
         Devices.sw_image = Sensors.sw_image = self.cfg.sw_image
-        super().open(self.testlimits, Devices, Sensors, Measurements)
+        super().configure(self.testlimits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),

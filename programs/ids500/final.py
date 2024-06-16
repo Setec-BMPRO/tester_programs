@@ -55,7 +55,8 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwr_up),
             tester.TestStep("KeySw1", self._step_key_sw1),
@@ -258,7 +259,7 @@ class Final(share.TestSequence):
             r"^I,  2, {0},Hardware Revision$".format(hwrev)
         )
         mes["pic_hwrev"]()
-        sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
+        sernum = self.uuts[0].sernum
         pic.expected = 3
         pic["WriteSerNum"] = sernum
         pic.expected = 1
@@ -401,10 +402,6 @@ class Sensors(share.Sensors):
             message=tester.translate("ids500_final", "IsLDDLedRed?"),
             caption=tester.translate("ids500_final", "capLddRedLed"),
         )
-        self["oSerNumEntry"] = sensor.DataEntry(
-            message=tester.translate("ids500_final", "msgSerEntry"),
-            caption=tester.translate("ids500_final", "capSerEntry"),
-        )
         self["oHwRevEntry"] = sensor.DataEntry(
             message=tester.translate("ids500_final", "msgHwRev"),
             caption=tester.translate("ids500_final", "capHwRev"),
@@ -458,7 +455,6 @@ class Measurements(share.Measurements):
                 ("ui_YesNoTecRed", "Notify", "oYesNoTecRed", ""),
                 ("ui_YesNoLddGreen", "Notify", "oYesNoLddGreen", ""),
                 ("ui_YesNoLddRed", "Notify", "oYesNoLddRed", ""),
-                ("ui_sernum", "SerNum", "oSerNumEntry", ""),
                 ("ui_hwrev", "HwRev", "oHwRevEntry", ""),
             )
         )

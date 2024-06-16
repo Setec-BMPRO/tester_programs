@@ -19,7 +19,8 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, uut)
         Sensors.sw_image = self.cfg["software"]
-        super().open(self.cfg["limits_ini"], Devices, Sensors, Measurements)
+        super().configure(self.cfg["limits_ini"], Devices, Sensors, Measurements)
+        super().open(uut)
         # Adjust for different console behaviour
         self.devices["rvswt101"].banner_lines = self.cfg["banner_lines"]
         self.steps = (

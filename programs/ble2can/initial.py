@@ -46,14 +46,14 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("TestArm", self._step_test_arm),
             tester.TestStep("Bluetooth", self._step_bluetooth),
             tester.TestStep("CanBus", self._step_canbus),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -62,7 +62,6 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         mes["dmm_tstpincov"](timeout=5)
         dev["ble2can"].open()
         dev["dcs_vin"].output(self.vbatt, True)
@@ -72,7 +71,7 @@ class Initial(share.TestSequence):
     def _step_test_arm(self, dev, mes):
         """Test operation."""
         ble2can = dev["ble2can"]
-        ble2can.brand(self.hw_version, self.sernum)
+        ble2can.brand(self.hw_version, self.uuts[0].sernum)
         self.measure(("SwVer", "dmm_redoff", "dmm_blueoff", "dmm_greenoff"), timeout=5)
         ble2can.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(("dmm_redon", "dmm_blueon", "dmm_greenon"), timeout=5)
@@ -180,11 +179,6 @@ class Sensors(share.Sensors):
             ("SwVer", "SW_VER"),
         ):
             self[name] = sensor.Keyed(ble2can, cmdkey)
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("ble2can_initial", "msgSnEntry"),
-            caption=tester.translate("ble2can_initial", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
 
 
 class Measurements(share.Measurements):
@@ -212,7 +206,6 @@ class Measurements(share.Measurements):
                 ("BtMac", "BtMac", "BtMac", "MAC address"),
                 ("detectBT", "DetectBT", "mirbt", "Scanned MAC address"),
                 ("SwVer", "SwVer", "SwVer", "Unit software version"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("CANbind", "CAN_BIND", "CANbind", "CAN bound"),
             )
         )

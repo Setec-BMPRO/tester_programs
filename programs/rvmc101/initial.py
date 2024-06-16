@@ -31,7 +31,8 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
         self.is_full = self.parameter != "LITE"
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program, self.is_full),

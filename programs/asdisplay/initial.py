@@ -33,12 +33,12 @@ class Initial(share.TestSequence):
     )
     # In testmode, updates of the water tank levels are less than 100ms.
     analog_read_wait = 0.1  # Analog read response time
-    sernum = None
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         Devices.sw_arm_image = self.sw_arm_image
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("PgmARM", self.devices["programmer"].program),
@@ -51,7 +51,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply Vin and check voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["dcs_vin"].output(self.vin_set, output=True, delay=1)
         self.measure(
             (
@@ -158,11 +157,6 @@ class Sensors(share.Sensors):
         self["3V3"].doc = "3V3 rail"
         self["5V"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self["5V"].doc = "5V rail"
-        self["SnEntry"] = sensor.DataEntry(
-            message=tester.translate("asdisplay_initial", "msgSnEntry"),
-            caption=tester.translate("asdisplay_initial", "capSnEntry"),
-        )
-        self["SnEntry"].doc = "Entered S/N"
         self["LEDsOnCheck"] = sensor.YesNo(
             message=tester.translate("asdisplay_initial", "AreLedsOn?"),
             caption=tester.translate("asdisplay_initial", "capLedCheck"),
@@ -196,7 +190,6 @@ class Measurements(share.Measurements):
                 ("LEDsOn", "leds_on", "leds_on", "LEDs On"),
                 ("LEDsOff", "leds_off", "leds_off", "LEDs Off"),
                 ("can_active", "CANok", "cantraffic", "CAN traffic seen"),
-                ("ui_serialnum", "SerNum", "SnEntry", "S/N valid"),
             )
         )
         self["tank_level0"] = tester.Measurement(

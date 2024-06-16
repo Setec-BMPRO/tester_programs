@@ -17,7 +17,8 @@ class Final(share.TestSequence):
         limits = self.cfg.limits_final()
         Sensors.output_count = self.cfg.output_count
         self.duplicate_limit_error = False
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))
         )
@@ -28,12 +29,10 @@ class Final(share.TestSequence):
             tester.TestStep("OCP", self._step_ocp),
             tester.TestStep("CanCable", self._step_can_cable, self.cfg.canbus),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_powerup(self, dev, mes):
         """Power-Up the Unit with 240Vac and measure output voltage."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         mes["dmm_fanoff"](timeout=5)
         dev["acsource"].output(240.0, output=True)
         mes["dmm_fanon"](timeout=15)
@@ -50,7 +49,7 @@ class Final(share.TestSequence):
         j35.open()
         mes["swver"]()
         # Set unit internal Serial Number to match the outside label
-        j35.set_sernum(self.sernum)
+        j35.set_sernum(self.uuts[0].sernum)
         j35.close()
 
     @share.teststep
@@ -147,11 +146,6 @@ class Sensors(share.Sensors):
             caption=tester.translate("j35_final", "capCableOut"),
         )
         self["notifycable"].doc = "Tester operator"
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("j35_final", "msgSnEntry"),
-            caption=tester.translate("j35_final", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
 
 
 class Measurements(share.Measurements):
@@ -161,7 +155,6 @@ class Measurements(share.Measurements):
         """Create all Measurement instances."""
         self.create_from_names(
             (
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("dmm_fanoff", "FanOff", "photo", "Fan not running"),
                 ("dmm_can12v", "Can12V", "can12v", "CAN Bus 12V"),
                 ("dmm_can0v", "Can0V", "can12v", "CAN Bus 0V"),

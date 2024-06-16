@@ -19,7 +19,8 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
         Devices.sw_version = self.cfg.sw_version
-        super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().open(uut)
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))
         )
@@ -32,7 +33,6 @@ class Initial(share.TestSequence):
             tester.TestStep("Bluetooth", self._step_bluetooth),
             tester.TestStep("CanBus", self._step_canbus),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_part_check(self, dev, mes):
@@ -42,7 +42,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["dcs_vin"].output(8.6, output=True)
         self.measure(
             (
@@ -56,7 +55,9 @@ class Initial(share.TestSequence):
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
         dev["cn101"].open()
-        dev["cn101"].brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
+        dev["cn101"].brand(
+            self.cfg.hw_version, self.uuts[0].sernum, self.cfg.banner_lines
+        )
         mes["cn101_swver"]()
 
     @share.teststep
@@ -168,10 +169,6 @@ class Sensors(share.Sensors):
         self["sw2"] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
         self["oVin"] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.01)
         self["o3V3"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
-        self["oSnEntry"] = sensor.DataEntry(
-            message=tester.translate("cn101_initial", "msgSnEntry"),
-            caption=tester.translate("cn101_initial", "capSnEntry"),
-        )
         # Console sensors
         cn101 = self.devices["cn101"]
         cn101tunnel = self.devices["cn101tunnel"]
@@ -204,7 +201,6 @@ class Measurements(share.Measurements):
                 ("detectBT", "DetectBT", "oMirBT", ""),
                 ("dmm_vin", "Vin", "oVin", ""),
                 ("dmm_3v3", "3V3", "o3V3", ""),
-                ("ui_serialnum", "SerNum", "oSnEntry", ""),
                 ("cn101_swver", "SwVer", "oSwVer", ""),
                 ("cn101_btmac", "BtMac", "oBtMac", ""),
                 ("tank1_level", "Tank", "tank1", ""),

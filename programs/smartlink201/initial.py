@@ -32,14 +32,14 @@ class Initial(share.TestSequence):
         libtester.LimitLow("TankLo", 0x200),
     )
     analog_read_wait = 2  # Analog read response time
-    sernum = None
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Sensors.sw_nrf_image = self.cfg.sw_nrf_image
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep(
@@ -54,7 +54,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply Vbatt and check voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         # Product specific measurements
         meas1 = ("dmm_Parts2",)
         meas2 = (
@@ -78,14 +77,13 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_test_nordic(self, dev, mes):
         """Test the Nordic device."""
+        sernum = self.uuts[0].sernum
         smartlink201 = dev["smartlink201"]
         smartlink201.open()
-        smartlink201.initialise(
-            self.sernum, self.cfg.product_rev, self.cfg.hardware_rev
-        )
+        smartlink201.initialise(sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
         mac = mes["SL_MAC"]().value1
-        dev["serialtomac"].blemac_set(self.sernum, mac)
+        dev["serialtomac"].blemac_set(sernum, mac)
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
@@ -206,11 +204,6 @@ class Sensors(share.Sensors):
         self["Vbatt"].doc = "X13 pin 1"
         self["S5tank"] = sensor.Vdc(dmm, high=6, low=1, rng=10, res=0.01)
         self["S5tank"].doc = "S5 Tank Type"
-        self["SnEntry"] = sensor.DataEntry(
-            message=tester.translate("smartlink201_initial", "msgSnEntry"),
-            caption=tester.translate("smartlink201_initial", "capSnEntry"),
-        )
-        self["SnEntry"].doc = "Entered S/N"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
             share.config.JFlashProject.projectfile("nrf52832"),
@@ -254,7 +247,6 @@ class Measurements(share.Measurements):
                 ("dmm_Vin", "Vin", "Vin", "Vin rail ok"),
                 ("dmm_3V3", "3V3", "3V3", "3V3 rail ok"),
                 ("dmm_Vbatt", "Vbatt", "Vbatt", "Actual Vbatt rail"),
-                ("ui_serialnum", "SerNum", "SnEntry", "S/N valid"),
                 (
                     "SL_VbattPre",
                     "SL_VbattPre",

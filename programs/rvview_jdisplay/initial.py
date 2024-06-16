@@ -43,7 +43,8 @@ class Initial(share.TestSequence):
         self.config = config.get(self.parameter)
         self.is_atsam = self.config.is_atsam
         Devices.sw_file = Sensors.sw_file = self.config.sw_file
-        super().open(self._limits, Devices, Sensors, Measurements)
+        super().configure(self._limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),
@@ -51,12 +52,10 @@ class Initial(share.TestSequence):
             tester.TestStep("Display", self._step_display),
             tester.TestStep("CanBus", self._step_canbus, not self.is_atsam),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input voltage and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vin_set, True)
         self.measure(("dmm_vin", "dmm_3v3"), timeout=5)
 
@@ -78,7 +77,7 @@ class Initial(share.TestSequence):
         arm = dev["arm"]
         arm.open()
         dev["rla_reset"].pulse(0.1)
-        arm.brand(self.config.hw_version, self.sernum)
+        arm.brand(self.config.hw_version, self.uuts[0].sernum)
 
     @share.teststep
     def _step_display(self, dev, mes):
@@ -200,12 +199,6 @@ class Sensors(share.Sensors):
             share.config.JFlashProject.projectfile("atsamc21e17"),
             pathlib.Path(__file__).parent / self.sw_file,
         )
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("rvview_jdisplay_initial", "msgSnEntry"),
-            caption=tester.translate("rvview_jdisplay_initial", "capSnEntry"),
-            timeout=300,
-        )
-        self["sernum"].doc = "Barcode scanner"
         self["oYesNoOn"] = sensor.YesNo(
             message=tester.translate("rvview_jdisplay_initial", "PushButtonOn?"),
             caption=tester.translate("rvview_jdisplay_initial", "capButtonOn"),
@@ -230,7 +223,6 @@ class Measurements(share.Measurements):
                 ("dmm_3v3", "3V3", "3v3", "3V3 rail voltage"),
                 ("dmm_bklghtoff", "BkLghtOff", "bklght", "Test backlight"),
                 ("dmm_bklghton", "BkLghtOn", "bklght", "Test backlight"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("ui_yesnoon", "Notify", "oYesNoOn", "Button on"),
                 ("ui_yesnooff", "Notify", "oYesNoOff", "Button off"),
                 ("can_bind", "CAN_BIND", "canbind", "CAN bound"),

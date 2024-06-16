@@ -24,9 +24,9 @@ class Final(share.TestSequence):
             4: "limits_fin_4_button",
             6: "limits_fin_6_button",
         }[button_count]
-        super().open(self.cfg[limits_fin], Devices, Sensors, Measurements)
+        super().configure(self.cfg[limits_fin], Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
-        self.sernum = None
         self.buttons = []  # 12 or 18 measurement name strings
         buttons_in_use = range(1, button_count + 1)
         button_presses = ["buttonPress_{0}".format(button) for button in buttons_in_use]
@@ -46,7 +46,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["ble"].uut = self.uuts[0]
         # Measure the MAC to save it in test result data
         mac = dev["ble"].mac
@@ -117,10 +116,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         sensor = tester.sensor
         self["mirmac"] = sensor.Mirror()
-        self["SnEntry"] = sensor.DataEntry(
-            message=tester.translate("rvswt101_final", "msgSnEntry"),
-            caption=tester.translate("rvswt101_final", "capSnEntry"),
-        )
         self["ButtonPress"] = sensor.OkCan(
             message=tester.translate("rvswt101_final", "msgPressButton"),
             caption=tester.translate("rvswt101_final", "capPressButton"),
@@ -172,7 +167,6 @@ class Measurements(share.Measurements):
 
         self.create_from_names(
             (
-                ("ui_serialnum", "SerNum", "SnEntry", ""),
                 ("ble_mac", "BleMac", "mirmac", "Get MAC address from server"),
                 ("ui_add_uut", "ButtonOk", "AddUUT", ""),
                 ("debugOn", "Reply", "debugOn", ""),

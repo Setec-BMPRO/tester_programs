@@ -30,7 +30,8 @@ class Initial(share.TestSequence):
         Sensors.iload = self.cfg.iload
         Sensors.pic_image = "bp35sr_{0}.hex".format(self.cfg.pic_sw_version)
         Measurements.is_pm = self.cfg.is_pm
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         if self.cfg.is_pm:
             self.devices["PmTimer"].interval = self.cfg.pm_zero_wait
         self.limits["ARM-SwVer"].adjust(
@@ -49,7 +50,6 @@ class Initial(share.TestSequence):
             tester.TestStep("OCP", self._step_ocp),
             tester.TestStep("CanBus", self._step_canbus),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -59,7 +59,6 @@ class Initial(share.TestSequence):
         Apply power to the unit's Battery terminals to power up the ARM.
 
         """
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         self.measure(
             (
                 "dmm_lock",
@@ -108,7 +107,7 @@ class Initial(share.TestSequence):
         bp35.open()
         bp35.brand(
             self.cfg.arm_hw_version,
-            self.sernum,
+            self.uuts[0].sernum,
             dev["rla_reset"],
             self.cfg.is_pm,
             self.cfg.pic_hw_version,
@@ -448,11 +447,6 @@ class Sensors(share.Sensors):
         self["solarvin"].doc = "TP306,7"
         self["canpwr"] = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
         self["canpwr"].doc = "X303"
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("bp35_initial", "msgSnEntry"),
-            caption=tester.translate("bp35_initial", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
         self["yesnored"] = sensor.YesNo(
             message=tester.translate("bp35_initial", "IsOutputLedRed?"),
             caption=tester.translate("bp35_initial", "capOutputLed"),
@@ -559,7 +553,6 @@ class Measurements(share.Measurements):
                 ("dmm_fanoff", "FanOff", "fan", "Fans off"),
                 ("ramp_ocp_pre", "OCP_pre", "ocp_pre", "OCP point (pre-cal)"),
                 ("ramp_ocp", "OCP", "ocp", "OCP point (post-cal)"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("ui_yesnored", "Notify", "yesnored", "LED Red"),
                 ("ui_yesnogreen", "Notify", "yesnogreen", "LED Green"),
                 ("arm_swver", "ARM-SwVer", "arm_swver", "Unit software version"),

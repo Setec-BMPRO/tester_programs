@@ -27,7 +27,8 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("PowerOn", self._step_power_on),

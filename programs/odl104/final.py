@@ -15,16 +15,15 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_final
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
-        self.sernum = None
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         # Lookup the MAC address from the server
-        mac = dev["serialtomac"].blemac_get(self.sernum)
+        mac = dev["serialtomac"].blemac_get(self.uuts[0].sernum)
         mes["ble_mac"].sensor.store(mac)
         mes["ble_mac"]()
         # Scan for the bluetooth transmission
@@ -68,11 +67,6 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("odl104_final", "msgSnEntry"),
-            caption=tester.translate("odl104_final", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
         self["mirscan"] = sensor.Mirror()
         self["mirmac"] = sensor.Mirror()
         self["mirrssi"] = sensor.Mirror()
@@ -85,7 +79,6 @@ class Measurements(share.Measurements):
         """Create all Measurements."""
         self.create_from_names(
             (
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("ble_mac", "BleMac", "mirmac", "Get MAC address from server"),
                 (
                     "scan_mac",

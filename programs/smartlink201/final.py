@@ -26,19 +26,18 @@ class Final(share.TestSequence):
             doc="Strong signal",
         ),
     )
-    sernum = None
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test Bluetooth signal strength."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         # Lookup the MAC address from the server
-        mac = dev["serialtomac"].blemac_get(self.sernum)
+        mac = dev["serialtomac"].blemac_get(self.uuts[0].sernum)
         reply = dev["pi_bt"].scan_advert_blemac(mac, timeout=20)
         rssi = reply["rssi"] if reply else float("NaN")
         mes["scan_RSSI"].sensor.store(rssi)
@@ -73,11 +72,6 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self["SnEntry"] = sensor.DataEntry(
-            message=tester.translate("smartlink201_final", "msgSnEntry"),
-            caption=tester.translate("smartlink201_final", "capSnEntry"),
-        )
-        self["SnEntry"].doc = "Entered S/N"
         self["mir_RSSI"] = sensor.Mirror()
         self["mir_RSSI"].doc = "Measured RSSI"
 
@@ -88,8 +82,5 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names(
-            (
-                ("ui_sernum", "SerNum", "SnEntry", "S/N valid"),
-                ("scan_RSSI", "ScanRSSI", "mir_RSSI", "Bluetooth signal strength"),
-            )
+            (("scan_RSSI", "ScanRSSI", "mir_RSSI", "Bluetooth signal strength"),)
         )

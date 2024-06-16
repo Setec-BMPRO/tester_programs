@@ -224,9 +224,6 @@ class TestSequenceMixin:
     """Utility methods for Test Programs."""
 
     _limit_builtin = (  # Built-in limits available to every test program
-        libtester.LimitRegExp(
-            "SerNum", r"^[AS][0-9]{4}[0-9A-Z]{2}[0-9]{4}$", doc="Serial Number"
-        ),
         libtester.LimitBoolean("Notify", True, doc="YES response"),
         libtester.LimitInteger("ProgramOk", 0, doc="Exit code 0"),
     )
@@ -316,28 +313,6 @@ class TestSequenceMixin:
             instr.binary(start, end, step)
         time.sleep(delay)
 
-    def get_serial(self, uuts, limit_name, measurement_name):
-        """Find the unit's Serial number.
-
-        @param uuts Tuple of libtester.UUT instances
-        @param limit_name TestLimit to validate a serial number
-        @param measurement_name Measurement to ask the operator for the number
-        @return Serial Number
-
-        Inspect uuts[0] first, and if it is not a serial number, use the
-        measurement to get the number from the tester operator.
-
-        """
-        try:
-            sernum = uuts[0].sernum
-        except AttributeError:
-            sernum = ""
-        limit = self.limits[limit_name]
-        measurement = self.measurements[measurement_name]
-        if not limit.check(sernum):
-            sernum = measurement.measure().value1
-        return sernum
-
 
 @define
 class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
@@ -369,14 +344,14 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         validator=validators.optional(validators.instance_of(str)),
     )
 
-    def open(
+    def configure(
         self,
-        limits: Sequence,
+        limits: Sequence[libtester.LimitABC],
         cls_devices: Devices,
         cls_sensors: Sensors,
         cls_measurements: Measurements,
     ) -> None:
-        """Open test program by creating supporting instances.
+        """Configure test program by creating supporting instances.
 
         @param limits Iterable libtester.Limit*
         @param cls_devices subclass of Devices
@@ -388,7 +363,14 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         self.devices = cls_devices(self.physical_devices, self.parameter)
         self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
         self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
-        super().open()
+
+    def open(self, uut: libtester.UUT) -> None:
+        """Open test program.
+
+        @param uut Libtester.UUT
+
+        """
+        super().open(uut)
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
@@ -402,9 +384,9 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         self.uuts.clear()
         self.uuts += uuts
         self.devices.run()
-        super().run()
+        super().run(self.uuts)
 
-    def safety(self):
+    def safety(self) -> None:
         """Reset everything ready for another test."""
         self.devices.reset()
         self.sensors.reset()

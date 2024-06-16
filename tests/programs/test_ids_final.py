@@ -75,7 +75,6 @@ class Ids500Final(ProgramTestCase):
                     (sen["oYesNoLddRed"], True),
                 ),
                 "Comms": (
-                    (sen["oSerNumEntry"], (self.uuts[0].sernum,)),
                     (sen["oHwRevEntry"], ("07A ",)),
                     (sen["hwrev"], ("I,  2, 07A,Hardware Revision",)),
                     (

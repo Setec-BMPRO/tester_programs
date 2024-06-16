@@ -44,12 +44,12 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Pin", self._step_pin),
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
-        self.sernum = None
         # PC-29164 for TRS-BT2 - Use BLE with chip antenna
         if uut and uut.lot.number in self.pc29164_lots:
             self.limits["ScanRSSI"].adjust(self.pc29164_rssi)
@@ -57,7 +57,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_pin(self, dev, mes):
         """Test the Pull-Pin operation."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vbat"].output(self.vbatt, True)
         self.measure(
             (
@@ -76,7 +75,7 @@ class Final(share.TestSequence):
         dev["dcs_vbat"].output(0.0, delay=1.0)
         dev["dcs_vbat"].output(self.vbatt)
         # Lookup the MAC address from the server
-        mac = dev["serialtomac"].blemac_get(self.sernum)
+        mac = dev["serialtomac"].blemac_get(self.uuts[0].sernum)
         mes["ble_mac"].sensor.store(mac)
         mes["ble_mac"]()
         # Scan for the bluetooth transmission
@@ -130,11 +129,6 @@ class Sensors(share.Sensors):
         )
         self["brake"] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
         self["brake"].doc = "Brake output"
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("trsbtx_final", "msgSnEntry"),
-            caption=tester.translate("trsbtx_final", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
         self["mirscan"] = sensor.Mirror()
         self["mirmac"] = sensor.Mirror()
         self["mirrssi"] = sensor.Mirror()
@@ -151,7 +145,6 @@ class Measurements(share.Measurements):
                 ("ui_pin", "Notify", "pin_in", "Operator inserts pin"),
                 ("dmm_brakeoff", "BrakeOff", "brake", "Brakes output off"),
                 ("dmm_brakeon", "BrakeOn", "brake", "Brakes output on"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("ble_mac", "BleMac", "mirmac", "Get MAC address from server"),
                 (
                     "scan_mac",

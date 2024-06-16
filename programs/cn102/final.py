@@ -15,15 +15,14 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_final
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
-        self.sernum = None
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
-        reply = dev["pi_bt"].scan_advert_sernum(self.sernum, timeout=20)
+        reply = dev["pi_bt"].scan_advert_sernum(self.uuts[0].sernum, timeout=20)
         if reply:
             rssi = reply["rssi"]
         else:
@@ -58,11 +57,6 @@ class Sensors(share.Sensors):
     def open(self):
         """Create all Sensors."""
         sensor = tester.sensor
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("cn102_final", "msgSnEntry"),
-            caption=tester.translate("cn102_final", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
         self["mirrssi"] = sensor.Mirror()
 
 
@@ -72,8 +66,5 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names(
-            (
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
-                ("scan_rssi", "ScanRSSI", "mirrssi", "Bluetooth signal strength"),
-            )
+            (("scan_rssi", "ScanRSSI", "mirrssi", "Bluetooth signal strength"),)
         )

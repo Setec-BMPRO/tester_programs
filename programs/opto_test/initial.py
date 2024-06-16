@@ -42,7 +42,8 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         Sensors._opto_count = self._opto_count
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("BoardNum", self._step_boardnum),
             tester.TestStep("InputAdj1", self._step_in_adj1),
@@ -51,14 +52,12 @@ class Initial(share.TestSequence):
             tester.TestStep("OutputAdj10", self._step_out_adj10),
             tester.TestStep("Email", self._step_email),
         )
-        self.sernum = None
         self._ctr_data1 = []
         self._ctr_data10 = []
 
     @share.teststep
     def _step_boardnum(self, dev, mes):
         """Get the PCB number."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         self._ctr_data1.clear()
         self._ctr_data10.clear()
 
@@ -143,6 +142,7 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_email(self, dev, mes):
         """Email test result data."""
+        sernum = self.uuts[0].sernum
         now = datetime.datetime.now().isoformat()[:19]
         # First make the CSV header row
         lines = []
@@ -151,7 +151,7 @@ class Initial(share.TestSequence):
         for opto in range(self._opto_count):
             lines.append(
                 '"{0}-{1:02}","{2}",{3},{4}'.format(
-                    self.sernum,
+                    sernum,
                     opto + 1,
                     now,
                     self._ctr_data1[opto],
@@ -162,7 +162,7 @@ class Initial(share.TestSequence):
         outer = MIMEMultipart()
         outer["To"] = self._recipient
         outer["From"] = '"Opto Tester" <noreply@setec.com.au>'
-        outer["Subject"] = "Opto Test Data for PCB {0}".format(self.sernum)
+        outer["Subject"] = "Opto Test Data for PCB {0}".format(sernum)
         outer.preamble = "You will not see this in a MIME-aware mail reader."
         summsg = MIMEText("Opto test data is attached.")
         outer.attach(summsg)
@@ -170,7 +170,7 @@ class Initial(share.TestSequence):
         msg.add_header(
             "Content-Disposition",
             "attachment",
-            filename="optodata_{0}_{1}.csv".format(self.sernum, now),
+            filename="optodata_{0}_{1}.csv".format(sernum, now),
         )
         outer.attach(msg)
         svr = smtplib.SMTP(self._email_server)
@@ -257,10 +257,6 @@ class Sensors(share.Sensors):
         for i in range(self._opto_count):
             s = sensor.Vdc(dmm, high=(i + 5), low=1, rng=100, res=0.001, scale=0.001)
             self["Iout"].append(s)
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("opto_initial", "msgSnEntry"),
-            caption=tester.translate("opto_initial", "capSnEntry"),
-        )
 
 
 class Measurements(share.Measurements):
@@ -276,7 +272,6 @@ class Measurements(share.Measurements):
                 ("dmm_Iin10", "Iin10", "Isense", ""),
                 ("ramp_VinAdj1", "VinAdj", "VinAdj1", ""),
                 ("ramp_VinAdj10", "VinAdj", "VinAdj10", ""),
-                ("ui_sernum", "SerNum", "sernum", "PCB serial number"),
             )
         )
         # Generate collector-emitter voltage measurements

@@ -24,7 +24,8 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, uut)
         limits = self.cfg.limits_initial
         Sensors.sw_nordic_image = self.cfg.sw_nordic_image
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PartCheck", self._step_part_check),
             tester.TestStep("PowerUp", self._step_power_up),
@@ -33,7 +34,6 @@ class Initial(share.TestSequence):
             tester.TestStep("TankSense", self._step_tank_sense),
             tester.TestStep("CanBus", self._step_canbus),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_part_check(self, dev, mes):
@@ -43,7 +43,6 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["rla_nxp"].set_on()  # Disconnect BDA4 Tx/Rx from ARM
         dev["dcs_vin"].output(8.6, output=True)
         self.measure(
@@ -67,10 +66,11 @@ class Initial(share.TestSequence):
         """Test the Nordic device."""
         console = dev["console"]
         console.open()
-        console.brand(self.cfg.hw_version, self.sernum, self.cfg.banner_lines)
+        sernum = self.uuts[0].sernum
+        console.brand(self.cfg.hw_version, sernum, self.cfg.banner_lines)
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
-        dev["serialtomac"].blemac_set(self.sernum, mac)
+        dev["serialtomac"].blemac_set(sernum, mac)
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
@@ -150,10 +150,6 @@ class Sensors(share.Sensors):
         self["sw1"] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
         self["sw2"] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
         self["microsw"] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
-        self["oSnEntry"] = sensor.DataEntry(
-            message=tester.translate("cn102_initial", "msgSnEntry"),
-            caption=tester.translate("cn102_initial", "capSnEntry"),
-        )
         console = self.devices["console"]
         for name, cmdkey in (
             ("tank1", "TANK1"),
@@ -191,7 +187,6 @@ class Measurements(share.Measurements):
                 ("dmm_sw2", "Part", "sw2", ""),
                 ("dmm_vin", "Vin", "oVin", ""),
                 ("dmm_3v3", "3V3", "o3V3", ""),
-                ("ui_serialnum", "SerNum", "oSnEntry", ""),
                 ("tank1_level", "Tank", "tank1", ""),
                 ("tank2_level", "Tank", "tank2", ""),
                 ("tank3_level", "Tank", "tank3", ""),

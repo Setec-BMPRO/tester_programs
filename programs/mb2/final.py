@@ -21,7 +21,8 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (tester.TestStep("PowerOn", self._step_power_on),)
 
     @share.teststep

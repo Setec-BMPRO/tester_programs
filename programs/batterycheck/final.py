@@ -29,17 +29,16 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Create the test program as a linear sequence."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("TestBlueTooth", self._step_test_bluetooth),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Power the battery check."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_SnEntry")
         dev["dcs_input"].output(12.0, output=True)
         mes["dmm_12V"](timeout=5)
 
@@ -48,7 +47,8 @@ class Final(share.TestSequence):
         """Scan for BT devices and match against serial number."""
         blue = dev["bt"]
         blue.open()
-        mac, pin = blue.scan(self.sernum)
+        sernum = self.uuts[0].sernum
+        mac, pin = blue.scan(sernum)
         mes["BTscan"].sensor.store(mac is not None)
         mes["BTscan"]()
         try:
@@ -63,7 +63,7 @@ class Final(share.TestSequence):
         info = blue.jsonrpc("GetSystemInfo")
         mes["SwVerARM"].sensor.store((info["SoftwareVersion"],))
         mes["SwVerARM"]()
-        mes["SerNumARM"].sensor.store(info["SerialID"] == self.sernum)
+        mes["SerNumARM"].sensor.store(info["SerialID"] == sernum)
         mes["SerNumARM"]()
         blue.data_mode_escape()
         blue.unpair()
@@ -103,10 +103,6 @@ class Sensors(share.Sensors):
         self["oMirBT"] = sensor.Mirror()
         self["oMirSwVer"] = sensor.Mirror()
         self["o12V"] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.001)
-        self["oSnEntry"] = sensor.DataEntry(
-            message=tester.translate("batterycheck_final", "msgSnEntry"),
-            caption=tester.translate("batterycheck_final", "capSnEntry"),
-        )
 
 
 class Measurements(share.Measurements):
@@ -121,6 +117,5 @@ class Measurements(share.Measurements):
                 ("SerNumARM", "ARMSerNum", "oMirBT", ""),
                 ("SwVerARM", "ARMSwVer", "oMirSwVer", ""),
                 ("dmm_12V", "12V", "o12V", ""),
-                ("ui_SnEntry", "SerNum", "oSnEntry", ""),
             )
         )

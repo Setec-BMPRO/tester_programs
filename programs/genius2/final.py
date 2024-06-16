@@ -40,9 +40,10 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(
+        super().configure(
             self.limitdata[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
+        super().open(uut)
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("PowerOn", self._step_poweron),

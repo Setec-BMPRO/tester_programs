@@ -31,7 +31,8 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         Sensors.sw_image = self.sw_image
-        super().open(self.testlimits, Devices, Sensors, Measurements)
+        super().configure(self.testlimits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),

@@ -64,21 +64,20 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]["Config"]
         Devices.sw_image = self.config.sw_image
-        super().open(
+        super().configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self.devices["programmer"].program),
             tester.TestStep("TestArm", self._step_test_arm),
             tester.TestStep("CanBus", self._step_canbus),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vin_start, output=True)
         self.measure(("dmm_vin", "dmm_3v3"), timeout=5)
         dev["dcs_vin"].output(self.vin_set)
@@ -87,7 +86,7 @@ class Initial(share.TestSequence):
     def _step_test_arm(self, dev, mes):
         """Test the ARM device."""
         dev["arm"].open()
-        dev["arm"].brand(self.config.hw_version, self.sernum, dev["rla_reset"])
+        dev["arm"].brand(self.config.hw_version, self.uuts[0].sernum, dev["rla_reset"])
         mes["sw_ver"]()
 
     @share.teststep
@@ -157,12 +156,6 @@ class Sensors(share.Sensors):
         self["vin"].doc = "X207"
         self["3v3"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self["3v3"].doc = "U4 output"
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("trek2_jcontrol_initial", "msgSnEntry"),
-            caption=tester.translate("trek2_jcontrol_initial", "capSnEntry"),
-            timeout=300,
-        )
-        self["sernum"].doc = "Barcode scanner"
         # Console sensors
         self["canbind"] = sensor.Keyed(arm, "CAN_BIND")
         self["swver"] = sensor.Keyed(arm, "SW_VER")
@@ -178,7 +171,6 @@ class Measurements(share.Measurements):
             (
                 ("dmm_vin", "Vin", "vin", "Input voltage"),
                 ("dmm_3v3", "3V3", "3v3", "3V3 rail voltage"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("can_bind", "CAN_BIND", "canbind", "CAN bound"),
                 ("sw_ver", "SwVer", "swver", "Unit software version"),
                 ("tunnel_swver", "SwVer", "tunnelswver", "Unit software version"),

@@ -21,25 +21,23 @@ class Final(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vbatt, True)
         mes["dmm_vin"](timeout=5)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        self._logger.debug('Scan for serial number via bluetooth: "%s"', self.sernum)
-        reply = dev["pi_bt"].scan_beacon_sernum(self.sernum)
+        reply = dev["pi_bt"].scan_beacon_sernum(self.uuts[0].sernum)
         mes["scan_ser"].sensor.store(reply)
         mes["scan_ser"]()
 
@@ -74,11 +72,6 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self["vin"] = sensor.Vdc(dmm, high=3, low=3, rng=100, res=0.01)
         self["vin"].doc = "Within Fixture"
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("trs2_final", "msgSnEntry"),
-            caption=tester.translate("trs2_final", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
         self["mirscan"] = sensor.Mirror()
 
 
@@ -90,7 +83,6 @@ class Measurements(share.Measurements):
         self.create_from_names(
             (
                 ("dmm_vin", "Vin", "vin", "Input voltage"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 (
                     "scan_ser",
                     "ScanSer",

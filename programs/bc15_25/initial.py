@@ -25,7 +25,8 @@ class Initial(share.TestSequence):
         Devices.arm_file = self.cfg.arm_file
         Devices.arm_port = self.cfg.arm_port
         console.Console.cal_linecount = self.cfg.cal_linecount
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("Program", self._step_program),

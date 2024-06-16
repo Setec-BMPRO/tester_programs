@@ -18,7 +18,8 @@ class Final(share.TestSequence):
         self.cfg = config.Config
         self.cfg.configure(self.parameter, uut)
         Sensors.callback = self._dso_callback
-        super().open(self.cfg.limits_final, Devices, Sensors, Measurements)
+        super().configure(self.cfg.limits_final, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwrup),
             tester.TestStep("PowerOn", self._step_pwron),

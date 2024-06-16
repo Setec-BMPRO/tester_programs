@@ -23,7 +23,8 @@ class Initial(share.TestSequence):
         Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
         Devices.is_renesas = self.cfg.is_renesas
-        super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Lock", self._step_lock),
             tester.TestStep("Program", self._step_program),

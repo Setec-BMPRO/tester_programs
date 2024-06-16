@@ -40,19 +40,18 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         Sensors.sw_image = self.sw_image
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Operation", self._step_operation),
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vbatt, True)
         self.measure(
             (
@@ -72,7 +71,7 @@ class Initial(share.TestSequence):
         """Test the operation of TRSRFM."""
         trsrfm = dev["trsrfm"]
         trsrfm.open()
-        trsrfm.initialise(self.hw_version, self.sernum)
+        trsrfm.initialise(self.hw_version, self.uuts[0].sernum)
         mes["arm_swver"]()
         trsrfm.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(("dmm_redon", "dmm_greenon", "dmm_blueon"), timeout=5)
@@ -156,11 +155,6 @@ class Sensors(share.Sensors):
         )
         trsrfm = self.devices["trsrfm"]
         self["arm_SwVer"] = sensor.Keyed(trsrfm, "SW_VER")
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("trsrfm_initial", "msgSnEntry"),
-            caption=tester.translate("trsrfm_initial", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
 
 
 class Measurements(share.Measurements):
@@ -186,7 +180,6 @@ class Measurements(share.Measurements):
                     "Validate MAC address over bluetooth",
                 ),
                 ("arm_swver", "ARM-SwVer", "arm_SwVer", "Unit software version"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
             )
         )

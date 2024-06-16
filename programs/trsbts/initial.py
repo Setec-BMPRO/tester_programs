@@ -52,7 +52,8 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.config = config.get(self.parameter)
         Sensors.sw_image = self.config.sw_image
-        super().open(self._limits, Devices, Sensors, Measurements)
+        super().configure(self._limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("PgmNordic", self._step_program),
@@ -60,13 +61,11 @@ class Initial(share.TestSequence):
             tester.TestStep("Calibrate", self._step_calibrate),
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
         dev["dcs_vbat"].output(self.vbatt, True)
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         self.measure(("dmm_vbat", "dmm_3v3", "dmm_chem"), timeout=5)
         if self.parameter == "BTS":
             self.measure(("dmm_sway-", "dmm_sway+"), timeout=5)
@@ -90,7 +89,7 @@ class Initial(share.TestSequence):
         dev["dcs_vbat"].output(0.0, delay=0.5)
         trsbts.reset_input_buffer()
         dev["dcs_vbat"].output(self.vbatt)
-        trsbts.initialise(self.config.hw_version, self.sernum)
+        trsbts.initialise(self.config.hw_version, self.uuts[0].sernum)
         self.measure(("dmm_redoff", "dmm_greenoff", "dmm_lightoff"), timeout=5)
         trsbts.override(share.console.parameter.OverrideTo.FORCE_ON)
         self.measure(
@@ -131,7 +130,7 @@ class Initial(share.TestSequence):
         mes["ble_mac"].sensor.store(mac)
         mes["ble_mac"]()
         # Save SerialNumber & MAC on a remote server.
-        dev["serialtomac"].blemac_set(self.sernum, mac)
+        dev["serialtomac"].blemac_set(self.uuts[0].sernum, mac)
         # Scan for the unit
         reply = dev["pi_bt"].scan_advert_blemac(mac, timeout=20)
         mes["scan_mac"].sensor.store(reply is not None)
@@ -210,11 +209,6 @@ class Sensors(share.Sensors):
         self["remote"].doc = "Remote output"
         self["mirmac"] = sensor.Mirror()
         self["mirscan"] = sensor.Mirror()
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("trsbts_initial", "msgSnEntry"),
-            caption=tester.translate("trsbts_initial", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
         # Console sensors
         trsbts = self.devices["trsbts"]
         for name, cmdkey, units in (
@@ -279,7 +273,6 @@ class Measurements(share.Measurements):
                 ("arm_vbatt", "ARM-Vbatt", "arm_vbatt", "Vbatt before cal"),
                 ("arm_vbatt_cal", "ARM-Vbatt-Cal", "arm_vbatt", "Vbatt after cal"),
                 ("arm_vpin", "ARM-Vpin", "arm_vpin", "Voltage on the pin microswitch"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
             )
         )

@@ -62,9 +62,10 @@ class Final(share.TestSequence):
     def open(self, uut):
         """Prepare for testing."""
         self.config = self.config_data[self.parameter]["Config"]
-        super().open(
+        super().configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("TunnelOpen", self._step_tunnel_open),
@@ -75,7 +76,6 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vin"].output(self.vin_set, output=True, delay=self.can_bind_time)
         precon = share.can.Trek2PreConditionsBuilder()
         candev = self.physical_devices["CAN"]
@@ -100,7 +100,7 @@ class Final(share.TestSequence):
             )
         )
         # Set unit internal Serial Number to match the outside label
-        unit.set_sernum(self.sernum)
+        unit.set_sernum(self.uuts[0].sernum)
 
     @share.teststep
     def _step_test_tanks(self, dev, mes):
@@ -199,11 +199,6 @@ class Sensors(share.Sensors):
             sensor.Keyed(armtunnel, "TANK4"),
         )
         self["swver"] = sensor.Keyed(armtunnel, "SW_VER")
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("j35_final", "msgSnEntry"),
-            caption=tester.translate("j35_final", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
 
 
 class Measurements(share.Measurements):
@@ -213,7 +208,6 @@ class Measurements(share.Measurements):
         """Create all Measurement instances."""
         self.create_from_names(
             (
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
                 ("ui_yesnoseg", "Notify", "yesnoseg", "Segment display"),
                 ("ui_yesnobklght", "Notify", "yesnobklght", "Backlight"),
                 ("sw_ver", "SwVer", "swver", "Unit software version"),

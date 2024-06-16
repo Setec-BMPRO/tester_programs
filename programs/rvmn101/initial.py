@@ -24,7 +24,8 @@ class Initial(share.TestSequence):
         Sensors.nordic_image = self.cfg.values.nordic_image
         Sensors.arm_devicetype = self.cfg.values.arm_devicetype
         Sensors.arm_image = self.cfg.values.arm_image
-        super().open(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        super().configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),
@@ -33,12 +34,10 @@ class Initial(share.TestSequence):
             tester.TestStep("Output", self._step_output),
             tester.TestStep("CanBus", self._step_canbus),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input power and measure voltages."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_serialnum")
         dev["dcs_vbatt"].output(self.cfg.vbatt_set, output=True)
         self.measure(
             (
@@ -58,14 +57,13 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
+        sernum = self.uuts[0].sernum
         rvmn = dev["rvmn"]
         rvmn.open()
         rvmn.reset()
         # FIXME: Console prompt appears before it is ready to accept commands
         time.sleep(4)  # RVMN200A: 2s gives a 1 in 5 branding failure rate
-        rvmn.brand(
-            self.sernum, self.cfg.values.product_rev, self.cfg.values.product_rev
-        )
+        rvmn.brand(sernum, self.cfg.values.product_rev, self.cfg.values.product_rev)
         with tester.PathName("Verify"):
             # FIXME: Power cycle module to reload everything from NV storage
             dcs = dev["dcs_vbatt"]
@@ -73,7 +71,7 @@ class Initial(share.TestSequence):
             dcs.output(self.cfg.vbatt_set, delay=2)
             # FIXME: Check that firmware has really saved the branding data
             for name, value in (  # Set the test limits
-                ("Serial", self.sernum),
+                ("Serial", sernum),
                 ("ProdRev", self.cfg.values.product_rev),
                 ("HardRev", self.cfg.values.product_rev),
             ):
@@ -81,7 +79,7 @@ class Initial(share.TestSequence):
             self.measure(("Serial", "ProdRev", "HardRev"))
         # Save SerialNumber & MAC on a remote server.
         mac = mes["ble_mac"]().value1
-        dev["serialtomac"].blemac_set(self.sernum, mac)
+        dev["serialtomac"].blemac_set(sernum, mac)
 
     @share.teststep
     def _step_input(self, dev, mes):
@@ -215,10 +213,6 @@ class Sensors(share.Sensors):
         self["ReverseHB"] = sensor.Vdc(dmm, high=6, low=1, rng=100, res=0.1)
         self["LSout1"] = sensor.Vdc(dmm, high=4, low=1, rng=100, res=0.1)
         self["LSout2"] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
-        self["SnEntry"] = sensor.DataEntry(
-            message=tester.translate("rvmn101_initial", "msgSnEntry"),
-            caption=tester.translate("rvmn101_initial", "capSnEntry"),
-        )
         self["JLinkBLE"] = sensor.JLink(
             self.devices["JLink"],
             share.config.JFlashProject.projectfile(self.nordic_devicetype),
@@ -283,7 +277,6 @@ class Measurements(share.Measurements):
                 ("dmm_ls1_off", "LSoff", "LSout1", "Low-side driver1 OFF"),
                 ("dmm_ls2_on", "LSon", "LSout2", "Low-side driver2 ON"),
                 ("dmm_ls2_off", "LSoff", "LSout2", "Low-side driver2 OFF"),
-                ("ui_serialnum", "SerNum", "SnEntry", ""),
                 ("can_active", "CANok", "cantraffic", "CAN traffic seen"),
                 ("ble_mac", "BleMac", "BleMac", "MAC address"),
                 ("JLinkARM", "ProgramOk", "JLinkARM", "Programmed"),

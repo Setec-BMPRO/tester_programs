@@ -16,19 +16,18 @@ class Initial(share.TestSequence):
     def open(self, uut):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, uut)
-        super().open(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        super().configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("TestArm", self._step_test_arm),
             tester.TestStep("Calibrate", self._step_calibrate),
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
         """Prepare to run a test."""
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["bc2"].open()
         dev["dcs_vin"].output(self.cfg.vbatt, True)
         self.measure(
@@ -43,7 +42,7 @@ class Initial(share.TestSequence):
     def _step_test_arm(self, dev, mes):
         """Test operation."""
         bc2 = dev["bc2"]
-        bc2.brand(self.cfg.hw_version, self.sernum)
+        bc2.brand(self.cfg.hw_version, self.uuts[0].sernum)
         bc2.set_model(self.cfg.model)
         mes["arm_swver"]()
 
@@ -144,11 +143,6 @@ class Sensors(share.Sensors):
             ("arm_Ibatt", "BATT_I"),
         ):
             self[name] = sensor.Keyed(bc2, cmdkey)
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("bc2_initial", "msgSnEntry"),
-            caption=tester.translate("bc2_initial", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
 
 
 class Measurements(share.Measurements):
@@ -188,6 +182,5 @@ class Measurements(share.Measurements):
                     "arm_Ibatt",
                     "Battery current after zero cal",
                 ),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
             )
         )

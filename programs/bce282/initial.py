@@ -83,9 +83,10 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(
+        super().configure(
             self.limitdata[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
+        super().open(uut)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("Program", self._step_program),

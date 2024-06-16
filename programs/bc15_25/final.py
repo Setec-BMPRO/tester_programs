@@ -15,7 +15,8 @@ class Final(share.TestSequence):
         self.cfg = config.get(self.parameter, uut)
         self.ocp_nominal, limits = self.cfg.limits_final()
         Sensors.ocp_nominal = self.ocp_nominal
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PowerOn", self._step_poweron),
             tester.TestStep("Load", self._step_loaded),

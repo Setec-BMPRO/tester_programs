@@ -43,13 +43,13 @@ class Initial(share.TestSequence):
 
     def open(self, uut):
         """Prepare for testing."""
-        super().open(self.limitdata, Devices, Sensors, Measurements)
+        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("TestArm", self._step_test_arm),
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
-        self.sernum = None
 
     @share.teststep
     def _step_prepare(self, dev, mes):
@@ -58,7 +58,6 @@ class Initial(share.TestSequence):
         Set the Input DC voltage to 12V.
 
         """
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         mes["dmm_tstpincov"](timeout=5)
         dev["dcs_vin"].output(self.vbatt, True)
         self.measure(
@@ -74,7 +73,7 @@ class Initial(share.TestSequence):
         """Test the operation of TRSRFM."""
         trsrfm = dev["trsrfm"]
         trsrfm.open()
-        trsrfm.brand(self.hw_version, self.sernum)
+        trsrfm.brand(self.hw_version, self.uuts[0].sernum)
         self.measure(
             ("arm_swver", "dmm_redoff", "dmm_greenoff", "dmm_blueoff"), timeout=5
         )
@@ -166,11 +165,6 @@ class Sensors(share.Sensors):
             ("arm_SwVer", "SW_VER"),
         ):
             self[name] = sensor.Keyed(trsrfm, cmdkey)
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("trsrfm_initial", "msgSnEntry"),
-            caption=tester.translate("trsrfm_initial", "capSnEntry"),
-        )
-        self["sernum"].doc = "Barcode scanner"
 
 
 class Measurements(share.Measurements):
@@ -197,6 +191,5 @@ class Measurements(share.Measurements):
                 ("arm_btmac", "BtMac", "arm_BtMAC", "MAC address"),
                 ("detectBT", "DetectBT", "mirbt", "Scanned MAC address"),
                 ("arm_swver", "ARM-SwVer", "arm_SwVer", "Unit software version"),
-                ("ui_sernum", "SerNum", "sernum", "Unit serial number"),
             )
         )

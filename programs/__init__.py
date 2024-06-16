@@ -64,20 +64,9 @@ class MockSequence(share.TestSequence):
 
     def open(self, uut):
         """Open the test program."""
-        super().open(tuple(), MockDevices, MockSensors, MockMeasurements)
+        super().configure(tuple(), MockDevices, MockSensors, MockMeasurements)
+        super().open(uut)
         self.steps = (tester.TestStep("Step1", self._step1),)
-
-    def run(self, uuts):
-        """Run the test sequence."""
-        super().run(uuts)
-
-    def safety(self):
-        """Reset logical devices and sensors."""
-        super().safety()
-
-    def close(self):
-        """Close logical devices."""
-        super().close()
 
     @share.teststep
     def _step1(self, dev, mes):

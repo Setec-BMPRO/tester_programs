@@ -22,7 +22,8 @@ class Initial(share.TestSequence):
         Sensors.load_per_output = self.cfg.load_per_output
         Devices.sw_version = self.cfg.sw_version
         self.duplicate_limit_error = False
-        super().open(limits, Devices, Sensors, Measurements)
+        super().configure(limits, Devices, Sensors, Measurements)
+        super().open(uut)
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))
         )
@@ -41,7 +42,6 @@ class Initial(share.TestSequence):
             tester.TestStep("OCP", self._step_ocp),
             tester.TestStep("CanBus", self._step_canbus, self.cfg.canbus),
         )
-        self.sernum = None
         self.derate = (self.parameter == "A") and (self.cfg.canbus == False)
 
     @share.teststep
@@ -53,7 +53,6 @@ class Initial(share.TestSequence):
 
         """
         mes["dmm_lock"](timeout=5)
-        self.sernum = self.get_serial(self.uuts, "SerNum", "ui_sernum")
         dev["dcs_vbat"].output(self.cfg.vbat_inject, True, delay=1.0)
         self.measure(("dmm_vbatin", "dmm_vfusein", "dmm_3v3u"), timeout=5)
 
@@ -68,7 +67,7 @@ class Initial(share.TestSequence):
         """
         j35 = dev["j35"]
         j35.open()
-        j35.brand(self.cfg.hw_version, self.sernum, dev["rla_reset"])
+        j35.brand(self.cfg.hw_version, self.uuts[0].sernum, dev["rla_reset"])
         j35.manual_mode(start=True)  # Start the change to manual mode
         if self.derate:  # Derate older version J35A units (Rev <8)
             j35.derate_A()
@@ -314,10 +313,6 @@ class Sensors(share.Sensors):
         self["o15Vs"] = sensor.Vdc(dmm, high=10, low=3, rng=100, res=0.01)
         self["ofan"] = sensor.Vdc(dmm, high=12, low=5, rng=100, res=0.01)
         self["ocanpwr"] = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
-        self["sernum"] = sensor.DataEntry(
-            message=tester.translate("j35_initial", "msgSnEntry"),
-            caption=tester.translate("j35_initial", "capSnEntry"),
-        )
         self["mircal"] = sensor.Mirror()
         # Console sensors
         j35 = self.devices["j35"]
@@ -410,7 +405,6 @@ class Measurements(share.Measurements):
                 ("ramp_solar_pre", "SolarCutoffPre", "solar_input", ""),
                 ("ramp_solar", "SolarCutoff", "solar_input", ""),
                 ("detectcal", "DetectCal", "mircal", ""),
-                ("ui_sernum", "SerNum", "sernum", ""),
                 ("arm_swver", "SwVer", "arm_swver", "Unit software version"),
                 ("arm_auxv", "ARM-AuxV", "arm_auxv", ""),
                 ("arm_auxi", "ARM-AuxI", "arm_auxi", ""),

@@ -25,7 +25,8 @@ class Initial(share.TestSequence):
         Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
         Sensors.callback = self._dso_callback
-        super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Initialise", self._step_initialise_arm),

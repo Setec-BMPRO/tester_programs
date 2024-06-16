@@ -20,7 +20,8 @@ class Initial(share.TestSequence):
         self.cfg = config.Config
         Devices.sw_image = self.cfg.arm_bin
         Sensors.ratings = self.cfg.ratings
-        super().open(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        super().open(uut)
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("Program", self._step_program_micros),
