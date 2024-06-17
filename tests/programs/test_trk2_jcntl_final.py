@@ -45,7 +45,7 @@ class _CommonFinal(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
-        self.assertEqual("P", result.code)
+        self.assertEqual("P", result.letter)
         self.assertEqual(19, len(result.readings))
         self.assertEqual(
             ["PowerUp", "TunnelOpen", "Display", "Tanks"], self.tester.ut_steps

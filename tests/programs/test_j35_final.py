@@ -63,7 +63,7 @@ class _J35Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
-        self.assertEqual("P", result.code)
+        self.assertEqual("P", result.letter)
         self.assertEqual(rdg_count, len(result.readings))
         self.assertEqual(steps_run, self.tester.ut_steps)
 

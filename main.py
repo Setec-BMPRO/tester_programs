@@ -98,7 +98,7 @@ class Worker:
 
     def _test_result(self, result):
         """Receive Test Result signals here."""
-        self._logger.info('Test Result: "%s"', result.code)
+        self._logger.info('Test Result: "%s"', result.letter)
         for rdg in result.readings:
             self._logger.info(
                 ' "%s", %s, %s',

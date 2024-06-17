@@ -55,7 +55,7 @@ class RVSWT101Initial(ProgramTestCase):
             )
         )
         for res in self.tester.ut_result:
-            self.assertEqual("P", res.code)
+            self.assertEqual("P", res.letter)
             self.assertEqual(4, len(res.readings))
         self.assertEqual(["PowerUp", "ProgramTest"], self.tester.ut_steps)
 

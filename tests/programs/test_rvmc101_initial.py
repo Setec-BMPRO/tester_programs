@@ -71,7 +71,7 @@ class RVMC101Initial(_RVMC101Initial):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         for res in self.tester.ut_result:
-            self.assertEqual("P", res.code)
+            self.assertEqual("P", res.letter)
             self.assertEqual(5, len(res.readings))
         self.assertEqual(
             ["PowerUp", "Program", "Display", "CanBus"], self.tester.ut_steps
@@ -101,6 +101,6 @@ class RVMC101InitialLite(_RVMC101Initial):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         for res in self.tester.ut_result:
-            self.assertEqual("P", res.code)
+            self.assertEqual("P", res.letter)
             self.assertEqual(2, len(res.readings))
         self.assertEqual(["PowerUp"], self.tester.ut_steps)

@@ -28,7 +28,7 @@ class RVMC101Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         for res in self.tester.ut_result:
-            self.assertEqual("P", res.code)
+            self.assertEqual("P", res.letter)
             self.assertEqual(3, len(res.readings))
         self.assertEqual(["PowerUp", "CanBus"], self.tester.ut_steps)
 
@@ -51,6 +51,6 @@ class RVMC101FinalLite(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         for res in self.tester.ut_result:
-            self.assertEqual("P", res.code)
+            self.assertEqual("P", res.letter)
             self.assertEqual(1, len(res.readings))
         self.assertEqual(["PowerUp"], self.tester.ut_steps)

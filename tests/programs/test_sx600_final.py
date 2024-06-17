@@ -51,7 +51,7 @@ class SX600Final(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
-        self.assertEqual("P", result.code)
+        self.assertEqual("P", result.letter)
         self.assertEqual(25, len(result.readings))
         self.assertEqual(
             ["PowerUp", "PowerOn", "Load", "Load115"], self.tester.ut_steps

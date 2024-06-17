@@ -92,7 +92,7 @@ class CMRSBPInitial(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
-        self.assertEqual("P", result.code)
+        self.assertEqual("P", result.letter)
         self.assertEqual(17, len(result.readings))
         self.assertEqual(
             [
@@ -149,7 +149,7 @@ class CMRSBPSerialDate(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
-        self.assertEqual("P", result.code)
+        self.assertEqual("P", result.letter)
         self.assertEqual(2, len(result.readings))
         self.assertEqual(["SerialDate"], self.tester.ut_steps)
         # Check S/N & Date were written
@@ -189,7 +189,7 @@ class _CMRSBPFin(ProgramTestCase):
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
-        self.assertEqual("P", result.code)
+        self.assertEqual("P", result.letter)
         self.assertEqual(13, len(result.readings))
         self.assertEqual(["Startup", "Verify"], self.tester.ut_steps)
         # Access to the CMR data driver
