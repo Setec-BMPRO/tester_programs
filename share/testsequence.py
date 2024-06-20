@@ -322,11 +322,6 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         validator=validators.instance_of(tester.devphysical.PhysicalDevices),
     )
     limits: TestLimits = field(init=False, factory=TestLimits)
-    fixture: libtester.Fixture = field(
-        init=False,
-        default=None,
-        validator=validators.optional(validators.instance_of(libtester.Fixture)),
-    )
     devices: Optional[Devices] = field(
         init=False,
         default=None,
@@ -341,11 +336,6 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         init=False,
         default=None,
         validator=validators.optional(validators.instance_of(Measurements)),
-    )
-    parameter: Optional[str] = field(
-        init=False,
-        default=None,
-        validator=validators.optional(validators.instance_of(str)),
     )
 
     def configure(
@@ -369,23 +359,14 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
 
     def open(self) -> None:
-        """Open test program.
-
-        @param uuts Sequence of Unit Under Test's
-        @param fixture libtester.Fixture
-
-        """
+        """Open test program."""
         super().open()
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
 
     def run(self) -> None:
-        """Run the test sequence.
-
-        @param uuts Sequence of Unit Under Test's
-
-        """
+        """Run the test sequence."""
         self.devices.run()
         super().run()
 
