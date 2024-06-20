@@ -62,10 +62,10 @@ from . import wtsi200
 class MockSequence(share.TestSequence):
     """Mock Test Sequence used for interactive testing of the Test Executive."""
 
-    def open(self, uut):
+    def open(self):
         """Open the test program."""
         super().configure(tuple(), MockDevices, MockSensors, MockMeasurements)
-        super().open(uut)
+        super().open()
         self.steps = (tester.TestStep("Step1", self._step1),)
 
     @share.teststep

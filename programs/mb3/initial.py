@@ -20,10 +20,10 @@ class Initial(share.TestSequence):
         libtester.LimitDelta("Vbat", 14.6, 0.3),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerOn", self._step_power_on),
             tester.TestStep("PgmAVR", self.devices["program_avr"].program),

@@ -33,13 +33,13 @@ class Initial(share.TestSequence):
     )
     analog_read_wait = 2  # Analog read response time
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Sensors.sw_nrf_image = self.cfg.sw_nrf_image
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep(

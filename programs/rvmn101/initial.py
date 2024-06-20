@@ -15,9 +15,9 @@ from . import console, config
 class Initial(share.TestSequence):
     """RVMN101 and RVMN5x Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.fixture = self.cfg.values.fixture
         Devices.reversed_outputs = self.cfg.values.reversed_outputs
         Sensors.nordic_devicetype = self.cfg.values.nordic_devicetype
@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
         Sensors.arm_devicetype = self.cfg.values.arm_devicetype
         Sensors.arm_image = self.cfg.values.arm_image
         super().configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),

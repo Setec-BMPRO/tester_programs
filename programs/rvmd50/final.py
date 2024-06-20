@@ -16,11 +16,11 @@ class Final(share.TestSequence):
     start_delay = 5.0
     limitdata = (libtester.LimitBoolean("PagePressed", True, doc="Button pressed"),)
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Display", self._step_display),

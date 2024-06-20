@@ -28,11 +28,11 @@ class Initial(share.TestSequence):
         libtester.LimitInteger("Phase", 2, doc="AC phase reading"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         Sensors.sw_image = self.sw_image
         super().configure(self.testlimits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),

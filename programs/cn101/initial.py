@@ -15,12 +15,12 @@ from . import config, console
 class Initial(share.TestSequence):
     """CN101 Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.sw_version = self.cfg.sw_version
         super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))
         )

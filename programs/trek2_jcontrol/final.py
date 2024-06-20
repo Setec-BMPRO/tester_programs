@@ -59,13 +59,13 @@ class Final(share.TestSequence):
         },
     }
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         self.config = self.config_data[self.parameter]["Config"]
         super().configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("TunnelOpen", self._step_tunnel_open),

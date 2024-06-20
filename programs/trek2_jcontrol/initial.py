@@ -60,14 +60,14 @@ class Initial(share.TestSequence):
         },
     }
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]["Config"]
         Devices.sw_image = self.config.sw_image
         super().configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self.devices["programmer"].program),

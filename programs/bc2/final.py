@@ -11,11 +11,11 @@ from . import config, console
 class Final(share.TestSequence):
     """BC2 Final Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         super().configure(self.cfg.limits_final(), Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("Bluetooth", self._step_bluetooth),

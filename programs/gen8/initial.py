@@ -64,10 +64,10 @@ class Initial(share.TestSequence):
         libtester.LimitRegExp("SwBld", r"^{0}$".format(bin_version[4:])),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("Program", self._step_program),

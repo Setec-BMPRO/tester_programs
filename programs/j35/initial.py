@@ -14,16 +14,16 @@ from . import config, console
 class Initial(share.TestSequence):
     """J35 Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_initial()
         Sensors.output_count = self.cfg.output_count
         Sensors.load_per_output = self.cfg.load_per_output
         Devices.sw_version = self.cfg.sw_version
         self.duplicate_limit_error = False
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))
         )

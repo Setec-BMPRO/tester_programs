@@ -18,10 +18,10 @@ class Final(share.TestSequence):
         libtester.LimitDelta("OCP", 14.0, 2.0),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("DCPowerOn", self._step_dcpower_on),
             tester.TestStep("DCLoad", self._step_dcload),

@@ -43,10 +43,10 @@ class Initial(share.TestSequence):
         libtester.LimitRegExp("CmrSerNum", r"^[9A-HJ-NP-V][1-9A-C][0-9]{5}F[0-9]{4}$"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(self.limitdata, Devices, Sensors, MeasureIni)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),
@@ -159,10 +159,10 @@ class Initial(share.TestSequence):
 class SerialDate(share.TestSequence):
     """CMR-SBP SerialDate Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(Initial.limitdata, Devices, Sensors, MeasureIni)
-        super().open(uut)
+        super().open()
         self.steps = (tester.TestStep("SerialDate", self._step_sn_date),)
 
     @share.teststep
@@ -233,10 +233,10 @@ class Final(share.TestSequence):
         "17_RMA": _common17 + (libtester.LimitBetween("Capacity", 13900, 20000),),
     }
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(self.limitdata[self.parameter], Devices, Sensors, MeasureFin)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Startup", self._step_startup),
             tester.TestStep("Verify", self._step_verify),

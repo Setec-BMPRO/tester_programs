@@ -14,7 +14,7 @@ import queue
 import unittest
 from unittest.mock import Mock, patch
 
-from libtester import UUT
+from libtester import Fixture, UUT
 import tester
 from pydispatch import dispatcher
 
@@ -135,6 +135,7 @@ class ProgramTestCase(unittest.TestCase):
             UUT.from_sernum("A000000000{0}".format(uut))
             for uut in range(1, cls.per_panel + 1)
         )
+        cls.fixture = Fixture.from_barcode("123456-0001")
 
     def setUp(self):
         """Per-Test setup."""
@@ -142,7 +143,7 @@ class ProgramTestCase(unittest.TestCase):
         myq = Mock(name="MyQueue")
         myq.get.side_effect = queue.Empty
         with patch("queue.Queue", return_value=myq):
-            self.tester.open(self.ut_program, self.uuts[0])
+            self.tester.open(self.ut_program, self.fixture, self.uuts)
         self.test_sequence = self.tester.sequence
 
     def tearDown(self):

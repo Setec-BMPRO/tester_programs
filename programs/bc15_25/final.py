@@ -10,13 +10,13 @@ from . import config
 class Final(share.TestSequence):
     """BC15/25 Final Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         self.ocp_nominal, limits = self.cfg.limits_final()
         Sensors.ocp_nominal = self.ocp_nominal
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerOn", self._step_poweron),
             tester.TestStep("Load", self._step_loaded),

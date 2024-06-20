@@ -34,11 +34,11 @@ class Initial(share.TestSequence):
     # In testmode, updates of the water tank levels are less than 100ms.
     analog_read_wait = 0.1  # Analog read response time
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         Devices.sw_arm_image = self.sw_arm_image
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("PgmARM", self.devices["programmer"].program),

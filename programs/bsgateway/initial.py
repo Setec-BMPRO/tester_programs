@@ -27,11 +27,11 @@ class Initial(share.TestSequence):
         libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
-        Sensors.sw_image = self.sw_image[uut.revision]
+        Sensors.sw_image = self.sw_image[self.uuts[0].revision]
         super().configure(self.testlimits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),

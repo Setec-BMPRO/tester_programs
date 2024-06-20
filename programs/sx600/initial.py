@@ -15,16 +15,16 @@ from . import arduino, config, console
 class Initial(share.TestSequence):
     """SX-600 Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         self.cfg = config.Config
-        self.cfg.configure(uut)
+        self.cfg.configure(self.uuts[0])
         Sensors.ratings = self.cfg.ratings
         Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
         Devices.is_renesas = self.cfg.is_renesas
         super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Lock", self._step_lock),
             tester.TestStep("Program", self._step_program),

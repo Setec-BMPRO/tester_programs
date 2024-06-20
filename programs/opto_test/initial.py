@@ -39,11 +39,11 @@ class Initial(share.TestSequence):
     )
     _email_server = "smtp.mel.setec.com.au"
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         Sensors._opto_count = self._opto_count
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("BoardNum", self._step_boardnum),
             tester.TestStep("InputAdj1", self._step_in_adj1),

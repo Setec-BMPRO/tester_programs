@@ -27,12 +27,12 @@ class Initial(share.TestSequence):
         libtester.LimitBetween("BkLghtOn", 2.5, 3.5, doc="Backlight on"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.sw_image = Sensors.sw_image = self.cfg.sw_image
         super().configure(self.testlimits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),

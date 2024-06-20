@@ -46,11 +46,11 @@ class InitialSyn(share.TestSequence):
         libtester.LimitLow("FixtureLock", 20),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         Sensors.pic_hex_syn = config.pic_hex_syn
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Program", self._step_program),
             tester.TestStep("PowerUp", self._step_pwrup),

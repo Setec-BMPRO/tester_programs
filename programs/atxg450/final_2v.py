@@ -39,10 +39,10 @@ class Final2V(share.TestSequence):
         libtester.LimitLow("PwrFailOn", 0.5),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("SwitchOn", self._step_switch_on),

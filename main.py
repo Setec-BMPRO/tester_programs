@@ -52,6 +52,7 @@ class Config:
     _config = field(init=False, factory=configparser.ConfigParser)
     # Configuration values
     tester_type = field(init=False)
+    fixture = field(init=False)
     test_program = field(init=False)
     per_panel = field(init=False)
     parameter = field(init=False)
@@ -63,6 +64,8 @@ class Config:
         self._config.read(self.configfile)
         section = self._config["DEFAULT"]
         self.tester_type = section.get("TesterType", "ATE3")
+        fixture = section.get("Fixture")
+        self.fixture = libtester.Fixture.from_barcode(fixture)
         self.test_program = section.get("Program", "Dummy")
         self.per_panel = section.getint("PerPanel", 1)
         self.parameter = section.get("Parameter")
@@ -130,9 +133,10 @@ class Worker:
         try:
             self.tst.start(self.config.tester_type, programs.PROGRAMS)
             self._logger.info('Open Program "%s"', self.config.test_program)
-            self.tst.open(self.pgm, self.config.uut)
+            uuts = [self.config.uut] * self.config.per_panel
+            self.tst.open(self.pgm, self.config.fixture, uuts)
             self._logger.info("Running Test")
-            self.tst.test((self.config.uut,) * self.config.per_panel)
+            self.tst.test(uuts)
         except Exception:
             self._logger.error("Test Run Exception:\n%s", traceback.format_exc())
             raise

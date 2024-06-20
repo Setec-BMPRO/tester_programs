@@ -20,10 +20,10 @@ class Final(share.TestSequence):
         libtester.LimitHigh("Vchem", 2.0, doc="Voltage present on sense conn"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerOn", self._step_power_on),
             tester.TestStep("Solar", self._step_solar),

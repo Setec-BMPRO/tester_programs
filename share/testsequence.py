@@ -322,7 +322,11 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         validator=validators.instance_of(tester.devphysical.PhysicalDevices),
     )
     limits: TestLimits = field(init=False, factory=TestLimits)
-    uuts: Sequence[libtester.UUT] = field(init=False, factory=list)
+    fixture: libtester.Fixture = field(
+        init=False,
+        default=None,
+        validator=validators.optional(validators.instance_of(libtester.Fixture)),
+    )
     devices: Optional[Devices] = field(
         init=False,
         default=None,
@@ -364,27 +368,26 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
         self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
 
-    def open(self, uut: libtester.UUT) -> None:
+    def open(self) -> None:
         """Open test program.
 
-        @param uut Libtester.UUT
+        @param uuts Sequence of Unit Under Test's
+        @param fixture libtester.Fixture
 
         """
-        super().open(uut)
+        super().open()
         self.devices.open()
         self.sensors.open()
         self.measurements.open()
 
-    def run(self, uuts: Sequence[libtester.UUT]) -> None:
+    def run(self) -> None:
         """Run the test sequence.
 
-        @param uuts Iterable of Unit Under Test's
+        @param uuts Sequence of Unit Under Test's
 
         """
-        self.uuts.clear()
-        self.uuts += uuts
         self.devices.run()
-        super().run(self.uuts)
+        super().run()
 
     def safety(self) -> None:
         """Reset everything ready for another test."""

@@ -15,12 +15,12 @@ from . import console, config
 class Initial(share.TestSequence):
     """RVSWT101 Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.Config.get(self.parameter, uut)
+        self.cfg = config.Config.get(self.parameter, self.uuts[0])
         Sensors.sw_image = self.cfg["software"]
         super().configure(self.cfg["limits_ini"], Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         # Adjust for different console behaviour
         self.devices["rvswt101"].banner_lines = self.cfg["banner_lines"]
         self.steps = (

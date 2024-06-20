@@ -19,10 +19,10 @@ class Final(share.TestSequence):
         libtester.LimitPercent("Vout", 14.4, 3.0),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (tester.TestStep("PowerOn", self._step_power_on),)
 
     @share.teststep

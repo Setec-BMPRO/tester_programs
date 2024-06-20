@@ -34,10 +34,10 @@ class Initial(share.TestSequence):
         libtester.LimitLow("FixtureLock", 20),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("FixtureLock", self._step_fixture_lock),
             tester.TestStep("SecCheck", self._step_sec_check),

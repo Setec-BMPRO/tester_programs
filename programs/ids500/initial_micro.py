@@ -22,11 +22,11 @@ class InitialMicro(share.TestSequence):
         libtester.LimitRegExp("MicroTemp", r"D, 16,    [0-9]{2},MICRO Temp\.\(C\)"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         Sensors.pic_hex_mic = config.pic_hex_mic
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Comms", self._step_comms),

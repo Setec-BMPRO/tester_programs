@@ -27,10 +27,10 @@ class Initial(share.TestSequence):
         libtester.LimitBetween("VoutOcp", 5, 16),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Power90", self._step_power_90),
             tester.TestStep("Power240", self._step_power_240),

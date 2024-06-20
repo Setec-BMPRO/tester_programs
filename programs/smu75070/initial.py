@@ -40,10 +40,10 @@ class Initial(share.TestSequence):
         ),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("PowerOn", self._step_pwron),

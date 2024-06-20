@@ -58,10 +58,10 @@ class InitialMain(share.TestSequence):
         libtester.LimitDelta("MonOutErr", 0, config.ldd_out_mon_error_6),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwr_up),
             tester.TestStep("KeySw1", self._step_key_sw1),

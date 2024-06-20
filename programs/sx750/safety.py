@@ -17,10 +17,10 @@ class Safety(share.TestSequence):
         libtester.LimitBetween("acw", 2.0, 4.0),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Gnd1", self._step_gnd1),
             tester.TestStep("Gnd2", self._step_gnd2),

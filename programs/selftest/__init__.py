@@ -35,12 +35,12 @@ class Main(share.TestSequence):
         libtester.LimitLow("Disch_off", 0.5),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         is_ate2 = share.config.System.tester_type.startswith("ATE2")
         Devices.is_ate2 = is_ate2
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("ACSource", self._step_acsource),
             tester.TestStep("Checker", self._step_checker),

@@ -23,14 +23,14 @@ from . import config, console
 class Initial(share.TestSequence):
     """CN10x / ODL10x Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_initial
         Sensors.sw_nordic_image = self.cfg.sw_nordic_image
         Devices.sw_nxp_image = self.cfg.sw_nxp_image
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PartCheck", self._step_part_check),
             tester.TestStep("PowerUp", self._step_power_up),

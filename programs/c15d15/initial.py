@@ -26,10 +26,10 @@ class Initial(share.TestSequence):
         libtester.LimitBetween("OCP", 1.0, 1.4),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("OCP", self._step_ocp),

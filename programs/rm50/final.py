@@ -30,10 +30,10 @@ class Final(share.TestSequence):
         libtester.LimitHigh("Eff", 84.0),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("FixtureLock", self._step_fixture_lock),
             tester.TestStep("DCInputLeakage", self._step_dcinput_leakage),

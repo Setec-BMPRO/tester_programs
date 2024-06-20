@@ -11,12 +11,12 @@ from . import console, config
 class Final(share.TestSequence):
     """BP35 / BP35-II Final Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_final()
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.limits["ARM-SwVer"].adjust(
             "^{0}$".format(self.cfg.arm_sw_version.replace(".", r"\."))
         )

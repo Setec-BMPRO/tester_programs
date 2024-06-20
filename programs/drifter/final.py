@@ -17,10 +17,10 @@ class Final(share.TestSequence):
         libtester.LimitDelta("USB5V", 5.00, 0.25),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("DisplayCheck", self._step_displ_check),
             tester.TestStep("SwitchCheck", self._step_sw_check),

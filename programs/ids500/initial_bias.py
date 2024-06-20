@@ -19,10 +19,10 @@ class InitialBias(share.TestSequence):
     )
     full_load = 1.2  # Must supply at least this much current
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwrup),
             tester.TestStep("Load", self._step_load),

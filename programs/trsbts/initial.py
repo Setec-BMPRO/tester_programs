@@ -48,12 +48,12 @@ class Initial(share.TestSequence):
         libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         self.config = config.get(self.parameter)
         Sensors.sw_image = self.config.sw_image
         super().configure(self._limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("PgmNordic", self._step_program),

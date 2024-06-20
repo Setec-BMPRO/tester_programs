@@ -14,9 +14,9 @@ from . import config, device, arduino
 class Final(share.TestSequence):
     """RVSWT101 Final Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.Config.get(self.parameter, uut)
+        self.cfg = config.Config.get(self.parameter, self.uuts[0])
         button_count = self.cfg["button_count"]
         Devices.fixture_num = self.cfg["fixture_num"]
         Devices.button_count = button_count
@@ -25,7 +25,7 @@ class Final(share.TestSequence):
             6: "limits_fin_6_button",
         }[button_count]
         super().configure(self.cfg[limits_fin], Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
         self.buttons = []  # 12 or 18 measurement name strings
         buttons_in_use = range(1, button_count + 1)

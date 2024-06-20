@@ -42,15 +42,16 @@ class Final(share.TestSequence):
         libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Pin", self._step_pin),
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
         # PC-29164 for TRS-BT2 - Use BLE with chip antenna
+        uut = self.uuts[0]
         if uut and uut.lot.number in self.pc29164_lots:
             self.limits["ScanRSSI"].adjust(self.pc29164_rssi)
 

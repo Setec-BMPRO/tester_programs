@@ -13,13 +13,13 @@ from . import config
 class Final(share.TestSequence):
     """GEN9-540 Final Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config
-        self.cfg.configure(self.parameter, uut)
+        self.cfg.configure(self.parameter, self.uuts[0])
         Sensors.callback = self._dso_callback
         super().configure(self.cfg.limits_final, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwrup),
             tester.TestStep("PowerOn", self._step_pwron),

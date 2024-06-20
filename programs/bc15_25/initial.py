@@ -17,16 +17,16 @@ from . import config
 class Initial(share.TestSequence):
     """BC15/25 Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         self.ocp_nominal, limits = self.cfg.limits_initial()
         Sensors.ocp_nominal = self.ocp_nominal
         Devices.arm_file = self.cfg.arm_file
         Devices.arm_port = self.cfg.arm_port
         console.Console.cal_linecount = self.cfg.cal_linecount
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("Program", self._step_program),

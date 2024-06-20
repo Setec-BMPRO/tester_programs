@@ -11,12 +11,12 @@ from . import config
 class Final(share.TestSequence):
     """SX-600 Final Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         self.cfg = config.Config
         limits = self.cfg.limits_final
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_powerup),
             tester.TestStep("PowerOn", self._step_poweron),

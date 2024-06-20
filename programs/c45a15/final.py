@@ -18,10 +18,10 @@ class Final(share.TestSequence):
         libtester.LimitLow("Voff", 1.0),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("ConnectCMR", self._step_connect_cmr),

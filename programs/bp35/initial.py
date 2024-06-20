@@ -16,9 +16,9 @@ from . import arduino, console, config
 class Initial(share.TestSequence):
     """BP35 / BP35-II Initial Test Programs."""
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_initial()
         if self.cfg.is_2:
             arm_image = "bp35II_{0}.bin".format(self.cfg.arm_sw_version)
@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
         Sensors.pic_image = "bp35sr_{0}.hex".format(self.cfg.pic_sw_version)
         Measurements.is_pm = self.cfg.is_pm
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         if self.cfg.is_pm:
             self.devices["PmTimer"].interval = self.cfg.pm_zero_wait
         self.limits["ARM-SwVer"].adjust(

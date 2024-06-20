@@ -38,13 +38,13 @@ class Initial(share.TestSequence):
         libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
     )
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         self.config = config.get(self.parameter)
         self.is_atsam = self.config.is_atsam
         Devices.sw_file = Sensors.sw_file = self.config.sw_file
         super().configure(self._limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program),

@@ -17,10 +17,10 @@ class Final(share.TestSequence):
     )
     is_full = None  # False if 'Lite' version (no uC)
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.is_full = self.parameter != "LITE"
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

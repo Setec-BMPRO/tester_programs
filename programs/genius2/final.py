@@ -38,12 +38,12 @@ class Final(share.TestSequence):
         },
     }
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         super().configure(
             self.limitdata[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("PowerOn", self._step_poweron),

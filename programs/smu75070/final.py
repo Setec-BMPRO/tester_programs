@@ -18,10 +18,10 @@ class Final(share.TestSequence):
         libtester.LimitLow("inOCP", 69.3),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("FullLoad", self._step_full_load),

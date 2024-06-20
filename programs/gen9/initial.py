@@ -18,15 +18,15 @@ class Initial(share.TestSequence):
 
     pfc_stable = 0.05  # Reading to reading difference for PFC voltage stability
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config
-        self.cfg.configure(self.parameter, uut)
+        self.cfg.configure(self.parameter, self.uuts[0])
         Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
         Sensors.callback = self._dso_callback
         super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Initialise", self._step_initialise_arm),

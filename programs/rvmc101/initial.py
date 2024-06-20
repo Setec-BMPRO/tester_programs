@@ -27,12 +27,12 @@ class Initial(share.TestSequence):
     )
     is_full = None  # False if 'Lite' version (no micro fitted)
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
         self.is_full = self.parameter != "LITE"
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("Program", self._step_program, self.is_full),

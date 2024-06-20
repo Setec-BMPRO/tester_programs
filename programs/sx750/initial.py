@@ -15,13 +15,13 @@ from . import arduino, config, console
 class Initial(share.TestSequence):
     """SX-750 Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
         self.cfg = config.Config
         Devices.sw_image = self.cfg.arm_bin
         Sensors.ratings = self.cfg.ratings
         super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),
             tester.TestStep("Program", self._step_program_micros),

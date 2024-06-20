@@ -13,11 +13,11 @@ from . import config, console
 class Initial(share.TestSequence):
     """BC2 Initial Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         super().configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("TestArm", self._step_test_arm),

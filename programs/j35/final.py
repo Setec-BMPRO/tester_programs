@@ -11,14 +11,14 @@ from . import config
 class Final(share.TestSequence):
     """J35 Final Test Program."""
 
-    def open(self, uut):
+    def open(self):
         """Prepare for testing."""
-        self.cfg = config.get(self.parameter, uut)
+        self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_final()
         Sensors.output_count = self.cfg.output_count
         self.duplicate_limit_error = False
         super().configure(limits, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))
         )

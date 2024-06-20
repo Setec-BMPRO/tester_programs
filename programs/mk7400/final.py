@@ -24,10 +24,10 @@ class Final(share.TestSequence):
         libtester.LimitHigh("PwrFailOff", 11.0),
     )
 
-    def open(self, uut):
+    def open(self):
         """Create the test program as a linear sequence."""
         super().configure(self.limitdata, Devices, Sensors, Measurements)
-        super().open(uut)
+        super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
             tester.TestStep("PowerOn", self._step_power_on),
