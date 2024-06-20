@@ -51,6 +51,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.config = config.get(self.parameter)
+        Devices.fixture = self.fixture
         Sensors.sw_image = self.config.sw_image
         super().configure(self._limits, Devices, Sensors, Measurements)
         super().open()
@@ -140,9 +141,10 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
-        fixture = "034352"
         # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
@@ -158,7 +160,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         trsbts_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        nordic_port = share.config.Fixture.port(fixture, "NORDIC")
+        nordic_port = share.config.Fixture.port(self.fixture, "NORDIC")
         trsbts_ser.port = nordic_port
         # trsbts Console driver
         self["trsbts"] = console.Console(trsbts_ser)

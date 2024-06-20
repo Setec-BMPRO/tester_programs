@@ -22,6 +22,7 @@ class Initial(share.TestSequence):
         Sensors.ratings = self.cfg.ratings
         Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
+        Devices.fixture = self.fixture
         Devices.is_renesas = self.cfg.is_renesas
         super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
         super().open()
@@ -267,7 +268,7 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = "033484"
+    fixture = None
     is_renesas = None
 
     def open(self):

@@ -63,6 +63,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]["Config"]
+        Devices.fixture = self.fixture
         Devices.sw_image = self.config.sw_image
         super().configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
@@ -102,6 +103,7 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
     sw_image = None
 
     def open(self):
@@ -114,7 +116,7 @@ class Devices(share.Devices):
             ("rla_boot", tester.Relay, "RLA2"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
-        arm_port = share.config.Fixture.port("027420", "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         # ARM device programmer
         self["programmer"] = share.programmer.ARM(
             arm_port,

@@ -48,6 +48,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
+        Devices.fixture = self.fixture
         super().configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
@@ -171,6 +172,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -190,7 +193,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port("017823", "ARDUINO")
+        ard_ser.port = share.config.Fixture.port(self.fixture, "ARDUINO")
         self["ard"] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         self["dcs_Vcom"].output(12.0, output=True, delay=2)

@@ -18,6 +18,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
+        Devices.fixture = self.fixture
         Devices.sw_version = self.cfg.sw_version
         super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
         super().open()
@@ -103,6 +104,7 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
     sw_version = None  # ARM software version
 
     def open(self):
@@ -118,7 +120,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port("028468", "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         sw_file = "cn101_{0}.bin".format(self.sw_version)
         self["programmer"] = share.programmer.ARM(
             arm_port,

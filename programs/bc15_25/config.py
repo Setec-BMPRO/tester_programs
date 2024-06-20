@@ -8,8 +8,6 @@ import math
 from attrs import define, field, validators
 import libtester
 
-import share
-
 
 def get(parameter, uut):
     """Get a configuration based on the parameter and lot.
@@ -32,7 +30,6 @@ class _Values:
     """Adjustable configuration data values."""
 
     arm_file = field(validator=validators.instance_of(str))
-    arm_port = field(validator=validators.instance_of(str))
     sw_version = field(validator=validators.instance_of(str))
     cal_linecount = field(validator=validators.instance_of(int))
 
@@ -90,7 +87,6 @@ class BCx5:
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         values = cls._rev_data[rev]
         cls.arm_file = values.arm_file
-        cls.arm_port = values.arm_port
         cls.sw_version = values.sw_version
         cls.cal_linecount = values.cal_linecount
 
@@ -100,10 +96,8 @@ class BC15(BCx5):
 
     sw_version = "2.0.18498.2003"
     arm_file_pattern = "bc15_{0}.bin"
-    arm_port = share.config.Fixture.port("028467", "ARM")
     _rev8_values = _Values(
         arm_file=arm_file_pattern.format(sw_version),
-        arm_port=arm_port,
         sw_version=sw_version,
         cal_linecount=43,
     )
@@ -132,7 +126,7 @@ class BC15(BCx5):
             + (
                 libtester.LimitLow("5Vs", 99.0),  # No test point
                 libtester.LimitRegExp(
-                    "ARM-SwVer", "^{0}$".format(cls.sw_version.replace(".", r"\."))
+                    "ARM-SwVer", r"^{0}$".format(cls.sw_version.replace(".", r"\."))
                 ),
                 libtester.LimitPercent("OCP_pre", ocp_nominal, 15),
                 libtester.LimitPercent("OCP_post", ocp_nominal, 2.0),
@@ -162,10 +156,8 @@ class BC25(BCx5):
 
     sw_version = "2.0.20136.2004"
     arm_file_pattern = "bc25_{0}.bin"
-    arm_port = share.config.Fixture.port("031032", "ARM")
     _rev5_values = _Values(
         arm_file=arm_file_pattern.format(sw_version),
-        arm_port=arm_port,
         sw_version=sw_version,
         cal_linecount=43,
     )
@@ -192,7 +184,7 @@ class BC25(BCx5):
             + (
                 libtester.LimitDelta("5Vs", 4.95, 0.15),
                 libtester.LimitRegExp(
-                    "ARM-SwVer", "^{0}$".format(cls.sw_version.replace(".", r"\."))
+                    "ARM-SwVer", r"^{0}$".format(cls.sw_version.replace(".", r"\."))
                 ),
                 libtester.LimitPercent("OCP_pre", ocp_nominal, 15),
                 libtester.LimitPercent("OCP_post", ocp_nominal, 2.0),

@@ -18,6 +18,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.cfg = config.Config
+        Devices.fixture = self.fixture
         Devices.sw_image = self.cfg.arm_bin
         Sensors.ratings = self.cfg.ratings
         super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
@@ -333,7 +334,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    sw_image = None  # ARM software image filename
+    fixture = None
+    sw_image = None
 
     def open(self):
         """Create all Instruments."""
@@ -358,7 +360,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.config.Fixture.port("022837", "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         # ARM device programmer
         self["programmer"] = share.programmer.ARM(
             arm_port,
@@ -373,7 +375,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port("022837", "ARDUINO")
+        ard_ser.port = share.config.Fixture.port(self.fixture, "ARDUINO")
         self["ard"] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ("dcs_Arduino", "dcs_Vcom", "dcs_DigPot"):

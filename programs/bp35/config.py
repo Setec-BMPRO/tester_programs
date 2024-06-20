@@ -55,7 +55,6 @@ class BP35:
     # Software versions
     arm_sw_version = "2.0.17344.4603"  # Software Rev 14
     pic_sw_version = "1.6.20227.735"  # Software Rev 11
-    fixture_num = "027176"  # BP35 Fixture
     pic_hw_version = 4
     # SR Solar Reg settings
     sr_vset = 13.650
@@ -314,7 +313,6 @@ class BP35_II(BP35):
     arm_5015 = "2.0.20330.5015"  # PC-24332 & MA-368 (All Rev 3)
     arm_5073 = "2.0.64652.5073"  # Rev 4 @ ECO-23109 & MA395, Rev 5, Rev 7
     arm_5090 = "2.0.1072.5090"  # Rev 6
-    fixture_num = "034400"  # BP35-II Fixture
 
     @classmethod
     def limits_initial(cls):

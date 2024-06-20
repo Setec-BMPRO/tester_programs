@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
         else:
             arm_image = "bp35_{0}.bin".format(self.cfg.arm_sw_version)
         Devices.arm_image = arm_image
-        Devices.fixture_num = self.cfg.fixture_num
+        Devices.fixture = self.fixture
         Sensors.outputs = self.cfg.outputs
         Sensors.iload = self.cfg.iload
         Sensors.pic_image = "bp35sr_{0}.hex".format(self.cfg.pic_sw_version)
@@ -334,7 +334,7 @@ class Devices(share.Devices):
     """Devices."""
 
     arm_image = None  # ARM software image
-    fixture_num = None  # Fixture number
+    fixture = None
 
     def open(self):
         """Create all Instruments."""
@@ -360,7 +360,7 @@ class Devices(share.Devices):
             (self.physical_devices["PICKIT"], self["rla_pic"])
         )
         # ARM device programmer
-        arm_port = share.config.Fixture.port(self.fixture_num, "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         self["program_arm"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.arm_image,
@@ -385,7 +385,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port(self.fixture_num, "ARDUINO")
+        ard_ser.port = share.config.Fixture.port(self.fixture, "ARDUINO")
         self["ard"] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         self["dcs_vcom"].output(9.0, output=True, delay=5.0)

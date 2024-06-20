@@ -29,6 +29,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
+        Devices.fixture = self.fixture
         Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
         self.is_full = self.parameter != "LITE"
         super().configure(self.limitdata, Devices, Sensors, Measurements)
@@ -103,6 +104,7 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
     sw_image = None
 
     def open(self):
@@ -125,7 +127,7 @@ class Devices(share.Devices):
         self["canreader"] = tester.CANReader(self["can"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
         self["display"] = display.LEDControl(self["can"])
-        arm_port = share.config.Fixture.port("032870", "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         self["program_arm"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_image,

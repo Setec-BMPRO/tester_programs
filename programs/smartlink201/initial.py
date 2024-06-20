@@ -36,6 +36,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
+        Devices.fixture = self.fixture
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Sensors.sw_nrf_image = self.cfg.sw_nrf_image
         super().configure(self.limitdata, Devices, Sensors, Measurements)
@@ -130,11 +131,11 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
     sw_arm_image = None
 
     def open(self):
         """Create all Instruments."""
-        fixture = "035827"
         # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
@@ -148,7 +149,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port(fixture, "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         self["progARM"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_arm_image,
@@ -158,7 +159,7 @@ class Devices(share.Devices):
         # Serial connection to the Nordic console
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
         #   Set port separately, as we don't want it opened yet
-        smartlink201_ser.port = share.config.Fixture.port(fixture, "NORDIC")
+        smartlink201_ser.port = share.config.Fixture.port(self.fixture, "NORDIC")
         con_class = {
             "B": console.BLExtenderConsole,
             "S": console.SmartLink201Console,

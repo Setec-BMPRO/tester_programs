@@ -4,8 +4,14 @@
 
 import os
 import pathlib
+from typing import ClassVar, Dict
+
+from attrs import define
+
+import libtester
 
 
+@define
 class System:  # pylint: disable=too-few-public-methods
     """System data."""
 
@@ -13,10 +19,10 @@ class System:  # pylint: disable=too-few-public-methods
     # One of ('ATE2a', 'ATE2c', 'ATE3', 'ATE4')
     #  Must be set by the user of this project, since there is
     #  no way we can find it...
-    tester_type = "ATE4"  # A default value...
+    tester_type: ClassVar[str] = "ATE4"  # A default value...
 
     @classmethod
-    def ble_url(cls):
+    def ble_url(cls) -> str:
         """Lookup the URL of the Bluetooth JSONRPC server.
 
         @return URL of JSON-RPC server
@@ -29,6 +35,7 @@ class System:  # pylint: disable=too-few-public-methods
         return url
 
 
+@define
 class Fixture:
     """Fixture specific data, such as serial port assignment.
 
@@ -42,13 +49,19 @@ class Fixture:
 
     """
 
-    # A single direct connected FTDI, ID: 0403:6001, without S/N
-    _ftdi = {"posix": "/dev/ttyUSB0", "nt": "COM16"}[os.name]
-    # FTDI without S/N connected via a USB Hub
-    _ftdi_hub_1 = {"posix": "/dev/ttyUSB0", "nt": "COM14"}[os.name]
-    _ftdi_hub_2 = {"posix": "/dev/ttyUSB1", "nt": "COM15"}[os.name]
+    __slots__ = ()
 
-    _data = {
+    # A single direct connected FTDI, ID: 0403:6001, without S/N
+    _ftdi: ClassVar[Dict[str, str]] = {"posix": "/dev/ttyUSB0", "nt": "COM16"}[os.name]
+    # FTDI without S/N connected via a USB Hub
+    _ftdi_hub_1: ClassVar[Dict[str, str]] = {"posix": "/dev/ttyUSB0", "nt": "COM14"}[
+        os.name
+    ]
+    _ftdi_hub_2: ClassVar[Dict[str, str]] = {"posix": "/dev/ttyUSB1", "nt": "COM15"}[
+        os.name
+    ]
+
+    _data: ClassVar[Dict[str, Dict[str, str]]] = {
         # Fixtures with a single USB Serial (inc. FTDI with S/N)
         "017048": {  # IDS-500 Final (Prolific)
             "PIC": {"posix": "/dev/ttyUSB0", "nt": "COM6"}[os.name],
@@ -175,26 +188,32 @@ class Fixture:
     }
 
     @classmethod
-    def port(cls, fixture, name):
+    def port(cls, fixture: libtester.Fixture, name: str) -> str:
         """Lookup the serial port assignment of a fixture.
 
-        @param fixture Fixture ID
+        @param fixture libtester.Fixture
         @param name Port name
         @return Serial port name
 
         """
-        result = cls._data[fixture][name]
+        if not isinstance(fixture, libtester.Fixture):
+            raise ValueError(
+                "Fixture must be a libtester.Fixture, not {0!r}".format(fixture)
+            )
+        item_num = fixture.item.number
+        result = cls._data[item_num][name]
         # ATE4 has the GEN4 Arduino as ttyACM1
         if System.tester_type == "ATE4" and result == "/dev/ttyACM1":
             result = "/dev/ttyACM2"
         return result
 
 
+@define
 class JFlashProject:
     """Common store of JFlash project files for devices."""
 
     @classmethod
-    def projectfile(cls, device):
+    def projectfile(cls, device: str) -> pathlib.Path:
         """Path to a device's jflash project file.
 
         @param device Device name string (Matches project filename)

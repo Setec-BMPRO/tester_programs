@@ -29,6 +29,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
+        Devices.fixture = self.fixture
         super().configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
@@ -72,6 +73,8 @@ class Final(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -83,7 +86,7 @@ class Devices(share.Devices):
         # Serial connection to the Bluetooth device
         btport = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        btport.port = share.config.Fixture.port("027013", "BT")
+        btport.port = share.config.Fixture.port(self.fixture, "BT")
         # BT Radio driver
         self["bt"] = eunistone_pan1322.BtRadio(btport)
 

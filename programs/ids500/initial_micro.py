@@ -24,6 +24,7 @@ class InitialMicro(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         Sensors.pic_hex_mic = config.pic_hex_mic
         super().configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
@@ -62,6 +63,8 @@ class InitialMicro(share.TestSequence):
 class Devices(share.Devices):
     """Micro Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -77,7 +80,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = share.config.Fixture.port("017056", "PIC")
+        pic_ser.port = share.config.Fixture.port(self.fixture, "PIC")
         self["pic"] = console.Console(pic_ser)
 
     def reset(self):

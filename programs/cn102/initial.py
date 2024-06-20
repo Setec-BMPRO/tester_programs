@@ -28,6 +28,7 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_initial
         Sensors.sw_nordic_image = self.cfg.sw_nordic_image
+        Devices.fixture = self.fixture
         Devices.sw_nxp_image = self.cfg.sw_nxp_image
         super().configure(limits, Devices, Sensors, Measurements)
         super().open()
@@ -98,11 +99,11 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
     sw_nxp_image = None  # ARM software image
 
     def open(self):
         """Create all Instruments."""
-        fixture = "028468"
         # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
@@ -118,7 +119,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port(fixture, "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         self["progARM"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_nxp_image,

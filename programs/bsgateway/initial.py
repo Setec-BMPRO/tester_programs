@@ -29,6 +29,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         Sensors.sw_image = self.sw_image[self.uuts[0].revision]
         super().configure(self.testlimits, Devices, Sensors, Measurements)
         super().open()
@@ -75,6 +76,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -87,7 +90,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         con_ser = serial.Serial()
         # Set port separately - don't open until after programming
-        con_ser.port = share.config.Fixture.port("039517", "ARM")
+        con_ser.port = share.config.Fixture.port(self.fixture, "ARM")
         self["console"] = console.Console(con_ser)
         self["can"] = self.physical_devices["CAN"]
         # CAN traffic reader

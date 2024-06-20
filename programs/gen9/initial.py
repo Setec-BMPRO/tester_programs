@@ -22,6 +22,7 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config
         self.cfg.configure(self.parameter, self.uuts[0])
+        Devices.fixture = self.fixture
         Sensors.devicetype = self.cfg.devicetype
         Sensors.sw_image = self.cfg.sw_image
         Sensors.callback = self._dso_callback
@@ -232,6 +233,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -255,7 +258,7 @@ class Devices(share.Devices):
         # Serial uses a BDA4 with DTR driving RESET
         arm_ser = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately - don't open until after programming
-        arm_ser.port = share.config.Fixture.port("032715", "ARM")
+        arm_ser.port = share.config.Fixture.port(self.fixture, "ARM")
         self["arm"] = console.Console(arm_ser)
 
     def reset(self):

@@ -20,6 +20,7 @@ class Initial(share.TestSequence):
         limits = self.cfg.limits_initial()
         Sensors.output_count = self.cfg.output_count
         Sensors.load_per_output = self.cfg.load_per_output
+        Devices.fixture = self.fixture
         Devices.sw_version = self.cfg.sw_version
         self.duplicate_limit_error = False
         super().configure(limits, Devices, Sensors, Measurements)
@@ -231,7 +232,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    sw_version = None  # ARM software version
+    fixture = None
+    sw_version = None
 
     def open(self):
         """Create all Instruments."""
@@ -251,7 +253,7 @@ class Devices(share.Devices):
             ("rla_loadsw", tester.Relay, "RLA3"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
-        arm_port = share.config.Fixture.port("029242", "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         # ARM device programmer
         sw_file = "j35_{0}.bin".format(self.sw_version)
         self["program_arm"] = share.programmer.ARM(

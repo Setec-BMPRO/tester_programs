@@ -30,6 +30,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, self.uuts[0])
+        Devices.fixture = self.fixture
         Devices.sw_image = Sensors.sw_image = self.cfg.sw_image
         super().configure(self.testlimits, Devices, Sensors, Measurements)
         super().open()
@@ -89,6 +90,7 @@ class LatchingRelay:
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
     sw_image = None
 
     def open(self):
@@ -107,7 +109,7 @@ class Devices(share.Devices):
         self["rla_reset"] = LatchingRelay(self["rla_rst_on"], self["rla_rst_off"])
         # ARM device programmer
         self["program_arm"] = share.programmer.ARM(
-            share.config.Fixture.port("029687", "ARM"),
+            share.config.Fixture.port(self.fixture, "ARM"),
             pathlib.Path(__file__).parent / self.sw_image,
             boot_relay=self["rla_boot"],
             reset_relay=self["rla_reset"],

@@ -42,6 +42,7 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.config = config.get(self.parameter)
         self.is_atsam = self.config.is_atsam
+        Devices.fixture = self.fixture
         Devices.sw_file = Sensors.sw_file = self.config.sw_file
         super().configure(self._limits, Devices, Sensors, Measurements)
         super().open()
@@ -138,6 +139,7 @@ class LatchingRelay:
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
     sw_file = None
 
     def open(self):
@@ -154,7 +156,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         self["rla_reset"] = LatchingRelay(self["rla_rst_on"], self["rla_rst_off"])
-        arm_port = share.config.Fixture.port("029687", "ARM")
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         # LPC1519 device programmer
         self["programmer"] = share.programmer.ARM(
             arm_port,

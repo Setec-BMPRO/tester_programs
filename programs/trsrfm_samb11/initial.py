@@ -43,6 +43,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         super().configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
@@ -101,6 +102,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -117,7 +120,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        trsrfm_ser.port = share.config.Fixture.port("030451", "ARM")
+        trsrfm_ser.port = share.config.Fixture.port(self.fixture, "ARM")
         # Console driver
         self["trsrfm"] = console.Console(trsrfm_ser)
         # Connection to RaspberryPi bluetooth server

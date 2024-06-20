@@ -55,6 +55,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         super().configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
@@ -299,6 +300,8 @@ class Final(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         for name, devtype, phydevname in (
@@ -325,7 +328,7 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the PIC
         pic_ser = serial.Serial(baudrate=19200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        pic_ser.port = share.config.Fixture.port("017048", "PIC")
+        pic_ser.port = share.config.Fixture.port(self.fixture, "PIC")
         self["pic"] = console.Console(pic_ser)
 
     def reset(self):

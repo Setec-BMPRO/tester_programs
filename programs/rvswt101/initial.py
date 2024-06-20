@@ -18,6 +18,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, self.uuts[0])
+        Devices.fixture = self.fixture
         Sensors.sw_image = self.cfg["software"]
         super().configure(self.cfg["limits_ini"], Devices, Sensors, Measurements)
         super().open()
@@ -82,6 +83,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -122,7 +125,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bl652_port = share.config.Fixture.port("032869", "NORDIC")
+        bl652_port = share.config.Fixture.port(self.fixture, "NORDIC")
         rvswt101_ser.port = bl652_port
         self["rvswt101"] = console.Console(rvswt101_ser)
         self["rvswt101"].measurement_fail_on_error = False

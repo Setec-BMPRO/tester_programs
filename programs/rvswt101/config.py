@@ -189,7 +189,6 @@ class Config:
         else:  # Rev 3+ auto-coded switch types
             image = cls._software["series"][rev]
             banner_lines = 2
-        fixture_num = "033030"  # RVSWT101 Final Fixture
         return {
             "software": image,
             "limits_ini": cls._common_limits + cls._initial_limits,
@@ -207,6 +206,5 @@ class Config:
                 + (type_lim,)
             ),
             "banner_lines": banner_lines,
-            "fixture_num": fixture_num,
             "button_count": button_count,
         }

@@ -83,6 +83,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         super().configure(
             self.limitdata[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
@@ -252,6 +253,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -269,7 +272,7 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the MSP430
         self["msp_ser"] = serial.Serial(baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self["msp_ser"].port = share.config.Fixture.port("020827", "CON")
+        self["msp_ser"].port = share.config.Fixture.port(self.fixture, "CON")
         # MSP430 Console driver
         self["msp"] = console.Console(self["msp_ser"])
         # Apply power to fixture circuits.

@@ -136,6 +136,9 @@ class ProgramTestCase(unittest.TestCase):
             for uut in range(1, cls.per_panel + 1)
         )
         cls.fixture = Fixture.from_barcode("123456-0001")
+        # Looking up devices for a fixture
+        cls.patchfixt = patch("share.config.Fixture.port", return_value="DummyPort")
+        cls.patchfixt.start()
 
     def setUp(self):
         """Per-Test setup."""

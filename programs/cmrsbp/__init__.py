@@ -45,6 +45,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         super().configure(self.limitdata, Devices, Sensors, MeasureIni)
         super().open()
         self.steps = (
@@ -161,6 +162,7 @@ class SerialDate(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         super().configure(Initial.limitdata, Devices, Sensors, MeasureIni)
         super().open()
         self.steps = (tester.TestStep("SerialDate", self._step_sn_date),)
@@ -235,6 +237,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         super().configure(self.limitdata[self.parameter], Devices, Sensors, MeasureFin)
         super().open()
         self.steps = (
@@ -316,6 +319,8 @@ class EvError:
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -345,14 +350,14 @@ class Devices(share.Devices):
         self.add_closer(lambda: self["dcs_Vcom"].output(0.0, output=False))
         # Open serial connection to data monitor
         cmr_ser = serial.Serial(
-            port=share.config.Fixture.port("017789", "CMR"), baudrate=9600, timeout=0.1
+            port=share.config.Fixture.port(self.fixture, "CMR"), baudrate=9600, timeout=0.1
         )
         self["cmr"] = cmrsbp.CmrSbp(cmr_ser, data_timeout=10)
         self.add_closer(self["cmr"].close)
         # EV2200 board
         ev_ser = serial.Serial(baudrate=9600, timeout=4)
         # Set port separately, as we don't want it opened yet
-        ev_ser.port = share.config.Fixture.port("017789", "EV")
+        ev_ser.port = share.config.Fixture.port(self.fixture, "EV")
         self["ev"] = ev2200.EV2200(ev_ser)
         self["PicKit"] = tester.PicKit(
             (self.physical_devices["PICKIT"], self["rla_Prog"])

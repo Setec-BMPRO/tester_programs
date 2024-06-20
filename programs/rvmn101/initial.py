@@ -141,7 +141,7 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None  # Fixture number
+    fixture = None
     reversed_outputs = None  # Outputs with reversed operation
 
     def open(self):

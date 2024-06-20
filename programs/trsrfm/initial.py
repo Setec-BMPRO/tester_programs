@@ -39,6 +39,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
+        Devices.fixture = self.fixture
         Sensors.sw_image = self.sw_image
         super().configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
@@ -97,9 +98,10 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
-        fixture = "034882"
         # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
@@ -112,7 +114,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        trsrfm_ser.port = share.config.Fixture.port(fixture, "NORDIC")
+        trsrfm_ser.port = share.config.Fixture.port(self.fixture, "NORDIC")
         self["trsrfm"] = console.Console(trsrfm_ser)
         # Connection to RaspberryPi bluetooth server
         self["pi_bt"] = share.bluetooth.RaspberryBluetooth(

@@ -23,7 +23,7 @@ class Initial(share.TestSequence):
         self.ocp_nominal, limits = self.cfg.limits_initial()
         Sensors.ocp_nominal = self.ocp_nominal
         Devices.arm_file = self.cfg.arm_file
-        Devices.arm_port = self.cfg.arm_port
+        Devices.fixture = self.fixture
         console.Console.cal_linecount = self.cfg.cal_linecount
         super().configure(limits, Devices, Sensors, Measurements)
         super().open()
@@ -139,7 +139,7 @@ class Devices(share.Devices):
     """Devices."""
 
     arm_file = None  # Firmware image filename
-    arm_port = None  # Serial port for ARM programming & console
+    fixture = None
 
     def open(self):
         """Create all Instruments."""
@@ -155,8 +155,9 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
+        arm_port = share.config.Fixture.port(self.fixture, "ARM")
         self["programmer"] = share.programmer.ARM(
-            self.arm_port,
+            arm_port,
             pathlib.Path(__file__).parent / self.arm_file,
             crpmode=False,
             boot_relay=self["rla_boot"],
@@ -165,7 +166,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         arm_ser = serial.Serial(baudrate=115200, timeout=2.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = self.arm_port
+        arm_ser.port = arm_port
         # Console driver
         self["arm"] = console.Console(arm_ser)
 

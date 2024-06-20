@@ -16,6 +16,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
+        Devices.fixture = self.fixture
         super().configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
         super().open()
         self.steps = (
@@ -79,6 +80,8 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
+    fixture = None
+
     def open(self):
         """Create all Instruments."""
         # Physical Instrument based devices
@@ -93,7 +96,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         bc2_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        bc2_ser.port = share.config.Fixture.port("030451", "ARM")
+        bc2_ser.port = share.config.Fixture.port(self.fixture, "ARM")
         # Console driver
         self["bc2"] = console.Console(bc2_ser)
         self["bc2"].verbose = False
