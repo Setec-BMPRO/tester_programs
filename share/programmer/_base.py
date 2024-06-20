@@ -16,9 +16,7 @@ class _Base(abc.ABC):
     def __init__(self):
         """Create a programmer."""
         self._measurement = tester.Measurement(
-            libtester.LimitRegExp(
-                name="Program", limit=self.pass_result, doc="Programming succeeded"
-            ),
+            libtester.LimitRegExp("Program", self.pass_result, "Programming succeeded"),
             tester.sensor.Mirror(),
         )
         self._result = None
