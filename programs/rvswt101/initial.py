@@ -54,7 +54,6 @@ class Initial(share.TestSequence):
                 for sen in (
                     mes["JLink"].sensor,
                     mes["ble_mac"].sensor,
-                    mes["scan_mac"].sensor,
                 ):
                     sen.position = mypos
                 dev["fixture"].connect(mypos)
@@ -71,13 +70,15 @@ class Initial(share.TestSequence):
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Save SerialNumber & MAC on a remote server.
-                dev["serialtomac"].blemac_set(self.uuts[pos].sernum, self.mac)
+                dev["ble"].uut = self.uuts[pos].sernum
+                dev["ble"].mac = self.mac
                 # Press Button2 to broadcast on bluetooth
-                dev["fixture"].press(mypos)
-                reply = dev["pi_bt"].scan_advert_blemac(self.mac, timeout=20)
-                dev["fixture"].release()
-                mes["scan_mac"].sensor.store(reply is not None)
-                mes["scan_mac"]()
+                try:
+                    dev["fixture"].press(mypos)
+                    mes["rssi"]()
+                except Exception:
+                    dev["fixture"].release()
+                    raise
 
 
 class Devices(share.Devices):
@@ -129,12 +130,12 @@ class Devices(share.Devices):
         rvswt101_ser.port = bl652_port
         self["rvswt101"] = console.Console(rvswt101_ser)
         self["rvswt101"].measurement_fail_on_error = False
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
+        # BLE MAC & Scanning server
+        self["ble"] = tester.BLE(
+            (self.physical_devices["BLE"], self.physical_devices["MAC"])
         )
-        # Connection to Serial To MAC server
-        self["serialtomac"] = share.bluetooth.SerialToMAC()
+        # BLE Packet decoder
+        self["decoder"] = share.bluetooth.RSSI(self["ble"])
 
     def reset(self):
         """Reset instruments."""
@@ -258,13 +259,14 @@ class Sensors(share.Sensors):
         dmm = self.devices["dmm"]
         sensor = tester.sensor
         self["mirmac"] = sensor.Mirror()
-        self["mirscan"] = sensor.Mirror()
         self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
             share.config.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
+        self["RSSI"] = sensor.Keyed(self.devices["decoder"], "rssi")
+        self["RSSI"].rereadable = True
 
 
 class Measurements(share.Measurements):
@@ -276,12 +278,7 @@ class Measurements(share.Measurements):
             (
                 ("dmm_vin", "Vin", "vin", ""),
                 ("ble_mac", "BleMac", "mirmac", "Get MAC address from console"),
-                (
-                    "scan_mac",
-                    "ScanMac",
-                    "mirscan",
-                    "Scan for MAC address over bluetooth",
-                ),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
+                ("rssi", "RSSI Level", "RSSI", "Bluetooth RSSI Level"),
             )
         )

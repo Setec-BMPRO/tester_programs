@@ -4,9 +4,10 @@
 
 from .mac import SerialToMAC
 from .raspblue import RaspberryBluetooth
-
+from .rssi import RSSI
 
 __all__ = [
     "RaspberryBluetooth",
+    "RSSI",
     "SerialToMAC",
 ]

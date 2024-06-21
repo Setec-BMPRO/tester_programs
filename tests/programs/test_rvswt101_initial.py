@@ -20,13 +20,6 @@ class RVSWT101Initial(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-            "share.bluetooth.RaspberryBluetooth",
-            "share.bluetooth.SerialToMAC",
-        ):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
         mycon = Mock(name="MyConsole")
         mycon.get_mac.return_value = "001ec030c2be"
         patcher = patch("programs.rvswt101.console.Console", return_value=mycon)
@@ -39,11 +32,13 @@ class RVSWT101Initial(ProgramTestCase):
         sen = self.test_sequence.sensors
         data = {
             UnitTester.key_sen: {  # Tuples of sensor data
-                "PowerUp": ((sen["vin"], 3.3),),
+                "PowerUp": (
+                    (sen["vin"], 3.3),
+                ),
                 "ProgramTest": (
                     (sen["JLink"], 0),
                     (sen["mirmac"], "ec70225e3dba"),
-                    (sen["mirscan"], True),
+                    (sen["RSSI"], -70),
                 ),
             },
         }
