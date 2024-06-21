@@ -9,7 +9,7 @@ class C15D15Final(ProgramTestCase):
     """C15D-15 Final program test suite."""
 
     prog_class = c15d15.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

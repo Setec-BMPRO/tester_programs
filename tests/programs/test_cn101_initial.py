@@ -10,7 +10,7 @@ class CN101Initial(ProgramTestCase):
     """CN101 Initial program test suite."""
 
     prog_class = cn101.Initial
-    parameter = None
+    parameter = ""
     debug = False
     btmac = "001EC030BC15"
 

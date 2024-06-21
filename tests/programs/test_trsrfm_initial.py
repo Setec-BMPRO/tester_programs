@@ -10,7 +10,7 @@ class TRSRFMInitial(ProgramTestCase):
     """TRS-RFM Initial program test suite."""
 
     prog_class = trsrfm.Initial
-    parameter = None
+    parameter = ""
     debug = False
     btmac = "001ec030bc15"
 

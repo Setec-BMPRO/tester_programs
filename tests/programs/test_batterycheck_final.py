@@ -10,7 +10,7 @@ class BatteryCheckFinal(ProgramTestCase):
     """BatteryCheck Final program test suite."""
 
     prog_class = batterycheck.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

@@ -10,7 +10,7 @@ class TRSFinal(ProgramTestCase):
     """TRS2 Final program test suite."""
 
     prog_class = trs2.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

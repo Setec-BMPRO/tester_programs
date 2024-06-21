@@ -11,7 +11,7 @@ class BSGatewayInitial(ProgramTestCase):
     """BSGateway Initial program test suite."""
 
     prog_class = bsgateway.Initial
-    parameter = None
+    parameter = ""
     debug = True
 
     def setUp(self):

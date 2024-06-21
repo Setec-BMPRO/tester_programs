@@ -10,7 +10,7 @@ class _J35Final(ProgramTestCase):
     """J35 Final program base test suite."""
 
     prog_class = j35.Final
-    parameter = None
+    parameter = ""
     vout = 12.7
 
     def setUp(self):

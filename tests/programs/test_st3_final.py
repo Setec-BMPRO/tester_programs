@@ -9,7 +9,7 @@ class _STxxIIIFinal(ProgramTestCase):
     """STxx-III Final program base test suite."""
 
     prog_class = st3.Final
-    parameter = None
+    parameter = ""
 
     def _pass_run(self, barcode):
         """PASS run of the program."""

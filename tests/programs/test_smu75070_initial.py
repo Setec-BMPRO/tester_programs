@@ -9,7 +9,7 @@ class SMU75070Initial(ProgramTestCase):
     """SMU750-70 Initial program test suite."""
 
     prog_class = smu75070.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

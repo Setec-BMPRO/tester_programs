@@ -10,7 +10,7 @@ class ETracInitial(ProgramTestCase):
     """ETrac-II Initial program test suite."""
 
     prog_class = etrac.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

@@ -10,7 +10,7 @@ class RVMD50Final(ProgramTestCase):
     """RVMD50 Final program test suite."""
 
     prog_class = rvmd50.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

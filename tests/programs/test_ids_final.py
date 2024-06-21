@@ -10,7 +10,7 @@ class Ids500Final(ProgramTestCase):
     """IDS500 Final program test suite."""
 
     prog_class = ids500.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

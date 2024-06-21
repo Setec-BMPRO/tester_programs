@@ -10,7 +10,7 @@ class RM5024Final(ProgramTestCase):
     """RM-50-24 Final program test suite."""
 
     prog_class = rm50.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

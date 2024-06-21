@@ -10,7 +10,7 @@ class _CommonInitial(ProgramTestCase):
     """RvView/JDisplay Initial program test suite."""
 
     prog_class = rvview_jdisplay.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

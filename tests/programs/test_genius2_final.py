@@ -9,7 +9,7 @@ class _Genius2Final(ProgramTestCase):
     """GENIUS-II(H) Final program base test suite."""
 
     prog_class = genius2.Final
-    parameter = None
+    parameter = ""
 
     def _pass_run(self):
         """PASS run of the program."""

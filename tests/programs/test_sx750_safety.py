@@ -13,7 +13,7 @@ class SX750Safety(ProgramTestCase):
     """SX750 Safety program test suite."""
 
     prog_class = sx750.Safety
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

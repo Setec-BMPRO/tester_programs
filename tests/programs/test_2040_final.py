@@ -9,7 +9,7 @@ class _2040Final(ProgramTestCase):
     """2040 Final program test suite."""
 
     prog_class = _2040.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

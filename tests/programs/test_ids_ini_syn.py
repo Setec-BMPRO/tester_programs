@@ -9,7 +9,7 @@ class Ids500InitialSyn(ProgramTestCase):
     """IDS500 SynBuck Initial program test suite."""
 
     prog_class = ids500.InitialSyn
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

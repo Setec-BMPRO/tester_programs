@@ -68,7 +68,7 @@ class Config:
         self.fixture = libtester.Fixture.from_barcode(fixture)
         self.test_program = section.get("Program", "Dummy")
         self.per_panel = section.getint("PerPanel", 1)
-        self.parameter = section.get("Parameter")
+        self.parameter = section.get("Parameter", "")
         self.revision = section.get("Revision", "")
         sernum = section.get("Sernum", "A0000000001")
         self.uut = libtester.UUT.from_sernum(sernum)

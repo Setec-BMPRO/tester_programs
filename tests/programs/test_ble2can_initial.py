@@ -10,7 +10,7 @@ class BLE2CANInitial(ProgramTestCase):
     """BLE2CAN Initial program test suite."""
 
     prog_class = ble2can.Initial
-    parameter = None
+    parameter = ""
     debug = False
     btmac = "00:1E:C0:30:BC:15"
 

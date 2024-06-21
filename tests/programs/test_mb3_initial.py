@@ -11,7 +11,7 @@ class MB3Initial(ProgramTestCase):
     """MB3 Initial program test suite."""
 
     prog_class = mb3.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

@@ -9,7 +9,7 @@ class SelfTest(ProgramTestCase):
     """SelfTest program test suite."""
 
     prog_class = selftest.Main
-    parameter = None
+    parameter = ""
     debug = False
 
     def _dso_store(self, value):

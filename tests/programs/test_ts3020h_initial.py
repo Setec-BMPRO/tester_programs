@@ -9,7 +9,7 @@ class TS3020HInitial(ProgramTestCase):
     """TS3020H Initial program test suite."""
 
     prog_class = ts3020h.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

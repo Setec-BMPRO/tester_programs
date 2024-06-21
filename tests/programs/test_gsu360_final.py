@@ -9,7 +9,7 @@ class GSU3601TAFinal(ProgramTestCase):
     """GSU360-1TA Final program test suite."""
 
     prog_class = gsu360.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

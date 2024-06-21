@@ -9,7 +9,7 @@ class SMU750Final(ProgramTestCase):
     """SMU750-70 Final program test suite."""
 
     prog_class = smu75070.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

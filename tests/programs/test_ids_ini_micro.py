@@ -10,7 +10,7 @@ class Ids500MicroInitial(ProgramTestCase):
     """IDS500 Micro Initial program test suite."""
 
     prog_class = ids500.InitialMicro
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

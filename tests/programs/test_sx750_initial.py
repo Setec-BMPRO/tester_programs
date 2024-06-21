@@ -12,7 +12,7 @@ class SX750Initial(ProgramTestCase):
     """SX750 Initial program test suite."""
 
     prog_class = sx750.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

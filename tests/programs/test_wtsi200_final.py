@@ -9,7 +9,7 @@ class WTSI200Final(ProgramTestCase):
     """WTSI200 Final program test suite."""
 
     prog_class = wtsi200.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

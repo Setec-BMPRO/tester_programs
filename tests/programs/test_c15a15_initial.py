@@ -9,7 +9,7 @@ class C15A15Initial(ProgramTestCase):
     """C15A-15 Initial program test suite."""
 
     prog_class = c15a15.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

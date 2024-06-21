@@ -9,7 +9,7 @@ class MB3Final(ProgramTestCase):
     """MB3 Final program test suite."""
 
     prog_class = mb3.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

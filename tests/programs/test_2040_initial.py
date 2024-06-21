@@ -9,7 +9,7 @@ class _2040Initial(ProgramTestCase):
     """2040 Initial program test suite."""
 
     prog_class = _2040.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

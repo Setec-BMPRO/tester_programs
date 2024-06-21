@@ -10,7 +10,7 @@ class C45A15Initial(ProgramTestCase):
     """C45A-15 Initial program test suite."""
 
     prog_class = c45a15.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

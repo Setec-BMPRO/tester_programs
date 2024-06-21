@@ -9,7 +9,7 @@ class TS3520Final(ProgramTestCase):
     """TS3520 Final program test suite."""
 
     prog_class = ts3520.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

@@ -106,7 +106,7 @@ class ProgramTestCase(unittest.TestCase):
 
     debug = False
     prog_class = None
-    parameter = None
+    parameter = ""
     _logger_names = ("tester", "share", "programs")
     per_panel = 1
 

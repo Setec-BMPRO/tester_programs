@@ -9,7 +9,7 @@ class ATXG4502VFinal(ProgramTestCase):
     """ATXG450-2V Final program test suite."""
 
     prog_class = atxg450.Final2V
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

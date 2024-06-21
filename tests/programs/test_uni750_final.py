@@ -9,7 +9,7 @@ class UNI750Final(ProgramTestCase):
     """UNI-750 Final program test suite."""
 
     prog_class = uni750.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

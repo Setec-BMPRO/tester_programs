@@ -10,7 +10,7 @@ class Gen8Initial(ProgramTestCase):
     """GEN8 Initial program test suite."""
 
     prog_class = gen8.Initial
-    parameter = None
+    parameter = ""
     debug = False
 
     def setUp(self):

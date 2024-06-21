@@ -9,7 +9,7 @@ class _BCE282Final(ProgramTestCase):
     """BCE282 Final program base test suite."""
 
     prog_class = bce282.Final
-    parameter = None
+    parameter = ""
 
     def _pass_run(self, data):
         """PASS run of the program."""

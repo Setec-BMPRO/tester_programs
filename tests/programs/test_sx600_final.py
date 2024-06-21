@@ -10,7 +10,7 @@ class SX600Final(ProgramTestCase):
     """SX600 Final program test suite."""
 
     prog_class = sx600.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

@@ -355,7 +355,9 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
 
         """
         self.limits.load(self._limit_builtin + limits)
-        self.devices = cls_devices(self.tester_type, self.physical_devices, self.parameter)
+        self.devices = cls_devices(
+            self.tester_type, self.physical_devices, self.parameter
+        )
         self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
         self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
 

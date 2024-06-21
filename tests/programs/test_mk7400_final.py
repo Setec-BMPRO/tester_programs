@@ -9,7 +9,7 @@ class MK7400Final(ProgramTestCase):
     """MK7-400-1 Final program test suite."""
 
     prog_class = mk7400.Final
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):

@@ -350,7 +350,9 @@ class Devices(share.Devices):
         self.add_closer(lambda: self["dcs_Vcom"].output(0.0, output=False))
         # Open serial connection to data monitor
         cmr_ser = serial.Serial(
-            port=share.config.Fixture.port(self.fixture, "CMR"), baudrate=9600, timeout=0.1
+            port=share.config.Fixture.port(self.fixture, "CMR"),
+            baudrate=9600,
+            timeout=0.1,
         )
         self["cmr"] = cmrsbp.CmrSbp(cmr_ser, data_timeout=10)
         self.add_closer(self["cmr"].close)

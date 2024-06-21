@@ -9,7 +9,7 @@ class Ids500InitialAux(ProgramTestCase):
     """IDS500 Aux Initial program test suite."""
 
     prog_class = ids500.InitialAux
-    parameter = None
+    parameter = ""
     debug = False
 
     def test_pass_run(self):
