@@ -37,8 +37,9 @@ def teststep(func: Callable) -> Callable:
 class Devices:
     """Devices abstract base class."""
 
+    tester_type = field(validator=validators.instance_of(str))
     physical_devices = field(validator=validators.instance_of(tester.PhysicalDevices))
-    parameter = field()
+    parameter = field(validator=validators.optional(validators.instance_of(str)))
     _close_callables = field(init=False, factory=list)
     _store = field(init=False, factory=dict)
 
@@ -354,7 +355,7 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
 
         """
         self.limits.load(self._limit_builtin + limits)
-        self.devices = cls_devices(self.physical_devices, self.parameter)
+        self.devices = cls_devices(self.tester_type, self.physical_devices, self.parameter)
         self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
         self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
 
