@@ -106,7 +106,7 @@ class Worker:
             self._logger.info(
                 ' "%s", %s, %s',
                 rdg.name,
-                rdg.reading,
+                rdg.value,
                 "Pass" if rdg.is_pass else "Fail",
             )
 

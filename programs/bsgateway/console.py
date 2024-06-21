@@ -81,10 +81,9 @@ class Console(share.console.BadUart):
         self["EEWR"] = None
         # Log calibration values
         sensor = tester.sensor.Mirror()
-        limit = libtester.LimitBetween("X Cal", 0x0, 0xFFFF)
-        meas = tester.Measurement(limit, sensor)
         for name, value in (("3V3", vcc), ("DAC", dac), ("OFF", offacc)):
-            limit.name = "{0} Cal".format(name)
-            limit.doc = "{0} value".format(name)
+            limit = libtester.LimitBetween(
+                "{0} Cal".format(name), 0x0, 0xFFFF, "{0} value".format(name))
+            meas = tester.Measurement(limit, sensor)
             sensor.store(value)
             meas.measure()

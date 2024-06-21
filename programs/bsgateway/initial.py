@@ -45,7 +45,9 @@ class Initial(share.TestSequence):
         """Power up the unit."""
         for dcs in ("dcs_vin", "dcs_can"):
             dev[dcs].output(self.v_set, True)
-        self.measure(("dev_3v3", "can_3v3"), timeout=5)
+        mes["dev_3v3"](timeout=5)
+        with tester.PathName("CAN"):
+            mes["can_3v3"](timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
