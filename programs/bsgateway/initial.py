@@ -15,7 +15,7 @@ from . import console
 class Initial(share.TestSequence):
     """Initial Test Program."""
 
-    _pre_release = "bsgateway_v1.0.0-0-g5927f65_pre_release.hex"
+    _pre_release = "bsgateway_v1.0.4-0-g794a95c.hex"
     sw_image = {  # Key: Revision, Value: Image filename
         None: _pre_release,
         "1": _pre_release,
