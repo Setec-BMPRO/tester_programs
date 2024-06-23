@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.fixture = self.fixture
-        super().configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        self.configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),

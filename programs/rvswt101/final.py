@@ -24,7 +24,7 @@ class Final(share.TestSequence):
             4: "limits_fin_4_button",
             6: "limits_fin_6_button",
         }[button_count]
-        super().configure(self.cfg[limits_fin], Devices, Sensors, Measurements)
+        self.configure(self.cfg[limits_fin], Devices, Sensors, Measurements)
         super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
         self.buttons = []  # 12 or 18 measurement name strings

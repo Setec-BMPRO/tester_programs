@@ -30,7 +30,7 @@ class Final(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         Devices.fixture = self.fixture
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

@@ -29,7 +29,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Power90", self._step_power_90),

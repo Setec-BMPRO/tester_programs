@@ -19,7 +19,7 @@ class Final(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, self.uuts[0])
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

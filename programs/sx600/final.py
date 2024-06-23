@@ -15,7 +15,7 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.Config
         limits = self.cfg.limits_final
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_powerup),

@@ -25,7 +25,7 @@ class Initial(share.TestSequence):
         Devices.arm_file = self.cfg.arm_file
         Devices.fixture = self.fixture
         console.Console.cal_linecount = self.cfg.cal_linecount
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),

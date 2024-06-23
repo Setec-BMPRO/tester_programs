@@ -24,7 +24,7 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_initial
         Sensors.sw_nordic_image = self.cfg.sw_nordic_image
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PartCheck", self._step_part_check),

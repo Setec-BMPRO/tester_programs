@@ -15,7 +15,7 @@ class Final(share.TestSequence):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_final
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
 

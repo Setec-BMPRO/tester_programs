@@ -20,7 +20,7 @@ class Initial(share.TestSequence):
         self.cfg = config.Config.get(self.parameter, self.uuts[0])
         Devices.fixture = self.fixture
         Sensors.sw_image = self.cfg["software"]
-        super().configure(self.cfg["limits_ini"], Devices, Sensors, Measurements)
+        self.configure(self.cfg["limits_ini"], Devices, Sensors, Measurements)
         super().open()
         # Adjust for different console behaviour
         self.devices["rvswt101"].banner_lines = self.cfg["banner_lines"]
@@ -70,7 +70,7 @@ class Initial(share.TestSequence):
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Save SerialNumber & MAC on a remote server.
-                dev["ble"].uut = self.uuts[pos].sernum
+                dev["ble"].uut = self.uuts[pos]
                 dev["ble"].mac = self.mac
                 # Press Button2 to broadcast on bluetooth
                 try:

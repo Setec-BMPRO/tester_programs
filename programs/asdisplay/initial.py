@@ -38,7 +38,7 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         Devices.sw_arm_image = self.sw_arm_image
         Devices.fixture = self.fixture
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

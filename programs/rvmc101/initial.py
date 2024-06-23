@@ -32,7 +32,7 @@ class Initial(share.TestSequence):
         Devices.fixture = self.fixture
         Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
         self.is_full = self.parameter != "LITE"
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

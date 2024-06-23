@@ -30,7 +30,7 @@ class Initial(share.TestSequence):
         Sensors.iload = self.cfg.iload
         Sensors.pic_image = "bp35sr_{0}.hex".format(self.cfg.pic_sw_version)
         Measurements.is_pm = self.cfg.is_pm
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         if self.cfg.is_pm:
             self.devices["PmTimer"].interval = self.cfg.pm_zero_wait

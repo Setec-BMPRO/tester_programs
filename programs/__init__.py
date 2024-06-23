@@ -64,7 +64,7 @@ class MockSequence(share.TestSequence):
 
     def open(self):
         """Open the test program."""
-        super().configure(tuple(), MockDevices, MockSensors, MockMeasurements)
+        self.configure(tuple(), MockDevices, MockSensors, MockMeasurements)
         super().open()
         self.steps = (tester.TestStep("Step1", self._step1),)
 

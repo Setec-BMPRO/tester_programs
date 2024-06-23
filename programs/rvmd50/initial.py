@@ -32,7 +32,7 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.fixture = self.fixture
         Devices.sw_image = Sensors.sw_image = self.cfg.sw_image
-        super().configure(self.testlimits, Devices, Sensors, Measurements)
+        self.configure(self.testlimits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

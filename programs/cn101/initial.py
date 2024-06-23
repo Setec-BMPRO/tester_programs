@@ -20,7 +20,7 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.fixture = self.fixture
         Devices.sw_version = self.cfg.sw_version
-        super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        self.configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
         super().open()
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))

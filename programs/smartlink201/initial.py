@@ -39,7 +39,7 @@ class Initial(share.TestSequence):
         Devices.fixture = self.fixture
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Sensors.sw_nrf_image = self.cfg.sw_nrf_image
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

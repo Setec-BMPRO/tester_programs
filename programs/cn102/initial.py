@@ -30,7 +30,7 @@ class Initial(share.TestSequence):
         Sensors.sw_nordic_image = self.cfg.sw_nordic_image
         Devices.fixture = self.fixture
         Devices.sw_nxp_image = self.cfg.sw_nxp_image
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PartCheck", self._step_part_check),

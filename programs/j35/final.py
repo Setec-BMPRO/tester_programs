@@ -17,7 +17,7 @@ class Final(share.TestSequence):
         limits = self.cfg.limits_final()
         Sensors.output_count = self.cfg.output_count
         self.duplicate_limit_error = False
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))

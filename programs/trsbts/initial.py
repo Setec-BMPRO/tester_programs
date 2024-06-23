@@ -53,7 +53,7 @@ class Initial(share.TestSequence):
         self.config = config.get(self.parameter)
         Devices.fixture = self.fixture
         Sensors.sw_image = self.config.sw_image
-        super().configure(self._limits, Devices, Sensors, Measurements)
+        self.configure(self._limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),

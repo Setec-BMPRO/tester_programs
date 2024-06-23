@@ -24,7 +24,7 @@ class Initial(share.TestSequence):
         Sensors.nordic_image = self.cfg.values.nordic_image
         Sensors.arm_devicetype = self.cfg.values.arm_devicetype
         Sensors.arm_image = self.cfg.values.arm_image
-        super().configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        self.configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

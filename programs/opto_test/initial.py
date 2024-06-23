@@ -42,7 +42,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         Sensors._opto_count = self._opto_count
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("BoardNum", self._step_boardnum),

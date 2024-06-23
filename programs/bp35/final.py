@@ -15,7 +15,7 @@ class Final(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_final()
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.limits["ARM-SwVer"].adjust(
             "^{0}$".format(self.cfg.arm_sw_version.replace(".", r"\."))

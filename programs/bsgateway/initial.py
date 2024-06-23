@@ -31,7 +31,7 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         Devices.fixture = self.fixture
         Sensors.sw_image = self.sw_image[self.uuts[0].revision]
-        super().configure(self.testlimits, Devices, Sensors, Measurements)
+        self.configure(self.testlimits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

@@ -44,7 +44,7 @@ class Initial(share.TestSequence):
         self.is_atsam = self.config.is_atsam
         Devices.fixture = self.fixture
         Devices.sw_file = Sensors.sw_file = self.config.sw_file
-        super().configure(self._limits, Devices, Sensors, Measurements)
+        self.configure(self._limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),

@@ -56,7 +56,7 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().configure(
+        self.configure(
             self.limitdata[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
         super().open()

@@ -23,7 +23,7 @@ class Initial(share.TestSequence):
         Devices.fixture = self.fixture
         Devices.sw_version = self.cfg.sw_version
         self.duplicate_limit_error = False
-        super().configure(limits, Devices, Sensors, Measurements)
+        self.configure(limits, Devices, Sensors, Measurements)
         super().open()
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))

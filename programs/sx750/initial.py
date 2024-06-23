@@ -21,7 +21,7 @@ class Initial(share.TestSequence):
         Devices.fixture = self.fixture
         Devices.sw_image = self.cfg.arm_bin
         Sensors.ratings = self.cfg.ratings
-        super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        self.configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PartDetect", self._step_part_detect),

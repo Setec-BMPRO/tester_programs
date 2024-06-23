@@ -21,7 +21,7 @@ class InitialBias(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwrup),

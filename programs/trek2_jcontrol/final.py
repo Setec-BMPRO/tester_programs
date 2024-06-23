@@ -62,7 +62,7 @@ class Final(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.config = self.config_data[self.parameter]["Config"]
-        super().configure(
+        self.configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
         super().open()

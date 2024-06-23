@@ -26,7 +26,7 @@ class InitialMicro(share.TestSequence):
         """Prepare for testing."""
         Devices.fixture = self.fixture
         Sensors.pic_hex_mic = config.pic_hex_mic
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Program", self._step_program),

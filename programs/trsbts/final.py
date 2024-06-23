@@ -44,7 +44,7 @@ class Final(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        super().configure(self.limitdata, Devices, Sensors, Measurements)
+        self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Pin", self._step_pin),

@@ -24,7 +24,7 @@ class Initial(share.TestSequence):
         Sensors.sw_image = self.cfg.sw_image
         Devices.fixture = self.fixture
         Devices.is_renesas = self.cfg.is_renesas
-        super().configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        self.configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Lock", self._step_lock),

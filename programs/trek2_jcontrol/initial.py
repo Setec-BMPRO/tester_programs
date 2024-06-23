@@ -65,7 +65,7 @@ class Initial(share.TestSequence):
         self.config = self.config_data[self.parameter]["Config"]
         Devices.fixture = self.fixture
         Devices.sw_image = self.config.sw_image
-        super().configure(
+        self.configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
         super().open()

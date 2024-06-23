@@ -46,7 +46,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         Devices.fixture = self.fixture
-        super().configure(self.limitdata, Devices, Sensors, MeasureIni)
+        self.configure(self.limitdata, Devices, Sensors, MeasureIni)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -163,7 +163,7 @@ class SerialDate(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         Devices.fixture = self.fixture
-        super().configure(Initial.limitdata, Devices, Sensors, MeasureIni)
+        self.configure(Initial.limitdata, Devices, Sensors, MeasureIni)
         super().open()
         self.steps = (tester.TestStep("SerialDate", self._step_sn_date),)
 
@@ -238,7 +238,7 @@ class Final(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         Devices.fixture = self.fixture
-        super().configure(self.limitdata[self.parameter], Devices, Sensors, MeasureFin)
+        self.configure(self.limitdata[self.parameter], Devices, Sensors, MeasureFin)
         super().open()
         self.steps = (
             tester.TestStep("Startup", self._step_startup),
