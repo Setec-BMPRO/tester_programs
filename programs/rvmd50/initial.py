@@ -109,7 +109,7 @@ class Devices(share.Devices):
         self["rla_reset"] = LatchingRelay(self["rla_rst_on"], self["rla_rst_off"])
         # ARM device programmer
         self["program_arm"] = share.programmer.ARM(
-            share.config.Fixture.port(self.fixture, "ARM"),
+            self.port("ARM"),
             pathlib.Path(__file__).parent / self.sw_image,
             boot_relay=self["rla_boot"],
             reset_relay=self["rla_reset"],

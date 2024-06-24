@@ -360,7 +360,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         # ARM device programmer
         self["programmer"] = share.programmer.ARM(
             arm_port,
@@ -375,7 +375,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port(self.fixture, "ARDUINO")
+        ard_ser.port = self.port("ARDUINO")
         self["ard"] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         for dcs in ("dcs_Arduino", "dcs_Vcom", "dcs_DigPot"):

@@ -127,7 +127,7 @@ class Devices(share.Devices):
         self["canreader"] = tester.CANReader(self["can"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
         self["display"] = display.LEDControl(self["can"])
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         self["program_arm"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_image,

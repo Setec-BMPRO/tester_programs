@@ -258,7 +258,7 @@ class Devices(share.Devices):
         # Serial uses a BDA4 with DTR driving RESET
         arm_ser = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately - don't open until after programming
-        arm_ser.port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_ser.port = self.port("ARM")
         self["arm"] = console.Console(arm_ser)
 
     def reset(self):

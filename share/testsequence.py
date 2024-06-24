@@ -11,6 +11,8 @@ from attrs import define, field, validators
 import libtester
 import tester
 
+from . import config
+
 
 class DuplicateNameError(Exception):
     """Duplicate name error."""
@@ -39,6 +41,9 @@ class Devices:
 
     tester_type = field(validator=validators.instance_of(str))
     physical_devices = field(validator=validators.instance_of(tester.PhysicalDevices))
+    fixture: libtester.Fixture = field(
+        validator=validators.instance_of(libtester.Fixture)
+    )
     parameter = field(validator=validators.optional(validators.instance_of(str)))
     _close_callables = field(init=False, factory=list)
     _store = field(init=False, factory=dict)
@@ -83,6 +88,10 @@ class Devices:
             target()
         self._close_callables.clear()
         self._store.clear()
+
+    def port(self, name: str) -> str:
+        """Find the device name of a serial port."""
+        return config.Fixture.port(self.tester_type, self.fixture, name)
 
 
 @define
@@ -314,6 +323,10 @@ class TestSequenceMixin:
             instr.binary(start, end, step)
         time.sleep(delay)
 
+    def port(self, name: str) -> str:
+        """Find the device name of a serial port."""
+        return self.devices.port(name)
+
 
 @define
 class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
@@ -356,13 +369,14 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
         """
         self.limits.load(self._limit_builtin + limits)
         self.devices = cls_devices(
-            self.tester_type, self.physical_devices, self.parameter
+            self.tester_type, self.physical_devices, self.fixture, self.parameter
         )
         self.sensors = cls_sensors(self.devices, self.limits, self.parameter)
         self.measurements = cls_measurements(self.sensors, self.limits, self.parameter)
 
     def open(self) -> None:
         """Open test program."""
+        config.System.tester_type = self.tester_type
         super().open()
         self.devices.open()
         self.sensors.open()

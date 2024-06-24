@@ -95,7 +95,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port(self.fixture, "ARDUINO")
+        ard_ser.port = self.port("ARDUINO")
         self["ard"] = arduino.Arduino(ard_ser)
         self["ard"].open()
         self.add_closer(lambda: self["ard"].close())

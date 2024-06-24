@@ -120,7 +120,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         sw_file = "cn101_{0}.bin".format(self.sw_version)
         self["programmer"] = share.programmer.ARM(
             arm_port,

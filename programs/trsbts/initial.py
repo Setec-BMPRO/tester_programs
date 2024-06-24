@@ -160,7 +160,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         trsbts_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        nordic_port = share.config.Fixture.port(self.fixture, "NORDIC")
+        nordic_port = self.port("NORDIC")
         trsbts_ser.port = nordic_port
         # trsbts Console driver
         self["trsbts"] = console.Console(trsbts_ser)

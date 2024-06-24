@@ -297,13 +297,13 @@ class Devices(share.Devices):
         # Serial connection to the ARM console
         arm_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        arm_ser.port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_ser.port = self.port("ARM")
         self["arm"] = console.Console(arm_ser)
         self["arm"].is_renesas = self.is_renesas
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port(self.fixture, "ARDUINO")
+        ard_ser.port = self.port("ARDUINO")
         self["ard"] = arduino.Arduino(ard_ser)
 
     def reset(self):

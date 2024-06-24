@@ -360,7 +360,7 @@ class Devices(share.Devices):
             (self.physical_devices["PICKIT"], self["rla_pic"])
         )
         # ARM device programmer
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         self["program_arm"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.arm_image,
@@ -385,7 +385,7 @@ class Devices(share.Devices):
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet
-        ard_ser.port = share.config.Fixture.port(self.fixture, "ARDUINO")
+        ard_ser.port = self.port("ARDUINO")
         self["ard"] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         self["dcs_vcom"].output(9.0, output=True, delay=5.0)

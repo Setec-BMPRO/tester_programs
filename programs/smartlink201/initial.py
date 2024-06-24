@@ -149,7 +149,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         self["progARM"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_arm_image,
@@ -159,7 +159,7 @@ class Devices(share.Devices):
         # Serial connection to the Nordic console
         smartlink201_ser = serial.Serial(baudrate=115200, timeout=5.0)
         #   Set port separately, as we don't want it opened yet
-        smartlink201_ser.port = share.config.Fixture.port(self.fixture, "NORDIC")
+        smartlink201_ser.port = self.port("NORDIC")
         con_class = {
             "B": console.BLExtenderConsole,
             "S": console.SmartLink201Console,

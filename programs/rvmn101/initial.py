@@ -159,7 +159,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         nordic_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        nordic_ser.port = share.config.Fixture.port(self.fixture, "NORDIC")
+        nordic_ser.port = self.port("NORDIC")
         # Console driver
         console_class = {
             "101A": console.Console101A,

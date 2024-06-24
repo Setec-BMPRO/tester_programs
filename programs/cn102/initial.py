@@ -119,7 +119,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         # ARM device programmer
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         self["progARM"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_nxp_image,

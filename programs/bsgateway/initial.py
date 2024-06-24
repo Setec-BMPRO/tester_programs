@@ -92,7 +92,7 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         con_ser = serial.Serial()
         # Set port separately - don't open until after programming
-        con_ser.port = share.config.Fixture.port(self.fixture, "ARM")
+        con_ser.port = self.port("ARM")
         self["console"] = console.Console(con_ser)
         self["can"] = self.physical_devices["CAN"]
         # CAN traffic reader

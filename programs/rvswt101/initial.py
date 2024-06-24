@@ -126,7 +126,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         rvswt101_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        bl652_port = share.config.Fixture.port(self.fixture, "NORDIC")
+        bl652_port = self.port("NORDIC")
         rvswt101_ser.port = bl652_port
         self["rvswt101"] = console.Console(rvswt101_ser)
         self["rvswt101"].measurement_fail_on_error = False

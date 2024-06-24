@@ -156,7 +156,7 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         self["rla_reset"] = LatchingRelay(self["rla_rst_on"], self["rla_rst_off"])
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         # LPC1519 device programmer
         self["programmer"] = share.programmer.ARM(
             arm_port,

@@ -96,7 +96,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         bc2_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        bc2_ser.port = share.config.Fixture.port(self.fixture, "ARM")
+        bc2_ser.port = self.port("ARM")
         # Console driver
         self["bc2"] = console.Console(bc2_ser)
         self["bc2"].verbose = False

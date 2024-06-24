@@ -253,7 +253,7 @@ class Devices(share.Devices):
             ("rla_loadsw", tester.Relay, "RLA3"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         # ARM device programmer
         sw_file = "j35_{0}.bin".format(self.sw_version)
         self["program_arm"] = share.programmer.ARM(

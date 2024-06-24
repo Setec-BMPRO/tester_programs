@@ -131,7 +131,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         ble2can_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        ble2can_ser.port = share.config.Fixture.port(self.fixture, "ARM")
+        ble2can_ser.port = self.port("ARM")
         # Console driver
         self["ble2can"] = console.Console(ble2can_ser)
         # Connection to RaspberryPi bluetooth server

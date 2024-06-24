@@ -120,7 +120,7 @@ class Devices(share.Devices):
         # Serial connection to the console
         trsrfm_ser = serial.Serial(baudrate=115200, timeout=15.0)
         # Set port separately, as we don't want it opened yet
-        trsrfm_ser.port = share.config.Fixture.port(self.fixture, "ARM")
+        trsrfm_ser.port = self.port("ARM")
         # Console driver
         self["trsrfm"] = console.Console(trsrfm_ser)
         # Connection to RaspberryPi bluetooth server

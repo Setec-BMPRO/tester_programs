@@ -86,7 +86,7 @@ class Devices(share.Devices):
         # Serial connection to the Bluetooth device
         btport = serial.Serial(baudrate=115200, timeout=2)
         # Set port separately, as we don't want it opened yet
-        btport.port = share.config.Fixture.port(self.fixture, "BT")
+        btport.port = self.port("BT")
         # BT Radio driver
         self["bt"] = eunistone_pan1322.BtRadio(btport)
 

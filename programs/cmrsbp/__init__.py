@@ -350,7 +350,7 @@ class Devices(share.Devices):
         self.add_closer(lambda: self["dcs_Vcom"].output(0.0, output=False))
         # Open serial connection to data monitor
         cmr_ser = serial.Serial(
-            port=share.config.Fixture.port(self.fixture, "CMR"),
+            port=self.port("CMR"),
             baudrate=9600,
             timeout=0.1,
         )
@@ -359,7 +359,7 @@ class Devices(share.Devices):
         # EV2200 board
         ev_ser = serial.Serial(baudrate=9600, timeout=4)
         # Set port separately, as we don't want it opened yet
-        ev_ser.port = share.config.Fixture.port(self.fixture, "EV")
+        ev_ser.port = self.port("EV")
         self["ev"] = ev2200.EV2200(ev_ser)
         self["PicKit"] = tester.PicKit(
             (self.physical_devices["PICKIT"], self["rla_Prog"])

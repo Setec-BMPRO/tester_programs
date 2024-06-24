@@ -67,7 +67,7 @@ class Devices(share.Devices):
         sw.monostable = sw.set_on
         sw.ftdi = sw.set_off
         # Serial port for the ATtiny406. Used by programmer and comms module.
-        avr_port = share.config.Fixture.port(self.fixture, "AVR")
+        avr_port = self.port("AVR")
         # ATtiny406 device programmer
         self["program_avr"] = share.programmer.AVR(
             avr_port,

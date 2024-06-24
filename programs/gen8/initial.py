@@ -326,7 +326,7 @@ class Devices(share.Devices):
             )
         )
         # Serial port for the ARM. Used by programmer and ARM comms module.
-        arm_port = share.config.Fixture.port(self.fixture, "ARM")
+        arm_port = self.port("ARM")
         # ARM device programmer
         self["programmer"] = share.programmer.ARM(
             arm_port,

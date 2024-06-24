@@ -162,7 +162,7 @@ class Initial(share.TestSequence):
                 msp.measurement_fail_on_error = True
         with dev["rla_prog"]:
             # BSL serial port for programming MSP430
-            bsl_port = share.config.Fixture.port("020827", "BSL")
+            bsl_port = self.port("BSL")
             # STEP 1 - SAVE INTERNAL CALIBRATION
             sys.argv = (
                 [
@@ -272,7 +272,7 @@ class Devices(share.Devices):
         # Serial connection to the console to communicate with the MSP430
         self["msp_ser"] = serial.Serial(baudrate=57600, timeout=5.0)
         # Set port separately, as we don't want it opened yet
-        self["msp_ser"].port = share.config.Fixture.port(self.fixture, "CON")
+        self["msp_ser"].port = self.port("CON")
         # MSP430 Console driver
         self["msp"] = console.Console(self["msp_ser"])
         # Apply power to fixture circuits.
