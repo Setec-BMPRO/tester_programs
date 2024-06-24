@@ -47,7 +47,6 @@ class Values:
     reversed_outputs = field(factory=dict, validator=validators.instance_of(dict))
     nordic_devicetype = field(default="nrf52832", validator=validators.instance_of(str))
     arm_devicetype = field(default="lpc1519", validator=validators.instance_of(str))
-    fixture = field(default="", validator=validators.instance_of(str))
 
 
 class Config:
@@ -90,7 +89,6 @@ class Config:
         rev = uut.revision
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         cls.values = cls._rev_data[rev]
-        cls.values.fixture = cls._fixture
 
     @classmethod
     def limits_initial(cls):
@@ -114,7 +112,6 @@ class Config:
 class RVMN101A(Config):
     """RVMN101A configuration."""
 
-    _fixture = "033550"
     _reversed7to9 = {  # Key: any text, Value: Output index
         "HBRIDGE 1 EXTEND": 0,
         "HBRIDGE 1 RETRACT": 1,
@@ -309,7 +306,6 @@ class RVMN101A(Config):
 class RVMN101B(Config):
     """RVMN101B configuration."""
 
-    _fixture = "032871"
     _nordic_2_6_3 = "rvmn101b_signed_2.6.3-0-g129a5c96_factory_mcuboot.hex"
     _arm_image_3_1 = "rvmn101b_nxp_3.1.bin"  # 039578 Rev ≥ 22
     _arm_image_3_0 = "rvmn101b_nxp_3.0.bin"  # 035879 Rev ≥ 14
@@ -445,7 +441,6 @@ class RVMN101B(Config):
 class RVMN101C(Config):
     """RVMN101C configuration."""
 
-    _fixture = "033550"
     _sonic_1_0_7 = "rvmn101c_signed_1.0.7-0-g0d768132_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
     _rev5_values = Values(
@@ -490,7 +485,6 @@ class RVMN101C(Config):
 class RVMN200A(Config):
     """RVMN200A configuration."""
 
-    _fixture = "033550"
     _sonic_4_2_0 = "rvmn200a_signed_4.2.0-0-g0734a4ac_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
     _rev1_values = Values(
@@ -521,7 +515,6 @@ class RVMN200A(Config):
 class RVMN5x(Config):
     """RVMN5x configuration."""
 
-    _fixture = "034861"
     _nordic_3_4_2 = "rvmn5x_signed_3.4.2-0-g5f0b6377_factory_mcuboot.hex"
     _nxp_image_2_3 = "rvmn5x_nxp_2.3.bin"
     _ra2_image_0_3_6 = "rvmn5x_ra2_v0.3.6-0-g34e425b.hex"
@@ -681,7 +674,6 @@ class RVMN5x(Config):
 class RVMN6x(Config):
     """RVMN6x configuration."""
 
-    _fixture = "034861"
     _nordic_4_2_0 = "rvmn6x_signed_4.2.0-0-g0734a4ac_factory_mcuboot.hex"
     _ra2_image_0_3_6 = "rvmn5x_ra2_v0.3.6-0-g34e425b.hex"
     _rev1_values = Values(
