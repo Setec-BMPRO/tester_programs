@@ -187,9 +187,10 @@ class Fixture:
     }
 
     @classmethod
-    def port(cls, fixture: libtester.Fixture, name: str) -> str:
+    def port(cls, tester_type: str, fixture: libtester.Fixture, name: str) -> str:
         """Lookup the serial port assignment of a fixture.
 
+        @param tester_type Tester name
         @param fixture libtester.Fixture
         @param name Port name
         @return Serial port name
@@ -202,6 +203,6 @@ class Fixture:
         item_num = fixture.item.number
         result = cls._data[item_num][name]
         # ATE4 has the GEN4 Arduino as ttyACM1
-        if System.tester_type == "ATE4" and result == "/dev/ttyACM1":
+        if tester_type == "ATE4" and result == "/dev/ttyACM1":
             result = "/dev/ttyACM2"
         return result
