@@ -105,7 +105,7 @@ class Config:
     _initial_limits = (
         libtester.LimitDelta("Vin", 3.3, 0.3, doc="Injected power"),
         libtester.LimitHigh("RSSI Level", -90, doc="Bluetooth RSSI Level"),
-        )
+    )
     # Final Test limits
     _final_limits = (
         libtester.LimitBoolean("ButtonOk", True, doc="Ok entered"),

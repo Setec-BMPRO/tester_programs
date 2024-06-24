@@ -128,7 +128,7 @@ class Sensors(share.Sensors):
         self["can_3v3"].doc = "U6 output"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile("r7fa2l1a9"),
+            share.programmer.JFlashProject.projectfile("r7fa2l1a9"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
         self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)

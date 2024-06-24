@@ -198,7 +198,7 @@ class Sensors(share.Sensors):
         self["bklght"].doc = "Across backlight"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile("atsamc21e17"),
+            share.programmer.JFlashProject.projectfile("atsamc21e17"),
             pathlib.Path(__file__).parent / self.sw_file,
         )
         self["oYesNoOn"] = sensor.YesNo(

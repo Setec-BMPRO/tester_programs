@@ -152,7 +152,7 @@ class Sensors(share.Sensors):
         self["mirscan"] = sensor.Mirror()
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile("nrf52832"),
+            share.programmer.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
         trsrfm = self.devices["trsrfm"]

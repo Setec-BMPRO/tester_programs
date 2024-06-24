@@ -185,7 +185,7 @@ class Sensors(share.Sensors):
         self["d_5v"] = sensor.Vdc(dmm, high=9, low=1, rng=10, res=0.01, position=4)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile("atsamc21e16"),
+            share.programmer.JFlashProject.projectfile("atsamc21e16"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
         self["yesnodisplay"] = sensor.YesNo(

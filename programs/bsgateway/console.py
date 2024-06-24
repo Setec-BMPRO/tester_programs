@@ -83,7 +83,8 @@ class Console(share.console.BadUart):
         sensor = tester.sensor.Mirror()
         for name, value in (("3V3", vcc), ("DAC", dac), ("OFF", offacc)):
             limit = libtester.LimitBetween(
-                "{0} Cal".format(name), 0x0, 0xFFFF, "{0} value".format(name))
+                "{0} Cal".format(name), 0x0, 0xFFFF, "{0} value".format(name)
+            )
             meas = tester.Measurement(limit, sensor)
             sensor.store(value)
             meas.measure()

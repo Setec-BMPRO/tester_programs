@@ -262,7 +262,7 @@ class Sensors(share.Sensors):
         self["vin"] = sensor.Vdc(dmm, high=1, low=1, rng=10, res=0.01)
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile("nrf52832"),
+            share.programmer.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
         self["RSSI"] = sensor.Keyed(self.devices["decoder"], "rssi")

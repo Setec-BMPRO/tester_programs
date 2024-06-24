@@ -215,12 +215,12 @@ class Sensors(share.Sensors):
         self["LSout2"] = sensor.Vdc(dmm, high=5, low=1, rng=100, res=0.1)
         self["JLinkBLE"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile(self.nordic_devicetype),
+            share.programmer.JFlashProject.projectfile(self.nordic_devicetype),
             pathlib.Path(__file__).parent / self.nordic_image,
         )
         self["JLinkARM"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile(self.arm_devicetype),
+            share.programmer.JFlashProject.projectfile(self.arm_devicetype),
             pathlib.Path(__file__).parent / self.arm_image,
         )
         # Console sensors

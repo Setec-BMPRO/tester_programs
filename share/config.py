@@ -3,7 +3,6 @@
 """Configuration classes."""
 
 import os
-import pathlib
 from typing import ClassVar, Dict
 
 from attrs import define
@@ -206,18 +205,3 @@ class Fixture:
         if System.tester_type == "ATE4" and result == "/dev/ttyACM1":
             result = "/dev/ttyACM2"
         return result
-
-
-@define
-class JFlashProject:
-    """Common store of JFlash project files for devices."""
-
-    @classmethod
-    def projectfile(cls, device: str) -> pathlib.Path:
-        """Path to a device's jflash project file.
-
-        @param device Device name string (Matches project filename)
-        @return Path to device project file
-
-        """
-        return pathlib.Path(__file__).parent / "programmer" / (device + ".jflash")

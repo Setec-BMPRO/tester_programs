@@ -207,7 +207,7 @@ class Sensors(share.Sensors):
         self["S5tank"].doc = "S5 Tank Type"
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
-            share.config.JFlashProject.projectfile("nrf52832"),
+            share.programmer.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_nrf_image,
         )
         # Console sensors
