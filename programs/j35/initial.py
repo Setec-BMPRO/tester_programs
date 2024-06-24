@@ -20,7 +20,6 @@ class Initial(share.TestSequence):
         limits = self.cfg.limits_initial()
         Sensors.output_count = self.cfg.output_count
         Sensors.load_per_output = self.cfg.load_per_output
-        Devices.fixture = self.fixture
         Devices.sw_version = self.cfg.sw_version
         self.duplicate_limit_error = False
         self.configure(limits, Devices, Sensors, Measurements)
@@ -232,7 +231,6 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     sw_version = None
 
     def open(self):

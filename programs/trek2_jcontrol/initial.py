@@ -63,7 +63,6 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.config = self.config_data[self.parameter]["Config"]
-        Devices.fixture = self.fixture
         Devices.sw_image = self.config.sw_image
         self.configure(
             self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
@@ -103,7 +102,6 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     sw_image = None
 
     def open(self):

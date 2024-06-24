@@ -23,7 +23,6 @@ class Initial(share.TestSequence):
         self.ocp_nominal, limits = self.cfg.limits_initial()
         Sensors.ocp_nominal = self.ocp_nominal
         Devices.arm_file = self.cfg.arm_file
-        Devices.fixture = self.fixture
         console.Console.cal_linecount = self.cfg.cal_linecount
         self.configure(limits, Devices, Sensors, Measurements)
         super().open()
@@ -139,7 +138,6 @@ class Devices(share.Devices):
     """Devices."""
 
     arm_file = None  # Firmware image filename
-    fixture = None
 
     def open(self):
         """Create all Instruments."""

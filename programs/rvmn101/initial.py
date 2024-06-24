@@ -18,7 +18,6 @@ class Initial(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
-        Devices.fixture = self.cfg.values.fixture
         Devices.reversed_outputs = self.cfg.values.reversed_outputs
         Sensors.nordic_devicetype = self.cfg.values.nordic_devicetype
         Sensors.nordic_image = self.cfg.values.nordic_image
@@ -141,7 +140,6 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     reversed_outputs = None  # Outputs with reversed operation
 
     def open(self):

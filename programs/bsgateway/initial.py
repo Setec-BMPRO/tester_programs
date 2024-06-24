@@ -29,7 +29,6 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        Devices.fixture = self.fixture
         Sensors.sw_image = self.sw_image[self.uuts[0].revision]
         self.configure(self.testlimits, Devices, Sensors, Measurements)
         super().open()
@@ -77,8 +76,6 @@ class Initial(share.TestSequence):
 
 class Devices(share.Devices):
     """Devices."""
-
-    fixture = None
 
     def open(self):
         """Create all Instruments."""

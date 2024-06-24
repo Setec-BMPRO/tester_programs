@@ -22,7 +22,6 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        Devices.fixture = self.fixture
         self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
@@ -48,8 +47,6 @@ class Initial(share.TestSequence):
 
 class Devices(share.Devices):
     """Devices."""
-
-    fixture = None
 
     def open(self):
         """Create all Instruments."""

@@ -55,7 +55,6 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        Devices.fixture = self.fixture
         self.configure(
             self.limitdata[self.parameter]["Limits"], Devices, Sensors, Measurements
         )
@@ -178,8 +177,6 @@ class Initial(share.TestSequence):
 
 class Devices(share.Devices):
     """Devices."""
-
-    fixture = None
 
     def open(self):
         """Create all Instruments."""

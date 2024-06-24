@@ -18,7 +18,6 @@ class Final(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config.get(self.parameter, self.uuts[0])
         button_count = self.cfg["button_count"]
-        Devices.fixture = self.fixture
         Devices.button_count = button_count
         limits_fin = {
             4: "limits_fin_4_button",
@@ -81,7 +80,6 @@ class Final(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     button_count = None  # 4 or 6 button selection
 
     def open(self):

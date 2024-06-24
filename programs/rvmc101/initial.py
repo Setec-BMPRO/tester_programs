@@ -29,7 +29,6 @@ class Initial(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        Devices.fixture = self.fixture
         Devices.sw_image = Sensors.sw_image = self.sw_image[self.parameter]
         self.is_full = self.parameter != "LITE"
         self.configure(self.limitdata, Devices, Sensors, Measurements)
@@ -104,7 +103,6 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     sw_image = None
 
     def open(self):

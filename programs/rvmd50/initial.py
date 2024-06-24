@@ -30,7 +30,6 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.cfg = config.get(self.parameter, self.uuts[0])
-        Devices.fixture = self.fixture
         Devices.sw_image = Sensors.sw_image = self.cfg.sw_image
         self.configure(self.testlimits, Devices, Sensors, Measurements)
         super().open()
@@ -90,7 +89,6 @@ class LatchingRelay:
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     sw_image = None
 
     def open(self):

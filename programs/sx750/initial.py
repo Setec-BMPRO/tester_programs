@@ -18,7 +18,6 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.cfg = config.Config
-        Devices.fixture = self.fixture
         Devices.sw_image = self.cfg.arm_bin
         Sensors.ratings = self.cfg.ratings
         self.configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
@@ -334,7 +333,6 @@ class Initial(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     sw_image = None
 
     def open(self):

@@ -25,7 +25,6 @@ class Initial(share.TestSequence):
         else:
             arm_image = "bp35_{0}.bin".format(self.cfg.arm_sw_version)
         Devices.arm_image = arm_image
-        Devices.fixture = self.fixture
         Sensors.outputs = self.cfg.outputs
         Sensors.iload = self.cfg.iload
         Sensors.pic_image = "bp35sr_{0}.hex".format(self.cfg.pic_sw_version)
@@ -334,7 +333,6 @@ class Devices(share.Devices):
     """Devices."""
 
     arm_image = None  # ARM software image
-    fixture = None
 
     def open(self):
         """Create all Instruments."""

@@ -24,7 +24,6 @@ class InitialMicro(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        Devices.fixture = self.fixture
         Sensors.pic_hex_mic = config.pic_hex_mic
         self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
@@ -62,8 +61,6 @@ class InitialMicro(share.TestSequence):
 
 class Devices(share.Devices):
     """Micro Devices."""
-
-    fixture = None
 
     def open(self):
         """Create all Instruments."""

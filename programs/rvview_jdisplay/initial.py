@@ -42,7 +42,6 @@ class Initial(share.TestSequence):
         """Prepare for testing."""
         self.config = config.get(self.parameter)
         self.is_atsam = self.config.is_atsam
-        Devices.fixture = self.fixture
         Devices.sw_file = Sensors.sw_file = self.config.sw_file
         self.configure(self._limits, Devices, Sensors, Measurements)
         super().open()
@@ -139,7 +138,6 @@ class LatchingRelay:
 class Devices(share.Devices):
     """Devices."""
 
-    fixture = None
     sw_file = None
 
     def open(self):

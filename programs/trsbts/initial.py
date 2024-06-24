@@ -51,7 +51,6 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.config = config.get(self.parameter)
-        Devices.fixture = self.fixture
         Sensors.sw_image = self.config.sw_image
         self.configure(self._limits, Devices, Sensors, Measurements)
         super().open()
@@ -140,8 +139,6 @@ class Initial(share.TestSequence):
 
 class Devices(share.Devices):
     """Devices."""
-
-    fixture = None
 
     def open(self):
         """Create all Instruments."""
