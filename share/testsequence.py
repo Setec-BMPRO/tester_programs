@@ -11,6 +11,7 @@ from attrs import define, field, validators
 import libtester
 import tester
 
+from . import bluetooth
 from . import config
 
 
@@ -326,6 +327,19 @@ class TestSequenceMixin:
     def port(self, name: str) -> str:
         """Find the device name of a serial port."""
         return self.devices.port(name)
+
+    def ble_rssi_dev(self) -> None:
+        """Generic configuration of a BLE MAC & Scanning server."""
+        ble_dev = tester.BLE(
+            (self.physical_devices["BLE"], self.physical_devices["MAC"])
+        )
+        rssi_decoder = bluetooth.RSSI(ble_dev)
+        rssi_sensor = tester.sensor.Keyed(rssi_decoder, "rssi")
+        rssi_sensor.rereadable = True
+        # Pre-populate devices and sensors
+        self.devices["BLE"] = ble_dev
+        self.devices["RSSIDecoder"] = rssi_decoder
+        self.sensors["RSSI"] = rssi_sensor
 
 
 @define
