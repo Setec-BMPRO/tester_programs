@@ -60,16 +60,14 @@ class Initial(share.TestSequence):
         rvmn = dev["rvmn"]
         rvmn.open()
         rvmn.reset()
-        if self.cfg.values.boot_delay:
-            # FIXME: Console prompt appears before it is ready to accept commands
-            time.sleep(4)  # RVMN200A: 2s gives a 1 in 5 branding failure rate
+        time.sleep(self.cfg.values.boot_delay)
         rvmn.brand(sernum, self.cfg.values.product_rev, self.cfg.values.hardware_rev)
         with tester.PathName("Verify"):
             # FIXME: Power cycle module to reload everything from NV storage
+            #        Check that firmware has really saved the branding data
             dcs = dev["dcs_vbatt"]
             dcs.output(0.0, delay=0.5)
             dcs.output(self.cfg.vbatt_set, delay=2)
-            # FIXME: Check that firmware has really saved the branding data
             for name, value in (  # Set the test limits
                 ("Serial", sernum),
                 ("ProdRev", self.cfg.values.product_rev),

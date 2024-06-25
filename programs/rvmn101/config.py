@@ -47,7 +47,9 @@ class Values:
     reversed_outputs = field(factory=dict, validator=validators.instance_of(dict))
     nordic_devicetype = field(default="nrf52832", validator=validators.instance_of(str))
     arm_devicetype = field(default="lpc1519", validator=validators.instance_of(str))
-    boot_delay = field(default=True, validator=validators.instance_of(bool))
+    # FIXME: Console prompt appears before it is ready to accept commands
+    # RVMN200A: 2s gives a 1 in 5 branding failure rate
+    boot_delay = field(default=4.0, validator=validators.instance_of(float))
 
 
 class Config:
