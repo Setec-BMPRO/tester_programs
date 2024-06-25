@@ -60,9 +60,10 @@ class Initial(share.TestSequence):
         rvmn = dev["rvmn"]
         rvmn.open()
         rvmn.reset()
-        # FIXME: Console prompt appears before it is ready to accept commands
-        time.sleep(4)  # RVMN200A: 2s gives a 1 in 5 branding failure rate
-        rvmn.brand(sernum, self.cfg.values.product_rev, self.cfg.values.product_rev)
+        if self.cfg.values.boot_delay:
+            # FIXME: Console prompt appears before it is ready to accept commands
+            time.sleep(4)  # RVMN200A: 2s gives a 1 in 5 branding failure rate
+        rvmn.brand(sernum, self.cfg.values.product_rev, self.cfg.values.hardware_rev)
         with tester.PathName("Verify"):
             # FIXME: Power cycle module to reload everything from NV storage
             dcs = dev["dcs_vbatt"]
@@ -72,7 +73,7 @@ class Initial(share.TestSequence):
             for name, value in (  # Set the test limits
                 ("Serial", sernum),
                 ("ProdRev", self.cfg.values.product_rev),
-                ("HardRev", self.cfg.values.product_rev),
+                ("HardRev", self.cfg.values.hardware_rev),
             ):
                 mes[name].testlimit[0].adjust("^{0}$".format(value))
             self.measure(("Serial", "ProdRev", "HardRev"))

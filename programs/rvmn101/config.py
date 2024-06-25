@@ -43,10 +43,11 @@ class Values:
     nordic_image = field(validator=validators.instance_of(str))
     arm_image = field(validator=validators.instance_of(str))
     product_rev = field(validator=validators.instance_of(str))
-    hardware_rev = field()
+    hardware_rev = field(validator=validators.instance_of(str))
     reversed_outputs = field(factory=dict, validator=validators.instance_of(dict))
     nordic_devicetype = field(default="nrf52832", validator=validators.instance_of(str))
     arm_devicetype = field(default="lpc1519", validator=validators.instance_of(str))
+    boot_delay = field(default=True, validator=validators.instance_of(bool))
 
 
 class Config:
