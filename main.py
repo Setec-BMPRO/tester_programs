@@ -63,7 +63,8 @@ class Config:
         """Read the config file."""
         self._config.read(self.configfile)
         section = self._config["DEFAULT"]
-        self.tester_type = section.get("TesterType", "ATE3")
+        atester = section.get("TesterType", "ATE3")
+        self.tester_type = libtester.Tester(atester, atester + "a")
         fixture = section.get("Fixture")
         self.fixture = libtester.Fixture.from_barcode(fixture)
         self.test_program = section.get("Program", "Dummy")
@@ -112,7 +113,7 @@ class Worker:
 
     def open(self):
         """Open the Worker."""
-        share.config.System.tester_type = self.config.tester_type
+        share.config.System.tester_type = self.config.tester_type.type
         dispatcher.connect(
             self._test_result,
             sender=tester.signals.Thread.tester,
