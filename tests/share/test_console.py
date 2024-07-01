@@ -4,6 +4,7 @@
 import unittest
 from unittest.mock import patch
 
+import libtester
 import tester
 
 import share
@@ -18,7 +19,7 @@ class BaseConsole(unittest.TestCase):
         logging_setup()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester()
-        cls.tester.start("MockATE", {})
+        cls.tester.start(libtester.Tester("MockATE", "MockATEa"), {})
 
     @classmethod
     def tearDownClass(cls):
@@ -78,7 +79,7 @@ class BadUartConsole(unittest.TestCase):
         logging_setup()
         # We need a tester to get MeasurementFailedError
         cls.tester = tester.Tester()
-        cls.tester.start("MockATE", {})
+        cls.tester.start(libtester.Tester("MockATE", "MockATEa"), {})
 
     @classmethod
     def tearDownClass(cls):

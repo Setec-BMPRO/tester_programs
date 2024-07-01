@@ -3,7 +3,10 @@
 
 import unittest
 from unittest.mock import Mock, patch
+
+import libtester
 import tester
+
 from programs import bc15_25
 
 
@@ -103,7 +106,7 @@ powersupply_ma                        10000
     def setUpClass(cls):
         # We need a tester to get MeasurementFailedError.
         cls.tester = tester.Tester()
-        cls.tester.start("MockATE", {})
+        cls.tester.start(libtester.Tester("MockATE", "MockATEa"), {})
 
     @classmethod
     def tearDownClass(cls):

@@ -14,7 +14,7 @@ import queue
 import unittest
 from unittest.mock import Mock, patch
 
-from libtester import Fixture, UUT
+import libtester
 import tester
 from pydispatch import dispatcher
 
@@ -130,12 +130,15 @@ class ProgramTestCase(unittest.TestCase):
             repr(cls.prog_class), cls.per_panel, cls.parameter
         )
         cls.tester = UnitTester()
-        cls.tester.start("MockATE", {repr(cls.prog_class): cls.prog_class})
+        cls.tester.start(
+            libtester.Tester("MockATE", "MockATEa"),
+            {repr(cls.prog_class): cls.prog_class},
+        )
         cls.uuts = list(
-            UUT.from_sernum("A000000000{0}".format(uut))
+            libtester.UUT.from_sernum("A000000000{0}".format(uut))
             for uut in range(1, cls.per_panel + 1)
         )
-        cls.fixture = Fixture.from_barcode("123456-0001")
+        cls.fixture = libtester.Fixture.from_barcode("123456-0001")
         # Looking up devices for a fixture
         cls.patchfixt = patch("share.config.Fixture.port", return_value="DummyPort")
         cls.patchfixt.start()
