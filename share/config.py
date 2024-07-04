@@ -146,6 +146,12 @@ class Fixture:
             # Hub port 2:
             "CMR": {"posix": "/dev/ttyUSB1", "nt": "COM22"}[os.name],
         },
+        "017790": {  # CMR-SBP Final (Prolific)
+            # Hub port 1:
+            "EV": {"posix": "/dev/ttyUSB0", "nt": "COM21"}[os.name],
+            # Hub port 2:
+            "CMR": {"posix": "/dev/ttyUSB1", "nt": "COM22"}[os.name],
+        },
         "020827": {  # BCE282 Initial
             "BSL": _ftdi_hub_1,  # Programming
             "CON": _ftdi_hub_2,  # Console
