@@ -3,6 +3,8 @@
 
 from unittest.mock import patch, Mock
 
+import tester
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import rvswt101
 
@@ -16,13 +18,12 @@ class RVSWT101Final(ProgramTestCase):
 
     def setUp(self):
         """Per-Test setup."""
-        for target in (
-            "tester.BLE",
-            "programs.rvswt101.arduino.Arduino",
-        ):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
+        patcher = patch("tester.BLE", spec=tester.BLE)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+        patcher = patch("programs.rvswt101.arduino.Arduino")
+        self.addCleanup(patcher.stop)
+        patcher.start()
         mypi = Mock(name="decoder")
         mypi.scan_count = 6
         mypi.read.return_value = (
@@ -38,8 +39,8 @@ class RVSWT101Final(ProgramTestCase):
         """PASS run of the program."""
         sen = self.test_sequence.sensors
         data = {
-            UnitTester.key_sen: {  # Tuples of sensor data
-                "Bluetooth": (  # Bluetooth TestStep
+            UnitTester.key_sen: {
+                "Bluetooth": (
                     (sen["mirmac"], "001ec030c2be"),
                     (sen["cell_voltage"], (3.31,)),
                     (sen["switch_type"], (2,)),

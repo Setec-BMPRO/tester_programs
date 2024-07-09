@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """UnitTest for TRS2 Final Test program."""
 
-from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trs2
 
@@ -13,14 +12,6 @@ class TRSFinal(ProgramTestCase):
     parameter = ""
     debug = False
 
-    def setUp(self):
-        """Per-Test setup."""
-        for target in ("share.bluetooth.RaspberryBluetooth",):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
-        super().setUp()
-
     def test_pass_run(self):
         """PASS run of the program."""
         sen = self.test_sequence.sensors
@@ -29,7 +20,9 @@ class TRSFinal(ProgramTestCase):
                 "Prepare": (
                     (sen["vin"], 12.0),
                 ),
-                "Bluetooth": ((sen["mirscan"], True),),
+                "Bluetooth": (
+                    (sen["mirscan"], True),
+                ),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)

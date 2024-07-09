@@ -23,10 +23,7 @@ class Final(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         reply = dev["pi_bt"].scan_advert_sernum(self.uuts[0].sernum, timeout=20)
-        if reply:
-            rssi = reply["rssi"]
-        else:
-            rssi = float("NaN")
+        rssi = reply["rssi"] if reply else float("NaN")
         mes["scan_rssi"].sensor.store(rssi)
         mes["scan_rssi"]()
 
@@ -38,11 +35,7 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
-        # Power to the units
+        self["pi_bt"] = self.physical_devices["BLE"]
         self["dcs_vbat"] = tester.DCSource(self.physical_devices["DCS1"])
         self["dcs_vbat"].output(self.vbatt, output=True, delay=5.0)
         self.add_closer(lambda: self["dcs_vbat"].output(0.0, output=False))

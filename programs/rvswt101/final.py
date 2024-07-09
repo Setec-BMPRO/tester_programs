@@ -24,6 +24,7 @@ class Final(share.TestSequence):
             6: "limits_fin_6_button",
         }[button_count]
         self.configure(self.cfg[limits_fin], Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
         self.buttons = []  # 12 or 18 measurement name strings
@@ -45,9 +46,9 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        dev["ble"].uut = self.uuts[0]
+        dev["BLE"].uut = self.uuts[0]
         # Measure the MAC to save it in test result data
-        mac = dev["ble"].mac
+        mac = dev["BLE"].mac
         mes["ble_mac"].sensor.store(mac)
         mes["ble_mac"]()
         if not dev["ard"].check_uut_in_place():
@@ -66,7 +67,7 @@ class Final(share.TestSequence):
         # Perform button press measurements
         self.measure(self.buttons, timeout=10)
         # Don't bluetooth scan for any measurement from here on
-        dev["decoder"].always_scan = False
+        dev["RvswtDecoder"].always_scan = False
         self.measure(
             (
                 "cell_voltage",
@@ -84,12 +85,7 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # BLE MAC & Scanning server
-        self["ble"] = tester.BLE(
-            (self.physical_devices["BLE"], self.physical_devices["MAC"])
-        )
-        # BLE Packet decoder
-        self["decoder"] = device.RVSWT101(self["ble"])
+        self["RvswtDecoder"] = device.RVSWT101(self["BLE"])
         # Serial connection to the Arduino console
         ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
         # Set port separately, as we don't want it opened yet
@@ -103,7 +99,7 @@ class Devices(share.Devices):
 
     def reset(self):
         """Reset instruments."""
-        self["decoder"].reset()
+        self["RvswtDecoder"].reset()
         self["ard"].retract_all()
 
 
@@ -122,11 +118,11 @@ class Sensors(share.Sensors):
             message=tester.translate("rvswt101_final", "msgAddUUT"),
             caption=tester.translate("rvswt101_final", "capAddUUT"),
         )
-        decoder = self.devices["decoder"]
+        decoder = self.devices["RvswtDecoder"]
         self["cell_voltage"] = sensor.Keyed(decoder, "cell_voltage")
         self["switch_type"] = sensor.Keyed(decoder, "switch_type")
-        self["RSSI"] = sensor.Keyed(decoder, "rssi")
-        self["RSSI"].rereadable = True
+        self["rssi"] = sensor.Keyed(decoder, "rssi")
+        self["rssi"].rereadable = True
         for button in range(1, 7):
             name = "switch_{0}_measure".format(button)
             self[name] = sensor.Keyed(decoder, "switch_code")
@@ -187,7 +183,7 @@ class Measurements(share.Measurements):
                 ("6ButtonModel", "Reply", "6ButtonModel", ""),
                 ("cell_voltage", "CellVoltage", "cell_voltage", "Button cell charged"),
                 ("switch_type", "SwitchType", "switch_type", "Switch type"),
-                ("rssi", "RSSI Level", "RSSI", "Bluetooth RSSI Level"),
+                ("rssi", "RSSI Level", "rssi", "Bluetooth RSSI Level"),
                 (
                     "buttonMeasure_1",
                     "switch_1_pressed",

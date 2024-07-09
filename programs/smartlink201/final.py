@@ -30,18 +30,15 @@ class Final(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.configure(self.limitdata, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
 
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test Bluetooth signal strength."""
-        # Lookup the MAC address from the server
-        mac = dev["serialtomac"].blemac_get(self.uuts[0].sernum)
-        reply = dev["pi_bt"].scan_advert_blemac(mac, timeout=20)
-        rssi = reply["rssi"] if reply else float("NaN")
-        mes["scan_RSSI"].sensor.store(rssi)
-        mes["scan_RSSI"]()
+        dev["BLE"].uut = self.uuts[0]
+        mes["rssi"]()
 
 
 class Devices(share.Devices):
@@ -51,13 +48,6 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Connection to Serial To MAC server
-        self["serialtomac"] = share.bluetooth.SerialToMAC()
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
-        # Power to the unit
         self["dcs_Vbatt"] = tester.DCSource(self.physical_devices["DCS1"])
         self["dcs_Vbatt"].output(self.vin_set, output=True, delay=5.0)
         self.add_closer(lambda: self["dcs_Vbatt"].output(0.0, output=False))
@@ -71,9 +61,6 @@ class Sensors(share.Sensors):
 
     def open(self):
         """Create all Sensors."""
-        sensor = tester.sensor
-        self["mir_RSSI"] = sensor.Mirror()
-        self["mir_RSSI"].doc = "Measured RSSI"
 
 
 class Measurements(share.Measurements):
@@ -82,5 +69,5 @@ class Measurements(share.Measurements):
     def open(self):
         """Create all Measurements."""
         self.create_from_names(
-            (("scan_RSSI", "ScanRSSI", "mir_RSSI", "Bluetooth signal strength"),)
+            (("rssi", "ScanRSSI", "RSSI", "Bluetooth signal strength"),)
         )

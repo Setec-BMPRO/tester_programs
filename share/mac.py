@@ -15,6 +15,9 @@ from attrs import define, field, validators
 class MAC:
     """Device MAC address."""
 
+    regex = r"^([0-9A-Fa-f]{2}[:\-]?){5}[0-9A-Fa-f]{2}$"
+    _mac_re = re.compile(regex)
+
     mac = field(validator=validators.instance_of(bytes))
 
     @mac.validator
@@ -30,8 +33,8 @@ class MAC:
         @return MAC instance
 
         """
-        if not re.match(r"^([0-9A-F]{2}[:\-]?){5}[0-9A-F]{2}$", mac_str, re.IGNORECASE):
-            raise ValueError()
+        if not cls._mac_re.match(mac_str):
+            raise ValueError("MAC does not match {0!r}".format(cls.regex))
         return cls(bytes.fromhex(mac_str.replace(":", "").replace("-", "")))
 
     def dumps(self, separator="-", lowercase=False):

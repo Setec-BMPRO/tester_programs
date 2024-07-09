@@ -33,14 +33,15 @@ class Initial(share.TestSequence):
             r"^{0}$".format(sw_version.replace(".", r"\.")),
             doc="Software version",
         ),
-        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address"),
-        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
+        libtester.LimitHigh("ScanRSSI", -90, doc="Strong BLE signal"),
     )
 
     def open(self):
         """Prepare for testing."""
         Sensors.sw_image = self.sw_image
         self.configure(self.limitdata, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
@@ -82,16 +83,12 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test Bluetooth."""
-        trsrfm = dev["trsrfm"]
-        # Get the MAC address from the console.
-        mac = trsrfm.get_mac()
-        mes["ble_mac"].sensor.store(mac)
-        mes["ble_mac"]()
+        mac = mes["ble_mac"]().value1
         dev["rla_pair_btn"].set_on()
         # Scan for the unit
-        reply = dev["pi_bt"].scan_advert_blemac(mac, timeout=20)
-        mes["scan_mac"].sensor.store(reply is not None)
-        mes["scan_mac"]()
+        dev["BLE"].uut = self.uuts[0]
+        dev["BLE"].mac = mac
+        mes["rssi"]()
 
 
 class Devices(share.Devices):
@@ -113,10 +110,6 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         trsrfm_ser.port = self.port("NORDIC")
         self["trsrfm"] = console.Console(trsrfm_ser)
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
 
     def reset(self):
         """Reset instruments."""
@@ -145,8 +138,6 @@ class Sensors(share.Sensors):
         self["green"].doc = "Led cathode"
         self["blue"] = sensor.Vdc(dmm, high=7, low=1, rng=10, res=0.01)
         self["blue"].doc = "Led cathode"
-        self["mirmac"] = sensor.Mirror()
-        self["mirscan"] = sensor.Mirror()
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
             share.programmer.JFlashProject.projectfile("nrf52832"),
@@ -154,6 +145,8 @@ class Sensors(share.Sensors):
         )
         trsrfm = self.devices["trsrfm"]
         self["arm_SwVer"] = sensor.Keyed(trsrfm, "SW_VER")
+        self["BleMac"] = sensor.Keyed(trsrfm, "BT_MAC")
+        self["BleMac"].on_read = lambda value: value.replace(":", "").lower()
 
 
 class Measurements(share.Measurements):
@@ -171,13 +164,8 @@ class Measurements(share.Measurements):
                 ("dmm_greenon", "LedOn", "green", "Green led on"),
                 ("dmm_blueoff", "LedOff", "blue", "Blue led off"),
                 ("dmm_blueon", "LedOn", "blue", "Blue led on"),
-                ("ble_mac", "BleMac", "mirmac", "Validate MAC address from console"),
-                (
-                    "scan_mac",
-                    "ScanMac",
-                    "mirscan",
-                    "Validate MAC address over bluetooth",
-                ),
+                ("ble_mac", "BleMac", "BleMac", "Validate MAC address from console"),
+                ("rssi", "ScanRSSI", "RSSI", "Bluetooth RSSI Level"),
                 ("arm_swver", "ARM-SwVer", "arm_SwVer", "Unit software version"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
             )

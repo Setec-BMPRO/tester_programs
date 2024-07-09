@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """UnitTest for TRS-BTS Initial Test program."""
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trsbts
@@ -13,25 +13,10 @@ class TRSBTS_Initial(ProgramTestCase):
     prog_class = trsbts.Initial
     parameter = "BTS"
     debug = False
-    btmac = "001ec030bc15"
 
     def setUp(self):
         """Per-Test setup."""
-
-        for target in ("share.bluetooth.SerialToMAC",):
-            patcher = patch(target)
-            self.addCleanup(patcher.stop)
-            patcher.start()
-        # Console
-        mycon = MagicMock(name="MyConsole")
-        mycon.get_mac.return_value = self.btmac
-        patcher = patch("programs.trsbts.console.Console", return_value=mycon)
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        # BLE scanner
-        mypi = Mock(name="MyRasPi")
-        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
-        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
+        patcher = patch("programs.trsbts.console.Console")
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -63,7 +48,10 @@ class TRSBTS_Initial(ProgramTestCase):
                     (sen["vbat"], (12.0, 12.0)),
                     (sen["arm_vpin"], 0.1),
                 ),
-                "Bluetooth": (),
+                "Bluetooth": (
+                    (sen["BleMac"], "001ec030bc15"),
+                    (sen["RSSI"], -50),
+                ),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)

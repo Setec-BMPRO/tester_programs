@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2024 , ",
-    "saved": "2024-06-21, 16:27:09"
+    "saved": "2024-06-25, 12:23:59"
   },
   "project": {
     "AUTHOR": "",
@@ -307,7 +307,6 @@
       "share/__init__.py",
       "share/bluetooth/__init__.py",
       "share/bluetooth/mac.py",
-      "share/bluetooth/raspblue.py",
       "share/bluetooth/rssi.py",
       "share/can/__init__.py",
       "share/can/_base.py",
@@ -421,7 +420,6 @@
       "tests/programs/test_uni750_final.py",
       "tests/programs/test_wtsi200_final.py",
       "tests/share/__init__.py",
-      "tests/share/test_bluetooth.py",
       "tests/share/test_can.py",
       "tests/share/test_console.py",
       "tests/share/test_mac.py",

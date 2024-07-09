@@ -12,13 +12,11 @@ class CN101Initial(ProgramTestCase):
     prog_class = cn101.Initial
     parameter = ""
     debug = False
-    btmac = "001EC030BC15"
 
     def setUp(self):
         """Per-Test setup."""
         for target in (
             "share.programmer.ARM",
-            "share.bluetooth.RaspberryBluetooth",
             "programs.cn101.console.DirectConsole",
             "programs.cn101.console.TunnelConsole",
         ):
@@ -48,7 +46,10 @@ class CN101Initial(ProgramTestCase):
                     (sen["tank3"], 5),
                     (sen["tank4"], 5),
                 ),
-                "Bluetooth": ((sen["oBtMac"], self.btmac),),
+                "Bluetooth": (
+                    (sen["oBtMac"], "001EC030BC15"),
+                    (sen["RSSI"], -60),
+                ),
                 "CanBus": (
                     (sen["oCANBIND"], 1 << 28),
                     (sen["TunnelSwVer"], cn101.config.CN101.sw_version),

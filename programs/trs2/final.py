@@ -11,9 +11,7 @@ import share
 class Final(share.TestSequence):
     """TRS2 Final Test Program."""
 
-    # Injected Vbatt
-    vbatt = 12.0
-    # Test limits
+    vbatt = 12.0  # Injected Vbatt
     limitdata = (
         libtester.LimitDelta("Vin", vbatt, 0.5, doc="Input voltage present"),
         libtester.LimitBoolean("ScanSer", True, doc="Serial number detected"),
@@ -47,16 +45,12 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vin", tester.DCSource, "DCS2"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Bluetooth connection to server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
+        self["pi_bt"] = self.physical_devices["BLE"]
 
     def reset(self):
         """Reset instruments."""

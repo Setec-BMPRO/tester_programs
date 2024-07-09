@@ -3,6 +3,7 @@
 """UnitTest for BC2 Final Test program."""
 
 from unittest.mock import patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc2
 
@@ -15,9 +16,6 @@ class _BC2Final(ProgramTestCase):
     def setUp(self):
         """Per-Test setup."""
         patcher = patch("programs.bc2.console.Console")
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        patcher = patch("share.bluetooth.RaspberryBluetooth")
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()

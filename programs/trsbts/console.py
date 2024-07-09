@@ -83,20 +83,3 @@ class Console(share.console.Base):
         for func in self.override_commands:
             self[func] = state
             time.sleep(0.1)
-
-    def get_mac(self):
-        """Get the MAC address from the console
-
-        @return 12 hex digit Bluetooth MAC address
-
-        """
-        result = ""
-        try:
-            mac = self["BT_MAC"]
-            mac = mac.replace(":", "").lower()
-            match = self.re_blemac.search(mac)
-            if match:
-                result = match.group(0)
-        except share.console.Error:
-            pass
-        return result

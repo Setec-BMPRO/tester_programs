@@ -37,7 +37,7 @@ class Final(share.TestSequence):
         libtester.LimitDelta("Vbat", vbatt, 0.5, doc="Battery input present"),
         libtester.LimitLow("BrakeOff", 0.5, doc="Brakes off"),
         libtester.LimitDelta("BrakeOn", vbatt, 0.5, doc="Brakes on"),
-        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
         libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
         libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
     )
@@ -45,6 +45,7 @@ class Final(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         self.configure(self.limitdata, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("Pin", self._step_pin),
@@ -76,20 +77,15 @@ class Final(share.TestSequence):
         dev["dcs_vbat"].output(0.0, delay=1.0)
         dev["dcs_vbat"].output(self.vbatt)
         # Lookup the MAC address from the server
-        mac = dev["serialtomac"].blemac_get(self.uuts[0].sernum)
+        dev["BLE"].uut = self.uuts[0]
+        mac = dev["BLE"].mac
         mes["ble_mac"].sensor.store(mac)
-        mes["ble_mac"]()
-        # Scan for the bluetooth transmission
-        # Reply is like this: {
-        #   'ad_data': {255: '1f050112022d624c3a00000300d1139e69'},
-        #   'rssi': rssi,
-        #   }
-        reply = dev["pi_bt"].scan_advert_blemac(mac, timeout=20)
-        mes["scan_mac"].sensor.store(reply is not None)
-        mes["scan_mac"]()
-        rssi = reply["rssi"]  # Received Signal Strength Indication
-        mes["scan_rssi"].sensor.store(rssi)
-        mes["scan_rssi"]()
+        self.measure(
+            (
+                "ble_mac",
+                "rssi",
+            )
+        )
 
 
 class Devices(share.Devices):
@@ -103,12 +99,6 @@ class Devices(share.Devices):
             ("dcs_vbat", tester.DCSource, "DCS2"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
-        # Connection to Serial To MAC server
-        self["serialtomac"] = share.bluetooth.SerialToMAC()
 
     def reset(self):
         """Reset instruments."""
@@ -130,9 +120,7 @@ class Sensors(share.Sensors):
         )
         self["brake"] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.01)
         self["brake"].doc = "Brake output"
-        self["mirscan"] = sensor.Mirror()
         self["mirmac"] = sensor.Mirror()
-        self["mirrssi"] = sensor.Mirror()
 
 
 class Measurements(share.Measurements):
@@ -147,12 +135,6 @@ class Measurements(share.Measurements):
                 ("dmm_brakeoff", "BrakeOff", "brake", "Brakes output off"),
                 ("dmm_brakeon", "BrakeOn", "brake", "Brakes output on"),
                 ("ble_mac", "BleMac", "mirmac", "Get MAC address from server"),
-                (
-                    "scan_mac",
-                    "ScanMac",
-                    "mirscan",
-                    "Scan for MAC address over Bluetooth",
-                ),
-                ("scan_rssi", "ScanRSSI", "mirrssi", "Bluetooth signal strength"),
+                ("rssi", "ScanRSSI", "RSSI", "Bluetooth signal strength"),
             )
         )

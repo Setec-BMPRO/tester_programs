@@ -59,7 +59,7 @@ class Config:
     vbatt_set = 12.5
     # Test limits common to all units and test types
     _base_limits = (
-        libtester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
     )
     # Initial Test limits common to all units
     _base_limits_initial = _base_limits + (
@@ -78,9 +78,7 @@ class Config:
         libtester.LimitRegExp("HardRev", "None", doc="Correct hardware revision"),
     )
     # Final Test limits common to all units
-    _base_limits_final = _base_limits + (
-        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
-    )
+    _base_limits_final = _base_limits
 
     @classmethod
     def _configure(cls, uut):

@@ -73,10 +73,7 @@ class Devices(share.Devices):
         self["acsource"].output(voltage=240.0, output=True, delay=1.0)
         self.add_closer(lambda: self["acsource"].output(0.0, output=False))
         # Bluetooth connection to the console
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
-        # Bluetooth console driver
+        self["pi_bt"] = self.physical_devices["BLE"]
         self["bc2"] = console.Console(self["pi_bt"])
 
     def reset(self):

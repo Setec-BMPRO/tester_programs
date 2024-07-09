@@ -44,8 +44,8 @@ class Initial(share.TestSequence):
             "ARM-Vbatt-Cal", vbatt, 1.8, delta=0.088, doc="Voltage present"
         ),
         libtester.LimitDelta("ARM-Vpin", 0.0, 1.0, doc="Micro switch voltage ok"),
-        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address"),
-        libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
+        libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
+        libtester.LimitHigh("ScanRSSI", -90, doc="BLE signal"),
     )
 
     def open(self):
@@ -53,6 +53,7 @@ class Initial(share.TestSequence):
         self.config = config.get(self.parameter)
         Sensors.sw_image = self.config.sw_image
         self.configure(self._limits, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
@@ -124,17 +125,11 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
-        trsbts = dev["trsbts"]
-        # Get the MAC address from the console.
-        mac = trsbts.get_mac()
-        mes["ble_mac"].sensor.store(mac)
-        mes["ble_mac"]()
+        mac = mes["ble_mac"]().value1
         # Save SerialNumber & MAC on a remote server.
-        dev["serialtomac"].blemac_set(self.uuts[0].sernum, mac)
-        # Scan for the unit
-        reply = dev["pi_bt"].scan_advert_blemac(mac, timeout=20)
-        mes["scan_mac"].sensor.store(reply is not None)
-        mes["scan_mac"]()
+        dev["BLE"].uut = self.uuts[0]
+        dev["BLE"].mac = mac
+        mes["rssi"]()
 
 
 class Devices(share.Devices):
@@ -161,12 +156,6 @@ class Devices(share.Devices):
         trsbts_ser.port = nordic_port
         # trsbts Console driver
         self["trsbts"] = console.Console(trsbts_ser)
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
-        # Connection to Serial To MAC server
-        self["serialtomac"] = share.bluetooth.SerialToMAC()
 
     def reset(self):
         """Reset instruments."""
@@ -206,8 +195,6 @@ class Sensors(share.Sensors):
         self["light"].doc = "Lights output"
         self["remote"] = sensor.Vdc(dmm, high=14, low=1, rng=100, res=0.01)
         self["remote"].doc = "Remote output"
-        self["mirmac"] = sensor.Mirror()
-        self["mirscan"] = sensor.Mirror()
         # Console sensors
         trsbts = self.devices["trsbts"]
         for name, cmdkey, units in (
@@ -216,6 +203,8 @@ class Sensors(share.Sensors):
         ):
             self[name] = sensor.Keyed(trsbts, cmdkey)
             self[name].units = units
+        self["BleMac"] = sensor.Keyed(trsbts, "BT_MAC")
+        self["BleMac"].on_read = lambda value: value.replace(":", "").lower()
         self["JLink"] = sensor.JLink(
             self.devices["JLink"],
             share.programmer.JFlashProject.projectfile("nrf52832"),
@@ -262,16 +251,11 @@ class Measurements(share.Measurements):
                     "sway+",
                     "Check for correct mounting of Sway+ wire",
                 ),
-                ("ble_mac", "BleMac", "mirmac", "Validate MAC address from console"),
-                (
-                    "scan_mac",
-                    "ScanMac",
-                    "mirscan",
-                    "Validate MAC address over bluetooth",
-                ),
+                ("ble_mac", "BleMac", "BleMac", "Validate MAC address from console"),
                 ("arm_vbatt", "ARM-Vbatt", "arm_vbatt", "Vbatt before cal"),
                 ("arm_vbatt_cal", "ARM-Vbatt-Cal", "arm_vbatt", "Vbatt after cal"),
                 ("arm_vpin", "ARM-Vpin", "arm_vpin", "Voltage on the pin microswitch"),
                 ("JLink", "ProgramOk", "JLink", "Programmed"),
+                ("rssi", "ScanRSSI", "RSSI", "Bluetooth signal strength"),
             )
         )

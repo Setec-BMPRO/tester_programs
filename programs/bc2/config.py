@@ -65,6 +65,7 @@ class Config:
         libtester.LimitPercent(
             "ARM-Vbatt", vbatt, 0.5, delta=0.02, doc="Battery voltage calibrated"
         ),
+        libtester.LimitHigh("ScanRSSI", -90, doc="BLE signal"),
     )
     # Final Test limits common to all units
     _base_limits_final = _base_limits + (

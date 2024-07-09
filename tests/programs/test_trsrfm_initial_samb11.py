@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """UnitTest for TRSRFM Initial Test program."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import trsrfm_samb11
 
@@ -12,16 +13,10 @@ class TRSRFMInitial(ProgramTestCase):
     prog_class = trsrfm_samb11.Initial
     parameter = ""
     debug = False
-    btmac = "001EC030BC15"
 
     def setUp(self):
         """Per-Test setup."""
         patcher = patch("programs.trsrfm_samb11.console.Console")
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        mypi = Mock(name="MyRasPi")
-        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
-        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -63,7 +58,10 @@ class TRSRFMInitial(ProgramTestCase):
                     ),
                     (sen["arm_SwVer"], self.test_sequence.sw_version),
                 ),
-                "Bluetooth": ((sen["arm_BtMAC"], self.btmac),),
+                "Bluetooth": (
+                    (sen["arm_BtMAC"], "001EC030BC15"),
+                    (sen["RSSI"], -70),
+                ),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)

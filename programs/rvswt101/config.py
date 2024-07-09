@@ -3,6 +3,7 @@
 """RVSWT101 Configuration."""
 
 import libtester
+import share
 
 
 class Config:
@@ -98,7 +99,7 @@ class Config:
     }
     # Common Test limits
     _common_limits = (
-        libtester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
         libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
     )
     # Initial Test limits

@@ -20,6 +20,7 @@ class Initial(share.TestSequence):
         self.cfg = config.Config.get(self.parameter, self.uuts[0])
         Sensors.sw_image = self.cfg["software"]
         self.configure(self.cfg["limits_ini"], Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         # Adjust for different console behaviour
         self.devices["rvswt101"].banner_lines = self.cfg["banner_lines"]
@@ -63,14 +64,14 @@ class Initial(share.TestSequence):
                 dev["dcs_vin"].output(0.0, delay=0.5)
                 dev["rvswt101"].port.reset_input_buffer()
                 dev["dcs_vin"].output(3.3, delay=0.1)
-                self.mac = dev["rvswt101"].get_mac()
-                mes["ble_mac"].sensor.store(self.mac)
+                mac = dev["rvswt101"].get_mac()
+                mes["ble_mac"].sensor.store(mac)
                 mes["ble_mac"]()
                 if not tester.Measurement.position_enabled(mypos):
                     continue
                 # Save SerialNumber & MAC on a remote server.
-                dev["ble"].uut = self.uuts[pos]
-                dev["ble"].mac = self.mac
+                dev["BLE"].uut = self.uuts[pos]
+                dev["BLE"].mac = mac
                 # Press Button2 to broadcast on bluetooth
                 try:
                     dev["fixture"].press(mypos)
@@ -127,12 +128,6 @@ class Devices(share.Devices):
         rvswt101_ser.port = bl652_port
         self["rvswt101"] = console.Console(rvswt101_ser)
         self["rvswt101"].measurement_fail_on_error = False
-        # BLE MAC & Scanning server
-        self["ble"] = tester.BLE(
-            (self.physical_devices["BLE"], self.physical_devices["MAC"])
-        )
-        # BLE Packet decoder
-        self["decoder"] = share.bluetooth.RSSI(self["ble"])
 
     def reset(self):
         """Reset instruments."""
@@ -262,8 +257,6 @@ class Sensors(share.Sensors):
             share.programmer.JFlashProject.projectfile("nrf52832"),
             pathlib.Path(__file__).parent / self.sw_image,
         )
-        self["RSSI"] = sensor.Keyed(self.devices["decoder"], "rssi")
-        self["RSSI"].rereadable = True
 
 
 class Measurements(share.Measurements):

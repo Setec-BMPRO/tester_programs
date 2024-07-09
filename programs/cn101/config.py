@@ -5,6 +5,7 @@
 import logging
 
 import libtester
+import share
 
 
 def get(parameter, uut):
@@ -22,7 +23,6 @@ def get(parameter, uut):
 class CN101:
     """CN101 parameters."""
 
-    # Initial test limits
     limits_initial = (
         libtester.LimitRegExp(
             "SwVer", "None", doc="Software version"  # Adjusted during _configure()
@@ -31,8 +31,8 @@ class CN101:
         libtester.LimitDelta("Vin", 8.0, 0.5),
         libtester.LimitPercent("3V3", 3.30, 3.0),
         libtester.LimitInteger("CAN_BIND", 1 << 28),
-        libtester.LimitRegExp("BtMac", r"(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}"),
-        libtester.LimitBoolean("DetectBT", True),
+        libtester.LimitRegExp("BtMac", share.MAC.regex),
+        libtester.LimitHigh("ScanRSSI", -90, doc="BLE signal"),
         libtester.LimitInteger("Tank", 5),
     )
     # These values get set per revision

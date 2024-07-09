@@ -17,6 +17,7 @@ class Initial(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
         self.configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
@@ -68,12 +69,9 @@ class Initial(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         btmac = share.MAC.loads(mes["arm_btmac"]().value1)
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
-        reply = dev["pi_bt"].scan_advert_blemac(btmac.dumps(separator=""), timeout=20)
-        reply = reply is not None  # To boolean
-        self._logger.debug("Bluetooth MAC detected: %s", reply)
-        mes["detectBT"].sensor.store(reply)
-        mes["detectBT"]()
+        dev["BLE"].uut = self.uuts[0]
+        dev["BLE"].mac = btmac.dumps(separator="")
+        mes["rssi"]()
 
 
 class Devices(share.Devices):
@@ -97,10 +95,6 @@ class Devices(share.Devices):
         # Console driver
         self["bc2"] = console.Console(bc2_ser)
         self["bc2"].verbose = False
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
         # Apply power to fixture circuits.
         self["dcs_vfix"].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self["dcs_vfix"].output(0.0, output=False))
@@ -127,7 +121,6 @@ class Sensors(share.Sensors):
         self["vin"].doc = "X4"
         self["3v3"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self["3v3"].doc = "U2 output"
-        self["mirbt"] = sensor.Mirror()
         self["mircal"] = sensor.Mirror()
         # Console sensors
         bc2 = self.devices["bc2"]
@@ -154,7 +147,7 @@ class Measurements(share.Measurements):
             (
                 ("dmm_vin", "Vin", "vin", "Input voltage"),
                 ("dmm_3v3", "3V3", "3v3", "3V3 rail voltage"),
-                ("detectBT", "DetectBT", "mirbt", "Scanned MAC address"),
+                ("rssi", "ScanRSSI", "RSSI", "Bluetooth RSSI Level"),
                 ("arm_btmac", "BtMac", "arm_BtMAC", "MAC address"),
                 ("arm_swver", "ARM-SwVer", "arm_SwVer", "Unit software version"),
                 (

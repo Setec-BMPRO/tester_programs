@@ -25,7 +25,7 @@ class ODL10xParameters:
 
     # Initial test limits
     limits_common = (
-        libtester.LimitRegExp("BleMac", "^[0-9a-f]{12}$", doc="Valid MAC address"),
+        libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
     )
     # Initial test limits
     limits_initial = limits_common + (

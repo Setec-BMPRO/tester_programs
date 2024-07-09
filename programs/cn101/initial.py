@@ -20,6 +20,7 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.sw_version = self.cfg.sw_version
         self.configure(self.cfg.limits_initial, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.limits["SwVer"].adjust(
             "^{0}$".format(self.cfg.sw_version.replace(".", r"\."))
@@ -82,13 +83,10 @@ class Initial(share.TestSequence):
         """Test the Bluetooth interface."""
         dev["dcs_vin"].output(0.0, delay=1.0)
         dev["dcs_vin"].output(12.0, delay=15.0)
+        dev["BLE"].uut = self.uuts[0]
         btmac = share.MAC.loads(mes["cn101_btmac"]().value1)
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
-        reply = dev["pi_bt"].scan_advert_blemac(btmac.dumps(separator=""), timeout=20)
-        reply = reply is not None  # To boolean
-        self._logger.debug("Bluetooth MAC detected: %s", reply)
-        mes["detectBT"].sensor.store(reply)
-        mes["detectBT"]()
+        dev["BLE"].mac = btmac.dumps(separator="")
+        mes["rssi"]()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -137,10 +135,6 @@ class Devices(share.Devices):
             self.physical_devices["CAN"], share.can.SETECDeviceID.CN101.value
         )
         self["cn101tunnel"] = console.TunnelConsole(tunnel)
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
 
     def reset(self):
         """Reset instruments."""
@@ -163,7 +157,6 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["oMirBT"] = sensor.Mirror()
         self["microsw"] = sensor.Res(dmm, high=7, low=3, rng=10000, res=0.1)
         self["sw1"] = sensor.Res(dmm, high=8, low=4, rng=10000, res=0.1)
         self["sw2"] = sensor.Res(dmm, high=9, low=5, rng=10000, res=0.1)
@@ -198,7 +191,7 @@ class Measurements(share.Measurements):
                 ("dmm_microsw", "Part", "microsw", ""),
                 ("dmm_sw1", "Part", "sw1", ""),
                 ("dmm_sw2", "Part", "sw2", ""),
-                ("detectBT", "DetectBT", "oMirBT", ""),
+                ("rssi", "ScanRSSI", "RSSI", "Bluetooth RSSI Level"),
                 ("dmm_vin", "Vin", "oVin", ""),
                 ("dmm_3v3", "3V3", "o3V3", ""),
                 ("cn101_swver", "SwVer", "oSwVer", ""),

@@ -40,13 +40,14 @@ class Initial(share.TestSequence):
         libtester.LimitRegExp(
             "BtMac", "(?:[0-9A-F]{2}:?){5}[0-9A-F]{2}", doc="Valid MAC address"
         ),
-        libtester.LimitBoolean("DetectBT", True, doc="MAC address detected"),
+        libtester.LimitHigh("ScanRSSI", -90, doc="BLE signal"),
         libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
     )
 
     def open(self):
         """Prepare for testing."""
         self.configure(self.limitdata, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
@@ -83,14 +84,11 @@ class Initial(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         btmac = share.MAC.loads(mes["BtMac"]().value1)
+        dev["BLE"].uut = self.uuts[0]
+        dev["BLE"].mac = btmac.dumps(separator="")
         dev["rla_pair_btn"].press()
         self._reset_unit()
-        self._logger.debug('Scanning for Bluetooth MAC: "%s"', btmac.dumps())
-        reply = dev["pi_bt"].scan_advert_blemac(btmac.dumps(separator=""), timeout=20)
-        reply = reply is not None  # To boolean
-        self._logger.debug("Bluetooth MAC detected: %s", reply)
-        mes["detectBT"].sensor.store(reply)
-        mes["detectBT"]()
+        mes["rssi"]()
 
     @share.teststep
     def _step_canbus(self, dev, mes):
@@ -131,10 +129,6 @@ class Devices(share.Devices):
         ble2can_ser.port = self.port("ARM")
         # Console driver
         self["ble2can"] = console.Console(ble2can_ser)
-        # Connection to RaspberryPi bluetooth server
-        self["pi_bt"] = share.bluetooth.RaspberryBluetooth(
-            share.config.System.ble_url()
-        )
         # Apply power to fixture circuits.
         self["dcs_vfix"].output(9.0, output=True, delay=5)
         self.add_closer(lambda: self["dcs_vfix"].output(0.0, output=False))
@@ -170,7 +164,6 @@ class Sensors(share.Sensors):
         self["blue"].doc = "Led cathode"
         self["tstpin_cover"] = sensor.Vdc(dmm, high=16, low=1, rng=100, res=0.01)
         self["tstpin_cover"].doc = "Photo sensor"
-        self["mirbt"] = sensor.Mirror()
         # Console sensors
         ble2can = self.devices["ble2can"]
         self["CANbind"] = sensor.Keyed(ble2can, "CAN_BIND")
@@ -204,7 +197,7 @@ class Measurements(share.Measurements):
                     "Cover over BC2 test pins",
                 ),
                 ("BtMac", "BtMac", "BtMac", "MAC address"),
-                ("detectBT", "DetectBT", "mirbt", "Scanned MAC address"),
+                ("rssi", "ScanRSSI", "RSSI", "Bluetooth RSSI Level"),
                 ("SwVer", "SwVer", "SwVer", "Unit software version"),
                 ("CANbind", "CAN_BIND", "CANbind", "CAN bound"),
             )

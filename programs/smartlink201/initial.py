@@ -17,7 +17,7 @@ class Initial(share.TestSequence):
 
     vin_set = 12.0  # Input voltage (V)
     limitdata = (
-        libtester.LimitRegExp("BleMac", r"^[0-9a-f]{12}$", doc="Valid MAC address "),
+        libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address "),
         libtester.LimitLow("PartOk", 2.0, doc="All parts present"),
         libtester.LimitLow("S5tank", 2.0, doc="S5 tank ON"),
         libtester.LimitDelta("Vbatt", vin_set, 0.5, doc="At nominal"),
@@ -39,6 +39,7 @@ class Initial(share.TestSequence):
         Devices.sw_arm_image = self.cfg.sw_arm_image
         Sensors.sw_nrf_image = self.cfg.sw_nrf_image
         self.configure(self.limitdata, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -77,13 +78,14 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_test_nordic(self, dev, mes):
         """Test the Nordic device."""
-        sernum = self.uuts[0].sernum
+        uut = self.uuts[0]
+        sernum = uut.sernum
         smartlink201 = dev["smartlink201"]
         smartlink201.open()
         smartlink201.initialise(sernum, self.cfg.product_rev, self.cfg.hardware_rev)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["SL_MAC"]().value1
-        dev["serialtomac"].blemac_set(sernum, mac)
+        dev["BLE"].uut = uut
+        dev["BLE"].mac = mes["SL_MAC"]().value1
 
     @share.teststep
     def _step_calibrate(self, dev, mes):
@@ -163,8 +165,6 @@ class Devices(share.Devices):
             "S": console.SmartLink201Console,
         }[self.parameter]
         self["smartlink201"] = con_class(smartlink201_ser)
-        # Connection to Serial To MAC server
-        self["serialtomac"] = share.bluetooth.SerialToMAC()
         # Fixture USB power
         self["dcs_USB"].output(8.0, output=True, delay=10)
         self.add_closer(lambda: self["dcs_USB"].output(0.0, output=False))

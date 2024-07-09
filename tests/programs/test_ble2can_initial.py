@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """UnitTest for BLE2CAN Initial Test program."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import ble2can
 
@@ -12,16 +12,10 @@ class BLE2CANInitial(ProgramTestCase):
     prog_class = ble2can.Initial
     parameter = ""
     debug = False
-    btmac = "00:1E:C0:30:BC:15"
 
     def setUp(self):
         """Per-Test setup."""
         patcher = patch("programs.ble2can.console.Console")
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        mypi = Mock(name="MyRasPi")
-        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
-        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -64,7 +58,7 @@ class BLE2CANInitial(ProgramTestCase):
                     ),
                     (sen["SwVer"], self.test_sequence.sw_version),
                 ),
-                "Bluetooth": ((sen["BtMac"], self.btmac),),
+                "Bluetooth": ((sen["BtMac"], "00:1E:C0:30:BC:15"),),
                 "CanBus": ((sen["CANbind"], 1 << 28),),
             },
         }
@@ -72,7 +66,7 @@ class BLE2CANInitial(ProgramTestCase):
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.letter)
-        self.assertEqual(17, len(result.readings))
+        self.assertEqual(16, len(result.readings))
         self.assertEqual(
             ["Prepare", "TestArm", "Bluetooth", "CanBus"], self.tester.ut_steps
         )

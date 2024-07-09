@@ -25,6 +25,7 @@ class Initial(share.TestSequence):
         limits = self.cfg.limits_initial
         Sensors.sw_nordic_image = self.cfg.sw_nordic_image
         self.configure(limits, Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("PartCheck", self._step_part_check),
@@ -69,8 +70,8 @@ class Initial(share.TestSequence):
         sernum = self.uuts[0].sernum
         console.brand(self.cfg.hw_version, sernum, self.cfg.banner_lines)
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["ble_mac"]().value1
-        dev["serialtomac"].blemac_set(sernum, mac)
+        dev["BLE"].uut = self.uuts[0]
+        dev["BLE"].mac = mes["ble_mac"]().value1
 
     @share.teststep
     def _step_tank_sense(self, dev, mes):
@@ -120,8 +121,6 @@ class Devices(share.Devices):
         # CAN devices
         self["canreader"] = tester.CANReader(self.physical_devices["CAN"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
-        # Connection to Serial To MAC server
-        self["serialtomac"] = share.bluetooth.SerialToMAC()
 
     def run(self):
         """Test run is starting."""

@@ -2,7 +2,8 @@
 # Copyright 2016 SETEC Pty Ltd.
 """UnitTest for BC2 Initial Test program."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import bc2
 
@@ -11,16 +12,10 @@ class _BC2Initial(ProgramTestCase):
     """BC2 Initial program test suite."""
 
     prog_class = bc2.Initial
-    btmac = "001EC030BC15"
 
     def setUp(self):
         """Per-Test setup."""
         patcher = patch("programs.bc2.console.Console")
-        self.addCleanup(patcher.stop)
-        patcher.start()
-        mypi = Mock(name="MyRasPi")
-        mypi.scan_advert_blemac.return_value = {"ad_data": "", "rssi": -50}
-        patcher = patch("share.bluetooth.RaspberryBluetooth", return_value=mypi)
         self.addCleanup(patcher.stop)
         patcher.start()
         super().setUp()
@@ -43,14 +38,16 @@ class _BC2Initial(ProgramTestCase):
                     (sen["arm_Ioffset"], -1),
                     (sen["arm_VbattLSB"], 2440),
                 ),
-                "Bluetooth": ((sen["arm_BtMAC"], self.btmac),),
+                "Bluetooth": (
+                    (sen["arm_BtMAC"], "001EC030BC15"),
+                ),
             },
         }
         self.tester.ut_load(data, self.test_sequence.sensor_store)
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.letter)
-        self.assertEqual(12, len(result.readings))
+        self.assertEqual(11, len(result.readings))
         self.assertEqual(
             ["Prepare", "TestArm", "Calibrate", "Bluetooth"], self.tester.ut_steps
         )

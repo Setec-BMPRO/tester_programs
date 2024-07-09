@@ -24,6 +24,7 @@ class Initial(share.TestSequence):
         Sensors.arm_devicetype = self.cfg.values.arm_devicetype
         Sensors.arm_image = self.cfg.values.arm_image
         self.configure(self.cfg.limits_initial(), Devices, Sensors, Measurements)
+        self.ble_rssi_dev()
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -56,7 +57,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_initialise(self, dev, mes):
         """Initialise the unit."""
-        sernum = self.uuts[0].sernum
+        uut = self.uuts[0]
+        dev["BLE"].uut = uut
+        sernum = uut.sernum
         rvmn = dev["rvmn"]
         rvmn.open()
         rvmn.reset()
@@ -76,8 +79,8 @@ class Initial(share.TestSequence):
                 mes[name].testlimit[0].adjust("^{0}$".format(value))
             self.measure(("Serial", "ProdRev", "HardRev"))
         # Save SerialNumber & MAC on a remote server.
-        mac = mes["ble_mac"]().value1
-        dev["serialtomac"].blemac_set(sernum, mac)
+        mac = share.MAC.loads(mes["ble_mac"]().value1)
+        dev["BLE"].mac = mac.dumps(separator="")
 
     @share.teststep
     def _step_input(self, dev, mes):
@@ -143,7 +146,6 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vbatt", tester.DCSource, "DCS1"),
@@ -174,8 +176,6 @@ class Devices(share.Devices):
         self["can"] = self.physical_devices["CAN"]
         self["canreader"] = tester.CANReader(self["can"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
-        # Connection to Serial To MAC server
-        self["serialtomac"] = share.bluetooth.SerialToMAC()
 
     def run(self):
         """Test run is starting."""

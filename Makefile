@@ -38,7 +38,7 @@ $(VENV):
 	$(MAKE) _venv
 # Update the venv
 _venv: $(VENV)
-	$(VPYTHON) -m pip install -U $(DEPENDENCIES)
+	$(VPYTHON) -m pip install -U pip $(DEPENDENCIES)
 # Update the venv, only if it is not newly created
 venv: $(VENV)
 	@if [ ! -e $(VENV_NEW_FLAG) ]; then $(MAKE) _venv; fi
