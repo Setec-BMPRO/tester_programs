@@ -52,15 +52,11 @@ class PacketDecoder(tester.sensor.KeyedDataDecoderMixin):
         """Decode packet.
 
         @param fields Dictionary to hold decoded field data
-        @param data Tuple(
-            rssi RSSI value
-            payload BLE broadcast packet payload
-                EG: '1f050112022d624c3a00000300d1139e69'
-            )
+        @param data Tuple(rssi RSSI value, ad_data BLE Advertisment dict)
 
         """
-        fields["rssi"], payload = data
-        payload_bytes = bytes.fromhex(payload)
+        fields["rssi"], ad_data = data
+        payload_bytes = bytes.fromhex(ad_data["255"])
         try:
             (
                 fields["company_id"],
