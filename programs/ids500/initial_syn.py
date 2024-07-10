@@ -48,7 +48,7 @@ class InitialSyn(share.TestSequence):
 
     def open(self):
         """Prepare for testing."""
-        Sensors.pic_hex_syn = config.pic_hex_syn
+        Sensors.pic_hex_syn = config.syn_get(self.uuts[0])
         self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
         self.steps = (

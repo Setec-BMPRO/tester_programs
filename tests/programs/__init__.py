@@ -14,12 +14,14 @@ from . import test_bc2_final
 from . import test_bc15_25_console
 from . import test_bc15_25_initial
 from . import test_bc15_25_final
-from . import test_bp35_final
-from . import test_bp35_initial
+from . import test_bc60_initial
+from . import test_bc60_final
 from . import test_bce282_final
 from . import test_bce282_initial
 from . import test_bce4_final
 from . import test_ble2can_initial
+from . import test_bp35_final
+from . import test_bp35_initial
 from . import test_bsgateway_initial
 from . import test_c15a15_initial
 from . import test_c15a15_final
@@ -107,6 +109,8 @@ __all__ = [
     "test_bc15_25_console",
     "test_bc15_25_initial",
     "test_bc15_25_final",
+    "test_bc60_initial",
+    "test_bc60_final",
     "test_bp35_final",
     "test_bp35_initial",
     "test_bce282_final",

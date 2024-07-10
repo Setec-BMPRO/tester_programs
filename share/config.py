@@ -20,19 +20,6 @@ class System:  # pylint: disable=too-few-public-methods
     #  no way we can find it...
     tester_type: ClassVar[str] = "ATE4"  # A default value...
 
-    @classmethod
-    def ble_url(cls) -> str:
-        """Lookup the URL of the Bluetooth JSONRPC server.
-
-        @return URL of JSON-RPC server
-
-        """
-        if cls.tester_type in ("ATE4", "ATE5"):
-            url = "http://127.0.0.1:8888/"
-        else:  # Use a networked Raspberry PI
-            url = "http://192.168.168.62:8888/"
-        return url
-
 
 @define
 class Fixture:
@@ -61,7 +48,7 @@ class Fixture:
     ]
 
     _data: ClassVar[Dict[str, Dict[str, str]]] = {
-        # Fixtures with a single USB Serial (inc. FTDI with S/N)
+        # ======== Fixtures with a single USB Serial (inc. FTDI with S/N)
         "017048": {  # IDS-500 Final (Prolific)
             "PIC": {"posix": "/dev/ttyUSB0", "nt": "COM6"}[os.name],
         },
@@ -78,7 +65,7 @@ class Fixture:
             # Panasonic eUniStone PAN1322 (FTDI with S/N)
             "BT": {"posix": "/dev/ttyUSB0", "nt": "COM9"}[os.name],
         },
-        # Fixtures with a single FTDI without any S/N
+        # ======== Fixtures with a single FTDI without any S/N
         "017056": {
             "PIC": _ftdi,
         },  # IDS-500 SubBoard Initial
@@ -136,10 +123,13 @@ class Fixture:
         "036746": {
             "ARM": _ftdi,
         },  # ASDisplay Initial
+        "039516": {
+            "STM": _ftdi,
+        },  # BC60 Initial
         "039517": {
             "ARM": _ftdi,
         },  # BSGateway Initial
-        # Fixtures with a USB Hub
+        # ======== Fixtures with a USB Hub
         "017789": {  # CMR-SBP Initial (Prolific)
             # Hub port 1:
             "EV": {"posix": "/dev/ttyUSB0", "nt": "COM21"}[os.name],

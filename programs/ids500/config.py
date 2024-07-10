@@ -3,9 +3,16 @@
 """IDS-500 Configuration."""
 
 
-# Software image filenames
+def syn_get(uut):
+    """Get a configuration based on the parameter and lot.
+
+    @param uut libtester.UUT instance
+    @return HEX filename
+
+    """
+    return "ids_picSyn_3.hex" if int(uut.revision) < 11 else "ids_picSyn_4.hex"
+
 pic_hex_mic = "ids_picMic_2.hex"
-pic_hex_syn = "ids_picSyn_2.hex"
 
 # LDD absolute error limits in Amps
 #   Ellex "SP-LPPSU-05 (Customer Specification Issue 5)":

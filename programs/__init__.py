@@ -13,6 +13,7 @@ from . import atxg450
 from . import batterycheck
 from . import bc2
 from . import bc15_25
+from . import bc60
 from . import bce4
 from . import bce282
 from . import ble2can
@@ -125,6 +126,8 @@ PROGRAMS = {
     "BC2 Final": bc2.Final,
     "BC15_25 Initial": bc15_25.Initial,
     "BC15_25 Final": bc15_25.Final,
+    "BC60 Initial": bc60.Initial,
+    "BC60 Final": bc60.Final,
     "BCE4_5 Final": bce4.Final,
     "BCE282 Initial": bce282.Initial,
     "BCE282 Final": bce282.Final,

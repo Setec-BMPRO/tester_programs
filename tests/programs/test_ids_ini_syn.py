@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """UnitTest for IDS500 SynBuck Initial Test program."""
 
+import libtester
+
 from ..data_feed import UnitTester, ProgramTestCase
 from programs import ids500
 
@@ -11,6 +13,13 @@ class Ids500InitialSyn(ProgramTestCase):
     prog_class = ids500.InitialSyn
     parameter = ""
     debug = False
+
+    def setUp(self):
+        """Per-Test setup. item.revision must be a number."""
+        item = libtester.Item("123456", "Item Description", "11")
+        lot = libtester.Lot("A000000", item)
+        self.uuts[0].lot = lot
+        super().setUp()
 
     def test_pass_run(self):
         """PASS run of the program."""

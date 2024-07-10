@@ -11,7 +11,7 @@ class RVSWT101Device(unittest.TestCase):
     """RVSWT101 device test suite."""
 
     # A sample BLE payload
-    payload = "1f050112022d624c3a00000300d1139e69"
+    payload = {"255": "1f050112022d624c3a00000300d1139e69"}
 
     def test_packet(self):
         """Packet decoder."""
