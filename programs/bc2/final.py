@@ -32,7 +32,10 @@ class Final(share.TestSequence):
     def _step_bluetooth(self, dev, mes):
         """Test the Bluetooth interface."""
         sernum = self.uuts[0].sernum
-        dev["pi_bt"].console_open(sernum, passkey=console.Console.passkey(sernum))
+        bc2 = dev["bc2"]
+        bc2.port.sernum = sernum
+        bc2.port.passkey = console.Console.passkey(sernum)
+        bc2.open()
         mes["arm_swver"]()
 
     @share.teststep
@@ -73,16 +76,14 @@ class Devices(share.Devices):
         self["acsource"].output(voltage=240.0, output=True, delay=1.0)
         self.add_closer(lambda: self["acsource"].output(0.0, output=False))
         # Bluetooth connection to the console
-        #  Don't use open() or close() on the "bc2" device.
-        #  Instead use console_open() and console_close() on the "pi_bt" device.
-        self["pi_bt"] = self.physical_devices["BLE"]
-        self["bc2"] = console.Console(self["pi_bt"])
+        bc2_port = self.physical_devices["BLE"].console_port
+        self["bc2"] = console.Console(bc2_port)
 
     def reset(self):
         """Reset instruments."""
         self["dcs_vin"].output(0.0, False)
         self["dcl"].output(0.0, False)
-        self["pi_bt"].console_close()
+        self["bc2"].close()
 
 
 class Sensors(share.Sensors):
