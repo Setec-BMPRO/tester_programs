@@ -11,7 +11,6 @@ class Console(share.console.Base):
     """Communications to console."""
 
     banner_lines = 5
-    # Console command prompt. Signals the end of output data.
     cmd_prompt = b"production:>"
     parameter = share.console.parameter
     cmd_data = {
@@ -117,5 +116,4 @@ class Console(share.console.Base):
         self["PS_ON"] = True
         time.sleep(0.1)
         self["PS_ON"] = False
-        time.sleep(0.1)
         self["VOUT"] = vset
