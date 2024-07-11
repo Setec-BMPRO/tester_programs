@@ -73,6 +73,8 @@ class Devices(share.Devices):
         self["acsource"].output(voltage=240.0, output=True, delay=1.0)
         self.add_closer(lambda: self["acsource"].output(0.0, output=False))
         # Bluetooth connection to the console
+        #  Don't use open() or close() on the "bc2" device.
+        #  Instead use console_open() and console_close() on the "pi_bt" device.
         self["pi_bt"] = self.physical_devices["BLE"]
         self["bc2"] = console.Console(self["pi_bt"])
 
@@ -80,7 +82,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self["dcs_vin"].output(0.0, False)
         self["dcl"].output(0.0, False)
-        self["pi_bt"].close()
+        self["pi_bt"].console_close()
 
 
 class Sensors(share.Sensors):
@@ -94,10 +96,9 @@ class Sensors(share.Sensors):
         self["vin"].doc = "Within Fixture"
         # Console sensors
         bc2 = self.devices["bc2"]
-        qlr = share.console.Base.query_last_response
-        self["arm_swver"] = sensor.Keyed(bc2, "SW_VER")
-        self["arm_query_last"] = sensor.Keyed(bc2, qlr)
         for name, cmdkey in (
+            ("arm_swver", "SW_VER"),
+            ("arm_query_last", share.console.Base.query_last_response),
             ("arm_ShuntRes", "SHUNT_RES"),
             ("arm_Ibatt", "BATT_I"),
         ):
