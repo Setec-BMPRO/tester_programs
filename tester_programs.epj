@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2024 , ",
-    "saved": "2024-07-10, 10:50:12"
+    "saved": "2024-07-11, 10:19:44"
   },
   "project": {
     "AUTHOR": "",
@@ -179,6 +179,10 @@
       "programs/cn102/console.py",
       "programs/cn102/final.py",
       "programs/cn102/initial.py",
+      "programs/dcx/__init__.py",
+      "programs/dcx/config.py",
+      "programs/dcx/console.py",
+      "programs/dcx/initial.py",
       "programs/drifter/__init__.py",
       "programs/drifter/console.py",
       "programs/drifter/final.py",
@@ -363,6 +367,7 @@
       "tests/programs/test_cn101_initial.py",
       "tests/programs/test_cn102_final.py",
       "tests/programs/test_cn102_initial.py",
+      "tests/programs/test_dcx_initial.py",
       "tests/programs/test_drifter_final.py",
       "tests/programs/test_drifter_initial.py",
       "tests/programs/test_etrac_initial.py",
