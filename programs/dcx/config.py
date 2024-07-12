@@ -35,7 +35,6 @@ class DCX:
     values = None  # This value is set per Product type & revision
 
     vbat_in = 12.4
-    iload = 28.0
     ibatt = 4.0
     outputs = 14
     vout_set = 12.8
@@ -43,9 +42,7 @@ class DCX:
         libtester.LimitDelta("Vload", 12.45, 0.45, doc="Load output present"),
         libtester.LimitLow("FixtureLock", 200, doc="Contacts closed"),
         libtester.LimitLow("VloadOff", 0.5, doc="Load output off"),
-        libtester.LimitDelta("VbatIn", 12.0, 0.5, doc="Injected Vbatt present"),
-        libtester.LimitBetween("Vbat", 12.2, 13.0, doc="Vbatt present"),
-        libtester.LimitDelta("Vaux", 13.4, 0.4, doc="Vaux present"),
+        libtester.LimitDelta("Vbat", 12.0, 0.5, doc="Injected Vbatt present"),
         libtester.LimitDelta("3V3", 3.30, 0.05, doc="3V3 present"),
         libtester.LimitBetween("ARM-SecT", 8.0, 70.0, doc="Reading ok"),
         libtester.LimitDelta("ARM-Vout", 12.45, 0.45),
@@ -59,7 +56,6 @@ class DCX:
         libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN comms established"),
         libtester.LimitInteger("Vout_OV", 0, doc="Over-voltage not triggered"),
         libtester.LimitRegExp("Reply", "^OK$"),
-        libtester.LimitBetween("15Vs", 11.5, 13.0, doc="Control rail present"),
     )
 
     _rev1_values = _Values(

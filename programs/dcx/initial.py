@@ -19,14 +19,12 @@ class Initial(share.TestSequence):
         self.cfg = config.get(self.parameter, self.uuts[0])
         Devices.sw_image = self.cfg.values.sw_image
         Sensors.outputs = self.cfg.outputs
-        Sensors.iload = self.cfg.iload
         self.configure(self.cfg.limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Initialise", self._step_initialise_arm),
-            tester.TestStep("PowerUp", self._step_powerup),
             tester.TestStep("Output", self._step_output),
             tester.TestStep("RemoteSw", self._step_remote_sw),
             tester.TestStep("CanBus", self._step_canbus),
@@ -34,83 +32,31 @@ class Initial(share.TestSequence):
 
     @share.teststep
     def _step_prepare(self, dev, mes):
-        """Prepare to run a test.
-
-        Measure fixture lock and part detection micro-switches.
-        Apply power to the unit's Battery terminals to power up the ARM.
-
-        """
-        self.measure(
-            (
-                "dmm_lock",
-            ),
-            timeout=5,
-        )
+        """Prepare to run a test."""
         dev["dcs_vbat"].output(self.cfg.vbat_in, True)
-        self.measure(("dmm_vbatin", "dmm_3v3"), timeout=5)
+        self.measure(("FixtureLock", "dmm_vbat", "dmm_3v3"), timeout=5)
 
     @share.teststep
     def _step_program(self, dev, mes):
-        """Program the ARM & PIC devices."""
-        dev["program_arm"].program_begin()  # Program ARM in background
-        try:
-            if not self.cfg.is_pm:
-                dev["SR_LowPower"].output(self.cfg.sr_vin, output=True)
-                mes["dmm_solarvcc"](timeout=5)
-                mes["program_pic"]()
-                dev["SR_LowPower"].output(0.0)
-        except Exception:
-            raise
-        finally:
-            dev["program_arm"].program_wait()  # Wait for ARM programming
-        # Cold Reset microprocessor for units that were already programmed
-        # (Pulsing RESET isn't enough to reconfigure the I/O circuits)
-        dcsource, load = dev["dcs_vbat"], dev["dcl_bat"]
-        dcsource.output(0.0)
-        load.output(1.0, delay=0.5)
-        load.output(0.0)
-        dcsource.output(self.cfg.vbat_in)
+        """Program the ARM device."""
+        dev["programmer"].program()
 
     @share.teststep
     def _step_initialise_arm(self, dev, mes):
-        """Initialise the ARM device.
-
-        Device is powered by injected Battery voltage.
-        Reset the device, set HW & SW versions & Serial number.
-        Write Non-Volatile memory defaults.
-        Put device into manual control mode.
-
-        """
+        """Initialise the ARM device."""
         con = dev["con"]
         con.open()
-        con.brand(
-            self.cfg.values.hw_version,
-            self.uuts[0].sernum,
-            dev["rla_reset"],
-        )
-
-    @share.teststep
-    def _step_powerup(self, dev, mes):
-        """Power-Up the Unit with AC."""
-        con = dev["con"]
-        con.power_on()
-        mes["arm_vout_ov"]()
-        dev["dcs_vbat"].output(0.0, output=False)
-        mes["arm_vout_ov"]()
-        self.measure(("dmm_3v3", "dmm_15vs"), timeout=10)
+        con.brand(self.cfg.values.hw_version, self.uuts[0].sernum, dev["rla_reset"])
 
     @share.teststep
     def _step_output(self, dev, mes):
         """Test the output switches."""
         con = dev["con"]
-        # All outputs OFF
-        con.load_set(set_on=True, loads=())
+        con.load_set(set_on=True, loads=())  # All outputs OFF
         mes["ui_yesnored"](timeout=5)
-        # A little load on the output.
-        dev["dcl_out"].output(1.0, True)
+        dev["dcl_out"].output(1.0, True)  # A little load on the output.
         mes["dmm_vloadoff"](timeout=5)
-        # All outputs ON
-        con.load_set(set_on=False, loads=())
+        con.load_set(set_on=False, loads=())  # All outputs ON
         mes["ui_yesnogreen"](timeout=5)
 
     @share.teststep
@@ -124,76 +70,56 @@ class Initial(share.TestSequence):
     def _step_canbus(self, dev, mes):
         """Test the Can Bus."""
         dev["con"]["CAN_PWR_EN"] = True
-        self.measure(
-            (
-                "dmm_canpwr",
-                "arm_can_bind",
-            ),
-            timeout=10,
-        )
+        self.measure(("dmm_canpwr", "arm_can_bind"), timeout=10)
 
 
 class Devices(share.Devices):
     """Devices."""
 
-    arm_image = None  # ARM software image
+    sw_image = None
 
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vcom", tester.DCSource, "DCS1"),
             ("dcs_vbat", tester.DCSource, "DCS2"),
-            ("dcs_vaux", tester.DCSource, "DCS3"),
             ("dcl_out", tester.DCLoad, "DCL1"),
             ("dcl_bat", tester.DCLoad, "DCL5"),
             ("rla_reset", tester.Relay, "RLA1"),
             ("rla_boot", tester.Relay, "RLA2"),
             ("rla_loadsw", tester.Relay, "RLA4"),
-            ("rla_acsw", tester.Relay, "RLA6"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
-        self["PicKit"] = tester.PicKit(
-            (self.physical_devices["PICKIT"], self["rla_pic"])
-        )
-        # Device programmer
         arm_port = self.port("ARM")
-        self["program_arm"] = share.programmer.ARM(
+        self["programmer"] = share.programmer.ARM(
             arm_port,
-            pathlib.Path(__file__).parent / self.arm_image,
+            pathlib.Path(__file__).parent / self.sw_image,
             crpmode=False,
             boot_relay=self["rla_boot"],
             reset_relay=self["rla_reset"],
         )
-        # Serial connection to the console
         con_ser = serial.Serial(baudrate=115200, timeout=5.0)
         # Set port separately, as we don't want it opened yet
         con_ser.port = arm_port
-        # BP35 Console driver
         self["con"] = console.Console(con_ser)
         # Switch on power to fixture circuits
         self["dcs_vcom"].output(9.0, output=True, delay=5.0)
         self.add_closer(lambda: self["dcs_vcom"].output(0.0, output=False))
-        self["ard"].open()
-        self.add_closer(lambda: self["ard"].close())
 
     def reset(self):
         """Reset instruments."""
         self["con"].close()
-        # Switch off AC Source & discharge the unit
-        self["dcl_bat"].output(2.0, delay=1)
-        for dev in ("dcs_vbat", "dcs_vaux", "dcl_out", "dcl_bat"):
+        for dev in ("dcs_vbat", "dcl_out", "dcl_bat"):
             self[dev].output(0.0, False)
-        for rla in ("rla_reset", "rla_boot", "rla_loadsw", "rla_acsw"):
+        for rla in ("rla_reset", "rla_boot", "rla_loadsw"):
             self[rla].set_off()
 
 
 class Sensors(share.Sensors):
     """Sensors."""
 
-    outputs = None  # Number of outputs
-    iload = None  # Load current
+    outputs = None
 
     def open(self):
         """Create all Sensors."""
@@ -203,12 +129,8 @@ class Sensors(share.Sensors):
         self["vload"].doc = "All Load outputs combined"
         self["vbat"] = sensor.Vdc(dmm, high=4, low=4, rng=100, res=0.001)
         self["vbat"].doc = "Battery output"
-        self["vset"] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
-        self["vset"].doc = "Between TP308,9 and Vout"
         self["o3v3"] = sensor.Vdc(dmm, high=6, low=3, rng=10, res=0.001)
         self["o3v3"].doc = "U307 Output"
-        self["o15vs"] = sensor.Vdc(dmm, high=9, low=3, rng=100, res=0.01)
-        self["o15vs"].doc = "Across C312"
         self["lock"] = sensor.Res(dmm, high=10, low=6, rng=10000, res=1)
         self["lock"].doc = "Microswitch contacts"
         self["canpwr"] = sensor.Vdc(dmm, high=13, low=3, rng=100, res=0.01)
@@ -223,7 +145,6 @@ class Sensors(share.Sensors):
             caption=tester.translate("bp35_initial", "capOutputLed"),
         )
         self["yesnogreen"].doc = "Tester operator"
-        # Console sensors
         con = self.devices["con"]
         for name, cmdkey, units in (
             ("arm_sect", "SEC_T", "°C"),
@@ -238,8 +159,7 @@ class Sensors(share.Sensors):
             self[name] = sensor.Keyed(con, cmdkey)
             if units:
                 self[name].units = units
-        # Generate load current sensors
-        loads = []
+        loads = []  # Generate load current sensors
         for i in range(1, self.outputs + 1):
             loads.append(sensor.Keyed(con, "LOAD_{0}".format(i)))
         self["arm_loads"] = loads
@@ -248,19 +168,14 @@ class Sensors(share.Sensors):
 class Measurements(share.Measurements):
     """Measurements."""
 
-    is_pm = None
-
     def open(self):
         """Create all Measurements."""
         self.create_from_names(
             (
-                ("dmm_lock", "FixtureLock", "lock", "Fixture lid closed"),
-                ("dmm_15vs", "15Vs", "o15vs", "Secondary 15V rail"),
+                ("FixtureLock", "FixtureLock", "lock", "Fixture lid closed"),
                 ("dmm_vload", "Vload", "vload", "Outputs on"),
                 ("dmm_vloadoff", "VloadOff", "vload", "Outputs off"),
-                ("dmm_vbatin", "VbatIn", "vbat", "Injected Vbatt voltage"),
-                ("dmm_vbat", "Vbat", "vbat", "Vbatt output voltage"),
-                ("dmm_vaux", "Vaux", "vbat", "Vaux output voltage"),
+                ("dmm_vbat", "Vbat", "vbat", "Injected Vbatt voltage"),
                 ("dmm_3v3", "3V3", "o3v3", "3V3 rail voltage"),
                 ("ui_yesnored", "Notify", "yesnored", "LED Red"),
                 ("ui_yesnogreen", "Notify", "yesnogreen", "LED Green"),
@@ -274,8 +189,7 @@ class Measurements(share.Measurements):
                 ("arm_remote", "ARM-RemoteClosed", "arm_remote", "Remote input"),
             )
         )
-        # Generate load current measurements
-        loads = []
+        loads = []  # Generate load current measurements
         for sen in self.sensors["arm_loads"]:
             loads.append(tester.Measurement(self.limits["ARM-LoadI"], sen))
         self["arm_loads"] = loads
