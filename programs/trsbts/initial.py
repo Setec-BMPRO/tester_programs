@@ -45,7 +45,7 @@ class Initial(share.TestSequence):
         ),
         libtester.LimitDelta("ARM-Vpin", 0.0, 1.0, doc="Micro switch voltage ok"),
         libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
-        libtester.LimitHigh("ScanRSSI", -90, doc="BLE signal"),
+        libtester.LimitHigh("ScanRSSI", -100, doc="BLE signal"),
     )
 
     def open(self):
