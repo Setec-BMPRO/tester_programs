@@ -59,12 +59,13 @@ class DCX:
     )
 
     _rev1_values = _Values(
-        hw_version=(1, 9999, "A"),
-        sw_image="dcx_1.0.8-0-g1049123.bin",
+        hw_version=(16, 3, "A"),
+        sw_image="dcx_1.0.9-0-g1f37ee0.bin",
     )
     _rev_data = {
         None: _rev1_values,
-        "1": _rev1_values,
+        "2": _rev1_values,
+        # Rev 1 was engineering prototype
     }
 
     @classmethod
