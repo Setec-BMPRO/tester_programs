@@ -9,6 +9,8 @@ class Console(share.console.BadUart):
     """Console driver."""
 
     banner_lines = 3
+    # "CAN Bound" is STATUS bit 28
+    can_bound = 1 << 28
     parameter = share.console.parameter
     cmd_data = {
         # Common commands
@@ -37,11 +39,10 @@ class Console(share.console.BadUart):
         "NVWIPE": parameter.Boolean(
             "NV-FACTORY-WIPE", writeable=True, readable=False, write_format="{1}"
         ),
-        # Product specific commands
-        "VSET_CAL": parameter.Calibration("VSET"),  # Voltage reading
-        "VBUS_CAL": parameter.Calibration("VBUS"),  # Voltage setpoint
-        "BUS_ICAL": parameter.Calibration("ICONV"),  # Current reading
-        "3V3_EN": parameter.Boolean("3V3_ENABLE", writeable=True),
+        "CAN_PWR_EN": parameter.Boolean("CAN_BUS_POWER_ENABLE", writeable=True),
+        "CAN_BIND": parameter.Hex(
+            "STATUS", writeable=True, minimum=0, maximum=0xF0000000, mask=can_bound
+        ),
         "LOAD_SET": parameter.Float(
             "LOAD_SWITCH_STATE_0",
             writeable=True,
@@ -49,26 +50,10 @@ class Console(share.console.BadUart):
             maximum=0x0FFFFFFF,
             scale=1,
         ),
-        "VOUT_OV": parameter.Float(
-            "CONVERTER_OVERVOLT", writeable=True, minimum=0, maximum=2, scale=1
-        ),
-        "SLEEP_MODE": parameter.Float(
-            "SLEEPMODE", writeable=True, minimum=0, maximum=3, scale=1
-        ),
-        "TASK_STARTUP": parameter.Float(
-            "TASK_STARTUP", writeable=True, minimum=0, maximum=3, scale=1
-        ),
-        "BATT_TYPE": parameter.Float("BATTERY_TYPE_SWITCH", scale=1),
         "BATT_SWITCH": parameter.Boolean("BATTERY_ISOLATE_SWITCH"),
         "BUS_V": parameter.Float("BUS_VOLTS", scale=1000),
         "BATT_V": parameter.Float("BATTERY_VOLTS", scale=1000),
         "BATT_I": parameter.Float("BATTERY_CURRENT", scale=1000),
-        "I2C_FAULTS": parameter.Float("I2C_FAULTS", scale=1),
-        "SPI_FAULTS": parameter.Float("SPI_FAULTS", scale=1),
-        "OPERATING_MODE": parameter.Hex("CHARGER_MODE"),
-        "STATUS": parameter.Hex(
-            "STATUS", writeable=True, minimum=0, maximum=0xF0000000
-        ),
     }
 
     def __init__(self, port):
@@ -79,7 +64,6 @@ class Console(share.console.BadUart):
             self.cmd_data["LOAD_{0}".format(i)] = share.console.parameter.Float(
                 "LOAD_SWITCH_CURRENT_{0}".format(i), scale=1000
             )
-        self._timer = share.BackgroundTimer(self.manual_mode_wait)
 
     def brand(self, hw_ver, sernum, reset_relay):
         """Brand the unit with Hardware ID & Serial Number."""

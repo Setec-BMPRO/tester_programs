@@ -39,7 +39,7 @@ class DCX:
     outputs = 14
     vout_set = 12.8
     limits = (
-        libtester.LimitDelta("Vload", 12.45, 0.45, doc="Load output present"),
+        libtester.LimitBetween("Vload", 11.0, 12.0, doc="Load output present"),
         libtester.LimitLow("FixtureLock", 200, doc="Contacts closed"),
         libtester.LimitLow("VloadOff", 0.5, doc="Load output off"),
         libtester.LimitDelta("Vbat", 12.0, 0.5, doc="Injected Vbatt present"),

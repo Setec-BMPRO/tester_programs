@@ -153,7 +153,6 @@ class Sensors(share.Sensors):
             ("arm_vbat", "BATT_V", "V"),
             ("arm_ibat", "BATT_I", "A"),
             ("arm_vout_ov", "VOUT_OV", ""),
-            ("arm_iout", "SR_IOUT", "A"),
             ("arm_remote", "BATT_SWITCH", ""),
         ):
             self[name] = sensor.Keyed(con, cmdkey)
