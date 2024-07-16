@@ -2,6 +2,8 @@
 # Copyright 2024 SETEC Pty Ltd.
 """DCX console driver."""
 
+import time
+
 import share
 
 
@@ -9,6 +11,8 @@ class Console(share.console.BadUart):
     """Console driver."""
 
     banner_lines = 3
+    # Time it takes for Manual Mode command to take effect (sec)
+    manual_mode_wait = 2.1
     # "CAN Bound" is STATUS bit 28
     can_bound = 1 << 28
     parameter = share.console.parameter
@@ -39,6 +43,7 @@ class Console(share.console.BadUart):
         "NVWIPE": parameter.Boolean(
             "NV-FACTORY-WIPE", writeable=True, readable=False, write_format="{1}"
         ),
+        "VBUS_CAL": parameter.Calibration("VBUS"),  # Voltage reading
         "CAN_PWR_EN": parameter.Boolean("CAN_BUS_POWER_ENABLE", writeable=True),
         "CAN_BIND": parameter.Hex(
             "STATUS", writeable=True, minimum=0, maximum=0xF0000000, mask=can_bound
@@ -77,6 +82,17 @@ class Console(share.console.BadUart):
         self["NVWRITE"] = True
         reset_relay.pulse(0.1)  # Reset is required because of HW_VER setting
         self.action(None, delay=1.5, expected=self.banner_lines)
+
+    def manual_mode(self):
+        """Set the unit to Manual Mode.
+
+        The unit takes some time for the command to take effect. We use a
+        timer to run this delay in the background.
+
+        """
+        self["SLEEP_MODE"] = 3
+        time.sleep(self.manual_mode_wait)
+        self["TASK_STARTUP"] = 0
 
     def load_set(self, set_on=True, loads=()):
         """Set the state of load outputs.

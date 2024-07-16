@@ -25,6 +25,7 @@ class Initial(share.TestSequence):
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("Program", self._step_program),
             tester.TestStep("Initialise", self._step_initialise_arm),
+            tester.TestStep("Calibrate", self._step_calibrate),
             tester.TestStep("Output", self._step_output),
             tester.TestStep("RemoteSw", self._step_remote_sw),
             tester.TestStep("CanBus", self._step_canbus),
@@ -47,6 +48,15 @@ class Initial(share.TestSequence):
         con = dev["con"]
         con.open()
         con.brand(self.cfg.values.hw_version, self.uuts[0].sernum, dev["rla_reset"])
+        con.manual_mode()
+
+    @share.teststep
+    def _step_calibrate(self, dev, mes):
+        """Calibration."""
+        con = dev["con"]
+        v_actual = self.measure(("dmm_vbat",), timeout=10).value1
+        con["VBUS_CAL"] = v_actual  # Calibrate Vout reading
+        con["NVWRITE"] = True
 
     @share.teststep
     def _step_output(self, dev, mes):
@@ -58,6 +68,12 @@ class Initial(share.TestSequence):
         mes["dmm_vloadoff"](timeout=5)
         con.load_set(set_on=False, loads=())  # All outputs ON
         mes["ui_yesnogreen"](timeout=5)
+        # Always measure all the outputs, and force a fail if any output
+        # has failed. So we get a full dataset on every test.
+        with share.MultiMeasurementSummary(default_timeout=5) as checker:
+            for load in range(self.cfg.outputs):
+                with tester.PathName("L{0}".format(load + 1)):
+                    checker.measure(mes["arm_loads"][load])
 
     @share.teststep
     def _step_remote_sw(self, dev, mes):

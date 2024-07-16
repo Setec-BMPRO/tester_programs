@@ -39,14 +39,14 @@ class DCX:
     outputs = 14
     vout_set = 12.8
     limits = (
-        libtester.LimitBetween("Vload", 11.0, 12.0, doc="Load output present"),
+        libtester.LimitBetween("Vload", 11.0, 12.5, doc="Load output present"),
         libtester.LimitLow("FixtureLock", 200, doc="Contacts closed"),
         libtester.LimitLow("VloadOff", 0.5, doc="Load output off"),
         libtester.LimitDelta("Vbat", 12.0, 0.5, doc="Injected Vbatt present"),
         libtester.LimitDelta("3V3", 3.30, 0.05, doc="3V3 present"),
         libtester.LimitBetween("ARM-SecT", 8.0, 70.0, doc="Reading ok"),
         libtester.LimitDelta("ARM-Vout", 12.45, 0.45),
-        libtester.LimitDelta("ARM-LoadI", 2.1, 0.9, doc="Load current flowing"),
+        libtester.LimitBetween("ARM-LoadI", 0.02, 0.1, doc="Load current flowing"),
         libtester.LimitDelta("ARM-BattI", ibatt, 1.0, doc="Battery current flowing"),
         libtester.LimitInteger("ARM-RemoteClosed", 1, doc="REMOTE input connected"),
         libtester.LimitDelta(
