@@ -4,6 +4,7 @@
 
 import libtester
 import tester
+
 import share
 
 
@@ -37,7 +38,7 @@ class Main(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        is_ate2 = share.config.System.tester_type.startswith("ATE2")
+        is_ate2 = self.tester_type.name in ("ATE3b", "ATE3c")
         Devices.is_ate2 = is_ate2
         self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()
@@ -184,7 +185,7 @@ class Main(share.TestSequence):
 class Devices(share.Devices):
     """Devices."""
 
-    # True if the tester is an ATE2
+    # True if the tester uses a ATE2 hardware
     is_ate2 = False
 
     def open(self):
