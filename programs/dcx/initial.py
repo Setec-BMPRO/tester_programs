@@ -72,8 +72,11 @@ class Initial(share.TestSequence):
         # has failed. So we get a full dataset on every test.
         with share.MultiMeasurementSummary(default_timeout=5) as checker:
             for load in range(self.cfg.outputs):
+                con.load_set(set_on=True, loads=[load])  # One outputs ON
                 with tester.PathName("L{0}".format(load + 1)):
                     checker.measure(mes["arm_loads"][load])
+                con.load_set(set_on=True, loads=())  # All outputs OFF
+        con.load_set(set_on=False, loads=())  # All outputs ON
 
     @share.teststep
     def _step_remote_sw(self, dev, mes):

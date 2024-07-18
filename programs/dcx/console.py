@@ -43,6 +43,12 @@ class Console(share.console.BadUart):
         "NVWIPE": parameter.Boolean(
             "NV-FACTORY-WIPE", writeable=True, readable=False, write_format="{1}"
         ),
+            "SLEEP_MODE": parameter.Float(
+            "SLEEPMODE", writeable=True, minimum=0, maximum=3, scale=1
+        ),
+        "TASK_STARTUP": parameter.Float(
+            "TASK_STARTUP", writeable=True, minimum=0, maximum=3, scale=1
+        ),
         "VBUS_CAL": parameter.Calibration("VBUS"),  # Voltage reading
         "CAN_PWR_EN": parameter.Boolean("CAN_BUS_POWER_ENABLE", writeable=True),
         "CAN_BIND": parameter.Hex(
