@@ -69,7 +69,7 @@ class DCX(ProgramTestCase):
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.letter)
-        self.assertEqual(25, len(result.readings))
+        self.assertEqual(11, len(result.readings))
         self.assertEqual([
                 "Prepare",
                 "Program",

@@ -34,7 +34,6 @@ import tester
 from pydispatch import dispatcher
 
 import programs
-import share
 
 
 @define
@@ -113,7 +112,6 @@ class Worker:
 
     def open(self):
         """Open the Worker."""
-        share.config.System.tester_type = self.config.tester_type.type
         dispatcher.connect(
             self._test_result,
             sender=tester.signals.Thread.tester,

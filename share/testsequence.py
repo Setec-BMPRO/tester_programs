@@ -390,7 +390,6 @@ class TestSequence(tester.TestSequenceEngine, TestSequenceMixin):
 
     def open(self) -> None:
         """Open test program."""
-        config.System.tester_type = self.tester_type.type
         super().open()
         self.devices.open()
         self.sensors.open()

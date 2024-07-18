@@ -291,18 +291,6 @@ class RVMN101A(Config):
         ):
             cls.product_rev = "24A"
 
-    @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple(limits)
-
-        """
-        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
-        return cls._base_limits_final + (
-            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
-        )
-
 
 class RVMN101B(Config):
     """RVMN101B configuration."""
@@ -425,19 +413,6 @@ class RVMN101B(Config):
         # Rev 1-4 were Engineering protoype builds
     }
 
-    @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple(limits)
-
-        """
-        # 3dB below the -A version
-        rssi = -73 if share.config.System.tester_type in ("ATE4", "ATE5") else -88
-        return cls._base_limits_final + (
-            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
-        )
-
 
 class RVMN101C(Config):
     """RVMN101C configuration."""
@@ -470,18 +445,6 @@ class RVMN101C(Config):
         ),
     }
 
-    @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple(limits)
-
-        """
-        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
-        return cls._base_limits_final + (
-            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
-        )
-
 
 class RVMN200A(Config):
     """RVMN200A configuration."""
@@ -499,18 +462,6 @@ class RVMN200A(Config):
         None: _rev1_values,
         "1": _rev1_values,
     }
-
-    @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple(limits)
-
-        """
-        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
-        return cls._base_limits_final + (
-            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
-        )
 
 
 class RVMN5x(Config):
@@ -659,18 +610,6 @@ class RVMN5x(Config):
         ):
             cls.product_rev = "14A"
 
-    @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple(limits)
-
-        """
-        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
-        return cls._base_limits_final + (
-            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
-        )
-
 
 class RVMN6x(Config):
     """RVMN6x configuration."""
@@ -689,15 +628,3 @@ class RVMN6x(Config):
         None: _rev1_values,
         "1": _rev1_values,
     }
-
-    @classmethod
-    def limits_final(cls):
-        """Final test limits.
-
-        @return Tuple(limits)
-
-        """
-        rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
-        return cls._base_limits_final + (
-            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
-        )

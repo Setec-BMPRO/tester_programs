@@ -2,6 +2,7 @@
 # Copyright 2019 SETEC Pty Ltd.
 """RVMN101x and RVMN5x Final Test Program."""
 
+import libtester
 import tester
 
 import share
@@ -14,7 +15,13 @@ class Final(share.TestSequence):
     def open(self):
         """Create the test program as a linear sequence."""
         self.cfg = config.get(self.parameter, self.uuts[0])
-        self.configure(self.cfg.limits_final(), Devices, Sensors, Measurements)
+        rssi = -70 if self.tester_type in ("ATE4", "ATE5") else -85
+        if self.parameter == "101B":  # 101B 3dB below the other versions
+            rssi -= 3
+        limits = self.cfg.limits_final() + (
+            libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+        )
+        self.configure(limits, Devices, Sensors, Measurements)
         self.ble_rssi_dev()
         super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)

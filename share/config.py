@@ -11,17 +11,6 @@ import libtester
 
 
 @define
-class System:  # pylint: disable=too-few-public-methods
-    """System data."""
-
-    # Type of Tester.
-    # One of ('ATE2a', 'ATE2c', 'ATE3', 'ATE4')
-    #  Must be set by the user of this project, since there is
-    #  no way we can find it...
-    tester_type: ClassVar[str] = "ATE4"  # A default value...
-
-
-@define
 class Fixture:
     """Fixture specific data, such as serial port assignment.
 
