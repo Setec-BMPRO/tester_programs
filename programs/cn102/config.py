@@ -5,7 +5,6 @@
 import logging
 
 import libtester
-import share
 
 
 def get(parameter, uut):
@@ -43,11 +42,7 @@ class CN10xParameters:
         libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
     )
     limits_final = (
-        libtester.LimitHigh(
-            "ScanRSSI",
-            -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85,
-            doc="Strong BLE signal",
-        ),
+        libtester.LimitHigh("ScanRSSI", float("NaN"), doc="Strong BLE signal"),
     )
 
     def __init__(

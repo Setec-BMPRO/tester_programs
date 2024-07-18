@@ -12,7 +12,6 @@ class Final(share.TestSequence):
     """TRS-BTS Final Test Program."""
 
     vbatt = 12.0  # Injected Vbatt
-    rssi = -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85
     pc29164_lots = (  # PC-29164 for TRS-BT2 - Use BLE with chip antenna
         "A220815",
         "A220816",
@@ -32,14 +31,13 @@ class Final(share.TestSequence):
         "A221702",
         "A221703",
     )
-    pc29164_rssi = -90 if share.config.System.tester_type in ("ATE4", "ATE5") else -100
     limitdata = (
         libtester.LimitDelta("Vbat", vbatt, 0.5, doc="Battery input present"),
         libtester.LimitLow("BrakeOff", 0.5, doc="Brakes off"),
         libtester.LimitDelta("BrakeOn", vbatt, 0.5, doc="Brakes on"),
         libtester.LimitRegExp("BleMac", share.MAC.regex, doc="Valid MAC address"),
         libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
-        libtester.LimitHigh("ScanRSSI", rssi, doc="Strong BLE signal"),
+        libtester.LimitHigh("ScanRSSI", float("NaN"), doc="Strong BLE signal"),
     )
 
     def open(self):
@@ -52,9 +50,16 @@ class Final(share.TestSequence):
             tester.TestStep("Bluetooth", self._step_bluetooth),
         )
         # PC-29164 for TRS-BT2 - Use BLE with chip antenna
+        if self.tester_type in ("ATE4", "ATE5"):
+            rssi, pc29164_rssi = -70, -90
+        else:
+            rssi, pc29164_rssi = -85, -100
         uut = self.uuts[0]
         if uut and uut.lot.number in self.pc29164_lots:
-            self.limits["ScanRSSI"].adjust(self.pc29164_rssi)
+            rssi_lim = pc29164_rssi
+        else:
+            rssi_lim = rssi
+        self.limits["ScanRSSI"].adjust(rssi_lim)
 
     @share.teststep
     def _step_pin(self, dev, mes):

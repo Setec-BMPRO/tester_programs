@@ -38,7 +38,7 @@ class Main(share.TestSequence):
 
     def open(self):
         """Create the test program as a linear sequence."""
-        is_ate2 = self.tester_type.name in ("ATE3b", "ATE3c")
+        is_ate2 = (self.tester_type.type == "ATE2")
         Devices.is_ate2 = is_ate2
         self.configure(self.limitdata, Devices, Sensors, Measurements)
         super().open()

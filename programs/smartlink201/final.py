@@ -12,24 +12,14 @@ class Final(share.TestSequence):
     """SmartLink201 Final Test Program."""
 
     limitdata = (
-        libtester.LimitHigh(
-            "ScanRSSI",
-            (
-                -70
-                if share.config.System.tester_type
-                in (
-                    "ATE4",
-                    "ATE5",
-                )
-                else -85
-            ),
-            doc="Strong signal",
-        ),
+        libtester.LimitHigh("ScanRSSI", float("NaN"), doc="Strong signal"),
     )
 
     def open(self):
         """Prepare for testing."""
         self.configure(self.limitdata, Devices, Sensors, Measurements)
+        rssi_lim = -70 if self.tester_type in ("ATE4", "ATE5") else -85
+        self.limits["ScanRSSI"].adjust(rssi_lim)
         self.ble_rssi_dev()
         super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)

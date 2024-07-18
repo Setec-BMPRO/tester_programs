@@ -16,6 +16,8 @@ class Final(share.TestSequence):
         self.cfg = config.get(self.parameter, self.uuts[0])
         limits = self.cfg.limits_final
         self.configure(limits, Devices, Sensors, Measurements)
+        rssi_lim = -70 if self.tester_type in ("ATE4", "ATE5") else -85
+        self.limits["ScanRSSI"].adjust(rssi_lim)
         super().open()
         self.steps = (tester.TestStep("Bluetooth", self._step_bluetooth),)
 

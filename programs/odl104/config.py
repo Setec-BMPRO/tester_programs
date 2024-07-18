@@ -38,11 +38,7 @@ class ODL10xParameters:
     # Final test limits
     limits_final = limits_common + (
         libtester.LimitBoolean("ScanMac", True, doc="MAC address detected"),
-        libtester.LimitHigh(
-            "ScanRSSI",
-            -70 if share.config.System.tester_type in ("ATE4", "ATE5") else -85,
-            doc="Strong BLE signal",
-        ),
+        libtester.LimitHigh("ScanRSSI", float("NaN"), doc="Strong BLE signal"),
     )
 
     def __init__(self, sw_nordic_image, hw_version, banner_lines):
