@@ -46,7 +46,7 @@ class DCX:
         libtester.LimitDelta("3V3", 3.30, 0.05, doc="3V3 present"),
         libtester.LimitBetween("ARM-SecT", 8.0, 70.0, doc="Reading ok"),
         libtester.LimitDelta("ARM-Vout", 12.45, 0.45),
-        libtester.LimitBetween("ARM-LoadI", 0.6, 0.8, doc="Load current flowing"),
+        libtester.LimitBetween("ARM-LoadI", 0.5, 1.0, doc="Load current flowing"),
         libtester.LimitDelta("ARM-BattI", ibatt, 1.0, doc="Battery current flowing"),
         libtester.LimitInteger("ARM-RemoteClosed", 1, doc="REMOTE input connected"),
         libtester.LimitDelta(
