@@ -13,6 +13,7 @@ class Final(share.TestSequence):
 
     limitdata = (
         libtester.LimitBoolean("ButtonOk", True, doc="Ok entered"),
+        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
         libtester.LimitBoolean("Zone4Pressed", True, doc="Button pressed"),
     )
     is_full = None  # False if 'Lite' version (no uC)
@@ -39,6 +40,7 @@ class Final(share.TestSequence):
         # Tell user to push unit's button after clicking OK
         mes["ui_buttonpress"]()
         with dev["canreader"]:
+            mes["can_active"](timeout=5)
             # Wait for the button press
             mes["zone4"](timeout=10)
 
@@ -51,6 +53,7 @@ class Devices(share.Devices):
         self["dcs_vin"] = tester.DCSource(self.physical_devices["DCS1"])
         self["can"] = self.physical_devices["CAN"]
         self["canreader"] = tester.CANReader(self["can"])
+        self["candetector"] = share.can.PacketDetector(self["canreader"])
         self["decoder"] = share.can.PacketPropertyReader(
             canreader=self["canreader"], decoder=share.can.SwitchStatusDecoder()
         )
@@ -81,6 +84,7 @@ class Sensors(share.Sensors):
             message=tester.translate("rvmc101_final", "msgTabletScreen?"),
             caption=tester.translate("rvmc101_final", "capTabletScreen"),
         )
+        self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
         self["zone4"] = sensor.Keyed(self.devices["decoder"], "zone4")
 
 
@@ -93,6 +97,7 @@ class Measurements(share.Measurements):
             (
                 ("ui_buttonpress", "ButtonOk", "ButtonPress", ""),
                 ("ui_tabletscreen", "Notify", "TabletScreen", ""),
+                ("can_active", "CANok", "cantraffic", "CAN traffic seen"),
                 ("zone4", "Zone4Pressed", "zone4", "4 button pressed"),
             )
         )

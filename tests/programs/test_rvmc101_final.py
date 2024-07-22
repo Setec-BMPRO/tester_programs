@@ -21,6 +21,7 @@ class RVMC101Final(ProgramTestCase):
                 "PowerUp": ((sen["TabletScreen"], True),),
                 "CanBus": (
                     (sen["ButtonPress"], True),
+                    (sen["cantraffic"], True),
                     (sen["zone4"], True),
                 ),
             },
@@ -29,7 +30,7 @@ class RVMC101Final(ProgramTestCase):
         self.tester.test(self.uuts)
         for res in self.tester.ut_result:
             self.assertEqual("P", res.letter)
-            self.assertEqual(3, len(res.readings))
+            self.assertEqual(4, len(res.readings))
         self.assertEqual(["PowerUp", "CanBus"], self.tester.ut_steps)
 
 
