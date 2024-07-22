@@ -64,7 +64,7 @@ class Initial(share.TestSequence):
         con = dev["con"]
         con.load_set(set_on=True, loads=())  # All outputs OFF
         mes["ui_yesnored"](timeout=5)
-        dev["dcl_out"].output(1.0, True)  # A little load on the output.
+        dev["dcl_out"].output(0.8, True)  # A little load on the output.
         mes["dmm_vloadoff"](timeout=5)
         con.load_set(set_on=False, loads=())  # All outputs ON
         mes["ui_yesnogreen"](timeout=5)
