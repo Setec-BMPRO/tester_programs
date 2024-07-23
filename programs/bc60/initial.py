@@ -15,7 +15,7 @@ from . import console
 class Initial(share.TestSequence):
     """Initial Test Program."""
 
-    limits = (
+    initial_limits = (
         libtester.LimitLow("LockClosed", 200, doc="Fixture switch closed"),
         libtester.LimitDelta("240Vac", 240.0, 5.0, doc="AC ok"),
         libtester.LimitPercent("340V", 340.0, 5.0, doc="340V ok"),
@@ -26,24 +26,20 @@ class Initial(share.TestSequence):
         libtester.LimitBetween("3V3", 3.275, 3.330, doc="3V3 ok"),
         libtester.LimitBetween("5V", 4.68, 5.13, doc="5V ok"),
         libtester.LimitBetween("CAN_PWR", 11.8, 13.0, doc="CAN_PWR ok"),
-#        libtester.LimitBetween("OutOCP", 20.05, 24.00),
-#        libtester.LimitLow("InOCP", 13.0),
-#        libtester.LimitPercent("Vout", 13.8, 2.6),
-        libtester.LimitBoolean("CANok", True, doc="CAN bus active"),
+        libtester.LimitPercent("Vout", 13.0, 5.0),
     )
 
     def open(self):
         """Prepare for testing."""
-        Sensors.ble_image = "abcd"
-        Sensors.stm_image = "abcd"
-        self.configure(self.limits, Devices, Sensors, Measurements)
+        Sensors.ble_image = "bl652_hci_uart_v1.0.0-0-ga43a850.hex"
+        Sensors.stm_image = "bc60_v1.0.1-0-g25dfa71-signed-mcuboot-factory.hex"
+        self.configure(self.initial_limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("Prepare", self._step_prepare),
             tester.TestStep("Program", self._step_program),
             tester.TestStep("PowerUp", self._step_power_up),
-            tester.TestStep("Calibration", self._step_cal),
-            tester.TestStep("OCP", self._step_ocp),
+            tester.TestStep("Load", self._step_load),
         )
 
     @share.teststep
@@ -98,26 +94,14 @@ class Initial(share.TestSequence):
         )
 
     @share.teststep
-    def _step_cal(self, dev, mes):
-        """Calibration."""
-        with dev["msp"] as msp:
-            msp.initialise()
-            mes["msp_status"]()
-            msp.filter_reload()
-            mes["msp_vout"]()
-            dmm_V = mes["dmm_voutpre"].stable(delta=0.005).value1
-            msp["CAL-V"] = dmm_V
-            mes["dmm_voutpost"].stable(delta=0.005)
-            msp["NV-WRITE"] = True
-            mes["msp_status"]()
-
-    @share.teststep
-    def _step_ocp(self, dev, mes):
-        """Test OCP."""
-        self.measure(("dmm_alarmopen", "ramp_battocp"), timeout=5)
-        dev["dcl_vbat"].output(0.0)
-        mes["ramp_outocp"](timeout=5)
-        dev["dcl_vout"].output(0.0)
+    def _step_load(self, dev, mes):
+        """Test load."""
+        dcl = dev["dcl_Vout"]
+        for load in range(0, 61, 10):
+            with tester.PathName("{0}A".format(load)):
+                dcl.output(load, delay=0.5)
+                mes["Vout"](timeout=5)
+        dcl.output(1.0)
 
 
 class Devices(share.Devices):
@@ -144,23 +128,14 @@ class Devices(share.Devices):
         # Set port separately, as we don't want it opened yet
         con_ser.port = self.port("STM")
         self["con"] = console.Console(con_ser)
-        # CAN devices
-        self["can"] = self.physical_devices["CAN"]
-        self["canreader"] = tester.CANReader(self["can"])
-        self["candetector"] = share.can.PacketDetector(self["canreader"])
-
-    def run(self):
-        """Test run is starting."""
-        self["canreader"].start()
 
     def reset(self):
         """Reset instruments."""
         self["con"].close()
-        self["canreader"].stop()
         self["acsource"].reset()
-        self["dcl_vout"].output(10.0, delay=1.0)
+        self["dcl_Vout"].output(10.0, delay=1.0)
         self["discharge"].pulse()
-        self["dcl_vout"].output(0.0, output=False)
+        self["dcl_Vout"].output(0.0, output=False)
         self["dcs_sec"].output(0.0, output=False)
         self["swd_select"].set_off()
 
@@ -220,21 +195,6 @@ class Sensors(share.Sensors):
         self["msp_vo"].doc = "MSP430 console"
 
 
-        low, high = self.limits["OutOCP"].limit
-        self["ocp_out"] = sensor.Ramp(
-            stimulus=self.devices["dcl_vout"],
-            sensor=self["vout"],
-            detect_limit=self.limits["InOCP"],
-            ramp_range=sensor.RampRange(start=low - 0.5, stop=high + 0.5, step=0.05),
-            delay=0.05,
-        )
-
-
-        # CAN
-        self["cantraffic"] = sensor.Keyed(self.devices["candetector"], None)
-        self["cantraffic"].doc = "CAN traffic detector"
-
-
 class Measurements(share.Measurements):
     """Measurements."""
 
@@ -245,7 +205,6 @@ class Measurements(share.Measurements):
                 ("FixtureShut", "LockClosed", "lock", "Fixture lid closed"),
                 ("JLinkBLE", "ProgramOk", "JLinkBLE", "BLE Programmed"),
                 ("JLinkSTM", "ProgramOk", "JLinkSTM", "STM Programmed"),
-                ("CANactive", "CANok", "cantraffic", "CAN traffic seen"),
                 ("240Vac", "240Vac", "Vac", "AC fuse fitted"),
                 ("340V", "340V", "400V", "PFC not running"),
                 ("400V", "400V", "400V", "PFC running"),
@@ -254,7 +213,6 @@ class Measurements(share.Measurements):
                 ("15Vsb", "15Vsb", "15Vsb", "15Vsb running"),
                 ("5V", "5V", "5V", "5V running"),
                 ("3V3", "3V3", "3V3", "3V3 running"),
-#                ("dmm_vout", "VoutPre", "vout", "Output"),
-#                ("ramp_outocp", "OutOCP", "ocp_out", ""),
+                ("Vout", "Vout", "Vout", "Output"),
             )
         )
