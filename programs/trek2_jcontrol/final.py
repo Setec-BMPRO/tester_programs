@@ -4,7 +4,6 @@
 
 import logging
 
-import libtester
 import tester
 
 import share
@@ -14,57 +13,10 @@ from . import config, console
 class Final(share.TestSequence):
     """Trek2/JControl Final Test Program."""
 
-    # Input voltage to power the unit
-    vin_set = 12.0
-    # Time to wait for CAN binding (sec)
-    can_bind_time = 9
-    # Common limits
-    _common = (
-        libtester.LimitInteger("ARM-level1", 1),
-        libtester.LimitInteger("ARM-level2", 2),
-        libtester.LimitInteger("ARM-level3", 3),
-        libtester.LimitInteger("ARM-level4", 4),
-    )
-    # Variant specific configuration data. Indexed by test program parameter.
-    config_data = {
-        "JC": {
-            "Config": config.JControl,
-            "Limits": _common
-            + (
-                libtester.LimitRegExp(
-                    "SwVer",
-                    r"^{0}$".format(config.JControl.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-        "TK2": {
-            "Config": config.Trek2,
-            "Limits": _common
-            + (
-                libtester.LimitRegExp(
-                    "SwVer",
-                    r"^{0}$".format(config.Trek2.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-        "TK3": {
-            "Config": config.Trek3,
-            "Limits": _common
-            + (
-                libtester.LimitRegExp(
-                    "SwVer",
-                    r"^{0}$".format(config.Trek3.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-    }
-
     def open(self):
         """Prepare for testing."""
-        self.config = self.config_data[self.parameter]["Config"]
-        self.configure(
-            self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
-        )
+        self.config = config.get(self.parameter)
+        self.configure(self.config.final_limits(), Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -76,7 +28,8 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        dev["dcs_vin"].output(self.vin_set, output=True, delay=self.can_bind_time)
+        can_bind_time = 9  # Time to wait for CAN binding (sec)
+        dev["dcs_vin"].output(self.config.vin_set, output=True, delay=can_bind_time)
         precon = share.can.Trek2PreConditionsBuilder()
         candev = self.physical_devices["CAN"]
         candev.send(precon.packet)

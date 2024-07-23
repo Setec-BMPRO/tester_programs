@@ -8,7 +8,6 @@ import share
 class _Console:
     """Base class for a Trek2/JControl console."""
 
-    # Number of lines in startup banner
     banner_lines = 2
     # Test mode controlled by STATUS bit 31
     _test_on = 1 << 31

@@ -4,7 +4,6 @@
 
 import pathlib
 
-import libtester
 import serial
 import tester
 
@@ -15,58 +14,11 @@ from . import config, console
 class Initial(share.TestSequence):
     """Trek2/JControl Initial Test Program."""
 
-    # Startup voltage
-    vin_start = 8.0
-    # Input voltage to power the unit
-    vin_set = 12.0
-    # Common limits
-    _common = (
-        libtester.LimitDelta("Vin", vin_start - 0.75, 0.5, doc="Input voltage present"),
-        libtester.LimitPercent("3V3", 3.3, 3.0, doc="3V3 present"),
-        # CAN Bus is operational if status bit 28 is set
-        libtester.LimitInteger("CAN_BIND", 1 << 28, doc="CAN bus bound"),
-    )
-    # Variant specific configuration data. Indexed by test program parameter.
-    config_data = {
-        "JC": {
-            "Config": config.JControl,
-            "Limits": _common
-            + (
-                libtester.LimitRegExp(
-                    "SwVer",
-                    r"^{0}$".format(config.JControl.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-        "TK2": {
-            "Config": config.Trek2,
-            "Limits": _common
-            + (
-                libtester.LimitRegExp(
-                    "SwVer",
-                    r"^{0}$".format(config.Trek2.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-        "TK3": {
-            "Config": config.Trek3,
-            "Limits": _common
-            + (
-                libtester.LimitRegExp(
-                    "SwVer",
-                    r"^{0}$".format(config.Trek3.sw_version.replace(".", r"\.")),
-                ),
-            ),
-        },
-    }
-
     def open(self):
         """Create the test program as a linear sequence."""
-        self.config = self.config_data[self.parameter]["Config"]
+        self.config = config.get(self.parameter)
         Devices.sw_image = self.config.sw_image
-        self.configure(
-            self.config_data[self.parameter]["Limits"], Devices, Sensors, Measurements
-        )
+        self.configure(self.config.initial_limits(), Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
@@ -78,9 +30,9 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Apply input 12Vdc and measure voltages."""
-        dev["dcs_vin"].output(self.vin_start, output=True)
+        dev["dcs_vin"].output(self.config.vin_start, output=True)
         self.measure(("dmm_vin", "dmm_3v3"), timeout=5)
-        dev["dcs_vin"].output(self.vin_set)
+        dev["dcs_vin"].output(self.config.vin_set)
 
     @share.teststep
     def _step_test_arm(self, dev, mes):
@@ -106,7 +58,6 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vin", tester.DCSource, "DCS3"),
@@ -115,7 +66,6 @@ class Devices(share.Devices):
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         arm_port = self.port("ARM")
-        # ARM device programmer
         self["programmer"] = share.programmer.ARM(
             arm_port,
             pathlib.Path(__file__).parent / self.sw_image,
@@ -156,7 +106,6 @@ class Sensors(share.Sensors):
         self["vin"].doc = "X207"
         self["3v3"] = sensor.Vdc(dmm, high=2, low=1, rng=10, res=0.01)
         self["3v3"].doc = "U4 output"
-        # Console sensors
         self["canbind"] = sensor.Keyed(arm, "CAN_BIND")
         self["swver"] = sensor.Keyed(arm, "SW_VER")
         self["tunnelswver"] = sensor.Keyed(armtunnel, "SW_VER")
