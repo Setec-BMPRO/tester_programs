@@ -10,7 +10,7 @@ import share
 class Console(share.console.Base):
     """Communications to RVSWT101 console."""
 
-    re_banner = re.compile("^ble addr ([0-9a-f]{12})$")
+    re_banner = re.compile(r"^ble addr ([0-9a-f]{12})$")
     banner_lines = None
 
     def get_mac(self):

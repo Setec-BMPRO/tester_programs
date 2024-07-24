@@ -30,9 +30,9 @@ class Console(share.console.Base):
         "SWITCH": parameter.Float("SW", read_format="{0}?"),
     }
     stat_data = {}  # Data readings: Key=Name, Value=Reading
-    stat_regexp = re.compile("^([a-z\-]+)=([0-9]+).*$")
+    stat_regexp = re.compile(r"^([a-z\-]+)=([0-9]+).*$")
     cal_data = {}  # Calibration readings: Key=Name, Value=Setting
-    cal_regexp = re.compile("^([a-z_0-9]+) +([\-0-9]+) $")
+    cal_regexp = re.compile(r"^([a-z_0-9]+) +([\-0-9]+) $")
 
     def initialise(self, reset_relay):
         """Initialise the unit."""
