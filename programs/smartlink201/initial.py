@@ -166,7 +166,7 @@ class Devices(share.Devices):
         }[self.parameter]
         self["smartlink201"] = con_class(smartlink201_ser)
         # Fixture USB power
-        self["dcs_USB"].output(8.0, output=True, delay=10)
+        self["dcs_USB"].output(8.0, output=True, delay=2)
         self.add_closer(lambda: self["dcs_USB"].output(0.0, output=False))
 
     def reset(self):
