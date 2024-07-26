@@ -37,22 +37,15 @@ class Console(share.console.Base):
         "OP_MODE": parameter.String(  # "v" = VERIFY_HARDWARE
             "op_mode", read_format="{0}", writeable=True, write_format="{1} {0}"
         ),
-        "PFC_EN": parameter.Boolean(
-            "hardware pfc_en", writeable=True, write_expected=1
-        ),
-        "DC_EN": parameter.Boolean(
-            "hardware dc_dc_en", writeable=True, write_expected=1
-        ),
-        "OUT_EN": parameter.Boolean(
-            "hardware dc_out_sw", writeable=True, write_expected=1
-        ),
-        "PS_ON": parameter.Boolean("hardware ps_on", writeable=True, write_expected=1),
+        "PFC_EN": parameter.Boolean("hardware pfc_en", writeable=True),
+        "DC_EN": parameter.Boolean("hardware dc_dc_en", writeable=True),
+        "OUT_EN": parameter.Boolean("hardware dc_out_sw", writeable=True),
+        "PS_ON": parameter.Boolean("hardware ps_on", writeable=True),
         "DC_VOLT_SET": parameter.Float(
             "hardware dc_volt_set",
             readable=False,
             writeable=True,
             write_format="{1} {0}",
-            write_expected=1,
             minimum=0.0,
             maximum=16.0,
             scale=1000,
@@ -62,7 +55,6 @@ class Console(share.console.Base):
             readable=False,
             writeable=True,
             write_format="{1} {0}",
-            write_expected=1,
             minimum=0.0,
             maximum=60.0,
             scale=1000,
@@ -72,7 +64,6 @@ class Console(share.console.Base):
             readable=False,
             writeable=True,
             write_format="{1} {0}",
-            write_expected=1,
             minimum=0.0,
             maximum=100.0,
         ),
@@ -105,7 +96,7 @@ class Console(share.console.Base):
         self["HARDWARE-REV"] = hardware_rev
 
     def startup(self, vset=13.5, ocp=60.0):
-        """Start the unit running at 13.0V 60A."""
+        """Start the unit running."""
         vout = 9.0
         self["OP_MODE"] = "v"
         self["PFC_EN"] = True
