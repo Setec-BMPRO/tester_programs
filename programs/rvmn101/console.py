@@ -173,14 +173,13 @@ class PinName:
 class _Console(share.console.Base):
     """Communications to RVMNx console."""
 
-    # Console command prompt. Signals the end of response data.
     cmd_prompt = b"uart:~$ \x1b[m"
     ignore = (  # Tuple of strings to remove from responses
         "\x1b[m",  # Normal
         "\x1b[1;31m",  # Bold, Red
         "\x1b[1;32m",  # Bold, Green
     )
-    # Console commands
+    banner_lines = 5
     parameter = share.console.parameter
     cmd_data = {
         "SERIAL": parameter.String(
@@ -217,7 +216,6 @@ class _Console(share.console.Base):
         "FUEL SENSOR 2": parameter.Hex("rvmn analog 13", read_format="{0}"),
         "VOLTAGE SYS": parameter.Hex("rvmn analog 14", read_format="{0}"),
     }
-    banner_lines = 5
 
     def __init__(self, port):
         """Initialise communications.
@@ -446,13 +444,13 @@ class Console101B(_Console):
 class Console101C(Console101A):
     """Communications to RVMN101C console."""
 
-    banner_lines = None  # A non-int will ignore number of lines
+    banner_lines = 13
 
 
 class Console200A(Console101A):
     """Communications to RVMN200A console."""
 
-    banner_lines = None  # A non-int will ignore number of lines
+    banner_lines = None  # [13] a non-int will ignore number of lines
 
 
 class _Console5x(_Console):
@@ -539,10 +537,10 @@ class Console55(_Console5x):
 class Console60(Console50):
     """Communications to RVMN60 console."""
 
-    banner_lines = None  # A non-int will ignore number of lines
+    banner_lines = None  # [13] a non-int will ignore number of lines
 
 
 class Console65(Console55):
     """Communications to RVMN65 console."""
 
-    banner_lines = None  # A non-int will ignore number of lines
+    banner_lines = None  # [13] a non-int will ignore number of lines

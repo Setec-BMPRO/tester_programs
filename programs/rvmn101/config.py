@@ -47,9 +47,7 @@ class Values:
     reversed_outputs = field(factory=dict, validator=validators.instance_of(dict))
     nordic_devicetype = field(default="nrf52832", validator=validators.instance_of(str))
     arm_devicetype = field(default="lpc1519", validator=validators.instance_of(str))
-    # FIXME: Console prompt appears before it is ready to accept commands
-    # RVMN200A: 2s gives a 1 in 5 branding failure rate
-    boot_delay = field(default=4.0, validator=validators.instance_of(float))
+    boot_delay = field(default=0, converter=float)
 
 
 class Config:
@@ -417,29 +415,36 @@ class RVMN101B(Config):
 class RVMN101C(Config):
     """RVMN101C configuration."""
 
-    _sonic_1_0_7 = "rvmn101c_signed_1.0.7-0-g0d768132_factory_mcuboot.hex"
+    _sonic_1_1_0 = "rvmn101c_signed_1.1.0-0-gc33c86fd_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
-    _rev5_values = Values(
-        nordic_image=_sonic_1_0_7,
+    _rev6_values = Values(
+        nordic_image=_sonic_1_1_0,
         arm_image=_arm_image_3_0_1,
-        product_rev="05A",
+        product_rev="06A",
         hardware_rev="04A",
         nordic_devicetype="nrf52840",
     )
     _rev_data = {
-        None: _rev5_values,
-        "5": _rev5_values,
-        "4": Values(
-            nordic_image=_sonic_1_0_7,
+        None: _rev6_values,
+        "6": _rev6_values,
+        "5": Values(
+            nordic_image=_sonic_1_1_0,
             arm_image=_arm_image_3_0_1,
-            product_rev="04B",
+            product_rev="05B",
+            hardware_rev="04A",
+            nordic_devicetype="nrf52840",
+        ),
+        "4": Values(
+            nordic_image=_sonic_1_1_0,
+            arm_image=_arm_image_3_0_1,
+            product_rev="04C",
             hardware_rev="04A",
             nordic_devicetype="nrf52840",
         ),
         "3": Values(
-            nordic_image=_sonic_1_0_7,
+            nordic_image=_sonic_1_1_0,
             arm_image=_arm_image_3_0_1,
-            product_rev="03E",
+            product_rev="03F",
             hardware_rev="03A",
             nordic_devicetype="nrf52840",
         ),
@@ -457,6 +462,9 @@ class RVMN200A(Config):
         product_rev="01A",
         hardware_rev="01A",
         nordic_devicetype="nrf52840",
+        # FIXME: Console prompt appears before it is ready to accept commands
+        # 2s gives a 1 in 5 branding failure rate
+        boot_delay=4,
     )
     _rev_data = {
         None: _rev1_values,
@@ -623,6 +631,9 @@ class RVMN6x(Config):
         hardware_rev="01A",
         arm_devicetype="r7fa2l1a9",
         nordic_devicetype="nrf52840",
+        # FIXME: Console prompt appears before it is ready to accept commands
+        # 2s gives a 1 in 5 branding failure rate
+        boot_delay=4,
     )
     _rev_data = {
         None: _rev1_values,

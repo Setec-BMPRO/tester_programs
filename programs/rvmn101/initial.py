@@ -65,9 +65,9 @@ class Initial(share.TestSequence):
         rvmn.reset()
         time.sleep(self.cfg.values.boot_delay)
         rvmn.brand(sernum, self.cfg.values.product_rev, self.cfg.values.hardware_rev)
+        # FIXME: Power cycle module to reload everything from NV storage
+        #        Check that firmware has really saved the branding data
         with tester.PathName("Verify"):
-            # FIXME: Power cycle module to reload everything from NV storage
-            #        Check that firmware has really saved the branding data
             dcs = dev["dcs_vbatt"]
             dcs.output(0.0, delay=0.5)
             dcs.output(self.cfg.vbatt_set, delay=2)
