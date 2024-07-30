@@ -102,7 +102,6 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vin", tester.DCSource, "DCS2"),
@@ -118,7 +117,6 @@ class Devices(share.Devices):
             self[name] = devtype(self.physical_devices[phydevname])
         port = tester.RttPort()
         self["console"] = console.Console(port)
-        # CAN devices
         self["canreader"] = tester.CANReader(self.physical_devices["CAN"])
         self["candetector"] = share.can.PacketDetector(self["canreader"])
 
