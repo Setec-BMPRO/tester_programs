@@ -95,7 +95,7 @@ class Console(share.console.Base):
             minimum=0.0,
             maximum=100.0,
         ),
-        "MAINS_VOLTS": parameter.Float("hardware mains_det_volts"),
+        "MAINS_VOLT": parameter.Float("hardware mains_det_volts"),
         "MAINS_FREQ": parameter.Float("hardware mains_det_freq", scale=1000),
         "DC_VOLT_MON": parameter.Float("hardware dc_voltage_mon", scale=1000),
         "DC_CURRENT_MON": parameter.Float("hardware dc_current_mon", scale=1000),

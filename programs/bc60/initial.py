@@ -18,6 +18,7 @@ class Initial(share.TestSequence):
     initial_limits = (
         libtester.LimitLow("LockClosed", 200, doc="Fixture switch closed"),
         libtester.LimitDelta("240Vac", 240.0, 5.0, doc="AC ok"),
+        libtester.LimitDelta("50Hz", 50.0, 5.0, doc="AC ok"),
         libtester.LimitPercent("340V", 340.0, 5.0, doc="340V ok"),
         libtester.LimitBetween("400V", 405.0, 434.0, doc="400V ok"),
         libtester.LimitBetween("12VPri", 13.0, 14.0, doc="12Vpri ok"),
@@ -26,7 +27,8 @@ class Initial(share.TestSequence):
         libtester.LimitBetween("3V3", 3.275, 3.330, doc="3V3 ok"),
         libtester.LimitBetween("5V", 4.68, 5.13, doc="5V ok"),
         libtester.LimitBetween("CAN_PWR", 11.8, 13.0, doc="CAN_PWR ok"),
-        libtester.LimitPercent("Vout", 13.0, 5.0),
+        libtester.LimitPercent("Vout", 13.0, 5.0, doc="Voltage reading"),
+        libtester.LimitPercent("Iout_60", 60.0, 5.0, doc="Current reading"),
     )
 
     def open(self):
@@ -85,10 +87,14 @@ class Initial(share.TestSequence):
         )
         con.brand(self.uuts[0].sernum, "05A", "05A")
         con.startup(13.5, 60.0)
+        con["PWM_AC_FAN"] = 50
+        con["PWM_DC_FAN"] = 50
         self.measure(
             (
                 "400V",
                 "Vout",
+                "STM_Vac",
+                "STM_Freq",
             ),
             timeout=5,
         )
@@ -101,7 +107,13 @@ class Initial(share.TestSequence):
             with tester.PathName("{0}A".format(load)):
                 dcl.output(load, delay=0.5)
                 mes["Vout"](timeout=5)
-        dcl.output(1.0)
+        self.measure(  # STM Voltage & Current at 60A
+            (
+                "STM_Vout",
+                "STM_Iout",
+            )
+        )
+        dcl.output(10.0)
 
 
 class Devices(share.Devices):
@@ -174,7 +186,7 @@ class Sensors(share.Sensors):
         self["DCfan"].doc = "DC fan X202"
         self["Vcan"] = sensor.Vdc(dmm, high=11, low=3, rng=10, res=0.01)
         self["Vcan"].doc = "CAN power"
-        # Progamming
+        # Programming
         self["JLinkBLE"] = sensor.JLink(
             self.devices["JLink"],
             share.programmer.JFlashProject.projectfile("nrf52832"),
@@ -189,10 +201,14 @@ class Sensors(share.Sensors):
         self["JLinkSTM"].doc = "STM programmer"
         # Console
         con = self.devices["con"]
-        self["msp_stat"] = sensor.Keyed(con, "MSP-STATUS")
-        self["msp_stat"].doc = "MSP430 console"
-        self["msp_vo"] = sensor.Keyed(con, "MSP-VOUT")
-        self["msp_vo"].doc = "MSP430 console"
+        self["STM_Vac"] = sensor.Keyed(con, "MAINS_VOLT")
+        self["STM_Vac"].doc = "Vac"
+        self["STM_Freq"] = sensor.Keyed(con, "MAINS_FREQ")
+        self["STM_Freq"].doc = "Frequency"
+        self["STM_Vout"] = sensor.Keyed(con, "DC_VOLT_MON")
+        self["STM_Vout"].doc = "Vout"
+        self["STM_Iout"] = sensor.Keyed(con, "DC_CURRENT_MON")
+        self["STM_Iout"].doc = "Iout"
 
 
 class Measurements(share.Measurements):
@@ -214,5 +230,9 @@ class Measurements(share.Measurements):
                 ("5V", "5V", "5V", "5V running"),
                 ("3V3", "3V3", "3V3", "3V3 running"),
                 ("Vout", "Vout", "Vout", "Output"),
+                ("STM_Vac", "240Vac", "STM_Vac", "AC Voltage reading"),
+                ("STM_Freq", "50Hz", "STM_Freq", "AC Frequency reading"),
+                ("STM_Vout", "Vout", "STM_Vout", "Voltage at 60A"),
+                ("STM_Iout", "Iout_60", "STM_Iout", "Current at 60A"),
             )
         )

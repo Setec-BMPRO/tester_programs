@@ -45,9 +45,14 @@ class BC60_Initial(ProgramTestCase):
                     (sen["5V"], 5.0),
                     (sen["3V3"], 3.3),
                     (sen["Vout"], 13.0),
+                    (sen["STM_Vac"], 241),
+                    (sen["STM_Freq"], 51),
                 ),
                 "Load": (
                     (sen["Vout"], (13.0, ) * 7),
+                    (sen["STM_Vout"], 13.4),
+                    (sen["STM_Iout"], 59.9),
+
                 ),
             },
         }
@@ -55,7 +60,7 @@ class BC60_Initial(ProgramTestCase):
         self.tester.test(self.uuts)
         result = self.tester.ut_result[0]
         self.assertEqual("P", result.letter)
-        self.assertEqual(22, len(result.readings))
+        self.assertEqual(26, len(result.readings))
         self.assertEqual(
             ["Prepare", "Program", "PowerUp", "Load"],
             self.tester.ut_steps,
