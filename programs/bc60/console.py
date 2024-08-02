@@ -91,14 +91,17 @@ class Console(share.console.Base):
             readable=False,
             writeable=True,
             write_format="{1} {0}",
-            write_expected=1,
             minimum=0.0,
             maximum=100.0,
         ),
-        "MAINS_VOLT": parameter.Float("hardware mains_det_volts"),
-        "MAINS_FREQ": parameter.Float("hardware mains_det_freq", scale=1000),
-        "DC_VOLT_MON": parameter.Float("hardware dc_voltage_mon", scale=1000),
-        "DC_CURRENT_MON": parameter.Float("hardware dc_current_mon", scale=1000),
+        "MAINS_VOLT": parameter.Float(
+            "hardware mains_det_volts", read_format="{0}"),
+        "MAINS_FREQ": parameter.Float(
+            "hardware mains_det_freq", scale=2000, read_format="{0}"),
+        "DC_VOLT_MON": parameter.Float(
+            "hardware dc_voltage_mon", scale=1000, read_format="{0}"),
+        "DC_CURRENT_MON": parameter.Float(
+            "hardware dc_current_mon", scale=1000, read_format="{0}"),
     }
 
     def brand(self, sernum, product_rev, hardware_rev):
