@@ -10,7 +10,7 @@ import share
 class Console(share.console.Base):
     """Communications to console."""
 
-    banner_lines = 5
+    banner_lines = 8
     cmd_prompt = b"production:>"
     parameter = share.console.parameter
     cmd_data = {
@@ -35,14 +35,33 @@ class Console(share.console.Base):
         "SOFTWARE-REV": parameter.String("production sw-rev", read_format="{0}"),
         "MAC": parameter.String("production mac", read_format="{0}"),
         "OP_MODE": parameter.String(  # "v" = VERIFY_HARDWARE
-            "op_mode", read_format="{0}", writeable=True, write_format="{1} {0}"
+            "hardware op_mode_set",
+            read_format="{0}",
+            writeable=True,
+            write_format="{1} {0}",
         ),
-        "PFC_EN": parameter.Boolean("hardware pfc_en", writeable=True),
-        "DC_EN": parameter.Boolean("hardware dc_dc_en", writeable=True),
-        "OUT_EN": parameter.Boolean("hardware dc_out_sw", writeable=True),
-        "PS_ON": parameter.Boolean("hardware ps_on", writeable=True),
+        "PFC_EN": parameter.Boolean(
+            "hardware pfc_en",
+            writeable=True,
+            write_format="{1} {0}",
+        ),
+        "DC_EN": parameter.Boolean(
+            "hardware dc_dc_en",
+            writeable=True,
+            write_format="{1} {0}",
+        ),
+        "OUT_EN": parameter.Boolean(
+            "hardware dc_out_sw",
+            writeable=True,
+            write_format="{1} {0}",
+        ),
+        "PS_ON": parameter.Boolean(
+            "hardware ps_on",
+            writeable=True,
+            write_format="{1} {0}",
+        ),
         "DC_VOLT_SET": parameter.Float(
-            "hardware dc_volt_set",
+            "hardware dc_voltage_set",
             readable=False,
             writeable=True,
             write_format="{1} {0}",
@@ -76,9 +95,9 @@ class Console(share.console.Base):
             minimum=0.0,
             maximum=100.0,
         ),
-        "MAINS_DET_VOLTS": parameter.Float("hardware mains_det_volts"),
-        "MAINS_DET_FREQ": parameter.Float("hardware mains_det_freq", scale=1000),
-        "DC_VOLT_MON": parameter.Float("hardware dc_volt_mon", scale=1000),
+        "MAINS_VOLTS": parameter.Float("hardware mains_det_volts"),
+        "MAINS_FREQ": parameter.Float("hardware mains_det_freq", scale=1000),
+        "DC_VOLT_MON": parameter.Float("hardware dc_voltage_mon", scale=1000),
         "DC_CURRENT_MON": parameter.Float("hardware dc_current_mon", scale=1000),
     }
 
@@ -100,11 +119,11 @@ class Console(share.console.Base):
         vout = 9.0
         self["OP_MODE"] = "v"
         self["PFC_EN"] = True
-        self["VOUT"] = vout
-        self["IOUT"] = ocp
+        self["DC_VOLT_SET"] = vout
+        self["DC_CURRENT_SET"] = ocp
         self["DC_EN"] = True
         self["OUT_EN"] = True
         self["PS_ON"] = True
         time.sleep(0.1)
         self["PS_ON"] = False
-        self["VOUT"] = vset
+        self["DC_VOLT_SET"] = vset

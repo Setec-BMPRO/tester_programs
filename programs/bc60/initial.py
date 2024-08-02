@@ -67,6 +67,8 @@ class Initial(share.TestSequence):
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Power up the unit."""
+        con = dev["con"]
+        con.open()
         dev["acsource"].output(voltage=240.0, output=True, delay=1.0)
         dev["dcl_Vout"].output(0.1, output=True)
         self.measure(
@@ -81,8 +83,6 @@ class Initial(share.TestSequence):
             ),
             timeout=5,
         )
-        con = dev["con"]
-        con.open()
         con.brand(self.uuts[0].sernum, "05A", "05A")
         con.startup(13.5, 60.0)
         self.measure(
