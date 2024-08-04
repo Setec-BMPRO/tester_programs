@@ -34,7 +34,7 @@ class Initial(share.TestSequence):
     def open(self):
         """Prepare for testing."""
         Sensors.ble_image = "bl652_hci_uart_v1.0.0-0-ga43a850.hex"
-        Sensors.stm_image = "bc60_v1.0.2-0-g65bd136-signed-mcuboot-factory.hex"
+        Sensors.stm_image = "bc60_v1.0.4-0-gf362af1-signed-mcuboot-factory.hex"
         self.configure(self.initial_limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
