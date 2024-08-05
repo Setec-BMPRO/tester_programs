@@ -12,13 +12,9 @@ class Final(share.TestSequence):
     """Final Test Program."""
 
     limits = (
-        libtester.LimitDelta("VoutNL", 13.55, 0.20, doc="Output at no load"),
-        libtester.LimitBetween("Vout", 12.98, 13.75, doc="Output with load"),
-        libtester.LimitLow("inOCP", 12.98, doc="OCP active"),
-        libtester.LimitBetween("OCPLoad", 20.0, 25.0, doc="OCP point"),
+        libtester.LimitDelta("VoutNL", 12.0, 1.0, doc="Output at no load"),
+        libtester.LimitBetween("Vout", 13.0, 13.75, doc="Output at charge"),
     )
-#            "FullLoad": 20.1,
-#            "OCPrampLoad": (20.0, 25.5),
 
     def open(self):
         """Prepare for testing."""
@@ -26,34 +22,27 @@ class Final(share.TestSequence):
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
-            tester.TestStep("FullLoad", self._step_full_load),
-            tester.TestStep("OCP", self._step_ocp),
+            tester.TestStep("Load", self._step_full_load),
         )
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Power up unit."""
+        dev["dcs_sec"].output(12.7, output=True)
+        dev["dcl_Vout"].output(0.5, output=True)
+        mes["VoutNL"](timeout=5)
+        mes["WatchLEDs"]()  # Tell user to watch unit's LEDs
         dev["acsource"].output(voltage=240.0, output=True, delay=0.5)
-        dev["dcl_Vout"].output(0.1, output=True)
-        mes["VoutNL"](timeout=5)
-        mes["VoutNL"](timeout=5)
+        mes["Display"]()  # Did unit's LEDs work properly?
 
     @share.teststep
-    def _step_full_load(self, dev, mes):
-        """Measure outputs at full-load."""
-        mes["YesNoGreen"]()
-        self.dcload(
-            (
-                ("dcl_Vout", self.limitdata[self.parameter]["FullLoad"]),
-            )
-        )
-        mes["Vout"](timeout=5)
-
-    @share.teststep
-    def _step_ocp(self, dev, mes):
-        """Measure OCP point."""
-        mes["OCPLoad"]()
-        dev["dcl_Vout"].output(0.0)
+    def _step_load(self, dev, mes):
+        """Measure output."""
+        dcl = dev["dcl_Vout"]
+        for load in range(0, 61, 10):
+            with tester.PathName("{0}A".format(load)):
+                dcl.output(load, delay=0.5)
+                mes["Vout"](timeout=5)
 
 
 class Devices(share.Devices):
@@ -64,6 +53,7 @@ class Devices(share.Devices):
         for name, devtype, phydevname in (
             ("dmm", tester.DMM, "DMM"),
             ("acsource", tester.ACSource, "ACS"),
+            ("dcs_sec", tester.DCSource, "DCS1"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
         self["dcl_Vout"] = tester.DCLoadParallel(
@@ -78,6 +68,7 @@ class Devices(share.Devices):
         self["acsource"].reset()
         self["dcl_Vout"].output(10.0, output=True, delay=0.5)
         self["dcl_Vout"].output(0.0)
+        self["dcs_sec"].output(0.0, output=False)
 
 
 class Sensors(share.Sensors):
@@ -89,22 +80,16 @@ class Sensors(share.Sensors):
         sensor = tester.sensor
         self["Vout"] = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
         self["Vout"].doc = "Output"
-
-
-        self["YesNoGreen"] = sensor.YesNo(
-            message=tester.translate("bc60_final", "IsGreenFlash?"),
-            caption=tester.translate("bc60_final", "capLedGreen"),
+        self["LEDs"] = sensor.OkCan(  # Watch LEDs after pressing Ok
+            message=tester.translate("bc60_final", "msgLEDs"),
+            caption=tester.translate("bc60_final", "capLEDs"),
         )
-        self["YesNoGreen"].doc = "Operator response"
-        ocp_start, ocp_stop = Final.limitdata[self.parameter]["OCPrampLoad"]
-        self["OCPLoad"] = sensor.Ramp(
-            stimulus=self.devices["dcl_Vout"],
-            sensor=self["Vout"],
-            detect_limit=self.limits["inOCP"],
-            ramp_range=sensor.RampRange(start=ocp_start, stop=ocp_stop, step=0.05),
-            delay=0.1,
+        self["LEDs"].doc = "Operator notification"
+        self["Display"] = sensor.YesNo(  # Did display work ok?
+            message=tester.translate("bc60_final", "msgDisplay"),
+            caption=tester.translate("bc60_final", "capDisplay"),
         )
-        self["OCPLoad"].doc = "Load OCP point"
+        self["Display"].doc = "Operator response"
 
 
 class Measurements(share.Measurements):
@@ -115,8 +100,8 @@ class Measurements(share.Measurements):
         self.create_from_names(
             (
                 ("VoutNL", "VoutNL", "Vout", ""),
+                ("WatchLEDs", "ButtonOk", "LEDs", ""),
+                ("Display", "Notify", "Display", ""),
                 ("Vout", "Vout", "Vout", ""),
-                ("OCPLoad", "OCPLoad", "OCPLoad", ""),
-                ("YesNoGreen", "Notify", "YesNoGreen", "Green LED flashing"),
             )
         )

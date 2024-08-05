@@ -114,6 +114,8 @@ class Initial(share.TestSequence):
             )
         )
         dcl.output(10.0)
+        con = dev["con"]
+        con.rv_mode()
 
 
 class Devices(share.Devices):

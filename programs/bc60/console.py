@@ -130,3 +130,8 @@ class Console(share.console.Base):
         time.sleep(0.1)
         self["PS_ON"] = False
         self["DC_VOLT_SET"] = vset
+
+    def rv_mode(self):
+        """Set the unit to RV Mode."""
+        self["OP_MODE"] = "r"
+        time.sleep(1.0)
