@@ -47,7 +47,8 @@ class Values:
     reversed_outputs = field(factory=dict, validator=validators.instance_of(dict))
     nordic_devicetype = field(default="nrf52832", validator=validators.instance_of(str))
     arm_devicetype = field(default="lpc1519", validator=validators.instance_of(str))
-    boot_delay = field(default=0, converter=float)
+    # Confirmed problems with: RVMN101B, RVMN200A, RVMN6x
+    boot_delay = field(default=4, converter=float)
 
 
 class Config:
