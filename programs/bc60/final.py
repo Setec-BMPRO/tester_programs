@@ -11,25 +11,26 @@ import share
 class Final(share.TestSequence):
     """Final Test Program."""
 
-    limits = (
-        libtester.LimitDelta("VoutNL", 12.0, 1.0, doc="Output at no load"),
-        libtester.LimitBetween("Vout", 13.0, 13.75, doc="Output at charge"),
+    final_limits = (
+        libtester.LimitBoolean("ButtonOk", True, doc="Ok entered"),
+        libtester.LimitDelta("VoutNL", 12.0, 1.5, doc="Output at no load"),
+        libtester.LimitBetween("Vout", 14.0, 15.0, doc="Output at charge"),
     )
 
     def open(self):
         """Prepare for testing."""
-        self.configure(self.limits, Devices, Sensors, Measurements)
+        self.configure(self.final_limits, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_power_up),
-            tester.TestStep("Load", self._step_full_load),
+            tester.TestStep("Load", self._step_load),
         )
 
     @share.teststep
     def _step_power_up(self, dev, mes):
         """Power up unit."""
-        dev["dcs_sec"].output(12.7, output=True)
-        dev["dcl_Vout"].output(0.5, output=True)
+        dev["dcs_sec"].output(13.0, output=True)
+        dev["dcl_Vout"].output(1.5, output=True)
         mes["VoutNL"](timeout=5)
         mes["WatchLEDs"]()  # Tell user to watch unit's LEDs
         dev["acsource"].output(voltage=240.0, output=True, delay=0.5)
@@ -39,7 +40,7 @@ class Final(share.TestSequence):
     def _step_load(self, dev, mes):
         """Measure output."""
         dcl = dev["dcl_Vout"]
-        for load in range(0, 61, 10):
+        for load in range(10, 61, 10):
             with tester.PathName("{0}A".format(load)):
                 dcl.output(load, delay=0.5)
                 mes["Vout"](timeout=5)
@@ -78,7 +79,7 @@ class Sensors(share.Sensors):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
         sensor = tester.sensor
-        self["Vout"] = sensor.Vdc(dmm, high=8, low=4, rng=100, res=0.001)
+        self["Vout"] = sensor.Vdc(dmm, high=1, low=1, rng=100, res=0.001)
         self["Vout"].doc = "Output"
         self["LEDs"] = sensor.OkCan(  # Watch LEDs after pressing Ok
             message=tester.translate("bc60_final", "msgLEDs"),
