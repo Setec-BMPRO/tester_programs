@@ -2,6 +2,8 @@
 # Copyright 2024 SETEC Pty Ltd.
 """BC60 Final Program."""
 
+import time
+
 import libtester
 import tester
 
@@ -40,6 +42,7 @@ class Final(share.TestSequence):
     def _step_load(self, dev, mes):
         """Measure output."""
         dcl = dev["dcl_Vout"]
+        time.sleep(5)
         for load in range(10, 61, 10):
             with tester.PathName("{0}A".format(load)):
                 dcl.output(load, delay=0.5)
