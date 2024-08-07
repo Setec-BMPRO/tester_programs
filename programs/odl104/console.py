@@ -10,7 +10,9 @@ import share
 class Console(share.console.Base):
     """Console via J-Link RTT"""
 
-    cmd_prompt = b"\r\n\x1b[1;32mrtt:~$ \x1b[m".replace(b"\n", b"")
+    cmd_prompt = b"\r\n\x1b[1;32m\r\r\n\x1b[1;32modl104:~$ \x1b[m\x1b[m".replace(
+        b"\n", b""
+    )
     parameter = share.console.parameter
     cmd_data = {
         "PROD_REV": parameter.String(

@@ -89,6 +89,7 @@ class Sensors(share.Sensors):
         self["Display"] = sensor.YesNo(  # Did display work ok?
             message=tester.translate("bc60_final", "msgDisplay"),
             caption=tester.translate("bc60_final", "capDisplay"),
+            timeout=60,
         )
         self["Display"].doc = "Operator response"
 
