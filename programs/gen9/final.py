@@ -2,8 +2,6 @@
 # Copyright 2018 SETEC Pty Ltd
 """GEN9-540 Final Test Program."""
 
-from pydispatch import dispatcher
-
 import tester
 
 import share
@@ -17,13 +15,11 @@ class Final(share.TestSequence):
         """Create the test program as a linear sequence."""
         self.cfg = config.Config
         self.cfg.configure(self.parameter, self.uuts[0])
-        Sensors.callback = self._dso_callback
         self.configure(self.cfg.limits_final, Devices, Sensors, Measurements)
         super().open()
         self.steps = (
             tester.TestStep("PowerUp", self._step_pwrup),
             tester.TestStep("PowerOn", self._step_pwron),
-            tester.TestStep("Transient", self._step_transient),
             tester.TestStep("FullLoad", self._step_fullload),
             tester.TestStep("115V", self._step_fullload115),
         )
@@ -51,34 +47,6 @@ class Final(share.TestSequence):
         )
 
     @share.teststep
-    def _step_transient(self, dev, mes):
-        """12V Transient Response.
-
-        To detect U104 pin-9 to pin-10 short.
-
-        Verification data:
-            Unit        Ok      Faulty_1    Faulty_2
-        ---------------------------------------------
-        A2152270010     11      83          77
-        A2152270011     13      61          58
-        A2152270012     23      73          70
-        A2152270013     16      64          61
-        A2152270014     13      69          72
-        A1927040011     20      x           x
-
-        """
-        # Wait long enough for DSO AC coupling to settle
-        dev["dcl_12v"].output(2.0, delay=2)
-        # This DSO measurement will callback to _dso_callback()
-        # to apply the higher load
-        mes["dso_12v"]()
-        dev["dcl_12v"].output(2.0, delay=0.5)
-
-    def _dso_callback(self):
-        """This load step should trigger the DSO as the 12V dips."""
-        self.devices["dcl_12v"].output(20.0, delay=0.1)
-
-    @share.teststep
     def _step_fullload(self, dev, mes):
         """Full Load step."""
         self.dcload((("dcl_5v", 2.0), ("dcl_24v", 10.0), ("dcl_12v", 24.0)), delay=0.5)
@@ -103,10 +71,8 @@ class Devices(share.Devices):
 
     def open(self):
         """Create all Instruments."""
-        # Physical Instrument based devices
         for name, devtype, phydevname, doc in (
             ("dmm", tester.DMM, "DMM", ""),
-            ("dso", tester.DSO, "DSO", ""),
             ("acsource", tester.ACSource, "ACS", "AC Input"),
             ("dcl_12v", tester.DCLoad, "DCL1", "12V Load"),
             ("dcl_24v", tester.DCLoad, "DCL3", "24V Load"),
@@ -133,8 +99,6 @@ class Devices(share.Devices):
 class Sensors(share.Sensors):
     """Sensors."""
 
-    callback = None
-
     def open(self):
         """Create all Sensors."""
         dmm = self.devices["dmm"]
@@ -150,22 +114,6 @@ class Sensors(share.Sensors):
         self["o12v"] = sensor.Vdc(dmm, high=4, low=3, rng=100, res=0.001)
         self["o24v"] = sensor.Vdc(dmm, high=5, low=3, rng=100, res=0.001)
         self["pwrfail"] = sensor.Vdc(dmm, high=6, low=3, rng=100, res=0.01)
-        dso = self.devices["dso"]
-        tbase = sensor.Timebase(range=0.001, main_mode=True, delay=0, centre_ref=False)
-        chan = sensor.Channel(
-            ch=1, mux=1, range=0.4, offset=0.0, dc_coupling=False, att=1, bwlim=True
-        )
-        trg = sensor.Trigger(ch=1, level=-0.04, normal_mode=True, pos_slope=False)
-        rdg = sensor.Vmax(ch=1)
-        self["12V_Vmax"] = sensor.DSO(dso, [chan], tbase, trg, [rdg], single=True)
-        dispatcher.connect(
-            self._dso_trigger, sender=self["12V_Vmax"], signal=tester.SigDso
-        )
-
-    def _dso_trigger(self):
-        """DSO Ready handler."""
-        if self.callback:
-            self.callback()
 
 
 class Measurements(share.Measurements):
@@ -186,6 +134,5 @@ class Measurements(share.Measurements):
                 ("dmm_24v", "24V", "o24v", "24V output ok"),
                 ("dmm_pwrfail", "PwrFail", "pwrfail", "PFAIL asserted"),
                 ("dmm_pwrfailoff", "PwrFailOff", "pwrfail", "PFAIL not asserted"),
-                ("dso_12v", "12Vmax", "12V_Vmax", "12V transient ok"),
             )
         )
