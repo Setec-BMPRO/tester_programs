@@ -102,7 +102,7 @@ class Trek3(_Limits):
 class TrekX(_Limits):
     """TrekX configuration."""
 
-    sw_version = "1.0.17722284.12"  # Pilot run
+    sw_version = "1.0.176314380.13"  # Pilot run
     sw_image = "trekx_{0}.bin".format(sw_version)
     hw_version = (1, 0, "B")
     _sw_lim = libtester.LimitRegExp(
