@@ -455,21 +455,29 @@ class RVMN101C(Config):
 class RVMN200A(Config):
     """RVMN200A configuration."""
 
-    _sonic_4_2_0 = "rvmn200a_signed_4.2.0-0-g0734a4ac_factory_mcuboot.hex"
+    _sonic_4_2_1 = "rvmn200a_signed_4.2.1-0-g51e17e2c_factory_mcuboot.hex"
     _arm_image_3_0_1 = "rvmn101c_nxp_3.0.1-0-gc609bee.bin"
-    _rev1_values = Values(
-        nordic_image=_sonic_4_2_0,
+    _rev2_values = Values(
+        nordic_image=_sonic_4_2_1,
         arm_image=_arm_image_3_0_1,
-        product_rev="01A",
-        hardware_rev="01A",
+        product_rev="02A",
+        hardware_rev="02A",
         nordic_devicetype="nrf52840",
         # FIXME: Console prompt appears before it is ready to accept commands
         # 2s gives a 1 in 5 branding failure rate
         boot_delay=4,
     )
     _rev_data = {
-        None: _rev1_values,
-        "1": _rev1_values,
+        None: _rev2_values,
+        "2": _rev2_values,
+        "1": Values(
+            nordic_image=_sonic_4_2_1,
+            arm_image=_arm_image_3_0_1,
+            product_rev="01B",
+            hardware_rev="01A",
+            nordic_devicetype="nrf52840",
+            boot_delay=4,
+        ),
     }
 
 
@@ -623,12 +631,12 @@ class RVMN5x(Config):
 class RVMN6x(Config):
     """RVMN6x configuration."""
 
-    _nordic_4_2_0 = "rvmn6x_signed_4.2.0-0-g0734a4ac_factory_mcuboot.hex"
+    _nordic_4_2_1 = "rvmn6x_signed_4.2.1-0-g51e17e2c_factory_mcuboot.hex"
     _ra2_image_0_3_6 = "rvmn5x_ra2_v0.3.6-0-g34e425b.hex"
-    _rev1_values = Values(
-        nordic_image=_nordic_4_2_0,
+    _rev2_values = Values(
+        nordic_image=_nordic_4_2_1,
         arm_image=_ra2_image_0_3_6,
-        product_rev="01A",
+        product_rev="02A",
         hardware_rev="01A",
         arm_devicetype="r7fa2l1a9",
         nordic_devicetype="nrf52840",
@@ -637,6 +645,15 @@ class RVMN6x(Config):
         boot_delay=4,
     )
     _rev_data = {
-        None: _rev1_values,
-        "1": _rev1_values,
+        None: _rev2_values,
+        "2": _rev2_values,
+        "1": Values(
+            nordic_image=_nordic_4_2_1,
+            arm_image=_ra2_image_0_3_6,
+            product_rev="01B",
+            hardware_rev="01A",
+            arm_devicetype="r7fa2l1a9",
+            nordic_devicetype="nrf52840",
+            boot_delay=4,
+        ),
     }
