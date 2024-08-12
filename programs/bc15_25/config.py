@@ -96,18 +96,19 @@ class BC15(BCx5):
 
     sw_version = "2.0.18498.2003"
     arm_file_pattern = "bc15_{0}.bin"
-    _rev8_values = _Values(
+    _rev9_values = _Values(
         arm_file=arm_file_pattern.format(sw_version),
         sw_version=sw_version,
         cal_linecount=43,
     )
     _rev_data = {
-        None: _rev8_values,
-        "8": _rev8_values,
-        "7": _rev8_values,
-        "6": _rev8_values,
-        "5": _rev8_values,
-        "4": _rev8_values,
+        None: _rev9_values,
+        "9": _rev9_values,
+        "8": _rev9_values,
+        "7": _rev9_values,
+        "6": _rev9_values,
+        "5": _rev9_values,
+        "4": _rev9_values,
         # Rev 1-3 Scrap
     }
 
@@ -156,16 +157,17 @@ class BC25(BCx5):
 
     sw_version = "2.0.20136.2004"
     arm_file_pattern = "bc25_{0}.bin"
-    _rev5_values = _Values(
+    _rev6_values = _Values(
         arm_file=arm_file_pattern.format(sw_version),
         sw_version=sw_version,
         cal_linecount=43,
     )
     _rev_data = {
-        None: _rev5_values,
-        "5": _rev5_values,
-        "4": _rev5_values,
-        "3": _rev5_values,
+        None: _rev6_values,
+        "6": _rev6_values,
+        "5": _rev6_values,
+        "4": _rev6_values,
+        "3": _rev6_values,
         # Rev 1,2 Scrap
     }
 
