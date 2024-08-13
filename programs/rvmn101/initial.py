@@ -77,7 +77,11 @@ class Initial(share.TestSequence):
                 ("HardRev", self.cfg.values.hardware_rev),
             ):
                 mes[name].testlimit[0].adjust("^{0}$".format(value))
-            self.measure(("Serial", "ProdRev", "HardRev"))
+
+# PC-RVMN101C-361 Hardware Rev not saved
+#            self.measure(("Serial", "ProdRev", "HardRev"))
+            self.measure(("Serial", "ProdRev"))
+
         # Save SerialNumber & MAC on a remote server.
         mac = share.MAC.loads(mes["ble_mac"]().value1)
         dev["BLE"].mac = mac.dumps(separator="")
