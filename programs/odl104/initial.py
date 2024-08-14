@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2022 SETEC Pty Ltd
-"""ODL104 Initial Test Program.
+"""ODL104/5 Initial Test Program.
 
 Shares the test fixture with the CN102 program.
 
@@ -68,7 +68,7 @@ class Initial(share.TestSequence):
         console = dev["console"]
         console.open()
         sernum = self.uuts[0].sernum
-        console.brand(self.cfg.hw_version, sernum, self.cfg.banner_lines)
+        console.brand(self.cfg.hw_version, sernum)
         # Save SerialNumber & MAC on a remote server.
         dev["BLE"].uut = self.uuts[0]
         dev["BLE"].mac = mes["ble_mac"]().value1

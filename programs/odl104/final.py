@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2022 SETEC Pty Ltd
-"""ODL104 Final Test Program."""
+"""ODL104/5 Final Test Program."""
 
 import tester
 import share

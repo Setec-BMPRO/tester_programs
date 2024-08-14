@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2022 SETEC Pty Ltd
-"""ODL104 Configuration."""
+"""ODL104/5 Configuration."""
 
 import logging
 
@@ -16,8 +16,12 @@ def get(parameter, uut):
     @return configuration class
 
     """
-    ODL104._configure(uut)  # Adjust for the revision
-    return ODL104.parameters
+    cfg = {
+        "104": ODL104,
+        "105": ODL105,
+    }[parameter]
+    cfg._configure(uut)  # Adjust for the revision
+    return cfg.parameters
 
 
 class ODL10xParameters:
@@ -41,17 +45,15 @@ class ODL10xParameters:
         libtester.LimitHigh("ScanRSSI", float("NaN"), doc="Strong BLE signal"),
     )
 
-    def __init__(self, sw_nordic_image, hw_version, banner_lines):
+    def __init__(self, sw_nordic_image, hw_version):
         """Create instance.
 
         @param sw_nordic_image Nordic image
         @param hw_version Hardware version
-        @param banner_lines Number of startup banner lines
 
         """
         self.sw_nordic_image = sw_nordic_image
         self.hw_version = hw_version
-        self.banner_lines = banner_lines
 
 
 class ODL104:
@@ -72,18 +74,39 @@ class ODL104:
 
     _nordic_115 = "odl104_v1.1.5-0-gd1a790f-signed-mcuboot-factory.hex"
     _rev4_values = ODL10xParameters(
-        sw_nordic_image=_nordic_115, hw_version=("04A", "01A"), banner_lines=1
-    )
-    _rev_data = {  # Revision data dictionary
+        sw_nordic_image=_nordic_115, hw_version=("04A", "01A"))
+    _rev_data = {
         None: _rev4_values,
         "4": _rev4_values,
         "3": ODL10xParameters(
-            sw_nordic_image=_nordic_115, hw_version=("03A", "01A"), banner_lines=1
-        ),
+            sw_nordic_image=_nordic_115, hw_version=("03A", "01A")),
         "2": ODL10xParameters(
-            sw_nordic_image=_nordic_115, hw_version=("02B", "01A"), banner_lines=1
-        ),
+            sw_nordic_image=_nordic_115, hw_version=("02B", "01A")),
         "1": ODL10xParameters(
-            sw_nordic_image=_nordic_115, hw_version=("01C", "01A"), banner_lines=1
-        ),
+            sw_nordic_image=_nordic_115, hw_version=("01C", "01A")),
+    }
+
+
+class ODL105:
+    """Configuration for ODL105."""
+
+    parameters = None  # Instance of ODL10xParameters
+
+    @classmethod
+    def _configure(cls, uut):
+        """Adjust configuration based on UUT Lot Number.
+
+        @param uut libtester.UUT instance
+
+        """
+        rev = uut.revision
+        logging.getLogger(__name__).debug("Revision detected as %s", rev)
+        cls.parameters = cls._rev_data[rev]
+
+    _nordic_115 = "odl104_v1.1.5-0-gd1a790f-signed-mcuboot-factory.hex"
+    _rev1_values = ODL10xParameters(
+        sw_nordic_image=_nordic_115, hw_version=("01A", "01A"))
+    _rev_data = {
+        None: _rev1_values,
+        "1": _rev1_values,
     }

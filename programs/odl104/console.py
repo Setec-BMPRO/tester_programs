@@ -47,12 +47,11 @@ class Console(share.console.Base):
     # Response 25.000000 means 25%
     _tank_regex = re.compile(r".*?(\d+\.\d+).*")
 
-    def brand(self, hw_ver, sernum, banner_lines):
+    def brand(self, hw_ver, sernum):
         """Brand the unit with Hardware ID & Serial Number.
 
         @param hw_ver Tuple (product-rev, hw-rev) ie. ('01A', '01A')
         @param sernum Serial number string
-        @param banner_lines Number of startup banner lines
 
         Startup banner:
         '\n*** ODL104 v1.0.3-0-g8413832 ***\n'

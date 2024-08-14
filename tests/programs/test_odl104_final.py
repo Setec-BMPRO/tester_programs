@@ -9,6 +9,7 @@ class ODL104Final(ProgramTestCase):
     """ODL104 Final program test suite."""
 
     prog_class = odl104.Final
+    parameter = "104"
     debug = False
 
     def test_pass_run(self):
