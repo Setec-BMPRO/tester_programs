@@ -51,7 +51,7 @@ class _Console:
         self.port.dtr = True
         self.port.reset_input_buffer()
         self.port.dtr = False
-        self.action(None, delay=1.5, expected=banner_lines)
+        self.action(None, delay=3, expected=banner_lines)
         self["UNLOCK"] = True
         self["HW_VER"] = hw_ver
         self["SER_ID"] = sernum
