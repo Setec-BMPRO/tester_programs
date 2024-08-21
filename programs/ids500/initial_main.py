@@ -77,7 +77,7 @@ class InitialMain(share.TestSequence):
         """Power Up the unit. Outputs should be off."""
         mes["dmm_lock"](timeout=5)
         self.dcload(
-            (("dcl_tec", 0.1), ("dcl_15vp", 1.0), ("dcl_15vpsw", 0.0), ("dcl_5v", 5.0)),
+            (("dcl_tec", 0.2), ("dcl_15vp", 1.0), ("dcl_15vpsw", 0.0), ("dcl_5v", 5.0)),
             output=True,
         )
         dev["acsource"].output(240.0, output=True, delay=1)
