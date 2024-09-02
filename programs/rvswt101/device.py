@@ -56,7 +56,7 @@ class PacketDecoder(tester.sensor.KeyedDataDecoderMixin):
 
         """
         fields["rssi"], ad_data = data
-        payload_bytes = bytes.fromhex(ad_data["255"])
+        payload_bytes = bytes.fromhex(ad_data.get("255", ""))
         try:
             (
                 fields["company_id"],
