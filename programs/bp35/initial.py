@@ -321,7 +321,8 @@ class SrHighPower:
     def on(self):
         """Switch on the source."""
         self.relay.set_on()
-        self.acsource.output(voltage=240, output=True, delay=0.5)
+        self.acsource.output(voltage=240, output=True, delay=1.0)
+
 
     def off(self):
         """Switch off the source."""
