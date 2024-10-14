@@ -469,6 +469,7 @@ class RVMN200A(Config):
     )
     _rev_data = {
         None: _rev2_values,
+        "3": _rev2_values,
         "2": _rev2_values,
         "1": Values(
             nordic_image=_sonic_4_2_1,
