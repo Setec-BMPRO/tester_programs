@@ -15,11 +15,11 @@ from . import console
 class Initial(share.TestSequence):
     """Initial Test Program."""
 
-    _sw_1_0_6 = "bsgateway_1.0.6-0-g02e546a.hex"
+    _sw_1_0_7 = "bsgateway_1.0.7-0-g839deff.hex"
     sw_image = {  # Key: Revision, Value: Image filename
-        None: _sw_1_0_6,
-        "2": _sw_1_0_6,
-        "1": _sw_1_0_6,
+        None: _sw_1_0_7,
+        "2": _sw_1_0_7,
+        "1": _sw_1_0_7,
     }
     v_set = 12.0  # Input DC voltage to power the unit
     testlimits = (  # Test limits
