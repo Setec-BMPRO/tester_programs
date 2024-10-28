@@ -18,6 +18,7 @@ class Initial(share.TestSequence):
     _sw_1_0_7 = "bsgateway_1.0.7-0-g839deff.hex"
     sw_image = {  # Key: Revision, Value: Image filename
         None: _sw_1_0_7,
+        "3": _sw_1_0_7,
         "2": _sw_1_0_7,
         "1": _sw_1_0_7,
     }
