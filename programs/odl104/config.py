@@ -105,7 +105,7 @@ class ODL105:
         logging.getLogger(__name__).debug("Revision detected as %s", rev)
         cls.parameters = cls._rev_data[rev]
 
-    _nordic_115 = "odl104_v1.1.5-0-gd1a790f-signed-mcuboot-factory.hex"
+    _nordic_115 = "odl105_v2.0.0-0-g5f506a0-signed-mcuboot-factory.hex"
     _rev1_values = ODL10xParameters(
         sw_nordic_image=_nordic_115, hw_version=("01A", "01A"))
     _rev_data = {
