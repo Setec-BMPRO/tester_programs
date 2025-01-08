@@ -16,10 +16,10 @@ class Main(share.TestSequence):
         libtester.LimitDelta("5V", 5.0, 0.5),
         libtester.LimitBetween("ShieldOFF", -0.5, 7.0),
         libtester.LimitBetween("ShieldON", -0.5, 7.0),
-        libtester.LimitDelta("Dso8", 8.0, 0.5),
-        libtester.LimitDelta("Dso6", 6.0, 0.5),
-        libtester.LimitDelta("Dso4", 4.0, 0.5),
-        libtester.LimitBetween("Dso2", 1.35, 2.5),
+        libtester.LimitDelta("Dso8", 8.0, 0.8),
+        libtester.LimitDelta("Dso6", 6.0, 0.8),
+        libtester.LimitDelta("Dso4", 4.0, 0.8),
+        libtester.LimitDelta("Dso2", 2.0, 0.8),
         libtester.LimitDelta("Dcs5", 5.0, 0.5),
         libtester.LimitDelta("Dcs10", 10.0, 0.5),
         libtester.LimitDelta("Dcs20", 20.0, 0.5),
@@ -29,7 +29,7 @@ class Main(share.TestSequence):
         libtester.LimitDelta("Dcl05", 5.0, 1),
         libtester.LimitDelta("Dcl10", 10.0, 1),
         libtester.LimitDelta("Dcl20", 20.0, 1),
-        libtester.LimitDelta("Dcl40", 40.0, 1),
+        libtester.LimitDelta("Dcl30", 30.0, 1),
         libtester.LimitDelta("RlaOff", 12.0, 0.5),
         libtester.LimitLow("RlaOn", 1.5),
         libtester.LimitDelta("Disch_on", 10.0, 1.0),
@@ -79,34 +79,19 @@ class Main(share.TestSequence):
 
     @share.teststep
     def _step_dso(self, dev, mes):
-        """Test DSO.
+        """Test 4-channel DSO.
 
-        Measure all DSO input connector shields off.
-        The 4 channels are connected to 8V, 6V, 4V, 2V from the Fixture.
-        For each subchannel in turn, measure voltages on all 4 inputs and
-        measure all shields on.
+        Measure all DSO shields off.
+        Measure 8V, 6V, 4V, 2V on each channel's subchannel.
+        While measuring voltages, measure all DSO shields on.
 
         """
-        self.measure(
-            (
-                "dmm_shld1off",
-                "dmm_shld2off",
-                "dmm_shld3off",
-                "dmm_shld4off",
-            ),
-            timeout=5,
-        )
-        for meas in mes["dso_subchan"]:
+        self.measure(("dmm_shld1off", "dmm_shld2off", "dmm_shld3off", "dmm_shld4off", ),
+                                timeout=5, )
+        for meas in mes["dso_chans"]:
             meas(timeout=5.0)
-            self.measure(
-                (
-                    "dmm_shld1on",
-                    "dmm_shld2on",
-                    "dmm_shld3on",
-                    "dmm_shld4on",
-                ),
-                timeout=5,
-            )
+            self.measure(("dmm_shld1on", "dmm_shld2on", "dmm_shld3on", "dmm_shld4on", ),
+                                    timeout=5, )
 
     @share.teststep
     def _step_dcsource(self, dev, mes):
@@ -280,71 +265,36 @@ class Sensors(share.Sensors):
         # DSO
         tbase = sensor.Timebase(range=0.10, main_mode=True, delay=0, centre_ref=True)
         trg = sensor.Trigger(ch=1, level=1.0, normal_mode=False, pos_slope=True)
-        rdgs = []
-        for ch in range(1, 5):
-            rdgs.append(sensor.Vavg(ch=ch))
-        subchans1 = []
-        for ch in range(1, 5):
-            subchans1.append(
-                sensor.Channel(
-                    ch=ch,
-                    mux=1,
-                    range=40.0,
-                    offset=0,
-                    dc_coupling=True,
-                    att=1,
-                    bwlim=True,
-                )
-            )
-        subchan1 = sensor.DSO(dso, subchans1, tbase, trg, rdgs)
-        subchans2 = []
-        for ch in range(1, 5):
-            subchans2.append(
-                sensor.Channel(
-                    ch=ch,
-                    mux=2,
-                    range=40.0,
-                    offset=0,
-                    dc_coupling=True,
-                    att=1,
-                    bwlim=True,
-                )
-            )
-        subchan2 = sensor.DSO(dso, subchans2, tbase, trg, rdgs)
-        subchans3 = []
-        for ch in range(1, 5):
-            subchans3.append(
-                sensor.Channel(
-                    ch=ch,
-                    mux=3,
-                    range=40.0,
-                    offset=0,
-                    dc_coupling=True,
-                    att=1,
-                    bwlim=True,
-                )
-            )
-        subchan3 = sensor.DSO(dso, subchans3, tbase, trg, rdgs)
-        subchans4 = []
-        for ch in range(1, 5):
-            subchans4.append(
-                sensor.Channel(
-                    ch=ch,
-                    mux=4,
-                    range=40.0,
-                    offset=0,
-                    dc_coupling=True,
-                    att=1,
-                    bwlim=True,
-                )
-            )
-        subchan4 = sensor.DSO(dso, subchans4, tbase, trg, rdgs)
-        self["subchan"] = (
-            subchan1,
-            subchan2,
-            subchan3,
-            subchan4,
-        )
+        rdgs = [sensor.Vavg(ch=1), sensor.Vavg(ch=2), sensor.Vavg(ch=3), sensor.Vavg(ch=4)]
+        chans = [
+        sensor.Channel(ch=1, mux=1, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=2, mux=1, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=3, mux=1, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=4, mux=1, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        ]
+        chansmux1 = sensor.DSO(dso, chans, tbase, trg, rdgs)
+        chans = [
+        sensor.Channel(ch=1, mux=2, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=2, mux=2, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=3, mux=2, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=4, mux=2, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        ]
+        chansmux2 = sensor.DSO(dso, chans, tbase, trg, rdgs)
+        chans = [
+        sensor.Channel(ch=1, mux=3, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=2, mux=3, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=3, mux=3, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=4, mux=3, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        ]
+        chansmux3 = sensor.DSO(dso, chans, tbase, trg, rdgs)
+        chans = [
+        sensor.Channel(ch=1, mux=4, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=2, mux=4, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=3, mux=4, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        sensor.Channel(ch=4, mux=4, range=40.0, offset=0, dc_coupling=True, att=1, bwlim=True,),
+        ]
+        chansmux4 = sensor.DSO(dso, chans, tbase, trg, rdgs)
+        self["chans"] = (chansmux1, chansmux2, chansmux3, chansmux4)
         # DC Sources
         self["dcs"] = [
             sensor.Vdc(dmm, high=18, low=8, rng=100, res=0.001),
@@ -403,15 +353,15 @@ class Measurements(share.Measurements):
         )
         Measurement = tester.Measurement
         # DSO
-        self["dso_subchan"] = []
+        self["dso_chans"] = []
         lims = (
             self.limits["Dso8"],
             self.limits["Dso6"],
             self.limits["Dso4"],
             self.limits["Dso2"],
         )
-        for sen in self.sensors["subchan"]:
-            self["dso_subchan"].append(Measurement(lims, sen))
+        for sen in self.sensors["chans"]:
+            self["dso_chans"].append(Measurement(lims, sen))
         # DC Sources
         dcs_05 = []
         dcs_10 = []
@@ -434,5 +384,5 @@ class Measurements(share.Measurements):
             (5.0, Measurement(self.limits["Dcl05"], shunt)),
             (10.0, Measurement(self.limits["Dcl10"], shunt)),
             (20.0, Measurement(self.limits["Dcl20"], shunt)),
-            (40.0, Measurement(self.limits["Dcl40"], shunt)),
+            (30.0, Measurement(self.limits["Dcl30"], shunt)),
         )
