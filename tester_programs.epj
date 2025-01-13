@@ -2,7 +2,7 @@
   "header": {
     "comment": "eric project file for project tester_programs",
     "copyright": "Copyright (C) 2024 , ",
-    "saved": "2024-10-17, 11:35:42"
+    "saved": "2024-07-11, 10:19:44"
   },
   "project": {
     "AUTHOR": "",
@@ -33,7 +33,7 @@
     "DOCSTRING": "ericdoc",
     "DOCUMENTATIONPARMS": {},
     "EMAIL": "",
-    "EMBEDDED_VENV": false,
+    "EMBEDDED_VENV": true,
     "EOL": 1,
     "FILETYPES": {
       "*.cfg": "OTHERS",
@@ -82,8 +82,7 @@
       "README.md",
       "main.py.ini",
       "non-serial_programmers.txt",
-      "pyproject.toml",
-      "tester_programs.epj"
+      "pyproject.toml"
     ],
     "OTHERTOOLSPARMS": {
       "Black": {
