@@ -28,6 +28,7 @@ class Final(share.TestSequence):
     @share.teststep
     def _step_power_on(self, dev, mes):
         """Power up unit."""
+        dev["rla_batt"].set_on()
         dev["dcs_vin"].output(self.vstart, True, delay=0.5)
         dev["dcl_vout"].output(0.1, True)
         self.measure(("dmm_vin", "ui_yesnolight", "dmm_vout"), timeout=5)
@@ -51,6 +52,7 @@ class Devices(share.Devices):
             ("dmm", tester.DMM, "DMM"),
             ("dcs_vin", tester.DCSource, "DCS2"),
             ("dcl_vout", tester.DCLoad, "DCL1"),
+            ("rla_batt", tester.Relay, "RLA2"),
         ):
             self[name] = devtype(self.physical_devices[phydevname])
 
@@ -58,6 +60,7 @@ class Devices(share.Devices):
         """Reset instruments."""
         self["dcs_vin"].output(0.0, False)
         self["dcl_vout"].output(0.0, False)
+        self["rla_batt"].set_off()
 
 
 class Sensors(share.Sensors):
