@@ -122,3 +122,4 @@ class Config:
         cls.devicetype = values.devicetype
         cls.sw_image = values.sw_image
         cls.pfc_trim = values.pfc_trim
+        cls.holdup_time = values.holdup_time
