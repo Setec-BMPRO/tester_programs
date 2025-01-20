@@ -16,6 +16,7 @@ class _Values:
     devicetype = field(validator=validators.instance_of(str))
     sw_image = field(validator=validators.instance_of(str))
     pfc_trim = field(validator=validators.instance_of(bool))
+    holdup_time = field(validator=validators.instance_of(bool))
 
 
 class Config:
@@ -25,6 +26,7 @@ class Config:
     devicetype = None
     sw_image = None
     pfc_trim = None
+    holdup_time = None
     # Common Test limits common to both test types
     _limits_common = (
         libtester.LimitLow("5Voff", 0.5, doc="5V output off"),
