@@ -73,16 +73,19 @@ class Config:
         devicetype="lpc1113",
         sw_image="gen9_1.0.18392.2512.bin",
         pfc_trim=True,
+        holdup_time= False,
     )
     _silver_renesas_values = _Values(
         devicetype="r7fa2e1a7",
         sw_image="gen9_renesas_1.1.0-0-g6d37938.hex",
         pfc_trim=False,
+        holdup_time= True,
     )
     _gold_values = _Values(
         devicetype="r7fa2e1a7",
         sw_image="gen9g_1.2.0-0-g2d5106a.hex",
         pfc_trim=True,
+        holdup_time= False,
     )
     _rev_data = {
         "G": {  # GEN9-540-G (Gold)

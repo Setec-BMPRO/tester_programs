@@ -34,7 +34,7 @@ class Initial(share.TestSequence):
             tester.TestStep("5V", self._step_reg_5v),
             tester.TestStep("12V", self._step_reg_12v),
             tester.TestStep("24V", self._step_reg_24v),
-            tester.TestStep("HoldUp", self._step_holdup),
+            tester.TestStep("HoldUp", self._step_holdup, self.cfg.holdup_time),
         )
 
     @share.teststep
