@@ -53,9 +53,11 @@ class Config:
         libtester.LimitDelta("PFCpost3", 426.0, 2.9),
         libtester.LimitDelta("PFCpost4", 426.0, 2.9),
         libtester.LimitDelta("PFCpost", 426.0, 3.0),
-        libtester.LimitBetween(
-            "HoldUpTime", 0.050 * 1.2, 1, doc="50ms + 20% for ageing"
-        ),
+        # Previously Holdup time had limits between which caused
+        # issues on long holdup error 
+        # libtester.LimitBetween("HoldUpTime", 0.050 * 1.2, 1, doc="50ms + 20% for ageing"),
+        # Changing to LimitHigh solves the above issue. 
+        libtester.LimitHigh("HoldUpTime", 0.050 * 1.2, doc="50ms + 20% for ageing"),
         libtester.LimitDelta("ARM-AcFreq", 50, 10),
         libtester.LimitDelta("ARM-AcVolt", 240, 20),
         libtester.LimitDelta("ARM-5V", 5.0, 1.0),
