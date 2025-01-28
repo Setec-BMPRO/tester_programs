@@ -452,6 +452,16 @@ class Console200A(Console101A):
 
     banner_lines = None  # [13] a non-int will ignore number of lines
 
+class Console300(Console101A):
+    """Communications to RVMN300 console."""
+
+    banner_lines = 13
+
+class Console301(Console101A):
+    """Communications to RVMN301 console."""
+
+    banner_lines = 13
+
 
 class _Console5x(_Console):
     """Communications to RVMN5x console."""
@@ -542,5 +552,11 @@ class Console60(Console50):
 
 class Console65(Console55):
     """Communications to RVMN65 console."""
+
+    banner_lines = None  # [13] a non-int will ignore number of lines
+
+
+class Console70(Console55):
+    """Communications to RVMN70 console."""
 
     banner_lines = None  # [13] a non-int will ignore number of lines
