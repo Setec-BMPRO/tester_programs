@@ -491,10 +491,10 @@ class RVMN300x(Config):
     """RVMN300x configuration."""
 
     _sonic_5_1_0 = "jayco_rvmn300_signed_5.1.0-0-g0b91098a_factory_mcuboot.hex"
-    _arm_image_4_0_0 = "rvmn300_nxp_v4.0.0_d670f0f.bin"
+    _arm_image_4_0_1 = "rvmn300_nxp_v4.0.1_d670f0f.bin" # This is a temporary FW, as the FW still has issues. FW only uploaded for Prod. Testing
     _rev1_values = Values(
         nordic_image=_sonic_5_1_0,
-        arm_image=_arm_image_4_0_0,
+        arm_image=_arm_image_4_0_1,
         product_rev="02A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
         hardware_rev="02A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
         nordic_devicetype="nrf52840",
@@ -506,7 +506,7 @@ class RVMN300x(Config):
         None: _rev1_values,
         "1": Values(
             nordic_image=_sonic_5_1_0,
-            arm_image=_arm_image_4_0_0,
+            arm_image=_arm_image_4_0_1,
             product_rev="01A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
             hardware_rev="01A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
             nordic_devicetype="nrf52840",
