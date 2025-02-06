@@ -23,10 +23,15 @@ def get(parameter, uut):
         "101B": RVMN101B,
         "101C": RVMN101C,
         "200A": RVMN200A,
+        "300A": RVMN300x,
+        "300C": RVMN300x,
+        "301C": RVMN300x,
         "50": RVMN5x,
         "55": RVMN5x,
         "60": RVMN6x,
         "65": RVMN6x,
+        "70": RVMN7x,
+        "75": RVMN7x,
     }[parameter]
     config._configure(uut)  # Adjust for the revision
     return config
@@ -482,6 +487,33 @@ class RVMN200A(Config):
     }
 
 
+class RVMN300x(Config):
+    """RVMN300x configuration."""
+
+    _sonic_5_1_0 = "jayco_rvmn300_signed_5.1.0-0-g0b91098a_factory_mcuboot.hex"
+    _arm_image_4_0_1 = "rvmn300_nxp_v4.0.1_d670f0f.bin" # This is a temporary FW, as the FW still has issues. FW only uploaded for Prod. Testing
+    _rev1_values = Values(
+        nordic_image=_sonic_5_1_0,
+        arm_image=_arm_image_4_0_1,
+        product_rev="02A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+        hardware_rev="02A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+        nordic_devicetype="nrf52840",
+        # FIXME: Console prompt appears before it is ready to accept commands
+        # 2s gives a 1 in 5 branding failure rate
+        boot_delay=4,
+    )
+    _rev_data = {
+        None: _rev1_values,
+        "1": Values(
+            nordic_image=_sonic_5_1_0,
+            arm_image=_arm_image_4_0_1,
+            product_rev="01A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+            hardware_rev="01A", # TODO: Upate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+            nordic_devicetype="nrf52840",
+            boot_delay=4,
+        ),
+    }
+
 class RVMN5x(Config):
     """RVMN5x configuration."""
 
@@ -653,6 +685,36 @@ class RVMN6x(Config):
             arm_image=_ra2_image_0_3_6,
             product_rev="01B",
             hardware_rev="01A",
+            arm_devicetype="r7fa2l1a9",
+            nordic_devicetype="nrf52840",
+            boot_delay=4,
+        ),
+    }
+
+
+class RVMN7x(Config):
+    """RVMN7x configuration."""
+
+    _sonic_5_1_0 = "jayco_rvmn7x_signed_5.1.0-0-g0b91098a_factory_mcuboot.hex"
+    _ra2_image_0_3_6 = "rvmn5x_ra2_v0.3.6-0-g34e425b.hex"
+    _rev2_values = Values(
+        nordic_image=_sonic_5_1_0,
+        arm_image=_ra2_image_0_3_6,
+        product_rev="02A", # TODO: UPate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+        hardware_rev="02A",# TODO: UPate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+        arm_devicetype="r7fa2l1a9",
+        # FIXME: Console prompt appears before it is ready to accept commands
+        # 2s gives a 1 in 5 branding failure rate
+        boot_delay=4,
+    )
+    _rev_data = {
+        None: _rev2_values,
+        "2": _rev2_values,
+        "1": Values(
+            nordic_image=_sonic_5_1_0,
+            arm_image=_ra2_image_0_3_6,
+            product_rev="02A", # TODO: UPate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+            hardware_rev="02A",# TODO: UPate from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
             arm_devicetype="r7fa2l1a9",
             nordic_devicetype="nrf52840",
             boot_delay=4,

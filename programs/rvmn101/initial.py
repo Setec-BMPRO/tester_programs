@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2019 SETEC Pty Ltd.
-"""RVMN101x and RVMN5x Initial Test Program."""
+"""RVMN101, RVMN300x, RVMN301x, RVMN5x and RVMN7x Initial Test Program."""
 
 import pathlib
 import time
@@ -13,7 +13,7 @@ from . import console, config
 
 
 class Initial(share.TestSequence):
-    """RVMN101 and RVMN5x Initial Test Program."""
+    """RVMN101, RVMN300x, RVMN301x, RVMN5x and RVMN7x Initial Test Program."""
 
     def open(self):
         """Create the test program as a linear sequence."""
@@ -101,8 +101,8 @@ class Initial(share.TestSequence):
         rvmn = dev["rvmn"]
         if self.parameter == "200A":  # Test for 2 x wire links
             dev["rla_link"].set_on()
-        if self.parameter in ("101A", "200A"):
-            rvmn.hs_output(41, False)  # Defaults to on, so we turn it off.
+        if self.parameter in ("101A", "200A", "300A", "300C", "301C"): 
+            rvmn.hs_output(41, False)  # Baggage Comp. Light defaults to on, so we turn it off.
         # Reversed HBridge outputs are only on 101A Rev 7-9
         if rvmn.reversed_outputs:
             # Turn LOW, then HIGH, reversed HBridge outputs in turn
@@ -169,10 +169,15 @@ class Devices(share.Devices):
             "101B": console.Console101B,
             "101C": console.Console101C,
             "200A": console.Console200A,
+            "300A": console.Console300A,
+            "300C": console.Console300C,
+            "301C": console.Console301C,
             "50": console.Console50,
             "55": console.Console55,
             "60": console.Console60,
             "65": console.Console65,
+            "70": console.Console70,
+            "75": console.Console75,
         }[self.parameter]
         self["rvmn"] = console_class(nordic_ser)
         self["rvmn"].output_reversed(self.reversed_outputs)

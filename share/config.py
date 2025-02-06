@@ -91,6 +91,9 @@ class Fixture:
         "032870": {
             "ARM": _ftdi,
         },  # RVMC101 Initial
+         "040556": {
+            "ARM": _ftdi,
+        },  # RVMN30X Initial
         "032871": {
             "NORDIC": _ftdi,
         },  # RVMN101B Initial
