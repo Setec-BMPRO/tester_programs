@@ -80,6 +80,8 @@ class Initial(share.TestSequence):
 
 # PC-RVMN101C-361 Hardware Rev not saved
 #            self.measure(("Serial", "ProdRev", "HardRev"))
+            # Adding time delay due to RVMN301C not getting enough time to read from serial
+            time.sleep(2)
             self.measure(("Serial", "ProdRev"))
 
         # Save SerialNumber & MAC on a remote server.
