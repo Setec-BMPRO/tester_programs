@@ -381,16 +381,16 @@ class Devices(share.Devices):
         # High power source for the SR Solar Regulator
         self["SR_HighPower"] = SrHighPower(self["rla_acsw"], self["acsource"])
         self["PmTimer"] = share.BackgroundTimer(1)
-        # Serial connection to the Arduino console
-        ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
-        # Set port separately, as we don't want it opened yet
-        ard_ser.port = self.port("ARDUINO")
-        self["ard"] = arduino.Arduino(ard_ser)
+#        # Serial connection to the Arduino console
+#        ard_ser = serial.Serial(baudrate=115200, timeout=20.0)
+#        # Set port separately, as we don't want it opened yet
+#        ard_ser.port = self.port("ARDUINO")
+#        self["ard"] = arduino.Arduino(ard_ser)
         # Switch on power to fixture circuits
         self["dcs_vcom"].output(9.0, output=True, delay=5.0)
         self.add_closer(lambda: self["dcs_vcom"].output(0.0, output=False))
-        self["ard"].open()
-        self.add_closer(lambda: self["ard"].close())
+#        self["ard"].open()
+#        self.add_closer(lambda: self["ard"].close())
 
     def reset(self):
         """Reset instruments."""
@@ -461,8 +461,8 @@ class Sensors(share.Sensors):
             pathlib.Path(__file__).parent / self.pic_image,
             "33FJ16GS402",
         )
-        ard = self.devices["ard"]
-        self["pgmbp35sr"] = sensor.Keyed(ard, "PGM_BP35SR")
+#        ard = self.devices["ard"]
+#        self["pgmbp35sr"] = sensor.Keyed(ard, "PGM_BP35SR")
         # Console sensors
         bp35 = self.devices["bp35"]
         bp35tunnel = self.devices["bp35tunnel"]
@@ -570,7 +570,7 @@ class Measurements(share.Measurements):
                 ("arm_vout_ov", "Vout_OV", "arm_vout_ov", "Vout OVP"),
                 ("arm_remote", "ARM-RemoteClosed", "arm_remote", "Remote input"),
                 ("TunnelSwVer", "ARM-SwVer", "TunnelSwVer", ""),
-                ("pgm_bp35sr", "Reply", "pgmbp35sr", ""),
+#                ("pgm_bp35sr", "Reply", "pgmbp35sr", ""),
                 ("program_pic", "ProgramOk", "pickit", ""),
             )
         )
