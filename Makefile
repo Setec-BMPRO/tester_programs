@@ -11,7 +11,8 @@ PYSOURCES += $(shell find $(PACKAGE2) -name '*.py')
 SOURCES := $(PYSOURCES) $(wildcard *.toml)
 VENV := .venv
 VENV_NEW_FLAG := $(VENV)/_venv_is_new
-VPYTHON := $(VENV)/bin/python
+# VPYTHON := $(VENV)/bin/python   # For Linux
+VPYTHON := $(VENV)/Scripts/python # For Windows
 PYCACHE := __pycache__
 CLEAN_TARGETS := dist *.egg-info
 DEEP_CLEAN_TARGETS := $(VENV)
@@ -29,19 +30,19 @@ clean:
 	@find -type d -name $(PYCACHE) -execdir rm -rf {} +
 # Remove venv as well
 deepclean:
-	$(MAKE) clean
+	"$(MAKE)" clean
 	@rm -rf $(DEEP_CLEAN_TARGETS)
 # Create the venv
 $(VENV):
-	python3 -m venv $(VENV)
+	python -m venv $(VENV)
 	$(VPYTHON) -m pip install -U pip
 	for PKG in $(EDITABLES); do $(VPYTHON) -m pip install -e $$PKG; done
 	@touch $(VENV_NEW_FLAG)
-	$(MAKE) _venv
+	"$(MAKE)" _venv
 # Update the venv
 _venv: $(VENV)
 	$(VPYTHON) -m pip install -U pip $(DEPENDENCIES)
 # Update the venv, only if it is not newly created
 venv: $(VENV)
-	@if [ ! -e $(VENV_NEW_FLAG) ]; then $(MAKE) _venv; fi
+	@if [ ! -e $(VENV_NEW_FLAG) ]; then "$(MAKE)" _venv; fi
 	@rm -f $(VENV_NEW_FLAG)
