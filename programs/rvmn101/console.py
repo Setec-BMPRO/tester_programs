@@ -455,17 +455,17 @@ class Console200A(Console101A):
 class Console300A(Console101A):
     """Communications to RVMN300 console."""
 
-    banner_lines = 10
+    banner_lines = 9
 
 class Console300C(Console101A):
     """Communications to RVMN300 console."""
 
-    banner_lines = 10
+    banner_lines = 9
 
 class Console301C(Console101A):
     """Communications to RVMN301 console."""
 
-    banner_lines = 10
+    banner_lines = 9
 
 
 class _Console5x(_Console):

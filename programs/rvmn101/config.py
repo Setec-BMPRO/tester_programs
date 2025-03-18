@@ -706,7 +706,7 @@ class RVMN7x(Config):
         arm_devicetype="r7fa2l1a9",
         # FIXME: Console prompt appears before it is ready to accept commands
         # 2s gives a 1 in 5 branding failure rate
-        boot_delay=4,
+        boot_delay=6,
     )
     _rev_data = {
         None: _rev3_values,
@@ -719,6 +719,6 @@ class RVMN7x(Config):
             hardware_rev="02A",# TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
             arm_devicetype="r7fa2l1a9",
             nordic_devicetype="nrf52840",
-            boot_delay=4,
+            boot_delay=6,
         ),
     }
