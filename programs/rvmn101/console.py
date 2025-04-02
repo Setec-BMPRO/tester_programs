@@ -561,7 +561,7 @@ class Console65(Console55):
     banner_lines = None  # [13] a non-int will ignore number of lines
 
 
-class Console70(Console55):
+class Console70(Console50):
     """Communications to RVMN70 console."""
 
     banner_lines = None  # [13] a non-int will ignore number of lines
