@@ -490,12 +490,12 @@ class RVMN200A(Config):
 class RVMN300x(Config):
     """RVMN300x configuration."""
 
-    _sonic_5_2_0 = "jayco_rvmn300_signed_5.2.0-0-g15c51487_factory_mcuboot.hex"
+    _sonic_5_2_3 = "jayco_rvmn300_signed_5.2.3-0-gd0149202_factory_mcuboot.hex"
     _arm_image_4_0_1 = "rvmn300_nxp_v4.0.1_61d85c8.bin" # Conditionally released FW - Full testing yet to be done. MP - 13/02/2024
     _rev3_values = Values(    
-        nordic_image=_sonic_5_2_0,
+        nordic_image=_sonic_5_2_3,
         arm_image=_arm_image_4_0_1,
-        product_rev="02A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+        product_rev="03A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
         hardware_rev="02A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
         nordic_devicetype="nrf52840",
         # FIXME: Console prompt appears before it is ready to accept commands
@@ -505,9 +505,16 @@ class RVMN300x(Config):
     _rev_data = {
         None: _rev3_values,
         "3": _rev3_values,
-        "2": _rev3_values,
+        "2": Values(
+            nordic_image=_sonic_5_2_3,
+            arm_image=_arm_image_4_0_1,
+            product_rev="02A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+            hardware_rev="01A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+            nordic_devicetype="nrf52840",
+            boot_delay=4,
+        ),
         "1": Values(
-            nordic_image=_sonic_5_2_0,
+            nordic_image=_sonic_5_2_3,
             arm_image=_arm_image_4_0_1,
             product_rev="01A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
             hardware_rev="01A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
@@ -698,12 +705,12 @@ class RVMN6x(Config):
 class RVMN7x(Config):
     """RVMN7x configuration."""
 
-    _sonic_5_2_0 = "jayco_rvmn7x_signed_5.2.0-0-g15c51487_factory_mcuboot.hex"
+    _sonic_5_2_3 = "jayco_rvmn7x_signed_5.2.3-0-gd0149202_factory_mcuboot.hex"
     _ra2_image_0_3_6 = "rvmn5x_ra2_v0.3.6-0-g34e425b.hex"
     _rev3_values = Values(
-        nordic_image=_sonic_5_2_0,
+        nordic_image=_sonic_5_2_3,
         arm_image=_ra2_image_0_3_6,
-        product_rev="02A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+        product_rev="03A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
         hardware_rev="02A",# TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
         arm_devicetype="r7fa2l1a9",
         # FIXME: Console prompt appears before it is ready to accept commands
@@ -713,12 +720,20 @@ class RVMN7x(Config):
     _rev_data = {
         None: _rev3_values,
         "3": _rev3_values,
-        "2": _rev3_values,
-        "1": Values(
-            nordic_image=_sonic_5_2_0,
+        "2": Values(
+            nordic_image=_sonic_5_2_3,
             arm_image=_ra2_image_0_3_6,
-            product_rev="02A", # TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
-            hardware_rev="02A",# TODO: Update from F:\PLM\PRODUCTS\RVMN7x\08_Change Management\10_Engineering Change Order\_Released
+            product_rev="02A", 
+            hardware_rev="01A",
+            arm_devicetype="r7fa2l1a9",
+            nordic_devicetype="nrf52840",
+            boot_delay=6,
+        ),
+        "1": Values(
+            nordic_image=_sonic_5_2_3,
+            arm_image=_ra2_image_0_3_6,
+            product_rev="01A", 
+            hardware_rev="01A",
             arm_devicetype="r7fa2l1a9",
             nordic_devicetype="nrf52840",
             boot_delay=6,
