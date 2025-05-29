@@ -15,6 +15,7 @@ from . import bc2
 from . import bc15_25
 from . import bc60
 from . import bce4
+from . import bce4a
 from . import bce282
 from . import ble2can
 from . import bp35
@@ -132,6 +133,8 @@ PROGRAMS = {
     "BCE4_5 Final": bce4.Final,
     "BCE282 Initial": bce282.Initial,
     "BCE282 Final": bce282.Final,
+    "BCE4A Initial": bce4a.Initial,
+    "BCE4A Final": bce4a.Final,
     "BLE2CAN Initial": ble2can.Initial,
     "BP35 Initial": bp35.Initial,
     "BP35 Final": bp35.Final,
