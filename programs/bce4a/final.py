@@ -8,14 +8,14 @@ import tester
 import share
 
 
-# class Final(share.TestSequence):
-#     """BCE4A Final Test Program."""
+class Final(share.TestSequence):
+    """BCE4A Final Test Program."""
 
 #     # Limits common to both versions
-#     _common = (
-#         libtester.LimitDelta("AlarmOpen", 10000, 1000, doc="Contacts open"),
-#         libtester.LimitLow("AlarmClosed", 100, doc="Contacts closed"),
-#     )
+    _common = (
+        libtester.LimitDelta("AlarmOpen", 10000, 1000, doc="Contacts open"),
+        libtester.LimitLow("AlarmClosed", 100, doc="Contacts closed"),
+    )
 #     # Test limit selection keyed by program parameter
 #     limitdata = {
 #         "12": {
