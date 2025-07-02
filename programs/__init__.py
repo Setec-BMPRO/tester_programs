@@ -40,6 +40,8 @@ from . import mb3
 from . import mk7400
 from . import odl104
 from . import opto_test
+from . import prog_trsbt2
+from . import prog_bsgateway
 from . import rvview_jdisplay
 from . import rvmc101
 from . import rvmd50
@@ -178,6 +180,8 @@ PROGRAMS = {
     "ODL104 Initial": odl104.Initial,
     "ODL104 Final": odl104.Final,
     "Opto Initial": opto_test.Initial,
+    "TRS-BT2 Prog": prog_trsbt2.Initial,
+    "BSGateway Prog": prog_bsgateway.Initial,
     "RvViewJDisplay Initial": rvview_jdisplay.Initial,
     "RVMC101 Final": rvmc101.Final,
     "RVMC101 Initial": rvmc101.Initial,
