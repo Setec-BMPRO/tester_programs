@@ -303,15 +303,21 @@ class RVMN101B(Config):
     _arm_image_3_1 = "rvmn101b_nxp_3.1.bin"  # 039578 Rev ≥ 22
     _arm_image_3_0 = "rvmn101b_nxp_3.0.bin"  # 035879 Rev ≥ 14
     _arm_image_1_9 = "rvmn101b_nxp_1.9.bin"  # 033092 Rev ≤ 13
-    _rev22_values = Values(
+    _rev23_values = Values(
         nordic_image=_nordic_2_6_3,
         arm_image=_arm_image_3_1,
-        product_rev="22A",
-        hardware_rev="13A",
+        product_rev="23A",
+        hardware_rev="14A",
     )
     _rev_data = {
-        None: _rev22_values,
-        "22": _rev22_values,
+        None: _rev23_values,
+        "23": _rev23_values,
+        "22": Values(
+            nordic_image=_nordic_2_6_3,
+            arm_image=_arm_image_3_1,
+            product_rev="22A",
+            hardware_rev="13A",
+        ),
         "21": Values(
             nordic_image=_nordic_2_6_3,
             arm_image=_arm_image_3_0,
