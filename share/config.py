@@ -112,6 +112,10 @@ class Fixture:
         "034882": {
             "NORDIC": _ftdi,
         },  # TRSRFM Initial
+        "037269": {
+            "ARM": _ftdi,
+            "NORDIC": _ftdi,
+        },  # Opto Initial (Program/Initialize all boards on this fixture number)
         "036746": {
             "ARM": _ftdi,
         },  # ASDisplay Initial
